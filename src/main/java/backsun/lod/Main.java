@@ -1,5 +1,6 @@
 package backsun.lod;
 
+import backsun.lod.proxy.ClientProxy;
 import backsun.lod.proxy.CommonProxy;
 import backsun.lod.util.Reference;
 import net.minecraftforge.common.MinecraftForge;
@@ -23,7 +24,8 @@ public class Main
 	public static Main instance;
 	
 	@SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS, serverSide = Reference.COMMON_PROXY_CLASS)
-	public static CommonProxy proxy;
+	public static CommonProxy common_proxy;
+	public static ClientProxy client_proxy;
 	
 	@EventHandler
 	public static void PreInit(FMLPreInitializationEvent event)
@@ -34,7 +36,9 @@ public class Main
 	@EventHandler
 	public static void Init(FMLInitializationEvent event)
 	{
-		MinecraftForge.EVENT_BUS.register(proxy);
+		MinecraftForge.EVENT_BUS.register(common_proxy);
+		client_proxy = new ClientProxy();
+		
 	}
 	
 	@EventHandler

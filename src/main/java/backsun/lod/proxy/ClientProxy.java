@@ -10,11 +10,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
 public class ClientProxy extends CommonProxy
 {
-	/**
-	 * @param item
-	 * @param meta
-	 * @param id
-	 */
+	private CustomRenderer renderer;
+	
+	public ClientProxy()
+	{
+		renderer = new CustomRenderer();
+	}
+	
 	@Override
 	public void registerItemRender(Item item, int meta, String id)
 	{
@@ -24,6 +26,7 @@ public class ClientProxy extends CommonProxy
 	@SubscribeEvent
 	public void renderWorldLastEvent(RenderWorldLastEvent event)
 	{
-		CustomRenderer.drawTest(Minecraft.getMinecraft(),event.getPartialTicks());
+		if(renderer != null)
+			renderer.drawTest(Minecraft.getMinecraft(),event.getPartialTicks());
 	}
 }
