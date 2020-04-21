@@ -82,7 +82,7 @@ public class CustomRenderer
 		setProjectionMatrix(partialTicks);
 		
 		// used for debugging
-		mc.world.profiler.startSection("renderlod");
+		mc.world.profiler.startSection("lod setup");
 		
 		// set the required open GL settings
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -134,7 +134,9 @@ public class CustomRenderer
 		boolean alternateColor = false;
 		boolean evenWidth = false;
 		if (debugging && numbOfBoxesWide % 2 == 0)
-				evenWidth = true;
+			evenWidth = true;
+		
+		mc.world.profiler.endStartSection("lod setup");
 		
 		// x axis
 		for (int i = 0; i < numbOfBoxesWide; i++)
@@ -175,9 +177,10 @@ public class CustomRenderer
 			}
 		}
 		
+		mc.world.profiler.endStartSection("lod draw");
+		
 		// draw the LODs
 		drawBoxArray(lodArray, colorArray);
-		
 		
 		// end the profile section (so we can see how long it took to draw the LODs)
 		mc.world.profiler.endSection();
@@ -197,6 +200,8 @@ public class CustomRenderer
 	}
 	
 	/**
+	 * TODO improve this method's speed
+	 * 
 	 * draw an array of cubes (or squares) with the given colors
 	 * @param bb the cube to draw
 	 * @param red
@@ -264,57 +269,6 @@ public class CustomRenderer
 		
 		tessellator.draw();
 	}
-	
-	/**
-	 * draw a cube (or square) with the given colors
-	 * @param bb the cube to draw
-	 * @param red
-	 * @param green
-	 * @param blue
-	 * @param alpha
-	 */
-	private void drawBox(AxisAlignedBB bb, int red, int green, int blue, int alpha)
-	{
-		worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		
-		worldRenderer.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-		worldRenderer.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-		worldRenderer.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-		worldRenderer.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-		
-		// only draw the other 5 sides if there is some thickness to this box
-		if (bb.minY != bb.maxY)
-		{
-			
-			worldRenderer.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-			
-			worldRenderer.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-			
-			worldRenderer.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-			
-			worldRenderer.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-			
-			worldRenderer.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-		}
-		
-		tessellator.draw();
-	}
-	
 	
 	/**
 	 * Sets up and enables the fog to be rendered.
