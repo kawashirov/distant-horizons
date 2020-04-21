@@ -26,7 +26,6 @@ public class ClientProxy extends CommonProxy
 	@SubscribeEvent
 	public void renderWorldLastEvent(RenderWorldLastEvent event)
 	{
-		if(renderer != null)
-			renderer.drawTest(Minecraft.getMinecraft(),event.getPartialTicks());
+		renderer.drawTest(Minecraft.getMinecraft(), event.getPartialTicks());
 	}
 }
