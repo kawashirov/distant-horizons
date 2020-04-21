@@ -1,6 +1,6 @@
 package backsun.lod.proxy;
 
-import backsun.lod.util.CustomRenderer;
+import backsun.lod.renderer.CustomRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.item.Item;

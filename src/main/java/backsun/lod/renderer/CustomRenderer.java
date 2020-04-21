@@ -1,4 +1,4 @@
-package backsun.lod.util;
+package backsun.lod.renderer;
 
 import java.awt.Color;
 
@@ -111,6 +111,7 @@ public class CustomRenderer
 		int totalLength = (int) farPlaneDistance * viewDistanceMultiplier;
 		int squareSideLength = 16;
 		int numbOfBoxesWide = totalLength / squareSideLength;
+		//TODO start distance is about 2 * farPlaneDistance
 		
 		// size of a single square
 		int bbx = squareSideLength;
@@ -177,7 +178,7 @@ public class CustomRenderer
 			}
 		}
 		
-		mc.world.profiler.endStartSection("lod draw");
+		mc.world.profiler.endStartSection("lod pre draw");
 		
 		// draw the LODs
 		drawBoxArray(lodArray, colorArray);
@@ -199,6 +200,39 @@ public class CustomRenderer
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 	}
 	
+	private void VBO()
+	{
+//		this.vboEnabled = OpenGlHelper.useVbo();
+//		this.vertexBufferFormat = new VertexFormat();
+//		this.vertexBufferFormat.addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.POSITION, 3));
+//		
+//		if (this.skyVBO != null)
+//		{
+//			this.skyVBO.deleteGlBuffers();
+//		}
+//		if (this.vboEnabled)
+//		{
+//			starVBO = new VertexBuffer(this.vertexBufferFormat);
+//			this.renderStars(bufferbuilder);
+//			bufferbuilder.finishDrawing();
+//			bufferbuilder.reset();
+//			this.starVBO.bufferData(bufferbuilder.getByteBuffer());
+//		}
+//		
+//		
+//		this.skyVBO.bindBuffer();
+//		GlStateManager.glEnableClientState(32884);
+//		GlStateManager.glVertexPointer(3, 5126, 12, 0);
+//		this.skyVBO.drawArrays(7);
+//		this.skyVBO.unbindBuffer();
+//		GlStateManager.glDisableClientState(32884);
+//		
+//		
+//		//rendersky
+//		bufferBuilderIn.begin(7, DefaultVertexFormats.POSITION);
+//		bufferBuilderIn.pos((double) f, (double) posY, (double) l).endVertex();
+	}
+	
 	/**
 	 * TODO improve this method's speed
 	 * 
@@ -218,6 +252,7 @@ public class CustomRenderer
 		int blue;
 		int alpha;
 		
+		//TODO this is the part that needs optimization
 		int colorIndex = 0;
 		for (AxisAlignedBB bb : bbArray)
 		{
@@ -266,6 +301,7 @@ public class CustomRenderer
 			colorIndex++;
 		}
 		
+		mc.world.profiler.endStartSection("lod draw");
 		
 		tessellator.draw();
 	}
