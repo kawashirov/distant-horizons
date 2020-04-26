@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.biome.Biome;
 
 /**
  * 
@@ -29,13 +30,18 @@ public class CustomRenderer
 	private float farPlaneDistance;
 	
 	private Tessellator tessellator;
-	private BufferBuilder worldRenderer;
+	private BufferBuilder bufferBuilder;
 	
 	// make sure this is an even number, or else it won't align with the chunk grid
-	public final int viewDistanceMultiplier = 12;
+	public final int viewDistanceMultiplier = 12;//12;
 	private float fovModifierHandPrev;
 	private float fovModifierHand;
-	public boolean debugging = false;
+	private float fovModifier = 1.1f;
+	private float fov = 70 * 1.1f;
+	
+	public int biomes[][];
+	
+	public boolean debugging = true;
 	
 	/**
 	 * constructor
@@ -45,7 +51,17 @@ public class CustomRenderer
 		mc = Minecraft.getMinecraft();
 		
 		tessellator = Tessellator.getInstance();
-		worldRenderer = tessellator.getBuffer();
+		bufferBuilder = tessellator.getBuffer();
+		
+		biomes = new int[64][64];
+		
+		for(int i = 0; i < 64; i++)
+		{
+			for(int j = 0; j < 64; j++)
+			{
+				biomes[i][j] = -1;
+			}
+		}
 		
 		// GL11.GL_MODELVIEW  //5888
 		// GL11.GL_PROJECTION //5889
@@ -57,13 +73,10 @@ public class CustomRenderer
 	 */
 	private void setProjectionMatrix(float partialTicks)
 	{
-		// update the fov
-		float fov = getFOVModifier(partialTicks, true);
-		
 		// create a new view frustum so that the squares can be drawn outside the normal view distance
 		GlStateManager.matrixMode(GL11.GL_PROJECTION);
 		GlStateManager.loadIdentity();
-		// farPlaneDistance // 10 chunks = 160
+		// farPlaneDistance // 10 chunks = 160											0.0125f
 		Project.gluPerspective(fov, (float) mc.displayWidth / (float) mc.displayHeight, 0.0125f, farPlaneDistance * viewDistanceMultiplier);
 	}
 	
@@ -74,15 +87,19 @@ public class CustomRenderer
 	 */
 	public void drawTest(Minecraft mc, float partialTicks)
 	{
+		// used for debugging and viewing how long different processes take
+		mc.world.profiler.startSection("LOD setup");
+		
+		long startTime = System.nanoTime();
+		
+		// determine how far the game's render distance is currently set
 		farPlaneDistance = mc.gameSettings.renderDistanceChunks * 16;
 		
-		setupFog();
+		// enable the fog
+//		setupFog();
 		
 		// set the new model view matrix
 		setProjectionMatrix(partialTicks);
-		
-		// used for debugging
-		mc.world.profiler.startSection("lod setup");
 		
 		// set the required open GL settings
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -96,22 +113,36 @@ public class CustomRenderer
 		
 		// get the camera location
 		Entity entity = mc.player;
-		double x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
-		double y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
-		double z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
+		double cameraX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
+		double cameraY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
+		double cameraZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
 		
-		int playerXChunkOffset = ((int) x / 16) * 16;
-		int playerZChunkOffset = ((int) z / 16) * 16;
+		int playerXChunkOffset = ((int) cameraX / 16) * 16;
+		int playerZChunkOffset = ((int) cameraZ / 16) * 16;
 		
-		Color grass = new Color(80, 104, 50, 255);
+//		System.out.println(mc.world.getBiome(new BlockPos(cameraX, cameraY, cameraZ)));
+		
+		
+		int alpha = 255;
+		Color error = new Color(255, 0, 225, alpha); // bright pink
+		Color grass = new Color(80, 104, 50, alpha);
+		Color water = new Color(37, 51, 174, alpha);
+		Color swamp = new Color(60, 63, 32, alpha);
+		Color mountain = new Color(100, 100, 100, alpha);
+		
+		Color red = Color.RED;
 		Color black = Color.BLACK;
 		Color white = Color.WHITE;
+		Color invisible = new Color(0,0,0,0);
+		
+		
+		
 		
 		// set how big the squares will be and how far they will go
 		int totalLength = (int) farPlaneDistance * viewDistanceMultiplier;
 		int squareSideLength = 16;
-		int numbOfBoxesWide = totalLength / squareSideLength;
-		//TODO start distance is about 2 * farPlaneDistance
+		int numbOfBoxesWide = (totalLength / squareSideLength);
+		//XXX start distance is about 2 * farPlaneDistance
 		
 		// size of a single square
 		int bbx = squareSideLength;
@@ -137,7 +168,12 @@ public class CustomRenderer
 		if (debugging && numbOfBoxesWide % 2 == 0)
 			evenWidth = true;
 		
-		mc.world.profiler.endStartSection("lod setup");
+		
+		
+		
+		
+		
+		mc.world.profiler.endStartSection("LOD generation");
 		
 		// x axis
 		for (int i = 0; i < numbOfBoxesWide; i++)
@@ -150,41 +186,143 @@ public class CustomRenderer
 			for (int j = 0; j < numbOfBoxesWide; j++)
 			{
 				// update where this square will be drawn
-				double xoffset = -x + (squareSideLength * i) + startX;
-				double yoffset = -y;
-				double zoffset = -z + (squareSideLength * j) + startZ;
+				double xoffset = -cameraX + // start at x = 0
+						(squareSideLength * i) + // offset by the number of LOD blocks
+						startX; // offset so the center LOD block is underneath the player
 				
+				double zoffset = -cameraZ + (squareSideLength * j) + startZ;
+				
+				
+				int chunkX = ((squareSideLength * j) + startX) / 16;
+				int chunkZ = ((squareSideLength * i) + startZ) / 16;
+				
+				
+//				if (distanceToPlayer(chunkX * 16, 70, chunkZ * 16, cameraX, 70, cameraZ) < farPlaneDistance * 2)
+//				{
+//					// near to player
+//					c = black;
+//				}
+//				else
+//				{
+//					// far from player
+//					c = white;
+////					System.out.println("loading");
+////					mc.world.getChunkProvider().loadChunk(chunkX, chunkZ);
+//				}
+				
+				Color c;
+				Biome biome = null;
+				try
+				{
+					biome = Biome.getBiome(biomes[chunkX+32][chunkZ+32]);
+				}
+				catch(IndexOutOfBoundsException e)
+				{
+					c = white;
+				}
+				
+				double yoffset = -cameraY + mc.world.provider.getAverageGroundLevel();
+				
+				
+//				if (i == (numbOfBoxesWide / 2) && j == i)
+//					System.out.println("\nx " + (int)cameraX + " z " + (int)cameraZ + "\nx " + chunkX  * 16 + " z " + chunkZ * 16 + "\t" + biome.getBiomeName());
+				
+				
+				// TODO fix this so that chunks outside of the view distance are loaded and the biomes are read
+				// TODO fix so that the chunks within view distance aren't always plains
+				if(biome != null)
+				{
+					// add the color
+					switch (Biome.getIdForBiome(biome))
+					{
+						case -1: // unloaded
+							c = red;
+							break;
+						case 0: // ocean
+							c = water;
+							break;
+						case 24: // deep ocean
+							c = water;
+							break;
+						case 7: // river
+							c = water;
+							break;
+						case 1: // plains
+//							c = invisible;
+							c = grass;
+							break;
+						case 6: // swamp
+							c = swamp;
+							break;
+						case 3: //extreme hills
+							c = mountain;
+							break;
+						case 34: // extreme hills with trees
+							c = mountain;
+							break;
+						default:
+							c = error;
+							break;
+					}
+				}
+				else
+				{
+					c = black;
+				}
+				
+				
+				
+				// if debugging draw the squares as a black and white checker board
+//				if (debugging)
+//				{
+//					if (alternateColor)
+//						c = white;
+//					else
+//						c = black;
+//					// draw the first square as red
+//					if (i == 0 && j == 0)
+//						c = Color.RED;
+//					
+//					colorArray[i + (j * numbOfBoxesWide)] = c;
+//					
+//					alternateColor = !alternateColor;
+//				}
+				
+				// add the color to the array
+				colorArray[i + (j * numbOfBoxesWide)] = c;
 				
 				// add the new box to the array
 				lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(bbx, bby, bbz, 0, bby, 0).offset(xoffset, yoffset, zoffset);
-				colorArray[i + (j * numbOfBoxesWide)] = grass;
 				
-				// if debugging draw the squares as a black and white checker board
-				if (debugging)
-				{
-					Color c;
-					if (alternateColor)
-						c = white;
-					else
-						c = black;
-					// draw the first square as red
-					if (i == 0 && j == 0)
-						c = Color.RED;
-					
-					colorArray[i + (j * numbOfBoxesWide)] = c;
-					
-					alternateColor = !alternateColor;
-				}
+				
 			}
 		}
 		
-		mc.world.profiler.endStartSection("lod pre draw");
 		
+		
+		
+		
+		mc.world.profiler.endStartSection("LOD pre draw");
+		
+		// send the LODs over to the GPU
+		sendDataToGPU(lodArray, colorArray);
+		
+		
+		
+		
+		
+		mc.world.profiler.endStartSection("LOD draw");
 		// draw the LODs
-		drawBoxArray(lodArray, colorArray);
+		tessellator.draw();
 		
-		// end the profile section (so we can see how long it took to draw the LODs)
-		mc.world.profiler.endSection();
+		
+		
+		
+		
+		
+		
+		mc.world.profiler.endStartSection("LOD cleanup");
+		
 		
 		// this must be done otherwise other parts of the screen may be drawn with a fog effect
 		// IE the GUI
@@ -198,54 +336,36 @@ public class CustomRenderer
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		
+		
+		// 7 - 5  ms
+		// 16 ms = 60 hz
+		long endTime = System.nanoTime();
+//		System.out.println((endTime - startTime) + " :ns");
+		
+		// end of profiler tracking
+		mc.world.profiler.endSection();
 	}
 	
-	private void VBO()
+	
+	public double distanceToPlayer(int x, int y, int z, double cameraX, double cameraY, double cameraZ)
 	{
-//		this.vboEnabled = OpenGlHelper.useVbo();
-//		this.vertexBufferFormat = new VertexFormat();
-//		this.vertexBufferFormat.addElement(new VertexFormatElement(0, VertexFormatElement.EnumType.FLOAT, VertexFormatElement.EnumUsage.POSITION, 3));
-//		
-//		if (this.skyVBO != null)
-//		{
-//			this.skyVBO.deleteGlBuffers();
-//		}
-//		if (this.vboEnabled)
-//		{
-//			starVBO = new VertexBuffer(this.vertexBufferFormat);
-//			this.renderStars(bufferbuilder);
-//			bufferbuilder.finishDrawing();
-//			bufferbuilder.reset();
-//			this.starVBO.bufferData(bufferbuilder.getByteBuffer());
-//		}
-//		
-//		
-//		this.skyVBO.bindBuffer();
-//		GlStateManager.glEnableClientState(32884);
-//		GlStateManager.glVertexPointer(3, 5126, 12, 0);
-//		this.skyVBO.drawArrays(7);
-//		this.skyVBO.unbindBuffer();
-//		GlStateManager.glDisableClientState(32884);
-//		
-//		
-//		//rendersky
-//		bufferBuilderIn.begin(7, DefaultVertexFormats.POSITION);
-//		bufferBuilderIn.pos((double) f, (double) posY, (double) l).endVertex();
+		if(cameraY == y)
+			return Math.sqrt(Math.pow((x - cameraX),2) + Math.pow((z - cameraZ),2));
+					
+		return Math.sqrt(Math.pow((x - cameraX),2) + Math.pow((y - cameraY),2) + Math.pow((z - cameraZ),2));
 	}
 	
 	/**
-	 * TODO improve this method's speed
-	 * 
 	 * draw an array of cubes (or squares) with the given colors
-	 * @param bb the cube to draw
-	 * @param red
-	 * @param green
-	 * @param blue
-	 * @param alpha
+	 * 
+	 * @param bbArray
+	 * @param colorArray
 	 */
-	private void drawBoxArray(AxisAlignedBB[] bbArray, Color[] colorArray)
+	private void sendDataToGPU(AxisAlignedBB[] bbArray, Color[] colorArray)
 	{
-		worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+		bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+		
 		
 		int red;
 		int green;
@@ -256,73 +376,76 @@ public class CustomRenderer
 		int colorIndex = 0;
 		for (AxisAlignedBB bb : bbArray)
 		{
+			
 			// get the color of this LOD object
 			red = colorArray[colorIndex].getRed();
 			green = colorArray[colorIndex].getGreen();
 			blue = colorArray[colorIndex].getBlue();
 			alpha = colorArray[colorIndex].getAlpha();
-			
 			// TODO which side is this?
-			worldRenderer.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-			worldRenderer.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+			bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+			bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+			bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+			bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
 			
 			// only draw the other 5 sides if there is some thickness to this box
 			if (bb.minY != bb.maxY)
 			{
-				worldRenderer.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-				worldRenderer.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-				worldRenderer.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				worldRenderer.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
 				
-				worldRenderer.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				worldRenderer.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				worldRenderer.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				worldRenderer.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
 				
-				worldRenderer.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-				worldRenderer.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-				worldRenderer.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-				worldRenderer.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
 				
-				worldRenderer.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-				worldRenderer.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				worldRenderer.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				worldRenderer.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
 				
-				worldRenderer.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-				worldRenderer.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				worldRenderer.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				worldRenderer.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
 			}
 			
 			// so we can get the next color
 			colorIndex++;
 		}
-		
-		mc.world.profiler.endStartSection("lod draw");
-		
-		tessellator.draw();
 	}
+	
 	
 	/**
 	 * Sets up and enables the fog to be rendered.
 	 */
 	private void setupFog()
 	{
-		float f = farPlaneDistance * (viewDistanceMultiplier * 0.5f);
 		GlStateManager.setFogDensity(0.1f);
-		GlStateManager.setFogStart(farPlaneDistance * (viewDistanceMultiplier * 0.25f));
-		GlStateManager.setFogEnd(f);
+		// near fog
+		GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
+		GlStateManager.setFogStart(farPlaneDistance * 2.25f);
+		
+		// far fog
+//		GlStateManager.setFogStart(farPlaneDistance * (viewDistanceMultiplier * 0.25f));
+//		GlStateManager.setFogEnd(farPlaneDistance * (viewDistanceMultiplier * 0.5f));
 		GlStateManager.enableFog();
 	}
 	
 	/**
+	 * possible replacement :  mc.gameSettings.fovSetting * fovModifier;
+	 * 
 	 * Originally from Minecraft's EntityRenderer
 	 * Changes the field of view of the player depending on if they are underwater or not
 	 */
-	public float getFOVModifier(float partialTicks, boolean useFOVSetting)
+	public float getFOV(float partialTicks, boolean useFOVSetting)
 	{
 		Entity entity = mc.getRenderViewEntity();
 		float f = 70.0F;
@@ -378,4 +501,19 @@ public class CustomRenderer
 			fovModifierHand = 0.1F;
 		}
 	}
+	
+	
+	/**
+	 * 
+	 * @param newfov
+	 */
+	public void updateFOVModifier(float newFov)
+	{
+		fovModifier = newFov;
+		
+		// update the fov
+		fov = mc.gameSettings.fovSetting * fovModifier;//getFOV(partialTicks, true);
+	}
+	
+	
 }

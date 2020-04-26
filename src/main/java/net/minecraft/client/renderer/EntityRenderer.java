@@ -723,13 +723,12 @@ public class EntityRenderer implements IResourceManagerReloadListener
         {
             GlStateManager.translate((-(pass * 2 - 1)) * 0.07F, 0.0F, 0.0F);
         }
-
-        // should never be called
-//        if (this.cameraZoom != 1.0D)
-//        {
-//            GlStateManager.translate((float)this.cameraYaw, (float)(-this.cameraPitch), 0.0F);
-//            GlStateManager.scale(this.cameraZoom, this.cameraZoom, 1.0D);
-//        }
+		
+		if (this.cameraZoom != 1.0D)
+		{
+			GlStateManager.translate((float) this.cameraYaw, (float) (-this.cameraPitch), 0.0F);
+			GlStateManager.scale(this.cameraZoom, this.cameraZoom, 1.0D);
+		}
         
 		float fov = mc.entityRenderer.getFOVModifier(partialTicks, true);
 		//		System.out.println("ER: " + fov + "\t\t pt: " + partialTicks);
