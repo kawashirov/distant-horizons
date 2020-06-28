@@ -31,7 +31,7 @@ public class ClientProxy extends CommonProxy
 	@SubscribeEvent
 	public void renderWorldLastEvent(RenderWorldLastEvent event)
 	{
-		renderer.drawTest(Minecraft.getMinecraft(), event.getPartialTicks());
+		//renderer.drawTest(Minecraft.getMinecraft(), event.getPartialTicks());
 	}
 	
 	@SubscribeEvent
@@ -53,7 +53,7 @@ public class ClientProxy extends CommonProxy
 				{
 					int biome = Biome.getIdForBiome(ch.getBiome(new BlockPos(ch.x, 70, ch.z), mc.world.getBiomeProvider()));
 					renderer.biomes[ch.x+32][ch.z+32] = biome; 
-					System.out.println(renderer.biomes[ch.x+32][ch.z+32]);
+					//System.out.println(renderer.biomes[ch.x+32][ch.z+32]);
 				}
 				else
 				{
