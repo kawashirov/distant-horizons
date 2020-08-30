@@ -20,9 +20,8 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.biome.Biome;
 
 /**
- * 
  * @author James Seibel
- * @version 04-19-2020
+ * @version 08-30-2020
  */
 public class CustomRenderer
 {
@@ -33,11 +32,11 @@ public class CustomRenderer
 	private BufferBuilder bufferBuilder;
 	
 	// make sure this is an even number, or else it won't align with the chunk grid
-	public final int viewDistanceMultiplier = 12;//12;
+	public final int viewDistanceMultiplier = 12;
 	private float fovModifierHandPrev;
 	private float fovModifierHand;
 	private float fovModifier = 1.1f;
-	private float fov = 70 * 1.1f;
+	private float fov = 70 * fovModifier;
 	
 	public int biomes[][];
 	
