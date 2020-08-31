@@ -17,7 +17,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.world.biome.Biome;
 
 /**
  * @author James Seibel
@@ -195,97 +194,79 @@ public class CustomRenderer
 				int chunkX = ((squareSideLength * j) + startX) / 16;
 				int chunkZ = ((squareSideLength * i) + startZ) / 16;
 				
-				
-//				if (distanceToPlayer(chunkX * 16, 70, chunkZ * 16, cameraX, 70, cameraZ) < farPlaneDistance * 2)
+								
+				Color c = null;
+//				Biome biome = null;
+//				try
 //				{
-//					// near to player
-//					c = black;
+//					biome = Biome.getBiome(biomes[chunkX+32][chunkZ+32]);
 //				}
-//				else
+//				catch(IndexOutOfBoundsException e)
 //				{
-//					// far from player
 //					c = white;
-////					System.out.println("loading");
-////					mc.world.getChunkProvider().loadChunk(chunkX, chunkZ);
 //				}
-				
-				Color c;
-				Biome biome = null;
-				try
-				{
-					biome = Biome.getBiome(biomes[chunkX+32][chunkZ+32]);
-				}
-				catch(IndexOutOfBoundsException e)
-				{
-					c = white;
-				}
-				
+//				
 				double yoffset = -cameraY + mc.world.provider.getAverageGroundLevel();
-				
-				
-//				if (i == (numbOfBoxesWide / 2) && j == i)
-//					System.out.println("\nx " + (int)cameraX + " z " + (int)cameraZ + "\nx " + chunkX  * 16 + " z " + chunkZ * 16 + "\t" + biome.getBiomeName());
-				
 				
 				// TODO fix this so that chunks outside of the view distance are loaded and the biomes are read
 				// TODO fix so that the chunks within view distance aren't always plains
-				if(biome != null)
-				{
-					// add the color
-					switch (Biome.getIdForBiome(biome))
-					{
-						case -1: // unloaded
-							c = red;
-							break;
-						case 0: // ocean
-							c = water;
-							break;
-						case 24: // deep ocean
-							c = water;
-							break;
-						case 7: // river
-							c = water;
-							break;
-						case 1: // plains
-//							c = invisible;
-							c = grass;
-							break;
-						case 6: // swamp
-							c = swamp;
-							break;
-						case 3: //extreme hills
-							c = mountain;
-							break;
-						case 34: // extreme hills with trees
-							c = mountain;
-							break;
-						default:
-							c = error;
-							break;
-					}
-				}
-				else
-				{
-					c = black;
-				}
+//				if(biome != null)
+//				{
+//					// add the color
+//					switch (Biome.getIdForBiome(biome))
+//					{
+//						case -1: // unloaded
+//							c = red;
+//							break;
+//						case 0: // ocean
+//							c = water;
+//							break;
+//						case 24: // deep ocean
+//							c = water;
+//							break;
+//						case 7: // river
+//							c = water;
+//							break;
+//						case 1: // plains
+////							c = invisible;
+//							c = grass;
+//							break;
+//						case 6: // swamp
+//							c = swamp;
+//							break;
+//						case 3: //extreme hills
+//							c = mountain;
+//							break;
+//						case 34: // extreme hills with trees
+//							c = mountain;
+//							break;
+//						default:
+//							c = error;
+//							break;
+//					}
+//				}
+//				else
+//				{
+//					c = black;
+//				}
 				
 				
 				
 				// if debugging draw the squares as a black and white checker board
-//				if (debugging)
-//				{
-//					if (alternateColor)
-//						c = white;
-//					else
-//						c = black;
-//					// draw the first square as red
-//					if (i == 0 && j == 0)
-//						c = Color.RED;
-//					
-//					colorArray[i + (j * numbOfBoxesWide)] = c;
-//					
-//					alternateColor = !alternateColor;
-//				}
+				if (debugging)
+				{
+					if (alternateColor)
+						c = white;
+					else
+						c = black;
+					// draw the first square as red
+					if (i == 0 && j == 0)
+						c = Color.RED;
+					
+					colorArray[i + (j * numbOfBoxesWide)] = c;
+					
+					alternateColor = !alternateColor;
+				}
 				
 				// add the color to the array
 				colorArray[i + (j * numbOfBoxesWide)] = c;
@@ -337,10 +318,8 @@ public class CustomRenderer
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		
 		
-		// 7 - 5  ms
+		// This is about how long this should take
 		// 16 ms = 60 hz
-		long endTime = System.nanoTime();
-//		System.out.println((endTime - startTime) + " :ns");
 		
 		// end of profiler tracking
 		mc.world.profiler.endSection();
