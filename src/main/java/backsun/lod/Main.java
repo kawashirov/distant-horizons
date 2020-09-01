@@ -15,7 +15,7 @@ import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 /**
  * 
  * @author James Seibel
- * @version 04-16-2020
+ * @version 08-31-2020
  */
 @Mod(modid = Reference.MOD_ID, name = Reference.NAME, version = Reference.VERSION)
 public class Main
