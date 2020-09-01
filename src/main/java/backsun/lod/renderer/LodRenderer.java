@@ -325,15 +325,6 @@ public class LodRenderer
 		mc.world.profiler.endSection();
 	}
 	
-	
-	public double distanceToPlayer(int x, int y, int z, double cameraX, double cameraY, double cameraZ)
-	{
-		if(cameraY == y)
-			return Math.sqrt(Math.pow((x - cameraX),2) + Math.pow((z - cameraZ),2));
-					
-		return Math.sqrt(Math.pow((x - cameraX),2) + Math.pow((y - cameraY),2) + Math.pow((z - cameraZ),2));
-	}
-	
 	/**
 	 * draw an array of cubes (or squares) with the given colors
 	 * 
