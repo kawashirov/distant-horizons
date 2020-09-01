@@ -79,48 +79,13 @@ public class LodRenderer
 	}
 	
 	/**
-	 * 
-	 * @param mc
+	 * Draw Level of Details in the world.
+	 * @param mc 
 	 * @param partialTicks
 	 */
 	public void drawLODs(Minecraft mc, float partialTicks)
 	{
-		// used for debugging and viewing how long different processes take
-		mc.world.profiler.startSection("LOD setup");
-		
-		long startTime = System.nanoTime();
-		
-		// determine how far the game's render distance is currently set
-		farPlaneDistance = mc.gameSettings.renderDistanceChunks * 16;
-		
-		// enable the fog
-//		setupFog();
-		
-		// set the new model view matrix
-		setProjectionMatrix(partialTicks);
-		
-		// set the required open GL settings
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glLineWidth(2.0f);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_CULL_FACE);
-		
-		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
-		GL11.glEnable(GL11.GL_BLEND);
-		
-		
-		// get the camera location
-		Entity entity = mc.player;
-		double cameraX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
-		double cameraY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
-		double cameraZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
-		
-		int playerXChunkOffset = ((int) cameraX / 16) * 16;
-		int playerZChunkOffset = ((int) cameraZ / 16) * 16;
-		
-//		System.out.println(mc.world.getBiome(new BlockPos(cameraX, cameraY, cameraZ)));
-		
-		
+		// color setup
 		int alpha = 255;
 		Color error = new Color(255, 0, 225, alpha); // bright pink
 		Color grass = new Color(80, 104, 50, alpha);
@@ -132,6 +97,24 @@ public class LodRenderer
 		Color black = Color.BLACK;
 		Color white = Color.WHITE;
 		Color invisible = new Color(0,0,0,0);
+		
+		
+		
+		// used for debugging and viewing how long different processes take
+		mc.world.profiler.startSection("LOD setup");
+		
+		long startTime = System.nanoTime();
+		
+		
+		
+		// get the camera location
+		Entity entity = mc.player;
+		double cameraX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
+		double cameraY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
+		double cameraZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
+		
+		int playerXChunkOffset = ((int) cameraX / 16) * 16;
+		int playerZChunkOffset = ((int) cameraZ / 16) * 16;
 		
 		
 		
@@ -160,7 +143,7 @@ public class LodRenderer
 		
 		
 		// used for debugging
-		// this is used to draw a checkerboard
+		// and drawing a checkerboard
 		boolean alternateColor = false;
 		boolean evenWidth = false;
 		if (debugging && numbOfBoxesWide % 2 == 0)
@@ -273,8 +256,6 @@ public class LodRenderer
 				
 				// add the new box to the array
 				lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(bbx, bby, bbz, 0, bby, 0).offset(xoffset, yoffset, zoffset);
-				
-				
 			}
 		}
 		
@@ -290,6 +271,25 @@ public class LodRenderer
 		
 		
 		
+		
+
+		// determine how far the game's render distance is currently set
+		farPlaneDistance = mc.gameSettings.renderDistanceChunks * 16;
+		
+		// enable the fog
+//		setupFog();
+		
+		// set the new model view matrix
+		setProjectionMatrix(partialTicks);
+		
+		// set the required open GL settings
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glLineWidth(2.0f);
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glDisable(GL11.GL_CULL_FACE);
+		
+		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+		GL11.glEnable(GL11.GL_BLEND);
 		
 		mc.world.profiler.endStartSection("LOD draw");
 		// draw the LODs
@@ -318,7 +318,7 @@ public class LodRenderer
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		
 		
-		// This is about how long this should take
+		// This is about how long this whole process should take
 		// 16 ms = 60 hz
 		
 		// end of profiler tracking
