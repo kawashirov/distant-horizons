@@ -115,10 +115,10 @@ public class LodRenderer
 		
 		
 		// get the camera location
-		Entity entity = mc.player;
-		double cameraX = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks;
-		double cameraY = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks;
-		double cameraZ = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks;
+		Entity player = mc.player;
+		double cameraX = player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks;
+		double cameraY = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks;
+		double cameraZ = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;
 		
 		int playerXChunkOffset = ((int) cameraX / 16) * 16;
 		int playerZChunkOffset = ((int) cameraZ / 16) * 16;
@@ -159,7 +159,9 @@ public class LodRenderer
 		
 		
 		
-		
+		//=================//
+		// create the LODs //
+		//=================//
 		
 		mc.world.profiler.endStartSection("LOD generation");
 		
@@ -270,15 +272,13 @@ public class LodRenderer
 		
 		
 		
-		mc.world.profiler.endStartSection("LOD pre draw");
-		
-		// send the LODs over to the GPU
-		sendDataToGPU(lodArray, colorArray);
 		
 		
 		
 		
-		
+		//===========================//
+		// GL settings for rendering //
+		//===========================//
 
 		// determine how far the game's render distance is currently set
 		farPlaneDistance = mc.gameSettings.renderDistanceChunks * 16;
@@ -298,6 +298,18 @@ public class LodRenderer
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_BLEND);
 		
+		
+		
+		
+		//===========//
+		// rendering //
+		//===========//
+
+		mc.world.profiler.endStartSection("LOD pre draw");
+		
+		// send the LODs over to the GPU
+		sendDataToGPU(lodArray, colorArray);
+		
 		mc.world.profiler.endStartSection("LOD draw");
 		// draw the LODs
 		tessellator.draw();
@@ -307,6 +319,10 @@ public class LodRenderer
 		
 		
 		
+		
+		//=========//
+		// cleanup //
+		//=========//
 		
 		mc.world.profiler.endStartSection("LOD cleanup");
 		
@@ -327,6 +343,7 @@ public class LodRenderer
 		
 		// This is about how long this whole process should take
 		// 16 ms = 60 hz
+		long endTime = System.nanoTime();
 		
 		// end of profiler tracking
 		mc.world.profiler.endSection();
