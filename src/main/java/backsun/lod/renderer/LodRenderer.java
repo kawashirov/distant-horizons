@@ -30,6 +30,10 @@ public class LodRenderer
 	private Tessellator tessellator;
 	private BufferBuilder bufferBuilder;
 	
+	
+
+	private enum FogMode{NEAR, FAR, NONE};
+	
 	// make sure this is an even number, or else it won't align with the chunk grid
 	public final int viewDistanceMultiplier = 12;
 	private float fovModifierHandPrev;
@@ -40,6 +44,9 @@ public class LodRenderer
 	public int biomes[][];
 	
 	public boolean debugging = true;
+	
+	
+	
 	
 	/**
 	 * constructor
@@ -277,7 +284,7 @@ public class LodRenderer
 		farPlaneDistance = mc.gameSettings.renderDistanceChunks * 16;
 		
 		// enable the fog
-//		setupFog();
+//		setupFog(FogMode.FAR);
 		
 		// set the new model view matrix
 		setProjectionMatrix(partialTicks);
@@ -395,16 +402,29 @@ public class LodRenderer
 	/**
 	 * Sets up and enables the fog to be rendered.
 	 */
-	private void setupFog()
+	private void setupFog(FogMode fogMode)
 	{
-		GlStateManager.setFogDensity(0.1f);
-		// near fog
-		GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
-		GlStateManager.setFogStart(farPlaneDistance * 2.25f);
+		if(fogMode == FogMode.NONE)
+		{
+			GlStateManager.disableFog();
+			return;
+		}
 		
-		// far fog
-//		GlStateManager.setFogStart(farPlaneDistance * (viewDistanceMultiplier * 0.25f));
-//		GlStateManager.setFogEnd(farPlaneDistance * (viewDistanceMultiplier * 0.5f));
+		
+		
+		if(fogMode == FogMode.NEAR)
+		{
+			GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
+			GlStateManager.setFogStart(farPlaneDistance * 2.25f);
+			
+		}
+		else //if(fogMode == FogMode.FAR)
+		{
+			GlStateManager.setFogStart(farPlaneDistance * (viewDistanceMultiplier * 0.25f));
+			GlStateManager.setFogEnd(farPlaneDistance * (viewDistanceMultiplier * 0.5f));
+		}
+		
+		GlStateManager.setFogDensity(0.1f);
 		GlStateManager.enableFog();
 	}
 	
@@ -414,7 +434,7 @@ public class LodRenderer
 	 * Originally from Minecraft's EntityRenderer
 	 * Changes the field of view of the player depending on if they are underwater or not
 	 */
-	public float getFOV(float partialTicks, boolean useFOVSetting)
+	private float getFOV(float partialTicks, boolean useFOVSetting)
 	{
 		Entity entity = mc.getRenderViewEntity();
 		float f = 70.0F;
