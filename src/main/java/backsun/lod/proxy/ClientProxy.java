@@ -68,7 +68,7 @@ public class ClientProxy extends CommonProxy
 		{
 			try
 			{
-				if(renderer.distanceToPlayer(ch.x * 16, 70, ch.z * 16, mc.player.posX, 70, mc.player.posZ) > mc.gameSettings.renderDistanceChunks * 16 * 2)
+				if(distanceToPlayer(ch.x * 16, 70, ch.z * 16, mc.player.posX, 70, mc.player.posZ) > mc.gameSettings.renderDistanceChunks * 16 * 2)
 				{
 					int biome = Biome.getIdForBiome(ch.getBiome(new BlockPos(ch.x, 70, ch.z), mc.world.getBiomeProvider()));
 					renderer.biomes[ch.x+32][ch.z+32] = biome;
@@ -96,4 +96,13 @@ public class ClientProxy extends CommonProxy
 		// later on this should save information about the chunk to be used later
 	}
 	
+	
+
+	public double distanceToPlayer(int x, int y, int z, double cameraX, double cameraY, double cameraZ)
+	{
+		if(cameraY == y)
+			return Math.sqrt(Math.pow((x - cameraX),2) + Math.pow((z - cameraZ),2));
+					
+		return Math.sqrt(Math.pow((x - cameraX),2) + Math.pow((y - cameraY),2) + Math.pow((z - cameraZ),2));
+	}
 }
