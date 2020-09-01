@@ -1,6 +1,6 @@
 package backsun.lod.proxy;
 
-import backsun.lod.renderer.CustomRenderer;
+import backsun.lod.renderer.LodRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
@@ -19,8 +19,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
  */
 public class ClientProxy extends CommonProxy
 {
-	private CustomRenderer renderer;
 	
+	private LodRenderer renderer;
 	
 	
 	
@@ -29,7 +29,7 @@ public class ClientProxy extends CommonProxy
 	 */
 	public ClientProxy()
 	{
-		renderer = new CustomRenderer();
+		renderer = new LodRenderer();
 	}
 	
 	
@@ -42,7 +42,7 @@ public class ClientProxy extends CommonProxy
 	@SubscribeEvent
 	public void renderWorldLastEvent(RenderWorldLastEvent event)
 	{
-		renderer.drawTest(Minecraft.getMinecraft(), event.getPartialTicks());
+		renderer.drawLODs(Minecraft.getMinecraft(), event.getPartialTicks());
 	}
 	
 	

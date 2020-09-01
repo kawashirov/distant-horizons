@@ -22,7 +22,7 @@ import net.minecraft.util.math.AxisAlignedBB;
  * @author James Seibel
  * @version 08-30-2020
  */
-public class CustomRenderer
+public class LodRenderer
 {
 	private Minecraft mc;
 	private float farPlaneDistance;
@@ -44,7 +44,7 @@ public class CustomRenderer
 	/**
 	 * constructor
 	 */
-	public CustomRenderer()
+	public LodRenderer()
 	{
 		mc = Minecraft.getMinecraft();
 		
@@ -83,7 +83,7 @@ public class CustomRenderer
 	 * @param mc
 	 * @param partialTicks
 	 */
-	public void drawTest(Minecraft mc, float partialTicks)
+	public void drawLODs(Minecraft mc, float partialTicks)
 	{
 		// used for debugging and viewing how long different processes take
 		mc.world.profiler.startSection("LOD setup");
