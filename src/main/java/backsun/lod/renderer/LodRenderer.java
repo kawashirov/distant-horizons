@@ -451,12 +451,16 @@ public class LodRenderer
 		
 		if(fogMode == FogMode.NEAR)
 		{
+			// 2.0f
+			// 2.25f
 			GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
 			GlStateManager.setFogStart(farPlaneDistance * 2.25f);
 			
 		}
 		else //if(fogMode == FogMode.FAR)
 		{
+			// 0.25f
+			// 0.5f
 			GlStateManager.setFogStart(farPlaneDistance * (viewDistanceMultiplier * 0.25f));
 			GlStateManager.setFogEnd(farPlaneDistance * (viewDistanceMultiplier * 0.5f));
 		}
