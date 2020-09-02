@@ -178,7 +178,7 @@ public class LodRenderer
 				// update where this square will be drawn
 				double xoffset = -cameraX + // start at x = 0
 						(squareSideLength * i) + // offset by the number of LOD blocks
-						startX; // offset so the center LOD block is underneath the player
+						startX; // offset so the center LOD block is centered underneath the player
 				
 				double zoffset = -cameraZ + (squareSideLength * j) + startZ;
 				
@@ -253,7 +253,7 @@ public class LodRenderer
 						c = black;
 					// draw the first square as red
 					if (i == 0 && j == 0)
-						c = Color.RED;
+						c = red;
 					
 					colorArray[i + (j * numbOfBoxesWide)] = c;
 					
@@ -264,7 +264,7 @@ public class LodRenderer
 				colorArray[i + (j * numbOfBoxesWide)] = c;
 				
 				// add the new box to the array
-				lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(bbx, bby, bbz, 0, bby, 0).offset(xoffset, yoffset, zoffset);
+				lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, bby, 0, bbx, bby, bbz).offset(xoffset, yoffset, zoffset);
 			}
 		}
 		
@@ -308,11 +308,8 @@ public class LodRenderer
 		mc.world.profiler.endStartSection("LOD pre draw");
 		
 		// send the LODs over to the GPU
-		sendDataToGPU(lodArray, colorArray);
+		sendDataToGPU(lodArray, colorArray, cameraX, cameraY ,cameraZ);
 		
-		mc.world.profiler.endStartSection("LOD draw");
-		// draw the LODs
-		tessellator.draw();
 		
 		
 		
@@ -355,11 +352,8 @@ public class LodRenderer
 	 * @param bbArray
 	 * @param colorArray
 	 */
-	private void sendDataToGPU(AxisAlignedBB[] bbArray, Color[] colorArray)
-	{
-		bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		
-		
+	private void sendDataToGPU(AxisAlignedBB[] bbArray, Color[] colorArray, double cameraX, double cameraY, double cameraZ)
+	{		
 		int red;
 		int green;
 		int blue;
@@ -369,6 +363,8 @@ public class LodRenderer
 		int colorIndex = 0;
 		for (AxisAlignedBB bb : bbArray)
 		{
+			mc.world.profiler.endStartSection("LOD pre draw");
+			bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 			
 			// get the color of this LOD object
 			red = colorArray[colorIndex].getRed();
@@ -412,7 +408,31 @@ public class LodRenderer
 			
 			// so we can get the next color
 			colorIndex++;
+			
+			double dist = Math.pow(farPlaneDistance * viewDistanceMultiplier * 0.25f, 2);
+			double diff = Math.pow(bb.minX, 2) + Math.pow(bb.minZ, 2);
+			
+			if (diff < dist)
+			{
+				 setupFog(FogMode.NEAR);
+			}
+			else
+			{
+				 setupFog(FogMode.FAR);
+			}
+			
+			mc.world.profiler.endStartSection("LOD draw");
+			// draw the LODs
+			tessellator.draw();
 		}
+	}
+	
+	private double distanceBetweenPoints(double x1, double y1, double z1, double x2, double y2, double z2)
+	{
+		if(y1 == y2)
+			return Math.sqrt(Math.pow((x1 - x2),2) + Math.pow((z1 - z2),2));
+					
+		return Math.sqrt(Math.pow((x1 - x2),2) + Math.pow((y1 - y2),2) + Math.pow((z1 - z2),2));
 	}
 	
 	
