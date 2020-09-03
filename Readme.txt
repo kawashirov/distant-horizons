@@ -17,7 +17,9 @@ Step 3: run the command: "./gradlew eclipse"
 
 Step 4: Import project
 
-Step 5: In Eclipse go to: Expanded Run Button -> Run Configurations -> Environment, Add the variable "JAVA_HOME" with the value of "JAVA_MC_HOME" or whatever the location of the JDK version 1.8.0_251.
+Step 5: create a system variable called "JAVA_MC_HOME" with the location of the JDK 1.8.0_251 (This is needed for gradle to work correctly)
+
+Step 6: make sure the eclipse has the JDK 1.8.0_251 installed. (This is needed so that eclipse can run minecraft)
 
 
 Other commands: 
