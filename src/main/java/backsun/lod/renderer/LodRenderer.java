@@ -67,18 +67,7 @@ public class LodRenderer
 		// GL11.GL_PROJECTION //5889
 	}
 	
-	/**
-	 * create a new projection matrix and send it over to the GPU
-	 * @param partialTicks how many ticks into the frame we are
-	 */
-	private void setProjectionMatrix(float partialTicks)
-	{
-		// create a new view frustum so that the squares can be drawn outside the normal view distance
-		GlStateManager.matrixMode(GL11.GL_PROJECTION);
-		GlStateManager.loadIdentity();
-		// farPlaneDistance // 10 chunks = 160											0.0125f
-		Project.gluPerspective(fov, (float) mc.displayWidth / (float) mc.displayHeight, 0.0125f, farPlaneDistance * viewDistanceMultiplier);
-	}
+	
 	
 	/**
 	 * Draw Level of Details in the world.
@@ -341,6 +330,55 @@ public class LodRenderer
 		mc.world.profiler.endSection();
 	}
 	
+
+	/**
+	 * create a new projection matrix and send it over to the GPU
+	 * @param partialTicks how many ticks into the frame we are
+	 */
+	private void setProjectionMatrix(float partialTicks)
+	{
+		// create a new view frustum so that the squares can be drawn outside the normal view distance
+		GlStateManager.matrixMode(GL11.GL_PROJECTION);
+		GlStateManager.loadIdentity();
+		// farPlaneDistance // 10 chunks = 160											0.0125f
+		Project.gluPerspective(fov, (float) mc.displayWidth / (float) mc.displayHeight, 0.0125f, farPlaneDistance * viewDistanceMultiplier);
+	}
+	
+
+	/**
+	 * Sets up and enables the fog to be rendered.
+	 */
+	private void setupFog(FogMode fogMode)
+	{
+		if(fogMode == FogMode.NONE)
+		{
+			GlStateManager.disableFog();
+			return;
+		}
+		
+		
+		
+		if(fogMode == FogMode.NEAR)
+		{
+			// 2.0f
+			// 2.25f
+			GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
+			GlStateManager.setFogStart(farPlaneDistance * 2.25f);
+			
+		}
+		else //if(fogMode == FogMode.FAR)
+		{
+			// 0.25f
+			// 0.5f
+			GlStateManager.setFogStart(farPlaneDistance * (viewDistanceMultiplier * 0.25f));
+			GlStateManager.setFogEnd(farPlaneDistance * (viewDistanceMultiplier * 0.5f));
+		}
+		
+		GlStateManager.setFogDensity(0.1f);
+//		GlStateManager.enableFog();
+	}
+	
+	
 	/**
 	 * draw an array of cubes (or squares) with the given colors
 	 * 
@@ -420,39 +458,6 @@ public class LodRenderer
 			// draw the LODs
 			tessellator.draw();
 		}
-	}
-	
-	/**
-	 * Sets up and enables the fog to be rendered.
-	 */
-	private void setupFog(FogMode fogMode)
-	{
-		if(fogMode == FogMode.NONE)
-		{
-			GlStateManager.disableFog();
-			return;
-		}
-		
-		
-		
-		if(fogMode == FogMode.NEAR)
-		{
-			// 2.0f
-			// 2.25f
-			GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
-			GlStateManager.setFogStart(farPlaneDistance * 2.25f);
-			
-		}
-		else //if(fogMode == FogMode.FAR)
-		{
-			// 0.25f
-			// 0.5f
-			GlStateManager.setFogStart(farPlaneDistance * (viewDistanceMultiplier * 0.25f));
-			GlStateManager.setFogEnd(farPlaneDistance * (viewDistanceMultiplier * 0.5f));
-		}
-		
-		GlStateManager.setFogDensity(0.1f);
-//		GlStateManager.enableFog();
 	}
 	
 	
