@@ -288,8 +288,6 @@ public class LodRenderer
 		//===========//
 		// rendering //
 		//===========//
-
-		mc.world.profiler.endStartSection("LOD pre draw");
 		
 		// send the LODs over to the GPU
 		sendDataToGPU(lodArray, colorArray, cameraX, cameraY ,cameraZ);
@@ -386,7 +384,9 @@ public class LodRenderer
 	 * @param colorArray
 	 */
 	private void sendDataToGPU(AxisAlignedBB[] bbArray, Color[] colorArray, double cameraX, double cameraY, double cameraZ)
-	{		
+	{
+		mc.world.profiler.endStartSection("LOD pre draw");
+		
 		int red;
 		int green;
 		int blue;
