@@ -34,7 +34,7 @@ public class LodRenderer
 	private float fovModifierHandPrev;
 	private float fovModifierHand;
 	private float fovModifier = 1.1f;
-	private float fov = 70 * fovModifier;
+	private float fov = 70.0f * fovModifier;
 	
 	public int biomes[][];
 	
@@ -338,7 +338,7 @@ public class LodRenderer
 		// create a new view frustum so that the squares can be drawn outside the normal view distance
 		GlStateManager.matrixMode(GL11.GL_PROJECTION);
 		GlStateManager.loadIdentity();
-		// farPlaneDistance // 10 chunks = 160											0.0125f
+		// farPlaneDistance // 10 chunks = 160											0.0125f (0.05f in the original)
 		Project.gluPerspective(fov, (float) mc.displayWidth / (float) mc.displayHeight, 0.0125f, farPlaneDistance * viewDistanceMultiplier);
 	}
 	
@@ -473,6 +473,4 @@ public class LodRenderer
 		// update the fov
 		fov = mc.gameSettings.fovSetting * fovModifier;
 	}
-	
-	
 }

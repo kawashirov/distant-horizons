@@ -1499,7 +1499,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
             this.mc.mcProfiler.endStartSection("aboveClouds");
 			this.renderCloudsCheck(renderglobal, partialTicks, pass, d0, d1, d2);
         }
-
+        
         this.mc.mcProfiler.endStartSection("forge_render_last");
         net.minecraftforge.client.ForgeHooksClient.dispatchRenderLast(renderglobal, partialTicks);
 
