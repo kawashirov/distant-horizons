@@ -5,17 +5,12 @@ import java.awt.Color;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Project;
 
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.AbstractClientPlayer;
-import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.math.AxisAlignedBB;
 
 /**
@@ -409,32 +404,23 @@ public class LodRenderer
 			// so we can get the next color
 			colorIndex++;
 			
-			double dist = Math.pow(farPlaneDistance * viewDistanceMultiplier * 0.25f, 2);
-			double diff = Math.pow(bb.minX, 2) + Math.pow(bb.minZ, 2);
 			
-			if (diff < dist)
-			{
+			// depending on how far away this bounding box is, either
+			// have it use near or far fog
+			double nearDist = Math.pow(farPlaneDistance * viewDistanceMultiplier * 0.5f, 2);
+			double bbDist = Math.pow(bb.minX, 2) + Math.pow(bb.minZ, 2);
+			
+			if (bbDist < nearDist)
 				 setupFog(FogMode.NEAR);
-			}
 			else
-			{
 				 setupFog(FogMode.FAR);
-			}
+			
 			
 			mc.world.profiler.endStartSection("LOD draw");
 			// draw the LODs
 			tessellator.draw();
 		}
 	}
-	
-	private double distanceBetweenPoints(double x1, double y1, double z1, double x2, double y2, double z2)
-	{
-		if(y1 == y2)
-			return Math.sqrt(Math.pow((x1 - x2),2) + Math.pow((z1 - z2),2));
-					
-		return Math.sqrt(Math.pow((x1 - x2),2) + Math.pow((y1 - y2),2) + Math.pow((z1 - z2),2));
-	}
-	
 	
 	/**
 	 * Sets up and enables the fog to be rendered.
@@ -466,71 +452,9 @@ public class LodRenderer
 		}
 		
 		GlStateManager.setFogDensity(0.1f);
-		GlStateManager.enableFog();
+//		GlStateManager.enableFog();
 	}
 	
-	/**
-	 * possible replacement :  mc.gameSettings.fovSetting * fovModifier;
-	 * 
-	 * Originally from Minecraft's EntityRenderer
-	 * Changes the field of view of the player depending on if they are underwater or not
-	 */
-	private float getFOV(float partialTicks, boolean useFOVSetting)
-	{
-		Entity entity = mc.getRenderViewEntity();
-		float f = 70.0F;
-		
-		updateFovModifierHand();
-		
-		if (useFOVSetting)
-		{
-			f = mc.gameSettings.fovSetting;
-			f = f * (fovModifierHandPrev + (fovModifierHand - fovModifierHandPrev) * partialTicks);
-		}
-		
-		if (entity instanceof EntityLivingBase && ((EntityLivingBase) entity).getHealth() <= 0.0F)
-		{
-			float f1 = ((EntityLivingBase) entity).deathTime + partialTicks;
-			f /= (1.0F - 500.0F / (f1 + 500.0F)) * 2.0F + 1.0F;
-		}
-		
-		IBlockState iblockstate = ActiveRenderInfo.getBlockStateAtEntityViewpoint(mc.world, entity, partialTicks);
-		
-		if (iblockstate.getMaterial() == Material.WATER)
-		{
-			f = f * 60.0F / 70.0F;
-		}
-		
-		return f;
-	}
-	
-	/**
-	 * originally from Minecraft's EntityRenderer
-	 * Update FOV modifier hand
-	 */
-	private void updateFovModifierHand()
-	{
-		float f = 1.0F;
-		
-		if (mc.getRenderViewEntity() instanceof AbstractClientPlayer)
-		{
-			AbstractClientPlayer abstractclientplayer = (AbstractClientPlayer) mc.getRenderViewEntity();
-			f = abstractclientplayer.getFovModifier();
-		}
-		
-		fovModifierHandPrev = fovModifierHand;
-		fovModifierHand += (f - fovModifierHand) * 0.5F;
-		
-		if (fovModifierHand > 1.5F)
-		{
-			fovModifierHand = 1.5F;
-		}
-		
-		if (fovModifierHand < 0.1F)
-		{
-			fovModifierHand = 0.1F;
-		}
-	}
 	
 	
 	/**
@@ -542,7 +466,7 @@ public class LodRenderer
 		fovModifier = newFov;
 		
 		// update the fov
-		fov = mc.gameSettings.fovSetting * fovModifier;//getFOV(partialTicks, true);
+		fov = mc.gameSettings.fovSetting * fovModifier;
 	}
 	
 	
