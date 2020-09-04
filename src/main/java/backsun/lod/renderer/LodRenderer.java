@@ -77,16 +77,16 @@ public class LodRenderer
 	public void drawLODs(Minecraft mc, float partialTicks)
 	{
 		// color setup
-		int alpha = 255;
+		int alpha = 255; // 0 - 255
 		Color error = new Color(255, 0, 225, alpha); // bright pink
 		Color grass = new Color(80, 104, 50, alpha);
 		Color water = new Color(37, 51, 174, alpha);
 		Color swamp = new Color(60, 63, 32, alpha);
 		Color mountain = new Color(100, 100, 100, alpha);
 		
-		Color red = Color.RED;
-		Color black = Color.BLACK;
-		Color white = Color.WHITE;
+		Color red = new Color(255, 0, 0, alpha);
+		Color black = new Color(0, 0, 0, alpha);
+		Color white = new Color(255, 255, 255, alpha);
 		Color invisible = new Color(0,0,0,0);
 		
 		
@@ -109,6 +109,8 @@ public class LodRenderer
 		
 		
 		
+		// determine how far the game's render distance is currently set
+		farPlaneDistance = mc.gameSettings.renderDistanceChunks * 16;
 		
 		// set how big the squares will be and how far they will go
 		int totalLength = (int) farPlaneDistance * viewDistanceMultiplier;
@@ -226,8 +228,6 @@ public class LodRenderer
 //					c = black;
 //				}
 				
-				
-				
 				// if debugging draw the squares as a black and white checker board
 				if (debugging)
 				{
@@ -243,6 +243,21 @@ public class LodRenderer
 					
 					alternateColor = !alternateColor;
 				}
+				
+				
+				// skip the middle
+				// (As the player moves some chunks will overlap or be missing,
+				// this is just how chunk loading/unloading works. This can hopefully
+				// be hidded with careful use of fog)
+				int middle = numbOfBoxesWide / 2;
+				int width = mc.gameSettings.renderDistanceChunks;
+				if ((i > middle - width && i < middle + width) && (j > middle - width && j < middle + width))
+				{
+					// in the future we shouldn't send these over to the GPU at
+					// all, but for now this works just fine
+					c = invisible;
+				}
+				
 				
 				// add the color to the array
 				colorArray[i + (j * numbOfBoxesWide)] = c;
@@ -264,9 +279,6 @@ public class LodRenderer
 		// GL settings for rendering //
 		//===========================//
 
-		// determine how far the game's render distance is currently set
-		farPlaneDistance = mc.gameSettings.renderDistanceChunks * 16;
-		
 		// enable the fog
 //		setupFog(FogMode.FAR);
 		
@@ -339,7 +351,7 @@ public class LodRenderer
 		GlStateManager.matrixMode(GL11.GL_PROJECTION);
 		GlStateManager.loadIdentity();
 		// farPlaneDistance // 10 chunks = 160											0.0125f (0.05f in the original)
-		Project.gluPerspective(fov, (float) mc.displayWidth / (float) mc.displayHeight, 0.0125f, farPlaneDistance * viewDistanceMultiplier);
+		Project.gluPerspective(fov, (float) mc.displayWidth / (float) mc.displayHeight, 0.05f, farPlaneDistance * viewDistanceMultiplier);
 	}
 	
 
