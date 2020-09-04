@@ -1379,7 +1379,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
 
         this.mc.mcProfiler.endStartSection("prepareterrain");
         this.setupFog(0, partialTicks);
-		GlStateManager.disableFog();//XXX
+		GlStateManager.disableFog();//XXX disable fog
         
         this.mc.getTextureManager().bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
         RenderHelper.disableStandardItemLighting();
@@ -1392,7 +1392,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
             this.mc.renderGlobal.updateChunks(finishTimeNano);
         }
 		
-		GlStateManager.disableFog();//XXX
+		GlStateManager.disableFog();//XXX disable fog
         this.mc.mcProfiler.endStartSection("terrain");
         GlStateManager.matrixMode(5888);
         GlStateManager.pushMatrix();
