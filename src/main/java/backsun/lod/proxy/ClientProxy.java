@@ -53,6 +53,7 @@ public class ClientProxy extends CommonProxy
 	@SubscribeEvent
 	public void fovUpdateEvent(FOVUpdateEvent event)
 	{
+		// TODO make it transition between the last fov
 		renderer.updateFOVModifier(event.getNewfov());
 	}
 	
