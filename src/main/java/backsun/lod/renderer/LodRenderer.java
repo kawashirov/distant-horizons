@@ -116,7 +116,7 @@ public class LodRenderer
 		int totalLength = (int) farPlaneDistance * viewDistanceMultiplier;
 		int squareSideLength = 16;
 		int numbOfBoxesWide = (totalLength / squareSideLength);
-		//XXX start distance is about 2 * farPlaneDistance
+		// start distance is about 2 * farPlaneDistance
 		
 		// size of a single square
 		int bbx = squareSideLength;
