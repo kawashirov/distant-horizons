@@ -78,10 +78,15 @@ public class LodRenderer
 	{
 		// color setup
 		int alpha = 255; // 0 - 255
+		@SuppressWarnings("unused")
 		Color error = new Color(255, 0, 225, alpha); // bright pink
+		@SuppressWarnings("unused")
 		Color grass = new Color(80, 104, 50, alpha);
+		@SuppressWarnings("unused")
 		Color water = new Color(37, 51, 174, alpha);
+		@SuppressWarnings("unused")
 		Color swamp = new Color(60, 63, 32, alpha);
+		@SuppressWarnings("unused")
 		Color mountain = new Color(100, 100, 100, alpha);
 		
 		Color red = new Color(255, 0, 0, alpha);
@@ -93,7 +98,7 @@ public class LodRenderer
 		
 		// used for debugging and viewing how long different processes take
 		mc.world.profiler.startSection("LOD setup");
-		
+		@SuppressWarnings("unused")
 		long startTime = System.nanoTime();
 		
 		
@@ -334,6 +339,7 @@ public class LodRenderer
 		
 		// This is about how long this whole process should take
 		// 16 ms = 60 hz
+		@SuppressWarnings("unused")
 		long endTime = System.nanoTime();
 		
 		// end of profiler tracking
