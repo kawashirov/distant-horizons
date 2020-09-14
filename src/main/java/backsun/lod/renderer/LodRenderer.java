@@ -1,6 +1,7 @@
 package backsun.lod.renderer;
 
 import java.awt.Color;
+import java.lang.reflect.Method;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Project;
@@ -487,6 +488,25 @@ public class LodRenderer
 	public void updateFOVModifier(float newFov)
 	{
 		fovModifier = newFov;
+		
+		//TODO move this code so that we don't
+		// have to find the class and method each time
+		// we want the zoom status
+		try
+		{
+			Class<?> ofConfig = Class.forName("OfConfig");
+			Method zoomMethod = ofConfig.getMethod("getZoom");
+			
+			System.out.println(zoomMethod.invoke(ofConfig));
+		}
+		catch(Exception e)
+		{
+			// the only way any exceptions should be thrown is if
+			// Optifine isn't installed or the method's name was
+			// changed.
+			
+			//System.err.println(e);
+		}
 		
 		// update the fov
 		fov = mc.gameSettings.fovSetting * fovModifier;
