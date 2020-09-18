@@ -1,6 +1,7 @@
 package backsun.lod.renderer;
 
 import java.awt.Color;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import org.lwjgl.opengl.GL11;
@@ -16,7 +17,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 
 /**
  * @author James Seibel
- * @version 08-30-2020
+ * @version 09-17-2020
  */
 public class LodRenderer
 {
@@ -32,10 +33,6 @@ public class LodRenderer
 	
 	// make sure this is an even number, or else it won't align with the chunk grid
 	public final int viewDistanceMultiplier = 12;
-	private float fovModifierHandPrev;
-	private float fovModifierHand;
-	private float fovModifier = 1.1f;
-	private float fov = 70.0f * fovModifier;
 	
 	public int biomes[][];
 	
@@ -358,7 +355,20 @@ public class LodRenderer
 		GlStateManager.matrixMode(GL11.GL_PROJECTION);
 		GlStateManager.loadIdentity();
 		// farPlaneDistance // 10 chunks = 160											0.0125f (0.05f in the original)
-		Project.gluPerspective(fov, (float) mc.displayWidth / (float) mc.displayHeight, 0.05f, farPlaneDistance * viewDistanceMultiplier);
+		
+		try
+		{
+			// TODO change so that it doesn't need to search for the method every time
+			Method getFov = mc.entityRenderer.getClass().getDeclaredMethod("getFOVModifier", float.class, boolean.class);
+			getFov.setAccessible(true);
+			Object[] args = {partialTicks,true};
+			
+			Project.gluPerspective((float)getFov.invoke(mc.entityRenderer, args), (float) mc.displayWidth / (float) mc.displayHeight, 0.05f, farPlaneDistance * viewDistanceMultiplier);
+		}
+		catch(NoSuchMethodException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
+		{
+			//System.out.println(e);
+		}
 	}
 	
 
@@ -372,8 +382,6 @@ public class LodRenderer
 			GlStateManager.disableFog();
 			return;
 		}
-		
-		
 		
 		if(fogMode == FogMode.NEAR)
 		{
@@ -479,36 +487,4 @@ public class LodRenderer
 		}
 	}
 	
-	
-	
-	/**
-	 * 
-	 * @param newfov
-	 */
-	public void updateFOVModifier(float newFov)
-	{
-		fovModifier = newFov;
-		
-		//TODO move this code so that we don't
-		// have to find the class and method each time
-		// we want the zoom status
-		try
-		{
-			Class<?> ofConfig = Class.forName("OfConfig");
-			Method zoomMethod = ofConfig.getMethod("getZoom");
-			
-			System.out.println(zoomMethod.invoke(ofConfig));
-		}
-		catch(Exception e)
-		{
-			// the only way any exceptions should be thrown is if
-			// Optifine isn't installed or the method's name was
-			// changed.
-			
-			//System.err.println(e);
-		}
-		
-		// update the fov
-		fov = mc.gameSettings.fovSetting * fovModifier;
-	}
 }

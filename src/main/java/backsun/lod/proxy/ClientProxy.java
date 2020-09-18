@@ -2,7 +2,6 @@ package backsun.lod.proxy;
 
 import backsun.lod.renderer.LodRenderer;
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.client.event.FOVUpdateEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.world.ChunkEvent;
@@ -12,7 +11,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
  * This is used by the client.
  * 
  * @author James_Seibel
- * @version 08-31-2020
+ * @version 09-17-2020
  */
 public class ClientProxy extends CommonProxy
 {
@@ -49,13 +48,6 @@ public class ClientProxy extends CommonProxy
 	//===============//
 	// update events //
 	//===============//
-	
-	@SubscribeEvent
-	public void fovUpdateEvent(FOVUpdateEvent event)
-	{
-		// TODO make it transition between the last fov
-		renderer.updateFOVModifier(event.getNewfov());
-	}
 	
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent event)
