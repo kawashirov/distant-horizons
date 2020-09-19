@@ -11,21 +11,17 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
  * This is used by the client.
  * 
  * @author James_Seibel
- * @version 09-17-2020
+ * @version 09-18-2020
  */
 public class ClientProxy extends CommonProxy
 {
-	
 	private LodRenderer renderer;
 	
 	
 	
-	/**
-	 * constructor
-	 */
 	public ClientProxy()
 	{
-		renderer = new LodRenderer();
+		
 	}
 	
 	
@@ -38,11 +34,19 @@ public class ClientProxy extends CommonProxy
 	@SubscribeEvent
 	public void renderWorldLastEvent(RenderWorldLastEvent event)
 	{
-		renderer.drawLODs(Minecraft.getMinecraft(), event.getPartialTicks());
-	}
-	
-	
-	
+		// we wait to create the renderer until the first frame
+		// to make sure that the EntityRenderer has
+		// been created, that way we can get the fovModifer
+		// method from it through reflection.
+		if (renderer == null)
+		{
+			renderer = new LodRenderer();
+		}
+		else
+		{
+			renderer.drawLODs(Minecraft.getMinecraft(), event.getPartialTicks());
+		}
+	}	
 	
 	
 	//===============//
@@ -88,7 +92,7 @@ public class ClientProxy extends CommonProxy
 	
 	
 
-	public double distanceToPlayer(int x, int y, int z, double cameraX, double cameraY, double cameraZ)
+	private double distanceToPlayer(int x, int y, int z, double cameraX, double cameraY, double cameraZ)
 	{
 		if(cameraY == y)
 			return Math.sqrt(Math.pow((x - cameraX),2) + Math.pow((z - cameraZ),2));
