@@ -27,14 +27,16 @@ public class OfConfigReflector
 	}
 	*/
 	
-	public static boolean zoomMode()
-	{
-		return Config.zoomMode;
-	}
+	// TODO fix not being able to build with optifine
 	
-	public static boolean isDynamicFov()
-	{
-		return Config.isDynamicFov();
-	}
+//	public static boolean zoomMode()
+//	{
+//		return Config.zoomMode;
+//	}
+//	
+//	public static boolean isDynamicFov()
+//	{
+//		return Config.isDynamicFov();
+//	}
 	
 }
