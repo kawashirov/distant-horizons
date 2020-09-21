@@ -1,13 +1,13 @@
 package backsun.lod.renderer;
 
 import java.awt.Color;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Parameter;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Project;
 
+import backsun.lod.util.OfConfig;
+import backsun.lod.util.fog.FogMode;
+import backsun.lod.util.fog.FogType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -27,16 +27,12 @@ public class LodRenderer
 	private Minecraft mc;
 	private float farPlaneDistance;
 	// make sure this is an even number, or else it won't align with the chunk grid
-	public final int viewDistanceMultiplier = 12;
+	public final int viewDistanceMultiplier = 12; 
 	
 	private Tessellator tessellator;
 	private BufferBuilder bufferBuilder;
-	private Method fovMethod = null;
 	
-
-	private enum FogMode{NEAR, FAR, NONE};
-	
-	
+	private OfConfig ofConfig;
 	
 	
 	public LodRenderer()
@@ -46,16 +42,17 @@ public class LodRenderer
 		tessellator = Tessellator.getInstance();
 		bufferBuilder = tessellator.getBuffer();
 		
-		setupFovMethod();
+		ofConfig = new OfConfig();
 		
 		// GL11.GL_MODELVIEW  //5888
 		// GL11.GL_PROJECTION //5889
 	}
 	
 	
+	
 	public void drawLODs(Minecraft mc, float partialTicks)
 	{
-		if (fovMethod == null)
+		if (ofConfig.fovMethod == null)
 		{
 			// don't continue if we can't get the
 			// user's FOV
@@ -179,8 +176,8 @@ public class LodRenderer
 //				
 				double yoffset = -cameraY + mc.world.provider.getAverageGroundLevel();
 				
-				// TODO fix this so that chunks outside of the view distance are loaded and the biomes are read
-				// TODO fix so that the chunks within view distance aren't always plains
+				// fix this so that chunks outside of the view distance are loaded and the biomes are read
+				// fix so that the chunks within view distance aren't always plains
 //				if(biome != null)
 //				{
 //					// add the color
@@ -296,7 +293,7 @@ public class LodRenderer
 		
 		mc.world.profiler.endStartSection("LOD draw");
 		// send the LODs over to the GPU
-		sendDataToGPUandDraw(lodArray, colorArray, cameraX, cameraY ,cameraZ);
+		sendToGPUAndDraw(lodArray, colorArray, cameraX, cameraY ,cameraZ);
 		
 		
 		
@@ -351,46 +348,12 @@ public class LodRenderer
 		GlStateManager.loadIdentity();
 		// farPlaneDistance // 10 chunks = 160	
 		
-		if (fovMethod != null)
-		{
-			try
-			{
-				Project.gluPerspective((float)fovMethod.invoke(mc.entityRenderer, new Object[]{partialTicks, true}), (float) mc.displayWidth / (float) mc.displayHeight, 0.05f, farPlaneDistance * viewDistanceMultiplier);
-			}
-			catch(InvocationTargetException | IllegalAccessException | IllegalArgumentException e)
-			{
-				// hopefully this should never be called
-				System.out.println(e);
-			}
-		}
-	}
-	
-	private void setupFog(FogMode fogMode)
-	{
-		if(fogMode == FogMode.NONE)
-		{
-			GlStateManager.disableFog();
-			return;
-		}
 		
-		if(fogMode == FogMode.NEAR)
+		// only continue if we can get the FOV
+		if (ofConfig.fovMethod != null)
 		{
-			// 2.0f
-			// 2.25f
-			GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
-			GlStateManager.setFogStart(farPlaneDistance * 2.25f);
-			
+			Project.gluPerspective(ofConfig.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.05f, farPlaneDistance * viewDistanceMultiplier);
 		}
-		else //if(fogMode == FogMode.FAR)
-		{
-			// 0.25f
-			// 0.5f
-			GlStateManager.setFogStart(farPlaneDistance * (viewDistanceMultiplier * 0.25f));
-			GlStateManager.setFogEnd(farPlaneDistance * (viewDistanceMultiplier * 0.5f));
-		}
-		
-		GlStateManager.setFogDensity(0.1f);
-//		GlStateManager.enableFog();
 	}
 	
 	
@@ -399,8 +362,10 @@ public class LodRenderer
 	 * @param bbArray bounding boxes to draw
 	 * @param colorArray color of each box to draw
 	 */
-	private void sendDataToGPUandDraw(AxisAlignedBB[] bbArray, Color[] colorArray, double cameraX, double cameraY, double cameraZ)
+	private void sendToGPUAndDraw(AxisAlignedBB[] bbArray, Color[] colorArray, double cameraX, double cameraY, double cameraZ)
 	{
+		FogType fogType = ofConfig.getFogSetting();
+		
 		int red;
 		int green;
 		int blue;
@@ -458,86 +423,54 @@ public class LodRenderer
 			
 			// depending on how far away this bounding box is,
 			// either use near or far fog
-			double nearDist = Math.pow(farPlaneDistance * viewDistanceMultiplier * 0.5f, 2); //TODO only calculate this once
+			double nearDist = Math.pow(farPlaneDistance * viewDistanceMultiplier * 0.35f, 2); //TODO only calculate this once, also maybe use y axis as well?
 			double bbDist = Math.pow(bb.minX, 2) + Math.pow(bb.minZ, 2);
 			
-			if (bbDist < nearDist)
-				 setupFog(FogMode.NEAR);
-			else
-				 setupFog(FogMode.FAR);
-			
+			if (fogType != FogType.OFF)
+			{
+				if (bbDist < nearDist)
+					 setupFog(FogMode.NEAR);
+				else
+					 setupFog(FogMode.FAR);
+			}
 			
 			// draw this LOD
 			tessellator.draw();
 		}
 	}
 	
-	
-	/**
-	 * This sets the "getFOVModifier" method from the 
-	 * minecraft "EntityRenderer" class, so that we can get
-	 * the FOV of the player at any time.
-	 * 
-	 * This is required since Minecraft is obfuscated so
-	 * we can't just look for 'getFOVModifier'
-	 * we have to search for it based on its parameters and
-	 * return type; which luckily are unique in the EntityRenderer
-	 * class.
-	 */
-	private void setupFovMethod()
+	private void setupFog(FogMode fogMode)
 	{
-		// get every method from the entity renderer
-		Method[] methods = Minecraft.getMinecraft().entityRenderer.getClass().getDeclaredMethods();
-		
-		Class<?> returnType;
-		Parameter[] params;
-		Method returnMethod = null;
-		
-		for(Method m : methods)
+		if(fogMode == FogMode.NONE)
 		{
-			returnType = m.getReturnType();
-			params = m.getParameters();
-			
-			// see if this method has the same return type
-			// and parameters as the 'getFOVModifier' method. 
-			if (returnType.equals(float.class) && 
-					params.length == 2 && 
-					params[0].getType().equals(float.class) &&
-					params[1].getType().equals(boolean.class))
-			{
-				
-				// only accept the first method that we find
-				if (returnMethod == null)
-				{
-					returnMethod = m;
-				}
-				else
-				{
-					// we found a second method that matches the 
-					// outline we were looking for,
-					// to prevent unexpected behavior 
-					// dont't set fovMethod.
-					
-					// Since we aren't sure that 
-					// this method is the right 
-					// one, we may accidently mess 
-					// up the entityRender by invoking
-					// it and we probably wouldn't get 
-					// the FOV from it anyway.
-					
-					System.err.println("Error: a second method that matches the parameters and return typ of 'getFOVModifier' was found, LODs won't be rendered.");
-					
-					return;
-				}
-			}
+			GlStateManager.disableFog();
+			return;
 		}
 		
-		// only set the method once we have gone through
-		// the whole array of methods, just to
-		// make sure we have the right one.
-		fovMethod = returnMethod;
-		// set up the method so we can invoke it later
-		fovMethod.setAccessible(true);
+		if(fogMode == FogMode.NEAR)
+		{
+			// 2.0f
+			// 2.25f
+			GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
+			GlStateManager.setFogStart(farPlaneDistance * 2.25f);
+			
+		}
+		else //if(fogMode == FogMode.FAR)
+		{
+			// 0.25f
+			// 0.5f
+			GlStateManager.setFogStart(farPlaneDistance * (viewDistanceMultiplier * 0.25f));
+			GlStateManager.setFogEnd(farPlaneDistance * (viewDistanceMultiplier * 0.5f));
+		}
+		
+		GlStateManager.setFogDensity(0.1f);
+		GlStateManager.enableFog();
 	}
+	
+	
+	
+	
+	
+	
 	
 }
