@@ -123,7 +123,7 @@ public class OfConfig
 	
 	
 	
-	public FogType getFogSetting()
+	public FogType getFogType()
 	{
 		if (ofFogField == null)
 		{

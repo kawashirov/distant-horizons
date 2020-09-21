@@ -238,7 +238,7 @@ public class LodRenderer
 				// skip the middle
 				// (As the player moves some chunks will overlap or be missing,
 				// this is just how chunk loading/unloading works. This can hopefully
-				// be hidded with careful use of fog)
+				// be hidden with careful use of fog)
 				int middle = numbOfBoxesWide / 2;
 				int width = mc.gameSettings.renderDistanceChunks;
 				if ((i > middle - width && i < middle + width) && (j > middle - width && j < middle + width))
@@ -364,12 +364,17 @@ public class LodRenderer
 	 */
 	private void sendToGPUAndDraw(AxisAlignedBB[] bbArray, Color[] colorArray, double cameraX, double cameraY, double cameraZ)
 	{
-		FogType fogType = ofConfig.getFogSetting();
+		FogType fogType = ofConfig.getFogType();
 		
 		int red;
 		int green;
 		int blue;
 		int alpha;
+		
+		// this is the cut off between
+		// near fog and far fog in fancy mode
+		double nearDist = Math.pow(farPlaneDistance * viewDistanceMultiplier * 0.25f, 2);
+		
 		
 		//TODO optimize
 		int colorIndex = 0;
@@ -421,17 +426,29 @@ public class LodRenderer
 			colorIndex++;
 			
 			
-			// depending on how far away this bounding box is,
-			// either use near or far fog
-			double nearDist = Math.pow(farPlaneDistance * viewDistanceMultiplier * 0.35f, 2); //TODO only calculate this once, also maybe use y axis as well?
-			double bbDist = Math.pow(bb.minX, 2) + Math.pow(bb.minZ, 2);
-			
 			if (fogType != FogType.OFF)
 			{
+				// depending on how far away this bounding box is,
+				// either use near or far fog
+				double bbDist = 0;
+				if(fogType == FogType.FANCY || fogType == FogType.UNKNOWN)
+				{
+					// if the fog is fancy, use the distance from the camera
+					// to determine near and far fog
+					bbDist = Math.pow(bb.minX, 2) + Math.pow(bb.minY, 2) + Math.pow(bb.minZ, 2);
+				}
+				else //if(fogType == FogType.FAST)
+				{
+					// if the fog is fast, have all LOD fogs be near
+					// (hide the LODs that are within the normal view
+					// range)
+					bbDist = 0;
+				}
+				
 				if (bbDist < nearDist)
-					 setupFog(FogMode.NEAR);
+					 setupFog(FogMode.NEAR, fogType);
 				else
-					 setupFog(FogMode.FAR);
+					 setupFog(FogMode.FAR, fogType);
 			}
 			
 			// draw this LOD
@@ -439,7 +456,7 @@ public class LodRenderer
 		}
 	}
 	
-	private void setupFog(FogMode fogMode)
+	private void setupFog(FogMode fogMode, FogType fogType)
 	{
 		if(fogMode == FogMode.NONE)
 		{
@@ -447,20 +464,43 @@ public class LodRenderer
 			return;
 		}
 		
+		
 		if(fogMode == FogMode.NEAR)
 		{
-			// 2.0f
-			// 2.25f
-			GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
-			GlStateManager.setFogStart(farPlaneDistance * 2.25f);
+			// the multipliers are percentages
+			// of the normal view distance.
 			
+			// the reason that I wrote fogEnd then fogStart backwards
+			// is because we are using fog backwards to how
+			// it is normally used, with it hiding near objects
+			// instead of far objects.
+			
+			if (fogType == FogType.FANCY || fogType == FogType.UNKNOWN)
+			{
+				GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
+				GlStateManager.setFogStart(farPlaneDistance * 2.25f);
+			}
+			else //if(fogType == FogType.FAST)
+			{
+				GlStateManager.setFogEnd(farPlaneDistance * 0.8f);
+				GlStateManager.setFogStart(farPlaneDistance * 1.5f);
+			}
 		}
 		else //if(fogMode == FogMode.FAR)
 		{
-			// 0.25f
-			// 0.5f
-			GlStateManager.setFogStart(farPlaneDistance * (viewDistanceMultiplier * 0.25f));
-			GlStateManager.setFogEnd(farPlaneDistance * (viewDistanceMultiplier * 0.5f));
+			// the multipliers are percentages of
+			// the LOD view distance.
+			
+			if (fogType == FogType.FANCY || fogType == FogType.UNKNOWN)
+			{
+				GlStateManager.setFogStart(farPlaneDistance * 0.5f * viewDistanceMultiplier / 2.0f);
+				GlStateManager.setFogEnd(farPlaneDistance * 1.0f * viewDistanceMultiplier / 2.0f);
+			}
+			else //if(fogType == FogType.FAST)
+			{
+				GlStateManager.setFogStart(farPlaneDistance * 0.5f * viewDistanceMultiplier / 2.0f);
+				GlStateManager.setFogEnd(farPlaneDistance * 0.8f * viewDistanceMultiplier / 2.0f);
+			}
 		}
 		
 		GlStateManager.setFogDensity(0.1f);
