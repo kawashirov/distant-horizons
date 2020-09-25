@@ -11,13 +11,20 @@ import java.awt.Color;
  */
 public class LodChunk
 {
+	/** The x coordinate of the chunk. */
+	public int x;
+	/** The z coordinate of the chunk. */
+	public int z;
+	
 	// each Vec3 is the average location of
 	// 8th of the chunk.
 	public Vec3 top[];
 	public Vec3 bottom[];
 	
-	/**  */
+	/** The average color of each 6 cardinal directions */
 	public Color colors[];
+	
+	
 	
 	
 	public LodChunk()
@@ -33,6 +40,10 @@ public class LodChunk
 		bottom = newBottom;
 		colors = newColors;
 	}
+	
+	
+	
+	
 	
 	
 	/**
