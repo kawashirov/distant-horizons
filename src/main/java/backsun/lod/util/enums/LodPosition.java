@@ -3,10 +3,10 @@ package backsun.lod.util.enums;
 public enum LodPosition
 {
 	// used for position
-	NE(0),
-	SE(1),
-	SW(2),
-	NW(3);
+	NE(0), // -Z, +X
+	SE(1), // +Z, +X
+	SW(2), // +Z, -X
+	NW(3); // -Z, -X
 	
 	public final int index;
 	
