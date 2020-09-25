@@ -6,10 +6,18 @@ package backsun.lod.objects;
  */
 public class Vec3
 {
-	public short x = 0;
-	public short y = 0;
-	public short z = 0;
+	public short x;
+	public short y;
+	public short z;
 	
+	
+	
+	public Vec3()
+	{
+		x = 0;
+		y = 0;
+		z = 0;
+	}
 	
 	public Vec3(int newX, int newY, int newZ)
 	{
@@ -17,6 +25,8 @@ public class Vec3
 		y = (short) newY;
 		z = (short) newZ;
 	}
+	
+	
 	
 	/**
 	 * Exports data in the form:
