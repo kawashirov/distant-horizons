@@ -11,7 +11,7 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
  * and color data for an LOD object.
  * 
  * @author James Seibel
- * @version 09-25-2020
+ * @version 09-27-2020
  */
 public class LodChunk
 {
