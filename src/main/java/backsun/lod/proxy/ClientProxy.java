@@ -66,8 +66,13 @@ public class ClientProxy extends CommonProxy
 		// or null chunks in this method)
 		if (event.getChunk() != null && isValidChunk(event.getChunk()))
 		{
+			// can be used for testing only the center chunk
+//			if(event.getChunk().x == 0 && event.getChunk().z == 0)
+//			{
+//				LodChunk c = new LodChunk(event.getChunk());
+//			}
 			
-			LodChunk c = new LodChunk(event.getChunk());			
+			LodChunk c = new LodChunk(event.getChunk());
 		}
 		
 		

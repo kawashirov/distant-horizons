@@ -15,15 +15,17 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
  */
 public class LodChunk
 {
-	private final int CHUNK_DATA_WIDTH = 8;
-	private final int CHUNK_DATA_HEIGHT = 8;
+	private final int CHUNK_DATA_WIDTH = 16;
+	private final int CHUNK_DATA_HEIGHT = 16;
 	
 	/**
 	 * This is how many blocks are
 	 * required at a specific y-value
 	 * to constitute a LOD point
 	 */
-	private final int LOD_BLOCK_REQ = 4;
+	private final int LOD_BLOCK_REQ = 16;
+	// the max number of blocks per layer = 64 (8*8)
+	// since each layer is 1/4 the chunk
 	
 	
 	
@@ -32,8 +34,8 @@ public class LodChunk
 	/** The z coordinate of the chunk. */
 	public int z;
 	
-	// each Vec3 is the average location of
-	// 8th of the chunk.
+	// each short is the height of
+	// that 8th of the chunk.
 	public short top[];
 	public short bottom[];
 	
@@ -59,6 +61,10 @@ public class LodChunk
 	
 	public LodChunk(Chunk chunk)
 	{
+		top = new short[4];
+		bottom = new short[4];
+		colors = new Color[6];
+		
 		for(LodPosition p : LodPosition.values())
 		{
 			top[p.index] = generateLodSection(chunk, true, p);
@@ -144,9 +150,9 @@ public class LodChunk
 	private short determineBottomPoint(ExtendedBlockStorage[] data, int startX, int endX, int startZ, int endZ)
 	{
 		// search from the bottom up
-		for(int i = 0; i < data.length; i--)
+		for(int i = 0; i < data.length; i++)
 		{
-			for(int y = 0; y < 16; y--)
+			for(int y = 0; y < 16; y++)
 			{
 				
 				if(isLayerValidLodPoint(data, startX, endX, startZ, endZ, i, y))
@@ -208,8 +214,7 @@ public class LodChunk
 		for(int x = startX; x < endX; x++)
 		{
 			for(int z = startZ; z < endZ; z++)
-			{	
-				
+			{
 				if(data[dataIndex] == null)
 				{
 					// this section doesn't have any blocks
