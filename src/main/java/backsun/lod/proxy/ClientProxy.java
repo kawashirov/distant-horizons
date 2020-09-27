@@ -1,7 +1,10 @@
 package backsun.lod.proxy;
 
+import backsun.lod.objects.LodChunk;
 import backsun.lod.renderer.LodRenderer;
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.world.ChunkEvent;
@@ -56,6 +59,22 @@ public class ClientProxy extends CommonProxy
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent event)
 	{
+		// don't try to create an LOD object
+		// if for some reason we aren't
+		// given a valid chunk object
+		// (Minecraft often gives back empty
+		// or null chunks in this method)
+		if (event.getChunk() != null && isValidChunk(event.getChunk()))
+		{
+			
+			LodChunk c = new LodChunk(event.getChunk());			
+		}
+		
+		
+		
+		
+		//System.out.println(c);
+		
 //		Chunk ch = event.getChunk();
 //		Minecraft mc = Minecraft.getMinecraft();
 //		if(renderer != null && ch != null && renderer.biomes != null && mc.world != null && mc.world.getBiomeProvider() != null)
@@ -88,6 +107,26 @@ public class ClientProxy extends CommonProxy
 	public void onChunkPopulate(PopulateChunkEvent event)
 	{
 		// later on this should save information about the chunk to be used later
+	}
+	
+	
+	/**
+	 * Return whether the given chunk
+	 * has any data in it.
+	 */
+	private boolean isValidChunk(Chunk chunk)
+	{
+		ExtendedBlockStorage[] data = chunk.getBlockStorageArray();
+		
+		for(ExtendedBlockStorage e : data)
+		{
+			if(e != null && !e.isEmpty())
+			{
+				return true;
+			}
+		}
+		
+		return false;
 	}
 	
 	
