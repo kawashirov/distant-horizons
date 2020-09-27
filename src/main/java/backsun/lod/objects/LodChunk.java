@@ -206,9 +206,8 @@ public class LodChunk
 			int startZ, int endZ, 
 			int dataIndex, int y)
 	{
-		int layerBlocks;
 		// search through this layer
-		layerBlocks = 0;
+		int layerBlocks = 0;
 		
 		for(int x = startX; x < endX; x++)
 		{
