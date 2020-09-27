@@ -16,7 +16,6 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 public class LodChunk
 {
 	private final int CHUNK_DATA_WIDTH = 16;
-	private final int CHUNK_DATA_HEIGHT = 16;
 	
 	/**
 	 * This is how many blocks are
