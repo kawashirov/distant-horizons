@@ -2,6 +2,7 @@ package backsun.lod.objects;
 
 import java.awt.Color;
 
+import backsun.lod.util.enums.ColorPosition;
 import backsun.lod.util.enums.LodPosition;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -91,27 +92,102 @@ public class LodChunk
 	/**
 	 * Creates an LodChunk from the string
 	 * created by the toData method.
+	 * 
+	 * @throws IllegalArgumentException if the data isn't valid to create a LodChunk
+	 * @throws NumberFormatException if the data can't be converted into an int at any point
 	 */
-	LodChunk(String data, String delimiter)
+	LodChunk(String data, char delimiter) throws IllegalArgumentException, NumberFormatException
 	{
 		/*
 		 * x, z, top data, bottom data, rgb color data
 		 * 
 		 * example:
-		 * 5,8, 4,4,4,4, 0,0,0,0 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255,
+		 * 5,8, 4,4,4,4, 0,0,0,0, 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255,
 		 */
 		
-		// index we will use when counting 
-		int i = 0;
+		// make sure there are the correct number of entries
+		// in the data string (28)
+		int count = 0;
 		
-//		i = data.indexOf(delimiter, 0);
-//		
-//		x = ;
+		for(int i = 0; i < data.length(); i++)
+		{
+			if(data.charAt(i) == delimiter)
+			{
+				count++;
+			}
+		}
+		
+		if(count != 28)
+		{
+			throw new IllegalArgumentException("LodChunk constructor givin an invalid string. The data given had " + count + " delimiters when it should have had 28.");
+		}
 		
 		
+		
+		// index we will use when going through the String
+		int index = 0;
+		int lastIndex = 0;
+		
+		
+		
+		// x and z position
+		index = data.indexOf(delimiter, 0);
+		x = Integer.parseInt(data.substring(0,index - 1));
+		
+		lastIndex = index;
+		index = data.indexOf(delimiter, lastIndex);
+		z = Integer.parseInt(data.substring(lastIndex,index - 1));
+		
+		
+		
+		// top
+		for(LodPosition p : LodPosition.values())
+		{
+			lastIndex = index;
+			index = data.indexOf(delimiter, lastIndex);
+			
+			top[p.index] = Short.parseShort(data.substring(lastIndex,index - 1));
+		}
+		
+		
+		// bottom
+		for(LodPosition p : LodPosition.values())
+		{
+			lastIndex = index;
+			index = data.indexOf(delimiter, lastIndex);
+			
+			bottom[p.index] = Short.parseShort(data.substring(lastIndex,index - 1));
+		}
+		
+		
+		// color
+		for(ColorPosition p : ColorPosition.values())
+		{
+			int red = 0;
+			int green = 0;
+			int blue = 0;
+			
+			// get r,g,b
+			for(int i = 0; i < 4; i++)
+			{
+				lastIndex = index;
+				index = data.indexOf(delimiter, lastIndex);
+				
+				
+				switch(i)
+				{
+				case 0:
+					red = Short.parseShort(data.substring(lastIndex,index - 1));
+				case 1:
+					green = Short.parseShort(data.substring(lastIndex,index - 1));
+				case 2:
+					blue = Short.parseShort(data.substring(lastIndex,index - 1));
+				}
+			}
+			
+			colors[p.index] = new Color(red, green, blue);
+		}
 	}
-	
-	
 	
 	
 	/**
@@ -294,7 +370,7 @@ public class LodChunk
 	 * <br>
 	 * 5,8, 4,4,4,4, 0,0,0,0 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255,
 	 */
-	public String toData(String delimiter)
+	public String toData(char delimiter)
 	{
 		String s = "";
 		
