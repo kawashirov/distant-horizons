@@ -15,7 +15,7 @@ import backsun.lod.objects.LodRegion;
  * to file.
  * 
  * @author James Seibel
- * @version 09-27-2020
+ * @version 09-28-2020
  */
 public class LodRegionFileHandler
 {
