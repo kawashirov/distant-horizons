@@ -56,6 +56,12 @@ public class LodChunk
 		top = new short[4];
 		bottom = new short[4];
 		colors = new Color[6];
+		
+		// by default have the colors invisible
+		for(ColorPosition p : ColorPosition.values())
+		{
+			colors[p.index] = new Color(0, 0, 0, 0);
+		}
 	}
 	
 	public LodChunk(int newX, int newZ, short[] newTop, short[] newBottom, Color newColors[])
@@ -84,10 +90,10 @@ public class LodChunk
 		}
 		
 		// TODO determine the average color of each direction
-//		for(ColorPosition p : ColorPosition.values())
-//		{
-//			
-//		}
+		for(ColorPosition p : ColorPosition.values())
+		{
+			colors[p.index] = new Color(0, 0, 0, 0);
+		}
 	}
 	
 	
