@@ -46,13 +46,19 @@ public class LodChunk
 	
 	public LodChunk()
 	{
+		x = 0;
+		z = 0;
+		
 		top = new short[4];
 		bottom = new short[4];
 		colors = new Color[6];
 	}
 	
-	public LodChunk(short[] newTop, short[] newBottom, Color newColors[])
+	public LodChunk(int newX, int newZ, short[] newTop, short[] newBottom, Color newColors[])
 	{
+		x = newX;
+		z = newZ;
+		
 		top = newTop;
 		bottom = newBottom;
 		colors = newColors;
@@ -60,6 +66,9 @@ public class LodChunk
 	
 	public LodChunk(Chunk chunk)
 	{
+		x = chunk.x;
+		z = chunk.z;
+		
 		top = new short[4];
 		bottom = new short[4];
 		colors = new Color[6];
@@ -192,6 +201,7 @@ public class LodChunk
 		} // data
 		
 		
+		
 		// we never found a valid LOD point
 		return -1;
 	}
@@ -206,7 +216,7 @@ public class LodChunk
 			int startZ, int endZ, 
 			int dataIndex, int y)
 	{
-		// search through this layer
+		// search through this layerfjfgfghj
 		int layerBlocks = 0;
 		
 		for(int x = startX; x < endX; x++)
@@ -246,53 +256,33 @@ public class LodChunk
 	
 	
 	/**
-	 * Similar to toString, but supports different delimiters,
-	 * and has fewer overall characters ("top " is written as "t").
+	 * Outputs all data in csv format
+	 * with the given delimiter.
 	 * <br>
-	 * Exports data in the form "t", (top data), "b", (bottom data), "c", (rgb color data)
+	 * Exports data in the form:
+	 * <br>
+	 * x, z, top data, bottom data, rgb color data
 	 */
-	public String toData(String delimiter, String endDelimiter)
+	public String toData(String delimiter)
 	{
 		String s = "";
 		
-		s += "t";
+		s += x + delimiter + z + delimiter;
+		
 		for(int i = 0; i < top.length; i++)
 		{
-			s += top[i];
-			
-			if (i != top.length - 1)
-			{
-				// separate each item, except the
-				// last item
-				s += delimiter;
-			}
+			s += top[i] + delimiter;
 		}
 		
-		
-		s += "b";
 		for(int i = 0; i < bottom.length; i++)
 		{
-			s += bottom[i];
-			
-			if (i != bottom.length - 1)
-			{
-				s += delimiter;
-			}
+			s += bottom[i] + delimiter;
 		}
 		
-		
-		s += "c";
 		for(int i = 0; i < colors.length; i++)
 		{
-			s += colors[i].getRed() + delimiter + colors[i].getGreen() + delimiter + colors[i].getBlue();
-			
-			if (i != colors.length - 1)
-			{
-				s += delimiter;
-			}
+			s += colors[i].getRed() + delimiter + colors[i].getGreen() + delimiter + colors[i].getBlue() + delimiter;
 		}
-		
-		s += endDelimiter;
 		
 		return s;
 	}
@@ -303,43 +293,26 @@ public class LodChunk
 	{
 		String s = "";
 		
+		s += "x: " + x + " z: " + z + "\n";
+		
 		s += "top: ";
 		for(int i = 0; i < top.length; i++)
 		{
-			s += top[i];
-			
-			if (i != top.length - 1)
-			{
-				// separate each item, except the
-				// last item
-				s += " ";
-			}
+			s += top[i] + " ";
 		}
 		s += "\n";
-		
 		
 		s += "bottom: ";
 		for(int i = 0; i < bottom.length; i++)
 		{
-			s += bottom[i];
-			
-			if (i != bottom.length - 1)
-			{
-				s += " ";
-			}
+			s += bottom[i] + " ";
 		}
 		s += "\n";
-		
 		
 		s += "colors ";
 		for(int i = 0; i < colors.length; i++)
 		{
-			s += colors[i].getRed() + ", " + colors[i].getGreen() + ", " + colors[i].getBlue();
-			
-			if (i != colors.length - 1)
-			{
-				s += " ";
-			}
+			s += colors[i].getRed() + ", " + colors[i].getGreen() + ", " + colors[i].getBlue() + " ";
 		}
 		
 		return s;
