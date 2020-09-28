@@ -7,7 +7,7 @@ package backsun.lod.objects;
  * one file in the file system.
  * 
  * @author James Seibel
- *
+ * @version 09-28-2020
  */
 public class LodRegion
 {
@@ -26,8 +26,9 @@ public class LodRegion
 		
 		data = new LodChunk[32][32];
 	}
-
-
+	
+	
+	
 	
 	public int getX()
 	{
