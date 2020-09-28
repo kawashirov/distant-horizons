@@ -16,13 +16,15 @@ public class LodRegion
 	/** Z coordinate of this region */
 	private int z;
 	
-	public LodChunk data[][] = new LodChunk[32][32];
+	public LodChunk data[][];
 	
 	
 	public LodRegion(int regionX, int regionZ)
 	{
 		x = regionX;
 		z = regionZ;
+		
+		data = new LodChunk[32][32];
 	}
 
 

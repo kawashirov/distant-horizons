@@ -89,6 +89,32 @@ public class LodChunk
 	
 	
 	/**
+	 * Creates an LodChunk from the string
+	 * created by the toData method.
+	 */
+	LodChunk(String data, String delimiter)
+	{
+		/*
+		 * x, z, top data, bottom data, rgb color data
+		 * 
+		 * example:
+		 * 5,8, 4,4,4,4, 0,0,0,0 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255,
+		 */
+		
+		// index we will use when counting 
+		int i = 0;
+		
+//		i = data.indexOf(delimiter, 0);
+//		
+//		x = ;
+		
+		
+	}
+	
+	
+	
+	
+	/**
 	 * If invalid/null/empty chunks are given 
 	 * crashes may occur.
 	 */
@@ -262,6 +288,11 @@ public class LodChunk
 	 * Exports data in the form:
 	 * <br>
 	 * x, z, top data, bottom data, rgb color data
+	 * 
+	 * <br>
+	 * example output:
+	 * <br>
+	 * 5,8, 4,4,4,4, 0,0,0,0 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255,
 	 */
 	public String toData(String delimiter)
 	{

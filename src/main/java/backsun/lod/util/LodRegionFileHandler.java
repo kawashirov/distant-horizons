@@ -1,7 +1,10 @@
 package backsun.lod.util;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
 
 import backsun.lod.objects.LodChunk;
 import backsun.lod.objects.LodRegion;
@@ -34,10 +37,51 @@ public class LodRegionFileHandler
 	
 	
 	/**
-	 * Return the 
+	 * Return the LodRegion that 
 	 */
 	public LodRegion loadRegionFromFile(int regionX, int regionZ)
 	{
+		String fileName = getFileNameForRegion(regionX, regionZ);
+		
+		File f = new File(fileName);
+		
+		if (!f.exists())
+		{
+			// there wasn't a file, don't
+			// return anything
+			return null;
+		}
+		
+		
+		LodRegion region = new LodRegion(regionX, regionZ);
+		
+		
+		try
+		{
+			BufferedReader br = new BufferedReader(new FileReader(f));
+			
+			String s = br.readLine();
+			
+			while(s != null || !s.isEmpty())
+			{
+				// convert each line into a LOD object and add it to the region
+			}
+			
+			
+			br.close();
+		}
+		catch (IOException e)
+		{
+			// File not found
+			
+			// or the buffered reader encountered a 
+			// problem reading the file
+			
+			return null;
+		}
+		
+		
+		
 		return null;
 	}
 	
@@ -45,7 +89,7 @@ public class LodRegionFileHandler
 	
 	
 	
-	public void saveLodToDisk(LodChunk chunk)
+	public void saveRegionToDisk(LodChunk chunk)
 	{
 		// convert chunk coordinates to region
 		// coordinates
@@ -59,11 +103,10 @@ public class LodRegionFileHandler
 		{
 			if (!f.exists())
 			{
-				System.out.println("LOD\tcreating file");
 				f.createNewFile();
 			}
 			
-			FileWriter fw = new FileWriter(f,true); // true means append to file
+			FileWriter fw = new FileWriter(f); // true means append to file
 			String data = chunk.x + "\t" + chunk.z;
 			
 			fw.write(data + "\n");
@@ -86,7 +129,7 @@ public class LodRegionFileHandler
 	 * Returns true if a file exists for the region
 	 * containing the given chunk.
 	 */
-	public boolean regionFileExistForChunk(int chunkX, int chunkZ)
+	private boolean regionFileExistForChunk(int chunkX, int chunkZ)
 	{
 		// convert chunk coordinates to region
 				// coordinates
@@ -100,17 +143,23 @@ public class LodRegionFileHandler
 	 * Returns true if a file exists
 	 * for the given region coordinates.
 	 */
-	public boolean regionFileExistForRegion(int regionX, int regionZ)
+	private boolean regionFileExistForRegion(int regionX, int regionZ)
 	{
 		return new File(getFileNameForRegion(regionX, regionZ)).exists();
 	}
 	
 	
 	
-	private String getFileNameForRegion(int x, int z)
+	/**
+	 * Return the name of the file that should contain the 
+	 * region at the given x and z.
+	 * @param regionX
+	 * @param regionZ
+	 */
+	private String getFileNameForRegion(int regionX, int regionZ)
 	{
 		return SAVE_DIR + 
 				FILE_NAME_PREFIX + FILE_NAME_DELIMITER + 
-				x + FILE_NAME_DELIMITER + z + FILE_EXTENSION;
+				regionX + FILE_NAME_DELIMITER + regionZ + FILE_EXTENSION;
 	}
 }
