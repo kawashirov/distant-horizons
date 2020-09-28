@@ -12,10 +12,13 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
  * and color data for an LOD object.
  * 
  * @author James Seibel
- * @version 09-27-2020
+ * @version 09-28-2020
  */
 public class LodChunk
 {
+	/** This is what separates each piece of data in the toData method */
+	public static final char DATA_DELIMITER = ',';
+	
 	private final int CHUNK_DATA_WIDTH = 16;
 	
 	/**
@@ -96,7 +99,7 @@ public class LodChunk
 	 * @throws IllegalArgumentException if the data isn't valid to create a LodChunk
 	 * @throws NumberFormatException if the data can't be converted into an int at any point
 	 */
-	LodChunk(String data, char delimiter) throws IllegalArgumentException, NumberFormatException
+	public LodChunk(String data) throws IllegalArgumentException, NumberFormatException
 	{
 		/*
 		 * x, z, top data, bottom data, rgb color data
@@ -111,7 +114,7 @@ public class LodChunk
 		
 		for(int i = 0; i < data.length(); i++)
 		{
-			if(data.charAt(i) == delimiter)
+			if(data.charAt(i) == DATA_DELIMITER)
 			{
 				count++;
 			}
@@ -131,11 +134,11 @@ public class LodChunk
 		
 		
 		// x and z position
-		index = data.indexOf(delimiter, 0);
+		index = data.indexOf(DATA_DELIMITER, 0);
 		x = Integer.parseInt(data.substring(0,index - 1));
 		
 		lastIndex = index;
-		index = data.indexOf(delimiter, lastIndex);
+		index = data.indexOf(DATA_DELIMITER, lastIndex);
 		z = Integer.parseInt(data.substring(lastIndex,index - 1));
 		
 		
@@ -144,7 +147,7 @@ public class LodChunk
 		for(LodPosition p : LodPosition.values())
 		{
 			lastIndex = index;
-			index = data.indexOf(delimiter, lastIndex);
+			index = data.indexOf(DATA_DELIMITER, lastIndex);
 			
 			top[p.index] = Short.parseShort(data.substring(lastIndex,index - 1));
 		}
@@ -154,7 +157,7 @@ public class LodChunk
 		for(LodPosition p : LodPosition.values())
 		{
 			lastIndex = index;
-			index = data.indexOf(delimiter, lastIndex);
+			index = data.indexOf(DATA_DELIMITER, lastIndex);
 			
 			bottom[p.index] = Short.parseShort(data.substring(lastIndex,index - 1));
 		}
@@ -171,7 +174,7 @@ public class LodChunk
 			for(int i = 0; i < 4; i++)
 			{
 				lastIndex = index;
-				index = data.indexOf(delimiter, lastIndex);
+				index = data.indexOf(DATA_DELIMITER, lastIndex);
 				
 				
 				switch(i)
@@ -370,25 +373,25 @@ public class LodChunk
 	 * <br>
 	 * 5,8, 4,4,4,4, 0,0,0,0 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255,
 	 */
-	public String toData(char delimiter)
+	public String toData()
 	{
 		String s = "";
 		
-		s += x + delimiter + z + delimiter;
+		s += x + DATA_DELIMITER + z + DATA_DELIMITER;
 		
 		for(int i = 0; i < top.length; i++)
 		{
-			s += top[i] + delimiter;
+			s += top[i] + DATA_DELIMITER;
 		}
 		
 		for(int i = 0; i < bottom.length; i++)
 		{
-			s += bottom[i] + delimiter;
+			s += bottom[i] + DATA_DELIMITER;
 		}
 		
 		for(int i = 0; i < colors.length; i++)
 		{
-			s += colors[i].getRed() + delimiter + colors[i].getGreen() + delimiter + colors[i].getBlue() + delimiter;
+			s += colors[i].getRed() + DATA_DELIMITER + colors[i].getGreen() + DATA_DELIMITER + colors[i].getBlue() + DATA_DELIMITER;
 		}
 		
 		return s;
