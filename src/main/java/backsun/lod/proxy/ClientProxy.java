@@ -73,6 +73,7 @@ public class ClientProxy extends CommonProxy
 //			}
 			
 			LodChunk c = new LodChunk(event.getChunk());
+			System.out.println(c.toString());
 		}
 		
 		
