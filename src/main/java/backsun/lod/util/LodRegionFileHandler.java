@@ -62,9 +62,29 @@ public class LodRegionFileHandler
 			
 			String s = br.readLine();
 			
-			while(s != null || !s.isEmpty())
+			while(s != null && !s.isEmpty())
 			{
-				// convert each line into a LOD object and add it to the region
+				try
+				{
+					// convert each line into an LOD object and add it to the region
+					LodChunk c = new LodChunk(s);
+					
+					// convert the chunk's world position into
+					// the region's index position
+					int x = c.x % 32;
+					int z = c.z % 32;
+					
+					region.data[x][z] = c;
+				}
+				catch(IllegalArgumentException e)
+				{
+					// we were unable to create this chunk
+					// for whatever reason.
+					// skip to the next chunk
+				}
+				
+				
+				s = br.readLine();
 			}
 			
 			
@@ -82,7 +102,7 @@ public class LodRegionFileHandler
 		
 		
 		
-		return null;
+		return region;
 	}
 	
 	
@@ -132,7 +152,7 @@ public class LodRegionFileHandler
 	private boolean regionFileExistForChunk(int chunkX, int chunkZ)
 	{
 		// convert chunk coordinates to region
-				// coordinates
+		// coordinates
 		int regionX = (int) (chunkX / 32.0);
 		int regionZ = (int) (chunkZ / 32.0);
 		
