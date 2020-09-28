@@ -109,12 +109,12 @@ public class LodRegionFileHandler
 	
 	
 	
-	public void saveRegionToDisk(LodChunk chunk)
+	public void saveRegionToDisk(LodRegion region)
 	{
 		// convert chunk coordinates to region
 		// coordinates
-		int x = (int) (chunk.x / 32.0);
-		int z = (int) (chunk.z / 32.0);
+		int x = region.getZ();
+		int z = region.getX();
 		
 		File f = new File(getFileNameForRegion(x, z));
 		
@@ -126,13 +126,17 @@ public class LodRegionFileHandler
 				f.createNewFile();
 			}
 			
-			FileWriter fw = new FileWriter(f); // true means append to file
-			String data = chunk.x + "\t" + chunk.z;
+			FileWriter fw = new FileWriter(f);
 			
-			fw.write(data + "\n");
+			for(LodChunk[] chunkArray : region.data)
+			{
+				for(LodChunk chunk : chunkArray)
+				{
+					fw.write(chunk + "\n");
+				}
+			}
+			
 			fw.close();
-			
-			System.out.println("LOD \t" + data);
 		}
 		catch(Exception e)
 		{
