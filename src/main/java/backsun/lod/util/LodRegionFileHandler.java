@@ -113,8 +113,8 @@ public class LodRegionFileHandler
 	{
 		// convert chunk coordinates to region
 		// coordinates
-		int x = region.getZ();
-		int z = region.getX();
+		int x = region.x;
+		int z = region.z;
 		
 		File f = new File(getFileNameForRegion(x, z));
 		
@@ -157,8 +157,8 @@ public class LodRegionFileHandler
 	{
 		// convert chunk coordinates to region
 		// coordinates
-		int regionX = (int) (chunkX / 32.0);
-		int regionZ = (int) (chunkZ / 32.0);
+		int regionX = chunkX / 32;
+		int regionZ = chunkZ / 32;
 		
 		return new File(getFileNameForRegion(regionX, regionZ)).exists();
 	}
