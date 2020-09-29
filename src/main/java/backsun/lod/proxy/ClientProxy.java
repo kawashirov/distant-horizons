@@ -1,7 +1,9 @@
 package backsun.lod.proxy;
 
 import backsun.lod.objects.LodChunk;
+import backsun.lod.objects.LodRegion;
 import backsun.lod.renderer.LodRenderer;
+import backsun.lod.util.LodRegionFileHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -19,12 +21,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class ClientProxy extends CommonProxy
 {
 	private LodRenderer renderer;
-	
-	
+	private LodRegionFileHandler rfHandler;
+	//TODO dynamically remove and add regions
+	private LodRegion region;
 	
 	public ClientProxy()
 	{
-		
+		rfHandler = new LodRegionFileHandler();
 	}
 	
 	
@@ -72,8 +75,17 @@ public class ClientProxy extends CommonProxy
 //				LodChunk c = new LodChunk(event.getChunk());
 //			}
 			
+			
 			LodChunk c = new LodChunk(event.getChunk());
-			System.out.println(c.toString());
+			
+			if (region == null || (region.x != (c.x / 32) && region.z != (c.z / 32)))
+			{
+				region = new LodRegion(c.x / 32, c.z / 32);
+			}
+			
+			region.data[Math.abs(c.x % 32)][Math.abs(c.z % 32)] = c;
+			
+			rfHandler.saveRegionToDisk(region);
 		}
 		
 		
@@ -104,7 +116,6 @@ public class ClientProxy extends CommonProxy
 //			
 //		}
 	}
-	
 	
 	/**
 	 * this event is called whenever a chunk is created for the first time.
