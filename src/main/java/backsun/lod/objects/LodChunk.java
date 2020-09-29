@@ -108,11 +108,14 @@ public class LodChunk
 	public LodChunk(String data) throws IllegalArgumentException, NumberFormatException
 	{
 		/*
+		 * data format:
 		 * x, z, top data, bottom data, rgb color data
 		 * 
 		 * example:
 		 * 5,8, 4,4,4,4, 0,0,0,0, 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255,
 		 */
+		
+		
 		
 		// make sure there are the correct number of entries
 		// in the data string (28)

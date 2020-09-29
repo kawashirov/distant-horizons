@@ -22,7 +22,7 @@ public class ClientProxy extends CommonProxy
 {
 	private LodRenderer renderer;
 	private LodRegionFileHandler rfHandler;
-	//TODO dynamically remove and add regions
+	//TODO have the ability to store multiple regions based on how large the user's view distance is
 	private LodRegion region;
 	
 	public ClientProxy()
@@ -75,8 +75,10 @@ public class ClientProxy extends CommonProxy
 //				LodChunk c = new LodChunk(event.getChunk());
 //			}
 			
-			
 			LodChunk c = new LodChunk(event.getChunk());
+			
+			
+			// TODO determine if a old region should be unloaded
 			
 			if (region == null || (region.x != (c.x / 32) && region.z != (c.z / 32)))
 			{
@@ -84,6 +86,8 @@ public class ClientProxy extends CommonProxy
 			}
 			
 			region.data[Math.abs(c.x % 32)][Math.abs(c.z % 32)] = c;
+			
+			//TODO send data to renderer
 			
 			rfHandler.saveRegionToDisk(region);
 		}
