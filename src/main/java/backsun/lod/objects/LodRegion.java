@@ -12,9 +12,9 @@ package backsun.lod.objects;
 public class LodRegion
 {
 	/**	X coordinate of this region */
-	private int x;
+	public final int x;
 	/** Z coordinate of this region */
-	private int z;
+	public final int z;
 	
 	public LodChunk data[][];
 	
@@ -25,18 +25,5 @@ public class LodRegion
 		z = regionZ;
 		
 		data = new LodChunk[32][32];
-	}
-	
-	
-	
-	
-	public int getX()
-	{
-		return x;
-	}
-	
-	public int getZ()
-	{
-		return z;
 	}
 }
