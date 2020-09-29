@@ -409,26 +409,26 @@ public class LodChunk
 	{
 		String s = "";
 		
-		s += "x: " + x + " z: " + z + "\n";
+		s += "x: " + x + " z: " + z + "\t";
 		
 		s += "top: ";
 		for(int i = 0; i < top.length; i++)
 		{
 			s += top[i] + " ";
 		}
-		s += "\n";
+		s += "\t";
 		
 		s += "bottom: ";
 		for(int i = 0; i < bottom.length; i++)
 		{
 			s += bottom[i] + " ";
 		}
-		s += "\n";
+		s += "\t";
 		
 		s += "colors ";
 		for(int i = 0; i < colors.length; i++)
 		{
-			s += colors[i].getRed() + ", " + colors[i].getGreen() + ", " + colors[i].getBlue() + " ";
+			s += "(" + colors[i].getRed() + ", " + colors[i].getGreen() + ", " + colors[i].getBlue() + "), ";
 		}
 		
 		return s;
