@@ -19,6 +19,7 @@ import backsun.lod.objects.LodRegion;
  */
 public class LodRegionFileHandler
 {
+	// String s = Minecraft.getMinecraftDir().getCanonicalPath() + "/saves/" + world.getSaveHandler().getSaveDirectoryName() + "/data/AA/World" + world.provider.dimensionId + ".dat";
 	private final String SAVE_DIR = "C:/Users/James Seibel/Desktop/lod_save_folder/";
 	
 	private final String FILE_NAME_PREFIX = "lod";
@@ -132,7 +133,11 @@ public class LodRegionFileHandler
 			{
 				for(LodChunk chunk : chunkArray)
 				{
-					fw.write(chunk + "\n");
+					
+					if(chunk != null)
+					{
+						fw.write(chunk + "\n");
+					}
 				}
 			}
 			
