@@ -145,7 +145,8 @@ public class LodRegionFileHandler
 		}
 		catch(Exception e)
 		{
-			System.err.println("LOD ERROR \t" + e);
+			System.err.println("LOD ERROR: ");
+			e.printStackTrace();
 		}
 	}
 	
