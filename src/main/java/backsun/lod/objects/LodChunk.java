@@ -381,8 +381,8 @@ public class LodChunk
 			{
 				if(data[dataIndex] == null)
 				{
-					// this section doesn't have any blocks
-					// skip to the next data section
+					// this section doesn't have any blocks,
+					// it is not a valid section
 					return false;
 				}
 				else
