@@ -4,7 +4,6 @@ import java.awt.Color;
 
 import backsun.lod.util.enums.ColorPosition;
 import backsun.lod.util.enums.LodPosition;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.util.math.BlockPos;
@@ -389,32 +388,36 @@ public class LodChunk
 	
 	private Color generateLodColorSection(Chunk chunk, World world, ColorPosition p)
 	{
+		Minecraft mc =  Minecraft.getMinecraft();
+		BlockColors bc = mc.getBlockColors();
+		
 		switch (p)
 		{
 			case TOP:
-				return generateLodColorTop(chunk, world);
+				return generateLodColorTop(chunk, world, bc);
 			case BOTTOM:
-//				return generateLodColorTop(chunk);
+				return generateLodColorTop(chunk, world, bc);
 				
 			case N:
-//				return generateLodColorTop(chunk);
+				return generateLodColorTop(chunk, world, bc);
 			case S:
-//				return generateLodColorTop(chunk);
+				return generateLodColorTop(chunk, world, bc);
 				
 			case E:
-//				return generateLodColorTop(chunk);
+				return generateLodColorTop(chunk, world, bc);
 			case W:
-//				return generateLodColorTop(chunk);
+				return generateLodColorTop(chunk, world, bc);
 		}
 		
 		
 		return null;
 	}
 	
-	private Color generateLodColorTop(Chunk chunk, World world)
+	private Color generateLodColorTop(Chunk chunk, World world, BlockColors bc)
 	{
 		ExtendedBlockStorage[] data = chunk.getBlockStorageArray();
 		
+		int numbOfBlocks = 0;
 		int red = 0;
 		int green = 0;
 		int blue = 0;
@@ -428,28 +431,28 @@ public class LodChunk
 				{
 					for(int y = CHUNK_DATA_HEIGHT - 1; y >= 0; y--)
 					{
-						try
+						if(data[di] != null)
 						{
-							// TODO only do this once, and do it without the multiple variables
-							Minecraft mc =  Minecraft.getMinecraft();
-							BlockColors bc = mc.getBlockColors();
+							int ci = bc.getColor(data[di].get(x, y, z), world, new BlockPos(x,y,z));
 							
-							IBlockState bs = data[di].get(x, y, z);
+							if(ci == 0)
+							{
+								// skip air or invisible blocks
+								continue;
+							}
 							
-							int ci = bc.getColor(bs, world, new BlockPos(x,y,z));
+							Color c = intToColor(ci);
 							
-							// TODO determine how colors are returned and how to properly use them
-							//Color c = new Color(ci);
+							red += c.getRed();
+							green += c.getGreen();
+							blue += c.getBlue();
 							
-							System.out.println(data[di].get(x, y, z).getBlock().getLocalizedName() + "\t" + ci);
+							numbOfBlocks++;
 							
-//							red += c.getRed();
-//							green += c.getGreen();
-//							blue += c.getBlue();
-						}
-						catch(Exception e)
-						{
-							
+							// we found a valid block, skip to the
+							// next x and z
+							y = 0;
+							di = 0;
 						}
 					}
 				}
@@ -458,16 +461,28 @@ public class LodChunk
 		}
 		
 		
-		int divisor = CHUNK_DATA_WIDTH * CHUNK_DATA_WIDTH;
-		
-		red /= divisor;
-		green /= divisor;
-		blue /= divisor;
-		
+		red /= numbOfBlocks;
+		green /= numbOfBlocks;
+		blue /= numbOfBlocks;
 		
 		return new Color(red, green, blue);
 	}
 	
+	/**
+	 * Convert a BlockColors int into a Color object.
+	 */
+	private Color intToColor(int num)
+	{
+		int filter = 0b11111111;
+		
+		int red = (num >> 16 ) & filter;
+		
+		int green = (num >> 8 ) & filter;
+		
+		int blue = num & filter;
+		
+		return new Color(red, green, blue);
+	}
 	
 	
 	
