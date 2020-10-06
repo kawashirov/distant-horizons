@@ -413,12 +413,28 @@ public class LodChunk
 		Minecraft mc =  Minecraft.getMinecraft();
 		BlockColors bc = mc.getBlockColors();
 		
+		if(p == ColorPosition.TOP)
+		{
+			Color c1 = generateLodColorVertical(chunk, true, world, bc);
+			Color c2 = generateLodColorTop(chunk, world, bc);
+			
+			if(c1.equals(c2))
+			{
+				// do nothing
+			}
+			else
+			{
+				System.out.println("\t" + c1 + "\t" + c2);
+			}
+		}
+		
+		
 		switch (p)
 		{
 			case TOP:
-				return generateLodColorTop(chunk, world, bc);
+				return generateLodColorVertical(chunk, true, world, bc);
 			case BOTTOM:
-				return generateLodColorTop(chunk, world, bc);
+				return generateLodColorVertical(chunk, false, world, bc);
 				
 			case N:
 				return generateLodColorTop(chunk, world, bc);
@@ -434,6 +450,90 @@ public class LodChunk
 		
 		return null;
 	}
+	
+	
+	
+	
+	private Color generateLodColorVertical(Chunk chunk, boolean bottom, World world, BlockColors bc)
+	{
+		ExtendedBlockStorage[] data = chunk.getBlockStorageArray();
+		
+		int numbOfBlocks = 0;
+		int red = 0;
+		int green = 0;
+		int blue = 0;
+		
+		// TODO check to make sure it always ends correctly
+		// by default this is top
+		int dataStart = data.length - 1;
+		int dataEnd = -1;
+		int dataIncrement = -1;
+		
+		int yStart = CHUNK_DATA_HEIGHT - 1;
+		int yEnd = -1;
+		int yIncrement = -1;
+		
+		if (bottom)
+		{
+			
+		}
+		
+		
+		
+		for(int x = 0; x < CHUNK_DATA_WIDTH; x++)
+		{
+			for(int z = 0; z < CHUNK_DATA_WIDTH; z++)
+			{
+				
+				for(int di = dataStart; di != dataEnd; di += dataIncrement)
+				{
+					for(int y = yStart; y != yEnd; y += yIncrement)
+					{
+						if(data[di] != null)
+						{
+							int ci = bc.getColor(data[di].get(x, y, z), world, new BlockPos(x,y,z));
+							
+							if(ci == 0)
+							{
+								// skip air or invisible blocks
+								continue;
+							}
+							
+							Color c = intToColor(ci);
+							
+							red += c.getRed();
+							green += c.getGreen();
+							blue += c.getBlue();
+							
+							numbOfBlocks++;
+							
+							// we found a valid block, skip to the
+							// next x and z
+							y = 0;
+							di = 0;
+						}
+					}
+				}
+				
+			}
+		}
+		
+		if(numbOfBlocks == 0)
+			numbOfBlocks = 1;
+		
+		
+		red /= numbOfBlocks;
+		green /= numbOfBlocks;
+		blue /= numbOfBlocks;
+		
+		return new Color(red, green, blue);
+	}
+	
+	
+	
+	
+	
+	
 	
 	private Color generateLodColorTop(Chunk chunk, World world, BlockColors bc)
 	{
