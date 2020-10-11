@@ -413,21 +413,6 @@ public class LodChunk
 		Minecraft mc =  Minecraft.getMinecraft();
 		BlockColors bc = mc.getBlockColors();
 		
-		if(p == ColorPosition.TOP)
-		{
-			Color c1 = generateLodColorVertical(chunk, true, world, bc);
-			Color c2 = generateLodColorTop(chunk, world, bc);
-			
-			if(c1.equals(c2))
-			{
-				// do nothing
-			}
-			else
-			{
-				System.out.println("\t" + c1 + "\t" + c2);
-			}
-		}
-		
 		
 		switch (p)
 		{
@@ -447,14 +432,10 @@ public class LodChunk
 				return generateLodColorTop(chunk, world, bc);
 		}
 		
-		
-		return null;
+		return new Color(0, 0, 0, 0);
 	}
 	
-	
-	
-	
-	private Color generateLodColorVertical(Chunk chunk, boolean bottom, World world, BlockColors bc)
+	private Color generateLodColorVertical(Chunk chunk, boolean goTopDown, World world, BlockColors bc)
 	{
 		ExtendedBlockStorage[] data = chunk.getBlockStorageArray();
 		
@@ -463,33 +444,31 @@ public class LodChunk
 		int green = 0;
 		int blue = 0;
 		
-		// TODO check to make sure it always ends correctly
-		// by default this is top
-		int dataStart = data.length - 1;
-		int dataEnd = -1;
-		int dataIncrement = -1;
 		
-		int yStart = CHUNK_DATA_HEIGHT - 1;
-		int yEnd = -1;
-		int yIncrement = -1;
+		// either go top down or bottom up
+		int dataStart = goTopDown? data.length - 1 : 0;
+		int dataMax = data.length; 
+		int dataMin = 0;
+		int dataIncrement = goTopDown? -1 : 1;
 		
-		if (bottom)
-		{
-			
-		}
-		
+		int topStart = goTopDown? CHUNK_DATA_HEIGHT - 1 : 0;
+		int topMax = CHUNK_DATA_HEIGHT;
+		int topMin = 0;
+		int topIncrement =  goTopDown? -1 : 1;
 		
 		
 		for(int x = 0; x < CHUNK_DATA_WIDTH; x++)
 		{
 			for(int z = 0; z < CHUNK_DATA_WIDTH; z++)
 			{
+				boolean foundBlock = false;
 				
-				for(int di = dataStart; di != dataEnd; di += dataIncrement)
+				for(int di = dataStart; !foundBlock && di >= dataMin && di < dataMax; di += dataIncrement)
 				{
-					for(int y = yStart; y != yEnd; y += yIncrement)
+					// TODO set dataStart as the top or bottom most index that has data
+					if(!foundBlock && data[di] != null)
 					{
-						if(data[di] != null)
+						for(int y = topStart; !foundBlock && y >= topMin && y < topMax; y += topIncrement)
 						{
 							int ci = bc.getColor(data[di].get(x, y, z), world, new BlockPos(x,y,z));
 							
@@ -507,10 +486,10 @@ public class LodChunk
 							
 							numbOfBlocks++;
 							
+							
 							// we found a valid block, skip to the
 							// next x and z
-							y = 0;
-							di = 0;
+							foundBlock = true;
 						}
 					}
 				}
@@ -521,13 +500,13 @@ public class LodChunk
 		if(numbOfBlocks == 0)
 			numbOfBlocks = 1;
 		
-		
 		red /= numbOfBlocks;
 		green /= numbOfBlocks;
 		blue /= numbOfBlocks;
 		
 		return new Color(red, green, blue);
 	}
+	
 	
 	
 	
@@ -589,6 +568,8 @@ public class LodChunk
 		
 		return new Color(red, green, blue);
 	}
+	
+	
 	
 	/**
 	 * Convert a BlockColors int into a Color object.
