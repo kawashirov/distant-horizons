@@ -6,15 +6,21 @@ package backsun.lod.util.enums;
 public enum ColorPosition
 {
 	// used for colors
-	TOP(0),		// +Y
+	/** +Y */
+	TOP(0),
 	
-	N(1),		// -Z
-	S(2),		// +Z
+	/** -Z */
+	N(1),
+	/** +Z */
+	S(2),
 	
-	E(3),		// +X
-	W(4), 		// -X
+	/** +X */
+	E(3),
+	/** -X */
+	W(4),
 	
-	BOTTOM(5);	// -Y
+	/** -Y */
+	BOTTOM(5);
 	
 	public final int index;
 	
