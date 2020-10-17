@@ -1,5 +1,12 @@
 package backsun.lod.util.enums;
 
+/**
+ * 
+ * @author James Seibel
+ * @version 10-17-2020
+ * 
+ * NE, SE, SW, NW
+ */
 public enum LodPosition
 {
 	// used for position
