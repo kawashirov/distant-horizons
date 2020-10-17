@@ -68,15 +68,41 @@ public class ClientProxy extends CommonProxy
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent event)
 	{
-		
+		generateLodChunk(event.getChunk());
+	}
+	
+	/**
+	 * this event is called whenever a chunk is created for the first time.
+	 */
+	@SubscribeEvent
+	public void onChunkPopulate(PopulateChunkEvent event)
+	{
+		generateLodChunk(Minecraft.getMinecraft().world.getChunkFromChunkCoords(event.getChunkX(), event.getChunkZ()));
+	}
+	
+	
+	
+	
+	/*
+	 * 
+	Use this for generating chunks and maybe determining if they are loaded at all?
+	
+ 	chunk = Minecraft.getMinecraft().getIntegratedServer().getWorld(0).getChunkProvider().chunkGenerator.generateChunk(chunk.x, chunk.z);
+	
+	System.out.println(chunk.x + " " + chunk.z + "\tloaded: " + chunk.isLoaded() + "\tpop: " + chunk.isPopulated() + "\tter pop: " + chunk.isTerrainPopulated());
+	 */
+	
+	
+	private void generateLodChunk(Chunk chunk)
+	{
 		// don't try to create an LOD object
 		// if for some reason we aren't
 		// given a valid chunk object
 		// (Minecraft often gives back empty
 		// or null chunks in this method)
-		if (event.getChunk() != null && isValidChunk(event.getChunk()) && Minecraft.getMinecraft().world != null)
+		if (chunk != null && isValidChunk(chunk) && Minecraft.getMinecraft().world != null)
 		{			
-			LodChunk c = new LodChunk(event.getChunk(), Minecraft.getMinecraft().world);
+			LodChunk c = new LodChunk(chunk, Minecraft.getMinecraft().world);
 			
 			
 			
@@ -91,20 +117,7 @@ public class ClientProxy extends CommonProxy
 			
 			rfHandler.saveRegionToDisk(region);
 		}
-		
-		
-		
 	}
-	
-	/**
-	 * this event is called whenever a chunk is created for the first time.
-	 */
-	@SubscribeEvent
-	public void onChunkPopulate(PopulateChunkEvent event)
-	{
-		// later on this should save information about the chunk to be used later
-	}
-	
 	
 	/**
 	 * Return whether the given chunk
@@ -126,7 +139,6 @@ public class ClientProxy extends CommonProxy
 	}
 	
 	
-
 	private double distanceToPlayer(int x, int y, int z, double cameraX, double cameraY, double cameraZ)
 	{
 		if(cameraY == y)
