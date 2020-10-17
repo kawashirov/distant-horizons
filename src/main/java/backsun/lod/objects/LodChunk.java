@@ -118,13 +118,14 @@ public class LodChunk
 		bottom = new short[4];
 		colors = new Color[6];
 		
+		// generate the top and bottom points of this LOD
 		for(LodPosition p : LodPosition.values())
 		{
 			top[p.index] = generateLodSection(chunk, true, p);
 			bottom[p.index] = generateLodSection(chunk, false, p);
 		}
 		
-		// determine the average color of each direction
+		// determine the average color for each direction
 		for(ColorPosition p : ColorPosition.values())
 		{
 			colors[p.index] = generateLodColorSection(chunk, world, p);
