@@ -124,7 +124,7 @@ public class LodChunk
 			bottom[p.index] = generateLodSection(chunk, false, p);
 		}
 		
-		// TODO determine the average color of each direction
+		// determine the average color of each direction
 		for(ColorPosition p : ColorPosition.values())
 		{
 			colors[p.index] = generateLodColorSection(chunk, world, p);
@@ -422,14 +422,14 @@ public class LodChunk
 				return generateLodColorVertical(chunk, false, world, bc);
 				
 			case N:
-				return generateLodColorTop(chunk, world, bc);
+				return generateLodColorHorizontal(chunk, p, world, bc);
 			case S:
-				return generateLodColorTop(chunk, world, bc);
+				return generateLodColorHorizontal(chunk, p, world, bc);
 				
 			case E:
-				return generateLodColorTop(chunk, world, bc);
+				return generateLodColorHorizontal(chunk, p, world, bc);
 			case W:
-				return generateLodColorTop(chunk, world, bc);
+				return generateLodColorHorizontal(chunk, p, world, bc);
 		}
 		
 		return new Color(0, 0, 0, 0);
@@ -510,11 +510,7 @@ public class LodChunk
 	
 	
 	
-	
-	
-	
-	
-	private Color generateLodColorTop(Chunk chunk, World world, BlockColors bc)
+	private Color generateLodColorHorizontal(Chunk chunk, ColorPosition direction, World world, BlockColors bc)
 	{
 		ExtendedBlockStorage[] data = chunk.getBlockStorageArray();
 		
@@ -523,21 +519,88 @@ public class LodChunk
 		int green = 0;
 		int blue = 0;
 		
-		for(int x = 0; x < CHUNK_DATA_WIDTH; x++)
+		
+		// these don't change since the over direction doesn't matter
+		int overStart = 0;
+		int overIncrement = 1;
+		
+		// determine which direction is "in"
+		int inStart = 0;
+		int inIncrement = 1;
+		switch (direction)
 		{
-			for(int z = 0; z < CHUNK_DATA_WIDTH; z++)
+		case N:
+			inStart = 0;
+			inIncrement = 1;
+			break;
+		case S:
+			inStart = CHUNK_DATA_WIDTH - 1;
+			inIncrement = -1;
+			break;
+		case E:
+			inStart = 0;
+			inIncrement = 1;
+			break;
+		case W:
+			inStart = CHUNK_DATA_WIDTH - 1;
+			inIncrement = -1;
+			break;
+		default:
+			// we were given an invalid position, return invisible.
+			// this shouldn't happen and is mostly here to make the
+			// compiler happy
+			return new Color(0,0,0,0);
+		}
+		
+		
+		for (int di = 0; di < data.length; di++)
+		{
+			// TODO set dataStart as the top or bottom most index that has data
+			if (data[di] != null)
 			{
-				
-				for(int di = data.length - 1; di >= 0; di--)
+				for (int y = 0; y < CHUNK_DATA_HEIGHT; y++)
 				{
-					for(int y = CHUNK_DATA_HEIGHT - 1; y >= 0; y--)
+					boolean foundBlock = false;
+					
+					// over moves "over" the side of the chunk
+					// in moves "into" the chunk until it finds a block
+					
+					for (int over = overStart; !foundBlock && over >= 0 && over < CHUNK_DATA_WIDTH; over += overIncrement)
 					{
-						if(data[di] != null)
+						for (int in = inStart; !foundBlock && in >= 0 && in < CHUNK_DATA_WIDTH; in += inIncrement)
 						{
-							int ci = bc.getColor(data[di].get(x, y, z), world, new BlockPos(x,y,z));
+							int x = -1;
+							int z = -1;
 							
-							if(ci == 0)
+							// determine which should be X and Z							
+							switch(direction)
 							{
+							case N:
+								x = over;
+								z = in;
+								break;
+							case S:
+								x = over;
+								z = in;
+								break;
+							case E:
+								x = in;
+								z = over;
+								break;
+							case W:
+								x = in;
+								z = over;
+								break;
+							default:
+								// this will never happen, it would have
+								// been caught by the switch before the loops
+								break;
+							}
+							
+							
+							int ci = bc.getColor(data[di].get(x, y, z), world, new BlockPos(x, y, z));
+							
+							if (ci == 0) {
 								// skip air or invisible blocks
 								continue;
 							}
@@ -552,8 +615,7 @@ public class LodChunk
 							
 							// we found a valid block, skip to the
 							// next x and z
-							y = 0;
-							di = 0;
+							foundBlock = true;
 						}
 					}
 				}
@@ -561,6 +623,8 @@ public class LodChunk
 			}
 		}
 		
+		if(numbOfBlocks == 0)
+			numbOfBlocks = 1;
 		
 		red /= numbOfBlocks;
 		green /= numbOfBlocks;
@@ -568,6 +632,49 @@ public class LodChunk
 		
 		return new Color(red, green, blue);
 	}
+	
+	/*
+	for (int di = 0; di < data.length; di++)
+		{
+			// TODO set dataStart as the top or bottom most index that has data
+			if (data[di] != null)
+			{
+				for (int y = 0; y < CHUNK_DATA_HEIGHT; y++)
+				{
+					boolean foundBlock = false;
+					
+					
+					for (int x = xStart; !foundBlock && x >= 0 && x < CHUNK_DATA_WIDTH; x += xIncrement)
+					{
+						for (int z = zStart; !foundBlock && z >= 0 && z < CHUNK_DATA_WIDTH; z += zIncrement)
+						{
+							
+							int ci = bc.getColor(data[di].get(x, y, z), world, new BlockPos(x, y, z));
+							
+							if (ci == 0) {
+								// skip air or invisible blocks
+								continue;
+							}
+							
+							Color c = intToColor(ci);
+							
+							red += c.getRed();
+							green += c.getGreen();
+							blue += c.getBlue();
+							
+							numbOfBlocks++;
+							
+							// we found a valid block, skip to the
+							// next x and z
+							foundBlock = true;
+						}
+					}
+				}
+				
+			}
+		}
+	*/
+	
 	
 	
 	
