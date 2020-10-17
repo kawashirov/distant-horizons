@@ -2,8 +2,8 @@ package backsun.lod.objects;
 
 import java.awt.Color;
 
-import backsun.lod.util.enums.ColorPosition;
-import backsun.lod.util.enums.LodPosition;
+import backsun.lod.util.enums.ColorDirection;
+import backsun.lod.util.enums.LodLocation;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.util.math.BlockPos;
@@ -16,7 +16,7 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
  * and color data for an LOD object.
  * 
  * @author James Seibel
- * @version 10-06-2020
+ * @version 10-17-2020
  */
 public class LodChunk
 {
@@ -65,7 +65,9 @@ public class LodChunk
 	// constructors //
 	//==============//
 	
-	
+	/**
+	 * Create an empty LodChunk
+	 */
 	public LodChunk()
 	{
 		x = 0;
@@ -76,59 +78,9 @@ public class LodChunk
 		colors = new Color[6];
 		
 		// by default have the colors invisible
-		for(ColorPosition p : ColorPosition.values())
+		for(ColorDirection dir : ColorDirection.values())
 		{
-			colors[p.index] = new Color(0, 0, 0, 0);
-		}
-	}
-	
-	public LodChunk(int newX, int newZ, short[] newTop, short[] newBottom, Color newColors[])
-	{
-		x = newX;
-		z = newZ;
-		
-		top = newTop;
-		bottom = newBottom;
-		colors = newColors;
-	}
-	
-	/**
-	 * Illegal argument is thrown if either the
-	 * chunk or world is null, the reason for the
-	 * world is because it is needed to determine the
-	 * block colors.
-	 * @throws IllegalArgumentException
-	 */
-	public LodChunk(Chunk chunk, World world) throws IllegalArgumentException
-	{
-		if(chunk == null)
-		{
-			throw new IllegalArgumentException("LodChunk constructor given a null chunk");
-		}
-		if(world == null)
-		{
-			throw new IllegalArgumentException("LodChunk constructor given a null world");
-		}
-		
-		
-		x = chunk.x;
-		z = chunk.z;
-		
-		top = new short[4];
-		bottom = new short[4];
-		colors = new Color[6];
-		
-		// generate the top and bottom points of this LOD
-		for(LodPosition p : LodPosition.values())
-		{
-			top[p.index] = generateLodSection(chunk, true, p);
-			bottom[p.index] = generateLodSection(chunk, false, p);
-		}
-		
-		// determine the average color for each direction
-		for(ColorPosition p : ColorPosition.values())
-		{
-			colors[p.index] = generateLodColorSection(chunk, world, p);
+			colors[dir.index] = new Color(0, 0, 0, 0);
 		}
 	}
 	
@@ -185,27 +137,27 @@ public class LodChunk
 		
 		
 		// top
-		for(LodPosition p : LodPosition.values())
+		for(LodLocation loc : LodLocation.values())
 		{
 			lastIndex = index;
 			index = data.indexOf(DATA_DELIMITER, lastIndex);
 			
-			top[p.index] = Short.parseShort(data.substring(lastIndex,index - 1));
+			top[loc.index] = Short.parseShort(data.substring(lastIndex,index - 1));
 		}
 		
 		
 		// bottom
-		for(LodPosition p : LodPosition.values())
+		for(LodLocation loc : LodLocation.values())
 		{
 			lastIndex = index;
 			index = data.indexOf(DATA_DELIMITER, lastIndex);
 			
-			bottom[p.index] = Short.parseShort(data.substring(lastIndex,index - 1));
+			bottom[loc.index] = Short.parseShort(data.substring(lastIndex,index - 1));
 		}
 		
 		
 		// color
-		for(ColorPosition p : ColorPosition.values())
+		for(ColorDirection dir : ColorDirection.values())
 		{
 			int red = 0;
 			int green = 0;
@@ -229,10 +181,49 @@ public class LodChunk
 				}
 			}
 			
-			colors[p.index] = new Color(red, green, blue);
+			colors[dir.index] = new Color(red, green, blue);
 		}
 	}
 	
+	/**
+	 * Illegal argument is thrown if either the
+	 * chunk or world is null. The reason the world
+	 * can't be null is because it's required to determine
+	 * a block's color.
+	 * @throws IllegalArgumentException
+	 */
+	public LodChunk(Chunk chunk, World world) throws IllegalArgumentException
+	{
+		if(chunk == null)
+		{
+			throw new IllegalArgumentException("LodChunk constructor given a null chunk");
+		}
+		if(world == null)
+		{
+			throw new IllegalArgumentException("LodChunk constructor given a null world");
+		}
+		
+		
+		x = chunk.x;
+		z = chunk.z;
+		
+		top = new short[4];
+		bottom = new short[4];
+		colors = new Color[6];
+		
+		// generate the top and bottom points of this LOD
+		for(LodLocation loc : LodLocation.values())
+		{
+			top[loc.index] = generateLodSection(chunk, true, loc);
+			bottom[loc.index] = generateLodSection(chunk, false, loc);
+		}
+		
+		// determine the average color for each direction
+		for(ColorDirection dir : ColorDirection.values())
+		{
+			colors[dir.index] = generateLodColorSection(chunk, world, dir);
+		}
+	}
 	
 	
 	
@@ -249,7 +240,7 @@ public class LodChunk
 	 * If invalid/null/empty chunks are given 
 	 * crashes may occur.
 	 */
-	public short generateLodSection(Chunk chunk, boolean getTopSection, LodPosition pos)
+	public short generateLodSection(Chunk chunk, boolean getTopSection, LodLocation lodLoc)
 	{
 		// should have a length of 16
 		// (each storage is 16x16x16 and the
@@ -266,7 +257,7 @@ public class LodChunk
 		
 		// determine where we should look in this
 		// chunk
-		switch(pos)
+		switch(lodLoc)
 		{
 			case NE:
 				// -N
@@ -409,34 +400,36 @@ public class LodChunk
 	
 	
 	
-	private Color generateLodColorSection(Chunk chunk, World world, ColorPosition p)
+	private Color generateLodColorSection(Chunk chunk, World world, ColorDirection colorDir)
 	{
 		Minecraft mc =  Minecraft.getMinecraft();
 		BlockColors bc = mc.getBlockColors();
 		
-		
-		switch (p)
+		switch (colorDir)
 		{
 			case TOP:
-				return generateLodColorVertical(chunk, true, world, bc);
+				return generateLodColorVertical(chunk, colorDir, world, bc);
 			case BOTTOM:
-				return generateLodColorVertical(chunk, false, world, bc);
+				return generateLodColorVertical(chunk, colorDir, world, bc);
 				
 			case N:
-				return generateLodColorHorizontal(chunk, p, world, bc);
+				return generateLodColorHorizontal(chunk, colorDir, world, bc);
 			case S:
-				return generateLodColorHorizontal(chunk, p, world, bc);
+				return generateLodColorHorizontal(chunk, colorDir, world, bc);
 				
 			case E:
-				return generateLodColorHorizontal(chunk, p, world, bc);
+				return generateLodColorHorizontal(chunk, colorDir, world, bc);
 			case W:
-				return generateLodColorHorizontal(chunk, p, world, bc);
+				return generateLodColorHorizontal(chunk, colorDir, world, bc);
 		}
 		
 		return new Color(0, 0, 0, 0);
 	}
 	
-	private Color generateLodColorVertical(Chunk chunk, boolean goTopDown, World world, BlockColors bc)
+	/**
+	 * Only accepts TOP and BOTTOM as ColorPositions
+	 */
+	private Color generateLodColorVertical(Chunk chunk, ColorDirection colorDir, World world, BlockColors bc)
 	{
 		ExtendedBlockStorage[] data = chunk.getBlockStorageArray();
 		
@@ -444,6 +437,8 @@ public class LodChunk
 		int red = 0;
 		int green = 0;
 		int blue = 0;
+		
+		boolean goTopDown = (colorDir == ColorDirection.TOP);
 		
 		
 		// either go top down or bottom up
@@ -508,10 +503,7 @@ public class LodChunk
 		return new Color(red, green, blue);
 	}
 	
-	
-	
-	
-	private Color generateLodColorHorizontal(Chunk chunk, ColorPosition direction, World world, BlockColors bc)
+	private Color generateLodColorHorizontal(Chunk chunk, ColorDirection colorDir, World world, BlockColors bc)
 	{
 		ExtendedBlockStorage[] data = chunk.getBlockStorageArray();
 		
@@ -528,7 +520,7 @@ public class LodChunk
 		// determine which direction is "in"
 		int inStart = 0;
 		int inIncrement = 1;
-		switch (direction)
+		switch (colorDir)
 		{
 		case N:
 			inStart = 0;
@@ -574,7 +566,7 @@ public class LodChunk
 							int z = -1;
 							
 							// determine which should be X and Z							
-							switch(direction)
+							switch(colorDir)
 							{
 							case N:
 								x = over;
@@ -634,51 +626,6 @@ public class LodChunk
 		return new Color(red, green, blue);
 	}
 	
-	/*
-	for (int di = 0; di < data.length; di++)
-		{
-			// TODO set dataStart as the top or bottom most index that has data
-			if (data[di] != null)
-			{
-				for (int y = 0; y < CHUNK_DATA_HEIGHT; y++)
-				{
-					boolean foundBlock = false;
-					
-					
-					for (int x = xStart; !foundBlock && x >= 0 && x < CHUNK_DATA_WIDTH; x += xIncrement)
-					{
-						for (int z = zStart; !foundBlock && z >= 0 && z < CHUNK_DATA_WIDTH; z += zIncrement)
-						{
-							
-							int ci = bc.getColor(data[di].get(x, y, z), world, new BlockPos(x, y, z));
-							
-							if (ci == 0) {
-								// skip air or invisible blocks
-								continue;
-							}
-							
-							Color c = intToColor(ci);
-							
-							red += c.getRed();
-							green += c.getGreen();
-							blue += c.getBlue();
-							
-							numbOfBlocks++;
-							
-							// we found a valid block, skip to the
-							// next x and z
-							foundBlock = true;
-						}
-					}
-				}
-				
-			}
-		}
-	*/
-	
-	
-	
-	
 	/**
 	 * Convert a BlockColors int into a Color object.
 	 */
@@ -687,9 +634,7 @@ public class LodChunk
 		int filter = 0b11111111;
 		
 		int red = (num >> 16 ) & filter;
-		
 		int green = (num >> 8 ) & filter;
-		
 		int blue = num & filter;
 		
 		return new Color(red, green, blue);
@@ -773,7 +718,8 @@ public class LodChunk
 		s += "colors ";
 		for(int i = 0; i < colors.length; i++)
 		{
-			s += "(" + colors[i].getRed() + ", " + colors[i].getGreen() + ", " + colors[i].getBlue() + "), ";
+			if(colors[i] != null)
+				s += "(" + colors[i].getRed() + ", " + colors[i].getGreen() + ", " + colors[i].getBlue() + "), ";
 		}
 		
 		return s;

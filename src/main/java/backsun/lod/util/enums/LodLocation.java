@@ -7,7 +7,7 @@ package backsun.lod.util.enums;
  * 
  * NE, SE, SW, NW
  */
-public enum LodPosition
+public enum LodLocation
 {
 	// used for position
 	NE(0), // -Z, +X
@@ -17,7 +17,7 @@ public enum LodPosition
 	
 	public final int index;
 	
-	private LodPosition(int newValue)
+	private LodLocation(int newValue)
 	{
 		index = newValue;
 	}

@@ -1,9 +1,12 @@
 package backsun.lod.util.enums;
 
 /**
+ * @author James Seibel
+ * @version 10-17-2020
+ * 
  * TOP, N, S, E, W, BOTTOM
  */
-public enum ColorPosition
+public enum ColorDirection
 {
 	// used for colors
 	/** +Y */
@@ -24,7 +27,7 @@ public enum ColorPosition
 	
 	public final int index;
 	
-	private ColorPosition(int newValue)
+	private ColorDirection(int newValue)
 	{
 		index = newValue;
 	}
