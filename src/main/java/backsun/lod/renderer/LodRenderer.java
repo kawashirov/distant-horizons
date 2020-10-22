@@ -5,8 +5,10 @@ import java.awt.Color;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Project;
 
+import backsun.lod.objects.LodChunk;
 import backsun.lod.objects.LodRegion;
 import backsun.lod.util.OfConfig;
+import backsun.lod.util.enums.ColorDirection;
 import backsun.lod.util.fog.FogMode;
 import backsun.lod.util.fog.FogType;
 import net.minecraft.client.Minecraft;
@@ -19,11 +21,11 @@ import net.minecraft.util.math.AxisAlignedBB;
 
 /**
  * @author James Seibel
- * @version 09-18-2020
+ * @version 10-22-2020
  */
 public class LodRenderer
 {
-	public boolean debugging = true;
+	public boolean debugging = false;
 	
 	private Minecraft mc;
 	private float farPlaneDistance;
@@ -74,14 +76,6 @@ public class LodRenderer
 		int alpha = 255; // 0 - 255
 		@SuppressWarnings("unused")
 		Color error = new Color(255, 0, 225, alpha); // bright pink
-		@SuppressWarnings("unused")
-		Color grass = new Color(80, 104, 50, alpha);
-		@SuppressWarnings("unused")
-		Color water = new Color(37, 51, 174, alpha);
-		@SuppressWarnings("unused")
-		Color swamp = new Color(60, 63, 32, alpha);
-		@SuppressWarnings("unused")
-		Color mountain = new Color(100, 100, 100, alpha);
 		
 		Color red = new Color(255, 0, 0, alpha);
 		Color black = new Color(0, 0, 0, alpha);
@@ -154,21 +148,36 @@ public class LodRenderer
 			// z axis
 			for (int j = 0; j < numbOfBoxesWide; j++)
 			{
-				// update where this square will be drawn
+				// set where this square will be drawn in the world
 				double xoffset = -cameraX + // start at x = 0
-						(squareSideLength * i) + // offset by the number of LOD blocks
-						startX; // offset so the center LOD block is centered underneath the player
-				
+							(squareSideLength * i) + // offset by the number of LOD blocks
+							startX; // offset so the center LOD block is centered underneath the player
 				double zoffset = -cameraZ + (squareSideLength * j) + startZ;
 				
+				int chunkX = ((squareSideLength * j) + startX) / 16;
+				int chunkZ = ((squareSideLength * i) + startZ) / 16;
 				
-//				int chunkX = ((squareSideLength * j) + startX) / 16;
-//				int chunkZ = ((squareSideLength * i) + startZ) / 16;
 				
-								
-				Color c = null;
+				if(chunkX < 0 || chunkZ < 0 || 
+						chunkX > renderRegions.data.length || chunkZ > renderRegions.data[chunkX].length)
+				{
+					colorArray[i + (j * numbOfBoxesWide)] = new Color(0,0,0,0);
+					lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, bby, 0, bbx, bby, bbz);
+					continue;
+				}
 				
-				double yoffset = -cameraY + mc.world.provider.getAverageGroundLevel();
+				LodChunk lod = renderRegions.data[chunkX][chunkZ];
+				
+				if (lod == null)
+				{
+					colorArray[i + (j * numbOfBoxesWide)] = new Color(0,0,0,0);
+					lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, bby, 0, bbx, bby, bbz);
+					continue;
+				}
+				
+				Color c = lod.colors[ColorDirection.TOP.index];
+				
+				double yoffset = -cameraY + lod.top[0];
 				
 				
 				// if debugging draw the squares as a black and white checker board

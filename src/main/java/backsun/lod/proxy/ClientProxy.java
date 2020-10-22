@@ -16,7 +16,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
  * This is used by the client.
  * 
  * @author James_Seibel
- * @version 10-17-2020
+ * @version 10-22-2020
  */
 public class ClientProxy extends CommonProxy
 {
@@ -104,7 +104,7 @@ public class ClientProxy extends CommonProxy
 		{			
 			LodChunk c = new LodChunk(chunk, Minecraft.getMinecraft().world);
 			
-			
+			// TODO does this work with negative chunks?
 			// TODO set up dynamic/multiple regions
 			if (region == null || (region.x != (c.x / 32) && region.z != (c.z / 32)))
 			{
@@ -113,7 +113,11 @@ public class ClientProxy extends CommonProxy
 			
 			region.data[Math.abs(c.x % 32)][Math.abs(c.z % 32)] = c;
 			
-			//TODO send data to renderer
+			if (renderer != null)
+			{
+				//TODO send data to renderer
+				renderer.renderRegions = region;
+			}
 			
 			rfHandler.saveRegionToDisk(region);
 		}
