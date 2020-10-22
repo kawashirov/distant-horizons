@@ -5,6 +5,7 @@ import java.awt.Color;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Project;
 
+import backsun.lod.objects.LodRegion;
 import backsun.lod.util.OfConfig;
 import backsun.lod.util.fog.FogMode;
 import backsun.lod.util.fog.FogType;
@@ -33,6 +34,8 @@ public class LodRenderer
 	private BufferBuilder bufferBuilder;
 	
 	private OfConfig ofConfig;
+	
+	public LodRegion renderRegions;
 	
 	
 	public LodRenderer()
@@ -164,59 +167,9 @@ public class LodRenderer
 				
 								
 				Color c = null;
-//				Biome biome = null;
-//				try
-//				{
-//					biome = Biome.getBiome(biomes[chunkX+32][chunkZ+32]);
-//				}
-//				catch(IndexOutOfBoundsException e)
-//				{
-//					c = white;
-//				}
-//				
+				
 				double yoffset = -cameraY + mc.world.provider.getAverageGroundLevel();
 				
-				// fix this so that chunks outside of the view distance are loaded and the biomes are read
-				// fix so that the chunks within view distance aren't always plains
-//				if(biome != null)
-//				{
-//					// add the color
-//					switch (Biome.getIdForBiome(biome))
-//					{
-//						case -1: // unloaded
-//							c = red;
-//							break;
-//						case 0: // ocean
-//							c = water;
-//							break;
-//						case 24: // deep ocean
-//							c = water;
-//							break;
-//						case 7: // river
-//							c = water;
-//							break;
-//						case 1: // plains
-////							c = invisible;
-//							c = grass;
-//							break;
-//						case 6: // swamp
-//							c = swamp;
-//							break;
-//						case 3: //extreme hills
-//							c = mountain;
-//							break;
-//						case 34: // extreme hills with trees
-//							c = mountain;
-//							break;
-//						default:
-//							c = error;
-//							break;
-//					}
-//				}
-//				else
-//				{
-//					c = black;
-//				}
 				
 				// if debugging draw the squares as a black and white checker board
 				if (debugging)
@@ -268,9 +221,6 @@ public class LodRenderer
 		//===========================//
 		// GL settings for rendering //
 		//===========================//
-
-		// enable the fog
-//		setupFog(FogMode.FAR);
 		
 		// set the new model view matrix
 		setProjectionMatrix(partialTicks);
@@ -322,6 +272,7 @@ public class LodRenderer
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		
+		// TODO re-set the modelview matrix
 		
 		// This is about how long this whole process should take
 		// 16 ms = 60 hz

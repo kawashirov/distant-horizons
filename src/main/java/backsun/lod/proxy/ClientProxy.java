@@ -105,7 +105,7 @@ public class ClientProxy extends CommonProxy
 			LodChunk c = new LodChunk(chunk, Minecraft.getMinecraft().world);
 			
 			
-			
+			// TODO set up dynamic/multiple regions
 			if (region == null || (region.x != (c.x / 32) && region.z != (c.z / 32)))
 			{
 				region = new LodRegion(c.x / 32, c.z / 32);
