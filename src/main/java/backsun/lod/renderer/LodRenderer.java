@@ -30,7 +30,9 @@ public class LodRenderer
 	private Minecraft mc;
 	private float farPlaneDistance;
 	// make sure this is an even number, or else it won't align with the chunk grid
-	public final int viewDistanceMultiplier = 12; 
+	public static final int VIEW_DISTANCE_MULTIPLIER = 12;
+	public static final int LOD_WIDTH = 16;
+	public static final int MINECRAFT_CHUNK_WIDTH = 16;
 	
 	private Tessellator tessellator;
 	private BufferBuilder bufferBuilder;
@@ -91,29 +93,24 @@ public class LodRenderer
 		double cameraY = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks;
 		double cameraZ = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;
 		
-		int playerXChunkOffset = ((int) cameraX / 16) * 16;
-		int playerZChunkOffset = ((int) cameraZ / 16) * 16;
+		int playerXChunkOffset = ((int) cameraX / MINECRAFT_CHUNK_WIDTH) * MINECRAFT_CHUNK_WIDTH;
+		int playerZChunkOffset = ((int) cameraZ / MINECRAFT_CHUNK_WIDTH) * MINECRAFT_CHUNK_WIDTH;
 		
 		
 		
 		// determine how far the game's render distance is currently set
-		farPlaneDistance = mc.gameSettings.renderDistanceChunks * 16;
+		farPlaneDistance = mc.gameSettings.renderDistanceChunks * MINECRAFT_CHUNK_WIDTH;
 		
-		// set how big the squares will be and how far they will go
-		int totalLength = (int) farPlaneDistance * viewDistanceMultiplier;
-		int squareSideLength = 16;
-		int numbOfBoxesWide = (totalLength / squareSideLength);
-		// start distance is about 2 * farPlaneDistance
+		// set how big the LODs will be and how far they will go
+		int totalLength = (int) farPlaneDistance * VIEW_DISTANCE_MULTIPLIER;
+		int numbOfBoxesWide = (totalLength / LOD_WIDTH);
 		
-		// size of a single square
-		int bbx = squareSideLength;
-		int bby = 0;
-		int bbz = squareSideLength;
+		int lodHeight = 0;
 		
 		// this where we will start drawing squares
 		// (exactly half the total width)
-		int startX = (-squareSideLength * (numbOfBoxesWide / 2)) + playerXChunkOffset;
-		int startZ = (-squareSideLength * (numbOfBoxesWide / 2)) + playerZChunkOffset;
+		int startX = (-LOD_WIDTH * (numbOfBoxesWide / 2)) + playerXChunkOffset;
+		int startZ = (-LOD_WIDTH * (numbOfBoxesWide / 2)) + playerZChunkOffset;
 		
 		
 		// this is where we store the LOD objects
@@ -149,20 +146,20 @@ public class LodRenderer
 			for (int j = 0; j < numbOfBoxesWide; j++)
 			{
 				// set where this square will be drawn in the world
-				double xoffset = -cameraX + // start at x = 0
-							(squareSideLength * i) + // offset by the number of LOD blocks
+				double xOffset = -cameraX + // start at x = 0
+							(LOD_WIDTH * i) + // offset by the number of LOD blocks
 							startX; // offset so the center LOD block is centered underneath the player
-				double zoffset = -cameraZ + (squareSideLength * j) + startZ;
+				double zOffset = -cameraZ + (LOD_WIDTH * j) + startZ;
 				
-				int chunkX = ((squareSideLength * j) + startX) / 16;
-				int chunkZ = ((squareSideLength * i) + startZ) / 16;
+				int chunkX = ((LOD_WIDTH * j) + startX) / MINECRAFT_CHUNK_WIDTH;
+				int chunkZ = ((LOD_WIDTH * i) + startZ) / MINECRAFT_CHUNK_WIDTH;
 				
 				
 				if(chunkX < 0 || chunkZ < 0 || 
 						chunkX > renderRegions.data.length || chunkZ > renderRegions.data[chunkX].length)
 				{
 					colorArray[i + (j * numbOfBoxesWide)] = new Color(0,0,0,0);
-					lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, bby, 0, bbx, bby, bbz);
+					lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, lodHeight, 0, LOD_WIDTH, lodHeight, LOD_WIDTH);
 					continue;
 				}
 				
@@ -171,13 +168,13 @@ public class LodRenderer
 				if (lod == null)
 				{
 					colorArray[i + (j * numbOfBoxesWide)] = new Color(0,0,0,0);
-					lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, bby, 0, bbx, bby, bbz);
+					lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, lodHeight, 0, LOD_WIDTH, lodHeight, LOD_WIDTH);
 					continue;
 				}
 				
 				Color c = lod.colors[ColorDirection.TOP.index];
 				
-				double yoffset = -cameraY + lod.top[0];
+				double yOffset = -cameraY + lod.top[0];
 				
 				
 				// if debugging draw the squares as a black and white checker board
@@ -215,7 +212,7 @@ public class LodRenderer
 				colorArray[i + (j * numbOfBoxesWide)] = c;
 				
 				// add the new box to the array
-				lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, bby, 0, bbx, bby, bbz).offset(xoffset, yoffset, zoffset);
+				lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, lodHeight, 0, LOD_WIDTH, lodHeight, LOD_WIDTH).offset(xOffset, yOffset, zOffset);
 			}
 		}
 		
@@ -312,7 +309,7 @@ public class LodRenderer
 		// only continue if we can get the FOV
 		if (ofConfig.fovMethod != null)
 		{
-			Project.gluPerspective(ofConfig.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.05f, farPlaneDistance * viewDistanceMultiplier);
+			Project.gluPerspective(ofConfig.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.05f, farPlaneDistance * VIEW_DISTANCE_MULTIPLIER);
 		}
 	}
 	
@@ -333,7 +330,7 @@ public class LodRenderer
 		
 		// this is the cut off between
 		// near fog and far fog in fancy mode
-		double nearDist = Math.pow(farPlaneDistance * viewDistanceMultiplier * 0.25f, 2);
+		double nearDist = Math.pow(farPlaneDistance * VIEW_DISTANCE_MULTIPLIER * 0.25f, 2);
 		
 		
 		//TODO optimize
@@ -453,13 +450,13 @@ public class LodRenderer
 			
 			if (fogType == FogType.FANCY || fogType == FogType.UNKNOWN)
 			{
-				GlStateManager.setFogStart(farPlaneDistance * 0.5f * viewDistanceMultiplier / 2.0f);
-				GlStateManager.setFogEnd(farPlaneDistance * 1.0f * viewDistanceMultiplier / 2.0f);
+				GlStateManager.setFogStart(farPlaneDistance * 0.5f * VIEW_DISTANCE_MULTIPLIER / 2.0f);
+				GlStateManager.setFogEnd(farPlaneDistance * 1.0f * VIEW_DISTANCE_MULTIPLIER / 2.0f);
 			}
 			else //if(fogType == FogType.FAST)
 			{
-				GlStateManager.setFogStart(farPlaneDistance * 0.5f * viewDistanceMultiplier / 2.0f);
-				GlStateManager.setFogEnd(farPlaneDistance * 0.8f * viewDistanceMultiplier / 2.0f);
+				GlStateManager.setFogStart(farPlaneDistance * 0.5f * VIEW_DISTANCE_MULTIPLIER / 2.0f);
+				GlStateManager.setFogEnd(farPlaneDistance * 0.8f * VIEW_DISTANCE_MULTIPLIER / 2.0f);
 			}
 		}
 		
