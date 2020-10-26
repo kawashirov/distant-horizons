@@ -75,7 +75,7 @@ public class LodRegionFileHandler
 					int x = c.x % 32;
 					int z = c.z % 32;
 					
-					region.data[x][z] = c;
+					region.chunks[x][z] = c;
 				}
 				catch(IllegalArgumentException e)
 				{
@@ -129,7 +129,7 @@ public class LodRegionFileHandler
 			
 			FileWriter fw = new FileWriter(f);
 			
-			for(LodChunk[] chunkArray : region.data)
+			for(LodChunk[] chunkArray : region.chunks)
 			{
 				for(LodChunk chunk : chunkArray)
 				{
