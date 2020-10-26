@@ -67,6 +67,12 @@ public class LodRenderer
 			return;
 		}
 		
+		if (regions == null)
+		{
+			// if there aren't any loaded LodChunks
+			// don't try drawing anything
+			return;
+		}
 		
 		
 		
