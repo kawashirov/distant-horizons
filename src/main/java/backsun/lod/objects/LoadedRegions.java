@@ -90,13 +90,20 @@ public class LoadedRegions
 		centerZ += zOffset;
 	}
 	
-	
+	/**
+	 * Returns null if the LodChunk isn't loaded
+	 */
 	public LodChunk getChunkFromCoordinates(int chunkX, int chunkZ)
 	{
 		int xIndex = (chunkX + centerX) % maxWidth;
 		int zIndex = (chunkZ + centerZ) % maxWidth;
 		
-		return regions[xIndex / maxWidth][zIndex / maxWidth].chunks[xIndex % LodRegion.SIZE][xIndex % LodRegion.SIZE];
+		LodRegion region = regions[xIndex / maxWidth][zIndex / maxWidth];
+		
+		if(region == null)
+			return null;
+		
+		return region.chunks[xIndex % LodRegion.SIZE][xIndex % LodRegion.SIZE];
 	}
 }
 
