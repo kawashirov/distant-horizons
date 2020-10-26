@@ -5,8 +5,8 @@ import java.awt.Color;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Project;
 
+import backsun.lod.objects.LoadedRegions;
 import backsun.lod.objects.LodChunk;
-import backsun.lod.objects.LodRegion;
 import backsun.lod.util.OfConfig;
 import backsun.lod.util.enums.ColorDirection;
 import backsun.lod.util.fog.FogMode;
@@ -21,7 +21,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 
 /**
  * @author James Seibel
- * @version 10-22-2020
+ * @version 10-25-2020
  */
 public class LodRenderer
 {
@@ -39,7 +39,8 @@ public class LodRenderer
 	
 	private OfConfig ofConfig;
 	
-	public LodRegion renderRegions;
+	public LoadedRegions regions;
+	
 	
 	
 	public LodRenderer()
@@ -155,15 +156,7 @@ public class LodRenderer
 				int chunkZ = ((LOD_WIDTH * i) + startZ) / MINECRAFT_CHUNK_WIDTH;
 				
 				
-				if(chunkX < 0 || chunkZ < 0 || 
-						chunkX > renderRegions.data.length || chunkZ > renderRegions.data[chunkX].length)
-				{
-					colorArray[i + (j * numbOfBoxesWide)] = new Color(0,0,0,0);
-					lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, lodHeight, 0, LOD_WIDTH, lodHeight, LOD_WIDTH);
-					continue;
-				}
-				
-				LodChunk lod = renderRegions.data[chunkX][chunkZ];
+				LodChunk lod = regions.getChunkFromCoordinates(chunkX, chunkZ);
 				
 				if (lod == null)
 				{
@@ -290,10 +283,9 @@ public class LodRenderer
 	}
 	
 	
-	
-	
-	
-	
+
+
+
 	/**
 	 * create a new projection matrix and send it over to the GPU
 	 * @param partialTicks how many ticks into the frame we are
