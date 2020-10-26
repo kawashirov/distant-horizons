@@ -19,8 +19,6 @@ public class LoadedRegions
 	
 	private int centerX;
 	private int centerZ;
-	// TODO create a chunk of memory large enough to contain every region in view range
-	// TODO when the client should load new regions recreate the data
 	
 	public LoadedRegions(DimensionType newDimension, int newMaxWidth)
 	{
