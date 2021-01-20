@@ -9,6 +9,7 @@ import backsun.lod.objects.LoadedRegions;
 import backsun.lod.objects.LodChunk;
 import backsun.lod.util.OfConfig;
 import backsun.lod.util.enums.ColorDirection;
+import backsun.lod.util.enums.LodLocation;
 import backsun.lod.util.fog.FogMode;
 import backsun.lod.util.fog.FogType;
 import net.minecraft.client.Minecraft;
@@ -21,11 +22,11 @@ import net.minecraft.util.math.AxisAlignedBB;
 
 /**
  * @author James Seibel
- * @version 10-25-2020
+ * @version 1-20-2021
  */
 public class LodRenderer
 {
-	public boolean debugging = false;
+	public boolean debugging = true;
 	
 	private Minecraft mc;
 	private float farPlaneDistance;
@@ -34,12 +35,14 @@ public class LodRenderer
 	public static final int LOD_WIDTH = 16;
 	public static final int MINECRAFT_CHUNK_WIDTH = 16;
 	
+	public int defaultLodHeight = 0;
+	
 	private Tessellator tessellator;
 	private BufferBuilder bufferBuilder;
 	
 	private OfConfig ofConfig;
 	
-	public LoadedRegions regions;
+	public LoadedRegions regions = null;
 	
 	
 	
@@ -112,8 +115,6 @@ public class LodRenderer
 		int totalLength = (int) farPlaneDistance * VIEW_DISTANCE_MULTIPLIER;
 		int numbOfBoxesWide = (totalLength / LOD_WIDTH);
 		
-		int lodHeight = 0;
-		
 		// this where we will start drawing squares
 		// (exactly half the total width)
 		int startX = (-LOD_WIDTH * (numbOfBoxesWide / 2)) + playerXChunkOffset;
@@ -126,13 +127,6 @@ public class LodRenderer
 		Color colorArray[] = new Color[numbOfBoxesWide * numbOfBoxesWide];
 		
 		
-		// used for debugging
-		// and drawing a checkerboard
-		boolean alternateColor = false;
-		boolean evenWidth = false;
-		if (debugging && numbOfBoxesWide % 2 == 0)
-			evenWidth = true;
-		
 		
 		
 		
@@ -142,13 +136,10 @@ public class LodRenderer
 		
 		mc.world.profiler.endStartSection("LOD generation");
 		
+		
 		// x axis
 		for (int i = 0; i < numbOfBoxesWide; i++)
 		{
-			// this is so that the debug pattern will be a checkerboard instead of stripes
-			if (debugging && evenWidth)
-				alternateColor = !alternateColor;
-			
 			// z axis
 			for (int j = 0; j < numbOfBoxesWide; j++)
 			{
@@ -158,28 +149,27 @@ public class LodRenderer
 							startX; // offset so the center LOD block is centered underneath the player
 				double zOffset = -cameraZ + (LOD_WIDTH * j) + startZ;
 				
-				int chunkX = ((LOD_WIDTH * j) + startX) / MINECRAFT_CHUNK_WIDTH;
-				int chunkZ = ((LOD_WIDTH * i) + startZ) / MINECRAFT_CHUNK_WIDTH;
-				
+				int chunkX = ((LOD_WIDTH * i) + startX) / MINECRAFT_CHUNK_WIDTH;
+				int chunkZ = ((LOD_WIDTH * j) + startZ) / MINECRAFT_CHUNK_WIDTH;
 				
 				LodChunk lod = regions.getChunkFromCoordinates(chunkX, chunkZ);
 				
 				if (lod == null)
 				{
 					colorArray[i + (j * numbOfBoxesWide)] = new Color(0,0,0,0);
-					lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, lodHeight, 0, LOD_WIDTH, lodHeight, LOD_WIDTH);
+					lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, defaultLodHeight, 0, LOD_WIDTH, defaultLodHeight, LOD_WIDTH);
 					continue;
 				}
 				
 				Color c = lod.colors[ColorDirection.TOP.index];
 				
-				double yOffset = -cameraY + lod.top[0];
+				double yOffset = -cameraY;
 				
 				
 				// if debugging draw the squares as a black and white checker board
 				if (debugging)
 				{
-					if (alternateColor)
+					if ((i + j) % 2 == 0)
 						c = white;
 					else
 						c = black;
@@ -188,8 +178,6 @@ public class LodRenderer
 						c = red;
 					
 					colorArray[i + (j * numbOfBoxesWide)] = c;
-					
-					alternateColor = !alternateColor;
 				}
 				
 				
@@ -211,7 +199,7 @@ public class LodRenderer
 				colorArray[i + (j * numbOfBoxesWide)] = c;
 				
 				// add the new box to the array
-				lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, lodHeight, 0, LOD_WIDTH, lodHeight, LOD_WIDTH).offset(xOffset, yOffset, zOffset);
+				lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, lod.bottom[LodLocation.NE.value], 0, LOD_WIDTH, lod.bottom[LodLocation.NE.value], LOD_WIDTH).offset(xOffset, yOffset, zOffset);
 			}
 		}
 		

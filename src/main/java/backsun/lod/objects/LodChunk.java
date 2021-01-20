@@ -16,7 +16,7 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
  * and color data for an LOD object.
  * 
  * @author James Seibel
- * @version 10-17-2020
+ * @version 1-20-2021
  */
 public class LodChunk
 {
@@ -26,8 +26,10 @@ public class LodChunk
 	/** This is what separates each piece of data in the toData method */
 	public static final char DATA_DELIMITER = ',';
 	
-	private final int CHUNK_DATA_WIDTH = 16;
-	private final int CHUNK_DATA_HEIGHT = 16;
+	public static final int WIDTH = 16;
+	
+	private final int CHUNK_DATA_WIDTH = WIDTH;
+	private final int CHUNK_DATA_HEIGHT = WIDTH;
 	
 	/**
 	 * This is how many blocks are
@@ -37,7 +39,6 @@ public class LodChunk
 	private final int LOD_BLOCK_REQ = 16;
 	// the max number of blocks per layer = 64 (8*8)
 	// since each layer is 1/4 the chunk
-	
 	
 	
 	/** The x coordinate of the chunk. */
@@ -142,7 +143,7 @@ public class LodChunk
 			lastIndex = index;
 			index = data.indexOf(DATA_DELIMITER, lastIndex);
 			
-			top[loc.index] = Short.parseShort(data.substring(lastIndex,index - 1));
+			top[loc.value] = Short.parseShort(data.substring(lastIndex,index - 1));
 		}
 		
 		
@@ -152,7 +153,7 @@ public class LodChunk
 			lastIndex = index;
 			index = data.indexOf(DATA_DELIMITER, lastIndex);
 			
-			bottom[loc.index] = Short.parseShort(data.substring(lastIndex,index - 1));
+			bottom[loc.value] = Short.parseShort(data.substring(lastIndex,index - 1));
 		}
 		
 		
@@ -214,8 +215,8 @@ public class LodChunk
 		// generate the top and bottom points of this LOD
 		for(LodLocation loc : LodLocation.values())
 		{
-			top[loc.index] = generateLodSection(chunk, true, loc);
-			bottom[loc.index] = generateLodSection(chunk, false, loc);
+			top[loc.value] = generateLodSection(chunk, true, loc);
+			bottom[loc.value] = generateLodSection(chunk, false, loc);
 		}
 		
 		// determine the average color for each direction

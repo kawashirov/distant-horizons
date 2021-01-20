@@ -1,5 +1,6 @@
 package backsun.lod.proxy;
 
+import backsun.lod.objects.LoadedRegions;
 import backsun.lod.objects.LodChunk;
 import backsun.lod.objects.LodRegion;
 import backsun.lod.renderer.LodRenderer;
@@ -16,21 +17,19 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
  * This is used by the client.
  * 
  * @author James_Seibel
- * @version 10-22-2020
+ * @version 1-20-2021
  */
 public class ClientProxy extends CommonProxy
 {
 	private LodRenderer renderer;
 	private LodRegionFileHandler rfHandler;
-	//TODO have the ability to store multiple regions based on how large the user's view distance is
-	private LodRegion region;
+	private LoadedRegions regions;
+	
+	private int regionWidth = 5;
 	
 	public ClientProxy()
 	{
 		rfHandler = new LodRegionFileHandler();
-		
-		
-		
 	}
 	
 	
@@ -43,6 +42,20 @@ public class ClientProxy extends CommonProxy
 	@SubscribeEvent
 	public void renderWorldLastEvent(RenderWorldLastEvent event)
 	{
+		double playerX = Minecraft.getMinecraft().player.posX;
+		double playerZ = Minecraft.getMinecraft().player.posZ;
+		
+		// TODO make sure moving between regions works correctly
+		// move the regions based on the player's movement //TODO deal with -0 - -15
+		int xOffset = ((int)playerX / (LodChunk.WIDTH * LodRegion.SIZE)) - regions.getCenterX();
+		int zOffset = ((int)playerZ / (LodChunk.WIDTH * LodRegion.SIZE)) - regions.getCenterZ();
+		
+		if (xOffset != 0 || zOffset != 0)
+		{
+			regions.move(xOffset, zOffset);
+		}
+		
+		
 		// we wait to create the renderer until the first frame
 		// to make sure that the EntityRenderer has
 		// been created, that way we can get the fovModifer
@@ -63,7 +76,7 @@ public class ClientProxy extends CommonProxy
 	//===============//
 	
 	// TODO determine if a old region should be unloaded
-	// use the chunkUnloadedEvent
+	// use the chunkUnloadedEvent, or player moved?
 	
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent event)
@@ -87,6 +100,8 @@ public class ClientProxy extends CommonProxy
 	 * 
 	Use this for generating chunks and maybe determining if they are loaded at all?
 	
+	Could I create my own chunk generator and multithread it? It wouldn't save to the world, but could I save it for LODs?
+	
  	chunk = Minecraft.getMinecraft().getIntegratedServer().getWorld(0).getChunkProvider().chunkGenerator.generateChunk(chunk.x, chunk.z);
 	
 	System.out.println(chunk.x + " " + chunk.z + "\tloaded: " + chunk.isLoaded() + "\tpop: " + chunk.isPopulated() + "\tter pop: " + chunk.isTerrainPopulated());
@@ -102,24 +117,23 @@ public class ClientProxy extends CommonProxy
 		// or null chunks in this method)
 		if (chunk != null && isValidChunk(chunk) && Minecraft.getMinecraft().world != null)
 		{			
-			LodChunk c = new LodChunk(chunk, Minecraft.getMinecraft().world);
+			LodChunk lod = new LodChunk(chunk, Minecraft.getMinecraft().world);
 			
-			// TODO does this work with negative chunks?
-			// TODO set up dynamic/multiple regions
-			if (region == null || (region.x != (c.x / 32) && region.z != (c.z / 32)))
+			
+			if (regions == null)
 			{
-				region = new LodRegion(c.x / 32, c.z / 32);
+				regions = new LoadedRegions(null, regionWidth);
 			}
 			
-			region.data[Math.abs(c.x % 32)][Math.abs(c.z % 32)] = c;
+			regions.addLod(lod);
 			
 			if (renderer != null)
 			{
-				//TODO send data to renderer
-				renderer.renderRegions = region;
+				renderer.regions = regions;
 			}
 			
-			rfHandler.saveRegionToDisk(region);
+			// TODO
+			//rfHandler.saveRegionToDisk(regions);
 		}
 	}
 	
