@@ -3,22 +3,27 @@ package backsun.lod.util.enums;
 /**
  * 
  * @author James Seibel
- * @version 10-17-2020
+ * @version 1-20-2020
  * 
  * NE, SE, SW, NW
  */
 public enum LodLocation
 {
 	// used for position
-	NE(0), // -Z, +X
-	SE(1), // +Z, +X
-	SW(2), // +Z, -X
-	NW(3); // -Z, -X
 	
-	public final int index;
+	/** -Z, +X */
+	NE(0),
+	/** +Z, +X */
+	SE(1),
+	/** +Z, -X */
+	SW(2),
+	/** -Z, -X */
+	NW(3);
+	
+	public final int value;
 	
 	private LodLocation(int newValue)
 	{
-		index = newValue;
+		value = newValue;
 	}
 }
