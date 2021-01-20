@@ -68,14 +68,9 @@ public class LodRegionFileHandler
 				try
 				{
 					// convert each line into an LOD object and add it to the region
-					LodChunk c = new LodChunk(s);
+					LodChunk lod = new LodChunk(s);
 					
-					// convert the chunk's world position into
-					// the region's index position
-					int x = c.x % 32;
-					int z = c.z % 32;
-					
-					region.chunks[x][z] = c;
+					region.addLod(lod);
 				}
 				catch(IllegalArgumentException e)
 				{
@@ -129,7 +124,9 @@ public class LodRegionFileHandler
 			
 			FileWriter fw = new FileWriter(f);
 			
-			for(LodChunk[] chunkArray : region.chunks)
+			// TODO
+			/*
+			for(LodChunk[] chunkArray : region.)
 			{
 				for(LodChunk chunk : chunkArray)
 				{
@@ -140,6 +137,7 @@ public class LodRegionFileHandler
 					}
 				}
 			}
+			*/
 			
 			fw.close();
 		}
