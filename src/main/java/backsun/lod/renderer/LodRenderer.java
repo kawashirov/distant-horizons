@@ -169,7 +169,7 @@ public class LodRenderer
 				// if debugging draw the squares as a black and white checker board
 				if (debugging)
 				{
-					if ((i + j) % 2 == 0)
+					if ((chunkX + chunkZ) % 2 == 0)
 						c = white;
 					else
 						c = black;
