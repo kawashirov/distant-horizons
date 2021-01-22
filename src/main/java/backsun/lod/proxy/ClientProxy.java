@@ -93,9 +93,6 @@ public class ClientProxy extends CommonProxy
 		generateLodChunk(Minecraft.getMinecraft().world.getChunkFromChunkCoords(event.getChunkX(), event.getChunkZ()));
 	}
 	
-	
-	
-	
 	/*
 	 * 
 	Use this for generating chunks and maybe determining if they are loaded at all?
@@ -107,6 +104,13 @@ public class ClientProxy extends CommonProxy
 	System.out.println(chunk.x + " " + chunk.z + "\tloaded: " + chunk.isLoaded() + "\tpop: " + chunk.isPopulated() + "\tter pop: " + chunk.isTerrainPopulated());
 	 */
 	
+	/*
+	use Minecraft.getMinecraft().world.getWorldInfo().getWorldName();
+	or
+	.getSaveHandler().getWorldDirectoryName()
+	to clear the regions on world change
+	
+	*/
 	
 	private void generateLodChunk(Chunk chunk)
 	{
