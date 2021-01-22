@@ -149,10 +149,10 @@ public class LodRenderer
 							startX; // offset so the center LOD block is centered underneath the player
 				double zOffset = -cameraZ + (LOD_WIDTH * j) + startZ;
 				
-				int chunkX = ((LOD_WIDTH * i) + startX) / MINECRAFT_CHUNK_WIDTH;
-				int chunkZ = ((LOD_WIDTH * j) + startZ) / MINECRAFT_CHUNK_WIDTH;
+				int chunkX = i + (startX / MINECRAFT_CHUNK_WIDTH);
+				int chunkZ = j + (startZ / MINECRAFT_CHUNK_WIDTH);
 				
-				LodChunk lod = regions.getChunkFromCoordinates(chunkX, chunkZ);
+				LodChunk lod = regions.getLodFromCoordinates(chunkX, chunkZ);
 				
 				if (lod == null)
 				{
@@ -164,7 +164,6 @@ public class LodRenderer
 				Color c = lod.colors[ColorDirection.TOP.index];
 				
 				double yOffset = -cameraY;
-				
 				
 				// if debugging draw the squares as a black and white checker board
 				if (debugging)

@@ -167,6 +167,7 @@ public class LoadedRegions
 		
 		if (xIndex < 0 || xIndex >= width || zIndex < 0 || zIndex >= width)
 			// out of range
+			// TODO, should this throw an exception?
 			return;
 		
 		regions[xIndex][zIndex] = newRegion;
@@ -179,29 +180,28 @@ public class LoadedRegions
 	
 	public void addLod(LodChunk lod)
 	{
-		int x = lod.x / 16;
-		int z = lod.z / 16;
+		int regionX = (lod.x + centerX) / LodRegion.SIZE;
+		int regionZ = (lod.z + centerZ) / LodRegion.SIZE;
 		
 		// prevent issues if X/Z is negative and less than 16
 		if (lod.x < 0)
 		{
-			x = (Math.abs(x) * -1) - 1; 
+			regionX = (Math.abs(regionX) * -1) - 1; 
 		}
 		if (lod.z < 0)
 		{
-			z = (Math.abs(z) * -1) - 1; 
+			regionZ = (Math.abs(regionZ) * -1) - 1; 
 		}
 		
-		LodRegion region = getRegion(x, z);
+		LodRegion region = getRegion(regionX, regionZ);
 		
 		if (region == null)
 		{
 			// if no region exists, create it
-			region = new LodRegion(x, z);
+			region = new LodRegion(regionX, regionZ);
 			setRegion(region);
 		}
 		
-		// TODO check what should be happening here
 		region.addLod(lod);
 	}
 	
@@ -209,27 +209,23 @@ public class LoadedRegions
 	/**
 	 * Returns null if the LodChunk isn't loaded
 	 */
-	public LodChunk getChunkFromCoordinates(int chunkX, int chunkZ)
+	public LodChunk getLodFromCoordinates(int chunkX, int chunkZ)
 	{
 		// (chunkX + centerX) % width
-		int xIndex = (chunkX + centerX) / LodRegion.SIZE;
-		int zIndex = (chunkZ + centerZ) / LodRegion.SIZE;
+		int regionX = (chunkX + centerX) / LodRegion.SIZE;
+		int regionZ = (chunkZ + centerZ) / LodRegion.SIZE;
 		
 		// prevent issues if chunkX/Z is negative and less than width
 		if (chunkX < 0)
 		{
-			xIndex = (Math.abs(xIndex) * -1) - 1; 
+			regionX = (Math.abs(regionX) * -1) - 1; 
 		}
 		if (chunkZ < 0)
 		{
-			zIndex = (Math.abs(zIndex) * -1) - 1; 
+			regionZ = (Math.abs(regionZ) * -1) - 1; 
 		}
 		
-		LodRegion region = getRegion(xIndex, zIndex);
-		
-		// TODO should abs be used here?
-		//if(chunkX < 0 || chunkZ < 0)
-		//	return null;
+		LodRegion region = getRegion(regionX, regionZ);
 		
 		if(region == null)
 			return null;

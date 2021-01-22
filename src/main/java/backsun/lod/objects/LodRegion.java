@@ -37,8 +37,8 @@ public class LodRegion
 		// the region will negative first, therefore we don't have to
 		// store the LOD chunks at negative indexes since we search 
 		// LOD the region first
-		int xIndex = Math.abs(lod.x % LodChunk.WIDTH);
-		int zIndex = Math.abs(lod.z % LodChunk.WIDTH);
+		int xIndex = Math.abs(lod.x % SIZE);
+		int zIndex = Math.abs(lod.z % SIZE);
 		
 		chunks[xIndex][zIndex] = lod;
 	}
@@ -47,8 +47,8 @@ public class LodRegion
 	public LodChunk getLod(int x, int z)
 	{
 		// since we add LOD's with ABS, we get them the same way
-		x = Math.abs(x);
-		z = Math.abs(z);
+		x = Math.abs(x % SIZE);
+		z = Math.abs(z % SIZE);
 		
 		if(x >= SIZE || z >= SIZE)
 			return null;
