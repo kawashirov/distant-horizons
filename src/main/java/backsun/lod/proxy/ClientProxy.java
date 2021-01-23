@@ -6,6 +6,7 @@ import backsun.lod.objects.LodRegion;
 import backsun.lod.renderer.LodRenderer;
 import backsun.lod.util.LodRegionFileHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -42,6 +43,10 @@ public class ClientProxy extends CommonProxy
 	@SubscribeEvent
 	public void renderWorldLastEvent(RenderWorldLastEvent event)
 	{
+		// We can't render anything if the loaded regions is null
+		if (regions == null)
+			return;
+		
 		double playerX = Minecraft.getMinecraft().player.posX;
 		double playerZ = Minecraft.getMinecraft().player.posZ;
 		
@@ -90,7 +95,16 @@ public class ClientProxy extends CommonProxy
 	@SubscribeEvent
 	public void onChunkPopulate(PopulateChunkEvent event)
 	{
-		generateLodChunk(Minecraft.getMinecraft().world.getChunkFromChunkCoords(event.getChunkX(), event.getChunkZ()));
+		Minecraft mc = Minecraft.getMinecraft();
+		if (mc != null && event != null)
+		{
+			WorldClient world = mc.world;
+			
+			if(world != null)
+			{
+				generateLodChunk(world.getChunkFromChunkCoords(event.getChunkX(), event.getChunkZ()));
+			}
+		}
 	}
 	
 	/*
