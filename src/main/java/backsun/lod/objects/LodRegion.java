@@ -43,17 +43,16 @@ public class LodRegion
 		chunks[xIndex][zIndex] = lod;
 	}
 	
-	
-	public LodChunk getLod(int x, int z)
+	public LodChunk getLod(int chunkX, int chunkZ)
 	{
 		// since we add LOD's with ABS, we get them the same way
-		x = Math.abs(x % SIZE);
-		z = Math.abs(z % SIZE);
+		int arrayX = Math.abs(chunkX % SIZE);
+		int arrayZ = Math.abs(chunkZ % SIZE);
 		
-		if(x >= SIZE || z >= SIZE)
+		if(arrayX >= SIZE || arrayZ >= SIZE)
 			return null;
 		
-		return chunks[x][z];
+		return chunks[arrayX][arrayZ];
 	}
 	
 }
