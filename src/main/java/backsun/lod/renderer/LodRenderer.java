@@ -94,6 +94,8 @@ public class LodRenderer
 		Color white = new Color(255, 255, 255, alpha);
 		Color invisible = new Color(0,0,0,0);
 		
+		//
+		AxisAlignedBB defaultLodBB = new AxisAlignedBB(0, defaultLodHeight, 0, LOD_WIDTH, defaultLodHeight, LOD_WIDTH);
 		
 		
 		
@@ -152,12 +154,16 @@ public class LodRenderer
 				int chunkX = i + (startX / MINECRAFT_CHUNK_WIDTH);
 				int chunkZ = j + (startZ / MINECRAFT_CHUNK_WIDTH);
 				
-				LodChunk lod = regions.getLodFromCoordinates(chunkX, chunkZ);
+				LodChunk lod = regions.getLodFromCoordinates(chunkX, chunkZ); // new LodChunk(); //   
 				
 				if (lod == null)
 				{
-					colorArray[i + (j * numbOfBoxesWide)] = new Color(0,0,0,0);
-					lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, defaultLodHeight, 0, LOD_WIDTH, defaultLodHeight, LOD_WIDTH);
+					// note: for some reason if any color or lod object are set here
+					// it causes the game to use 100% gpu, all of it undefined in the debug menu
+					// and drop to ~6 fps.
+					colorArray[i + (j * numbOfBoxesWide)] = null;
+					lodArray[i + (j * numbOfBoxesWide)] = null;
+					
 					continue;
 				}
 				
@@ -188,17 +194,20 @@ public class LodRenderer
 				int width = mc.gameSettings.renderDistanceChunks;
 				if ((i > middle - width && i < middle + width) && (j > middle - width && j < middle + width))
 				{
-					// in the future we shouldn't send these over to the GPU at
-					// all, but for now this works just fine
-					c = invisible;
+					// add the color to the array
+					colorArray[i + (j * numbOfBoxesWide)] = null;
+					
+					// add the new box to the array
+					lodArray[i + (j * numbOfBoxesWide)] = null;
 				}
-				
-				
-				// add the color to the array
-				colorArray[i + (j * numbOfBoxesWide)] = c;
-				
-				// add the new box to the array
-				lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, lod.bottom[LodLocation.NE.value], 0, LOD_WIDTH, lod.bottom[LodLocation.NE.value], LOD_WIDTH).offset(xOffset, yOffset, zOffset);
+				else
+				{
+					// add the color to the array
+					colorArray[i + (j * numbOfBoxesWide)] = c;
+					
+					// add the new box to the array
+					lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, lod.bottom[LodLocation.NE.value], 0, LOD_WIDTH, lod.top[LodLocation.NE.value], LOD_WIDTH).offset(xOffset, yOffset, zOffset);
+				}
 			}
 		}
 		
@@ -233,7 +242,7 @@ public class LodRenderer
 		// rendering //
 		//===========//
 		
-		mc.world.profiler.endStartSection("LOD draw");
+		mc.world.profiler.endStartSection("LOD build buffer");
 		// send the LODs over to the GPU
 		sendToGPUAndDraw(lodArray, colorArray, cameraX, cameraY ,cameraZ);
 		
@@ -306,101 +315,79 @@ public class LodRenderer
 	 */
 	private void sendToGPUAndDraw(AxisAlignedBB[] bbArray, Color[] colorArray, double cameraX, double cameraY, double cameraZ)
 	{
-		FogType fogType = ofConfig.getFogType();
-		
 		int red;
 		int green;
 		int blue;
 		int alpha;
+				
+		bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 		
-		// this is the cut off between
-		// near fog and far fog in fancy mode
-		double nearDist = Math.pow(farPlaneDistance * VIEW_DISTANCE_MULTIPLIER * 0.25f, 2);
+		int numbDrawn = 0;
 		
-		
-		//TODO optimize
 		int colorIndex = 0;
 		for (AxisAlignedBB bb : bbArray)
 		{
-			bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-			
-			// get the color of this LOD object
-			red = colorArray[colorIndex].getRed();
-			green = colorArray[colorIndex].getGreen();
-			blue = colorArray[colorIndex].getBlue();
-			alpha = colorArray[colorIndex].getAlpha();
-			
-			bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-			bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-			bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-			bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-			
-			// only draw the other 5 sides if there is some thickness to this box
-			if (bb.minY != bb.maxY)
+			if (bb != null && colorArray[colorIndex] != null)
 			{
-				bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-				bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-				bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+				numbDrawn++; // XXX
 				
-				bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+				// get the color of this LOD object
+				red = colorArray[colorIndex].getRed();
+				green = colorArray[colorIndex].getGreen();
+				blue = colorArray[colorIndex].getBlue();
+				alpha = colorArray[colorIndex].getAlpha();
 				
 				bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-				bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-				bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-				bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-				
-				bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-				bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-				
 				bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
 				bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-				bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+				bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+				
+				// only draw the other 5 sides if there is some thickness to this box
+				if (bb.minY != bb.maxY)
+				{
+					bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					
+					bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					
+					bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					
+					bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					
+					bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+				}
 			}
-			
 			// so we can get the next color
-			colorIndex++;
-			
-			
-			if (fogType != FogType.OFF)
-			{
-				// depending on how far away this bounding box is,
-				// either use near or far fog
-				double bbDist = 0;
-				if(fogType == FogType.FANCY || fogType == FogType.UNKNOWN)
-				{
-					// if the fog is fancy, use the distance from the camera
-					// to determine near and far fog
-					bbDist = Math.pow(bb.minX, 2) + Math.pow(bb.minY, 2) + Math.pow(bb.minZ, 2);
-				}
-				else //if(fogType == FogType.FAST)
-				{
-					// if the fog is fast, have all LOD fogs be near
-					// (hide the LODs that are within the normal view
-					// range)
-					bbDist = 0;
-				}
-				
-				if (bbDist < nearDist)
-					 setupFog(FogMode.NEAR, fogType);
-				else
-					 setupFog(FogMode.FAR, fogType);
-			}
-			
-			// draw this LOD
-			tessellator.draw();
+			colorIndex++;			
 		}
+		
+		setupFog(FogMode.NEAR, ofConfig.getFogType());
+		
+		mc.world.profiler.endStartSection("LOD draw");
+		
+		// draw the LODs
+		tessellator.draw();
+		
+		System.out.println(numbDrawn);
 	}
 	
 	private void setupFog(FogMode fogMode, FogType fogType)
 	{
-		if(fogMode == FogMode.NONE)
+		if(fogMode == FogMode.NONE || fogType == FogType.OFF)
 		{
 			GlStateManager.disableFog();
 			return;
