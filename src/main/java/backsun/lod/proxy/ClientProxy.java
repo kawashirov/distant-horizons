@@ -1,5 +1,8 @@
 package backsun.lod.proxy;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import backsun.lod.objects.LoadedRegions;
 import backsun.lod.objects.LodChunk;
 import backsun.lod.objects.LodRegion;
@@ -25,7 +28,9 @@ public class ClientProxy extends CommonProxy
 	private LodRenderer renderer;
 	private LodRegionFileHandler rfHandler;
 	private LoadedRegions regions;
+	private ExecutorService lodGenThreadPool = Executors.newFixedThreadPool(1);
 	
+	// TODO make this change dynamically based on the render distance
 	private int regionWidth = 5;
 	
 	public ClientProxy()
@@ -134,24 +139,30 @@ public class ClientProxy extends CommonProxy
 		// (Minecraft often gives back empty
 		// or null chunks in this method)
 		if (chunk != null && isValidChunk(chunk) && Minecraft.getMinecraft().world != null)
-		{			
-			LodChunk lod = new LodChunk(chunk, Minecraft.getMinecraft().world);
+		{
+			Thread thread = new Thread(() ->
+			{ 
+				Minecraft mc = Minecraft.getMinecraft();
+				
+				LodChunk lod = new LodChunk(chunk, mc.world);
+				
+				if (regions == null)
+				{
+					regions = new LoadedRegions(null, regionWidth);
+				}
+				
+				regions.addLod(lod);
+				
+				if (renderer != null)
+				{
+					renderer.regions = regions;
+				}
+				
+				// TODO
+				//rfHandler.saveRegionToDisk(regions);
+			});
 			
-			
-			if (regions == null)
-			{
-				regions = new LoadedRegions(null, regionWidth);
-			}
-			
-			regions.addLod(lod);
-			
-			if (renderer != null)
-			{
-				renderer.regions = regions;
-			}
-			
-			// TODO
-			//rfHandler.saveRegionToDisk(regions);
+			lodGenThreadPool.execute(thread);
 		}
 	}
 	
