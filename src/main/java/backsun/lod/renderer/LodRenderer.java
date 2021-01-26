@@ -77,8 +77,6 @@ public class LodRenderer
 			return;
 		}
 		
-		
-		
 		// used for debugging and viewing how long different processes take
 		mc.world.profiler.startSection("LOD setup");
 		@SuppressWarnings("unused")
@@ -93,9 +91,6 @@ public class LodRenderer
 		Color black = new Color(0, 0, 0, alpha);
 		Color white = new Color(255, 255, 255, alpha);
 		Color invisible = new Color(0,0,0,0);
-		
-		//
-		AxisAlignedBB defaultLodBB = new AxisAlignedBB(0, defaultLodHeight, 0, LOD_WIDTH, defaultLodHeight, LOD_WIDTH);
 		
 		
 		
@@ -322,15 +317,11 @@ public class LodRenderer
 				
 		bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 		
-		int numbDrawn = 0;
-		
 		int colorIndex = 0;
 		for (AxisAlignedBB bb : bbArray)
 		{
 			if (bb != null && colorArray[colorIndex] != null)
 			{
-				numbDrawn++; // XXX
-				
 				// get the color of this LOD object
 				red = colorArray[colorIndex].getRed();
 				green = colorArray[colorIndex].getGreen();
@@ -381,8 +372,6 @@ public class LodRenderer
 		
 		// draw the LODs
 		tessellator.draw();
-		
-		System.out.println(numbDrawn);
 	}
 	
 	private void setupFog(FogMode fogMode, FogType fogType)
