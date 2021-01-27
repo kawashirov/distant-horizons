@@ -462,7 +462,6 @@ public class LodChunk
 				
 				for(int di = dataStart; !foundBlock && di >= dataMin && di < dataMax; di += dataIncrement)
 				{
-					// TODO set dataStart as the top or bottom most index that has data
 					if(!foundBlock && data[di] != null)
 					{
 						for(int y = topStart; !foundBlock && y >= topMin && y < topMax; y += topIncrement)
@@ -549,7 +548,6 @@ public class LodChunk
 		
 		for (int di = 0; di < data.length; di++)
 		{
-			// TODO set dataStart as the top or bottom most index that has data
 			if (data[di] != null)
 			{
 				for (int y = 0; y < CHUNK_DATA_HEIGHT; y++)
