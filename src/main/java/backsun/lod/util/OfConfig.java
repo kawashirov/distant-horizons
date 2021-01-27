@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-import backsun.lod.util.fog.FogType;
+import backsun.lod.util.fog.FogQuality;
 import net.minecraft.client.Minecraft;
 
 /**
@@ -123,14 +123,14 @@ public class OfConfig
 	
 	
 	
-	public FogType getFogType()
+	public FogQuality getFogType()
 	{
 		if (ofFogField == null)
 		{
 			// either optifine isn't installed,
 			// the variable name was changed,
 			// or the setup method wasn't called yet.
-			return FogType.UNKNOWN;
+			return FogQuality.UNKNOWN;
 		}
 		
 		
@@ -146,20 +146,19 @@ public class OfConfig
 			System.out.println(e);
 		}
 		
-		
 		switch (returnNum)
 		{
 			case 0:
-				return FogType.UNKNOWN;
+				return FogQuality.UNKNOWN;
 			case 1:
-				return FogType.FAST;
+				return FogQuality.FAST;
 			case 2:
-				return FogType.FANCY;
+				return FogQuality.FANCY;
 			case 3:
-				return FogType.OFF;
+				return FogQuality.OFF;
 				
 			default:
-				return FogType.UNKNOWN;
+				return FogQuality.UNKNOWN;
 		}
 	}
 	

@@ -1,10 +1,12 @@
 package backsun.lod.util.fog;
 
 /**
+ * Unknown, fast, fancy, or off
+ * 
  * @author James Seibel
- * @version 09-21-2020
+ * @version 01-27-2021
  */
-public enum FogType
+public enum FogQuality
 {
 	UNKNOWN,
 	FAST,

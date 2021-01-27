@@ -10,8 +10,8 @@ import backsun.lod.objects.LodChunk;
 import backsun.lod.util.OfConfig;
 import backsun.lod.util.enums.ColorDirection;
 import backsun.lod.util.enums.LodLocation;
-import backsun.lod.util.fog.FogMode;
-import backsun.lod.util.fog.FogType;
+import backsun.lod.util.fog.FogDistanceMode;
+import backsun.lod.util.fog.FogQuality;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
@@ -379,7 +379,7 @@ public class LodRenderer
 			colorIndex++;			
 		}
 		
-		setupFog(FogMode.NEAR, ofConfig.getFogType());
+		setupFog(FogDistanceMode.NEAR, ofConfig.getFogType());
 		
 		mc.world.profiler.endStartSection("LOD draw");
 		
@@ -387,16 +387,16 @@ public class LodRenderer
 		tessellator.draw();
 	}
 	
-	private void setupFog(FogMode fogMode, FogType fogType)
+	private void setupFog(FogDistanceMode fogMode, FogQuality fogQuality)
 	{
-		if(fogMode == FogMode.NONE || fogType == FogType.OFF)
+		if(fogQuality == FogQuality.OFF)
 		{
 			GlStateManager.disableFog();
 			return;
 		}
 		
 		
-		if(fogMode == FogMode.NEAR)
+		if(fogMode == FogDistanceMode.NEAR)
 		{
 			// the multipliers are percentages
 			// of the normal view distance.
@@ -406,7 +406,7 @@ public class LodRenderer
 			// it is normally used, with it hiding near objects
 			// instead of far objects.
 			
-			if (fogType == FogType.FANCY || fogType == FogType.UNKNOWN)
+			if (fogQuality == FogQuality.FANCY || fogQuality == FogQuality.UNKNOWN)
 			{
 				GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
 				GlStateManager.setFogStart(farPlaneDistance * 2.25f);
@@ -422,7 +422,7 @@ public class LodRenderer
 			// the multipliers are percentages of
 			// the LOD view distance.
 			
-			if (fogType == FogType.FANCY || fogType == FogType.UNKNOWN)
+			if (fogQuality == FogQuality.FANCY || fogQuality == FogQuality.UNKNOWN)
 			{
 				GlStateManager.setFogStart(farPlaneDistance * 0.5f * VIEW_DISTANCE_MULTIPLIER / 2.0f);
 				GlStateManager.setFogEnd(farPlaneDistance * 1.0f * VIEW_DISTANCE_MULTIPLIER / 2.0f);
