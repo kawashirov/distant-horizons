@@ -85,9 +85,6 @@ public class ClientProxy extends CommonProxy
 	// update events //
 	//===============//
 	
-	// TODO determine if a old region should be unloaded
-	// use the chunkUnloadedEvent, or player moved?
-	
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent event)
 	{
