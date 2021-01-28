@@ -1,5 +1,9 @@
 package backsun.lod.objects;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import backsun.lod.util.LodRegionFileHandler;
 import net.minecraft.world.DimensionType;
 
 /**
@@ -7,7 +11,7 @@ import net.minecraft.world.DimensionType;
  * currently needed by the LodRenderer.
  * 
  * @author James Seibel
- * @version 1-20-2021
+ * @version 1-27-2021
  */
 public class LoadedRegions
 {
@@ -17,9 +21,14 @@ public class LoadedRegions
 	private int halfWidth;
 	
 	public LodRegion regions[][];
+	private boolean isRegionDirty[][];
+	private long regionLastWriteTime[][];
 	
 	private int centerX;
 	private int centerZ;
+	
+	private LodRegionFileHandler rfHandler = new LodRegionFileHandler();;
+	private ExecutorService fileHandlerPool = Executors.newFixedThreadPool(1);
 	
 	public LoadedRegions(DimensionType newDimension, int newMaxWidth)
 	{
@@ -27,6 +36,18 @@ public class LoadedRegions
 		width = newMaxWidth;
 		
 		regions = new LodRegion[width][width];
+		isRegionDirty = new boolean[width][width];
+		regionLastWriteTime = new long[width][width];
+		
+		// populate isRegionDirty and regionLastWriteTime
+		for(int i = 0; i < width; i++)
+		{
+			for(int j = 0; j < width; j++)
+			{
+				isRegionDirty[i][j] = false;
+				regionLastWriteTime[i][j] = -1;
+			}
+		}
 		
 		centerX = 0;
 		centerZ = 0;
@@ -150,9 +171,18 @@ public class LoadedRegions
 		int xIndex = (regionX - centerX) + halfWidth;
 		int zIndex = (centerZ - regionZ) + halfWidth;
 		
-		if (xIndex < 0 || xIndex >= width || zIndex < 0 || zIndex >= width)
+		if (!regionIsInRange(regionX, regionZ))
 			// out of range
 			return null;
+		
+		if (regions[xIndex][zIndex] == null)
+		{
+			regions[xIndex][zIndex] = getRegionFromFile(regionX, regionZ);
+			if (regions[xIndex][zIndex] == null)
+			{
+				regions[xIndex][zIndex] = new LodRegion(regionX, regionZ);
+			}
+		}
 		
 		return regions[xIndex][zIndex];
 	}
@@ -165,9 +195,8 @@ public class LoadedRegions
 		int xIndex = (newRegion.x - centerX) + halfWidth;
 		int zIndex = (centerZ - newRegion.z) + halfWidth;
 		
-		if (xIndex < 0 || xIndex >= width || zIndex < 0 || zIndex >= width)
+		if (!regionIsInRange(newRegion.x, newRegion.z))
 			// out of range
-			// TODO, should this throw an exception?
 			return;
 		
 		regions[xIndex][zIndex] = newRegion;
@@ -182,6 +211,9 @@ public class LoadedRegions
 	{
 		int regionX = (lod.x + centerX) / LodRegion.SIZE;
 		int regionZ = (lod.z + centerZ) / LodRegion.SIZE;
+		
+		if (!regionIsInRange(regionX, regionZ))
+			return;
 		
 		// prevent issues if X/Z is negative and less than 16
 		if (lod.x < 0)
@@ -203,8 +235,14 @@ public class LoadedRegions
 		}
 		
 		region.addLod(lod);
+		
+		// mark the region as dirty so it will be saved to disk
+		int xIndex = (regionX - centerX) + halfWidth;
+		int zIndex = (centerZ - regionZ) + halfWidth;
+		isRegionDirty[xIndex][zIndex] = true;
+		
+		fileHandlerPool.execute(saveDirtyRegionsAsync);
 	}
-	
 	
 	/**
 	 * Returns null if the LodChunk isn't loaded
@@ -231,6 +269,64 @@ public class LoadedRegions
 			return null;
 		
 		return region.getLod(chunkX, chunkZ);
+	}
+	
+	
+	
+	
+	public LodRegion getRegionFromFile(int regionX, int regionZ)
+	{
+		return rfHandler.loadRegionFromFile(regionX, regionZ);
+	}
+	
+	public void saveAllRegionsToFile()
+	{
+		Thread task = new Thread(() -> {
+			for (LodRegion regionArray[] : regions)
+				for (LodRegion region : regionArray)
+					rfHandler.saveRegionToDisk(region);
+		});
+		
+		for(int i = 0; i < width; i++)
+		{
+			for(int j = 0; j < width; j++)
+			{
+				isRegionDirty[i][j] = false;
+				regionLastWriteTime[i][j] = System.currentTimeMillis();
+			}
+		}
+		
+		
+		fileHandlerPool.execute(task);
+	}
+	
+	
+	private Thread saveDirtyRegionsAsync = new Thread(() -> {
+		for(int i = 0; i < width; i++)
+		{
+			for(int j = 0; j < width; j++)
+			{
+				if(isRegionDirty[i][j])
+				{
+					rfHandler.saveRegionToDisk(regions[i][j]);
+					isRegionDirty[i][j] = false;
+				}
+			}
+		}
+	});
+	
+	
+	
+	/**
+	 * Returns whether the region at the given X and Z coordinates
+	 * is within the loaded range.
+	 */
+	private boolean regionIsInRange(int regionX, int regionZ)
+	{
+		int xIndex = (regionX - centerX) + halfWidth;
+		int zIndex = (centerZ - regionZ) + halfWidth;
+		
+		return xIndex >= 0 && xIndex < width && zIndex >= 0 && zIndex < width;
 	}
 }
 
