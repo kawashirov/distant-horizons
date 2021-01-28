@@ -53,14 +53,11 @@ public class LodRegionFileHandler
 			return null;
 		}
 		
-		
 		LodRegion region = new LodRegion(regionX, regionZ);
-		
 		
 		try
 		{
 			BufferedReader br = new BufferedReader(new FileReader(f));
-			
 			String s = br.readLine();
 			
 			while(s != null && !s.isEmpty())
@@ -79,10 +76,8 @@ public class LodRegionFileHandler
 					// skip to the next chunk
 				}
 				
-				
 				s = br.readLine();
 			}
-			
 			
 			br.close();
 		}
@@ -92,11 +87,8 @@ public class LodRegionFileHandler
 			
 			// or the buffered reader encountered a 
 			// problem reading the file
-			
 			return null;
 		}
-		
-		
 		
 		return region;
 	}
@@ -128,14 +120,12 @@ public class LodRegionFileHandler
 			{
 				for(LodChunk chunk : chunkArray)
 				{
-					
 					if(chunk != null)
 					{
-						fw.write(chunk + "\n");
+						fw.write(chunk.toData() + "\n");
 					}
 				}
 			}
-			
 			
 			fw.close();
 		}
