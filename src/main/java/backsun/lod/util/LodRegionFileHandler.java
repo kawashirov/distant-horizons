@@ -23,7 +23,7 @@ public class LodRegionFileHandler
 	private final String SAVE_DIR = "C:/Users/James Seibel/Desktop/lod_save_folder/";
 	
 	private final String FILE_NAME_PREFIX = "lod";
-	private final String FILE_NAME_DELIMITER = "-";
+	private final String FILE_NAME_DELIMITER = ".";
 	private final String FILE_EXTENSION = ".txt";
 	
 	
@@ -124,9 +124,7 @@ public class LodRegionFileHandler
 			
 			FileWriter fw = new FileWriter(f);
 			
-			// TODO
-			/*
-			for(LodChunk[] chunkArray : region.)
+			for(LodChunk[] chunkArray : region.getAllLods())
 			{
 				for(LodChunk chunk : chunkArray)
 				{
@@ -137,7 +135,7 @@ public class LodRegionFileHandler
 					}
 				}
 			}
-			*/
+			
 			
 			fw.close();
 		}
