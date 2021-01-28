@@ -700,26 +700,28 @@ public class LodChunk
 		
 		s += "x: " + x + " z: " + z + "\t";
 		
-		s += "top: ";
-		for(int i = 0; i < top.length; i++)
-		{
-			s += top[i] + " ";
-		}
-		s += "\t";
+//		s += "top: ";
+//		for(int i = 0; i < top.length; i++)
+//		{
+//			s += top[i] + " ";
+//		}
+//		s += "\t";
 		
-		s += "bottom: ";
-		for(int i = 0; i < bottom.length; i++)
-		{
-			s += bottom[i] + " ";
-		}
-		s += "\t";
+//		s += "bottom: ";
+//		for(int i = 0; i < bottom.length; i++)
+//		{
+//			s += bottom[i] + " ";
+//		}
+//		s += "\t";
 		
-		s += "colors ";
-		for(int i = 0; i < colors.length; i++)
-		{
-			if(colors[i] != null)
-				s += "(" + colors[i].getRed() + ", " + colors[i].getGreen() + ", " + colors[i].getBlue() + "), ";
-		}
+//		s += "colors ";
+//		for(int i = 0; i < colors.length; i++)
+//		{
+//			if(colors[i] != null)
+//				s += "(" + colors[i].getRed() + ", " + colors[i].getGreen() + ", " + colors[i].getBlue() + "), ";
+//		}
+		
+		s += "(" + colors[ColorDirection.TOP.index].getRed() + ", " + colors[ColorDirection.TOP.index].getGreen() + ", " + colors[ColorDirection.TOP.index].getBlue() + "), ";
 		
 		return s;
 	}
