@@ -233,6 +233,7 @@ public class LodRenderer
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_BLEND);
 		
+		setupFog(FogDistanceMode.NEAR, ofConfig.getFogType());
 		
 		
 		
@@ -378,8 +379,6 @@ public class LodRenderer
 			// so we can get the next color
 			colorIndex++;			
 		}
-		
-		setupFog(FogDistanceMode.NEAR, ofConfig.getFogType());
 		
 		mc.world.profiler.endStartSection("LOD draw");
 		
