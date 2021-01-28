@@ -61,4 +61,16 @@ public class LodRegion
 	{
 		return chunks;
 	}
+	
+	
+	
+	@Override
+	public String toString()
+	{
+		String s = "";
+		
+		s += "x: " + x + " z: " + z + "\t";
+		
+		return s;
+	}
 }
