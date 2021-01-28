@@ -81,7 +81,7 @@ public class LodChunk
 		// by default have the colors invisible
 		for(ColorDirection dir : ColorDirection.values())
 		{
-			colors[dir.index] = new Color(0, 0, 0, 0);
+			colors[dir.value] = new Color(0, 0, 0, 0);
 		}
 	}
 	
@@ -182,7 +182,7 @@ public class LodChunk
 				}
 			}
 			
-			colors[dir.index] = new Color(red, green, blue);
+			colors[dir.value] = new Color(red, green, blue);
 		}
 	}
 	
@@ -222,7 +222,7 @@ public class LodChunk
 		// determine the average color for each direction
 		for(ColorDirection dir : ColorDirection.values())
 		{
-			colors[dir.index] = generateLodColorSection(chunk, world, dir);
+			colors[dir.value] = generateLodColorSection(chunk, world, dir);
 		}
 	}
 	
@@ -721,7 +721,7 @@ public class LodChunk
 //				s += "(" + colors[i].getRed() + ", " + colors[i].getGreen() + ", " + colors[i].getBlue() + "), ";
 //		}
 		
-		s += "(" + colors[ColorDirection.TOP.index].getRed() + ", " + colors[ColorDirection.TOP.index].getGreen() + ", " + colors[ColorDirection.TOP.index].getBlue() + "), ";
+		s += "(" + colors[ColorDirection.TOP.value].getRed() + ", " + colors[ColorDirection.TOP.value].getGreen() + ", " + colors[ColorDirection.TOP.value].getBlue() + "), ";
 		
 		return s;
 	}

@@ -25,10 +25,10 @@ public enum ColorDirection
 	/** -Y */
 	BOTTOM(5);
 	
-	public final int index;
+	public final int value;
 	
 	private ColorDirection(int newValue)
 	{
-		index = newValue;
+		value = newValue;
 	}
 }

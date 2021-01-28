@@ -165,7 +165,7 @@ public class LodRenderer
 					continue;
 				}
 				
-				Color c = lod.colors[ColorDirection.TOP.index];
+				Color c = lod.colors[ColorDirection.TOP.value];
 				
 				double yOffset = -cameraY;
 				

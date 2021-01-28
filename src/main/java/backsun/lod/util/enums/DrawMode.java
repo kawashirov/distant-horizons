@@ -23,10 +23,10 @@ public enum DrawMode
 	 */
 	INDIVIDUAL(5);
 	
-	public final int index;
+	public final int value;
 	
 	private DrawMode(int newValue)
 	{
-		index = newValue;
+		value = newValue;
 	}
 }
