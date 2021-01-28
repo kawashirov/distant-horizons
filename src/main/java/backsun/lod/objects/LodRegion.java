@@ -55,4 +55,10 @@ public class LodRegion
 		return chunks[arrayX][arrayZ];
 	}
 	
+	
+	
+	public LodChunk[][] getAllLods()
+	{
+		return chunks;
+	}
 }
