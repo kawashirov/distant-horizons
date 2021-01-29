@@ -7,7 +7,6 @@ import backsun.lod.objects.LoadedRegions;
 import backsun.lod.objects.LodChunk;
 import backsun.lod.objects.LodRegion;
 import backsun.lod.renderer.LodRenderer;
-import backsun.lod.util.LodRegionFileHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.world.chunk.Chunk;
@@ -26,7 +25,6 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class ClientProxy extends CommonProxy
 {
 	private LodRenderer renderer;
-	private LodRegionFileHandler rfHandler;
 	private LoadedRegions regions;
 	private ExecutorService lodGenThreadPool = Executors.newFixedThreadPool(1);
 	
@@ -35,7 +33,7 @@ public class ClientProxy extends CommonProxy
 	
 	public ClientProxy()
 	{
-		rfHandler = new LodRegionFileHandler();
+		
 	}
 	
 	
@@ -55,8 +53,6 @@ public class ClientProxy extends CommonProxy
 		double playerX = Minecraft.getMinecraft().player.posX;
 		double playerZ = Minecraft.getMinecraft().player.posZ;
 		
-		// TODO make sure moving between regions works correctly
-		// move the regions based on the player's movement //TODO deal with -0 - -15
 		int xOffset = ((int)playerX / (LodChunk.WIDTH * LodRegion.SIZE)) - regions.getCenterX();
 		int zOffset = ((int)playerZ / (LodChunk.WIDTH * LodRegion.SIZE)) - regions.getCenterZ();
 		
@@ -154,9 +150,6 @@ public class ClientProxy extends CommonProxy
 				{
 					renderer.regions = regions;
 				}
-				
-				// TODO
-				//rfHandler.saveRegionToDisk(regions);
 			});
 			
 			lodGenThreadPool.execute(thread);

@@ -129,35 +129,38 @@ public class LodChunk
 		
 		// x and z position
 		index = data.indexOf(DATA_DELIMITER, 0);
-		x = Integer.parseInt(data.substring(0,index - 1));
+		x = Integer.parseInt(data.substring(0,index));
 		
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER, lastIndex);
-		z = Integer.parseInt(data.substring(lastIndex,index - 1));
+		index = data.indexOf(DATA_DELIMITER, lastIndex + 1);
+		z = Integer.parseInt(data.substring(lastIndex+1,index));
 		
 		
 		
 		// top
+		top = new short[4];
 		for(LodLocation loc : LodLocation.values())
 		{
 			lastIndex = index;
-			index = data.indexOf(DATA_DELIMITER, lastIndex);
+			index = data.indexOf(DATA_DELIMITER, lastIndex + 1);
 			
-			top[loc.value] = Short.parseShort(data.substring(lastIndex,index - 1));
+			top[loc.value] = Short.parseShort(data.substring(lastIndex+1,index));
 		}
 		
 		
 		// bottom
+		bottom = new short[4];
 		for(LodLocation loc : LodLocation.values())
 		{
 			lastIndex = index;
-			index = data.indexOf(DATA_DELIMITER, lastIndex);
+			index = data.indexOf(DATA_DELIMITER, lastIndex + 1);
 			
-			bottom[loc.value] = Short.parseShort(data.substring(lastIndex,index - 1));
+			bottom[loc.value] = Short.parseShort(data.substring(lastIndex+1,index));
 		}
 		
 		
 		// color
+		colors = new Color[6];
 		for(ColorDirection dir : ColorDirection.values())
 		{
 			int red = 0;
@@ -165,20 +168,26 @@ public class LodChunk
 			int blue = 0;
 			
 			// get r,g,b
-			for(int i = 0; i < 4; i++)
+			for(int i = 0; i < 3; i++)
 			{
 				lastIndex = index;
-				index = data.indexOf(DATA_DELIMITER, lastIndex);
+				index = data.indexOf(DATA_DELIMITER, lastIndex + 1);
 				
-				
+				String raw = "";
 				switch(i)
 				{
 				case 0:
-					red = Short.parseShort(data.substring(lastIndex,index - 1));
+					raw = data.substring(lastIndex+1,index);
+					red = Short.parseShort(raw);
+					break;
 				case 1:
-					green = Short.parseShort(data.substring(lastIndex,index - 1));
+					raw = data.substring(lastIndex+1,index);
+					green = Short.parseShort(raw);
+					break;
 				case 2:
-					blue = Short.parseShort(data.substring(lastIndex,index - 1));
+					raw = data.substring(lastIndex+1,index);
+					blue = Short.parseShort(raw);
+					break;
 				}
 			}
 			
@@ -672,21 +681,21 @@ public class LodChunk
 	{
 		String s = "";
 		
-		s += x + DATA_DELIMITER + z + DATA_DELIMITER;
+		s += Integer.toString(x) + DATA_DELIMITER +  Integer.toString(z) + DATA_DELIMITER;
 		
 		for(int i = 0; i < top.length; i++)
 		{
-			s += top[i] + DATA_DELIMITER;
+			s += Short.toString(top[i]) + DATA_DELIMITER;
 		}
 		
 		for(int i = 0; i < bottom.length; i++)
 		{
-			s += bottom[i] + DATA_DELIMITER;
+			s += Short.toString(bottom[i]) + DATA_DELIMITER;
 		}
 		
 		for(int i = 0; i < colors.length; i++)
 		{
-			s += colors[i].getRed() + DATA_DELIMITER + colors[i].getGreen() + DATA_DELIMITER + colors[i].getBlue() + DATA_DELIMITER;
+			s += Integer.toString(colors[i].getRed()) + DATA_DELIMITER + Integer.toString(colors[i].getGreen()) + DATA_DELIMITER + Integer.toString(colors[i].getBlue()) + DATA_DELIMITER;
 		}
 		
 		return s;
