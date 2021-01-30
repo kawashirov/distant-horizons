@@ -142,7 +142,7 @@ public class ClientProxy extends CommonProxy
 		// or null chunks in this method)
 		if (mc != null && mc.world != null && chunk != null && isValidChunk(chunk))
 		{
-			int dimId = mc.player.dimension;
+			int dimId = chunk.getWorld().provider.getDimension();
 			
 			Thread thread = new Thread(() ->
 			{
@@ -154,7 +154,7 @@ public class ClientProxy extends CommonProxy
 				
 				if (lodWorld.getLodDimension(dimId) == null)
 				{
-					DimensionType dim = DimensionType.getById(chunk.getWorld().provider.getDimension());
+					DimensionType dim = DimensionType.getById(dimId);
 					lodDim = new LodDimension(dim, regionWidth);
 					lodWorld.addLodDimension(lodDim);
 				}
