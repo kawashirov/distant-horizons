@@ -5,9 +5,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
+import backsun.lod.objects.LoadedRegions;
 import backsun.lod.objects.LodChunk;
 import backsun.lod.objects.LodRegion;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.storage.ISaveHandler;
 
 /**
  * This object handles creating LodRegions
@@ -15,21 +20,49 @@ import backsun.lod.objects.LodRegion;
  * to file.
  * 
  * @author James Seibel
- * @version 09-28-2020
+ * @version 01-30-2021
  */
 public class LodRegionFileHandler
 {
+	private LoadedRegions loadedRegion = null;
+	public long regionLastWriteTime[][];
+	
 	// String s = Minecraft.getMinecraftDir().getCanonicalPath() + "/saves/" + world.getSaveHandler().getSaveDirectoryName() + "/data/AA/World" + world.provider.dimensionId + ".dat";
-	private final String SAVE_DIR = "C:/Users/James Seibel/Desktop/lod_save_folder/";
+	private String save_dir;
+	public ISaveHandler saveHandler;
 	
 	private final String FILE_NAME_PREFIX = "lod";
-	private final String FILE_NAME_DELIMITER = ".";
 	private final String FILE_EXTENSION = ".txt";
 	
+	private ExecutorService fileWritingThreadPool = Executors.newFixedThreadPool(1);
+	/** Is true if the readyToReadAndWrite is false */
+	private boolean waitingToSaveRegions = false;
 	
-	public LodRegionFileHandler()
+	
+	public LodRegionFileHandler(ISaveHandler newSaveHandler, LoadedRegions newLoadedRegion)
 	{
+		saveHandler = newSaveHandler;
 		
+		if (saveHandler == null)
+		{
+			throw new NullPointerException("LodRegionFileHandler requires a world SaveHandler.");
+		}
+		
+		loadedRegion = newLoadedRegion;
+		// these two variable are used in sync with the LoadedRegions
+		regionLastWriteTime = new long[loadedRegion.getWidth()][loadedRegion.getWidth()];
+		for(int i = 0; i < loadedRegion.getWidth(); i++)
+			for(int j = 0; j < loadedRegion.getWidth(); j++)
+				regionLastWriteTime[i][j] = -1;
+		
+		
+		if (saveHandler != null && saveHandler.getWorldDirectory() != null)
+			try {
+				save_dir = saveHandler.getWorldDirectory().getCanonicalPath();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	}
 	
 	
@@ -38,10 +71,14 @@ public class LodRegionFileHandler
 	
 	
 	/**
-	 * Return the LodRegion that 
+	 * Return the LodRegion at the given coordinates.
+	 * (null if the file doesn't exist)
 	 */
 	public LodRegion loadRegionFromFile(int regionX, int regionZ)
 	{
+		if (!readyToReadAndWrite())
+			return null;
+		
 		String fileName = getFileNameForRegion(regionX, regionZ);
 		
 		File f = new File(fileName);
@@ -94,8 +131,50 @@ public class LodRegionFileHandler
 	}
 	
 	
-	
-	
+	public synchronized void saveDirtyRegionsToFile()
+	{
+		if (!readyToReadAndWrite())
+		{	
+			// we aren't ready to read and write yet
+			if(!waitingToSaveRegions)
+			{
+				waitingToSaveRegions = true;
+				
+				// retry until we are able to read and write
+				// then wake up the fileWritingThreadPool
+				Thread retryReady = new Thread(() -> 
+				{
+					try
+					{
+						// check once every so often so see
+						// if anything has changed so we can
+						// start reading and writing files
+						while(!readyToReadAndWrite())
+						{
+							// TODO what can be done if connected to a server?
+							saveHandler = Minecraft.getMinecraft().getIntegratedServer().getWorld(0).getSaveHandler();
+							this.wait(1000);
+						}
+						
+						// we can start writing files now
+						if (waitingToSaveRegions)
+						{
+							fileWritingThreadPool.execute(saveDirtyRegionsAsync);
+							waitingToSaveRegions = false;
+						}
+					}
+					catch (InterruptedException e) 
+					{ /* should never be called */}
+				});
+				
+				retryReady.run();
+			}
+			
+			return;
+		}
+		
+		fileWritingThreadPool.execute(saveDirtyRegionsAsync);
+	}
 	
 	public void saveRegionToDisk(LodRegion region)
 	{
@@ -106,11 +185,16 @@ public class LodRegionFileHandler
 		
 		File f = new File(getFileNameForRegion(x, z));
 		
-		
 		try
 		{
 			if (!f.exists())
 			{
+				// make the LOD folder if it doesn't exist
+				if(!f.getParentFile().exists())
+				{
+					f.getParentFile().mkdirs();
+				}
+				
 				f.createNewFile();
 			}
 			
@@ -131,51 +215,82 @@ public class LodRegionFileHandler
 		}
 		catch(Exception e)
 		{
-			System.err.println("LOD ERROR: ");
-			e.printStackTrace();
+			System.err.println("LOD ERROR: " + e.getMessage());
+			//e.printStackTrace();
 		}
 	}
 	
 	
-	
-	
-	
-
-	/**
-	 * Returns true if a file exists for the region
-	 * containing the given chunk.
-	 */
-	private boolean regionFileExistForChunk(int chunkX, int chunkZ)
+	private Thread saveDirtyRegionsAsync = new Thread(() -> 
 	{
-		// convert chunk coordinates to region
-		// coordinates
-		int regionX = chunkX / 32;
-		int regionZ = chunkZ / 32;
+		for(int i = 0; i < loadedRegion.getWidth(); i++)
+		{
+			for(int j = 0; j < loadedRegion.getWidth(); j++)
+			{
+				if(loadedRegion.isRegionDirty[i][j])
+				{
+					saveRegionToDisk(loadedRegion.regions[i][j]);
+					loadedRegion.isRegionDirty[i][j] = false;
+				}
+			}
+		}
 		
-		return new File(getFileNameForRegion(regionX, regionZ)).exists();
-	}
-	
-	/**
-	 * Returns true if a file exists
-	 * for the given region coordinates.
-	 */
-	private boolean regionFileExistForRegion(int regionX, int regionZ)
-	{
-		return new File(getFileNameForRegion(regionX, regionZ)).exists();
-	}
-	
-	
+		waitingToSaveRegions = false;
+	});
+ 	
+ 	
 	
 	/**
 	 * Return the name of the file that should contain the 
-	 * region at the given x and z.
+	 * region at the given x and z. <br>
+	 * Returns null if this object isn't ready to read and write.
 	 * @param regionX
 	 * @param regionZ
 	 */
 	private String getFileNameForRegion(int regionX, int regionZ)
 	{
-		return SAVE_DIR + 
-				FILE_NAME_PREFIX + FILE_NAME_DELIMITER + 
-				regionX + FILE_NAME_DELIMITER + regionZ + FILE_EXTENSION;
+		if (!readyToReadAndWrite())
+			return null;
+		
+		return save_dir + "\\lod_data\\DIM" + loadedRegion.dimension.getId() + "\\" +
+				FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
 	}
+	
+	
+	/**
+	 * Returns if this FileHandler is ready to read
+	 * and write files.
+	 */
+	public boolean readyToReadAndWrite()
+	{
+		return saveHandler != null && saveHandler.getWorldDirectory() != null && 
+				save_dir != null && !save_dir.isEmpty();
+	}
+	
+//	/**
+//	 * Used to wake up the fileWritingThreadPool once
+//	 * we are able to read and write files.
+//	 */
+//	private Thread retryReady = new Thread(() -> 
+//	{
+//		try
+//		{
+//			// check once every so often so see
+//			// if anything has changed so we can
+//			// start reading and writing files
+//			while(!readyToReadAndWrite())
+//			{
+//				this.wait(1000);
+//			}
+//			
+//			// we can start writing files now
+//			if (waitingToSaveRegions)
+//			{
+//				fileWritingThreadPool.execute(saveDirtyRegionsAsync);
+//				waitingToSaveRegions = false;
+//			}
+//		}
+//		catch (InterruptedException e) 
+//		{ /* should never be called */}
+//	});
 }

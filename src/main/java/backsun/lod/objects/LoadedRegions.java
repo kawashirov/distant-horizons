@@ -1,9 +1,7 @@
 package backsun.lod.objects;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import backsun.lod.util.LodRegionFileHandler;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.DimensionType;
 
 /**
@@ -21,33 +19,28 @@ public class LoadedRegions
 	private int halfWidth;
 	
 	public LodRegion regions[][];
-	private boolean isRegionDirty[][];
-	private long regionLastWriteTime[][];
+	public boolean isRegionDirty[][];
 	
 	private int centerX;
 	private int centerZ;
 	
-	private LodRegionFileHandler rfHandler = new LodRegionFileHandler();;
-	private ExecutorService fileHandlerPool = Executors.newFixedThreadPool(1);
+	private LodRegionFileHandler rfHandler;
 	
 	public LoadedRegions(DimensionType newDimension, int newMaxWidth)
 	{
 		dimension = newDimension;
 		width = newMaxWidth;
 		
+		// TODO what can be done if connected to a server?
+		rfHandler = new LodRegionFileHandler(Minecraft.getMinecraft().getIntegratedServer().getWorld(0).getSaveHandler(), this);
+		
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];
-		regionLastWriteTime = new long[width][width];
 		
-		// populate isRegionDirty and regionLastWriteTime
+		// populate isRegionDirty
 		for(int i = 0; i < width; i++)
-		{
 			for(int j = 0; j < width; j++)
-			{
 				isRegionDirty[i][j] = false;
-				regionLastWriteTime[i][j] = -1;
-			}
-		}
 		
 		centerX = 0;
 		centerZ = 0;
@@ -241,7 +234,9 @@ public class LoadedRegions
 		int zIndex = (centerZ - regionZ) + halfWidth;
 		isRegionDirty[xIndex][zIndex] = true;
 		
-		fileHandlerPool.execute(saveDirtyRegionsAsync);
+		
+		
+		rfHandler.saveDirtyRegionsToFile();
 	}
 	
 	/**
@@ -279,43 +274,6 @@ public class LoadedRegions
 		return rfHandler.loadRegionFromFile(regionX, regionZ);
 	}
 	
-	public void saveAllRegionsToFile()
-	{
-		Thread task = new Thread(() -> {
-			for (LodRegion regionArray[] : regions)
-				for (LodRegion region : regionArray)
-					rfHandler.saveRegionToDisk(region);
-		});
-		
-		for(int i = 0; i < width; i++)
-		{
-			for(int j = 0; j < width; j++)
-			{
-				isRegionDirty[i][j] = false;
-				regionLastWriteTime[i][j] = System.currentTimeMillis();
-			}
-		}
-		
-		
-		fileHandlerPool.execute(task);
-	}
-	
-	
-	private Thread saveDirtyRegionsAsync = new Thread(() -> {
-		for(int i = 0; i < width; i++)
-		{
-			for(int j = 0; j < width; j++)
-			{
-				if(isRegionDirty[i][j])
-				{
-					rfHandler.saveRegionToDisk(regions[i][j]);
-					isRegionDirty[i][j] = false;
-				}
-			}
-		}
-	});
-	
-	
 	
 	/**
 	 * Returns whether the region at the given X and Z coordinates
@@ -327,6 +285,13 @@ public class LoadedRegions
 		int zIndex = (centerZ - regionZ) + halfWidth;
 		
 		return xIndex >= 0 && xIndex < width && zIndex >= 0 && zIndex < width;
+	}
+
+	
+	
+	public int getWidth()
+	{
+		return width;
 	}
 }
 

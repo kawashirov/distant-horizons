@@ -9,6 +9,7 @@ import backsun.lod.objects.LodRegion;
 import backsun.lod.renderer.LodRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -131,17 +132,17 @@ public class ClientProxy extends CommonProxy
 		// given a valid chunk object
 		// (Minecraft often gives back empty
 		// or null chunks in this method)
-		if (chunk != null && isValidChunk(chunk) && Minecraft.getMinecraft().world != null)
+		Minecraft mc = Minecraft.getMinecraft();
+		if (mc != null && mc.world != null && chunk != null && isValidChunk(chunk))
 		{
 			Thread thread = new Thread(() ->
 			{ 
-				Minecraft mc = Minecraft.getMinecraft();
-				
 				LodChunk lod = new LodChunk(chunk, mc.world);
 				
 				if (regions == null)
 				{
-					regions = new LoadedRegions(null, regionWidth);
+					DimensionType dim = DimensionType.getById(chunk.getWorld().provider.getDimension());
+					regions = new LoadedRegions(dim, regionWidth);
 				}
 				
 				regions.addLod(lod);
