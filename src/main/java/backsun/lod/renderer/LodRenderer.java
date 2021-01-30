@@ -317,7 +317,10 @@ public class LodRenderer
 		int green;
 		int blue;
 		int alpha;
-				
+		
+		// TODO set the brightness level
+		// chunk.getWorld().getSunBrightness(partialTicks)
+		
 		bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 		
 		int colorIndex = 0;
