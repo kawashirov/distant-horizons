@@ -9,29 +9,29 @@ import java.util.Hashtable;
  * @author James Seibel
  * @version 01-30-2021
  */
-public class LodStorage
+public class LodWorld
 {
 	/**
 	 * Key = Dimension id (as an int)
 	 */
-	private Dictionary<Integer, LodDimensionalStorage> LodDimensions;
+	private Dictionary<Integer, LodDimension> LodDimensions;
 	
 	public String worldName;
 	
 	
-	public LodStorage()
+	public LodWorld()
 	{
-		LodDimensions = new Hashtable<Integer, LodDimensionalStorage>();
+		LodDimensions = new Hashtable<Integer, LodDimension>();
 	}
 	
 	
 	
-	public void addLodDimensionalStorage(LodDimensionalStorage newStorage)
+	public void addLodDimension(LodDimension newStorage)
 	{
 		LodDimensions.put(newStorage.dimension.getId(), newStorage);
 	}
 	
-	public LodDimensionalStorage getLodDimensionalStorage(int dimensionId)
+	public LodDimension getLodDimension(int dimensionId)
 	{
 		return LodDimensions.get(dimensionId);
 	}

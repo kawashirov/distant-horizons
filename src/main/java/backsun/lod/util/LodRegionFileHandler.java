@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import backsun.lod.objects.LodDimensionalStorage;
+import backsun.lod.objects.LodDimension;
 import backsun.lod.objects.LodChunk;
 import backsun.lod.objects.LodRegion;
 import net.minecraft.client.Minecraft;
@@ -24,7 +24,7 @@ import net.minecraft.world.storage.ISaveHandler;
  */
 public class LodRegionFileHandler
 {
-	private LodDimensionalStorage loadedRegion = null;
+	private LodDimension loadedRegion = null;
 	public long regionLastWriteTime[][];
 	
 	// String s = Minecraft.getMinecraftDir().getCanonicalPath() + "/saves/" + world.getSaveHandler().getSaveDirectoryName() + "/data/AA/World" + world.provider.dimensionId + ".dat";
@@ -39,7 +39,7 @@ public class LodRegionFileHandler
 	private boolean waitingToSaveRegions = false;
 	
 	
-	public LodRegionFileHandler(ISaveHandler newSaveHandler, LodDimensionalStorage newLoadedRegion)
+	public LodRegionFileHandler(ISaveHandler newSaveHandler, LodDimension newLoadedRegion)
 	{
 		saveHandler = newSaveHandler;
 		
@@ -49,7 +49,7 @@ public class LodRegionFileHandler
 		}
 		
 		loadedRegion = newLoadedRegion;
-		// these two variable are used in sync with the LodDimensionalStorage
+		// these two variable are used in sync with the LodDimension
 		regionLastWriteTime = new long[loadedRegion.getWidth()][loadedRegion.getWidth()];
 		for(int i = 0; i < loadedRegion.getWidth(); i++)
 			for(int j = 0; j < loadedRegion.getWidth(); j++)

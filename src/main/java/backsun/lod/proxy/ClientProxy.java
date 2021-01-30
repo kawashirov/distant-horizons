@@ -4,9 +4,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import backsun.lod.objects.LodChunk;
-import backsun.lod.objects.LodDimensionalStorage;
+import backsun.lod.objects.LodDimension;
 import backsun.lod.objects.LodRegion;
-import backsun.lod.objects.LodStorage;
+import backsun.lod.objects.LodWorld;
 import backsun.lod.renderer.LodRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -27,7 +27,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class ClientProxy extends CommonProxy
 {
 	private LodRenderer renderer;
-	private LodStorage lodStorage;
+	private LodWorld lodWorld;
 	private ExecutorService lodGenThreadPool = Executors.newFixedThreadPool(1);
 	
 	// TODO make this change dynamically based on the render distance
@@ -48,24 +48,24 @@ public class ClientProxy extends CommonProxy
 	@SubscribeEvent
 	public void renderWorldLastEvent(RenderWorldLastEvent event)
 	{
-		// We can't render anything if the lodStorage is null
-		if (lodStorage == null)
+		// We can't render anything if the lodWorld is null
+		if (lodWorld == null)
 			return;
 		
 		Minecraft mc = Minecraft.getMinecraft();
 		int dimId = mc.player.dimension;
-		LodDimensionalStorage regions = lodStorage.getLodDimensionalStorage(dimId);
+		LodDimension lodDim = lodWorld.getLodDimension(dimId);
 		
 		
 		double playerX = mc.player.posX;
 		double playerZ = mc.player.posZ;
 		
-		int xOffset = ((int)playerX / (LodChunk.WIDTH * LodRegion.SIZE)) - regions.getCenterX();
-		int zOffset = ((int)playerZ / (LodChunk.WIDTH * LodRegion.SIZE)) - regions.getCenterZ();
+		int xOffset = ((int)playerX / (LodChunk.WIDTH * LodRegion.SIZE)) - lodDim.getCenterX();
+		int zOffset = ((int)playerZ / (LodChunk.WIDTH * LodRegion.SIZE)) - lodDim.getCenterZ();
 		
 		if (xOffset != 0 || zOffset != 0)
 		{
-			regions.move(xOffset, zOffset);
+			lodDim.move(xOffset, zOffset);
 		}
 		
 		
@@ -147,27 +147,27 @@ public class ClientProxy extends CommonProxy
 			Thread thread = new Thread(() ->
 			{
 				LodChunk lod = new LodChunk(chunk, mc.world);
-				LodDimensionalStorage regions;
+				LodDimension lodDim;
 				
-				if (lodStorage == null)
-					lodStorage = new LodStorage();
+				if (lodWorld == null)
+					lodWorld = new LodWorld();
 				
-				if (lodStorage.getLodDimensionalStorage(dimId) == null)
+				if (lodWorld.getLodDimension(dimId) == null)
 				{
 					DimensionType dim = DimensionType.getById(chunk.getWorld().provider.getDimension());
-					regions = new LodDimensionalStorage(dim, regionWidth);
-					lodStorage.addLodDimensionalStorage(regions);
+					lodDim = new LodDimension(dim, regionWidth);
+					lodWorld.addLodDimension(lodDim);
 				}
 				else
 				{
-					regions = lodStorage.getLodDimensionalStorage(dimId);
+					lodDim = lodWorld.getLodDimension(dimId);
 				}
 				
-				regions.addLod(lod);
+				lodDim.addLod(lod);
 				
 				if (renderer != null)
 				{
-					renderer.regions = regions;
+					renderer.regions = lodDim;
 				}
 			});
 			
