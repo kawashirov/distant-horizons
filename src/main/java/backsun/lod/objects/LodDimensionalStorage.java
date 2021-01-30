@@ -5,13 +5,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.DimensionType;
 
 /**
- * This object holds the regions
- * currently needed by the LodRenderer.
+ * This object holds the LOD regions
+ * of a given dimension.
  * 
  * @author James Seibel
- * @version 1-27-2021
+ * @version 01-30-2021
  */
-public class LoadedRegions
+public class LodDimensionalStorage
 {
 	public final DimensionType dimension;
 	
@@ -26,7 +26,7 @@ public class LoadedRegions
 	
 	private LodRegionFileHandler rfHandler;
 	
-	public LoadedRegions(DimensionType newDimension, int newMaxWidth)
+	public LodDimensionalStorage(DimensionType newDimension, int newMaxWidth)
 	{
 		dimension = newDimension;
 		width = newMaxWidth;

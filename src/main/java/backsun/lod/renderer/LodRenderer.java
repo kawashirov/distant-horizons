@@ -5,7 +5,7 @@ import java.awt.Color;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Project;
 
-import backsun.lod.objects.LoadedRegions;
+import backsun.lod.objects.LodDimensionalStorage;
 import backsun.lod.objects.LodChunk;
 import backsun.lod.util.OfConfig;
 import backsun.lod.util.enums.ColorDirection;
@@ -42,7 +42,7 @@ public class LodRenderer
 	
 	private OfConfig ofConfig;
 	
-	public LoadedRegions regions = null;
+	public LodDimensionalStorage regions = null;
 	
 	
 	

@@ -3,9 +3,10 @@ package backsun.lod.proxy;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import backsun.lod.objects.LoadedRegions;
 import backsun.lod.objects.LodChunk;
+import backsun.lod.objects.LodDimensionalStorage;
 import backsun.lod.objects.LodRegion;
+import backsun.lod.objects.LodStorage;
 import backsun.lod.renderer.LodRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -26,7 +27,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 public class ClientProxy extends CommonProxy
 {
 	private LodRenderer renderer;
-	private LoadedRegions regions;
+	private LodStorage lodStorage;
 	private ExecutorService lodGenThreadPool = Executors.newFixedThreadPool(1);
 	
 	// TODO make this change dynamically based on the render distance
@@ -47,12 +48,17 @@ public class ClientProxy extends CommonProxy
 	@SubscribeEvent
 	public void renderWorldLastEvent(RenderWorldLastEvent event)
 	{
-		// We can't render anything if the loaded regions is null
-		if (regions == null)
+		// We can't render anything if the lodStorage is null
+		if (lodStorage == null)
 			return;
 		
-		double playerX = Minecraft.getMinecraft().player.posX;
-		double playerZ = Minecraft.getMinecraft().player.posZ;
+		Minecraft mc = Minecraft.getMinecraft();
+		int dimId = mc.player.dimension;
+		LodDimensionalStorage regions = lodStorage.getLodDimensionalStorage(dimId);
+		
+		
+		double playerX = mc.player.posX;
+		double playerZ = mc.player.posZ;
 		
 		int xOffset = ((int)playerX / (LodChunk.WIDTH * LodRegion.SIZE)) - regions.getCenterX();
 		int zOffset = ((int)playerZ / (LodChunk.WIDTH * LodRegion.SIZE)) - regions.getCenterZ();
@@ -127,22 +133,34 @@ public class ClientProxy extends CommonProxy
 	
 	private void generateLodChunk(Chunk chunk)
 	{
+		Minecraft mc = Minecraft.getMinecraft();
+		
 		// don't try to create an LOD object
 		// if for some reason we aren't
 		// given a valid chunk object
 		// (Minecraft often gives back empty
 		// or null chunks in this method)
-		Minecraft mc = Minecraft.getMinecraft();
 		if (mc != null && mc.world != null && chunk != null && isValidChunk(chunk))
 		{
+			int dimId = mc.player.dimension;
+			
 			Thread thread = new Thread(() ->
-			{ 
+			{
 				LodChunk lod = new LodChunk(chunk, mc.world);
+				LodDimensionalStorage regions;
 				
-				if (regions == null)
+				if (lodStorage == null)
+					lodStorage = new LodStorage();
+				
+				if (lodStorage.getLodDimensionalStorage(dimId) == null)
 				{
 					DimensionType dim = DimensionType.getById(chunk.getWorld().provider.getDimension());
-					regions = new LoadedRegions(dim, regionWidth);
+					regions = new LodDimensionalStorage(dim, regionWidth);
+					lodStorage.addLodDimensionalStorage(regions);
+				}
+				else
+				{
+					regions = lodStorage.getLodDimensionalStorage(dimId);
 				}
 				
 				regions.addLod(lod);
@@ -177,11 +195,4 @@ public class ClientProxy extends CommonProxy
 	}
 	
 	
-	private double distanceToPlayer(int x, int y, int z, double cameraX, double cameraY, double cameraZ)
-	{
-		if(cameraY == y)
-			return Math.sqrt(Math.pow((x - cameraX),2) + Math.pow((z - cameraZ),2));
-					
-		return Math.sqrt(Math.pow((x - cameraX),2) + Math.pow((y - cameraY),2) + Math.pow((z - cameraZ),2));
-	}
 }
