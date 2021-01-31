@@ -162,7 +162,7 @@ public class LodDimension
 	public LodRegion getRegion(int regionX, int regionZ)
 	{
 		int xIndex = (regionX - centerX) + halfWidth;
-		int zIndex = (centerZ - regionZ) + halfWidth;
+		int zIndex = (regionZ - centerZ) + halfWidth;
 		
 		if (!regionIsInRange(regionX, regionZ))
 			// out of range
@@ -182,15 +182,16 @@ public class LodDimension
 	
 	/**
 	 * Overwrite the LodRegion at the location of newRegion with newRegion.
+	 * @throws ArrayIndexOutOfBoundsException if newRegion is outside what can be stored in this LodDimension.
 	 */
-	public void setRegion(LodRegion newRegion)
+	public void setRegion(LodRegion newRegion) throws ArrayIndexOutOfBoundsException
 	{
 		int xIndex = (newRegion.x - centerX) + halfWidth;
 		int zIndex = (centerZ - newRegion.z) + halfWidth;
 		
 		if (!regionIsInRange(newRegion.x, newRegion.z))
 			// out of range
-			return;
+			throw new ArrayIndexOutOfBoundsException();
 		
 		regions[xIndex][zIndex] = newRegion;
 	}
@@ -205,9 +206,6 @@ public class LodDimension
 		int regionX = (lod.x + centerX) / LodRegion.SIZE;
 		int regionZ = (lod.z + centerZ) / LodRegion.SIZE;
 		
-		if (!regionIsInRange(regionX, regionZ))
-			return;
-		
 		// prevent issues if X/Z is negative and less than 16
 		if (lod.x < 0)
 		{
@@ -217,6 +215,10 @@ public class LodDimension
 		{
 			regionZ = (Math.abs(regionZ) * -1) - 1; 
 		}
+		
+		// don't continue if the region can't be saved
+		if (!regionIsInRange(regionX, regionZ))
+			return;
 		
 		LodRegion region = getRegion(regionX, regionZ);
 		
@@ -231,7 +233,7 @@ public class LodDimension
 		
 		// mark the region as dirty so it will be saved to disk
 		int xIndex = (regionX - centerX) + halfWidth;
-		int zIndex = (centerZ - regionZ) + halfWidth;
+		int zIndex = (regionZ - centerZ) + halfWidth;
 		isRegionDirty[xIndex][zIndex] = true;
 		
 		
@@ -282,7 +284,7 @@ public class LodDimension
 	private boolean regionIsInRange(int regionX, int regionZ)
 	{
 		int xIndex = (regionX - centerX) + halfWidth;
-		int zIndex = (centerZ - regionZ) + halfWidth;
+		int zIndex = (regionZ - centerZ) + halfWidth;
 		
 		return xIndex >= 0 && xIndex < width && zIndex >= 0 && zIndex < width;
 	}
