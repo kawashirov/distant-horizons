@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.chunk.Chunk;
 
 /**
  * @author James Seibel
@@ -210,11 +211,20 @@ public class LodRenderer
 				int width = mc.gameSettings.renderDistanceChunks;
 				if ((i > middle - width && i < middle + width) && (j > middle - width && j < middle + width))
 				{
-					// add the color to the array
-					colorArray[i + (j * numbOfBoxesWide)] = null;
-					
-					// add the new box to the array
-					lodArray[i + (j * numbOfBoxesWide)] = null;
+					// if we are within the range that chunks could
+					// be loaded, make sure not to render
+					// LODs on top of regular chunks
+					Chunk chunk = Minecraft.getMinecraft().world.getChunkFromChunkCoords(chunkX, chunkZ);
+					if (chunk == null || !chunk.isLoaded())
+					{
+						colorArray[i + (j * numbOfBoxesWide)] = c;
+						lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, lod.bottom[LodLocation.NE.value], 0, LOD_WIDTH, lod.top[LodLocation.NE.value], LOD_WIDTH).offset(xOffset, yOffset, zOffset);
+					}
+					else
+					{
+						colorArray[i + (j * numbOfBoxesWide)] = null;
+						lodArray[i + (j * numbOfBoxesWide)] = null;
+					}
 				}
 				else
 				{
@@ -326,7 +336,7 @@ public class LodRenderer
 			// might need to be changed to prevent z-fighting
 			// when zoomed in
 			//																													0.05f
-			Project.gluPerspective(ofConfig.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.02f, farPlaneDistance * VIEW_DISTANCE_MULTIPLIER);
+			Project.gluPerspective(ofConfig.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.05f, farPlaneDistance * VIEW_DISTANCE_MULTIPLIER);
 			return true;
 		}
 		
@@ -362,56 +372,57 @@ public class LodRenderer
 				green = colorArray[colorIndex].getGreen();
 				blue = colorArray[colorIndex].getBlue();
 				alpha = colorArray[colorIndex].getAlpha();
+				double offset = 0.01;
 				
 				// only draw all 6 sides if there is some thickness to the box
 				if (bb.minY != bb.maxY)
 				{
 					// top (facing up)
-					bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
 					// bottom (facing down)
-					bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
 					
 					// south (facing -Z) 
-					bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
 					// north (facing +Z)
-					bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
 					
 					// west (facing -X)
-					bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
 					// east (facing +X)
-					bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
 				}
 				else
 				{
 					// bottom (facing up)
-					bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
 					
 					// top (facing up)
-//					bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-//					bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-//					bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-//					bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+//					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+//					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+//					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+//					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
 				}
 			}
 			// so we can get the next color

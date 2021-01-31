@@ -14,7 +14,7 @@ import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -47,7 +47,7 @@ public class ClientProxy extends CommonProxy
 	//==============//
 	
 	@SubscribeEvent
-	public void renderWorldLastEvent(RenderWorldLastEvent event)
+	public void onRenderTick(EntityViewRenderEvent.FogDensity event)
 	{
 		Minecraft mc = Minecraft.getMinecraft();
 		int dimId = mc.player.dimension;
@@ -80,7 +80,7 @@ public class ClientProxy extends CommonProxy
 		}
 		else
 		{
-			renderer.drawLODs(Minecraft.getMinecraft(), event.getPartialTicks());
+			renderer.drawLODs(Minecraft.getMinecraft(), (float)event.getRenderPartialTicks());
 		}
 	}	
 	
