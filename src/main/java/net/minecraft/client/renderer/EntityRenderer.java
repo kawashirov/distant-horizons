@@ -733,7 +733,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
 		float fov = mc.entityRenderer.getFOVModifier(partialTicks, true);
 		//		System.out.println("ER: " + fov + "\t\t pt: " + partialTicks);
 		
-		Project.gluPerspective(fov, (float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F, this.farPlaneDistance * 4.0f);// * MathHelper.SQRT_2);
+		Project.gluPerspective(fov, (float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F, this.farPlaneDistance * MathHelper.SQRT_2);
         GlStateManager.matrixMode(5888);
         GlStateManager.loadIdentity();
 
