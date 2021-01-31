@@ -26,7 +26,7 @@ import net.minecraft.util.math.AxisAlignedBB;
  */
 public class LodRenderer
 {
-	public boolean debugging = true;
+	public boolean debugging = false;
 	
 	private Minecraft mc;
 	private float farPlaneDistance;
@@ -314,7 +314,13 @@ public class LodRenderer
 		// only continue if we can get the FOV
 		if (ofConfig.fovMethod != null)
 		{
-			Project.gluPerspective(ofConfig.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.05f, farPlaneDistance * VIEW_DISTANCE_MULTIPLIER);
+			// TODO
+			// 0.05f is the clipping plane originally used, 
+			// this or the VIEW_DISTANCE_MULTIPLIER 
+			// might need to be changed to prevent z-fighting
+			// when zoomed in
+			//																													0.05f
+			Project.gluPerspective(ofConfig.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.02f, farPlaneDistance * VIEW_DISTANCE_MULTIPLIER);
 			return true;
 		}
 		
@@ -394,6 +400,12 @@ public class LodRenderer
 					bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
 					bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
 					bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					
+					// top (facing up)
+//					bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+//					bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+//					bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+//					bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
 				}
 			}
 			// so we can get the next color

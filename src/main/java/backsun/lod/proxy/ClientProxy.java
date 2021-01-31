@@ -189,6 +189,7 @@ public class ClientProxy extends CommonProxy
 				{
 					renderer.regions = lodDim;
 				}
+				
 			});
 			
 			lodGenThreadPool.execute(thread);
