@@ -200,9 +200,6 @@ public class LodRenderer
 					colorArray[i + (j * numbOfBoxesWide)] = c;
 				}
 				
-				// TODO increase the size of the middle when the user is high up
-				// this is to prevent the LODs from overlapping with the terrain
-				
 				// skip the middle
 				// (As the player moves some chunks will overlap or be missing,
 				// this is just how chunk loading/unloading works. This can hopefully
@@ -258,9 +255,6 @@ public class LodRenderer
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_BLEND);
 		
-		// TODO when the user is high up increase the distance the fog starts and ends;
-		// this is used in conjunction with the increased middle skip area
-		// to prevent the LODs from overlapping the normal terrain
 		setupFog(FogDistanceMode.NEAR, ofConfig.getFogType());
 		
 		
@@ -299,8 +293,6 @@ public class LodRenderer
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		
-		// TODO re-set the modelview matrix
-		
 		// This is about how long this whole process should take
 		// 16 ms = 60 hz
 		@SuppressWarnings("unused")
@@ -330,12 +322,6 @@ public class LodRenderer
 		// only continue if we can get the FOV
 		if (ofConfig.fovMethod != null)
 		{
-			// TODO
-			// 0.05f is the clipping plane originally used, 
-			// this or the VIEW_DISTANCE_MULTIPLIER 
-			// might need to be changed to prevent z-fighting
-			// when zoomed in
-			//																													0.05f
 			Project.gluPerspective(ofConfig.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.05f, farPlaneDistance * VIEW_DISTANCE_MULTIPLIER);
 			return true;
 		}
