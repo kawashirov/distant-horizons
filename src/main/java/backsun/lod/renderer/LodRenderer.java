@@ -5,8 +5,8 @@ import java.awt.Color;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Project;
 
-import backsun.lod.objects.LodDimension;
 import backsun.lod.objects.LodChunk;
+import backsun.lod.objects.LodDimension;
 import backsun.lod.util.OfConfig;
 import backsun.lod.util.enums.ColorDirection;
 import backsun.lod.util.enums.LodLocation;
@@ -83,6 +83,21 @@ public class LodRenderer
 		mc.world.profiler.startSection("LOD setup");
 		@SuppressWarnings("unused")
 		long startTime = System.nanoTime();
+		
+		
+		// set the new model view matrix
+		if(setProjectionMatrix(partialTicks))
+		{
+			// we were able to set up the matrix correctly,
+			// continue like normal
+		}
+		else
+		{
+			// we weren't able to create the projection matrix
+			// we can't draw LODs
+			return;
+		}
+		
 		
 		// color setup
 		int alpha = 255; // 0 - 255
@@ -221,9 +236,6 @@ public class LodRenderer
 		// GL settings for rendering //
 		//===========================//
 		
-		// set the new model view matrix
-		setProjectionMatrix(partialTicks);
-		
 		// set the required open GL settings
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		GL11.glLineWidth(2.0f);
@@ -289,8 +301,9 @@ public class LodRenderer
 	/**
 	 * create a new projection matrix and send it over to the GPU
 	 * @param partialTicks how many ticks into the frame we are
+	 * @return true if the matrix was successfully created and sent to the GPU, false otherwise
 	 */
-	private void setProjectionMatrix(float partialTicks)
+	private boolean setProjectionMatrix(float partialTicks)
 	{
 		// create a new view frustum so that the squares can be drawn outside the normal view distance
 		GlStateManager.matrixMode(GL11.GL_PROJECTION);
@@ -302,7 +315,11 @@ public class LodRenderer
 		if (ofConfig.fovMethod != null)
 		{
 			Project.gluPerspective(ofConfig.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.05f, farPlaneDistance * VIEW_DISTANCE_MULTIPLIER);
+			return true;
 		}
+		
+		// we weren't able to set up the projection matrix
+		return false;
 	}
 	
 	
