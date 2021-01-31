@@ -1,6 +1,6 @@
 package backsun.lod.objects;
 
-import backsun.lod.util.LodRegionFileHandler;
+import backsun.lod.util.LodFileHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.DimensionType;
 
@@ -24,7 +24,7 @@ public class LodDimension
 	private int centerX;
 	private int centerZ;
 	
-	private LodRegionFileHandler rfHandler;
+	private LodFileHandler rfHandler;
 	
 	public LodDimension(DimensionType newDimension, int newMaxWidth)
 	{
@@ -32,7 +32,7 @@ public class LodDimension
 		width = newMaxWidth;
 		
 		// TODO what can be done if connected to a server?
-		rfHandler = new LodRegionFileHandler(Minecraft.getMinecraft().getIntegratedServer().getWorld(0).getSaveHandler(), this);
+		rfHandler = new LodFileHandler(Minecraft.getMinecraft().getIntegratedServer().getWorld(0).getSaveHandler(), this);
 		
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];

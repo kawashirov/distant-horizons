@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import backsun.lod.objects.LodDimension;
 import backsun.lod.objects.LodChunk;
+import backsun.lod.objects.LodDimension;
 import backsun.lod.objects.LodRegion;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.storage.ISaveHandler;
@@ -22,7 +22,7 @@ import net.minecraft.world.storage.ISaveHandler;
  * @author James Seibel
  * @version 01-30-2021
  */
-public class LodRegionFileHandler
+public class LodFileHandler
 {
 	private LodDimension loadedRegion = null;
 	public long regionLastWriteTime[][];
@@ -39,14 +39,9 @@ public class LodRegionFileHandler
 	private boolean waitingToSaveRegions = false;
 	
 	
-	public LodRegionFileHandler(ISaveHandler newSaveHandler, LodDimension newLoadedRegion)
+	public LodFileHandler(ISaveHandler newSaveHandler, LodDimension newLoadedRegion)
 	{
 		saveHandler = newSaveHandler;
-		
-		if (saveHandler == null)
-		{
-			throw new NullPointerException("LodRegionFileHandler requires a world SaveHandler.");
-		}
 		
 		loadedRegion = newLoadedRegion;
 		// these two variable are used in sync with the LodDimension
@@ -55,18 +50,17 @@ public class LodRegionFileHandler
 			for(int j = 0; j < loadedRegion.getWidth(); j++)
 				regionLastWriteTime[i][j] = -1;
 		
-		
 		if (saveHandler != null && saveHandler.getWorldDirectory() != null)
-			try {
-				save_dir = saveHandler.getWorldDirectory().getCanonicalPath();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			save_dir = getWorldSaveDirectory();
 	}
 	
 	
 	
+	
+	
+	//================//
+	// read from file //
+	//================//
 	
 	
 	
@@ -76,6 +70,11 @@ public class LodRegionFileHandler
 	 */
 	public LodRegion loadRegionFromFile(int regionX, int regionZ)
 	{
+		// we don't currently support reading or writing
+		// files when connected to a server
+		if (!Minecraft.getMinecraft().isIntegratedServerRunning())
+			return null;
+		
 		if (!readyToReadAndWrite())
 			return null;
 		
@@ -131,8 +130,24 @@ public class LodRegionFileHandler
 	}
 	
 	
+	
+	
+	
+	
+	
+	
+	//==============//
+	// Save to File //
+	//==============//
+	
+	
 	public synchronized void saveDirtyRegionsToFile()
 	{
+		// we don't currently support reading or writing
+		// files when connected to a server
+		if (!Minecraft.getMinecraft().isIntegratedServerRunning())
+			return;
+		
 		if (!readyToReadAndWrite())
 		{	
 			// we aren't ready to read and write yet
@@ -151,17 +166,16 @@ public class LodRegionFileHandler
 						// start reading and writing files
 						while(!readyToReadAndWrite())
 						{
-							// TODO what can be done if connected to a server?
-							saveHandler = Minecraft.getMinecraft().getIntegratedServer().getWorld(0).getSaveHandler();
 							this.wait(1000);
+							// get the save handler again, if for some
+							// reason the original handler was null
+							saveHandler = Minecraft.getMinecraft().getIntegratedServer().getWorld(0).getSaveHandler();
+							save_dir = getWorldSaveDirectory();
 						}
 						
 						// we can start writing files now
-						if (waitingToSaveRegions)
-						{
-							fileWritingThreadPool.execute(saveDirtyRegionsAsync);
-							waitingToSaveRegions = false;
-						}
+						fileWritingThreadPool.execute(saveDirtyRegionsThread);
+						waitingToSaveRegions = false;
 					}
 					catch (InterruptedException e) 
 					{ /* should never be called */}
@@ -173,55 +187,9 @@ public class LodRegionFileHandler
 			return;
 		}
 		
-		fileWritingThreadPool.execute(saveDirtyRegionsAsync);
+		fileWritingThreadPool.execute(saveDirtyRegionsThread);
 	}
-	
-	public void saveRegionToDisk(LodRegion region)
-	{
-		// convert chunk coordinates to region
-		// coordinates
-		int x = region.x;
-		int z = region.z;
-		
-		File f = new File(getFileNameForRegion(x, z));
-		
-		try
-		{
-			if (!f.exists())
-			{
-				// make the LOD folder if it doesn't exist
-				if(!f.getParentFile().exists())
-				{
-					f.getParentFile().mkdirs();
-				}
-				
-				f.createNewFile();
-			}
-			
-			FileWriter fw = new FileWriter(f);
-			
-			for(LodChunk[] chunkArray : region.getAllLods())
-			{
-				for(LodChunk chunk : chunkArray)
-				{
-					if(chunk != null)
-					{
-						fw.write(chunk.toData() + "\n");
-					}
-				}
-			}
-			
-			fw.close();
-		}
-		catch(Exception e)
-		{
-			System.err.println("LOD ERROR: " + e.getMessage());
-			//e.printStackTrace();
-		}
-	}
-	
-	
-	private Thread saveDirtyRegionsAsync = new Thread(() -> 
+	private Thread saveDirtyRegionsThread = new Thread(() -> 
 	{
 		for(int i = 0; i < loadedRegion.getWidth(); i++)
 		{
@@ -238,7 +206,52 @@ public class LodRegionFileHandler
 		waitingToSaveRegions = false;
 	});
  	
+	
+	private void saveRegionToDisk(LodRegion region)
+	{
+		if (!readyToReadAndWrite())
+			return;
+		
+		// convert chunk coordinates to region
+		// coordinates
+		int x = region.x;
+		int z = region.z;
+		
+		File f = new File(getFileNameForRegion(x, z));
+		
+		try
+		{
+			// make sure the file and folder exists
+			if (!f.exists())
+				if(!f.getParentFile().exists())
+					f.getParentFile().mkdirs();
+				f.createNewFile();
+			
+			FileWriter fw = new FileWriter(f);
+			
+			for(LodChunk[] chunkArray : region.getAllLods())
+				for(LodChunk chunk : chunkArray)
+					if(chunk != null)
+						fw.write(chunk.toData() + "\n");
+			
+			fw.close();
+		}
+		catch(Exception e)
+		{
+			System.err.println("LOD file write error: " + e.getMessage());
+		}
+	}
+	
+	
  	
+	
+	
+	
+	
+	//================//
+	// helper methods //
+	//================//
+	
 	
 	/**
 	 * Return the name of the file that should contain the 
@@ -267,30 +280,42 @@ public class LodRegionFileHandler
 				save_dir != null && !save_dir.isEmpty();
 	}
 	
-//	/**
-//	 * Used to wake up the fileWritingThreadPool once
-//	 * we are able to read and write files.
-//	 */
-//	private Thread retryReady = new Thread(() -> 
-//	{
-//		try
-//		{
-//			// check once every so often so see
-//			// if anything has changed so we can
-//			// start reading and writing files
-//			while(!readyToReadAndWrite())
-//			{
-//				this.wait(1000);
-//			}
-//			
-//			// we can start writing files now
-//			if (waitingToSaveRegions)
-//			{
-//				fileWritingThreadPool.execute(saveDirtyRegionsAsync);
-//				waitingToSaveRegions = false;
-//			}
-//		}
-//		catch (InterruptedException e) 
-//		{ /* should never be called */}
-//	});
+	
+	
+	
+	/**
+	 * If on single player this will return the name of the user's
+	 * world, if in multiplayer it will return the server name
+	 * and game version.
+	 */
+	public static String getWorldName()
+	{
+		Minecraft mc = Minecraft.getMinecraft();
+		
+		if(mc.isIntegratedServerRunning())
+		{
+			return mc.getIntegratedServer().getWorldName();
+		}
+		else
+		{
+			return mc.getCurrentServerData().serverName + "_version_" + mc.getCurrentServerData().gameVersion;
+		}
+	}
+	
+	
+	
+	/**
+	 * Returns null if there was an IO Exception
+	 */
+	private String getWorldSaveDirectory()
+	{
+		try
+		{
+			return saveHandler.getWorldDirectory().getCanonicalPath();
+		}
+		catch (IOException e) 
+		{
+			return null;
+		}
+	}
 }

@@ -11,16 +11,17 @@ import java.util.Hashtable;
  */
 public class LodWorld
 {
+	public String worldName;
+	
 	/**
 	 * Key = Dimension id (as an int)
 	 */
 	private Dictionary<Integer, LodDimension> LodDimensions;
 	
-	public String worldName;
 	
-	
-	public LodWorld()
+	public LodWorld(String newWorldName)
 	{
+		worldName = newWorldName;
 		LodDimensions = new Hashtable<Integer, LodDimension>();
 	}
 	

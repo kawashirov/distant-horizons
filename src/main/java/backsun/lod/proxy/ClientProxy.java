@@ -8,6 +8,7 @@ import backsun.lod.objects.LodDimension;
 import backsun.lod.objects.LodRegion;
 import backsun.lod.objects.LodWorld;
 import backsun.lod.renderer.LodRenderer;
+import backsun.lod.util.LodFileHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.world.DimensionType;
@@ -22,7 +23,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
  * This is used by the client.
  * 
  * @author James_Seibel
- * @version 1-20-2021
+ * @version 01-30-2021
  */
 public class ClientProxy extends CommonProxy
 {
@@ -48,13 +49,13 @@ public class ClientProxy extends CommonProxy
 	@SubscribeEvent
 	public void renderWorldLastEvent(RenderWorldLastEvent event)
 	{
-		// We can't render anything if the lodWorld is null
-		if (lodWorld == null)
-			return;
-		
 		Minecraft mc = Minecraft.getMinecraft();
 		int dimId = mc.player.dimension;
 		LodDimension lodDim = lodWorld.getLodDimension(dimId);
+		
+		// We can't render anything if the lodWorld or lodDim is null
+		if (lodWorld == null || lodDim == null)
+			return;
 		
 		
 		double playerX = mc.player.posX;
@@ -135,6 +136,7 @@ public class ClientProxy extends CommonProxy
 	{
 		Minecraft mc = Minecraft.getMinecraft();
 		
+		
 		// don't try to create an LOD object
 		// if for some reason we aren't
 		// given a valid chunk object
@@ -150,7 +152,25 @@ public class ClientProxy extends CommonProxy
 				LodDimension lodDim;
 				
 				if (lodWorld == null)
-					lodWorld = new LodWorld();
+				{
+					lodWorld = new LodWorld(LodFileHandler.getWorldName());
+				}
+				else
+				{
+					// if we have a lodWorld make sure 
+					// it is for this minecraft world
+					if (!lodWorld.worldName.equals(LodFileHandler.getWorldName()))
+					{
+						// this lodWorld isn't for this minecraft world
+						// delete it so we can get a new one
+						lodWorld = null;
+						
+						// skip this frame
+						// we'll get this set up next time
+						return;
+					}
+				}
+				
 				
 				if (lodWorld.getLodDimension(dimId) == null)
 				{
