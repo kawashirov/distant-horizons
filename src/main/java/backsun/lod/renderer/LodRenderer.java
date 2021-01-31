@@ -151,6 +151,7 @@ public class LodRenderer
 		
 		mc.world.profiler.endStartSection("LOD generation");
 		
+		// TODO multithread this
 		
 		// x axis
 		for (int i = 0; i < numbOfBoxesWide; i++)
@@ -198,6 +199,8 @@ public class LodRenderer
 					colorArray[i + (j * numbOfBoxesWide)] = c;
 				}
 				
+				// TODO increase the size of the middle when the user is high up
+				// this is to prevent the LODs from overlapping with the terrain
 				
 				// skip the middle
 				// (As the player moves some chunks will overlap or be missing,
@@ -245,6 +248,9 @@ public class LodRenderer
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_BLEND);
 		
+		// TODO when the user is high up increase the distance the fog starts and ends;
+		// this is used in conjunction with the increased middle skip area
+		// to prevent the LODs from overlapping the normal terrain
 		setupFog(FogDistanceMode.NEAR, ofConfig.getFogType());
 		
 		
