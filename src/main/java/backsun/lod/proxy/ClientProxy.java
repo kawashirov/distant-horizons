@@ -64,16 +64,16 @@ public class ClientProxy extends CommonProxy
 			return;
 		frameRendered = true;
 		
-//		int newWidth = Math.max(3, (Minecraft.getMinecraft().gameSettings.renderDistanceChunks * LodRenderer.VIEW_DISTANCE_MULTIPLIER) / LodRegion.SIZE);
-//		if (lodWorld != null && regionWidth != newWidth)
-//		{
-//			lodWorld.resizeDimensionRegionWidth(newWidth);
-//			regionWidth = newWidth;
-//			
-//			// skip this frame, hopefully the lodWorld
-//			// should have everything set up by then
-//			return;
-//		}
+		int newWidth = Math.max(3, (Minecraft.getMinecraft().gameSettings.renderDistanceChunks * LodRenderer.VIEW_DISTANCE_MULTIPLIER) / LodRegion.SIZE);
+		if (lodWorld != null && regionWidth != newWidth)
+		{
+			lodWorld.resizeDimensionRegionWidth(newWidth);
+			regionWidth = newWidth;
+			
+			// skip this frame, hopefully the lodWorld
+			// should have everything set up by then
+			return;
+		}
 		
 		Minecraft mc = Minecraft.getMinecraft();
 		int dimId = mc.player.dimension;
