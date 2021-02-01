@@ -14,7 +14,6 @@ import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.world.ChunkEvent;
@@ -46,24 +45,9 @@ public class ClientProxy extends CommonProxy
 	// render event //
 	//==============//
 	
-	/** prevent LODs from being rendered multiple times */
-	private boolean frameRendered = false;
-	
 	@SubscribeEvent
-	public void onRenderTick(RenderWorldLastEvent event)
+	public void renderLods(RenderWorldLastEvent event)
 	{
-		frameRendered = false;
-	}
-	
-	@SubscribeEvent
-	public void onRenderTick(EntityViewRenderEvent.FogDensity event)
-	{
-		// this event is called 5 times every frame
-		// but we only need to render the LODs once
-		if (frameRendered)
-			return;
-		frameRendered = true;
-		
 		int newWidth = Math.max(3, (Minecraft.getMinecraft().gameSettings.renderDistanceChunks * LodRenderer.VIEW_DISTANCE_MULTIPLIER) / LodRegion.SIZE);
 		if (lodWorld != null && regionWidth != newWidth)
 		{
@@ -106,7 +90,7 @@ public class ClientProxy extends CommonProxy
 		}
 		else
 		{
-			renderer.drawLODs(Minecraft.getMinecraft(), (float)event.getRenderPartialTicks());
+			renderer.drawLODs(Minecraft.getMinecraft(), event.getPartialTicks());
 		}
 	}	
 	
