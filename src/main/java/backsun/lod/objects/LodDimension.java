@@ -9,14 +9,14 @@ import net.minecraft.world.DimensionType;
  * for a given dimension.
  * 
  * @author James Seibel
- * @version 01-30-2021
+ * @version 01-31-2021
  */
 public class LodDimension
 {
 	public final DimensionType dimension;
 	
-	private int width; // if this ever changes make sure to update the halfWidth too
-	private int halfWidth;
+	private volatile int width; // if this ever changes make sure to update the halfWidth too
+	private volatile int halfWidth;
 	
 	public LodRegion regions[][];
 	public boolean isRegionDirty[][];
@@ -294,6 +294,20 @@ public class LodDimension
 	public int getWidth()
 	{
 		return width;
+	}
+	
+	public void setRegionWidth(int newWidth)
+	{
+		width = newWidth;
+		halfWidth = (int)Math.floor(width / 2);
+		
+		regions = new LodRegion[width][width];
+		isRegionDirty = new boolean[width][width];
+		
+		// populate isRegionDirty
+		for(int i = 0; i < width; i++)
+			for(int j = 0; j < width; j++)
+				isRegionDirty[i][j] = false;
 	}
 }
 

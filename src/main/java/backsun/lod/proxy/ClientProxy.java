@@ -15,6 +15,7 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
@@ -23,7 +24,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
  * This is used by the client.
  * 
  * @author James_Seibel
- * @version 01-30-2021
+ * @version 01-31-2021
  */
 public class ClientProxy extends CommonProxy
 {
@@ -31,7 +32,6 @@ public class ClientProxy extends CommonProxy
 	private LodWorld lodWorld;
 	private ExecutorService lodGenThreadPool = Executors.newFixedThreadPool(1);
 	
-	// TODO make this change dynamically based on the render distance
 	private int regionWidth = 5;
 	
 	public ClientProxy()
@@ -46,9 +46,35 @@ public class ClientProxy extends CommonProxy
 	// render event //
 	//==============//
 	
+	/** prevent LODs from being rendered multiple times */
+	private boolean frameRendered = false;
+	
+	@SubscribeEvent
+	public void onRenderTick(RenderWorldLastEvent event)
+	{
+		frameRendered = false;
+	}
+	
 	@SubscribeEvent
 	public void onRenderTick(EntityViewRenderEvent.FogDensity event)
 	{
+		// this event is called 5 times every frame
+		// but we only need to render the LODs once
+		if (frameRendered)
+			return;
+		frameRendered = true;
+		
+//		int newWidth = Math.max(3, (Minecraft.getMinecraft().gameSettings.renderDistanceChunks * LodRenderer.VIEW_DISTANCE_MULTIPLIER) / LodRegion.SIZE);
+//		if (lodWorld != null && regionWidth != newWidth)
+//		{
+//			lodWorld.resizeDimensionRegionWidth(newWidth);
+//			regionWidth = newWidth;
+//			
+//			// skip this frame, hopefully the lodWorld
+//			// should have everything set up by then
+//			return;
+//		}
+		
 		Minecraft mc = Minecraft.getMinecraft();
 		int dimId = mc.player.dimension;
 		LodDimension lodDim = lodWorld.getLodDimension(dimId);

@@ -81,7 +81,9 @@ public class LodRenderer
 		
 		
 		// used for debugging and viewing how long different processes take
-		mc.world.profiler.startSection("LOD setup");
+		mc.mcProfiler.endSection();
+		mc.mcProfiler.startSection("LOD");
+		mc.mcProfiler.startSection("LOD setup");
 		@SuppressWarnings("unused")
 		long startTime = System.nanoTime();
 		
@@ -150,7 +152,7 @@ public class LodRenderer
 		// create the LODs //
 		//=================//
 		
-		mc.world.profiler.endStartSection("LOD generation");
+		mc.mcProfiler.endStartSection("LOD generation");
 		
 		// TODO multithread this
 		
@@ -263,7 +265,7 @@ public class LodRenderer
 		// rendering //
 		//===========//
 		
-		mc.world.profiler.endStartSection("LOD build buffer");
+		mc.mcProfiler.endStartSection("LOD build buffer");
 		// send the LODs over to the GPU
 		sendToGPUAndDraw(lodArray, colorArray, cameraX, cameraY ,cameraZ);
 		
@@ -278,7 +280,7 @@ public class LodRenderer
 		// cleanup //
 		//=========//
 		
-		mc.world.profiler.endStartSection("LOD cleanup");
+		mc.mcProfiler.endStartSection("LOD cleanup");
 		
 		
 		// this must be done otherwise other parts of the screen may be drawn with a fog effect
@@ -299,7 +301,7 @@ public class LodRenderer
 		long endTime = System.nanoTime();
 		
 		// end of profiler tracking
-		mc.world.profiler.endSection();
+		mc.mcProfiler.endSection();
 	}
 	
 	
@@ -415,7 +417,7 @@ public class LodRenderer
 			colorIndex++;			
 		}
 		
-		mc.world.profiler.endStartSection("LOD draw");
+		mc.mcProfiler.endStartSection("LOD draw");
 		
 		// draw the LODs
 		tessellator.draw();
