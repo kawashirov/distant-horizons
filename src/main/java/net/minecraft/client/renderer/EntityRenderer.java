@@ -1332,7 +1332,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
      * @param finishTimeNano
      */
     private void renderWorldPass(int pass, float partialTicks, long finishTimeNano)
-    {
+    {    	
         RenderGlobal renderglobal = this.mc.renderGlobal;
         ParticleManager particlemanager = this.mc.effectRenderer;
         boolean flag = this.isDrawBlockOutline();
@@ -1365,7 +1365,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
             renderglobal.renderSky(partialTicks, pass);
             GlStateManager.matrixMode(GL11.GL_PROJECTION);
             GlStateManager.loadIdentity();
-			Project.gluPerspective(this.getFOVModifier(partialTicks, true), (float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F, this.farPlaneDistance * 4.0f);// * MathHelper.SQRT_2);
+			Project.gluPerspective(this.getFOVModifier(partialTicks, true), (float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F, this.farPlaneDistance * MathHelper.SQRT_2);
             GlStateManager.matrixMode(GL11.GL_MODELVIEW);
         }
 
@@ -1528,7 +1528,7 @@ public class EntityRenderer implements IResourceManagerReloadListener
             GlStateManager.popMatrix();
             GlStateManager.matrixMode(5889);
             GlStateManager.loadIdentity();
-			Project.gluPerspective(this.getFOVModifier(partialTicks, true), (float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F, this.farPlaneDistance * 4.0f);// * MathHelper.SQRT_2);
+			Project.gluPerspective(this.getFOVModifier(partialTicks, true), (float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F, this.farPlaneDistance * MathHelper.SQRT_2);
             GlStateManager.matrixMode(5888);
         }
     }
