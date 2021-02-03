@@ -3,6 +3,7 @@ package backsun.lod;
 import backsun.lod.proxy.ClientProxy;
 import backsun.lod.proxy.CommonProxy;
 import backsun.lod.util.Reference;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
@@ -30,7 +31,7 @@ public class Main
 	@EventHandler
 	public static void PreInit(FMLPreInitializationEvent event)
 	{
-		
+		Minecraft.getMinecraft().getFramebuffer().enableStencil();
 	}
 	
 	@EventHandler
