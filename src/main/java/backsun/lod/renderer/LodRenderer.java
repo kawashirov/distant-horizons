@@ -19,7 +19,6 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.world.chunk.Chunk;
 
 /**
  * @author James Seibel
@@ -27,7 +26,7 @@ import net.minecraft.world.chunk.Chunk;
  */
 public class LodRenderer
 {
-	public boolean debugging = false;
+	public boolean debugging = true;
 	
 	private Minecraft mc;
 	private float farPlaneDistance;
@@ -78,6 +77,12 @@ public class LodRenderer
 			return;
 		}
 		
+		if (ofConfig.fovMethod == null)
+		{
+			// we aren't able to get the user's
+			// FOV, don't render anything
+			return;
+		}
 		
 		
 		// used for debugging and viewing how long different processes take
@@ -86,21 +91,7 @@ public class LodRenderer
 		mc.mcProfiler.startSection("LOD setup");
 		@SuppressWarnings("unused")
 		long startTime = System.nanoTime();
-		
-		
-		// set the new model view matrix
-		if(setProjectionMatrix(partialTicks))
-		{
-			// we were able to set up the matrix correctly,
-			// continue like normal
-		}
-		else
-		{
-			// we weren't able to create the projection matrix
-			// we can't draw LODs
-			return;
-		}
-		
+				
 		
 		// color setup
 		int alpha = 255; // 0 - 255
@@ -206,24 +197,12 @@ public class LodRenderer
 				// (As the player moves some chunks will overlap or be missing,
 				// this is just how chunk loading/unloading works. This can hopefully
 				// be hidden with careful use of fog)
-				int middle = numbOfBoxesWide / 2;
-				int width = mc.gameSettings.renderDistanceChunks;
-				if ((i > middle - width && i < middle + width) && (j > middle - width && j < middle + width))
+				int middle = (numbOfBoxesWide / 2) - 1;
+				int width = mc.gameSettings.renderDistanceChunks + 0;
+				if ((i >= middle - width && i <= middle + width) && (j >= middle - width && j <= middle + width))
 				{
-					// if we are within the range that chunks could
-					// be loaded, make sure not to render
-					// LODs on top of regular chunks
-					Chunk chunk = Minecraft.getMinecraft().world.getChunkFromChunkCoords(chunkX, chunkZ);
-					if (chunk == null || !chunk.isLoaded())
-					{
-						colorArray[i + (j * numbOfBoxesWide)] = c;
-						lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, lod.bottom[LodLocation.NE.value], 0, LOD_WIDTH, lod.top[LodLocation.NE.value], LOD_WIDTH).offset(xOffset, yOffset, zOffset);
-					}
-					else
-					{
-						colorArray[i + (j * numbOfBoxesWide)] = null;
-						lodArray[i + (j * numbOfBoxesWide)] = null;
-					}
+					colorArray[i + (j * numbOfBoxesWide)] = null;
+					lodArray[i + (j * numbOfBoxesWide)] = null;
 				}
 				else
 				{
@@ -235,9 +214,6 @@ public class LodRenderer
 				}
 			}
 		}
-		
-		
-		
 		
 		
 		
@@ -257,7 +233,12 @@ public class LodRenderer
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_BLEND);
 		
+		setProjectionMatrix(partialTicks);
 		setupFog(FogDistanceMode.NEAR, ofConfig.getFogType());
+		
+		
+		
+		
 		
 		
 		
@@ -268,9 +249,6 @@ public class LodRenderer
 		mc.mcProfiler.endStartSection("LOD build buffer");
 		// send the LODs over to the GPU
 		sendToGPUAndDraw(lodArray, colorArray, cameraX, cameraY ,cameraZ);
-		
-		
-		
 		
 		
 		
@@ -288,12 +266,12 @@ public class LodRenderer
 		GlStateManager.disableFog();
 		
 		GL11.glDisable(GL11.GL_BLEND);
-		GL11.glEnable(GL11.GL_POLYGON_OFFSET_LINE);
-		GL11.glPolygonOffset(-1.f, -1.f);
-		
-		
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		
+		
+		
+		
 		
 		// This is about how long this whole process should take
 		// 16 ms = 60 hz
@@ -307,29 +285,31 @@ public class LodRenderer
 	
 
 
+		
+
+
 
 	/**
 	 * create a new projection matrix and send it over to the GPU
 	 * @param partialTicks how many ticks into the frame we are
 	 * @return true if the matrix was successfully created and sent to the GPU, false otherwise
 	 */
-	private boolean setProjectionMatrix(float partialTicks)
+	private void setProjectionMatrix(float partialTicks)
 	{
 		// create a new view frustum so that the squares can be drawn outside the normal view distance
 		GlStateManager.matrixMode(GL11.GL_PROJECTION);
-		GlStateManager.loadIdentity();
-		// farPlaneDistance // 10 chunks = 160	
-		
+		GlStateManager.loadIdentity();	
 		
 		// only continue if we can get the FOV
 		if (ofConfig.fovMethod != null)
 		{
-			Project.gluPerspective(ofConfig.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.05f, farPlaneDistance * VIEW_DISTANCE_MULTIPLIER);
-			return true;
+			// TODO perspective
+			
+			Project.gluPerspective(ofConfig.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.5F, farPlaneDistance * 12);
 		}
 		
 		// we weren't able to set up the projection matrix
-		return false;
+		return;
 	}
 	
 	
@@ -419,6 +399,8 @@ public class LodRenderer
 		
 		mc.mcProfiler.endStartSection("LOD draw");
 		
+		// TODO draw
+		
 		// draw the LODs
 		tessellator.draw();
 	}
@@ -431,7 +413,9 @@ public class LodRenderer
 			return;
 		}
 		
-		
+		// TODO have fog change based on height
+		// when higher up have it end up farther away
+		// (to hide the boarders of the LODs)
 		if(fogMode == FogDistanceMode.NEAR)
 		{
 			// the multipliers are percentages
@@ -449,8 +433,12 @@ public class LodRenderer
 			}
 			else //if(fogType == FogType.FAST)
 			{
-				GlStateManager.setFogEnd(farPlaneDistance * 0.8f);
-				GlStateManager.setFogStart(farPlaneDistance * 1.5f);
+				// for the far fog of the normal chunks
+				// to start right where the LODs' end use:
+				// end = 0.8f, start = 1.5f
+				
+				GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
+				GlStateManager.setFogStart(farPlaneDistance * 3.5f);
 			}
 		}
 		else //if(fogMode == FogMode.FAR)
