@@ -209,7 +209,7 @@ public class LodFileHandler
 	
 	private void saveRegionToDisk(LodRegion region)
 	{
-		if (!readyToReadAndWrite())
+		if (!readyToReadAndWrite() || region == null)
 			return;
 		
 		// convert chunk coordinates to region
