@@ -3,6 +3,8 @@ package backsun.lod.proxy;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.lwjgl.opengl.GL11;
+
 import backsun.lod.objects.LodChunk;
 import backsun.lod.objects.LodDimension;
 import backsun.lod.objects.LodRegion;
@@ -18,6 +20,8 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
+import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 
 /**
  * This is used by the client.
@@ -46,7 +50,44 @@ public class ClientProxy extends CommonProxy
 	//==============//
 	
 	@SubscribeEvent
-	public void renderLods(RenderWorldLastEvent event)
+	public void renderTick(RenderTickEvent event)
+	{		
+		if (event.phase == Phase.START)
+		{
+			renderStencil();
+		}
+	}
+	
+	
+	
+	public void renderStencil()
+	{
+		GL11.glClearStencil(0);
+		GL11.glStencilMask(0xFF); //255
+		GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT);
+		
+		GL11.glEnable(GL11.GL_STENCIL_TEST);
+		GL11.glStencilFunc(GL11.GL_ALWAYS, 0, 0); // the 2 numbers here don't matter since GL_ALWAYS is being used
+		GL11.glStencilMask(0b11111111);
+		GL11.glStencilOp(GL11.GL_KEEP, // this doesn't mater since GL_ALWAYS is being used
+				GL11.GL_INCR,  // stencil test passes
+				GL11.GL_INCR); // stencil + depth pass
+		//GL11.glStencilOp(GL11.GL_INCR, GL11.GL_INCR, GL11.GL_INCR);
+	}
+	
+	@SubscribeEvent
+	public void renderWorldLast(RenderWorldLastEvent event)
+	{
+		GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
+		GL11.glStencilFunc(GL11.GL_GEQUAL, 1, 0xFF);
+		// GEQUAL 1, once EQUAL 1 doens't render on mountains
+		
+		renderLods(event.getPartialTicks());
+		
+		GL11.glDisable(GL11.GL_STENCIL_TEST);
+	}
+	
+	public void renderLods(float partialTicks)
 	{
 		int newWidth = Math.max(3, (Minecraft.getMinecraft().gameSettings.renderDistanceChunks * LodRenderer.VIEW_DISTANCE_MULTIPLIER) / LodRegion.SIZE);
 		if (lodWorld != null && regionWidth != newWidth)
@@ -60,6 +101,8 @@ public class ClientProxy extends CommonProxy
 		}
 		
 		Minecraft mc = Minecraft.getMinecraft();
+		if (mc.player == null)
+			return;
 		int dimId = mc.player.dimension;
 		LodDimension lodDim = lodWorld.getLodDimension(dimId);
 		
@@ -90,9 +133,15 @@ public class ClientProxy extends CommonProxy
 		}
 		else
 		{
-			renderer.drawLODs(Minecraft.getMinecraft(), event.getPartialTicks());
+			renderer.drawLODs(Minecraft.getMinecraft(), partialTicks);
 		}
 	}	
+	
+	
+	
+	
+	
+	
 	
 	
 	//===============//
