@@ -54,32 +54,39 @@ public class ClientProxy extends CommonProxy
 	{		
 		if (event.phase == Phase.START)
 		{
-			renderStencil();
+			startRenderingStencil();
 		}
 	}
-	
-	
-	
-	public void renderStencil()
+	public static void startRenderingStencil()
 	{
 		GL11.glClearStencil(0);
 		GL11.glStencilMask(0xFF); //255
 		GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT);
 		
 		GL11.glEnable(GL11.GL_STENCIL_TEST);
-		GL11.glStencilFunc(GL11.GL_ALWAYS, 0, 0); // the 2 numbers here don't matter since GL_ALWAYS is being used
+		GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 0x11111111); // the 2 numbers here don't matter since GL_ALWAYS is being used
 		GL11.glStencilMask(0b11111111);
 		GL11.glStencilOp(GL11.GL_KEEP, // this doesn't mater since GL_ALWAYS is being used
-				GL11.GL_INCR,  // stencil test passes
+				GL11.GL_KEEP,  // stencil test passes
 				GL11.GL_INCR); // stencil + depth pass
 		//GL11.glStencilOp(GL11.GL_INCR, GL11.GL_INCR, GL11.GL_INCR);
 	}
+	public static void endRenderingStencil()
+	{
+		GL11.glStencilOp(GL11.GL_KEEP, // this doesn't mater since GL_ALWAYS is being used
+				GL11.GL_KEEP,  // stencil test passes
+				GL11.GL_KEEP); // stencil + depth pass
+	}
+	
+	
+	
+	
 	
 	@SubscribeEvent
 	public void renderWorldLast(RenderWorldLastEvent event)
 	{
-		GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_KEEP);
-		GL11.glStencilFunc(GL11.GL_GEQUAL, 1, 0xFF);
+		endRenderingStencil();
+		GL11.glStencilFunc(GL11.GL_EQUAL, 0, 0xFF);
 		// GEQUAL 1, once EQUAL 1 doens't render on mountains
 		
 		renderLods(event.getPartialTicks());
