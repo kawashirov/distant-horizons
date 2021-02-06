@@ -30,3 +30,6 @@ Other commands:
 
 Tip:
 	The Minecraft source code is NOT added to your workspace in a editable way. Minecraft is treated like a normal Library. Sources are there for documentation and research purposes only.
+
+	Current location of mcp-srg.srg:
+	"C:/Users/James Seibel/.gradle/caches/minecraft/de/oceanlabs/mcp/mcp_snapshot/20171003/1.12.2/srgs/"
