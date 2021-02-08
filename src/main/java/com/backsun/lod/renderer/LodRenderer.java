@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.MathHelper;
 
 /**
  * @author James Seibel
@@ -27,7 +28,7 @@ import net.minecraft.util.math.AxisAlignedBB;
  */
 public class LodRenderer
 {
-	public boolean debugging = true;
+	public boolean debugging = false;
 	
 	private Minecraft mc;
 	private float farPlaneDistance;
@@ -270,9 +271,9 @@ public class LodRenderer
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		
-		// TODO
 		// change the perspective matrix back to prevent incompatibilities
-		// Project.gluPerspective(this.getFOVModifier(partialTicks, true), (float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F, this.farPlaneDistance * MathHelper.SQRT_2);
+		// with other mods that may render during forgeRenderLast
+		Project.gluPerspective(ofConfig.getFov(mc, partialTicks, true), (float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F, this.farPlaneDistance * MathHelper.SQRT_2);
 		
 		
 		
