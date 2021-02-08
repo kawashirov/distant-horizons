@@ -20,8 +20,6 @@ import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent.Phase;
-import net.minecraftforge.fml.common.gameevent.TickEvent.RenderTickEvent;
 
 /**
  * This is used by the client.
@@ -49,34 +47,15 @@ public class ClientProxy extends CommonProxy
 	// render event //
 	//==============//
 	
-	@SubscribeEvent
-	public void renderTick(RenderTickEvent event)
-	{		
-		if (event.phase == Phase.START)
-		{
-			startRenderingStencil();
-		}
-	}
-	public static void startRenderingStencil()
-	{
-		GL11.glClearStencil(0);
-		GL11.glStencilMask(0xFF); //255
-		GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT);
-		
-		GL11.glEnable(GL11.GL_STENCIL_TEST);
-		GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 0x11111111); // the 2 numbers here don't matter since GL_ALWAYS is being used
-		GL11.glStencilMask(0b11111111);
-		GL11.glStencilOp(GL11.GL_KEEP, // this doesn't mater since GL_ALWAYS is being used
-				GL11.GL_KEEP,  // stencil test passes
-				GL11.GL_INCR); // stencil + depth pass
-		//GL11.glStencilOp(GL11.GL_INCR, GL11.GL_INCR, GL11.GL_INCR);
-	}
-	public static void endRenderingStencil()
-	{
-		GL11.glStencilOp(GL11.GL_KEEP, // this doesn't mater since GL_ALWAYS is being used
-				GL11.GL_KEEP,  // stencil test passes
-				GL11.GL_KEEP); // stencil + depth pass
-	}
+//	@SubscribeEvent
+//	public void renderTick(RenderTickEvent event)
+//	{		
+//		if (event.phase == Phase.START)
+//		{
+//			RenderGlobalHook.startRenderingStencil(null);
+//		}
+//	}
+	
 	
 	
 	
@@ -85,9 +64,8 @@ public class ClientProxy extends CommonProxy
 	@SubscribeEvent
 	public void renderWorldLast(RenderWorldLastEvent event)
 	{
-		endRenderingStencil();
+//		RenderGlobalHook.endRenderingStencil(null);
 		GL11.glStencilFunc(GL11.GL_EQUAL, 0, 0xFF);
-		// GEQUAL 1, once EQUAL 1 doens't render on mountains
 		
 		renderLods(event.getPartialTicks());
 		
