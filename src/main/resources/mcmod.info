@@ -1,14 +1,14 @@
 [
 {
   "modid": "lod",
-  "name": "LOD Mod",
-  "description": "Work in Progress.",
+  "name": "Level Of Details",
+  "description": "Generates and renders simplified chunks beyond the normal view distance, at a low performance cost.",
   "version": "0.1",
   "mcversion": "1.12.2",
   "url": "",
   "updateUrl": "",
   "authorList": ["James Seibel"],
-  "credits": "TechnoVision for his modding tutorial.",
+  "credits": "TechnoVision and Vike for their modding tutorials.",
   "logoFile": "",
   "screenshots": [],
   "dependencies": ["lodcore"]
