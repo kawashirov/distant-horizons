@@ -21,7 +21,7 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
  */
 @IFMLLoadingPlugin.MCVersion("1.12.2")
 @IFMLLoadingPlugin.TransformerExclusions({"backsun.lod.asm"})
-@Mod(modid = Reference.MOD_ID, name = Reference.NAME, version = Reference.VERSION, dependencies = "required-after:lodcore")
+@Mod(modid = Reference.MOD_ID, name = Reference.NAME, version = Reference.VERSION, dependencies = "required-after:lodcore@[1.0,)")
 public class LodMain
 {
 	@Instance
