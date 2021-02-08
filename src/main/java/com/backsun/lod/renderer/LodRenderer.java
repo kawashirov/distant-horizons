@@ -44,7 +44,7 @@ public class LodRenderer
 	
 	private OfConfig ofConfig;
 	
-	public LodDimension regions = null;
+	public LodDimension dimension = null;
 	
 	
 	
@@ -63,7 +63,7 @@ public class LodRenderer
 	
 	
 	
-	public void drawLODs(Minecraft mc, float partialTicks)
+	public void drawLODs(LodDimension newDimension, Minecraft mc, float partialTicks)
 	{
 		if (ofConfig.fovMethod == null)
 		{
@@ -72,7 +72,8 @@ public class LodRenderer
 			return;
 		}
 		
-		if (regions == null)
+		dimension = newDimension;
+		if (dimension == null)
 		{
 			// if there aren't any loaded LodChunks
 			// don't try drawing anything
@@ -166,7 +167,7 @@ public class LodRenderer
 				int chunkX = i + (startX / MINECRAFT_CHUNK_WIDTH);
 				int chunkZ = j + (startZ / MINECRAFT_CHUNK_WIDTH);
 				
-				LodChunk lod = regions.getLodFromCoordinates(chunkX, chunkZ); // new LodChunk(); //   
+				LodChunk lod = dimension.getLodFromCoordinates(chunkX, chunkZ); // new LodChunk(); //   
 				if (lod == null)
 				{
 					// note: for some reason if any color or lod object are set here
@@ -443,7 +444,7 @@ public class LodRenderer
 				GlStateManager.setFogStart(farPlaneDistance * 3.5f);
 			}
 		}
-		else //if(fogMode == FogMode.FAR)
+		else //if(fogMode == FogMode.FAR) or Both
 		{
 			// the multipliers are percentages of
 			// the LOD view distance.

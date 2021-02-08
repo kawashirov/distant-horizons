@@ -107,7 +107,7 @@ public class ClientProxy extends CommonProxy
 		}
 		else
 		{
-			renderer.drawLODs(Minecraft.getMinecraft(), partialTicks);
+			renderer.drawLODs(lodDim, Minecraft.getMinecraft(), partialTicks);
 		}
 	}	
 	
@@ -156,14 +156,6 @@ public class ClientProxy extends CommonProxy
 	
 	System.out.println(chunk.x + " " + chunk.z + "\tloaded: " + chunk.isLoaded() + "\tpop: " + chunk.isPopulated() + "\tter pop: " + chunk.isTerrainPopulated());
 	 */
-	
-	/*
-	use Minecraft.getMinecraft().world.getWorldInfo().getWorldName();
-	or
-	.getSaveHandler().getWorldDirectoryName()
-	to clear the regions on world change
-	
-	*/
 	
 	private void generateLodChunk(Chunk chunk)
 	{
@@ -217,12 +209,6 @@ public class ClientProxy extends CommonProxy
 				}
 				
 				lodDim.addLod(lod);
-				
-				if (renderer != null)
-				{
-					renderer.regions = lodDim;
-				}
-				
 			});
 			
 			lodGenThreadPool.execute(thread);
