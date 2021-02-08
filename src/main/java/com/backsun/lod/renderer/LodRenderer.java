@@ -97,14 +97,15 @@ public class LodRenderer
 		
 		// color setup
 		int alpha = 255; // 0 - 255
-		@SuppressWarnings("unused")
-		Color error = new Color(255, 0, 225, alpha); // bright pink
+		float sunBrightness = mc.world.getSunBrightness(partialTicks);
 		
 		Color red = new Color(255, 0, 0, alpha);
 		Color black = new Color(0, 0, 0, alpha);
 		Color white = new Color(255, 255, 255, alpha);
 		@SuppressWarnings("unused")
 		Color invisible = new Color(0,0,0,0);
+		@SuppressWarnings("unused")
+		Color error = new Color(255, 0, 225, alpha); // bright pink
 		
 		
 		
@@ -159,13 +160,13 @@ public class LodRenderer
 				double xOffset = -cameraX + // start at x = 0
 							(LOD_WIDTH * i) + // offset by the number of LOD blocks
 							startX; // offset so the center LOD block is centered underneath the player
+				double yOffset = -cameraY;
 				double zOffset = -cameraZ + (LOD_WIDTH * j) + startZ;
 				
 				int chunkX = i + (startX / MINECRAFT_CHUNK_WIDTH);
 				int chunkZ = j + (startZ / MINECRAFT_CHUNK_WIDTH);
 				
 				LodChunk lod = regions.getLodFromCoordinates(chunkX, chunkZ); // new LodChunk(); //   
-				
 				if (lod == null)
 				{
 					// note: for some reason if any color or lod object are set here
@@ -177,9 +178,12 @@ public class LodRenderer
 					continue;
 				}
 				
-				Color c = lod.colors[ColorDirection.TOP.value];
+				Color c = new Color(
+						(int) (lod.colors[ColorDirection.TOP.value].getRed() * sunBrightness),
+						(int) (lod.colors[ColorDirection.TOP.value].getGreen() * sunBrightness),
+						(int) (lod.colors[ColorDirection.TOP.value].getBlue() * sunBrightness),
+						lod.colors[ColorDirection.TOP.value].getAlpha());
 				
-				double yOffset = -cameraY;
 				
 				// if debugging draw the squares as a black and white checker board
 				if (debugging)
@@ -200,7 +204,7 @@ public class LodRenderer
 				// this is just how chunk loading/unloading works. This can hopefully
 				// be hidden with careful use of fog)
 				int middle = (numbOfBoxesWide / 2) - 1;
-				int width = mc.gameSettings.renderDistanceChunks + 0;
+				int width = mc.gameSettings.renderDistanceChunks;
 				if ((i >= middle - width && i <= middle + width) && (j >= middle - width && j <= middle + width))
 				{
 					colorArray[i + (j * numbOfBoxesWide)] = null;
@@ -327,9 +331,6 @@ public class LodRenderer
 		int green;
 		int blue;
 		int alpha;
-		
-		// TODO set the brightness level
-		// chunk.getWorld().getSunBrightness(partialTicks)
 		
 		bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 		
