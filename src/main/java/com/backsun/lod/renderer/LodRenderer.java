@@ -97,7 +97,7 @@ public class LodRenderer
 		
 		// color setup
 		int alpha = 255; // 0 - 255
-		float sunBrightness = mc.world.getSunBrightness(partialTicks);
+		float sunBrightness = mc.world.getSunBrightness(partialTicks); // TODO this only works in dimensions with day night cycles
 		
 		Color red = new Color(255, 0, 0, alpha);
 		Color black = new Color(0, 0, 0, alpha);
