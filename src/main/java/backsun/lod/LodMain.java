@@ -1,8 +1,5 @@
 package backsun.lod;
 
-import java.util.Map;
-
-import backsun.lod.asm.RenderGlobalClassTransformer;
 import backsun.lod.proxy.ClientProxy;
 import backsun.lod.proxy.CommonProxy;
 import backsun.lod.util.Reference;
@@ -24,8 +21,8 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
  */
 @IFMLLoadingPlugin.MCVersion("1.12.2")
 @IFMLLoadingPlugin.TransformerExclusions({"backsun.lod.asm"})
-@Mod(modid = Reference.MOD_ID, name = Reference.NAME, version = Reference.VERSION)
-public class LodMain implements IFMLLoadingPlugin
+@Mod(modid = Reference.MOD_ID, name = Reference.NAME, version = Reference.VERSION, dependencies = "required-after:lodcore")
+public class LodMain
 {
 	@Instance
 	public static LodMain instance;
@@ -51,40 +48,5 @@ public class LodMain implements IFMLLoadingPlugin
 	public static void PostInit(FMLPostInitializationEvent event)
 	{
 		
-	}
-	
-	
-	
-	
-	// required for IFMLLoadingPlugin
-	
-	@Override
-	public String[] getASMTransformerClass()
-	{
-		return new String[] { RenderGlobalClassTransformer.class.getName() };
-	}
-
-	@Override
-	public String getModContainerClass()
-	{
-		// unneeded since we are also running a normal mod
-		return null;
-	}
-
-	@Override
-	public String getSetupClass() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void injectData(Map<String, Object> data) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
-	public String getAccessTransformerClass() {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

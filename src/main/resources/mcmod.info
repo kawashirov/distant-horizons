@@ -11,6 +11,6 @@
   "credits": "TechnoVision for his modding tutorial.",
   "logoFile": "",
   "screenshots": [],
-  "dependencies": []
+  "dependencies": ["lodcore"]
 }
 ]
