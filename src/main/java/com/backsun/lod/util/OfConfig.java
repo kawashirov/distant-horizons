@@ -16,10 +16,8 @@ import net.minecraft.client.Minecraft;
  */
 public class OfConfig
 {
-	
 	public Method fovMethod = null;
 	public Field ofFogField = null;
-	
 	
 	
 	public OfConfig()
@@ -98,6 +96,9 @@ public class OfConfig
 		fovMethod.setAccessible(true);
 	}
 	
+	/**
+	 * Similar to setupFovMethod.
+	 */
 	private void setupFogField()
 	{
 		// get every variable from the entity renderer
@@ -123,7 +124,9 @@ public class OfConfig
 	
 	
 	
-	
+	/**
+	 * Get what type of fog optifine is currently set to render.
+	 */
 	public FogQuality getFogType()
 	{
 		if (ofFogField == null)
@@ -133,8 +136,6 @@ public class OfConfig
 			// or the setup method wasn't called yet.
 			return FogQuality.UNKNOWN;
 		}
-		
-		
 		
 		int returnNum = 0;
 		
@@ -164,6 +165,9 @@ public class OfConfig
 	}
 	
 	
+	/**
+	 * Gets the FOV used by the EntityRender.
+	 */
 	public float getFov(Minecraft mc, float partialTicks, boolean useFovSetting)
 	{
 		try
