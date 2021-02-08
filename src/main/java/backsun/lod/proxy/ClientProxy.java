@@ -5,6 +5,8 @@ import java.util.concurrent.Executors;
 
 import org.lwjgl.opengl.GL11;
 
+import com.backsun.lodCore.util.RenderGlobalHook;
+
 import backsun.lod.objects.LodChunk;
 import backsun.lod.objects.LodDimension;
 import backsun.lod.objects.LodRegion;
@@ -33,6 +35,7 @@ public class ClientProxy extends CommonProxy
 	private LodWorld lodWorld;
 	private ExecutorService lodGenThreadPool = Executors.newFixedThreadPool(1);
 	
+	/** Default size of any LOD regions we use */
 	private int regionWidth = 5;
 	
 	public ClientProxy()
@@ -47,24 +50,10 @@ public class ClientProxy extends CommonProxy
 	// render event //
 	//==============//
 	
-//	@SubscribeEvent
-//	public void renderTick(RenderTickEvent event)
-//	{		
-//		if (event.phase == Phase.START)
-//		{
-//			RenderGlobalHook.startRenderingStencil(null);
-//		}
-//	}
-	
-	
-	
-	
-	
-	
 	@SubscribeEvent
 	public void renderWorldLast(RenderWorldLastEvent event)
 	{
-//		RenderGlobalHook.endRenderingStencil(null);
+		RenderGlobalHook.endRenderingStencil();
 		GL11.glStencilFunc(GL11.GL_EQUAL, 0, 0xFF);
 		
 		renderLods(event.getPartialTicks());
