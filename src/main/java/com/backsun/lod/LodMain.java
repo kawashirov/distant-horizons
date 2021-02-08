@@ -1,8 +1,9 @@
-package backsun.lod;
+package com.backsun.lod;
 
-import backsun.lod.proxy.ClientProxy;
-import backsun.lod.proxy.CommonProxy;
-import backsun.lod.util.Reference;
+import com.backsun.lod.proxy.ClientProxy;
+import com.backsun.lod.proxy.CommonProxy;
+import com.backsun.lod.util.Reference;
+
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
@@ -20,7 +21,7 @@ import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
  * @version 02-07-2021
  */
 @IFMLLoadingPlugin.MCVersion("1.12.2")
-@IFMLLoadingPlugin.TransformerExclusions({"backsun.lod.asm"})
+@IFMLLoadingPlugin.TransformerExclusions({"com.backsun.lod.asm"})
 @Mod(modid = Reference.MOD_ID, name = Reference.NAME, version = Reference.VERSION, dependencies = "required-after:lodcore@[1.0,)")
 public class LodMain
 {

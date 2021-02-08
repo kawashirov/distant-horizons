@@ -1,4 +1,4 @@
-package backsun.lod.proxy;
+package com.backsun.lod.proxy;
 
 /**
  * This is used by the server.

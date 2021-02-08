@@ -1,4 +1,4 @@
-package backsun.lod.util;
+package com.backsun.lod.util;
 
 /**
  * 
@@ -17,9 +17,9 @@ public class Reference
 	public static final String ACCEPTED_VERSIONS = "[1.12.2]";
 	
 	/** where the client proxy class is */
-	public static final String CLIENT_PROXY_CLASS = "backsun.lod.proxy.ClientProxy";
+	public static final String CLIENT_PROXY_CLASS = "com.backsun.lod.proxy.ClientProxy";
 	/** where the  common proxy class is*/
-	public static final String COMMON_PROXY_CLASS = "backsun.lod.proxy.CommonProxy";
+	public static final String COMMON_PROXY_CLASS = "com.backsun.lod.proxy.CommonProxy";
 	
 	
 }

@@ -1,17 +1,18 @@
-package backsun.lod.renderer;
+package com.backsun.lod.renderer;
 
 import java.awt.Color;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Project;
 
-import backsun.lod.objects.LodChunk;
-import backsun.lod.objects.LodDimension;
-import backsun.lod.util.OfConfig;
-import backsun.lod.util.enums.ColorDirection;
-import backsun.lod.util.enums.LodLocation;
-import backsun.lod.util.fog.FogDistanceMode;
-import backsun.lod.util.fog.FogQuality;
+import com.backsun.lod.objects.LodChunk;
+import com.backsun.lod.objects.LodDimension;
+import com.backsun.lod.util.OfConfig;
+import com.backsun.lod.util.enums.ColorDirection;
+import com.backsun.lod.util.enums.LodLocation;
+import com.backsun.lod.util.fog.FogDistanceMode;
+import com.backsun.lod.util.fog.FogQuality;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;

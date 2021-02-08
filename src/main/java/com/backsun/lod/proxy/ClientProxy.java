@@ -1,18 +1,18 @@
-package backsun.lod.proxy;
+package com.backsun.lod.proxy;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.lwjgl.opengl.GL11;
 
+import com.backsun.lod.objects.LodChunk;
+import com.backsun.lod.objects.LodDimension;
+import com.backsun.lod.objects.LodRegion;
+import com.backsun.lod.objects.LodWorld;
+import com.backsun.lod.renderer.LodRenderer;
+import com.backsun.lod.util.LodFileHandler;
 import com.backsun.lodCore.util.RenderGlobalHook;
 
-import backsun.lod.objects.LodChunk;
-import backsun.lod.objects.LodDimension;
-import backsun.lod.objects.LodRegion;
-import backsun.lod.objects.LodWorld;
-import backsun.lod.renderer.LodRenderer;
-import backsun.lod.util.LodFileHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.world.DimensionType;

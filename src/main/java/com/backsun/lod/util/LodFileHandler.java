@@ -1,4 +1,4 @@
-package backsun.lod.util;
+package com.backsun.lod.util;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -8,9 +8,10 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import backsun.lod.objects.LodChunk;
-import backsun.lod.objects.LodDimension;
-import backsun.lod.objects.LodRegion;
+import com.backsun.lod.objects.LodChunk;
+import com.backsun.lod.objects.LodDimension;
+import com.backsun.lod.objects.LodRegion;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.storage.ISaveHandler;
 

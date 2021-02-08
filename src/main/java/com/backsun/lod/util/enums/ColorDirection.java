@@ -1,4 +1,4 @@
-package backsun.lod.util.enums;
+package com.backsun.lod.util.enums;
 
 /**
  * @author James Seibel

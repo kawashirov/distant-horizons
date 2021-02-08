@@ -1,11 +1,12 @@
-package backsun.lod.util;
+package com.backsun.lod.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-import backsun.lod.util.fog.FogQuality;
+import com.backsun.lod.util.fog.FogQuality;
+
 import net.minecraft.client.Minecraft;
 
 /**

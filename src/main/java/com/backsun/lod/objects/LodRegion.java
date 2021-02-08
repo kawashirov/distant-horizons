@@ -1,4 +1,4 @@
-package backsun.lod.objects;
+package com.backsun.lod.objects;
 
 /**
  * A LodRegion is the a 32x32
