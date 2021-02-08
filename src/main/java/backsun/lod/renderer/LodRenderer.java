@@ -269,6 +269,9 @@ public class LodRenderer
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		
+		// TODO
+		// change the perspective matrix back to prevent incompatibilities
+		// Project.gluPerspective(this.getFOVModifier(partialTicks, true), (float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F, this.farPlaneDistance * MathHelper.SQRT_2);
 		
 		
 		
@@ -303,8 +306,6 @@ public class LodRenderer
 		// only continue if we can get the FOV
 		if (ofConfig.fovMethod != null)
 		{
-			// TODO perspective
-			
 			Project.gluPerspective(ofConfig.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.5F, farPlaneDistance * 12);
 		}
 		
@@ -398,8 +399,6 @@ public class LodRenderer
 		}
 		
 		mc.mcProfiler.endStartSection("LOD draw");
-		
-		// TODO draw
 		
 		// draw the LODs
 		tessellator.draw();
