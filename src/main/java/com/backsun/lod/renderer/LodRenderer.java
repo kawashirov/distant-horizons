@@ -7,7 +7,7 @@ import org.lwjgl.util.glu.Project;
 
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
-import com.backsun.lod.util.OfConfig;
+import com.backsun.lod.util.ReflectionHandler;
 import com.backsun.lod.util.enums.ColorDirection;
 import com.backsun.lod.util.enums.LodLocation;
 import com.backsun.lod.util.fog.FogDistanceMode;
@@ -42,7 +42,7 @@ public class LodRenderer
 	private Tessellator tessellator;
 	private BufferBuilder bufferBuilder;
 	
-	private OfConfig ofConfig;
+	private ReflectionHandler reflectionHandler;
 	
 	public LodDimension dimension = null;
 	
@@ -55,7 +55,7 @@ public class LodRenderer
 		tessellator = Tessellator.getInstance();
 		bufferBuilder = tessellator.getBuffer();
 		
-		ofConfig = new OfConfig();
+		reflectionHandler = new ReflectionHandler();
 		
 		// GL11.GL_MODELVIEW  //5888
 		// GL11.GL_PROJECTION //5889
@@ -65,7 +65,7 @@ public class LodRenderer
 	
 	public void drawLODs(LodDimension newDimension, Minecraft mc, float partialTicks)
 	{
-		if (ofConfig.fovMethod == null)
+		if (reflectionHandler.fovMethod == null)
 		{
 			// don't continue if we can't get the
 			// user's FOV
@@ -80,7 +80,7 @@ public class LodRenderer
 			return;
 		}
 		
-		if (ofConfig.fovMethod == null)
+		if (reflectionHandler.fovMethod == null)
 		{
 			// we aren't able to get the user's
 			// FOV, don't render anything
@@ -241,7 +241,7 @@ public class LodRenderer
 		GL11.glEnable(GL11.GL_BLEND);
 		
 		setProjectionMatrix(partialTicks);
-		setupFog(FogDistanceMode.NEAR, ofConfig.getFogType());
+		setupFog(FogDistanceMode.NEAR, reflectionHandler.getFogType());
 		
 		
 		
@@ -278,7 +278,7 @@ public class LodRenderer
 		
 		// change the perspective matrix back to prevent incompatibilities
 		// with other mods that may render during forgeRenderLast
-		Project.gluPerspective(ofConfig.getFov(mc, partialTicks, true), (float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F, this.farPlaneDistance * MathHelper.SQRT_2);
+		Project.gluPerspective(reflectionHandler.getFov(mc, partialTicks, true), (float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F, this.farPlaneDistance * MathHelper.SQRT_2);
 		
 		
 		
@@ -311,9 +311,9 @@ public class LodRenderer
 		GlStateManager.loadIdentity();	
 		
 		// only continue if we can get the FOV
-		if (ofConfig.fovMethod != null)
+		if (reflectionHandler.fovMethod != null)
 		{
-			Project.gluPerspective(ofConfig.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.5F, farPlaneDistance * 12);
+			Project.gluPerspective(reflectionHandler.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.5F, farPlaneDistance * 12);
 		}
 		
 		// we weren't able to set up the projection matrix

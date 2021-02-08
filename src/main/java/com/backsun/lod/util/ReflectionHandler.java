@@ -10,17 +10,19 @@ import com.backsun.lod.util.fog.FogQuality;
 import net.minecraft.client.Minecraft;
 
 /**
+ * This object is used to get variables from methods
+ * where they are private.
  * 
  * @author James Seibel
  * @version 09-21-2020
  */
-public class OfConfig
+public class ReflectionHandler
 {
 	public Method fovMethod = null;
 	public Field ofFogField = null;
 	
 	
-	public OfConfig()
+	public ReflectionHandler()
 	{
 		setupFovMethod();
 		setupFogField();
