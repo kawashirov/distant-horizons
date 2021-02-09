@@ -56,9 +56,6 @@ public class LodRenderer
 		bufferBuilder = tessellator.getBuffer();
 		
 		reflectionHandler = new ReflectionHandler();
-		
-		// GL11.GL_MODELVIEW  //5888
-		// GL11.GL_PROJECTION //5889
 	}
 	
 	
@@ -122,22 +119,23 @@ public class LodRenderer
 		
 		
 		// determine how far the game's render distance is currently set
-		farPlaneDistance = mc.gameSettings.renderDistanceChunks * MINECRAFT_CHUNK_WIDTH;
+		int renderDistWidth = mc.gameSettings.renderDistanceChunks;
+		farPlaneDistance = renderDistWidth * MINECRAFT_CHUNK_WIDTH;
 		
 		// set how big the LODs will be and how far they will go
 		int totalLength = (int) farPlaneDistance * VIEW_DISTANCE_MULTIPLIER;
-		int numbOfBoxesWide = (totalLength / LOD_WIDTH);
+		int numbChunksWide = (totalLength / LOD_WIDTH);
 		
 		// this where we will start drawing squares
 		// (exactly half the total width)
-		int startX = (-LOD_WIDTH * (numbOfBoxesWide / 2)) + playerXChunkOffset;
-		int startZ = (-LOD_WIDTH * (numbOfBoxesWide / 2)) + playerZChunkOffset;
+		int startX = (-LOD_WIDTH * (numbChunksWide / 2)) + playerXChunkOffset;
+		int startZ = (-LOD_WIDTH * (numbChunksWide / 2)) + playerZChunkOffset;
 		
 		
 		// this is where we store the LOD objects
-		AxisAlignedBB lodArray[] = new AxisAlignedBB[numbOfBoxesWide * numbOfBoxesWide];
+		AxisAlignedBB lodArray[][] = new AxisAlignedBB[numbChunksWide][numbChunksWide];
 		// this is where we store the color for each LOD object
-		Color colorArray[] = new Color[numbOfBoxesWide * numbOfBoxesWide];
+		Color colorArray[][] = new Color[numbChunksWide][numbChunksWide];
 		
 		
 		
@@ -149,14 +147,25 @@ public class LodRenderer
 		
 		mc.mcProfiler.endStartSection("LOD generation");
 		
-		// TODO multithread this
-		
 		// x axis
-		for (int i = 0; i < numbOfBoxesWide; i++)
+		for (int i = 0; i < numbChunksWide; i++)
 		{
 			// z axis
-			for (int j = 0; j < numbOfBoxesWide; j++)
+			for (int j = 0; j < numbChunksWide; j++)
 			{
+				// skip the middle
+				// (As the player moves some chunks will overlap or be missing,
+				// this is just how chunk loading/unloading works. This can hopefully
+				// be hidden with careful use of fog)
+				int middle = (numbChunksWide / 2) - 1;
+				if (isCoordinateInLoadedArea(i, j, middle))
+				{
+					continue;
+//					colorArray[i][j] = null;
+//					lodArray[i][j] = null;
+				}
+				
+				
 				// set where this square will be drawn in the world
 				double xOffset = -cameraX + // start at x = 0
 							(LOD_WIDTH * i) + // offset by the number of LOD blocks
@@ -173,8 +182,8 @@ public class LodRenderer
 					// note: for some reason if any color or lod object are set here
 					// it causes the game to use 100% gpu, all of it undefined in the debug menu
 					// and drop to ~6 fps.
-					colorArray[i + (j * numbOfBoxesWide)] = null;
-					lodArray[i + (j * numbOfBoxesWide)] = null;
+//					colorArray[i][j] = null;
+//					lodArray[i][j] = null;
 					
 					continue;
 				}
@@ -197,28 +206,15 @@ public class LodRenderer
 					if (i == 0 && j == 0)
 						c = red;
 					
-					colorArray[i + (j * numbOfBoxesWide)] = c;
+					colorArray[i][j] = c; // TODO does this work? if so why?
 				}
 				
-				// skip the middle
-				// (As the player moves some chunks will overlap or be missing,
-				// this is just how chunk loading/unloading works. This can hopefully
-				// be hidden with careful use of fog)
-				int middle = (numbOfBoxesWide / 2) - 1;
-				int width = mc.gameSettings.renderDistanceChunks;
-				if ((i >= middle - width && i <= middle + width) && (j >= middle - width && j <= middle + width))
-				{
-					colorArray[i + (j * numbOfBoxesWide)] = null;
-					lodArray[i + (j * numbOfBoxesWide)] = null;
-				}
-				else
-				{
-					// add the color to the array
-					colorArray[i + (j * numbOfBoxesWide)] = c;
-					
-					// add the new box to the array
-					lodArray[i + (j * numbOfBoxesWide)] = new AxisAlignedBB(0, lod.bottom[LodLocation.NE.value], 0, LOD_WIDTH, lod.top[LodLocation.NE.value], LOD_WIDTH).offset(xOffset, yOffset, zOffset);
-				}
+				
+				// add the color to the array
+				colorArray[i][j] = c;
+				
+				// add the new box to the array
+				lodArray[i][j] = new AxisAlignedBB(0, lod.bottom[LodLocation.NE.value], 0, LOD_WIDTH, lod.top[LodLocation.NE.value], LOD_WIDTH).offset(xOffset, yOffset, zOffset);
 			}
 		}
 		
@@ -293,41 +289,23 @@ public class LodRenderer
 	}
 	
 	
-
-
-		
-
-
-
-	/**
-	 * create a new projection matrix and send it over to the GPU
-	 * @param partialTicks how many ticks into the frame we are
-	 * @return true if the matrix was successfully created and sent to the GPU, false otherwise
-	 */
-	private void setProjectionMatrix(float partialTicks)
-	{
-		// create a new view frustum so that the squares can be drawn outside the normal view distance
-		GlStateManager.matrixMode(GL11.GL_PROJECTION);
-		GlStateManager.loadIdentity();	
-		
-		// only continue if we can get the FOV
-		if (reflectionHandler.fovMethod != null)
-		{
-			Project.gluPerspective(reflectionHandler.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.5F, farPlaneDistance * 12);
-		}
-		
-		// we weren't able to set up the projection matrix
-		return;
-	}
+	
+	
+	
+	
+	
 	
 	
 	/**
 	 * draw an array of cubes (or squares) with the given colors.
-	 * @param bbArray bounding boxes to draw
-	 * @param colorArray color of each box to draw
+	 * @param lods bounding boxes to draw
+	 * @param colors color of each box to draw
 	 */
-	private void sendToGPUAndDraw(AxisAlignedBB[] bbArray, Color[] colorArray, double cameraX, double cameraY, double cameraZ)
+	private void sendToGPUAndDraw(AxisAlignedBB[][] lods, Color[][] colors, double cameraX, double cameraY, double cameraZ)
 	{
+		int numbChunksWide = lods.length;
+		
+		AxisAlignedBB bb;
 		int red;
 		int green;
 		int blue;
@@ -335,78 +313,100 @@ public class LodRenderer
 		
 		bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 		
-		int colorIndex = 0;
-		for (AxisAlignedBB bb : bbArray)
+		// x axis
+		for (int i = 0; i < numbChunksWide; i++)
 		{
-			if (bb != null && colorArray[colorIndex] != null)
+			// z axis
+			for (int j = 0; j < numbChunksWide; j++)
 			{
+				// skip the middle
+				// (As the player moves some chunks will overlap or be missing,
+				// this is just how chunk loading/unloading works. This can hopefully
+				// be hidden with careful use of fog)
+				int middle = (numbChunksWide / 2) - 1;
+				if (isCoordinateInLoadedArea(i, j, middle))
+				{
+					continue;
+				}
+				
+				
+				if (lods[i][j] == null || colors[i][j] == null)
+					continue;
+				
+				bb = lods[i][j];
+				
 				// get the color of this LOD object
-				red = colorArray[colorIndex].getRed();
-				green = colorArray[colorIndex].getGreen();
-				blue = colorArray[colorIndex].getBlue();
-				alpha = colorArray[colorIndex].getAlpha();
-				double offset = 0.01;
+				red = colors[i][j].getRed();
+				green = colors[i][j].getGreen();
+				blue = colors[i][j].getBlue();
+				alpha = colors[i][j].getAlpha();
 				
 				// only draw all 6 sides if there is some thickness to the box
 				if (bb.minY != bb.maxY)
 				{
 					// top (facing up)
-					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
 					// bottom (facing down)
-					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
 					
 					// south (facing -Z) 
-					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
 					// north (facing +Z)
-					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
 					
 					// west (facing -X)
-					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
 					// east (facing +X)
-					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
 				}
 				else
 				{
 					// bottom (facing up)
-					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.minX + offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
-					bufferBuilder.pos(bb.maxX - offset, bb.minY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+					bufferBuilder.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
 					
 					// top (facing up)
-//					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
-//					bufferBuilder.pos(bb.minX + offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
-//					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.maxZ - offset).color(red, green, blue, alpha).endVertex();
-//					bufferBuilder.pos(bb.maxX - offset, bb.maxY, bb.minZ + offset).color(red, green, blue, alpha).endVertex();
+//					bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+//					bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+//					bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
+//					bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
 				}
-			}
-			// so we can get the next color
-			colorIndex++;			
-		}
+				
+			} // z axis
+		} // x axis
 		
 		mc.mcProfiler.endStartSection("LOD draw");
 		
 		// draw the LODs
 		tessellator.draw();
 	}
+	
+	
+	
+	
+	//=================//
+	// Setup Functions //
+	//=================//
 	
 	private void setupFog(FogDistanceMode fogMode, FogQuality fogQuality)
 	{
@@ -465,7 +465,48 @@ public class LodRenderer
 		GlStateManager.enableFog();
 	}
 	
+
+	/**
+	 * create a new projection matrix and send it over to the GPU
+	 * @param partialTicks how many ticks into the frame we are
+	 * @return true if the matrix was successfully created and sent to the GPU, false otherwise
+	 */
+	private void setProjectionMatrix(float partialTicks)
+	{
+		// create a new view frustum so that the squares can be drawn outside the normal view distance
+		GlStateManager.matrixMode(GL11.GL_PROJECTION);
+		GlStateManager.loadIdentity();	
+		
+		// only continue if we can get the FOV
+		if (reflectionHandler.fovMethod != null)
+		{
+			Project.gluPerspective(reflectionHandler.getFov(mc, partialTicks, true), (float) mc.displayWidth / (float) mc.displayHeight, 0.5F, farPlaneDistance * 12);
+		}
+		
+		// we weren't able to set up the projection matrix
+		return;
+	}
 	
+	
+	
+	
+	//==================//
+	// Helper Functions //
+	//==================//
+	
+	
+	/**
+	 * Returns if the given coordinate is in the loaded area of the world.
+	 * @param middle the center of the loaded world
+	 */
+	private boolean isCoordinateInLoadedArea(int x, int z, int middle)
+	{
+		return (x >= middle - mc.gameSettings.renderDistanceChunks 
+				&& x <= middle + mc.gameSettings.renderDistanceChunks) 
+				&& 
+				(z >= middle - mc.gameSettings.renderDistanceChunks 
+				&& z <= middle + mc.gameSettings.renderDistanceChunks);
+	}
 	
 	
 	
