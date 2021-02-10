@@ -296,11 +296,11 @@ public class LodRenderer
 	
 	
 	
-	//private ExecutorService threadPool = Executors.newFixedThreadPool(8);
+	private int numbThreads = 4;
+	private volatile BuildBufferThread[] threads = new BuildBufferThread[numbThreads];
+	private volatile ByteBuffer[] buffers = new ByteBuffer[numbThreads];
 	
-	private int numbThreads = 1;
-	private BuildBufferThread[] threads = new BuildBufferThread[numbThreads];
-	private ByteBuffer[] buffers = new ByteBuffer[numbThreads];
+	private int previousChunkDistance = 0;
 	
 	/**
 	 * draw an array of cubes (or squares) with the given colors.
@@ -309,12 +309,16 @@ public class LodRenderer
 	 */
 	private void sendToGPUAndDraw(AxisAlignedBB[][] lods, Color[][] colors)
 	{
+		// mc.mcProfiler.endStartSection("LOD build buffer");
+		
 		for(int i = 0; i < numbThreads; i++)
 		{
-			if (buffers[i] == null)
+			if (buffers[i] == null || previousChunkDistance != mc.gameSettings.renderDistanceChunks)
 			{
-				buffers[i] = ByteBuffer.allocateDirect(bufferBuilder.getByteBuffer().capacity()); // 8388608
+				buffers[i] = ByteBuffer.allocateDirect(8388608); //bufferBuilder.getByteBuffer().capacity());
 				buffers[i].order(ByteOrder.LITTLE_ENDIAN);
+				if(i == 0)
+					System.out.println(buffers[i].toString());
 			}
 			int pos = bufferBuilder.getByteBuffer().position();
 			buffers[i].position(pos);
@@ -325,37 +329,16 @@ public class LodRenderer
 			else
 				threads[i].setNewData(buffers[i], lods, colors, i, numbThreads);
 			threads[i].run();
+		}
+		for(int i = 0; i < numbThreads; i++)
+		{
 			try
 			{ threads[i].join(); }
 			catch(Exception e)
 			{ e.printStackTrace(); }
 		}
-//		for(int i = 0; i < 8; i++)
-//		{
-//			try
-//			{ threads[i].join(); }
-//			catch(Exception e)
-//			{ e.printStackTrace(); }
-//		}
 		
-//		ByteBuffer tessBuffer = bufferBuilder.getByteBuffer();
-//		ByteBuffer demoBuffer = buffers[0];
-//		
-//		boolean same = true;
-//		for(int i = 0; i < tessBuffer.capacity(); i++)
-//		{
-//			int testIndex = i;
-//			byte demoVal = demoBuffer.get(testIndex);
-//			byte tessVal = tessBuffer.get(testIndex);
-//			if(demoVal != tessVal)
-//			{
-//				System.out.println("ye-no " + i);
-//				same = false;
-//				break;
-//			}
-//		}
-//		if (same)
-//			System.out.println("they are the same jim");
+		previousChunkDistance = mc.gameSettings.renderDistanceChunks;
 		
 		
 		mc.mcProfiler.endStartSection("LOD draw");
@@ -365,8 +348,8 @@ public class LodRenderer
 			bufferBuilder.putBulkData(buffers[i]);
 			tessellator.draw();
 			
-			// this is required otherwise nothing is drawn
-			bufferBuilder.getByteBuffer().clear();
+			bufferBuilder.getByteBuffer().clear(); // this is required otherwise nothing is drawn
+			bufferBuilder.reset();
 		}
 	}
 	
