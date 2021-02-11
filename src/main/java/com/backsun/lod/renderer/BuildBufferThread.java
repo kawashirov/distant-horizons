@@ -2,6 +2,7 @@ package com.backsun.lod.renderer;
 import java.awt.Color;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.concurrent.Callable;
 
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -10,7 +11,7 @@ import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 
-public class BuildBufferThread extends Thread
+public class BuildBufferThread implements Callable<Boolean>
 {
 	public ByteBuffer buffer;
 	public AxisAlignedBB[][] lods;
@@ -52,7 +53,7 @@ public class BuildBufferThread extends Thread
 	}
 	
 	@Override
-	public void run()
+	public Boolean call()
 	{
 		int numbChunksWide = lods.length;
 		
@@ -143,6 +144,8 @@ public class BuildBufferThread extends Thread
 				
 			} // z axis
 		} // x axis
+		
+		return true;
 	}
 	
 	private void addPosAndColor(ByteBuffer buffer, double x, double y, double z, int red, int green, int blue, int alpha)

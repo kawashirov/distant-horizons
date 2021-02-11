@@ -3,6 +3,9 @@ package com.backsun.lod.renderer;
 import java.awt.Color;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Project;
@@ -86,6 +89,9 @@ public class LodRenderer
 			// FOV, don't render anything
 			return;
 		}
+		
+		
+		
 		
 		
 		// used for debugging and viewing how long different processes take
@@ -296,9 +302,10 @@ public class LodRenderer
 	
 	
 	
-	private int numbThreads = 4;
-	private volatile BuildBufferThread[] threads = new BuildBufferThread[numbThreads];
+	private int numbThreads = Runtime.getRuntime().availableProcessors();
+	private volatile ArrayList<BuildBufferThread> threads = new ArrayList<BuildBufferThread>();
 	private volatile ByteBuffer[] buffers = new ByteBuffer[numbThreads];
+	private ExecutorService threadPool = Executors.newFixedThreadPool(numbThreads);
 	
 	private int previousChunkDistance = 0;
 	
@@ -317,36 +324,34 @@ public class LodRenderer
 			{
 				buffers[i] = ByteBuffer.allocateDirect(8388608); //bufferBuilder.getByteBuffer().capacity());
 				buffers[i].order(ByteOrder.LITTLE_ENDIAN);
-				if(i == 0)
-					System.out.println(buffers[i].toString());
 			}
 			int pos = bufferBuilder.getByteBuffer().position();
 			buffers[i].position(pos);
 			
 			
-			if(threads[i] == null)
-				threads[i] = new BuildBufferThread(buffers[i], lods, colors, i, numbThreads);
+			if(i >= threads.size())
+				threads.add(new BuildBufferThread(buffers[i], lods, colors, i, numbThreads));
 			else
-				threads[i].setNewData(buffers[i], lods, colors, i, numbThreads);
-			threads[i].run();
-		}
-		for(int i = 0; i < numbThreads; i++)
-		{
-			try
-			{ threads[i].join(); }
-			catch(Exception e)
-			{ e.printStackTrace(); }
+				threads.get(i).setNewData(buffers[i], lods, colors, i, numbThreads);
 		}
 		
+		try {
+			threadPool.invokeAll(threads);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 		previousChunkDistance = mc.gameSettings.renderDistanceChunks;
 		
 		
-		mc.mcProfiler.endStartSection("LOD draw");
+		mc.mcProfiler.endStartSection("LOD draw setup");
 		for(int i = 0; i < numbThreads; i++)
 		{
 			bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
 			bufferBuilder.putBulkData(buffers[i]);
+			
+			mc.mcProfiler.endStartSection("LOD draw");
 			tessellator.draw();
+			mc.mcProfiler.endStartSection("LOD draw setup");
 			
 			bufferBuilder.getByteBuffer().clear(); // this is required otherwise nothing is drawn
 			bufferBuilder.reset();
