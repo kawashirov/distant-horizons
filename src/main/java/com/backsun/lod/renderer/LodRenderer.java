@@ -3,9 +3,12 @@ package com.backsun.lod.renderer;
 import java.awt.Color;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.util.glu.Project;
@@ -42,14 +45,44 @@ public class LodRenderer
 	public static final int LOD_WIDTH = 16;
 	public static final int MINECRAFT_CHUNK_WIDTH = 16;
 	
-	public int defaultLodHeight = 0;
-	
 	private Tessellator tessellator;
 	private BufferBuilder bufferBuilder;
 	
 	private ReflectionHandler reflectionHandler;
 	
 	public LodDimension dimension = null;
+	
+	
+	/** How many threads should be used for building the render buffer. <br>
+	 *  After testing I found that 1 thread is the fastest, since we can't build
+	 *  to the same byte buffer, and thus have to make a separate render call for
+	 *  each thread.
+	 *  <br>
+	 *  <br>
+	 *  num Threads, % of frame time, fps, frame time <br>
+	 *  1:	78%		62 fps		12 ms <br>
+	 *  2:	63%		69 fps		11 ms <br>
+	 *  4:	37%		65 fps		11 ms <br>
+	 *  8:	30%		44 fps		20 ms <br>
+	 *  16:	33%		25 fps		36 ms <br>
+	 */
+	private int numbThreads = 1;
+	private int maxThreads = Runtime.getRuntime().availableProcessors();
+	private ArrayList<BuildBufferThread> bufferThreads = new ArrayList<BuildBufferThread>();
+	private volatile ByteBuffer[] buffers = new ByteBuffer[maxThreads];
+	private ExecutorService threadPool = Executors.newFixedThreadPool(maxThreads);
+	
+	/** This is used to determine if the LODs should be regenerated */
+	private int previousChunkRenderDistance = 0;
+	/** This is used to determine if the LODs should be regenerated */
+	private int prevChunkX = 0;
+	/** This is used to determine if the LODs should be regenerated */
+	private int prevChunkZ = 0;
+	
+	/** if this is true the LODs should be regenerated */
+	private boolean regen = false;
+	
+	
 	
 	
 	
@@ -75,6 +108,32 @@ public class LodRenderer
 			return;
 		}
 		
+		if (reflectionHandler.fovMethod == null)
+		{
+			// we aren't able to get the user's
+			// FOV, don't render anything
+			return;
+		}
+		
+		// should the LODs be regenerated?
+		if ((int)Minecraft.getMinecraft().player.posX / LodChunk.WIDTH != prevChunkX ||
+			(int)Minecraft.getMinecraft().player.posZ / LodChunk.WIDTH != prevChunkZ ||
+			previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks ||
+			dimension != newDimension)
+		{
+			regen = true;
+			
+			prevChunkX = (int)Minecraft.getMinecraft().player.posX / LodChunk.WIDTH;
+			prevChunkZ = (int)Minecraft.getMinecraft().player.posZ / LodChunk.WIDTH;
+		}
+		else
+		{
+			// nope, the player hasn't moved, the
+			// render distance hasn't changed, and
+			// the dimension is the same
+			regen = false;
+		}
+		
 		dimension = newDimension;
 		if (dimension == null)
 		{
@@ -83,12 +142,6 @@ public class LodRenderer
 			return;
 		}
 		
-		if (reflectionHandler.fovMethod == null)
-		{
-			// we aren't able to get the user's
-			// FOV, don't render anything
-			return;
-		}
 		
 		
 		
@@ -101,6 +154,7 @@ public class LodRenderer
 		@SuppressWarnings("unused")
 		long startTime = System.nanoTime();
 				
+		
 		
 		// color setup
 		int alpha = 255; // 0 - 255
@@ -154,79 +208,77 @@ public class LodRenderer
 		// create the LODs //
 		//=================//
 		
-		mc.mcProfiler.endStartSection("LOD generation");
-		
-		// x axis
-		for (int i = 0; i < numbChunksWide; i++)
+		if (regen)
 		{
-			// z axis
-			for (int j = 0; j < numbChunksWide; j++)
+			mc.mcProfiler.endStartSection("LOD generation");
+			
+			// x axis
+			for (int i = 0; i < numbChunksWide; i++)
 			{
-				// skip the middle
-				// (As the player moves some chunks will overlap or be missing,
-				// this is just how chunk loading/unloading works. This can hopefully
-				// be hidden with careful use of fog)
-				int middle = (numbChunksWide / 2) - 1;
-				if (RenderUtil.isCoordinateInLoadedArea(i, j, middle))
+				// z axis
+				for (int j = 0; j < numbChunksWide; j++)
 				{
-					continue;
-//					colorArray[i][j] = null;
-//					lodArray[i][j] = null;
-				}
-				
-				
-				// set where this square will be drawn in the world
-				double xOffset = -cameraX + // start at x = 0
-							(LOD_WIDTH * i) + // offset by the number of LOD blocks
-							startX; // offset so the center LOD block is centered underneath the player
-				double yOffset = -cameraY;
-				double zOffset = -cameraZ + (LOD_WIDTH * j) + startZ;
-				
-				int chunkX = i + (startX / MINECRAFT_CHUNK_WIDTH);
-				int chunkZ = j + (startZ / MINECRAFT_CHUNK_WIDTH);
-				
-				LodChunk lod = dimension.getLodFromCoordinates(chunkX, chunkZ); // new LodChunk(); //   
-				if (lod == null)
-				{
-					// note: for some reason if any color or lod object are set here
-					// it causes the game to use 100% gpu, all of it undefined in the debug menu
-					// and drop to ~6 fps.
-//					colorArray[i][j] = null;
-//					lodArray[i][j] = null;
+					// skip the middle
+					// (As the player moves some chunks will overlap or be missing,
+					// this is just how chunk loading/unloading works. This can hopefully
+					// be hidden with careful use of fog)
+					int middle = (numbChunksWide / 2) - 1;
+					if (RenderUtil.isCoordinateInLoadedArea(i, j, middle))
+					{
+						continue;
+					}
 					
-					continue;
-				}
-				
-				Color c = new Color(
-						(int) (lod.colors[ColorDirection.TOP.value].getRed() * sunBrightness),
-						(int) (lod.colors[ColorDirection.TOP.value].getGreen() * sunBrightness),
-						(int) (lod.colors[ColorDirection.TOP.value].getBlue() * sunBrightness),
-						lod.colors[ColorDirection.TOP.value].getAlpha());
-				
-				
-				// if debugging draw the squares as a black and white checker board
-				if (debugging)
-				{
-					if ((chunkX + chunkZ) % 2 == 0)
-						c = white;
-					else
-						c = black;
-					// draw the first square as red
-					if (i == 0 && j == 0)
-						c = red;
 					
-					colorArray[i][j] = c; // TODO does this work? if so why?
+					// set where this square will be drawn in the world
+					double xOffset = (LOD_WIDTH * i) + // offset by the number of LOD blocks
+									startX; // offset so the center LOD block is centered underneath the player
+					double yOffset = 0;
+					double zOffset = (LOD_WIDTH * j) + startZ;
+					
+					int chunkX = i + (startX / MINECRAFT_CHUNK_WIDTH);
+					int chunkZ = j + (startZ / MINECRAFT_CHUNK_WIDTH);
+					
+					LodChunk lod = dimension.getLodFromCoordinates(chunkX, chunkZ); // new LodChunk(); //   
+					if (lod == null)
+					{
+						// note: for some reason if any color or lod object are set here
+						// it causes the game to use 100% gpu, all of it undefined in the debug menu
+						// and drop to ~6 fps.
+//						colorArray[i][j] = null;
+//						lodArray[i][j] = null;
+						
+						continue;
+					}
+					
+					Color c = new Color(
+							(lod.colors[ColorDirection.TOP.value].getRed()),
+							(lod.colors[ColorDirection.TOP.value].getGreen()),
+							(lod.colors[ColorDirection.TOP.value].getBlue()),
+							lod.colors[ColorDirection.TOP.value].getAlpha());
+					
+					
+					// if debugging draw the squares as a black and white checker board
+					if (debugging)
+					{
+						if ((chunkX + chunkZ) % 2 == 0)
+							c = white;
+						else
+							c = black;
+						// draw the first square as red
+						if (i == 0 && j == 0)
+							c = red;
+						
+						colorArray[i][j] = c; // TODO does this work? if so why?
+					}
+					
+					// add the color to the array
+					colorArray[i][j] = c;
+					// add the new box to the array
+					lodArray[i][j] = new AxisAlignedBB(0, lod.bottom[LodLocation.NE.value], 0, LOD_WIDTH, lod.top[LodLocation.NE.value], LOD_WIDTH).offset(xOffset, yOffset, zOffset);
 				}
-				
-				
-				// add the color to the array
-				colorArray[i][j] = c;
-				
-				// add the new box to the array
-				lodArray[i][j] = new AxisAlignedBB(0, lod.bottom[LodLocation.NE.value], 0, LOD_WIDTH, lod.top[LodLocation.NE.value], LOD_WIDTH).offset(xOffset, yOffset, zOffset);
 			}
+			
 		}
-		
 		
 		
 		
@@ -302,13 +354,6 @@ public class LodRenderer
 	
 	
 	
-	private int numbThreads = Runtime.getRuntime().availableProcessors();
-	private volatile ArrayList<BuildBufferThread> threads = new ArrayList<BuildBufferThread>();
-	private volatile ByteBuffer[] buffers = new ByteBuffer[numbThreads];
-	private ExecutorService threadPool = Executors.newFixedThreadPool(numbThreads);
-	
-	private int previousChunkDistance = 0;
-	
 	/**
 	 * draw an array of cubes (or squares) with the given colors.
 	 * @param lods bounding boxes to draw
@@ -316,45 +361,71 @@ public class LodRenderer
 	 */
 	private void sendToGPUAndDraw(AxisAlignedBB[][] lods, Color[][] colors)
 	{
+		numbThreads = 1;
 		// mc.mcProfiler.endStartSection("LOD build buffer");
 		
-		for(int i = 0; i < numbThreads; i++)
+		if (numbThreads != bufferThreads.size())
 		{
-			if (buffers[i] == null || previousChunkDistance != mc.gameSettings.renderDistanceChunks)
+			bufferThreads.clear();
+			for(int i = 0; i < numbThreads; i++)
+				bufferThreads.add(new BuildBufferThread());
+			regen = true;
+		}
+		
+		List<Future<ByteBuffer>> futures = new ArrayList<>();
+		if (regen)
+		{
+			for(int i = 0; i < numbThreads; i++)
 			{
-				buffers[i] = ByteBuffer.allocateDirect(8388608); //bufferBuilder.getByteBuffer().capacity());
-				buffers[i].order(ByteOrder.LITTLE_ENDIAN);
+				// TODO I need to find a better way of clearing the buffers between frames
+				// and when changing dimensions
+				if (regen || buffers[i] == null || previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks)
+				{
+					buffers[i] = ByteBuffer.allocateDirect(8388608); //bufferBuilder.getByteBuffer().capacity());
+					buffers[i].order(ByteOrder.LITTLE_ENDIAN);
+				}
+				
+				int pos = bufferBuilder.getByteBuffer().position();
+				buffers[i].position(pos);
+				
+				bufferThreads.get(i).setNewData(buffers[i], lods, colors, i, numbThreads);
 			}
-			int pos = bufferBuilder.getByteBuffer().position();
-			buffers[i].position(pos);
 			
-			
-			if(i >= threads.size())
-				threads.add(new BuildBufferThread(buffers[i], lods, colors, i, numbThreads));
-			else
-				threads.get(i).setNewData(buffers[i], lods, colors, i, numbThreads);
+			try {
+				futures = threadPool.invokeAll(bufferThreads);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			previousChunkRenderDistance = mc.gameSettings.renderDistanceChunks;
 		}
-		
-		try {
-			threadPool.invokeAll(threads);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		previousChunkDistance = mc.gameSettings.renderDistanceChunks;
-		
 		
 		mc.mcProfiler.endStartSection("LOD draw setup");
 		for(int i = 0; i < numbThreads; i++)
 		{
-			bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-			bufferBuilder.putBulkData(buffers[i]);
-			
-			mc.mcProfiler.endStartSection("LOD draw");
-			tessellator.draw();
-			mc.mcProfiler.endStartSection("LOD draw setup");
-			
-			bufferBuilder.getByteBuffer().clear(); // this is required otherwise nothing is drawn
-			bufferBuilder.reset();
+			try
+			{
+				if (regen)
+					buffers[i] = futures.get(i).get();
+				else
+				{
+					int pos = bufferBuilder.getByteBuffer().position();
+					buffers[i].position(pos);
+				}
+				
+				bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+				bufferBuilder.putBulkData(buffers[i]);
+				
+				mc.mcProfiler.endStartSection("LOD draw");
+				tessellator.draw();
+				mc.mcProfiler.endStartSection("LOD draw setup");
+				
+				bufferBuilder.getByteBuffer().clear(); // this is required otherwise nothing is drawn
+				bufferBuilder.reset(); // I don't know if this is required :P
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
 		}
 	}
 	

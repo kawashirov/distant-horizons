@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 
-public class BuildBufferThread implements Callable<Boolean>
+public class BuildBufferThread implements Callable<ByteBuffer>
 {
 	public ByteBuffer buffer;
 	public AxisAlignedBB[][] lods;
@@ -26,6 +26,14 @@ public class BuildBufferThread implements Callable<Boolean>
 	private VertexFormatElement vertexFormatElement = null; 
 	
 	
+	
+	BuildBufferThread()
+	{
+		vertexCount = 0;
+		vertexFormat = DefaultVertexFormats.POSITION_COLOR;
+		vertexFormatIndex = 0;
+		vertexFormatElement = vertexFormat.getElement(vertexFormatIndex); 
+	}
 	
 	BuildBufferThread(ByteBuffer newByteBuffer, AxisAlignedBB[][] newLods, Color[][] newColors, int threadNumber, int totalThreads)
 	{
@@ -53,7 +61,7 @@ public class BuildBufferThread implements Callable<Boolean>
 	}
 	
 	@Override
-	public Boolean call()
+	public ByteBuffer call()
 	{
 		int numbChunksWide = lods.length;
 		
@@ -145,7 +153,7 @@ public class BuildBufferThread implements Callable<Boolean>
 			} // z axis
 		} // x axis
 		
-		return true;
+		return buffer;
 	}
 	
 	private void addPosAndColor(ByteBuffer buffer, double x, double y, double z, int red, int green, int blue, int alpha)
