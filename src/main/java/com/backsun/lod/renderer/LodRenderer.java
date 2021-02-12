@@ -295,15 +295,30 @@ public class LodRenderer
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
-		GL11.glEnable(GL11.GL_BLEND);
+//		GL11.glEnable(GL11.GL_BLEND); // this shouldn't be needed unless I do something with transparancy
+		
+		GlStateManager.translate(-cameraX, -cameraY, -cameraZ);
 		
 		setProjectionMatrix(partialTicks);
 		setupFog(FogDistanceMode.NEAR, reflectionHandler.getFogType());
 		
 		
+		GL11.glEnable(GL11.GL_COLOR_MATERIAL); // have the color be used as the material (this allows lighting to be enabled)
 		
+		// mc.gameSettings.gammaSetting
+		float lightStrength = sunBrightness; // TODO change based on day and gamma setting
+		float lightAmbient[] = {lightStrength, lightStrength, lightStrength, 1.0f};  // Ambient Light Values
+        float lightDiffuse[] = {0.0f, 0.0f, 0.0f, 0.0f};	// Diffuse Light Values
+        float lightPosition[] = {0.0f, 0.0f, 0.0f, 1.0f};	// Light Position
+
+        ByteBuffer temp = ByteBuffer.allocateDirect(16);
+        temp.order(ByteOrder.nativeOrder());
+        GL11.glLight(GL11.GL_LIGHT1, GL11.GL_AMBIENT, (FloatBuffer) temp.asFloatBuffer().put(lightAmbient).flip());
+        GL11.glLight(GL11.GL_LIGHT1, GL11.GL_DIFFUSE, (FloatBuffer) temp.asFloatBuffer().put(lightDiffuse).flip());
+        GL11.glLight(GL11.GL_LIGHT1, GL11.GL_POSITION, (FloatBuffer) temp.asFloatBuffer().put(lightPosition).flip());
+        GL11.glEnable(GL11.GL_LIGHT1); // Enable the above lighting
 		
-		
+        GlStateManager.enableLighting();
 		
 		
 		//===========//
