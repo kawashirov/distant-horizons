@@ -274,7 +274,14 @@ public class LodRenderer
 					// add the color to the array
 					colorArray[i][j] = c;
 					// add the new box to the array
-					lodArray[i][j] = new AxisAlignedBB(0, lod.bottom[LodLocation.NE.value], 0, LOD_WIDTH, lod.top[LodLocation.NE.value], LOD_WIDTH).offset(xOffset, yOffset, zOffset);
+					int topPoint = getLodHeightPoint(lod.top);
+					int bottomPoint = getLodHeightPoint(lod.bottom);
+					
+					// don't draw an LOD if it is empty
+					if (topPoint == -1 && bottomPoint == -1)
+						continue;
+					
+					lodArray[i][j] = new AxisAlignedBB(0, bottomPoint, 0, LOD_WIDTH, topPoint, LOD_WIDTH).offset(xOffset, yOffset, zOffset);
 				}
 			}
 			
@@ -305,20 +312,21 @@ public class LodRenderer
 		
 		GL11.glEnable(GL11.GL_COLOR_MATERIAL); // have the color be used as the material (this allows lighting to be enabled)
 		
+//		System.out.println(mc.world.provider.getSunBrightnessFactor(partialTicks) + "\t" + sunBrightness);
 		// mc.gameSettings.gammaSetting
-		float lightStrength = sunBrightness; // TODO change based on day and gamma setting
-		float lightAmbient[] = {lightStrength, lightStrength, lightStrength, 1.0f};  // Ambient Light Values
-        float lightDiffuse[] = {0.0f, 0.0f, 0.0f, 0.0f};	// Diffuse Light Values
-        float lightPosition[] = {0.0f, 0.0f, 0.0f, 1.0f};	// Light Position
-
-        ByteBuffer temp = ByteBuffer.allocateDirect(16);
-        temp.order(ByteOrder.nativeOrder());
-        GL11.glLight(GL11.GL_LIGHT1, GL11.GL_AMBIENT, (FloatBuffer) temp.asFloatBuffer().put(lightAmbient).flip());
-        GL11.glLight(GL11.GL_LIGHT1, GL11.GL_DIFFUSE, (FloatBuffer) temp.asFloatBuffer().put(lightDiffuse).flip());
-        GL11.glLight(GL11.GL_LIGHT1, GL11.GL_POSITION, (FloatBuffer) temp.asFloatBuffer().put(lightPosition).flip());
-        GL11.glEnable(GL11.GL_LIGHT1); // Enable the above lighting
+		float lightStrength = sunBrightness * mc.world.provider.getSunBrightnessFactor(partialTicks); // TODO change based on day and gamma setting
+		float lightAmbient[] = {lightStrength, lightStrength, lightStrength, 1.0f};
+//		float lightDiffuse[] = {0.0f, 0.0f, 0.0f, 0.0f};
+//		float lightPosition[] = {0.0f, 0.0f, 0.0f, 1.0f};
+        	
+		ByteBuffer temp = ByteBuffer.allocateDirect(16);
+		temp.order(ByteOrder.nativeOrder());
+		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_AMBIENT, (FloatBuffer) temp.asFloatBuffer().put(lightAmbient).flip());
+//		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_DIFFUSE, (FloatBuffer) temp.asFloatBuffer().put(lightDiffuse).flip());
+//		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_POSITION, (FloatBuffer) temp.asFloatBuffer().put(lightPosition).flip());
+		GL11.glEnable(GL11.GL_LIGHT1); // Enable the above lighting
 		
-        GlStateManager.enableLighting();
+		GlStateManager.enableLighting();
 		
 		
 		//===========//
@@ -533,6 +541,20 @@ public class LodRenderer
 		return;
 	}
 	
+	
+	/**
+	 * Returns -1 if there are no valid points
+	 */
+	private int getLodHeightPoint(short[] heightPoints)
+	{
+		if (heightPoints[LodLocation.NE.value] != -1)
+			return heightPoints[LodLocation.NE.value];
+		if (heightPoints[LodLocation.NW.value] != -1)
+			return heightPoints[LodLocation.NW.value];
+		if (heightPoints[LodLocation.SE.value] != -1)
+			return heightPoints[LodLocation.NE.value];
+		return heightPoints[LodLocation.NE.value];
+	}
 	
 	
 }

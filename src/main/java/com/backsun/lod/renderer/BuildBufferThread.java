@@ -99,7 +99,7 @@ public class BuildBufferThread implements Callable<ByteBuffer>
 				blue = colors[i][j].getBlue();
 				alpha = colors[i][j].getAlpha();
 				
-				// only draw all 6 sides if there is some thickness to the box
+				
 				if (bb.minY != bb.maxY)
 				{
 					// top (facing up)
@@ -137,17 +137,40 @@ public class BuildBufferThread implements Callable<ByteBuffer>
 				}
 				else
 				{
-					// bottom (facing up)
-//						buffer.pos(bb.minX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
-//						buffer.pos(bb.minX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-//						buffer.pos(bb.maxX, bb.minY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-//						buffer.pos(bb.maxX, bb.minY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					// render this LOD as one block thick
 					
 					// top (facing up)
-//						bufferBuilder.pos(bb.minX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
-//						bufferBuilder.pos(bb.minX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-//						bufferBuilder.pos(bb.maxX, bb.maxY, bb.maxZ).color(red, green, blue, alpha).endVertex();
-//						bufferBuilder.pos(bb.maxX, bb.maxY, bb.minZ).color(red, green, blue, alpha).endVertex();
+					addPosAndColor(buffer, bb.minX, bb.minY+1, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.minX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.maxX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.maxX, bb.minY+1, bb.minZ, red, green, blue, alpha);
+					// bottom (facing down)
+					addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
+
+					// south (facing -Z) 
+					addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.maxX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.minX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					// north (facing +Z)
+					addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.minX, bb.minY+1, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.maxX, bb.minY+1, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
+
+					// west (facing -X)
+					addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.minX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.minX, bb.minY+1, bb.minZ, red, green, blue, alpha);
+					// east (facing +X)
+					addPosAndColor(buffer, bb.maxX, bb.minY+1, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.maxX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
 				}
 				
 			} // z axis
