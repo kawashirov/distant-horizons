@@ -5,6 +5,7 @@ import java.awt.Color;
 import com.backsun.lod.util.enums.ColorDirection;
 import com.backsun.lod.util.enums.LodLocation;
 
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.util.math.BlockPos;
@@ -29,8 +30,12 @@ public class LodChunk
 	
 	public static final int WIDTH = 16;
 	
-	private final int CHUNK_DATA_WIDTH = WIDTH;
-	private final int CHUNK_DATA_HEIGHT = WIDTH;
+	private static final int CHUNK_DATA_WIDTH = WIDTH;
+	private static final int CHUNK_DATA_HEIGHT = WIDTH;
+	
+	private final int airBlockId = Block.getIdFromBlock(Block.getBlockFromName("air"));
+	private final int waterBlockId = Block.getIdFromBlock(Block.getBlockFromName("water"));
+	private final int waterColor = colorToInt(new Color(36, 50, 171));
 	
 	/**
 	 * This is how many blocks are
@@ -388,7 +393,7 @@ public class LodChunk
 				}
 				else
 				{
-					if(data[dataIndex].get(x, y, z) != null && data[dataIndex].get(x, y, z).isOpaqueCube())
+					if(data[dataIndex].get(x, y, z) != null && Block.getIdFromBlock(data[dataIndex].get(x, y, z).getBlock()) != airBlockId)
 					{
 						// we found a valid block in
 						// in this layer
@@ -461,7 +466,6 @@ public class LodChunk
 		int topMin = 0;
 		int topIncrement =  goTopDown? -1 : 1;
 		
-		
 		for(int x = 0; x < CHUNK_DATA_WIDTH; x++)
 		{
 			for(int z = 0; z < CHUNK_DATA_WIDTH; z++)
@@ -474,7 +478,12 @@ public class LodChunk
 					{
 						for(int y = topStart; !foundBlock && y >= topMin && y < topMax; y += topIncrement)
 						{
-							int ci = bc.getColor(data[di].get(x, y, z), world, new BlockPos(x,y,z));
+							int ci;
+							if(Block.getIdFromBlock(data[di].get(x, y, z).getBlock()) == waterBlockId)
+								// this is a special case since getColor on water generally returns white
+								ci = waterColor;
+							else
+								ci = bc.getColor(data[di].get(x, y, z), world, new BlockPos(x,y,z));
 							
 							if(ci == 0)
 							{
@@ -510,7 +519,7 @@ public class LodChunk
 		
 		return new Color(red, green, blue);
 	}
-	
+
 	private Color generateLodColorHorizontal(Chunk chunk, ColorDirection colorDir, World world, BlockColors bc)
 	{
 		ExtendedBlockStorage[] data = chunk.getBlockStorageArray();
@@ -597,8 +606,12 @@ public class LodChunk
 								break;
 							}
 							
-							
-							int ci = bc.getColor(data[di].get(x, y, z), world, new BlockPos(x, y, z));
+							int ci;
+							if(Block.getIdFromBlock(data[di].get(x, y, z).getBlock()) == waterBlockId)
+								// this is a special case since getColor on water generally returns white
+								ci = waterColor;
+							else
+								ci = bc.getColor(data[di].get(x, y, z), world, new BlockPos(x,y,z));
 							
 							if (ci == 0) {
 								// skip air or invisible blocks
@@ -647,7 +660,13 @@ public class LodChunk
 		return new Color(red, green, blue);
 	}
 	
-	
+	/**
+	 * Convert a Color into a BlockColors object.
+	 */
+	private int colorToInt(Color color)
+	{
+		return color.getRGB();
+	}
 	
 	
 	
