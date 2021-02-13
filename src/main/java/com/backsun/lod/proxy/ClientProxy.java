@@ -161,7 +161,6 @@ public class ClientProxy extends CommonProxy
 	{
 		Minecraft mc = Minecraft.getMinecraft();
 		
-		
 		// don't try to create an LOD object
 		// if for some reason we aren't
 		// given a valid chunk object

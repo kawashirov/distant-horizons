@@ -346,7 +346,6 @@ public class LodChunk
 		{
 			for(int y = CHUNK_DATA_WIDTH - 1; y >= 0; y--)
 			{
-				
 				if(isLayerValidLodPoint(data, startX, endX, startZ, endZ, i, y))
 				{
 					// we found
@@ -355,7 +354,6 @@ public class LodChunk
 					// LOD point
 					return (short) (y + (i * CHUNK_DATA_HEIGHT));
 				}
-				
 			} // y
 		} // data
 		
