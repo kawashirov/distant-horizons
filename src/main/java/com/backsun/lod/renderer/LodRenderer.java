@@ -99,7 +99,7 @@ public class LodRenderer
 	
 	
 	
-	public void drawLODs(LodDimension newDimension, Minecraft mc, float partialTicks)
+	public void drawLODs(LodDimension newDimension, float partialTicks)
 	{
 		if (reflectionHandler.fovMethod == null)
 		{
@@ -158,7 +158,6 @@ public class LodRenderer
 		
 		// color setup
 		int alpha = 255; // 0 - 255
-		float sunBrightness = mc.world.getSunBrightness(partialTicks); // TODO this only works in dimensions with day night cycles
 		
 		Color red = new Color(255, 0, 0, alpha);
 		Color black = new Color(0, 0, 0, alpha);
@@ -302,31 +301,15 @@ public class LodRenderer
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
-//		GL11.glEnable(GL11.GL_BLEND); // this shouldn't be needed unless I do something with transparancy
 		
 		GlStateManager.translate(-cameraX, -cameraY, -cameraZ);
 		
 		setProjectionMatrix(partialTicks);
 		setupFog(FogDistanceMode.NEAR, reflectionHandler.getFogType());
+		setupLighting(partialTicks);
 		
 		
-		GL11.glEnable(GL11.GL_COLOR_MATERIAL); // have the color be used as the material (this allows lighting to be enabled)
 		
-//		System.out.println(mc.world.provider.getSunBrightnessFactor(partialTicks) + "\t" + sunBrightness);
-		// mc.gameSettings.gammaSetting
-		float lightStrength = sunBrightness * mc.world.provider.getSunBrightnessFactor(partialTicks); // TODO change based on day and gamma setting
-		float lightAmbient[] = {lightStrength, lightStrength, lightStrength, 1.0f};
-//		float lightDiffuse[] = {0.0f, 0.0f, 0.0f, 0.0f};
-//		float lightPosition[] = {0.0f, 0.0f, 0.0f, 1.0f};
-        	
-		ByteBuffer temp = ByteBuffer.allocateDirect(16);
-		temp.order(ByteOrder.nativeOrder());
-		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_AMBIENT, (FloatBuffer) temp.asFloatBuffer().put(lightAmbient).flip());
-//		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_DIFFUSE, (FloatBuffer) temp.asFloatBuffer().put(lightDiffuse).flip());
-//		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_POSITION, (FloatBuffer) temp.asFloatBuffer().put(lightPosition).flip());
-		GL11.glEnable(GL11.GL_LIGHT1); // Enable the above lighting
-		
-		GlStateManager.enableLighting();
 		
 		
 		//===========//
@@ -352,9 +335,10 @@ public class LodRenderer
 		// IE the GUI
 		GlStateManager.disableFog();
 		
-		GL11.glDisable(GL11.GL_BLEND);
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glDisable(GL11.GL_LIGHT1);
+		GL11.glDisable(GL11.GL_COLOR_MATERIAL);
 		
 		// change the perspective matrix back to prevent incompatibilities
 		// with other mods that may render during forgeRenderLast
@@ -371,6 +355,10 @@ public class LodRenderer
 		// end of profiler tracking
 		mc.mcProfiler.endSection();
 	}
+
+
+
+	
 	
 	
 	
@@ -543,6 +531,33 @@ public class LodRenderer
 	
 	
 	/**
+	 * setup the lighting to be used for the LODs
+	 */
+	private void setupLighting(float partialTicks)
+	{
+		GL11.glEnable(GL11.GL_COLOR_MATERIAL); // set the color to be used as the material (this allows lighting to be enabled)
+		
+//		System.out.println(mc.world.provider.getSunBrightnessFactor(partialTicks) + "\t" + sunBrightness);
+//		
+		
+		float sunBrightness = mc.world.getSunBrightness(partialTicks) * mc.world.provider.getSunBrightnessFactor(partialTicks);
+		float skyHasLight = mc.world.provider.hasSkyLight()? 1.0f : 0.15f;
+		float gammaMultiplyer = (mc.gameSettings.gammaSetting * 0.5f + 0.5f);
+		float lightStrength = sunBrightness * skyHasLight * gammaMultiplyer;
+		float lightAmbient[] = {lightStrength, lightStrength, lightStrength, 1.0f};
+        	
+		ByteBuffer temp = ByteBuffer.allocateDirect(16);
+		temp.order(ByteOrder.nativeOrder());
+		GL11.glLight(GL11.GL_LIGHT1, GL11.GL_AMBIENT, (FloatBuffer) temp.asFloatBuffer().put(lightAmbient).flip());
+		GL11.glEnable(GL11.GL_LIGHT1); // Enable the above lighting
+		
+		GlStateManager.enableLighting();
+	}
+	
+	
+	
+	
+	/**
 	 * Returns -1 if there are no valid points
 	 */
 	private int getLodHeightPoint(short[] heightPoints)
@@ -555,6 +570,9 @@ public class LodRenderer
 			return heightPoints[LodLocation.NE.value];
 		return heightPoints[LodLocation.NE.value];
 	}
+	
+	
+	
 	
 	
 }

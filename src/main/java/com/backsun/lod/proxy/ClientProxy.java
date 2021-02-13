@@ -107,7 +107,7 @@ public class ClientProxy extends CommonProxy
 		}
 		else
 		{
-			renderer.drawLODs(lodDim, Minecraft.getMinecraft(), partialTicks);
+			renderer.drawLODs(lodDim, partialTicks);
 		}
 	}	
 	
