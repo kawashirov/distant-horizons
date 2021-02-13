@@ -172,42 +172,52 @@ public class ClientProxy extends CommonProxy
 			
 			Thread thread = new Thread(() ->
 			{
-				LodChunk lod = new LodChunk(chunk, mc.world);
-				LodDimension lodDim;
-				
-				if (lodWorld == null)
+				try
 				{
-					lodWorld = new LodWorld(LodFileHandler.getWorldName());
-				}
-				else
-				{
-					// if we have a lodWorld make sure 
-					// it is for this minecraft world
-					if (!lodWorld.worldName.equals(LodFileHandler.getWorldName()))
+					LodChunk lod = new LodChunk(chunk, mc.world);
+					LodDimension lodDim;
+					
+					if (lodWorld == null)
 					{
-						// this lodWorld isn't for this minecraft world
-						// delete it so we can get a new one
-						lodWorld = null;
-						
-						// skip this frame
-						// we'll get this set up next time
-						return;
+						lodWorld = new LodWorld(LodFileHandler.getWorldName());
 					}
+					else
+					{
+						// if we have a lodWorld make sure 
+						// it is for this minecraft world
+						if (!lodWorld.worldName.equals(LodFileHandler.getWorldName()))
+						{
+							// this lodWorld isn't for this minecraft world
+							// delete it so we can get a new one
+							lodWorld = null;
+							
+							// skip this frame
+							// we'll get this set up next time
+							return;
+						}
+					}
+					
+					
+					if (lodWorld.getLodDimension(dimId) == null)
+					{
+						DimensionType dim = DimensionType.getById(dimId);
+						lodDim = new LodDimension(dim, regionWidth);
+						lodWorld.addLodDimension(lodDim);
+					}
+					else
+					{
+						lodDim = lodWorld.getLodDimension(dimId);
+					}
+					
+					lodDim.addLod(lod);
 				}
-				
-				
-				if (lodWorld.getLodDimension(dimId) == null)
+				catch(IllegalArgumentException | NullPointerException e)
 				{
-					DimensionType dim = DimensionType.getById(dimId);
-					lodDim = new LodDimension(dim, regionWidth);
-					lodWorld.addLodDimension(lodDim);
-				}
-				else
-				{
-					lodDim = lodWorld.getLodDimension(dimId);
+					// if the world changes while LODs are being generated
+					// they will throw errors as they try to access things that no longer
+					// exist.
 				}
 				
-				lodDim.addLod(lod);
 			});
 			
 			lodGenThreadPool.execute(thread);
