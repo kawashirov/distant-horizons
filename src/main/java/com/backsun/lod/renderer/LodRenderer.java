@@ -452,7 +452,6 @@ public class LodRenderer
 				mc.mcProfiler.endStartSection("LOD draw setup");
 				
 				bufferBuilder.getByteBuffer().clear(); // this is required otherwise nothing is drawn
-				bufferBuilder.reset(); // I don't know if this is required :P
 			}
 			catch(Exception e)
 			{
