@@ -81,7 +81,7 @@ public class BuildBufferThread implements Callable<ByteBuffer>
 				// (As the player moves some chunks will overlap or be missing,
 				// this is just how chunk loading/unloading works. This can hopefully
 				// be hidden with careful use of fog)
-				int middle = (numbChunksWide / 2) - 1;
+				int middle = (numbChunksWide / 2);
 				if (RenderUtil.isCoordinateInLoadedArea(i, j, middle))
 				{
 					continue;

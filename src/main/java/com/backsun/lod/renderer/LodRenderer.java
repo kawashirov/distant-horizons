@@ -221,7 +221,7 @@ public class LodRenderer
 					// (As the player moves some chunks will overlap or be missing,
 					// this is just how chunk loading/unloading works. This can hopefully
 					// be hidden with careful use of fog)
-					int middle = (numbChunksWide / 2) - 1;
+					int middle = (numbChunksWide / 2);
 					if (RenderUtil.isCoordinateInLoadedArea(i, j, middle))
 					{
 						continue;
@@ -461,15 +461,14 @@ public class LodRenderer
 			GlStateManager.disableFog();
 			return;
 		}
+
+		// the multipliers are percentages
+		// of the regular view distance.
 		
-		// TODO have fog change based on height
-		// when higher up have it end up farther away
-		// (to hide the boarders of the LODs)
+		// TODO add the ability to change the fogDistanceMode 
+		// in the mod settings
 		if(fogMode == FogDistanceMode.NEAR)
 		{
-			// the multipliers are percentages
-			// of the normal view distance.
-			
 			// the reason that I wrote fogEnd then fogStart backwards
 			// is because we are using fog backwards to how
 			// it is normally used, with it hiding near objects
@@ -478,7 +477,7 @@ public class LodRenderer
 			if (fogQuality == FogQuality.FANCY || fogQuality == FogQuality.UNKNOWN)
 			{
 				GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
-				GlStateManager.setFogStart(farPlaneDistance * 2.25f);
+				GlStateManager.setFogStart(farPlaneDistance * 2.5f);
 			}
 			else //if(fogType == FogType.FAST)
 			{
@@ -492,9 +491,6 @@ public class LodRenderer
 		}
 		else //if(fogMode == FogMode.FAR) or Both
 		{
-			// the multipliers are percentages of
-			// the LOD view distance.
-			
 			if (fogQuality == FogQuality.FANCY || fogQuality == FogQuality.UNKNOWN)
 			{
 				GlStateManager.setFogStart(farPlaneDistance * 0.5f * VIEW_DISTANCE_MULTIPLIER / 2.0f);
