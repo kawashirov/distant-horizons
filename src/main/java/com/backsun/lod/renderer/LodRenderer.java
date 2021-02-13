@@ -48,6 +48,16 @@ public class LodRenderer
 	private Tessellator tessellator;
 	private BufferBuilder bufferBuilder;
 	
+	/**
+	 * Equivalent to calling: bufferBuilder.getByteBuffer().capacity())
+	 */
+	private static final int BUFFER_BUILDER_CAPACITY = 8388608;
+	/**
+	 * This is an array of 0's used to clear old 
+	 * ByteBuffers when they need to be rebuilt.
+	 */
+	byte[] clearBytes = new byte[BUFFER_BUILDER_CAPACITY];
+	
 	private ReflectionHandler reflectionHandler;
 	
 	public LodDimension dimension = null;
@@ -207,6 +217,7 @@ public class LodRenderer
 		// create the LODs //
 		//=================//
 		
+		// TODO create a worker thread to do this
 		if (regen)
 		{
 			mc.mcProfiler.endStartSection("LOD generation");
@@ -288,7 +299,6 @@ public class LodRenderer
 					lodArray[i][j] = new AxisAlignedBB(0, bottomPoint, 0, LOD_WIDTH, topPoint, LOD_WIDTH).offset(xOffset, yOffset, zOffset);
 				}
 			}
-			
 		}
 		
 		
@@ -368,7 +378,6 @@ public class LodRenderer
 	
 	
 	
-	
 	/**
 	 * draw an array of cubes (or squares) with the given colors.
 	 * @param lods bounding boxes to draw
@@ -376,7 +385,6 @@ public class LodRenderer
 	 */
 	private void sendToGPUAndDraw(AxisAlignedBB[][] lods, Color[][] colors)
 	{
-		numbThreads = 1;
 		// mc.mcProfiler.endStartSection("LOD build buffer");
 		
 		if (numbThreads != bufferThreads.size())
@@ -392,12 +400,21 @@ public class LodRenderer
 		{
 			for(int i = 0; i < numbThreads; i++)
 			{
-				// TODO I need to find a better way of clearing the buffers between frames
-				// and when changing dimensions
-				if (regen || buffers[i] == null || previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks)
+				if (buffers[i] == null || previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks)
 				{
-					buffers[i] = ByteBuffer.allocateDirect(8388608); //bufferBuilder.getByteBuffer().capacity());
+					buffers[i] = ByteBuffer.allocateDirect(BUFFER_BUILDER_CAPACITY);
 					buffers[i].order(ByteOrder.LITTLE_ENDIAN);
+				}
+				
+				if (regen)
+				{
+					// this is the best way I could find to
+					// overwrite the old data
+					// (which needs to be done otherwise the old
+					// LODs may be drawn)
+					buffers[i].clear();
+					buffers[i].put(clearBytes);
+					buffers[i].clear();
 				}
 				
 				int pos = bufferBuilder.getByteBuffer().position();
