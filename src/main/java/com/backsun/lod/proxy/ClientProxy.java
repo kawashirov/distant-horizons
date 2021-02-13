@@ -16,6 +16,7 @@ import com.backsun.lodCore.util.RenderGlobalHook;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
@@ -75,13 +76,12 @@ public class ClientProxy extends CommonProxy
 		}
 		
 		Minecraft mc = Minecraft.getMinecraft();
-		if (mc.player == null)
+		if (mc == null || mc.player == null || lodWorld == null)
 			return;
+		
 		int dimId = mc.player.dimension;
 		LodDimension lodDim = lodWorld.getLodDimension(dimId);
-		
-		// We can't render anything if the lodWorld or lodDim is null
-		if (lodWorld == null || lodDim == null)
+		if (lodDim == null)
 			return;
 		
 		
@@ -166,62 +166,66 @@ public class ClientProxy extends CommonProxy
 		// given a valid chunk object
 		// (Minecraft often gives back empty
 		// or null chunks in this method)
-		if (mc != null && mc.world != null && chunk != null && isValidChunk(chunk))
-		{
-			int dimId = chunk.getWorld().provider.getDimension();
+		if (chunk == null || !isValidChunk(chunk))
+			return;
+		
+		int dimId = chunk.getWorld().provider.getDimension();
+		World world = mc.getIntegratedServer().getWorld(dimId); // TODO what can be done if not connected to a server?
+		
+		if (world == null)
+			return;
 			
-			Thread thread = new Thread(() ->
+		Thread thread = new Thread(() ->
+		{
+			try
 			{
-				try
+				LodChunk lod = new LodChunk(chunk, world);
+				LodDimension lodDim;
+				
+				if (lodWorld == null)
 				{
-					LodChunk lod = new LodChunk(chunk, mc.world);
-					LodDimension lodDim;
-					
-					if (lodWorld == null)
-					{
-						lodWorld = new LodWorld(LodFileHandler.getWorldName());
-					}
-					else
-					{
-						// if we have a lodWorld make sure 
-						// it is for this minecraft world
-						if (!lodWorld.worldName.equals(LodFileHandler.getWorldName()))
-						{
-							// this lodWorld isn't for this minecraft world
-							// delete it so we can get a new one
-							lodWorld = null;
-							
-							// skip this frame
-							// we'll get this set up next time
-							return;
-						}
-					}
-					
-					
-					if (lodWorld.getLodDimension(dimId) == null)
-					{
-						DimensionType dim = DimensionType.getById(dimId);
-						lodDim = new LodDimension(dim, regionWidth);
-						lodWorld.addLodDimension(lodDim);
-					}
-					else
-					{
-						lodDim = lodWorld.getLodDimension(dimId);
-					}
-					
-					lodDim.addLod(lod);
+					lodWorld = new LodWorld(LodFileHandler.getWorldName());
 				}
-				catch(IllegalArgumentException | NullPointerException e)
+				else
 				{
-					// if the world changes while LODs are being generated
-					// they will throw errors as they try to access things that no longer
-					// exist.
+					// if we have a lodWorld make sure 
+					// it is for this minecraft world
+					if (!lodWorld.worldName.equals(LodFileHandler.getWorldName()))
+					{
+						// this lodWorld isn't for this minecraft world
+						// delete it so we can get a new one
+						lodWorld = null;
+						
+						// skip this frame
+						// we'll get this set up next time
+						return;
+					}
 				}
 				
-			});
+				
+				if (lodWorld.getLodDimension(dimId) == null)
+				{
+					DimensionType dim = DimensionType.getById(dimId);
+					lodDim = new LodDimension(dim, regionWidth);
+					lodWorld.addLodDimension(lodDim);
+				}
+				else
+				{
+					lodDim = lodWorld.getLodDimension(dimId);
+				}
+				
+				lodDim.addLod(lod);
+			}
+			catch(IllegalArgumentException | NullPointerException e)
+			{
+				// if the world changes while LODs are being generated
+				// they will throw errors as they try to access things that no longer
+				// exist.
+			}
 			
-			lodGenThreadPool.execute(thread);
-		}
+		});
+		
+		lodGenThreadPool.execute(thread);
 	}
 	
 	/**
