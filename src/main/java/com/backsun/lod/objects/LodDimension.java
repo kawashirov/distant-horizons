@@ -33,6 +33,7 @@ public class LodDimension
 		width = newMaxWidth;
 		
 		// TODO what can be done if connected to a server?
+		// dimension 0 works here since we are just looking for the save handler anyway
 		rfHandler = new LodFileHandler(Minecraft.getMinecraft().getIntegratedServer().getWorld(0).getSaveHandler(), this);
 		
 		regions = new LodRegion[width][width];
