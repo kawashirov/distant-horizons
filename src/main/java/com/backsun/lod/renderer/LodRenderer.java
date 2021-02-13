@@ -256,9 +256,15 @@ public class LodRenderer
 							lod.colors[ColorDirection.TOP.value].getAlpha());
 					
 					
-					// if debugging draw the squares as a black and white checker board
-					if (debugging)
+					
+					if (!debugging)
 					{
+						// add the color to the array
+						colorArray[i][j] = c;
+					}
+					else
+					{
+						// if debugging draw the squares as a black and white checker board
 						if ((chunkX + chunkZ) % 2 == 0)
 							c = white;
 						else
@@ -267,11 +273,10 @@ public class LodRenderer
 						if (i == 0 && j == 0)
 							c = red;
 						
-						colorArray[i][j] = c; // TODO does this work? if so why?
+						colorArray[i][j] = c;
 					}
 					
-					// add the color to the array
-					colorArray[i][j] = c;
+					
 					// add the new box to the array
 					int topPoint = getLodHeightPoint(lod.top);
 					int bottomPoint = getLodHeightPoint(lod.bottom);
@@ -285,7 +290,6 @@ public class LodRenderer
 			}
 			
 		}
-		
 		
 		
 		
