@@ -1,4 +1,4 @@
-package com.backsun.lod.util.fog;
+package com.backsun.lod.util.enums;
 
 /**
  * Near, far, or both.

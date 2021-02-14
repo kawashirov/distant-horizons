@@ -17,11 +17,12 @@ import org.lwjgl.util.glu.Project;
 
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
+import com.backsun.lod.util.LodConfig;
 import com.backsun.lod.util.ReflectionHandler;
 import com.backsun.lod.util.enums.ColorDirection;
+import com.backsun.lod.util.enums.FogDistance;
+import com.backsun.lod.util.enums.FogQuality;
 import com.backsun.lod.util.enums.LodLocation;
-import com.backsun.lod.util.fog.FogDistance;
-import com.backsun.lod.util.fog.FogQuality;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -39,6 +40,8 @@ import net.minecraft.util.math.Vec3i;
  */
 public class LodRenderer
 {
+	/** If true the LODs colors will be replaced with
+	 * a checkerboard, this can be used for debugging. */
 	public boolean debugging = false;
 	
 	private Minecraft mc;
@@ -159,7 +162,18 @@ public class LodRenderer
 		mc.mcProfiler.startSection("LOD setup");
 		@SuppressWarnings("unused")
 		long startTime = System.nanoTime();
-				
+		if (LodConfig.drawCheckerBoard)
+		{
+			if (debugging != LodConfig.drawCheckerBoard)
+				regen = true;
+			debugging = true;
+		}
+		else
+		{
+			if (debugging != LodConfig.drawCheckerBoard)
+				regen = true;
+			debugging = false;
+		}
 		
 		
 		// color setup
@@ -321,6 +335,8 @@ public class LodRenderer
 		
 		
 		
+		
+		
 		//===========//
 		// rendering //
 		//===========//
@@ -329,13 +345,32 @@ public class LodRenderer
 		if (regen)
 			generateLodBuffers(lodArray, colorArray, FogDistance.BOTH, new Vec3i(startX, 0, startZ));
 		
-		mc.mcProfiler.endStartSection("LOD draw setup");
-		setupFog(FogDistance.NEAR, reflectionHandler.getFogQuality());
-		sendLodsToGpuAndDraw(nearBuffers);
+		switch(LodConfig.fogDistance)
+		{
+		case BOTH:
+			mc.mcProfiler.endStartSection("LOD draw setup");
+			setupFog(FogDistance.NEAR, reflectionHandler.getFogQuality());
+			sendLodsToGpuAndDraw(nearBuffers);
+			
+			mc.mcProfiler.endStartSection("LOD draw setup");
+			setupFog(FogDistance.FAR, reflectionHandler.getFogQuality());
+			sendLodsToGpuAndDraw(farBuffers);
+			break;
+		case NEAR:
+			mc.mcProfiler.endStartSection("LOD draw setup");
+			setupFog(FogDistance.NEAR, reflectionHandler.getFogQuality());
+			sendLodsToGpuAndDraw(nearBuffers);
+			sendLodsToGpuAndDraw(farBuffers);
+			break;
+		case FAR:
+			mc.mcProfiler.endStartSection("LOD draw setup");
+			setupFog(FogDistance.FAR, reflectionHandler.getFogQuality());
+			sendLodsToGpuAndDraw(nearBuffers);
+			sendLodsToGpuAndDraw(farBuffers);
+			break;
+		}
 		
-		mc.mcProfiler.endStartSection("LOD draw setup");
-		setupFog(FogDistance.FAR, reflectionHandler.getFogQuality());
-		sendLodsToGpuAndDraw(farBuffers);
+		
 		
 		
 		
@@ -498,8 +533,6 @@ public class LodRenderer
 		// the multipliers are percentages
 		// of the regular view distance.
 		
-		// TODO add the ability to change the fogDistanceMode 
-		// in the mod settings
 		if(fogDistance == FogDistance.NEAR)
 		{
 			// the reason that I wrote fogEnd then fogStart backwards
@@ -507,7 +540,7 @@ public class LodRenderer
 			// it is normally used, with it hiding near objects
 			// instead of far objects.
 			
-			if (fogQuality == FogQuality.FANCY || fogQuality == FogQuality.UNKNOWN)
+			if (fogQuality == FogQuality.FANCY)
 			{
 				GlStateManager.setFogEnd(farPlaneDistance * 0.3f * (VIEW_DISTANCE_MULTIPLIER * 0.5f));
 				GlStateManager.setFogStart(farPlaneDistance * 0.35f * (VIEW_DISTANCE_MULTIPLIER * 0.5f));
@@ -524,7 +557,7 @@ public class LodRenderer
 		}
 		else if(fogDistance == FogDistance.FAR)
 		{
-			if (fogQuality == FogQuality.FANCY || fogQuality == FogQuality.UNKNOWN)
+			if (fogQuality == FogQuality.FANCY)
 			{
 				GlStateManager.setFogStart(farPlaneDistance * 0.78f * (VIEW_DISTANCE_MULTIPLIER * 0.5f)); // TODO rename to view_distance_radius
 				GlStateManager.setFogEnd(farPlaneDistance * 1.0f * (VIEW_DISTANCE_MULTIPLIER * 0.5f));

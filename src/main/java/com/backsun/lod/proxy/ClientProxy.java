@@ -10,6 +10,7 @@ import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodRegion;
 import com.backsun.lod.objects.LodWorld;
 import com.backsun.lod.renderer.LodRenderer;
+import com.backsun.lod.util.LodConfig;
 import com.backsun.lod.util.LodFileHandler;
 import com.backsun.lodCore.util.RenderGlobalHook;
 
@@ -57,7 +58,8 @@ public class ClientProxy extends CommonProxy
 		RenderGlobalHook.endRenderingStencil();
 		GL11.glStencilFunc(GL11.GL_EQUAL, 0, 0xFF);
 		
-		renderLods(event.getPartialTicks());
+		if (LodConfig.drawLODs)
+			renderLods(event.getPartialTicks());
 		
 		GL11.glDisable(GL11.GL_STENCIL_TEST);
 	}

@@ -1,14 +1,13 @@
-package com.backsun.lod.util.fog;
+package com.backsun.lod.util.enums;
 
 /**
- * Unknown, fast, fancy, or off
+ * fast, fancy, or off
  * 
  * @author James Seibel
- * @version 01-27-2021
+ * @version 02-14-2021
  */
 public enum FogQuality
 {
-	UNKNOWN,
 	FAST,
 	FANCY,
 	OFF;

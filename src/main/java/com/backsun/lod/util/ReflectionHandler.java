@@ -5,7 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-import com.backsun.lod.util.fog.FogQuality;
+import com.backsun.lod.util.enums.FogQuality;
 
 import net.minecraft.client.Minecraft;
 
@@ -131,12 +131,13 @@ public class ReflectionHandler
 	 */
 	public FogQuality getFogQuality()
 	{
-		if (ofFogField == null)
+		if (!LodConfig.useOptifineFogQuality || ofFogField == null)
 		{
 			// either optifine isn't installed,
 			// the variable name was changed,
-			// or the setup method wasn't called yet.
-			return FogQuality.UNKNOWN;
+			// the setup method wasn't called yet, or
+			// the user wants to use their own quality setting.
+			return LodConfig.fogQualityOverride;
 		}
 		
 		int returnNum = 0;
@@ -147,13 +148,13 @@ public class ReflectionHandler
 		}
 		catch (IllegalArgumentException | IllegalAccessException e)
 		{
-			System.out.println(e);
+			e.printStackTrace();
 		}
 		
 		switch (returnNum)
 		{
 			case 0:
-				return FogQuality.UNKNOWN;
+				return FogQuality.FAST;
 			case 1:
 				return FogQuality.FAST;
 			case 2:
@@ -162,7 +163,7 @@ public class ReflectionHandler
 				return FogQuality.OFF;
 				
 			default:
-				return FogQuality.UNKNOWN;
+				return FogQuality.FAST;
 		}
 	}
 	
@@ -178,8 +179,7 @@ public class ReflectionHandler
 		}
 		catch(InvocationTargetException | IllegalAccessException | IllegalArgumentException e)
 		{
-			// hopefully this should never be called
-			System.out.println(e);
+			e.printStackTrace();
 		}
 		
 		return 0.0f;
