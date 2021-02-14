@@ -88,7 +88,7 @@ public class LodRenderer
 	/** This is used to determine if the LODs should be regenerated */
 	private int prevChunkZ = 0;
 	/** This is used to determine if the LODs should be regenerated */
-	private FogDistance prevFogDistance = FogDistance.BOTH;
+	private FogDistance prevFogDistance = FogDistance.NEAR_AND_FAR;
 	
 	/** if this is true the LODs should be regenerated */
 	private boolean regen = false;
@@ -351,7 +351,7 @@ public class LodRenderer
 		
 		switch(LodConfig.fogDistance)
 		{
-		case BOTH:
+		case NEAR_AND_FAR:
 			mc.mcProfiler.endStartSection("LOD draw setup");
 			setupFog(FogDistance.NEAR, reflectionHandler.getFogQuality());
 			sendLodsToGpuAndDraw(nearBuffers);
@@ -527,7 +527,7 @@ public class LodRenderer
 			return;
 		}
 		
-		if(fogDistance == FogDistance.BOTH)
+		if(fogDistance == FogDistance.NEAR_AND_FAR)
 		{
 			throw new IllegalArgumentException("setupFog only accepts NEAR or FAR fog distances.");
 		}

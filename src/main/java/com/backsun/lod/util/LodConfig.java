@@ -42,7 +42,7 @@ public class LodConfig
 	@Config.Comment(
 			{"Fog Distance", 
 			"What distance should Fog be drawn on the LODs?"})
-	public static FogDistance fogDistance = FogDistance.BOTH;
+	public static FogDistance fogDistance = FogDistance.NEAR_AND_FAR;
 	
 	@Config.Comment(
 			{"Use Optifine Fog Quality Setting", 

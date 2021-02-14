@@ -121,7 +121,7 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 				alpha = colors[i][j].getAlpha();
 				
 				// choose which buffer to add these LODs too
-				if (distanceMode == FogDistance.BOTH)
+				if (distanceMode == FogDistance.NEAR_AND_FAR)
 				{
 					if (RenderUtil.isCoordinateInNearFogArea(i, j, numbChunksWide / 2))
 						currentBuffer = nearBuffer;
