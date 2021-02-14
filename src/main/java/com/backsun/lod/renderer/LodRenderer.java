@@ -570,6 +570,7 @@ public class LodRenderer
 	{
 		GL11.glEnable(GL11.GL_COLOR_MATERIAL); // set the color to be used as the material (this allows lighting to be enabled)
 		
+		// this isn't perfect right now, but it looks pretty good at 50% brightness
 		float sunBrightness = mc.world.getSunBrightness(partialTicks) * mc.world.provider.getSunBrightnessFactor(partialTicks);
 		float skyHasLight = mc.world.provider.hasSkyLight()? 1.0f : 0.15f;
 		float gammaMultiplyer = (mc.gameSettings.gammaSetting * 0.5f + 0.5f);
