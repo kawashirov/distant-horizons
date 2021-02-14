@@ -99,17 +99,6 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 			// z axis
 			for (int j = 0; j < numbChunksWide; j++)
 			{
-				// skip the middle
-				// (As the player moves some chunks will overlap or be missing,
-				// this is just how chunk loading/unloading works. This can hopefully
-				// be hidden with careful use of fog)
-				int middle = (numbChunksWide / 2);
-				if (RenderUtil.isCoordinateInLoadedArea(i, j, middle))
-				{
-					continue;
-				}
-				
-				
 				if (lods[i][j] == null || colors[i][j] == null)
 					continue;
 				
