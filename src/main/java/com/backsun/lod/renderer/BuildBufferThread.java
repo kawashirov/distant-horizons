@@ -93,6 +93,16 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 		int chunkX;
 		int chunkZ;
 		
+		if (distanceMode == FogDistance.NEAR)
+		{
+			currentBuffer = nearBuffer;
+		}
+		else // if (distanceMode == FogDistance.FAR)
+		{
+			currentBuffer = farBuffer;
+		}
+		
+		
 		// x axis
 		for (int i = start; i < end; i++)
 		{
@@ -117,14 +127,6 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 						currentBuffer = nearBuffer;
 					else
 						currentBuffer = farBuffer;
-				}
-				else if (distanceMode == FogDistance.NEAR)
-				{
-					currentBuffer = nearBuffer;
-				}
-				else // if (distanceMode == FogDistance.FAR)
-				{
-					currentBuffer = farBuffer;
 				}
 				
 				
