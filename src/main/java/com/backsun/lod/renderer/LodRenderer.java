@@ -32,7 +32,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3i;
 
 /**
  * @author James Seibel
@@ -49,7 +48,6 @@ public class LodRenderer
 	// make sure this is an even number, or else it won't align with the chunk grid
 	/** this is the total width of the LODs (I.E the diameter, not the radius) */
 	public static final int VIEW_DISTANCE_MULTIPLIER = 12; // TODO rename and split into 2 variables
-	public static final int LOD_WIDTH = 16; // TODO remove and replace with the LodChunk variable
 	public static final int MINECRAFT_CHUNK_WIDTH = 16; // TODO remove and replace with the LodChunk variable
 	
 	private Tessellator tessellator;
@@ -210,12 +208,12 @@ public class LodRenderer
 		
 		// set how big the LODs will be and how far they will go
 		int totalLength = (int) farPlaneDistance * VIEW_DISTANCE_MULTIPLIER;
-		int numbChunksWide = (totalLength / LOD_WIDTH);
+		int numbChunksWide = (totalLength / LodChunk.WIDTH);
 		
 		// this where we will start drawing squares
 		// (exactly half the total width)
-		int startX = (-LOD_WIDTH * (numbChunksWide / 2)) + playerXChunkOffset;
-		int startZ = (-LOD_WIDTH * (numbChunksWide / 2)) + playerZChunkOffset;
+		int startX = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerXChunkOffset;
+		int startZ = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerZChunkOffset;
 		
 		
 		// this is where we store the LOD objects
@@ -254,10 +252,10 @@ public class LodRenderer
 					
 					
 					// set where this square will be drawn in the world
-					double xOffset = (LOD_WIDTH * i) + // offset by the number of LOD blocks
+					double xOffset = (LodChunk.WIDTH * i) + // offset by the number of LOD blocks
 									startX; // offset so the center LOD block is centered underneath the player
 					double yOffset = 0;
-					double zOffset = (LOD_WIDTH * j) + startZ;
+					double zOffset = (LodChunk.WIDTH * j) + startZ;
 					
 					int chunkX = i + (startX / MINECRAFT_CHUNK_WIDTH);
 					int chunkZ = j + (startZ / MINECRAFT_CHUNK_WIDTH);
@@ -310,7 +308,7 @@ public class LodRenderer
 					if (topPoint == -1 && bottomPoint == -1)
 						continue;
 					
-					lodArray[i][j] = new AxisAlignedBB(0, bottomPoint, 0, LOD_WIDTH, topPoint, LOD_WIDTH).offset(xOffset, yOffset, zOffset);
+					lodArray[i][j] = new AxisAlignedBB(0, bottomPoint, 0, LodChunk.WIDTH, topPoint, LodChunk.WIDTH).offset(xOffset, yOffset, zOffset);
 				}
 			}
 		}
@@ -347,7 +345,7 @@ public class LodRenderer
 		
 		mc.mcProfiler.endStartSection("LOD build buffer");
 		if (regen)
-			generateLodBuffers(lodArray, colorArray, LodConfig.fogDistance, new Vec3i(startX, 0, startZ));
+			generateLodBuffers(lodArray, colorArray, LodConfig.fogDistance);
 		
 		switch(LodConfig.fogDistance)
 		{
@@ -424,7 +422,7 @@ public class LodRenderer
 	 * @param lods bounding boxes to draw
 	 * @param colors color of each box to draw
 	 */
-	private void generateLodBuffers(AxisAlignedBB[][] lods, Color[][] colors, FogDistance fogDistance, Vec3i lodStartCoordinate)
+	private void generateLodBuffers(AxisAlignedBB[][] lods, Color[][] colors, FogDistance fogDistance)
 	{
 		List<Future<NearFarBuffer>> bufferFutures = new ArrayList<>();
 		bufferMaxCapacity = (lods.length * lods.length * (6 * 4 * ((3 * 4) + (4 * 4)))) / numbBufferThreads; // TODO this should change based on whether we are using near/far or both fog settings
@@ -461,7 +459,7 @@ public class LodRenderer
 			nearBuffers[i].position(pos);
 			farBuffers[i].position(pos);
 			
-			bufferThreads.get(i).setNewData(nearBuffers[i], farBuffers[i], fogDistance, lodStartCoordinate, lods, colors, i, numbBufferThreads);
+			bufferThreads.get(i).setNewData(nearBuffers[i], farBuffers[i], fogDistance, lods, colors, i, numbBufferThreads);
 		}
 		
 		try

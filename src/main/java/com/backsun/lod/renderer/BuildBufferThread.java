@@ -12,7 +12,6 @@ import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3i;
 
 /**
  * 
@@ -28,8 +27,6 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 	public AxisAlignedBB[][] lods;
 	public Color[][] colors;
 	
-	private int lodStartX = 0;
-	private int lodStartZ = 0;
 	private int start = 0;
 	private int end = -1;
 	
@@ -48,9 +45,9 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 		vertexFormatElement = vertexFormat.getElement(vertexFormatIndex); 
 	}
 	
-	BuildBufferThread(ByteBuffer newNearByteBuffer, ByteBuffer newFarByteBuffer, AxisAlignedBB[][] newLods, Color[][] newColors, FogDistance newDistanceMode, Vec3i newLodStartCoordinate, int threadNumber, int totalThreads)
+	BuildBufferThread(ByteBuffer newNearByteBuffer, ByteBuffer newFarByteBuffer, AxisAlignedBB[][] newLods, Color[][] newColors, FogDistance newDistanceMode, int threadNumber, int totalThreads)
 	{
-		setNewData(newNearByteBuffer, newFarByteBuffer, distanceMode, newLodStartCoordinate, newLods, newColors, threadNumber, totalThreads);
+		setNewData(newNearByteBuffer, newFarByteBuffer, distanceMode, newLods, newColors, threadNumber, totalThreads);
 		
 		vertexCount = 0;
 		vertexFormat = DefaultVertexFormats.POSITION_COLOR;
@@ -58,7 +55,7 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 		vertexFormatElement = vertexFormat.getElement(vertexFormatIndex); 
 	}
 	
-	public void setNewData(ByteBuffer newNearByteBuffer, ByteBuffer newFarByteBuffer, FogDistance newDistanceMode, Vec3i newlodStartCoordinate, AxisAlignedBB[][] newLods, Color[][] newColors, int threadNumber, int totalThreads)
+	public void setNewData(ByteBuffer newNearByteBuffer, ByteBuffer newFarByteBuffer, FogDistance newDistanceMode, AxisAlignedBB[][] newLods, Color[][] newColors, int threadNumber, int totalThreads)
 	{
 		vertexCount = 0;
         vertexFormatIndex = 0;
@@ -73,9 +70,6 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 		int rowsToRender = numbChunksWide / totalThreads;
 		start = threadNumber * rowsToRender;
 		end = (threadNumber + 1) * rowsToRender;
-		
-		lodStartX = newlodStartCoordinate.getX();
-		lodStartZ = newlodStartCoordinate.getZ();
 	}
 	
 	@Override
@@ -89,9 +83,6 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 		int green;
 		int blue;
 		int alpha;
-		
-		int chunkX;
-		int chunkZ;
 		
 		if (distanceMode == FogDistance.NEAR)
 		{
