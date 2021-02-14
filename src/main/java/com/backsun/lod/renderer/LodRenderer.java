@@ -392,7 +392,7 @@ public class LodRenderer
 		List<Future<NearFarBuffer>> bufferFutures = new ArrayList<>();
 		bufferMaxCapacity = (lods.length * lods.length * (6 * 4 * ((3 * 4) + (4 * 4)))) / numbBufferThreads; // TODO this should change based on whether we are using near/far or both fog settings
 		
-		for(int i = 0; i < maxThreads; i++)
+		for(int i = 0; i < numbBufferThreads; i++)
 		{
 			if (nearBuffers[i] == null || previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks)
 			{
@@ -585,10 +585,6 @@ public class LodRenderer
 	}
 	
 	
-	/**
-	 * This is used for changing the number of buffer threads during runtime.
-	 * This will only be used during testing and not during release.
-	 */
 	private void setupBufferThreads(AxisAlignedBB[][] lods)
 	{
 		if (numbBufferThreads != bufferThreads.size())
