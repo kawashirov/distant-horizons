@@ -131,13 +131,12 @@ public class ReflectionHandler
 	 */
 	public FogQuality getFogQuality()
 	{
-		if (!LodConfig.useOptifineFogQuality || ofFogField == null)
+		if (ofFogField == null)
 		{
 			// either optifine isn't installed,
-			// the variable name was changed,
-			// the setup method wasn't called yet, or
-			// the user wants to use their own quality setting.
-			return LodConfig.fogQualityOverride;
+			// the variable name was changed, or
+			// the setup method wasn't called yet.
+			return FogQuality.OFF;
 		}
 		
 		int returnNum = 0;
