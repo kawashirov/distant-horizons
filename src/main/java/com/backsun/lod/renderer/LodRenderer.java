@@ -47,7 +47,7 @@ public class LodRenderer
 	private float farPlaneDistance;
 	// make sure this is an even number, or else it won't align with the chunk grid
 	/** this is the total width of the LODs (I.E the diameter, not the radius) */
-	public static final int VIEW_DISTANCE_MULTIPLIER = 12; // TODO rename and split into 2 variables
+	private static final int LOD_CHUNK_DISTANCE_RADIUS = 6;
 	
 	private Tessellator tessellator;
 	private BufferBuilder bufferBuilder;
@@ -203,7 +203,7 @@ public class LodRenderer
 		farPlaneDistance = renderDistWidth * LodChunk.WIDTH;
 		
 		// set how big the LODs will be and how far they will go
-		int totalLength = (int) farPlaneDistance * VIEW_DISTANCE_MULTIPLIER;
+		int totalLength = (int) farPlaneDistance * LOD_CHUNK_DISTANCE_RADIUS * 2;
 		int numbChunksWide = (totalLength / LodChunk.WIDTH);
 		
 		// this where we will start drawing squares
@@ -538,8 +538,8 @@ public class LodRenderer
 			
 			if (fogQuality == FogQuality.FANCY)
 			{
-				GlStateManager.setFogEnd(farPlaneDistance * 0.3f * (VIEW_DISTANCE_MULTIPLIER * 0.5f));
-				GlStateManager.setFogStart(farPlaneDistance * 0.35f * (VIEW_DISTANCE_MULTIPLIER * 0.5f));
+				GlStateManager.setFogEnd(farPlaneDistance * 0.3f * LOD_CHUNK_DISTANCE_RADIUS);
+				GlStateManager.setFogStart(farPlaneDistance * 0.35f * LOD_CHUNK_DISTANCE_RADIUS);
 			}
 			else if(fogQuality == FogQuality.FAST)
 			{
@@ -547,21 +547,21 @@ public class LodRenderer
 				// to start right where the LODs' end use:
 				// end = 0.8f, start = 1.5f
 				
-				GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
-				GlStateManager.setFogStart(farPlaneDistance * 3.5f);
+				GlStateManager.setFogEnd(farPlaneDistance * 1.5f);
+				GlStateManager.setFogStart(farPlaneDistance * 2.0f);
 			}
 		}
 		else if(fogDistance == FogDistance.FAR)
 		{
 			if (fogQuality == FogQuality.FANCY)
 			{
-				GlStateManager.setFogStart(farPlaneDistance * 0.78f * (VIEW_DISTANCE_MULTIPLIER * 0.5f)); // TODO rename to view_distance_radius
-				GlStateManager.setFogEnd(farPlaneDistance * 1.0f * (VIEW_DISTANCE_MULTIPLIER * 0.5f));
+				GlStateManager.setFogStart(farPlaneDistance * 0.78f * LOD_CHUNK_DISTANCE_RADIUS);
+				GlStateManager.setFogEnd(farPlaneDistance * 1.0f * LOD_CHUNK_DISTANCE_RADIUS);
 			}
 			else if(fogQuality == FogQuality.FAST)
 			{
-				GlStateManager.setFogStart(farPlaneDistance * 0.5f * VIEW_DISTANCE_MULTIPLIER);
-				GlStateManager.setFogEnd(farPlaneDistance * 0.8f * VIEW_DISTANCE_MULTIPLIER);
+				GlStateManager.setFogStart(farPlaneDistance * 0.5f * LOD_CHUNK_DISTANCE_RADIUS);
+				GlStateManager.setFogEnd(farPlaneDistance * 0.75f * LOD_CHUNK_DISTANCE_RADIUS);
 			}
 		}
 		
