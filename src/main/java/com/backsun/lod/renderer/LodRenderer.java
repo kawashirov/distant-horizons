@@ -48,7 +48,6 @@ public class LodRenderer
 	// make sure this is an even number, or else it won't align with the chunk grid
 	/** this is the total width of the LODs (I.E the diameter, not the radius) */
 	public static final int VIEW_DISTANCE_MULTIPLIER = 12; // TODO rename and split into 2 variables
-	public static final int MINECRAFT_CHUNK_WIDTH = 16; // TODO remove and replace with the LodChunk variable
 	
 	private Tessellator tessellator;
 	private BufferBuilder bufferBuilder;
@@ -196,15 +195,12 @@ public class LodRenderer
 		double cameraX = player.lastTickPosX + (player.posX - player.lastTickPosX) * partialTicks;
 		double cameraY = player.lastTickPosY + (player.posY - player.lastTickPosY) * partialTicks;
 		double cameraZ = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;
-		
-		int playerXChunkOffset = ((int) cameraX / MINECRAFT_CHUNK_WIDTH) * MINECRAFT_CHUNK_WIDTH;
-		int playerZChunkOffset = ((int) cameraZ / MINECRAFT_CHUNK_WIDTH) * MINECRAFT_CHUNK_WIDTH;
-		
+
 		
 		
 		// determine how far the game's render distance is currently set
 		int renderDistWidth = mc.gameSettings.renderDistanceChunks;
-		farPlaneDistance = renderDistWidth * MINECRAFT_CHUNK_WIDTH;
+		farPlaneDistance = renderDistWidth * LodChunk.WIDTH;
 		
 		// set how big the LODs will be and how far they will go
 		int totalLength = (int) farPlaneDistance * VIEW_DISTANCE_MULTIPLIER;
@@ -212,8 +208,8 @@ public class LodRenderer
 		
 		// this where we will start drawing squares
 		// (exactly half the total width)
-		int startX = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerXChunkOffset;
-		int startZ = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerZChunkOffset;
+		int startX = (-LodChunk.WIDTH * (numbChunksWide / 2)) + (int)cameraX;
+		int startZ = (-LodChunk.WIDTH * (numbChunksWide / 2)) + (int)cameraZ;
 		
 		
 		// this is where we store the LOD objects
@@ -257,8 +253,8 @@ public class LodRenderer
 					double yOffset = 0;
 					double zOffset = (LodChunk.WIDTH * j) + startZ;
 					
-					int chunkX = i + (startX / MINECRAFT_CHUNK_WIDTH);
-					int chunkZ = j + (startZ / MINECRAFT_CHUNK_WIDTH);
+					int chunkX = i + (startX / LodChunk.WIDTH);
+					int chunkZ = j + (startZ / LodChunk.WIDTH);
 					
 					LodChunk lod = dimension.getLodFromCoordinates(chunkX, chunkZ); // new LodChunk(); //   
 					if (lod == null)
