@@ -129,7 +129,7 @@ public class ReflectionHandler
 	/**
 	 * Get what type of fog optifine is currently set to render.
 	 */
-	public FogQuality getFogType()
+	public FogQuality getFogQuality()
 	{
 		if (ofFogField == null)
 		{

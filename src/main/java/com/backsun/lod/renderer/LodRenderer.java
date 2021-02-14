@@ -6,6 +6,8 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -311,9 +313,8 @@ public class LodRenderer
 		GlStateManager.translate(-cameraX, -cameraY, -cameraZ);
 		
 		setProjectionMatrix(partialTicks);
-		setupFog(FogDistanceMode.NEAR, reflectionHandler.getFogType());
 		setupLighting(partialTicks);
-		
+		setupBufferThreads(lodArray);
 		
 		
 		
@@ -323,8 +324,12 @@ public class LodRenderer
 		//===========//
 		
 		mc.mcProfiler.endStartSection("LOD build buffer");
-		// send the LODs over to the GPU
-		sendToGPUAndDraw(lodArray, colorArray);
+		if (regen)
+			generateLodBuffers(lodArray, colorArray);
+		
+		mc.mcProfiler.endStartSection("LOD draw setup");
+		setupFog(FogDistanceMode.NEAR, reflectionHandler.getFogQuality());
+		sendLodsToGpuAndDraw();
 		
 		
 		
@@ -350,6 +355,9 @@ public class LodRenderer
 		// with other mods that may render during forgeRenderLast
 		Project.gluPerspective(reflectionHandler.getFov(mc, partialTicks, true), (float) this.mc.displayWidth / (float) this.mc.displayHeight, 0.05F, this.farPlaneDistance * MathHelper.SQRT_2);
 		
+		// this can't be called until after the buffers are built
+		// because otherwise the buffers may be set to the wrong size
+		previousChunkRenderDistance = mc.gameSettings.renderDistanceChunks;
 		
 		
 		
@@ -375,94 +383,77 @@ public class LodRenderer
 	 * @param lods bounding boxes to draw
 	 * @param colors color of each box to draw
 	 */
-	private void sendToGPUAndDraw(AxisAlignedBB[][] lods, Color[][] colors)
+	private void generateLodBuffers(AxisAlignedBB[][] lods, Color[][] colors)
 	{
-		// mc.mcProfiler.endStartSection("LOD build buffer");
+		List<Future<ByteBuffer>> bufferFutures = new ArrayList<>();
+		bufferMaxCapacity = (lods.length * lods.length * (6 * 4 * ((3 * 4) + (4 * 4)))) / numbBufferThreads;
 		
-		// This is used for changing the number of buffer threads during runtime.
-		// This will only be used during testing and not during release
-		if (numbBufferThreads != bufferThreads.size())
+		for(int i = 0; i < numbBufferThreads; i++)
 		{
-			bufferMaxCapacity = (lods.length * lods.length * (6 * 4 * ((3 * 4) + (4 * 4)))) / numbBufferThreads;
-			clearBytes = new byte[bufferMaxCapacity];
-			
-			bufferThreads.clear();
-			for(int i = 0; i < numbBufferThreads; i++)
-				bufferThreads.add(new BuildBufferThread());
-			regen = true;
-			
-			for(int i = 0; i < maxThreads; i++)
+			if (buffers[i] == null || previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks)
 			{
 				buffers[i] = ByteBuffer.allocateDirect(bufferMaxCapacity);
 				buffers[i].order(ByteOrder.LITTLE_ENDIAN);
 			}
-		}
-		
-		List<Future<ByteBuffer>> futures = new ArrayList<>();
-		if (regen)
-		{
-			bufferMaxCapacity = (lods.length * lods.length * (6 * 4 * ((3 * 4) + (4 * 4)))) / numbBufferThreads;
 			
-			for(int i = 0; i < numbBufferThreads; i++)
+			if (regen)
 			{
-				if (buffers[i] == null || previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks)
-				{
-					buffers[i] = ByteBuffer.allocateDirect(bufferMaxCapacity);
-					buffers[i].order(ByteOrder.LITTLE_ENDIAN);
-				}
-				
-				if (regen)
-				{
-					// this is the best way I could find to
-					// overwrite the old data
-					// (which needs to be done otherwise the old
-					// LODs may be drawn)
-					buffers[i].clear();
-					buffers[i].put(clearBytes);
-					buffers[i].clear();
-				}
-				
-				int pos = bufferBuilder.getByteBuffer().position();
-				buffers[i].position(pos);
-				
-				bufferThreads.get(i).setNewData(buffers[i], lods, colors, i, numbBufferThreads);
+				// this is the best way I could find to
+				// overwrite the old data
+				// (which needs to be done otherwise the old
+				// LODs may be drawn)
+				buffers[i].clear();
+				buffers[i].put(clearBytes);
+				buffers[i].clear();
 			}
 			
-			try {
-				futures = threadPool.invokeAll(bufferThreads);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			previousChunkRenderDistance = mc.gameSettings.renderDistanceChunks;
+			int pos = bufferBuilder.getByteBuffer().position();
+			buffers[i].position(pos);
+			
+			bufferThreads.get(i).setNewData(buffers[i], lods, colors, i, numbBufferThreads);
 		}
 		
-		mc.mcProfiler.endStartSection("LOD draw setup");
+		try
+		{
+			bufferFutures = threadPool.invokeAll(bufferThreads);
+		}
+		catch (InterruptedException e)
+		{
+			// this should never happen, but just in case
+			e.printStackTrace();
+		}
+		
 		for(int i = 0; i < numbBufferThreads; i++)
 		{
 			try
 			{
-				if (regen)
-					buffers[i] = futures.get(i).get();
-				else
-				{
-					int pos = bufferBuilder.getByteBuffer().position();
-					buffers[i].position(pos);
-				}
-				
-				bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-				bufferBuilder.getByteBuffer().clear();
-				bufferBuilder.putBulkData(buffers[i]);
-				
-				mc.mcProfiler.endStartSection("LOD draw");
-				tessellator.draw();
-				mc.mcProfiler.endStartSection("LOD draw setup");
-				
-				bufferBuilder.getByteBuffer().clear(); // this is required otherwise nothing is drawn
+				buffers[i] = bufferFutures.get(i).get();
 			}
-			catch(Exception e)
+			catch(CancellationException | ExecutionException| InterruptedException e)
 			{
+				// this should never happen, but just in case
 				e.printStackTrace();
 			}
+		}
+		
+	}
+	
+	private void sendLodsToGpuAndDraw()
+	{
+		for(int i = 0; i < numbBufferThreads; i++)
+		{
+			int pos = bufferBuilder.getByteBuffer().position();
+			buffers[i].position(pos);
+			
+			bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+			bufferBuilder.getByteBuffer().clear();
+			bufferBuilder.putBulkData(buffers[i]);
+			
+			mc.mcProfiler.endStartSection("LOD draw");
+			tessellator.draw();
+			mc.mcProfiler.endStartSection("LOD draw setup");
+			
+			bufferBuilder.getByteBuffer().clear(); // this is required otherwise nothing is drawn
 		}
 	}
 	
@@ -501,7 +492,7 @@ public class LodRenderer
 				GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
 				GlStateManager.setFogStart(farPlaneDistance * 2.5f);
 			}
-			else //if(fogType == FogType.FAST)
+			else if(fogQuality == FogQuality.FAST)
 			{
 				// for the far fog of the normal chunks
 				// to start right where the LODs' end use:
@@ -511,14 +502,14 @@ public class LodRenderer
 				GlStateManager.setFogStart(farPlaneDistance * 3.5f);
 			}
 		}
-		else //if(fogMode == FogMode.FAR) or Both
+		else if(fogMode == FogDistanceMode.FAR)
 		{
 			if (fogQuality == FogQuality.FANCY || fogQuality == FogQuality.UNKNOWN)
 			{
 				GlStateManager.setFogStart(farPlaneDistance * 0.5f * VIEW_DISTANCE_MULTIPLIER / 2.0f);
 				GlStateManager.setFogEnd(farPlaneDistance * 1.0f * VIEW_DISTANCE_MULTIPLIER / 2.0f);
 			}
-			else //if(fogType == FogType.FAST)
+			else if(fogQuality == FogQuality.FAST)
 			{
 				GlStateManager.setFogStart(farPlaneDistance * 0.5f * VIEW_DISTANCE_MULTIPLIER / 2.0f);
 				GlStateManager.setFogEnd(farPlaneDistance * 0.8f * VIEW_DISTANCE_MULTIPLIER / 2.0f);
@@ -572,6 +563,32 @@ public class LodRenderer
 		
 		GlStateManager.enableLighting();
 	}
+	
+	
+	/**
+	 * This is used for changing the number of buffer threads during runtime.
+	 * This will only be used during testing and not during release.
+	 */
+	private void setupBufferThreads(AxisAlignedBB[][] lods)
+	{
+		if (numbBufferThreads != bufferThreads.size())
+		{
+			bufferMaxCapacity = (lods.length * lods.length * (6 * 4 * ((3 * 4) + (4 * 4)))) / numbBufferThreads;
+			clearBytes = new byte[bufferMaxCapacity];
+			
+			bufferThreads.clear();
+			for(int i = 0; i < numbBufferThreads; i++)
+				bufferThreads.add(new BuildBufferThread());
+			regen = true;
+			
+			for(int i = 0; i < maxThreads; i++)
+			{
+				buffers[i] = ByteBuffer.allocateDirect(bufferMaxCapacity);
+				buffers[i].order(ByteOrder.LITTLE_ENDIAN);
+			}
+		}
+	}
+	
 	
 	
 	
