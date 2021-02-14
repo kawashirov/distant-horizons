@@ -64,7 +64,7 @@ public class ClientProxy extends CommonProxy
 	
 	public void renderLods(float partialTicks)
 	{
-		int newWidth = Math.max(3, (Minecraft.getMinecraft().gameSettings.renderDistanceChunks * LodRenderer.VIEW_DISTANCE_MULTIPLIER * 2) / LodRegion.SIZE);
+		int newWidth = Math.max(4, (Minecraft.getMinecraft().gameSettings.renderDistanceChunks * LodChunk.WIDTH * 2) / LodRegion.SIZE);
 		if (lodWorld != null && regionWidth != newWidth)
 		{
 			lodWorld.resizeDimensionRegionWidth(newWidth);
