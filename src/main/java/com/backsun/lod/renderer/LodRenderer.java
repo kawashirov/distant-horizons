@@ -87,6 +87,8 @@ public class LodRenderer
 	private int prevChunkX = 0;
 	/** This is used to determine if the LODs should be regenerated */
 	private int prevChunkZ = 0;
+	/** This is used to determine if the LODs should be regenerated */
+	private FogDistance prevFogDistance = FogDistance.BOTH;
 	
 	/** if this is true the LODs should be regenerated */
 	private boolean regen = false;
@@ -128,12 +130,14 @@ public class LodRenderer
 		if ((int)Minecraft.getMinecraft().player.posX / LodChunk.WIDTH != prevChunkX ||
 			(int)Minecraft.getMinecraft().player.posZ / LodChunk.WIDTH != prevChunkZ ||
 			previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks ||
+			prevFogDistance != LodConfig.fogDistance ||
 			dimension != newDimension)
 		{
 			regen = true;
 			
 			prevChunkX = (int)Minecraft.getMinecraft().player.posX / LodChunk.WIDTH;
 			prevChunkZ = (int)Minecraft.getMinecraft().player.posZ / LodChunk.WIDTH;
+			prevFogDistance = LodConfig.fogDistance;
 		}
 		else
 		{
