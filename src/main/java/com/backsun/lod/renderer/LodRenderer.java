@@ -343,7 +343,7 @@ public class LodRenderer
 		
 		mc.mcProfiler.endStartSection("LOD build buffer");
 		if (regen)
-			generateLodBuffers(lodArray, colorArray, FogDistance.BOTH, new Vec3i(startX, 0, startZ));
+			generateLodBuffers(lodArray, colorArray, LodConfig.fogDistance, new Vec3i(startX, 0, startZ));
 		
 		switch(LodConfig.fogDistance)
 		{
@@ -360,12 +360,10 @@ public class LodRenderer
 			mc.mcProfiler.endStartSection("LOD draw setup");
 			setupFog(FogDistance.NEAR, reflectionHandler.getFogQuality());
 			sendLodsToGpuAndDraw(nearBuffers);
-			sendLodsToGpuAndDraw(farBuffers);
 			break;
 		case FAR:
 			mc.mcProfiler.endStartSection("LOD draw setup");
 			setupFog(FogDistance.FAR, reflectionHandler.getFogQuality());
-			sendLodsToGpuAndDraw(nearBuffers);
 			sendLodsToGpuAndDraw(farBuffers);
 			break;
 		}

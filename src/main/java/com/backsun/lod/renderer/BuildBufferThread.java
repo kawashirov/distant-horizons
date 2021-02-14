@@ -118,9 +118,13 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 					else
 						currentBuffer = farBuffer;
 				}
-				else
+				else if (distanceMode == FogDistance.NEAR)
 				{
 					currentBuffer = nearBuffer;
+				}
+				else // if (distanceMode == FogDistance.FAR)
+				{
+					currentBuffer = farBuffer;
 				}
 				
 				
