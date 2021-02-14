@@ -4,19 +4,32 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.concurrent.Callable;
 
+import com.backsun.lod.util.fog.FogDistance;
+
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3i;
 
-public class BuildBufferThread implements Callable<ByteBuffer>
+/**
+ * 
+ * 
+ * @author James Seibel
+ * @version 02-13-2021
+ */
+public class BuildBufferThread implements Callable<NearFarBuffer>
 {
-	public ByteBuffer buffer;
+	public ByteBuffer nearBuffer;
+	public ByteBuffer farBuffer;
+	public FogDistance distanceMode;
 	public AxisAlignedBB[][] lods;
 	public Color[][] colors;
 	
+	private int lodStartX = 0;
+	private int lodStartZ = 0;
 	private int start = 0;
 	private int end = -1;
 	
@@ -35,9 +48,9 @@ public class BuildBufferThread implements Callable<ByteBuffer>
 		vertexFormatElement = vertexFormat.getElement(vertexFormatIndex); 
 	}
 	
-	BuildBufferThread(ByteBuffer newByteBuffer, AxisAlignedBB[][] newLods, Color[][] newColors, int threadNumber, int totalThreads)
+	BuildBufferThread(ByteBuffer newNearByteBuffer, ByteBuffer newFarByteBuffer, AxisAlignedBB[][] newLods, Color[][] newColors, FogDistance newDistanceMode, Vec3i newLodStartCoordinate, int threadNumber, int totalThreads)
 	{
-		setNewData(newByteBuffer, newLods, newColors, threadNumber, totalThreads);
+		setNewData(newNearByteBuffer, newFarByteBuffer, distanceMode, newLodStartCoordinate, newLods, newColors, threadNumber, totalThreads);
 		
 		vertexCount = 0;
 		vertexFormat = DefaultVertexFormats.POSITION_COLOR;
@@ -45,12 +58,14 @@ public class BuildBufferThread implements Callable<ByteBuffer>
 		vertexFormatElement = vertexFormat.getElement(vertexFormatIndex); 
 	}
 	
-	public void setNewData(ByteBuffer newByteBuffer, AxisAlignedBB[][] newLods, Color[][] newColors, int threadNumber, int totalThreads)
+	public void setNewData(ByteBuffer newNearByteBuffer, ByteBuffer newFarByteBuffer, FogDistance newDistanceMode, Vec3i newlodStartCoordinate, AxisAlignedBB[][] newLods, Color[][] newColors, int threadNumber, int totalThreads)
 	{
 		vertexCount = 0;
         vertexFormatIndex = 0;
 		
-		buffer = newByteBuffer;
+		nearBuffer = newNearByteBuffer;
+		farBuffer = newFarByteBuffer;
+		distanceMode = newDistanceMode;
 		lods = newLods;
 		colors = newColors;
 		
@@ -58,18 +73,25 @@ public class BuildBufferThread implements Callable<ByteBuffer>
 		int rowsToRender = numbChunksWide / totalThreads;
 		start = threadNumber * rowsToRender;
 		end = (threadNumber + 1) * rowsToRender;
+		
+		lodStartX = newlodStartCoordinate.getX();
+		lodStartZ = newlodStartCoordinate.getZ();
 	}
 	
 	@Override
-	public ByteBuffer call()
+	public NearFarBuffer call()
 	{
 		int numbChunksWide = lods.length;
 		
+		ByteBuffer currentBuffer;
 		AxisAlignedBB bb;
 		int red;
 		int green;
 		int blue;
 		int alpha;
+		
+		int chunkX;
+		int chunkZ;
 		
 		// x axis
 		for (int i = start; i < end; i++)
@@ -99,84 +121,97 @@ public class BuildBufferThread implements Callable<ByteBuffer>
 				blue = colors[i][j].getBlue();
 				alpha = colors[i][j].getAlpha();
 				
+				// choose which buffer to add these LODs too
+				if (distanceMode == FogDistance.BOTH)
+				{
+					if (RenderUtil.isCoordinateInNearFogArea(i, j, numbChunksWide / 2))
+						currentBuffer = nearBuffer;
+					else
+						currentBuffer = farBuffer;
+				}
+				else
+				{
+					currentBuffer = nearBuffer;
+				}
+				
 				
 				if (bb.minY != bb.maxY)
 				{
 					// top (facing up)
-					addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.maxY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.maxY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.maxY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.maxY, bb.minZ, red, green, blue, alpha);
 					// bottom (facing down)
-					addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
 
 					// south (facing -Z) 
-					addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.maxY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.maxY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
 					// north (facing +Z)
-					addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.maxY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.maxY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
 
 					// west (facing -X)
-					addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.maxY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.maxY, bb.minZ, red, green, blue, alpha);
 					// east (facing +X)
-					addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.maxY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.maxY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
 				}
 				else
 				{
 					// render this LOD as one block thick
 					
 					// top (facing up)
-					addPosAndColor(buffer, bb.minX, bb.minY+1, bb.minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.minY+1, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY+1, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY+1, bb.minZ, red, green, blue, alpha);
 					// bottom (facing down)
-					addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
 
 					// south (facing -Z) 
-					addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
 					// north (facing +Z)
-					addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.minY+1, bb.minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.minY+1, bb.minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY+1, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY+1, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
 
 					// west (facing -X)
-					addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.minX, bb.minY+1, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.minX, bb.minY+1, bb.minZ, red, green, blue, alpha);
 					// east (facing +X)
-					addPosAndColor(buffer, bb.maxX, bb.minY+1, bb.minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY+1, bb.minZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY+1, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
+					addPosAndColor(currentBuffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
 				}
 				
 			} // z axis
 		} // x axis
 		
-		return buffer;
+		return new NearFarBuffer(nearBuffer, farBuffer);
 	}
 	
 	private void addPosAndColor(ByteBuffer buffer, double x, double y, double z, int red, int green, int blue, int alpha)
@@ -289,16 +324,16 @@ public class BuildBufferThread implements Callable<ByteBuffer>
 	private void growBuffer(int p_181670_1_)
     {
         //if (MathHelper.roundUp(p_181670_1_, 4) / 4 > this.rawIntBuffer.remaining() || this.vertexCount * this.vertexFormat.getNextOffset() + p_181670_1_ > this.byteBuffer.capacity())
-		if (this.vertexCount * this.vertexFormat.getNextOffset() + p_181670_1_ > buffer.capacity())
+		if (this.vertexCount * this.vertexFormat.getNextOffset() + p_181670_1_ > nearBuffer.capacity())
         {
-            int i = buffer.capacity();
+            int i = nearBuffer.capacity();
             int j = i + MathHelper.roundUp(p_181670_1_, 2097152);
 //	            int k = this.rawIntBuffer.position();
             ByteBuffer directBytebuffer = GLAllocation.createDirectByteBuffer(j);
-            buffer.position(0);
-            directBytebuffer.put(buffer);
+            nearBuffer.position(0);
+            directBytebuffer.put(nearBuffer);
             directBytebuffer.rewind();
-            buffer = directBytebuffer;
+            nearBuffer = directBytebuffer;
 //	            this.rawFloatBuffer = buffer.asFloatBuffer().asReadOnlyBuffer();
 //	            this.rawIntBuffer = buffer.asIntBuffer();
 //	            this.rawIntBuffer.position(k);

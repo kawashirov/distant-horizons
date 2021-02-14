@@ -20,7 +20,7 @@ import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.util.ReflectionHandler;
 import com.backsun.lod.util.enums.ColorDirection;
 import com.backsun.lod.util.enums.LodLocation;
-import com.backsun.lod.util.fog.FogDistanceMode;
+import com.backsun.lod.util.fog.FogDistance;
 import com.backsun.lod.util.fog.FogQuality;
 
 import net.minecraft.client.Minecraft;
@@ -31,10 +31,11 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3i;
 
 /**
  * @author James Seibel
- * @version 2-10-2021
+ * @version 2-13-2021
  */
 public class LodRenderer
 {
@@ -44,9 +45,9 @@ public class LodRenderer
 	private float farPlaneDistance;
 	// make sure this is an even number, or else it won't align with the chunk grid
 	/** this is the total width of the LODs (I.E the diameter, not the radius) */
-	public static final int VIEW_DISTANCE_MULTIPLIER = 12;
-	public static final int LOD_WIDTH = 16;
-	public static final int MINECRAFT_CHUNK_WIDTH = 16;
+	public static final int VIEW_DISTANCE_MULTIPLIER = 12; // TODO rename and split into 2 variables
+	public static final int LOD_WIDTH = 16; // TODO remove and replace with the LodChunk variable
+	public static final int MINECRAFT_CHUNK_WIDTH = 16; // TODO remove and replace with the LodChunk variable
 	
 	private Tessellator tessellator;
 	private BufferBuilder bufferBuilder;
@@ -67,7 +68,8 @@ public class LodRenderer
 	/** How many threads should be used for building the render buffer. */
 	private int numbBufferThreads = maxThreads;
 	private ArrayList<BuildBufferThread> bufferThreads = new ArrayList<BuildBufferThread>();
-	private volatile ByteBuffer[] buffers = new ByteBuffer[maxThreads];
+	private volatile ByteBuffer[] nearBuffers = new ByteBuffer[maxThreads];
+	private volatile ByteBuffer[] farBuffers = new ByteBuffer[maxThreads];
 	private ExecutorService threadPool = Executors.newFixedThreadPool(maxThreads);
 	/*
 	 * this is the maximum number of bytes a buffer
@@ -325,13 +327,15 @@ public class LodRenderer
 		
 		mc.mcProfiler.endStartSection("LOD build buffer");
 		if (regen)
-			generateLodBuffers(lodArray, colorArray);
+			generateLodBuffers(lodArray, colorArray, FogDistance.BOTH, new Vec3i(startX, 0, startZ));
 		
 		mc.mcProfiler.endStartSection("LOD draw setup");
-		setupFog(FogDistanceMode.NEAR, reflectionHandler.getFogQuality());
-		sendLodsToGpuAndDraw();
+		setupFog(FogDistance.NEAR, reflectionHandler.getFogQuality());
+		sendLodsToGpuAndDraw(nearBuffers);
 		
-		
+		mc.mcProfiler.endStartSection("LOD draw setup");
+		setupFog(FogDistance.FAR, reflectionHandler.getFogQuality());
+		sendLodsToGpuAndDraw(farBuffers);
 		
 		
 		
@@ -383,34 +387,44 @@ public class LodRenderer
 	 * @param lods bounding boxes to draw
 	 * @param colors color of each box to draw
 	 */
-	private void generateLodBuffers(AxisAlignedBB[][] lods, Color[][] colors)
+	private void generateLodBuffers(AxisAlignedBB[][] lods, Color[][] colors, FogDistance fogDistance, Vec3i lodStartCoordinate)
 	{
-		List<Future<ByteBuffer>> bufferFutures = new ArrayList<>();
-		bufferMaxCapacity = (lods.length * lods.length * (6 * 4 * ((3 * 4) + (4 * 4)))) / numbBufferThreads;
+		List<Future<NearFarBuffer>> bufferFutures = new ArrayList<>();
+		bufferMaxCapacity = (lods.length * lods.length * (6 * 4 * ((3 * 4) + (4 * 4)))) / numbBufferThreads; // TODO this should change based on whether we are using near/far or both fog settings
 		
-		for(int i = 0; i < numbBufferThreads; i++)
+		for(int i = 0; i < maxThreads; i++)
 		{
-			if (buffers[i] == null || previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks)
+			if (nearBuffers[i] == null || previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks)
 			{
-				buffers[i] = ByteBuffer.allocateDirect(bufferMaxCapacity);
-				buffers[i].order(ByteOrder.LITTLE_ENDIAN);
+				nearBuffers[i] = ByteBuffer.allocateDirect(bufferMaxCapacity);
+				nearBuffers[i].order(ByteOrder.LITTLE_ENDIAN);
+				
+				farBuffers[i] = ByteBuffer.allocateDirect(bufferMaxCapacity);
+				farBuffers[i].order(ByteOrder.LITTLE_ENDIAN);
+				
+				clearBytes = new byte[bufferMaxCapacity];
 			}
 			
 			if (regen)
 			{
 				// this is the best way I could find to
 				// overwrite the old data
-				// (which needs to be done otherwise the old
+				// (which needs to be done otherwise old
 				// LODs may be drawn)
-				buffers[i].clear();
-				buffers[i].put(clearBytes);
-				buffers[i].clear();
+				nearBuffers[i].clear();
+				nearBuffers[i].put(clearBytes);
+				nearBuffers[i].clear();
+				
+				farBuffers[i].clear();
+				farBuffers[i].put(clearBytes);
+				farBuffers[i].clear();
 			}
 			
 			int pos = bufferBuilder.getByteBuffer().position();
-			buffers[i].position(pos);
+			nearBuffers[i].position(pos);
+			farBuffers[i].position(pos);
 			
-			bufferThreads.get(i).setNewData(buffers[i], lods, colors, i, numbBufferThreads);
+			bufferThreads.get(i).setNewData(nearBuffers[i], farBuffers[i], fogDistance, lodStartCoordinate, lods, colors, i, numbBufferThreads);
 		}
 		
 		try
@@ -427,7 +441,8 @@ public class LodRenderer
 		{
 			try
 			{
-				buffers[i] = bufferFutures.get(i).get();
+				nearBuffers[i] = bufferFutures.get(i).get().nearBuffer;
+				farBuffers[i] = bufferFutures.get(i).get().farBuffer;
 			}
 			catch(CancellationException | ExecutionException| InterruptedException e)
 			{
@@ -438,7 +453,7 @@ public class LodRenderer
 		
 	}
 	
-	private void sendLodsToGpuAndDraw()
+	private void sendLodsToGpuAndDraw(ByteBuffer[] buffers)
 	{
 		for(int i = 0; i < numbBufferThreads; i++)
 		{
@@ -467,12 +482,17 @@ public class LodRenderer
 	// Setup Functions //
 	//=================//
 	
-	private void setupFog(FogDistanceMode fogMode, FogQuality fogQuality)
+	private void setupFog(FogDistance fogDistance, FogQuality fogQuality)
 	{
 		if(fogQuality == FogQuality.OFF)
 		{
 			GlStateManager.disableFog();
 			return;
+		}
+		
+		if(fogDistance == FogDistance.BOTH)
+		{
+			throw new IllegalArgumentException("setupFog only accepts NEAR or FAR fog distances.");
 		}
 
 		// the multipliers are percentages
@@ -480,7 +500,7 @@ public class LodRenderer
 		
 		// TODO add the ability to change the fogDistanceMode 
 		// in the mod settings
-		if(fogMode == FogDistanceMode.NEAR)
+		if(fogDistance == FogDistance.NEAR)
 		{
 			// the reason that I wrote fogEnd then fogStart backwards
 			// is because we are using fog backwards to how
@@ -489,8 +509,8 @@ public class LodRenderer
 			
 			if (fogQuality == FogQuality.FANCY || fogQuality == FogQuality.UNKNOWN)
 			{
-				GlStateManager.setFogEnd(farPlaneDistance * 2.0f);
-				GlStateManager.setFogStart(farPlaneDistance * 2.5f);
+				GlStateManager.setFogEnd(farPlaneDistance * 0.3f * (VIEW_DISTANCE_MULTIPLIER * 0.5f));
+				GlStateManager.setFogStart(farPlaneDistance * 0.35f * (VIEW_DISTANCE_MULTIPLIER * 0.5f));
 			}
 			else if(fogQuality == FogQuality.FAST)
 			{
@@ -502,17 +522,17 @@ public class LodRenderer
 				GlStateManager.setFogStart(farPlaneDistance * 3.5f);
 			}
 		}
-		else if(fogMode == FogDistanceMode.FAR)
+		else if(fogDistance == FogDistance.FAR)
 		{
 			if (fogQuality == FogQuality.FANCY || fogQuality == FogQuality.UNKNOWN)
 			{
-				GlStateManager.setFogStart(farPlaneDistance * 0.5f * VIEW_DISTANCE_MULTIPLIER / 2.0f);
-				GlStateManager.setFogEnd(farPlaneDistance * 1.0f * VIEW_DISTANCE_MULTIPLIER / 2.0f);
+				GlStateManager.setFogStart(farPlaneDistance * 0.78f * (VIEW_DISTANCE_MULTIPLIER * 0.5f)); // TODO rename to view_distance_radius
+				GlStateManager.setFogEnd(farPlaneDistance * 1.0f * (VIEW_DISTANCE_MULTIPLIER * 0.5f));
 			}
 			else if(fogQuality == FogQuality.FAST)
 			{
-				GlStateManager.setFogStart(farPlaneDistance * 0.5f * VIEW_DISTANCE_MULTIPLIER / 2.0f);
-				GlStateManager.setFogEnd(farPlaneDistance * 0.8f * VIEW_DISTANCE_MULTIPLIER / 2.0f);
+				GlStateManager.setFogStart(farPlaneDistance * 0.5f * VIEW_DISTANCE_MULTIPLIER);
+				GlStateManager.setFogEnd(farPlaneDistance * 0.8f * VIEW_DISTANCE_MULTIPLIER);
 			}
 		}
 		
@@ -583,8 +603,11 @@ public class LodRenderer
 			
 			for(int i = 0; i < maxThreads; i++)
 			{
-				buffers[i] = ByteBuffer.allocateDirect(bufferMaxCapacity);
-				buffers[i].order(ByteOrder.LITTLE_ENDIAN);
+				nearBuffers[i] = ByteBuffer.allocateDirect(bufferMaxCapacity);
+				nearBuffers[i].order(ByteOrder.LITTLE_ENDIAN);
+				
+				farBuffers[i] = ByteBuffer.allocateDirect(bufferMaxCapacity);
+				farBuffers[i].order(ByteOrder.LITTLE_ENDIAN);
 			}
 		}
 	}

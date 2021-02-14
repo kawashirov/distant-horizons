@@ -6,7 +6,7 @@ package com.backsun.lod.util.fog;
  * @author James Seibel
  * @version 01-27-2021
  */
-public enum FogDistanceMode
+public enum FogDistance
 {
 	/** valid for both fast and fancy qualities. */
 	NEAR,
