@@ -41,6 +41,7 @@ public class LodRenderer
 	private Minecraft mc;
 	private float farPlaneDistance;
 	// make sure this is an even number, or else it won't align with the chunk grid
+	/** this is the total width of the LODs (I.E the diameter, not the radius) */
 	public static final int VIEW_DISTANCE_MULTIPLIER = 12;
 	public static final int LOD_WIDTH = 16;
 	public static final int MINECRAFT_CHUNK_WIDTH = 16;
@@ -49,38 +50,29 @@ public class LodRenderer
 	private BufferBuilder bufferBuilder;
 	
 	/**
-	 * Equivalent to calling: bufferBuilder.getByteBuffer().capacity())
-	 */
-	private static final int BUFFER_BUILDER_CAPACITY = 8388608;
-	/**
 	 * This is an array of 0's used to clear old 
 	 * ByteBuffers when they need to be rebuilt.
 	 */
-	byte[] clearBytes = new byte[BUFFER_BUILDER_CAPACITY];
+	byte[] clearBytes;
 	
 	private ReflectionHandler reflectionHandler;
 	
 	public LodDimension dimension = null;
 	
 	
-	/** How many threads should be used for building the render buffer. <br>
-	 *  After testing I found that 1 thread is the fastest, since we can't build
-	 *  to the same byte buffer, and thus have to make a separate render call for
-	 *  each thread.
-	 *  <br>
-	 *  <br>
-	 *  num Threads, % of frame time, fps, frame time <br>
-	 *  1:	78%		62 fps		12 ms <br>
-	 *  2:	63%		69 fps		11 ms <br>
-	 *  4:	37%		65 fps		11 ms <br>
-	 *  8:	30%		44 fps		20 ms <br>
-	 *  16:	33%		25 fps		36 ms <br>
-	 */
-	private int numbThreads = 1;
+	
 	private int maxThreads = Runtime.getRuntime().availableProcessors();
+	/** How many threads should be used for building the render buffer. */
+	private int numbBufferThreads = maxThreads;
 	private ArrayList<BuildBufferThread> bufferThreads = new ArrayList<BuildBufferThread>();
 	private volatile ByteBuffer[] buffers = new ByteBuffer[maxThreads];
 	private ExecutorService threadPool = Executors.newFixedThreadPool(maxThreads);
+	/*
+	 * this is the maximum number of bytes a buffer
+	 * would ever have to hold at once (this prevents the buffer
+	 * from having to resize and thus save performance)
+	 */
+	private int bufferMaxCapacity = 0;
 	
 	/** This is used to determine if the LODs should be regenerated */
 	private int previousChunkRenderDistance = 0;
@@ -387,22 +379,35 @@ public class LodRenderer
 	{
 		// mc.mcProfiler.endStartSection("LOD build buffer");
 		
-		if (numbThreads != bufferThreads.size())
+		// This is used for changing the number of buffer threads during runtime.
+		// This will only be used during testing and not during release
+		if (numbBufferThreads != bufferThreads.size())
 		{
+			bufferMaxCapacity = (lods.length * lods.length * (6 * 4 * ((3 * 4) + (4 * 4)))) / numbBufferThreads;
+			clearBytes = new byte[bufferMaxCapacity];
+			
 			bufferThreads.clear();
-			for(int i = 0; i < numbThreads; i++)
+			for(int i = 0; i < numbBufferThreads; i++)
 				bufferThreads.add(new BuildBufferThread());
 			regen = true;
+			
+			for(int i = 0; i < maxThreads; i++)
+			{
+				buffers[i] = ByteBuffer.allocateDirect(bufferMaxCapacity);
+				buffers[i].order(ByteOrder.LITTLE_ENDIAN);
+			}
 		}
 		
 		List<Future<ByteBuffer>> futures = new ArrayList<>();
 		if (regen)
 		{
-			for(int i = 0; i < numbThreads; i++)
+			bufferMaxCapacity = (lods.length * lods.length * (6 * 4 * ((3 * 4) + (4 * 4)))) / numbBufferThreads;
+			
+			for(int i = 0; i < numbBufferThreads; i++)
 			{
 				if (buffers[i] == null || previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks)
 				{
-					buffers[i] = ByteBuffer.allocateDirect(BUFFER_BUILDER_CAPACITY);
+					buffers[i] = ByteBuffer.allocateDirect(bufferMaxCapacity);
 					buffers[i].order(ByteOrder.LITTLE_ENDIAN);
 				}
 				
@@ -420,7 +425,7 @@ public class LodRenderer
 				int pos = bufferBuilder.getByteBuffer().position();
 				buffers[i].position(pos);
 				
-				bufferThreads.get(i).setNewData(buffers[i], lods, colors, i, numbThreads);
+				bufferThreads.get(i).setNewData(buffers[i], lods, colors, i, numbBufferThreads);
 			}
 			
 			try {
@@ -432,7 +437,7 @@ public class LodRenderer
 		}
 		
 		mc.mcProfiler.endStartSection("LOD draw setup");
-		for(int i = 0; i < numbThreads; i++)
+		for(int i = 0; i < numbBufferThreads; i++)
 		{
 			try
 			{
@@ -445,6 +450,7 @@ public class LodRenderer
 				}
 				
 				bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+				bufferBuilder.getByteBuffer().clear();
 				bufferBuilder.putBulkData(buffers[i]);
 				
 				mc.mcProfiler.endStartSection("LOD draw");
