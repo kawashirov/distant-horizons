@@ -197,6 +197,7 @@ public class LodRenderer
 		double cameraZ = player.lastTickPosZ + (player.posZ - player.lastTickPosZ) * partialTicks;
 
 		
+
 		
 		// determine how far the game's render distance is currently set
 		int renderDistWidth = mc.gameSettings.renderDistanceChunks;
@@ -206,10 +207,14 @@ public class LodRenderer
 		int totalLength = (int) farPlaneDistance * LOD_CHUNK_DISTANCE_RADIUS * 2;
 		int numbChunksWide = (totalLength / LodChunk.WIDTH);
 		
+		// this seemingly useless math is required,
+		// just using (int) camera doesn't work
+		int playerXChunkOffset = ((int) cameraX / LodChunk.WIDTH) * LodChunk.WIDTH;
+		int playerZChunkOffset = ((int) cameraZ / LodChunk.WIDTH) * LodChunk.WIDTH;
 		// this where we will start drawing squares
 		// (exactly half the total width)
-		int startX = (-LodChunk.WIDTH * (numbChunksWide / 2)) + (int)cameraX;
-		int startZ = (-LodChunk.WIDTH * (numbChunksWide / 2)) + (int)cameraZ;
+		int startX = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerXChunkOffset;
+		int startZ = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerZChunkOffset;
 		
 		
 		// this is where we store the LOD objects
