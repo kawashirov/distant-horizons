@@ -60,17 +60,17 @@ public class LodRenderer
 	
 	private ReflectionHandler reflectionHandler;
 	
-	public LodDimension dimension = null;
+	public LodDimension lodDimension = null;
 	
 	
 	
-	private int maxThreads = Runtime.getRuntime().availableProcessors();
+	private int maxNumbThreads = Runtime.getRuntime().availableProcessors();
 	/** How many threads should be used for building the render buffer. */
-	private int numbBufferThreads = maxThreads;
+	private int numbBufferThreads = maxNumbThreads;
 	private ArrayList<BuildBufferThread> bufferThreads = new ArrayList<BuildBufferThread>();
-	private volatile ByteBuffer[] nearBuffers = new ByteBuffer[maxThreads];
-	private volatile ByteBuffer[] farBuffers = new ByteBuffer[maxThreads];
-	private ExecutorService threadPool = Executors.newFixedThreadPool(maxThreads);
+	private volatile ByteBuffer[] nearBuffers = new ByteBuffer[maxNumbThreads];
+	private volatile ByteBuffer[] farBuffers = new ByteBuffer[maxNumbThreads];
+	private ExecutorService bufferThreadPool = Executors.newFixedThreadPool(maxNumbThreads);
 	/*
 	 * this is the maximum number of bytes a buffer
 	 * would ever have to hold at once (this prevents the buffer
@@ -89,7 +89,6 @@ public class LodRenderer
 	
 	/** if this is true the LODs should be regenerated */
 	private boolean regen = false;
-	
 	
 	
 	
@@ -128,7 +127,7 @@ public class LodRenderer
 			(int)Minecraft.getMinecraft().player.posZ / LodChunk.WIDTH != prevChunkZ ||
 			previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks ||
 			prevFogDistance != LodConfig.fogDistance ||
-			dimension != newDimension)
+			lodDimension != newDimension)
 		{
 			regen = true;
 			
@@ -144,8 +143,8 @@ public class LodRenderer
 			regen = false;
 		}
 		
-		dimension = newDimension;
-		if (dimension == null)
+		lodDimension = newDimension;
+		if (lodDimension == null)
 		{
 			// if there aren't any loaded LodChunks
 			// don't try drawing anything
@@ -230,7 +229,6 @@ public class LodRenderer
 		// create the LODs //
 		//=================//
 		
-		// TODO create a worker thread to do this
 		if (regen)
 		{
 			mc.mcProfiler.endStartSection("LOD generation");
@@ -261,7 +259,7 @@ public class LodRenderer
 					int chunkX = i + (startX / LodChunk.WIDTH);
 					int chunkZ = j + (startZ / LodChunk.WIDTH);
 					
-					LodChunk lod = dimension.getLodFromCoordinates(chunkX, chunkZ); // new LodChunk(); //   
+					LodChunk lod = lodDimension.getLodFromCoordinates(chunkX, chunkZ); // new LodChunk(); //   
 					if (lod == null)
 					{
 						// note: for some reason if any color or lod object are set here
@@ -426,7 +424,8 @@ public class LodRenderer
 	private void generateLodBuffers(AxisAlignedBB[][] lods, Color[][] colors, FogDistance fogDistance)
 	{
 		List<Future<NearFarBuffer>> bufferFutures = new ArrayList<>();
-		bufferMaxCapacity = (lods.length * lods.length * (6 * 4 * ((3 * 4) + (4 * 4)))) / numbBufferThreads; // TODO this should change based on whether we are using near/far or both fog settings
+		// TODO this should change based on whether we are using near/far or both fog settings
+		bufferMaxCapacity = (lods.length * lods.length * (6 * 4 * ((3 * 4) + (4 * 4)))) / numbBufferThreads; 
 		
 		for(int i = 0; i < numbBufferThreads; i++)
 		{
@@ -465,7 +464,7 @@ public class LodRenderer
 		
 		try
 		{
-			bufferFutures = threadPool.invokeAll(bufferThreads);
+			bufferFutures = bufferThreadPool.invokeAll(bufferThreads);
 		}
 		catch (InterruptedException e)
 		{
@@ -632,7 +631,7 @@ public class LodRenderer
 				bufferThreads.add(new BuildBufferThread());
 			regen = true;
 			
-			for(int i = 0; i < maxThreads; i++)
+			for(int i = 0; i < maxNumbThreads; i++)
 			{
 				nearBuffers[i] = ByteBuffer.allocateDirect(bufferMaxCapacity);
 				nearBuffers[i].order(ByteOrder.LITTLE_ENDIAN);
