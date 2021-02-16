@@ -1,6 +1,9 @@
 This program is an attempt to create Level Of Details (LODs) in Minecraft.
 The purpose is to increase the maximum view distance in game 
 
+Used in congunction with:
+https://gitlab.com/jeseibel/minecraft-lod-core-mod
+
 
 ========================
 source code installation
