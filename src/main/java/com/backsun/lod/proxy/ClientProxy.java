@@ -25,6 +25,9 @@ import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 
+//TODO Find a way to replace getIntegratedServer so this mod could be used on non-local worlds.
+// Minecraft.getMinecraft().getIntegratedServer()
+
 /**
  * This is used by the client.
  * 
@@ -172,7 +175,7 @@ public class ClientProxy extends CommonProxy
 			return;
 		
 		int dimId = chunk.getWorld().provider.getDimension();
-		World world = mc.getIntegratedServer().getWorld(dimId); // TODO what can be done if not connected to a server?
+		World world = mc.getIntegratedServer().getWorld(dimId);
 		
 		if (world == null)
 			return;
