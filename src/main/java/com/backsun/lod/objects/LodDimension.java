@@ -263,6 +263,7 @@ public class LodDimension
 		
 		LodRegion region = getRegion(regionX, regionZ);
 		
+		// TODO fix small render distances sometimes not having all regions loaded
 		if(region == null)
 			return null;
 		
