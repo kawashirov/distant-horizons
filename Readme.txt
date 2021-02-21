@@ -1,8 +1,5 @@
 This program is an attempt to create Level Of Details (LODs) in Minecraft.
-The purpose is to increase the maximum view distance in game 
-
-Used in congunction with:
-https://gitlab.com/jeseibel/minecraft-lod-core-mod
+The purpose is to increase the maximum view distance in game
 
 
 ========================
@@ -12,20 +9,19 @@ source code installation
 See the Forge Documentation online for more detailed instructions:
 http://mcforge.readthedocs.io/en/latest/gettingstarted/
 
-Step 1: open a command line in the project folder
+Step 1: Create a system variable called "JAVA_MC_HOME" with the location of the JDK 1.8.0_251 (This is needed for gradle to work correctly)
 
-Step 2: run the command: "./gradlew setupDecompWorkspace"
+Step 2: replace JAVA_HOME with JAVA_MC_HOME in gradle.bat
 
-Step 3: run the command: "./gradlew eclipse"
+Step 3: open a command line in the project folder
 
-Step 4: Import project
+Step 4: run the command: "./gradlew geneclipseruns"
 
-Step 5: Create a system variable called "JAVA_MC_HOME" with the location of the JDK 1.8.0_251 (This is needed for gradle to work correctly)
-		And make sure it is used in the build.gradle file.
-
-Step 6: Import the lodcore and lodcore_source jar files into the referenced libraries.
+Step 5: run the command: "./gradlew eclipse"
 
 Step 6: Make sure the eclipse has the JDK 1.8.0_251 installed. (This is needed so that eclipse can run minecraft)
+
+Step 7: Import the project into eclipse
 
 
 Other commands: 
