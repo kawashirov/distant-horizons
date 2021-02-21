@@ -2,7 +2,6 @@ package com.backsun.lod.objects;
 
 import com.backsun.lod.util.LodFileHandler;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.DimensionType;
 
 /**
@@ -33,7 +32,7 @@ public class LodDimension
 		width = newMaxWidth;
 		
 		// dimension 0 works here since we are just looking for the save handler anyway
-		rfHandler = new LodFileHandler(Minecraft.getMinecraft().getIntegratedServer().getWorld(0).getSaveHandler(), this);
+		rfHandler = new LodFileHandler(this);
 		
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];

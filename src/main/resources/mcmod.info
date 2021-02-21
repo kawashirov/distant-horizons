@@ -4,13 +4,13 @@
   "name": "Level Of Details",
   "description": "Generates and renders simplified chunks beyond the normal view distance, at a low performance cost.",
   "version": "0.1",
-  "mcversion": "1.12.2",
+  "mcversion": "1.16.4",
   "url": "",
   "updateUrl": "",
   "authorList": ["James Seibel"],
   "credits": "TechnoVision and Vike for their modding tutorials.",
   "logoFile": "",
   "screenshots": [],
-  "dependencies": ["lodcore"]
+  "dependencies": []
 }
 ]

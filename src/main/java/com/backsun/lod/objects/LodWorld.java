@@ -4,6 +4,8 @@ import java.util.Dictionary;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import net.minecraft.world.DimensionType;
+
 /**
  * This stores all LODs for a given world.
  * 
@@ -17,31 +19,31 @@ public class LodWorld
 	/**
 	 * Key = Dimension id (as an int)
 	 */
-	private Dictionary<Integer, LodDimension> lodDimensions;
+	private Dictionary<DimensionType, LodDimension> lodDimensions;
 	
 	
 	public LodWorld(String newWorldName)
 	{
 		worldName = newWorldName;
-		lodDimensions = new Hashtable<Integer, LodDimension>();
+		lodDimensions = new Hashtable<>();
 	}
 	
 	
 	
 	public void addLodDimension(LodDimension newStorage)
 	{
-		lodDimensions.put(newStorage.dimension.getId(), newStorage);
+		lodDimensions.put(newStorage.dimension, newStorage);
 	}
 	
-	public LodDimension getLodDimension(int dimensionId)
+	public LodDimension getLodDimension(DimensionType dimension)
 	{
-		return lodDimensions.get(dimensionId);
+		return lodDimensions.get(dimension);
 	}
 	
 	
 	public void resizeDimensionRegionWidth(int newWidth)
 	{
-		Enumeration<Integer> keys = lodDimensions.keys();
+		Enumeration<DimensionType> keys = lodDimensions.keys();
 		
 		while(keys.hasMoreElements())
 			lodDimensions.get(keys.nextElement()).setRegionWidth(newWidth);

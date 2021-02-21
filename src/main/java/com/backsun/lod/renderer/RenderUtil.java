@@ -17,7 +17,7 @@ public class RenderUtil
 	 */
 	public static boolean isCoordinateInLoadedArea(int i, int j, int centerCoordinate)
 	{
-		Minecraft mc = Minecraft.getMinecraft();
+		Minecraft mc = Minecraft.getInstance();
 		
 		return (i >= centerCoordinate - mc.gameSettings.renderDistanceChunks 
 				&& i <= centerCoordinate + mc.gameSettings.renderDistanceChunks) 

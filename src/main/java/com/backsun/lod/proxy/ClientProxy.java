@@ -10,23 +10,21 @@ import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodRegion;
 import com.backsun.lod.objects.LodWorld;
 import com.backsun.lod.renderer.LodRenderer;
+import com.backsun.lod.renderer.RenderGlobalHook;
 import com.backsun.lod.util.LodConfig;
 import com.backsun.lod.util.LodFileHandler;
-import com.backsun.lodCore.util.RenderGlobalHook;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import net.minecraft.world.chunk.ChunkSection;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
-import net.minecraftforge.event.terraingen.PopulateChunkEvent;
 import net.minecraftforge.event.world.ChunkEvent;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 //TODO Find a way to replace getIntegratedServer so this mod could be used on non-local worlds.
-// Minecraft.getMinecraft().getIntegratedServer()
+// Minecraft.getInstance().getIntegratedServer()
 
 /**
  * This is used by the client.
@@ -34,11 +32,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
  * @author James_Seibel
  * @version 01-31-2021
  */
-public class ClientProxy extends CommonProxy
+public class ClientProxy
 {
 	private LodRenderer renderer;
 	private LodWorld lodWorld;
 	private ExecutorService lodGenThreadPool = Executors.newFixedThreadPool(1);
+	Minecraft mc = Minecraft.getInstance();
 	
 	/** Default size of any LOD regions we use */
 	private int regionWidth = 5;
@@ -61,7 +60,7 @@ public class ClientProxy extends CommonProxy
 		RenderGlobalHook.endRenderingStencil();
 		GL11.glStencilFunc(GL11.GL_EQUAL, 0, 0xFF);
 		
-		if (LodConfig.drawLODs)
+		if (LodConfig.COMMON.drawLODs.get())
 			renderLods(event.getPartialTicks());
 		
 		GL11.glDisable(GL11.GL_STENCIL_TEST);
@@ -69,7 +68,7 @@ public class ClientProxy extends CommonProxy
 	
 	public void renderLods(float partialTicks)
 	{
-		int newWidth = Math.max(4, (Minecraft.getMinecraft().gameSettings.renderDistanceChunks * LodChunk.WIDTH * 2) / LodRegion.SIZE);
+		int newWidth = Math.max(4, (mc.gameSettings.renderDistanceChunks * LodChunk.WIDTH * 2) / LodRegion.SIZE);
 		if (lodWorld != null && regionWidth != newWidth)
 		{
 			lodWorld.resizeDimensionRegionWidth(newWidth);
@@ -80,18 +79,18 @@ public class ClientProxy extends CommonProxy
 			return;
 		}
 		
-		Minecraft mc = Minecraft.getMinecraft();
 		if (mc == null || mc.player == null || lodWorld == null)
 			return;
 		
-		int dimId = mc.player.dimension;
-		LodDimension lodDim = lodWorld.getLodDimension(dimId);
+		LodDimension lodDim = lodWorld.getLodDimension(mc.player.world.getDimensionType());
 		if (lodDim == null)
 			return;
 		
+		mc.getProfiler().endSection();
+		mc.getProfiler().startSection("LOD");
 		
-		double playerX = mc.player.posX;
-		double playerZ = mc.player.posZ;
+		double playerX = mc.player.getPosX();
+		double playerZ = mc.player.getPosZ();
 		
 		int xOffset = ((int)playerX / (LodChunk.WIDTH * LodRegion.SIZE)) - lodDim.getCenterX();
 		int zOffset = ((int)playerZ / (LodChunk.WIDTH * LodRegion.SIZE)) - lodDim.getCenterZ();
@@ -112,8 +111,11 @@ public class ClientProxy extends CommonProxy
 		}
 		else
 		{
-			renderer.drawLODs(lodDim, partialTicks);
+			renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
 		}
+		
+		// end of profiler tracking
+		mc.getProfiler().endSection();
 	}	
 	
 	
@@ -128,62 +130,35 @@ public class ClientProxy extends CommonProxy
 	//===============//
 	
 	@SubscribeEvent
-	public void chunkLoadEvent(ChunkEvent event)
+	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
-		generateLodChunk(event.getChunk());
-	}
-	
-	/**
-	 * this event is called whenever a chunk is created for the first time.
-	 */
-	@SubscribeEvent
-	public void onChunkPopulate(PopulateChunkEvent event)
-	{
-		Minecraft mc = Minecraft.getMinecraft();
 		if (mc != null && event != null)
 		{
-			WorldClient world = mc.world;
+			World world = mc.world;
 			
 			if(world != null)
 			{
-				generateLodChunk(world.getChunkFromChunkCoords(event.getChunkX(), event.getChunkZ()));
+				generateLodChunk((Chunk)event.getChunk());
 			}
 		}
 	}
 	
-	/*
-	 * 
-	Use this for generating chunks and maybe determining if they are loaded at all?
-	
-	Could I create my own chunk generator and multithread it? It wouldn't save to the world, but could I save it for LODs?
-	
- 	chunk = Minecraft.getMinecraft().getIntegratedServer().getWorld(0).getChunkProvider().chunkGenerator.generateChunk(chunk.x, chunk.z);
-	
-	System.out.println(chunk.x + " " + chunk.z + "\tloaded: " + chunk.isLoaded() + "\tpop: " + chunk.isPopulated() + "\tter pop: " + chunk.isTerrainPopulated());
-	 */
-	
 	private void generateLodChunk(Chunk chunk)
 	{
-		Minecraft mc = Minecraft.getMinecraft();
-		
 		// don't try to create an LOD object
 		// if for some reason we aren't
 		// given a valid chunk object
 		// (Minecraft often gives back empty
 		// or null chunks in this method)
-		if (chunk == null || !isValidChunk(chunk))
-			return;
-		
-		int dimId = chunk.getWorld().provider.getDimension();
-		World world = mc.getIntegratedServer().getWorld(dimId);
-		
-		if (world == null)
+		if (chunk == null || chunk.getWorld() == null || !isValidChunk(chunk))
 			return;
 			
 		Thread thread = new Thread(() ->
 		{
 			try
 			{
+				DimensionType dim = chunk.getWorldForge().getDimensionType();
+				World world = chunk.getWorld();
 				LodChunk lod = new LodChunk(chunk, world);
 				LodDimension lodDim;
 				
@@ -208,15 +183,14 @@ public class ClientProxy extends CommonProxy
 				}
 				
 				
-				if (lodWorld.getLodDimension(dimId) == null)
+				if (lodWorld.getLodDimension(dim) == null)
 				{
-					DimensionType dim = DimensionType.getById(dimId);
 					lodDim = new LodDimension(dim, regionWidth);
 					lodWorld.addLodDimension(lodDim);
 				}
 				else
 				{
-					lodDim = lodWorld.getLodDimension(dimId);
+					lodDim = lodWorld.getLodDimension(dim);
 				}
 				
 				lodDim.addLod(lod);
@@ -239,11 +213,11 @@ public class ClientProxy extends CommonProxy
 	 */
 	private boolean isValidChunk(Chunk chunk)
 	{
-		ExtendedBlockStorage[] data = chunk.getBlockStorageArray();
+		ChunkSection[] sections = chunk.getSections();
 		
-		for(ExtendedBlockStorage e : data)
+		for(ChunkSection section : sections)
 		{
-			if(e != null && !e.isEmpty())
+			if(section != null && !section.isEmpty())
 			{
 				return true;
 			}

@@ -5,13 +5,13 @@ import java.awt.Color;
 import com.backsun.lod.util.enums.ColorDirection;
 import com.backsun.lod.util.enums.LodLocation;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import net.minecraft.world.chunk.ChunkSection;
 
 /**
  * This object contains position
@@ -33,8 +33,6 @@ public class LodChunk
 	private static final int CHUNK_DATA_WIDTH = WIDTH;
 	private static final int CHUNK_DATA_HEIGHT = WIDTH;
 	
-	private final int airBlockId = Block.getIdFromBlock(Block.getBlockFromName("air"));
-	private final int waterBlockId = Block.getIdFromBlock(Block.getBlockFromName("water"));
 	private final int waterColor = colorToInt(new Color(36, 50, 171));
 	
 	/**
@@ -220,8 +218,8 @@ public class LodChunk
 		}
 		
 		
-		x = chunk.x;
-		z = chunk.z;
+		x = chunk.getPos().x;
+		z = chunk.getPos().z;
 		
 		top = new short[4];
 		bottom = new short[4];
@@ -261,7 +259,7 @@ public class LodChunk
 		// should have a length of 16
 		// (each storage is 16x16x16 and the
 		// world height is 256)
-		ExtendedBlockStorage[] data = chunk.getBlockStorageArray();
+		ChunkSection[] chunkSections = chunk.getSections();
 		
 		
 		
@@ -314,20 +312,20 @@ public class LodChunk
 		
 		
 		if(getTopSection)
-			return determineTopPoint(data, startX, endX, startZ, endZ);
+			return determineTopPoint(chunkSections, startX, endX, startZ, endZ);
 		else
-			return determineBottomPoint(data, startX, endX, startZ, endZ);
+			return determineBottomPoint(chunkSections, startX, endX, startZ, endZ);
 	}
 	
-	private short determineBottomPoint(ExtendedBlockStorage[] data, int startX, int endX, int startZ, int endZ)
+	private short determineBottomPoint(ChunkSection[] chunkSections, int startX, int endX, int startZ, int endZ)
 	{
 		// search from the bottom up
-		for(int i = 0; i < data.length; i++)
+		for(int i = 0; i < chunkSections.length; i++)
 		{
 			for(int y = 0; y < CHUNK_DATA_HEIGHT; y++)
 			{
 				
-				if(isLayerValidLodPoint(data, startX, endX, startZ, endZ, i, y))
+				if(isLayerValidLodPoint(chunkSections, startX, endX, startZ, endZ, i, y))
 				{
 					// we found
 					// enough blocks in this
@@ -344,14 +342,14 @@ public class LodChunk
 		return -1;
 	}
 	
-	private short determineTopPoint(ExtendedBlockStorage[] data, int startX, int endX, int startZ, int endZ)
+	private short determineTopPoint(ChunkSection[] chunkSections, int startX, int endX, int startZ, int endZ)
 	{
 		// search from the top down
-		for(int i = data.length - 1; i >= 0; i--)
+		for(int i = chunkSections.length - 1; i >= 0; i--)
 		{
 			for(int y = CHUNK_DATA_WIDTH - 1; y >= 0; y--)
 			{
-				if(isLayerValidLodPoint(data, startX, endX, startZ, endZ, i, y))
+				if(isLayerValidLodPoint(chunkSections, startX, endX, startZ, endZ, i, y))
 				{
 					// we found
 					// enough blocks in this
@@ -373,10 +371,10 @@ public class LodChunk
 	 * values a valid LOD point?
 	 */
 	private boolean isLayerValidLodPoint(
-			ExtendedBlockStorage[] data, 
+			ChunkSection[] chunkSections, 
 			int startX, int endX, 
 			int startZ, int endZ, 
-			int dataIndex, int y)
+			int sectionIndex, int y)
 	{
 		// search through this layer
 		int layerBlocks = 0;
@@ -385,7 +383,7 @@ public class LodChunk
 		{
 			for(int z = startZ; z < endZ; z++)
 			{
-				if(data[dataIndex] == null)
+				if(chunkSections[sectionIndex] == null)
 				{
 					// this section doesn't have any blocks,
 					// it is not a valid section
@@ -393,7 +391,7 @@ public class LodChunk
 				}
 				else
 				{
-					if(data[dataIndex].get(x, y, z) != null && Block.getIdFromBlock(data[dataIndex].get(x, y, z).getBlock()) != airBlockId)
+					if(chunkSections[sectionIndex].getBlockState(x, y, z) != null && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.AIR)
 					{
 						// we found a valid block in
 						// in this layer
@@ -416,7 +414,7 @@ public class LodChunk
 	
 	private Color generateLodColorSection(Chunk chunk, World world, ColorDirection colorDir)
 	{
-		Minecraft mc =  Minecraft.getMinecraft();
+		Minecraft mc =  Minecraft.getInstance();
 		BlockColors bc = mc.getBlockColors();
 		
 		switch (colorDir)
@@ -445,7 +443,7 @@ public class LodChunk
 	 */
 	private Color generateLodColorVertical(Chunk chunk, ColorDirection colorDir, World world, BlockColors bc)
 	{
-		ExtendedBlockStorage[] data = chunk.getBlockStorageArray();
+		ChunkSection[] chunkSections = chunk.getSections();
 		
 		int numbOfBlocks = 0;
 		int red = 0;
@@ -456,8 +454,8 @@ public class LodChunk
 		
 		
 		// either go top down or bottom up
-		int dataStart = goTopDown? data.length - 1 : 0;
-		int dataMax = data.length; 
+		int dataStart = goTopDown? chunkSections.length - 1 : 0;
+		int dataMax = chunkSections.length; 
 		int dataMin = 0;
 		int dataIncrement = goTopDown? -1 : 1;
 		
@@ -472,18 +470,18 @@ public class LodChunk
 			{
 				boolean foundBlock = false;
 				
-				for(int di = dataStart; !foundBlock && di >= dataMin && di < dataMax; di += dataIncrement)
+				for(int i = dataStart; !foundBlock && i >= dataMin && i < dataMax; i += dataIncrement)
 				{
-					if(!foundBlock && data[di] != null)
+					if(!foundBlock && chunkSections[i] != null)
 					{
 						for(int y = topStart; !foundBlock && y >= topMin && y < topMax; y += topIncrement)
 						{
 							int ci;
-							if(Block.getIdFromBlock(data[di].get(x, y, z).getBlock()) == waterBlockId)
+							if(chunkSections[i].getBlockState(x, y, z).getBlock() == Blocks.WATER)
 								// this is a special case since getColor on water generally returns white
 								ci = waterColor;
 							else
-								ci = bc.getColor(data[di].get(x, y, z), world, new BlockPos(x,y,z));
+								ci = bc.getColor(chunkSections[i].getBlockState(x, y, z), null, new BlockPos(x,y,z), 0);
 							
 							if(ci == 0)
 							{
@@ -522,7 +520,7 @@ public class LodChunk
 
 	private Color generateLodColorHorizontal(Chunk chunk, ColorDirection colorDir, World world, BlockColors bc)
 	{
-		ExtendedBlockStorage[] data = chunk.getBlockStorageArray();
+		ChunkSection[] chunkSections = chunk.getSections();
 		
 		int numbOfBlocks = 0;
 		int red = 0;
@@ -563,9 +561,9 @@ public class LodChunk
 		}
 		
 		
-		for (int di = 0; di < data.length; di++)
+		for (int i = 0; i < chunkSections.length; i++)
 		{
-			if (data[di] != null)
+			if (chunkSections[i] != null)
 			{
 				for (int y = 0; y < CHUNK_DATA_HEIGHT; y++)
 				{
@@ -607,11 +605,11 @@ public class LodChunk
 							}
 							
 							int ci;
-							if(Block.getIdFromBlock(data[di].get(x, y, z).getBlock()) == waterBlockId)
+							if(chunkSections[i].getBlockState(x, y, z).getBlock() == Blocks.WATER)
 								// this is a special case since getColor on water generally returns white
 								ci = waterColor;
 							else
-								ci = bc.getColor(data[di].get(x, y, z), world, new BlockPos(x,y,z));
+								ci = bc.getColor(chunkSections[i].getBlockState(x, y, z), null, new BlockPos(x,y,z), 0);
 							
 							if (ci == 0) {
 								// skip air or invisible blocks

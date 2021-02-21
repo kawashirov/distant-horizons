@@ -1,17 +1,16 @@
 package com.backsun.lod.renderer;
 import java.awt.Color;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.concurrent.Callable;
+
+import org.lwjgl.opengl.GL11;
 
 import com.backsun.lod.util.enums.FogDistance;
 
-import net.minecraft.client.renderer.GLAllocation;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.client.renderer.vertex.VertexFormatElement;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.MathHelper;
 
 /**
  * 
@@ -21,8 +20,8 @@ import net.minecraft.util.math.MathHelper;
  */
 public class BuildBufferThread implements Callable<NearFarBuffer>
 {
-	public ByteBuffer nearBuffer;
-	public ByteBuffer farBuffer;
+	public BufferBuilder nearBuffer;
+	public BufferBuilder farBuffer;
 	public FogDistance distanceMode;
 	public AxisAlignedBB[][] lods;
 	public Color[][] colors;
@@ -42,20 +41,20 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 		vertexCount = 0;
 		vertexFormat = DefaultVertexFormats.POSITION_COLOR;
 		vertexFormatIndex = 0;
-		vertexFormatElement = vertexFormat.getElement(vertexFormatIndex); 
+		vertexFormatElement = vertexFormat.getElements().get(vertexFormatIndex);
 	}
 	
-	BuildBufferThread(ByteBuffer newNearByteBuffer, ByteBuffer newFarByteBuffer, AxisAlignedBB[][] newLods, Color[][] newColors, FogDistance newDistanceMode, int threadNumber, int totalThreads)
+	BuildBufferThread(BufferBuilder newNearByteBuffer, BufferBuilder newFarByteBuffer, AxisAlignedBB[][] newLods, Color[][] newColors, FogDistance newDistanceMode, int threadNumber, int totalThreads)
 	{
 		setNewData(newNearByteBuffer, newFarByteBuffer, distanceMode, newLods, newColors, threadNumber, totalThreads);
 		
 		vertexCount = 0;
 		vertexFormat = DefaultVertexFormats.POSITION_COLOR;
 		vertexFormatIndex = 0;
-		vertexFormatElement = vertexFormat.getElement(vertexFormatIndex); 
+		vertexFormatElement = vertexFormat.getElements().get(vertexFormatIndex); 
 	}
 	
-	public void setNewData(ByteBuffer newNearByteBuffer, ByteBuffer newFarByteBuffer, FogDistance newDistanceMode, AxisAlignedBB[][] newLods, Color[][] newColors, int threadNumber, int totalThreads)
+	public void setNewData(BufferBuilder newNearByteBuffer, BufferBuilder newFarByteBuffer, FogDistance newDistanceMode, AxisAlignedBB[][] newLods, Color[][] newColors, int threadNumber, int totalThreads)
 	{
 		vertexCount = 0;
         vertexFormatIndex = 0;
@@ -74,10 +73,13 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 	
 	@Override
 	public NearFarBuffer call()
-	{
+	{		
+		nearBuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+		farBuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+		
 		int numbChunksWide = lods.length;
 		
-		ByteBuffer currentBuffer;
+		BufferBuilder currentBuffer;
 		AxisAlignedBB bb;
 		int red;
 		int green;
@@ -200,16 +202,20 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 		return new NearFarBuffer(nearBuffer, farBuffer);
 	}
 	
-	private void addPosAndColor(ByteBuffer buffer, double x, double y, double z, int red, int green, int blue, int alpha)
+	private void addPosAndColor(BufferBuilder buffer, double x, double y, double z, int red, int green, int blue, int alpha)
 	{
-		addPos(buffer, x, y, z);
-		addColor(buffer, red, green, blue, alpha);
-		endVertex();
+		buffer.pos(x, y, z).color(red, green, blue, alpha).endVertex();
+		
+//		addPos(buffer, x, y, z);
+//		addColor(buffer, red, green, blue, alpha);
+//		endVertex();
 	}
 
+	
+	/*
 	private void addPos(ByteBuffer byteBuffer, double x, double y, double z)
 	{
-		int i = this.vertexCount * this.vertexFormat.getNextOffset() + this.vertexFormat.getOffset(this.vertexFormatIndex);
+		int i = this.vertexCount * this.vertexFormat.getOffset(this.vertexFormatIndex+1) + this.vertexFormat.getOffset(this.vertexFormatIndex);
 
         switch (this.vertexFormatElement.getType())
         {
@@ -242,7 +248,7 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 	
 	private void addColor(ByteBuffer byteBuffer, int red, int green, int blue, int alpha)
     {
-        int i = this.vertexCount * this.vertexFormat.getNextOffset() + this.vertexFormat.getOffset(this.vertexFormatIndex);
+        int i = this.vertexCount * this.vertexFormat.getOffset(this.vertexFormatIndex+1) + this.vertexFormat.getOffset(this.vertexFormatIndex);
 
         switch (this.vertexFormatElement.getType())
         {
@@ -292,10 +298,10 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 	private void nextVertexFormatIndex()
     {
         ++this.vertexFormatIndex;
-        this.vertexFormatIndex %= this.vertexFormat.getElementCount();
-        this.vertexFormatElement = this.vertexFormat.getElement(this.vertexFormatIndex);
+        this.vertexFormatIndex %= this.vertexFormat.getSize();
+        this.vertexFormatElement = this.vertexFormat.getElements().get(this.vertexFormatIndex);
 
-        if (this.vertexFormatElement.getUsage() == VertexFormatElement.EnumUsage.PADDING)
+        if (this.vertexFormatElement.getUsage() == VertexFormatElement.Usage.PADDING)
         {
             this.nextVertexFormatIndex();
         }
@@ -303,14 +309,21 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 	
 	private void endVertex()
     {
-        ++this.vertexCount;
-        growBuffer(this.vertexFormat.getNextOffset());
+//        ++this.vertexCount;
+//        growBuffer(this.vertexFormat.getNextOffset());
+        
+        if (this.vertexFormatIndex != 0) {
+            throw new IllegalStateException("Not filled all elements of the vertex");
+         } else {
+            ++this.vertexCount;
+            this.growBuffer(vertexFormat.getSize());
+         }
     }
 	
 	private void growBuffer(int p_181670_1_)
     {
         //if (MathHelper.roundUp(p_181670_1_, 4) / 4 > this.rawIntBuffer.remaining() || this.vertexCount * this.vertexFormat.getNextOffset() + p_181670_1_ > this.byteBuffer.capacity())
-		if (this.vertexCount * this.vertexFormat.getNextOffset() + p_181670_1_ > nearBuffer.capacity())
+		if (this.vertexCount * this.vertexFormat.getOffset(this.vertexFormatIndex+1) + p_181670_1_ > nearBuffer.capacity())
         {
             int i = nearBuffer.capacity();
             int j = i + MathHelper.roundUp(p_181670_1_, 2097152);
@@ -327,7 +340,7 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 //	            this.rawShortBuffer.position(k << 1);
         }
     }
-	
+	*/
 	
 	
 }

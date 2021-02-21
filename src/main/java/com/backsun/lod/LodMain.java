@@ -1,53 +1,61 @@
 package com.backsun.lod;
 
 import com.backsun.lod.proxy.ClientProxy;
-import com.backsun.lod.proxy.CommonProxy;
-import com.backsun.lod.util.Reference;
+import com.backsun.lod.util.LodConfig;
 
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.Mod.Instance;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
+import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 /**
  * 
  * @author James Seibel
  * @version 02-07-2021
  */
-@IFMLLoadingPlugin.MCVersion("1.12.2")
-@IFMLLoadingPlugin.TransformerExclusions({"com.backsun.lod.asm"})
-@Mod(modid = Reference.MOD_ID, name = Reference.NAME, version = Reference.VERSION, dependencies = "required-after:lodcore@[1.0,)")
+@Mod(ModInfo.MODID)
 public class LodMain
 {
-	@Instance
 	public static LodMain instance;
 	
-	@SidedProxy(clientSide = Reference.CLIENT_PROXY_CLASS, serverSide = Reference.COMMON_PROXY_CLASS)
-	public static CommonProxy common_proxy;
 	public static ClientProxy client_proxy;
 	
-	@EventHandler
-	public static void PreInit(FMLPreInitializationEvent event)
+	
+	private void init(final FMLCommonSetupEvent event)
 	{
-		Minecraft.getMinecraft().getFramebuffer().enableStencil();
+		Minecraft.getInstance().getFramebuffer().enableStencil();
+		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, LodConfig.COMMON_SPEC);
 	}
 	
-	@EventHandler
-	public static void Init(FMLInitializationEvent event)
-	{
-		MinecraftForge.EVENT_BUS.register(common_proxy);
-		client_proxy = new ClientProxy();
-	}
 	
-	@EventHandler
-	public static void PostInit(FMLPostInitializationEvent event)
-	{
-		
-	}
+    public LodMain()
+    {
+        // Register the methods
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::init);
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientStart);
+
+        // Register ourselves for server and other game events we are interested in
+        MinecraftForge.EVENT_BUS.register(this);
+    }
+
+    private void onClientStart(final FMLClientSetupEvent event)
+    {
+    	client_proxy = new ClientProxy();
+		MinecraftForge.EVENT_BUS.register(client_proxy);
+    }
+    
+    
+    
+    @SubscribeEvent
+    public void onServerStarting(FMLServerStartingEvent event)
+    {
+        // this is called when the server starts
+    }
+    
 }

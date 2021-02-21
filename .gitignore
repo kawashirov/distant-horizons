@@ -19,8 +19,7 @@ build
 
 # other
 eclipse
+run
 
-# minecraft run folder,
-# ignore everything but the mods folder
-run/*
-!run/mods
+# Files from Forge MDK
+forge*changelog.txt
