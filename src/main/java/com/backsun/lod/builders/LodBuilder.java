@@ -10,9 +10,9 @@ import com.backsun.lod.objects.LodWorld;
 import com.backsun.lod.util.LodUtils;
 
 import net.minecraft.world.DimensionType;
-import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.server.ServerWorld;
 
 /**
  * This object is in charge of creating Lod
@@ -53,7 +53,7 @@ public class LodBuilder
 		
 		
 		DimensionType dim = chunk.getWorld().getDimensionType();
-		World world = LodUtils.getServerWorldFromDimension(dim);
+		ServerWorld world = LodUtils.getServerWorldFromDimension(dim);
 		
 		
 		if (world == null)

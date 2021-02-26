@@ -9,7 +9,6 @@ import com.backsun.lod.util.enums.LodLocation;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.color.BlockColors;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
@@ -497,11 +496,7 @@ public class LodChunk
 						for(int y = topStart; !foundBlock && y >= topMin && y < topMax; y += topIncrement)
 						{
 							int ci;
-							if(chunkSections[i].getBlockState(x, y, z).getBlock() == Blocks.WATER)
-								// this is a special case since getColor on water generally returns white
-								ci = waterColor;
-							else
-								ci = bc.getColor(chunkSections[i].getBlockState(x, y, z), null, new BlockPos(x,y,z), 0);
+							ci = chunkSections[i].getBlockState(x, y, z).getMaterial().getColor().colorValue;
 							
 							if(ci == 0)
 							{
@@ -635,11 +630,7 @@ public class LodChunk
 							}
 							
 							int ci;
-							if(chunkSections[i].getBlockState(x, y, z).getBlock() == Blocks.WATER)
-								// this is a special case since getColor on water generally returns white
-								ci = waterColor;
-							else
-								ci = bc.getColor(chunkSections[i].getBlockState(x, y, z), null, new BlockPos(x,y,z), 0);
+							ci = chunkSections[i].getBlockState(x, y, z).getMaterial().getColor().colorValue;
 							
 							if (ci == 0) {
 								// skip air or invisible blocks
