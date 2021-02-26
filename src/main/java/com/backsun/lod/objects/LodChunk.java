@@ -33,8 +33,6 @@ public class LodChunk
 	private static final int CHUNK_DATA_WIDTH = WIDTH;
 	private static final int CHUNK_DATA_HEIGHT = WIDTH;
 	
-	private final int waterColor = colorToInt(new Color(36, 50, 171));
-	
 	/**
 	 * This is how many blocks are
 	 * required at a specific y-value
@@ -682,6 +680,7 @@ public class LodChunk
 	/**
 	 * Convert a Color into a BlockColors object.
 	 */
+	@SuppressWarnings("unused")
 	private int colorToInt(Color color)
 	{
 		return color.getRGB();
