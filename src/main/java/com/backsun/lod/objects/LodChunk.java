@@ -229,14 +229,14 @@ public class LodChunk
 		// generate the top and bottom points of this LOD
 		for(LodLocation loc : LodLocation.values())
 		{
-			top[loc.value] = generateLodSection(chunk, true, loc);
-			bottom[loc.value] = generateLodSection(chunk, false, loc);
+			top[loc.value] = generateLodCorner(chunk, SectionGenerationMode.GENERATE_TOP, loc);
+			bottom[loc.value] = generateLodCorner(chunk, SectionGenerationMode.GENERATE_BOTTOM, loc);
 		}
 		
 		// determine the average color for each direction
 		for(ColorDirection dir : ColorDirection.values())
 		{
-			colors[dir.value] = generateLodColorSection(chunk, world, dir);
+			colors[dir.value] = generateLodColorForDirection(chunk, world, dir);
 		}
 	}
 	
@@ -257,7 +257,7 @@ public class LodChunk
 	 * If invalid/null/empty chunks are given 
 	 * crashes may occur.
 	 */
-	public short generateLodSection(Chunk chunk, boolean getTopSection, LodLocation lodLoc)
+	public short generateLodCorner(Chunk chunk, SectionGenerationMode generationMode, LodLocation lodLoc)
 	{
 		// should have a length of 16
 		// (each storage is 16x16x16 and the
@@ -314,7 +314,7 @@ public class LodChunk
 		}
 		
 		
-		if(getTopSection)
+		if(generationMode == SectionGenerationMode.GENERATE_TOP)
 			return determineTopPoint(chunkSections, startX, endX, startZ, endZ);
 		else
 			return determineBottomPoint(chunkSections, startX, endX, startZ, endZ);
@@ -425,7 +425,7 @@ public class LodChunk
 	 * Generate the color of the given ColorDirection at the given chunk
 	 * in the given world.
 	 */
-	private Color  generateLodColorSection(Chunk chunk, World world, ColorDirection colorDir)
+	private Color  generateLodColorForDirection(Chunk chunk, World world, ColorDirection colorDir)
 	{
 		Minecraft mc =  Minecraft.getInstance();
 		BlockColors bc = mc.getBlockColors();
