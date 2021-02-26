@@ -231,6 +231,8 @@ public class LodDimensionFileHandler
 		{
 			// saveFolder is something like
 			// ".\Super Flat\DIM-1\data"
+			// or
+			// ".\Super Flat\data"
 			return dimensionDataSaveFolder.getCanonicalPath() + "\\lod\\" +
 					FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
 		}
