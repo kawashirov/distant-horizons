@@ -29,8 +29,7 @@ public class LodDimensionFileHandler
 	private LodDimension loadedDimension = null;
 	public long regionLastWriteTime[][];
 	
-	private File saveFolder;
-	private String saveDir;
+	private File dimensionDataSaveFolder;
 	
 	private final String FILE_NAME_PREFIX = "lod";
 	private final String FILE_EXTENSION = ".txt";
@@ -40,7 +39,7 @@ public class LodDimensionFileHandler
 	
 	public LodDimensionFileHandler(File newSaveFolder, LodDimension newLoadedDimension)
 	{
-		saveFolder = newSaveFolder;
+		dimensionDataSaveFolder = newSaveFolder;
 		
 		loadedDimension = newLoadedDimension;
 		// these two variable are used in sync with the LodDimension
@@ -228,8 +227,17 @@ public class LodDimensionFileHandler
 		if (!readyToReadAndWrite())
 			return null;
 		
-		return saveDir + "\\lod_data\\DIM" + loadedDimension.dimension.toString() + "\\" +
-				FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
+		try
+		{
+			// saveFolder is something like
+			// ".\Super Flat\DIM-1\data"
+			return dimensionDataSaveFolder.getCanonicalPath() + "\\lod\\" +
+					FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
+		}
+		catch(IOException e)
+		{
+			return null;
+		}
 	}
 	
 	
@@ -241,7 +249,7 @@ public class LodDimensionFileHandler
 	 */
 	public boolean readyToReadAndWrite()
 	{
-		return saveFolder != null;
+		return dimensionDataSaveFolder != null;
 	}
 	
 	
@@ -271,26 +279,4 @@ public class LodDimensionFileHandler
 	}
 	
 	
-	
-	/**
-	 * Gets the canonical path to the world save folder.
-	 * <br>
-	 * Returns null if there was an IO Exception
-	 */
-	private String getWorldSaveDirectory()
-	{
-		ServerWorld world = LodUtils.getFirstValidServerWorld();
-		
-		try
-		{
-			if(world != null)
-				return world.getServer().getDataDirectory().getCanonicalPath();
-		}
-		catch (IOException e)
-		{
-			e.printStackTrace();
-		}
-		
-		return null;
-	}
 }
