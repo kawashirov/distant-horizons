@@ -1,6 +1,7 @@
 package com.backsun.lod.util;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 
@@ -38,7 +39,11 @@ public class LodUtils
 	 */
 	public static ServerWorld getServerWorldFromDimension(DimensionType dimension)
 	{
-		Iterable<ServerWorld> worlds = mc.getIntegratedServer().getWorlds();
+		IntegratedServer server = mc.getIntegratedServer();
+		if (server == null)
+			return null;
+		
+		Iterable<ServerWorld> worlds = server.getWorlds();
 		ServerWorld returnWorld = null;
 		
 		for (ServerWorld world : worlds)
