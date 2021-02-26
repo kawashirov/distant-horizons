@@ -119,7 +119,8 @@ public class ClientProxy
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent event)
 	{
-		lodWorld = lodBuilder.generateLodChunkAsync((Chunk) event.getChunk());
+		if (event.getChunk().getClass() == Chunk.class)
+			lodWorld = lodBuilder.generateLodChunkAsync((Chunk) event.getChunk());
 	}
 	
 	/**
