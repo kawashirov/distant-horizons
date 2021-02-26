@@ -1,21 +1,23 @@
 package com.backsun.lod.objects;
 
-import com.backsun.lod.util.LodFileHandler;
+import com.backsun.lod.handlers.LodDimensionFileHandler;
+import com.backsun.lod.util.LodUtils;
 
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.server.ServerChunkProvider;
 
 /**
  * This object holds all loaded LOD regions
  * for a given dimension.
  * 
  * @author James Seibel
- * @version 01-31-2021
+ * @version 02-23-2021
  */
 public class LodDimension
 {
 	public final DimensionType dimension;
 	
-	private volatile int width; // if this ever changes make sure to update the halfWidth too
+	private volatile int width;
 	private volatile int halfWidth;
 	
 	public LodRegion regions[][];
@@ -24,15 +26,16 @@ public class LodDimension
 	private int centerX;
 	private int centerZ;
 	
-	private LodFileHandler rfHandler;
+	private LodDimensionFileHandler fileHandler;
+	
 	
 	public LodDimension(DimensionType newDimension, int newMaxWidth)
 	{
 		dimension = newDimension;
 		width = newMaxWidth;
 		
-		// dimension 0 works here since we are just looking for the save handler anyway
-		rfHandler = new LodFileHandler(this);
+		ServerChunkProvider provider = LodUtils.getServerWorldFromDimension(newDimension).getChunkProvider();
+		fileHandler = new LodDimensionFileHandler(provider.getSavedData().folder, this);
 		
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];
@@ -49,7 +52,10 @@ public class LodDimension
 	}
 	
 	
-	
+	/**
+	 * Move the center of this LodDimension and move all owned
+	 * regions over by the given x and z offset.
+	 */
 	public void move(int xOffset, int zOffset)
 	{		
 		// if the x or z offset is equal to or greater than
@@ -143,22 +149,16 @@ public class LodDimension
 	}
 	
 	
-	public int getCenterX()
-	{
-		return centerX;
-	}
-	
-	public int getCenterZ()
-	{
-		return centerZ;
-	}
 	
 	
 	
 	
-	
-	
-	
+	/**
+	 * Gets the region at the given X and Z
+	 * <br>
+	 * Returns null if the region doesn't exist
+	 * or is outside the loaded area.
+	 */
 	public LodRegion getRegion(int regionX, int regionZ)
 	{
 		int xIndex = (regionX - centerX) + halfWidth;
@@ -200,11 +200,15 @@ public class LodDimension
 	
 	
 	
-	
+	/**
+	 * Add the given LOD to this dimension at the coordinate
+	 * stored in the LOD. If an LOD already exists at the given
+	 * coordinates it will be overwritten.
+	 */
 	public void addLod(LodChunk lod)
 	{
-		int regionX = (lod.x + centerX) / LodRegion.SIZE;
-		int regionZ = (lod.z + centerZ) / LodRegion.SIZE;
+		int regionX = lod.x / LodRegion.SIZE;
+		int regionZ = lod.z / LodRegion.SIZE;
 		
 		// prevent issues if X/Z is negative and less than 16
 		if (lod.x < 0)
@@ -235,20 +239,20 @@ public class LodDimension
 		int xIndex = (regionX - centerX) + halfWidth;
 		int zIndex = (regionZ - centerZ) + halfWidth;
 		isRegionDirty[xIndex][zIndex] = true;
-		
-		
-		
-		rfHandler.saveDirtyRegionsToFile();
+		fileHandler.saveDirtyRegionsToFileAsync();
 	}
 	
 	/**
-	 * Returns null if the LodChunk isn't loaded
+	 * Get the LodChunk at the given X and Z coordinates
+	 * in this dimension.
+	 * <br>
+	 * Returns null if the LodChunk doesn't exist or 
+	 * is outside the loaded area.
 	 */
 	public LodChunk getLodFromCoordinates(int chunkX, int chunkZ)
 	{
-		// (chunkX + centerX) % width
-		int regionX = (chunkX + centerX) / LodRegion.SIZE;
-		int regionZ = (chunkZ + centerZ) / LodRegion.SIZE;
+		int regionX = chunkX / LodRegion.SIZE;
+		int regionZ = chunkZ / LodRegion.SIZE;
 		
 		// prevent issues if chunkX/Z is negative and less than width
 		if (chunkX < 0)
@@ -262,7 +266,6 @@ public class LodDimension
 		
 		LodRegion region = getRegion(regionX, regionZ);
 		
-		// TODO fix small render distances sometimes not having all regions loaded
 		if(region == null)
 			return null;
 		
@@ -270,11 +273,13 @@ public class LodDimension
 	}
 	
 	
-	
-	
+	/**
+	 * Get the region at the given X and Z coordinates from the
+	 * RegionFileHandler.
+	 */
 	public LodRegion getRegionFromFile(int regionX, int regionZ)
 	{
-		return rfHandler.loadRegionFromFile(regionX, regionZ);
+		return fileHandler.loadRegionFromFile(regionX, regionZ);
 	}
 	
 	
@@ -290,6 +295,22 @@ public class LodDimension
 		return xIndex >= 0 && xIndex < width && zIndex >= 0 && zIndex < width;
 	}
 
+	
+	
+	
+	
+	
+
+	public int getCenterX()
+	{
+		return centerX;
+	}
+	
+	public int getCenterZ()
+	{
+		return centerZ;
+	}
+	
 	
 	
 	public int getWidth()
@@ -309,6 +330,18 @@ public class LodDimension
 		for(int i = 0; i < width; i++)
 			for(int j = 0; j < width; j++)
 				isRegionDirty[i][j] = false;
+	}
+	
+	
+	@Override
+	public String toString()
+	{
+		String s = "";
+		
+		s += "dim: " + dimension.toString() + "\t";
+		s += "(" + centerX + "," + centerZ + ")";
+		
+		return s;
 	}
 }
 

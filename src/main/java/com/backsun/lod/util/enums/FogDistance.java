@@ -8,9 +8,9 @@ package com.backsun.lod.util.enums;
  */
 public enum FogDistance
 {
-	/** valid for both fast and fancy fog qualities. */
+	/** good for fast or fancy fog qualities. */
 	NEAR,
-	/** valid for both fast and fancy fog qualities. */
+	/** good for fast or fancy fog qualities. */
 	FAR,
 	/** only looks good if the fog quality is set to Fancy. */
 	NEAR_AND_FAR;

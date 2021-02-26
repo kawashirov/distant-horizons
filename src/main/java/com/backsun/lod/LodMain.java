@@ -15,6 +15,10 @@ import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 /**
+ * Initialize and setup the Mod.
+ * <br>
+ * If you are looking for the real start of the mod
+ * check out the ClientProxy.
  * 
  * @author James Seibel
  * @version 02-07-2021

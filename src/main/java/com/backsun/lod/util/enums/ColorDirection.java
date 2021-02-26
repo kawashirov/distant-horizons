@@ -1,10 +1,10 @@
 package com.backsun.lod.util.enums;
 
 /**
+ * TOP, N, S, E, W, BOTTOM
+ * 
  * @author James Seibel
  * @version 10-17-2020
- * 
- * TOP, N, S, E, W, BOTTOM
  */
 public enum ColorDirection
 {

@@ -14,17 +14,20 @@ import java.util.concurrent.Future;
 
 import org.lwjgl.opengl.GL11;
 
+import com.backsun.lod.builders.BuildBufferThread;
+import com.backsun.lod.handlers.ReflectionHandler;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
+import com.backsun.lod.objects.NearFarBuffer;
 import com.backsun.lod.util.LodConfig;
-import com.backsun.lod.util.ReflectionHandler;
 import com.backsun.lod.util.enums.ColorDirection;
 import com.backsun.lod.util.enums.FogDistance;
 import com.backsun.lod.util.enums.FogQuality;
-import com.backsun.lod.util.enums.LodLocation;
+import com.backsun.lod.util.enums.LodCorner;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GameRenderer;
@@ -34,14 +37,17 @@ import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.chunk.Chunk;
 
 /**
  * @author James Seibel
- * @version 2-13-2021
+ * @version 2-24-2021
  */
 public class LodRenderer
 {
+	/** this is the light used when rendering the LODs,
+	 * it should be something different than what is used by Minecraft */
+	private static final int LOD_GL_LIGHT_NUMBER = GL11.GL_LIGHT2;
+
 	/** If true the LODs colors will be replaced with
 	 * a checkerboard, this can be used for debugging. */
 	public boolean debugging = false;
@@ -57,31 +63,35 @@ public class LodRenderer
 	private Tessellator tessellator;
 	private BufferBuilder bufferBuilder;
 	
-	/**
-	 * This is an array of 0's used to clear old 
-	 * ByteBuffers when they need to be rebuilt.
-	 */
-	byte[] clearBytes;
-	
 	private ReflectionHandler reflectionHandler;
 	
 	public LodDimension lodDimension = null;
 	
 	
-	
+	/** Total number of CPU cores available to the Java VM */
 	private int maxNumbThreads = Runtime.getRuntime().availableProcessors();
-	/** How many threads should be used for building the render buffer. */
-	private int numbBufferThreads = 1;
+	/** How many threads should be used for building render buffers */
+	private int numbBufferThreads = maxNumbThreads;
+	/** This stores all the BuildBufferThread objects for each CPU core */
 	private ArrayList<BuildBufferThread> bufferThreads = new ArrayList<BuildBufferThread>();
-	private volatile BufferBuilder[] nearBuffers = new BufferBuilder[maxNumbThreads];
-	private volatile BufferBuilder[] farBuffers = new BufferBuilder[maxNumbThreads];
+	/** The buffers that are used to draw LODs using near fog */
+	private volatile BufferBuilder[] drawableNearBuffers = null;
+	/** The buffers that are used to draw LODs using far fog */
+	private volatile BufferBuilder[] drawableFarBuffers = null;
+	
+	/** The buffers that are used to create LODs using near fog */
+	private volatile BufferBuilder[] buildableNearBuffers = null;
+	/** The buffers that are used to create LODs using far fog */
+	private volatile BufferBuilder[] buildableFarBuffers = null;
+	
+	/** If we have more CPU cores than LOD rows to draw this tells
+	 * which drawable buffers will and won't be used. */
+	private boolean[] shouldDrawBuffer = new boolean[maxNumbThreads];
+	
+	/** This holds the threads used to generate the LOD buffers */
 	private ExecutorService bufferThreadPool = Executors.newFixedThreadPool(maxNumbThreads);
-	/*
-	 * this is the maximum number of bytes a buffer
-	 * would ever have to hold at once (this prevents the buffer
-	 * from having to resize and thus save performance)
-	 */
-	private int bufferMaxCapacity = 0;
+	/** This holds the thread used to generate new LODs off the main thread. */
+	private ExecutorService genThread = Executors.newSingleThreadExecutor();
 	
 	/** This is used to determine if the LODs should be regenerated */
 	private int previousChunkRenderDistance = 0;
@@ -92,10 +102,18 @@ public class LodRenderer
 	/** This is used to determine if the LODs should be regenerated */
 	private FogDistance prevFogDistance = FogDistance.NEAR_AND_FAR;
 	
-	/** if this is true the LODs should be regenerated */
+	/** if this is true the LOD buffers should be regenerated,
+	 * provided they aren't already being regenerated. */
 	private boolean regen = false;
-	
+	/** if this is true the LOD buffers are currently being
+	 * regenerated. */
 	private volatile boolean regenerating = false;
+	/** if this is true new LOD buffers have been generated 
+	 * and are waiting to be swapped with the drawable buffers*/
+	private volatile boolean switchBuffers = false;
+	
+	
+	
 	
 	
 	
@@ -105,29 +123,57 @@ public class LodRenderer
 		gameRender = mc.gameRenderer;
 		
 		// for some reason "Tessellator.getInstance()" won't work here, we have to create a new one
-		tessellator = new Tessellator(2097152);
+		tessellator = new Tessellator(2097152); // the number here is what is used by the default Tessellator
 		bufferBuilder = tessellator.getBuffer();
 		
 		reflectionHandler = new ReflectionHandler();
 	}
 	
-	private ExecutorService genThread = Executors.newSingleThreadExecutor();
-	private ExecutorService loadQueueThread = Executors.newSingleThreadExecutor();
 	
-	
+	/**
+	 * Besides drawing the LODs this method also starts
+	 * the async process of generating the Buffers that hold those LODs.
+	 * 
+	 * @param newDimension The dimension to draw, if null doesn't replace the current dimension.
+	 * @param partialTicks how far into the current tick this method was called.
+	 */
 	public void drawLODs(LodDimension newDimension, float partialTicks, IProfiler newProfiler)
-	{
-		// should the LODs be regenerated?
-		if ((int)mc.player.getPosX() / LodChunk.WIDTH != prevChunkX ||
-			(int)mc.player.getPosZ() / LodChunk.WIDTH != prevChunkZ ||
+	{		
+		if (lodDimension == null && newDimension == null)
+		{
+			// if there aren't any loaded LodChunks
+			// don't try drawing anything
+			return;
+		}
+		
+		
+		
+		
+		
+		//===============//
+		// initial setup //
+		//===============//
+		
+		
+		// used for debugging and viewing how long different processes take
+		mc.getProfiler().endSection();
+		mc.getProfiler().startSection("LOD");
+		mc.getProfiler().startSection("LOD setup");
+		
+		ClientPlayerEntity player = mc.player;
+		
+		// should LODs be regenerated?
+		if ((int)player.getPosX() / LodChunk.WIDTH != prevChunkX ||
+			(int)player.getPosZ() / LodChunk.WIDTH != prevChunkZ ||
 			previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks ||
 			prevFogDistance != LodConfig.COMMON.fogDistance.get() ||
 			lodDimension != newDimension)
 		{
+			// yes
 			regen = true;
 			
-			prevChunkX = (int)mc.player.getPosX() / LodChunk.WIDTH;
-			prevChunkZ = (int)mc.player.getPosZ() / LodChunk.WIDTH;
+			prevChunkX = (int)player.getPosX() / LodChunk.WIDTH;
+			prevChunkZ = (int)player.getPosZ() / LodChunk.WIDTH;
 			prevFogDistance = LodConfig.COMMON.fogDistance.get();
 		}
 		else
@@ -147,16 +193,6 @@ public class LodRenderer
 			return;
 		}
 		
-		
-		
-		
-		
-		
-		// used for debugging and viewing how long different processes take
-		profiler.startSection("LOD_setup");
-		
-		@SuppressWarnings("unused")
-		long startTime = System.nanoTime();
 		if (LodConfig.COMMON.drawCheckerBoard.get())
 		{
 			if (debugging != LodConfig.COMMON.drawCheckerBoard.get())
@@ -169,18 +205,6 @@ public class LodRenderer
 				regen = true;
 			debugging = false;
 		}
-		
-		
-		// color setup
-		int alpha = 255; // 0 - 255
-		
-		Color red = new Color(255, 0, 0, alpha);
-		Color black = new Color(0, 0, 0, alpha);
-		Color white = new Color(255, 255, 255, alpha);
-		@SuppressWarnings("unused")
-		Color invisible = new Color(0,0,0,0);
-		@SuppressWarnings("unused")
-		Color error = new Color(255, 0, 225, alpha); // bright pink
 		
 		
 		
@@ -202,20 +226,7 @@ public class LodRenderer
 		int totalLength = (int) farPlaneDistance * LOD_CHUNK_DISTANCE_RADIUS * 2;
 		int numbChunksWide = (totalLength / LodChunk.WIDTH);
 		
-		// this seemingly useless math is required,
-		// just using (int) camera doesn't work
-		int playerXChunkOffset = ((int) cameraX / LodChunk.WIDTH) * LodChunk.WIDTH;
-		int playerZChunkOffset = ((int) cameraZ / LodChunk.WIDTH) * LodChunk.WIDTH;
-		// this where we will start drawing squares
-		// (exactly half the total width)
-		int startX = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerXChunkOffset;
-		int startZ = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerZChunkOffset;
 		
-		
-		// this is where we store the LOD objects
-		AxisAlignedBB lodArray[][] = new AxisAlignedBB[numbChunksWide][numbChunksWide];
-		// this is where we store the color for each LOD object
-		Color colorArray[][] = new Color[numbChunksWide][numbChunksWide];
 		
 		
 		
@@ -224,117 +235,36 @@ public class LodRenderer
 		// create the LODs //
 		//=================//
 		
-		
-		profiler.endStartSection("LOD_generation");
-		
-		if (regen)
+		// only regenerate the LODs if:
+		// 1. we want to regenerate LODs
+		// 2. we aren't already regenerating the LODs
+		// 3. we aren't waiting for the build and draw buffers to swap
+		//		(this is to prevent thread conflicts)
+		if (regen && !regenerating && !switchBuffers)
 		{
-			Thread t = new Thread(()->
-			{
-				int numbChunksGen = 0; 
-				int maxChunkGen = 640;
-				
-				// x axis
-				for (int i = 0; i < numbChunksWide; i++)
-				{
-					// z axis
-					for (int j = 0; j < numbChunksWide; j++)
-					{
-						// skip the middle
-						// (As the player moves some chunks will overlap or be missing,
-						// this is just how chunk loading/unloading works. This can hopefully
-						// be hidden with careful use of fog)
-						int middle = (numbChunksWide / 2);
-						if (RenderUtil.isCoordinateInLoadedArea(i, j, middle))
-						{
-							continue;
-						}
-						
-						
-						// set where this square will be drawn in the world
-						double xOffset = (LodChunk.WIDTH * i) + // offset by the number of LOD blocks
-										startX; // offset so the center LOD block is centered underneath the player
-						double yOffset = 0;
-						double zOffset = (LodChunk.WIDTH * j) + startZ;
-						
-						int chunkX = i + (startX / LodChunk.WIDTH);
-						int chunkZ = j + (startZ / LodChunk.WIDTH);
-						
-						LodChunk lod = lodDimension.getLodFromCoordinates(chunkX, chunkZ);
-						if (lod == null)
-						{
-							// note: for some reason if any color or lod object are set here
-							// it causes the game to use 100% gpu, all of it undefined in the debug menu
-							// and drop to ~6 fps.
-	//						colorArray[i][j] = null;
-	//						lodArray[i][j] = null;
-							
-							// TODO this partially works, but not fully
-							if (numbChunksGen < maxChunkGen)
-							{
-//								if (lod == null)
-//								{
-//									LodChunk placeholder = new LodChunk();
-//									placeholder.x = chunkX;
-//									placeholder.z = chunkZ;
-//									placeholder.colors[ColorDirection.TOP.value] = error;
-//									lodDimension.addLod(placeholder);
-//								}
-								
-	//							Thread loadT = new Thread(()-> {
-								Chunk newChunk = mc.world.getChunk(chunkX, chunkZ);
-								lodDimension.addLod(new LodChunk(newChunk, newChunk.getWorld()));
-								System.out.println(chunkX + "," + chunkZ + "\t" + numbChunksGen);
-	//							});
-	//							loadQueueThread.execute(loadT);
-								numbChunksGen++;
-							}
-							
-							continue;
-						}
-						
-						Color c = new Color(
-								(lod.colors[ColorDirection.TOP.value].getRed()),
-								(lod.colors[ColorDirection.TOP.value].getGreen()),
-								(lod.colors[ColorDirection.TOP.value].getBlue()),
-								lod.colors[ColorDirection.TOP.value].getAlpha());
-						
-						
-						
-						if (!debugging)
-						{
-							// add the color to the array
-							colorArray[i][j] = c;
-						}
-						else
-						{
-							// if debugging draw the squares as a black and white checker board
-							if ((chunkX + chunkZ) % 2 == 0)
-								c = white;
-							else
-								c = black;
-							// draw the first square as red
-							if (i == 0 && j == 0)
-								c = red;
-							
-							colorArray[i][j] = c;
-						}
-						
-						
-						// add the new box to the array
-						int topPoint = getLodHeightPoint(lod.top);
-						int bottomPoint = getLodHeightPoint(lod.bottom);
-						
-						// don't draw an LOD if it is empty
-						if (topPoint == -1 && bottomPoint == -1)
-							continue;
-						
-						lodArray[i][j] = new AxisAlignedBB(0, bottomPoint, 0, LodChunk.WIDTH, topPoint, LodChunk.WIDTH).offset(xOffset, yOffset, zOffset);
-					}
-				}
-			});
-			t.run();
-//			genThread.execute(t);
+			mc.getProfiler().endStartSection("LOD generation");
+			regenerating = true;
+			
+			// this will only be called once, unless the numbBufferThreads changes
+			if (numbBufferThreads != bufferThreads.size())
+				setupBufferThreads();
+			
+			// this will mainly happen when the view distance is changed
+			if (drawableNearBuffers == null || drawableFarBuffers == null || 
+				previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks)
+				setupBuffers(numbChunksWide);
+			
+			// generate the LODs on a separate thread to prevent stuttering or freezing
+			genThread.execute(createLodBufferGenerationThread(player.getPosX(), player.getPosZ(), numbChunksWide));
+		}
+		
+		// replace the buffers used to draw and build,
+		// this is only done when the createLodBufferGenerationThread
+		// has finished executing on a parallel thread.
+		if (switchBuffers)
+		{
+			swapBuffers();
+			switchBuffers = false;
 		}
 		
 		
@@ -345,14 +275,14 @@ public class LodRenderer
 		// GL settings for rendering //
 		//===========================//
 		
-		profiler.endStartSection("LOD_setup");
 		// set the required open GL settings
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glEnable(GL11.GL_CULL_FACE);
-		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
-		
-		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+//		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+//		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+//		GL11.glDisable(GL11.GL_TEXTURE_2D);
+//		GL11.glEnable(GL11.GL_CULL_FACE);
+//		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
+//		
+//		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		
 		RenderSystem.pushMatrix();
         RenderSystem.rotatef(renderInfo.getPitch(), 1, 0, 0); // Fixes camera rotation.
@@ -361,8 +291,6 @@ public class LodRenderer
 		
 //		setupProjectionMatrix(partialTicks);
 //		setupLighting(partialTicks);
-		setupBufferThreads(lodArray);
-		
 		
 		
 		
@@ -377,34 +305,31 @@ public class LodRenderer
 		// rendering //
 		//===========//
 		
-		profiler.endStartSection("LOD build buffer");
-		if (regen)
-			generateLodBuffers(lodArray, colorArray, LodConfig.COMMON.fogDistance.get());
-		
-		profiler.endStartSection("LOD draw");
-		
 		switch(LodConfig.COMMON.fogDistance.get())
 		{
 		case NEAR_AND_FAR:
-			profiler.startSection("LOD draw near");
-			setupFog(FogDistance.NEAR, reflectionHandler.getFogQuality());
-			sendLodsToGpuAndDraw(nearBuffers);
-			profiler.endSection();
+			// when drawing NEAR_AND_FAR fog we need 2 draw
+			// calls since fog can only go in one direction at a time
 			
-//			profiler.startSection("LOD draw far");
-//			setupFog(FogDistance.FAR, reflectionHandler.getFogQuality());
-//			sendLodsToGpuAndDraw(farBuffers);
-//			profiler.endSection();
-			break;
-		case NEAR:
-			profiler.endStartSection("LOD draw near");
+			mc.getProfiler().endStartSection("LOD draw");
 			setupFog(FogDistance.NEAR, reflectionHandler.getFogQuality());
-			sendLodsToGpuAndDraw(nearBuffers);
-			break;
-		case FAR:
-			profiler.endStartSection("LOD draw far");
+			sendLodsToGpuAndDraw(drawableNearBuffers);
+			
+			mc.getProfiler().endStartSection("LOD draw");
 			setupFog(FogDistance.FAR, reflectionHandler.getFogQuality());
-			sendLodsToGpuAndDraw(farBuffers);
+			sendLodsToGpuAndDraw(drawableFarBuffers);
+			break;
+			
+		case NEAR:
+			mc.getProfiler().endStartSection("LOD draw");
+			setupFog(FogDistance.NEAR, reflectionHandler.getFogQuality());
+			sendLodsToGpuAndDraw(drawableNearBuffers);
+			break;
+			
+		case FAR:
+			mc.getProfiler().endStartSection("LOD draw");
+			setupFog(FogDistance.FAR, reflectionHandler.getFogQuality());
+			sendLodsToGpuAndDraw(drawableFarBuffers);
 			break;
 		}
 		
@@ -415,18 +340,16 @@ public class LodRenderer
 		// cleanup //
 		//=========//
 		
-		profiler.endStartSection("LOD_cleanup");
-		
+		mc.getProfiler().endStartSection("LOD cleanup");
 		
 		// this must be done otherwise other parts of the screen may be drawn with a fog effect
 		// IE the GUI
 		RenderSystem.disableFog();
 		
-		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(GL11.GL_LIGHT2);
-		GL11.glDisable(GL11.GL_COLOR_MATERIAL);
-		GL11.glDisable(GL11.GL_CULL_FACE);
+//		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+//		GL11.glEnable(GL11.GL_TEXTURE_2D);
+//		GL11.glDisable(LOD_GL_LIGHT_NUMBER);
+//		GL11.glDisable(GL11.GL_COLOR_MATERIAL);
 		
 		// undo any projection matrix changes we did to prevent other renders
 		// from being corrupted
@@ -438,122 +361,34 @@ public class LodRenderer
 		previousChunkRenderDistance = mc.gameSettings.renderDistanceChunks;
 		
 		
-		// This is about how long this whole process should take
-		// 16 ms = 60 hz
-		@SuppressWarnings("unused")
-		long endTime = System.nanoTime();
+		// end of profiler tracking
+		mc.getProfiler().endSection();
 	}
-
-
 	
 	
-	
-	
-	
-	
-	
-	
-
-
-
-
-
-
-
-
-
 	/**
-	 * draw an array of cubes (or squares) with the given colors.
-	 * @param lods bounding boxes to draw
-	 * @param colors color of each box to draw
+	 * This is where the actual drawing happens.
+	 * 
+	 * @param buffers the buffers sent to the GPU to draw
 	 */
-	private void generateLodBuffers(AxisAlignedBB[][] lods, Color[][] colors, FogDistance fogDistance)
-	{
-		List<Future<NearFarBuffer>> bufferFutures = new ArrayList<>();
-		// TODO this should change based on whether we are using near/far or both fog settings
-		bufferMaxCapacity = (lods.length * lods.length * (6 * 4 * ((3 * 4) + (4 * 4)))) / numbBufferThreads; 
-		
-		for(int i = 0; i < numbBufferThreads; i++)
-		{
-			if (nearBuffers[i] == null || previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks)
-			{
-				nearBuffers[i] = new BufferBuilder(bufferMaxCapacity); //ByteBuffer.allocateDirect(bufferMaxCapacity);
-//				nearBuffers[i].order(ByteOrder.LITTLE_ENDIAN);
-				
-				farBuffers[i] = new BufferBuilder(bufferMaxCapacity); //ByteBuffer.allocateDirect(bufferMaxCapacity);
-//				farBuffers[i].order(ByteOrder.LITTLE_ENDIAN);
-				
-				clearBytes = new byte[bufferMaxCapacity];
-			}
-			
-			if (regen)
-			{
-				// this is the best way I could find to
-				// overwrite the old data
-				// (which needs to be done otherwise old
-				// LODs may be drawn)
-				nearBuffers[i].byteBuffer.clear();
-				nearBuffers[i].byteBuffer.put(clearBytes);
-				nearBuffers[i].byteBuffer.clear();
-				
-				farBuffers[i].byteBuffer.clear();
-				farBuffers[i].byteBuffer.put(clearBytes);
-				farBuffers[i].byteBuffer.clear();
-			}
-			
-//			int pos = bufferBuilder.byteBuffer.position();
-//			nearBuffers[i].byteBuffer.position(pos);
-//			farBuffers[i].byteBuffer.position(pos);
-			
-			bufferThreads.get(i).setNewData(nearBuffers[i], farBuffers[i], fogDistance, lods, colors, i, numbBufferThreads);
-		}
-		
-		try
-		{
-			bufferFutures = bufferThreadPool.invokeAll(bufferThreads);
-		}
-		catch (InterruptedException e)
-		{
-			// this should never happen, but just in case
-			e.printStackTrace();
-		}
-		
-		for(int i = 0; i < numbBufferThreads; i++)
-		{
-			try
-			{
-				nearBuffers[i] = bufferFutures.get(i).get().nearBuffer;
-				farBuffers[i] = bufferFutures.get(i).get().farBuffer;
-				
-				nearBuffers[i].finishDrawing();
-				farBuffers[i].finishDrawing();
-			}
-			catch(CancellationException | ExecutionException| InterruptedException e)
-			{
-				// this should never happen, but just in case
-				e.printStackTrace();
-			}
-		}
-		
-	}
-	
-	private void sendLodsToGpuAndDraw(BufferBuilder[] nearBuffers)
+	private void sendLodsToGpuAndDraw(BufferBuilder[] buffers)
 	{
 		for(int i = 0; i < numbBufferThreads; i++)
 		{
-			profiler.startSection("LOD setup");
-//			int pos = bufferBuilder.byteBuffer.position();
-//			nearBuffers[i].byteBuffer.position(pos);
-			
-			bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-			bufferBuilder.byteBuffer.clear();
-			bufferBuilder.putBulkData(nearBuffers[i].byteBuffer);
-			
-			profiler.endStartSection("LOD draw");
-			tessellator.draw();
-			
-			bufferBuilder.byteBuffer.clear(); // this is required otherwise nothing is drawn
-			profiler.endSection();
+			if (shouldDrawBuffer[i])
+			{
+				int pos = bufferBuilder.byteBuffer.position();
+				buffers[i].byteBuffer.position(pos);
+				
+				bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+				bufferBuilder.byteBuffer.clear();
+				// replace the data in bufferBuilder with the data from the given buffer
+				bufferBuilder.putBulkData(buffers[i].byteBuffer);
+				
+				tessellator.draw();
+				
+				bufferBuilder.byteBuffer.clear(); // this is required otherwise nothing is drawn
+			}
 		}
 	}
 	
@@ -567,7 +402,6 @@ public class LodRenderer
 	// Setup Functions //
 	//=================//
 	
-	@SuppressWarnings("deprecation")
 	private void setupFog(FogDistance fogDistance, FogQuality fogQuality)
 	{
 		if(fogQuality == FogQuality.OFF)
@@ -578,7 +412,7 @@ public class LodRenderer
 		
 		if(fogDistance == FogDistance.NEAR_AND_FAR)
 		{
-			throw new IllegalArgumentException("setupFog only accepts NEAR or FAR fog distances.");
+			throw new IllegalArgumentException("setupFog doesn't accept the NEAR_AND_FAR fog distance.");
 		}
 
 		// the multipliers are percentages
@@ -620,16 +454,13 @@ public class LodRenderer
 			}
 		}
 		
-		RenderSystem.fogDensity(0.1f);
 		RenderSystem.enableFog();
 	}
 	
 
-	
 	/**
 	 * create a new projection matrix and send it over to the GPU
 	 * @param partialTicks how many ticks into the frame we are
-	 * @return true if the matrix was successfully created and sent to the GPU, false otherwise
 	 */
 	private void setupProjectionMatrix(float partialTicks)
 	{
@@ -660,42 +491,69 @@ public class LodRenderer
 	{
 		GL11.glEnable(GL11.GL_COLOR_MATERIAL); // set the color to be used as the material (this allows lighting to be enabled)
 		
+		// FIXME
 		// this isn't perfect right now, but it looks pretty good at 50% brightness
-		float sunBrightness = mc.world.getSunBrightness(partialTicks);
+		float sunBrightness = mc.world.getSunBrightness(partialTicks); // * mc.world.provider.getSunBrightnessFactor(partialTicks);
 		float skyHasLight = 1.0f; //mc.world.provider.hasSkyLight()? 1.0f : 0.15f;
-		float gammaMultiplyer = ((float)mc.gameSettings.gamma * 0.5f + 0.5f);
+		float gammaMultiplyer = (float) mc.gameSettings.gamma * 0.5f + 0.5f;
 		float lightStrength = sunBrightness * skyHasLight * gammaMultiplyer;
 		float lightAmbient[] = {lightStrength, lightStrength, lightStrength, 1.0f};
-        	
+        
 		ByteBuffer temp = ByteBuffer.allocateDirect(16);
 		temp.order(ByteOrder.nativeOrder());
-		GL11.glLightfv(GL11.GL_LIGHT2, GL11.GL_AMBIENT, (FloatBuffer) temp.asFloatBuffer().put(lightAmbient).flip());
-		GL11.glEnable(GL11.GL_LIGHT2); // Enable the above lighting
+		GL11.glLightfv(LOD_GL_LIGHT_NUMBER, GL11.GL_AMBIENT, (FloatBuffer) temp.asFloatBuffer().put(lightAmbient).flip());
+		GL11.glEnable(LOD_GL_LIGHT_NUMBER); // Enable the above lighting
 		
 		RenderSystem.enableLighting();
 	}
 	
-	
-	private void setupBufferThreads(AxisAlignedBB[][] lods)
+	/**
+	 * create the BuildBufferThreads
+	 */
+	private void setupBufferThreads()
 	{
-		if (numbBufferThreads != bufferThreads.size())
+		bufferThreads.clear();
+		for(int i = 0; i < numbBufferThreads; i++)
+			bufferThreads.add(new BuildBufferThread());
+	}
+	
+	/**
+	 * Create all buffers that will be used.
+	 */
+	private void setupBuffers(int numbChunksWide)
+	{
+		drawableNearBuffers = new BufferBuilder[numbBufferThreads];
+		drawableFarBuffers = new BufferBuilder[numbBufferThreads];
+		
+		buildableNearBuffers = new BufferBuilder[numbBufferThreads];
+		buildableFarBuffers = new BufferBuilder[numbBufferThreads];
+		
+		
+		// calculate how many chunks wide, at most
+		// any thread will have to generate
+		int biggestWidth = -1;
+		int[] loads = calculateCpuLoadBalance(numbChunksWide, numbBufferThreads);
+		for(int i : loads)
+			if (i > biggestWidth)
+				biggestWidth = i;
+		
+		
+		// calculate the max amount of storage needed (in bytes)
+		// by any singular buffer
+		// NOTE: most buffers won't use the full amount, but this should prevent
+		//		them from needing to allocate more memory (which is a slow progress)
+		int bufferMaxCapacity = (numbChunksWide * biggestWidth * (6 * 4 * ((3 * 4) + (4 * 4))));
+		
+		for(int i = 0; i < numbBufferThreads; i++)
 		{
-			bufferMaxCapacity = (lods.length * lods.length * (6 * 4 * ((3 * 4) + (4 * 4)))) / numbBufferThreads;
-			clearBytes = new byte[bufferMaxCapacity];
+			// TODO complain or do something when memory is too low
+			// currently the VM will just crash and complain there is no more memory
+			// issue #4
+			drawableNearBuffers[i] = new BufferBuilder(bufferMaxCapacity);
+			drawableFarBuffers[i] = new BufferBuilder(bufferMaxCapacity);
 			
-			bufferThreads.clear();
-			for(int i = 0; i < numbBufferThreads; i++)
-				bufferThreads.add(new BuildBufferThread());
-			regen = true;
-			
-			for(int i = 0; i < maxNumbThreads; i++)
-			{
-				nearBuffers[i] = new BufferBuilder(bufferMaxCapacity); //ByteBuffer.allocateDirect(bufferMaxCapacity);
-//				nearBuffers[i].order(ByteOrder.LITTLE_ENDIAN);
-				
-				farBuffers[i] = new BufferBuilder(bufferMaxCapacity); //ByteBuffer.allocateDirect(bufferMaxCapacity);
-//				farBuffers[i].order(ByteOrder.LITTLE_ENDIAN);
-			}
+			buildableNearBuffers[i] = new BufferBuilder(bufferMaxCapacity);
+			buildableFarBuffers[i] = new BufferBuilder(bufferMaxCapacity);
 		}
 	}
 	
@@ -704,18 +562,275 @@ public class LodRenderer
 	
 	
 	
+	
+	//======================//
+	// Other Misc Functions // 
+	//======================//
+	
+	
 	/**
-	 * Returns -1 if there are no valid points
+	 * @Returns -1 if there are no valid points
 	 */
-	private int getLodHeightPoint(short[] heightPoints)
+	private int getValidHeightPoint(short[] heightPoints)
 	{
-		if (heightPoints[LodLocation.NE.value] != -1)
-			return heightPoints[LodLocation.NE.value];
-		if (heightPoints[LodLocation.NW.value] != -1)
-			return heightPoints[LodLocation.NW.value];
-		if (heightPoints[LodLocation.SE.value] != -1)
-			return heightPoints[LodLocation.NE.value];
-		return heightPoints[LodLocation.NE.value];
+		if (heightPoints[LodCorner.NE.value] != -1)
+			return heightPoints[LodCorner.NE.value];
+		if (heightPoints[LodCorner.NW.value] != -1)
+			return heightPoints[LodCorner.NW.value];
+		if (heightPoints[LodCorner.SE.value] != -1)
+			return heightPoints[LodCorner.NE.value];
+		return heightPoints[LodCorner.NE.value];
+	}
+	
+	
+	/**
+	 * Create a thread to asynchronously generate LOD buffers
+	 * centered around the given camera X and Z.
+	 * <br>
+	 * This thread will write to the drawableNearBuffers and drawableFarBuffers.
+	 * <br>
+	 * After the buildable buffers have been generated they must be
+	 * swapped with the drawable buffers to be drawn.
+	 */
+	private Thread createLodBufferGenerationThread(double playerX, double playerZ,
+			int numbChunksWide)
+	{
+		// this is where we store the points for each LOD object
+		AxisAlignedBB lodArray[][] = new AxisAlignedBB[numbChunksWide][numbChunksWide];
+		// this is where we store the color for each LOD object
+		Color colorArray[][] = new Color[numbChunksWide][numbChunksWide];
+		
+		int alpha = 255; // 0 - 255
+		Color red = new Color(255, 0, 0, alpha);
+		Color black = new Color(0, 0, 0, alpha);
+		Color white = new Color(255, 255, 255, alpha);
+		@SuppressWarnings("unused")
+		Color invisible = new Color(0,0,0,0);
+		@SuppressWarnings("unused")
+		Color error = new Color(255, 0, 225, alpha); // bright pink
+		
+		// this seemingly useless math is required,
+		// just using (int) camera doesn't work
+		int playerXChunkOffset = ((int) playerX / LodChunk.WIDTH) * LodChunk.WIDTH;
+		int playerZChunkOffset = ((int) playerZ / LodChunk.WIDTH) * LodChunk.WIDTH;
+		// this is where we will start drawing squares
+		// (exactly half the total width)
+		int startX = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerXChunkOffset;
+		int startZ = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerZChunkOffset;
+		
+		Thread t = new Thread(()->
+		{
+			// x axis
+			for (int i = 0; i < numbChunksWide; i++)
+			{
+				// z axis
+				for (int j = 0; j < numbChunksWide; j++)
+				{
+					// skip the middle
+					// (As the player moves some chunks will overlap or be missing,
+					// this is just how chunk loading/unloading works. This can hopefully
+					// be hidden with careful use of fog)
+					int middle = (numbChunksWide / 2);
+					if (isCoordInCenterArea(i, j, middle))
+					{
+						continue;
+					}
+					
+					
+					// set where this square will be drawn in the world
+					double xOffset = (LodChunk.WIDTH * i) + // offset by the number of LOD blocks
+									startX; // offset so the center LOD block is centered underneath the player
+					double yOffset = 0;
+					double zOffset = (LodChunk.WIDTH * j) + startZ;
+					
+					int chunkX = i + (startX / LodChunk.WIDTH);
+					int chunkZ = j + (startZ / LodChunk.WIDTH);
+					
+					LodChunk lod = lodDimension.getLodFromCoordinates(chunkX, chunkZ);
+					if (lod == null)
+					{
+						// note: for some reason if any color or lod objects are set here
+						// it causes the game to use 100% gpu; 
+						// undefined in the debug menu
+						// and drop to ~6 fps.
+						colorArray[i][j] = null;
+						lodArray[i][j] = null;
+						
+						continue;
+					}
+					
+					Color c = new Color(
+							(lod.colors[ColorDirection.TOP.value].getRed()),
+							(lod.colors[ColorDirection.TOP.value].getGreen()),
+							(lod.colors[ColorDirection.TOP.value].getBlue()),
+							lod.colors[ColorDirection.TOP.value].getAlpha());
+										
+					if (!debugging)
+					{
+						// add the color to the array
+						colorArray[i][j] = c;
+					}
+					else
+					{
+						// if debugging draw the squares as a black and white checker board
+						if ((chunkX + chunkZ) % 2 == 0)
+							c = white;
+						else
+							c = black;
+						// draw the first square as red
+						if (i == 0 && j == 0)
+							c = red;
+						
+						colorArray[i][j] = c;
+					}
+					
+					
+					// add the new box to the array
+					int topPoint = getValidHeightPoint(lod.top);
+					int bottomPoint = getValidHeightPoint(lod.bottom);
+					
+					// don't draw an LOD if it is empty
+					if (topPoint == -1 && bottomPoint == -1)
+						continue;
+					
+					lodArray[i][j] = new AxisAlignedBB(0, bottomPoint, 0, LodChunk.WIDTH, topPoint, LodChunk.WIDTH).offset(xOffset, yOffset, zOffset);
+				}
+			}
+			
+			generateLodBuffers(lodArray, colorArray, LodConfig.COMMON.fogDistance.get());
+			
+			regenerating = false;
+			switchBuffers = true;
+		});
+		return t;
+	}
+	
+	/**
+	 * draw an array of boxes with the given colors.
+	 * <br><br>
+	 * Currently only one color per box is supported.
+	 * 
+	 * @param lods bounding boxes to draw
+	 * @param colors color of each box to draw
+	 */
+	private void generateLodBuffers(AxisAlignedBB[][] lods, Color[][] colors, FogDistance fogDistance)
+	{
+		List<Future<NearFarBuffer>> bufferFutures = new ArrayList<>();
+		ArrayList<BuildBufferThread> threadsToRun = new ArrayList<>();
+		
+		int indexToStart = 0;
+		int[] threadLoads = calculateCpuLoadBalance(lods.length, numbBufferThreads);
+		
+		// update the information that the bufferThreads are using
+		for(int i = 0; i < numbBufferThreads; i++)
+		{
+			// if we have more threads than LOD rows to generate
+			// don't send the threads to the CPU
+			if (threadLoads[i] != 0)
+			{
+				// update this thread with the latest information
+				bufferThreads.get(i).
+				setNewData(buildableNearBuffers[i], buildableFarBuffers[i], 
+						fogDistance, lods, colors, indexToStart, threadLoads[i]);
+				indexToStart += threadLoads[i];
+				
+				// add this thread to the list of threads we are going to run
+				threadsToRun.add(bufferThreads.get(i));
+				
+				shouldDrawBuffer[i] = true;
+			}
+			else
+			{
+				shouldDrawBuffer[i] = false;
+			}
+		}
+		
+		// run all the bufferThreads and get their results
+		try
+		{
+			bufferFutures = bufferThreadPool.invokeAll(threadsToRun);
+		}
+		catch (InterruptedException e)
+		{
+			// this should never happen, but just in case
+			e.printStackTrace();
+		}
+		
+		// update our buildable buffers
+		for(int i = 0; i < numbBufferThreads; i++)
+		{
+			// only replace buffers that actually generated something
+			if (threadLoads[i] != 0)
+			{
+				try
+				{
+					buildableNearBuffers[i] = bufferFutures.get(i).get().nearBuffer;
+					buildableFarBuffers[i] = bufferFutures.get(i).get().farBuffer;
+				}
+				catch(CancellationException | ExecutionException| InterruptedException e)
+				{
+					// this should never happen, but just in case
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	
+	/**
+	 * Swap buildable and drawable buffers.
+	 */
+	private void swapBuffers()
+	{
+		for(int i = 0; i < buildableNearBuffers.length; i++)
+		{				
+			try
+			{
+				BufferBuilder tmp = buildableNearBuffers[i];
+				buildableNearBuffers[i] = drawableNearBuffers[i];
+				drawableNearBuffers[i] = tmp;
+				
+				tmp = buildableFarBuffers[i];
+				buildableFarBuffers[i] = drawableFarBuffers[i];
+				drawableFarBuffers[i] = tmp;
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	
+	/**
+	 * Returns if the given coordinate is in the loaded area of the world.
+	 * @param centerCoordinate the center of the loaded world
+	 */
+	private boolean isCoordInCenterArea(int i, int j, int centerCoordinate)
+	{
+		return (i >= centerCoordinate - mc.gameSettings.renderDistanceChunks 
+				&& i <= centerCoordinate + mc.gameSettings.renderDistanceChunks) 
+				&& 
+				(j >= centerCoordinate - mc.gameSettings.renderDistanceChunks 
+				&& j <= centerCoordinate + mc.gameSettings.renderDistanceChunks);
+	}
+	
+	
+	/**
+	 * This is a simple implementation of the pigeon hole
+	 * principle to try and give each BuildBufferThread a balanced load.
+	 * 
+	 * @returns an array of ints where each int is how many rows 
+	 * that BuildBufferThread should generate
+	 */
+	private int[] calculateCpuLoadBalance(int numbOfItems, int numbOfThreads)
+	{
+		int[] cpuLoad = new int[numbOfThreads];
+		
+		for(int i = 0; i < numbOfItems; i++)
+			cpuLoad[i % numbOfThreads]++;
+		
+		return cpuLoad;
 	}
 	
 	

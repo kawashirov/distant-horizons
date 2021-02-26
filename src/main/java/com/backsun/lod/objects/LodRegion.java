@@ -7,7 +7,7 @@ package com.backsun.lod.objects;
  * one file in the file system.
  * 
  * @author James Seibel
- * @version 1-20-2021
+ * @version 1-22-2021
  */
 public class LodRegion
 {
@@ -31,6 +31,11 @@ public class LodRegion
 	}
 	
 	
+	/**
+	 * Add the given LOD to this region at the coordinate
+	 * stored in the LOD. If an LOD already exists at the given
+	 * coordinates it will be overwritten.
+	 */
 	public void addLod(LodChunk lod)
 	{
 		// we use ABS since LODs can be negative, but if they are
@@ -43,6 +48,13 @@ public class LodRegion
 		chunks[xIndex][zIndex] = lod;
 	}
 	
+	/**
+	 * Get the LodChunk at the given X and Z coordinates
+	 * in this region.
+	 * <br>
+	 * Returns null if the LodChunk doesn't exist or 
+	 * is outside the loaded area.
+	 */
 	public LodChunk getLod(int chunkX, int chunkZ)
 	{
 		// since we add LOD's with ABS, we get them the same way
@@ -56,7 +68,9 @@ public class LodRegion
 	}
 	
 	
-	
+	/**
+	 * Returns all LodChunks in this region
+	 */
 	public LodChunk[][] getAllLods()
 	{
 		return chunks;

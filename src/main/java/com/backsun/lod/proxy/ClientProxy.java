@@ -1,10 +1,8 @@
 package com.backsun.lod.proxy;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import org.lwjgl.opengl.GL11;
 
+import com.backsun.lod.builders.LodBuilder;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodRegion;
@@ -12,39 +10,33 @@ import com.backsun.lod.objects.LodWorld;
 import com.backsun.lod.renderer.LodRenderer;
 import com.backsun.lod.renderer.RenderGlobalHook;
 import com.backsun.lod.util.LodConfig;
-import com.backsun.lod.util.LodFileHandler;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkSection;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 //TODO Find a way to replace getIntegratedServer so this mod could be used on non-local worlds.
-// Minecraft.getInstance().getIntegratedServer()
+// Minecraft.getMinecraft().getIntegratedServer()
 
 /**
- * This is used by the client.
+ * This handles all events sent to the client,
+ * and is the starting point for most of this program.
  * 
  * @author James_Seibel
- * @version 01-31-2021
+ * @version 02-23-2021
  */
 public class ClientProxy
 {
 	private LodRenderer renderer;
 	private LodWorld lodWorld;
-	private ExecutorService lodGenThreadPool = Executors.newFixedThreadPool(1);
+	private LodBuilder lodBuilder;
 	Minecraft mc = Minecraft.getInstance();
-	
-	/** Default size of any LOD regions we use */
-	private int regionWidth = 5;
 	
 	public ClientProxy()
 	{
-		
+		lodBuilder = new LodBuilder();
 	}
 	
 	
@@ -66,13 +58,17 @@ public class ClientProxy
 		GL11.glDisable(GL11.GL_STENCIL_TEST);
 	}
 	
+	/**
+	 * Do any setup that is required to draw LODs
+	 * and then tell the LodRenderer to draw.
+	 */
 	public void renderLods(float partialTicks)
 	{
 		int newWidth = Math.max(4, (mc.gameSettings.renderDistanceChunks * LodChunk.WIDTH * 2) / LodRegion.SIZE);
-		if (lodWorld != null && regionWidth != newWidth)
+		if (lodWorld != null && lodBuilder.regionWidth != newWidth)
 		{
 			lodWorld.resizeDimensionRegionWidth(newWidth);
-			regionWidth = newWidth;
+			lodBuilder.regionWidth = newWidth;
 			
 			// skip this frame, hopefully the lodWorld
 			// should have everything set up by then
@@ -86,8 +82,6 @@ public class ClientProxy
 		if (lodDim == null)
 			return;
 		
-		mc.getProfiler().endSection();
-		mc.getProfiler().startSection("LOD");
 		
 		double playerX = mc.player.getPosX();
 		double playerZ = mc.player.getPosZ();
@@ -99,7 +93,6 @@ public class ClientProxy
 		{
 			lodDim.move(xOffset, zOffset);
 		}
-		
 		
 		// we wait to create the renderer until the first frame
 		// to make sure that the EntityRenderer has
@@ -113,13 +106,7 @@ public class ClientProxy
 		{
 			renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
 		}
-		
-		// end of profiler tracking
-		mc.getProfiler().endSection();
 	}	
-	
-	
-	
 	
 	
 	
@@ -130,101 +117,30 @@ public class ClientProxy
 	//===============//
 	
 	@SubscribeEvent
-	public void chunkLoadEvent(ChunkEvent.Load event)
+	public void chunkLoadEvent(ChunkEvent event)
 	{
-		if (mc != null && event != null)
-		{
-			World world = mc.world;
-			
-			if(world != null)
-			{
-				generateLodChunk((Chunk)event.getChunk());
-			}
-		}
-	}
-	
-	private void generateLodChunk(Chunk chunk)
-	{
-		// don't try to create an LOD object
-		// if for some reason we aren't
-		// given a valid chunk object
-		// (Minecraft often gives back empty
-		// or null chunks in this method)
-		if (chunk == null || chunk.getWorld() == null || !isValidChunk(chunk))
-			return;
-			
-		Thread thread = new Thread(() ->
-		{
-			try
-			{
-				DimensionType dim = chunk.getWorldForge().getDimensionType();
-				World world = chunk.getWorld();
-				LodChunk lod = new LodChunk(chunk, world);
-				LodDimension lodDim;
-				
-				if (lodWorld == null)
-				{
-					lodWorld = new LodWorld(LodFileHandler.getWorldName());
-				}
-				else
-				{
-					// if we have a lodWorld make sure 
-					// it is for this minecraft world
-					if (!lodWorld.worldName.equals(LodFileHandler.getWorldName()))
-					{
-						// this lodWorld isn't for this minecraft world
-						// delete it so we can get a new one
-						lodWorld = null;
-						
-						// skip this frame
-						// we'll get this set up next time
-						return;
-					}
-				}
-				
-				
-				if (lodWorld.getLodDimension(dim) == null)
-				{
-					lodDim = new LodDimension(dim, regionWidth);
-					lodWorld.addLodDimension(lodDim);
-				}
-				else
-				{
-					lodDim = lodWorld.getLodDimension(dim);
-				}
-				
-				lodDim.addLod(lod);
-			}
-			catch(IllegalArgumentException | NullPointerException e)
-			{
-				// if the world changes while LODs are being generated
-				// they will throw errors as they try to access things that no longer
-				// exist.
-			}
-			
-		});
-		
-		lodGenThreadPool.execute(thread);
+		lodWorld = lodBuilder.generateLodChunkAsync((Chunk) event.getChunk());
 	}
 	
 	/**
-	 * Return whether the given chunk
-	 * has any data in it.
+	 * this event is called whenever a chunk is created for the first time.
 	 */
-	private boolean isValidChunk(Chunk chunk)
-	{
-		ChunkSection[] sections = chunk.getSections();
-		
-		for(ChunkSection section : sections)
-		{
-			if(section != null && !section.isEmpty())
-			{
-				return true;
-			}
-		}
-		
-		return false;
-	}
+//	@SubscribeEvent
+//	public void onChunkPopulate(PopulateChunkEvent event)
+//	{
+//		Minecraft mc = Minecraft.getMinecraft();
+//		if (mc != null && event != null)
+//		{
+//			WorldClient world = mc.world;
+//			
+//			if(world != null)
+//			{
+//				lodWorld = lodBuilder.generateLodChunkAsync(world.getChunkFromChunkCoords(event.getChunkX(), event.getChunkZ()));
+//			}
+//		}
+//	}
+	
+	
 	
 	
 }

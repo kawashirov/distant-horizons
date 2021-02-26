@@ -1,4 +1,4 @@
-package com.backsun.lod.util;
+package com.backsun.lod.handlers;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,8 +11,10 @@ import java.util.concurrent.Executors;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodRegion;
+import com.backsun.lod.util.LodUtils;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.server.ServerWorld;
 
 /**
  * This object handles creating LodRegions
@@ -22,26 +24,29 @@ import net.minecraft.client.Minecraft;
  * @author James Seibel
  * @version 01-30-2021
  */
-public class LodFileHandler
+public class LodDimensionFileHandler
 {
-	// TODO this object needs to be changed to use NBT data instead of writing to files
-	private static final boolean IMPLEMENTED = false;
-	
-	private Minecraft mc = Minecraft.getInstance();
-	
-	private LodDimension loadedRegion = null;
+	private LodDimension loadedDimension = null;
 	public long regionLastWriteTime[][];
 	
-	private ExecutorService fileWritingThreadPool = Executors.newSingleThreadExecutor();
+	private File saveFolder;
+	private String saveDir;
+	
+	private final String FILE_NAME_PREFIX = "lod";
+	private final String FILE_EXTENSION = ".txt";
+	
+	private ExecutorService fileWritingThreadPool = Executors.newFixedThreadPool(1);
 	
 	
-	public LodFileHandler(LodDimension newLoadedRegion)
+	public LodDimensionFileHandler(File newSaveFolder, LodDimension newLoadedDimension)
 	{
-		loadedRegion = newLoadedRegion;
+		saveFolder = newSaveFolder;
+		
+		loadedDimension = newLoadedDimension;
 		// these two variable are used in sync with the LodDimension
-		regionLastWriteTime = new long[loadedRegion.getWidth()][loadedRegion.getWidth()];
-		for(int i = 0; i < loadedRegion.getWidth(); i++)
-			for(int j = 0; j < loadedRegion.getWidth(); j++)
+		regionLastWriteTime = new long[loadedDimension.getWidth()][loadedDimension.getWidth()];
+		for(int i = 0; i < loadedDimension.getWidth(); i++)
+			for(int j = 0; j < loadedDimension.getWidth(); j++)
 				regionLastWriteTime[i][j] = -1;
 	}
 	
@@ -61,15 +66,15 @@ public class LodFileHandler
 	 */
 	public LodRegion loadRegionFromFile(int regionX, int regionZ)
 	{
-		if (!IMPLEMENTED)
-			return null;
-		
 		// we don't currently support reading or writing
 		// files when connected to a server
-		if (!mc.isIntegratedServerRunning())
+		if (!Minecraft.getInstance().isIntegratedServerRunning())
 			return null;
 		
-		String fileName = "";
+		if (!readyToReadAndWrite())
+			return null;
+		
+		String fileName = getFileNameForRegion(regionX, regionZ);
 		
 		File f = new File(fileName);
 		
@@ -131,47 +136,53 @@ public class LodFileHandler
 	// Save to File //
 	//==============//
 	
-	
-	public synchronized void saveDirtyRegionsToFile()
+	/**
+	 * Save all dirty regions in this LodDimension to file.
+	 */
+	public synchronized void saveDirtyRegionsToFileAsync()
 	{
-		if (!IMPLEMENTED)
-			return;
-		
 		// we don't currently support reading or writing
 		// files when connected to a server
-		if (!mc.isIntegratedServerRunning())
+		if (!Minecraft.getInstance().isIntegratedServerRunning())
+			return;
+		
+		if (!readyToReadAndWrite())
+			// we aren't ready to read and write yet
 			return;
 		
 		fileWritingThreadPool.execute(saveDirtyRegionsThread);
 	}
 	private Thread saveDirtyRegionsThread = new Thread(() -> 
 	{
-		for(int i = 0; i < loadedRegion.getWidth(); i++)
+		for(int i = 0; i < loadedDimension.getWidth(); i++)
 		{
-			for(int j = 0; j < loadedRegion.getWidth(); j++)
+			for(int j = 0; j < loadedDimension.getWidth(); j++)
 			{
-				if(loadedRegion.isRegionDirty[i][j])
+				if(loadedDimension.isRegionDirty[i][j])
 				{
-					saveRegionToDisk(loadedRegion.regions[i][j]);
-					loadedRegion.isRegionDirty[i][j] = false;
+					saveRegionToDisk(loadedDimension.regions[i][j]);
+					loadedDimension.isRegionDirty[i][j] = false;
 				}
 			}
 		}
 	});
  	
-	
+	/**
+	 * Save a specific region to disk.<br>
+	 * Note: it will save to the LodDimension that this
+	 * handler is associated with.
+	 */
 	private void saveRegionToDisk(LodRegion region)
 	{
-		if (!IMPLEMENTED)
+		if (!readyToReadAndWrite() || region == null)
 			return;
 		
-		if (region == null)
-			return;
+		// convert chunk coordinates to region
+		// coordinates
+		int x = region.x;
+		int z = region.z;
 		
-//		int x = region.x;
-//		int z = region.z;
-		
-		File f = new File("");
+		File f = new File(getFileNameForRegion(x, z));
 		
 		try
 		{
@@ -207,6 +218,33 @@ public class LodFileHandler
 	//================//
 	
 	
+	/**
+	 * Return the name of the file that should contain the 
+	 * region at the given x and z. <br>
+	 * Returns null if this object isn't ready to read and write.
+	 */
+	private String getFileNameForRegion(int regionX, int regionZ)
+	{
+		if (!readyToReadAndWrite())
+			return null;
+		
+		return saveDir + "\\lod_data\\DIM" + loadedDimension.dimension.toString() + "\\" +
+				FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
+	}
+	
+	
+	/**
+	 * Returns if this FileHandler is ready to read
+	 * and write files.
+	 * <br>
+	 * This returns true when the world save directory is known.
+	 */
+	public boolean readyToReadAndWrite()
+	{
+		return saveFolder != null;
+	}
+	
+	
 	
 	
 	/**
@@ -220,7 +258,11 @@ public class LodFileHandler
 		
 		if(mc.isIntegratedServerRunning())
 		{
-			return mc.getIntegratedServer().getName();
+			ServerWorld world = LodUtils.getFirstValidServerWorld();
+			if(world != null)
+				return world.getServer().getDataDirectory().toString();
+			
+			return "";
 		}
 		else
 		{
@@ -229,4 +271,26 @@ public class LodFileHandler
 	}
 	
 	
+	
+	/**
+	 * Gets the canonical path to the world save folder.
+	 * <br>
+	 * Returns null if there was an IO Exception
+	 */
+	private String getWorldSaveDirectory()
+	{
+		ServerWorld world = LodUtils.getFirstValidServerWorld();
+		
+		try
+		{
+			if(world != null)
+				return world.getServer().getDataDirectory().getCanonicalPath();
+		}
+		catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
 }
