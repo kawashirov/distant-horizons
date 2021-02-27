@@ -4,17 +4,12 @@ import java.awt.Color;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import org.lwjgl.opengl.GL11;
 
-import com.backsun.lod.builders.BuildBufferThread;
+import com.backsun.lod.builders.LodBufferBuilder;
 import com.backsun.lod.handlers.ReflectionHandler;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
@@ -24,6 +19,7 @@ import com.backsun.lod.util.enums.ColorDirection;
 import com.backsun.lod.util.enums.FogDistance;
 import com.backsun.lod.util.enums.FogQuality;
 import com.backsun.lod.util.enums.LodCorner;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
@@ -31,12 +27,15 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexBuffer;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
+
 
 /**
  * @author James Seibel
@@ -56,40 +55,33 @@ public class LodRenderer
 	private GameRenderer gameRender;
 	private IProfiler profiler;
 	private float farPlaneDistance;
-	// make sure this is an even number, or else it won't align with the chunk grid
-	/** this is the total width of the LODs (I.E the diameter, not the radius) */
+	/** this is the radius of the LODs */
 	private static final int LOD_CHUNK_DISTANCE_RADIUS = 6;
-	
-	private Tessellator tessellator;
-	private BufferBuilder bufferBuilder;
 	
 	private ReflectionHandler reflectionHandler;
 	
 	public LodDimension lodDimension = null;
 	
 	
-	/** Total number of CPU cores available to the Java VM */
-	private int maxNumbThreads = Runtime.getRuntime().availableProcessors();
-	/** How many threads should be used for building render buffers */
-	private int numbBufferThreads = maxNumbThreads;
-	/** This stores all the BuildBufferThread objects for each CPU core */
-	private ArrayList<BuildBufferThread> bufferThreads = new ArrayList<BuildBufferThread>();
+	/** This is used to generate the buildable buffers */
+	private LodBufferBuilder lodBufferBuilder = null;
+	
 	/** The buffers that are used to draw LODs using near fog */
-	private volatile BufferBuilder[] drawableNearBuffers = null;
+	private volatile BufferBuilder drawableNearBuffer = null;
 	/** The buffers that are used to draw LODs using far fog */
-	private volatile BufferBuilder[] drawableFarBuffers = null;
+	private volatile BufferBuilder drawableFarBuffer = null;
 	
 	/** The buffers that are used to create LODs using near fog */
-	private volatile BufferBuilder[] buildableNearBuffers = null;
+	private volatile BufferBuilder buildableNearBuffer = null;
 	/** The buffers that are used to create LODs using far fog */
-	private volatile BufferBuilder[] buildableFarBuffers = null;
+	private volatile BufferBuilder buildableFarBuffer = null;
 	
-	/** If we have more CPU cores than LOD rows to draw this tells
-	 * which drawable buffers will and won't be used. */
-	private boolean[] shouldDrawBuffer = new boolean[maxNumbThreads];
+	/** This is the VertexBuffer used to draw any LODs that use near fog */
+	private volatile VertexBuffer nearVbo = null;
+	/** This is the VertexBuffer used to draw any LODs that use far fog */
+	private volatile VertexBuffer farVbo = null;
+	public static final VertexFormat LOD_VERTEX_FORMAT = DefaultVertexFormats.POSITION_COLOR;
 	
-	/** This holds the threads used to generate the LOD buffers */
-	private ExecutorService bufferThreadPool = Executors.newFixedThreadPool(maxNumbThreads);
 	/** This holds the thread used to generate new LODs off the main thread. */
 	private ExecutorService genThread = Executors.newSingleThreadExecutor();
 	
@@ -122,10 +114,6 @@ public class LodRenderer
 		mc = Minecraft.getInstance();
 		gameRender = mc.gameRenderer;
 		
-		// for some reason "Tessellator.getInstance()" won't work here, we have to create a new one
-		tessellator = new Tessellator(2097152); // the number here is what is used by the default Tessellator
-		bufferBuilder = tessellator.getBuffer();
-		
 		reflectionHandler = new ReflectionHandler();
 	}
 	
@@ -137,6 +125,7 @@ public class LodRenderer
 	 * @param newDimension The dimension to draw, if null doesn't replace the current dimension.
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
+	@SuppressWarnings("deprecation")
 	public void drawLODs(LodDimension newDimension, float partialTicks, IProfiler newProfiler)
 	{		
 		if (lodDimension == null && newDimension == null)
@@ -150,15 +139,17 @@ public class LodRenderer
 		
 		
 		
+		
 		//===============//
 		// initial setup //
 		//===============//
 		
 		
 		// used for debugging and viewing how long different processes take
-		mc.getProfiler().endSection();
-		mc.getProfiler().startSection("LOD");
-		mc.getProfiler().startSection("LOD setup");
+		profiler = newProfiler;
+		profiler.endSection();
+		profiler.startSection("LOD");
+		profiler.startSection("LOD setup");
 		
 		ClientPlayerEntity player = mc.player;
 		
@@ -184,7 +175,6 @@ public class LodRenderer
 			regen = false;
 		}
 		
-		profiler = newProfiler;
 		lodDimension = newDimension;
 		if (lodDimension == null)
 		{
@@ -207,16 +197,6 @@ public class LodRenderer
 		}
 		
 		
-		
-		// get the camera location
-		ActiveRenderInfo renderInfo = mc.gameRenderer.getActiveRenderInfo();
-        Vector3d projectedView = renderInfo.getProjectedView();
-		double cameraX = projectedView.x;
-		double cameraY = projectedView.y;
-		double cameraZ = projectedView.z;
-
-		
-
 		
 		// determine how far the game's render distance is currently set
 		int renderDistWidth = mc.gameSettings.renderDistanceChunks;
@@ -242,15 +222,14 @@ public class LodRenderer
 		//		(this is to prevent thread conflicts)
 		if (regen && !regenerating && !switchBuffers)
 		{
-			mc.getProfiler().endStartSection("LOD generation");
+			profiler.endStartSection("LOD generation");
 			regenerating = true;
 			
-			// this will only be called once, unless the numbBufferThreads changes
-			if (numbBufferThreads != bufferThreads.size())
-				setupBufferThreads();
+			if (lodBufferBuilder == null)
+				lodBufferBuilder = new LodBufferBuilder();
 			
 			// this will mainly happen when the view distance is changed
-			if (drawableNearBuffers == null || drawableFarBuffers == null || 
+			if (drawableNearBuffer == null || drawableFarBuffer == null || 
 				previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks)
 				setupBuffers(numbChunksWide);
 			
@@ -276,20 +255,17 @@ public class LodRenderer
 		//===========================//
 		
 		// set the required open GL settings
-//		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
-//		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-//		GL11.glDisable(GL11.GL_TEXTURE_2D);
-//		GL11.glEnable(GL11.GL_CULL_FACE);
-//		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
-//		
-//		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glEnable(GL11.GL_CULL_FACE);
+		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
 		
-		RenderSystem.pushMatrix();
-        RenderSystem.rotatef(renderInfo.getPitch(), 1, 0, 0); // Fixes camera rotation.
-        RenderSystem.rotatef(renderInfo.getYaw() + 180, 0, 1, 0); // Fixes camera rotation.
-        RenderSystem.translated(-cameraX, -cameraY, -cameraZ);
+		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		
-//		setupProjectionMatrix(partialTicks);
+		Matrix4f modelViewMatrix = generateModelViewMatrix();
+		
+		setupProjectionMatrix(partialTicks);
 //		setupLighting(partialTicks);
 		
 		
@@ -311,25 +287,21 @@ public class LodRenderer
 			// when drawing NEAR_AND_FAR fog we need 2 draw
 			// calls since fog can only go in one direction at a time
 			
-			mc.getProfiler().endStartSection("LOD draw");
 			setupFog(FogDistance.NEAR, reflectionHandler.getFogQuality());
-			sendLodsToGpuAndDraw(drawableNearBuffers);
+			sendLodsToGpuAndDraw(nearVbo, modelViewMatrix);
 			
-			mc.getProfiler().endStartSection("LOD draw");
 			setupFog(FogDistance.FAR, reflectionHandler.getFogQuality());
-			sendLodsToGpuAndDraw(drawableFarBuffers);
+			sendLodsToGpuAndDraw(farVbo, modelViewMatrix);
 			break;
 			
 		case NEAR:
-			mc.getProfiler().endStartSection("LOD draw");
 			setupFog(FogDistance.NEAR, reflectionHandler.getFogQuality());
-			sendLodsToGpuAndDraw(drawableNearBuffers);
+			sendLodsToGpuAndDraw(nearVbo, modelViewMatrix);
 			break;
 			
 		case FAR:
-			mc.getProfiler().endStartSection("LOD draw");
 			setupFog(FogDistance.FAR, reflectionHandler.getFogQuality());
-			sendLodsToGpuAndDraw(drawableFarBuffers);
+			sendLodsToGpuAndDraw(farVbo, modelViewMatrix);
 			break;
 		}
 		
@@ -340,20 +312,16 @@ public class LodRenderer
 		// cleanup //
 		//=========//
 		
-		mc.getProfiler().endStartSection("LOD cleanup");
+		profiler.endStartSection("LOD cleanup");
 		
 		// this must be done otherwise other parts of the screen may be drawn with a fog effect
 		// IE the GUI
 		RenderSystem.disableFog();
 		
-//		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
-//		GL11.glEnable(GL11.GL_TEXTURE_2D);
-//		GL11.glDisable(LOD_GL_LIGHT_NUMBER);
-//		GL11.glDisable(GL11.GL_COLOR_MATERIAL);
-		
-		// undo any projection matrix changes we did to prevent other renders
-		// from being corrupted
-		RenderSystem.popMatrix();
+		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glDisable(LOD_GL_LIGHT_NUMBER);
+		GL11.glDisable(GL11.GL_COLOR_MATERIAL);
 		
 		
 		// this can't be called until after the buffers are built
@@ -362,34 +330,52 @@ public class LodRenderer
 		
 		
 		// end of profiler tracking
-		mc.getProfiler().endSection();
+		profiler.endSection();
 	}
 	
 	
+	private Matrix4f generateModelViewMatrix()
+	{
+		// get all relevant camera info
+		ActiveRenderInfo renderInfo = mc.gameRenderer.getActiveRenderInfo();
+        Vector3d projectedView = renderInfo.getProjectedView();
+		double cameraX = projectedView.x;
+		double cameraY = projectedView.y;
+		double cameraZ = projectedView.z;
+		
+		
+		// generate the model view matrix
+		MatrixStack matrixStack = new MatrixStack();
+        matrixStack.push();
+        // translate and rotate to the current camera location
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(renderInfo.getPitch()));
+        matrixStack.rotate(Vector3f.YP.rotationDegrees(renderInfo.getYaw() + 180));
+        matrixStack.translate(-cameraX, -cameraY, -cameraZ);
+        
+        return matrixStack.getLast().getMatrix();
+	}
+
+
 	/**
 	 * This is where the actual drawing happens.
 	 * 
 	 * @param buffers the buffers sent to the GPU to draw
 	 */
-	private void sendLodsToGpuAndDraw(BufferBuilder[] buffers)
+	private void sendLodsToGpuAndDraw(VertexBuffer vbo, Matrix4f modelViewMatrix)
 	{
-		for(int i = 0; i < numbBufferThreads; i++)
-		{
-			if (shouldDrawBuffer[i])
-			{
-				int pos = bufferBuilder.byteBuffer.position();
-				buffers[i].byteBuffer.position(pos);
-				
-				bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-				bufferBuilder.byteBuffer.clear();
-				// replace the data in bufferBuilder with the data from the given buffer
-				bufferBuilder.putBulkData(buffers[i].byteBuffer);
-				
-				tessellator.draw();
-				
-				bufferBuilder.byteBuffer.clear(); // this is required otherwise nothing is drawn
-			}
-		}
+		if (vbo == null)
+			return;
+		
+		profiler.endStartSection("LOD draw setup");
+        vbo.bindBuffer();
+        LOD_VERTEX_FORMAT.setupBufferState(0L); // TODO what does this do?
+        
+        profiler.endStartSection("LOD draw");
+        vbo.draw(modelViewMatrix, 7); // TODO what is 7?
+        
+        profiler.endStartSection("LOD draw cleanup");
+        VertexBuffer.unbindBuffer();
+        LOD_VERTEX_FORMAT.clearBufferState();
 	}
 	
 	
@@ -402,6 +388,7 @@ public class LodRenderer
 	// Setup Functions //
 	//=================//
 	
+	@SuppressWarnings("deprecation")
 	private void setupFog(FogDistance fogDistance, FogQuality fogQuality)
 	{
 		if(fogQuality == FogQuality.OFF)
@@ -487,6 +474,7 @@ public class LodRenderer
 	/**
 	 * setup the lighting to be used for the LODs
 	 */
+	@SuppressWarnings({ "unused", "deprecation" })
 	private void setupLighting(float partialTicks)
 	{
 		GL11.glEnable(GL11.GL_COLOR_MATERIAL); // set the color to be used as the material (this allows lighting to be enabled)
@@ -508,53 +496,23 @@ public class LodRenderer
 	}
 	
 	/**
-	 * create the BuildBufferThreads
-	 */
-	private void setupBufferThreads()
-	{
-		bufferThreads.clear();
-		for(int i = 0; i < numbBufferThreads; i++)
-			bufferThreads.add(new BuildBufferThread());
-	}
-	
-	/**
 	 * Create all buffers that will be used.
 	 */
 	private void setupBuffers(int numbChunksWide)
 	{
-		drawableNearBuffers = new BufferBuilder[numbBufferThreads];
-		drawableFarBuffers = new BufferBuilder[numbBufferThreads];
-		
-		buildableNearBuffers = new BufferBuilder[numbBufferThreads];
-		buildableFarBuffers = new BufferBuilder[numbBufferThreads];
-		
-		
-		// calculate how many chunks wide, at most
-		// any thread will have to generate
-		int biggestWidth = -1;
-		int[] loads = calculateCpuLoadBalance(numbChunksWide, numbBufferThreads);
-		for(int i : loads)
-			if (i > biggestWidth)
-				biggestWidth = i;
-		
-		
 		// calculate the max amount of storage needed (in bytes)
-		// by any singular buffer
-		// NOTE: most buffers won't use the full amount, but this should prevent
-		//		them from needing to allocate more memory (which is a slow progress)
-		int bufferMaxCapacity = (numbChunksWide * biggestWidth * (6 * 4 * ((3 * 4) + (4 * 4))));
+		int bufferMaxCapacity = (numbChunksWide * numbChunksWide * (6 * 4 * (3 + 4)));
+		// (numbChunksWide * numbChunksWide * 
+		// (sidesOnACube * pointsInASquare * (positionPoints + colorPoints)))
 		
-		for(int i = 0; i < numbBufferThreads; i++)
-		{
-			// TODO complain or do something when memory is too low
-			// currently the VM will just crash and complain there is no more memory
-			// issue #4
-			drawableNearBuffers[i] = new BufferBuilder(bufferMaxCapacity);
-			drawableFarBuffers[i] = new BufferBuilder(bufferMaxCapacity);
-			
-			buildableNearBuffers[i] = new BufferBuilder(bufferMaxCapacity);
-			buildableFarBuffers[i] = new BufferBuilder(bufferMaxCapacity);
-		}
+		// TODO complain or do something when memory is too low
+		// currently the VM will just crash and complain there is no more memory
+		// issue #4
+		drawableNearBuffer = new BufferBuilder(bufferMaxCapacity);
+		drawableFarBuffer = new BufferBuilder(bufferMaxCapacity);
+		
+		buildableNearBuffer = new BufferBuilder(bufferMaxCapacity);
+		buildableFarBuffer = new BufferBuilder(bufferMaxCapacity);
 	}
 	
 	
@@ -697,84 +655,22 @@ public class LodRenderer
 				}
 			}
 			
-			generateLodBuffers(lodArray, colorArray, LodConfig.COMMON.fogDistance.get());
+			// generate our new buildable buffers
+			NearFarBuffer nearFarBuffers = lodBufferBuilder.createBuffers(
+					buildableNearBuffer, buildableFarBuffer, 
+					LodConfig.COMMON.fogDistance.get(), lodArray, colorArray);
 			
+			// update our buffers
+			buildableNearBuffer = nearFarBuffers.nearBuffer;
+			buildableFarBuffer = nearFarBuffers.farBuffer;
+			
+			// mark the buildable buffers as ready to swap
 			regenerating = false;
 			switchBuffers = true;
 		});
 		return t;
 	}
 	
-	/**
-	 * draw an array of boxes with the given colors.
-	 * <br><br>
-	 * Currently only one color per box is supported.
-	 * 
-	 * @param lods bounding boxes to draw
-	 * @param colors color of each box to draw
-	 */
-	private void generateLodBuffers(AxisAlignedBB[][] lods, Color[][] colors, FogDistance fogDistance)
-	{
-		List<Future<NearFarBuffer>> bufferFutures = new ArrayList<>();
-		ArrayList<BuildBufferThread> threadsToRun = new ArrayList<>();
-		
-		int indexToStart = 0;
-		int[] threadLoads = calculateCpuLoadBalance(lods.length, numbBufferThreads);
-		
-		// update the information that the bufferThreads are using
-		for(int i = 0; i < numbBufferThreads; i++)
-		{
-			// if we have more threads than LOD rows to generate
-			// don't send the threads to the CPU
-			if (threadLoads[i] != 0)
-			{
-				// update this thread with the latest information
-				bufferThreads.get(i).
-				setNewData(buildableNearBuffers[i], buildableFarBuffers[i], 
-						fogDistance, lods, colors, indexToStart, threadLoads[i]);
-				indexToStart += threadLoads[i];
-				
-				// add this thread to the list of threads we are going to run
-				threadsToRun.add(bufferThreads.get(i));
-				
-				shouldDrawBuffer[i] = true;
-			}
-			else
-			{
-				shouldDrawBuffer[i] = false;
-			}
-		}
-		
-		// run all the bufferThreads and get their results
-		try
-		{
-			bufferFutures = bufferThreadPool.invokeAll(threadsToRun);
-		}
-		catch (InterruptedException e)
-		{
-			// this should never happen, but just in case
-			e.printStackTrace();
-		}
-		
-		// update our buildable buffers
-		for(int i = 0; i < numbBufferThreads; i++)
-		{
-			// only replace buffers that actually generated something
-			if (threadLoads[i] != 0)
-			{
-				try
-				{
-					buildableNearBuffers[i] = bufferFutures.get(i).get().nearBuffer;
-					buildableFarBuffers[i] = bufferFutures.get(i).get().farBuffer;
-				}
-				catch(CancellationException | ExecutionException| InterruptedException e)
-				{
-					// this should never happen, but just in case
-					e.printStackTrace();
-				}
-			}
-		}
-	}
 	
 	
 	/**
@@ -782,22 +678,35 @@ public class LodRenderer
 	 */
 	private void swapBuffers()
 	{
-		for(int i = 0; i < buildableNearBuffers.length; i++)
-		{				
-			try
-			{
-				BufferBuilder tmp = buildableNearBuffers[i];
-				buildableNearBuffers[i] = drawableNearBuffers[i];
-				drawableNearBuffers[i] = tmp;
-				
-				tmp = buildableFarBuffers[i];
-				buildableFarBuffers[i] = drawableFarBuffers[i];
-				drawableFarBuffers[i] = tmp;
-			}
-			catch(Exception e)
-			{
-				e.printStackTrace();
-			}
+		try
+		{
+			// swap the BufferBuilders
+			BufferBuilder tmp = buildableNearBuffer;
+			buildableNearBuffer = drawableNearBuffer;
+			drawableNearBuffer = tmp;
+			
+			tmp = buildableFarBuffer;
+			buildableFarBuffer = drawableFarBuffer;
+			drawableFarBuffer = tmp;
+			
+			
+			// bind the buffers with their respective VBOs
+			if (nearVbo != null)
+				nearVbo.close();
+			
+			nearVbo = new VertexBuffer(LOD_VERTEX_FORMAT);
+			nearVbo.upload(drawableNearBuffer);
+			
+			
+			if (farVbo != null)
+				farVbo.close();
+			
+			farVbo = new VertexBuffer(LOD_VERTEX_FORMAT);
+			farVbo.upload(drawableFarBuffer);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 	
@@ -813,24 +722,6 @@ public class LodRenderer
 				&& 
 				(j >= centerCoordinate - mc.gameSettings.renderDistanceChunks 
 				&& j <= centerCoordinate + mc.gameSettings.renderDistanceChunks);
-	}
-	
-	
-	/**
-	 * This is a simple implementation of the pigeon hole
-	 * principle to try and give each BuildBufferThread a balanced load.
-	 * 
-	 * @returns an array of ints where each int is how many rows 
-	 * that BuildBufferThread should generate
-	 */
-	private int[] calculateCpuLoadBalance(int numbOfItems, int numbOfThreads)
-	{
-		int[] cpuLoad = new int[numbOfThreads];
-		
-		for(int i = 0; i < numbOfItems; i++)
-			cpuLoad[i % numbOfThreads]++;
-		
-		return cpuLoad;
 	}
 	
 	

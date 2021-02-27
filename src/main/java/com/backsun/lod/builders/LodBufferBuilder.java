@@ -1,25 +1,22 @@
 package com.backsun.lod.builders;
 import java.awt.Color;
-import java.util.concurrent.Callable;
 
 import org.lwjgl.opengl.GL11;
 
 import com.backsun.lod.objects.NearFarBuffer;
+import com.backsun.lod.renderer.LodRenderer;
 import com.backsun.lod.util.enums.FogDistance;
 
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.AxisAlignedBB;
 
 /**
- * This object is used to create NearFarBuffer objects
- * in a thread independent way, so multiple of these objects can be
- * created and executed in parallel to populate BufferBuilders.
+ * This object is used to create NearFarBuffer objects.
  * 
  * @author James Seibel
- * @version 02-23-2021
+ * @version 02-27-2021
  */
-public class BuildBufferThread implements Callable<NearFarBuffer>
+public class LodBufferBuilder
 {
 	public BufferBuilder nearBuffer;
 	public BufferBuilder farBuffer;
@@ -27,29 +24,19 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 	public AxisAlignedBB[][] lods;
 	public Color[][] colors;
 	
-	private int startLodIndex = 0;
-	private int endLodIndex = -1;
 	
 	
-	
-	public BuildBufferThread()
+	public LodBufferBuilder()
 	{
 		
 	}
 	
-	public BuildBufferThread(BufferBuilder newNearBufferBuilder, 
-			BufferBuilder newFarBufferBuilder, AxisAlignedBB[][] newLods, 
-			Color[][] newColors, FogDistance newDistanceMode, int newStartingIndex, 
-			int numberOfRowsToGenerate)
-	{
-		setNewData(newNearBufferBuilder, newFarBufferBuilder, distanceMode, 
-				newLods, newColors, newStartingIndex, numberOfRowsToGenerate);
-	}
 	
-	public void setNewData(BufferBuilder newNearBufferBuilder, 
-			BufferBuilder newFarBufferBuilder, FogDistance newDistanceMode, 
-			AxisAlignedBB[][] newLods, Color[][] newColors, 
-			int newStartingIndex, int numberOfRowsToGenerate)
+	
+	public NearFarBuffer createBuffers(
+			BufferBuilder newNearBufferBuilder, BufferBuilder newFarBufferBuilder,
+			FogDistance newDistanceMode, 
+			AxisAlignedBB[][] newLods, Color[][] newColors)
 	{
 		nearBuffer = newNearBufferBuilder;
 		farBuffer = newFarBufferBuilder;
@@ -57,15 +44,9 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 		lods = newLods;
 		colors = newColors;
 		
-		startLodIndex = newStartingIndex;
-		endLodIndex = newStartingIndex + numberOfRowsToGenerate;
-	}
-	
-	@Override
-	public NearFarBuffer call()
-	{
-		nearBuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
-		farBuffer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR);
+		
+		nearBuffer.begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
+		farBuffer.begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
 		
 		int numbChunksWide = lods.length;
 		
@@ -90,7 +71,7 @@ public class BuildBufferThread implements Callable<NearFarBuffer>
 		
 		
 		// x axis
-		for (int i = startLodIndex; i < endLodIndex; i++)
+		for (int i = 0; i < numbChunksWide; i++)
 		{
 			// z axis
 			for (int j = 0; j < numbChunksWide; j++)
