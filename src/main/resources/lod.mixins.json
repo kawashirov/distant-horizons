@@ -4,7 +4,6 @@
 	"compatibilityLevel": "JAVA_8",
 	"refmap": "lod.refmap.json",
 	"mixins": [
-	           "MixinItemEntity",
 	           "MixinWorldRenderer"
 	],
 	"minVersion": "0.8"
