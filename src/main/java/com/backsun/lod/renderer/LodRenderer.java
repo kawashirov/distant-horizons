@@ -20,12 +20,14 @@ import com.backsun.lod.util.enums.FogDistance;
 import com.backsun.lod.util.enums.FogQuality;
 import com.backsun.lod.util.enums.LodCorner;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
@@ -316,6 +318,7 @@ public class LodRenderer
 		
 		// this must be done otherwise other parts of the screen may be drawn with a fog effect
 		// IE the GUI
+		FogRenderer.resetFog();
 		RenderSystem.disableFog();
 		
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
@@ -393,6 +396,7 @@ public class LodRenderer
 	{
 		if(fogQuality == FogQuality.OFF)
 		{
+			FogRenderer.resetFog();
 			RenderSystem.disableFog();
 			return;
 		}
@@ -441,6 +445,7 @@ public class LodRenderer
 			}
 		}
 		
+		RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
 		RenderSystem.enableFog();
 	}
 	
