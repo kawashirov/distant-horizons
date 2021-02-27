@@ -451,24 +451,19 @@ public class LodRenderer
 	 */
 	private void setupProjectionMatrix(float partialTicks)
 	{
-//		Project.gluPerspective(getFov(partialTicks, true), (float) mc.currentScreen.width / (float) mc.currentScreen.height, 0.5F, farPlaneDistance * 12);
-		gameRender.resetProjectionMatrix(getCustomProjectionMatrix(partialTicks, false));
-		
-		return;
-	}
-	/**
-	 * Almost an exact copy of what is in GameRenderer
-	 */
-	public Matrix4f getCustomProjectionMatrix(float partialTicks, boolean useFovSetting)
-	{
 		ActiveRenderInfo activeRenderInfoIn = mc.gameRenderer.getActiveRenderInfo();
 		
-		return Matrix4f.perspective(
-				gameRender.getFOVModifier(activeRenderInfoIn, partialTicks, useFovSetting), 
+		Matrix4f projectionMatrix = 
+				Matrix4f.perspective(
+				gameRender.getFOVModifier(activeRenderInfoIn, partialTicks, true), 
 				(float)this.mc.getMainWindow().getFramebufferWidth() / (float)this.mc.getMainWindow().getFramebufferHeight(), 
 				0.5F, 
 				this.farPlaneDistance * LOD_CHUNK_DISTANCE_RADIUS * 2);
-   }
+		
+		gameRender.resetProjectionMatrix(projectionMatrix);
+		
+		return;
+	}
 	
 	
 	/**
