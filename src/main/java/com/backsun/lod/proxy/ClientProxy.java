@@ -114,18 +114,16 @@ public class ClientProxy
 	
 	
 	
-	//===============//
-	// update events //
-	//===============//
+	//=====================//
+	// lod creation events //
+	//=====================//
 	
 	@SubscribeEvent
-	public void chunkLoadEvent(ChunkEvent event)
+	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
 		if (event.getChunk().getClass() == Chunk.class)
 			lodWorld = lodBuilder.generateLodChunkAsync((Chunk) event.getChunk());
 	}
-	
-	
 	
 	
 }
