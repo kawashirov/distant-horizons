@@ -228,7 +228,6 @@ public class LodRenderer
 		//		(this is to prevent thread conflicts)
 		if (regen && !regenerating && !switchBuffers)
 		{
-			profiler.endStartSection("LOD generation");
 			regenerating = true;
 			
 			if (lodBufferBuilder == null)
@@ -240,7 +239,7 @@ public class LodRenderer
 				setupBuffers(numbChunksWide);
 			
 			// generate the LODs on a separate thread to prevent stuttering or freezing
-			genThread.execute(createLodBufferGenerationThread(player.getPosX(), player.getPosZ(), numbChunksWide));
+			generateLodBuffersAsync(player.getPosX(), player.getPosZ(), numbChunksWide);
 		}
 		
 		// replace the buffers used to draw and build,
@@ -321,8 +320,10 @@ public class LodRenderer
 	}
 	
 	
-
-
+	/**
+	 * Create the model view matrix to move the LODs
+	 * from object space into world space.
+	 */
 	private Matrix4f generateModelViewMatrix()
 	{
 		// get all relevant camera info
@@ -534,7 +535,7 @@ public class LodRenderer
 	 * After the buildable buffers have been generated they must be
 	 * swapped with the drawable buffers to be drawn.
 	 */
-	private Thread createLodBufferGenerationThread(double playerX, double playerZ,
+	private void generateLodBuffersAsync(double playerX, double playerZ,
 			int numbChunksWide)
 	{
 		// this is where we store the points for each LOD object
@@ -598,8 +599,21 @@ public class LodRenderer
 						colorArray[i][j] = null;
 						lodArray[i][j] = null;
 						
+						// This is something I would like to have done someday
+						// but currently world generation is too slow to have it
+						// here, maybe it could be put in a loop 
+						// that happens every tick for a specific number of chunks?
+//						LodChunk tmpLod = new LodChunk();
+//						tmpLod.x = chunkX;
+//						tmpLod.z = chunkZ;
+//						lodDimension.addLod(tmpLod);
+//						
+//						world.getChunkProvider().getChunk(chunkX, chunkZ, true);
+//						System.out.println(chunkX + "," + chunkZ);
+						
 						continue;
 					}
+					
 					
 					Color c = new Color(
 							(lod.colors[ColorDirection.TOP.value].getRed()),
@@ -652,7 +666,10 @@ public class LodRenderer
 			regenerating = false;
 			switchBuffers = true;
 		});
-		return t;
+		
+		genThread.execute(t);
+		
+		return;
 	}
 	
 	
@@ -694,10 +711,10 @@ public class LodRenderer
 	 */
 	private boolean isCoordInCenterArea(int i, int j, int centerCoordinate)
 	{
-		return (i >= centerCoordinate - mc.gameSettings.renderDistanceChunks 
+		return (i >= centerCoordinate - mc.gameSettings.renderDistanceChunks
 				&& i <= centerCoordinate + mc.gameSettings.renderDistanceChunks) 
 				&& 
-				(j >= centerCoordinate - mc.gameSettings.renderDistanceChunks 
+				(j >= centerCoordinate - mc.gameSettings.renderDistanceChunks
 				&& j <= centerCoordinate + mc.gameSettings.renderDistanceChunks);
 	}
 	
