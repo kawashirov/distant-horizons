@@ -14,6 +14,7 @@ import com.backsun.lod.objects.LodRegion;
 import com.backsun.lod.util.LodUtils;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 
 /**
@@ -262,15 +263,19 @@ public class LodDimensionFileHandler
 	 * world, if in multiplayer it will return the server name
 	 * and game version.
 	 */
-	public static String getWorldName()
+	public static String getWorldIdentifier()
 	{
 		Minecraft mc = Minecraft.getInstance();
 		
 		if(mc.isIntegratedServerRunning())
 		{
-			ServerWorld world = LodUtils.getFirstValidServerWorld();
-			if(world != null)
-				return world.getServer().getDataDirectory().toString();
+			ServerWorld serverWorld = LodUtils.getFirstValidServerWorld();
+			if (serverWorld == null)
+				return "";
+			
+			ServerChunkProvider provider = serverWorld.getChunkProvider();
+			if(provider != null)
+				return provider.getSavedData().folder.toString();
 			
 			return "";
 		}
