@@ -461,8 +461,6 @@ public class LodRenderer
 	 */
 	private void setupProjectionMatrix(float partialTicks)
 	{
-		// TODO fix bobbing/portal swirling not moving the LODs
-		// issue #6
 		Matrix4f projectionMatrix = 
 				Matrix4f.perspective(
 				getFov(partialTicks, true), 
