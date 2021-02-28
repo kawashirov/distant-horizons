@@ -263,7 +263,7 @@ public class LodDimensionFileHandler
 	 * world, if in multiplayer it will return the server name
 	 * and game version.
 	 */
-	public static String getWorldIdentifier()
+	public static String getCurrentWorldID()
 	{
 		Minecraft mc = Minecraft.getInstance();
 		
