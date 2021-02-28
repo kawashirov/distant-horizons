@@ -33,8 +33,10 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.potion.Effects;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
@@ -267,7 +269,7 @@ public class LodRenderer
 		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		
-		Matrix4f modelViewMatrix = generateModelViewMatrix();
+		Matrix4f modelViewMatrix = generateModelViewMatrix(partialTicks);
 		
 		setupProjectionMatrix(partialTicks);
 		setupLighting(partialTicks);
@@ -324,7 +326,7 @@ public class LodRenderer
 	 * Create the model view matrix to move the LODs
 	 * from object space into world space.
 	 */
-	private Matrix4f generateModelViewMatrix()
+	private Matrix4f generateModelViewMatrix(float partialTicks)
 	{
 		// get all relevant camera info
 		ActiveRenderInfo renderInfo = mc.gameRenderer.getActiveRenderInfo();
@@ -341,6 +343,22 @@ public class LodRenderer
         matrixStack.rotate(Vector3f.XP.rotationDegrees(renderInfo.getPitch()));
         matrixStack.rotate(Vector3f.YP.rotationDegrees(renderInfo.getYaw() + 180));
         matrixStack.translate(-cameraX, -cameraY, -cameraZ);
+        
+        
+        // this isn't a great solution to nausea or portal spinning
+        // but i'm not sure what to do otherwise
+        float f = 0.23f * MathHelper.lerp(partialTicks, this.mc.player.prevTimeInPortal, this.mc.player.timeInPortal) * this.mc.gameSettings.screenEffectScale * this.mc.gameSettings.screenEffectScale;
+        if (f > 0.0F) {
+           int i = this.mc.player.isPotionActive(Effects.NAUSEA) ? 7 : 20;
+           float f1 = 5.0F / (f * f + 5.0F) - f * 0.04F;
+           f1 = f1 * f1;
+           Vector3f vector3f = new Vector3f(0.0F, MathHelper.SQRT_2 / 2.0F, MathHelper.SQRT_2 / 2.0F);
+           matrixStack.rotate(vector3f.rotationDegrees((mc.gameRenderer.rendererUpdateCount + partialTicks) * i));
+           matrixStack.scale(1.01F / f1, 1.0F, 1.0F);
+           float f2 = -(mc.gameRenderer.rendererUpdateCount + partialTicks) * i;
+           matrixStack.rotate(vector3f.rotationDegrees(f2));
+        }
+        
         
         return matrixStack.getLast().getMatrix();
 	}
