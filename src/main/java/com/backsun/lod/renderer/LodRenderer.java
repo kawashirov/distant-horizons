@@ -442,8 +442,6 @@ public class LodRenderer
 	 */
 	private void setupProjectionMatrix(float partialTicks)
 	{
-		ActiveRenderInfo activeRenderInfoIn = mc.gameRenderer.getActiveRenderInfo();
-		
 		Matrix4f projectionMatrix = 
 				Matrix4f.perspective(
 				getFov(partialTicks, true), 
