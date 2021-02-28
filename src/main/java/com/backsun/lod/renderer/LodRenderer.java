@@ -179,7 +179,6 @@ public class LodRenderer
 			// nope, the player hasn't moved, the
 			// render distance hasn't changed, and
 			// the dimension is the same
-			regen = false;
 		}
 		
 		lodDimension = newDimension;
@@ -241,6 +240,9 @@ public class LodRenderer
 			
 			// generate the LODs on a separate thread to prevent stuttering or freezing
 			generateLodBuffersAsync(player.getPosX(), player.getPosZ(), numbChunksWide);
+			
+			// the regen process has been started
+			regen = false;
 		}
 		
 		// replace the buffers used to draw and build,
