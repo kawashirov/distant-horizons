@@ -262,8 +262,7 @@ public class LodRenderer
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
-		
-		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+		GL11.glEnable(GL11.GL_DEPTH_TEST);
 		
 		Matrix4f modelViewMatrix = generateModelViewMatrix();
 		
@@ -325,7 +324,7 @@ public class LodRenderer
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(LOD_GL_LIGHT_NUMBER);
 		GL11.glDisable(GL11.GL_COLOR_MATERIAL);
-		
+		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		
 		// this can't be called until after the buffers are built
 		// because otherwise the buffers may be set to the wrong size
@@ -678,36 +677,29 @@ public class LodRenderer
 	 */
 	private void swapBuffers()
 	{
-		try
-		{
-			// swap the BufferBuilders
-			BufferBuilder tmp = buildableNearBuffer;
-			buildableNearBuffer = drawableNearBuffer;
-			drawableNearBuffer = tmp;
-			
-			tmp = buildableFarBuffer;
-			buildableFarBuffer = drawableFarBuffer;
-			drawableFarBuffer = tmp;
-			
-			
-			// bind the buffers with their respective VBOs
-			if (nearVbo != null)
-				nearVbo.close();
-			
-			nearVbo = new VertexBuffer(LOD_VERTEX_FORMAT);
-			nearVbo.upload(drawableNearBuffer);
-			
-			
-			if (farVbo != null)
-				farVbo.close();
-			
-			farVbo = new VertexBuffer(LOD_VERTEX_FORMAT);
-			farVbo.upload(drawableFarBuffer);
-		}
-		catch(Exception e)
-		{
-			e.printStackTrace();
-		}
+		// swap the BufferBuilders
+		BufferBuilder tmp = buildableNearBuffer;
+		buildableNearBuffer = drawableNearBuffer;
+		drawableNearBuffer = tmp;
+		
+		tmp = buildableFarBuffer;
+		buildableFarBuffer = drawableFarBuffer;
+		drawableFarBuffer = tmp;
+		
+		
+		// bind the buffers with their respective VBOs
+		if (nearVbo != null)
+			nearVbo.close();
+		
+		nearVbo = new VertexBuffer(LOD_VERTEX_FORMAT);
+		nearVbo.upload(drawableNearBuffer);
+		
+		
+		if (farVbo != null)
+			farVbo.close();
+		
+		farVbo = new VertexBuffer(LOD_VERTEX_FORMAT);
+		farVbo.upload(drawableFarBuffer);
 	}
 	
 	
