@@ -14,6 +14,7 @@ import com.backsun.lod.handlers.ReflectionHandler;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.NearFarBuffer;
+import com.backsun.lod.objects.NearFarFogSetting;
 import com.backsun.lod.util.LodConfig;
 import com.backsun.lod.util.enums.ColorDirection;
 import com.backsun.lod.util.enums.FogDistance;
@@ -269,9 +270,9 @@ public class LodRenderer
 		setupProjectionMatrix(partialTicks);
 //		setupLighting(partialTicks);
 		
-		
-		
-		
+		NearFarFogSetting fogSetting = determineFogSettings();
+
+
 		
 		
 		
@@ -282,30 +283,11 @@ public class LodRenderer
 		// rendering //
 		//===========//
 		
-		switch(LodConfig.COMMON.fogDistance.get())
-		{
-		case NEAR_AND_FAR:
-			// when drawing NEAR_AND_FAR fog we need 2 draw
-			// calls since fog can only go in one direction at a time
-			
-			setupFog(FogDistance.NEAR, reflectionHandler.getFogQuality());
-			sendLodsToGpuAndDraw(nearVbo, modelViewMatrix);
-			
-			setupFog(FogDistance.FAR, reflectionHandler.getFogQuality());
-			sendLodsToGpuAndDraw(farVbo, modelViewMatrix);
-			break;
-			
-		case NEAR:
-			setupFog(FogDistance.NEAR, reflectionHandler.getFogQuality());
-			sendLodsToGpuAndDraw(nearVbo, modelViewMatrix);
-			break;
-			
-		case FAR:
-			setupFog(FogDistance.FAR, reflectionHandler.getFogQuality());
-			sendLodsToGpuAndDraw(farVbo, modelViewMatrix);
-			break;
-		}
+		setupFog(fogSetting.nearFogSetting, reflectionHandler.getFogQuality());
+		sendLodsToGpuAndDraw(nearVbo, modelViewMatrix);
 		
+		setupFog(fogSetting.farFogSetting, reflectionHandler.getFogQuality());
+		sendLodsToGpuAndDraw(farVbo, modelViewMatrix);
 		
 		
 		
@@ -336,6 +318,8 @@ public class LodRenderer
 	}
 	
 	
+
+
 	private Matrix4f generateModelViewMatrix()
 	{
 		// get all relevant camera info
@@ -459,7 +443,7 @@ public class LodRenderer
 		
 		Matrix4f projectionMatrix = 
 				Matrix4f.perspective(
-				gameRender.getFOVModifier(activeRenderInfoIn, partialTicks, true), 
+				getFov(partialTicks, true), 
 				(float)this.mc.getMainWindow().getFramebufferWidth() / (float)this.mc.getMainWindow().getFramebufferHeight(), 
 				0.5F, 
 				this.farPlaneDistance * LOD_CHUNK_DISTANCE_RADIUS * 2);
@@ -720,6 +704,73 @@ public class LodRenderer
 	public double getFov(float partialTicks, boolean useFovSetting)
 	{
 		return mc.gameRenderer.getFOVModifier(mc.gameRenderer.getActiveRenderInfo(), partialTicks, useFovSetting);
+	}
+	
+	
+	/**
+	 * Based on the fogDistance setting and
+	 * optifine's fogQuality setting return what fog
+	 * settings should be used when rendering.
+	 */
+	private NearFarFogSetting determineFogSettings()
+	{
+		NearFarFogSetting fogSetting = new NearFarFogSetting();
+		
+		LodConfig.COMMON.fogDistance.get();
+		switch(reflectionHandler.getFogQuality())
+		{
+		case FANCY:
+			
+			switch(LodConfig.COMMON.fogDistance.get())
+			{
+			case NEAR_AND_FAR:
+				fogSetting.nearFogSetting = FogDistance.NEAR;
+				fogSetting.farFogSetting = FogDistance.FAR;
+				break;
+				
+			case NEAR:
+				fogSetting.nearFogSetting = FogDistance.NEAR;
+				fogSetting.farFogSetting = FogDistance.NEAR;
+				break;
+				
+			case FAR:
+				fogSetting.nearFogSetting = FogDistance.FAR;
+				fogSetting.farFogSetting = FogDistance.FAR;
+				break;
+			}
+			
+			break;
+		case FAST:
+			// fast fog setting should only have one type of
+			// fog, since the LODs are separated into a near
+			// and far portion; and fast fog is rendered from the
+			// frustrum's perspective instead of the camera
+			
+			switch(LodConfig.COMMON.fogDistance.get())
+			{
+			case NEAR_AND_FAR:
+				fogSetting.nearFogSetting = FogDistance.NEAR;
+				fogSetting.farFogSetting = FogDistance.NEAR;
+				break;
+				
+			case NEAR:
+				fogSetting.nearFogSetting = FogDistance.NEAR;
+				fogSetting.farFogSetting = FogDistance.NEAR;
+				break;
+				
+			case FAR:
+				fogSetting.nearFogSetting = FogDistance.FAR;
+				fogSetting.farFogSetting = FogDistance.FAR;
+				break;
+			}
+			
+			break;
+		case OFF:
+			break;
+		
+		}
+		
+		return fogSetting;
 	}
 	
 	

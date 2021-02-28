@@ -57,18 +57,6 @@ public class LodBufferBuilder
 		int blue;
 		int alpha;
 		
-		// this is done if the FogDistance is either
-		// NEAR or FAR, if it is NEAR_AND_FAR
-		// the buffer is determined for each LOD
-		if (distanceMode == FogDistance.NEAR)
-		{
-			currentBuffer = nearBuffer;
-		}
-		else // if (distanceMode == FogDistance.FAR)
-		{
-			currentBuffer = farBuffer;
-		}
-		
 		
 		// x axis
 		for (int i = 0; i < numbChunksWide; i++)
@@ -88,13 +76,10 @@ public class LodBufferBuilder
 				alpha = colors[i][j].getAlpha();
 				
 				
-				if (distanceMode == FogDistance.NEAR_AND_FAR)
-				{
-					if (isCoordinateInNearFogArea(i, j, numbChunksWide / 2))
-						currentBuffer = nearBuffer;
-					else
-						currentBuffer = farBuffer;
-				}
+				if (isCoordinateInNearFogArea(i, j, numbChunksWide / 2))
+					currentBuffer = nearBuffer;
+				else
+					currentBuffer = farBuffer;
 				
 				
 				if (bb.minY != bb.maxY)
