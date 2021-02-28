@@ -41,8 +41,11 @@ import net.minecraft.util.math.vector.Vector3f;
 
 
 /**
+ * This is where all the magic happens.
+ * This is where LODs are draw to the world. 
+ * 
  * @author James Seibel
- * @version 2-24-2021
+ * @version 2-27-2021
  */
 public class LodRenderer
 {
