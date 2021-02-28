@@ -24,6 +24,9 @@ public class LodUtils
 	 */
 	public static ServerWorld getFirstValidServerWorld()
 	{
+		if (mc.getIntegratedServer() == null)
+			return null;
+		
 		Iterable<ServerWorld> worlds = mc.getIntegratedServer().getWorlds();
 		
 		for (ServerWorld world : worlds)
