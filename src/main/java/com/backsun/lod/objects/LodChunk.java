@@ -494,7 +494,7 @@ public class LodChunk
 						for(int y = topStart; !foundBlock && y >= topMin && y < topMax; y += topIncrement)
 						{
 							int ci;
-							ci = chunkSections[i].getBlockState(x, y, z).getMaterial().getColor().colorValue;
+							ci = chunkSections[i].getBlockState(x, y, z).materialColor.colorValue;
 							
 							if(ci == 0)
 							{
