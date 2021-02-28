@@ -43,6 +43,13 @@ public class LodBuilder
 	 */
 	public LodWorld generateLodChunkAsync(Chunk chunk)
 	{
+		if (lodWorld != null)
+			// is this chunk from the same world as the lodWorld?
+			if (!lodWorld.worldName.equals(LodDimensionFileHandler.getCurrentWorldID()))
+				// we are not in the same world anymore,
+				// remove the old world so it can be recreated later
+				lodWorld = null;
+		
 		// don't try to create an LOD object
 		// if for some reason we aren't
 		// given a valid chunk object
@@ -68,22 +75,7 @@ public class LodBuilder
 				
 				if (lodWorld == null)
 				{
-					lodWorld = new LodWorld(LodDimensionFileHandler.getWorldName());
-				}
-				else
-				{
-					// if we have a lodWorld make sure 
-					// it is for this minecraft world
-					if (!lodWorld.worldName.equals(LodDimensionFileHandler.getWorldName()))
-					{
-						// this lodWorld isn't for this minecraft world
-						// delete it so we can get a new one
-						lodWorld = null;
-						
-						// skip this frame
-						// we'll get this set up next time
-						return;
-					}
+					lodWorld = new LodWorld(LodDimensionFileHandler.getCurrentWorldID());
 				}
 				
 				

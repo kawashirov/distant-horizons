@@ -3,6 +3,7 @@ package com.backsun.lod.proxy;
 import org.lwjgl.opengl.GL11;
 
 import com.backsun.lod.builders.LodBuilder;
+import com.backsun.lod.handlers.LodDimensionFileHandler;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodRegion;
@@ -37,6 +38,7 @@ public class ClientProxy
 	public ClientProxy()
 	{
 		lodBuilder = new LodBuilder();
+		renderer = new LodRenderer();
 	}
 	
 	
@@ -64,6 +66,7 @@ public class ClientProxy
 	 */
 	public void renderLods(float partialTicks)
 	{
+		// update the 
 		int newWidth = Math.max(4, (mc.gameSettings.renderDistanceChunks * LodChunk.WIDTH * 2) / LodRegion.SIZE);
 		if (lodWorld != null && lodBuilder.regionWidth != newWidth)
 		{
@@ -75,6 +78,12 @@ public class ClientProxy
 			return;
 		}
 		
+		// are we still in the same world?
+		if (!lodWorld.worldName.equals(LodDimensionFileHandler.getCurrentWorldID()))
+			// no, don't render the wrong world
+			return;
+		
+		
 		if (mc == null || mc.player == null || lodWorld == null)
 			return;
 		
@@ -83,6 +92,8 @@ public class ClientProxy
 			return;
 		
 		
+		
+		// offset the regions
 		double playerX = mc.player.getPosX();
 		double playerZ = mc.player.getPosZ();
 		
@@ -94,18 +105,9 @@ public class ClientProxy
 			lodDim.move(xOffset, zOffset);
 		}
 		
-		// we wait to create the renderer until the first frame
-		// to make sure that the EntityRenderer has
-		// been created, that way we can get the fovModifer
-		// method from it through reflection.
-		if (renderer == null)
-		{
-			renderer = new LodRenderer();
-		}
-		else
-		{
-			renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
-		}
+		
+		
+		renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
 	}	
 	
 	
@@ -122,24 +124,6 @@ public class ClientProxy
 		if (event.getChunk().getClass() == Chunk.class)
 			lodWorld = lodBuilder.generateLodChunkAsync((Chunk) event.getChunk());
 	}
-	
-	/**
-	 * this event is called whenever a chunk is created for the first time.
-	 */
-//	@SubscribeEvent
-//	public void onChunkPopulate(PopulateChunkEvent event)
-//	{
-//		Minecraft mc = Minecraft.getMinecraft();
-//		if (mc != null && event != null)
-//		{
-//			WorldClient world = mc.world;
-//			
-//			if(world != null)
-//			{
-//				lodWorld = lodBuilder.generateLodChunkAsync(world.getChunkFromChunkCoords(event.getChunkX(), event.getChunkZ()));
-//			}
-//		}
-//	}
 	
 	
 	
