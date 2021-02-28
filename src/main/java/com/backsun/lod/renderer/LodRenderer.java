@@ -270,7 +270,7 @@ public class LodRenderer
 		Matrix4f modelViewMatrix = generateModelViewMatrix();
 		
 		setupProjectionMatrix(partialTicks);
-//		setupLighting(partialTicks);
+		setupLighting(partialTicks);
 		
 		NearFarFogSetting fogSetting = determineFogSettings();
 
@@ -443,6 +443,8 @@ public class LodRenderer
 	 */
 	private void setupProjectionMatrix(float partialTicks)
 	{
+		// TODO fix bobbing/portal swirling not moving the LODs
+		// issue #6
 		Matrix4f projectionMatrix = 
 				Matrix4f.perspective(
 				getFov(partialTicks, true), 
@@ -459,19 +461,14 @@ public class LodRenderer
 	/**
 	 * setup the lighting to be used for the LODs
 	 */
-	@SuppressWarnings({ "unused", "deprecation" })
 	private void setupLighting(float partialTicks)
 	{
-		GL11.glEnable(GL11.GL_COLOR_MATERIAL); // set the color to be used as the material (this allows lighting to be enabled)
+		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.world.getSunBrightness(partialTicks) : 0.2f;
+		float gammaMultiplyer = (float)mc.gameSettings.gamma - 0.5f;
+		float lightStrength = sunBrightness - 0.7f + (gammaMultiplyer * 0.2f);
 		
-		// FIXME
-		// this isn't perfect right now, but it looks pretty good at 50% brightness
-		float sunBrightness = mc.world.getSunBrightness(partialTicks); // * mc.world.provider.getSunBrightnessFactor(partialTicks);
-		float skyHasLight = 1.0f; //mc.world.provider.hasSkyLight()? 1.0f : 0.15f;
-		float gammaMultiplyer = (float) mc.gameSettings.gamma * 0.5f + 0.5f;
-		float lightStrength = sunBrightness * skyHasLight * gammaMultiplyer;
 		float lightAmbient[] = {lightStrength, lightStrength, lightStrength, 1.0f};
-        
+		
 		ByteBuffer temp = ByteBuffer.allocateDirect(16);
 		temp.order(ByteOrder.nativeOrder());
 		GL11.glLightfv(LOD_GL_LIGHT_NUMBER, GL11.GL_AMBIENT, (FloatBuffer) temp.asFloatBuffer().put(lightAmbient).flip());
