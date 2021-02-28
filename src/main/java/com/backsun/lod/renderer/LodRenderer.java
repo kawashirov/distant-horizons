@@ -376,10 +376,11 @@ public class LodRenderer
 		
 		profiler.endStartSection("LOD draw setup");
         vbo.bindBuffer();
-        LOD_VERTEX_FORMAT.setupBufferState(0L); // TODO what does this do?
+        // 0L is the starting pointer, and the value doesn't appear to matter
+        LOD_VERTEX_FORMAT.setupBufferState(0L);
         
         profiler.endStartSection("LOD draw");
-        vbo.draw(modelViewMatrix, 7); // TODO what is 7?
+        vbo.draw(modelViewMatrix, GL11.GL_QUADS);
         
         profiler.endStartSection("LOD draw cleanup");
         VertexBuffer.unbindBuffer();
