@@ -1,34 +1,30 @@
 package com.backsun.lod.util;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
 
 import com.backsun.lod.ModInfo;
 import com.backsun.lod.util.enums.FogDistance;
+import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.electronwill.nightconfig.core.io.WritingMode;
 
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 
 /**
  * 
  * @author James Seibel
- * @version 02-14-2021
+ * @version 02-27-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
 {
-	public static final LodConfig.Common COMMON;
-    public static final ForgeConfigSpec COMMON_SPEC;
-    
-    // create the required variables
-    static
-    {
-        final Pair<Common, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(LodConfig.Common::new);
-        COMMON_SPEC = specPair.getRight();
-        COMMON = specPair.getLeft();
-    }
-	
-	
-	public static class Common
+	public static class Client
 	{
 		public ForgeConfigSpec.BooleanValue drawLODs;
 		
@@ -37,24 +33,28 @@ public class LodConfig
 		public ForgeConfigSpec.BooleanValue drawCheckerBoard;
 		
 		
-		Common(ForgeConfigSpec.Builder builder)
+		Client(ForgeConfigSpec.Builder builder)
 		{
-	        builder.comment(ModInfo.MODNAME + " configuration settings").push("common");
+	        builder.comment(ModInfo.MODNAME + " configuration settings").push("client");
 	        
 	        drawLODs = builder
-	        		.comment("If true LODs will be drawn, if false LODs will "
-	        				+ "not be rendered. However they will "
-	        				+ "still be generated.")
+	        		.comment("If false LODs will not be drawn, \n"
+	        				+ "however they will still be generated \n"
+	        				+ "and saved to file for later use.")
 	        		.define("drawLODs", true);
 	        
 	        fogDistance = builder
-	                .comment("At what distance should Fog be drawn on the LODs?")
+	                .comment("\n"
+	                		+ "At what distance should Fog be drawn on the LODs? \n"
+	                		+ "If fog cuts off ubruptly or you are using Optifine's \"fast\" \n"
+	                		+ "fog option set this to " + FogDistance.NEAR.toString() + " or " + FogDistance.FAR.toString() + ".")
 	                .defineEnum("fogDistance", FogDistance.NEAR_AND_FAR);
 	        
 	        drawCheckerBoard = builder
-	                .comment("If false the LODs will draw with their normal world colors. "
-	                		+ "If true they will draw as a black and white checkerboard. "
-	                		+ "This can be used for debugging or imagining you are playing a "
+	                .comment("\n"
+	                		+ "If false the LODs will draw with their normal world colors. \n"
+	                		+ "If true they will draw as a black and white checkerboard. \n"
+	                		+ "This can be used for debugging or imagining you are playing a \n"
 	                		+ "giant game of chess ;)")
 	                .define("drawCheckerBoard", false);
 	        
@@ -62,4 +62,44 @@ public class LodConfig
 	    }
 	}
 	
+	
+
+    /**
+     * {@link Path} to the configuration file of this mod
+     */
+    private static final Path CONFIG_PATH =
+            Paths.get("config", ModInfo.MODID + ".toml");
+
+    public static final ForgeConfigSpec clientSpec;
+    public static final Client CLIENT;
+    static {
+        final Pair<Client, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Client::new);
+        clientSpec = specPair.getRight();
+        CLIENT = specPair.getLeft();
+        
+        // setup the config file
+        CommentedFileConfig config = CommentedFileConfig.builder(CONFIG_PATH)
+                .writingMode(WritingMode.REPLACE)
+                .build();
+        config.load();
+        config.save();
+        clientSpec.setConfig(config);
+    }
+    
+    
+    @SubscribeEvent
+    public static void onLoad(final ModConfig.Loading configEvent)
+    {
+        LogManager.getLogger().debug(ModInfo.MODNAME, "Loaded forge config file {}", configEvent.getConfig().getFileName());
+    }
+    
+    @SubscribeEvent
+    public static void onFileChange(final ModConfig.Reloading configEvent)
+    {
+        LogManager.getLogger().debug(ModInfo.MODNAME, "Forge config just got changed on the file system!");
+    }
+    
+    
+    
+    
 }

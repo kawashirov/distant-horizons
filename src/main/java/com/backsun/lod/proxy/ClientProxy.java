@@ -54,7 +54,7 @@ public class ClientProxy
 		RenderGlobalHook.endRenderingStencil();
 		GL11.glStencilFunc(GL11.GL_EQUAL, 0, 0xFF);
 		
-		if (LodConfig.COMMON.drawLODs.get())
+		if (LodConfig.CLIENT.drawLODs.get())
 			renderLods(event.getPartialTicks());
 		
 		GL11.glDisable(GL11.GL_STENCIL_TEST);

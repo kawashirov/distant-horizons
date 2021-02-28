@@ -163,7 +163,7 @@ public class LodRenderer
 		if ((int)player.getPosX() / LodChunk.WIDTH != prevChunkX ||
 			(int)player.getPosZ() / LodChunk.WIDTH != prevChunkZ ||
 			previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks ||
-			prevFogDistance != LodConfig.COMMON.fogDistance.get() ||
+			prevFogDistance != LodConfig.CLIENT.fogDistance.get() ||
 			lodDimension != newDimension)
 		{
 			// yes
@@ -171,7 +171,7 @@ public class LodRenderer
 			
 			prevChunkX = (int)player.getPosX() / LodChunk.WIDTH;
 			prevChunkZ = (int)player.getPosZ() / LodChunk.WIDTH;
-			prevFogDistance = LodConfig.COMMON.fogDistance.get();
+			prevFogDistance = LodConfig.CLIENT.fogDistance.get();
 		}
 		else
 		{
@@ -189,15 +189,15 @@ public class LodRenderer
 			return;
 		}
 		
-		if (LodConfig.COMMON.drawCheckerBoard.get())
+		if (LodConfig.CLIENT.drawCheckerBoard.get())
 		{
-			if (debugging != LodConfig.COMMON.drawCheckerBoard.get())
+			if (debugging != LodConfig.CLIENT.drawCheckerBoard.get())
 				regen = true;
 			debugging = true;
 		}
 		else
 		{
-			if (debugging != LodConfig.COMMON.drawCheckerBoard.get())
+			if (debugging != LodConfig.CLIENT.drawCheckerBoard.get())
 				regen = true;
 			debugging = false;
 		}
@@ -656,7 +656,7 @@ public class LodRenderer
 			// generate our new buildable buffers
 			NearFarBuffer nearFarBuffers = lodBufferBuilder.createBuffers(
 					buildableNearBuffer, buildableFarBuffer, 
-					LodConfig.COMMON.fogDistance.get(), lodArray, colorArray);
+					LodConfig.CLIENT.fogDistance.get(), lodArray, colorArray);
 			
 			// update our buffers
 			buildableNearBuffer = nearFarBuffers.nearBuffer;
@@ -734,12 +734,12 @@ public class LodRenderer
 	{
 		NearFarFogSetting fogSetting = new NearFarFogSetting();
 		
-		LodConfig.COMMON.fogDistance.get();
+		LodConfig.CLIENT.fogDistance.get();
 		switch(reflectionHandler.getFogQuality())
 		{
 		case FANCY:
 			
-			switch(LodConfig.COMMON.fogDistance.get())
+			switch(LodConfig.CLIENT.fogDistance.get())
 			{
 			case NEAR_AND_FAR:
 				fogSetting.nearFogSetting = FogDistance.NEAR;
@@ -764,7 +764,7 @@ public class LodRenderer
 			// and far portion; and fast fog is rendered from the
 			// frustrum's perspective instead of the camera
 			
-			switch(LodConfig.COMMON.fogDistance.get())
+			switch(LodConfig.CLIENT.fogDistance.get())
 			{
 			case NEAR_AND_FAR:
 				fogSetting.nearFogSetting = FogDistance.NEAR;

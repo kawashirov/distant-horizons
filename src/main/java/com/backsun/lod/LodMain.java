@@ -34,7 +34,7 @@ public class LodMain
 	private void init(final FMLCommonSetupEvent event)
 	{
 		Minecraft.getInstance().getFramebuffer().enableStencil();
-		ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, LodConfig.COMMON_SPEC);
+		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, LodConfig.clientSpec);
 	}
 	
 	
