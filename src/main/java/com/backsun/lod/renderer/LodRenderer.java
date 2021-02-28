@@ -133,7 +133,6 @@ public class LodRenderer
 	 * @param newDimension The dimension to draw, if null doesn't replace the current dimension.
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
-	@SuppressWarnings("deprecation")
 	public void drawLODs(LodDimension newDimension, float partialTicks, IProfiler newProfiler)
 	{		
 		if (lodDimension == null && newDimension == null)
@@ -310,7 +309,6 @@ public class LodRenderer
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(LOD_GL_LIGHT_NUMBER);
 		GL11.glDisable(GL11.GL_COLOR_MATERIAL);
-		GL11.glDisable(GL11.GL_DEPTH_TEST);
 		
 		// this can't be called until after the buffers are built
 		// because otherwise the buffers may be set to the wrong size
