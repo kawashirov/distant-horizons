@@ -1,5 +1,7 @@
-This program is an attempt to implement a Level Of Detail system for Minecraft;
-the goal being to increase the maximum view distance in game without harming performance.
+This mod adds a Level Of Detail (LOD) system to Minecraft.
+This implementation renders simplified chunks outside the normal render distance
+allowing for an increased view distance without harming performance.
+
 
 Forge version: 1.16.4-35.1.4
 
