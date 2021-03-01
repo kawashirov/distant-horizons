@@ -1,5 +1,11 @@
-This program is an attempt to create Level Of Details (LODs) in Minecraft.
-The purpose is to increase the maximum view distance in game
+This program is an attempt to implement a Level Of Detail system for Minecraft;
+the goal being to increase the maximum view distance in game without harming performance.
+
+Forge version: 1.16.4-35.1.4
+
+Notes:
+This version has been confirmed to work on eclipse and retail Minecraft.
+(retail running forge 1.16.4-35.1.37)
 
 
 ========================
