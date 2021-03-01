@@ -35,14 +35,31 @@ Step 6: Make sure the eclipse has the JDK 1.8.0_251 installed. (This is needed s
 Step 7: Import the project into eclipse
 
 
-Other commands: 
-	"gradlew --refresh-dependencies" to refresh local dependencies. 
-	"gradlew clean" to reset everything (this does not affect your code) and then start the process again.
+
+=========
+compiling
+=========
+
+Step 1: open a command line in the project folder
+
+Step 2: run the command: "./gradlew build"
+
+Step 3: the compiled jar file will be in the folder "build\libs"
 
 
 
-Tip:
-	The Minecraft source code is NOT added to your workspace in a editable way. Minecraft is treated like a normal Library. Sources are there for documentation and research purposes only.
+==============
+Other commands
+==============
 
-	Current location of mcp-srg.srg:
-	"C:/Users/James Seibel/.gradle/caches/minecraft/de/oceanlabs/mcp/mcp_snapshot/20171003/1.12.2/srgs/"
+"./gradlew --refresh-dependencies" to refresh local dependencies. 
+"./gradlew clean" to reset everything (this does not affect your code) and then start the process again.
+
+
+
+============
+Note to self
+============
+
+The Minecraft source code is NOT added to your workspace in a editable way. Minecraft is treated like a normal Library. Sources are there for documentation and research purposes only.
+
