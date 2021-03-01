@@ -8,6 +8,9 @@ Forge version: 1.16.4-35.1.4
 Notes:
 This version has been confirmed to work on eclipse and retail Minecraft.
 (retail running forge 1.16.4-35.1.37)
+That being said only singleplayer is currently supported; connecting
+to servers (local or otherwise) will cause no LODs to be drawn and
+may cause instibility.
 
 
 ========================
