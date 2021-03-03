@@ -3,6 +3,8 @@ This implementation renders simplified chunks outside the normal render distance
 allowing for an increased view distance without harming performance.
 
 Or in other words: this mod let's you see farther without turning your game into a slide show.
+If you want to see a quick demo, check out the video I made here:
+https://youtu.be/v61iOYZQWCs
 
 
 Forge version: 1.16.4-35.1.4
