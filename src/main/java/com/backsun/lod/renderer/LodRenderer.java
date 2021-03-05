@@ -310,7 +310,6 @@ public class LodRenderer
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(LOD_GL_LIGHT_NUMBER);
-		GL11.glDisable(GL11.GL_COLOR_MATERIAL);
 		
 		// this can't be called until after the buffers are built
 		// because otherwise the buffers may be set to the wrong size
