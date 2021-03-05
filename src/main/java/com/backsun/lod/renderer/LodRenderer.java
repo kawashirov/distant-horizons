@@ -330,9 +330,6 @@ public class LodRenderer
 		// get all relevant camera info
 		ActiveRenderInfo renderInfo = mc.gameRenderer.getActiveRenderInfo();
         Vector3d projectedView = renderInfo.getProjectedView();
-		double cameraX = projectedView.x;
-		double cameraY = projectedView.y;
-		double cameraZ = projectedView.z;
 		
 		
 		// generate the model view matrix
@@ -341,23 +338,7 @@ public class LodRenderer
         // translate and rotate to the current camera location
         matrixStack.rotate(Vector3f.XP.rotationDegrees(renderInfo.getPitch()));
         matrixStack.rotate(Vector3f.YP.rotationDegrees(renderInfo.getYaw() + 180));
-        matrixStack.translate(-cameraX, -cameraY, -cameraZ);
-        
-        
-        // this isn't a great solution to nausea or portal spinning
-        // but i'm not sure what to do otherwise
-        float f = 0.23f * MathHelper.lerp(partialTicks, this.mc.player.prevTimeInPortal, this.mc.player.timeInPortal) * this.mc.gameSettings.screenEffectScale * this.mc.gameSettings.screenEffectScale;
-        if (f > 0.0F) {
-           int i = this.mc.player.isPotionActive(Effects.NAUSEA) ? 7 : 20;
-           float f1 = 5.0F / (f * f + 5.0F) - f * 0.04F;
-           f1 = f1 * f1;
-           Vector3f vector3f = new Vector3f(0.0F, MathHelper.SQRT_2 / 2.0F, MathHelper.SQRT_2 / 2.0F);
-           matrixStack.rotate(vector3f.rotationDegrees((mc.gameRenderer.rendererUpdateCount + partialTicks) * i));
-           matrixStack.scale(1.01F / f1, 1.0F, 1.0F);
-           float f2 = -(mc.gameRenderer.rendererUpdateCount + partialTicks) * i;
-           matrixStack.rotate(vector3f.rotationDegrees(f2));
-        }
-        
+        matrixStack.translate(-projectedView.x, -projectedView.y, -projectedView.z);
         
         return matrixStack.getLast().getMatrix();
 	}
@@ -457,10 +438,47 @@ public class LodRenderer
 
 	/**
 	 * create a new projection matrix and send it over to the GPU
+	 * <br><br>
+	 * A lot of this code is copied from renderWorld (line 578)
+	 * in the GameRender class. The code copied is anything with
+	 * a matrixStack and is responsible for making sure the LOD
+	 * objects distort correctly relative to the rest of the world.
+	 * Distortions are caused by: standing in a nether portal,
+	 * nausea potion effect, walking bobbing.
+	 * 
 	 * @param partialTicks how many ticks into the frame we are
 	 */
 	private void setupProjectionMatrix(float partialTicks)
 	{
+		// Note: if the LOD objects don't distort correctly
+		// compared to regular minecraft terrain, make sure
+		// all the transformations in renderWorld are here too
+		
+		MatrixStack matrixStack = new MatrixStack();
+        matrixStack.push();
+		
+		gameRender.hurtCameraEffect(matrixStack, partialTicks);
+		if (this.mc.gameSettings.viewBobbing) {
+			gameRender.applyBobbing(matrixStack, partialTicks);
+		}
+		
+		// potion and nausea effects
+		float f = MathHelper.lerp(partialTicks, mc.player.prevTimeInPortal, mc.player.timeInPortal) * mc.gameSettings.screenEffectScale * mc.gameSettings.screenEffectScale;
+		if (f > 0.0F) {
+			int i = this.mc.player.isPotionActive(Effects.NAUSEA) ? 7 : 20;
+			float f1 = 5.0F / (f * f + 5.0F) - f * 0.04F;
+			f1 = f1 * f1;
+			Vector3f vector3f = new Vector3f(0.0F, MathHelper.SQRT_2 / 2.0F, MathHelper.SQRT_2 / 2.0F);
+			matrixStack.rotate(vector3f.rotationDegrees((gameRender.rendererUpdateCount + partialTicks) * i));
+			matrixStack.scale(1.0F / f1, 1.0F, 1.0F);
+			float f2 = -(gameRender.rendererUpdateCount + partialTicks) * i;
+			matrixStack.rotate(vector3f.rotationDegrees(f2));
+		}
+		
+		
+		
+		// this projection matrix allows us to see past the normal 
+		// world render distance
 		Matrix4f projectionMatrix = 
 				Matrix4f.perspective(
 				getFov(partialTicks, true), 
@@ -468,8 +486,9 @@ public class LodRenderer
 				0.5F, 
 				this.farPlaneDistance * LOD_CHUNK_DISTANCE_RADIUS * 2);
 		
+		// add the screen space distortions
+		projectionMatrix.mul(matrixStack.getLast().getMatrix());
 		gameRender.resetProjectionMatrix(projectionMatrix);
-		
 		return;
 	}
 	
