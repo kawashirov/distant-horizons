@@ -655,6 +655,8 @@ public class LodRenderer
 							placeholder.z = chunkZ;
 							lodDimension.addLod(placeholder);
 							
+							// TODO generate chunks closer to the player first
+							// issue #11
 							SingleLodChunkGenWorker genWorker = new SingleLodChunkGenWorker(new ChunkPos(chunkX, chunkZ), this, lodBuilder, lodDimension);
 							WorldWorkerManager.addWorker(genWorker);
 						}
