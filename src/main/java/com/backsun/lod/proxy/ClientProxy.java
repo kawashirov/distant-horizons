@@ -26,7 +26,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of this program.
  * 
  * @author James_Seibel
- * @version 02-23-2021
+ * @version 03-19-2021
  */
 public class ClientProxy
 {
@@ -35,10 +35,11 @@ public class ClientProxy
 	private LodBuilder lodBuilder;
 	Minecraft mc = Minecraft.getInstance();
 	
+	
 	public ClientProxy()
 	{
 		lodBuilder = new LodBuilder();
-		renderer = new LodRenderer();
+		renderer = new LodRenderer(lodBuilder);
 	}
 	
 	
@@ -92,7 +93,6 @@ public class ClientProxy
 			return;
 		
 		
-		
 		// offset the regions
 		double playerX = mc.player.getPosX();
 		double playerZ = mc.player.getPosZ();
@@ -113,10 +113,12 @@ public class ClientProxy
 	
 	
 	
-	
 	//=====================//
 	// lod creation events //
 	//=====================//
+	
+	// TODO add on chunk changed event
+	// issue #10
 	
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)

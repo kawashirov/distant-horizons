@@ -18,7 +18,7 @@ import net.minecraft.world.chunk.ChunkSection;
  * and color data for an LOD object.
  * 
  * @author James Seibel
- * @version 02-13-2021
+ * @version 03-19-2021
  */
 public class LodChunk
 {
@@ -57,7 +57,9 @@ public class LodChunk
 	public Color colors[];
 	
 	
-	
+	/** If true that means this LodChunk is just a placeholder and
+	 * no LOD has been generated for this chunk location */
+	private boolean emptyPlaceholder = false;
 	
 	
 	
@@ -73,6 +75,8 @@ public class LodChunk
 	 */
 	public LodChunk()
 	{
+		emptyPlaceholder = true;
+		
 		x = 0;
 		z = 0;
 		
@@ -103,6 +107,8 @@ public class LodChunk
 		 * example:
 		 * 5,8, 4,4,4,4, 0,0,0,0, 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255,
 		 */
+		
+		emptyPlaceholder = false;
 		
 		// make sure there are the correct number of entries
 		// in the data string (28)
@@ -215,6 +221,7 @@ public class LodChunk
 			throw new IllegalArgumentException("LodChunk constructor given a null world");
 		}
 		
+		emptyPlaceholder = false;
 		
 		x = chunk.getPos().x;
 		z = chunk.getPos().z;
@@ -261,6 +268,10 @@ public class LodChunk
 		// world height is 256)
 		ChunkSection[] chunkSections = chunk.getSections();
 		
+		// if this LodChunk was a empltyPlaceholder before
+		// it will hold some data after this method's completion,
+		// make sure it is handled like a normal LodChunk
+		emptyPlaceholder = false;
 		
 		
 		int startX = 0;
@@ -694,12 +705,23 @@ public class LodChunk
 	//================//
 	
 	/**
-	 * If this LOD is either invisible from every
-	 * direction or doesn't have a valid height 
-	 * it is empty.
+	 * Returns true if this LodChunk is an emptyPlaceholder
+	 */
+	public boolean isPlaceholder()
+	{
+		return emptyPlaceholder;
+	}
+	
+	/**
+	 * Returns true if this LOD is either invisible
+	 * from every direction, doesn't have a valid height, 
+	 * or is an emptyPlaceholder.
 	 */
 	public boolean isLodEmpty()
 	{
+		if (emptyPlaceholder)
+			return true;
+		
 		for(LodCorner corner : LodCorner.values())
 			if(top[corner.value] != -1 || bottom[corner.value] != -1)
 				// at least one corner is valid

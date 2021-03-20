@@ -3,6 +3,7 @@ package com.backsun.lod.objects;
 import com.backsun.lod.handlers.LodDimensionFileHandler;
 import com.backsun.lod.util.LodUtils;
 
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 
@@ -11,7 +12,7 @@ import net.minecraft.world.server.ServerChunkProvider;
  * for a given dimension.
  * 
  * @author James Seibel
- * @version 02-23-2021
+ * @version 03-19-2021
  */
 public class LodDimension
 {
@@ -207,39 +208,35 @@ public class LodDimension
 	 */
 	public void addLod(LodChunk lod)
 	{
-		int regionX = lod.x / LodRegion.SIZE;
-		int regionZ = lod.z / LodRegion.SIZE;
-		
-		// prevent issues if X/Z is negative and less than 16
-		if (lod.x < 0)
-		{
-			regionX = (Math.abs(regionX) * -1) - 1; 
-		}
-		if (lod.z < 0)
-		{
-			regionZ = (Math.abs(regionZ) * -1) - 1; 
-		}
+		RegionPos pos = LodUtils.convertChunkPosToRegionPos(new ChunkPos(lod.x, lod.z));
 		
 		// don't continue if the region can't be saved
-		if (!regionIsInRange(regionX, regionZ))
+		if (!regionIsInRange(pos.x, pos.z))
+		{
+			System.out.println(pos.x + " " + pos.z + " out of range");
 			return;
-		
-		LodRegion region = getRegion(regionX, regionZ);
+		}
+			
+		LodRegion region = getRegion(pos.x, pos.z);
 		
 		if (region == null)
 		{
 			// if no region exists, create it
-			region = new LodRegion(regionX, regionZ);
+			region = new LodRegion(pos.x, pos.z);
 			setRegion(region);
 		}
 		
 		region.addLod(lod);
 		
-		// mark the region as dirty so it will be saved to disk
-		int xIndex = (regionX - centerX) + halfWidth;
-		int zIndex = (regionZ - centerZ) + halfWidth;
-		isRegionDirty[xIndex][zIndex] = true;
-		fileHandler.saveDirtyRegionsToFileAsync();
+		// don't save empty place holders to disk
+		if (!lod.isPlaceholder())
+		{
+			// mark the region as dirty so it will be saved to disk
+			int xIndex = (pos.x - centerX) + halfWidth;
+			int zIndex = (pos.z - centerZ) + halfWidth;
+			isRegionDirty[xIndex][zIndex] = true;
+			fileHandler.saveDirtyRegionsToFileAsync();
+		}
 	}
 	
 	/**
@@ -251,20 +248,9 @@ public class LodDimension
 	 */
 	public LodChunk getLodFromCoordinates(int chunkX, int chunkZ)
 	{
-		int regionX = chunkX / LodRegion.SIZE;
-		int regionZ = chunkZ / LodRegion.SIZE;
+		RegionPos pos = LodUtils.convertChunkPosToRegionPos(new ChunkPos(chunkX, chunkZ));
 		
-		// prevent issues if chunkX/Z is negative and less than width
-		if (chunkX < 0)
-		{
-			regionX = (Math.abs(regionX) * -1) - 1; 
-		}
-		if (chunkZ < 0)
-		{
-			regionZ = (Math.abs(regionZ) * -1) - 1; 
-		}
-		
-		LodRegion region = getRegion(regionX, regionZ);
+		LodRegion region = getRegion(pos.x, pos.z);
 		
 		if(region == null)
 			return null;
@@ -287,7 +273,7 @@ public class LodDimension
 	 * Returns whether the region at the given X and Z coordinates
 	 * is within the loaded range.
 	 */
-	private boolean regionIsInRange(int regionX, int regionZ)
+	public boolean regionIsInRange(int regionX, int regionZ)
 	{
 		int xIndex = (regionX - centerX) + halfWidth;
 		int zIndex = (regionZ - centerZ) + halfWidth;

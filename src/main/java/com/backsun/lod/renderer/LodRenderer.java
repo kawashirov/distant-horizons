@@ -10,11 +10,13 @@ import java.util.concurrent.Executors;
 import org.lwjgl.opengl.GL11;
 
 import com.backsun.lod.builders.LodBufferBuilder;
+import com.backsun.lod.builders.LodBuilder;
 import com.backsun.lod.handlers.ReflectionHandler;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.NearFarBuffer;
 import com.backsun.lod.objects.NearFarFogSetting;
+import com.backsun.lod.proxy.SingleLodChunkGenWorker;
 import com.backsun.lod.util.LodConfig;
 import com.backsun.lod.util.enums.ColorDirection;
 import com.backsun.lod.util.enums.FogDistance;
@@ -36,18 +38,20 @@ import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.potion.Effects;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraftforge.common.WorldWorkerManager;
 
 
 /**
- * This is where all the magic happens.
+ * This is where all the magic happens. <br>
  * This is where LODs are draw to the world. 
  * 
  * @author James Seibel
- * @version 2-27-2021
+ * @version 03-19-2021
  */
 public class LodRenderer
 {
@@ -112,17 +116,18 @@ public class LodRenderer
 	 * and are waiting to be swapped with the drawable buffers*/
 	private volatile boolean switchBuffers = false;
 	
+	private LodBuilder lodBuilder;
 	
 	
 	
 	
-	
-	public LodRenderer()
+	public LodRenderer(LodBuilder newLodBuilder)
 	{
 		mc = Minecraft.getInstance();
 		gameRender = mc.gameRenderer;
 		
 		reflectionHandler = new ReflectionHandler();
+		lodBuilder = newLodBuilder;
 	}
 	
 	
@@ -211,8 +216,6 @@ public class LodRenderer
 		// set how big the LODs will be and how far they will go
 		int totalLength = (int) farPlaneDistance * LOD_CHUNK_DISTANCE_RADIUS * 2;
 		int numbChunksWide = (totalLength / LodChunk.WIDTH);
-		
-		
 		
 		
 		
@@ -542,6 +545,14 @@ public class LodRenderer
 	// Other Misc Functions // 
 	//======================//
 	
+	/**
+	 * If this is called then the next time "drawLODs" is called
+	 * the LODs will be regenerated; the same as if the player moved.
+	 */
+	public void regenerateLODsNextFrame()
+	{
+		regen = true;
+	}
 	
 	/**
 	 * @Returns -1 if there are no valid points
@@ -622,7 +633,7 @@ public class LodRenderer
 					int chunkZ = j + (startZ / LodChunk.WIDTH);
 					
 					LodChunk lod = lodDimension.getLodFromCoordinates(chunkX, chunkZ);
-					if (lod == null)
+					if (lod == null || lod.isLodEmpty())
 					{
 						// note: for some reason if any color or lod objects are set here
 						// it causes the game to use 100% gpu; 
@@ -631,17 +642,22 @@ public class LodRenderer
 						colorArray[i][j] = null;
 						lodArray[i][j] = null;
 						
-						// This is something I would like to have done someday
-						// but currently world generation is too slow to have it
-						// here, maybe it could be put in a loop 
-						// that happens every tick for a specific number of chunks?
-//						LodChunk tmpLod = new LodChunk();
-//						tmpLod.x = chunkX;
-//						tmpLod.z = chunkZ;
-//						lodDimension.addLod(tmpLod);
-//						
-//						world.getChunkProvider().getChunk(chunkX, chunkZ, true);
-//						System.out.println(chunkX + "," + chunkZ);
+						if (lod == null)
+						{
+							// no LOD exists for this location,
+							// have the server generate one when it is
+							// convenient
+							
+							// add a placeholder LOD so we don't try to
+							// generate the same chunk multiple times
+							LodChunk placeholder = new LodChunk();
+							placeholder.x = chunkX;
+							placeholder.z = chunkZ;
+							lodDimension.addLod(placeholder);
+							
+							SingleLodChunkGenWorker genWorker = new SingleLodChunkGenWorker(new ChunkPos(chunkX, chunkZ), this, lodBuilder, lodDimension);
+							WorldWorkerManager.addWorker(genWorker);
+						}
 						
 						continue;
 					}
@@ -685,6 +701,7 @@ public class LodRenderer
 				}
 			}
 			
+			
 			// generate our new buildable buffers
 			NearFarBuffer nearFarBuffers = lodBufferBuilder.createBuffers(
 					buildableNearBuffer, buildableFarBuffer, 
@@ -694,7 +711,7 @@ public class LodRenderer
 			buildableNearBuffer = nearFarBuffers.nearBuffer;
 			buildableFarBuffer = nearFarBuffers.farBuffer;
 			
-			// mark the buildable buffers as ready to swap
+			// mark that the buildable buffers as ready to swap
 			regenerating = false;
 			switchBuffers = true;
 		});

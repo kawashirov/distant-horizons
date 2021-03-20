@@ -1,7 +1,11 @@
 package com.backsun.lod.util;
 
+import com.backsun.lod.objects.LodRegion;
+import com.backsun.lod.objects.RegionPos;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 
@@ -9,7 +13,7 @@ import net.minecraft.world.server.ServerWorld;
  * This class holds methods that may be used in multiple places.
  * 
  * @author James Seibel
- * @version 02-26-2021
+ * @version 03-19-2021
  */
 public class LodUtils
 {
@@ -59,5 +63,27 @@ public class LodUtils
 		}
 				
 		return returnWorld;
+	}
+	
+	/**
+	 * Convert the given ChunkPos into a RegionPos.
+	 */
+	public static RegionPos convertChunkPosToRegionPos(ChunkPos pos)
+	{
+		RegionPos rPos = new RegionPos();
+		rPos.x = pos.x / LodRegion.SIZE;
+		rPos.z = pos.z / LodRegion.SIZE;
+		
+		// prevent issues if X/Z is negative and less than 16
+		if (pos.x < 0)
+		{
+			rPos.x = (Math.abs(rPos.x) * -1) - 1; 
+		}
+		if (pos.z < 0)
+		{
+			rPos.z = (Math.abs(rPos.z) * -1) - 1; 
+		}
+		
+		return rPos;
 	}
 }
