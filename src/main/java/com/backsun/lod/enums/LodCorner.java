@@ -1,4 +1,4 @@
-package com.backsun.lod.util.enums;
+package com.backsun.lod.enums;
 
 /**
  * NE, SE, SW, NW

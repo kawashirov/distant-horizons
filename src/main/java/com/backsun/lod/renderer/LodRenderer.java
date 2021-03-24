@@ -11,6 +11,10 @@ import org.lwjgl.opengl.GL11;
 
 import com.backsun.lod.builders.LodBufferBuilder;
 import com.backsun.lod.builders.LodBuilder;
+import com.backsun.lod.enums.ColorDirection;
+import com.backsun.lod.enums.FogDistance;
+import com.backsun.lod.enums.FogQuality;
+import com.backsun.lod.enums.LodCorner;
 import com.backsun.lod.handlers.ReflectionHandler;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
@@ -18,10 +22,6 @@ import com.backsun.lod.objects.NearFarBuffer;
 import com.backsun.lod.objects.NearFarFogSetting;
 import com.backsun.lod.proxy.SingleLodChunkGenWorker;
 import com.backsun.lod.util.LodConfig;
-import com.backsun.lod.util.enums.ColorDirection;
-import com.backsun.lod.util.enums.FogDistance;
-import com.backsun.lod.util.enums.FogQuality;
-import com.backsun.lod.util.enums.LodCorner;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -596,7 +596,7 @@ public class LodRenderer
 		Color error = new Color(255, 0, 225, alpha); // bright pink
 		
 		// this seemingly useless math is required,
-		// just using (int) camera doesn't work
+		// just using (int) playerX/Z doesn't work
 		int playerXChunkOffset = ((int) playerX / LodChunk.WIDTH) * LodChunk.WIDTH;
 		int playerZChunkOffset = ((int) playerZ / LodChunk.WIDTH) * LodChunk.WIDTH;
 		// this is where we will start drawing squares

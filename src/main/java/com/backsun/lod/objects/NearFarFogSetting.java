@@ -1,6 +1,6 @@
 package com.backsun.lod.objects;
 
-import com.backsun.lod.util.enums.FogDistance;
+import com.backsun.lod.enums.FogDistance;
 
 /**
  * This object is just a replacement for an array

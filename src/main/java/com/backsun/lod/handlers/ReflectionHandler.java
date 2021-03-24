@@ -2,7 +2,7 @@ package com.backsun.lod.handlers;
 
 import java.lang.reflect.Field;
 
-import com.backsun.lod.util.enums.FogQuality;
+import com.backsun.lod.enums.FogQuality;
 
 import net.minecraft.client.Minecraft;
 

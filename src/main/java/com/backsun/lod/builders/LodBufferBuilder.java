@@ -3,9 +3,9 @@ import java.awt.Color;
 
 import org.lwjgl.opengl.GL11;
 
+import com.backsun.lod.enums.FogDistance;
 import com.backsun.lod.objects.NearFarBuffer;
 import com.backsun.lod.renderer.LodRenderer;
-import com.backsun.lod.util.enums.FogDistance;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.AxisAlignedBB;

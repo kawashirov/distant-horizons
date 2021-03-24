@@ -7,7 +7,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 
 import com.backsun.lod.ModInfo;
-import com.backsun.lod.util.enums.FogDistance;
+import com.backsun.lod.enums.FogDistance;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 
