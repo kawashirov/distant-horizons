@@ -11,7 +11,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.backsun.lod.builders.LodBufferBuilder;
 import com.backsun.lod.builders.LodBuilder;
-import com.backsun.lod.builders.SingleLodChunkGenWorker;
+import com.backsun.lod.builders.LodChunkGenWorker;
 import com.backsun.lod.enums.ColorDirection;
 import com.backsun.lod.enums.FogDistance;
 import com.backsun.lod.enums.FogQuality;
@@ -138,6 +138,7 @@ public class LodRenderer
 	 * @param newDimension The dimension to draw, if null doesn't replace the current dimension.
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
+	@SuppressWarnings("deprecation")
 	public void drawLODs(LodDimension newDimension, float partialTicks, IProfiler newProfiler)
 	{		
 		if (lodDimension == null && newDimension == null)
@@ -499,6 +500,7 @@ public class LodRenderer
 	/**
 	 * setup the lighting to be used for the LODs
 	 */
+	@SuppressWarnings("deprecation")
 	private void setupLighting(float partialTicks)
 	{
 		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.world.getSunBrightness(partialTicks) : 0.2f;
@@ -590,10 +592,6 @@ public class LodRenderer
 		Color red = new Color(255, 0, 0, alpha);
 		Color black = new Color(0, 0, 0, alpha);
 		Color white = new Color(255, 255, 255, alpha);
-		@SuppressWarnings("unused")
-		Color invisible = new Color(0,0,0,0);
-		@SuppressWarnings("unused")
-		Color error = new Color(255, 0, 225, alpha); // bright pink
 		
 		// this seemingly useless math is required,
 		// just using (int) playerX/Z doesn't work
@@ -606,6 +604,17 @@ public class LodRenderer
 		
 		Thread t = new Thread(()->
 		{
+			// how many chunks to generate outside of the player's
+			// view distance
+			int maxNumbToGen = 8;
+			int chunkGenIndex = 0;
+			
+			ChunkPos[] chunksToGen = new ChunkPos[maxNumbToGen];
+			int minChunkDist = Integer.MAX_VALUE;
+			ChunkPos playerChunkPos = new ChunkPos((int)playerX / LodChunk.WIDTH, (int)playerZ / LodChunk.WIDTH);
+			
+			
+			
 			// x axis
 			for (int i = 0; i < numbChunksWide; i++)
 			{
@@ -642,23 +651,38 @@ public class LodRenderer
 						colorArray[i][j] = null;
 						lodArray[i][j] = null;
 						
+						
 						if (lod == null)
 						{
-							// no LOD exists for this location,
-							// have the server generate one when it is
-							// convenient
+							ChunkPos pos = new ChunkPos(chunkX, chunkZ);
 							
-							// add a placeholder LOD so we don't try to
-							// generate the same chunk multiple times
-							LodChunk placeholder = new LodChunk();
-							placeholder.x = chunkX;
-							placeholder.z = chunkZ;
-							lodDimension.addLod(placeholder);
+							// determine if this position is closer to the player
+							// than the previous
+							int newDistance = playerChunkPos.getChessboardDistance(pos);
 							
-							// TODO generate chunks closer to the player first
-							// issue #11
-							SingleLodChunkGenWorker genWorker = new SingleLodChunkGenWorker(new ChunkPos(chunkX, chunkZ), this, lodBuilder, lodDimension);
-							WorldWorkerManager.addWorker(genWorker);
+							if (newDistance < minChunkDist)
+							{
+								// this chunk is closer, clear any previous
+								// positions and update the new minimum distance
+								minChunkDist = newDistance;
+								
+								chunkGenIndex = 0;
+								chunksToGen = new ChunkPos[maxNumbToGen];
+								chunksToGen[chunkGenIndex] = pos;
+								chunkGenIndex++;
+							}
+							else if (newDistance <= minChunkDist)
+							{
+								// this chunk position is as close or closers than the
+								// minimum distance
+								if(chunkGenIndex < maxNumbToGen)
+								{
+									// we are still under the number of chunks to generate
+									// add this pos to the list
+									chunksToGen[chunkGenIndex] = pos;
+									chunkGenIndex++;
+								}
+							}
 						}
 						
 						continue;
@@ -669,7 +693,7 @@ public class LodRenderer
 							(lod.colors[ColorDirection.TOP.value].getRed()),
 							(lod.colors[ColorDirection.TOP.value].getGreen()),
 							(lod.colors[ColorDirection.TOP.value].getBlue()),
-							lod.colors[ColorDirection.TOP.value].getAlpha());
+							 lod.colors[ColorDirection.TOP.value].getAlpha());
 										
 					if (!debugging)
 					{
@@ -702,6 +726,26 @@ public class LodRenderer
 					lodArray[i][j] = new AxisAlignedBB(0, bottomPoint, 0, LodChunk.WIDTH, topPoint, LodChunk.WIDTH).offset(xOffset, yOffset, zOffset);
 				}
 			}
+			
+			// start chunk generation
+			for(ChunkPos chunkPos : chunksToGen)
+			{
+				if(chunkPos == null)
+					break;
+				
+				// add a placeholder chunk to prevent this chunk from
+				// being generated again
+				LodChunk placeholder = new LodChunk();
+				placeholder.x = chunkPos.x;
+				placeholder.z = chunkPos.z;
+				lodDimension.addLod(placeholder);
+				
+				LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, this, lodBuilder, lodDimension);
+				WorldWorkerManager.addWorker(genWorker);
+			}
+
+			
+			
 			
 			
 			// generate our new buildable buffers
