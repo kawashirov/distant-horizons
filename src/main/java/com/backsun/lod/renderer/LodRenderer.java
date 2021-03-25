@@ -11,6 +11,7 @@ import org.lwjgl.opengl.GL11;
 
 import com.backsun.lod.builders.LodBufferBuilder;
 import com.backsun.lod.builders.LodBuilder;
+import com.backsun.lod.builders.SingleLodChunkGenWorker;
 import com.backsun.lod.enums.ColorDirection;
 import com.backsun.lod.enums.FogDistance;
 import com.backsun.lod.enums.FogQuality;
@@ -20,7 +21,6 @@ import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.NearFarBuffer;
 import com.backsun.lod.objects.NearFarFogSetting;
-import com.backsun.lod.proxy.SingleLodChunkGenWorker;
 import com.backsun.lod.util.LodConfig;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;

@@ -17,9 +17,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-package com.backsun.lod.proxy;
+package com.backsun.lod.builders;
 
-import com.backsun.lod.builders.LodBuilder;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodRegion;
 import com.backsun.lod.renderer.LodRenderer;
