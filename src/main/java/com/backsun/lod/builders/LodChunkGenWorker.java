@@ -36,7 +36,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * @author James Seibel
  * @version 03-24-2021
  */
-public class SingleLodChunkGenWorker implements IWorker
+public class LodChunkGenWorker implements IWorker
 {
     private ServerWorld serverWorld;
     private ChunkPos pos;
@@ -44,7 +44,7 @@ public class SingleLodChunkGenWorker implements IWorker
     private LodBuilder lodBuilder;
     private LodRenderer lodRenderer;
     
-    public SingleLodChunkGenWorker(ChunkPos newPos, LodRenderer newLodRenderer, LodBuilder newLodBuilder, LodDimension newLodDimension)
+    public LodChunkGenWorker(ChunkPos newPos, LodRenderer newLodRenderer, LodBuilder newLodBuilder, LodDimension newLodDimension)
     {
         serverWorld  = LodUtils.getServerWorldFromDimension(newLodDimension.dimension);
         pos = newPos;
@@ -52,13 +52,7 @@ public class SingleLodChunkGenWorker implements IWorker
         lodBuilder = newLodBuilder;
         lodRenderer = newLodRenderer;
     }
-
-    @Override
-    public boolean hasWork()
-    {
-        return pos != null;
-    }
-
+    
     @Override
     public boolean doWork()
     {
@@ -99,14 +93,15 @@ public class SingleLodChunkGenWorker implements IWorker
             
             pos = null;
         }
-
-        if (pos == null)
-        {
-            return false;
-        }
-        return true;
+        
+        return false;
     }
     
+    @Override
+    public boolean hasWork()
+    {
+        return pos != null;
+    }
     
     /*
      * performance/generation tests related to
