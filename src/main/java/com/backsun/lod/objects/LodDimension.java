@@ -213,7 +213,7 @@ public class LodDimension
 		// don't continue if the region can't be saved
 		if (!regionIsInRange(pos.x, pos.z))
 		{
-			System.out.println(pos.x + " " + pos.z + " out of range");
+			//System.out.println(pos.x + " " + pos.z + " out of range");
 			return;
 		}
 			
