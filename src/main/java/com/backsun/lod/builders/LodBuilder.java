@@ -10,8 +10,8 @@ import com.backsun.lod.objects.LodWorld;
 import com.backsun.lod.util.LodUtils;
 
 import net.minecraft.world.DimensionType;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.server.ServerWorld;
 
 /**
@@ -20,7 +20,7 @@ import net.minecraft.world.server.ServerWorld;
  * (specifically: Lod World, Dimension, Region, and Chunk objects)
  * 
  * @author James Seibel
- * @version 2-22-2021
+ * @version 3-24-2021
  */
 public class LodBuilder
 {
@@ -40,8 +40,9 @@ public class LodBuilder
 	/**
 	 * Returns LodWorld so that it can be passed
 	 * to the LodRenderer.
+	 * @param dimensionType 
 	 */
-	public LodWorld generateLodChunkAsync(Chunk chunk)
+	public LodWorld generateLodChunkAsync(IChunk chunk, DimensionType dim)
 	{
 		if (lodWorld != null)
 			// is this chunk from the same world as the lodWorld?
@@ -55,11 +56,9 @@ public class LodBuilder
 		// given a valid chunk object
 		// (Minecraft often gives back empty
 		// or null chunks in this method)
-		if (chunk == null || !isValidChunk(chunk))
+		if (chunk == null || !hasBlockData(chunk))
 			return lodWorld;
 		
-		
-		DimensionType dim = chunk.getWorld().getDimensionType();
 		ServerWorld world = LodUtils.getServerWorldFromDimension(dim);
 		
 		
@@ -71,6 +70,7 @@ public class LodBuilder
 			try
 			{
 				LodChunk lod = new LodChunk(chunk, world);
+				
 				LodDimension lodDim;
 				
 				if (lodWorld == null)
@@ -103,11 +103,14 @@ public class LodBuilder
 		return lodWorld;
 	}
 	
+	
+	
+	
 	/**
 	 * Return whether the given chunk
 	 * has any data in it.
 	 */
-	public boolean isValidChunk(Chunk chunk)
+	public boolean hasBlockData(IChunk chunk)
 	{
 		ChunkSection[] blockStorage = chunk.getSections();
 		

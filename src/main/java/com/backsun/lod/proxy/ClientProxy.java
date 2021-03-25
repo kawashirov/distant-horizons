@@ -26,7 +26,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of this program.
  * 
  * @author James_Seibel
- * @version 03-19-2021
+ * @version 03-24-2021
  */
 public class ClientProxy
 {
@@ -124,7 +124,7 @@ public class ClientProxy
 	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
 		if (event.getChunk().getClass() == Chunk.class)
-			lodWorld = lodBuilder.generateLodChunkAsync((Chunk) event.getChunk());
+			lodWorld = lodBuilder.generateLodChunkAsync(event.getChunk(), event.getWorld().getDimensionType());
 	}
 	
 	

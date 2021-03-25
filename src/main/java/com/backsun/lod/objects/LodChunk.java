@@ -2,23 +2,24 @@ package com.backsun.lod.objects;
 
 import java.awt.Color;
 
-import com.backsun.lod.util.enums.ColorDirection;
-import com.backsun.lod.util.enums.LodCorner;
-import com.backsun.lod.util.enums.LodLocation;
+import com.backsun.lod.enums.ColorDirection;
+import com.backsun.lod.enums.LodCorner;
+import com.backsun.lod.enums.LodLocation;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.IChunk;
+import net.minecraft.world.gen.Heightmap;
 
 /**
  * This object contains position
  * and color data for an LOD object.
  * 
  * @author James Seibel
- * @version 03-19-2021
+ * @version 03-24-2021
  */
 public class LodChunk
 {
@@ -43,6 +44,7 @@ public class LodChunk
 	// since each layer is 1/4 the chunk
 	
 	
+	
 	/** The x coordinate of the chunk. */
 	public int x;
 	/** The z coordinate of the chunk. */
@@ -55,7 +57,6 @@ public class LodChunk
 	
 	/** The average color of each 6 cardinal directions */
 	public Color colors[];
-	
 	
 	/** If true that means this LodChunk is just a placeholder and
 	 * no LOD has been generated for this chunk location */
@@ -210,7 +211,7 @@ public class LodChunk
 	 * @throws IllegalArgumentException 
 	 * thrown if either the chunk or world is null.
 	 */
-	public LodChunk(Chunk chunk, World world) throws IllegalArgumentException
+	public LodChunk(IChunk chunk, World world) throws IllegalArgumentException
 	{
 		if(chunk == null)
 		{
@@ -249,11 +250,16 @@ public class LodChunk
 	
 	
 	
-	
 	//=====================//
 	// constructor helpers //
 	//=====================//
 	
+	/** GENERATE_TOP, GENERATE_BOTTOM */
+	private enum SectionGenerationMode
+	{
+		GENERATE_TOP,
+		GENERATE_BOTTOM;
+	}
 	
 	/**
 	 * Generate the height for the given LodLocation, either the top or bottom.
@@ -261,13 +267,8 @@ public class LodChunk
 	 * If invalid/null/empty chunks are given 
 	 * crashes may occur.
 	 */
-	public short generateLodCorner(Chunk chunk, SectionGenerationMode generationMode, LodLocation lodLoc)
+	public short generateLodCorner(IChunk chunk, SectionGenerationMode sectionGenMode, LodLocation lodLoc)
 	{
-		// should have a length of 16
-		// (each storage is 16x16x16 and the
-		// world height is 256)
-		ChunkSection[] chunkSections = chunk.getSections();
-		
 		// if this LodChunk was a empltyPlaceholder before
 		// it will hold some data after this method's completion,
 		// make sure it is handled like a normal LodChunk
@@ -322,17 +323,18 @@ public class LodChunk
 		}
 		
 		
-		if(generationMode == SectionGenerationMode.GENERATE_TOP)
+		// should have a length of 16
+		// (each storage is 16x16x16 and the
+		// world height is 256)
+		ChunkSection[] chunkSections = chunk.getSections();
+		
+		
+		if(sectionGenMode == SectionGenerationMode.GENERATE_TOP)
 			return determineTopPoint(chunkSections, startX, endX, startZ, endZ);
 		else
 			return determineBottomPoint(chunkSections, startX, endX, startZ, endZ);
 	}
-	/** GENERATE_TOP, GENERATE_BOTTOM */
-	private enum SectionGenerationMode
-	{
-		GENERATE_TOP,
-		GENERATE_BOTTOM;
-	}
+	
 	
 	/**
 	 * Find the lowest valid point from the bottom.
@@ -340,7 +342,7 @@ public class LodChunk
 	private short determineBottomPoint(ChunkSection[] chunkSections, int startX, int endX, int startZ, int endZ)
 	{
 		// search from the bottom up
-		for(int i = 0; i < chunkSections.length; i++)
+		for(int i = 0; i < CHUNK_DATA_WIDTH; i++)
 		{
 			for(int y = 0; y < CHUNK_DATA_HEIGHT; y++)
 			{
@@ -359,6 +361,19 @@ public class LodChunk
 		// we never found a valid LOD point
 		return -1;
 	}
+
+	/**
+	 * Find the lowest valid point from the bottom.
+	 */
+	@SuppressWarnings("unused")
+	private short determineBottomPoint(Heightmap heightmap, int startX, int endX, int startZ, int endZ)
+	{
+		// the heightmap only shows how high the blocks go, it
+		// doesn't have any info about how low they go
+		return 0;
+	}
+	
+	
 	
 	/**
 	 * Find the highest valid point from the Top
@@ -384,6 +399,33 @@ public class LodChunk
 		// we never found a valid LOD point
 		return -1;
 	}
+	
+	/**
+	 * Find the highest valid point from the Top
+	 */
+	@SuppressWarnings("unused")
+	private short determineTopPoint(Heightmap heightmap, int startX, int endX, int startZ, int endZ)
+	{
+		short highest = 0;
+		for(int x = startX; x < endX; x++)
+		{
+			for(int z = startZ; z < endZ; z++)
+			{
+				short newHeight = (short) heightmap.getHeight(x, z);
+				if (newHeight > highest)
+					highest = newHeight;
+			}
+		}
+		
+		return highest;
+	}
+	
+	
+	
+	
+	
+	
+	
 	
 	/**
 	 * Is the layer between the given X, Z, and dataIndex
@@ -433,7 +475,7 @@ public class LodChunk
 	 * Generate the color of the given ColorDirection at the given chunk
 	 * in the given world.
 	 */
-	private Color  generateLodColorForDirection(Chunk chunk, World world, ColorDirection colorDir)
+	private Color  generateLodColorForDirection(IChunk chunk, World world, ColorDirection colorDir)
 	{
 		Minecraft mc =  Minecraft.getInstance();
 		BlockColors bc = mc.getBlockColors();
@@ -464,12 +506,14 @@ public class LodChunk
 	 * 
 	 * @throws IllegalArgumentException if given a ColorDirection other than TOP or BOTTOM
 	 */
-	private Color generateLodColorVertical(Chunk chunk, ColorDirection colorDir, World world, BlockColors bc)
+	private Color generateLodColorVertical(IChunk chunk, ColorDirection colorDir, World world, BlockColors bc)
 	{
 		if(colorDir != ColorDirection.TOP && colorDir != ColorDirection.BOTTOM)
 		{
 			throw new IllegalArgumentException("generateLodColorVertical only accepts the ColorDirection TOP or BOTTOM");
 		}
+		
+		
 		
 		ChunkSection[] chunkSections = chunk.getSections();
 		
@@ -540,6 +584,38 @@ public class LodChunk
 		blue /= numbOfBlocks;
 		
 		return new Color(red, green, blue);
+		
+		/*
+		 * unused variation that can be used with only the heightmap,
+		 * although it just returns the foliage color, so it shouldn't
+		 * be used normally.
+		
+		Heightmap heightmap = chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE_WG);
+		
+		int numbOfBlocks = CHUNK_DATA_WIDTH * CHUNK_DATA_WIDTH;
+		int red = 0;
+		int green = 0;
+		int blue = 0;
+		
+		for(int x = 0; x < CHUNK_DATA_WIDTH; x++)
+		{
+			for(int z = 0; z < CHUNK_DATA_WIDTH; z++)
+			{
+				Biome biome = chunk.getBiomes().getNoiseBiome(x,z, heightmap.getHeight(x, z));
+				Color c = intToColor(biome.getFoliageColor());
+				
+				red += c.getRed();
+				green += c.getGreen();
+				blue += c.getBlue();
+			}
+		}
+		
+		red /= numbOfBlocks;
+		green /= numbOfBlocks;
+		blue /= numbOfBlocks;
+		
+		return new Color(red, green, blue);
+		 */
 	}
 	
 	/**
@@ -547,7 +623,7 @@ public class LodChunk
 	 * 
 	 * @throws IllegalArgumentException if given a ColorDirection other than N, S, W, E (North, South, East, West)
 	 */
-	private Color generateLodColorHorizontal(Chunk chunk, ColorDirection colorDir, World world, BlockColors bc)
+	private Color generateLodColorHorizontal(IChunk chunk, ColorDirection colorDir, World world, BlockColors bc)
 	{
 		if(colorDir != ColorDirection.N && colorDir != ColorDirection.S && colorDir != ColorDirection.E && colorDir != ColorDirection.W)
 		{
@@ -673,6 +749,7 @@ public class LodChunk
 		
 		return new Color(red, green, blue);
 	}
+	
 	
 	/**
 	 * Convert a BlockColors int into a Color object.
