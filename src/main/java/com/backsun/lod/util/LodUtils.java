@@ -7,13 +7,15 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.server.ServerWorld;
 
 /**
  * This class holds methods that may be used in multiple places.
  * 
  * @author James Seibel
- * @version 03-19-2021
+ * @version 03-24-2021
  */
 public class LodUtils
 {
@@ -85,5 +87,24 @@ public class LodUtils
 		}
 		
 		return rPos;
+	}
+	
+	/**
+	 * Return whether the given chunk
+	 * has any data in it.
+	 */
+	public static boolean chunkHasBlockData(IChunk chunk)
+	{
+		ChunkSection[] blockStorage = chunk.getSections();
+		
+		for(ChunkSection section : blockStorage)
+		{
+			if(section != null && !section.isEmpty())
+			{
+				return true;
+			}
+		}
+		
+		return false;
 	}
 }
