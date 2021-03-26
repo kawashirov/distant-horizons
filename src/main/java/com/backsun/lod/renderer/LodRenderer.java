@@ -1,21 +1,15 @@
 package com.backsun.lod.renderer;
 
-import java.awt.Color;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import org.lwjgl.opengl.GL11;
 
 import com.backsun.lod.builders.LodBufferBuilder;
 import com.backsun.lod.builders.LodBuilder;
-import com.backsun.lod.builders.LodChunkGenWorker;
-import com.backsun.lod.enums.ColorDirection;
 import com.backsun.lod.enums.FogDistance;
 import com.backsun.lod.enums.FogQuality;
-import com.backsun.lod.enums.LodCorner;
 import com.backsun.lod.handlers.ReflectionHandler;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
@@ -37,13 +31,10 @@ import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.potion.Effects;
 import net.minecraft.profiler.IProfiler;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraftforge.common.WorldWorkerManager;
 
 
 /**
@@ -51,7 +42,7 @@ import net.minecraftforge.common.WorldWorkerManager;
  * This is where LODs are draw to the world. 
  * 
  * @author James Seibel
- * @version 03-19-2021
+ * @version 03-25-2021
  */
 public class LodRenderer
 {
@@ -72,30 +63,22 @@ public class LodRenderer
 	
 	private ReflectionHandler reflectionHandler;
 	
-	public LodDimension lodDimension = null;
+	public LodDimension lodDimension;
 	
 	
 	/** This is used to generate the buildable buffers */
-	private LodBufferBuilder lodBufferBuilder = null;
+	private LodBufferBuilder lodBufferBuilder;
 	
 	/** The buffers that are used to draw LODs using near fog */
-	private volatile BufferBuilder drawableNearBuffer = null;
+	private volatile BufferBuilder drawableNearBuffer;
 	/** The buffers that are used to draw LODs using far fog */
-	private volatile BufferBuilder drawableFarBuffer = null;
-	
-	/** The buffers that are used to create LODs using near fog */
-	private volatile BufferBuilder buildableNearBuffer = null;
-	/** The buffers that are used to create LODs using far fog */
-	private volatile BufferBuilder buildableFarBuffer = null;
+	private volatile BufferBuilder drawableFarBuffer;
 	
 	/** This is the VertexBuffer used to draw any LODs that use near fog */
-	private volatile VertexBuffer nearVbo = null;
+	private volatile VertexBuffer nearVbo;
 	/** This is the VertexBuffer used to draw any LODs that use far fog */
-	private volatile VertexBuffer farVbo = null;
+	private volatile VertexBuffer farVbo;
 	public static final VertexFormat LOD_VERTEX_FORMAT = DefaultVertexFormats.POSITION_COLOR;
-	
-	/** This holds the thread used to generate new LODs off the main thread. */
-	private ExecutorService genThread = Executors.newSingleThreadExecutor();
 	
 	/** This is used to determine if the LODs should be regenerated */
 	private int previousChunkRenderDistance = 0;
@@ -109,14 +92,7 @@ public class LodRenderer
 	/** if this is true the LOD buffers should be regenerated,
 	 * provided they aren't already being regenerated. */
 	private boolean regen = false;
-	/** if this is true the LOD buffers are currently being
-	 * regenerated. */
-	private volatile boolean regenerating = false;
-	/** if this is true new LOD buffers have been generated 
-	 * and are waiting to be swapped with the drawable buffers*/
-	private volatile boolean switchBuffers = false;
 	
-	private LodBuilder lodBuilder;
 	
 	
 	
@@ -127,7 +103,7 @@ public class LodRenderer
 		gameRender = mc.gameRenderer;
 		
 		reflectionHandler = new ReflectionHandler();
-		lodBuilder = newLodBuilder;
+		lodBufferBuilder = new LodBufferBuilder(newLodBuilder);
 	}
 	
 	
@@ -230,32 +206,28 @@ public class LodRenderer
 		// 2. we aren't already regenerating the LODs
 		// 3. we aren't waiting for the build and draw buffers to swap
 		//		(this is to prevent thread conflicts)
-		if (regen && !regenerating && !switchBuffers)
+		if (regen && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvaliable())
 		{
-			regenerating = true;
-			
-			if (lodBufferBuilder == null)
-				lodBufferBuilder = new LodBufferBuilder();
-			
 			// this will mainly happen when the view distance is changed
 			if (drawableNearBuffer == null || drawableFarBuffer == null || 
 				previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks)
 				setupBuffers(numbChunksWide);
 			
 			// generate the LODs on a separate thread to prevent stuttering or freezing
-			generateLodBuffersAsync(player.getPosX(), player.getPosZ(), numbChunksWide);
+			lodBufferBuilder.generateLodBuffersAsync(this, player.getPosX(), player.getPosZ(), numbChunksWide);
 			
-			// the regen process has been started
+			// the regen process has been started,
+			// it will be done when lodBufferBuilder.newBuffersAvaliable
+			// is true
 			regen = false;
 		}
 		
 		// replace the buffers used to draw and build,
 		// this is only done when the createLodBufferGenerationThread
 		// has finished executing on a parallel thread.
-		if (switchBuffers)
+		if (lodBufferBuilder.newBuffersAvaliable())
 		{
 			swapBuffers();
-			switchBuffers = false;
 		}
 		
 		
@@ -325,28 +297,6 @@ public class LodRenderer
 	}
 	
 	
-	/**
-	 * Create the model view matrix to move the LODs
-	 * from object space into world space.
-	 */
-	private Matrix4f generateModelViewMatrix(float partialTicks)
-	{
-		// get all relevant camera info
-		ActiveRenderInfo renderInfo = mc.gameRenderer.getActiveRenderInfo();
-        Vector3d projectedView = renderInfo.getProjectedView();
-		
-		
-		// generate the model view matrix
-		MatrixStack matrixStack = new MatrixStack();
-        matrixStack.push();
-        // translate and rotate to the current camera location
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(renderInfo.getPitch()));
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(renderInfo.getYaw() + 180));
-        matrixStack.translate(-projectedView.x, -projectedView.y, -projectedView.z);
-        
-        return matrixStack.getLast().getMatrix();
-	}
-
 
 	/**
 	 * This is where the actual drawing happens.
@@ -441,6 +391,29 @@ public class LodRenderer
 	
 
 	/**
+	 * Create the model view matrix to move the LODs
+	 * from object space into world space.
+	 */
+	private Matrix4f generateModelViewMatrix(float partialTicks)
+	{
+		// get all relevant camera info
+		ActiveRenderInfo renderInfo = mc.gameRenderer.getActiveRenderInfo();
+        Vector3d projectedView = renderInfo.getProjectedView();
+		
+		
+		// generate the model view matrix
+		MatrixStack matrixStack = new MatrixStack();
+        matrixStack.push();
+        // translate and rotate to the current camera location
+        matrixStack.rotate(Vector3f.XP.rotationDegrees(renderInfo.getPitch()));
+        matrixStack.rotate(Vector3f.YP.rotationDegrees(renderInfo.getYaw() + 180));
+        matrixStack.translate(-projectedView.x, -projectedView.y, -projectedView.z);
+        
+        return matrixStack.getLast().getMatrix();
+	}
+	
+	
+	/**
 	 * create a new projection matrix and send it over to the GPU
 	 * <br><br>
 	 * A lot of this code is copied from renderWorld (line 578)
@@ -517,6 +490,7 @@ public class LodRenderer
 		RenderSystem.enableLighting();
 	}
 	
+	
 	/**
 	 * Create all buffers that will be used.
 	 */
@@ -533,11 +507,11 @@ public class LodRenderer
 		drawableNearBuffer = new BufferBuilder(bufferMaxCapacity);
 		drawableFarBuffer = new BufferBuilder(bufferMaxCapacity);
 		
-		buildableNearBuffer = new BufferBuilder(bufferMaxCapacity);
-		buildableFarBuffer = new BufferBuilder(bufferMaxCapacity);
+		lodBufferBuilder.setupBuffers(bufferMaxCapacity);
 	}
 	
 	
+
 	
 	
 	
@@ -556,232 +530,18 @@ public class LodRenderer
 		regen = true;
 	}
 	
-	/**
-	 * @Returns -1 if there are no valid points
-	 */
-	private int getValidHeightPoint(short[] heightPoints)
-	{
-		if (heightPoints[LodCorner.NE.value] != -1)
-			return heightPoints[LodCorner.NE.value];
-		if (heightPoints[LodCorner.NW.value] != -1)
-			return heightPoints[LodCorner.NW.value];
-		if (heightPoints[LodCorner.SE.value] != -1)
-			return heightPoints[LodCorner.NE.value];
-		return heightPoints[LodCorner.NE.value];
-	}
-	
 	
 	/**
-	 * Create a thread to asynchronously generate LOD buffers
-	 * centered around the given camera X and Z.
-	 * <br>
-	 * This thread will write to the drawableNearBuffers and drawableFarBuffers.
-	 * <br>
-	 * After the buildable buffers have been generated they must be
-	 * swapped with the drawable buffers to be drawn.
-	 */
-	private void generateLodBuffersAsync(double playerX, double playerZ,
-			int numbChunksWide)
-	{
-		// this is where we store the points for each LOD object
-		AxisAlignedBB lodArray[][] = new AxisAlignedBB[numbChunksWide][numbChunksWide];
-		// this is where we store the color for each LOD object
-		Color colorArray[][] = new Color[numbChunksWide][numbChunksWide];
-		
-		int alpha = 255; // 0 - 255
-		Color red = new Color(255, 0, 0, alpha);
-		Color black = new Color(0, 0, 0, alpha);
-		Color white = new Color(255, 255, 255, alpha);
-		
-		// this seemingly useless math is required,
-		// just using (int) playerX/Z doesn't work
-		int playerXChunkOffset = ((int) playerX / LodChunk.WIDTH) * LodChunk.WIDTH;
-		int playerZChunkOffset = ((int) playerZ / LodChunk.WIDTH) * LodChunk.WIDTH;
-		// this is where we will start drawing squares
-		// (exactly half the total width)
-		int startX = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerXChunkOffset;
-		int startZ = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerZChunkOffset;
-		
-		Thread t = new Thread(()->
-		{
-			// how many chunks to generate outside of the player's
-			// view distance
-			int maxNumbToGen = 8;
-			int chunkGenIndex = 0;
-			
-			ChunkPos[] chunksToGen = new ChunkPos[maxNumbToGen];
-			int minChunkDist = Integer.MAX_VALUE;
-			ChunkPos playerChunkPos = new ChunkPos((int)playerX / LodChunk.WIDTH, (int)playerZ / LodChunk.WIDTH);
-			
-			
-			
-			// x axis
-			for (int i = 0; i < numbChunksWide; i++)
-			{
-				// z axis
-				for (int j = 0; j < numbChunksWide; j++)
-				{
-					// skip the middle
-					// (As the player moves some chunks will overlap or be missing,
-					// this is just how chunk loading/unloading works. This can hopefully
-					// be hidden with careful use of fog)
-					int middle = (numbChunksWide / 2);
-					if (isCoordInCenterArea(i, j, middle))
-					{
-						continue;
-					}
-					
-					
-					// set where this square will be drawn in the world
-					double xOffset = (LodChunk.WIDTH * i) + // offset by the number of LOD blocks
-									startX; // offset so the center LOD block is centered underneath the player
-					double yOffset = 0;
-					double zOffset = (LodChunk.WIDTH * j) + startZ;
-					
-					int chunkX = i + (startX / LodChunk.WIDTH);
-					int chunkZ = j + (startZ / LodChunk.WIDTH);
-					
-					LodChunk lod = lodDimension.getLodFromCoordinates(chunkX, chunkZ);
-					if (lod == null || lod.isLodEmpty())
-					{
-						// note: for some reason if any color or lod objects are set here
-						// it causes the game to use 100% gpu; 
-						// undefined in the debug menu
-						// and drop to ~6 fps.
-						colorArray[i][j] = null;
-						lodArray[i][j] = null;
-						
-						
-						if (lod == null)
-						{
-							ChunkPos pos = new ChunkPos(chunkX, chunkZ);
-							
-							// determine if this position is closer to the player
-							// than the previous
-							int newDistance = playerChunkPos.getChessboardDistance(pos);
-							
-							if (newDistance < minChunkDist)
-							{
-								// this chunk is closer, clear any previous
-								// positions and update the new minimum distance
-								minChunkDist = newDistance;
-								
-								chunkGenIndex = 0;
-								chunksToGen = new ChunkPos[maxNumbToGen];
-								chunksToGen[chunkGenIndex] = pos;
-								chunkGenIndex++;
-							}
-							else if (newDistance <= minChunkDist)
-							{
-								// this chunk position is as close or closers than the
-								// minimum distance
-								if(chunkGenIndex < maxNumbToGen)
-								{
-									// we are still under the number of chunks to generate
-									// add this pos to the list
-									chunksToGen[chunkGenIndex] = pos;
-									chunkGenIndex++;
-								}
-							}
-						}
-						
-						continue;
-					}
-					
-					
-					Color c = new Color(
-							(lod.colors[ColorDirection.TOP.value].getRed()),
-							(lod.colors[ColorDirection.TOP.value].getGreen()),
-							(lod.colors[ColorDirection.TOP.value].getBlue()),
-							 lod.colors[ColorDirection.TOP.value].getAlpha());
-										
-					if (!debugging)
-					{
-						// add the color to the array
-						colorArray[i][j] = c;
-					}
-					else
-					{
-						// if debugging draw the squares as a black and white checker board
-						if ((chunkX + chunkZ) % 2 == 0)
-							c = white;
-						else
-							c = black;
-						// draw the first square as red
-						if (i == 0 && j == 0)
-							c = red;
-						
-						colorArray[i][j] = c;
-					}
-					
-					
-					// add the new box to the array
-					int topPoint = getValidHeightPoint(lod.top);
-					int bottomPoint = getValidHeightPoint(lod.bottom);
-					
-					// don't draw an LOD if it is empty
-					if (topPoint == -1 && bottomPoint == -1)
-						continue;
-					
-					lodArray[i][j] = new AxisAlignedBB(0, bottomPoint, 0, LodChunk.WIDTH, topPoint, LodChunk.WIDTH).offset(xOffset, yOffset, zOffset);
-				}
-			}
-			
-			// start chunk generation
-			for(ChunkPos chunkPos : chunksToGen)
-			{
-				if(chunkPos == null)
-					break;
-				
-				// add a placeholder chunk to prevent this chunk from
-				// being generated again
-				LodChunk placeholder = new LodChunk();
-				placeholder.x = chunkPos.x;
-				placeholder.z = chunkPos.z;
-				lodDimension.addLod(placeholder);
-				
-				LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, this, lodBuilder, lodDimension);
-				WorldWorkerManager.addWorker(genWorker);
-			}
-
-			
-			
-			
-			
-			// generate our new buildable buffers
-			NearFarBuffer nearFarBuffers = lodBufferBuilder.createBuffers(
-					buildableNearBuffer, buildableFarBuffer, 
-					LodConfig.CLIENT.fogDistance.get(), lodArray, colorArray);
-			
-			// update our buffers
-			buildableNearBuffer = nearFarBuffers.nearBuffer;
-			buildableFarBuffer = nearFarBuffers.farBuffer;
-			
-			// mark that the buildable buffers as ready to swap
-			regenerating = false;
-			switchBuffers = true;
-		});
-		
-		genThread.execute(t);
-		
-		return;
-	}
-	
-	
-	
-	/**
-	 * Swap buildable and drawable buffers.
+	 * Replace the current drawable buffers with the newly
+	 * created buffers from the lodBufferBuilder.
 	 */
 	private void swapBuffers()
 	{
-		// swap the BufferBuilders
-		BufferBuilder tmp = buildableNearBuffer;
-		buildableNearBuffer = drawableNearBuffer;
-		drawableNearBuffer = tmp;
-		
-		tmp = buildableFarBuffer;
-		buildableFarBuffer = drawableFarBuffer;
-		drawableFarBuffer = tmp;
+		// replace the drawable buffers with
+		// the newly created buffers from the lodBufferBuilder
+		NearFarBuffer newBuffers = lodBufferBuilder.swapBuffers(drawableNearBuffer, drawableFarBuffer);
+		drawableNearBuffer = newBuffers.nearBuffer;
+		drawableFarBuffer = newBuffers.farBuffer;
 		
 		
 		// bind the buffers with their respective VBOs
@@ -800,21 +560,7 @@ public class LodRenderer
 	}
 	
 	
-	/**
-	 * Returns if the given coordinate is in the loaded area of the world.
-	 * @param centerCoordinate the center of the loaded world
-	 */
-	private boolean isCoordInCenterArea(int i, int j, int centerCoordinate)
-	{
-		return (i >= centerCoordinate - mc.gameSettings.renderDistanceChunks
-				&& i <= centerCoordinate + mc.gameSettings.renderDistanceChunks) 
-				&& 
-				(j >= centerCoordinate - mc.gameSettings.renderDistanceChunks
-				&& j <= centerCoordinate + mc.gameSettings.renderDistanceChunks);
-	}
-	
-	
-	public double getFov(float partialTicks, boolean useFovSetting)
+	private double getFov(float partialTicks, boolean useFovSetting)
 	{
 		return mc.gameRenderer.getFOVModifier(mc.gameRenderer.getActiveRenderInfo(), partialTicks, useFovSetting);
 	}

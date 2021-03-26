@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.BufferBuilder;
  * and BuildBufferThread.
  * 
  * @author James Seibel
- * @version 02-21-2021
+ * @version 03-25-2021
  */
 public class NearFarBuffer
 {
@@ -16,7 +16,10 @@ public class NearFarBuffer
 	
 	public BufferBuilder farBuffer;
 	
-	
+	/**
+	 * @param newNearBuffer
+	 * @param newFarBuffer
+	 */
 	public NearFarBuffer(BufferBuilder newNearBuffer, BufferBuilder newFarBuffer)
 	{
 		nearBuffer = newNearBuffer;

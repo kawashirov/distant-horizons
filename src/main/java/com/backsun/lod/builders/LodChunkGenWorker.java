@@ -34,7 +34,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  * 
  * @author James Seibel
- * @version 03-24-2021
+ * @version 03-25-2021
  */
 public class LodChunkGenWorker implements IWorker
 {
@@ -42,14 +42,16 @@ public class LodChunkGenWorker implements IWorker
     private ChunkPos pos;
     private LodDimension lodDim;
     private LodBuilder lodBuilder;
+    private LodBufferBuilder lodBufferBuilder;
     private LodRenderer lodRenderer;
     
-    public LodChunkGenWorker(ChunkPos newPos, LodRenderer newLodRenderer, LodBuilder newLodBuilder, LodDimension newLodDimension)
+    public LodChunkGenWorker(ChunkPos newPos, LodRenderer newLodRenderer, LodBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, LodDimension newLodDimension)
     {
         serverWorld  = LodUtils.getServerWorldFromDimension(newLodDimension.dimension);
         pos = newPos;
         lodDim = newLodDimension;
         lodBuilder = newLodBuilder;
+        lodBufferBuilder = newLodBufferBuilder;
         lodRenderer = newLodRenderer;
     }
     
@@ -90,6 +92,8 @@ public class LodChunkGenWorker implements IWorker
             //{
             //	System.out.println("Out of range " + x + " " + z);
             //}
+            
+            lodBufferBuilder.numChunksWaitingToGen--;
             
             pos = null;
         }
