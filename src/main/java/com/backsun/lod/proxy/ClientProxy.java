@@ -3,7 +3,6 @@ package com.backsun.lod.proxy;
 import org.lwjgl.opengl.GL11;
 
 import com.backsun.lod.builders.LodBuilder;
-import com.backsun.lod.handlers.LodDimensionFileHandler;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodRegion;
@@ -16,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.world.ChunkEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 //TODO Find a way to replace getIntegratedServer so this mod could be used on non-local worlds.
@@ -26,7 +26,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of this program.
  * 
  * @author James_Seibel
- * @version 03-24-2021
+ * @version 03-27-2021
  */
 public class ClientProxy
 {
@@ -79,11 +79,6 @@ public class ClientProxy
 			return;
 		}
 		
-		// are we still in the same world?
-		if (!lodWorld.worldName.equals(LodDimensionFileHandler.getCurrentWorldID()))
-			// no, don't render the wrong world
-			return;
-		
 		
 		if (mc == null || mc.player == null || lodWorld == null)
 			return;
@@ -113,9 +108,9 @@ public class ClientProxy
 	
 	
 	
-	//=====================//
-	// lod creation events //
-	//=====================//
+	//==============//
+	// forge events //
+	//==============//
 	
 	// TODO add on chunk changed event
 	// issue #10
@@ -127,5 +122,13 @@ public class ClientProxy
 			lodWorld = lodBuilder.generateLodChunkAsync(event.getChunk(), event.getWorld().getDimensionType());
 	}
 	
+	
+	@SubscribeEvent
+	public void worldUnloadEvent(WorldEvent.Unload event)
+	{
+		// clear the old LodWorld to make sure
+		// the correct world is used when changing worlds
+		lodWorld = null;
+	}
 	
 }

@@ -28,7 +28,7 @@ import net.minecraft.world.server.ServerWorld;
  * (specifically: Lod World, Dimension, Region, and Chunk objects)
  * 
  * @author James Seibel
- * @version 3-24-2021
+ * @version 3-27-2021
  */
 public class LodBuilder
 {
@@ -69,9 +69,10 @@ public class LodBuilder
 		if (lodWorld != null)
 			// is this chunk from the same world as the lodWorld?
 			if (!lodWorld.worldName.equals(LodDimensionFileHandler.getCurrentWorldID()))
-				// we are not in the same world anymore,
-				// remove the old world so it can be recreated later
-				lodWorld = null;
+				// we are not in the same world anymore
+				// don't add this LOD
+				return lodWorld;
+				
 		
 		// don't try to create an LOD object
 		// if for some reason we aren't
