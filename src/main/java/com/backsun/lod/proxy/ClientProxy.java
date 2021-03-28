@@ -12,8 +12,8 @@ import com.backsun.lod.renderer.RenderGlobalHook;
 import com.backsun.lod.util.LodConfig;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
+import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -112,14 +112,10 @@ public class ClientProxy
 	// forge events //
 	//==============//
 	
-	// TODO add on chunk changed event
-	// issue #10
-	
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
-		if (event.getChunk().getClass() == Chunk.class)
-			lodWorld = lodBuilder.generateLodChunkAsync(event.getChunk(), event.getWorld().getDimensionType());
+		lodWorld = lodBuilder.generateLodChunkAsync(event.getChunk(), event.getWorld().getDimensionType());
 	}
 	
 	
@@ -129,6 +125,21 @@ public class ClientProxy
 		// clear the old LodWorld to make sure
 		// the correct world is used when changing worlds
 		lodWorld = null;
+	}
+	
+	
+	@SubscribeEvent
+	public void worldChangeEvent(BlockEvent event)
+	{
+		if (event.getClass() == BlockEvent.BreakEvent.class ||
+			event.getClass() == BlockEvent.EntityPlaceEvent.class ||
+			event.getClass() == BlockEvent.EntityMultiPlaceEvent.class ||
+			event.getClass() == BlockEvent.FluidPlaceBlockEvent.class ||
+			event.getClass() == BlockEvent.PortalSpawnEvent.class)
+		{
+			// recreate the LOD where the blocks were changed
+			lodWorld = lodBuilder.generateLodChunkAsync(event.getWorld().getChunk(event.getPos()), event.getWorld().getDimensionType());
+		}
 	}
 	
 }
