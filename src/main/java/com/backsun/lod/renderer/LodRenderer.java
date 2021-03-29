@@ -241,10 +241,14 @@ public class LodRenderer
 		// set the required open GL settings
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glDisable(GL11.GL_TEXTURE_2D); // TODO store the default values of each of these so they can be reset correctly
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		
+		// disable the lights Minecraft uses
+		GL11.glDisable(GL11.GL_LIGHT0);
+		GL11.glDisable(GL11.GL_LIGHT1);
 		
 		Matrix4f modelViewMatrix = generateModelViewMatrix(partialTicks);
 		
@@ -252,7 +256,12 @@ public class LodRenderer
 		setupLighting(partialTicks);
 		
 		NearFarFogSetting fogSetting = determineFogSettings();
-
+		
+		// determine the current fog settings so they can be
+		// reset after drawing the LODs
+		float defaultFogStartDist = GL11.glGetFloat(GL11.GL_FOG_START);
+		float defaultFogEndDist = GL11.glGetFloat(GL11.GL_FOG_END);
+		int defaultFogMode = GL11.glGetInteger(GL11.GL_FOG_MODE);
 
 		
 		
@@ -278,18 +287,25 @@ public class LodRenderer
 		
 		profiler.endStartSection("LOD cleanup");
 		
-		// this must be done otherwise other parts of the screen may be drawn with a fog effect
-		// IE the GUI
-		FogRenderer.resetFog();
-		RenderSystem.disableFog();
-		
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(LOD_GL_LIGHT_NUMBER);
+		// re-enable the lights Minecraft uses
+		GL11.glEnable(GL11.GL_LIGHT0);
+		GL11.glEnable(GL11.GL_LIGHT1);
+		// TODO record the light states before to make sure they are being reset correctly
+		RenderSystem.disableLighting();
 		
 		// this can't be called until after the buffers are built
 		// because otherwise the buffers may be set to the wrong size
 		previousChunkRenderDistance = mc.gameSettings.renderDistanceChunks;
+		
+		// reset the fog settings so the normal chunks
+		// will be drawn correctly
+		RenderSystem.fogStart(defaultFogStartDist);
+		RenderSystem.fogEnd(defaultFogEndDist);
+		RenderSystem.fogMode(defaultFogMode);
+		
 		
 		
 		// end of profiler tracking
@@ -478,7 +494,7 @@ public class LodRenderer
 	{
 		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.world.getSunBrightness(partialTicks) : 0.2f;
 		float gammaMultiplyer = (float)mc.gameSettings.gamma - 0.5f;
-		float lightStrength = sunBrightness - 0.7f + (gammaMultiplyer * 0.2f);
+		float lightStrength = sunBrightness - 0.4f + (gammaMultiplyer * 0.2f);
 		
 		float lightAmbient[] = {lightStrength, lightStrength, lightStrength, 1.0f};
 		

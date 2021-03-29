@@ -1,18 +1,13 @@
 package com.backsun.lod.proxy;
 
-import org.lwjgl.opengl.GL11;
-
 import com.backsun.lod.builders.LodBuilder;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodRegion;
 import com.backsun.lod.objects.LodWorld;
 import com.backsun.lod.renderer.LodRenderer;
-import com.backsun.lod.renderer.RenderGlobalHook;
-import com.backsun.lod.util.LodConfig;
 
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -49,25 +44,13 @@ public class ClientProxy
 	// render event //
 	//==============//
 	
-	@SubscribeEvent
-	public void renderWorldLast(RenderWorldLastEvent event)
-	{
-		RenderGlobalHook.endRenderingStencil();
-		GL11.glStencilFunc(GL11.GL_EQUAL, 0, 0xFF);
-		
-		if (LodConfig.CLIENT.drawLODs.get())
-			renderLods(event.getPartialTicks());
-		
-		GL11.glDisable(GL11.GL_STENCIL_TEST);
-	}
-	
 	/**
 	 * Do any setup that is required to draw LODs
 	 * and then tell the LodRenderer to draw.
 	 */
 	public void renderLods(float partialTicks)
 	{
-		// update the 
+		// update each regions' width to match the new render distance
 		int newWidth = Math.max(4, (mc.gameSettings.renderDistanceChunks * LodChunk.WIDTH * 2) / LodRegion.SIZE);
 		if (lodWorld != null && lodBuilder.regionWidth != newWidth)
 		{
