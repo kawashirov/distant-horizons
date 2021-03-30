@@ -23,7 +23,7 @@ import net.minecraft.world.server.ServerWorld;
  * to file.
  * 
  * @author James Seibel
- * @version 01-30-2021
+ * @version 03-30-2021
  */
 public class LodDimensionFileHandler
 {
@@ -196,7 +196,7 @@ public class LodDimensionFileHandler
 			
 			for(LodChunk[] chunkArray : region.getAllLods())
 				for(LodChunk chunk : chunkArray)
-					if(chunk != null)
+					if(chunk != null && !chunk.isPlaceholder())
 						fw.write(chunk.toData() + "\n");
 			
 			fw.close();
