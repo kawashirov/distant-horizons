@@ -250,6 +250,11 @@ public class LodRenderer
 		GL11.glDisable(GL11.GL_LIGHT0);
 		GL11.glDisable(GL11.GL_LIGHT1);
 		
+		// get the default projection matrix so we can
+		// reset it after drawing the LODs
+		float[] defaultProjMatrix = new float[16];
+        GL11.glGetFloatv(GL11.GL_PROJECTION_MATRIX, defaultProjMatrix);
+		
 		Matrix4f modelViewMatrix = generateModelViewMatrix(partialTicks);
 		
 		setupProjectionMatrix(partialTicks);
@@ -281,6 +286,8 @@ public class LodRenderer
 		
 		
 		
+		
+		
 		//=========//
 		// cleanup //
 		//=========//
@@ -305,6 +312,16 @@ public class LodRenderer
 		RenderSystem.fogStart(defaultFogStartDist);
 		RenderSystem.fogEnd(defaultFogEndDist);
 		RenderSystem.fogMode(defaultFogMode);
+		
+		// reset the projection matrix so anything drawn after
+		// the LODs will use the correct projection matrix
+		Matrix4f mvm = new Matrix4f(defaultProjMatrix);
+		mvm.transpose();
+		gameRender.resetProjectionMatrix(mvm);
+		
+		// clear the depth buffer so anything drawn is drawn
+		// over the LODs
+		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		
 		
 		
