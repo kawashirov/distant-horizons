@@ -6,7 +6,6 @@ import java.util.concurrent.Executors;
 
 import com.backsun.lod.enums.ColorDirection;
 import com.backsun.lod.enums.LodLocation;
-import com.backsun.lod.handlers.LodDimensionFileHandler;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodWorld;
@@ -33,7 +32,6 @@ import net.minecraft.world.server.ServerWorld;
 public class LodBuilder
 {
 	private ExecutorService lodGenThreadPool = Executors.newSingleThreadExecutor();
-	public volatile LodWorld lodWorld;
 	
 	/** Default size of any LOD regions we use */
 	public int regionWidth = 5;
@@ -59,12 +57,7 @@ public class LodBuilder
 	
 	
 	
-	/**
-	 * Returns LodWorld so that it can be passed
-	 * to the LodRenderer.
-	 * @param dimensionType 
-	 */
-	public LodWorld generateLodChunkAsync(IChunk chunk, DimensionType dim)
+	public void generateLodChunkAsync(IChunk chunk, LodWorld lodWorld, DimensionType dim)
 	{
 		if (lodWorld == null)
 			return;
@@ -79,16 +72,12 @@ public class LodBuilder
 		// don't try to create an LOD object
 		// if for some reason we aren't
 		// given a valid chunk object
-		// (Minecraft often gives back empty
-		// or null chunks in this method)
 		if (chunk == null || !LodUtils.chunkHasBlockData(chunk))
-			return lodWorld;
+			return;
 		
 		ServerWorld world = LodUtils.getServerWorldFromDimension(dim);
-		
-		
 		if (world == null)
-			return lodWorld;
+			return;
 			
 		Thread thread = new Thread(() ->
 		{
@@ -97,12 +86,6 @@ public class LodBuilder
 				LodChunk lod = generateLodFromChunk(chunk, world);
 				
 				LodDimension lodDim;
-				
-				if (lodWorld == null)
-				{
-					lodWorld = new LodWorld(LodDimensionFileHandler.getCurrentWorldID());
-				}
-				
 				
 				if (lodWorld.getLodDimension(dim) == null)
 				{
@@ -125,7 +108,7 @@ public class LodBuilder
 		});
 		lodGenThreadPool.execute(thread);
 		
-		return lodWorld;
+		return;
 	}
 	
 	

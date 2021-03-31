@@ -1,26 +1,8 @@
-/*
- * Minecraft Forge
- * Copyright (c) 2016-2020.
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation version 2.1
- * of the License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
 package com.backsun.lod.builders;
 
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodRegion;
+import com.backsun.lod.proxy.ClientProxy;
 import com.backsun.lod.renderer.LodRenderer;
 import com.backsun.lod.util.LodUtils;
 
@@ -34,7 +16,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  * 
  * @author James Seibel
- * @version 03-25-2021
+ * @version 03-31-2021
  */
 public class LodChunkGenWorker implements IWorker
 {
@@ -45,7 +27,9 @@ public class LodChunkGenWorker implements IWorker
     private LodBufferBuilder lodBufferBuilder;
     private LodRenderer lodRenderer;
     
-    public LodChunkGenWorker(ChunkPos newPos, LodRenderer newLodRenderer, LodBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, LodDimension newLodDimension)
+    public LodChunkGenWorker(ChunkPos newPos, LodRenderer newLodRenderer, 
+    		LodBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, 
+    		LodDimension newLodDimension)
     {
         serverWorld  = LodUtils.getServerWorldFromDimension(newLodDimension.dimension);
         pos = newPos;
@@ -75,7 +59,7 @@ public class LodChunkGenWorker implements IWorker
                 //System.out.println(endTime - startTime + "\t" + lodBuilder.hasBlockData(chunk));
                 
                 
-                lodBuilder.generateLodChunkAsync(chunk, serverWorld.getDimensionType());
+                lodBuilder.generateLodChunkAsync(chunk, ClientProxy.getLodWorld(), serverWorld.getDimensionType());
                 // this is called so that the new LOD chunk is drawn
                 // after it is generated
                 lodRenderer.regenerateLODsNextFrame();

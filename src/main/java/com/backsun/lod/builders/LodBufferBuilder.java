@@ -8,6 +8,7 @@ import org.lwjgl.opengl.GL11;
 import com.backsun.lod.enums.ColorDirection;
 import com.backsun.lod.enums.LodCorner;
 import com.backsun.lod.objects.LodChunk;
+import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.NearFarBuffer;
 import com.backsun.lod.renderer.LodRenderer;
 
@@ -75,7 +76,7 @@ public class LodBufferBuilder
 	 * After the buildable buffers have been generated they must be
 	 * swapped with the drawable buffers in the LodRenderer to be drawn.
 	 */
-	public void generateLodBuffersAsync(LodRenderer renderer, 
+	public void generateLodBuffersAsync(LodRenderer renderer, LodDimension lodDim,
 			double playerX, double playerZ, int numbChunksWide)
 	{
 		// only allow one generation process to happen at a time
@@ -148,7 +149,7 @@ public class LodBufferBuilder
 					int chunkX = i + (startX / LodChunk.WIDTH);
 					int chunkZ = j + (startZ / LodChunk.WIDTH);
 					
-					LodChunk lod = renderer.lodDimension.getLodFromCoordinates(chunkX, chunkZ);
+					LodChunk lod = lodDim.getLodFromCoordinates(chunkX, chunkZ);
 					if (lod == null || lod.isLodEmpty())
 					{
 						// note: for some reason if any color or lod objects are set here
@@ -247,11 +248,11 @@ public class LodBufferBuilder
 				LodChunk placeholder = new LodChunk();
 				placeholder.x = chunkPos.x;
 				placeholder.z = chunkPos.z;
-				renderer.lodDimension.addLod(placeholder);
+				lodDim.addLod(placeholder);
 				
 				numChunksWaitingToGen++;
 				
-				LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, renderer, lodBuilder, this, renderer.lodDimension);
+				LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, renderer, lodBuilder, this, lodDim);
 				WorldWorkerManager.addWorker(genWorker);
 			}
 			

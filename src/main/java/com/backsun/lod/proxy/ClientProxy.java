@@ -6,6 +6,7 @@ import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodRegion;
 import com.backsun.lod.objects.LodWorld;
 import com.backsun.lod.renderer.LodRenderer;
+import com.backsun.lod.util.LodUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.event.world.BlockEvent;
@@ -21,20 +22,20 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of this program.
  * 
  * @author James_Seibel
- * @version 03-27-2021
+ * @version 03-31-2021
  */
 public class ClientProxy
 {
-	private LodRenderer renderer;
-	private LodWorld lodWorld;
-	private LodBuilder lodBuilder;
+	private static LodWorld lodWorld = new LodWorld();
+	private static LodBuilder lodBuilder = new LodBuilder();
+	private static LodRenderer renderer = new LodRenderer(lodBuilder);
+	
 	Minecraft mc = Minecraft.getInstance();
 	
 	
 	public ClientProxy()
 	{
-		lodBuilder = new LodBuilder();
-		renderer = new LodRenderer(lodBuilder);
+		
 	}
 	
 	
@@ -98,16 +99,22 @@ public class ClientProxy
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
-		lodWorld = lodBuilder.generateLodChunkAsync(event.getChunk(), event.getWorld().getDimensionType());
+		lodBuilder.generateLodChunkAsync(event.getChunk(), lodWorld, event.getWorld().getDimensionType());
 	}
 	
 	
 	@SubscribeEvent
+	public void worldLoadEvent(WorldEvent.Load event)
+	{
+		// update the LodWorld to use the new world the player
+		// is loaded
+		lodWorld.selectWorld(LodUtils.getCurrentWorldID());
+	}
+	
+	@SubscribeEvent
 	public void worldUnloadEvent(WorldEvent.Unload event)
 	{
-		// clear the old LodWorld to make sure
-		// the correct world is used when changing worlds
-		lodWorld = null;
+		lodWorld.deselectWorld();
 	}
 	
 	
@@ -121,8 +128,29 @@ public class ClientProxy
 			event.getClass() == BlockEvent.PortalSpawnEvent.class)
 		{
 			// recreate the LOD where the blocks were changed
-			lodWorld = lodBuilder.generateLodChunkAsync(event.getWorld().getChunk(event.getPos()), event.getWorld().getDimensionType());
+			lodBuilder.generateLodChunkAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld().getDimensionType());
 		}
 	}
 	
+	
+	
+	
+	//================//
+	// public getters //
+	//================//
+	
+	public static LodWorld getLodWorld()
+	{
+		return lodWorld;
+	}
+	
+	public static LodBuilder getLodBuilder()
+	{
+		return lodBuilder;
+	}
+	
+	public static LodRenderer getRenderer()
+	{
+		return renderer;
+	}
 }
