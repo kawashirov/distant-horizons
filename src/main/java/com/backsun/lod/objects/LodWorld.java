@@ -9,33 +9,56 @@ import net.minecraft.world.DimensionType;
  * This stores all LODs for a given world.
  * 
  * @author James Seibel
- * @version 02-22-2021
+ * @version 03-31-2021
  */
 public class LodWorld
 {
-	public String worldName;
+	private String worldName;
 	
-	/**
-	 * Key = Dimension id (as an int)
-	 */
 	private Map<DimensionType, LodDimension> lodDimensions;
 	
 	
-	public LodWorld(String newWorldName)
+	public LodWorld()
+	{
+		worldName = "No world loaded";
+	}
+	
+	/**
+	 * Set up the LodWorld with the given newWorldName. <br>
+	 * This should be done whenever loading a new world.
+	 * @param newWorldName
+	 */
+	public void selectWorld(String newWorldName)
 	{
 		worldName = newWorldName;
 		lodDimensions = new Hashtable<DimensionType, LodDimension>();
 	}
 	
+	/**
+	 * Set the worldName to "No world loaded"
+	 * and clear the lodDimensions Map. <br>
+	 * This should be done whenever unloaded a world. 
+	 */
+	public void deselectWorld()
+	{
+		worldName = "No world loaded";
+		lodDimensions = null;
+	}
 	
 	
 	public void addLodDimension(LodDimension newStorage)
 	{
+		if (lodDimensions == null)
+			throw new IllegalStateException("LodWorld hasn't been given a world yet.");
+		
 		lodDimensions.put(newStorage.dimension, newStorage);
 	}
 	
 	public LodDimension getLodDimension(DimensionType dimension)
 	{
+		if (lodDimensions == null)
+			throw new IllegalStateException("LodWorld hasn't been given a world yet.");
+		
 		return lodDimensions.get(dimension);
 	}
 	
@@ -45,21 +68,23 @@ public class LodWorld
 	 */
 	public void resizeDimensionRegionWidth(int newWidth)
 	{
+		if (lodDimensions == null)
+			throw new IllegalStateException("LodWorld hasn't been given a world yet.");
+		
 		for(DimensionType key : lodDimensions.keySet())
 			lodDimensions.get(key).setRegionWidth(newWidth);
 	}
 	
 	
 	
+	public String getWorldName()
+	{
+		return worldName;
+	}
+	
 	@Override
 	public String toString()
 	{
-		String s = "";
-		
-		s += worldName + "\t - dimensions: ";
-		for(DimensionType key : lodDimensions.keySet())
-			s += lodDimensions.get(key).dimension.toString() + ", ";
-		
-		return s;
+		return "World name: " + worldName;
 	}
 }
