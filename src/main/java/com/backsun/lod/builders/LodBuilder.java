@@ -66,12 +66,14 @@ public class LodBuilder
 	 */
 	public LodWorld generateLodChunkAsync(IChunk chunk, DimensionType dim)
 	{
-		if (lodWorld != null)
-			// is this chunk from the same world as the lodWorld?
-			if (!lodWorld.worldName.equals(LodDimensionFileHandler.getCurrentWorldID()))
-				// we are not in the same world anymore
-				// don't add this LOD
-				return lodWorld;
+		if (lodWorld == null)
+			return;
+			
+		// is this chunk from the same world as the lodWorld?
+		if (!lodWorld.getWorldName().equals(LodUtils.getCurrentWorldID()))
+			// we are not in the same world anymore
+			// don't add this LOD
+			return;
 				
 		
 		// don't try to create an LOD object

@@ -9,13 +9,14 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
+import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 
 /**
  * This class holds methods that may be used in multiple places.
  * 
  * @author James Seibel
- * @version 03-24-2021
+ * @version 03-31-2021
  */
 public class LodUtils
 {
@@ -107,4 +108,33 @@ public class LodUtils
 		
 		return false;
 	}
+		
+	/**
+	 * If on single player this will return the name of the user's
+	 * world, if in multiplayer it will return the server name
+	 * and game version.
+	 */
+	public static String getCurrentWorldID()
+	{
+		Minecraft mc = Minecraft.getInstance();
+		
+		if(mc.isIntegratedServerRunning())
+		{
+			ServerWorld serverWorld = LodUtils.getFirstValidServerWorld();
+			if (serverWorld == null)
+				return "";
+			
+			ServerChunkProvider provider = serverWorld.getChunkProvider();
+			if(provider != null)
+				return provider.getSavedData().folder.toString();
+			
+			return "";
+		}
+		else
+		{
+			return mc.getCurrentServerData().serverName + "_version_" + mc.getCurrentServerData().gameVersion;
+		}
+	}
+	
+	
 }
