@@ -42,7 +42,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world. 
  * 
  * @author James Seibel
- * @version 03-25-2021
+ * @version 03-31-2021
  */
 public class LodRenderer
 {
@@ -62,8 +62,6 @@ public class LodRenderer
 	private static final int LOD_CHUNK_DISTANCE_RADIUS = 6;
 	
 	private ReflectionHandler reflectionHandler;
-	
-	public LodDimension lodDimension;
 	
 	
 	/** This is used to generate the buildable buffers */
@@ -115,9 +113,9 @@ public class LodRenderer
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
 	@SuppressWarnings("deprecation")
-	public void drawLODs(LodDimension newDimension, float partialTicks, IProfiler newProfiler)
+	public void drawLODs(LodDimension lodDim, float partialTicks, IProfiler newProfiler)
 	{		
-		if (lodDimension == null && newDimension == null)
+		if (lodDim == null)
 		{
 			// if there aren't any loaded LodChunks
 			// don't try drawing anything
@@ -146,8 +144,7 @@ public class LodRenderer
 		if ((int)player.getPosX() / LodChunk.WIDTH != prevChunkX ||
 			(int)player.getPosZ() / LodChunk.WIDTH != prevChunkZ ||
 			previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks ||
-			prevFogDistance != LodConfig.CLIENT.fogDistance.get() ||
-			lodDimension != newDimension)
+			prevFogDistance != LodConfig.CLIENT.fogDistance.get())
 		{
 			// yes
 			regen = true;
@@ -161,14 +158,6 @@ public class LodRenderer
 			// nope, the player hasn't moved, the
 			// render distance hasn't changed, and
 			// the dimension is the same
-		}
-		
-		lodDimension = newDimension;
-		if (lodDimension == null)
-		{
-			// if there aren't any loaded LodChunks
-			// don't try drawing anything
-			return;
 		}
 		
 		if (LodConfig.CLIENT.drawCheckerBoard.get())
@@ -214,7 +203,7 @@ public class LodRenderer
 				setupBuffers(numbChunksWide);
 			
 			// generate the LODs on a separate thread to prevent stuttering or freezing
-			lodBufferBuilder.generateLodBuffersAsync(this, player.getPosX(), player.getPosZ(), numbChunksWide);
+			lodBufferBuilder.generateLodBuffersAsync(this, lodDim, player.getPosX(), player.getPosZ(), numbChunksWide);
 			
 			// the regen process has been started,
 			// it will be done when lodBufferBuilder.newBuffersAvaliable
@@ -258,7 +247,7 @@ public class LodRenderer
 		Matrix4f modelViewMatrix = generateModelViewMatrix(partialTicks);
 		
 		setupProjectionMatrix(partialTicks);
-		setupLighting(partialTicks);
+		setupLighting(lodDim, partialTicks);
 		
 		NearFarFogSetting fogSetting = determineFogSettings();
 		
@@ -507,7 +496,7 @@ public class LodRenderer
 	 * setup the lighting to be used for the LODs
 	 */
 	@SuppressWarnings("deprecation")
-	private void setupLighting(float partialTicks)
+	private void setupLighting(LodDimension lodDimension, float partialTicks)
 	{
 		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.world.getSunBrightness(partialTicks) : 0.2f;
 		float gammaMultiplyer = (float)mc.gameSettings.gamma - 0.5f;
