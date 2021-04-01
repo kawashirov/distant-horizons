@@ -15,11 +15,9 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.world.DimensionType;
-import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.server.ServerWorld;
 
 /**
  * This object is in charge of creating Lod
@@ -74,16 +72,12 @@ public class LodBuilder
 		// given a valid chunk object
 		if (chunk == null || !LodUtils.chunkHasBlockData(chunk))
 			return;
-		
-		ServerWorld world = LodUtils.getServerWorldFromDimension(dim);
-		if (world == null)
-			return;
 			
 		Thread thread = new Thread(() ->
 		{
 			try
 			{
-				LodChunk lod = generateLodFromChunk(chunk, world);
+				LodChunk lod = generateLodFromChunk(chunk);
 				
 				LodDimension lodDim;
 				
@@ -124,15 +118,11 @@ public class LodBuilder
 	 * @throws IllegalArgumentException 
 	 * thrown if either the chunk or world is null.
 	 */
-	public LodChunk generateLodFromChunk(IChunk chunk, World world) throws IllegalArgumentException
+	public LodChunk generateLodFromChunk(IChunk chunk) throws IllegalArgumentException
 	{
 		if(chunk == null)
 		{
 			throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
-		}
-		if(world == null)
-		{
-			throw new IllegalArgumentException("generateLodFromChunk given a null world");
 		}
 		
 		short[] top = new short[4];
@@ -149,7 +139,7 @@ public class LodBuilder
 		// determine the average color for each direction
 		for(ColorDirection dir : ColorDirection.values())
 		{
-			colors[dir.value] = generateLodColorForDirection(chunk, world, dir);
+			colors[dir.value] = generateLodColorForDirection(chunk, dir);
 		}
 		
 		return new LodChunk(chunk.getPos(), top, bottom, colors);
@@ -379,7 +369,7 @@ public class LodBuilder
 	 * Generate the color of the given ColorDirection at the given chunk
 	 * in the given world.
 	 */
-	private Color  generateLodColorForDirection(IChunk chunk, World world, ColorDirection colorDir)
+	private Color  generateLodColorForDirection(IChunk chunk, ColorDirection colorDir)
 	{
 		Minecraft mc =  Minecraft.getInstance();
 		BlockColors bc = mc.getBlockColors();
@@ -387,19 +377,19 @@ public class LodBuilder
 		switch (colorDir)
 		{
 		case TOP:
-			return generateLodColorVertical(chunk, colorDir, world, bc);
+			return generateLodColorVertical(chunk, colorDir, bc);
 		case BOTTOM:
-			return generateLodColorVertical(chunk, colorDir, world, bc);
+			return generateLodColorVertical(chunk, colorDir, bc);
 			
 		case N:
-			return generateLodColorHorizontal(chunk, colorDir, world, bc);
+			return generateLodColorHorizontal(chunk, colorDir, bc);
 		case S:
-			return generateLodColorHorizontal(chunk, colorDir, world, bc);
+			return generateLodColorHorizontal(chunk, colorDir, bc);
 			
 		case E:
-			return generateLodColorHorizontal(chunk, colorDir, world, bc);
+			return generateLodColorHorizontal(chunk, colorDir, bc);
 		case W:
-			return generateLodColorHorizontal(chunk, colorDir, world, bc);
+			return generateLodColorHorizontal(chunk, colorDir, bc);
 		}
 		
 		return new Color(0, 0, 0, 0);
@@ -410,7 +400,7 @@ public class LodBuilder
 	 * 
 	 * @throws IllegalArgumentException if given a ColorDirection other than TOP or BOTTOM
 	 */
-	private Color generateLodColorVertical(IChunk chunk, ColorDirection colorDir, World world, BlockColors bc)
+	private Color generateLodColorVertical(IChunk chunk, ColorDirection colorDir, BlockColors bc)
 	{
 		if(colorDir != ColorDirection.TOP && colorDir != ColorDirection.BOTTOM)
 		{
@@ -527,7 +517,7 @@ public class LodBuilder
 	 * 
 	 * @throws IllegalArgumentException if given a ColorDirection other than N, S, W, E (North, South, East, West)
 	 */
-	private Color generateLodColorHorizontal(IChunk chunk, ColorDirection colorDir, World world, BlockColors bc)
+	private Color generateLodColorHorizontal(IChunk chunk, ColorDirection colorDir, BlockColors bc)
 	{
 		if(colorDir != ColorDirection.N && colorDir != ColorDirection.S && colorDir != ColorDirection.E && colorDir != ColorDirection.W)
 		{
