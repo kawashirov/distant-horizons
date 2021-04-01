@@ -22,7 +22,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of this program.
  * 
  * @author James_Seibel
- * @version 03-31-2021
+ * @version 04-01-2021
  */
 public class ClientProxy
 {
@@ -64,7 +64,7 @@ public class ClientProxy
 		}
 		
 		
-		if (mc == null || mc.player == null || lodWorld == null)
+		if (mc == null || mc.player == null || !lodWorld.getIsWorldLoaded())
 			return;
 		
 		LodDimension lodDim = lodWorld.getLodDimension(mc.player.world.getDimensionType());

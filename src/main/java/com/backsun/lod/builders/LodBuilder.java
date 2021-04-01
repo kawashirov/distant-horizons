@@ -27,7 +27,7 @@ import net.minecraft.world.server.ServerWorld;
  * (specifically: Lod World, Dimension, Region, and Chunk objects)
  * 
  * @author James Seibel
- * @version 3-27-2021
+ * @version 4-01-2021
  */
 public class LodBuilder
 {
@@ -59,7 +59,7 @@ public class LodBuilder
 	
 	public void generateLodChunkAsync(IChunk chunk, LodWorld lodWorld, DimensionType dim)
 	{
-		if (lodWorld == null)
+		if (lodWorld == null || !lodWorld.getIsWorldLoaded())
 			return;
 			
 		// is this chunk from the same world as the lodWorld?
