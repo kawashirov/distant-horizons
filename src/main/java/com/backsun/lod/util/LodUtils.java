@@ -4,6 +4,7 @@ import com.backsun.lod.objects.LodRegion;
 import com.backsun.lod.objects.RegionPos;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
@@ -16,7 +17,7 @@ import net.minecraft.world.server.ServerWorld;
  * This class holds methods that may be used in multiple places.
  * 
  * @author James Seibel
- * @version 03-31-2021
+ * @version 04-01-2021
  */
 public class LodUtils
 {
@@ -122,7 +123,7 @@ public class LodUtils
 		{
 			ServerWorld serverWorld = LodUtils.getFirstValidServerWorld();
 			if (serverWorld == null)
-				return "";
+				throw new NullPointerException("getCurrentWorldID tried to get the ServerWorld but it was null");
 			
 			ServerChunkProvider provider = serverWorld.getChunkProvider();
 			if(provider != null)
@@ -132,7 +133,8 @@ public class LodUtils
 		}
 		else
 		{
-			return mc.getCurrentServerData().serverName + "_version_" + mc.getCurrentServerData().gameVersion;
+			ServerData server = mc.getCurrentServerData();
+			return server.serverName + ", IP " + server.serverIP + ", GameVersion " + server.gameVersion.getString();
 		}
 	}
 	
