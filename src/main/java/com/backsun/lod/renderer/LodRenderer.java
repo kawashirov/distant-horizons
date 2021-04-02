@@ -227,10 +227,15 @@ public class LodRenderer
 		// GL settings for rendering //
 		//===========================//
 		
+		// TODO store the default values of each of these so they can be reset correctly
+		// currently what is done here works, but it may not work in future versions of
+		// Minecraft or with mods that effect rendering
+		// issue #13
+		
 		// set the required open GL settings
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glDisable(GL11.GL_TEXTURE_2D); // TODO store the default values of each of these so they can be reset correctly
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
