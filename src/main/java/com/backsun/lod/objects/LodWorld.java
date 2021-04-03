@@ -19,9 +19,11 @@ public class LodWorld
 	/** If true then the LOD world is setup and ready to use */
 	private boolean isWorldLoaded = false;
 	
+	public static final String NO_WORLD_LOADED = "No world loaded";
+	
 	public LodWorld()
 	{
-		worldName = "No world loaded";
+		worldName = NO_WORLD_LOADED;
 	}
 	
 	/**
@@ -31,6 +33,17 @@ public class LodWorld
 	 */
 	public void selectWorld(String newWorldName)
 	{
+		if(newWorldName.isEmpty())
+		{
+			deselectWorld();
+			return;
+		}
+		
+		if (worldName.equals(newWorldName))
+			// don't recreate everything if we
+			// didn't actually change worlds
+			return;
+		
 		worldName = newWorldName;
 		lodDimensions = new Hashtable<DimensionType, LodDimension>();
 		isWorldLoaded = true;
@@ -43,7 +56,7 @@ public class LodWorld
 	 */
 	public void deselectWorld()
 	{
-		worldName = "No world loaded";
+		worldName = NO_WORLD_LOADED;
 		lodDimensions = null;
 		isWorldLoaded = false;
 	}

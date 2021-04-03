@@ -1,11 +1,16 @@
 package com.backsun.lod.objects;
 
+import java.io.File;
+import java.io.IOException;
+
 import com.backsun.lod.handlers.LodDimensionFileHandler;
 import com.backsun.lod.util.LodUtils;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
 
 /**
  * This object holds all loaded LOD regions
@@ -30,13 +35,42 @@ public class LodDimension
 	private LodDimensionFileHandler fileHandler;
 	
 	
-	public LodDimension(DimensionType newDimension, int newMaxWidth)
+	public LodDimension(DimensionType newDimension, LodWorld lodWorld, int newMaxWidth)
 	{
 		dimension = newDimension;
 		width = newMaxWidth;
 		
-		ServerChunkProvider provider = LodUtils.getServerWorldFromDimension(newDimension).getChunkProvider();
-		fileHandler = new LodDimensionFileHandler(provider.getSavedData().folder, this);
+		try
+		{
+			Minecraft mc = Minecraft.getInstance();
+			
+			File saveDir;
+			if(mc.isIntegratedServerRunning())
+			{
+				// local world
+				
+				ServerWorld serverWorld = LodUtils.getServerWorldFromDimension(newDimension);
+				// provider needs a separate variable to prevent
+				// the compiler from complaining
+				ServerChunkProvider provider = serverWorld.getChunkProvider();
+				saveDir = new File(provider.getSavedData().folder.getCanonicalFile() + "\\lod");
+			}
+			else
+			{
+				// connected to server
+				
+				saveDir = new File(mc.gameDir.getCanonicalFile() + 
+						"\\lod server data\\" + LodUtils.getDimensionIDFromWorld(mc.world));
+			}
+			
+			fileHandler = new LodDimensionFileHandler(saveDir, this);
+		}
+		catch(IOException e)
+		{
+			// the file handler wasn't able to be created
+			// we won't be able to read or write any files
+		}
+		
 		
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];
@@ -229,7 +263,7 @@ public class LodDimension
 		region.addLod(lod);
 		
 		// don't save empty place holders to disk
-		if (!lod.isPlaceholder())
+		if (!lod.isPlaceholder() && fileHandler != null)
 		{
 			// mark the region as dirty so it will be saved to disk
 			int xIndex = (pos.x - centerX) + halfWidth;
@@ -265,7 +299,10 @@ public class LodDimension
 	 */
 	public LodRegion getRegionFromFile(int regionX, int regionZ)
 	{
-		return fileHandler.loadRegionFromFile(regionX, regionZ);
+		if (fileHandler != null)
+			return fileHandler.loadRegionFromFile(regionX, regionZ);
+		else
+			return null;
 	}
 	
 	

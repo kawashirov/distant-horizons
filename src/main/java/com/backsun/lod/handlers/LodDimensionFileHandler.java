@@ -12,8 +12,6 @@ import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodRegion;
 
-import net.minecraft.client.Minecraft;
-
 /**
  * This object handles creating LodRegions
  * from files and saving LodRegion objects
@@ -63,11 +61,6 @@ public class LodDimensionFileHandler
 	 */
 	public LodRegion loadRegionFromFile(int regionX, int regionZ)
 	{
-		// we don't currently support reading or writing
-		// files when connected to a server
-		if (!Minecraft.getInstance().isIntegratedServerRunning())
-			return null;
-		
 		if (!readyToReadAndWrite())
 			return null;
 		
@@ -138,11 +131,6 @@ public class LodDimensionFileHandler
 	 */
 	public synchronized void saveDirtyRegionsToFileAsync()
 	{
-		// we don't currently support reading or writing
-		// files when connected to a server
-		if (!Minecraft.getInstance().isIntegratedServerRunning())
-			return;
-		
 		if (!readyToReadAndWrite())
 			// we aren't ready to read and write yet
 			return;
@@ -231,7 +219,7 @@ public class LodDimensionFileHandler
 			// ".\Super Flat\DIM-1\data"
 			// or
 			// ".\Super Flat\data"
-			return dimensionDataSaveFolder.getCanonicalPath() + "\\lod\\" +
+			return dimensionDataSaveFolder.getCanonicalPath() + "\\" +
 					FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
 		}
 		catch(IOException e)
