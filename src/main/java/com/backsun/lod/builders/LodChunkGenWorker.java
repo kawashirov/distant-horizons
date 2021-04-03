@@ -32,6 +32,9 @@ public class LodChunkGenWorker implements IWorker
     		LodDimension newLodDimension)
     {
         serverWorld  = LodUtils.getServerWorldFromDimension(newLodDimension.dimension);
+        if (serverWorld == null)
+        	throw new IllegalArgumentException("LodChunkGenWorker must have a non-null ServerWorld"); 
+        	
         pos = newPos;
         lodDim = newLodDimension;
         lodBuilder = newLodBuilder;
