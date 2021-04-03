@@ -170,29 +170,34 @@ public class LodBufferBuilder
 							// than the previous
 							int newDistance = playerChunkPos.getChessboardDistance(pos);
 							
-							if (newDistance < minChunkDist)
+							// TODO add a way for a server side mod to generate chunks requested here
+							if (mc.isIntegratedServerRunning())
 							{
-								// this chunk is closer, clear any previous
-								// positions and update the new minimum distance
-								minChunkDist = newDistance;
-								
-								chunkGenIndex = 0;
-								chunksToGen = new ChunkPos[maxChunkGenRequests];
-								chunksToGen[chunkGenIndex] = pos;
-								chunkGenIndex++;
-							}
-							else if (newDistance <= minChunkDist)
-							{
-								// this chunk position is as close or closers than the
-								// minimum distance
-								if(chunkGenIndex < maxChunkGenRequests)
+								if (newDistance < minChunkDist)
 								{
-									// we are still under the number of chunks to generate
-									// add this pos to the list
+									// this chunk is closer, clear any previous
+									// positions and update the new minimum distance
+									minChunkDist = newDistance;
+									
+									chunkGenIndex = 0;
+									chunksToGen = new ChunkPos[maxChunkGenRequests];
 									chunksToGen[chunkGenIndex] = pos;
 									chunkGenIndex++;
 								}
+								else if (newDistance <= minChunkDist)
+								{
+									// this chunk position is as close or closers than the
+									// minimum distance
+									if(chunkGenIndex < maxChunkGenRequests)
+									{
+										// we are still under the number of chunks to generate
+										// add this pos to the list
+										chunksToGen[chunkGenIndex] = pos;
+										chunkGenIndex++;
+									}
+								}
 							}
+							
 						}
 						
 						continue;
@@ -237,23 +242,26 @@ public class LodBufferBuilder
 				}
 			}
 			
-			// start chunk generation
-			for(ChunkPos chunkPos : chunksToGen)
+			if(mc.isIntegratedServerRunning())
 			{
-				if(chunkPos == null)
-					break;
-				
-				// add a placeholder chunk to prevent this chunk from
-				// being generated again
-				LodChunk placeholder = new LodChunk();
-				placeholder.x = chunkPos.x;
-				placeholder.z = chunkPos.z;
-				lodDim.addLod(placeholder);
-				
-				numChunksWaitingToGen++;
-				
-				LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, renderer, lodBuilder, this, lodDim);
-				WorldWorkerManager.addWorker(genWorker);
+				// start chunk generation
+				for(ChunkPos chunkPos : chunksToGen)
+				{
+					if(chunkPos == null)
+						break;
+					
+					// add a placeholder chunk to prevent this chunk from
+					// being generated again
+					LodChunk placeholder = new LodChunk();
+					placeholder.x = chunkPos.x;
+					placeholder.z = chunkPos.z;
+					lodDim.addLod(placeholder);
+					
+					numChunksWaitingToGen++;
+					
+					LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, renderer, lodBuilder, this, lodDim);
+					WorldWorkerManager.addWorker(genWorker);
+				}
 			}
 			
 			
