@@ -14,9 +14,6 @@ import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-//TODO Find a way to replace getIntegratedServer so this mod could be used on non-local worlds.
-// Minecraft.getMinecraft().getIntegratedServer()
-
 /**
  * This handles all events sent to the client,
  * and is the starting point for most of this program.
@@ -51,9 +48,12 @@ public class ClientProxy
 	 */
 	public void renderLods(float partialTicks)
 	{
+		if (mc == null || mc.player == null || !lodWorld.getIsWorldLoaded())
+			return;
+		
 		// update each regions' width to match the new render distance
 		int newWidth = Math.max(4, (mc.gameSettings.renderDistanceChunks * LodChunk.WIDTH * 2) / LodRegion.SIZE);
-		if (lodWorld != null && lodBuilder.regionWidth != newWidth)
+		if (lodBuilder.regionWidth != newWidth)
 		{
 			lodWorld.resizeDimensionRegionWidth(newWidth);
 			lodBuilder.regionWidth = newWidth;
@@ -62,10 +62,6 @@ public class ClientProxy
 			// should have everything set up by then
 			return;
 		}
-		
-		
-		if (mc == null || mc.player == null || !lodWorld.getIsWorldLoaded())
-			return;
 		
 		LodDimension lodDim = lodWorld.getLodDimension(mc.player.world.getDimensionType());
 		if (lodDim == null)
@@ -99,27 +95,33 @@ public class ClientProxy
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
-		lodBuilder.generateLodChunkAsync(event.getChunk(), lodWorld, event.getWorld().getDimensionType());
+		lodBuilder.generateLodChunkAsync(event.getChunk(), lodWorld, event.getWorld());
 	}
 	
 	
 	@SubscribeEvent
 	public void worldLoadEvent(WorldEvent.Load event)
 	{
-		// update the LodWorld to use the new world the player
-		// is loaded
-		lodWorld.selectWorld(LodUtils.getCurrentWorldID());
+		// the player just loaded a new world/dimension
+		lodWorld.selectWorld(LodUtils.getWorldID(event.getWorld()));
+		// make sure the correct LODs are being rendered
+		// (if this isn't done the previous world's LODs may be drawn)
+		renderer.regenerateLODsNextFrame();
 	}
 	
 	@SubscribeEvent
 	public void worldUnloadEvent(WorldEvent.Unload event)
 	{
-		lodWorld.deselectWorld();
+		// the player just loaded a new world/dimension
+		
+		if(mc.getConnection().getWorld() == null)
+			// the player has disconnected from a server
+			lodWorld.deselectWorld();
 	}
 	
 	
 	@SubscribeEvent
-	public void worldChangeEvent(BlockEvent event)
+	public void blockChangeEvent(BlockEvent event)
 	{
 		if (event.getClass() == BlockEvent.BreakEvent.class ||
 			event.getClass() == BlockEvent.EntityPlaceEvent.class ||
@@ -128,7 +130,7 @@ public class ClientProxy
 			event.getClass() == BlockEvent.PortalSpawnEvent.class)
 		{
 			// recreate the LOD where the blocks were changed
-			lodBuilder.generateLodChunkAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld().getDimensionType());
+			lodBuilder.generateLodChunkAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld());
 		}
 	}
 	

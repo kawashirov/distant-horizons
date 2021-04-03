@@ -62,7 +62,7 @@ public class LodChunkGenWorker implements IWorker
                 //System.out.println(endTime - startTime + "\t" + lodBuilder.hasBlockData(chunk));
                 
                 
-                lodBuilder.generateLodChunkAsync(chunk, ClientProxy.getLodWorld(), serverWorld.getDimensionType());
+                lodBuilder.generateLodChunkAsync(chunk, ClientProxy.getLodWorld(), serverWorld);
                 // this is called so that the new LOD chunk is drawn
                 // after it is generated
                 lodRenderer.regenerateLODsNextFrame();

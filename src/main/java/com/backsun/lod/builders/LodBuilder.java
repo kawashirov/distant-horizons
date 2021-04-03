@@ -15,6 +15,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
@@ -55,13 +56,13 @@ public class LodBuilder
 	
 	
 	
-	public void generateLodChunkAsync(IChunk chunk, LodWorld lodWorld, DimensionType dim)
+	public void generateLodChunkAsync(IChunk chunk, LodWorld lodWorld, IWorld world)
 	{
 		if (lodWorld == null || !lodWorld.getIsWorldLoaded())
 			return;
 			
 		// is this chunk from the same world as the lodWorld?
-		if (!lodWorld.getWorldName().equals(LodUtils.getCurrentWorldID()))
+		if (!lodWorld.getWorldName().equals(LodUtils.getWorldID(world)))
 			// we are not in the same world anymore
 			// don't add this LOD
 			return;
@@ -77,13 +78,15 @@ public class LodBuilder
 		{
 			try
 			{
+				DimensionType dim = world.getDimensionType();
+				
 				LodChunk lod = generateLodFromChunk(chunk);
 				
 				LodDimension lodDim;
 				
 				if (lodWorld.getLodDimension(dim) == null)
 				{
-					lodDim = new LodDimension(dim, regionWidth);
+					lodDim = new LodDimension(dim, lodWorld, regionWidth);
 					lodWorld.addLodDimension(lodDim);
 				}
 				else

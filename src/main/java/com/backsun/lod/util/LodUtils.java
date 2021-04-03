@@ -8,6 +8,7 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.server.ServerChunkProvider;
@@ -109,32 +110,104 @@ public class LodUtils
 		
 		return false;
 	}
+	
+	
+	
+	public static String getCurrentDimensionID()
+	{
+
+		Minecraft mc = Minecraft.getInstance();
 		
+		if(mc.isIntegratedServerRunning())
+		{
+			// this will return the world save location
+			// and the dimension folder
+			
+			if(mc.world == null)
+				return "";
+			
+			ServerWorld serverWorld = LodUtils.getServerWorldFromDimension(mc.world.getDimensionType());
+			if(serverWorld == null)
+				return "";
+			
+			ServerChunkProvider provider = serverWorld.getChunkProvider();
+			if(provider == null)
+				return "";
+			
+			return provider.getSavedData().folder.toString();
+		}
+		else
+		{
+			ServerData server = mc.getCurrentServerData();
+			return server.serverName + ", IP " + 
+					server.serverIP + ", GameVersion " + 
+					server.gameVersion.getString() + "\\"
+					+ "dim_" + mc.world.getDimensionType().getEffects().getPath() + "\\";
+		}
+	}
+
+	
 	/**
 	 * If on single player this will return the name of the user's
-	 * world, if in multiplayer it will return the server name
-	 * and game version.
+	 * world and the dimensional save folder, if in multiplayer 
+	 * it will return the server name, game version, and dimension.<br>
+	 * <br>
+	 * This can be used to determine where to save files for a given
+	 * dimension.
 	 */
-	public static String getCurrentWorldID()
+	public static String getDimensionIDFromWorld(IWorld world)
 	{
 		Minecraft mc = Minecraft.getInstance();
 		
 		if(mc.isIntegratedServerRunning())
 		{
-			ServerWorld serverWorld = LodUtils.getFirstValidServerWorld();
-			if (serverWorld == null)
-				throw new NullPointerException("getCurrentWorldID tried to get the ServerWorld but it was null");
+			// this will return the world save location
+			// and the dimension folder
+			
+			ServerWorld serverWorld = LodUtils.getServerWorldFromDimension(world.getDimensionType());
+			if(serverWorld == null)
+				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerWorld for the dimension " + world.getDimensionType().getEffects().getPath());
 			
 			ServerChunkProvider provider = serverWorld.getChunkProvider();
-			if(provider != null)
-				return provider.getSavedData().folder.toString();
+			if(provider == null)
+				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerChunkProvider for the dimension " + world.getDimensionType().getEffects().getPath());
 			
-			return "";
+			return provider.getSavedData().folder.toString();
 		}
 		else
 		{
 			ServerData server = mc.getCurrentServerData();
-			return server.serverName + ", IP " + server.serverIP + ", GameVersion " + server.gameVersion.getString();
+			return server.serverName + ", IP " + 
+					server.serverIP + ", GameVersion " + 
+					server.gameVersion.getString() + "\\"
+					+ "dim_" + world.getDimensionType().getEffects().getPath() + "\\";
+		}
+	}
+	
+	/**
+	 * If on single player this will return the name of the user's
+	 * world, if in multiplayer it will return the server name
+	 * and game version.
+	 */
+	public static String getWorldID(IWorld world)
+	{
+		if(mc.isIntegratedServerRunning())
+		{
+			// chop off the dimension ID as it is not needed/wanted
+			String dimId = getDimensionIDFromWorld(world);
+			
+			// get the world name
+			int saveIndex = dimId.indexOf("saves") + 1 + "saves".length();
+			int slashIndex = dimId.indexOf('\\', saveIndex);
+			dimId = dimId.substring(saveIndex, slashIndex);
+			return dimId;
+		}
+		else
+		{
+			ServerData server = mc.getCurrentServerData();
+			return server.serverName + ", IP " + 
+					server.serverIP + ", GameVersion " + 
+					server.gameVersion.getString();
 		}
 	}
 	
