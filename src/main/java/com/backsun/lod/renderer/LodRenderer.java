@@ -227,11 +227,6 @@ public class LodRenderer
 		// GL settings for rendering //
 		//===========================//
 		
-		// TODO store the default values of each of these so they can be reset correctly
-		// currently what is done here works, but it may not work in future versions of
-		// Minecraft or with mods that effect rendering
-		// issue #13
-		
 		// set the required open GL settings
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
@@ -294,7 +289,6 @@ public class LodRenderer
 		// re-enable the lights Minecraft uses
 		GL11.glEnable(GL11.GL_LIGHT0);
 		GL11.glEnable(GL11.GL_LIGHT1);
-		// TODO record the light states before to make sure they are being reset correctly
 		RenderSystem.disableLighting();
 		
 		// this can't be called until after the buffers are built
