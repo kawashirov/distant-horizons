@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 
 import com.backsun.lod.ModInfo;
 import com.backsun.lod.enums.FogDistance;
+import com.backsun.lod.enums.LodDrawMode;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 
@@ -19,7 +20,7 @@ import net.minecraftforge.fml.config.ModConfig;
 /**
  * 
  * @author James Seibel
- * @version 02-27-2021
+ * @version 05-05-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -32,31 +33,41 @@ public class LodConfig
 		
 		public ForgeConfigSpec.BooleanValue drawCheckerBoard;
 		
+		public ForgeConfigSpec.EnumValue<LodDrawMode> lodDrawMode;
+		
 		
 		Client(ForgeConfigSpec.Builder builder)
 		{
 	        builder.comment(ModInfo.MODNAME + " configuration settings").push("client");
 	        
 	        drawLODs = builder
-	        		.comment("If false LODs will not be drawn, \n"
-	        				+ "however they will still be generated \n"
-	        				+ "and saved to file for later use.")
+	        		.comment(" If false LODs will not be drawn, \n"
+	        				+ " however they will still be generated \n"
+	        				+ " and saved to file for later use.")
 	        		.define("drawLODs", true);
 	        
 	        fogDistance = builder
 	                .comment("\n"
-	                		+ "At what distance should Fog be drawn on the LODs? \n"
-	                		+ "If fog cuts off ubruptly or you are using Optifine's \"fast\" \n"
-	                		+ "fog option set this to " + FogDistance.NEAR.toString() + " or " + FogDistance.FAR.toString() + ".")
+	                		+ " At what distance should Fog be drawn on the LODs? \n"
+	                		+ " If fog cuts off ubruptly or you are using Optifine's \"fast\" \n"
+	                		+ " fog option set this to " + FogDistance.NEAR.toString() + " or " + FogDistance.FAR.toString() + ".")
 	                .defineEnum("fogDistance", FogDistance.NEAR_AND_FAR);
 	        
 	        drawCheckerBoard = builder
 	                .comment("\n"
-	                		+ "If false the LODs will draw with their normal world colors. \n"
-	                		+ "If true they will draw as a black and white checkerboard. \n"
-	                		+ "This can be used for debugging or imagining you are playing a \n"
-	                		+ "giant game of chess ;)")
+	                		+ " If false the LODs will draw with their normal world colors. \n"
+	                		+ " If true they will draw as a black and white checkerboard. \n"
+	                		+ " This can be used for debugging or imagining you are playing a \n"
+	                		+ " giant game of chess ;)")
 	                .define("drawCheckerBoard", false);
+	        
+	        lodDrawMode = builder
+	                .comment("\n"
+	                		+ " How should the LODs be drawn? \n"
+	                		+ " " + LodDrawMode.CUBIC.toString() + ": LOD Chunks are drawn as rectangular prisms (boxes). \n"
+	                		+ " " + LodDrawMode.TRIANGULAR.toString() + ": LOD Chunks smoothly transition between other. \n"
+	                		+ " " + LodDrawMode.DYNAMIC.toString() + ": LOD Chunks smoothly transition between other, unless a neighboring chunk is at a significantly different height. ")
+	                .defineEnum("lodDrawMode", LodDrawMode.CUBIC);
 	        
 	        builder.pop();
 	    }
