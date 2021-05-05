@@ -8,8 +8,6 @@ package com.backsun.lod.enums;
  */
 public enum LodCorner
 {
-	// used for position
-	
 	/** -Z, +X */
 	NE(0),
 	/** +Z, +X */
