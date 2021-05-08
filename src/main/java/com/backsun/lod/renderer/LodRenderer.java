@@ -160,15 +160,16 @@ public class LodRenderer
 			// the dimension is the same
 		}
 		
-		if (LodConfig.CLIENT.drawCheckerBoard.get())
+		// TODO simplify this logic?
+		if (LodConfig.CLIENT.debugMode.get())
 		{
-			if (debugging != LodConfig.CLIENT.drawCheckerBoard.get())
+			if (debugging != LodConfig.CLIENT.debugMode.get())
 				regen = true;
 			debugging = true;
 		}
 		else
 		{
-			if (debugging != LodConfig.CLIENT.drawCheckerBoard.get())
+			if (debugging != LodConfig.CLIENT.debugMode.get())
 				regen = true;
 			debugging = false;
 		}

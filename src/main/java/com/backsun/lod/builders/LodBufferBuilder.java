@@ -199,7 +199,7 @@ public class LodBufferBuilder
 					
 					// get the desired LodTemplate and
 					// add this LOD to the buffer
-					LodConfig.CLIENT.lodTemplateMode.get().template.
+					LodConfig.CLIENT.lodTemplate.get().template.
 					addLodToBuffer(currentBuffer, lodDim, lod, 
 							xOffset, yOffset, zOffset, renderer.debugging);
 				}

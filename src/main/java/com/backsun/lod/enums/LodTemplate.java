@@ -11,7 +11,7 @@ import com.backsun.lod.builders.lodTemplates.TriangularLodTemplate;
  * @author James Seibel
  * @version 05-07-2021
  */
-public enum LodTemplateMode
+public enum LodTemplate
 {
 	// used for position
 
@@ -31,7 +31,7 @@ public enum LodTemplateMode
 	
 	public final AbstractLodTemplate template;
 	
-	private LodTemplateMode(AbstractLodTemplate newTemplate)
+	private LodTemplate(AbstractLodTemplate newTemplate)
 	{
 		template = newTemplate;
 	}

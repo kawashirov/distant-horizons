@@ -8,7 +8,9 @@ import org.apache.logging.log4j.LogManager;
 
 import com.backsun.lod.ModInfo;
 import com.backsun.lod.enums.FogDistance;
-import com.backsun.lod.enums.LodTemplateMode;
+import com.backsun.lod.enums.LodColorStyle;
+import com.backsun.lod.enums.LodGeometryQuality;
+import com.backsun.lod.enums.LodTemplate;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 
@@ -31,10 +33,13 @@ public class LodConfig
 		
 		public ForgeConfigSpec.EnumValue<FogDistance> fogDistance;
 		
-		public ForgeConfigSpec.BooleanValue drawCheckerBoard;
+		public ForgeConfigSpec.BooleanValue debugMode;
 		
-		public ForgeConfigSpec.EnumValue<LodTemplateMode> lodTemplateMode;
+		public ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
 		
+		public ForgeConfigSpec.EnumValue<LodGeometryQuality> lodGeometryQuality;
+
+		public ForgeConfigSpec.EnumValue<LodColorStyle> lodColorStyle;
 		
 		Client(ForgeConfigSpec.Builder builder)
 		{
@@ -49,11 +54,11 @@ public class LodConfig
 	        fogDistance = builder
 	                .comment("\n"
 	                		+ " At what distance should Fog be drawn on the LODs? \n"
-	                		+ " If fog cuts off ubruptly or you are using Optifine's \"fast\" \n"
+	                		+ " If the fog cuts off ubruptly or you are using Optifine's \"fast\" \n"
 	                		+ " fog option set this to " + FogDistance.NEAR.toString() + " or " + FogDistance.FAR.toString() + ".")
 	                .defineEnum("fogDistance", FogDistance.NEAR_AND_FAR);
 	        
-	        drawCheckerBoard = builder
+	        debugMode = builder
 	                .comment("\n"
 	                		+ " If false the LODs will draw with their normal world colors. \n"
 	                		+ " If true they will draw as a black and white checkerboard. \n"
@@ -61,13 +66,28 @@ public class LodConfig
 	                		+ " giant game of chess ;)")
 	                .define("drawCheckerBoard", false);
 	        
-	        lodTemplateMode = builder
+	        lodTemplate = builder
 	                .comment("\n"
 	                		+ " How should the LODs be drawn? \n"
-	                		+ " " + LodTemplateMode.CUBIC.toString() + ": LOD Chunks are drawn as rectangular prisms (boxes). \n"
-	                		+ " " + LodTemplateMode.TRIANGULAR.toString() + ": LOD Chunks smoothly transition between other. \n"
-	                		+ " " + LodTemplateMode.DYNAMIC.toString() + ": LOD Chunks smoothly transition between other, unless a neighboring chunk is at a significantly different height. ")
-	                .defineEnum("lodDrawMode", LodTemplateMode.CUBIC);
+	                		+ " " + LodTemplate.CUBIC.toString() + ": LOD Chunks are drawn as rectangular prisms (boxes). \n"
+	                		+ " " + LodTemplate.TRIANGULAR.toString() + ": LOD Chunks smoothly transition between other. \n"
+	                		+ " " + LodTemplate.DYNAMIC.toString() + ": LOD Chunks smoothly transition between other, unless a neighboring chunk is at a significantly different height. ")
+	                .defineEnum("lodTemplate", LodTemplate.CUBIC);
+	        
+	        lodGeometryQuality = builder
+	                .comment("\n"
+	                		+ " How detailed should the LODs be? \n"
+	                		+ " " + LodGeometryQuality.SINGLE.toString() + ": render 1 LOD for each Chunk. \n"
+	                		+ " " + LodGeometryQuality.SINGLE_CLOSE_QUAD_FAR.toString() + ": render 4 LODs for each near chunk and 1 LOD for each far chunk. \n"
+	                		+ " " + LodGeometryQuality.QUAD.toString() + ": render 4 LODs for each Chunk. ")
+	                .defineEnum("lodGeometryQuality", LodGeometryQuality.SINGLE);
+	        
+	        lodColorStyle = builder
+	                .comment("\n"
+	                		+ " How should the LODs be colored? \n"
+	                		+ " " + LodColorStyle.TOP.toString() + ": Use the color from the top of the LOD chunk for all sides. \n"
+	                		+ " " + LodColorStyle.INDIVIDUAL_SIDES.toString() + ": For each side of the LOD use the color correspondingto that side. ")
+	                .defineEnum("lodColorStyle", LodColorStyle.TOP);
 	        
 	        builder.pop();
 	    }
