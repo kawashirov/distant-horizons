@@ -42,7 +42,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world. 
  * 
  * @author James Seibel
- * @version 03-31-2021
+ * @version 05-08-2021
  */
 public class LodRenderer
 {
@@ -596,7 +596,6 @@ public class LodRenderer
 	{
 		NearFarFogSetting fogSetting = new NearFarFogSetting();
 		
-		LodConfig.CLIENT.fogDistance.get();
 		switch(reflectionHandler.getFogQuality())
 		{
 		case FANCY:
