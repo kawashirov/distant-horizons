@@ -8,7 +8,7 @@ import org.apache.logging.log4j.LogManager;
 
 import com.backsun.lod.ModInfo;
 import com.backsun.lod.enums.FogDistance;
-import com.backsun.lod.enums.LodDrawMode;
+import com.backsun.lod.enums.LodTemplateMode;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 
@@ -33,7 +33,7 @@ public class LodConfig
 		
 		public ForgeConfigSpec.BooleanValue drawCheckerBoard;
 		
-		public ForgeConfigSpec.EnumValue<LodDrawMode> lodDrawMode;
+		public ForgeConfigSpec.EnumValue<LodTemplateMode> lodTemplateMode;
 		
 		
 		Client(ForgeConfigSpec.Builder builder)
@@ -61,13 +61,13 @@ public class LodConfig
 	                		+ " giant game of chess ;)")
 	                .define("drawCheckerBoard", false);
 	        
-	        lodDrawMode = builder
+	        lodTemplateMode = builder
 	                .comment("\n"
 	                		+ " How should the LODs be drawn? \n"
-	                		+ " " + LodDrawMode.CUBIC.toString() + ": LOD Chunks are drawn as rectangular prisms (boxes). \n"
-	                		+ " " + LodDrawMode.TRIANGULAR.toString() + ": LOD Chunks smoothly transition between other. \n"
-	                		+ " " + LodDrawMode.DYNAMIC.toString() + ": LOD Chunks smoothly transition between other, unless a neighboring chunk is at a significantly different height. ")
-	                .defineEnum("lodDrawMode", LodDrawMode.CUBIC);
+	                		+ " " + LodTemplateMode.CUBIC.toString() + ": LOD Chunks are drawn as rectangular prisms (boxes). \n"
+	                		+ " " + LodTemplateMode.TRIANGULAR.toString() + ": LOD Chunks smoothly transition between other. \n"
+	                		+ " " + LodTemplateMode.DYNAMIC.toString() + ": LOD Chunks smoothly transition between other, unless a neighboring chunk is at a significantly different height. ")
+	                .defineEnum("lodDrawMode", LodTemplateMode.CUBIC);
 	        
 	        builder.pop();
 	    }
