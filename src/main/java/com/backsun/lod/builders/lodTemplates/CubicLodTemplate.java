@@ -15,7 +15,7 @@ import net.minecraft.util.math.AxisAlignedBB;
  * Builds each LOD chunk as a singular rectangular prism.
  * 
  * @author James Seibel
- * @version 05-07-2021
+ * @version 05-19-2021
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {
@@ -32,6 +32,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			double xOffset, double yOffset, double zOffset, 
 			boolean debugging)
 	{
+		AxisAlignedBB bbox;
 		int topPoint = getValidHeightPoint(lod.top);
 		int bottomPoint = getValidHeightPoint(lod.bottom);
 		
@@ -47,43 +48,56 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		}
 		
 		
-		Color[] c = new Color[ColorDirection.values().length];
+		Color[] colors = generateLodColors(lod, debugging);
 		
-		// generate the color for this LOD
-		if (debugging)
+		
+		// Add this LOD to the BufferBuilder
+		// using the quality setting set by the config
+		switch(LodConfig.CLIENT.lodGeometryQuality.get())
 		{
-			// if debugging draw the squares as a black and white checker board
-			if ((lod.x + lod.z) % 2 == 0)
-				for(ColorDirection dir : ColorDirection.values())
-					// have each direction be the same
-					// color if debugging
-					c[dir.value] = debugWhite;
-			else
-				for(ColorDirection dir : ColorDirection.values())
-					c[dir.value] = debugBlack;
+		case SINGLE:
+			bbox = new AxisAlignedBB(0, bottomPoint, 0, LodChunk.WIDTH, topPoint, LodChunk.WIDTH).offset(xOffset, yOffset, zOffset);
+					
+			addBoundingBoxToBuffer(buffer, bbox, colors);
+			break;
+			
+		case  SINGLE_CLOSE_QUAD_FAR:
+			// TODO
+			break;
+			
+		case QUAD:
+			
+			int halfWidth = LodChunk.WIDTH / 2;
+			
+			addQuarterBoundingBoxToBuffer(buffer, lod, colors, LodCorner.NE, xOffset, yOffset, zOffset);
+			addQuarterBoundingBoxToBuffer(buffer, lod, colors, LodCorner.NE, xOffset + halfWidth, yOffset, zOffset + halfWidth);
+			addQuarterBoundingBoxToBuffer(buffer, lod, colors, LodCorner.NE, xOffset + halfWidth, yOffset, zOffset);
+			addQuarterBoundingBoxToBuffer(buffer, lod, colors, LodCorner.SW, xOffset, yOffset, zOffset + halfWidth);
+			
+			break;
+			
 		}
-		else
+	}
+	
+	private void addQuarterBoundingBoxToBuffer(BufferBuilder buffer, LodChunk lod, Color[] c, 
+			LodCorner corner, double xOffset, double yOffset, double zOffset)
+	{
+		int topPoint = lod.top[corner.value];
+		int bottomPoint = lod.bottom[corner.value];
+		int halfWidth = LodChunk.WIDTH / 2;
+		
+		if (topPoint != -1 && bottomPoint != -1)
 		{
-			switch (LodConfig.CLIENT.lodColorStyle.get())
-			{
-			case TOP:
-				// only add the top's color to the array
-				for(ColorDirection dir : ColorDirection.values())
-					c[dir.value] = lod.colors[ColorDirection.TOP.value];
-				break;
-				
-			case INDIVIDUAL_SIDES:
-				// add each direction's color to the array
-				for(ColorDirection dir : ColorDirection.values())
-					c[dir.value] = lod.colors[dir.value];
-				break;
-			}
+			AxisAlignedBB bb = new AxisAlignedBB(0, bottomPoint, 0, halfWidth, topPoint, halfWidth)
+					.offset(xOffset, 
+							yOffset, 
+							zOffset);
+			addBoundingBoxToBuffer(buffer, bb, c);
 		}
-		
-		
-		// TODO add different geometry quality levels
-		AxisAlignedBB bb = new AxisAlignedBB(0, bottomPoint, 0, LodChunk.WIDTH, topPoint, LodChunk.WIDTH).offset(xOffset, yOffset, zOffset);
-		
+	}
+	
+	private void addBoundingBoxToBuffer(BufferBuilder buffer, AxisAlignedBB bb, Color[] c)
+	{
 		// top (facing up)
 		addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, c[ColorDirection.TOP.value].getRed(), c[ColorDirection.TOP.value].getGreen(), c[ColorDirection.TOP.value].getBlue(), c[ColorDirection.TOP.value].getAlpha());
 		addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, c[ColorDirection.TOP.value].getRed(), c[ColorDirection.TOP.value].getGreen(), c[ColorDirection.TOP.value].getBlue(), c[ColorDirection.TOP.value].getAlpha());
@@ -121,10 +135,6 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	
 	
 	
-	
-	
-	
-	
 	/**
 	 * @Returns -1 if there are no valid points
 	 */
@@ -137,5 +147,48 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		if (heightPoints[LodCorner.SE.value] != -1)
 			return heightPoints[LodCorner.NE.value];
 		return heightPoints[LodCorner.NE.value];
+	}
+	
+	
+	/**
+	 * Determine the color for each side of this LOD.
+	 */
+	private Color[] generateLodColors(LodChunk lod, boolean debugging)
+	{
+		Color[] colors = new Color[ColorDirection.values().length];
+		
+		if (debugging)
+		{
+			// if debugging draw the squares as a black and white checker board
+			if ((lod.x + lod.z) % 2 == 0)
+				for(ColorDirection dir : ColorDirection.values())
+					// have each direction be the same
+					// color if debugging
+					colors[dir.value] = debugWhite;
+			else
+				for(ColorDirection dir : ColorDirection.values())
+					colors[dir.value] = debugBlack;
+		}
+		else
+		{
+			// if NOT debugging, look to the config to determine
+			// how this LOD should be colored
+			switch (LodConfig.CLIENT.lodColorStyle.get())
+			{
+			case TOP:
+				// only add the top's color to the array
+				for(ColorDirection dir : ColorDirection.values())
+					colors[dir.value] = lod.colors[ColorDirection.TOP.value];
+				break;
+				
+			case INDIVIDUAL_SIDES:
+				// add each direction's color to the array
+				for(ColorDirection dir : ColorDirection.values())
+					colors[dir.value] = lod.colors[dir.value];
+				break;
+			}
+		}
+		
+		return colors;
 	}
 }

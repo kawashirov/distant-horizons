@@ -1,7 +1,7 @@
 package com.backsun.lod.enums;
 
 /**
- * low, medium, high
+ * Single, single_close_quad_far, quad
  * 
  * @author James Seibel
  * @version 05-08-2021
