@@ -30,11 +30,16 @@ public class LodDimensionFileHandler
 	private final String FILE_NAME_PREFIX = "lod";
 	private final String FILE_EXTENSION = ".txt";
 	
-	private ExecutorService fileWritingThreadPool = Executors.newFixedThreadPool(1);
+	/** Allow saving asynchronously, but never try to save multiple regions
+	 * at a time */
+	private ExecutorService fileWritingThreadPool = Executors.newSingleThreadExecutor();
 	
 	
 	public LodDimensionFileHandler(File newSaveFolder, LodDimension newLoadedDimension)
 	{
+		if (newSaveFolder == null)
+			throw new IllegalArgumentException("LodDimensionFileHandler requires a valid File location to read and write to.");
+		
 		dimensionDataSaveFolder = newSaveFolder;
 		
 		loadedDimension = newLoadedDimension;
@@ -61,9 +66,6 @@ public class LodDimensionFileHandler
 	 */
 	public LodRegion loadRegionFromFile(int regionX, int regionZ)
 	{
-		if (!readyToReadAndWrite())
-			return null;
-		
 		String fileName = getFileNameForRegion(regionX, regionZ);
 		
 		File f = new File(fileName);
@@ -131,12 +133,9 @@ public class LodDimensionFileHandler
 	 */
 	public synchronized void saveDirtyRegionsToFileAsync()
 	{
-		if (!readyToReadAndWrite())
-			// we aren't ready to read and write yet
-			return;
-		
 		fileWritingThreadPool.execute(saveDirtyRegionsThread);
 	}
+	
 	private Thread saveDirtyRegionsThread = new Thread(() -> 
 	{
 		for(int i = 0; i < loadedDimension.getWidth(); i++)
@@ -159,9 +158,6 @@ public class LodDimensionFileHandler
 	 */
 	private void saveRegionToDisk(LodRegion region)
 	{
-		if (!readyToReadAndWrite() || region == null)
-			return;
-		
 		// convert chunk coordinates to region
 		// coordinates
 		int x = region.x;
@@ -210,9 +206,6 @@ public class LodDimensionFileHandler
 	 */
 	private String getFileNameForRegion(int regionX, int regionZ)
 	{
-		if (!readyToReadAndWrite())
-			return null;
-		
 		try
 		{
 			// saveFolder is something like
@@ -227,19 +220,6 @@ public class LodDimensionFileHandler
 			return null;
 		}
 	}
-	
-	
-	/**
-	 * Returns if this FileHandler is ready to read
-	 * and write files.
-	 * <br>
-	 * This returns true when the world save directory is known.
-	 */
-	public boolean readyToReadAndWrite()
-	{
-		return dimensionDataSaveFolder != null;
-	}
-	
 	
 	
 }
