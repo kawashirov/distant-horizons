@@ -1,7 +1,7 @@
 package com.backsun.lod.enums;
 
 /**
- * TOP, N, S, E, W, BOTTOM
+ * TOP, NORTH, SOUTH, EAST, WEST, BOTTOM
  * 
  * @author James Seibel
  * @version 10-17-2020
@@ -13,14 +13,14 @@ public enum ColorDirection
 	TOP(0),
 	
 	/** -Z */
-	N(1),
+	NORTH(1),
 	/** +Z */
-	S(2),
+	SOUTH(2),
 	
 	/** +X */
-	E(3),
+	EAST(3),
 	/** -X */
-	W(4),
+	WEST(4),
 	
 	/** -Y */
 	BOTTOM(5);

@@ -110,26 +110,26 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, c[ColorDirection.BOTTOM.value].getRed(), c[ColorDirection.BOTTOM.value].getGreen(), c[ColorDirection.BOTTOM.value].getBlue(), c[ColorDirection.BOTTOM.value].getAlpha());
 
 		// south (facing -Z) 
-		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, c[ColorDirection.S.value].getRed(), c[ColorDirection.S.value].getGreen(), c[ColorDirection.S.value].getBlue(), c[ColorDirection.S.value].getAlpha());
-		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, c[ColorDirection.S.value].getRed(), c[ColorDirection.S.value].getGreen(), c[ColorDirection.S.value].getBlue(), c[ColorDirection.S.value].getAlpha());
-		addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, c[ColorDirection.S.value].getRed(), c[ColorDirection.S.value].getGreen(), c[ColorDirection.S.value].getBlue(), c[ColorDirection.S.value].getAlpha());
-		addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, c[ColorDirection.S.value].getRed(), c[ColorDirection.S.value].getGreen(), c[ColorDirection.S.value].getBlue(), c[ColorDirection.S.value].getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, c[ColorDirection.SOUTH.value].getRed(), c[ColorDirection.SOUTH.value].getGreen(), c[ColorDirection.SOUTH.value].getBlue(), c[ColorDirection.SOUTH.value].getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, c[ColorDirection.SOUTH.value].getRed(), c[ColorDirection.SOUTH.value].getGreen(), c[ColorDirection.SOUTH.value].getBlue(), c[ColorDirection.SOUTH.value].getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, c[ColorDirection.SOUTH.value].getRed(), c[ColorDirection.SOUTH.value].getGreen(), c[ColorDirection.SOUTH.value].getBlue(), c[ColorDirection.SOUTH.value].getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, c[ColorDirection.SOUTH.value].getRed(), c[ColorDirection.SOUTH.value].getGreen(), c[ColorDirection.SOUTH.value].getBlue(), c[ColorDirection.SOUTH.value].getAlpha());
 		// north (facing +Z)
-		addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, c[ColorDirection.N.value].getRed(), c[ColorDirection.N.value].getGreen(), c[ColorDirection.N.value].getBlue(), c[ColorDirection.N.value].getAlpha());
-		addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, c[ColorDirection.N.value].getRed(), c[ColorDirection.N.value].getGreen(), c[ColorDirection.N.value].getBlue(), c[ColorDirection.N.value].getAlpha());
-		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, c[ColorDirection.N.value].getRed(), c[ColorDirection.N.value].getGreen(), c[ColorDirection.N.value].getBlue(), c[ColorDirection.N.value].getAlpha());
-		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, c[ColorDirection.N.value].getRed(), c[ColorDirection.N.value].getGreen(), c[ColorDirection.N.value].getBlue(), c[ColorDirection.N.value].getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, c[ColorDirection.NORTH.value].getRed(), c[ColorDirection.NORTH.value].getGreen(), c[ColorDirection.NORTH.value].getBlue(), c[ColorDirection.NORTH.value].getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, c[ColorDirection.NORTH.value].getRed(), c[ColorDirection.NORTH.value].getGreen(), c[ColorDirection.NORTH.value].getBlue(), c[ColorDirection.NORTH.value].getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, c[ColorDirection.NORTH.value].getRed(), c[ColorDirection.NORTH.value].getGreen(), c[ColorDirection.NORTH.value].getBlue(), c[ColorDirection.NORTH.value].getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, c[ColorDirection.NORTH.value].getRed(), c[ColorDirection.NORTH.value].getGreen(), c[ColorDirection.NORTH.value].getBlue(), c[ColorDirection.NORTH.value].getAlpha());
 
 		// west (facing -X)
-		addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, c[ColorDirection.W.value].getRed(), c[ColorDirection.W.value].getGreen(), c[ColorDirection.W.value].getBlue(), c[ColorDirection.W.value].getAlpha());
-		addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, c[ColorDirection.W.value].getRed(), c[ColorDirection.W.value].getGreen(), c[ColorDirection.W.value].getBlue(), c[ColorDirection.W.value].getAlpha());
-		addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, c[ColorDirection.W.value].getRed(), c[ColorDirection.W.value].getGreen(), c[ColorDirection.W.value].getBlue(), c[ColorDirection.W.value].getAlpha());
-		addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, c[ColorDirection.W.value].getRed(), c[ColorDirection.W.value].getGreen(), c[ColorDirection.W.value].getBlue(), c[ColorDirection.W.value].getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, c[ColorDirection.WEST.value].getRed(), c[ColorDirection.WEST.value].getGreen(), c[ColorDirection.WEST.value].getBlue(), c[ColorDirection.WEST.value].getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, c[ColorDirection.WEST.value].getRed(), c[ColorDirection.WEST.value].getGreen(), c[ColorDirection.WEST.value].getBlue(), c[ColorDirection.WEST.value].getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, c[ColorDirection.WEST.value].getRed(), c[ColorDirection.WEST.value].getGreen(), c[ColorDirection.WEST.value].getBlue(), c[ColorDirection.WEST.value].getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, c[ColorDirection.WEST.value].getRed(), c[ColorDirection.WEST.value].getGreen(), c[ColorDirection.WEST.value].getBlue(), c[ColorDirection.WEST.value].getAlpha());
 		// east (facing +X)
-		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, c[ColorDirection.E.value].getRed(), c[ColorDirection.E.value].getGreen(), c[ColorDirection.E.value].getBlue(), c[ColorDirection.E.value].getAlpha());
-		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, c[ColorDirection.E.value].getRed(), c[ColorDirection.E.value].getGreen(), c[ColorDirection.E.value].getBlue(), c[ColorDirection.E.value].getAlpha());
-		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, c[ColorDirection.E.value].getRed(), c[ColorDirection.E.value].getGreen(), c[ColorDirection.E.value].getBlue(), c[ColorDirection.E.value].getAlpha());
-		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, c[ColorDirection.E.value].getRed(), c[ColorDirection.E.value].getGreen(), c[ColorDirection.E.value].getBlue(), c[ColorDirection.E.value].getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, c[ColorDirection.EAST.value].getRed(), c[ColorDirection.EAST.value].getGreen(), c[ColorDirection.EAST.value].getBlue(), c[ColorDirection.EAST.value].getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, c[ColorDirection.EAST.value].getRed(), c[ColorDirection.EAST.value].getGreen(), c[ColorDirection.EAST.value].getBlue(), c[ColorDirection.EAST.value].getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, c[ColorDirection.EAST.value].getRed(), c[ColorDirection.EAST.value].getGreen(), c[ColorDirection.EAST.value].getBlue(), c[ColorDirection.EAST.value].getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, c[ColorDirection.EAST.value].getRed(), c[ColorDirection.EAST.value].getGreen(), c[ColorDirection.EAST.value].getBlue(), c[ColorDirection.EAST.value].getAlpha());
 	}
 	
 	

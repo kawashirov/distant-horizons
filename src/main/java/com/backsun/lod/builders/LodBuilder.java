@@ -384,14 +384,14 @@ public class LodBuilder
 		case BOTTOM:
 			return generateLodColorVertical(chunk, colorDir, bc);
 			
-		case N:
+		case NORTH:
 			return generateLodColorHorizontal(chunk, colorDir, bc);
-		case S:
+		case SOUTH:
 			return generateLodColorHorizontal(chunk, colorDir, bc);
 			
-		case E:
+		case EAST:
 			return generateLodColorHorizontal(chunk, colorDir, bc);
-		case W:
+		case WEST:
 			return generateLodColorHorizontal(chunk, colorDir, bc);
 		}
 		
@@ -522,7 +522,7 @@ public class LodBuilder
 	 */
 	private Color generateLodColorHorizontal(IChunk chunk, ColorDirection colorDir, BlockColors bc)
 	{
-		if(colorDir != ColorDirection.N && colorDir != ColorDirection.S && colorDir != ColorDirection.E && colorDir != ColorDirection.W)
+		if(colorDir != ColorDirection.NORTH && colorDir != ColorDirection.SOUTH && colorDir != ColorDirection.EAST && colorDir != ColorDirection.WEST)
 		{
 			throw new IllegalArgumentException("generateLodColorHorizontal only accepts the ColorDirection N (North), S (South), E (East), or W (West)");
 		}
@@ -544,19 +544,19 @@ public class LodBuilder
 		int inIncrement = 1;
 		switch (colorDir)
 		{
-		case N:
+		case NORTH:
 			inStart = 0;
 			inIncrement = 1;
 			break;
-		case S:
+		case SOUTH:
 			inStart = CHUNK_DATA_WIDTH - 1;
 			inIncrement = -1;
 			break;
-		case E:
+		case EAST:
 			inStart = 0;
 			inIncrement = 1;
 			break;
-		case W:
+		case WEST:
 			inStart = CHUNK_DATA_WIDTH - 1;
 			inIncrement = -1;
 			break;
@@ -589,19 +589,19 @@ public class LodBuilder
 							// determine which should be X and Z							
 							switch(colorDir)
 							{
-							case N:
+							case NORTH:
 								x = over;
 								z = in;
 								break;
-							case S:
+							case SOUTH:
 								x = over;
 								z = in;
 								break;
-							case E:
+							case EAST:
 								x = in;
 								z = over;
 								break;
-							case W:
+							case WEST:
 								x = in;
 								z = over;
 								break;
