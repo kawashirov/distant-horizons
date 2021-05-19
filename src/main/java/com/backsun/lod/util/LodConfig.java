@@ -46,7 +46,8 @@ public class LodConfig
 	        builder.comment(ModInfo.MODNAME + " configuration settings").push("client");
 	        
 	        drawLODs = builder
-	        		.comment(" If false LODs will not be drawn, \n"
+	        		.comment("\n"
+	        				+ " If false LODs will not be drawn, \n"
 	        				+ " however they will still be generated \n"
 	        				+ " and saved to file for later use.")
 	        		.define("drawLODs", true);
