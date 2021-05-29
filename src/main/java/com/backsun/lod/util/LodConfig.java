@@ -9,7 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import com.backsun.lod.ModInfo;
 import com.backsun.lod.enums.FogDistance;
 import com.backsun.lod.enums.LodColorStyle;
-import com.backsun.lod.enums.LodGeometryQuality;
+import com.backsun.lod.enums.LodDetail;
 import com.backsun.lod.enums.LodTemplate;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
@@ -37,7 +37,7 @@ public class LodConfig
 		
 		public ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
 		
-		public ForgeConfigSpec.EnumValue<LodGeometryQuality> lodGeometryQuality;
+		public ForgeConfigSpec.EnumValue<LodDetail> lodDetail;
 
 		public ForgeConfigSpec.EnumValue<LodColorStyle> lodColorStyle;
 		
@@ -75,13 +75,12 @@ public class LodConfig
 	                		+ " " + LodTemplate.DYNAMIC.toString() + ": LOD Chunks smoothly transition between other, unless a neighboring chunk is at a significantly different height. ")
 	                .defineEnum("lodTemplate", LodTemplate.CUBIC);
 	        
-	        lodGeometryQuality = builder
+	        lodDetail = builder
 	                .comment("\n"
 	                		+ " How detailed should the LODs be? \n"
-	                		+ " " + LodGeometryQuality.SINGLE.toString() + ": render 1 LOD for each Chunk. \n"
-	                		+ " " + LodGeometryQuality.SINGLE_CLOSE_QUAD_FAR.toString() + ": render 4 LODs for each near chunk and 1 LOD for each far chunk. \n"
-	                		+ " " + LodGeometryQuality.QUAD.toString() + ": render 4 LODs for each Chunk. ")
-	                .defineEnum("lodGeometryQuality", LodGeometryQuality.SINGLE);
+	                		+ " " + LodDetail.SINGLE.toString() + ": render 1 LOD for each Chunk. \n"
+            				+ " " + LodDetail.QUAD.toString() + ": render 4 LODs for each Chunk.")
+	                .defineEnum("lodGeometryQuality", LodDetail.SINGLE);
 	        
 	        lodColorStyle = builder
 	                .comment("\n"
