@@ -3,7 +3,7 @@ package com.backsun.lod.builders.lodTemplates;
 import java.awt.Color;
 
 import com.backsun.lod.enums.ColorDirection;
-import com.backsun.lod.enums.LodCorner;
+import com.backsun.lod.enums.LodDetail;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.util.LodConfig;
@@ -15,7 +15,7 @@ import net.minecraft.util.math.AxisAlignedBB;
  * Builds each LOD chunk as a singular rectangular prism.
  * 
  * @author James Seibel
- * @version 05-19-2021
+ * @version 05-29-2021
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {
@@ -33,12 +33,61 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			boolean debugging)
 	{
 		AxisAlignedBB bbox;
-		int topPoint = getValidHeightPoint(lod.top);
-		int bottomPoint = getValidHeightPoint(lod.bottom);
+		
+		
+		// Add this LOD to the BufferBuilder
+		// using the quality setting set by the config
+		switch(LodConfig.CLIENT.lodDetail.get())
+		{
+		case SINGLE:
+			// returns null if the lod is empty at the given location
+			bbox = generateBoundingBox(lod, LodChunk.WIDTH, xOffset, yOffset, zOffset);
+			
+			if (bbox != null)
+			{
+				addBoundingBoxToBuffer(buffer, bbox, generateLodColors(lod, false));
+			}
+			
+			break;
+			
+		case QUAD:
+			
+			// TODO use the adjacent chunks to generate quarter sections
+//			width = LodChunk.WIDTH / LodDetail.QUAD.value;
+//			
+//			for(int i = 0; i < LodDetail.QUAD.value; i++)
+//			{
+//				for(int j = 0; j < LodDetail.QUAD.value; j++)
+//				{
+//					int x = i * width;
+//					int z = j * width;
+//					
+//					// returns null if the lod is empty at the given location
+//					bbox = generateBoundingBox(lod, x, z, width, xOffset - (width / 2) + x, yOffset, zOffset - (width / 2) + z);
+//					
+//					if (bbox != null)
+//					{
+//						Color[] colors = generateLodColors(lod, x, z, debugging);
+//						
+//						addBoundingBoxToBuffer(buffer, bbox, colors);
+//					}
+//				}
+//			}
+			break;
+		} // case
+	}
+	
+	
+	
+	
+	private AxisAlignedBB generateBoundingBox(LodChunk lod, int width, double xOffset, double yOffset, double zOffset)
+	{
+		int topPoint = lod.getHeight();
+		int bottomPoint = lod.getDepth();
 		
 		// don't add an LOD if it is empty
 		if (topPoint == -1 && bottomPoint == -1)
-			return;
+			return null;
 		
 		if (bottomPoint == topPoint)
 		{
@@ -47,54 +96,10 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			topPoint++;
 		}
 		
-		
-		Color[] colors = generateLodColors(lod, debugging);
-		
-		
-		// Add this LOD to the BufferBuilder
-		// using the quality setting set by the config
-		switch(LodConfig.CLIENT.lodGeometryQuality.get())
-		{
-		case SINGLE:
-			bbox = new AxisAlignedBB(0, bottomPoint, 0, LodChunk.WIDTH, topPoint, LodChunk.WIDTH).offset(xOffset, yOffset, zOffset);
-					
-			addBoundingBoxToBuffer(buffer, bbox, colors);
-			break;
-			
-		case  SINGLE_CLOSE_QUAD_FAR:
-			// TODO
-			break;
-			
-		case QUAD:
-			
-			int halfWidth = LodChunk.WIDTH / 2;
-			
-			addQuarterBoundingBoxToBuffer(buffer, lod, colors, LodCorner.NE, xOffset, yOffset, zOffset);
-			addQuarterBoundingBoxToBuffer(buffer, lod, colors, LodCorner.NE, xOffset + halfWidth, yOffset, zOffset + halfWidth);
-			addQuarterBoundingBoxToBuffer(buffer, lod, colors, LodCorner.NE, xOffset + halfWidth, yOffset, zOffset);
-			addQuarterBoundingBoxToBuffer(buffer, lod, colors, LodCorner.SW, xOffset, yOffset, zOffset + halfWidth);
-			
-			break;
-			
-		}
+		return new AxisAlignedBB(0, bottomPoint, 0, width, topPoint, width).offset(xOffset, yOffset, zOffset);
 	}
 	
-	private void addQuarterBoundingBoxToBuffer(BufferBuilder buffer, LodChunk lod, Color[] c, 
-			LodCorner corner, double xOffset, double yOffset, double zOffset)
-	{
-		int topPoint = lod.top[corner.value];
-		int bottomPoint = lod.bottom[corner.value];
-		int halfWidth = LodChunk.WIDTH / 2;
-		
-		if (topPoint != -1 && bottomPoint != -1)
-		{
-			AxisAlignedBB bb = new AxisAlignedBB(0, bottomPoint, 0, halfWidth, topPoint, halfWidth)
-					.offset(xOffset, 
-							yOffset, 
-							zOffset);
-			addBoundingBoxToBuffer(buffer, bb, c);
-		}
-	}
+	
 	
 	private void addBoundingBoxToBuffer(BufferBuilder buffer, AxisAlignedBB bb, Color[] c)
 	{
@@ -135,19 +140,6 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	
 	
 	
-	/**
-	 * @Returns -1 if there are no valid points
-	 */
-	private int getValidHeightPoint(short[] heightPoints)
-	{
-		if (heightPoints[LodCorner.NE.value] != -1)
-			return heightPoints[LodCorner.NE.value];
-		if (heightPoints[LodCorner.NW.value] != -1)
-			return heightPoints[LodCorner.NW.value];
-		if (heightPoints[LodCorner.SE.value] != -1)
-			return heightPoints[LodCorner.NE.value];
-		return heightPoints[LodCorner.NE.value];
-	}
 	
 	
 	/**
@@ -157,7 +149,26 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	{
 		Color[] colors = new Color[ColorDirection.values().length];
 		
-		if (debugging)
+		if (!debugging)
+		{
+			// if NOT debugging, look to the config to determine
+			// how this LOD should be colored
+			switch (LodConfig.CLIENT.lodColorStyle.get())
+			{
+			case TOP:
+				// only add the top's color to the array
+				for(ColorDirection dir : ColorDirection.values())
+					colors[dir.value] = lod.getColor(ColorDirection.TOP);
+				break;
+				
+			case INDIVIDUAL_SIDES:
+				// add each direction's color to the array
+				for(ColorDirection dir : ColorDirection.values())
+					colors[dir.value] = lod.getColor(dir);
+				break;
+			}
+		}
+		else
 		{
 			// if debugging draw the squares as a black and white checker board
 			if ((lod.x + lod.z) % 2 == 0)
@@ -169,26 +180,10 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				for(ColorDirection dir : ColorDirection.values())
 					colors[dir.value] = debugBlack;
 		}
-		else
-		{
-			// if NOT debugging, look to the config to determine
-			// how this LOD should be colored
-			switch (LodConfig.CLIENT.lodColorStyle.get())
-			{
-			case TOP:
-				// only add the top's color to the array
-				for(ColorDirection dir : ColorDirection.values())
-					colors[dir.value] = lod.colors[ColorDirection.TOP.value];
-				break;
-				
-			case INDIVIDUAL_SIDES:
-				// add each direction's color to the array
-				for(ColorDirection dir : ColorDirection.values())
-					colors[dir.value] = lod.colors[dir.value];
-				break;
-			}
-		}
 		
 		return colors;
 	}
+	
+	
+
 }

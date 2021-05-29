@@ -5,7 +5,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.backsun.lod.enums.ColorDirection;
-import com.backsun.lod.enums.LodLocation;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodWorld;
@@ -26,7 +25,7 @@ import net.minecraft.world.gen.Heightmap;
  * (specifically: Lod World, Dimension, Region, and Chunk objects)
  * 
  * @author James Seibel
- * @version 4-01-2021
+ * @version 5-29-2021
  */
 public class LodBuilder
 {
@@ -37,16 +36,15 @@ public class LodBuilder
 	
 	
 	public static final int CHUNK_DATA_WIDTH = LodChunk.WIDTH;
-	public static final int CHUNK_DATA_HEIGHT = LodChunk.WIDTH;
+	public static final int CHUNK_SECTION_HEIGHT = LodChunk.WIDTH;
 	
 	/**
 	 * This is how many blocks are
 	 * required at a specific y-value
 	 * to constitute a LOD point
 	 */
-	private final int LOD_BLOCK_REQ = 16;
+	private final int LOD_BLOCK_REQ = 32;
 	// the max number of blocks per layer = 64 (8*8)
-	// since each layer is 1/4 the chunk
 	
 	
 	public LodBuilder()
@@ -115,8 +113,7 @@ public class LodBuilder
 	
 	
 	/**
-	 * Creates a LodChunk for a chunk in the given world. <br>
-	 * Note: The world is required to determine each block's color
+	 * Creates a LodChunk for a chunk in the given world.
 	 * 
 	 * @throws IllegalArgumentException 
 	 * thrown if either the chunk or world is null.
@@ -128,16 +125,12 @@ public class LodBuilder
 			throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
 		}
 		
-		short[] top = new short[4];
-		short[] bottom = new short[4];
-		Color[] colors = new Color[6];
+		Color[] colors = new Color[ColorDirection.values().length];
 		
-		// generate the top and bottom points of this LOD
-		for(LodLocation loc : LodLocation.values())
-		{
-			top[loc.value] = generateLodCorner(chunk, SectionGenerationMode.GENERATE_TOP, loc);
-			bottom[loc.value] = generateLodCorner(chunk, SectionGenerationMode.GENERATE_BOTTOM, loc);
-		}
+		
+		short height = determineTopPoint(chunk.getSections());
+		short depth = determineBottomPoint(chunk.getSections());
+		
 		
 		// determine the average color for each direction
 		for(ColorDirection dir : ColorDirection.values())
@@ -145,7 +138,7 @@ public class LodBuilder
 			colors[dir.value] = generateLodColorForDirection(chunk, dir);
 		}
 		
-		return new LodChunk(chunk.getPos(), top, bottom, colors);
+		return new LodChunk(chunk.getPos(), height, depth, colors);
 	}
 	
 	
@@ -157,100 +150,24 @@ public class LodBuilder
 	// constructor helpers //
 	//=====================//
 	
-	/** GENERATE_TOP, GENERATE_BOTTOM */
-	private enum SectionGenerationMode
-	{
-		GENERATE_TOP,
-		GENERATE_BOTTOM;
-	}
-	
-	/**
-	 * Generate the height for the given LodLocation, either the top or bottom.
-	 * <br><br>
-	 * If invalid/null/empty chunks are given 
-	 * crashes may occur.
-	 */
-	public short generateLodCorner(IChunk chunk, SectionGenerationMode sectionGenMode, LodLocation lodLoc)
-	{
-		int startX = 0;
-		int endX = 0;
-		
-		int startZ = 0;
-		int endZ = 0;
-		
-		// determine where we should look in this
-		// chunk
-		switch(lodLoc)
-		{
-		case NE:
-			// -N
-			startZ = 0;
-			endZ = (CHUNK_DATA_WIDTH / 2) - 1;
-			// +E
-			startX = CHUNK_DATA_WIDTH / 2;
-			endX = CHUNK_DATA_WIDTH - 1;
-			break;
-			
-		case SE:
-			// +S
-			startZ = CHUNK_DATA_WIDTH / 2;
-			endZ = CHUNK_DATA_WIDTH;
-			// +E
-			startX = CHUNK_DATA_WIDTH / 2;
-			endX = CHUNK_DATA_WIDTH;
-			break;
-			
-		case SW:
-			// +S
-			startZ = CHUNK_DATA_WIDTH / 2;
-			endZ = CHUNK_DATA_WIDTH;
-			// -W
-			startX = 0;
-			endX = (CHUNK_DATA_WIDTH / 2) - 1;
-			break;
-			
-		case NW:
-			// -N
-			startZ = 0;
-			endZ = CHUNK_DATA_WIDTH / 2;
-			// -W
-			startX = 0;
-			endX = CHUNK_DATA_WIDTH / 2;
-			break;
-		}
-		
-		
-		// should have a length of 16
-		// (each storage is 16x16x16 and the
-		// world height is 256)
-		ChunkSection[] chunkSections = chunk.getSections();
-		
-		
-		if(sectionGenMode == SectionGenerationMode.GENERATE_TOP)
-			return determineTopPoint(chunkSections, startX, endX, startZ, endZ);
-		else
-			return determineBottomPoint(chunkSections, startX, endX, startZ, endZ);
-	}
-	
 	
 	/**
 	 * Find the lowest valid point from the bottom.
 	 */
-	private short determineBottomPoint(ChunkSection[] chunkSections, int startX, int endX, int startZ, int endZ)
+	private short determineBottomPoint(ChunkSection[] chunkSections)
 	{
 		// search from the bottom up
 		for(int i = 0; i < CHUNK_DATA_WIDTH; i++)
 		{
-			for(int y = 0; y < CHUNK_DATA_HEIGHT; y++)
+			for(int y = 0; y < CHUNK_SECTION_HEIGHT; y++)
 			{
-				
-				if(isLayerValidLodPoint(chunkSections, startX, endX, startZ, endZ, i, y))
+				if(isLayerValidLodPoint(chunkSections, i, y))
 				{
 					// we found
 					// enough blocks in this
 					// layer to count as an
 					// LOD point
-					return (short) (y + (i * CHUNK_DATA_HEIGHT));
+					return (short) (y + (i * CHUNK_SECTION_HEIGHT));
 				}
 			}
 		}
@@ -263,7 +180,7 @@ public class LodBuilder
 	 * Find the lowest valid point from the bottom.
 	 */
 	@SuppressWarnings("unused")
-	private short determineBottomPoint(Heightmap heightmap, int startX, int endX, int startZ, int endZ)
+	private short determineBottomPoint(Heightmap heightmap)
 	{
 		// the heightmap only shows how high the blocks go, it
 		// doesn't have any info about how low they go
@@ -275,20 +192,20 @@ public class LodBuilder
 	/**
 	 * Find the highest valid point from the Top
 	 */
-	private short determineTopPoint(ChunkSection[] chunkSections, int startX, int endX, int startZ, int endZ)
+	private short determineTopPoint(ChunkSection[] chunkSections)
 	{
 		// search from the top down
-		for(int i = chunkSections.length - 1; i >= 0; i--)
+		for(int section = chunkSections.length - 1; section >= 0; section--)
 		{
 			for(int y = CHUNK_DATA_WIDTH - 1; y >= 0; y--)
 			{
-				if(isLayerValidLodPoint(chunkSections, startX, endX, startZ, endZ, i, y))
+				if(isLayerValidLodPoint(chunkSections, section, y))
 				{
 					// we found
 					// enough blocks in this
 					// layer to count as an
 					// LOD point
-					return (short) (y + (i * CHUNK_DATA_HEIGHT));
+					return (short) (y + (section * CHUNK_SECTION_HEIGHT));
 				}
 			}
 		}
@@ -298,15 +215,15 @@ public class LodBuilder
 	}
 	
 	/**
-	 * Find the highest valid point from the Top
+	 * Find the highest point from the Top
 	 */
 	@SuppressWarnings("unused")
-	private short determineTopPoint(Heightmap heightmap, int startX, int endX, int startZ, int endZ)
+	private short determineTopPoint(Heightmap heightmap, int endZ)
 	{
 		short highest = 0;
-		for(int x = startX; x < endX; x++)
+		for(int x = 0; x < LodChunk.WIDTH; x++)
 		{
-			for(int z = startZ; z < endZ; z++)
+			for(int z = 0; z < LodChunk.WIDTH; z++)
 			{
 				short newHeight = (short) heightmap.getHeight(x, z);
 				if (newHeight > highest)
@@ -329,17 +246,15 @@ public class LodBuilder
 	 * values a valid LOD point?
 	 */
 	private boolean isLayerValidLodPoint(
-			ChunkSection[] chunkSections, 
-			int startX, int endX, 
-			int startZ, int endZ, 
+			ChunkSection[] chunkSections,
 			int sectionIndex, int y)
 	{
 		// search through this layer
 		int layerBlocks = 0;
 		
-		for(int x = startX; x < endX; x++)
+		for(int x = 0; x < LodChunk.WIDTH; x++)
 		{
-			for(int z = startZ; z < endZ; z++)
+			for(int z = 0; z < LodChunk.WIDTH; z++)
 			{
 				if(chunkSections[sectionIndex] == null)
 				{
@@ -349,7 +264,8 @@ public class LodBuilder
 				}
 				else
 				{
-					if(chunkSections[sectionIndex].getBlockState(x, y, z) != null && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.AIR)
+					if(chunkSections[sectionIndex].getBlockState(x, y, z) != null && 
+						chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.AIR)
 					{
 						// we found a valid block in
 						// in this layer
@@ -369,37 +285,7 @@ public class LodBuilder
 	}
 	
 	/**
-	 * Generate the color of the given ColorDirection at the given chunk
-	 * in the given world.
-	 */
-	private Color  generateLodColorForDirection(IChunk chunk, ColorDirection colorDir)
-	{
-		Minecraft mc =  Minecraft.getInstance();
-		BlockColors bc = mc.getBlockColors();
-		
-		switch (colorDir)
-		{
-		case TOP:
-			return generateLodColorVertical(chunk, colorDir, bc);
-		case BOTTOM:
-			return generateLodColorVertical(chunk, colorDir, bc);
-			
-		case NORTH:
-			return generateLodColorHorizontal(chunk, colorDir, bc);
-		case SOUTH:
-			return generateLodColorHorizontal(chunk, colorDir, bc);
-			
-		case EAST:
-			return generateLodColorHorizontal(chunk, colorDir, bc);
-		case WEST:
-			return generateLodColorHorizontal(chunk, colorDir, bc);
-		}
-		
-		return new Color(0, 0, 0, 0);
-	}
-	
-	/**
-	 * Generates the color of the top or bottom of a given chunk in the given world.
+	 * Generates the color of the top or bottom of the given chunk.
 	 * 
 	 * @throws IllegalArgumentException if given a ColorDirection other than TOP or BOTTOM
 	 */
@@ -428,8 +314,8 @@ public class LodBuilder
 		int dataMin = 0;
 		int dataIncrement = goTopDown? -1 : 1;
 		
-		int topStart = goTopDown? CHUNK_DATA_HEIGHT - 1 : 0;
-		int topMax = CHUNK_DATA_HEIGHT;
+		int topStart = goTopDown? CHUNK_SECTION_HEIGHT - 1 : 0;
+		int topMax = CHUNK_SECTION_HEIGHT;
 		int topMin = 0;
 		int topIncrement =  goTopDown? -1 : 1;
 		
@@ -481,6 +367,7 @@ public class LodBuilder
 		blue /= numbOfBlocks;
 		
 		return new Color(red, green, blue);
+	}
 		
 		/*
 		 * unused variation that can be used with only the heightmap,
@@ -496,29 +383,25 @@ public class LodBuilder
 			
 			for(int x = 0; x < CHUNK_DATA_WIDTH; x++)
 			{
-				for(int z = 0; z < CHUNK_DATA_WIDTH; z++)
-				{
-					Biome biome = chunk.getBiomes().getNoiseBiome(x,z, heightmap.getHeight(x, z));
-					Color c = intToColor(biome.getFoliageColor());
-					
-					red += c.getRed();
-					green += c.getGreen();
-					blue += c.getBlue();
-				}
+				Biome biome = chunk.getBiomes().getNoiseBiome(x,z, heightmap.getHeight(x, z));
+				Color c = intToColor(biome.getFoliageColor());
+				
+				red += c.getRed();
+				green += c.getGreen();
+				blue += c.getBlue();
 			}
-			
-			red /= numbOfBlocks;
-			green /= numbOfBlocks;
-			blue /= numbOfBlocks;
-			
-			return new Color(red, green, blue);
-		 */
-	}
+		}
+		
+		red /= numbOfBlocks;
+		green /= numbOfBlocks;
+		blue /= numbOfBlocks;
+		
+		return new Color(red, green, blue);
+	 */
+	
 	
 	/**
-	 * Generates the color of the side of a given chunk in the given world for the given ColorDirection.
-	 * 
-	 * @throws IllegalArgumentException if given a ColorDirection other than N, S, W, E (North, South, East, West)
+	 * Generates the color for the sides of the given chunk.
 	 */
 	private Color generateLodColorHorizontal(IChunk chunk, ColorDirection colorDir, BlockColors bc)
 	{
@@ -572,13 +455,14 @@ public class LodBuilder
 		{
 			if (chunkSections[i] != null)
 			{
-				for (int y = 0; y < CHUNK_DATA_HEIGHT; y++)
+				for (int y = 0; y < CHUNK_SECTION_HEIGHT; y++)
 				{
+					// TODO #24 only add colors that are visible, IE don't add stone blocks that are surrounded by other stone blocks
+					
 					boolean foundBlock = false;
 					
 					// over moves "over" the side of the chunk
 					// in moves "into" the chunk until it finds a block
-					
 					for (int over = overStart; !foundBlock && over >= 0 && over < CHUNK_DATA_WIDTH; over += overIncrement)
 					{
 						for (int in = inStart; !foundBlock && in >= 0 && in < CHUNK_DATA_WIDTH; in += inIncrement)
@@ -646,6 +530,43 @@ public class LodBuilder
 		
 		return new Color(red, green, blue);
 	}
+	
+	
+	
+	
+	
+	
+	/**
+	 * Generate the color for the given chunk in the given ColorDirection.
+	 */
+	private Color  generateLodColorForDirection(IChunk chunk, ColorDirection colorDir)
+	{
+		Minecraft mc =  Minecraft.getInstance();
+		BlockColors bc = mc.getBlockColors();
+		
+		switch (colorDir)
+		{
+		case TOP:
+			return generateLodColorVertical(chunk, colorDir, bc);
+		case BOTTOM:
+			return generateLodColorVertical(chunk, colorDir, bc);
+			
+		case NORTH:
+			return generateLodColorHorizontal(chunk, colorDir, bc);
+		case SOUTH:
+			return generateLodColorHorizontal(chunk, colorDir, bc);
+			
+		case EAST:
+			return generateLodColorHorizontal(chunk, colorDir, bc);
+		case WEST:
+			return generateLodColorHorizontal(chunk, colorDir, bc);
+		}
+		
+		return new Color(0, 0, 0, 0);
+	}
+	
+	
+	
 	
 	
 	/**
