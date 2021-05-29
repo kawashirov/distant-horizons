@@ -12,6 +12,15 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.WorldRenderer;
 
+/**
+ * This class is used to mix in my rendering code
+ * before Minecraft starts rendering blocks.
+ * If this wasn't done the LODs would render on top
+ * of the normal terrain.
+ * 
+ * @author James Seibel
+ * @version 05-29-2021
+ */
 @Mixin(WorldRenderer.class)
 public class MixinWorldRenderer
 {
@@ -30,7 +39,7 @@ public class MixinWorldRenderer
 	{
 		// only render if LODs are enabled and
 		// only render before solid blocks
-		if (LodConfig.CLIENT.drawLODs.get() && renderType == RenderType.getSolid())
+		if (LodConfig.CLIENT.drawLODs.get() && renderType.equals(RenderType.getSolid()))
 			LodMain.client_proxy.renderLods(previousPartialTicks);
 	}
 }
