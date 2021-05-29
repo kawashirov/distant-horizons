@@ -10,6 +10,7 @@ import com.backsun.lod.renderer.LodRenderer;
 import com.backsun.lod.util.LodUtils;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.profiler.IProfiler;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -83,8 +84,18 @@ public class ClientProxy
 		}
 		
 		
+		// Note to self:
+		// if "unspecified" shows up in the pie chart, it is
+		// possibly because the amount of time between sections
+		// is too small for the profile to measure
+		IProfiler profiler = mc.getProfiler();
+		profiler.endSection(); // get out of "terrain"
+		profiler.startSection("LOD");
 		
 		renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
+		
+		profiler.endSection(); // end LOD
+		profiler.startSection("terrain"); // restart terrain
 	}	
 	
 	

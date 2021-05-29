@@ -111,7 +111,6 @@ public class LodRenderer
 	 * @param newDimension The dimension to draw, if null doesn't replace the current dimension.
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
-	@SuppressWarnings("deprecation")
 	public void drawLODs(LodDimension lodDim, float partialTicks, IProfiler newProfiler)
 	{		
 		if (lodDim == null)
@@ -130,11 +129,7 @@ public class LodRenderer
 		// initial setup //
 		//===============//
 		
-		
-		// used for debugging and viewing how long different processes take
 		profiler = newProfiler;
-		profiler.endSection();
-		profiler.startSection("LOD");
 		profiler.startSection("LOD setup");
 		
 		ClientPlayerEntity player = mc.player;
@@ -266,6 +261,7 @@ public class LodRenderer
 		//===========//
 		// rendering //
 		//===========//
+		profiler.endStartSection("LOD draw");
 		
 		setupFog(fogSetting.nearFogSetting, reflectionHandler.getFogQuality());
 		sendLodsToGpuAndDraw(nearVbo, modelViewMatrix);
@@ -312,8 +308,7 @@ public class LodRenderer
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		
 		
-		
-		// end of profiler tracking
+		// end of internal LOD profiling
 		profiler.endSection();
 	}
 	
@@ -329,15 +324,12 @@ public class LodRenderer
 		if (vbo == null)
 			return;
 		
-		profiler.endStartSection("LOD draw setup");
         vbo.bindBuffer();
-        // 0L is the starting pointer, and the value doesn't appear to matter
+        // 0L is the starting pointer
         LOD_VERTEX_FORMAT.setupBufferState(0L);
         
-        profiler.endStartSection("LOD draw");
         vbo.draw(modelViewMatrix, GL11.GL_QUADS);
         
-        profiler.endStartSection("LOD draw cleanup");
         VertexBuffer.unbindBuffer();
         LOD_VERTEX_FORMAT.clearBufferState();
 	}
@@ -494,7 +486,6 @@ public class LodRenderer
 	/**
 	 * setup the lighting to be used for the LODs
 	 */
-	@SuppressWarnings("deprecation")
 	private void setupLighting(LodDimension lodDimension, float partialTicks)
 	{
 		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.world.getSunBrightness(partialTicks) : 0.2f;
