@@ -6,7 +6,7 @@ import com.backsun.lod.objects.LodDimension;
 import net.minecraft.client.renderer.BufferBuilder;
 
 /**
- * TODO
+ * TODO DynamicLodTemplate
  * Chunks smoothly transition between
  * each other, unless a neighboring chunk
  * is at a significantly different height.

@@ -3,7 +3,6 @@ package com.backsun.lod.builders.lodTemplates;
 import java.awt.Color;
 
 import com.backsun.lod.enums.ColorDirection;
-import com.backsun.lod.enums.LodDetail;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.util.LodConfig;
@@ -34,6 +33,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	{
 		AxisAlignedBB bbox;
 		
+		// TODO for testing
+		//LodConfig.CLIENT.lodDetail.set(LodDetail.SINGLE);
 		
 		// Add this LOD to the BufferBuilder
 		// using the quality setting set by the config
