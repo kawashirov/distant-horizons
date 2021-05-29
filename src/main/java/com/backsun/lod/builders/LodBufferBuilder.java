@@ -12,7 +12,6 @@ import com.backsun.lod.util.LodConfig;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraftforge.common.WorldWorkerManager;
 
@@ -88,9 +87,6 @@ public class LodBufferBuilder
 		
 		generatingBuffers = true;
 		
-		// this is where we store the points for each LOD object
-		AxisAlignedBB lodArray[][] = new AxisAlignedBB[numbChunksWide][numbChunksWide];
-		
 		
 		
 		// this seemingly useless math is required,
@@ -149,8 +145,6 @@ public class LodBufferBuilder
 					
 					if (lod == null || lod.isLodEmpty())
 					{
-						lodArray[i][j] = null;
-						
 						// generate a new chunk if no chunk currently exists
 						// and we aren't waiting on any other chunks to generate
 						if (lod == null && numChunksWaitingToGen == 0)
@@ -213,13 +207,6 @@ public class LodBufferBuilder
 				{
 					if(chunkPos == null)
 						break;
-					
-					// add a placeholder chunk to prevent this chunk from
-					// being generated again
-					LodChunk placeholder = new LodChunk();
-					placeholder.x = chunkPos.x;
-					placeholder.z = chunkPos.z;
-					lodDim.addLod(placeholder);
 					
 					numChunksWaitingToGen++;
 					
