@@ -18,7 +18,7 @@ import com.backsun.lod.objects.LodRegion;
  * to file.
  * 
  * @author James Seibel
- * @version 05-19-2021
+ * @version 05-29-2021
  */
 public class LodDimensionFileHandler
 {
@@ -91,40 +91,52 @@ public class LodDimensionFileHandler
 			BufferedReader br = new BufferedReader(new FileReader(f));
 			String s = br.readLine();
 			int fileVersion = -1;
-			
-			// try to get the file version
-			try
+						
+			if(s != null && !s.isEmpty())
 			{
-				fileVersion = Integer.parseInt(s.substring(s.indexOf(' ')).trim());
-			}
-			catch(NumberFormatException | StringIndexOutOfBoundsException e)
-			{
-				// this file doesn't have a version
-				// keep the version as -1
-			}
-			
-			// check if this file can be read by this file handler
-			if(fileVersion < LOD_SAVE_FILE_VERSION)
-			{
-				// the file we are reading is an older version,
-				// close the reader and delete the file.
-				br.close();
-				f.delete();
+				// try to get the file version
+				try
+				{
+					fileVersion = Integer.parseInt(s.substring(s.indexOf(' ')).trim());
+				}
+				catch(NumberFormatException | StringIndexOutOfBoundsException e)
+				{
+					// this file doesn't have a version
+					// keep the version as -1
+					fileVersion = -1;
+				}
 				
-				return null;
+				// check if this file can be read by this file handler
+				if(fileVersion < LOD_SAVE_FILE_VERSION)
+				{
+					// the file we are reading is an older version,
+					// close the reader and delete the file.
+					br.close();
+					f.delete();
+					
+					return null;
+				}
+				else if(fileVersion > LOD_SAVE_FILE_VERSION)
+				{
+					// the file we are reading is an newer version,
+					// close the reader and ignore the file, we don't
+					// want to accidently delete anything the user may want.
+					br.close();
+					
+					return null;
+				}
 			}
-			else if(fileVersion > LOD_SAVE_FILE_VERSION)
+			else
 			{
-				// the file we are reading is an newer version,
-				// close the reader and ignore the file, we don't
-				// want to accidently delete anything the user may want.
+				// there is no data in this file
 				br.close();
-				
 				return null;
 			}
 			
 			
 			// this file is a readable version, begin reading the file
+			s = br.readLine();
+			
 			while(s != null && !s.isEmpty())
 			{
 				try
@@ -141,6 +153,7 @@ public class LodDimensionFileHandler
 					// skip to the next chunk
 					
 					// TODO write this to the log
+					System.err.println(e.getMessage());
 				}
 				
 				s = br.readLine();
@@ -172,7 +185,7 @@ public class LodDimensionFileHandler
 	/**
 	 * Save all dirty regions in this LodDimension to file.
 	 */
-	public synchronized void saveDirtyRegionsToFileAsync()
+	public void saveDirtyRegionsToFileAsync()
 	{
 		fileWritingThreadPool.execute(saveDirtyRegionsThread);
 	}
@@ -183,7 +196,7 @@ public class LodDimensionFileHandler
 		{
 			for(int j = 0; j < loadedDimension.getWidth(); j++)
 			{
-				if(loadedDimension.isRegionDirty[i][j])
+				if(loadedDimension.isRegionDirty[i][j] && loadedDimension.regions[i][j] != null)
 				{
 					saveRegionToDisk(loadedDimension.regions[i][j]);
 					loadedDimension.isRegionDirty[i][j] = false;
