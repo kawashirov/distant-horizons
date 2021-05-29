@@ -7,7 +7,6 @@ import java.nio.FloatBuffer;
 import org.lwjgl.opengl.GL11;
 
 import com.backsun.lod.builders.LodBufferBuilder;
-import com.backsun.lod.builders.LodBuilder;
 import com.backsun.lod.enums.FogDistance;
 import com.backsun.lod.enums.FogQuality;
 import com.backsun.lod.handlers.ReflectionHandler;
@@ -95,13 +94,13 @@ public class LodRenderer
 	
 	
 	
-	public LodRenderer(LodBuilder newLodBuilder)
+	public LodRenderer(LodBufferBuilder newLodBufferBuilder)
 	{
 		mc = Minecraft.getInstance();
 		gameRender = mc.gameRenderer;
 		
 		reflectionHandler = new ReflectionHandler();
-		lodBufferBuilder = new LodBufferBuilder(newLodBuilder);
+		lodBufferBuilder = newLodBufferBuilder;
 	}
 	
 	
