@@ -46,7 +46,7 @@ public class LodBufferBuilder
 	/** If this is greater than 0 no new chunk generation requests will be made
 	 * this is to prevent chunks from being generated for a long time in an area
 	 * the player is no longer in. */
-	public int numChunksWaitingToGen = 0;
+	public int numberOfChunksWaitingToGenerate = 0;
 	
 	/** how many chunks to generate outside of the player's
 	 * view distance at one time. (or more specifically how
@@ -147,7 +147,7 @@ public class LodBufferBuilder
 					{
 						// generate a new chunk if no chunk currently exists
 						// and we aren't waiting on any other chunks to generate
-						if (lod == null && numChunksWaitingToGen == 0)
+						if (lod == null && numberOfChunksWaitingToGenerate == 0)
 						{
 							ChunkPos pos = new ChunkPos(chunkX, chunkZ);
 							
@@ -208,7 +208,7 @@ public class LodBufferBuilder
 					if(chunkPos == null)
 						break;
 					
-					numChunksWaitingToGen++;
+					numberOfChunksWaitingToGenerate++;
 					
 					LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, renderer, lodBuilder, this, lodDim);
 					WorldWorkerManager.addWorker(genWorker);

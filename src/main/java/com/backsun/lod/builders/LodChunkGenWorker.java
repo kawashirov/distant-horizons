@@ -80,7 +80,7 @@ public class LodChunkGenWorker implements IWorker
             //	System.out.println("Out of range " + x + " " + z);
             //}
             
-            lodBufferBuilder.numChunksWaitingToGen--;
+            lodBufferBuilder.numberOfChunksWaitingToGenerate--;
             
             pos = null;
         }

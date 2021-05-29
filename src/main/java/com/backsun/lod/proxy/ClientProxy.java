@@ -1,5 +1,6 @@
 package com.backsun.lod.proxy;
 
+import com.backsun.lod.builders.LodBufferBuilder;
 import com.backsun.lod.builders.LodBuilder;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
@@ -19,13 +20,14 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of this program.
  * 
  * @author James_Seibel
- * @version 04-01-2021
+ * @version 05-29-2021
  */
 public class ClientProxy
 {
 	private static LodWorld lodWorld = new LodWorld();
 	private static LodBuilder lodBuilder = new LodBuilder();
-	private static LodRenderer renderer = new LodRenderer(lodBuilder);
+	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder(lodBuilder);
+	private static LodRenderer renderer = new LodRenderer(lodBufferBuilder);
 	
 	Minecraft mc = Minecraft.getInstance();
 	
@@ -112,11 +114,14 @@ public class ClientProxy
 	@SubscribeEvent
 	public void worldUnloadEvent(WorldEvent.Unload event)
 	{
-		// the player just loaded a new world/dimension
+		// the player just unloaded a world/dimension
 		
 		if(mc.getConnection().getWorld() == null)
+		{
+			lodBufferBuilder.numberOfChunksWaitingToGenerate = 0;
 			// the player has disconnected from a server
 			lodWorld.deselectWorld();
+		}
 	}
 	
 	
