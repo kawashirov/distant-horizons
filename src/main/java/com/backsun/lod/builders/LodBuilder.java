@@ -10,6 +10,7 @@ import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodWorld;
 import com.backsun.lod.util.LodUtils;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.color.BlockColors;
@@ -29,6 +30,8 @@ import net.minecraft.world.gen.Heightmap;
  */
 public class LodBuilder
 {
+	private static final Color INVISIBLE = new Color(0,0,0,0);
+
 	private ExecutorService lodGenThreadPool = Executors.newSingleThreadExecutor();
 	
 	/** Default size of any LOD regions we use */
@@ -138,6 +141,19 @@ public class LodBuilder
 			colors[dir.value] = generateLodColorForDirection(chunk, dir);
 		}
 		
+		// check to see if there are any invisible sides
+		for(ColorDirection dir : ColorDirection.values())
+		{
+			// if there are any invisible sides
+			// replace them with the top side
+			// (this is done to make sure oceans and other totally
+			// flat locations have the correct side colors)
+			if (dir == ColorDirection.BOTTOM || dir == ColorDirection.TOP)
+				continue;
+			if (colors[dir.value] == INVISIBLE)
+				colors[dir.value] = colors[ColorDirection.TOP.value];
+		}
+		
 		return new LodChunk(chunk.getPos(), height, depth, colors);
 	}
 	
@@ -234,7 +250,34 @@ public class LodBuilder
 		return highest;
 	}
 	
-	
+	/**
+	 * Generate the color for the given chunk in the given ColorDirection.
+	 */
+	private Color  generateLodColorForDirection(IChunk chunk, ColorDirection colorDir)
+	{
+		Minecraft mc =  Minecraft.getInstance();
+		BlockColors bc = mc.getBlockColors();
+		
+		switch (colorDir)
+		{
+		case TOP:
+			return generateLodColorVertical(chunk, colorDir, bc);
+		case BOTTOM:
+			return generateLodColorVertical(chunk, colorDir, bc);
+			
+		case NORTH:
+			return generateLodColorHorizontal(chunk, colorDir, bc);
+		case SOUTH:
+			return generateLodColorHorizontal(chunk, colorDir, bc);
+			
+		case EAST:
+			return generateLodColorHorizontal(chunk, colorDir, bc);
+		case WEST:
+			return generateLodColorHorizontal(chunk, colorDir, bc);
+		}
+		
+		return INVISIBLE;
+	}
 	
 	
 	
@@ -447,82 +490,94 @@ public class LodBuilder
 			// we were given an invalid position, return invisible.
 			// this shouldn't happen and is mostly here to make the
 			// compiler happy
-			return new Color(0,0,0,0);
+			return INVISIBLE;
 		}
 		
 		
-		for (int i = 0; i < chunkSections.length; i++)
+		for (int section = 0; section < chunkSections.length; section++)
 		{
-			if (chunkSections[i] != null)
+			if (chunkSections[section] == null)
+				continue;
+			
+			for (int y = 0; y < CHUNK_SECTION_HEIGHT; y++)
 			{
-				for (int y = 0; y < CHUNK_SECTION_HEIGHT; y++)
+				boolean foundBlock = false;
+				
+				// over moves "over" the side of the chunk
+				// in moves "into" the chunk until it finds a block
+				for (int over = overStart; !foundBlock && over >= 0 && over < CHUNK_DATA_WIDTH; over += overIncrement)
 				{
-					// TODO #24 only add colors that are visible, IE don't add stone blocks that are surrounded by other stone blocks
-					
-					boolean foundBlock = false;
-					
-					// over moves "over" the side of the chunk
-					// in moves "into" the chunk until it finds a block
-					for (int over = overStart; !foundBlock && over >= 0 && over < CHUNK_DATA_WIDTH; over += overIncrement)
+					for (int in = inStart; !foundBlock && in >= 0 && in < CHUNK_DATA_WIDTH; in += inIncrement)
 					{
-						for (int in = inStart; !foundBlock && in >= 0 && in < CHUNK_DATA_WIDTH; in += inIncrement)
+						int x = -1;
+						int z = -1;
+						
+						// determine which should be X and Z							
+						switch(colorDir)
 						{
-							int x = -1;
-							int z = -1;
-							
-							// determine which should be X and Z							
-							switch(colorDir)
-							{
-							case NORTH:
-								x = over;
-								z = in;
-								break;
-							case SOUTH:
-								x = over;
-								z = in;
-								break;
-							case EAST:
-								x = in;
-								z = over;
-								break;
-							case WEST:
-								x = in;
-								z = over;
-								break;
-							default:
-								// this will never happen, it would have
-								// been caught by the switch before the loops
-								break;
-							}
-							
-							int ci;
-							ci = chunkSections[i].getBlockState(x, y, z).getMaterial().getColor().colorValue;
-							
-							if (ci == 0) {
-								// skip air or invisible blocks
-								continue;
-							}
-							
-							Color c = intToColor(ci);
-							
-							red += c.getRed();
-							green += c.getGreen();
-							blue += c.getBlue();
-							
-							numbOfBlocks++;
-							
-							// we found a valid block, skip to the
-							// next x and z
-							foundBlock = true;
+						case NORTH:
+							x = over;
+							z = in;
+							break;
+						case SOUTH:
+							x = over;
+							z = in;
+							break;
+						case EAST:
+							x = in;
+							z = over;
+							break;
+						case WEST:
+							x = in;
+							z = over;
+							break;
+						default:
+							// here to make the compiler happy
+							break;
 						}
+						
+						// if this block is buried, under other blocks
+						// don't add it
+						if(!isBlockPosVisible(chunkSections[section], x,y,z))
+						{
+							// go to the next "over" block location,
+							// don't look at the next "in" location,
+							// since the next "in" location will more than
+							// likely still be covered
+							in = CHUNK_DATA_WIDTH + 2;
+							continue;
+						}
+						
+						
+						int ci;
+						ci = chunkSections[section].getBlockState(x, y, z).getMaterial().getColor().colorValue;
+						
+						if (ci == 0) {
+							// skip air or invisible blocks
+							continue;
+						}
+						
+						Color c = intToColor(ci);
+						
+						red += c.getRed();
+						green += c.getGreen();
+						blue += c.getBlue();
+						
+						numbOfBlocks++;
+						
+						// we found a valid block, skip to the
+						// next x and z
+						foundBlock = true;
 					}
 				}
+				
 				
 			}
 		}
 		
+		// if we didn't find any blocks return invisible
 		if(numbOfBlocks == 0)
-			numbOfBlocks = 1;
+			return INVISIBLE;
 		
 		red /= numbOfBlocks;
 		green /= numbOfBlocks;
@@ -533,37 +588,50 @@ public class LodBuilder
 	
 	
 	
+	private static BlockState airState = Blocks.AIR.getDefaultState();
 	
-	
-	
-	/**
-	 * Generate the color for the given chunk in the given ColorDirection.
+	/** 
+	 * returns true if the block at the given coordinates is open to
+	 * air on at least one side.
 	 */
-	private Color  generateLodColorForDirection(IChunk chunk, ColorDirection colorDir)
+	private boolean isBlockPosVisible(ChunkSection chunkSection, int x, int y, int z)
 	{
-		Minecraft mc =  Minecraft.getInstance();
-		BlockColors bc = mc.getBlockColors();
+		/*
+		// above
+		if (y+1 < CHUNK_SECTION_HEIGHT) // don't go over the top
+			if (chunkSection.getBlockState(x, y+1, z).getBlock() == (Blocks.AIR))
+				return true;
+		// below
+		if (y-1 >= 0) // don't go below the bottom
+			if (chunkSection.getBlockState(x, y-1, z).getBlock() == (Blocks.AIR))
+				return true;
+		*/
 		
-		switch (colorDir)
-		{
-		case TOP:
-			return generateLodColorVertical(chunk, colorDir, bc);
-		case BOTTOM:
-			return generateLodColorVertical(chunk, colorDir, bc);
-			
-		case NORTH:
-			return generateLodColorHorizontal(chunk, colorDir, bc);
-		case SOUTH:
-			return generateLodColorHorizontal(chunk, colorDir, bc);
-			
-		case EAST:
-			return generateLodColorHorizontal(chunk, colorDir, bc);
-		case WEST:
-			return generateLodColorHorizontal(chunk, colorDir, bc);
-		}
+		// north
+		if (z-1 > 0)
+			if (chunkSection.getBlockState(x, y, z-1) == airState)
+				return true;
+		// south
+		if (z+1 < LodChunk.WIDTH)
+			if (chunkSection.getBlockState(x, y, z+1) == airState)
+				return true;
 		
-		return new Color(0, 0, 0, 0);
+		// east
+		if (x+1 <= LodChunk.WIDTH)
+			if (chunkSection.getBlockState(x+1, y, z) == airState)
+				return true;
+		// west
+		if (x-1 >= 0)
+			if (chunkSection.getBlockState(x-1, y, z) == airState)
+				return true;
+		
+			
+		return false;
 	}
+
+
+
+	
 	
 	
 	
