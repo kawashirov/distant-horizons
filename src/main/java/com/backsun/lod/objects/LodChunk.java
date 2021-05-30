@@ -33,6 +33,20 @@ public class LodChunk
 	/** The z coordinate of the chunk. */
 	public int z = 0;
 	
+	/*
+	 * The reason we are only using 1 height and depth point
+	 * instead of multiple is because:
+	 * 1. more points would drastically increase the amount of
+	 * 		memory and disk space needed
+	 * 2. more height/depth points require more color points,
+	 * 		which can get out of hand quickly
+	 * 3. with the increased disk space reading/writing would
+	 * 		take far too long
+	 * 4. the increased resolution is generally not worth it,
+	 * 		4 LODs per chunk is the limit of diminishing returns.
+	 * 		And some of that could potentially be faked through 
+	 * 		smart LodTemplates
+	 */
 	private short height;
 	private short depth;
 	
