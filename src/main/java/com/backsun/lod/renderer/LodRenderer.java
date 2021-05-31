@@ -154,20 +154,12 @@ public class LodRenderer
 			// the dimension is the same
 		}
 		
-		// TODO simplify this logic?
-		if (LodConfig.CLIENT.debugMode.get())
+		// did the user change the debug setting?
+		if (LodConfig.CLIENT.debugMode.get() != debugging)
 		{
-			if (debugging != LodConfig.CLIENT.debugMode.get())
-				regen = true;
-			debugging = true;
+			debugging = LodConfig.CLIENT.debugMode.get();
+			regen = true;
 		}
-		else
-		{
-			if (debugging != LodConfig.CLIENT.debugMode.get())
-				regen = true;
-			debugging = false;
-		}
-		
 		
 		
 		// determine how far the game's render distance is currently set
