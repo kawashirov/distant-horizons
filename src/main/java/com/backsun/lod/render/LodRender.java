@@ -108,6 +108,7 @@ public class LodRender
 	 * @param newDimension The dimension to draw, if null doesn't replace the current dimension.
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
+	@SuppressWarnings("deprecation")
 	public void drawLODs(LodDimension lodDim, float partialTicks, IProfiler newProfiler)
 	{		
 		if (lodDim == null)
@@ -377,7 +378,7 @@ public class LodRender
 		{
 			if (fogQuality == FogQuality.FANCY)
 			{
-				RenderSystem.fogStart(farPlaneDistance * 0.78f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
+				RenderSystem.fogStart(farPlaneDistance * 0.85f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
 				RenderSystem.fogEnd(farPlaneDistance * 1.0f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
 			}
 			else if(fogQuality == FogQuality.FAST)
@@ -475,6 +476,7 @@ public class LodRender
 	/**
 	 * setup the lighting to be used for the LODs
 	 */
+	@SuppressWarnings("deprecation")
 	private void setupLighting(LodDimension lodDimension, float partialTicks)
 	{
 		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.world.getSunBrightness(partialTicks) : 0.2f;
