@@ -69,10 +69,12 @@ public class LodChunkGenWorker implements IWorker
                 
                 
                 // useful for debugging
-                //if (lodDim.getLodFromCoordinates(x, z) != null)
-                //	System.out.println(x + " " + z + " Success!");
-                //else
-                //	System.out.println(x + " " + z);
+//                ClientProxy.LOGGER.info(lodDim.getNumberOfLods());
+                
+//                if (lodDim.getLodFromCoordinates(x, z) != null)
+//                	ClientProxy.LOGGER.info(x + " " + z + " Success!");
+//                else
+//                	ClientProxy.LOGGER.info(x + " " + z);
             }
             // can be used for debugging
             //else

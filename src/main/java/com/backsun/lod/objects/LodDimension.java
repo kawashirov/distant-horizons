@@ -334,6 +334,40 @@ public class LodDimension
 	}
 	
 	
+	/**
+	 * Returns how many non-null LodChunks
+	 * are stored in this LodDimension.
+	 */
+	public int getNumberOfLods()
+	{
+		int numbLods = 0;
+        for (LodRegion[] regions : regions)
+        {
+        	if(regions == null)
+    			continue;
+        	
+        	for (LodRegion region : regions)
+            {
+        		if(region == null)
+        			continue;
+        			
+            	for(LodChunk[] lods : region.getAllLods())
+            	{
+            		if(lods == null)
+            			continue;
+            		
+            		for(LodChunk lod : lods)
+                	{
+                		if (lod != null)
+                			numbLods++;
+                	}
+            	}
+            }
+        }
+        
+        return numbLods;
+	}
+	
 	
 	public int getWidth()
 	{
