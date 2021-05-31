@@ -72,7 +72,7 @@ public class LodBuilder
 		// don't try to create an LOD object
 		// if for some reason we aren't
 		// given a valid chunk object
-		if (chunk == null || !LodUtils.chunkHasBlockData(chunk))
+		if (chunk == null)
 			return;
 			
 		Thread thread = new Thread(() ->
