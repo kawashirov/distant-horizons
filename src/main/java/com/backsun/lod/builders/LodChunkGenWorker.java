@@ -3,7 +3,7 @@ package com.backsun.lod.builders;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodRegion;
 import com.backsun.lod.proxy.ClientProxy;
-import com.backsun.lod.renderer.LodRenderer;
+import com.backsun.lod.render.LodRender;
 import com.backsun.lod.util.LodUtils;
 
 import net.minecraft.util.math.ChunkPos;
@@ -25,9 +25,9 @@ public class LodChunkGenWorker implements IWorker
     private LodDimension lodDim;
     private LodBuilder lodBuilder;
     private LodBufferBuilder lodBufferBuilder;
-    private LodRenderer lodRenderer;
+    private LodRender lodRender;
     
-    public LodChunkGenWorker(ChunkPos newPos, LodRenderer newLodRenderer, 
+    public LodChunkGenWorker(ChunkPos newPos, LodRender newLodRenderer, 
     		LodBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, 
     		LodDimension newLodDimension)
     {
@@ -39,7 +39,7 @@ public class LodChunkGenWorker implements IWorker
         lodDim = newLodDimension;
         lodBuilder = newLodBuilder;
         lodBufferBuilder = newLodBufferBuilder;
-        lodRenderer = newLodRenderer;
+        lodRender = newLodRenderer;
     }
     
     @Override
@@ -65,7 +65,7 @@ public class LodChunkGenWorker implements IWorker
                 lodBuilder.generateLodChunkAsync(chunk, ClientProxy.getLodWorld(), serverWorld);
                 // this is called so that the new LOD chunk is drawn
                 // after it is generated
-                lodRenderer.regenerateLODsNextFrame();
+                lodRender.regenerateLODsNextFrame();
                 
                 
                 // useful for debugging

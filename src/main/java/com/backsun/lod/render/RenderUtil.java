@@ -1,4 +1,4 @@
-package com.backsun.lod.renderer;
+package com.backsun.lod.render;
 
 import net.minecraft.client.Minecraft;
 

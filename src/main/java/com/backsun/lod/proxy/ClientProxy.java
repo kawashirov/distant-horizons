@@ -9,7 +9,7 @@ import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodRegion;
 import com.backsun.lod.objects.LodWorld;
-import com.backsun.lod.renderer.LodRenderer;
+import com.backsun.lod.render.LodRender;
 import com.backsun.lod.util.LodUtils;
 
 import net.minecraft.client.Minecraft;
@@ -33,7 +33,7 @@ public class ClientProxy
 	private static LodWorld lodWorld = new LodWorld();
 	private static LodBuilder lodBuilder = new LodBuilder();
 	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder(lodBuilder);
-	private static LodRenderer renderer = new LodRenderer(lodBufferBuilder);
+	private static LodRender renderer = new LodRender(lodBufferBuilder);
 	
 	Minecraft mc = Minecraft.getInstance();
 	
@@ -177,7 +177,7 @@ public class ClientProxy
 		return lodBuilder;
 	}
 	
-	public static LodRenderer getRenderer()
+	public static LodRender getRenderer()
 	{
 		return renderer;
 	}
