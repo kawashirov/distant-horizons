@@ -18,7 +18,7 @@ import com.backsun.lod.objects.LodRegion;
  * to file.
  * 
  * @author James Seibel
- * @version 05-29-2021
+ * @version 05-31-2021
  */
 public class LodDimensionFileHandler
 {
@@ -207,7 +207,10 @@ public class LodDimensionFileHandler
  	
 	/**
 	 * Save a specific region to disk.<br>
-	 * Note: it will save to the LodDimension that this
+	 * Note: <br>
+	 * 1. If a file already exists for a newer version
+	 * the file won't be written.<br>
+	 * 2. This will save to the LodDimension that this
 	 * handler is associated with.
 	 */
 	private void saveRegionToDisk(LodRegion region)
@@ -223,9 +226,52 @@ public class LodDimensionFileHandler
 		{
 			// make sure the file and folder exists
 			if (!f.exists())
+			{
+				// the file doesn't exist,
+				// create it and the folder if need be
 				if(!f.getParentFile().exists())
 					f.getParentFile().mkdirs();
 				f.createNewFile();
+			}
+			else
+			{
+				// the file exists, make sure it
+				// is the correct version.
+				// (to make sure we don't overwrite a newer
+				// version file if it exists)
+				
+				BufferedReader br = new BufferedReader(new FileReader(f));
+				String s = br.readLine();
+				int fileVersion = LOD_SAVE_FILE_VERSION;
+							
+				if(s != null && !s.isEmpty())
+				{
+					// try to get the file version
+					try
+					{
+						fileVersion = Integer.parseInt(s.substring(s.indexOf(' ')).trim());
+					}
+					catch(NumberFormatException | StringIndexOutOfBoundsException e)
+					{
+						// this file doesn't have a correctly formated version
+						// just overwrite the file
+					}
+				}
+				br.close();
+				
+				// check if this file can be written to by the file handler
+				if(fileVersion <= LOD_SAVE_FILE_VERSION)
+				{
+					// we are good to continue and overwrite the old file
+				}
+				else //if(fileVersion > LOD_SAVE_FILE_VERSION)
+				{
+					// the file we are reading is a newer version,
+					// don't write anything, we don't want to accidently 
+					// delete anything the user may want.
+					return;
+				}
+			}
 			
 			FileWriter fw = new FileWriter(f);
 			
