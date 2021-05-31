@@ -217,18 +217,27 @@ public class LodChunk
 	 */
 	private boolean determineIfEmtpy()
 	{
-		if(height != -1)
-			// we don't check the depth since the
-			// height should always be greater than or equal
-			// to the depth
-			return false;
-		
-		for(ColorDirection dir : ColorDirection.values())
-			if(!colors[dir.value].equals(INVISIBLE))
-				// at least one direction has a non-invisible color
-				return false;
-		
-		return true;
+		// we don't check the depth since the
+		// height should always be greater than or equal
+		// to the depth
+		if(height >= 0)
+		{
+			// the height is valid,
+			// do we have at least 1 non-invisible color?
+			
+			for(ColorDirection dir : ColorDirection.values())
+				if(!colors[dir.value].equals(INVISIBLE))
+					// at least one direction has a non-invisible color
+					return false;
+			
+			return true;
+		}
+		else
+		{
+			// the height is negative,
+			// this LodChunk is empty
+			return true;
+		}
 	}
 	
 	
