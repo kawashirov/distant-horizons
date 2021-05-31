@@ -1,8 +1,10 @@
 package com.backsun.lod.builders.lodTemplates;
 
 import java.awt.Color;
+import java.util.EnumSet;
 
 import com.backsun.lod.enums.ColorDirection;
+import com.backsun.lod.enums.RelativeChunkPos;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.util.LodConfig;
@@ -11,10 +13,10 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.AxisAlignedBB;
 
 /**
- * Builds each LOD chunk as a singular rectangular prism.
+ * Builds LODs as rectangular prisms.
  * 
  * @author James Seibel
- * @version 05-29-2021
+ * @version 05-31-2021
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {
@@ -27,77 +29,162 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer,
-			LodDimension lodDim, LodChunk lod, 
+			LodDimension lodDim, LodChunk centerLod, 
 			double xOffset, double yOffset, double zOffset, 
 			boolean debugging)
 	{
 		AxisAlignedBB bbox;
 		
-		// TODO for testing
-		//LodConfig.CLIENT.lodDetail.set(LodDetail.SINGLE);
-		
 		// Add this LOD to the BufferBuilder
 		// using the quality setting set by the config
 		switch(LodConfig.CLIENT.lodDetail.get())
 		{
+		// add a single LOD object for this chunk
 		case SINGLE:
+			
 			// returns null if the lod is empty at the given location
-			bbox = generateBoundingBox(lod, LodChunk.WIDTH, xOffset, yOffset, zOffset);
+			bbox = generateBoundingBox(centerLod.getHeight(), centerLod.getDepth(), LodChunk.WIDTH, xOffset, yOffset, zOffset);
 			
 			if (bbox != null)
 			{
-				addBoundingBoxToBuffer(buffer, bbox, generateLodColors(lod, false));
+				addBoundingBoxToBuffer(buffer, bbox, generateLodColors(centerLod, false));
 			}
 			
 			break;
+		
+		// add 4 LOD objects for this chunk
+		case DOUBLE:
+			/*
+			 * This method generates LODs using the LodChunks that
+			 * are adjacent to create an average quarter and thus 
+			 * smooth the transition between chunks.
+			 */
 			
-		case QUAD:
+			// get the adjacent LodChunks
+			LodChunk[] lods = new LodChunk[RelativeChunkPos.values().length];
+			for(RelativeChunkPos pos : RelativeChunkPos.values())
+				lods[pos.index] = lodDim.getLodFromCoordinates(centerLod.x + pos.x, centerLod.z + pos.z);
 			
-			// TODO use the adjacent chunks to generate quarter sections
-//			width = LodChunk.WIDTH / LodDetail.QUAD.value;
-//			
-//			for(int i = 0; i < LodDetail.QUAD.value; i++)
-//			{
-//				for(int j = 0; j < LodDetail.QUAD.value; j++)
-//				{
-//					int x = i * width;
-//					int z = j * width;
-//					
-//					// returns null if the lod is empty at the given location
-//					bbox = generateBoundingBox(lod, x, z, width, xOffset - (width / 2) + x, yOffset, zOffset - (width / 2) + z);
-//					
-//					if (bbox != null)
-//					{
-//						Color[] colors = generateLodColors(lod, x, z, debugging);
-//						
-//						addBoundingBoxToBuffer(buffer, bbox, colors);
-//					}
-//				}
-//			}
+			
+			int halfWidth = LodChunk.WIDTH / 2;
+			
+			// use the adjacent chunks to generate quarter sections
+			for(EnumSet<RelativeChunkPos> set : RelativeChunkPos.CORNERS)
+			{
+				int x = 0;
+				int z = 0;
+				
+				// Weight the center LodChunk by this amount
+				// when taking the average.
+				// this should be between 3 and 6; 
+				// if set to 1 (no extra weight)
+				// then the chunks don't appear to be averaged.
+				int centerWeight = 3;
+				
+				// how many LodChunks adjacent to the center
+				// are valid?
+				int validPoints = centerWeight;
+				
+				int avgHeight = centerLod.getHeight() * centerWeight;
+				int avgDepth = centerLod.getDepth() * centerWeight;
+				
+				int[][] colorAverages = new int[ColorDirection.values().length][3];
+				Color[] colorToAdd = generateLodColors(centerLod, debugging);
+				for(int i = 0; i < centerWeight; i++)
+					colorAverages = addColorToColorAverages(colorAverages, colorToAdd);
+				
+				for(RelativeChunkPos cornerPos : set)
+				{
+					// set the x and y location based on which
+					// corner we are working on
+					if (RelativeChunkPos.DIAGONAL.contains(cornerPos))
+					{
+						x = Math.min(cornerPos.x, 0) * halfWidth;
+						z = Math.min(cornerPos.z, 0) * halfWidth;
+					}
+					
+					LodChunk cornerLod = lods[cornerPos.index];
+					if (cornerLod != null)
+					{
+						validPoints++;
+						
+						avgHeight += cornerLod.getHeight();
+						avgDepth += cornerLod.getDepth();
+						
+						// only generate average colors if we aren't debugging
+						// (this is to prevent everything from becoming grey)
+						if (!debugging)
+							colorToAdd = generateLodColors(cornerLod, debugging);
+						else
+							colorToAdd = generateLodColors(centerLod, debugging);
+						// add to the running color average
+						colorAverages = addColorToColorAverages(colorAverages, colorToAdd);
+					}
+				}
+				
+				
+				// convert the heights into actual averages
+				avgHeight /= validPoints;
+				avgDepth /= validPoints;
+				// calculate the average colors
+				Color[] colors = new Color[ColorDirection.values().length];
+				for(ColorDirection dir : ColorDirection.values())
+				{
+					for(int rgbIndex = 0; rgbIndex < 3; rgbIndex++)
+						colorAverages[dir.value][rgbIndex] /= validPoints;
+					colors[dir.value] = new Color(colorAverages[dir.value][0], colorAverages[dir.value][1], colorAverages[dir.value][2]);
+				}
+				
+				
+				// returns null if the lod is empty at the given location
+				bbox = generateBoundingBox(avgHeight, avgDepth, halfWidth, xOffset - (halfWidth / 2) + x + 12, yOffset, zOffset - (halfWidth / 2) + z + 12);
+				
+				if (bbox != null)
+				{
+					addBoundingBoxToBuffer(buffer, bbox, colors);
+				}
+			}
 			break;
 		} // case
 	}
 	
 	
-	
-	
-	private AxisAlignedBB generateBoundingBox(LodChunk lod, int width, double xOffset, double yOffset, double zOffset)
+	private int[][] addColorToColorAverages(int[][] colorAverages, Color[] colorToAdd) 
 	{
-		int topPoint = lod.getHeight();
-		int bottomPoint = lod.getDepth();
+		for(ColorDirection dir : ColorDirection.values())
+		{
+			// convert the colorToAdd to an int array
+			float[] colorCompoments = new float[4];
+			colorCompoments = colorToAdd[dir.value].getColorComponents(colorCompoments);
+			
+			// add each color component to the array
+			for(int rgbIndex = 0; rgbIndex < 3; rgbIndex++)
+			{
+				// * 255 + 0.5 taken from the Color java class
+				colorAverages[dir.value][rgbIndex] += (int) (colorCompoments[rgbIndex] * 255 + 0.5);
+			}
+		}
 		
+		return colorAverages;
+	}
+	
+	
+	
+	
+	private AxisAlignedBB generateBoundingBox(int height, int depth, int width, double xOffset, double yOffset, double zOffset)
+	{
 		// don't add an LOD if it is empty
-		if (topPoint == -1 && bottomPoint == -1)
+		if (height == -1 && depth == -1)
 			return null;
 		
-		if (bottomPoint == topPoint)
+		if (depth == height)
 		{
 			// if the top and bottom points are at the same height
 			// render this LOD as 1 block thick
-			topPoint++;
+			height++;
 		}
 		
-		return new AxisAlignedBB(0, bottomPoint, 0, width, topPoint, width).offset(xOffset, yOffset, zOffset);
+		return new AxisAlignedBB(0, depth, 0, width, height, width).offset(xOffset, yOffset, zOffset);
 	}
 	
 	

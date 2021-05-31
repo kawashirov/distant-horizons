@@ -79,7 +79,7 @@ public class LodConfig
 	                .comment("\n"
 	                		+ " How detailed should the LODs be? \n"
 	                		+ " " + LodDetail.SINGLE.toString() + ": render 1 LOD for each Chunk. \n"
-            				+ " " + LodDetail.QUAD.toString() + ": render 4 LODs for each Chunk.")
+            				+ " " + LodDetail.DOUBLE.toString() + ": render 4 LODs for each Chunk.")
 	                .defineEnum("lodGeometryQuality", LodDetail.SINGLE);
 	        
 	        lodColorStyle = builder

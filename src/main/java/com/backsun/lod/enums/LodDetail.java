@@ -12,7 +12,7 @@ public enum LodDetail
 	SINGLE(1),
 	
 	/** render 4 LODs for each chunk */
-	QUAD(4);
+	DOUBLE(2);
 	
 	/** How many data points wide the related
 	 * LodChunk object should contain */
