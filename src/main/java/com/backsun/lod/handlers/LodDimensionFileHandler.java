@@ -11,6 +11,7 @@ import java.util.concurrent.Executors;
 import com.backsun.lod.objects.LodChunk;
 import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodRegion;
+import com.backsun.lod.proxy.ClientProxy;
 
 /**
  * This object handles creating LodRegions
@@ -113,15 +114,19 @@ public class LodDimensionFileHandler
 					// close the reader and delete the file.
 					br.close();
 					f.delete();
+					ClientProxy.LOGGER.info("LOD region file: \"" + fileName + "\" version: " + fileVersion + ", version requested: " + LOD_SAVE_FILE_VERSION + "\t" +
+					" File was outdated and has been deleted.");
 					
 					return null;
 				}
 				else if(fileVersion > LOD_SAVE_FILE_VERSION)
 				{
-					// the file we are reading is an newer version,
+					// the file we are reading is a newer version,
 					// close the reader and ignore the file, we don't
 					// want to accidently delete anything the user may want.
 					br.close();
+					ClientProxy.LOGGER.info("LOD region file: \"" + fileName + "\" version: " + fileVersion + ", version requested: " + LOD_SAVE_FILE_VERSION + "\t" +
+							" File is newer than .");
 					
 					return null;
 				}
@@ -151,9 +156,7 @@ public class LodDimensionFileHandler
 					// we were unable to create this chunk
 					// for whatever reason.
 					// skip to the next chunk
-					
-					// TODO write this to the log
-					System.err.println(e.getMessage());
+					ClientProxy.LOGGER.warn(e.getMessage());
 				}
 				
 				s = br.readLine();
@@ -288,7 +291,7 @@ public class LodDimensionFileHandler
 		}
 		catch(Exception e)
 		{
-			System.err.println("LOD file write error: " + e.getMessage());
+			ClientProxy.LOGGER.error("LOD file write error: " + e.getMessage());
 		}
 	}
 	

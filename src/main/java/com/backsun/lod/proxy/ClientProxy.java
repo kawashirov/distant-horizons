@@ -1,5 +1,8 @@
 package com.backsun.lod.proxy;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.backsun.lod.builders.LodBufferBuilder;
 import com.backsun.lod.builders.LodBuilder;
 import com.backsun.lod.objects.LodChunk;
@@ -21,10 +24,12 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of this program.
  * 
  * @author James_Seibel
- * @version 05-29-2021
+ * @version 05-31-2021
  */
 public class ClientProxy
 {
+	public static final Logger LOGGER = LogManager.getLogger();
+	
 	private static LodWorld lodWorld = new LodWorld();
 	private static LodBuilder lodBuilder = new LodBuilder();
 	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder(lodBuilder);
@@ -83,6 +88,11 @@ public class ClientProxy
 			lodDim.move(xOffset, zOffset);
 		}
 		
+		
+		// TODO for testing
+//		LodConfig.CLIENT.debugMode.set(false);
+//		LodConfig.CLIENT.lodDetail.set(LodDetail.DOUBLE);
+//		LodConfig.CLIENT.lodColorStyle.set(LodColorStyle.TOP);
 		
 		// Note to self:
 		// if "unspecified" shows up in the pie chart, it is
