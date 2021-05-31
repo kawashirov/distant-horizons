@@ -104,7 +104,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 					}
 					
 					LodChunk cornerLod = lods[cornerPos.index];
-					if (cornerLod != null)
+					if (cornerLod != null && !cornerLod.isLodEmpty())
 					{
 						validPoints++;
 						
