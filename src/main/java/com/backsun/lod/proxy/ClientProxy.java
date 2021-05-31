@@ -28,7 +28,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  */
 public class ClientProxy
 {
-	public static final Logger LOGGER = LogManager.getLogger();
+	public static final Logger LOGGER = LogManager.getLogger("LOD");
 	
 	private static LodWorld lodWorld = new LodWorld();
 	private static LodBuilder lodBuilder = new LodBuilder();
