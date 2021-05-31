@@ -72,7 +72,8 @@ public class LodConfig
 	                		+ " How should the LODs be drawn? \n"
 	                		+ " " + LodTemplate.CUBIC.toString() + ": LOD Chunks are drawn as rectangular prisms (boxes). \n"
 	                		+ " " + LodTemplate.TRIANGULAR.toString() + ": LOD Chunks smoothly transition between other. \n"
-	                		+ " " + LodTemplate.DYNAMIC.toString() + ": LOD Chunks smoothly transition between other, unless a neighboring chunk is at a significantly different height. ")
+	                		+ " " + LodTemplate.DYNAMIC.toString() + ": LOD Chunks smoothly transition between other, "
+	                		+ " " + "         unless a neighboring chunk is at a significantly different height. ")
 	                .defineEnum("lodTemplate", LodTemplate.CUBIC);
 	        
 	        lodDetail = builder
@@ -86,7 +87,7 @@ public class LodConfig
 	                .comment("\n"
 	                		+ " How should the LODs be colored? \n"
 	                		+ " " + LodColorStyle.TOP.toString() + ": Use the color from the top of the LOD chunk for all sides. \n"
-	                		+ " " + LodColorStyle.INDIVIDUAL_SIDES.toString() + ": For each side of the LOD use the color correspondingto that side. ")
+	                		+ " " + LodColorStyle.INDIVIDUAL_SIDES.toString() + ": For each side of the LOD use the color corresponding to that side. ")
 	                .defineEnum("lodColorStyle", LodColorStyle.TOP);
 	        
 	        builder.pop();
