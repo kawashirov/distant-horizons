@@ -10,6 +10,7 @@ import com.backsun.lod.objects.LodDimension;
 import com.backsun.lod.objects.LodRegion;
 import com.backsun.lod.objects.LodWorld;
 import com.backsun.lod.render.LodRender;
+import com.backsun.lod.util.LodConfig;
 import com.backsun.lod.util.LodUtils;
 
 import net.minecraft.client.Minecraft;
@@ -60,7 +61,10 @@ public class ClientProxy
 			return;
 		
 		// update each regions' width to match the new render distance
-		int newWidth = Math.max(4, (mc.gameSettings.renderDistanceChunks * LodChunk.WIDTH * 2) / LodRegion.SIZE);
+		int newWidth = Math.max(4, 
+				// TODO is this logic good?
+				(mc.gameSettings.renderDistanceChunks * LodChunk.WIDTH * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get()) / LodRegion.SIZE
+				);
 		if (lodBuilder.regionWidth != newWidth)
 		{
 			lodWorld.resizeDimensionRegionWidth(newWidth);
