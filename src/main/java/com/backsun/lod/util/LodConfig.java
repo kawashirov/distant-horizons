@@ -22,7 +22,7 @@ import net.minecraftforge.fml.config.ModConfig;
 /**
  * 
  * @author James Seibel
- * @version 05-05-2021
+ * @version 05-31-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -38,8 +38,12 @@ public class LodConfig
 		public ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
 		
 		public ForgeConfigSpec.EnumValue<LodDetail> lodDetail;
-
+		
 		public ForgeConfigSpec.EnumValue<LodColorStyle> lodColorStyle;
+		
+		/** this is multiplied by the default view distance
+		 * to determine how far out to generate/render LODs */
+		public ForgeConfigSpec.IntValue lodChunkRadiusMultiplier;
 		
 		Client(ForgeConfigSpec.Builder builder)
 		{
@@ -89,6 +93,14 @@ public class LodConfig
 	                		+ " " + LodColorStyle.TOP.toString() + ": Use the color from the top of the LOD chunk for all sides. \n"
 	                		+ " " + LodColorStyle.INDIVIDUAL_SIDES.toString() + ": For each side of the LOD use the color corresponding to that side. ")
 	                .defineEnum("lodColorStyle", LodColorStyle.TOP);
+	        
+	        lodChunkRadiusMultiplier = builder
+	                .comment("\n"
+	                		+ " This is multiplied by the default view distance \n"
+	                		+ " to determine how far out to generate/render LODs. \n"
+	                		+ " A value of 2 means that there is 1 render distance worth \n"
+	                		+ " of LODs in each cardinal direction.")
+	                .defineInRange("lodChunkRadiusMultiplier", 6, 2, 1023);
 	        
 	        builder.pop();
 	    }

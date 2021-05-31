@@ -57,9 +57,6 @@ public class LodRender
 	private GameRenderer gameRender;
 	private IProfiler profiler;
 	private float farPlaneDistance;
-	/** this is the radius of the LODs */
-	private static final int LOD_CHUNK_DISTANCE_RADIUS = 6;
-	
 	private ReflectionHandler reflectionHandler;
 	
 	
@@ -167,7 +164,7 @@ public class LodRender
 		farPlaneDistance = renderDistWidth * LodChunk.WIDTH;
 		
 		// set how big the LODs will be and how far they will go
-		int totalLength = (int) farPlaneDistance * LOD_CHUNK_DISTANCE_RADIUS * 2;
+		int totalLength = (int) farPlaneDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 2;
 		int numbChunksWide = (totalLength / LodChunk.WIDTH);
 		
 		
@@ -363,8 +360,8 @@ public class LodRender
 			
 			if (fogQuality == FogQuality.FANCY)
 			{
-				RenderSystem.fogEnd(farPlaneDistance * 0.3f * LOD_CHUNK_DISTANCE_RADIUS);
-				RenderSystem.fogStart(farPlaneDistance * 0.35f * LOD_CHUNK_DISTANCE_RADIUS);
+				RenderSystem.fogEnd(farPlaneDistance * 1.75f);
+				RenderSystem.fogStart(farPlaneDistance * 1.95f);
 			}
 			else if(fogQuality == FogQuality.FAST)
 			{
@@ -380,13 +377,13 @@ public class LodRender
 		{
 			if (fogQuality == FogQuality.FANCY)
 			{
-				RenderSystem.fogStart(farPlaneDistance * 0.78f * LOD_CHUNK_DISTANCE_RADIUS);
-				RenderSystem.fogEnd(farPlaneDistance * 1.0f * LOD_CHUNK_DISTANCE_RADIUS);
+				RenderSystem.fogStart(farPlaneDistance * 0.78f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
+				RenderSystem.fogEnd(farPlaneDistance * 1.0f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
 			}
 			else if(fogQuality == FogQuality.FAST)
 			{
-				RenderSystem.fogStart(farPlaneDistance * 0.5f * LOD_CHUNK_DISTANCE_RADIUS);
-				RenderSystem.fogEnd(farPlaneDistance * 0.75f * LOD_CHUNK_DISTANCE_RADIUS);
+				RenderSystem.fogStart(farPlaneDistance * 0.5f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
+				RenderSystem.fogEnd(farPlaneDistance * 0.75f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
 			}
 		}
 		
@@ -466,7 +463,7 @@ public class LodRender
 				getFov(partialTicks, true), 
 				(float)this.mc.getMainWindow().getFramebufferWidth() / (float)this.mc.getMainWindow().getFramebufferHeight(), 
 				0.5F, 
-				this.farPlaneDistance * LOD_CHUNK_DISTANCE_RADIUS * 2);
+				this.farPlaneDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 2);
 		
 		// add the screen space distortions
 		projectionMatrix.mul(matrixStack.getLast().getMatrix());

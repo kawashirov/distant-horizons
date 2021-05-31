@@ -93,6 +93,7 @@ public class ClientProxy
 //		LodConfig.CLIENT.debugMode.set(false);
 //		LodConfig.CLIENT.lodDetail.set(LodDetail.DOUBLE);
 //		LodConfig.CLIENT.lodColorStyle.set(LodColorStyle.TOP);
+//		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
 		
 		// Note to self:
 		// if "unspecified" shows up in the pie chart, it is
