@@ -74,7 +74,7 @@ public class LodDimensionFileHandler
 	 */
 	public LodRegion loadRegionFromFile(int regionX, int regionZ)
 	{
-		String fileName = getFileNameForRegion(regionX, regionZ);
+		String fileName = getFileNameAndPathForRegion(regionX, regionZ);
 		
 		File f = new File(fileName);
 		
@@ -225,7 +225,7 @@ public class LodDimensionFileHandler
 		int x = region.x;
 		int z = region.z;
 		
-		File f = new File(getFileNameForRegion(x, z));
+		File f = new File(getFileNameAndPathForRegion(x, z));
 		
 		try
 		{
@@ -313,7 +313,7 @@ public class LodDimensionFileHandler
 	 * region at the given x and z. <br>
 	 * Returns null if this object isn't ready to read and write.
 	 */
-	private String getFileNameForRegion(int regionX, int regionZ)
+	private String getFileNameAndPathForRegion(int regionX, int regionZ)
 	{
 		try
 		{
@@ -329,6 +329,5 @@ public class LodDimensionFileHandler
 			return null;
 		}
 	}
-	
 	
 }
