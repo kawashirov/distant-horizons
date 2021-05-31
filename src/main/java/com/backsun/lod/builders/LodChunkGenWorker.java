@@ -100,19 +100,20 @@ public class LodChunkGenWorker implements IWorker
      
      true/false is whether they generated blocks or not
      the time is how long it took to generate
-    
-     ChunkStatus.FULL 					30 - 50 ms	true
-     ChunkStatus.HEIGHTMAPS 			20 - 40 ms	true
-     ChunkStatus.BIOMES 				1  - 10 ms	false	(no height)
-     ChunkStatus.CARVERS				5  - 30 ms	true	(no snow/trees, just grass)
+     
      ChunkStatus.EMPTY					0  - 1  ms	false	(empty, what did you expect? :P)
-     ChunkStatus.FEATURES				7  - 25 ms	true
-     ChunkStatus.LIGHT					20 - 40 ms	true
-     ChunkStatus.LIQUID_CARVERS			6  - 12 ms	true	(no snow/trees, just grass)
-     ChunkStatus.NOISE					4  - 15 ms	true	(all blocks are stone)
-     ChunkStatus.SPAWN			   		50 - 80 ms	true
-     ChunkStatus.SURFACE				5  - 15 ms	true	(no snow/trees, just grass)
      ChunkStatus.STRUCTURE_REFERENCES	1  - 2  ms  false	(no height, only generates some chunks)
+     ChunkStatus.BIOMES 				1  - 10 ms	false	(no height)
+     ChunkStatus.NOISE					4  - 15 ms	true	(all blocks are stone)
+     ChunkStatus.LIQUID_CARVERS			6  - 12 ms	true	(no snow/trees, just grass)
+     ChunkStatus.SURFACE				5  - 15 ms	true	(no snow/trees, just grass)
+     ChunkStatus.CARVERS				5  - 30 ms	true	(no snow/trees, just grass)
+     ChunkStatus.FEATURES				7  - 25 ms	true
+     ChunkStatus.HEIGHTMAPS 			20 - 40 ms	true
+     ChunkStatus.LIGHT					20 - 40 ms	true
+     ChunkStatus.FULL 					30 - 50 ms	true
+     ChunkStatus.SPAWN			   		50 - 80 ms	true
+     
      
      At this point I would suggest using FEATURES, as it generates snow and trees
      (and any other object that is needed to make biomes distinct)
