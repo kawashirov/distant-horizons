@@ -5,8 +5,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.builders.LodBuilder;
-import com.seibel.lod.enums.LodColorStyle;
-import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
@@ -97,9 +95,9 @@ public class ClientProxy
 		
 		// TODO for testing
 //		LodConfig.CLIENT.debugMode.set(false);
-		LodConfig.CLIENT.lodDetail.set(LodDetail.DOUBLE);
-		LodConfig.CLIENT.lodColorStyle.set(LodColorStyle.INDIVIDUAL_SIDES);
-		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
+//		LodConfig.CLIENT.lodDetail.set(LodDetail.DOUBLE);
+//		LodConfig.CLIENT.lodColorStyle.set(LodColorStyle.INDIVIDUAL_SIDES);
+//		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
 		
 		// Note to self:
 		// if "unspecified" shows up in the pie chart, it is
