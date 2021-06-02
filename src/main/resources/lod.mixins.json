@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "com.backsun.lod.mixin",
+	"package": "com.seibel.lod.mixin",
 	"compatibilityLevel": "JAVA_8",
 	"refmap": "lod.refmap.json",
 	"mixins": [
