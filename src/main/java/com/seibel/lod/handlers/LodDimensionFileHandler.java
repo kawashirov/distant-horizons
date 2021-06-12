@@ -19,10 +19,14 @@ import com.seibel.lod.proxy.ClientProxy;
  * to file.
  * 
  * @author James Seibel
- * @version 05-31-2021
+ * @version 6-12-2021
  */
 public class LodDimensionFileHandler
 {
+	/** This is what separates each piece of data */
+	public static final char DATA_DELIMITER = ',';
+	
+	
 	private LodDimension loadedDimension = null;
 	public long regionLastWriteTime[][];
 	
@@ -74,6 +78,9 @@ public class LodDimensionFileHandler
 	 */
 	public LodRegion loadRegionFromFile(int regionX, int regionZ)
 	{
+		// TODO
+		return null;
+		/*
 		String fileName = getFileNameAndPathForRegion(regionX, regionZ);
 		
 		File f = new File(fileName);
@@ -174,6 +181,7 @@ public class LodDimensionFileHandler
 		}
 		
 		return region;
+		*/
 	}
 	
 	
@@ -192,7 +200,8 @@ public class LodDimensionFileHandler
 	 */
 	public void saveDirtyRegionsToFileAsync()
 	{
-		fileWritingThreadPool.execute(saveDirtyRegionsThread);
+		// TODO
+		//fileWritingThreadPool.execute(saveDirtyRegionsThread);
 	}
 	
 	private Thread saveDirtyRegionsThread = new Thread(() -> 

@@ -1,7 +1,5 @@
 package com.seibel.lod.builders.lodTemplates;
 
-import java.awt.Color;
-
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
 
@@ -12,16 +10,10 @@ import net.minecraft.client.renderer.BufferBuilder;
  * BufferBuilders.
  * 
  * @author James Seibel
- * @version 05-07-2021
+ * @version 06-12-2021
  */
 public abstract class AbstractLodTemplate
 {
-	/** alpha used when drawing chunks in debug mode */
-	protected int debugAlpha = 255; // 0 - 255
-	protected Color debugBlack = new Color(0, 0, 0, debugAlpha);
-	protected Color debugWhite = new Color(255, 255, 255, debugAlpha);
-	
-	
 	public abstract void addLodToBuffer(BufferBuilder buffer, 
 			LodDimension lodDim, LodChunk lod, 
 			double xOffset, double yOffset, double zOffset, 

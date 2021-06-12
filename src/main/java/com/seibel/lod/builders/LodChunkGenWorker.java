@@ -16,7 +16,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  * 
  * @author James Seibel
- * @version 03-31-2021
+ * @version 6-12-2021
  */
 public class LodChunkGenWorker implements IWorker
 {
@@ -54,7 +54,7 @@ public class LodChunkGenWorker implements IWorker
             // be added to the current LodDimension
             if (lodDim.regionIsInRange(pos.x / LodRegion.SIZE, pos.z / LodRegion.SIZE))
             {
-                IChunk chunk;// = serverWorld.getChunk(x, z, ChunkStatus.EMPTY, true);
+                IChunk chunk;
                 
                 //long startTime = System.currentTimeMillis();
                 chunk = serverWorld.getChunk(x, z, ChunkStatus.FEATURES);

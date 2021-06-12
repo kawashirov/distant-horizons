@@ -1,13 +1,11 @@
 package com.seibel.lod.builders.lodTemplates;
 
 import java.awt.Color;
-import java.util.EnumSet;
 
 import com.seibel.lod.enums.ColorDirection;
-import com.seibel.lod.enums.RelativeChunkPos;
+import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
-import com.seibel.lod.util.LodConfig;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -16,7 +14,7 @@ import net.minecraft.util.math.AxisAlignedBB;
  * Builds LODs as rectangular prisms.
  * 
  * @author James Seibel
- * @version 05-31-2021
+ * @version 06-12-2021
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {
@@ -37,118 +35,34 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		
 		// Add this LOD to the BufferBuilder
 		// using the quality setting set by the config
-		switch(LodConfig.CLIENT.lodDetail.get())
+		LodDetail detail = LodChunk.DETAIL; //LodConfig.CLIENT.lodDetail.get();
+		
+		int halfWidth = detail.width / 2;
+		
+		for(int i = 0; i < detail.lengthCount * detail.lengthCount; i++)
 		{
-		// add a single LOD object for this chunk
-		case SINGLE:
+			int startX = detail.startX[i];
+			int startZ = detail.startZ[i];
+			int endX = detail.endX[i];
+			int endZ = detail.endZ[i];
 			
 			// returns null if the lod is empty at the given location
-			bbox = generateBoundingBox(centerLod.getHeight(), centerLod.getDepth(), LodChunk.WIDTH, xOffset, yOffset, zOffset);
+			bbox = generateBoundingBox(
+					centerLod.getAverageHeightOverArea(startX, startZ, endX, endZ), 
+					centerLod.getAverageDepthOverArea(startX, startZ, endX, endZ), 
+					detail.width, 
+					xOffset - (halfWidth / 2) + detail.startX[i],
+					yOffset, 
+					zOffset - (halfWidth / 2) + detail.startZ[i]);
 			
 			if (bbox != null)
 			{
-				addBoundingBoxToBuffer(buffer, bbox, generateLodColors(centerLod, false));
+				addBoundingBoxToBuffer(buffer, bbox, centerLod.getAverageColorOverArea(startX, startZ, endX, endZ, debugging));
 			}
-			
-			break;
-		
-		// add 4 LOD objects for this chunk
-		case DOUBLE:
-			/*
-			 * This method generates LODs using the LodChunks that
-			 * are adjacent to create an average quarter and thus 
-			 * smooth the transition between chunks.
-			 */
-			
-			// get the adjacent LodChunks
-			LodChunk[] lods = new LodChunk[RelativeChunkPos.values().length];
-			for(RelativeChunkPos pos : RelativeChunkPos.values())
-				lods[pos.index] = lodDim.getLodFromCoordinates(centerLod.x + pos.x, centerLod.z + pos.z);
-			
-			
-			int halfWidth = LodChunk.WIDTH / 2;
-			
-			// use the adjacent chunks to generate quarter sections
-			for(EnumSet<RelativeChunkPos> set : RelativeChunkPos.CORNERS)
-			{
-				int x = 0;
-				int z = 0;
-				
-				// Weight the center LodChunk by this amount
-				// when taking the average.
-				// this should be between 3 and 6; 
-				// if set to 1 (no extra weight)
-				// then the chunks don't appear to be averaged.
-				int centerWeight = 3;
-				
-				// how many LodChunks adjacent to the center
-				// are valid?
-				int validPoints = centerWeight;
-				
-				int avgHeight = centerLod.getHeight() * centerWeight;
-				int avgDepth = centerLod.getDepth() * centerWeight;
-				
-				int[][] colorAverages = new int[ColorDirection.values().length][3];
-				Color[] colorToAdd = generateLodColors(centerLod, debugging);
-				for(int i = 0; i < centerWeight; i++)
-					colorAverages = addColorToColorAverages(colorAverages, colorToAdd);
-				
-				for(RelativeChunkPos cornerPos : set)
-				{
-					// set the x and y location based on which
-					// corner we are working on
-					if (RelativeChunkPos.DIAGONAL.contains(cornerPos))
-					{
-						x = Math.min(cornerPos.x, 0) * halfWidth;
-						z = Math.min(cornerPos.z, 0) * halfWidth;
-					}
-					
-					LodChunk cornerLod = lods[cornerPos.index];
-					if (cornerLod != null && !cornerLod.isLodEmpty())
-					{
-						validPoints++;
-						
-						avgHeight += cornerLod.getHeight();
-						avgDepth += cornerLod.getDepth();
-						
-						// only generate average colors if we aren't debugging
-						// (this is to prevent everything from becoming grey)
-						if (!debugging)
-							colorToAdd = generateLodColors(cornerLod, debugging);
-						else
-							colorToAdd = generateLodColors(centerLod, debugging);
-						// add to the running color average
-						colorAverages = addColorToColorAverages(colorAverages, colorToAdd);
-					}
-				}
-				
-				
-				// convert the heights into actual averages
-				avgHeight /= validPoints;
-				avgDepth /= validPoints;
-				// calculate the average colors
-				Color[] colors = new Color[ColorDirection.values().length];
-				for(ColorDirection dir : ColorDirection.values())
-				{
-					for(int rgbIndex = 0; rgbIndex < 3; rgbIndex++)
-						colorAverages[dir.value][rgbIndex] /= validPoints;
-					colors[dir.value] = new Color(colorAverages[dir.value][0], colorAverages[dir.value][1], colorAverages[dir.value][2]);
-				}
-				
-				
-				// returns null if the lod is empty at the given location
-				bbox = generateBoundingBox(avgHeight, avgDepth, halfWidth, xOffset - (halfWidth / 2) + x + 12, yOffset, zOffset - (halfWidth / 2) + z + 12);
-				
-				if (bbox != null)
-				{
-					addBoundingBoxToBuffer(buffer, bbox, colors);
-				}
-			}
-			break;
-		} // case
+		}
 	}
 	
-	
+	/*
 	private int[][] addColorToColorAverages(int[][] colorAverages, Color[] colorToAdd) 
 	{
 		for(ColorDirection dir : ColorDirection.values())
@@ -167,7 +81,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		
 		return colorAverages;
 	}
-	
+	*/
 	
 	
 	
@@ -228,50 +142,4 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	
 	
 	
-	
-	
-	/**
-	 * Determine the color for each side of this LOD.
-	 */
-	private Color[] generateLodColors(LodChunk lod, boolean debugging)
-	{
-		Color[] colors = new Color[ColorDirection.values().length];
-		
-		if (!debugging)
-		{
-			// if NOT debugging, look to the config to determine
-			// how this LOD should be colored
-			switch (LodConfig.CLIENT.lodColorStyle.get())
-			{
-			case TOP:
-				// only add the top's color to the array
-				for(ColorDirection dir : ColorDirection.values())
-					colors[dir.value] = lod.getColor(ColorDirection.TOP);
-				break;
-				
-			case INDIVIDUAL_SIDES:
-				// add each direction's color to the array
-				for(ColorDirection dir : ColorDirection.values())
-					colors[dir.value] = lod.getColor(dir);
-				break;
-			}
-		}
-		else
-		{
-			// if debugging draw the squares as a black and white checker board
-			if ((lod.x + lod.z) % 2 == 0)
-				for(ColorDirection dir : ColorDirection.values())
-					// have each direction be the same
-					// color if debugging
-					colors[dir.value] = debugWhite;
-			else
-				for(ColorDirection dir : ColorDirection.values())
-					colors[dir.value] = debugBlack;
-		}
-		
-		return colors;
-	}
-	
-	
-
 }

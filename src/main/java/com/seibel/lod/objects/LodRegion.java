@@ -7,7 +7,7 @@ package com.seibel.lod.objects;
  * one file in the file system.
  * 
  * @author James Seibel
- * @version 1-22-2021
+ * @version 6-12-2021
  */
 public class LodRegion
 {
@@ -60,9 +60,6 @@ public class LodRegion
 		// since we add LOD's with ABS, we get them the same way
 		int arrayX = Math.abs(chunkX % SIZE);
 		int arrayZ = Math.abs(chunkZ % SIZE);
-		
-		if(arrayX >= SIZE || arrayZ >= SIZE)
-			return null;
 		
 		return chunks[arrayX][arrayZ];
 	}
