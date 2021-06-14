@@ -4,7 +4,6 @@ import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodRender;
-import com.seibel.lod.util.LodUtils;
 
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.ChunkStatus;
@@ -16,11 +15,11 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  * 
  * @author James Seibel
- * @version 6-12-2021
+ * @version 6-13-2021
  */
 public class LodChunkGenWorker implements IWorker
 {
-    private ServerWorld serverWorld;
+	private ServerWorld serverWorld;
     private ChunkPos pos;
     private LodDimension lodDim;
     private LodBuilder lodBuilder;
@@ -29,9 +28,9 @@ public class LodChunkGenWorker implements IWorker
     
     public LodChunkGenWorker(ChunkPos newPos, LodRender newLodRenderer, 
     		LodBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, 
-    		LodDimension newLodDimension)
+    		LodDimension newLodDimension, ServerWorld newServerWorld)
     {
-        serverWorld  = LodUtils.getServerWorldFromDimension(newLodDimension.dimension);
+        serverWorld = newServerWorld;
         if (serverWorld == null)
         	throw new IllegalArgumentException("LodChunkGenWorker must have a non-null ServerWorld"); 
         	

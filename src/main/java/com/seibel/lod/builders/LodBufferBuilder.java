@@ -9,10 +9,12 @@ import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarBuffer;
 import com.seibel.lod.render.LodRender;
 import com.seibel.lod.util.LodConfig;
+import com.seibel.lod.util.LodUtils;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.WorldWorkerManager;
 
 /**
@@ -193,8 +195,8 @@ public class LodBufferBuilder
 					
 					// get the desired LodTemplate and
 					// add this LOD to the buffer
-					LodConfig.CLIENT.lodTemplate.get().template.
-					addLodToBuffer(currentBuffer, lodDim, lod, 
+					LodConfig.CLIENT.lodTemplate.get().
+						template.addLodToBuffer(currentBuffer, lodDim, lod, 
 							xOffset, yOffset, zOffset, renderer.debugging);
 				}
 			}
@@ -202,6 +204,8 @@ public class LodBufferBuilder
 			// TODO add a way for a server side mod to generate chunks requested here
 			if(mc.isIntegratedServerRunning())
 			{
+		        ServerWorld serverWorld = LodUtils.getServerWorldFromDimension(lodDim.dimension);
+				
 				// start chunk generation
 				for(ChunkPos chunkPos : chunksToGen)
 				{
@@ -210,7 +214,7 @@ public class LodBufferBuilder
 					
 					numberOfChunksWaitingToGenerate++;
 					
-					LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, renderer, lodBuilder, this, lodDim);
+					LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, renderer, lodBuilder, this, lodDim, serverWorld);
 					WorldWorkerManager.addWorker(genWorker);
 				}
 			}
