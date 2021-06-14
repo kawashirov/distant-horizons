@@ -82,6 +82,7 @@ public class LodChunk
 		// make sure there are the correct number of entries
 		// in the data string
 		int count = 0;
+		detail = newDetail;
 		
 		for(int i = 0; i < data.length(); i++)
 			if(data.charAt(i) == DATA_DELIMITER)
@@ -91,7 +92,6 @@ public class LodChunk
 			throw new IllegalArgumentException("LodChunk constructor givin an invalid string. The data given had " + count + " delimiters when it should have had " + detail.lodChunkStringDelimiterCount + ".");
 		
 		
-		detail = newDetail;
 		dataPoints = new LodDataPoint[detail.lengthCount][detail.lengthCount];
 		
 		// index we will use when going through the String

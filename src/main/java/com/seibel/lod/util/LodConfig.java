@@ -82,7 +82,7 @@ public class LodConfig
 	                		+ " How detailed should the LODs be? \n"
 	                		+ " " + LodDetail.SINGLE.toString() + ": render 1 LOD for each Chunk. \n"
             				+ " " + LodDetail.DOUBLE.toString() + ": render 4 LODs for each Chunk.")
-	                .defineEnum("lodGeometryQuality", LodDetail.SINGLE);
+	                .defineEnum("lodGeometryQuality", LodDetail.QUAD);
 	        
 	        lodChunkRadiusMultiplier = builder
 	                .comment("\n"
