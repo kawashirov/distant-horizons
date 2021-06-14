@@ -10,6 +10,7 @@ import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
+import com.seibel.lod.util.LodConfig;
 import com.seibel.lod.util.LodUtils;
 
 import net.minecraft.block.BlockState;
@@ -28,7 +29,7 @@ import net.minecraft.world.gen.Heightmap;
  * (specifically: Lod World, Dimension, Region, and Chunk objects)
  * 
  * @author James Seibel
- * @version 6-12-2021
+ * @version 6-13-2021
  */
 public class LodBuilder
 {
@@ -119,11 +120,10 @@ public class LodBuilder
 	public LodChunk generateLodFromChunk(IChunk chunk) throws IllegalArgumentException
 	{
 		if(chunk == null)
-		{
 			throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
-		}
 		
-		LodDetail detail = LodChunk.DETAIL;
+		
+		LodDetail detail = LodConfig.CLIENT.lodDetail.get();
 		LodDataPoint[][] dataPoints = new LodDataPoint[detail.lengthCount][detail.lengthCount];
 		
 		for(int i = 0; i < detail.lengthCount * detail.lengthCount; i++)
@@ -134,35 +134,15 @@ public class LodBuilder
 			int endZ = detail.endZ[i];
 			
 			
-			Color[] colors = new Color[ColorDirection.values().length];
+			Color color = generateLodColorForAreaInDirection(chunk, ColorDirection.TOP, startX, startZ, endX, endZ);
 			
-			short height = determineTopPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
+			short height = determineHeightPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
 			short depth = determineBottomPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
-			
-			
-			// determine the average color for each direction
-			for(ColorDirection dir : ColorDirection.values())
-			{
-				colors[dir.value] = generateLodColorForAreaInDirection(chunk, dir, startX, startZ, endX, endZ);
-			}
-			
-			// check to see if there are any invisible sides
-			for(ColorDirection dir : ColorDirection.values())
-			{
-				// if there are any invisible sides
-				// replace them with the top side
-				// (this is done to make sure oceans and other totally
-				// flat locations have the correct side colors)
-				if (dir == ColorDirection.BOTTOM || dir == ColorDirection.TOP)
-					continue;
-				if (colors[dir.value] == INVISIBLE)
-					colors[dir.value] = colors[ColorDirection.TOP.value];
-			}
 			
 			int x = i / detail.lengthCount;
 			int z = i % detail.lengthCount;
 			
-			dataPoints[x][z] = new LodDataPoint(height, depth, colors);
+			dataPoints[x][z] = new LodDataPoint(height, depth, color);
 		}
 		
 		return new LodChunk(chunk.getPos(), dataPoints);
@@ -245,7 +225,7 @@ public class LodBuilder
 	 * @param endX
 	 * @param endZ
 	 */
-	private short determineTopPointForArea(ChunkSection[] chunkSections, 
+	private short determineHeightPointForArea(ChunkSection[] chunkSections, 
 			int startX, int startZ, int endX, int endZ)
 	{
 		int numberOfBlocksRequired = ((endX-startX) * (endZ-startZ) / 2);
@@ -287,7 +267,7 @@ public class LodBuilder
 	 * Find the highest point from the Top
 	 */
 	@SuppressWarnings("unused")
-	private short determineTopPoint(Heightmap heightmap, int endZ)
+	private short determineHeightPoint(Heightmap heightmap, int endZ)
 	{
 		short highest = 0;
 		for(int x = 0; x < LodChunk.WIDTH; x++)
@@ -305,6 +285,8 @@ public class LodBuilder
 	
 	/**
 	 * Generate the color for the given chunk in the given ColorDirection.
+	 * NOTE: only vertical is currently implemented for area,
+	 * the horizontal colors will always be the same regardless of the area.
 	 */
 	private Color  generateLodColorForAreaInDirection(IChunk chunk, ColorDirection colorDir, int startX, int startZ, int endX, int endZ)
 	{
@@ -318,16 +300,15 @@ public class LodBuilder
 		case BOTTOM:
 			return generateLodColorVerticalOverArea(chunk, colorDir, bc, startX, startZ, endX, endZ);
 			
-			// TODO
 		case NORTH:
-			return generateLodColorHorizontalOverArea(chunk, colorDir, bc);
+			return generateLodColorHorizontal(chunk, colorDir, bc);
 		case SOUTH:
-			return generateLodColorHorizontalOverArea(chunk, colorDir, bc);
+			return generateLodColorHorizontal(chunk, colorDir, bc);
 			
 		case EAST:
-			return generateLodColorHorizontalOverArea(chunk, colorDir, bc);
+			return generateLodColorHorizontal(chunk, colorDir, bc);
 		case WEST:
-			return generateLodColorHorizontalOverArea(chunk, colorDir, bc);
+			return generateLodColorHorizontal(chunk, colorDir, bc);
 		}
 		
 		return INVISIBLE;
@@ -486,7 +467,7 @@ public class LodBuilder
 	/**
 	 * Generates the color for the sides of the given chunk.
 	 */
-	private Color generateLodColorHorizontalOverArea(
+	private Color generateLodColorHorizontal(
 			IChunk chunk, ColorDirection colorDir, BlockColors bc)
 	{
 		if(colorDir != ColorDirection.NORTH && colorDir != ColorDirection.SOUTH && colorDir != ColorDirection.EAST && colorDir != ColorDirection.WEST)

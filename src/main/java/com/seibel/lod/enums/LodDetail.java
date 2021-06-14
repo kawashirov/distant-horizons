@@ -1,12 +1,13 @@
 package com.seibel.lod.enums;
 
 import com.seibel.lod.objects.LodChunk;
+import com.seibel.lod.objects.LodDataPoint;
 
 /**
  * single, double, quad, half, full
  * 
  * @author James Seibel
- * @version 06-12-2021
+ * @version 06-13-2021
  */
 public enum LodDetail
 {
@@ -32,12 +33,19 @@ public enum LodDetail
 	/** How wide each LOD is */
 	public final int width;
 	
-	/*  */
+	/* Start/End X/Z give the block positions
+	 * for each individual dataPoint in a LodChunk */
 	public final int[] startX;
 	public final int[] startZ;
 	
 	public final int[] endX;
 	public final int[] endZ;
+	
+	/** This is how many pieces of data should be expected
+	 * when creating a LodChunk with this detail level */
+	public final int lodChunkStringDelimiterCount;
+	
+	
 	
 	
 	private LodDetail(int newLengthCount)
@@ -81,5 +89,9 @@ public enum LodDetail
 				index++;
 			}
 		}
-	}
+		
+		
+		lodChunkStringDelimiterCount = 2 + (lengthCount * lengthCount * LodDataPoint.NUMBER_OF_DELIMITERS);
+		
+	}// constructor
 }

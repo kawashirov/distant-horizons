@@ -2,7 +2,6 @@ package com.seibel.lod.objects;
 
 import java.awt.Color;
 
-import com.seibel.lod.enums.ColorDirection;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
 
 /**
@@ -10,12 +9,15 @@ import com.seibel.lod.handlers.LodDimensionFileHandler;
  * for a specific area in a LodChunk.
  * 
  * @author James Seibel
- * @version 6-12-2021
+ * @version 6-13-2021
  */
 public class LodDataPoint
 {
 	/** This is what separates each piece of data in the toData method */
 	private static final char DATA_DELIMITER = LodDimensionFileHandler.DATA_DELIMITER;
+	
+	/** this is how many pieces of data are exported when toData is called */
+	public static final int NUMBER_OF_DELIMITERS = 5;
 	
 	private static final Color INVISIBLE = new Color(0,0,0,0);
 	
@@ -26,29 +28,25 @@ public class LodDataPoint
 	public short depth;
 	
 	/** The average color for the 6 cardinal directions */
-	public Color colors[];
+	public Color color;
 	
 	
 	/**
-	 * default constructor
+	 * Creates and empty LodDataPoint
 	 */
 	public LodDataPoint()
 	{
-		height = 0;
-		depth = 0;
-		colors = new Color[ColorDirection.values().length];
-		
-		// by default have the colors invisible
-		for(ColorDirection dir : ColorDirection.values())
-			colors[dir.value] = INVISIBLE;
+		height = -1;
+		depth = -1;
+		color = INVISIBLE;
 	}
 	
 	
-	public LodDataPoint(short newHeight, short newDepth, Color[] newColors)
+	public LodDataPoint(short newHeight, short newDepth, Color newColor)
 	{
 		height = newHeight;
 		depth = newDepth;
-		colors = newColors;
+		color = newColor;
 	}
 	
 	
@@ -63,19 +61,15 @@ public class LodDataPoint
 	 * <br>
 	 * example output:
 	 * <br>
-	 * 4, 0, 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255, 255,255,255,
+	 * 4, 0, 255,255,255, 
 	 */
 	public String toData()
 	{
-		
 		String s = Short.toString(height) + DATA_DELIMITER;
 		
 		s += Short.toString(depth) + DATA_DELIMITER;
 		
-		for(int i = 0; i < colors.length; i++)
-		{
-			s += Integer.toString(colors[i].getRed()) + DATA_DELIMITER + Integer.toString(colors[i].getGreen()) + DATA_DELIMITER + Integer.toString(colors[i].getBlue()) + DATA_DELIMITER;
-		}
+		s += Integer.toString(color.getRed()) + DATA_DELIMITER + Integer.toString(color.getGreen()) + DATA_DELIMITER + Integer.toString(color.getBlue()) + DATA_DELIMITER;
 		
 		return s;
 	}

@@ -8,10 +8,12 @@ import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.proxy.ClientProxy;
+import com.seibel.lod.util.LodConfig;
 
 /**
  * This object handles creating LodRegions
@@ -19,7 +21,7 @@ import com.seibel.lod.proxy.ClientProxy;
  * to file.
  * 
  * @author James Seibel
- * @version 6-12-2021
+ * @version 6-13-2021
  */
 public class LodDimensionFileHandler
 {
@@ -32,13 +34,16 @@ public class LodDimensionFileHandler
 	
 	private File dimensionDataSaveFolder;
 	
+	/** lod */
 	private final String FILE_NAME_PREFIX = "lod";
+	/** .txt */
 	private final String FILE_EXTENSION = ".txt";
 	
 	/** This is the file version currently accepted by this
 	 * file handler, older versions (smaller numbers) will be deleted and overwritten,
 	 * newer versions (larger numbers) will be ignored and won't be read. */
-	public static final int LOD_SAVE_FILE_VERSION = 1;
+	public static final int LOD_SAVE_FILE_VERSION = 2;
+	
 	/** This is the string written before the file version */
 	private static final String LOD_FILE_VERSION_PREFIX = "lod_save_file_version";
 	
@@ -78,10 +83,8 @@ public class LodDimensionFileHandler
 	 */
 	public LodRegion loadRegionFromFile(int regionX, int regionZ)
 	{
-		// TODO
-		return null;
-		/*
-		String fileName = getFileNameAndPathForRegion(regionX, regionZ);
+		
+		String fileName = getFileNameAndPathForRegion(regionX, regionZ, LodConfig.CLIENT.lodDetail.get());
 		
 		File f = new File(fileName);
 		
@@ -156,7 +159,7 @@ public class LodDimensionFileHandler
 				try
 				{
 					// convert each line into an LOD object and add it to the region
-					LodChunk lod = new LodChunk(s);
+					LodChunk lod = new LodChunk(s, LodConfig.CLIENT.lodDetail.get());
 					
 					region.addLod(lod);
 				}
@@ -181,7 +184,6 @@ public class LodDimensionFileHandler
 		}
 		
 		return region;
-		*/
 	}
 	
 	
@@ -200,8 +202,7 @@ public class LodDimensionFileHandler
 	 */
 	public void saveDirtyRegionsToFileAsync()
 	{
-		// TODO
-		//fileWritingThreadPool.execute(saveDirtyRegionsThread);
+		fileWritingThreadPool.execute(saveDirtyRegionsThread);
 	}
 	
 	private Thread saveDirtyRegionsThread = new Thread(() -> 
@@ -234,7 +235,7 @@ public class LodDimensionFileHandler
 		int x = region.x;
 		int z = region.z;
 		
-		File f = new File(getFileNameAndPathForRegion(x, z));
+		File f = new File(getFileNameAndPathForRegion(x, z, LodConfig.CLIENT.lodDetail.get()));
 		
 		try
 		{
@@ -320,9 +321,11 @@ public class LodDimensionFileHandler
 	/**
 	 * Return the name of the file that should contain the 
 	 * region at the given x and z. <br>
-	 * Returns null if this object isn't ready to read and write.
+	 * Returns null if this object isn't ready to read and write. <br><br>
+	 * 
+	 * example: "lod.FULL.0.0.txt"
 	 */
-	private String getFileNameAndPathForRegion(int regionX, int regionZ)
+	private String getFileNameAndPathForRegion(int regionX, int regionZ, LodDetail detail)
 	{
 		try
 		{
@@ -330,8 +333,8 @@ public class LodDimensionFileHandler
 			// ".\Super Flat\DIM-1\data"
 			// or
 			// ".\Super Flat\data"
-			return dimensionDataSaveFolder.getCanonicalPath() + "\\" +
-					FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
+			return dimensionDataSaveFolder.getCanonicalPath() + "\\" + 
+					FILE_NAME_PREFIX + "." + detail.toString() + "." + regionX + "." + regionZ + FILE_EXTENSION;
 		}
 		catch(IOException e)
 		{

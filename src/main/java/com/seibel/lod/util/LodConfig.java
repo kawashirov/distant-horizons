@@ -10,7 +10,6 @@ import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.seibel.lod.ModInfo;
 import com.seibel.lod.enums.FogDistance;
-import com.seibel.lod.enums.LodColorStyle;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.enums.LodTemplate;
 
@@ -22,7 +21,7 @@ import net.minecraftforge.fml.config.ModConfig;
 /**
  * 
  * @author James Seibel
- * @version 05-31-2021
+ * @version 6-13-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -38,8 +37,6 @@ public class LodConfig
 		public ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
 		
 		public ForgeConfigSpec.EnumValue<LodDetail> lodDetail;
-		
-		public ForgeConfigSpec.EnumValue<LodColorStyle> lodColorStyle;
 		
 		/** this is multiplied by the default view distance
 		 * to determine how far out to generate/render LODs */
@@ -86,13 +83,6 @@ public class LodConfig
 	                		+ " " + LodDetail.SINGLE.toString() + ": render 1 LOD for each Chunk. \n"
             				+ " " + LodDetail.DOUBLE.toString() + ": render 4 LODs for each Chunk.")
 	                .defineEnum("lodGeometryQuality", LodDetail.SINGLE);
-	        
-	        lodColorStyle = builder
-	                .comment("\n"
-	                		+ " How should the LODs be colored? \n"
-	                		+ " " + LodColorStyle.TOP.toString() + ": Use the color from the top of the LOD chunk for all sides. \n"
-	                		+ " " + LodColorStyle.INDIVIDUAL_SIDES.toString() + ": For each side of the LOD use the color corresponding to that side. ")
-	                .defineEnum("lodColorStyle", LodColorStyle.TOP);
 	        
 	        lodChunkRadiusMultiplier = builder
 	                .comment("\n"

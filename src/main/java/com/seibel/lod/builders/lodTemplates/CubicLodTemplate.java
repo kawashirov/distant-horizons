@@ -6,6 +6,7 @@ import com.seibel.lod.enums.ColorDirection;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.util.LodConfig;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -14,7 +15,7 @@ import net.minecraft.util.math.AxisAlignedBB;
  * Builds LODs as rectangular prisms.
  * 
  * @author James Seibel
- * @version 06-12-2021
+ * @version 06-13-2021
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {
@@ -35,7 +36,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		
 		// Add this LOD to the BufferBuilder
 		// using the quality setting set by the config
-		LodDetail detail = LodChunk.DETAIL; //LodConfig.CLIENT.lodDetail.get();
+		LodDetail detail = LodConfig.CLIENT.lodDetail.get();
 		
 		int halfWidth = detail.width / 2;
 		
@@ -62,26 +63,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		}
 	}
 	
-	/*
-	private int[][] addColorToColorAverages(int[][] colorAverages, Color[] colorToAdd) 
-	{
-		for(ColorDirection dir : ColorDirection.values())
-		{
-			// convert the colorToAdd to an int array
-			float[] colorCompoments = new float[4];
-			colorCompoments = colorToAdd[dir.value].getColorComponents(colorCompoments);
-			
-			// add each color component to the array
-			for(int rgbIndex = 0; rgbIndex < 3; rgbIndex++)
-			{
-				// * 255 + 0.5 taken from the Color java class
-				colorAverages[dir.value][rgbIndex] += (int) (colorCompoments[rgbIndex] * 255 + 0.5);
-			}
-		}
-		
-		return colorAverages;
-	}
-	*/
+	
 	
 	
 	
@@ -103,6 +85,45 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	
 	
 	
+	private void addBoundingBoxToBuffer(BufferBuilder buffer, AxisAlignedBB bb, Color c)
+	{
+		// top (facing up)
+		addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		// bottom (facing down)
+		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+
+		// south (facing -Z) 
+		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		// north (facing +Z)
+		addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+
+		// west (facing -X)
+		addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		// east (facing +X)
+		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha());
+	}
+	
+	
+	
+	@SuppressWarnings("unused")
 	private void addBoundingBoxToBuffer(BufferBuilder buffer, AxisAlignedBB bb, Color[] c)
 	{
 		// top (facing up)
