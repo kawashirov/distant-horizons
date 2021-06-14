@@ -7,7 +7,6 @@ import com.seibel.lod.render.LodRender;
 
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.WorldWorkerManager.IWorker;
 
@@ -53,15 +52,11 @@ public class LodChunkGenWorker implements IWorker
             // be added to the current LodDimension
             if (lodDim.regionIsInRange(pos.x / LodRegion.SIZE, pos.z / LodRegion.SIZE))
             {
-                IChunk chunk;
-                
                 //long startTime = System.currentTimeMillis();
-                chunk = serverWorld.getChunk(x, z, ChunkStatus.FEATURES);
+            	lodBuilder.generateLodChunkAsync(serverWorld.getChunk(x, z, ChunkStatus.FEATURES), ClientProxy.getLodWorld(), serverWorld);
                 //long endTime = System.currentTimeMillis();
                 //System.out.println(endTime - startTime + "\t" + lodBuilder.hasBlockData(chunk));
                 
-                
-                lodBuilder.generateLodChunkAsync(chunk, ClientProxy.getLodWorld(), serverWorld);
                 // this is called so that the new LOD chunk is drawn
                 // after it is generated
                 lodRender.regenerateLODsNextFrame();
