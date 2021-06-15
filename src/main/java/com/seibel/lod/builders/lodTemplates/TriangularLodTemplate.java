@@ -6,7 +6,7 @@ import com.seibel.lod.objects.LodDimension;
 import net.minecraft.client.renderer.BufferBuilder;
 
 /**
- * TODO TriangularLodTemplate
+ * TODO #21 TriangularLodTemplate
  * Builds each LOD chunk as a singular rectangular prism.
  * 
  * @author James Seibel
