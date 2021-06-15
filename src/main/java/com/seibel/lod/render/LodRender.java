@@ -3,6 +3,7 @@ package com.seibel.lod.render;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.HashSet;
 
 import org.lwjgl.opengl.GL11;
 
@@ -25,11 +26,14 @@ import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.potion.Effects;
 import net.minecraft.profiler.IProfiler;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
@@ -87,7 +91,9 @@ public class LodRender
 	 * provided they aren't already being regenerated. */
 	private boolean regen = false;
 	
-	
+	/** This HashSet contains every chunk that Vanilla Minecraft
+	 *  is going to render */
+	public HashSet<ChunkPos> vanillaRenderedChunks = new HashSet<>();
 	
 	
 	
@@ -168,7 +174,18 @@ public class LodRender
 		int totalLength = (int) farPlaneDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 2;
 		int numbChunksWide = (totalLength / LodChunk.WIDTH);
 		
+		// see if the chunks Minecraft is going to render are the
+		// same as last time
+		// (This is done so we only render LODs )
+		HashSet<ChunkPos> newRenderedChunks = getRenderedChunks(); 
+		if (!vanillaRenderedChunks.containsAll(newRenderedChunks))
+		{
+			regen = true;
+			vanillaRenderedChunks = newRenderedChunks;
+		}
 		
+		
+				
 		
 		
 		//=================//
@@ -634,6 +651,39 @@ public class LodRender
 		return fogSetting;
 	}
 	
+	
+	
+	/**
+	 * This method returns the ChunkPos of all chunks that Minecraft
+	 * is going to render this frame. <br><br>
+	 * 
+	 * Note: This isn't perfect. It will return some chunks that are outside
+	 * 		 the clipping plane. (For example, if you are high above the ground some chunks
+	 * 		 will be incorrectly added, even though they are outside render range).
+	 */
+	public static HashSet<ChunkPos> getRenderedChunks()
+	{
+		HashSet<ChunkPos> loadedPos = new HashSet<>();
+		
+		Minecraft mc = Minecraft.getInstance();
+		
+		// Wow those are some long names!
+		
+		// go through every RenderInfo to get the compiled chunks
+		for(WorldRenderer.LocalRenderInformationContainer 
+				worldrenderer$localrenderinformationcontainer : mc.worldRenderer.renderInfos)
+		{
+			if (!worldrenderer$localrenderinformationcontainer.renderChunk.getCompiledChunk().isEmpty())
+			{
+				// add the ChunkPos for every empty compiled chunk
+				BlockPos bpos = worldrenderer$localrenderinformationcontainer.renderChunk.getPosition();
+				
+				loadedPos.add(new ChunkPos(bpos.getX() / 16, bpos.getZ() / 16));
+			}
+		}
+		
+		return loadedPos;
+	}
 	
 	
 }

@@ -101,7 +101,6 @@ public class LodBufferBuilder
 		int startZ = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerZChunkOffset;
 		
 		
-		
 		Thread t = new Thread(()->
 		{
 			// index of the chunk currently being added to the
@@ -123,12 +122,12 @@ public class LodBufferBuilder
 				// z axis
 				for (int j = 0; j < numbChunksWide; j++)
 				{
-					// skip the middle
-					// (As the player moves some chunks will overlap or be missing,
-					// this is just how chunk loading/unloading works. This can hopefully
-					// be hidden with careful use of fog)
-					int middle = (numbChunksWide / 2);
-					if (isCoordInCenterArea(i, j, middle))
+					int chunkX = i + (startX / LodChunk.WIDTH);
+					int chunkZ = j + (startZ / LodChunk.WIDTH);
+					
+					// skip any chunks that Minecraft is going to render
+					if(isCoordInCenterArea(i, j, (numbChunksWide / 2)) 
+						&& renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkX, chunkZ)))
 					{
 						continue;
 					}
@@ -139,9 +138,6 @@ public class LodBufferBuilder
 									startX; // offset so the center LOD block is centered underneath the player
 					double yOffset = 0;
 					double zOffset = (LodChunk.WIDTH * j) + startZ;
-					
-					int chunkX = i + (startX / LodChunk.WIDTH);
-					int chunkZ = j + (startZ / LodChunk.WIDTH);
 					
 					LodChunk lod = lodDim.getLodFromCoordinates(chunkX, chunkZ);
 					
