@@ -511,9 +511,13 @@ public class LodRender
 	{
 		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.world.getSunBrightness(partialTicks) : 0.2f;
 		float gammaMultiplyer = (float)mc.gameSettings.gamma - 0.5f;
-		float lightStrength = sunBrightness - 0.4f + (gammaMultiplyer * 0.2f);
+		float lightStrength = ((sunBrightness / 2f) - 0.2f) + (gammaMultiplyer * 0.2f);
 		
 		float lightAmbient[] = {lightStrength, lightStrength, lightStrength, 1.0f};
+		
+		// can be used for debugging
+//		if (partialTicks < 0.005)
+//			ClientProxy.LOGGER.debug(lightStrength);
 		
 		ByteBuffer temp = ByteBuffer.allocateDirect(16);
 		temp.order(ByteOrder.nativeOrder());
