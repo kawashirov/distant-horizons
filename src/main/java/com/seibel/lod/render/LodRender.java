@@ -13,11 +13,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogQuality;
+import com.seibel.lod.enums.LodDetail;
+import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarBuffer;
 import com.seibel.lod.objects.NearFarFogSetting;
+import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodConfig;
 
 import net.minecraft.client.Minecraft;
@@ -45,14 +48,28 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world. 
  * 
  * @author James Seibel
- * @version 05-08-2021
+ * @version 06-17-2021
  */
 public class LodRender
 {
 	/** this is the light used when rendering the LODs,
 	 * it should be something different than what is used by Minecraft */
 	private static final int LOD_GL_LIGHT_NUMBER = GL11.GL_LIGHT2;
-
+	
+	/** 
+	 * 64 MB by default is the maximum amount of memory that
+	 * can be directly allocated. <br><br>
+	 * 
+	 * I know there are commands to change that amount
+	 * (specifically "-XX:MaxDirectMemorySize"), but
+	 * I have no idea how to access that amount. <br> 
+	 * So I guess this will be the hard limit for now. <br><br>
+	 * 
+	 * https://stackoverflow.com/questions/50499238/bytebuffer-allocatedirect-and-xmx
+	 */
+	public static final int MAX_ALOCATEABLE_DIRECT_MEMORY = 64 * 1024 * 1024;
+	
+	
 	/** If true the LODs colors will be replaced with
 	 * a checkerboard, this can be used for debugging. */
 	public boolean debugging = false;
@@ -114,7 +131,6 @@ public class LodRender
 	 * @param newDimension The dimension to draw, if null doesn't replace the current dimension.
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
-	@SuppressWarnings("deprecation")
 	public void drawLODs(LodDimension lodDim, float partialTicks, IProfiler newProfiler)
 	{		
 		if (lodDim == null)
@@ -493,7 +509,6 @@ public class LodRender
 	/**
 	 * setup the lighting to be used for the LODs
 	 */
-	@SuppressWarnings("deprecation")
 	private void setupLighting(LodDimension lodDimension, float partialTicks)
 	{
 		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.world.getSunBrightness(partialTicks) : 0.2f;
@@ -510,28 +525,63 @@ public class LodRender
 		RenderSystem.enableLighting();
 	}
 	
-	
 	/**
 	 * Create all buffers that will be used.
 	 */
 	private void setupBuffers(int numbChunksWide)
 	{
-		// calculate the max amount of storage needed (in bytes)
-		int bufferMaxCapacity = (numbChunksWide * numbChunksWide * (6 * 4 * (3 + 4)));
-		// (numbChunksWide * numbChunksWide * 
-		// (sidesOnACube * pointsInASquare * (positionPoints + colorPoints)))
+		// calculate the max amount of memory needed (in bytes)
+		int bufferMemory = getBufferMemoryForRadiusMultiplier(LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
 		
-		// TODO complain or do something when memory is too low
-		// currently the VM will just crash and complain there is no more memory
-		// issue #4
-		drawableNearBuffer = new BufferBuilder(bufferMaxCapacity);
-		drawableFarBuffer = new BufferBuilder(bufferMaxCapacity);
+		// if the required memory is greater than the 
+		// MAX_ALOCATEABLE_DIRECT_MEMORY lower the lodChunkRadiusMultiplier
+		// to fit.
+		if (bufferMemory > MAX_ALOCATEABLE_DIRECT_MEMORY)
+		{
+			int maxRadiusMultiplier = getMaxRadiusMultiplierWithAvaliableMemory(LodConfig.CLIENT.lodTemplate.get(), LodConfig.CLIENT.lodDetail.get());
+			
+			ClientProxy.LOGGER.warn("The lodChunkRadiusMultiplier was set too high "
+					+ "and had to be lowered to fit memory constraints "
+					+ "from " + LodConfig.CLIENT.lodChunkRadiusMultiplier.get() + " " 
+					+ "to " + maxRadiusMultiplier);
+			
+			LodConfig.CLIENT.lodChunkRadiusMultiplier.set(
+					maxRadiusMultiplier);
+			
+			bufferMemory = getBufferMemoryForRadiusMultiplier(maxRadiusMultiplier);
+		}
 		
-		lodBufferBuilder.setupBuffers(bufferMaxCapacity);
+		drawableNearBuffer = new BufferBuilder(bufferMemory);
+		drawableFarBuffer = new BufferBuilder(bufferMemory);
+		
+		lodBufferBuilder.setupBuffers(bufferMemory);
 	}
 	
+	/**
+	 * Get how much buffer memory would be required for the given radius multiplier
+	 */
+	public int getBufferMemoryForRadiusMultiplier(int radiusMultiplier)
+	{ 
+		int numbChunksWide = mc.gameSettings.renderDistanceChunks * 
+							radiusMultiplier * 2;
+		
+		// calculate the max amount of buffer memory needed (in bytes)
+		return numbChunksWide * numbChunksWide *
+				LodConfig.CLIENT.lodTemplate.get().
+				getBufferMemoryForSingleLod(LodConfig.CLIENT.lodDetail.get());
+	}
 	
-
+	/**
+	 * Returns the maxViewDistanceMultiplier for the given LodTemplate
+	 * at the given LodDetail level.
+	 */
+	public int getMaxRadiusMultiplierWithAvaliableMemory(LodTemplate lodTemplate, LodDetail lodDetail)
+	{
+		int maxNumberOfLods = MAX_ALOCATEABLE_DIRECT_MEMORY / lodTemplate.getBufferMemoryForSingleLod(lodDetail); 
+		int numbLodsWide = (int) Math.sqrt(maxNumberOfLods);
+		
+		return numbLodsWide / (2 * mc.gameSettings.renderDistanceChunks);
+	}
 	
 	
 	

@@ -1,5 +1,6 @@
 package com.seibel.lod.builders.lodTemplates;
 
+import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
 
@@ -10,7 +11,7 @@ import net.minecraft.client.renderer.BufferBuilder;
  * BufferBuilders.
  * 
  * @author James Seibel
- * @version 06-12-2021
+ * @version 06-16-2021
  */
 public abstract class AbstractLodTemplate
 {
@@ -27,7 +28,9 @@ public abstract class AbstractLodTemplate
 		buffer.pos(x, y, z).color(red, green, blue, alpha).endVertex();
 	}
 	
-	
+	/** Returns in bytes how much buffer memory is required
+	 * for one LOD object */
+	public abstract int getBufferMemoryForSingleLod(LodDetail detail);
 	
 	
 	

@@ -15,7 +15,7 @@ import net.minecraft.util.math.AxisAlignedBB;
  * Builds LODs as rectangular prisms.
  * 
  * @author James Seibel
- * @version 06-13-2021
+ * @version 06-16-2021
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {
@@ -158,6 +158,14 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, c[ColorDirection.EAST.value].getRed(), c[ColorDirection.EAST.value].getGreen(), c[ColorDirection.EAST.value].getBlue(), c[ColorDirection.EAST.value].getAlpha());
 		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, c[ColorDirection.EAST.value].getRed(), c[ColorDirection.EAST.value].getGreen(), c[ColorDirection.EAST.value].getBlue(), c[ColorDirection.EAST.value].getAlpha());
 		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, c[ColorDirection.EAST.value].getRed(), c[ColorDirection.EAST.value].getGreen(), c[ColorDirection.EAST.value].getBlue(), c[ColorDirection.EAST.value].getAlpha());
+	}
+
+
+	@Override
+	public int getBufferMemoryForSingleLod(LodDetail detail)
+	{
+		// (sidesOnACube * pointsInASquare * (positionPoints + colorPoints))) * howManyPointsPerLodChunk
+		return (6 * 4 * (3 + 4)) * detail.lengthCount * detail.lengthCount;
 	}
 	
 	

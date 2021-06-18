@@ -1,5 +1,6 @@
 package com.seibel.lod.builders.lodTemplates;
 
+import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
 
@@ -12,7 +13,7 @@ import net.minecraft.client.renderer.BufferBuilder;
  * is at a significantly different height.
  * 
  * @author James Seibel
- * @version 05-07-2021
+ * @version 06-16-2021
  */
 public class DynamicLodTemplate extends AbstractLodTemplate
 {
@@ -23,5 +24,11 @@ public class DynamicLodTemplate extends AbstractLodTemplate
 			boolean debugging)
 	{
 		System.err.println("DynamicLodTemplate not implemented!");
+	}
+
+	@Override
+	public int getBufferMemoryForSingleLod(LodDetail detail) {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

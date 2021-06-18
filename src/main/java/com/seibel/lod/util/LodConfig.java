@@ -21,7 +21,7 @@ import net.minecraftforge.fml.config.ModConfig;
 /**
  * 
  * @author James Seibel
- * @version 6-13-2021
+ * @version 6-17-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -89,8 +89,8 @@ public class LodConfig
 	                		+ " This is multiplied by the default view distance \n"
 	                		+ " to determine how far out to generate/render LODs. \n"
 	                		+ " A value of 2 means that there is 1 render distance worth \n"
-	                		+ " of LODs in each cardinal direction.")
-	                .defineInRange("lodChunkRadiusMultiplier", 6, 2, 1023);
+	                		+ " of LODs in each cardinal direction. ")
+	                .defineInRange("lodChunkRadiusMultiplier", 6, 2, 32);
 	        
 	        builder.pop();
 	    }

@@ -9,7 +9,7 @@ import com.seibel.lod.builders.lodTemplates.TriangularLodTemplate;
  * Cubic, Triangular, Dynamic
  * 
  * @author James Seibel
- * @version 05-07-2021
+ * @version 06-16-2021
  */
 public enum LodTemplate
 {
@@ -34,5 +34,11 @@ public enum LodTemplate
 	private LodTemplate(AbstractLodTemplate newTemplate)
 	{
 		template = newTemplate;
+	}
+	
+	
+	public int getBufferMemoryForSingleLod(LodDetail detail)
+	{
+		return template.getBufferMemoryForSingleLod(detail);
 	}
 }
