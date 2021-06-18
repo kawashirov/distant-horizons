@@ -165,12 +165,14 @@ public class LodChunk
 	/**
 	 * Create a LodChunk from the given values.
 	 */
-	public LodChunk(ChunkPos pos, LodDataPoint[][] newDataPoints)
+	public LodChunk(ChunkPos pos, LodDataPoint[][] newDataPoints, LodDetail newDetail)
 	{
 		x = pos.x;
 		z = pos.z;
 		
 		dataPoints = newDataPoints;
+		
+		detail = newDetail;
 		
 		empty = determineIfEmtpy();
 	}

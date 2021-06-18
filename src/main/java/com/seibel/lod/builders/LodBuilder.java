@@ -145,7 +145,7 @@ public class LodBuilder
 			dataPoints[x][z] = new LodDataPoint(height, depth, color);
 		}
 		
-		return new LodChunk(chunk.getPos(), dataPoints);
+		return new LodChunk(chunk.getPos(), dataPoints, detail);
 	}
 	
 	
