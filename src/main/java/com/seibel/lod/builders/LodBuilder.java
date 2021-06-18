@@ -6,11 +6,11 @@ import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.ColorDirection;
 import com.seibel.lod.enums.LodDetail;
+import com.seibel.lod.handlers.LodConfigHandler;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
-import com.seibel.lod.util.LodConfig;
 import com.seibel.lod.util.LodUtils;
 
 import net.minecraft.block.BlockState;
@@ -123,7 +123,7 @@ public class LodBuilder
 			throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
 		
 		
-		LodDetail detail = LodConfig.CLIENT.lodDetail.get();
+		LodDetail detail = LodConfigHandler.CLIENT.lodDetail.get();
 		LodDataPoint[][] dataPoints = new LodDataPoint[detail.lengthCount][detail.lengthCount];
 		
 		for(int i = 0; i < detail.lengthCount * detail.lengthCount; i++)

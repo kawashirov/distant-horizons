@@ -1,4 +1,4 @@
-package com.seibel.lod.util;
+package com.seibel.lod.handlers;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -24,7 +24,7 @@ import net.minecraftforge.fml.config.ModConfig;
  * @version 6-17-2021
  */
 @Mod.EventBusSubscriber
-public class LodConfig
+public class LodConfigHandler
 {
 	public static class Client
 	{

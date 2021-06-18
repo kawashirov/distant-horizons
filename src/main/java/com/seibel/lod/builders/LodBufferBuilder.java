@@ -4,11 +4,11 @@ import java.util.concurrent.Executors;
 
 import org.lwjgl.opengl.GL11;
 
+import com.seibel.lod.handlers.LodConfigHandler;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarBuffer;
 import com.seibel.lod.render.LodRender;
-import com.seibel.lod.util.LodConfig;
 import com.seibel.lod.util.LodUtils;
 
 import net.minecraft.client.Minecraft;
@@ -191,7 +191,7 @@ public class LodBufferBuilder
 					
 					// get the desired LodTemplate and
 					// add this LOD to the buffer
-					LodConfig.CLIENT.lodTemplate.get().
+					LodConfigHandler.CLIENT.lodTemplate.get().
 						template.addLodToBuffer(currentBuffer, lodDim, lod, 
 							xOffset, yOffset, zOffset, renderer.debugging);
 				}
