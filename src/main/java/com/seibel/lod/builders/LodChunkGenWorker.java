@@ -14,7 +14,7 @@ import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodRender;
-import com.seibel.lod.util.LodUtils;
+import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.biome.Biome;
@@ -155,7 +155,7 @@ public class LodChunkGenWorker implements IWorker
 					Color color;
 					if (biome.getCategory() == Biome.Category.OCEAN)
 					{
-						color = LodUtils.intToColor(biome.getWaterColor());
+						color = LodUtil.intToColor(biome.getWaterColor());
 					}
 					else if (biome.getCategory() == Biome.Category.ICY)
 					{
@@ -163,7 +163,7 @@ public class LodChunkGenWorker implements IWorker
 					}
 					else
 					{
-						color = LodUtils.intToColor(biome.getFoliageColor());
+						color = LodUtil.intToColor(biome.getFoliageColor());
 					}
 					
 					

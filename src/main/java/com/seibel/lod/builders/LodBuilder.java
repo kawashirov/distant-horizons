@@ -11,7 +11,7 @@ import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
-import com.seibel.lod.util.LodUtils;
+import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -59,7 +59,7 @@ public class LodBuilder
 			return;
 			
 		// is this chunk from the same world as the lodWorld?
-		if (!lodWorld.getWorldName().equals(LodUtils.getWorldID(world)))
+		if (!lodWorld.getWorldName().equals(LodUtil.getWorldID(world)))
 			// we are not in the same world anymore
 			// don't add this LOD
 			return;
@@ -404,7 +404,7 @@ public class LodBuilder
 								continue;
 							}
 							
-							Color c = LodUtils.intToColor(ci);
+							Color c = LodUtil.intToColor(ci);
 							
 							red += c.getRed();
 							green += c.getGreen();
@@ -579,7 +579,7 @@ public class LodBuilder
 							continue;
 						}
 						
-						Color c = LodUtils.intToColor(ci);
+						Color c = LodUtil.intToColor(ci);
 						
 						red += c.getRed();
 						green += c.getGreen();

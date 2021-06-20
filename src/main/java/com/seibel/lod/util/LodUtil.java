@@ -22,7 +22,7 @@ import net.minecraft.world.server.ServerWorld;
  * @author James Seibel
  * @version 06-19-2021
  */
-public class LodUtils
+public class LodUtil
 {
 	private static Minecraft mc = Minecraft.getInstance();
 	
@@ -128,7 +128,7 @@ public class LodUtils
 			if(mc.world == null)
 				return "";
 			
-			ServerWorld serverWorld = LodUtils.getServerWorldFromDimension(mc.world.getDimensionType());
+			ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(mc.world.getDimensionType());
 			if(serverWorld == null)
 				return "";
 			
@@ -166,7 +166,7 @@ public class LodUtils
 			// this will return the world save location
 			// and the dimension folder
 			
-			ServerWorld serverWorld = LodUtils.getServerWorldFromDimension(world.getDimensionType());
+			ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(world.getDimensionType());
 			if(serverWorld == null)
 				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerWorld for the dimension " + world.getDimensionType().getEffects().getPath());
 			

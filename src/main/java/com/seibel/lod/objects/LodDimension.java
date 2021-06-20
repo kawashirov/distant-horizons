@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 import com.seibel.lod.handlers.LodDimensionFileHandler;
-import com.seibel.lod.util.LodUtils;
+import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.ChunkPos;
@@ -49,7 +49,7 @@ public class LodDimension
 			{
 				// local world
 				
-				ServerWorld serverWorld = LodUtils.getServerWorldFromDimension(newDimension);
+				ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(newDimension);
 				// provider needs a separate variable to prevent
 				// the compiler from complaining
 				ServerChunkProvider provider = serverWorld.getChunkProvider();
@@ -60,7 +60,7 @@ public class LodDimension
 				// connected to server
 				
 				saveDir = new File(mc.gameDir.getCanonicalFile() + 
-						"\\lod server data\\" + LodUtils.getDimensionIDFromWorld(mc.world));
+						"\\lod server data\\" + LodUtil.getDimensionIDFromWorld(mc.world));
 			}
 			
 			fileHandler = new LodDimensionFileHandler(saveDir, this);
@@ -242,7 +242,7 @@ public class LodDimension
 	 */
 	public void addLod(LodChunk lod)
 	{
-		RegionPos pos = LodUtils.convertChunkPosToRegionPos(new ChunkPos(lod.x, lod.z));
+		RegionPos pos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(lod.x, lod.z));
 		
 		// don't continue if the region can't be saved
 		if (!regionIsInRange(pos.x, pos.z))
@@ -281,7 +281,7 @@ public class LodDimension
 	 */
 	public LodChunk getLodFromCoordinates(int chunkX, int chunkZ)
 	{
-		RegionPos pos = LodUtils.convertChunkPosToRegionPos(new ChunkPos(chunkX, chunkZ));
+		RegionPos pos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(chunkX, chunkZ));
 		
 		LodRegion region = getRegion(pos.x, pos.z);
 		

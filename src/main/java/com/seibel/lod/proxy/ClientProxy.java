@@ -11,7 +11,7 @@ import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.render.LodRender;
-import com.seibel.lod.util.LodUtils;
+import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.profiler.IProfiler;
@@ -131,7 +131,7 @@ public class ClientProxy
 	public void worldLoadEvent(WorldEvent.Load event)
 	{
 		// the player just loaded a new world/dimension
-		lodWorld.selectWorld(LodUtils.getWorldID(event.getWorld()));
+		lodWorld.selectWorld(LodUtil.getWorldID(event.getWorld()));
 		// make sure the correct LODs are being rendered
 		// (if this isn't done the previous world's LODs may be drawn)
 		renderer.regenerateLODsNextFrame();

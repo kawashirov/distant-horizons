@@ -9,7 +9,7 @@ import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarBuffer;
 import com.seibel.lod.render.LodRender;
-import com.seibel.lod.util.LodUtils;
+import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -90,7 +90,7 @@ public class LodBufferBuilder
 		
 		if (previousDimension != lodDim)
 		{
-			biomeContainer = LodUtils.getServerWorldFromDimension(lodDim.dimension).getChunk(0, 0, ChunkStatus.EMPTY).getBiomes();
+			biomeContainer = LodUtil.getServerWorldFromDimension(lodDim.dimension).getChunk(0, 0, ChunkStatus.EMPTY).getBiomes();
 			previousDimension = lodDim;
 		}
 		
@@ -213,7 +213,7 @@ public class LodBufferBuilder
 			// TODO add a way for a server side mod to generate chunks requested here
 			if(mc.isIntegratedServerRunning())
 			{
-		        ServerWorld serverWorld = LodUtils.getServerWorldFromDimension(lodDim.dimension);
+		        ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(lodDim.dimension);
 				
 		        // make sure we have as many chunks to generate as we are allowed
 		        if (chunkGenIndex < maxChunkGenRequests)
