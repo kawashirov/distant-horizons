@@ -9,7 +9,7 @@ import com.seibel.lod.handlers.LodDimensionFileHandler;
  * for a specific area in a LodChunk.
  * 
  * @author James Seibel
- * @version 6-13-2021
+ * @version 6-19-2021
  */
 public class LodDataPoint
 {
@@ -46,6 +46,13 @@ public class LodDataPoint
 	{
 		height = newHeight;
 		depth = newDepth;
+		color = newColor;
+	}
+	
+	public LodDataPoint(int newHeight, int newDepth, Color newColor)
+	{
+		height = (short) newHeight;
+		depth = (short) newDepth;
 		color = newColor;
 	}
 	
