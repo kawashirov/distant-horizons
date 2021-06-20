@@ -10,7 +10,7 @@ import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
-import com.seibel.lod.render.LodRender;
+import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
@@ -34,7 +34,7 @@ public class ClientProxy
 	private static LodWorld lodWorld = new LodWorld();
 	private static LodBuilder lodBuilder = new LodBuilder();
 	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder(lodBuilder);
-	private static LodRender renderer = new LodRender(lodBufferBuilder);
+	private static LodRenderer renderer = new LodRenderer(lodBufferBuilder);
 	
 	Minecraft mc = Minecraft.getInstance();
 	
@@ -182,7 +182,7 @@ public class ClientProxy
 		return lodBuilder;
 	}
 	
-	public static LodRender getRenderer()
+	public static LodRenderer getRenderer()
 	{
 		return renderer;
 	}

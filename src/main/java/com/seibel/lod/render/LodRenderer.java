@@ -48,7 +48,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * @author James Seibel
  * @version 06-19-2021
  */
-public class LodRender
+public class LodRenderer
 {
 	/** this is the light used when rendering the LODs,
 	 * it should be something different than what is used by Minecraft */
@@ -112,7 +112,7 @@ public class LodRender
 	
 	
 	
-	public LodRender(LodBufferBuilder newLodBufferBuilder)
+	public LodRenderer(LodBufferBuilder newLodBufferBuilder)
 	{
 		mc = Minecraft.getInstance();
 		gameRender = mc.gameRenderer;

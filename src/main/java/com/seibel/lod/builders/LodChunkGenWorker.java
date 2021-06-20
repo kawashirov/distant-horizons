@@ -13,7 +13,7 @@ import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.proxy.ClientProxy;
-import com.seibel.lod.render.LodRender;
+import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.util.math.ChunkPos;
@@ -41,7 +41,7 @@ public class LodChunkGenWorker implements IWorker
     private LodChunkGenThread thread;
     
     
-    public LodChunkGenWorker(ChunkPos newPos, LodRender newLodRenderer, 
+    public LodChunkGenWorker(ChunkPos newPos, LodRenderer newLodRenderer, 
     		LodBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, 
     		LodDimension newLodDimension, ServerWorld newServerWorld,
     		BiomeContainer newBiomeContainer)
@@ -102,19 +102,19 @@ public class LodChunkGenWorker implements IWorker
     	public final ServerWorld serverWorld;
         public final LodDimension lodDim;
         public final LodBuilder lodBuilder;
-        public final LodRender lodRender;
+        public final LodRenderer lodRenderer;
         public final BiomeContainer biomeContainer;
         private LodBufferBuilder lodBufferBuilder;
     	
     	private ChunkPos pos;
     	
-    	public LodChunkGenThread(ChunkPos newPos, LodRender newLodRenderer, 
+    	public LodChunkGenThread(ChunkPos newPos, LodRenderer newLodRenderer, 
         		LodBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, 
         		LodDimension newLodDimension, ServerWorld newServerWorld,
         		BiomeContainer newBiomeContainer)
     	{
     		pos = newPos;
-    		lodRender = newLodRenderer;
+    		lodRenderer = newLodRenderer;
     		lodBuilder = newLodBuilder;
     		lodBufferBuilder = newLodBufferBuilder;
     		lodDim = newLodDimension;
@@ -176,7 +176,7 @@ public class LodChunkGenWorker implements IWorker
 					lodBuilder.generateLodChunkAsync(serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES), ClientProxy.getLodWorld(), serverWorld);
 				}
 				
-				lodRender.regenerateLODsNextFrame();
+				lodRenderer.regenerateLODsNextFrame();
 				
 				
 //				if (lodDim.getLodFromCoordinates(pos.x, pos.z) != null)

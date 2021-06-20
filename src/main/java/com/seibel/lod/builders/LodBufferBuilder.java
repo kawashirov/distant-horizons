@@ -8,7 +8,7 @@ import com.seibel.lod.handlers.LodConfigHandler;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarBuffer;
-import com.seibel.lod.render.LodRender;
+import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
@@ -78,7 +78,7 @@ public class LodBufferBuilder
 	 * After the buildable buffers have been generated they must be
 	 * swapped with the drawable buffers in the LodRenderer to be drawn.
 	 */
-	public void generateLodBuffersAsync(LodRender renderer, LodDimension lodDim,
+	public void generateLodBuffersAsync(LodRenderer renderer, LodDimension lodDim,
 			double playerX, double playerZ, int numbChunksWide)
 	{
 		// only allow one generation process to happen at a time
@@ -125,8 +125,8 @@ public class LodBufferBuilder
 			
 			
 			// generate our new buildable buffers
-			buildableNearBuffer.begin(GL11.GL_QUADS, LodRender.LOD_VERTEX_FORMAT);
-			buildableFarBuffer.begin(GL11.GL_QUADS, LodRender.LOD_VERTEX_FORMAT);
+			buildableNearBuffer.begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
+			buildableFarBuffer.begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
 			
 			// x axis
 			for (int i = 0; i < numbChunksWide; i++)
