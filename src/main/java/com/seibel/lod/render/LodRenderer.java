@@ -13,7 +13,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogQuality;
-import com.seibel.lod.handlers.LodConfigHandler;
+import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
@@ -156,14 +156,14 @@ public class LodRenderer
 		if ((int)player.getPosX() / LodChunk.WIDTH != prevChunkX ||
 			(int)player.getPosZ() / LodChunk.WIDTH != prevChunkZ ||
 			previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks ||
-			prevFogDistance != LodConfigHandler.CLIENT.fogDistance.get())
+			prevFogDistance != LodConfig.CLIENT.fogDistance.get())
 		{
 			// yes
 			regen = true;
 			
 			prevChunkX = (int)player.getPosX() / LodChunk.WIDTH;
 			prevChunkZ = (int)player.getPosZ() / LodChunk.WIDTH;
-			prevFogDistance = LodConfigHandler.CLIENT.fogDistance.get();
+			prevFogDistance = LodConfig.CLIENT.fogDistance.get();
 		}
 		else
 		{
@@ -173,9 +173,9 @@ public class LodRenderer
 		}
 		
 		// did the user change the debug setting?
-		if (LodConfigHandler.CLIENT.debugMode.get() != debugging)
+		if (LodConfig.CLIENT.debugMode.get() != debugging)
 		{
-			debugging = LodConfigHandler.CLIENT.debugMode.get();
+			debugging = LodConfig.CLIENT.debugMode.get();
 			regen = true;
 		}
 		
@@ -185,7 +185,7 @@ public class LodRenderer
 		farPlaneDistance = renderDistWidth * LodChunk.WIDTH;
 		
 		// set how big the LODs will be and how far they will go
-		int totalLength = (int) farPlaneDistance * LodConfigHandler.CLIENT.lodChunkRadiusMultiplier.get() * 2;
+		int totalLength = (int) farPlaneDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 2;
 		int numbChunksWide = (totalLength / LodChunk.WIDTH);
 		
 		// see if the chunks Minecraft is going to render are the
@@ -409,13 +409,13 @@ public class LodRenderer
 		{
 			if (fogQuality == FogQuality.FANCY)
 			{
-				RenderSystem.fogStart(farPlaneDistance * 0.85f * LodConfigHandler.CLIENT.lodChunkRadiusMultiplier.get());
-				RenderSystem.fogEnd(farPlaneDistance * 1.0f * LodConfigHandler.CLIENT.lodChunkRadiusMultiplier.get());
+				RenderSystem.fogStart(farPlaneDistance * 0.85f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
+				RenderSystem.fogEnd(farPlaneDistance * 1.0f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
 			}
 			else if(fogQuality == FogQuality.FAST)
 			{
-				RenderSystem.fogStart(farPlaneDistance * 0.5f * LodConfigHandler.CLIENT.lodChunkRadiusMultiplier.get());
-				RenderSystem.fogEnd(farPlaneDistance * 0.75f * LodConfigHandler.CLIENT.lodChunkRadiusMultiplier.get());
+				RenderSystem.fogStart(farPlaneDistance * 0.5f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
+				RenderSystem.fogEnd(farPlaneDistance * 0.75f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
 			}
 		}
 		
@@ -495,7 +495,7 @@ public class LodRenderer
 				getFov(partialTicks, true), 
 				(float)this.mc.getMainWindow().getFramebufferWidth() / (float)this.mc.getMainWindow().getFramebufferHeight(), 
 				0.5F, 
-				this.farPlaneDistance * LodConfigHandler.CLIENT.lodChunkRadiusMultiplier.get() * 2);
+				this.farPlaneDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 2);
 		
 		// add the screen space distortions
 		projectionMatrix.mul(matrixStack.getLast().getMatrix());
@@ -533,21 +533,21 @@ public class LodRenderer
 	private void setupBuffers(int numbChunksWide)
 	{
 		// calculate the max amount of memory needed (in bytes)
-		int bufferMemory = RenderUtil.getBufferMemoryForRadiusMultiplier(LodConfigHandler.CLIENT.lodChunkRadiusMultiplier.get());
+		int bufferMemory = RenderUtil.getBufferMemoryForRadiusMultiplier(LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
 		
 		// if the required memory is greater than the 
 		// MAX_ALOCATEABLE_DIRECT_MEMORY lower the lodChunkRadiusMultiplier
 		// to fit.
 		if (bufferMemory > MAX_ALOCATEABLE_DIRECT_MEMORY)
 		{
-			int maxRadiusMultiplier = RenderUtil.getMaxRadiusMultiplierWithAvaliableMemory(LodConfigHandler.CLIENT.lodTemplate.get(), LodConfigHandler.CLIENT.lodDetail.get());
+			int maxRadiusMultiplier = RenderUtil.getMaxRadiusMultiplierWithAvaliableMemory(LodConfig.CLIENT.lodTemplate.get(), LodConfig.CLIENT.lodDetail.get());
 			
 			ClientProxy.LOGGER.warn("The lodChunkRadiusMultiplier was set too high "
 					+ "and had to be lowered to fit memory constraints "
-					+ "from " + LodConfigHandler.CLIENT.lodChunkRadiusMultiplier.get() + " " 
+					+ "from " + LodConfig.CLIENT.lodChunkRadiusMultiplier.get() + " " 
 					+ "to " + maxRadiusMultiplier);
 			
-			LodConfigHandler.CLIENT.lodChunkRadiusMultiplier.set(
+			LodConfig.CLIENT.lodChunkRadiusMultiplier.set(
 					maxRadiusMultiplier);
 			
 			bufferMemory = RenderUtil.getBufferMemoryForRadiusMultiplier(maxRadiusMultiplier);
@@ -625,7 +625,7 @@ public class LodRenderer
 		{
 		case FANCY:
 			
-			switch(LodConfigHandler.CLIENT.fogDistance.get())
+			switch(LodConfig.CLIENT.fogDistance.get())
 			{
 			case NEAR_AND_FAR:
 				fogSetting.nearFogSetting = FogDistance.NEAR;
@@ -650,7 +650,7 @@ public class LodRenderer
 			// and far portion; and fast fog is rendered from the
 			// frustrum's perspective instead of the camera
 			
-			switch(LodConfigHandler.CLIENT.fogDistance.get())
+			switch(LodConfig.CLIENT.fogDistance.get())
 			{
 			case NEAR_AND_FAR:
 				fogSetting.nearFogSetting = FogDistance.NEAR;

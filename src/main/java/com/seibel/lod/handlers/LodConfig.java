@@ -24,7 +24,7 @@ import net.minecraftforge.fml.config.ModConfig;
  * @version 6-19-2021
  */
 @Mod.EventBusSubscriber
-public class LodConfigHandler
+public class LodConfig
 {
 	public static class Client
 	{

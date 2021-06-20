@@ -1,6 +1,6 @@
 package com.seibel.lod;
 
-import com.seibel.lod.handlers.LodConfigHandler;
+import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.proxy.ClientProxy;
 
 import net.minecraft.client.Minecraft;
@@ -34,7 +34,7 @@ public class LodMain
 	private void init(final FMLCommonSetupEvent event)
 	{
 		Minecraft.getInstance().getFramebuffer().enableStencil();
-		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, LodConfigHandler.clientSpec);
+		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, LodConfig.clientSpec);
 	}
 	
 	

@@ -6,7 +6,7 @@ import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.ColorDirection;
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.handlers.LodConfigHandler;
+import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
@@ -123,7 +123,7 @@ public class LodBuilder
 			throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
 		
 		
-		LodDetail detail = LodConfigHandler.CLIENT.lodDetail.get();
+		LodDetail detail = LodConfig.CLIENT.lodDetail.get();
 		LodDataPoint[][] dataPoints = new LodDataPoint[detail.lengthCount][detail.lengthCount];
 		
 		for(int i = 0; i < detail.lengthCount * detail.lengthCount; i++)

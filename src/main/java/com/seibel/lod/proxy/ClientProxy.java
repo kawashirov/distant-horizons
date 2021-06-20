@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.builders.LodBuilder;
-import com.seibel.lod.handlers.LodConfigHandler;
+import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
@@ -63,7 +63,7 @@ public class ClientProxy
 		// update each regions' width to match the new render distance
 		int newWidth = Math.max(4, 
 				// TODO is this logic good?
-				(mc.gameSettings.renderDistanceChunks * LodChunk.WIDTH * 2 * LodConfigHandler.CLIENT.lodChunkRadiusMultiplier.get()) / LodRegion.SIZE
+				(mc.gameSettings.renderDistanceChunks * LodChunk.WIDTH * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get()) / LodRegion.SIZE
 				);
 		if (lodBuilder.regionWidth != newWidth)
 		{

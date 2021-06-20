@@ -4,7 +4,7 @@ import java.util.concurrent.Executors;
 
 import org.lwjgl.opengl.GL11;
 
-import com.seibel.lod.handlers.LodConfigHandler;
+import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarBuffer;
@@ -204,7 +204,7 @@ public class LodBufferBuilder
 					
 					// get the desired LodTemplate and
 					// add this LOD to the buffer
-					LodConfigHandler.CLIENT.lodTemplate.get().
+					LodConfig.CLIENT.lodTemplate.get().
 						template.addLodToBuffer(currentBuffer, lodDim, lod, 
 							xOffset, yOffset, zOffset, renderer.debugging);
 				}

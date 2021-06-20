@@ -83,7 +83,7 @@ public class LodDimensionFileHandler
 	public LodRegion loadRegionFromFile(int regionX, int regionZ)
 	{
 		
-		String fileName = getFileNameAndPathForRegion(regionX, regionZ, LodConfigHandler.CLIENT.lodDetail.get());
+		String fileName = getFileNameAndPathForRegion(regionX, regionZ, LodConfig.CLIENT.lodDetail.get());
 		
 		File f = new File(fileName);
 		
@@ -158,7 +158,7 @@ public class LodDimensionFileHandler
 				try
 				{
 					// convert each line into an LOD object and add it to the region
-					LodChunk lod = new LodChunk(s, LodConfigHandler.CLIENT.lodDetail.get());
+					LodChunk lod = new LodChunk(s, LodConfig.CLIENT.lodDetail.get());
 					
 					region.addLod(lod);
 				}
@@ -234,7 +234,7 @@ public class LodDimensionFileHandler
 		int x = region.x;
 		int z = region.z;
 		
-		File f = new File(getFileNameAndPathForRegion(x, z, LodConfigHandler.CLIENT.lodDetail.get()));
+		File f = new File(getFileNameAndPathForRegion(x, z, LodConfig.CLIENT.lodDetail.get()));
 		
 		try
 		{

@@ -4,7 +4,7 @@ import java.awt.Color;
 
 import com.seibel.lod.enums.ColorDirection;
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.handlers.LodConfigHandler;
+import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
 
@@ -36,7 +36,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		
 		// Add this LOD to the BufferBuilder
 		// using the quality setting set by the config
-		LodDetail detail = LodConfigHandler.CLIENT.lodDetail.get();
+		LodDetail detail = LodConfig.CLIENT.lodDetail.get();
 		
 		int halfWidth = detail.width / 2;
 		

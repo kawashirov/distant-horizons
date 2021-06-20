@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.handlers.LodConfigHandler;
+import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
@@ -65,7 +65,7 @@ public class LodChunkGenWorker implements IWorker
         	
         	thread.lodBufferBuilder.numberOfChunksWaitingToGenerate--;
         	
-        	if (LodConfigHandler.CLIENT.distanceBiomeOnlyGeneration.get())
+        	if (LodConfig.CLIENT.distanceBiomeOnlyGeneration.get())
 			{
         		// if we are using biome only generation
         		// that can be done asynchronously
@@ -133,7 +133,7 @@ public class LodChunkGenWorker implements IWorker
 			{
 				long startTime = System.currentTimeMillis();
 				
-				if (LodConfigHandler.CLIENT.distanceBiomeOnlyGeneration.get())
+				if (LodConfig.CLIENT.distanceBiomeOnlyGeneration.get())
 				{
 					Chunk chunk = new Chunk(serverWorld, pos, biomeContainer);
 					List<IChunk> chunkList = new LinkedList<>();
