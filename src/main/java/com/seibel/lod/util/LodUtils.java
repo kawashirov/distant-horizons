@@ -1,5 +1,7 @@
 package com.seibel.lod.util;
 
+import java.awt.Color;
+
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.RegionPos;
 
@@ -18,7 +20,7 @@ import net.minecraft.world.server.ServerWorld;
  * This class holds methods that may be used in multiple places.
  * 
  * @author James Seibel
- * @version 04-01-2021
+ * @version 06-19-2021
  */
 public class LodUtils
 {
@@ -212,4 +214,26 @@ public class LodUtils
 	}
 	
 	
+	
+	/**
+	 * Convert a BlockColors int into a Color object.
+	 */
+	public static Color intToColor(int num)
+	{
+		int filter = 0b11111111;
+		
+		int red = (num >> 16 ) & filter;
+		int green = (num >> 8 ) & filter;
+		int blue = num & filter;
+		
+		return new Color(red, green, blue);
+	}
+	
+	/**
+	 * Convert a Color into a BlockColors object.
+	 */
+	public static int colorToInt(Color color)
+	{
+		return color.getRGB();
+	}
 }

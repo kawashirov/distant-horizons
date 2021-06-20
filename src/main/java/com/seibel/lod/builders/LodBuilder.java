@@ -29,7 +29,7 @@ import net.minecraft.world.gen.Heightmap;
  * (specifically: Lod World, Dimension, Region, and Chunk objects)
  * 
  * @author James Seibel
- * @version 6-13-2021
+ * @version 6-19-2021
  */
 public class LodBuilder
 {
@@ -404,7 +404,7 @@ public class LodBuilder
 								continue;
 							}
 							
-							Color c = intToColor(ci);
+							Color c = LodUtils.intToColor(ci);
 							
 							red += c.getRed();
 							green += c.getGreen();
@@ -579,7 +579,7 @@ public class LodBuilder
 							continue;
 						}
 						
-						Color c = intToColor(ci);
+						Color c = LodUtils.intToColor(ci);
 						
 						red += c.getRed();
 						green += c.getGreen();
@@ -657,29 +657,5 @@ public class LodBuilder
 	
 	
 	
-	
-	
-	/**
-	 * Convert a BlockColors int into a Color object.
-	 */
-	private Color intToColor(int num)
-	{
-		int filter = 0b11111111;
-		
-		int red = (num >> 16 ) & filter;
-		int green = (num >> 8 ) & filter;
-		int blue = num & filter;
-		
-		return new Color(red, green, blue);
-	}
-	
-	/**
-	 * Convert a Color into a BlockColors object.
-	 */
-	@SuppressWarnings("unused")
-	private int colorToInt(Color color)
-	{
-		return color.getRGB();
-	}
 	
 }
