@@ -1,12 +1,28 @@
 package com.seibel.lod.builders;
 
+import java.awt.Color;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import com.seibel.lod.enums.LodDetail;
+import com.seibel.lod.handlers.LodConfigHandler;
+import com.seibel.lod.objects.LodChunk;
+import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodRender;
+import com.seibel.lod.util.LodUtils;
 
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeContainer;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
+import net.minecraft.world.chunk.IChunk;
+import net.minecraft.world.gen.WorldGenRegion;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.WorldWorkerManager.IWorker;
 
@@ -14,71 +30,59 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  * 
  * @author James Seibel
- * @version 6-13-2021
+ * @version 6-19-2021
  */
 public class LodChunkGenWorker implements IWorker
 {
-	private ServerWorld serverWorld;
-    private ChunkPos pos;
-    private LodDimension lodDim;
-    private LodBuilder lodBuilder;
-    private LodBufferBuilder lodBufferBuilder;
-    private LodRender lodRender;
+	// this seems to be faster as a singled threaded process
+    private static final ExecutorService genThread = Executors.newSingleThreadExecutor();
+    
+    private boolean threadStarted = false;
+    private LodChunkGenThread thread;
+    
     
     public LodChunkGenWorker(ChunkPos newPos, LodRender newLodRenderer, 
     		LodBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, 
-    		LodDimension newLodDimension, ServerWorld newServerWorld)
+    		LodDimension newLodDimension, ServerWorld newServerWorld,
+    		BiomeContainer newBiomeContainer)
     {
-        serverWorld = newServerWorld;
-        if (serverWorld == null)
+        if (newServerWorld == null)
         	throw new IllegalArgumentException("LodChunkGenWorker must have a non-null ServerWorld"); 
         	
-        pos = newPos;
-        lodDim = newLodDimension;
-        lodBuilder = newLodBuilder;
-        lodBufferBuilder = newLodBufferBuilder;
-        lodRender = newLodRenderer;
+        thread = new LodChunkGenThread(newPos, newLodRenderer, 
+        		newLodBuilder, newLodBufferBuilder, 
+        		newLodDimension, newServerWorld,
+        		newBiomeContainer);
     }
     
     @Override
     public boolean doWork()
     {
-        if (pos != null)
+        if (!threadStarted)
         {
-            int x = pos.x;
-            int z = pos.z;
-            
-            // only generate LodChunks if they can
-            // be added to the current LodDimension
-            if (lodDim.regionIsInRange(pos.x / LodRegion.SIZE, pos.z / LodRegion.SIZE))
-            {
-                //long startTime = System.currentTimeMillis();
-            	lodBuilder.generateLodChunkAsync(serverWorld.getChunk(x, z, ChunkStatus.FEATURES), ClientProxy.getLodWorld(), serverWorld);
-                //long endTime = System.currentTimeMillis();
-                //System.out.println(endTime - startTime + "\t" + lodBuilder.hasBlockData(chunk));
-                
-                // this is called so that the new LOD chunk is drawn
-                // after it is generated
-                lodRender.regenerateLODsNextFrame();
-                
-                
-                // useful for debugging
-//                ClientProxy.LOGGER.info(lodDim.getNumberOfLods());
-                
-//                if (lodDim.getLodFromCoordinates(x, z) != null)
-//                	ClientProxy.LOGGER.info(x + " " + z + " Success!");
-//                else
-//                	ClientProxy.LOGGER.info(x + " " + z);
-            }
-            // can be used for debugging
-            //else
-            //{
-            //	System.out.println("Out of range " + x + " " + z);
-            //}
-            
-            lodBufferBuilder.numberOfChunksWaitingToGenerate--;
-            
-            pos = null;
+        	// make sure we don't generate this chunk again
+        	thread.lodDim.addLod(new LodChunk(thread.pos));
+        	
+        	thread.lodBufferBuilder.numberOfChunksWaitingToGenerate--;
+        	
+        	if (LodConfigHandler.CLIENT.distanceBiomeOnlyGeneration.get())
+			{
+        		// if we are using biome only generation
+        		// that can be done asynchronously
+        		genThread.execute(thread);
+			}
+        	else
+        	{
+        		// if we are using normal generation that has to be done
+        		// synchronously to prevent crashing and harmful
+        		// interactions with the normal world generator
+        		thread.run();
+        	}
+        	
+        	threadStarted = true;
+        	
+    		// useful for debugging
+//        	ClientProxy.LOGGER.info(lodDim.getNumberOfLods());
         }
         
         return false;
@@ -87,8 +91,108 @@ public class LodChunkGenWorker implements IWorker
     @Override
     public boolean hasWork()
     {
-        return pos != null;
+        return !threadStarted;
     }
+    
+    
+    
+    
+    private class LodChunkGenThread implements Runnable
+    {
+    	public final ServerWorld serverWorld;
+        public final LodDimension lodDim;
+        public final LodBuilder lodBuilder;
+        public final LodRender lodRender;
+        public final BiomeContainer biomeContainer;
+        private LodBufferBuilder lodBufferBuilder;
+    	
+    	private ChunkPos pos;
+    	
+    	public LodChunkGenThread(ChunkPos newPos, LodRender newLodRenderer, 
+        		LodBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, 
+        		LodDimension newLodDimension, ServerWorld newServerWorld,
+        		BiomeContainer newBiomeContainer)
+    	{
+    		pos = newPos;
+    		lodRender = newLodRenderer;
+    		lodBuilder = newLodBuilder;
+    		lodBufferBuilder = newLodBufferBuilder;
+    		lodDim = newLodDimension;
+    		serverWorld = newServerWorld;
+    		biomeContainer = newBiomeContainer;
+    	}
+    	
+    	
+    	
+		@Override
+		public void run()
+		{
+			// only generate LodChunks if they can
+            // be added to the current LodDimension
+			if (lodDim.regionIsInRange(pos.x / LodRegion.SIZE, pos.z / LodRegion.SIZE))
+			{
+				long startTime = System.currentTimeMillis();
+				
+				if (LodConfigHandler.CLIENT.distanceBiomeOnlyGeneration.get())
+				{
+					Chunk chunk = new Chunk(serverWorld, pos, biomeContainer);
+					List<IChunk> chunkList = new LinkedList<>();
+					chunkList.add(chunk);
+					
+					WorldGenRegion worldGenRegion = new WorldGenRegion(serverWorld, chunkList);
+					Biome biome = worldGenRegion.getBiome(pos.asBlockPos());
+					
+					//biome.buildSurface(serverWorld.rand, chunk, pos.x, pos.z, 0, 0, Blocks.STONE.getDefaultState(), Blocks.WATER.getDefaultState(), serverWorld.getSeaLevel(), serverWorld.getSeed());
+					
+					// biome.buildSurface(Random random, IChunk chunkIn, int x, int z, int startHeight, double noise, BlockState defaultBlock, BlockState defaultFluid, int seaLevel, long seed)
+					//chunkGen.generateSurface(worldGenRegion, chunk);
+					
+					// generate features
+					//chunkGen.func_230351_a_(worldGenRegion, 
+					//serverWorld.field_241106_P_); // StructureManager
+					
+					LodDataPoint[][] details = new LodDataPoint[1][1];
+					Color color;
+					if (biome.getCategory() == Biome.Category.OCEAN)
+					{
+						color = LodUtils.intToColor(biome.getWaterColor());
+					}
+					else if (biome.getCategory() == Biome.Category.ICY)
+					{
+						color = Color.WHITE;
+					}
+					else
+					{
+						color = LodUtils.intToColor(biome.getFoliageColor());
+					}
+					
+					
+					details[0][0] = new LodDataPoint(serverWorld.getSeaLevel(), 0, color);
+					LodChunk lod = new LodChunk(pos, details , LodDetail.SINGLE);
+					lodDim.addLod(lod);
+				}
+				else
+				{
+					lodBuilder.generateLodChunkAsync(serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES), ClientProxy.getLodWorld(), serverWorld);
+				}
+				
+				lodRender.regenerateLODsNextFrame();
+				
+				
+//				if (lodDim.getLodFromCoordinates(pos.x, pos.z) != null)
+//					ClientProxy.LOGGER.info(pos.x + " " + pos.z + " Success!");
+//				else
+//					ClientProxy.LOGGER.info(pos.x + " " + pos.z);
+				
+				long endTime = System.currentTimeMillis();
+				System.out.println(endTime - startTime);
+				
+			}// if in range
+			
+		}// run
+		
+    }
+    
     
     /*
      * performance/generation tests related to

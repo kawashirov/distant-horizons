@@ -17,7 +17,7 @@ import net.minecraft.world.server.ServerWorld;
  * for a given dimension.
  * 
  * @author James Seibel
- * @version 03-19-2021
+ * @version 06-19-2021
  */
 public class LodDimension
 {
@@ -26,8 +26,8 @@ public class LodDimension
 	private volatile int width;
 	private volatile int halfWidth;
 	
-	public LodRegion regions[][];
-	public boolean isRegionDirty[][];
+	public volatile LodRegion regions[][];
+	public volatile boolean isRegionDirty[][];
 	
 	private int centerX;
 	private int centerZ;

@@ -21,7 +21,7 @@ import net.minecraftforge.fml.config.ModConfig;
 /**
  * 
  * @author James Seibel
- * @version 6-17-2021
+ * @version 6-19-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfigHandler
@@ -37,6 +37,8 @@ public class LodConfigHandler
 		public ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
 		
 		public ForgeConfigSpec.EnumValue<LodDetail> lodDetail;
+		
+		public ForgeConfigSpec.BooleanValue distanceBiomeOnlyGeneration;
 		
 		/** this is multiplied by the default view distance
 		 * to determine how far out to generate/render LODs */
@@ -73,7 +75,7 @@ public class LodConfigHandler
 	                		+ " How should the LODs be drawn? \n"
 	                		+ " " + LodTemplate.CUBIC.toString() + ": LOD Chunks are drawn as rectangular prisms (boxes). \n"
 	                		+ " " + LodTemplate.TRIANGULAR.toString() + ": LOD Chunks smoothly transition between other. \n"
-	                		+ " " + LodTemplate.DYNAMIC.toString() + ": LOD Chunks smoothly transition between other, "
+	                		+ " " + LodTemplate.DYNAMIC.toString() + ": LOD Chunks smoothly transition between other, \n"
 	                		+ " " + "         unless a neighboring chunk is at a significantly different height. ")
 	                .defineEnum("lodTemplate", LodTemplate.CUBIC);
 	        
@@ -91,6 +93,15 @@ public class LodConfigHandler
 	                		+ " A value of 2 means that there is 1 render distance worth \n"
 	                		+ " of LODs in each cardinal direction. ")
 	                .defineInRange("lodChunkRadiusMultiplier", 6, 2, 32);
+	        
+	        distanceBiomeOnlyGeneration = builder
+	                .comment("\n"
+	                		+ " If true LODs generated outside the normal view distance \n"
+	                		+ " will be created using a simpler faster method \n"
+	                		+ " at the cost of visual quality. \n"
+	                		+ " Nearby chunks will still use the full quality method \n"
+	                		+ " and will overwrite the lower quality ones. ")
+	                .define("distanceBiomeOnlyGeneration", false);
 	        
 	        builder.pop();
 	    }

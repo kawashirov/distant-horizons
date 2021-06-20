@@ -14,6 +14,8 @@ import com.seibel.lod.util.LodUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.biome.BiomeContainer;
+import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.WorldWorkerManager;
 
@@ -21,7 +23,7 @@ import net.minecraftforge.common.WorldWorkerManager;
  * This object is used to create NearFarBuffer objects.
  * 
  * @author James Seibel
- * @version 05-06-2021
+ * @version 06-19-2021
  */
 public class LodBufferBuilder
 {
@@ -48,7 +50,7 @@ public class LodBufferBuilder
 	/** If this is greater than 0 no new chunk generation requests will be made
 	 * this is to prevent chunks from being generated for a long time in an area
 	 * the player is no longer in. */
-	public int numberOfChunksWaitingToGenerate = 0;
+	public volatile int numberOfChunksWaitingToGenerate = 0;
 	
 	/** how many chunks to generate outside of the player's
 	 * view distance at one time. (or more specifically how
@@ -63,7 +65,8 @@ public class LodBufferBuilder
 	}
 	
 	
-	
+	private BiomeContainer biomeContainer = null;
+	private LodDimension previousDimension = null;
 	
 
 	/**
@@ -84,6 +87,12 @@ public class LodBufferBuilder
 		
 		if (buildableNearBuffer == null || buildableFarBuffer == null)
 			throw new IllegalStateException("generateLodBuffersAsync was called before the buildableNearBuffer and buildableFarBuffer were created.");
+		
+		if (previousDimension != lodDim)
+		{
+			biomeContainer = LodUtils.getServerWorldFromDimension(lodDim.dimension).getChunk(0, 0, ChunkStatus.EMPTY).getBiomes();
+			previousDimension = lodDim;
+		}
 		
 		
 		
@@ -108,6 +117,9 @@ public class LodBufferBuilder
 			int chunkGenIndex = 0;
 			
 			ChunkPos[] chunksToGen = new ChunkPos[maxChunkGenRequests];
+			// if we don't have a full number of chunks to generate in chunksToGen
+			// we can top it off from the reserve
+			ChunkPos[] chunksToGenReserve = new ChunkPos[maxChunkGenRequests];
 			int minChunkDist = Integer.MAX_VALUE;
 			ChunkPos playerChunkPos = new ChunkPos((int)playerX / LodChunk.WIDTH, (int)playerZ / LodChunk.WIDTH);
 			
@@ -145,7 +157,7 @@ public class LodBufferBuilder
 					{
 						// generate a new chunk if no chunk currently exists
 						// and we aren't waiting on any other chunks to generate
-						if (lod == null && numberOfChunksWaitingToGenerate == 0)
+						if (lod == null && numberOfChunksWaitingToGenerate < maxChunkGenRequests)
 						{
 							ChunkPos pos = new ChunkPos(chunkX, chunkZ);
 							
@@ -158,6 +170,7 @@ public class LodBufferBuilder
 								// this chunk is closer, clear any previous
 								// positions and update the new minimum distance
 								minChunkDist = newDistance;
+								chunksToGenReserve = chunksToGen;
 								
 								chunkGenIndex = 0;
 								chunksToGen = new ChunkPos[maxChunkGenRequests];
@@ -202,6 +215,15 @@ public class LodBufferBuilder
 			{
 		        ServerWorld serverWorld = LodUtils.getServerWorldFromDimension(lodDim.dimension);
 				
+		        // make sure we have as many chunks to generate as we are allowed
+		        if (chunkGenIndex < maxChunkGenRequests)
+		        {
+		        	for(int i = chunkGenIndex, j = 0; i < maxChunkGenRequests; i++, j++)
+		        	{
+		        		chunksToGen[i] = chunksToGenReserve[j];
+		        	}
+		        }
+		        
 				// start chunk generation
 				for(ChunkPos chunkPos : chunksToGen)
 				{
@@ -210,7 +232,7 @@ public class LodBufferBuilder
 					
 					numberOfChunksWaitingToGenerate++;
 					
-					LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, renderer, lodBuilder, this, lodDim, serverWorld);
+					LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, renderer, lodBuilder, this, lodDim, serverWorld, biomeContainer);
 					WorldWorkerManager.addWorker(genWorker);
 				}
 			}
@@ -228,7 +250,6 @@ public class LodBufferBuilder
 		
 		return;
 	}
-	
 	
 	
 	

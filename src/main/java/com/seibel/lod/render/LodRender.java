@@ -46,7 +46,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world. 
  * 
  * @author James Seibel
- * @version 06-17-2021
+ * @version 06-19-2021
  */
 public class LodRender
 {
@@ -104,7 +104,7 @@ public class LodRender
 	
 	/** if this is true the LOD buffers should be regenerated,
 	 * provided they aren't already being regenerated. */
-	private boolean regen = false;
+	private volatile boolean regen = false;
 	
 	/** This HashSet contains every chunk that Vanilla Minecraft
 	 *  is going to render */
