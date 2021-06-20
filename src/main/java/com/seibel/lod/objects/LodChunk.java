@@ -12,7 +12,7 @@ import net.minecraft.util.math.ChunkPos;
  * and color data for an LOD object.
  * 
  * @author James Seibel
- * @version 6-13-2021
+ * @version 6-19-2021
  */
 public class LodChunk
 {
@@ -28,8 +28,11 @@ public class LodChunk
 	private static final Color DEBUG_WHITE = new Color(255, 255, 255, DEBUG_ALPHA);
 	private static final Color INVISIBLE = new Color(0,0,0,0);
 	
-	
 	public LodDetail detail = LodDetail.SINGLE;
+	
+	/** If this is set to true then toData will return
+	 * the empty string */
+	public boolean dontSave = false;
 	
 	
 	/** The x coordinate of the chunk. */
@@ -46,10 +49,11 @@ public class LodChunk
 	
 	
 	/**
-	 * Create an empty invisible LodChunk at (0,0)
+	 * Create an empty, invisible, non-saving LodChunk at (0,0)
 	 */
 	public LodChunk()
 	{
+		dontSave = true;
 		empty = true;
 		
 		x = 0;
@@ -58,6 +62,28 @@ public class LodChunk
 		detail = LodDetail.SINGLE;
 		
 		dataPoints = new LodDataPoint[detail.lengthCount][detail.lengthCount];
+	}
+	
+	/**
+	 * Create an empty, invisible, non-saving LodChunk at the given ChunkPos
+	 */
+	public LodChunk(ChunkPos pos)
+	{
+		this();
+		
+		x = pos.x;
+		z = pos.z;
+	}
+	
+	/**
+	 * Create an empty, invisible, non-saving LodChunk at the given ChunkPos
+	 */
+	public LodChunk(int newX, int newZ)
+	{
+		this();
+		
+		x = newX;
+		z = newZ;
 	}
 	
 	
@@ -78,6 +104,8 @@ public class LodChunk
 		 * example:
 		 * 5,8,  4, 0, 255,255,255,  4, 0, 255, 255, 255, ...
 		 */
+		
+		dontSave = false;
 		
 		// make sure there are the correct number of entries
 		// in the data string
@@ -172,6 +200,7 @@ public class LodChunk
 		
 		dataPoints = newDataPoints;
 		
+		dontSave = false;
 		detail = newDetail;
 		
 		empty = determineIfEmtpy();
@@ -376,7 +405,8 @@ public class LodChunk
 	
 	/**
 	 * Outputs all data in a csv format
-	 * with the given delimiter. <br><br>
+	 * with the given delimiter, if
+	 * dontSave is false. <br><br>
 	 * 
 	 * data format: <br>
 	 * x, z, dataPoint[0][0], dataPoint[0][1], ... <br>
@@ -387,8 +417,10 @@ public class LodChunk
 	 */
 	public String toData()
 	{
-		String s = "";
+		if (dontSave)
+			return "";
 		
+		String s = "";
 		s += Integer.toString(x) + DATA_DELIMITER +  Integer.toString(z) + DATA_DELIMITER;
 		
 		for (int i = 0; i < dataPoints.length; i++)
