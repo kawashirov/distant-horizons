@@ -1,29 +1,26 @@
 package com.seibel.lod.builders;
 
-import java.awt.Color;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
-import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodRenderer;
-import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.util.palette.UpgradeData;
 import net.minecraft.world.biome.BiomeContainer;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.gen.WorldGenRegion;
+import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.server.ServerWorldLightManager;
 import net.minecraftforge.common.WorldWorkerManager.IWorker;
 
 /**
@@ -34,8 +31,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  */
 public class LodChunkGenWorker implements IWorker
 {
-	// this seems to be faster as a singled threaded process
-    private static final ExecutorService genThread = Executors.newSingleThreadExecutor();
+    public static final ExecutorService genThreads = Executors.newFixedThreadPool(16);
     
     private boolean threadStarted = false;
     private LodChunkGenThread thread;
@@ -51,8 +47,7 @@ public class LodChunkGenWorker implements IWorker
         	
         thread = new LodChunkGenThread(newPos, newLodRenderer, 
         		newLodBuilder, newLodBufferBuilder, 
-        		newLodDimension, newServerWorld,
-        		newBiomeContainer);
+        		newLodDimension, newServerWorld);
     }
     
     @Override
@@ -69,7 +64,7 @@ public class LodChunkGenWorker implements IWorker
 			{
         		// if we are using biome only generation
         		// that can be done asynchronously
-        		genThread.execute(thread);
+        		genThreads.execute(thread);
 			}
         	else
         	{
@@ -82,7 +77,7 @@ public class LodChunkGenWorker implements IWorker
         	threadStarted = true;
         	
     		// useful for debugging
-//        	ClientProxy.LOGGER.info(lodDim.getNumberOfLods());
+//        	ClientProxy.LOGGER.info(thread.lodDim.getNumberOfLods());
         }
         
         return false;
@@ -103,15 +98,13 @@ public class LodChunkGenWorker implements IWorker
         public final LodDimension lodDim;
         public final LodBuilder lodBuilder;
         public final LodRenderer lodRenderer;
-        public final BiomeContainer biomeContainer;
         private LodBufferBuilder lodBufferBuilder;
     	
     	private ChunkPos pos;
     	
     	public LodChunkGenThread(ChunkPos newPos, LodRenderer newLodRenderer, 
         		LodBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, 
-        		LodDimension newLodDimension, ServerWorld newServerWorld,
-        		BiomeContainer newBiomeContainer)
+        		LodDimension newLodDimension, ServerWorld newServerWorld)
     	{
     		pos = newPos;
     		lodRenderer = newLodRenderer;
@@ -119,7 +112,6 @@ public class LodChunkGenWorker implements IWorker
     		lodBufferBuilder = newLodBufferBuilder;
     		lodDim = newLodDimension;
     		serverWorld = newServerWorld;
-    		biomeContainer = newBiomeContainer;
     	}
     	
     	
@@ -131,45 +123,73 @@ public class LodChunkGenWorker implements IWorker
             // be added to the current LodDimension
 			if (lodDim.regionIsInRange(pos.x / LodRegion.SIZE, pos.z / LodRegion.SIZE))
 			{
-				long startTime = System.currentTimeMillis();
+//				long startTime = System.currentTimeMillis();
 				
 				if (LodConfig.CLIENT.distanceBiomeOnlyGeneration.get())
 				{
-					Chunk chunk = new Chunk(serverWorld, pos, biomeContainer);
 					List<IChunk> chunkList = new LinkedList<>();
+					ChunkPrimer chunk = new ChunkPrimer(pos, UpgradeData.EMPTY);
 					chunkList.add(chunk);
+//					int width = 0;
+//					for(int i = pos.x - width; i < pos.x + width; i++)
+//					{
+//						for(int j = pos.x - width; j < pos.x + width; j++)
+//						{
+//							if(i == pos.x && j == pos.z)
+//							{
+//								chunkList.add(chunk);
+//							}
+//							else
+//							{
+//								chunkList.add(new ChunkPrimer(new ChunkPos(i,j), UpgradeData.EMPTY));							
+//							}
+//						}
+//					}
 					
-					WorldGenRegion worldGenRegion = new WorldGenRegion(serverWorld, chunkList);
-					Biome biome = worldGenRegion.getBiome(pos.asBlockPos());
+					ChunkGenerator chunkGen = serverWorld.getWorld().getChunkProvider().getChunkGenerator();
 					
-					//biome.buildSurface(serverWorld.rand, chunk, pos.x, pos.z, 0, 0, Blocks.STONE.getDefaultState(), Blocks.WATER.getDefaultState(), serverWorld.getSeaLevel(), serverWorld.getSeed());
+					ChunkStatus.EMPTY.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
+					//ChunkStatus.STRUCTURE_STARTS.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
+					//ChunkStatus.STRUCTURE_REFERENCES.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
+					for(IChunk c : chunkList)
+						((ChunkPrimer)c).setStatus(ChunkStatus.STRUCTURE_REFERENCES);
+					ChunkStatus.BIOMES.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
+					ChunkStatus.NOISE.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
+					ChunkStatus.SURFACE.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
+					//ChunkStatus.CARVERS.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
+					//ChunkStatus.LIQUID_CARVERS.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
+//					for(IChunk c : chunkList)
+//						((ChunkPrimer)c).setStatus(ChunkStatus.LIQUID_CARVERS);
 					
-					// biome.buildSurface(Random random, IChunk chunkIn, int x, int z, int startHeight, double noise, BlockState defaultBlock, BlockState defaultFluid, int seaLevel, long seed)
-					//chunkGen.generateSurface(worldGenRegion, chunk);
-					
-					// generate features
-					//chunkGen.func_230351_a_(worldGenRegion, 
-					//serverWorld.field_241106_P_); // StructureManager
-					
-					LodDataPoint[][] details = new LodDataPoint[1][1];
-					Color color;
-					if (biome.getCategory() == Biome.Category.OCEAN)
-					{
-						color = LodUtil.intToColor(biome.getWaterColor());
-					}
-					else if (biome.getCategory() == Biome.Category.ICY)
-					{
-						color = Color.WHITE;
-					}
-					else
-					{
-						color = LodUtil.intToColor(biome.getFoliageColor());
-					}
+//					ChunkStatus.FEATURES.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
 					
 					
-					details[0][0] = new LodDataPoint(serverWorld.getSeaLevel(), 0, color);
-					LodChunk lod = new LodChunk(pos, details , LodDetail.SINGLE);
+					LodChunk lod = lodBuilder.generateLodFromChunk(chunk, false);
 					lodDim.addLod(lod);
+					
+//					ClientProxy.LOGGER.info(pos.x + " " + pos.z + " h:" + lod.getHeight(0, 0) + " c:" + lod.getColor(0, 0));
+					
+//					Biome biome = ;// = worldGenRegion.getBiome(pos.asBlockPos());
+//					LodDataPoint[][] details = new LodDataPoint[1][1];
+//					Color color;
+//					if (biome.getCategory() == Biome.Category.OCEAN)
+//					{
+//						color = LodUtil.intToColor(biome.getWaterColor());
+//					}
+//					else if (biome.getCategory() == Biome.Category.ICY ||
+//							biome.getCategory() == Biome.Category.EXTREME_HILLS)
+//					{
+//						color = Color.WHITE;
+//					}
+//					else
+//					{
+//						color = LodUtil.intToColor(biome.getFoliageColor());
+//					}
+//					
+//					
+//					details[0][0] = new LodDataPoint(serverWorld.getSeaLevel(), 0, color);
+//					LodChunk lod = new LodChunk(pos, details , LodDetail.SINGLE);
+//					lodDim.addLod(lod);
 				}
 				else
 				{
@@ -184,8 +204,8 @@ public class LodChunkGenWorker implements IWorker
 //				else
 //					ClientProxy.LOGGER.info(pos.x + " " + pos.z);
 				
-				long endTime = System.currentTimeMillis();
-				System.out.println(endTime - startTime);
+//				long endTime = System.currentTimeMillis();
+//				System.out.println(endTime - startTime);
 				
 			}// if in range
 			
