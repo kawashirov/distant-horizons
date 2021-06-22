@@ -109,8 +109,6 @@ public class LodBuilder
 	
 	
 	
-	
-	
 	/**
 	 * Creates a LodChunk for a chunk in the given world.
 	 * 
@@ -118,6 +116,17 @@ public class LodBuilder
 	 * thrown if either the chunk or world is null.
 	 */
 	public LodChunk generateLodFromChunk(IChunk chunk) throws IllegalArgumentException
+	{
+		return generateLodFromChunk(chunk, false);
+	}
+	
+	/**
+	 * Creates a LodChunk for a chunk in the given world.
+	 * 
+	 * @throws IllegalArgumentException 
+	 * thrown if either the chunk or world is null.
+	 */
+	public LodChunk generateLodFromChunk(IChunk chunk, boolean useHeightmap) throws IllegalArgumentException
 	{
 		if(chunk == null)
 			throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
@@ -136,8 +145,19 @@ public class LodBuilder
 			
 			Color color = generateLodColorForAreaInDirection(chunk, ColorDirection.TOP, startX, startZ, endX, endZ);
 			
-			short height = determineHeightPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
-			short depth = determineBottomPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
+			short height;
+			short depth;
+			
+			if (!useHeightmap)
+			{
+				height = determineHeightPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
+				depth = determineBottomPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
+			}
+			else
+			{
+				height = determineHeightPoint(chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE), startX, startZ, endX, endZ);
+				depth = 0;
+			}
 			
 			int x = i / detail.lengthCount;
 			int z = i % detail.lengthCount;
@@ -266,13 +286,13 @@ public class LodBuilder
 	/**
 	 * Find the highest point from the Top
 	 */
-	@SuppressWarnings("unused")
-	private short determineHeightPoint(Heightmap heightmap, int endZ)
+	private short determineHeightPoint(Heightmap heightmap,
+			int startX, int startZ, int endX, int endZ)
 	{
 		short highest = 0;
-		for(int x = 0; x < LodChunk.WIDTH; x++)
+		for(int x = startX; x < endX; x++)
 		{
-			for(int z = 0; z < LodChunk.WIDTH; z++)
+			for(int z = startZ; z < endZ; z++)
 			{
 				short newHeight = (short) heightmap.getHeight(x, z);
 				if (newHeight > highest)
