@@ -19,6 +19,8 @@ import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.gen.feature.IceAndSnowFeature;
+import net.minecraft.world.gen.feature.NoFeatureConfig;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.ServerWorldLightManager;
 import net.minecraftforge.common.WorldWorkerManager.IWorker;
@@ -27,7 +29,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  * 
  * @author James Seibel
- * @version 6-19-2021
+ * @version 6-22-2021
  */
 public class LodChunkGenWorker implements IWorker
 {
@@ -161,8 +163,11 @@ public class LodChunkGenWorker implements IWorker
 //					for(IChunk c : chunkList)
 //						((ChunkPrimer)c).setStatus(ChunkStatus.LIQUID_CARVERS);
 					
-//					ChunkStatus.FEATURES.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
+					//ChunkStatus.FEATURES.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
 					
+					LodServerWorld lodWorld = new LodServerWorld(chunk);
+					IceAndSnowFeature snowFeature = new IceAndSnowFeature(NoFeatureConfig.field_236558_a_);
+					snowFeature.generate(lodWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos(), null);
 					
 					LodChunk lod = lodBuilder.generateLodFromChunk(chunk, false);
 					lodDim.addLod(lod);
