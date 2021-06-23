@@ -319,6 +319,10 @@ public class LodChunk
 	 */
 	public short getAverageHeightOverArea(int startX, int startZ, int endX, int endZ)
 	{
+		if (startX == endX || startZ == endZ)
+			// we were given an area with 0 blocks in it
+			return getHeightForBlockPos(startX,startZ);
+		
 		int average = 0;
 		
 		for(int x = startX; x < endX; x++)
@@ -337,6 +341,10 @@ public class LodChunk
 	 */
 	public short getAverageDepthOverArea(int startX, int startZ, int endX, int endZ)
 	{
+		if (startX == endX || startZ == endZ)
+			// we were given an area with 0 blocks in it
+			return getDepthForBlockPos(startX,startZ);
+		
 		int average = 0;
 		
 		for(int x = startX; x < endX; x++)
@@ -352,6 +360,12 @@ public class LodChunk
 	 */
 	public Color getAverageColorOverArea(int startX, int startZ, int endX, int endZ, boolean debugging)
 	{
+		if (startX == endX || startZ == endZ)
+			// we were given an area with 0 blocks in it
+			return getColorForBlockPos(startX,startZ);
+		
+		
+		
 		int[] colorComponents = new int[3];
 		
 		
