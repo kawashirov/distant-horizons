@@ -55,7 +55,7 @@ public class LodBufferBuilder
 	/** how many chunks to generate outside of the player's
 	 * view distance at one time. (or more specifically how
 	 * many requests to make at one time) */
-	public int maxChunkGenRequests = 8;
+	public int maxChunkGenRequests = Runtime.getRuntime().availableProcessors();
 	
 	
 	public LodBufferBuilder(LodBuilder newLodBuilder)

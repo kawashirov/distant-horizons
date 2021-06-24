@@ -19,8 +19,12 @@ import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.ChunkGenerator;
+import net.minecraft.world.gen.feature.BaseTreeFeatureConfig;
+import net.minecraft.world.gen.feature.ConfiguredFeature;
+import net.minecraft.world.gen.feature.Features;
 import net.minecraft.world.gen.feature.IceAndSnowFeature;
 import net.minecraft.world.gen.feature.NoFeatureConfig;
+import net.minecraft.world.gen.feature.TreeFeature;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.ServerWorldLightManager;
 import net.minecraftforge.common.WorldWorkerManager.IWorker;
@@ -29,11 +33,11 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  * 
  * @author James Seibel
- * @version 6-22-2021
+ * @version 6-23-2021
  */
 public class LodChunkGenWorker implements IWorker
 {
-    public static final ExecutorService genThreads = Executors.newFixedThreadPool(16);
+    public static final ExecutorService genThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     
     private boolean threadStarted = false;
     private LodChunkGenThread thread;
@@ -132,42 +136,62 @@ public class LodChunkGenWorker implements IWorker
 					List<IChunk> chunkList = new LinkedList<>();
 					ChunkPrimer chunk = new ChunkPrimer(pos, UpgradeData.EMPTY);
 					chunkList.add(chunk);
-//					int width = 0;
-//					for(int i = pos.x - width; i < pos.x + width; i++)
-//					{
-//						for(int j = pos.x - width; j < pos.x + width; j++)
-//						{
-//							if(i == pos.x && j == pos.z)
-//							{
-//								chunkList.add(chunk);
-//							}
-//							else
-//							{
-//								chunkList.add(new ChunkPrimer(new ChunkPos(i,j), UpgradeData.EMPTY));							
-//							}
-//						}
-//					}
 					
 					ChunkGenerator chunkGen = serverWorld.getWorld().getChunkProvider().getChunkGenerator();
 					
 					ChunkStatus.EMPTY.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
-					//ChunkStatus.STRUCTURE_STARTS.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
-					//ChunkStatus.STRUCTURE_REFERENCES.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
 					for(IChunk c : chunkList)
 						((ChunkPrimer)c).setStatus(ChunkStatus.STRUCTURE_REFERENCES);
 					ChunkStatus.BIOMES.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
 					ChunkStatus.NOISE.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
 					ChunkStatus.SURFACE.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
-					//ChunkStatus.CARVERS.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
-					//ChunkStatus.LIQUID_CARVERS.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
-//					for(IChunk c : chunkList)
-//						((ChunkPrimer)c).setStatus(ChunkStatus.LIQUID_CARVERS);
 					
-					//ChunkStatus.FEATURES.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
 					
-					LodServerWorld lodWorld = new LodServerWorld(chunk);
+					LodServerWorld lodWorld = new LodServerWorld(chunk, serverWorld);
+					
 					IceAndSnowFeature snowFeature = new IceAndSnowFeature(NoFeatureConfig.field_236558_a_);
 					snowFeature.generate(lodWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos(), null);
+					
+					TreeFeature treeFeature = new TreeFeature(BaseTreeFeatureConfig.CODEC);
+					treeFeature.generate(lodWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos(), Features.SPRUCE.getConfig());
+					treeFeature.generate(lodWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos(), Features.OAK.getConfig());
+					treeFeature.generate(lodWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos(), Features.PINE.getConfig());
+					 
+					
+					
+					try
+					{
+						// TODO fix concurrent exception
+						
+						ConfiguredFeature<?, ?> configFeature = new ConfiguredFeature(Features.PATCH_TALL_GRASS.feature, Features.PATCH_TALL_GRASS.config);
+						configFeature.generate(lodWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos());
+						configFeature = new ConfiguredFeature(Features.PATCH_TALL_GRASS_2.feature, Features.PATCH_TALL_GRASS_2.config);
+						configFeature.generate(lodWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos());
+						configFeature = new ConfiguredFeature(Features.PATCH_TAIGA_GRASS.feature, Features.PATCH_TAIGA_GRASS.config);
+						configFeature.generate(lodWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos());
+						
+						configFeature = new ConfiguredFeature(Features.PATCH_GRASS_PLAIN.feature, Features.PATCH_GRASS_PLAIN.config);
+						configFeature.generate(lodWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos());
+						configFeature = new ConfiguredFeature(Features.PATCH_GRASS_FOREST.feature, Features.PATCH_GRASS_FOREST.config);
+						configFeature.generate(lodWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos());
+						configFeature = new ConfiguredFeature(Features.PATCH_GRASS_BADLANDS.feature, Features.PATCH_GRASS_BADLANDS.config);
+						configFeature.generate(lodWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos());
+						configFeature = new ConfiguredFeature(Features.PATCH_GRASS_SAVANNA.feature, Features.PATCH_GRASS_SAVANNA.config);
+						configFeature.generate(lodWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos());
+						configFeature = new ConfiguredFeature(Features.PATCH_GRASS_NORMAL.feature, Features.PATCH_GRASS_NORMAL.config);
+						configFeature.generate(lodWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos());
+						configFeature = new ConfiguredFeature(Features.PATCH_GRASS_TAIGA_2.feature, Features.PATCH_GRASS_TAIGA_2.config);
+						configFeature.generate(lodWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos());
+						configFeature = new ConfiguredFeature(Features.PATCH_GRASS_TAIGA.feature, Features.PATCH_GRASS_TAIGA.config);
+						configFeature.generate(lodWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos());
+					}
+					catch(Exception e)
+					{
+						//e.printStackTrace();
+//						System.out.println();
+					}
+					
+					
 					
 					LodChunk lod = lodBuilder.generateLodFromChunk(chunk, false);
 					lodDim.addLod(lod);
