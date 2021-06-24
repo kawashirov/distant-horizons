@@ -56,8 +56,15 @@ public class LodServerWorld implements ISeedReader {
 	
 	
 	@Override
-	public int getHeight(Type heightmapType, int x, int z) {
-		return chunk.getHeightmap(Type.WORLD_SURFACE_WG).getHeight(Math.abs(x % LodChunk.WIDTH), Math.abs(z % LodChunk.WIDTH));
+	public int getHeight(Type heightmapType, int x, int z)
+	{
+		x = x % LodChunk.WIDTH;
+		x = (x < 0) ? x + 16 : x;
+		
+		z = z % LodChunk.WIDTH;
+		z = (z < 0) ? z + 16 : z;
+		
+		return chunk.getHeightmap(Type.WORLD_SURFACE_WG).getHeight(x, z);
 	}
 	
 	@Override
