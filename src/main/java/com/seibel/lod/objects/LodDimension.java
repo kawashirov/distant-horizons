@@ -17,7 +17,7 @@ import net.minecraft.world.server.ServerWorld;
  * for a given dimension.
  * 
  * @author James Seibel
- * @version 06-19-2021
+ * @version 06-27-2021
  */
 public class LodDimension
 {
@@ -53,14 +53,14 @@ public class LodDimension
 				// provider needs a separate variable to prevent
 				// the compiler from complaining
 				ServerChunkProvider provider = serverWorld.getChunkProvider();
-				saveDir = new File(provider.getSavedData().folder.getCanonicalFile() + "\\lod");
+				saveDir = new File(provider.getSavedData().folder.getCanonicalFile().getPath() + File.separatorChar + "lod");
 			}
 			else
 			{
 				// connected to server
 				
-				saveDir = new File(mc.gameDir.getCanonicalFile() + 
-						"\\lod server data\\" + LodUtil.getDimensionIDFromWorld(mc.world));
+				saveDir = new File(mc.gameDir.getCanonicalFile().getPath() +
+						File.separatorChar + "lod server data" + File.separatorChar + LodUtil.getDimensionIDFromWorld(mc.world));
 			}
 			
 			fileHandler = new LodDimensionFileHandler(saveDir, this);

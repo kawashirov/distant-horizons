@@ -20,7 +20,7 @@ import com.seibel.lod.proxy.ClientProxy;
  * to file.
  * 
  * @author James Seibel
- * @version 6-13-2021
+ * @version 6-27-2021
  */
 public class LodDimensionFileHandler
 {
@@ -332,7 +332,7 @@ public class LodDimensionFileHandler
 			// ".\Super Flat\DIM-1\data"
 			// or
 			// ".\Super Flat\data"
-			return dimensionDataSaveFolder.getCanonicalPath() + "\\" + 
+			return dimensionDataSaveFolder.getCanonicalPath() + File.separatorChar + 
 					FILE_NAME_PREFIX + "." + detail.toString() + "." + regionX + "." + regionZ + FILE_EXTENSION;
 		}
 		catch(IOException e)

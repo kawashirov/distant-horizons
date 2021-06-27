@@ -1,6 +1,7 @@
 package com.seibel.lod.util;
 
 import java.awt.Color;
+import java.io.File;
 
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.RegionPos;
@@ -20,7 +21,7 @@ import net.minecraft.world.server.ServerWorld;
  * This class holds methods that may be used in multiple places.
  * 
  * @author James Seibel
- * @version 06-19-2021
+ * @version 06-27-2021
  */
 public class LodUtil
 {
@@ -143,8 +144,8 @@ public class LodUtil
 			ServerData server = mc.getCurrentServerData();
 			return server.serverName + ", IP " + 
 					server.serverIP + ", GameVersion " + 
-					server.gameVersion.getString() + "\\"
-					+ "dim_" + mc.world.getDimensionType().getEffects().getPath() + "\\";
+					server.gameVersion.getString() + File.separatorChar
+					+ "dim_" + mc.world.getDimensionType().getEffects().getPath() + File.separatorChar;
 		}
 	}
 
@@ -181,8 +182,8 @@ public class LodUtil
 			ServerData server = mc.getCurrentServerData();
 			return server.serverName + ", IP " + 
 					server.serverIP + ", GameVersion " + 
-					server.gameVersion.getString() + "\\"
-					+ "dim_" + world.getDimensionType().getEffects().getPath() + "\\";
+					server.gameVersion.getString() + File.separatorChar
+					+ "dim_" + world.getDimensionType().getEffects().getPath() + File.separatorChar;
 		}
 	}
 	
@@ -200,7 +201,7 @@ public class LodUtil
 			
 			// get the world name
 			int saveIndex = dimId.indexOf("saves") + 1 + "saves".length();
-			int slashIndex = dimId.indexOf('\\', saveIndex);
+			int slashIndex = dimId.indexOf(File.separatorChar, saveIndex);
 			dimId = dimId.substring(saveIndex, slashIndex);
 			return dimId;
 		}
