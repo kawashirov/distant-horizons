@@ -6,13 +6,14 @@ import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
 
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.gen.Heightmap;
 
 /**
  * This object contains position
  * and color data for an LOD object.
  * 
  * @author James Seibel
- * @version 6-19-2021
+ * @version 6-27-2021
  */
 public class LodChunk
 {
@@ -28,11 +29,17 @@ public class LodChunk
 	private static final Color DEBUG_WHITE = new Color(255, 255, 255, DEBUG_ALPHA);
 	private static final Color INVISIBLE = new Color(0,0,0,0);
 	
+	/** If we ever have to use a heightmap for any reason, use this one. */
+	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
+	
+	
 	public LodDetail detail = LodDetail.SINGLE;
 	
 	/** If this is set to true then toData will return
 	 * the empty string */
 	public boolean dontSave = false;
+	
+	// TODO store the DistanceGenerationMethod used for this chunk (so we can upgrade old chunks if we want to)
 	
 	
 	/** The x coordinate of the chunk. */

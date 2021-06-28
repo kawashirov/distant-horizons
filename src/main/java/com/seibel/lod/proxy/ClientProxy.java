@@ -25,7 +25,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of this program.
  * 
  * @author James_Seibel
- * @version 05-31-2021
+ * @version 06-27-2021
  */
 public class ClientProxy
 {
@@ -98,6 +98,7 @@ public class ClientProxy
 //		LodConfig.CLIENT.lodDetail.set(LodDetail.DOUBLE);
 //		LodConfig.CLIENT.lodColorStyle.set(LodColorStyle.INDIVIDUAL_SIDES);
 //		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
+//		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
 		
 		// Note to self:
 		// if "unspecified" shows up in the pie chart, it is

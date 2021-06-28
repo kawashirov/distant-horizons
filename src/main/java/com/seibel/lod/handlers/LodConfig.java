@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.seibel.lod.ModInfo;
+import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.enums.LodTemplate;
@@ -21,7 +22,7 @@ import net.minecraftforge.fml.config.ModConfig;
 /**
  * 
  * @author James Seibel
- * @version 6-19-2021
+ * @version 6-27-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -38,7 +39,7 @@ public class LodConfig
 		
 		public ForgeConfigSpec.EnumValue<LodDetail> lodDetail;
 		
-		public ForgeConfigSpec.BooleanValue distanceBiomeOnlyGeneration;
+		public ForgeConfigSpec.EnumValue<DistanceGenerationMode> distanceGenerationMode;
 		
 		/** this is multiplied by the default view distance
 		 * to determine how far out to generate/render LODs */
@@ -49,21 +50,21 @@ public class LodConfig
 	        builder.comment(ModInfo.MODNAME + " configuration settings").push("client");
 	        
 	        drawLODs = builder
-	        		.comment("\n"
+	        		.comment("\n\n"
 	        				+ " If false LODs will not be drawn, \n"
 	        				+ " however they will still be generated \n"
 	        				+ " and saved to file for later use.")
 	        		.define("drawLODs", true);
 	        
 	        fogDistance = builder
-	                .comment("\n"
+	                .comment("\n\n"
 	                		+ " At what distance should Fog be drawn on the LODs? \n"
 	                		+ " If the fog cuts off ubruptly or you are using Optifine's \"fast\" \n"
 	                		+ " fog option set this to " + FogDistance.NEAR.toString() + " or " + FogDistance.FAR.toString() + ".")
 	                .defineEnum("fogDistance", FogDistance.NEAR_AND_FAR);
 	        
 	        debugMode = builder
-	                .comment("\n"
+	                .comment("\n\n"
 	                		+ " If false the LODs will draw with their normal world colors. \n"
 	                		+ " If true they will draw as a black and white checkerboard. \n"
 	                		+ " This can be used for debugging or imagining you are playing a \n"
@@ -71,7 +72,7 @@ public class LodConfig
 	                .define("drawCheckerBoard", false);
 	        
 	        lodTemplate = builder
-	                .comment("\n"
+	                .comment("\n\n"
 	                		+ " How should the LODs be drawn? \n"
 	                		+ " " + LodTemplate.CUBIC.toString() + ": LOD Chunks are drawn as rectangular prisms (boxes). \n"
 	                		+ " " + LodTemplate.TRIANGULAR.toString() + ": LOD Chunks smoothly transition between other. \n"
@@ -80,28 +81,64 @@ public class LodConfig
 	                .defineEnum("lodTemplate", LodTemplate.CUBIC);
 	        
 	        lodDetail = builder
-	                .comment("\n"
+	                .comment("\n\n"
 	                		+ " How detailed should the LODs be? \n"
 	                		+ " " + LodDetail.SINGLE.toString() + ": render 1 LOD for each Chunk. \n"
             				+ " " + LodDetail.DOUBLE.toString() + ": render 4 LODs for each Chunk.")
 	                .defineEnum("lodGeometryQuality", LodDetail.QUAD);
 	        
 	        lodChunkRadiusMultiplier = builder
-	                .comment("\n"
+	                .comment("\n\n"
 	                		+ " This is multiplied by the default view distance \n"
 	                		+ " to determine how far out to generate/render LODs. \n"
 	                		+ " A value of 2 means that there is 1 render distance worth \n"
 	                		+ " of LODs in each cardinal direction. ")
 	                .defineInRange("lodChunkRadiusMultiplier", 6, 2, 32);
 	        
-	        distanceBiomeOnlyGeneration = builder
-	                .comment("\n"
-	                		+ " If true LODs generated outside the normal view distance \n"
-	                		+ " will be created using a simpler faster method \n"
-	                		+ " at the cost of visual quality. \n"
-	                		+ " Nearby chunks will still use the full quality method \n"
-	                		+ " and will overwrite the lower quality ones. ")
-	                .define("distanceBiomeOnlyGeneration", false);
+	        distanceGenerationMode = builder
+	                .comment("\n\n"
+	                		+ " Note: The times listed here are based on the developer's \n"
+	                		+ "       PC, and are included to show the speed difference \n"
+	                		+ "       between options. Your mileage may vary. \n"
+	                		+ "\n"
+	                		
+	                		+ " " + DistanceGenerationMode.BIOME_ONLY.toString() + " \n"
+	                		+ " Only generate the biomes and use biome \n"
+	                		+ " grass/foliage color, water color, or ice color \n"
+	                		+ " to generate the color. \n"
+	                		+ " Doesn't generate height, everything is shown at sea level. \n"
+	                		+ " Multithreaded - Fastest (2-5 ms) \n"
+	                		
+	                		+ "\n"
+							+ " " + DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT.toString() + " \n"
+							+ " Same as BIOME_ONLY, except instead \n"
+							+ " of always using sea level as the LOD height \n"
+							+ " different biome types (mountain, ocean, forest, etc.) \n"
+							+ " use predetermined heights to simulate having height data. \n"
+							+ " Multithreaded - Fastest (2-5 ms) \n"
+							
+							+ "\n"
+							+ " " + DistanceGenerationMode.SURFACE.toString() + " \n"
+							+ " Generate the world surface, \n"
+							+ " this does NOT include caves, trees, \n"
+							+ " or structures. \n"
+							+ " Multithreaded - Faster (10-20 ms) \n"
+							
+							+ "\n"
+							+ " " + DistanceGenerationMode.FEATURES.toString() + " \n"
+							+ " Generate everything except structures. \n"
+							+ " WARNING: This may cause world generation bugs or instability, \n"
+							+ "	since some features cause concurrentModification exceptions. \n"
+							+ " Multithreaded - Fast (15-20 ms) \n"
+							
+							+ "\n"
+							+ " " + DistanceGenerationMode.SERVER.toString() + " \n"
+							+ " Ask the server to generate/load each chunk. \n"
+							+ " This is the most compatible, but causes server/simulation lag. \n"
+							+ " This will also show player made structures if you \n"
+							+ " are adding the mod to a pre-existing world. \n"
+							+ " Singlethreaded - Slow (15-50 ms, with spikes up to 200 ms) \n")
+	                .defineEnum("distanceBiomeOnlyGeneration", DistanceGenerationMode.FEATURES);
 	        
 	        builder.pop();
 	    }

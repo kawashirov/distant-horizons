@@ -1,4 +1,4 @@
-package com.seibel.lod.builders;
+package com.seibel.lod.builders.worldGeneration;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,27 +45,23 @@ import net.minecraft.world.storage.IWorldInfo;
 
 
 /**
- * This is used when generating features.
+ * This is a fake ServerWorld used when generating features.
  * This allows us to keep each LodChunk generation independent
  * of the actual ServerWorld, allowing us
  * to multithread generation.
  * 
  * @author James Seibel
- * @version 6-23-2021
+ * @version 6-27-2021
  */
 public class LodServerWorld implements ISeedReader {
 	
 	public HashMap<Heightmap.Type, Heightmap> heightmaps = new HashMap<>();
 	
 	public IChunk chunk;
-	private Random rand;
-	private ServerWorld serverWorld;
 	
-	public LodServerWorld(IChunk newChunk, ServerWorld newServerWorld)
+	public LodServerWorld(IChunk newChunk)
 	{
 		chunk = newChunk;
-		rand = newServerWorld.rand;
-		serverWorld = newServerWorld;
 	}
 	
 	
@@ -80,7 +76,7 @@ public class LodServerWorld implements ISeedReader {
 		z = z % LodChunk.WIDTH;
 		z = (z < 0) ? z + 16 : z;
 		
-		return chunk.getHeightmap(Type.WORLD_SURFACE_WG).getHeight(x, z);
+		return chunk.getHeightmap(LodChunk.DEFAULT_HEIGHTMAP).getHeight(x, z);
 	}
 	
 	@Override
@@ -124,6 +120,11 @@ public class LodServerWorld implements ISeedReader {
 	public ITickList<Block> getPendingBlockTicks()
 	{
 		return EmptyTickList.get();
+	}
+	
+	@Override
+	public IChunk getChunk(int x, int z, ChunkStatus requiredStatus, boolean nonnull) {
+		return chunk;
 	}
 	
 	
@@ -204,11 +205,6 @@ public class LodServerWorld implements ISeedReader {
 	
 	@Override
 	public List<? extends PlayerEntity> getPlayers() {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
-	@Override
-	public IChunk getChunk(int x, int z, ChunkStatus requiredStatus, boolean nonnull) {
 		throw new UnsupportedOperationException("Not Implemented");
 	}
 	

@@ -4,6 +4,7 @@ import java.util.concurrent.Executors;
 
 import org.lwjgl.opengl.GL11;
 
+import com.seibel.lod.builders.worldGeneration.LodChunkGenWorker;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
