@@ -5,6 +5,7 @@ import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.handlers.LodConfig;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.math.ChunkPos;
 
 /**
  * This holds miscellaneous helper code
@@ -16,6 +17,22 @@ import net.minecraft.client.Minecraft;
 public class RenderUtil
 {
 	private static final Minecraft mc = Minecraft.getInstance();
+	
+	
+	/**
+	 * Returns if the given ChunkPos is in the loaded area of the world.
+	 * @param centerCoordinate the center of the loaded world (probably the player's ChunkPos)
+	 */
+	public static boolean isChunkPosInLoadedArea(ChunkPos pos, ChunkPos center)
+	{
+		Minecraft mc = Minecraft.getInstance();
+		
+		return (pos.x >= center.x - mc.gameSettings.renderDistanceChunks 
+				&& pos.x <= center.x + mc.gameSettings.renderDistanceChunks) 
+				&& 
+				(pos.z >= center.z - mc.gameSettings.renderDistanceChunks 
+				&& pos.z <= center.z + mc.gameSettings.renderDistanceChunks);
+	}
 	
 	/**
 	 * Returns if the given coordinate is in the loaded area of the world.
