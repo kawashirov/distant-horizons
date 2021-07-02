@@ -188,14 +188,15 @@ public class LodRenderer
 		int totalLength = (int) farPlaneDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 2;
 		int numbChunksWide = (totalLength / LodChunk.WIDTH);
 		
+		// determine which LODs should not be rendered close to the player
+		HashSet<ChunkPos> chunkPosToSkip = getNearbyLodChunkPosToSkip(lodDim, player.getPosition());
+		
 		// see if the chunks Minecraft is going to render are the
 		// same as last time
-		// (This is done so we only render LODs )
-		HashSet<ChunkPos> newRenderedChunks = getRenderedChunks(); 
-		if (!vanillaRenderedChunks.containsAll(newRenderedChunks))
+		if (!vanillaRenderedChunks.containsAll(chunkPosToSkip))
 		{
 			regen = true;
-			vanillaRenderedChunks = newRenderedChunks;
+			vanillaRenderedChunks = chunkPosToSkip;
 		}
 		
 		
@@ -678,6 +679,48 @@ public class LodRenderer
 	}
 	
 	
+	
+	/**
+	 * Get a HashSet of all ChunkPos within the normal render distance
+	 * that should not be rendered.
+	 */
+	private HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodDimension lodDim, BlockPos playerPos) 
+	{
+		int chunkRenderDist = mc.gameSettings.renderDistanceChunks;
+		int blockRenderDist = chunkRenderDist * 16;
+		ChunkPos centerChunk = new ChunkPos(playerPos);
+		
+		// skip chunks that are already going to be rendered by Minecraft
+		HashSet<ChunkPos> posToSkip = getRenderedChunks();
+		
+		
+		// go through each chunk within the normal view distance
+		for(int x = centerChunk.x - chunkRenderDist; x < centerChunk.x + chunkRenderDist; x++)
+		{
+			for(int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
+			{
+				LodChunk lod = lodDim.getLodFromCoordinates(x, z);
+				if (lod != null)
+				{
+					short lodHighestPoint = lod.calculateHighestPoint();
+					
+					if (playerPos.getY() < lodHighestPoint)
+					{
+						// don't draw Lod's that are taller than the player
+						// to prevent LODs being drawn on top of the player
+						posToSkip.add(new ChunkPos(x, z));
+					}
+					else if (blockRenderDist < Math.abs(playerPos.getY() - lodHighestPoint))
+					{
+						// draw Lod's that are lower than the player's view range
+						posToSkip.remove(new ChunkPos(x, z));
+					}
+				}
+			}
+		}
+		
+		return posToSkip;
+	}
 	
 	/**
 	 * This method returns the ChunkPos of all chunks that Minecraft

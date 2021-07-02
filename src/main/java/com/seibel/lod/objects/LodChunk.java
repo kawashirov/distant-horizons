@@ -68,7 +68,7 @@ public class LodChunk
 		
 		detail = LodDetail.SINGLE;
 		
-		dataPoints = new LodDataPoint[detail.lengthCount][detail.lengthCount];
+		dataPoints = new LodDataPoint[detail.dataPointLengthCount][detail.dataPointLengthCount];
 	}
 	
 	/**
@@ -127,7 +127,7 @@ public class LodChunk
 			throw new IllegalArgumentException("LodChunk constructor givin an invalid string. The data given had " + count + " delimiters when it should have had " + detail.lodChunkStringDelimiterCount + ".");
 		
 		
-		dataPoints = new LodDataPoint[detail.lengthCount][detail.lengthCount];
+		dataPoints = new LodDataPoint[detail.dataPointLengthCount][detail.dataPointLengthCount];
 		
 		// index we will use when going through the String
 		int index = 0;
@@ -145,9 +145,9 @@ public class LodChunk
 		
 		
 		// LodDataPoints
-		for(int blockX = 0; blockX < detail.lengthCount; blockX++)
+		for(int blockX = 0; blockX < detail.dataPointLengthCount; blockX++)
 		{
-			for(int blockZ = 0; blockZ < detail.lengthCount; blockZ++)
+			for(int blockZ = 0; blockZ < detail.dataPointLengthCount; blockZ++)
 			{
 				// height
 				lastIndex = index;
@@ -281,7 +281,7 @@ public class LodChunk
 	 */
 	public LodDataPoint getDataPointForBlockPos(int blockX, int blockZ)
 	{
-		return dataPoints[blockX / detail.width][blockZ / detail.width];
+		return dataPoints[blockX / detail.dataPointWidth][blockZ / detail.dataPointWidth];
 	}
 	
 	public Color getColorForBlockPos(int blockX, int blockZ)
@@ -313,6 +313,22 @@ public class LodChunk
 	public short getDepth(int xIndex, int zIndex)
 	{
 		return dataPoints[xIndex][zIndex].depth;
+	}
+	
+	public short calculateHighestPoint()
+	{
+		short highest = 0;
+		
+		for(int x = 0; x < detail.dataPointLengthCount; x++)
+		{
+			for(int z = 0; z < detail.dataPointLengthCount; z++)
+			{
+				if (getHeight(x,z) > highest)
+					highest = getHeight(x,z);
+			}
+		}
+		
+		return highest;
 	}
 	
 	
@@ -461,4 +477,5 @@ public class LodChunk
 		
 		return s;
 	}
+	
 }

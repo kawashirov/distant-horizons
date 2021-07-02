@@ -27,11 +27,11 @@ public enum LodDetail
 	FULL(16);
 	
 	
-	/** How many LODs wide should 
-	 * be drawn per LodChunk */
-	public final int lengthCount;
-	/** How wide each LOD is */
-	public final int width;
+	/** How many DataPoints should 
+	 * be drawn per side per LodChunk */
+	public final int dataPointLengthCount;
+	/** How wide each LOD DataPoint is */
+	public final int dataPointWidth;
 	
 	/* Start/End X/Z give the block positions
 	 * for each individual dataPoint in a LodChunk */
@@ -50,8 +50,8 @@ public enum LodDetail
 	
 	private LodDetail(int newLengthCount)
 	{
-		lengthCount = newLengthCount;
-		width = 16 / lengthCount;
+		dataPointLengthCount = newLengthCount;
+		dataPointWidth = 16 / dataPointLengthCount;
 		
 		if(newLengthCount == LodChunk.WIDTH)
 		{
@@ -59,11 +59,11 @@ public enum LodDetail
 			newLengthCount = LodChunk.WIDTH - 1;
 		}
 		
-		startX = new int[lengthCount * lengthCount];
-		endX = new int[lengthCount * lengthCount];
+		startX = new int[dataPointLengthCount * dataPointLengthCount];
+		endX = new int[dataPointLengthCount * dataPointLengthCount];
 		
-		startZ = new int[lengthCount * lengthCount];
-		endZ = new int[lengthCount * lengthCount];
+		startZ = new int[dataPointLengthCount * dataPointLengthCount];
+		endZ = new int[dataPointLengthCount * dataPointLengthCount];
 		
 		
 		int index = 0;
@@ -71,19 +71,19 @@ public enum LodDetail
 		{
 			for(int z = 0; z < newLengthCount; z++)
 			{
-				startX[index] = x * width;
-				startZ[index] = z * width;
+				startX[index] = x * dataPointWidth;
+				startZ[index] = z * dataPointWidth;
 				
 				// special case for FULL
-				if(width != 1)
+				if(dataPointWidth != 1)
 				{
-					endX[index] = (x*width) + width - 1; 
-					endZ[index] = (z*width) + width - 1; 
+					endX[index] = (x*dataPointWidth) + dataPointWidth - 1; 
+					endZ[index] = (z*dataPointWidth) + dataPointWidth - 1; 
 				}
 				else
 				{
-					endX[index] = (x*width) + width;
-					endZ[index] = (z*width) + width;
+					endX[index] = (x*dataPointWidth) + dataPointWidth;
+					endZ[index] = (z*dataPointWidth) + dataPointWidth;
 				}
 				
 				index++;
@@ -91,7 +91,7 @@ public enum LodDetail
 		}
 		
 		
-		lodChunkStringDelimiterCount = 2 + (lengthCount * lengthCount * LodDataPoint.NUMBER_OF_DELIMITERS);
+		lodChunkStringDelimiterCount = 2 + (dataPointLengthCount * dataPointLengthCount * LodDataPoint.NUMBER_OF_DELIMITERS);
 		
 	}// constructor
 }

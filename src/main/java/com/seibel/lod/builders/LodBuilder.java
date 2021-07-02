@@ -129,9 +129,9 @@ public class LodBuilder
 		
 		
 		LodDetail detail = LodConfig.CLIENT.lodDetail.get();
-		LodDataPoint[][] dataPoints = new LodDataPoint[detail.lengthCount][detail.lengthCount];
+		LodDataPoint[][] dataPoints = new LodDataPoint[detail.dataPointLengthCount][detail.dataPointLengthCount];
 		
-		for(int i = 0; i < detail.lengthCount * detail.lengthCount; i++)
+		for(int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++)
 		{
 			int startX = detail.startX[i];
 			int startZ = detail.startZ[i];
@@ -157,8 +157,8 @@ public class LodBuilder
 				depth = 0;
 			}
 			
-			int x = i / detail.lengthCount;
-			int z = i % detail.lengthCount;
+			int x = i / detail.dataPointLengthCount;
+			int z = i % detail.dataPointLengthCount;
 			
 			dataPoints[x][z] = new LodDataPoint(height, depth, color);
 		}

@@ -38,9 +38,9 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		// using the quality setting set by the config
 		LodDetail detail = LodConfig.CLIENT.lodDetail.get();
 		
-		int halfWidth = detail.width / 2;
+		int halfWidth = detail.dataPointWidth / 2;
 		
-		for(int i = 0; i < detail.lengthCount * detail.lengthCount; i++)
+		for(int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++)
 		{
 			int startX = detail.startX[i];
 			int startZ = detail.startZ[i];
@@ -51,7 +51,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			bbox = generateBoundingBox(
 					centerLod.getAverageHeightOverArea(startX, startZ, endX, endZ), 
 					centerLod.getAverageDepthOverArea(startX, startZ, endX, endZ), 
-					detail.width, 
+					detail.dataPointWidth, 
 					xOffset - (halfWidth / 2) + detail.startX[i],
 					yOffset, 
 					zOffset - (halfWidth / 2) + detail.startZ[i]);
@@ -165,7 +165,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	public int getBufferMemoryForSingleLod(LodDetail detail)
 	{
 		// (sidesOnACube * pointsInASquare * (positionPoints + colorPoints))) * howManyPointsPerLodChunk
-		return (6 * 4 * (3 + 4)) * detail.lengthCount * detail.lengthCount;
+		return (6 * 4 * (3 + 4)) * detail.dataPointLengthCount * detail.dataPointLengthCount;
 	}
 	
 	
