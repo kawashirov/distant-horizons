@@ -80,4 +80,16 @@ public class LodDataPoint
 		
 		return s;
 	}
+	
+	@Override
+	public String toString()
+	{
+		String s = Short.toString(height) + DATA_DELIMITER;
+		
+		s += Short.toString(depth) + DATA_DELIMITER;
+		
+		s += Integer.toString(color.getRed()) + DATA_DELIMITER + Integer.toString(color.getGreen()) + DATA_DELIMITER + Integer.toString(color.getBlue()) + DATA_DELIMITER;
+		
+		return s;
+	}
 }
