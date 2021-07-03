@@ -212,7 +212,7 @@ public class LodBufferBuilder
 			}
 			
 			// TODO add a way for a server side mod to generate chunks requested here
-			if(mc.isIntegratedServerRunning())
+			if(mc.hasSingleplayerServer())
 			{
 		        ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(lodDim.dimension);
 				
@@ -239,8 +239,8 @@ public class LodBufferBuilder
 			}
 			
 			// finish the buffer building
-			buildableNearBuffer.finishDrawing();
-			buildableFarBuffer.finishDrawing();
+			buildableNearBuffer.end();
+			buildableFarBuffer.end();
 			
 			// mark that the buildable buffers as ready to swap
 			generatingBuffers = false;
@@ -271,11 +271,11 @@ public class LodBufferBuilder
 	 */
 	private boolean isCoordInCenterArea(int i, int j, int centerCoordinate)
 	{
-		return (i >= centerCoordinate - mc.gameSettings.renderDistanceChunks
-				&& i <= centerCoordinate + mc.gameSettings.renderDistanceChunks) 
+		return (i >= centerCoordinate - mc.options.renderDistance
+				&& i <= centerCoordinate + mc.options.renderDistance) 
 				&& 
-				(j >= centerCoordinate - mc.gameSettings.renderDistanceChunks
-				&& j <= centerCoordinate + mc.gameSettings.renderDistanceChunks);
+				(j >= centerCoordinate - mc.options.renderDistance
+				&& j <= centerCoordinate + mc.options.renderDistance);
 	}
 	
 	

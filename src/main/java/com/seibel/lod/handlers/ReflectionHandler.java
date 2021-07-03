@@ -34,7 +34,7 @@ public class ReflectionHandler
 	private void setupFogField()
 	{
 		// get every variable from the entity renderer
-		Field[] vars = mc.gameSettings.getClass().getDeclaredFields();
+		Field[] vars = mc.options.getClass().getDeclaredFields();
 				
 		// try and find the ofFogType variable in gameSettings
 		for(Field f : vars)
@@ -73,7 +73,7 @@ public class ReflectionHandler
 		
 		try
 		{
-			returnNum = (int)ofFogField.get(mc.gameSettings);
+			returnNum = (int)ofFogField.get(mc.options);
 		}
 		catch (IllegalArgumentException | IllegalAccessException e)
 		{

@@ -69,6 +69,11 @@ public class LodChunk
 		detail = LodDetail.SINGLE;
 		
 		dataPoints = new LodDataPoint[detail.dataPointLengthCount][detail.dataPointLengthCount];
+		
+		// fill with dummy data, to prevent null pointers
+		for(int i = 0; i < detail.dataPointLengthCount; i++)
+			for(int j = 0; j < detail.dataPointLengthCount; j++)
+				dataPoints[i][j] = new LodDataPoint();
 	}
 	
 	/**

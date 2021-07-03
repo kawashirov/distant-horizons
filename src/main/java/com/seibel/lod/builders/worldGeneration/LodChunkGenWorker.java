@@ -43,6 +43,7 @@ import net.minecraft.world.gen.placement.ConfiguredPlacement;
 import net.minecraft.world.gen.placement.DecoratedPlacementConfig;
 import net.minecraft.world.gen.placement.IPlacementConfig;
 import net.minecraft.world.gen.placement.NoiseDependant;
+import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.ServerWorldLightManager;
 import net.minecraftforge.common.WorldWorkerManager.IWorker;
@@ -194,13 +195,15 @@ public class LodChunkGenWorker implements IWorker
 			ChunkPrimer chunk = new ChunkPrimer(pos, UpgradeData.EMPTY);
 			chunkList.add(chunk);
 			
-			ChunkGenerator chunkGen = serverWorld.getWorld().getChunkProvider().getChunkGenerator();
+			ServerChunkProvider chunkSource = serverWorld.getChunkSource();
+			ChunkGenerator chunkGen = chunkSource.generator;
+			
 			
 			// generate the terrain (this is thread safe)
-			ChunkStatus.EMPTY.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
+			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			// override the chunk status so we can run the next generator stage
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
-			ChunkStatus.BIOMES.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
+			ChunkStatus.BIOMES.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
 			
 			
@@ -222,31 +225,31 @@ public class LodChunkGenWorker implements IWorker
 						
 						// these heights are of course aren't super accurate,
 						// they are just to simulate height data where there isn't any
-						switch(chunk.getBiomes().getNoiseBiome(x, seaLevel, z).getCategory())
+						switch(chunk.getBiomes().getNoiseBiome(x, seaLevel, z).getBiomeCategory())
 						{
 						case NETHER:
-							heightmap.set(x, z, serverWorld.getHeight() / 2);
+							heightmap.setHeight(x, z, serverWorld.getHeight() / 2);
 							break;
 							
 						case EXTREME_HILLS:
-							heightmap.set(x, z, seaLevel + 30);
+							heightmap.setHeight(x, z, seaLevel + 30);
 							break;
 						case MESA:
-							heightmap.set(x, z, seaLevel + 20);
+							heightmap.setHeight(x, z, seaLevel + 20);
 							break;
 						case JUNGLE:
-							heightmap.set(x, z, seaLevel + 20);
+							heightmap.setHeight(x, z, seaLevel + 20);
 							break;
 						case BEACH:
-							heightmap.set(x, z, seaLevel + 5);
+							heightmap.setHeight(x, z, seaLevel + 5);
 							break;
 						case NONE:
-							heightmap.set(x, z, 0);
+							heightmap.setHeight(x, z, 0);
 							break;
 							
 						case OCEAN:
 						case RIVER:
-							heightmap.set(x, z, seaLevel);
+							heightmap.setHeight(x, z, seaLevel);
 							break;
 							
 						case THEEND:
@@ -262,7 +265,7 @@ public class LodChunkGenWorker implements IWorker
 						// TAIGA
 						// PLAINS
 						default:
-							heightmap.set(x, z, seaLevel + 10);
+							heightmap.setHeight(x, z, seaLevel + 10);
 							break;
 						}// heightmap switch
 					}
@@ -270,12 +273,12 @@ public class LodChunkGenWorker implements IWorker
 					{
 						// we aren't simulating height
 						// always use sea level
-						heightmap.set(x, z, seaLevel);
+						heightmap.setHeight(x, z, seaLevel);
 					}
 				}// z
 			}// x
 			
-			chunk.setHeightmap(LodChunk.DEFAULT_HEIGHTMAP, heightmap.getDataArray());
+			chunk.setHeightmap(LodChunk.DEFAULT_HEIGHTMAP, heightmap.getRawData());
 			
 			
 			LodChunk lod;
@@ -304,20 +307,22 @@ public class LodChunkGenWorker implements IWorker
 			chunkList.add(chunk);
 			LodServerWorld lodServerWorld = new LodServerWorld(chunk);
 			
-			ChunkGenerator chunkGen = serverWorld.getWorld().getChunkProvider().getChunkGenerator();
+			ServerChunkProvider chunkSource = serverWorld.getChunkSource();
+			ChunkGenerator chunkGen = chunkSource.generator;
+			
 			
 			// generate the terrain (this is thread safe)
-			ChunkStatus.EMPTY.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
+			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			// override the chunk status so we can run the next generator stage
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
-			ChunkStatus.BIOMES.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
-			ChunkStatus.NOISE.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
-			ChunkStatus.SURFACE.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
+			ChunkStatus.BIOMES.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
+			ChunkStatus.NOISE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
+			ChunkStatus.SURFACE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			
 			// this feature has proved to be thread safe
 			// so we will add it
-			IceAndSnowFeature snowFeature = new IceAndSnowFeature(NoFeatureConfig.field_236558_a_);
-			snowFeature.generate(lodServerWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos(), null);
+			IceAndSnowFeature snowFeature = new IceAndSnowFeature(NoFeatureConfig.CODEC);
+			snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
 			
 			
 			LodChunk lod = lodBuilder.generateLodFromChunk(chunk, new LodBuilderConfig(false, true, true));
@@ -338,16 +343,17 @@ public class LodChunkGenWorker implements IWorker
 			chunkList.add(chunk);
 			LodServerWorld lodServerWorld = new LodServerWorld(chunk);
 			
-			ChunkGenerator chunkGen = serverWorld.getWorld().getChunkProvider().getChunkGenerator();
+			ServerChunkProvider chunkSource = serverWorld.getChunkSource();
+			ChunkGenerator chunkGen = chunkSource.generator;
 			
 			
 			// generate the terrain (this is thread safe)
-			ChunkStatus.EMPTY.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
+			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			// override the chunk status so we can run the next generator stage
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
-			ChunkStatus.BIOMES.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
-			ChunkStatus.NOISE.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
-			ChunkStatus.SURFACE.doGenerationWork(serverWorld, chunkGen, serverWorld.getStructureTemplateManager(), (ServerWorldLightManager) serverWorld.getLightManager(), null, chunkList);
+			ChunkStatus.BIOMES.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
+			ChunkStatus.NOISE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
+			ChunkStatus.SURFACE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			
 			
 			// get all the biomes in the chunk
@@ -367,7 +373,7 @@ public class LodChunkGenWorker implements IWorker
 			// this may or may not be thread safe
 			for (Biome biome : biomes)
 			{
-				List<List<Supplier<ConfiguredFeature<?, ?>>>> featuresForState = biome.biomeGenerationSettings.getFeatures();
+				List<List<Supplier<ConfiguredFeature<?, ?>>>> featuresForState = biome.generationSettings.features();
 				
 				for(int featureStateToGenerate = 0; featureStateToGenerate < featuresForState.size(); featureStateToGenerate++)
 				{
@@ -390,7 +396,7 @@ public class LodChunkGenWorker implements IWorker
 						
 						try
 						{
-							configuredfeature.generate(lodServerWorld, chunkGen, serverWorld.rand, chunk.getPos().asBlockPos());
+							configuredfeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition());
 						}
 						catch(ConcurrentModificationException e)
 						{
@@ -462,28 +468,28 @@ public class LodChunkGenWorker implements IWorker
 		{
 			IPlacementConfig placementConfig = null;
 			
-			Class oldConfigClass = config.decorator.func_242877_b().getClass();
+			Class oldConfigClass = config.decorator.config().getClass();
 			
 			if (oldConfigClass == FeatureSpreadConfig.class)
 			{
-				FeatureSpreadConfig oldPlacementConfig = (FeatureSpreadConfig) config.decorator.func_242877_b();
-				FeatureSpread oldSpread = oldPlacementConfig.func_242799_a();
+				FeatureSpreadConfig oldPlacementConfig = (FeatureSpreadConfig) config.decorator.config();
+				FeatureSpread oldSpread = oldPlacementConfig.count();
 				
 				placementConfig = new FeatureSpreadConfig(oldSpread);
 			}
 			else if(oldConfigClass == DecoratedPlacementConfig.class)
 			{
-				DecoratedPlacementConfig oldPlacementConfig = (DecoratedPlacementConfig) config.decorator.func_242877_b();
-				placementConfig = new DecoratedPlacementConfig(oldPlacementConfig.getInner(), oldPlacementConfig.getOuter());
+				DecoratedPlacementConfig oldPlacementConfig = (DecoratedPlacementConfig) config.decorator.config();
+				placementConfig = new DecoratedPlacementConfig(oldPlacementConfig.inner(), oldPlacementConfig.outer());
 			}
 			else if(oldConfigClass == NoiseDependant.class)
 			{
-				NoiseDependant oldPlacementConfig = (NoiseDependant) config.decorator.func_242877_b();
+				NoiseDependant oldPlacementConfig = (NoiseDependant) config.decorator.config();
 				placementConfig = new NoiseDependant(oldPlacementConfig.noiseLevel, oldPlacementConfig.belowNoise, oldPlacementConfig.aboveNoise);
 			}
 			else
 			{
-//				ClientProxy.LOGGER.debug("unkown decorated placement config: \"" + config.decorator.func_242877_b().getClass() + "\"");
+//				ClientProxy.LOGGER.debug("unkown decorated placement config: \"" + config.decorator.config().getClass() + "\"");
 				return config;
 			}
 			
@@ -497,8 +503,8 @@ public class LodChunkGenWorker implements IWorker
 		private BlockClusterFeatureConfig cloneBlockClusterFeatureConfig(BlockClusterFeatureConfig config)
 		{
 			WeightedBlockStateProvider provider = new WeightedBlockStateProvider();
-			for(Entry<BlockState> state : ((WeightedBlockStateProvider) config.stateProvider).weightedStates.field_220658_a)
-				provider.weightedStates.field_220658_a.add(state);
+			for(Entry<BlockState> state : ((WeightedBlockStateProvider) config.stateProvider).weightedList.entries)
+				provider.weightedList.entries.add(state);
 			
 			HashSet<Block> whitelist = new HashSet<>();
 			for(Block block : config.whitelist)
@@ -512,13 +518,13 @@ public class LodChunkGenWorker implements IWorker
 			BlockClusterFeatureConfig.Builder builder = new BlockClusterFeatureConfig.Builder(provider, config.blockPlacer);
 			builder.whitelist(whitelist);
 			builder.blacklist(blacklist);
-			builder.xSpread(config.xSpread);
-			builder.ySpread(config.ySpread);
-			builder.zSpread(config.zSpread);
-			if(config.isReplaceable) { builder.replaceable(); }
-			if(config.requiresWater) { builder.requiresWater(); }
-			if(config.field_227298_k_) { builder.func_227317_b_(); }
-			builder.tries(config.tryCount);
+			builder.xspread(config.xspread);
+			builder.yspread(config.yspread);
+			builder.zspread(config.zspread);
+			if(config.canReplace) { builder.canReplace(); }
+			if(config.needWater) { builder.needWater(); }
+			if(config.project) { builder.noProjection(); }
+			builder.tries(config.tries);
 			
 			
 			return builder.build();

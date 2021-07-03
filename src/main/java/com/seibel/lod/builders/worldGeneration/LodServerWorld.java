@@ -28,7 +28,6 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.EmptyTickList;
 import net.minecraft.world.ISeedReader;
 import net.minecraft.world.ITickList;
-import net.minecraft.world.LightType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeManager;
 import net.minecraft.world.border.WorldBorder;
@@ -76,7 +75,7 @@ public class LodServerWorld implements ISeedReader {
 		z = z % LodChunk.WIDTH;
 		z = (z < 0) ? z + 16 : z;
 		
-		return chunk.getHeightmap(LodChunk.DEFAULT_HEIGHTMAP).getHeight(x, z);
+		return chunk.getOrCreateHeightmapUnprimed(LodChunk.DEFAULT_HEIGHTMAP).getFirstAvailable(x, z);
 	}
 	
 	@Override
@@ -86,7 +85,7 @@ public class LodServerWorld implements ISeedReader {
 	}
 	
 	@Override
-	public boolean setBlockState(BlockPos pos, BlockState state, int flags, int recursionLeft)
+	public boolean setBlock(BlockPos pos, BlockState state, int flags, int recursionLeft)
 	{
 		return chunk.setBlockState(pos, state, false) == state;
 	}
@@ -103,23 +102,23 @@ public class LodServerWorld implements ISeedReader {
 		return chunk.getFluidState(pos);
 	}
 	
-	@Override
-	public int getLightFor(LightType type, BlockPos pos)
-	{
-		// this needs to be low for snow generation to work
-		return 0;
-	}
+//	@Override
+//	public int getLightFor(LightType type, BlockPos pos)
+//	{
+//		// this needs to be low for snow generation to work
+//		return 0;
+//	}
 	
 	@Override
-	public boolean hasBlockState(BlockPos pos, Predicate<BlockState> state)
+	public boolean isStateAtPosition(BlockPos pos, Predicate<BlockState> state)
 	{
 		return state.test(chunk.getBlockState(pos));
 	}
 	
 	@Override
-	public ITickList<Block> getPendingBlockTicks()
+	public ITickList<Block> getBlockTicks()
 	{
-		return EmptyTickList.get();
+		return EmptyTickList.empty();
 	}
 	
 	@Override
@@ -140,31 +139,6 @@ public class LodServerWorld implements ISeedReader {
 	
 	
 	@Override
-	public ServerWorld getWorld() {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
-	@Override
-	public ITickList<Fluid> getPendingFluidTicks() {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
-	@Override
-	public IWorldInfo getWorldInfo() {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
-	@Override
-	public DifficultyInstance getDifficultyForLocation(BlockPos pos) {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
-	@Override
-	public AbstractChunkProvider getChunkProvider() {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
-	@Override
 	public Random getRandom() {
 		throw new UnsupportedOperationException("Not Implemented");
 	}
@@ -180,76 +154,21 @@ public class LodServerWorld implements ISeedReader {
 			double zSpeed) {
 		throw new UnsupportedOperationException("Not Implemented");
 	}
-	
 	@Override
-	public void playEvent(PlayerEntity player, int type, BlockPos pos, int data) {
+	public DynamicRegistries registryAccess() {
 		throw new UnsupportedOperationException("Not Implemented");
 	}
-	
-	@Override
-	public DynamicRegistries func_241828_r() {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
-	@Override
-	public List<Entity> getEntitiesInAABBexcluding(Entity entityIn, AxisAlignedBB boundingBox,
-			Predicate<? super Entity> predicate) {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
-	@Override
-	public <T extends Entity> List<T> getEntitiesWithinAABB(Class<? extends T> clazz, AxisAlignedBB aabb,
-			Predicate<? super T> filter) {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
-	@Override
-	public List<? extends PlayerEntity> getPlayers() {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
-	@Override
-	public int getSkylightSubtracted() {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
 	@Override
 	public BiomeManager getBiomeManager() {
 		throw new UnsupportedOperationException("Not Implemented");
 	}
-	
-	@Override
-	public Biome getNoiseBiomeRaw(int x, int y, int z) {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
-	@Override
-	public boolean isRemote() {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
 	@Override
 	public int getSeaLevel() {
 		throw new UnsupportedOperationException("Not Implemented");
 	}
 	
 	@Override
-	public DimensionType getDimensionType() {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
-	@Override
-	public float func_230487_a_(Direction p_230487_1_, boolean p_230487_2_) {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
-	@Override
-	public WorldLightManager getLightManager() {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
-	@Override
-	public TileEntity getTileEntity(BlockPos pos) {
+	public float getShade(Direction p_230487_1_, boolean p_230487_2_) {
 		throw new UnsupportedOperationException("Not Implemented");
 	}
 	
@@ -274,7 +193,115 @@ public class LodServerWorld implements ISeedReader {
 	}
 	
 	@Override
-	public Stream<? extends StructureStart<?>> func_241827_a(SectionPos p_241827_1_, Structure<?> p_241827_2_) {
+	public Stream<? extends StructureStart<?>> startsForFeature(SectionPos p_241827_1_, Structure<?> p_241827_2_) {
+		throw new UnsupportedOperationException("Not Implemented");
+	}
+
+
+
+	@Override
+	public ServerWorld getLevel() {
+		throw new UnsupportedOperationException("Not Implemented");
+	}
+	
+
+
+
+	@Override
+	public AbstractChunkProvider getChunkSource() {
+		throw new UnsupportedOperationException("Not Implemented");
+	}
+
+
+
+	@Override
+	public DifficultyInstance getCurrentDifficultyAt(BlockPos arg0) {
+		throw new UnsupportedOperationException("Not Implemented");
+	}
+
+
+
+	@Override
+	public IWorldInfo getLevelData() {
+		throw new UnsupportedOperationException("Not Implemented");
+	}
+
+
+
+	@Override
+	public ITickList<Fluid> getLiquidTicks() {
+		throw new UnsupportedOperationException("Not Implemented");
+	}
+
+
+
+	@Override
+	public void levelEvent(PlayerEntity arg0, int arg1, BlockPos arg2, int arg3) {
+		throw new UnsupportedOperationException("Not Implemented");
+		
+	}
+
+
+
+	@Override
+	public List<Entity> getEntities(Entity arg0, AxisAlignedBB arg1, Predicate<? super Entity> arg2) {
+		throw new UnsupportedOperationException("Not Implemented");
+	}
+
+
+
+	@Override
+	public <T extends Entity> List<T> getEntitiesOfClass(Class<? extends T> arg0, AxisAlignedBB arg1,
+			Predicate<? super T> arg2) {
+		throw new UnsupportedOperationException("Not Implemented");
+	}
+
+
+
+	@Override
+	public List<? extends PlayerEntity> players() {
+		throw new UnsupportedOperationException("Not Implemented");
+	}
+
+
+
+	@Override
+	public int getSkyDarken() {
+		throw new UnsupportedOperationException("Not Implemented");
+	}
+
+
+
+	@Override
+	public Biome getUncachedNoiseBiome(int p_225604_1_, int p_225604_2_, int p_225604_3_) {
+		throw new UnsupportedOperationException("Not Implemented");
+	}
+
+
+
+	@Override
+	public boolean isClientSide() {
+		throw new UnsupportedOperationException("Not Implemented");
+	}
+
+
+
+	@Override
+	public DimensionType dimensionType() {
+		throw new UnsupportedOperationException("Not Implemented");
+	}
+
+
+
+	@Override
+	public WorldLightManager getLightEngine() {
+		throw new UnsupportedOperationException("Not Implemented");
+	}
+
+
+
+	@Override
+	public TileEntity getBlockEntity(BlockPos p_175625_1_) {
 		throw new UnsupportedOperationException("Not Implemented");
 	}
 	

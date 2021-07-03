@@ -71,7 +71,7 @@ public class LodBuilder
 		{
 			try
 			{
-				DimensionType dim = world.getDimensionType();
+				DimensionType dim = world.dimensionType();
 				
 				LodChunk lod = generateLodFromChunk(chunk, config);
 				
@@ -153,7 +153,7 @@ public class LodBuilder
 			}
 			else
 			{
-				height = determineHeightPoint(chunk.getHeightmap(LodChunk.DEFAULT_HEIGHTMAP), startX, startZ, endX, endZ);
+				height = determineHeightPoint(chunk.getOrCreateHeightmapUnprimed(LodChunk.DEFAULT_HEIGHTMAP), startX, startZ, endX, endZ);
 				depth = 0;
 			}
 			
@@ -292,7 +292,7 @@ public class LodBuilder
 		{
 			for(int z = startZ; z < endZ; z++)
 			{
-				short newHeight = (short) heightmap.getHeight(x, z);
+				short newHeight = (short) heightmap.getFirstAvailable(x, z);
 				if (newHeight > highest)
 					highest = newHeight;
 			}
@@ -343,7 +343,7 @@ public class LodBuilder
 							if (chunkSections[i] != null)
 							{
 								blockState = chunkSections[i].getBlockState(x, y, z);
-								colorInt = blockState.materialColor.colorValue;
+								colorInt = blockState.materialColor.col;
 							}
 							
 							if(colorInt == 0 && config.useSolidBlocksInColorGen)
@@ -356,22 +356,22 @@ public class LodBuilder
 							{
 								Biome biome = chunk.getBiomes().getNoiseBiome(x, y + i * chunkSections.length, z);
 								
-								if (biome.getCategory() == Biome.Category.OCEAN ||
-										biome.getCategory() == Biome.Category.RIVER)
+								if (biome.getBiomeCategory() == Biome.Category.OCEAN ||
+										biome.getBiomeCategory() == Biome.Category.RIVER)
 								{
 									colorInt = biome.getWaterColor();
 								}
-								else if (biome.getCategory() == Biome.Category.EXTREME_HILLS)
+								else if (biome.getBiomeCategory() == Biome.Category.EXTREME_HILLS)
 								{
-									colorInt = Blocks.STONE.getMaterialColor().colorValue;
+									colorInt = Blocks.STONE.defaultMaterialColor().col;
 								}
-								else if (biome.getCategory() == Biome.Category.ICY)
+								else if (biome.getBiomeCategory() == Biome.Category.ICY)
 								{
 									colorInt = LodUtil.colorToInt(Color.WHITE);
 								}
-								else if (biome.getCategory() == Biome.Category.THEEND)
+								else if (biome.getBiomeCategory() == Biome.Category.THEEND)
 								{
-									colorInt = Blocks.END_STONE.getDefaultState().materialColor.colorValue;
+									colorInt = Blocks.END_STONE.defaultBlockState().materialColor.col;
 								}
 								else if (config.useSolidBlocksInColorGen)
 								{
@@ -427,7 +427,7 @@ public class LodBuilder
 	{
 		int colorInt = 0;
 		
-		if (blockState == Blocks.AIR.getDefaultState())
+		if (blockState == Blocks.AIR.defaultBlockState())
 		{
 			colorInt = biome.getGrassColor(x, z);
 		}
@@ -447,7 +447,7 @@ public class LodBuilder
 		}
 		else
 		{
-			colorInt = blockState.materialColor.colorValue;
+			colorInt = blockState.materialColor.col;
 		}
 		
 		return colorInt;

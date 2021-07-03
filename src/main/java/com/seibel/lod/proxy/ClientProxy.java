@@ -63,7 +63,7 @@ public class ClientProxy
 		// update each regions' width to match the new render distance
 		int newWidth = Math.max(4, 
 				// TODO is this logic good?
-				(mc.gameSettings.renderDistanceChunks * LodChunk.WIDTH * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get()) / LodRegion.SIZE
+				(mc.options.renderDistance * LodChunk.WIDTH * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get()) / LodRegion.SIZE
 				);
 		if (lodBuilder.regionWidth != newWidth)
 		{
@@ -75,14 +75,14 @@ public class ClientProxy
 			return;
 		}
 		
-		LodDimension lodDim = lodWorld.getLodDimension(mc.player.world.getDimensionType());
+		LodDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
 		if (lodDim == null)
 			return;
 		
 		
 		// offset the regions
-		double playerX = mc.player.getPosX();
-		double playerZ = mc.player.getPosZ();
+		double playerX = mc.player.getX();
+		double playerZ = mc.player.getZ();
 		
 		int xOffset = ((int)playerX / (LodChunk.WIDTH * LodRegion.SIZE)) - lodDim.getCenterX();
 		int zOffset = ((int)playerZ / (LodChunk.WIDTH * LodRegion.SIZE)) - lodDim.getCenterZ();
@@ -99,19 +99,20 @@ public class ClientProxy
 //		LodConfig.CLIENT.lodColorStyle.set(LodColorStyle.INDIVIDUAL_SIDES);
 //		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
 //		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
+//		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 		
 		// Note to self:
 		// if "unspecified" shows up in the pie chart, it is
 		// possibly because the amount of time between sections
 		// is too small for the profile to measure
 		IProfiler profiler = mc.getProfiler();
-		profiler.endSection(); // get out of "terrain"
-		profiler.startSection("LOD");
+		profiler.pop(); // get out of "terrain"
+		profiler.push("LOD");
 		
 		renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
 		
-		profiler.endSection(); // end LOD
-		profiler.startSection("terrain"); // restart terrain
+		profiler.pop(); // end LOD
+		profiler.push("terrain"); // restart terrain
 	}	
 	
 	
@@ -143,7 +144,7 @@ public class ClientProxy
 	{
 		// the player just unloaded a world/dimension
 		
-		if(mc.getConnection().getWorld() == null)
+		if(mc.getConnection().getLevel() == null)
 		{
 			lodBufferBuilder.numberOfChunksWaitingToGenerate = 0;
 			// the player has disconnected from a server

@@ -80,7 +80,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			height++;
 		}
 		
-		return new AxisAlignedBB(0, depth, 0, width, height, width).offset(xOffset, yOffset, zOffset);
+		return new AxisAlignedBB(0, depth, 0, width, height, width).move(xOffset, yOffset, zOffset);
 	}
 	
 	

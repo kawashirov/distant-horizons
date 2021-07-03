@@ -25,7 +25,7 @@ public abstract class AbstractLodTemplate
 			double x, double y, double z, 
 			int red, int green, int blue, int alpha)
 	{
-		buffer.pos(x, y, z).color(red, green, blue, alpha).endVertex();
+		buffer.vertex(x, y, z).color(red, green, blue, alpha).endVertex();
 	}
 	
 	/** Returns in bytes how much buffer memory is required

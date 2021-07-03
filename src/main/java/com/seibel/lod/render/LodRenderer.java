@@ -148,21 +148,21 @@ public class LodRenderer
 		//===============//
 		
 		profiler = newProfiler;
-		profiler.startSection("LOD setup");
+		profiler.push("LOD setup");
 		
 		ClientPlayerEntity player = mc.player;
 		
 		// should LODs be regenerated?
-		if ((int)player.getPosX() / LodChunk.WIDTH != prevChunkX ||
-			(int)player.getPosZ() / LodChunk.WIDTH != prevChunkZ ||
-			previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks ||
+		if ((int)player.getX() / LodChunk.WIDTH != prevChunkX ||
+			(int)player.getZ() / LodChunk.WIDTH != prevChunkZ ||
+			previousChunkRenderDistance != mc.options.renderDistance ||
 			prevFogDistance != LodConfig.CLIENT.fogDistance.get())
 		{
 			// yes
 			regen = true;
 			
-			prevChunkX = (int)player.getPosX() / LodChunk.WIDTH;
-			prevChunkZ = (int)player.getPosZ() / LodChunk.WIDTH;
+			prevChunkX = (int)player.getX() / LodChunk.WIDTH;
+			prevChunkZ = (int)player.getZ() / LodChunk.WIDTH;
 			prevFogDistance = LodConfig.CLIENT.fogDistance.get();
 		}
 		else
@@ -181,7 +181,7 @@ public class LodRenderer
 		
 		
 		// determine how far the game's render distance is currently set
-		int renderDistWidth = mc.gameSettings.renderDistanceChunks;
+		int renderDistWidth = mc.options.renderDistance;
 		farPlaneDistance = renderDistWidth * LodChunk.WIDTH;
 		
 		// set how big the LODs will be and how far they will go
@@ -189,7 +189,7 @@ public class LodRenderer
 		int numbChunksWide = (totalLength / LodChunk.WIDTH);
 		
 		// determine which LODs should not be rendered close to the player
-		HashSet<ChunkPos> chunkPosToSkip = getNearbyLodChunkPosToSkip(lodDim, player.getPosition());
+		HashSet<ChunkPos> chunkPosToSkip = getNearbyLodChunkPosToSkip(lodDim, player.blockPosition());
 		
 		// see if the chunks Minecraft is going to render are the
 		// same as last time
@@ -216,11 +216,11 @@ public class LodRenderer
 		{
 			// this will mainly happen when the view distance is changed
 			if (drawableNearBuffer == null || drawableFarBuffer == null || 
-				previousChunkRenderDistance != mc.gameSettings.renderDistanceChunks)
+				previousChunkRenderDistance != mc.options.renderDistance)
 				setupBuffers(numbChunksWide);
 			
 			// generate the LODs on a separate thread to prevent stuttering or freezing
-			lodBufferBuilder.generateLodBuffersAsync(this, lodDim, player.getPosX(), player.getPosZ(), numbChunksWide);
+			lodBufferBuilder.generateLodBuffersAsync(this, lodDim, player.getX(), player.getZ(), numbChunksWide);
 			
 			// the regen process has been started,
 			// it will be done when lodBufferBuilder.newBuffersAvaliable
@@ -283,7 +283,7 @@ public class LodRenderer
 		//===========//
 		// rendering //
 		//===========//
-		profiler.endStartSection("LOD draw");
+		profiler.popPush("LOD draw");
 		
 		setupFog(fogSetting.nearFogSetting, reflectionHandler.getFogQuality());
 		sendLodsToGpuAndDraw(nearVbo, modelViewMatrix);
@@ -299,7 +299,7 @@ public class LodRenderer
 		// cleanup //
 		//=========//
 		
-		profiler.endStartSection("LOD cleanup");
+		profiler.popPush("LOD cleanup");
 		
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
@@ -311,7 +311,7 @@ public class LodRenderer
 		
 		// this can't be called until after the buffers are built
 		// because otherwise the buffers may be set to the wrong size
-		previousChunkRenderDistance = mc.gameSettings.renderDistanceChunks;
+		previousChunkRenderDistance = mc.options.renderDistance;
 		
 		// reset the fog settings so the normal chunks
 		// will be drawn correctly
@@ -331,7 +331,7 @@ public class LodRenderer
 		
 		
 		// end of internal LOD profiling
-		profiler.endSection();
+		profiler.pop();
 	}
 	
 	
@@ -346,13 +346,13 @@ public class LodRenderer
 		if (vbo == null)
 			return;
 		
-        vbo.bindBuffer();
+        vbo.bind();
         // 0L is the starting pointer
         LOD_VERTEX_FORMAT.setupBufferState(0L);
         
         vbo.draw(modelViewMatrix, GL11.GL_QUADS);
         
-        VertexBuffer.unbindBuffer();
+        VertexBuffer.unbind();
         LOD_VERTEX_FORMAT.clearBufferState();
 	}
 	
@@ -371,7 +371,7 @@ public class LodRenderer
 	{
 		if(fogQuality == FogQuality.OFF)
 		{
-			FogRenderer.resetFog();
+			FogRenderer.setupNoFog();
 			RenderSystem.disableFog();
 			return;
 		}
@@ -432,26 +432,26 @@ public class LodRenderer
 	private Matrix4f generateModelViewMatrix(float partialTicks)
 	{
 		// get all relevant camera info
-		ActiveRenderInfo renderInfo = mc.gameRenderer.getActiveRenderInfo();
-        Vector3d projectedView = renderInfo.getProjectedView();
+		ActiveRenderInfo renderInfo = mc.gameRenderer.getMainCamera();
+        Vector3d projectedView = renderInfo.getPosition();
 		
 		
 		// generate the model view matrix
 		MatrixStack matrixStack = new MatrixStack();
-        matrixStack.push();
+        matrixStack.pushPose();
         // translate and rotate to the current camera location
-        matrixStack.rotate(Vector3f.XP.rotationDegrees(renderInfo.getPitch()));
-        matrixStack.rotate(Vector3f.YP.rotationDegrees(renderInfo.getYaw() + 180));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(renderInfo.getXRot()));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(renderInfo.getYRot() + 180));
         matrixStack.translate(-projectedView.x, -projectedView.y, -projectedView.z);
         
-        return matrixStack.getLast().getMatrix();
+        return matrixStack.last().pose();
 	}
 	
 	
 	/**
 	 * create a new projection matrix and send it over to the GPU
 	 * <br><br>
-	 * A lot of this code is copied from renderWorld (line 578)
+	 * A lot of this code is copied from renderLevel (line 567)
 	 * in the GameRender class. The code copied is anything with
 	 * a matrixStack and is responsible for making sure the LOD
 	 * objects distort correctly relative to the rest of the world.
@@ -467,25 +467,25 @@ public class LodRenderer
 		// all the transformations in renderWorld are here too
 		
 		MatrixStack matrixStack = new MatrixStack();
-        matrixStack.push();
+        matrixStack.pushPose();
 		
-		gameRender.hurtCameraEffect(matrixStack, partialTicks);
-		if (this.mc.gameSettings.viewBobbing) {
-			gameRender.applyBobbing(matrixStack, partialTicks);
+		gameRender.bobHurt(matrixStack, partialTicks);
+		if (this.mc.options.bobView) {
+			gameRender.bobView(matrixStack, partialTicks);
 		}
 		
 		// potion and nausea effects
-		float f = MathHelper.lerp(partialTicks, mc.player.prevTimeInPortal, mc.player.timeInPortal) * mc.gameSettings.screenEffectScale * mc.gameSettings.screenEffectScale;
-		if (f > 0.0F) {
-			int i = this.mc.player.isPotionActive(Effects.NAUSEA) ? 7 : 20;
-			float f1 = 5.0F / (f * f + 5.0F) - f * 0.04F;
-			f1 = f1 * f1;
-			Vector3f vector3f = new Vector3f(0.0F, MathHelper.SQRT_2 / 2.0F, MathHelper.SQRT_2 / 2.0F);
-			matrixStack.rotate(vector3f.rotationDegrees((gameRender.rendererUpdateCount + partialTicks) * i));
-			matrixStack.scale(1.0F / f1, 1.0F, 1.0F);
-			float f2 = -(gameRender.rendererUpdateCount + partialTicks) * i;
-			matrixStack.rotate(vector3f.rotationDegrees(f2));
-		}
+		float f = MathHelper.lerp(partialTicks, this.mc.player.oPortalTime, this.mc.player.portalTime) * this.mc.options.screenEffectScale * this.mc.options.screenEffectScale;
+	      if (f > 0.0F) {
+	         int i = this.mc.player.hasEffect(Effects.CONFUSION) ? 7 : 20;
+	         float f1 = 5.0F / (f * f + 5.0F) - f * 0.04F;
+	         f1 = f1 * f1;
+	         Vector3f vector3f = new Vector3f(0.0F, MathHelper.SQRT_OF_TWO / 2.0F, MathHelper.SQRT_OF_TWO / 2.0F);
+	         matrixStack.mulPose(vector3f.rotationDegrees((gameRender.tick + partialTicks) * i));
+	         matrixStack.scale(1.0F / f1, 1.0F, 1.0F);
+	         float f2 = -(gameRender.tick + partialTicks) * i;
+	         matrixStack.mulPose(vector3f.rotationDegrees(f2));
+	      }
 		
 		
 		
@@ -494,12 +494,12 @@ public class LodRenderer
 		Matrix4f projectionMatrix = 
 				Matrix4f.perspective(
 				getFov(partialTicks, true), 
-				(float)this.mc.getMainWindow().getFramebufferWidth() / (float)this.mc.getMainWindow().getFramebufferHeight(), 
+				(float)this.mc.getWindow().getScreenWidth() / (float)this.mc.getWindow().getScreenHeight(), 
 				0.5F, 
 				this.farPlaneDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 2);
 		
 		// add the screen space distortions
-		projectionMatrix.mul(matrixStack.getLast().getMatrix());
+		projectionMatrix.multiply(matrixStack.last().pose());
 		gameRender.resetProjectionMatrix(projectionMatrix);
 		return;
 	}
@@ -510,8 +510,8 @@ public class LodRenderer
 	 */
 	private void setupLighting(LodDimension lodDimension, float partialTicks)
 	{
-		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.world.getSunBrightness(partialTicks) : 0.2f;
-		float gammaMultiplyer = (float)mc.gameSettings.gamma - 0.5f;
+		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.level.getSkyDarken(partialTicks) : 0.2f;
+		float gammaMultiplyer = (float)mc.options.gamma - 0.5f;
 		float lightStrength = ((sunBrightness / 2f) - 0.2f) + (gammaMultiplyer * 0.2f);
 		
 		float lightAmbient[] = {lightStrength, lightStrength, lightStrength, 1.0f};
@@ -609,7 +609,7 @@ public class LodRenderer
 	
 	private double getFov(float partialTicks, boolean useFovSetting)
 	{
-		return mc.gameRenderer.getFOVModifier(mc.gameRenderer.getActiveRenderInfo(), partialTicks, useFovSetting);
+		return mc.gameRenderer.getFov(mc.gameRenderer.getMainCamera(), partialTicks, useFovSetting);
 	}
 	
 	
@@ -686,7 +686,7 @@ public class LodRenderer
 	 */
 	private HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodDimension lodDim, BlockPos playerPos) 
 	{
-		int chunkRenderDist = mc.gameSettings.renderDistanceChunks;
+		int chunkRenderDist = mc.options.renderDistance;
 		int blockRenderDist = chunkRenderDist * 16;
 		ChunkPos centerChunk = new ChunkPos(playerPos);
 		
@@ -739,13 +739,12 @@ public class LodRenderer
 		// Wow those are some long names!
 		
 		// go through every RenderInfo to get the compiled chunks
-		for(WorldRenderer.LocalRenderInformationContainer 
-				worldrenderer$localrenderinformationcontainer : mc.worldRenderer.renderInfos)
+		for(WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer : mc.levelRenderer.renderChunks)
 		{
-			if (!worldrenderer$localrenderinformationcontainer.renderChunk.getCompiledChunk().isEmpty())
+			if (!worldrenderer$localrenderinformationcontainer.chunk.getCompiledChunk().hasNoRenderableLayers())
 			{
 				// add the ChunkPos for every empty compiled chunk
-				BlockPos bpos = worldrenderer$localrenderinformationcontainer.renderChunk.getPosition();
+				BlockPos bpos = worldrenderer$localrenderinformationcontainer.chunk.getOrigin();
 				
 				loadedPos.add(new ChunkPos(bpos.getX() / 16, bpos.getZ() / 16));
 			}

@@ -34,12 +34,12 @@ public class MixinWorldRenderer
 		previousPartialTicks = partialTicks;
 	}
 	
-	@Inject(at = @At("HEAD"), method = "renderBlockLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/matrix/MatrixStack;DDD)V", cancellable = false)
-	private void renderBlockLayer(RenderType renderType, MatrixStack matrixStackIn, double xIn, double yIn, double zIn, CallbackInfo callback)
+	@Inject(at = @At("HEAD"), method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/matrix/MatrixStack;DDD)V", cancellable = false)
+	private void renderChunkLayer(RenderType renderType, MatrixStack matrixStackIn, double xIn, double yIn, double zIn, CallbackInfo callback)
 	{
 		// only render if LODs are enabled and
 		// only render before solid blocks
-		if (LodConfig.CLIENT.drawLODs.get() && renderType.equals(RenderType.getSolid()))
+		if (LodConfig.CLIENT.drawLODs.get() && renderType.equals(RenderType.solid()))
 			LodMain.client_proxy.renderLods(previousPartialTicks);
 	}
 }

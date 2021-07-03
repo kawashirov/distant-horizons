@@ -27,11 +27,11 @@ public class RenderUtil
 	{
 		Minecraft mc = Minecraft.getInstance();
 		
-		return (pos.x >= center.x - mc.gameSettings.renderDistanceChunks 
-				&& pos.x <= center.x + mc.gameSettings.renderDistanceChunks) 
+		return (pos.x >= center.x - mc.options.renderDistance 
+				&& pos.x <= center.x + mc.options.renderDistance) 
 				&& 
-				(pos.z >= center.z - mc.gameSettings.renderDistanceChunks 
-				&& pos.z <= center.z + mc.gameSettings.renderDistanceChunks);
+				(pos.z >= center.z - mc.options.renderDistance 
+				&& pos.z <= center.z + mc.options.renderDistance);
 	}
 	
 	/**
@@ -42,11 +42,11 @@ public class RenderUtil
 	{
 		Minecraft mc = Minecraft.getInstance();
 		
-		return (i >= centerCoordinate - mc.gameSettings.renderDistanceChunks 
-				&& i <= centerCoordinate + mc.gameSettings.renderDistanceChunks) 
+		return (i >= centerCoordinate - mc.options.renderDistance 
+				&& i <= centerCoordinate + mc.options.renderDistance) 
 				&& 
-				(j >= centerCoordinate - mc.gameSettings.renderDistanceChunks 
-				&& j <= centerCoordinate + mc.gameSettings.renderDistanceChunks);
+				(j >= centerCoordinate - mc.options.renderDistance 
+				&& j <= centerCoordinate + mc.options.renderDistance);
 	}
 	
 	
@@ -71,7 +71,7 @@ public class RenderUtil
 	 */
 	public static int getBufferMemoryForRadiusMultiplier(int radiusMultiplier)
 	{ 
-		int numbChunksWide = mc.gameSettings.renderDistanceChunks * 
+		int numbChunksWide = mc.options.renderDistance * 
 							radiusMultiplier * 2;
 		
 		// calculate the max amount of buffer memory needed (in bytes)
@@ -89,6 +89,6 @@ public class RenderUtil
 		int maxNumberOfLods = LodRenderer.MAX_ALOCATEABLE_DIRECT_MEMORY / lodTemplate.getBufferMemoryForSingleLod(lodDetail); 
 		int numbLodsWide = (int) Math.sqrt(maxNumberOfLods);
 		
-		return numbLodsWide / (2 * mc.gameSettings.renderDistanceChunks);
+		return numbLodsWide / (2 * mc.options.renderDistance);
 	}
 }

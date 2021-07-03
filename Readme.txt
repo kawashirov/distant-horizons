@@ -4,14 +4,13 @@ allowing for an increased view distance without harming performance.
 
 Or in other words: this mod let's you see farther without turning your game into a slide show.
 If you want to see a quick demo, check out the video I made here:
-https://youtu.be/v61iOYZQWCs
+https://youtu.be/CCT-3s02tYA
 
 
-Forge version: 1.16.4-35.1.4
+Forge version: 1.16.5-36.1.0
 
 Notes:
-This version has been confirmed to work in Eclipse and retail Minecraft.
-(retail running forge 1.16.4-35.1.37)
+This version has been confirmed to work in Eclipse.
 
 
 ========================
@@ -64,3 +63,7 @@ Note to self
 
 The Minecraft source code is NOT added to your workspace in a editable way. Minecraft is treated like a normal Library. Sources are there for documentation and research purposes only.
 
+Source code uses mcp mappings not Mojangs.
+
+The source code can be 'created' with the ./eclipse command and can be found in the following path:
+minecraft-lod-mod\build\fg_cache\mcp\ VERSION \joined\ RANDOM_STRING \patch\output.jar

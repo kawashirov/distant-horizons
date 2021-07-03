@@ -36,10 +36,10 @@ public class LodUtil
 	 */
 	public static ServerWorld getFirstValidServerWorld()
 	{
-		if (mc.getIntegratedServer() == null)
+		if (mc.hasSingleplayerServer())
 			return null;
 		
-		Iterable<ServerWorld> worlds = mc.getIntegratedServer().getWorlds();
+		Iterable<ServerWorld> worlds = mc.getSingleplayerServer().getAllLevels();
 		
 		for (ServerWorld world : worlds)
 			return world;
@@ -54,16 +54,16 @@ public class LodUtil
 	 */
 	public static ServerWorld getServerWorldFromDimension(DimensionType dimension)
 	{
-		IntegratedServer server = mc.getIntegratedServer();
+		IntegratedServer server = mc.getSingleplayerServer();
 		if (server == null)
 			return null;
 		
-		Iterable<ServerWorld> worlds = server.getWorlds();
+		Iterable<ServerWorld> worlds = server.getAllLevels();
 		ServerWorld returnWorld = null;
 		
 		for (ServerWorld world : worlds)
 		{
-			if(world.getDimensionType() == dimension)
+			if(world.dimensionType() == dimension)
 			{
 				returnWorld = world;
 				break;
@@ -121,31 +121,31 @@ public class LodUtil
 
 		Minecraft mc = Minecraft.getInstance();
 		
-		if(mc.isIntegratedServerRunning())
+		if(mc.hasSingleplayerServer())
 		{
 			// this will return the world save location
 			// and the dimension folder
 			
-			if(mc.world == null)
+			if(mc.level == null)
 				return "";
 			
-			ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(mc.world.getDimensionType());
+			ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(mc.level.dimensionType());
 			if(serverWorld == null)
 				return "";
 			
-			ServerChunkProvider provider = serverWorld.getChunkProvider();
+			ServerChunkProvider provider = serverWorld.getChunkSource();
 			if(provider == null)
 				return "";
 			
-			return provider.getSavedData().folder.toString();
+			return provider.dataStorage.dataFolder.toString();
 		}
 		else
 		{
-			ServerData server = mc.getCurrentServerData();
-			return server.serverName + ", IP " + 
-					server.serverIP + ", GameVersion " + 
-					server.gameVersion.getString() + File.separatorChar
-					+ "dim_" + mc.world.getDimensionType().getEffects().getPath() + File.separatorChar;
+			ServerData server = mc.getCurrentServer();
+			return server.name + ", IP " + 
+					server.ip + ", GameVersion " + 
+					server.version.getString() + File.separatorChar
+					+ "dim_" + mc.level.dimensionType().effectsLocation().getPath() + File.separatorChar;
 		}
 	}
 
@@ -162,28 +162,28 @@ public class LodUtil
 	{
 		Minecraft mc = Minecraft.getInstance();
 		
-		if(mc.isIntegratedServerRunning())
+		if(mc.hasSingleplayerServer())
 		{
 			// this will return the world save location
 			// and the dimension folder
 			
-			ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(world.getDimensionType());
+			ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(world.dimensionType());
 			if(serverWorld == null)
-				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerWorld for the dimension " + world.getDimensionType().getEffects().getPath());
+				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerWorld for the dimension " + world.dimensionType().effectsLocation().getPath());
 			
-			ServerChunkProvider provider = serverWorld.getChunkProvider();
+			ServerChunkProvider provider = serverWorld.getChunkSource();
 			if(provider == null)
-				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerChunkProvider for the dimension " + world.getDimensionType().getEffects().getPath());
+				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerChunkProvider for the dimension " + world.dimensionType().effectsLocation().getPath());
 			
-			return provider.getSavedData().folder.toString();
+			return provider.dataStorage.dataFolder.toString();
 		}
 		else
 		{
-			ServerData server = mc.getCurrentServerData();
-			return server.serverName + ", IP " + 
-					server.serverIP + ", GameVersion " + 
-					server.gameVersion.getString() + File.separatorChar
-					+ "dim_" + world.getDimensionType().getEffects().getPath() + File.separatorChar;
+			ServerData server = mc.getCurrentServer();
+			return server.name + ", IP " + 
+					server.ip + ", GameVersion " + 
+					server.version.getString() + File.separatorChar
+					+ "dim_" + world.dimensionType().effectsLocation().getPath() + File.separatorChar;
 		}
 	}
 	
@@ -194,7 +194,7 @@ public class LodUtil
 	 */
 	public static String getWorldID(IWorld world)
 	{
-		if(mc.isIntegratedServerRunning())
+		if(mc.hasSingleplayerServer())
 		{
 			// chop off the dimension ID as it is not needed/wanted
 			String dimId = getDimensionIDFromWorld(world);
@@ -207,10 +207,10 @@ public class LodUtil
 		}
 		else
 		{
-			ServerData server = mc.getCurrentServerData();
-			return server.serverName + ", IP " + 
-					server.serverIP + ", GameVersion " + 
-					server.gameVersion.getString();
+			ServerData server = mc.getCurrentServer();
+			return server.name + ", IP " + 
+					server.ip + ", GameVersion " + 
+					server.version.getString();
 		}
 	}
 	
