@@ -50,7 +50,7 @@ import net.minecraft.world.storage.IWorldInfo;
  * to multithread generation.
  * 
  * @author James Seibel
- * @version 6-27-2021
+ * @version 7-4-2021
  */
 public class LodServerWorld implements ISeedReader {
 	
@@ -58,9 +58,12 @@ public class LodServerWorld implements ISeedReader {
 	
 	public IChunk chunk;
 	
-	public LodServerWorld(IChunk newChunk)
+	public ServerWorld serverWorld;
+	
+	public LodServerWorld(ServerWorld newServerWorld, IChunk newChunk)
 	{
 		chunk = newChunk;
+		serverWorld = newServerWorld;
 	}
 	
 	
@@ -102,12 +105,7 @@ public class LodServerWorld implements ISeedReader {
 		return chunk.getFluidState(pos);
 	}
 	
-//	@Override
-//	public int getLightFor(LightType type, BlockPos pos)
-//	{
-//		// this needs to be low for snow generation to work
-//		return 0;
-//	}
+	
 	
 	@Override
 	public boolean isStateAtPosition(BlockPos pos, Predicate<BlockState> state)
@@ -122,9 +120,29 @@ public class LodServerWorld implements ISeedReader {
 	}
 	
 	@Override
-	public IChunk getChunk(int x, int z, ChunkStatus requiredStatus, boolean nonnull) {
+	public IChunk getChunk(int x, int z, ChunkStatus requiredStatus, boolean nonnull)
+	{
 		return chunk;
 	}
+	
+	@Override
+	public Stream<? extends StructureStart<?>> startsForFeature(SectionPos p_241827_1_, Structure<?> p_241827_2_)
+	{
+		return serverWorld.startsForFeature(p_241827_1_, p_241827_2_);
+	}
+	
+	@Override
+	public ITickList<Fluid> getLiquidTicks()
+	{
+		return EmptyTickList.empty();
+	}
+	
+	@Override
+	public WorldLightManager getLightEngine()
+	{
+		return new WorldLightManager(null, false, false);
+	}
+	
 	
 	
 	
@@ -191,14 +209,8 @@ public class LodServerWorld implements ISeedReader {
 	public long getSeed() {
 		throw new UnsupportedOperationException("Not Implemented");
 	}
+
 	
-	@Override
-	public Stream<? extends StructureStart<?>> startsForFeature(SectionPos p_241827_1_, Structure<?> p_241827_2_) {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-
-
-
 	@Override
 	public ServerWorld getLevel() {
 		throw new UnsupportedOperationException("Not Implemented");
@@ -226,15 +238,7 @@ public class LodServerWorld implements ISeedReader {
 		throw new UnsupportedOperationException("Not Implemented");
 	}
 
-
-
-	@Override
-	public ITickList<Fluid> getLiquidTicks() {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-
-
-
+	
 	@Override
 	public void levelEvent(PlayerEntity arg0, int arg1, BlockPos arg2, int arg3) {
 		throw new UnsupportedOperationException("Not Implemented");
@@ -290,16 +294,8 @@ public class LodServerWorld implements ISeedReader {
 	public DimensionType dimensionType() {
 		throw new UnsupportedOperationException("Not Implemented");
 	}
-
-
-
-	@Override
-	public WorldLightManager getLightEngine() {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-
-
-
+	
+	
 	@Override
 	public TileEntity getBlockEntity(BlockPos p_175625_1_) {
 		throw new UnsupportedOperationException("Not Implemented");

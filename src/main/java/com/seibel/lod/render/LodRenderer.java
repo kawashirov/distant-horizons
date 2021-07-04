@@ -48,7 +48,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world. 
  * 
  * @author James Seibel
- * @version 06-19-2021
+ * @version 07-4-2021
  */
 public class LodRenderer
 {

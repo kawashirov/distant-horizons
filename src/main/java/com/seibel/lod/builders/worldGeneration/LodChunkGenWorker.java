@@ -4,13 +4,14 @@ import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 import com.seibel.lod.builders.LodBufferBuilder;
-import com.seibel.lod.builders.LodChunkBuilder;
 import com.seibel.lod.builders.LodBuilderConfig;
+import com.seibel.lod.builders.LodChunkBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
@@ -52,7 +53,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  * 
  * @author James Seibel
- * @version 6-27-2021
+ * @version 7-4-2021
  */
 public class LodChunkGenWorker implements IWorker
 {
@@ -60,6 +61,12 @@ public class LodChunkGenWorker implements IWorker
     
     private boolean threadStarted = false;
     private LodChunkGenThread thread;
+    
+    /** If a configured feature fails for whatever reason,
+     * add it to this list, this is to hopefully remove any
+     * features that could cause issues down the line. */
+    private static ConcurrentHashMap<Integer, ConfiguredFeature<?, ?>> configuredFeaturesToAvoid = new ConcurrentHashMap<>();
+    
     
     
     public LodChunkGenWorker(ChunkPos newPos, LodRenderer newLodRenderer, 
@@ -305,7 +312,7 @@ public class LodChunkGenWorker implements IWorker
 			List<IChunk> chunkList = new LinkedList<>();
 			ChunkPrimer chunk = new ChunkPrimer(pos, UpgradeData.EMPTY);
 			chunkList.add(chunk);
-			LodServerWorld lodServerWorld = new LodServerWorld(chunk);
+			LodServerWorld lodServerWorld = new LodServerWorld(serverWorld, chunk);
 			
 			ServerChunkProvider chunkSource = serverWorld.getChunkSource();
 			ChunkGenerator chunkGen = chunkSource.generator;
@@ -341,7 +348,7 @@ public class LodChunkGenWorker implements IWorker
 			List<IChunk> chunkList = new LinkedList<>();
 			ChunkPrimer chunk = new ChunkPrimer(pos, UpgradeData.EMPTY);
 			chunkList.add(chunk);
-			LodServerWorld lodServerWorld = new LodServerWorld(chunk);
+			LodServerWorld lodServerWorld = new LodServerWorld(serverWorld, chunk);
 			
 			ServerChunkProvider chunkSource = serverWorld.getChunkSource();
 			ChunkGenerator chunkGen = chunkSource.generator;
@@ -381,6 +388,9 @@ public class LodChunkGenWorker implements IWorker
 					{
 						ConfiguredFeature<?, ?> configuredfeature = featureSupplier.get();
 						
+						if (configuredFeaturesToAvoid.containsKey(configuredfeature.hashCode()))
+							continue;
+						
 						/*
 						// clone any items that aren't thread safe to prevent
 						// them from causing issues
@@ -409,12 +419,18 @@ public class LodChunkGenWorker implements IWorker
 							// I tried using a deep cloning library and discovered
 							// the problem there.
 							// ( https://github.com/kostaskougios/cloning )
+							
+							configuredFeaturesToAvoid.put(configuredfeature.hashCode(), configuredfeature);
+//							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
 						}
 						catch(UnsupportedOperationException e)
 						{
 							// This will happen when the LodServerWorld
 							// isn't able to return something that a feature
 							// generator needs
+							
+							configuredFeaturesToAvoid.put(configuredfeature.hashCode(), configuredfeature);
+//							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
 						}
 						catch(Exception e)
 						{
@@ -426,6 +442,9 @@ public class LodChunkGenWorker implements IWorker
 							System.out.println();
 							//ClientProxy.LOGGER.error("error class: \"" + configuredfeature.config.getClass() + "\"");
 							System.out.println();
+							
+							configuredFeaturesToAvoid.put(configuredfeature.hashCode(), configuredfeature);
+//							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
 						}
 					}
 				}
