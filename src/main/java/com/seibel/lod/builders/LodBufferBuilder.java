@@ -33,7 +33,7 @@ public class LodBufferBuilder
 	/** This holds the thread used to generate new LODs off the main thread. */
 	private ExecutorService genThread = Executors.newSingleThreadExecutor();
 	
-	private LodBuilder lodBuilder;
+	private LodChunkBuilder lodChunkBuilder;
 	
 	/** The buffers that are used to create LODs using near fog */
 	public volatile BufferBuilder buildableNearBuffer;
@@ -59,10 +59,10 @@ public class LodBufferBuilder
 	public int maxChunkGenRequests = Runtime.getRuntime().availableProcessors();
 	
 	
-	public LodBufferBuilder(LodBuilder newLodBuilder)
+	public LodBufferBuilder(LodChunkBuilder newLodBuilder)
 	{
 		mc = Minecraft.getInstance();
-		lodBuilder = newLodBuilder;
+		lodChunkBuilder = newLodBuilder;
 	}
 	
 	
@@ -233,7 +233,7 @@ public class LodBufferBuilder
 					
 					numberOfChunksWaitingToGenerate++;
 					
-					LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, renderer, lodBuilder, this, lodDim, serverWorld, biomeContainer);
+					LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, renderer, lodChunkBuilder, this, lodDim, serverWorld, biomeContainer);
 					WorldWorkerManager.addWorker(genWorker);
 				}
 			}

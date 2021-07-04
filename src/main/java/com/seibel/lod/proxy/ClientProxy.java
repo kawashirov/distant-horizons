@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.seibel.lod.builders.LodBufferBuilder;
-import com.seibel.lod.builders.LodBuilder;
+import com.seibel.lod.builders.LodChunkBuilder;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
@@ -32,8 +32,8 @@ public class ClientProxy
 	public static final Logger LOGGER = LogManager.getLogger("LOD");
 	
 	private static LodWorld lodWorld = new LodWorld();
-	private static LodBuilder lodBuilder = new LodBuilder();
-	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder(lodBuilder);
+	private static LodChunkBuilder lodChunkBuilder = new LodChunkBuilder();
+	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder(lodChunkBuilder);
 	private static LodRenderer renderer = new LodRenderer(lodBufferBuilder);
 	
 	Minecraft mc = Minecraft.getInstance();
@@ -65,10 +65,10 @@ public class ClientProxy
 				// TODO is this logic good?
 				(mc.options.renderDistance * LodChunk.WIDTH * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get()) / LodRegion.SIZE
 				);
-		if (lodBuilder.regionWidth != newWidth)
+		if (lodChunkBuilder.regionWidth != newWidth)
 		{
 			lodWorld.resizeDimensionRegionWidth(newWidth);
-			lodBuilder.regionWidth = newWidth;
+			lodChunkBuilder.regionWidth = newWidth;
 			
 			// skip this frame, hopefully the lodWorld
 			// should have everything set up by then
@@ -99,8 +99,8 @@ public class ClientProxy
 //		LodConfig.CLIENT.lodColorStyle.set(LodColorStyle.INDIVIDUAL_SIDES);
 //		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
 //		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
-//		LodConfig.CLIENT.fogDistance.set(FogDistance.NEAR_AND_FAR);
-//		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.USE_OPTIFINE_FOG_SETTING);
+//		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
+//		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
 		
 		// Note to self:
 		// if "unspecified" shows up in the pie chart, it is
@@ -126,7 +126,7 @@ public class ClientProxy
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
-		lodBuilder.generateLodChunkAsync(event.getChunk(), lodWorld, event.getWorld());
+		lodChunkBuilder.generateLodChunkAsync(event.getChunk(), lodWorld, event.getWorld());
 	}
 	
 	
@@ -164,7 +164,7 @@ public class ClientProxy
 			event.getClass() == BlockEvent.PortalSpawnEvent.class)
 		{
 			// recreate the LOD where the blocks were changed
-			lodBuilder.generateLodChunkAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld());
+			lodChunkBuilder.generateLodChunkAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld());
 		}
 	}
 	
@@ -180,9 +180,9 @@ public class ClientProxy
 		return lodWorld;
 	}
 	
-	public static LodBuilder getLodBuilder()
+	public static LodChunkBuilder getLodBuilder()
 	{
-		return lodBuilder;
+		return lodChunkBuilder;
 	}
 	
 	public static LodRenderer getRenderer()

@@ -32,7 +32,7 @@ import net.minecraft.world.gen.Heightmap;
  * @author James Seibel
  * @version 6-27-2021
  */
-public class LodBuilder
+public class LodChunkBuilder
 {
 	private ExecutorService lodGenThreadPool = Executors.newSingleThreadExecutor();
 	
@@ -45,7 +45,7 @@ public class LodBuilder
 	
 	
 	
-	public LodBuilder()
+	public LodChunkBuilder()
 	{
 		
 	}

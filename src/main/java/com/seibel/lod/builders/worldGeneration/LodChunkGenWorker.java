@@ -9,7 +9,7 @@ import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 import com.seibel.lod.builders.LodBufferBuilder;
-import com.seibel.lod.builders.LodBuilder;
+import com.seibel.lod.builders.LodChunkBuilder;
 import com.seibel.lod.builders.LodBuilderConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodConfig;
@@ -63,7 +63,7 @@ public class LodChunkGenWorker implements IWorker
     
     
     public LodChunkGenWorker(ChunkPos newPos, LodRenderer newLodRenderer, 
-    		LodBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, 
+    		LodChunkBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, 
     		LodDimension newLodDimension, ServerWorld newServerWorld,
     		BiomeContainer newBiomeContainer)
     {
@@ -121,19 +121,19 @@ public class LodChunkGenWorker implements IWorker
     {
     	public final ServerWorld serverWorld;
         public final LodDimension lodDim;
-        public final LodBuilder lodBuilder;
+        public final LodChunkBuilder lodChunkBuilder;
         public final LodRenderer lodRenderer;
         private LodBufferBuilder lodBufferBuilder;
     	
     	private ChunkPos pos;
     	
     	public LodChunkGenThread(ChunkPos newPos, LodRenderer newLodRenderer, 
-        		LodBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, 
+        		LodChunkBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, 
         		LodDimension newLodDimension, ServerWorld newServerWorld)
     	{
     		pos = newPos;
     		lodRenderer = newLodRenderer;
-    		lodBuilder = newLodBuilder;
+    		lodChunkBuilder = newLodBuilder;
     		lodBufferBuilder = newLodBufferBuilder;
     		lodDim = newLodDimension;
     		serverWorld = newServerWorld;
@@ -284,7 +284,7 @@ public class LodChunkGenWorker implements IWorker
 			LodChunk lod;
 			if (!inTheEnd)
 			{
-				lod = lodBuilder.generateLodFromChunk(chunk, new LodBuilderConfig(true, true, false));
+				lod = lodChunkBuilder.generateLodFromChunk(chunk, new LodBuilderConfig(true, true, false));
 			}
 			else
 			{
@@ -325,7 +325,7 @@ public class LodChunkGenWorker implements IWorker
 			snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
 			
 			
-			LodChunk lod = lodBuilder.generateLodFromChunk(chunk, new LodBuilderConfig(false, true, true));
+			LodChunk lod = lodChunkBuilder.generateLodFromChunk(chunk, new LodBuilderConfig(false, true, true));
 			lodDim.addLod(lod);
 		}
 		
@@ -432,7 +432,7 @@ public class LodChunkGenWorker implements IWorker
 			}
 			
 			// generate a Lod like normal
-			LodChunk lod = lodBuilder.generateLodFromChunk(chunk);
+			LodChunk lod = lodChunkBuilder.generateLodFromChunk(chunk);
 			lodDim.addLod(lod);
 		}
 		
@@ -448,7 +448,7 @@ public class LodChunkGenWorker implements IWorker
 		 */
 		private void generateWithServer()
 		{
-			lodBuilder.generateLodChunkAsync(serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES), ClientProxy.getLodWorld(), serverWorld);
+			lodChunkBuilder.generateLodChunkAsync(serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES), ClientProxy.getLodWorld(), serverWorld);
 		}
 		
 		
