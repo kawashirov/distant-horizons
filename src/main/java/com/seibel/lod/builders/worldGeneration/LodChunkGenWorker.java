@@ -369,9 +369,20 @@ public class LodChunkGenWorker implements IWorker
 			{
 				for (int z = 0; z < LodChunk.WIDTH; z++)
 				{
-					// should probably use the heightmap here instead of seaLevel,
-					// but this seems to get the job done well enough
-					biomes.add(chunk.getBiomes().getNoiseBiome(x, serverWorld.getSeaLevel(), z));
+					Biome biome = chunk.getBiomes().getNoiseBiome(x, serverWorld.getSeaLevel(), z);
+					
+					// Issue #35
+					// For some reason Jungle biomes cause incredible lag
+					// the features here must be interacting with each other
+					// in unpredictable ways (specifically tree feature generation).
+					// When generating Features my CPU usage generally hovers around 30 - 40%
+					// when generating Jungles it spikes to 100%.
+					if (biome.getBiomeCategory() != Biome.Category.JUNGLE)
+					{
+						// should probably use the heightmap here instead of seaLevel,
+						// but this seems to get the job done well enough
+						biomes.add(biome);
+					}
 				}
 			}
 			
