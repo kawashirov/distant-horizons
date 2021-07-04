@@ -6,19 +6,21 @@ import java.nio.FloatBuffer;
 import java.util.HashSet;
 
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.NVFogDistance;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.enums.FogDistance;
+import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarBuffer;
-import com.seibel.lod.objects.NearFarFogSetting;
+import com.seibel.lod.objects.NearFarFogSettings;
 import com.seibel.lod.proxy.ClientProxy;
 
 import net.minecraft.client.Minecraft;
@@ -67,6 +69,10 @@ public class LodRenderer
 	 */
 	public static final int MAX_ALOCATEABLE_DIRECT_MEMORY = 64 * 1024 * 1024;
 	
+	/** Does this computer's GPU support fancy fog? */
+	public static boolean fancyFogAvailable = false;
+	
+	
 	
 	/** If true the LODs colors will be replaced with
 	 * a checkerboard, this can be used for debugging. */
@@ -92,6 +98,7 @@ public class LodRenderer
 	/** This is the VertexBuffer used to draw any LODs that use far fog */
 	private volatile VertexBuffer farVbo;
 	public static final VertexFormat LOD_VERTEX_FORMAT = DefaultVertexFormats.POSITION_COLOR;
+	
 	
 	/** This is used to determine if the LODs should be regenerated */
 	private int previousChunkRenderDistance = 0;
@@ -266,14 +273,14 @@ public class LodRenderer
 		setupProjectionMatrix(partialTicks);
 		setupLighting(lodDim, partialTicks);
 		
-		NearFarFogSetting fogSetting = determineFogSettings();
+		NearFarFogSettings fogSettings = determineFogSettings();
 		
 		// determine the current fog settings so they can be
 		// reset after drawing the LODs
 		float defaultFogStartDist = GL11.glGetFloat(GL11.GL_FOG_START);
 		float defaultFogEndDist = GL11.glGetFloat(GL11.GL_FOG_END);
 		int defaultFogMode = GL11.glGetInteger(GL11.GL_FOG_MODE);
-
+		int defaultFogDistance = GL11.glGetInteger(NVFogDistance.GL_FOG_DISTANCE_MODE_NV);
 		
 		
 		
@@ -285,10 +292,10 @@ public class LodRenderer
 		//===========//
 		profiler.popPush("LOD draw");
 		
-		setupFog(fogSetting.nearFogSetting, reflectionHandler.getFogQuality());
+		setupFog(fogSettings.near.distance, fogSettings.near.quality);
 		sendLodsToGpuAndDraw(nearVbo, modelViewMatrix);
 		
-		setupFog(fogSetting.farFogSetting, reflectionHandler.getFogQuality());
+		setupFog(fogSettings.far.distance, fogSettings.far.quality);
 		sendLodsToGpuAndDraw(farVbo, modelViewMatrix);
 		
 		
@@ -315,9 +322,7 @@ public class LodRenderer
 		
 		// reset the fog settings so the normal chunks
 		// will be drawn correctly
-		RenderSystem.fogStart(defaultFogStartDist);
-		RenderSystem.fogEnd(defaultFogEndDist);
-		RenderSystem.fogMode(defaultFogMode);
+		cleanupFog(fogSettings, defaultFogStartDist, defaultFogEndDist, defaultFogMode, defaultFogDistance);
 		
 		// reset the projection matrix so anything drawn after
 		// the LODs will use the correct projection matrix
@@ -380,10 +385,24 @@ public class LodRenderer
 		{
 			throw new IllegalArgumentException("setupFog doesn't accept the NEAR_AND_FAR fog distance.");
 		}
-
+		
+		
+		// determine the fog distance mode to use
+		int glFogDistanceMode = NVFogDistance.GL_EYE_RADIAL_NV;
+		if (fogQuality == FogQuality.FANCY)
+		{
+			// fancy fog (fragment distance based fog)
+			glFogDistanceMode = NVFogDistance.GL_EYE_RADIAL_NV;
+		}
+		else
+		{
+			// fast fog (frustum distance based fog)
+			glFogDistanceMode = NVFogDistance.GL_EYE_PLANE_ABSOLUTE_NV;
+		}
+		
+		
 		// the multipliers are percentages
 		// of the regular view distance.
-		
 		if(fogDistance == FogDistance.NEAR)
 		{
 			// the reason that I wrote fogEnd then fogStart backwards
@@ -420,8 +439,34 @@ public class LodRenderer
 			}
 		}
 		
-		RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
+		
+		GL11.glEnable(GL11.GL_FOG);
 		RenderSystem.enableFog();
+        RenderSystem.setupNvFogDistance();
+        RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
+        GL11.glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, glFogDistanceMode);
+	}
+	
+	/**
+	 * Revert any changes that were made to the fog.
+	 */
+	private void cleanupFog(NearFarFogSettings fogSettings, 
+			float defaultFogStartDist, float defaultFogEndDist, 
+			int defaultFogMode, int defaultFogDistance)
+	{
+		RenderSystem.fogStart(defaultFogStartDist);
+		RenderSystem.fogEnd(defaultFogEndDist);
+		RenderSystem.fogMode(defaultFogMode);
+		GL11.glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, defaultFogDistance);
+		
+		// disable fog if Minecraft wasn't rendering fog
+		// but we were
+		if(!fogSettings.vanillaIsRenderingFog && 
+				(fogSettings.near.quality != FogQuality.OFF ||
+				fogSettings.far.quality != FogQuality.OFF))
+		{
+			GL11.glDisable(GL11.GL_FOG);
+		}
 	}
 	
 
@@ -614,68 +659,114 @@ public class LodRenderer
 	
 	
 	/**
-	 * Based on the fogDistance setting and
-	 * optifine's fogQuality setting return what fog
-	 * settings should be used when rendering.
+	 * Return what fog settings should be used when rendering.
 	 */
-	private NearFarFogSetting determineFogSettings()
+	private NearFarFogSettings determineFogSettings()
 	{
-		NearFarFogSetting fogSetting = new NearFarFogSetting();
+		NearFarFogSettings fogSettings = new NearFarFogSettings();
 		
-		switch(reflectionHandler.getFogQuality())
+		
+		FogQuality quality = reflectionHandler.getFogQuality();
+		FogDrawOverride override = LodConfig.CLIENT.fogDrawOverride.get();
+		
+		
+		if (quality == FogQuality.OFF)
+			fogSettings.vanillaIsRenderingFog = false;
+		else
+			fogSettings.vanillaIsRenderingFog = true;
+		
+		
+		// use any fog overrides the user may have set
+		switch(override)
+		{
+		case ALWAYS_DRAW_FOG_FANCY:
+			quality = FogQuality.FANCY;
+			break;
+			
+		case NEVER_DRAW_FOG:
+			quality = FogQuality.OFF;
+			break;
+			
+		case ALWAYS_DRAW_FOG_FAST:
+			quality = FogQuality.FAST;
+			break;
+			
+		case USE_OPTIFINE_FOG_SETTING:
+			// don't override anything
+			break;
+		}
+		
+		
+		// only use fancy fog if the user's GPU can deliver
+		if (!fancyFogAvailable && quality == FogQuality.FANCY)
+		{
+			quality = FogQuality.FAST;
+		}
+		
+		
+		// how different distances are drawn depends on the quality set
+		switch(quality)
 		{
 		case FANCY:
+			fogSettings.near.quality = FogQuality.FANCY;
+			fogSettings.far.quality = FogQuality.FANCY;
 			
 			switch(LodConfig.CLIENT.fogDistance.get())
 			{
 			case NEAR_AND_FAR:
-				fogSetting.nearFogSetting = FogDistance.NEAR;
-				fogSetting.farFogSetting = FogDistance.FAR;
+				fogSettings.near.distance = FogDistance.NEAR;
+				fogSettings.far.distance = FogDistance.FAR;
 				break;
 				
 			case NEAR:
-				fogSetting.nearFogSetting = FogDistance.NEAR;
-				fogSetting.farFogSetting = FogDistance.NEAR;
+				fogSettings.near.distance = FogDistance.NEAR;
+				fogSettings.far.distance = FogDistance.NEAR;
 				break;
 				
 			case FAR:
-				fogSetting.nearFogSetting = FogDistance.FAR;
-				fogSetting.farFogSetting = FogDistance.FAR;
+				fogSettings.near.distance = FogDistance.FAR;
+				fogSettings.far.distance = FogDistance.FAR;
 				break;
 			}
-			
 			break;
+			
 		case FAST:
+			fogSettings.near.quality = FogQuality.FAST;
+			fogSettings.far.quality = FogQuality.FAST;
+			
 			// fast fog setting should only have one type of
 			// fog, since the LODs are separated into a near
 			// and far portion; and fast fog is rendered from the
 			// frustrum's perspective instead of the camera
-			
 			switch(LodConfig.CLIENT.fogDistance.get())
 			{
 			case NEAR_AND_FAR:
-				fogSetting.nearFogSetting = FogDistance.NEAR;
-				fogSetting.farFogSetting = FogDistance.NEAR;
+				fogSettings.near.distance = FogDistance.NEAR;
+				fogSettings.far.distance = FogDistance.NEAR;
 				break;
 				
 			case NEAR:
-				fogSetting.nearFogSetting = FogDistance.NEAR;
-				fogSetting.farFogSetting = FogDistance.NEAR;
+				fogSettings.near.distance = FogDistance.NEAR;
+				fogSettings.far.distance = FogDistance.NEAR;
 				break;
 				
 			case FAR:
-				fogSetting.nearFogSetting = FogDistance.FAR;
-				fogSetting.farFogSetting = FogDistance.FAR;
+				fogSettings.near.distance = FogDistance.FAR;
+				fogSettings.far.distance = FogDistance.FAR;
 				break;
 			}
+			break;
 			
-			break;
 		case OFF:
+			
+			fogSettings.near.quality = FogQuality.OFF;
+			fogSettings.far.quality = FogQuality.OFF;
 			break;
-		
+
 		}
 		
-		return fogSetting;
+		
+		return fogSettings;
 	}
 	
 	

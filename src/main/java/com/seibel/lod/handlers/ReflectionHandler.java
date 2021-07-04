@@ -12,13 +12,12 @@ import net.minecraft.client.Minecraft;
  * in Optifine.
  * 
  * @author James Seibel
- * @version 09-21-2020
+ * @version 7-03-2021
  */
 public class ReflectionHandler
 {
 	private Minecraft mc = Minecraft.getInstance();
 	public Field ofFogField = null;
-	
 	
 	public ReflectionHandler()
 	{
@@ -34,14 +33,14 @@ public class ReflectionHandler
 	private void setupFogField()
 	{
 		// get every variable from the entity renderer
-		Field[] vars = mc.options.getClass().getDeclaredFields();
+		Field[] optionFields = mc.options.getClass().getDeclaredFields();
 				
 		// try and find the ofFogType variable in gameSettings
-		for(Field f : vars)
+		for(Field field : optionFields)
 		{
-			if(f.getName().equals("ofFogType"))
+			if(field.getName().equals("ofFogType"))
 			{
-				ofFogField = f;
+				ofFogField = field;
 				return;
 			}
 		}
@@ -82,8 +81,12 @@ public class ReflectionHandler
 		
 		switch (returnNum)
 		{
+			// optifine's "default" option,
+			// it should never be called in this case
 			case 0:
 				return FogQuality.FAST;
+				
+			// normal options
 			case 1:
 				return FogQuality.FAST;
 			case 2:

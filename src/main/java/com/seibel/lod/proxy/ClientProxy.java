@@ -99,7 +99,8 @@ public class ClientProxy
 //		LodConfig.CLIENT.lodColorStyle.set(LodColorStyle.INDIVIDUAL_SIDES);
 //		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
 //		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
-//		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
+//		LodConfig.CLIENT.fogDistance.set(FogDistance.NEAR_AND_FAR);
+//		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.USE_OPTIFINE_FOG_SETTING);
 		
 		// Note to self:
 		// if "unspecified" shows up in the pie chart, it is

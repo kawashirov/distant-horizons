@@ -11,6 +11,7 @@ import com.electronwill.nightconfig.core.io.WritingMode;
 import com.seibel.lod.ModInfo;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.FogDistance;
+import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.enums.LodTemplate;
 
@@ -33,6 +34,8 @@ public class LodConfig
 		
 		public ForgeConfigSpec.EnumValue<FogDistance> fogDistance;
 		
+		public ForgeConfigSpec.EnumValue<FogDrawOverride> fogDrawOverride;
+		
 		public ForgeConfigSpec.BooleanValue debugMode;
 		
 		public ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
@@ -53,22 +56,31 @@ public class LodConfig
 	        		.comment("\n\n"
 	        				+ " If false LODs will not be drawn, \n"
 	        				+ " however they will still be generated \n"
-	        				+ " and saved to file for later use.")
+	        				+ " and saved to file for later use. \n")
 	        		.define("drawLODs", true);
 	        
 	        fogDistance = builder
 	                .comment("\n\n"
 	                		+ " At what distance should Fog be drawn on the LODs? \n"
 	                		+ " If the fog cuts off ubruptly or you are using Optifine's \"fast\" \n"
-	                		+ " fog option set this to " + FogDistance.NEAR.toString() + " or " + FogDistance.FAR.toString() + ".")
+	                		+ " fog option set this to " + FogDistance.NEAR.toString() + " or " + FogDistance.FAR.toString() + ". \n")
 	                .defineEnum("fogDistance", FogDistance.NEAR_AND_FAR);
+	        
+	        fogDrawOverride = builder
+	                .comment("\n\n"
+	                		+ " When should fog be drawn? \n"
+	                		+ " " + FogDrawOverride.USE_OPTIFINE_FOG_SETTING.toString() + ": Use whatever Fog setting Optifine is using. If Optifine isn't installed this defaults to " + FogDrawOverride.ALWAYS_DRAW_FOG_FANCY.toString() + ". \n"
+	                		+ " " + FogDrawOverride.NEVER_DRAW_FOG.toString() + ": Never draw fog on the LODs \n"
+            				+ " " + FogDrawOverride.ALWAYS_DRAW_FOG_FAST.toString() + ": Always draw fast fog on the LODs \n"
+	                		+ " " + FogDrawOverride.ALWAYS_DRAW_FOG_FANCY.toString() + ": Always draw fancy fog on the LODs (if your graphics card supports it) \n")
+	                .defineEnum("fogDrawOverride", FogDrawOverride.USE_OPTIFINE_FOG_SETTING);
 	        
 	        debugMode = builder
 	                .comment("\n\n"
 	                		+ " If false the LODs will draw with their normal world colors. \n"
 	                		+ " If true they will draw as a black and white checkerboard. \n"
 	                		+ " This can be used for debugging or imagining you are playing a \n"
-	                		+ " giant game of chess ;)")
+	                		+ " giant game of chess ;) \n")
 	                .define("drawCheckerBoard", false);
 	        
 	        lodTemplate = builder
@@ -77,14 +89,16 @@ public class LodConfig
 	                		+ " " + LodTemplate.CUBIC.toString() + ": LOD Chunks are drawn as rectangular prisms (boxes). \n"
 	                		+ " " + LodTemplate.TRIANGULAR.toString() + ": LOD Chunks smoothly transition between other. \n"
 	                		+ " " + LodTemplate.DYNAMIC.toString() + ": LOD Chunks smoothly transition between other, \n"
-	                		+ " " + "         unless a neighboring chunk is at a significantly different height. ")
+	                		+ " " + "         unless a neighboring chunk is at a significantly different height. \n")
 	                .defineEnum("lodTemplate", LodTemplate.CUBIC);
 	        
 	        lodDetail = builder
 	                .comment("\n\n"
 	                		+ " How detailed should the LODs be? \n"
 	                		+ " " + LodDetail.SINGLE.toString() + ": render 1 LOD for each Chunk. \n"
-            				+ " " + LodDetail.DOUBLE.toString() + ": render 4 LODs for each Chunk.")
+            				+ " " + LodDetail.DOUBLE.toString() + ": render 4 LODs for each Chunk. \n"
+            				+ " " + LodDetail.QUAD.toString() +   ": render 16 LODs for each Chunk. \n"
+            				+ " " + LodDetail.HALF.toString() +   ": render 64 LODs for each Chunk. \n")
 	                .defineEnum("lodGeometryQuality", LodDetail.QUAD);
 	        
 	        lodChunkRadiusMultiplier = builder
@@ -92,14 +106,15 @@ public class LodConfig
 	                		+ " This is multiplied by the default view distance \n"
 	                		+ " to determine how far out to generate/render LODs. \n"
 	                		+ " A value of 2 means that there is 1 render distance worth \n"
-	                		+ " of LODs in each cardinal direction. ")
+	                		+ " of LODs in each cardinal direction. \n")
 	                .defineInRange("lodChunkRadiusMultiplier", 6, 2, 32);
 	        
 	        distanceGenerationMode = builder
 	                .comment("\n\n"
-	                		+ " Note: The times listed here are based on the developer's \n"
-	                		+ "       PC, and are included to show the speed difference \n"
-	                		+ "       between options. Your mileage may vary. \n"
+	                		+ " Note: The times listed here are the amount of time it took"
+	                		+ "       the developer's PC to generate 1 chunk, \n"
+	                		+ "       and are included so you can compare the \n"
+	                		+ "       different generation options. Your mileage may vary. \n"
 	                		+ "\n"
 	                		
 	                		+ " " + DistanceGenerationMode.BIOME_ONLY.toString() + " \n"

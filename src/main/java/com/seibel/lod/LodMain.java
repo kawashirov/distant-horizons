@@ -1,10 +1,14 @@
 package com.seibel.lod;
 
+import org.lwjgl.opengl.GL;
+
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.proxy.ClientProxy;
+import com.seibel.lod.render.LodRenderer;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DeferredWorkQueue;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -20,7 +24,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
  * check out the ClientProxy.
  * 
  * @author James Seibel
- * @version 02-07-2021
+ * @version 7-3-2021
  */
 @Mod(ModInfo.MODID)
 public class LodMain
@@ -30,9 +34,26 @@ public class LodMain
 	public static ClientProxy client_proxy;
 	
 	
+	@SuppressWarnings("deprecation")
 	private void init(final FMLCommonSetupEvent event)
 	{
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, LodConfig.clientSpec);
+		
+		
+		Thread setFancyFog = new Thread(() ->
+		{ 
+			LodRenderer.fancyFogAvailable = GL.getCapabilities().GL_NV_fog_distance;
+			
+			if (!LodRenderer.fancyFogAvailable)
+			{
+				ClientProxy.LOGGER.info("This GPU does not support GL_NV_fog_distance. This means that fancy fog options will not be available.");
+			}
+		});
+		
+		// This will be run on the main thread when it is able.
+		// If it wasn't run on the main thread GL.getCapabilities()
+		// would fail.
+		DeferredWorkQueue.runLater(setFancyFog);
 	}
 	
 	
