@@ -411,7 +411,8 @@ public class LodChunkGenWorker implements IWorker
 						{
 							// This will happen. I'm not sure what to do about it
 							// except pray that it doesn't effect the normal world generation
-							// in any harmful way
+							// in any harmful way.
+							// Update: this can cause crashes and high CPU usage.
 							
 							// Issue #35
 							// I tried cloning the config for each feature, but that
@@ -442,7 +443,6 @@ public class LodChunkGenWorker implements IWorker
 							System.out.println();
 							e.printStackTrace();
 							System.out.println();
-							//ClientProxy.LOGGER.error("error class: \"" + configuredfeature.config.getClass() + "\"");
 							System.out.println();
 							
 							configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
