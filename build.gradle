@@ -18,7 +18,7 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = 'a1.2'
+version = 'a1.3'
 group = 'com.backsun.lod'
 archivesBaseName = 'lod_1.16.5'
 
