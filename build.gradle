@@ -121,7 +121,21 @@ dependencies {
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.16.5-36.1.0'
-
+	
+	
+	// these were added to hopefully allow for cloning
+	// configuredFeatures to allow for safe 
+	// multi threaded feature generation. Sadly I couldn't find
+	// a way to duplicate lambda functions (which features use)
+	// so for now I'm not sure what to do. 
+	//implementation 'io.github.kostaskougios:cloning:1.10.3'
+	//
+	//implementation ('com.esotericsoftware:kryo:5.1.1') {
+	//  exclude group: "org.objenesis"
+	//}
+	//implementation 'org.objenesis:objenesis:3.2'
+	
+	
     // You may put jars on which you depend on in ./libs or you may define them like so..
     // compile "some.group:artifact:version:classifier"
     // compile "some.group:artifact:version"

@@ -397,27 +397,15 @@ public class LodChunkGenWorker implements IWorker
 				{
 					for(Supplier<ConfiguredFeature<?, ?>> featureSupplier : featuresForState.get(featureStateToGenerate))
 					{
-						ConfiguredFeature<?, ?> configuredfeature = featureSupplier.get();
+						ConfiguredFeature<?, ?> configuredFeature = featureSupplier.get();
 						
-						if (configuredFeaturesToAvoid.containsKey(configuredfeature.hashCode()))
+						if (configuredFeaturesToAvoid.containsKey(configuredFeature.hashCode()))
 							continue;
 						
-						/*
-						// clone any items that aren't thread safe to prevent
-						// them from causing issues
-						if(configuredfeature.config.getClass() == BlockClusterFeatureConfig.class)
-						{
-							config = cloneBlockClusterFeatureConfig((BlockClusterFeatureConfig) configuredfeature.config);
-						}
-						else if (configuredfeature.config.getClass() == DecoratedFeatureConfig.class)
-						{
-							config = cloneDecoratedFeatureConfig((DecoratedFeatureConfig) configuredfeature.config);
-						}
-						*/
 						
 						try
 						{
-							configuredfeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition());
+							configuredFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition());
 						}
 						catch(ConcurrentModificationException e)
 						{
@@ -425,13 +413,14 @@ public class LodChunkGenWorker implements IWorker
 							// except pray that it doesn't effect the normal world generation
 							// in any harmful way
 							
+							// Issue #35
 							// I tried cloning the config for each feature, but that
 							// path was blocked since I can't clone lambda methods.
 							// I tried using a deep cloning library and discovered
 							// the problem there.
 							// ( https://github.com/kostaskougios/cloning )
 							
-							configuredFeaturesToAvoid.put(configuredfeature.hashCode(), configuredfeature);
+							configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
 						}
 						catch(UnsupportedOperationException e)
@@ -440,7 +429,7 @@ public class LodChunkGenWorker implements IWorker
 							// isn't able to return something that a feature
 							// generator needs
 							
-							configuredFeaturesToAvoid.put(configuredfeature.hashCode(), configuredfeature);
+							configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
 						}
 						catch(Exception e)
@@ -454,7 +443,7 @@ public class LodChunkGenWorker implements IWorker
 							//ClientProxy.LOGGER.error("error class: \"" + configuredfeature.config.getClass() + "\"");
 							System.out.println();
 							
-							configuredFeaturesToAvoid.put(configuredfeature.hashCode(), configuredfeature);
+							configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
 						}
 					}
