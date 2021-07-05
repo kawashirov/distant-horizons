@@ -11,8 +11,11 @@ package com.seibel.lod.builders;
  */
 public class LodBuilderConfig
 {
+	/** default false */
 	public boolean useHeightmap;
+	/** default false */
 	public boolean useBiomeColors;
+	/** default true */
 	public boolean useSolidBlocksInColorGen;
 	
 	/** default settings for a normal chunk 
@@ -28,9 +31,9 @@ public class LodBuilderConfig
 	}
 	
 	/**
-	 * @param newUseHeightmap
-	 * @param newUseBiomeColors
-	 * @param newUseSolidBlocksInBiomeColor
+	 * @param newUseHeightmap default = false
+	 * @param newUseBiomeColors default = false
+	 * @param newUseSolidBlocksInBiomeColor default = true
 	 */
 	public LodBuilderConfig(boolean newUseHeightmap, boolean newUseBiomeColors, boolean newUseSolidBlocksInBiomeColor)
 	{
