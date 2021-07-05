@@ -10,7 +10,8 @@ https://youtu.be/CCT-3s02tYA
 Forge version: 1.16.5-36.1.0
 
 Notes:
-This version has been confirmed to work in Eclipse.
+This version has been confirmed to work in Eclipse and Retail Minecraft.
+(Retail running forge version 1.16.5-36.1.0)
 
 
 ========================
