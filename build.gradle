@@ -160,7 +160,7 @@ dependencies {
 jar {
     manifest {
         attributes([
-            "Specification-Title": "Levels of Detail",
+            "Specification-Title": "Level of Detail",
             "Specification-Version": "1", // We are version 1 of ourselves
             "Implementation-Title": project.name,
             "Implementation-Version": "{version}",
