@@ -418,7 +418,9 @@ public class LodChunkGenWorker implements IWorker
 							// path was blocked since I can't clone lambda methods.
 							// I tried using a deep cloning library and discovered
 							// the problem there.
-							// ( https://github.com/kostaskougios/cloning )
+							// ( https://github.com/kostaskougios/cloning 
+							//   and
+							//   https://github.com/EsotericSoftware/kryo )
 							
 							configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
