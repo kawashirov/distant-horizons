@@ -122,7 +122,6 @@ public class LodBufferBuilder
 		generatingBuffers = true;
 		
 		
-		
 		// this seemingly useless math is required,
 		// just using (int) playerX/Z doesn't work
 		int playerXChunkOffset = ((int) playerX / LodChunk.WIDTH) * LodChunk.WIDTH;
@@ -186,10 +185,32 @@ public class LodBufferBuilder
 						{
 							ChunkPos pos = new ChunkPos(chunkX, chunkZ);
 							
+							
+							// can be used for debugging
+//							if (chunksToGen == null)
+//							{
+//								chunkGenIndex = 0;
+//								chunksToGen = new ChunkPos[maxChunkGenRequests];
+//							}
+//							
+//							if (chunkGenIndex < maxChunkGenRequests)
+//							{
+//								chunksToGen[chunkGenIndex] = pos;
+//								chunkGenIndex++;
+//							}
+							
+							
+							
+							
 							// determine if this position is closer to the player
 							// than the previous
 							int newDistance = playerChunkPos.getChessboardDistance(pos);
 							
+							// issue #40
+							// TODO optimize this code, 
+							// using the purely optimized code above we can achieve close to
+							// 100% CPU utilization, this code generally achieves 40 - 50 %
+							// I'm sure there is a better data structure for this.
 							if (newDistance < minChunkDist)
 							{
 								// this chunk is closer, clear any previous
