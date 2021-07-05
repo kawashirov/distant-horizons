@@ -113,7 +113,7 @@ public class LodConfig
 	        
 	        distanceGenerationMode = builder
 	                .comment("\n\n"
-	                		+ " Note: The times listed here are the amount of time it took"
+	                		+ " Note: The times listed here are the amount of time it took \n"
 	                		+ "       the developer's PC to generate 1 chunk, \n"
 	                		+ "       and are included so you can compare the \n"
 	                		+ "       different generation options. Your mileage may vary. \n"
@@ -165,7 +165,7 @@ public class LodConfig
 	                		+ " By default (false) those features are skipped, \n"
 	                		+ " improving stability, but decreasing how many features are \n"
 	                		+ " actually generated. \n"
-	                		+ " (for example: tree generation is a unstable feature,"
+	                		+ " (for example: tree generation is a unstable feature, \n"
 	                		+ "               so trees may not be generated.) \n"
 	                		+ " By setting this to true, all features will be generated, \n"
 	                		+ " but your game will be more unstable and crashes may occur. \n"
