@@ -12,10 +12,13 @@ import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.util.LodUtil;
 
+import net.minecraft.block.AbstractPlantBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.BushBlock;
 import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.block.GrassBlock;
+import net.minecraft.block.IGrowable;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
@@ -312,7 +315,7 @@ public class LodChunkBuilder
 	 * 			each x and z.
 	 * @param config_useBiomeColors <br>
 	 * 			If true use biome foliage, water, and grass colors, <br>
-	 * 			otherwise use the  
+	 * 			otherwise only use the block's material color
 	 */
 	private Color  generateLodColorForArea(IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{
@@ -357,9 +360,19 @@ public class LodChunkBuilder
 								Biome biome = chunk.getBiomes().getNoiseBiome(x, y + i * chunkSections.length, z);
 								
 								if (biome.getBiomeCategory() == Biome.Category.OCEAN ||
-										biome.getBiomeCategory() == Biome.Category.RIVER)
+									biome.getBiomeCategory() == Biome.Category.RIVER)
 								{
-									colorInt = biome.getWaterColor();
+									if (config.useSolidBlocksInColorGen &&
+											blockState != Blocks.WATER.defaultBlockState())
+									{
+										// non-water block
+										colorInt = getColorForBlock(x, z, blockState, biome);
+									}
+									else
+									{
+										// water block
+										colorInt = biome.getWaterColor();
+									}
 								}
 								else if (biome.getBiomeCategory() == Biome.Category.EXTREME_HILLS)
 								{
@@ -432,12 +445,16 @@ public class LodChunkBuilder
 			colorInt = biome.getGrassColor(x, z);
 		}
 		
+		
 		else if (blockState.getBlock() instanceof LeavesBlock)
 		{
 			Color leafColor = LodUtil.intToColor(biome.getFoliageColor()).darker();
 			colorInt = LodUtil.colorToInt(leafColor);
 		}
-		else if (blockState.getBlock() instanceof GrassBlock)
+		else if (blockState.getBlock() instanceof GrassBlock ||
+				blockState.getBlock() instanceof AbstractPlantBlock ||
+				blockState.getBlock() instanceof BushBlock ||
+				blockState.getBlock() instanceof IGrowable)
 		{
 			colorInt = biome.getGrassColor(x, z);
 		}
