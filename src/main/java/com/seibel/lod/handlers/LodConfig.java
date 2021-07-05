@@ -46,9 +46,13 @@ public class LodConfig
 		
 		public ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
 		
+		public ForgeConfigSpec.IntValue numberOfWorldGenerationThreads;
+		
 		/** this is multiplied by the default view distance
 		 * to determine how far out to generate/render LODs */
 		public ForgeConfigSpec.IntValue lodChunkRadiusMultiplier;
+		
+		
 		
 		Client(ForgeConfigSpec.Builder builder)
 		{
@@ -175,6 +179,18 @@ public class LodConfig
 	                		+ " If you are a Java wizard, check out the git issue here: \n"
 	                		+ " https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues/35 \n")
 	                .define("allowUnstableFeatureGeneration", false);
+	        
+	        numberOfWorldGenerationThreads = builder
+	                .comment("\n\n"
+	                		+ " This is how many threads are used when generating terrain. \n"
+	                		+ " If you experience stuttering when generating terrain, decrease \n"
+	                		+ " this number. If you want to increase LOD generation speed, \n"
+	                		+ " increase the number. \n"
+	                		+ " The max is the number of processors on your CPU. \n"
+	                		+ "\n"
+	                		+ " Requires a restart to take effect. \n"
+	                		)
+	                .defineInRange("numberOfWorldGenerationThreads", Runtime.getRuntime().availableProcessors(), 1, Runtime.getRuntime().availableProcessors());
 	        
 	        
 	        builder.pop();

@@ -57,7 +57,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  */
 public class LodChunkGenWorker implements IWorker
 {
-    public static final ExecutorService genThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+    public static final ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfWorldGenerationThreads.get());
     
     private boolean threadStarted = false;
     private LodChunkGenThread thread;
@@ -87,7 +87,7 @@ public class LodChunkGenWorker implements IWorker
     {
         if (!threadStarted)
         {
-        	thread.lodBufferBuilder.numberOfChunksWaitingToGenerate--;
+        	thread.lodBufferBuilder.numberOfChunksWaitingToGenerate.addAndGet(-1);
         	
         	if (LodConfig.CLIENT.distanceGenerationMode.get() == DistanceGenerationMode.SERVER)
 			{

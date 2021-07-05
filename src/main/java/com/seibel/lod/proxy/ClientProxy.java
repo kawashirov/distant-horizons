@@ -93,14 +93,17 @@ public class ClientProxy
 		}
 		
 		
-		// TODO for testing
+		// for testing
 //		LodConfig.CLIENT.debugMode.set(false);
+		
 //		LodConfig.CLIENT.lodDetail.set(LodDetail.DOUBLE);
-//		LodConfig.CLIENT.lodColorStyle.set(LodColorStyle.INDIVIDUAL_SIDES);
 //		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
-//		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
 //		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 //		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
+		
+//		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
+//		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
+		
 		
 		// Note to self:
 		// if "unspecified" shows up in the pie chart, it is
@@ -147,7 +150,7 @@ public class ClientProxy
 		
 		if(mc.getConnection().getLevel() == null)
 		{
-			lodBufferBuilder.numberOfChunksWaitingToGenerate = 0;
+			lodBufferBuilder.numberOfChunksWaitingToGenerate.set(0);
 			// the player has disconnected from a server
 			lodWorld.deselectWorld();
 		}

@@ -1,6 +1,7 @@
 package com.seibel.lod.builders;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.lwjgl.opengl.GL11;
 
@@ -48,15 +49,20 @@ public class LodBufferBuilder
 	 * and are waiting to be swapped with the drawable buffers*/
 	private volatile boolean switchBuffers = false;
 	
-	/** If this is greater than 0 no new chunk generation requests will be made
-	 * this is to prevent chunks from being generated for a long time in an area
+	/** This keeps track of how many chunk generation requests are on going.
+	 * This is to prevent chunks from being generated for a long time in an area
 	 * the player is no longer in. */
-	public volatile int numberOfChunksWaitingToGenerate = 0;
+	public volatile AtomicInteger numberOfChunksWaitingToGenerate = new AtomicInteger(0);
+	
+	
 	
 	/** how many chunks to generate outside of the player's
 	 * view distance at one time. (or more specifically how
-	 * many requests to make at one time) */
-	public int maxChunkGenRequests = Runtime.getRuntime().availableProcessors();
+	 * many requests to make at one time).
+	 * I multiply by 8 to make sure there is always a buffer of chunk requests,
+	 * to make sure the CPU is always busy and we can generate LODs as quickly as
+	 * possible. */
+	public int maxChunkGenRequests = LodConfig.CLIENT.numberOfWorldGenerationThreads.get() * 8;
 	
 	
 	public LodBufferBuilder(LodChunkBuilder newLodBuilder)
@@ -95,8 +101,6 @@ public class LodBufferBuilder
 			previousDimension = lodDim;
 		}
 		
-		
-		
 		generatingBuffers = true;
 		
 		
@@ -111,7 +115,7 @@ public class LodBufferBuilder
 		int startZ = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerZChunkOffset;
 		
 		
-		Thread t = new Thread(()->
+		Thread thread = new Thread(()->
 		{
 			// index of the chunk currently being added to the
 			// generation list
@@ -128,6 +132,8 @@ public class LodBufferBuilder
 			// generate our new buildable buffers
 			buildableNearBuffer.begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
 			buildableFarBuffer.begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
+			
+			
 			
 			// x axis
 			for (int i = 0; i < numbChunksWide; i++)
@@ -158,7 +164,7 @@ public class LodBufferBuilder
 					{
 						// generate a new chunk if no chunk currently exists
 						// and we aren't waiting on any other chunks to generate
-						if (lod == null && numberOfChunksWaitingToGenerate < maxChunkGenRequests)
+						if (lod == null && numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
 						{
 							ChunkPos pos = new ChunkPos(chunkX, chunkZ);
 							
@@ -171,7 +177,41 @@ public class LodBufferBuilder
 								// this chunk is closer, clear any previous
 								// positions and update the new minimum distance
 								minChunkDist = newDistance;
-								chunksToGenReserve = chunksToGen;
+								
+								
+								// move all the old chunks into the reserve
+								ChunkPos[] newReserve = new ChunkPos[maxChunkGenRequests];
+								int oldToGenIndex = 0;
+								int oldReserveIndex = 0;
+								for(int tmpIndex = 0; tmpIndex < newReserve.length; tmpIndex++)
+								{
+									// we don't check if the boundaries are good since
+									// the tmp array will always be the same length
+									// as chunksToGen and chunksToGenReserve
+									
+									if (chunksToGen[oldToGenIndex] != null)
+									{
+										// add all the closest chunks...
+										newReserve[tmpIndex] = chunksToGen[oldToGenIndex];
+										oldToGenIndex++;
+									}
+									else if (chunksToGenReserve[oldReserveIndex] != null)
+									{
+										// ...then add all the previous reserve chunks
+										// (which are farther away)
+										newReserve[tmpIndex] = chunksToGenReserve[oldToGenIndex];
+										oldReserveIndex++;
+									}
+									else
+									{
+										// we have moved all the items from
+										// the old chunksToGen and reserve
+										break;
+									}
+								}
+								chunksToGenReserve = newReserve;
+								
+								
 								
 								chunkGenIndex = 0;
 								chunksToGen = new ChunkPos[maxChunkGenRequests];
@@ -231,7 +271,10 @@ public class LodBufferBuilder
 					if(chunkPos == null)
 						break;
 					
-					numberOfChunksWaitingToGenerate++;
+					// make sure we don't generate this chunk again
+		        	lodDim.addLod(new LodChunk(chunkPos));
+					
+					numberOfChunksWaitingToGenerate.addAndGet(1);
 					
 					LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, renderer, lodChunkBuilder, this, lodDim, serverWorld, biomeContainer);
 					WorldWorkerManager.addWorker(genWorker);
@@ -247,7 +290,7 @@ public class LodBufferBuilder
 			switchBuffers = true;
 		});
 		
-		genThread.execute(t);
+		genThread.execute(thread);
 		
 		return;
 	}
