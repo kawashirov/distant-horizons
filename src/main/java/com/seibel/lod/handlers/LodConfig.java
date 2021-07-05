@@ -109,6 +109,8 @@ public class LodConfig
 	        lodTemplate = builder
 	                .comment("\n\n"
 	                		+ " How should the LODs be drawn? \n"
+	                		+ " NOTE: Currently only " + LodTemplate.CUBIC.toString() + " is implemented! \n"
+	                		+ " \n"
 	                		+ " " + LodTemplate.CUBIC.toString() + ": LOD Chunks are drawn as rectangular prisms (boxes). \n"
 	                		+ " " + LodTemplate.TRIANGULAR.toString() + ": LOD Chunks smoothly transition between other. \n"
 	                		+ " " + LodTemplate.DYNAMIC.toString() + ": LOD Chunks smoothly transition between other, \n"
@@ -130,7 +132,7 @@ public class LodConfig
 	                		+ " to determine how far out to generate/render LODs. \n"
 	                		+ " A value of 2 means that there is 1 render distance worth \n"
 	                		+ " of LODs in each cardinal direction. \n")
-	                .defineInRange("lodChunkRadiusMultiplier", 6, 2, 32);
+	                .defineInRange("lodChunkRadiusMultiplier", 8, 2, 16);
 	        
 	        distanceGenerationMode = builder
 	                .comment("\n\n"
@@ -142,7 +144,7 @@ public class LodConfig
 	                		
 	                		+ " " + DistanceGenerationMode.BIOME_ONLY.toString() + " \n"
 	                		+ " Only generate the biomes and use biome \n"
-	                		+ " grass/foliage color, water color, or ice color \n"
+	                		+ " grass/foliage color, water color, or snow color \n"
 	                		+ " to generate the color. \n"
 	                		+ " Doesn't generate height, everything is shown at sea level. \n"
 	                		+ " Multithreaded - Fastest (2-5 ms) \n"
@@ -165,8 +167,7 @@ public class LodConfig
 							+ "\n"
 							+ " " + DistanceGenerationMode.FEATURES.toString() + " \n"
 							+ " Generate everything except structures. \n"
-							+ " WARNING: This may cause world generation bugs or instability, \n"
-							+ "	since some features cause concurrentModification exceptions. \n"
+							+ " WARNING: This may cause world generation bugs or instability! \n"
 							+ " Multithreaded - Fast (15-20 ms) \n"
 							
 							+ "\n"
@@ -186,8 +187,8 @@ public class LodConfig
 	                		+ " By default (false) those features are skipped, \n"
 	                		+ " improving stability, but decreasing how many features are \n"
 	                		+ " actually generated. \n"
-	                		+ " (for example: tree generation is a unstable feature, \n"
-	                		+ "               so trees may not be generated.) \n"
+	                		+ " (for example: some tree generation is unstable, \n"
+	                		+ "               so some trees may not be generated.) \n"
 	                		+ " By setting this to true, all features will be generated, \n"
 	                		+ " but your game will be more unstable and crashes may occur. \n"
 	                		+ " \n"
