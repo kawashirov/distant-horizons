@@ -23,7 +23,7 @@ import net.minecraftforge.fml.config.ModConfig;
 /**
  * 
  * @author James Seibel
- * @version 6-27-2021
+ * @version 7-5-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -43,6 +43,8 @@ public class LodConfig
 		public ForgeConfigSpec.EnumValue<LodDetail> lodDetail;
 		
 		public ForgeConfigSpec.EnumValue<DistanceGenerationMode> distanceGenerationMode;
+		
+		public ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
 		
 		/** this is multiplied by the default view distance
 		 * to determine how far out to generate/render LODs */
@@ -99,7 +101,7 @@ public class LodConfig
             				+ " " + LodDetail.DOUBLE.toString() + ": render 4 LODs for each Chunk. \n"
             				+ " " + LodDetail.QUAD.toString() +   ": render 16 LODs for each Chunk. \n"
             				+ " " + LodDetail.HALF.toString() +   ": render 64 LODs for each Chunk. \n")
-	                .defineEnum("lodGeometryQuality", LodDetail.QUAD);
+	                .defineEnum("lodGeometryQuality", LodDetail.DOUBLE);
 	        
 	        lodChunkRadiusMultiplier = builder
 	                .comment("\n\n"
@@ -153,7 +155,27 @@ public class LodConfig
 							+ " This will also show player made structures if you \n"
 							+ " are adding the mod to a pre-existing world. \n"
 							+ " Singlethreaded - Slow (15-50 ms, with spikes up to 200 ms) \n")
-	                .defineEnum("distanceBiomeOnlyGeneration", DistanceGenerationMode.FEATURES);
+	                .defineEnum("distanceBiomeOnlyGeneration", DistanceGenerationMode.SURFACE);
+	        
+	        allowUnstableFeatureGeneration = builder
+	                .comment("\n\n"
+	                		+ " When using the " + DistanceGenerationMode.FEATURES.toString() + "generation mode \n"
+	                		+ " some features may not be thread safe, which could \n"
+	                		+ " cause instability and crashes. \n"
+	                		+ " By default (false) those features are skipped, \n"
+	                		+ " improving stability, but decreasing how many features are \n"
+	                		+ " actually generated. \n"
+	                		+ " (for example: tree generation is a unstable feature,"
+	                		+ "               so trees may not be generated.) \n"
+	                		+ " By setting this to true, all features will be generated, \n"
+	                		+ " but your game will be more unstable and crashes may occur. \n"
+	                		+ " \n"
+	                		+ " I would love to remove this option and always generate everything, \n"
+	                		+ " but I'm not sure how to do that. \n"
+	                		+ " If you are a Java wizard, check out the git issue here: \n"
+	                		+ " https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues/35 \n")
+	                .define("allowUnstableFeatureGeneration", false);
+	        
 	        
 	        builder.pop();
 	    }

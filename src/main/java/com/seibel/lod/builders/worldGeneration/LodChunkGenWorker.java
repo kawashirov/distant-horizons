@@ -53,7 +53,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  * 
  * @author James Seibel
- * @version 7-4-2021
+ * @version 7-5-2021
  */
 public class LodChunkGenWorker implements IWorker
 {
@@ -87,9 +87,6 @@ public class LodChunkGenWorker implements IWorker
     {
         if (!threadStarted)
         {
-        	// make sure we don't generate this chunk again
-        	thread.lodDim.addLod(new LodChunk(thread.pos));
-        	
         	thread.lodBufferBuilder.numberOfChunksWaitingToGenerate--;
         	
         	if (LodConfig.CLIENT.distanceGenerationMode.get() == DistanceGenerationMode.SERVER)
@@ -332,7 +329,7 @@ public class LodChunkGenWorker implements IWorker
 			snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
 			
 			
-			LodChunk lod = lodChunkBuilder.generateLodFromChunk(chunk, new LodBuilderConfig(false, true, true));
+			LodChunk lod = lodChunkBuilder.generateLodFromChunk(chunk);
 			lodDim.addLod(lod);
 		}
 		
@@ -386,6 +383,7 @@ public class LodChunkGenWorker implements IWorker
 				}
 			}
 			
+			boolean allowUnstableFeatures = LodConfig.CLIENT.allowUnstableFeatureGeneration.get();
 			
 			// generate all the features related to this chunk.
 			// this may or may not be thread safe
@@ -399,7 +397,8 @@ public class LodChunkGenWorker implements IWorker
 					{
 						ConfiguredFeature<?, ?> configuredFeature = featureSupplier.get();
 						
-						if (configuredFeaturesToAvoid.containsKey(configuredFeature.hashCode()))
+						if (!allowUnstableFeatures &&
+							configuredFeaturesToAvoid.containsKey(configuredFeature.hashCode()))
 							continue;
 						
 						
@@ -423,7 +422,8 @@ public class LodChunkGenWorker implements IWorker
 							//   and
 							//   https://github.com/EsotericSoftware/kryo )
 							
-							configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
+							if (!allowUnstableFeatures)
+								configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
 						}
 						catch(UnsupportedOperationException e)
@@ -432,7 +432,8 @@ public class LodChunkGenWorker implements IWorker
 							// isn't able to return something that a feature
 							// generator needs
 							
-							configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
+							if (!allowUnstableFeatures)
+								configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
 						}
 						catch(Exception e)
@@ -445,7 +446,8 @@ public class LodChunkGenWorker implements IWorker
 							System.out.println();
 							System.out.println();
 							
-							configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
+							if (!allowUnstableFeatures)
+								configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
 						}
 					}
