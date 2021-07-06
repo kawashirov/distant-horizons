@@ -29,7 +29,7 @@ public class LodQuadTreeDimension {
     private LodQuadTreeDimensionFileHandler fileHandler;
 
 
-    public LodQuadTreeDimension(DimensionType newDimension, LodWorld lodWorld, int newMaxWidth)
+    public LodQuadTreeDimension(DimensionType newDimension, LodQuadTreeWorld lodWorld, int newMaxWidth)
     {
         dimension = newDimension;
         width = newMaxWidth;
@@ -39,7 +39,7 @@ public class LodQuadTreeDimension {
             Minecraft mc = Minecraft.getInstance();
 
             File saveDir;
-            if(mc.isIntegratedServerRunning())
+            if(mc.hasSingleplayerServer())
             {
                 // local world
 
@@ -47,15 +47,15 @@ public class LodQuadTreeDimension {
                 seed = serverWorld.getSeed();
                 // provider needs a separate variable to prevent
                 // the compiler from complaining
-                ServerChunkProvider provider = serverWorld.getChunkProvider();
-                saveDir = new File(provider.getSavedData().folder.getCanonicalFile().getPath() + File.separatorChar + "lod");
+                ServerChunkProvider provider = serverWorld.getChunkSource();
+                saveDir = new File(provider.dataStorage.dataFolder.getCanonicalFile().getPath() + File.separatorChar + "lod");
             }
             else
             {
                 // connected to server
 
-                saveDir = new File(mc.gameDir.getCanonicalFile().getPath() +
-                        File.separatorChar + "lod server data" + File.separatorChar + LodUtil.getDimensionIDFromWorld(mc.world));
+                saveDir = new File(mc.gameDirectory.getCanonicalFile().getPath() +
+                        File.separatorChar + "lod server data" + File.separatorChar + LodUtil.getDimensionIDFromWorld(mc.level));
             }
 
             fileHandler = new LodQuadTreeDimensionFileHandler(saveDir, this);

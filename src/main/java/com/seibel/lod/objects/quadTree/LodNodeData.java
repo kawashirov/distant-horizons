@@ -62,6 +62,7 @@ public class LodNodeData {
     //if dirty is true, then this node have unsaved changes
     public boolean dirty;
 
+
     /**
      * Creates and empty LodDataPoint
      * This LodDataPoint only contains the position data
