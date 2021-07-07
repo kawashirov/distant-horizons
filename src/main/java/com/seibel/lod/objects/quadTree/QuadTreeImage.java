@@ -1,5 +1,8 @@
 package com.seibel.lod.objects.quadTree;
-
+import com.seibel.lod.util.BiomeColorsUtils;
+import kaptainwutax.biomeutils.biome.Biome;
+import kaptainwutax.biomeutils.source.OverworldBiomeSource;
+import kaptainwutax.mcutils.version.MCVersion;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -65,44 +68,42 @@ public class QuadTreeImage extends JPanel {
 
     private static void createAndShowGui( ) {
         LodQuadTree lodQuadTree = new LodQuadTree(0,0);
+        OverworldBiomeSource biomeSource = new OverworldBiomeSource(MCVersion.v1_16_5, 0);
+        for(int i = 0; i<9; i++){
+            for(int j = 0; j<8; j++) {
+                List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> levelToGenerate = lodQuadTree.getLevelToGenerate(150, 260, (byte)  (9-i), (int) 50 * (9 - i), 0);
+                boolean bw = true;
+                //System.out.println(levelToGenerate);
+                for (AbstractMap.SimpleEntry<LodQuadTree, Integer> levelDist : levelToGenerate) {
+                    LodQuadTree level = levelDist.getKey();
+                    Color color;
+                    int startX = level.getLodNodeData().startX;
+                    int startZ = level.getLodNodeData().startZ;
+                    int endX = level.getLodNodeData().endX;
+                    int endZ = level.getLodNodeData().endZ;
+                    int width = level.getLodNodeData().width;
+                    byte otherLevel = LodNodeData.BLOCK_LEVEL;
+                    int otherWidth = LodNodeData.BLOCK_WIDTH;
+                    int posX = 2 * startX / otherWidth;
+                    int posZ = 2 * startZ / otherWidth;
+                    color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ,0,posX).getId());
+                    lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color, true), true);
 
-        for(int i = 0; i<6; i++){
-            List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> levelToGenerate= lodQuadTree.getLevelToGenerate(0,0,(byte) (7),350,0);
-            boolean bw= true;
-            System.out.println(levelToGenerate);
-            for(AbstractMap.SimpleEntry<LodQuadTree, Integer> levelDist : levelToGenerate){
-                LodQuadTree level = levelDist.getKey();
-                Color color ;
-                if(bw){
-                    color = Color.red;
-                    bw = false;
-                }else{
-                    color = Color.blue;
-                    bw = true;
+                    posX = 2 * endX / otherWidth;
+                    posZ = 2 * startZ / otherWidth;
+                    color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ,0,posX).getId());
+                    lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color, true), true);
+
+                    posX = 2 * startX / otherWidth;
+                    posZ = 2 * endZ / otherWidth;
+                    color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ,0,posX).getId());
+                    lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color, true), true);
+
+                    posX = 2 * endX / otherWidth;
+                    posZ = 2 * endZ / otherWidth;
+                    color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ,0,posX).getId());
+                    lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color, true), true);
                 }
-
-                int startX = level.getLodNodeData().startX;
-                int startZ = level.getLodNodeData().startZ;
-                int endX = level.getLodNodeData().endX;
-                int endZ = level.getLodNodeData().endZ;
-                int width = level.getLodNodeData().width;
-                byte otherLevel = LodNodeData.BLOCK_LEVEL;
-                int otherWidth = LodNodeData.BLOCK_WIDTH;
-                int posZ = 2*startX/otherWidth;
-                int posX = 2*startZ/otherWidth;
-                lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color,true),true);
-
-                posZ = 2*endX/otherWidth;
-                posX = 2*startZ/otherWidth;
-                lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color,true),true);
-
-                posZ = 2*startX/otherWidth;
-                posX = 2*endZ/otherWidth;
-                lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color,true),true);
-
-                posZ = 2*endX/otherWidth;
-                posX = 2*endZ/otherWidth;
-                lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color,true),true);
             }
         }
         System.out.println(lodQuadTree.getNodeList(false,false,false));
@@ -124,21 +125,9 @@ public class QuadTreeImage extends JPanel {
         frame.setLocationByPlatform(true);
         frame.setVisible(true);
 
-        int timerDelay = 1;
-        new Timer(timerDelay, new ActionListener() {
-            private int drawCount = 0;
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (drawCount >= myDrawables.size()) {
-                    drawCount = 0;
-                    quadTreeImage.clearAll();
-                } else {
-                    quadTreeImage.addMyDrawable(myDrawables.get(drawCount));
-                    drawCount++;
-                }
-            }
-        }).start();
+        for(int i=0; i<myDrawables.size(); i++){
+            quadTreeImage.addMyDrawable(myDrawables.get(i));
+        }
     }
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
@@ -177,7 +166,7 @@ class MyDrawable {
         Stroke oldStroke = g2.getStroke();
 
         g2.setColor(color);
-        g2.setStroke(stroke);
+        g2.fill(shape);
         g2.draw(shape);
 
         g2.setColor(oldColor);

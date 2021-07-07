@@ -146,6 +146,9 @@ dependencies {
     compile('com.github.KaptainWutax:NoiseUtils:1.0.0') {
         transitive = false
     }
+    compile('com.github.KaptainWutax:MathUtils:-SNAPSHOT') {
+        transitive = false
+    }
     compile('com.github.KaptainWutax:TerrainUtils:1.0.0') {
         transitive = false
     }
