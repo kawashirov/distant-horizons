@@ -115,7 +115,8 @@ public class QuadTreeImage extends JPanel {
             }
         }
 
-        Collection<LodNodeData> lodList = lodQuadTree.getNodeToRender(playerX,playerZ,(byte) 0,10000,0);
+        Collection<LodNodeData> lodList = lodQuadTree.getNodeToRender(playerX,playerZ,(byte) 2,10000,0);
+        //lodList = lodQuadTree.getNodeList(false,false,true);
         System.out.println(lodList);
         final List<MyDrawable> myDrawables = new ArrayList<>();
         for(LodNodeData data : lodList) {
@@ -123,7 +124,7 @@ public class QuadTreeImage extends JPanel {
                     data.color, new BasicStroke(1)));
         }
 
-        myDrawables.add(new MyDrawable(new Rectangle2D.Double(playerX-10,playerZ-10, 20, 20),
+        myDrawables.add(new MyDrawable(new Rectangle2D.Double(playerZ-10,playerX-10, 20, 20),
                 Color.yellow, new BasicStroke(1)));
         final QuadTreeImage quadTreeImage = new QuadTreeImage();
 

@@ -193,7 +193,10 @@ public class LodNodeData {
             short depth = (short) dataList.stream().mapToInt(x -> (int) x.depth).max().getAsInt();
             height = height;
             depth = depth;
-            color = dataList.get(0).color;
+            int red= dataList.stream().mapToInt(x -> x.color.getRed()).sum()/dataList.size();
+            int green= dataList.stream().mapToInt(x -> x.color.getGreen()).sum()/dataList.size();
+            int blue = dataList.stream().mapToInt(x -> x.color.getBlue()).sum()/dataList.size();
+            color = new Color(red,green,blue);
             real = dataList.stream().filter(x -> x.real).count() == 4;
             voidNode = dataList.stream().filter(x -> !x.voidNode).count() == 0;
         }
