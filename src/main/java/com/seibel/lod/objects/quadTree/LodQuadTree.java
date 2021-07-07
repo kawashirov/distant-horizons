@@ -297,16 +297,31 @@ public class LodQuadTree {
      * @return
      */
     public List<LodNodeData> getNodeToRender(int x, int z, byte targetLevel, int maxDistance, int minDistance) {
-        int distance = (int) Math.sqrt(Math.pow(x + lodNodeData.centerX, 2) + Math.pow(z + lodNodeData.centerZ, 2));
+        int distance = (int) Math.sqrt(Math.pow(x - lodNodeData.centerX, 2) + Math.pow(z - lodNodeData.centerZ, 2));
+        List<Integer> distances = new ArrayList();
+        distances.add(distance);
+        distances.add((int) Math.sqrt(Math.pow(x - lodNodeData.startX, 2) + Math.pow(z - lodNodeData.startZ, 2)));
+        distances.add((int) Math.sqrt(Math.pow(x - lodNodeData.startX, 2) + Math.pow(z - lodNodeData.endZ, 2)));
+        distances.add((int) Math.sqrt(Math.pow(x - lodNodeData.endX, 2) + Math.pow(z - lodNodeData.startZ, 2)));
+        distances.add((int) Math.sqrt(Math.pow(x - lodNodeData.endX, 2) + Math.pow(z - lodNodeData.endZ, 2)));
+        int min = distances.stream().mapToInt(Integer::intValue).min().getAsInt();
+        int max = distances.stream().mapToInt(Integer::intValue).max().getAsInt();
         List<LodNodeData> nodeList = new ArrayList<>();
-        if (distance > maxDistance || distance < minDistance || targetLevel < lodNodeData.level) {
+        if (min > maxDistance || max < minDistance || targetLevel > lodNodeData.level) {
+            System.out.println("test1");
+            System.out.println(lodNodeData);
             return nodeList;
         }
-        if (targetLevel == lodNodeData.level || !isThereAnyChild()) {
-            if (!lodNodeData.voidNode) {
+        if (targetLevel == lodNodeData.level || !isNodeFull()) {
+            if (lodNodeData.voidNode) {
+                System.out.println("test2");
+                System.out.println(lodNodeData);
                 nodeList.add(lodNodeData);
                 return nodeList;
             } else {
+                System.out.println("test3");
+                System.out.println(lodNodeData);
+                nodeList.add(lodNodeData);
                 return nodeList;
             }
         } else {
@@ -334,11 +349,19 @@ public class LodQuadTree {
      */
     public List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> getLevelToGenerate(int x, int z, byte targetLevel, int maxDistance, int minDistance) {
         int distance = (int) Math.sqrt(Math.pow(x - lodNodeData.centerX, 2) + Math.pow(z - lodNodeData.centerZ, 2));
+        List<Integer> distances = new ArrayList();
+        distances.add(distance);
+        distances.add((int) Math.sqrt(Math.pow(x - lodNodeData.startX, 2) + Math.pow(z - lodNodeData.startZ, 2)));
+        distances.add((int) Math.sqrt(Math.pow(x - lodNodeData.startX, 2) + Math.pow(z - lodNodeData.endZ, 2)));
+        distances.add((int) Math.sqrt(Math.pow(x - lodNodeData.endX, 2) + Math.pow(z - lodNodeData.startZ, 2)));
+        distances.add((int) Math.sqrt(Math.pow(x - lodNodeData.endX, 2) + Math.pow(z - lodNodeData.endZ, 2)));
+        int min = distances.stream().mapToInt(Integer::intValue).min().getAsInt();
+        int max = distances.stream().mapToInt(Integer::intValue).max().getAsInt();
         List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> nodeList = new ArrayList<>();
         if ( targetLevel > lodNodeData.level) {
             return nodeList;
         }
-        if (distance > maxDistance || distance < minDistance){
+        if (min > maxDistance || max < minDistance){
             return nodeList;
         }
         if(isNodeFull()) {
