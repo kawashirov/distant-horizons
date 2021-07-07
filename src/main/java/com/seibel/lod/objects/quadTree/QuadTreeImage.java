@@ -65,8 +65,9 @@ public class QuadTreeImage extends JPanel {
 
     private static void createAndShowGui( ) {
         LodQuadTree lodQuadTree = new LodQuadTree(0,0);
-        for(int i = 0; i<9; i++){
-            List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> levelToGenerate= lodQuadTree.getLevelToGenerate(0,0,(byte) (9-i),1000,0);
+
+        for(int i = 0; i<6; i++){
+            List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> levelToGenerate= lodQuadTree.getLevelToGenerate(0,0,(byte) (7),350,0);
             boolean bw= true;
             System.out.println(levelToGenerate);
             for(AbstractMap.SimpleEntry<LodQuadTree, Integer> levelDist : levelToGenerate){
@@ -80,25 +81,28 @@ public class QuadTreeImage extends JPanel {
                     bw = true;
                 }
 
-                int posZ = level.getLodNodeData().startX/LodNodeData.BLOCK_WIDTH;
-                int posX = level.getLodNodeData().startZ/LodNodeData.BLOCK_WIDTH;
-                System.out.println(posX + " " + posZ);
-                lodQuadTree.setNodeAtLowerLevel(new LodNodeData(LodNodeData.BLOCK_LEVEL, posX, posZ, 0, 0, color,true),true);
+                int startX = level.getLodNodeData().startX;
+                int startZ = level.getLodNodeData().startZ;
+                int endX = level.getLodNodeData().endX;
+                int endZ = level.getLodNodeData().endZ;
+                int width = level.getLodNodeData().width;
+                byte otherLevel = LodNodeData.BLOCK_LEVEL;
+                int otherWidth = LodNodeData.BLOCK_WIDTH;
+                int posZ = 2*startX/otherWidth;
+                int posX = 2*startZ/otherWidth;
+                lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color,true),true);
 
-                posZ = level.getLodNodeData().endX/LodNodeData.BLOCK_WIDTH;
-                posX = level.getLodNodeData().startZ/LodNodeData.BLOCK_WIDTH;
-                System.out.println(posX + " " + posZ);
-                lodQuadTree.setNodeAtLowerLevel(new LodNodeData(LodNodeData.BLOCK_LEVEL, posX, posZ, 0, 0, color,true),true);
+                posZ = 2*endX/otherWidth;
+                posX = 2*startZ/otherWidth;
+                lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color,true),true);
 
-                posZ = level.getLodNodeData().startX/LodNodeData.BLOCK_WIDTH;
-                posX = level.getLodNodeData().endX/LodNodeData.BLOCK_WIDTH;
-                System.out.println(posX + " " + posZ);
-                lodQuadTree.setNodeAtLowerLevel(new LodNodeData(LodNodeData.BLOCK_LEVEL, posX, posZ, 0, 0, color,true),true);
+                posZ = 2*startX/otherWidth;
+                posX = 2*endZ/otherWidth;
+                lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color,true),true);
 
-                posZ = level.getLodNodeData().endX/LodNodeData.BLOCK_WIDTH;
-                posX = level.getLodNodeData().endZ/LodNodeData.BLOCK_WIDTH;
-                System.out.println(posX + " " + posZ);
-                lodQuadTree.setNodeAtLowerLevel(new LodNodeData(LodNodeData.BLOCK_LEVEL, posX, posZ, 0, 0, color,true),true);
+                posZ = 2*endX/otherWidth;
+                posX = 2*endZ/otherWidth;
+                lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color,true),true);
             }
         }
         System.out.println(lodQuadTree.getNodeList(false,false,false));

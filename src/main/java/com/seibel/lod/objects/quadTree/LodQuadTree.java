@@ -333,12 +333,12 @@ public class LodQuadTree {
      * @return
      */
     public List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> getLevelToGenerate(int x, int z, byte targetLevel, int maxDistance, int minDistance) {
-        int distance = (int) Math.sqrt(Math.pow(x + lodNodeData.centerX, 2) + Math.pow(z + lodNodeData.centerZ, 2));
+        int distance = (int) Math.sqrt(Math.pow(x - lodNodeData.centerX, 2) + Math.pow(z - lodNodeData.centerZ, 2));
         List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> nodeList = new ArrayList<>();
-        if (distance > maxDistance || distance < minDistance || targetLevel > lodNodeData.level || lodNodeData.real) {
+        if (distance > maxDistance || distance < minDistance || targetLevel > lodNodeData.level) {
             return nodeList;
         }
-        if(isThereAnyChild()) {
+        if(isNodeFull()) {
             //THIS LEVEL HAS CHILD SO IT'S GENERATED.
             if (targetLevel != lodNodeData.level) {
                 for (int NS = 0; NS <= 1; NS++) {
@@ -353,6 +353,23 @@ public class LodQuadTree {
             }
         } else {
             nodeList.add(new AbstractMap.SimpleEntry<>(this, distance));
+            /*
+            if(isThereAnyChild()){
+                for (int NS = 0; NS <= 1; NS++) {
+                    for (int WE = 0; WE <= 1; WE++) {
+                        if (children[NS][WE] == null) {
+                            setChild(NS,WE);
+                            LodQuadTree child = children[NS][WE];
+                            distance = (int) Math.sqrt(Math.pow(x - child.lodNodeData.centerX, 2) + Math.pow(z -  child.lodNodeData.centerZ, 2));
+                            nodeList.add(new AbstractMap.SimpleEntry<>(child, distance));
+                        }
+                    }
+                }
+            }else{
+            nodeList.add(new AbstractMap.SimpleEntry<>(this, distance));
+            }
+
+             */
         }
         return nodeList;
     }
@@ -400,6 +417,8 @@ public class LodQuadTree {
 
     public String toString(){
         String s = lodNodeData.toString();
+        return s;
+        /*
         if(isThereAnyChild()){
             for (int NS = 0; NS <= 1; NS++) {
                 for (int WE = 0; WE <= 1; WE++) {
@@ -411,5 +430,6 @@ public class LodQuadTree {
             }
         }
         return s;
+        */
     }
 }
