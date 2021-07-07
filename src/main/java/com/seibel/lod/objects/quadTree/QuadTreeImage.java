@@ -68,10 +68,18 @@ public class QuadTreeImage extends JPanel {
 
     private static void createAndShowGui( ) {
         LodQuadTree lodQuadTree = new LodQuadTree(0,0);
-        OverworldBiomeSource biomeSource = new OverworldBiomeSource(MCVersion.v1_16_5, 0);
+        int playerX = 150;
+        int playerZ = 260;
+        OverworldBiomeSource biomeSource = new OverworldBiomeSource(MCVersion.v1_16_5, 20);
         for(int i = 0; i<9; i++){
-            for(int j = 0; j<8; j++) {
-                List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> levelToGenerate = lodQuadTree.getLevelToGenerate(150, 260, (byte)  (9-i), (int) 50 * (9 - i), 0);
+            for(int j = 0; j<2; j++) {
+                int dist;
+                if (i == 9) {
+                    dist = 500;
+                }else{
+                    dist = 100;
+                }
+                List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> levelToGenerate = lodQuadTree.getLevelToGenerate(playerX, playerZ, (byte)  (9-i), (int) dist * (9 - i), 0);
                 boolean bw = true;
                 //System.out.println(levelToGenerate);
                 for (AbstractMap.SimpleEntry<LodQuadTree, Integer> levelDist : levelToGenerate) {
@@ -84,38 +92,39 @@ public class QuadTreeImage extends JPanel {
                     int width = level.getLodNodeData().width;
                     byte otherLevel = LodNodeData.BLOCK_LEVEL;
                     int otherWidth = LodNodeData.BLOCK_WIDTH;
-                    int posX = 2 * startX / otherWidth;
-                    int posZ = 2 * startZ / otherWidth;
+                    int posX = startX / otherWidth;
+                    int posZ = startZ / otherWidth;
                     color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ,0,posX).getId());
                     lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color, true), true);
 
-                    posX = 2 * endX / otherWidth;
-                    posZ = 2 * startZ / otherWidth;
+                    posX = endX / otherWidth;
+                    posZ = startZ / otherWidth;
                     color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ,0,posX).getId());
                     lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color, true), true);
 
-                    posX = 2 * startX / otherWidth;
-                    posZ = 2 * endZ / otherWidth;
+                    posX = startX / otherWidth;
+                    posZ = endZ / otherWidth;
                     color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ,0,posX).getId());
                     lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color, true), true);
 
-                    posX = 2 * endX / otherWidth;
-                    posZ = 2 * endZ / otherWidth;
+                    posX = endX / otherWidth;
+                    posZ = endZ / otherWidth;
                     color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ,0,posX).getId());
                     lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color, true), true);
                 }
             }
         }
-        System.out.println(lodQuadTree.getNodeList(false,false,false));
 
-        Collection<LodNodeData> lodList = lodQuadTree.getNodeList(false,false,false);
+        Collection<LodNodeData> lodList = lodQuadTree.getNodeList(false,false,true);
 
         final List<MyDrawable> myDrawables = new ArrayList<>();
         for(LodNodeData data : lodList) {
-            myDrawables.add(new MyDrawable(new Rectangle2D.Double(data.startX+100, data.startZ+100, data.width, data.width),
+            myDrawables.add(new MyDrawable(new Rectangle2D.Double(data.startX, data.startZ, data.width, data.width),
                     data.color, new BasicStroke(1)));
         }
 
+        myDrawables.add(new MyDrawable(new Rectangle2D.Double(playerZ-10,playerX-10, 20, 20),
+                Color.yellow, new BasicStroke(1)));
         final QuadTreeImage quadTreeImage = new QuadTreeImage();
 
         JFrame frame = new JFrame("DrawChit");
@@ -167,6 +176,8 @@ class MyDrawable {
 
         g2.setColor(color);
         g2.fill(shape);
+
+        g2.setStroke(stroke);
         g2.draw(shape);
 
         g2.setColor(oldColor);

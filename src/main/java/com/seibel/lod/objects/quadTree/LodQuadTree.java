@@ -135,7 +135,7 @@ public class LodQuadTree {
         if (targetLevel < currentLevel) {
             int posX = newLodNodeData.posX;
             int posZ = newLodNodeData.posZ;
-            short widthRatio = (short) (lodNodeData.width / newLodNodeData.width);
+            short widthRatio = (short) (lodNodeData.width / (2 * newLodNodeData.width));
             int NS = (posX / widthRatio) % 2;
             int WE = (posZ / widthRatio) % 2;
             if (getChild(NS, WE) == null) {
@@ -335,7 +335,10 @@ public class LodQuadTree {
     public List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> getLevelToGenerate(int x, int z, byte targetLevel, int maxDistance, int minDistance) {
         int distance = (int) Math.sqrt(Math.pow(x - lodNodeData.centerX, 2) + Math.pow(z - lodNodeData.centerZ, 2));
         List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> nodeList = new ArrayList<>();
-        if (distance > maxDistance || distance < minDistance || targetLevel > lodNodeData.level) {
+        if ( targetLevel > lodNodeData.level) {
+            return nodeList;
+        }
+        if (distance > maxDistance || distance < minDistance){
             return nodeList;
         }
         if(isNodeFull()) {
