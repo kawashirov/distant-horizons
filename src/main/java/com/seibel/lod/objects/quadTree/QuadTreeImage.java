@@ -72,10 +72,10 @@ public class QuadTreeImage extends JPanel {
         int playerZ = 260;
         OverworldBiomeSource biomeSource = new OverworldBiomeSource(MCVersion.v1_16_5, 20);
         for(int i = 0; i<9; i++){
-            for(int j = 0; j<2; j++) {
+            for(int j = 0; j<5; j++) {
                 int dist;
                 if (i == 9) {
-                    dist = 500;
+                    dist = 100;
                 }else{
                     dist = 100;
                 }
@@ -115,15 +115,15 @@ public class QuadTreeImage extends JPanel {
             }
         }
 
-        Collection<LodNodeData> lodList = lodQuadTree.getNodeList(false,false,true);
-
+        Collection<LodNodeData> lodList = lodQuadTree.getNodeToRender(playerX,playerZ,(byte) 0,10000,0);
+        System.out.println(lodList);
         final List<MyDrawable> myDrawables = new ArrayList<>();
         for(LodNodeData data : lodList) {
             myDrawables.add(new MyDrawable(new Rectangle2D.Double(data.startX, data.startZ, data.width, data.width),
                     data.color, new BasicStroke(1)));
         }
 
-        myDrawables.add(new MyDrawable(new Rectangle2D.Double(playerZ-10,playerX-10, 20, 20),
+        myDrawables.add(new MyDrawable(new Rectangle2D.Double(playerX-10,playerZ-10, 20, 20),
                 Color.yellow, new BasicStroke(1)));
         final QuadTreeImage quadTreeImage = new QuadTreeImage();
 
@@ -177,7 +177,7 @@ class MyDrawable {
         g2.setColor(color);
         g2.fill(shape);
 
-        g2.setStroke(stroke);
+        //g2.setStroke(stroke);
         g2.draw(shape);
 
         g2.setColor(oldColor);
