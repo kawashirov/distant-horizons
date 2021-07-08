@@ -76,6 +76,12 @@ public class QuadTreeImage extends JPanel {
         LodQuadTree lodQuadTree = new LodQuadTree(0, 0);
         final QuadTreeImage quadTreeImage = new QuadTreeImage();
 
+        JFrame frame = new JFrame("DrawChit");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.getContentPane().add(quadTreeImage);
+        frame.pack();
+        frame.setLocationByPlatform(true);
+        frame.setVisible(true);
         System.out.println(lodQuadTree.getLodNodeData().endX);
         int playerX = 150;
         int playerZ = 260;
@@ -87,7 +93,7 @@ public class QuadTreeImage extends JPanel {
                 if (i == 9) {
                     dist = 500;
                 } else {
-                    dist = 50;
+                    dist = 500;
                 }
                 List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> levelToGenerate = lodQuadTree.getLevelToGenerate(playerX, playerZ, (byte) (9 - i), (int) dist * (9 - i + 1), 0);
                 System.out.println(levelToGenerate);
@@ -129,8 +135,8 @@ public class QuadTreeImage extends JPanel {
                         for(Integer posZI : posZs){
                             int posX = posXI.intValue();
                             int posZ = posZI.intValue();
-                            color = BiomeColorsUtils.getColorFromBiomeBlock(biomeSource.getBiome(posZ, 0, posX));
-                            //color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ, 0, posX).getId());
+                            //color = BiomeColorsUtils.getColorFromBiomeManual(biomeSource.getBiome(posZ, 0, posX));
+                            color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ, 0, posX).getId());
                             lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color, true), true);
                         }
                     }
@@ -141,16 +147,22 @@ public class QuadTreeImage extends JPanel {
 
             //lodList = lodQuadTree.getNodeList(false,false,false);
             listOfList.add(lodList);
-            System.out.println(listOfList.size());
+
+            final List<MyDrawable> myDrawables = new ArrayList<>();
+            int amp = 2;
+            for (LodNodeData data : lodList) {
+                myDrawables.add(new MyDrawable(new Rectangle2D.Double(data.startX * amp, data.startZ * amp, data.width * amp, data.width * amp),
+                        data.color, new BasicStroke(1)));
+            }
+            myDrawables.add(new MyDrawable(new Rectangle2D.Double(playerZ * amp - 10, playerX * amp - 10, 20, 20),
+                    Color.yellow, new BasicStroke(1)));
+            for (int k = 0; k < myDrawables.size(); k++) {
+                quadTreeImage.addMyDrawable(myDrawables.get(k));
+            }
         }
 
-        JFrame frame = new JFrame("DrawChit");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.getContentPane().add(quadTreeImage);
-        frame.pack();
-        frame.setLocationByPlatform(true);
-        frame.setVisible(true);
-        int timerDelay = 1000;
+        /*
+        int timerDelay = 100;
         new Timer(timerDelay, new ActionListener() {
             private int drawCount = 0;
 
@@ -176,6 +188,7 @@ public class QuadTreeImage extends JPanel {
                 }
             }
         }).start();
+         */
     }
 
     public static void main(String[] args) {

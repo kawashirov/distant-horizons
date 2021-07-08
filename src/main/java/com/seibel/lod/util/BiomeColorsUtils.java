@@ -240,51 +240,51 @@ public class BiomeColorsUtils {
         switch(biome.getCategory()) {
             case BEACH:
             case DESERT:
-                color = new Color();
+                color = new Color(65,85,40);
                 break;
             case EXTREME_HILLS:
-                color = Blocks.SNOW.defaultMaterialColor().col;
+                color = new Color(81,129,60);
                 break;
             case FOREST:
-                color = Blocks.OAK_LEAVES.defaultMaterialColor().col;
+                color = new Color(81,129,60);
                 break;
             case SAVANNA:
-                color = Blocks.ACACIA_LEAVES.defaultMaterialColor().col;
+                color = new Color(119,113,53);
                 break;
             case JUNGLE:
-                color = Blocks.JUNGLE_LEAVES.defaultMaterialColor().col;
+                color = new Color(41,141,4);
                 break;
             case TAIGA:
-                color = Blocks.SPRUCE_LEAVES.defaultMaterialColor().col;
+                color = new Color(70,95,68);
                 break;
             case MUSHROOM:
-                color = Blocks.MYCELIUM.defaultMaterialColor().col;
+                color = new Color(123,105,109);
                 break;
             case PLAINS:
-                color = Blocks.GRASS_BLOCK.defaultMaterialColor().col;
+                color = new Color(65,85,40);
                 break;
             case OCEAN:
             case RIVER:
-                color = Blocks.WATER.defaultMaterialColor().col;
+                color = new Color(42,63,110);
             case SWAMP:
-                color = Blocks.LILY_PAD.defaultMaterialColor().col;
+                color = new Color(57,67,53);
                 break;
             case ICY:
-                color = Blocks.PACKED_ICE.defaultMaterialColor().col;
+                color = new Color(199,217,254);
                 break;
             case THE_END:
-                color = Blocks.END_STONE.defaultMaterialColor().col;
+                color = new Color(100,100,0);
                 break;
             case NETHER:
-                color = Blocks.NETHERRACK.defaultMaterialColor().col;
+                color = new Color(100,0,0);
                 break;
             case BADLANDS_PLATEAU:
             case MESA:
-                color = Blocks.RED_SAND.defaultMaterialColor().col;
+                color = new Color(188,103,39);
                 break;
             case NONE:
             default:
-                color = 0;
+                color = new Color(0,0,0,0);
         }
         return color;
     }
