@@ -333,7 +333,7 @@ public class LodQuadTree {
 
     /**
      * Nodes that can be generated in the approximated version
-     * A level is generated only if it has child and is higher than the target level
+     * A level is generated only if it has child and is higher than the target level and in the distance range
      * @param x
      * @param z
      * @param targetLevel
@@ -352,10 +352,11 @@ public class LodQuadTree {
         int min = distances.stream().mapToInt(Integer::intValue).min().getAsInt();
         int max = distances.stream().mapToInt(Integer::intValue).max().getAsInt();
         List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> nodeList = new ArrayList<>();
-        if ( targetLevel > lodNodeData.level) {
+        if ( targetLevel > lodNodeData.level ) {
             return nodeList;
         }
-        if (min > maxDistance || max < minDistance){
+        //
+        if ((min > maxDistance || max < minDistance) && !isCoordinateInLevel(x,z)){
             return nodeList;
         }
         if(isNodeFull()) {
@@ -435,6 +436,9 @@ public class LodQuadTree {
         return (lodNodeData != null);
     }
 
+    public boolean isCoordinateInLevel(int x, int z){
+        return !(lodNodeData.startX > x || lodNodeData.startZ > z || lodNodeData.endX < x || lodNodeData.endZ < z);
+    }
     public String toString(){
         String s = lodNodeData.toString();
         return s;

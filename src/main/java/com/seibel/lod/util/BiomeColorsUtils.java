@@ -1,7 +1,7 @@
 package com.seibel.lod.util;
 
 import net.minecraft.block.Blocks;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.*;
 
 import java.awt.*;
 
@@ -169,6 +169,124 @@ public class BiomeColorsUtils {
                 color = 0;
         }
         return new Color(color);
+    }
+
+    /**
+     * methods that gives the ChunkBase color of biomes
+     * @param biome to check
+     * @return color of the biome
+     */
+    public static Color getColorFromBiomeBlock(kaptainwutax.biomeutils.biome.Biome biome){
+        int color = 0;
+        switch(biome.getCategory()) {
+            case BEACH:
+            case DESERT:
+                color = Blocks.SAND.defaultMaterialColor().col;
+                break;
+            case EXTREME_HILLS:
+                color = Blocks.SNOW.defaultMaterialColor().col;
+                break;
+            case FOREST:
+                color = Blocks.OAK_LEAVES.defaultMaterialColor().col;
+                break;
+            case SAVANNA:
+                color = Blocks.ACACIA_LEAVES.defaultMaterialColor().col;
+                break;
+            case JUNGLE:
+                color = Blocks.JUNGLE_LEAVES.defaultMaterialColor().col;
+                break;
+            case TAIGA:
+                color = Blocks.SPRUCE_LEAVES.defaultMaterialColor().col;
+                break;
+            case MUSHROOM:
+                color = Blocks.MYCELIUM.defaultMaterialColor().col;
+                break;
+            case PLAINS:
+                color = Blocks.GRASS_BLOCK.defaultMaterialColor().col;
+                break;
+            case OCEAN:
+            case RIVER:
+                color = Blocks.WATER.defaultMaterialColor().col;
+            case SWAMP:
+                color = Blocks.LILY_PAD.defaultMaterialColor().col;
+                break;
+            case ICY:
+                color = Blocks.PACKED_ICE.defaultMaterialColor().col;
+                break;
+            case THE_END:
+                color = Blocks.END_STONE.defaultMaterialColor().col;
+                break;
+            case NETHER:
+                color = Blocks.NETHERRACK.defaultMaterialColor().col;
+                break;
+            case BADLANDS_PLATEAU:
+            case MESA:
+                color = Blocks.RED_SAND.defaultMaterialColor().col;
+                break;
+            case NONE:
+            default:
+                color = 0;
+        }
+        return new Color(color);
+    }
+
+    /**
+     * methods that gives the ChunkBase color of biomes
+     * @param biome to check
+     * @return color of the biome
+     */
+    public static Color getColorFromBiomeManual(kaptainwutax.biomeutils.biome.Biome biome){
+        Color color;
+        switch(biome.getCategory()) {
+            case BEACH:
+            case DESERT:
+                color = new Color();
+                break;
+            case EXTREME_HILLS:
+                color = Blocks.SNOW.defaultMaterialColor().col;
+                break;
+            case FOREST:
+                color = Blocks.OAK_LEAVES.defaultMaterialColor().col;
+                break;
+            case SAVANNA:
+                color = Blocks.ACACIA_LEAVES.defaultMaterialColor().col;
+                break;
+            case JUNGLE:
+                color = Blocks.JUNGLE_LEAVES.defaultMaterialColor().col;
+                break;
+            case TAIGA:
+                color = Blocks.SPRUCE_LEAVES.defaultMaterialColor().col;
+                break;
+            case MUSHROOM:
+                color = Blocks.MYCELIUM.defaultMaterialColor().col;
+                break;
+            case PLAINS:
+                color = Blocks.GRASS_BLOCK.defaultMaterialColor().col;
+                break;
+            case OCEAN:
+            case RIVER:
+                color = Blocks.WATER.defaultMaterialColor().col;
+            case SWAMP:
+                color = Blocks.LILY_PAD.defaultMaterialColor().col;
+                break;
+            case ICY:
+                color = Blocks.PACKED_ICE.defaultMaterialColor().col;
+                break;
+            case THE_END:
+                color = Blocks.END_STONE.defaultMaterialColor().col;
+                break;
+            case NETHER:
+                color = Blocks.NETHERRACK.defaultMaterialColor().col;
+                break;
+            case BADLANDS_PLATEAU:
+            case MESA:
+                color = Blocks.RED_SAND.defaultMaterialColor().col;
+                break;
+            case NONE:
+            default:
+                color = 0;
+        }
+        return color;
     }
 
     /**
