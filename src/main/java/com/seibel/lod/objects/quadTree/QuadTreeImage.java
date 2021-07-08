@@ -122,13 +122,13 @@ public class QuadTreeImage extends JPanel {
                         posZs.add(endZ / otherWidth);
                     }else{
                         posXs.add(startX / otherWidth);
-                        posXs.add((centerX / otherWidth)-1);
+                        //posXs.add((centerX / otherWidth)-1);
                         posXs.add(centerX / otherWidth);
-                        posXs.add(endX / otherWidth);
+                        //posXs.add(endX / otherWidth);
                         posZs.add(startZ / otherWidth);
-                        posZs.add((centerZ / otherWidth)-1);
+                        //posZs.add((centerZ / otherWidth)-1);
                         posZs.add(centerZ / otherWidth);
-                        posZs.add(endZ / otherWidth);
+                        //posZs.add(endZ / otherWidth);
                     }
 
                     for(Integer posXI : posXs){
@@ -147,7 +147,7 @@ public class QuadTreeImage extends JPanel {
 
             //lodList = lodQuadTree.getNodeList(false,false,false);
             listOfList.add(lodList);
-
+/*
             final List<MyDrawable> myDrawables = new ArrayList<>();
             int amp = 2;
             for (LodNodeData data : lodList) {
@@ -158,11 +158,12 @@ public class QuadTreeImage extends JPanel {
                     Color.yellow, new BasicStroke(1)));
             for (int k = 0; k < myDrawables.size(); k++) {
                 quadTreeImage.addMyDrawable(myDrawables.get(k));
+
             }
+ */
         }
 
-        /*
-        int timerDelay = 100;
+        int timerDelay = 500;
         new Timer(timerDelay, new ActionListener() {
             private int drawCount = 0;
 
@@ -188,7 +189,6 @@ public class QuadTreeImage extends JPanel {
                 }
             }
         }).start();
-         */
     }
 
     public static void main(String[] args) {
