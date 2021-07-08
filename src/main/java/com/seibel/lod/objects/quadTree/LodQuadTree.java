@@ -307,7 +307,10 @@ public class LodQuadTree {
         int min = distances.stream().mapToInt(Integer::intValue).min().getAsInt();
         int max = distances.stream().mapToInt(Integer::intValue).max().getAsInt();
         List<LodNodeData> nodeList = new ArrayList<>();
-        if (min > maxDistance || max < minDistance || targetLevel > lodNodeData.level) {
+        if (targetLevel > lodNodeData.level) {
+            return nodeList;
+        }
+        if ((min > maxDistance || max < minDistance) && !isCoordinateInLevel(x,z)){
             return nodeList;
         }
         if (targetLevel == lodNodeData.level || !isNodeFull()) {
