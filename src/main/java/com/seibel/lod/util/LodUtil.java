@@ -79,8 +79,8 @@ public class LodUtil
 	public static RegionPos convertChunkPosToRegionPos(ChunkPos pos)
 	{
 		RegionPos rPos = new RegionPos();
-		rPos.x = pos.x / LodRegion.SIZE;
-		rPos.z = pos.z / LodRegion.SIZE;
+		rPos.x = pos.x / 512;
+		rPos.z = pos.z / 512;
 		
 		// prevent issues if X/Z is negative and less than 16
 		if (pos.x < 0)

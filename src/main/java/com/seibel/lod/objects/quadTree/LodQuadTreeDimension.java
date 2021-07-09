@@ -34,40 +34,34 @@ public class LodQuadTreeDimension {
     {
         dimension = newDimension;
         width = newMaxWidth;
+        if(newDimension != null && lodWorld != null) {
+            try {
+                Minecraft mc = Minecraft.getInstance();
 
-            /*
-        try
-        {
-            Minecraft mc = Minecraft.getInstance();
+                File saveDir;
+                if (mc.hasSingleplayerServer()) {
+                    // local world
 
-            File saveDir;
-            if(mc.hasSingleplayerServer())
-            {
-                // local world
+                    ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(newDimension);
+                    seed = serverWorld.getSeed();
+                    // provider needs a separate variable to prevent
+                    // the compiler from complaining
+                    ServerChunkProvider provider = serverWorld.getChunkSource();
+                    saveDir = new File(provider.dataStorage.dataFolder.getCanonicalFile().getPath() + File.separatorChar + "lod");
+                } else {
+                    // connected to server
 
-                ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(newDimension);
-                seed = serverWorld.getSeed();
-                // provider needs a separate variable to prevent
-                // the compiler from complaining
-                ServerChunkProvider provider = serverWorld.getChunkSource();
-                saveDir = new File(provider.dataStorage.dataFolder.getCanonicalFile().getPath() + File.separatorChar + "lod");
+                    saveDir = new File(mc.gameDirectory.getCanonicalFile().getPath() +
+                            File.separatorChar + "lod server data" + File.separatorChar + LodUtil.getDimensionIDFromWorld(mc.level));
+                }
+
+                fileHandler = new LodQuadTreeDimensionFileHandler(saveDir, this);
+
+            } catch (IOException e) {
+                // the file handler wasn't able to be created
+                // we won't be able to read or write any files
             }
-            else
-            {
-                // connected to server
-
-                saveDir = new File(mc.gameDirectory.getCanonicalFile().getPath() +
-                        File.separatorChar + "lod server data" + File.separatorChar + LodUtil.getDimensionIDFromWorld(mc.level));
-            }
-
-            fileHandler = new LodQuadTreeDimensionFileHandler(saveDir, this);
-
         }
-        catch(IOException e)
-        {
-            // the file handler wasn't able to be created
-            // we won't be able to read or write any files
-        } */
 
 
         regions = new LodQuadTree[width][width];
@@ -262,8 +256,8 @@ public class LodQuadTreeDimension {
     public void addNode(LodNodeData lodNodeData)
     {
         RegionPos pos = new RegionPos(
-                lodNodeData.posX / lodNodeData.width,
-                lodNodeData.posZ / lodNodeData.width
+                lodNodeData.startX / 512,
+                lodNodeData.startZ / 512
         );
 
         // don't continue if the region can't be saved
@@ -280,10 +274,6 @@ public class LodQuadTreeDimension {
             region = new LodQuadTree(pos.x, pos.z);
             setRegion(region);
         }
-        System.out.println("Adding this node");
-        System.out.println(lodNodeData);
-        System.out.println("to");
-        System.out.println(region);
         region.setNodeAtLowerLevel(lodNodeData, true);
 
         // don't save empty place holders to disk
@@ -341,11 +331,22 @@ public class LodQuadTreeDimension {
      * @return list of quadTrees
      */
     public List<LodQuadTree> getNodeToGenerate(int x, int z, byte level, int maxDistance, int minDistance){
+
         int n = regions.length;
+        int xIndex;
+        int zIndex;
+        LodQuadTree region;
         List<Map.Entry<LodQuadTree,Integer>> listOfQuadTree = new ArrayList<>();
-        for(int i=0; i<n; i++){
-            for(int j=0; j<n; j++){
-                listOfQuadTree.addAll(regions[i][j].getLevelToGenerate(x,z,level,maxDistance,minDistance));
+        for(int xRegion=0; xRegion<n; xRegion++){
+            for(int zRegion=0; zRegion<n; zRegion++){
+                xIndex = (xRegion + centerX) - halfWidth;
+                zIndex = (zRegion + centerZ) - halfWidth;
+                region = getRegion(xIndex,zIndex);
+                if (region == null){
+                    region = new LodQuadTree(xIndex, zIndex);
+                    setRegion(region);
+                }
+                listOfQuadTree.addAll(region.getLevelToGenerate(x,z,level,maxDistance,minDistance));
             }
         }
         Collections.sort(listOfQuadTree,Map.Entry.comparingByValue());
@@ -359,9 +360,17 @@ public class LodQuadTreeDimension {
     public List<LodNodeData> getNodes(boolean getOnlyReal, boolean getOnlyDirty, boolean getOnlyLeaf){
         int n = regions.length;
         List<LodNodeData> listOfNodes = new ArrayList<>();
-        for(int i=0; i<n; i++){
-            for(int j=0; j<n; j++){
-                listOfNodes.addAll(regions[i][j].getNodeList(getOnlyReal, getOnlyDirty, getOnlyLeaf));
+        int xIndex;
+        int zIndex;
+        LodQuadTree region;
+        for(int xRegion=0; xRegion<n; xRegion++){
+            for(int zRegion=0; zRegion<n; zRegion++){
+                xIndex = (xRegion + centerX) - halfWidth;
+                zIndex = (zRegion + centerZ) - halfWidth;
+                region = getRegion(xIndex,zIndex);
+                if (region != null){
+                    listOfNodes.addAll(region.getNodeList(getOnlyReal, getOnlyDirty, getOnlyLeaf));
+                }
             }
         }
         return listOfNodes;

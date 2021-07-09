@@ -73,16 +73,16 @@ public class QuadTreeImage extends JPanel {
     }
 
     private static void createAndShowGui() {
-        int playerX = 600;
-        int playerZ = 260;
-        LodQuadTreeDimension dim = new LodQuadTreeDimension(null, null, 10);
-        dim.move(playerX / 512, playerZ / 512);
-        dim.initializeNullRegions();
+        int playerX = 0;
+        int playerZ = 0;
+        LodQuadTreeDimension dim = new LodQuadTreeDimension(null, null, 8);
         System.out.println(dim.getRegion(0, 0));
-        List<LodQuadTree> levelToGenerate2 = dim.getNodeToGenerate(playerX, playerZ, (byte) 0, 1000, 0);
-        System.out.println(levelToGenerate2);
-
+        dim.move(playerX/512,playerZ/512);
+        System.out.println(dim.getCenterX());
+        System.out.println(dim.getCenterZ());
+        System.out.println(dim.getWidth());
         final QuadTreeImage quadTreeImage = new QuadTreeImage();
+
 
         JFrame frame = new JFrame("DrawChit");
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -92,18 +92,16 @@ public class QuadTreeImage extends JPanel {
         frame.setVisible(true);
         List<Collection<LodNodeData>> listOfList = new ArrayList<>();
         OverworldBiomeSource biomeSource = new OverworldBiomeSource(MCVersion.v1_16_5, 100);
-        for (int i = 0; i <= (9 - 8); i++) {
+        for (int i = 0; i <= (9 - 5); i++) {
             for (int j = 0; j < 1; j++) {
                 int dist;
                 if (i == 9) {
-                    dist = 1000;
+                    dist = 10000;
                 } else {
                     dist = 100;
                 }
-                List<LodQuadTree> levelToGenerate = dim.getNodeToGenerate(playerX, playerZ, (byte) (9 - i), (int) dist * (9 - i + 1), 0);
-
+                List<LodQuadTree> levelToGenerate = dim.getNodeToGenerate(playerX, playerZ, (byte) (9 - i), (int) dist, 0);
                 for (LodQuadTree level : levelToGenerate) {
-                    System.out.println(level);
                     Color color;
                     int startX = level.getLodNodeData().startX;
                     int startZ = level.getLodNodeData().startZ;
@@ -117,6 +115,7 @@ public class QuadTreeImage extends JPanel {
 
                     List<Integer> posXs = new ArrayList<>();
                     List<Integer> posZs = new ArrayList<>();
+                    /*
                     if (level.getLodNodeData().level == 0) {
                         posXs.add(startX / otherWidth);
                         posZs.add(startZ / otherWidth);
@@ -135,6 +134,11 @@ public class QuadTreeImage extends JPanel {
                         //posZs.add(centerZ / otherWidth);
                         //posZs.add(endZ / otherWidth);
                     }
+                     */
+                    posXs.add(startX / otherWidth);
+                    //posXs.add(centerX / otherWidth);
+                    posZs.add(startZ / otherWidth);
+                    //posXs.add(centerZ / otherWidth);
 
                     for (Integer posXI : posXs) {
                         for (Integer posZI : posZs) {
@@ -148,29 +152,13 @@ public class QuadTreeImage extends JPanel {
                     }
                 }
             }
-            Collection<LodNodeData> lodList = dim.getNodes(false, false, true);
+            Collection<LodNodeData> lodList = dim.getNodes(false, false, false);
             //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 2, 100, 0));
             //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 3, 200, 100));
             //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 4, 400, 200));
             //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 5, 10000, 400));
-
-
-            //lodList = lodQuadTree.getNodeList(false,false,false);
             listOfList.add(lodList);
-/*
-            final List<MyDrawable> myDrawables = new ArrayList<>();
-            int amp = 2;
-            for (LodNodeData data : lodList) {
-                myDrawables.add(new MyDrawable(new Rectangle2D.Double(data.startX * amp, data.startZ * amp, data.width * amp, data.width * amp),
-                        data.color, new BasicStroke(1)));
-            }
-            myDrawables.add(new MyDrawable(new Rectangle2D.Double(playerZ * amp - 10, playerX * amp - 10, 20, 20),
-                    Color.yellow, new BasicStroke(1)));
-            for (int k = 0; k < myDrawables.size(); k++) {
-                quadTreeImage.addMyDrawable(myDrawables.get(k));
-
-            }
- */
+            System.out.println(lodList);
         }
 
 
@@ -182,16 +170,26 @@ public class QuadTreeImage extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 if (drawCount >= listOfList.size()) {
                     drawCount = 0;
-                    quadTreeImage.clearAll();
                 } else {
+                    if(drawCount==0) quadTreeImage.clearAll();
                     final List<MyDrawable> myDrawables = new ArrayList<>();
-                    int amp = 1;
+                    double amp = 1;
+                    int xOffset = (dim.getCenterX() - (dim.getWidth()/2))*512;
+                    int zOffset = (dim.getCenterZ() - (dim.getWidth()/2))*512;
                     Collection<LodNodeData> lodList = listOfList.get(drawCount);
                     for (LodNodeData data : lodList) {
-                        myDrawables.add(new MyDrawable(new Rectangle2D.Double(data.startX * amp, data.startZ * amp, data.width * amp, data.width * amp),
+                        myDrawables.add(new MyDrawable(new Rectangle2D.Double(
+                                ((data.startX - xOffset ) * amp),
+                                ((data.startZ - zOffset) * amp),
+                                data.width * amp,
+                                data.width * amp),
                                 data.color, new BasicStroke(1)));
                     }
-                    myDrawables.add(new MyDrawable(new Rectangle2D.Double(playerX * amp - 10, playerZ * amp - 10, 20, 20),
+                    myDrawables.add(new MyDrawable(new Rectangle2D.Double(
+                            (playerX - 10 + xOffset) * amp,
+                            (playerZ - 10 + zOffset) * amp,
+                            20,
+                            20),
                             Color.yellow, new BasicStroke(1)));
                     for (int k = 0; k < myDrawables.size(); k++) {
                         quadTreeImage.addMyDrawable(myDrawables.get(k));

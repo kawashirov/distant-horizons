@@ -136,8 +136,8 @@ public class LodQuadTree {
             int posX = newLodNodeData.posX;
             int posZ = newLodNodeData.posZ;
             short widthRatio = (short) (lodNodeData.width / (2 * newLodNodeData.width));
-            int NS = (posX / widthRatio) % 2;
-            int WE = (posZ / widthRatio) % 2;
+            int NS = Math.abs((posX / widthRatio) % 2);
+            int WE = Math.abs((posZ / widthRatio) % 2);
             if (getChild(NS, WE) == null) {
                 setChild(NS, WE);
             }
