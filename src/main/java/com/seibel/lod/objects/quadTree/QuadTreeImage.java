@@ -21,6 +21,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -34,7 +35,7 @@ import javax.swing.Timer;
 
 @SuppressWarnings("serial")
 public class QuadTreeImage extends JPanel {
-    private static final int PREF_W = 1024;
+    private static final int PREF_W = (int) 0.1*16*512;
     private static final int PREF_H = PREF_W;
     private List<MyDrawable> drawables = new ArrayList<>();
 
@@ -73,9 +74,9 @@ public class QuadTreeImage extends JPanel {
     }
 
     private static void createAndShowGui() {
-        int playerX = 1000;
-        int playerZ = 3000;
-        LodQuadTreeDimension dim = new LodQuadTreeDimension(null, null, 8);
+        int playerX = 8*512;
+        int playerZ = (8*512);
+        LodQuadTreeDimension dim = new LodQuadTreeDimension(null, null, 16);
         System.out.println(dim.getRegion(0, 0));
         dim.move(playerX/512,playerZ/512);
         System.out.println(dim.getCenterX());
@@ -92,15 +93,15 @@ public class QuadTreeImage extends JPanel {
         frame.setVisible(true);
         List<List<LodNodeData>> listOfList = new ArrayList<>();
         OverworldBiomeSource biomeSource = new OverworldBiomeSource(MCVersion.v1_16_5, 100);
-        for (int i = 0; i <= (9 - 0); i++) {
+        for (int i = 0; i <= (9 - 2); i++) {
             for (int j = 0; j < 1; j++) {
                 int dist;
                 if (i == 9) {
-                    dist = 200;
+                    dist = 30;
                 } else {
-                    dist = 200;
+                    dist = 30;
                 }
-                List<LodQuadTree> levelToGenerate = dim.getNodeToGenerate(playerX, playerZ, (byte) (9 - i), (int) dist*(9-i), 0);
+                List<LodQuadTree> levelToGenerate = dim.getNodeToGenerate(playerX, playerZ, (byte) (9 - i), (int) (dist*Math.pow(9-i,2.5)), 0);
                 for (LodQuadTree level : levelToGenerate) {
                     Color color;
                     int startX = level.getLodNodeData().startX;
@@ -129,15 +130,20 @@ public class QuadTreeImage extends JPanel {
                         for (Integer posZI : posZs) {
                             int posZ = posXI.intValue();
                             int posX = posZI.intValue();
-                            //color = BiomeColorsUtils.getColorFromBiomeManual(biomeSource.getBiome(posZ, 0, posX));
-                            color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ, 0, posX).getId());
+                            color = BiomeColorsUtils.getColorFromBiomeManual(biomeSource.getBiome(posZ, 0, posX));
+                            //color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ, 0, posX).getId());
                             LodNodeData node = new LodNodeData(otherLevel, posX, posZ, 0, 0, color, true);
                             dim.addNode(node);
                         }
                     }
                 }
             }
-            List<LodNodeData> lodList = dim.getNodeToRender(playerX,playerZ,(byte) 0, 10000,0);
+            List<LodNodeData> lodList = dim.getNodeToRender(playerX,playerZ,(byte) 8, 10000,4000);
+            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 7, 4000,2000));
+            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 6, 2000,1000));
+            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 5, 1000,500));
+            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 4, 500,0));
+            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 3, 250,0));
             //Collection<LodNodeData> lodList = dim.getNodes(false,false,false);
             //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 2, 100, 0));
             //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 3, 200, 100));
@@ -147,11 +153,14 @@ public class QuadTreeImage extends JPanel {
         }
 
 
-        int timerDelay = 250;
+        int timerDelay = 5000;
         System.out.println("STARTING");
-        System.out.println(listOfList.get(0).get(0).startX);
         System.out.println(dim.getWidth());
         System.out.println(dim.getCenterX());
+        int xOffset = listOfList.stream().mapToInt(x -> x.stream().mapToInt(y -> y.startX).min().getAsInt()).min().getAsInt();
+        int zOffset = listOfList.stream().mapToInt(x -> x.stream().mapToInt(y -> y.startZ).min().getAsInt()).min().getAsInt();
+        System.out.println(xOffset);
+        System.out.println(zOffset);
         new Timer(timerDelay, new ActionListener() {
             private int drawCount = 0;
 
@@ -162,11 +171,10 @@ public class QuadTreeImage extends JPanel {
                 } else {
                     if(drawCount==0) quadTreeImage.clearAll();
                     final List<MyDrawable> myDrawables = new ArrayList<>();
-                    double amp = 1;
-                    int xOffset = (dim.getCenterX() - (dim.getWidth()/2))*512;
-                    int zOffset = (dim.getCenterZ() - (dim.getWidth()/2))*512;
+                    double amp = 0.1;
                     Collection<LodNodeData> lodList = listOfList.get(drawCount);
                     for (LodNodeData data : lodList) {
+                        System.out.println();
                         myDrawables.add(new MyDrawable(new Rectangle2D.Double(
                                 ((data.startX - xOffset ) * amp),
                                 ((data.startZ - zOffset) * amp),
@@ -182,6 +190,15 @@ public class QuadTreeImage extends JPanel {
                             Color.yellow, new BasicStroke(1)));
                     for (int k = 0; k < myDrawables.size(); k++) {
                         quadTreeImage.addMyDrawable(myDrawables.get(k));
+                    }
+                    BufferedImage img = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_RGB);
+                    Graphics2D g2d = img.createGraphics();
+                    frame.printAll(g2d);
+                    g2d.dispose();
+                    try {
+                        ImageIO.write(img, "png", new File("Img" + drawCount+".png"));
+                    } catch (IOException ioException) {
+                        ioException.printStackTrace();
                     }
                     drawCount++;
                 }
