@@ -1,9 +1,5 @@
 package com.seibel.lod.proxy;
 
-import com.seibel.lod.builders.LodNodeBufferBuilder;
-import com.seibel.lod.builders.LodNodeBuilder;
-import com.seibel.lod.objects.quadTree.LodQuadTreeWorld;
-import com.seibel.lod.render.LodNodeRenderer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,10 +31,10 @@ public class ClientProxy
 {
 	public static final Logger LOGGER = LogManager.getLogger("LOD");
 	
-	private static LodQuadTreeWorld lodWorld = new LodQuadTreeWorld();
-	private static LodNodeBuilder lodChunkBuilder = new LodNodeBuilder();
-	private static LodNodeBufferBuilder lodBufferBuilder = new LodNodeBufferBuilder(lodChunkBuilder);
-	private static LodNodeRenderer renderer = new LodNodeRenderer(lodBufferBuilder);
+	private static LodWorld lodWorld = new LodWorld();
+	private static LodChunkBuilder lodChunkBuilder = new LodChunkBuilder();
+	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder(lodChunkBuilder);
+	private static LodRenderer renderer = new LodRenderer(lodBufferBuilder);
 	
 	Minecraft mc = Minecraft.getInstance();
 	
