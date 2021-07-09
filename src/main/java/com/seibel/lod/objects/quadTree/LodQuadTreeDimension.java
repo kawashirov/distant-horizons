@@ -35,6 +35,7 @@ public class LodQuadTreeDimension {
         dimension = newDimension;
         width = newMaxWidth;
 
+            /*
         try
         {
             Minecraft mc = Minecraft.getInstance();
@@ -60,12 +61,13 @@ public class LodQuadTreeDimension {
             }
 
             fileHandler = new LodQuadTreeDimensionFileHandler(saveDir, this);
+
         }
         catch(IOException e)
         {
             // the file handler wasn't able to be created
             // we won't be able to read or write any files
-        }
+        } */
 
 
         regions = new LodQuadTree[width][width];
@@ -231,7 +233,7 @@ public class LodQuadTreeDimension {
     /**
      *this method create all the regions that are null
      */
-    public void initializeNullRegions(LodNodeData lodNodeData){
+    public void initializeNullRegions(){
         int n = regions.length;
         int xIndex;
         int zIndex;
@@ -278,11 +280,14 @@ public class LodQuadTreeDimension {
             region = new LodQuadTree(pos.x, pos.z);
             setRegion(region);
         }
-
+        System.out.println("Adding this node");
+        System.out.println(lodNodeData);
+        System.out.println("to");
+        System.out.println(region);
         region.setNodeAtLowerLevel(lodNodeData, true);
 
         // don't save empty place holders to disk
-        if (!lodNodeData.real && fileHandler != null)
+        if (lodNodeData.real && fileHandler != null)
         {
             // mark the region as dirty so it will be saved to disk
             int xIndex = (pos.x - centerX) + halfWidth;
@@ -345,6 +350,21 @@ public class LodQuadTreeDimension {
         }
         Collections.sort(listOfQuadTree,Map.Entry.comparingByValue());
         return listOfQuadTree.stream().map(entry -> entry.getKey()).collect(Collectors.toList());
+    }
+
+    /**
+     * getNodes
+     * @return list of quadTrees
+     */
+    public List<LodNodeData> getNodes(boolean getOnlyReal, boolean getOnlyDirty, boolean getOnlyLeaf){
+        int n = regions.length;
+        List<LodNodeData> listOfNodes = new ArrayList<>();
+        for(int i=0; i<n; i++){
+            for(int j=0; j<n; j++){
+                listOfNodes.addAll(regions[i][j].getNodeList(getOnlyReal, getOnlyDirty, getOnlyLeaf));
+            }
+        }
+        return listOfNodes;
     }
 
     /**

@@ -75,15 +75,13 @@ public class QuadTreeImage extends JPanel {
     private static void createAndShowGui() {
         int playerX = 600;
         int playerZ = 260;
-        LodQuadTree lodQuadTree1 = new LodQuadTree(0, 0);
-        LodQuadTree lodQuadTree3 = new LodQuadTree(1, 0);
-        LodQuadTree lodQuadTree2 = new LodQuadTree(0, 1);
-        LodQuadTree lodQuadTree4 = new LodQuadTree(1, 1);
-        List<LodQuadTree> lodQuadTreeList = new ArrayList<>();
-        lodQuadTreeList.add(lodQuadTree1);
-        lodQuadTreeList.add(lodQuadTree2);
-        lodQuadTreeList.add(lodQuadTree3);
-        lodQuadTreeList.add(lodQuadTree4);
+        LodQuadTreeDimension dim = new LodQuadTreeDimension(null, null, 10);
+        dim.move(playerX / 512, playerZ / 512);
+        dim.initializeNullRegions();
+        System.out.println(dim.getRegion(0, 0));
+        List<LodQuadTree> levelToGenerate2 = dim.getNodeToGenerate(playerX, playerZ, (byte) 0, 1000, 0);
+        System.out.println(levelToGenerate2);
+
         final QuadTreeImage quadTreeImage = new QuadTreeImage();
 
         JFrame frame = new JFrame("DrawChit");
@@ -94,77 +92,68 @@ public class QuadTreeImage extends JPanel {
         frame.setVisible(true);
         List<Collection<LodNodeData>> listOfList = new ArrayList<>();
         OverworldBiomeSource biomeSource = new OverworldBiomeSource(MCVersion.v1_16_5, 100);
-        for (int i = 0; i <= (9 - 2); i++) {
+        for (int i = 0; i <= (9 - 8); i++) {
             for (int j = 0; j < 1; j++) {
+                int dist;
+                if (i == 9) {
+                    dist = 1000;
+                } else {
+                    dist = 100;
+                }
+                List<LodQuadTree> levelToGenerate = dim.getNodeToGenerate(playerX, playerZ, (byte) (9 - i), (int) dist * (9 - i + 1), 0);
 
-                for (LodQuadTree lodQuadTree : lodQuadTreeList) {
-                    int dist;
-                    if (i == 9) {
-                        dist = 1000;
+                for (LodQuadTree level : levelToGenerate) {
+                    System.out.println(level);
+                    Color color;
+                    int startX = level.getLodNodeData().startX;
+                    int startZ = level.getLodNodeData().startZ;
+                    int endX = level.getLodNodeData().endX;
+                    int endZ = level.getLodNodeData().endZ;
+                    int centerX = level.getLodNodeData().centerX;
+                    int centerZ = level.getLodNodeData().centerZ;
+                    int width = level.getLodNodeData().width;
+                    byte otherLevel = LodNodeData.BLOCK_LEVEL;
+                    int otherWidth = LodNodeData.BLOCK_WIDTH;
+
+                    List<Integer> posXs = new ArrayList<>();
+                    List<Integer> posZs = new ArrayList<>();
+                    if (level.getLodNodeData().level == 0) {
+                        posXs.add(startX / otherWidth);
+                        posZs.add(startZ / otherWidth);
+                    } else if (level.getLodNodeData().level == 2) {
+                        posXs.add(startX / otherWidth);
+                        posXs.add(endX / otherWidth);
+                        posZs.add(startZ / otherWidth);
+                        posZs.add(endZ / otherWidth);
                     } else {
-                        dist = 100;
+                        posXs.add(startX / otherWidth);
+                        //posXs.add((centerX / otherWidth)-1);
+                        //posXs.add(centerX / otherWidth);
+                        //posXs.add(endX / otherWidth);
+                        posZs.add(startZ / otherWidth);
+                        //posZs.add((centerZ / otherWidth)-1);
+                        //posZs.add(centerZ / otherWidth);
+                        //posZs.add(endZ / otherWidth);
                     }
-                    List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> levelToGenerate = lodQuadTree.getLevelToGenerate(playerX, playerZ, (byte) (9 - i), (int) dist * (9 - i + 1), 0);
 
-                    for (AbstractMap.SimpleEntry<LodQuadTree, Integer> levelDist : levelToGenerate) {
-                        LodQuadTree level = levelDist.getKey();
-                        Color color;
-                        int startX = level.getLodNodeData().startX;
-                        int startZ = level.getLodNodeData().startZ;
-                        int endX = level.getLodNodeData().endX;
-                        int endZ = level.getLodNodeData().endZ;
-                        int centerX = level.getLodNodeData().centerX;
-                        int centerZ = level.getLodNodeData().centerZ;
-                        int width = level.getLodNodeData().width;
-                        byte otherLevel = LodNodeData.BLOCK_LEVEL;
-                        int otherWidth = LodNodeData.BLOCK_WIDTH;
-
-                        List<Integer> posXs = new ArrayList<>();
-                        List<Integer> posZs = new ArrayList<>();
-                        if (level.getLodNodeData().level == 0) {
-                            posXs.add(startX / otherWidth);
-                            posZs.add(startZ / otherWidth);
-                        } else if (level.getLodNodeData().level == 2) {
-                            posXs.add(startX / otherWidth);
-                            posXs.add(endX / otherWidth);
-                            posZs.add(startZ / otherWidth);
-                            posZs.add(endZ / otherWidth);
-                        } else {
-                            posXs.add(startX / otherWidth);
-                            //posXs.add((centerX / otherWidth)-1);
-                            posXs.add(centerX / otherWidth);
-                            //posXs.add(endX / otherWidth);
-                            posZs.add(startZ / otherWidth);
-                            //posZs.add((centerZ / otherWidth)-1);
-                            posZs.add(centerZ / otherWidth);
-                            //posZs.add(endZ / otherWidth);
-                        }
-
-                        for (Integer posXI : posXs) {
-                            for (Integer posZI : posZs) {
-                                int posZ = posXI.intValue();
-                                int posX = posZI.intValue();
-                                //color = BiomeColorsUtils.getColorFromBiomeManual(biomeSource.getBiome(posZ, 0, posX));
-                                color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ, 0, posX).getId());
-                                lodQuadTree.setNodeAtLowerLevel(new LodNodeData(otherLevel, posX, posZ, 0, 0, color, true), true);
-                            }
+                    for (Integer posXI : posXs) {
+                        for (Integer posZI : posZs) {
+                            int posZ = posXI.intValue();
+                            int posX = posZI.intValue();
+                            //color = BiomeColorsUtils.getColorFromBiomeManual(biomeSource.getBiome(posZ, 0, posX));
+                            color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ, 0, posX).getId());
+                            LodNodeData node = new LodNodeData(otherLevel, posX, posZ, 0, 0, color, true);
+                            dim.addNode(node);
                         }
                     }
                 }
             }
-            Collection<LodNodeData> lodList = new ArrayList<>();
-            for (LodQuadTree lodQuadTree : lodQuadTreeList) {
-                //lodList.addAll(lodQuadTree.getNodeList(false, false,true));
-                lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 0, 10000, 0));
-                /*
-                lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 2, 100, 0));
-                lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 3, 200, 100));
-                lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 4, 400, 200));
-                lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 5, 10000, 400));
+            Collection<LodNodeData> lodList = dim.getNodes(false, false, true);
+            //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 2, 100, 0));
+            //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 3, 200, 100));
+            //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 4, 400, 200));
+            //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 5, 10000, 400));
 
-                 */
-
-            }
 
             //lodList = lodQuadTree.getNodeList(false,false,false);
             listOfList.add(lodList);
@@ -184,10 +173,6 @@ public class QuadTreeImage extends JPanel {
  */
         }
 
-        for (LodQuadTree lodQuadTree : lodQuadTreeList) {
-            System.out.println(lodQuadTree.getLodNodeData().posX + " " + lodQuadTree.getLodNodeData().posZ );
-            System.out.println(lodQuadTree.getLodNodeData().startX + " " + lodQuadTree.getLodNodeData().startZ );
-        }
 
         int timerDelay = 500;
         new Timer(timerDelay, new ActionListener() {
