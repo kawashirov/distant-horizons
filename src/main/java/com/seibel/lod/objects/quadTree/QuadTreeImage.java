@@ -93,8 +93,8 @@ public class QuadTreeImage extends JPanel {
         frame.setLocationByPlatform(true);
         frame.setVisible(true);
         List<List<LodNodeData>> listOfList = new ArrayList<>();
-        //OverworldBiomeSource biomeSource = new OverworldBiomeSource(MCVersion.v1_16_5, 1000);
-        EndBiomeSource biomeSource = new EndBiomeSource(MCVersion.v1_16_5, 1000);
+        OverworldBiomeSource biomeSource = new OverworldBiomeSource(MCVersion.v1_16_5, 1000);
+        //EndBiomeSource biomeSource = new EndBiomeSource(MCVersion.v1_16_5, 1000);
         int[] distances = {100000,8000,4000,2000,1000,500,250,100,50,25};
         for (int i = 0; i <= (9 - 2); i++) {
             for (int j = 0; j < 1; j++) {
@@ -159,7 +159,7 @@ public class QuadTreeImage extends JPanel {
         }
 
 
-        int timerDelay = 5000;
+        int timerDelay = 0;
         System.out.println("STARTING");
         System.out.println(dim.getWidth());
         System.out.println(dim.getCenterX());
