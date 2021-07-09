@@ -263,7 +263,7 @@ public class LodQuadTreeDimension {
         // don't continue if the region can't be saved
         if (!regionIsInRange(pos.x, pos.z))
         {
-            return;
+            return false;
         }
 
         LodQuadTree region = getRegion(pos.x, pos.z);

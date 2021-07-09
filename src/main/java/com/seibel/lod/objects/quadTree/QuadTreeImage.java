@@ -75,7 +75,7 @@ public class QuadTreeImage extends JPanel {
     private static void createAndShowGui() {
         int playerX = 0;
         int playerZ = 0;
-        LodQuadTreeDimension dim = new LodQuadTreeDimension(null, null, 8);
+        LodQuadTreeDimension dim = new LodQuadTreeDimension(null, null, 2);
         System.out.println(dim.getRegion(0, 0));
         dim.move(playerX/512,playerZ/512);
         System.out.println(dim.getCenterX());
@@ -101,6 +101,7 @@ public class QuadTreeImage extends JPanel {
                     dist = 1000;
                 }
                 List<LodQuadTree> levelToGenerate = dim.getNodeToGenerate(playerX, playerZ, (byte) (9 - i), (int) dist, 0);
+                System.out.println(levelToGenerate);
                 for (LodQuadTree level : levelToGenerate) {
                     System.out.println(level);
                     Color color;
@@ -137,9 +138,9 @@ public class QuadTreeImage extends JPanel {
                     }
                      */
                     posXs.add(startX / otherWidth);
-                    //posXs.add(centerX / otherWidth);
+                    posXs.add(centerX / otherWidth);
                     posZs.add(startZ / otherWidth);
-                    //posXs.add(centerZ / otherWidth);
+                    posZs.add(centerZ / otherWidth);
 
                     for (Integer posXI : posXs) {
                         for (Integer posZI : posZs) {
@@ -202,11 +203,26 @@ public class QuadTreeImage extends JPanel {
     }
 
     public static void main(String[] args) {
+
+        /*
+        LodQuadTreeDimension dim2 = new LodQuadTreeDimension(null, null, 8);
+        List<LodQuadTree> levelToGenerate = dim2.getNodeToGenerate(0, 0, (byte) 0, (int) 10000, 0);
+        System.out.println(levelToGenerate);
+        dim2.addNode(new LodNodeData((byte) 0,0,0,-1,-1, new Color(100,100,100),true));
+        dim2.addNode(new LodNodeData((byte) 0,256,0,-1,-1, new Color(100,100,100),true));
+        dim2.addNode(new LodNodeData((byte) 0,0,256,-1,-1, new Color(100,100,100),true));
+        dim2.addNode(new LodNodeData((byte) 0,256,256,-1,-1, new Color(100,100,100),true));
+        levelToGenerate = dim2.getNodeToGenerate(0, 0,  (byte) 0, (int) 10000, 0);
+        System.out.println(levelToGenerate);
+
+         */
+
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 createAndShowGui();
             }
         });
+
     }
 }
 
