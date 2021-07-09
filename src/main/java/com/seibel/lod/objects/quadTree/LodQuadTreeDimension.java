@@ -297,15 +297,15 @@ public class LodQuadTreeDimension {
      */
     public LodNodeData getLodFromCoordinates(int posX, int posZ, byte level)
     {
-        /*TODO */
-        return null;
+        LodQuadTree region = getRegion(posX/(512/Math.pow(level,2)),posZ/(512/Math.pow(level,2)));
+        if(region == null)
+            return null;
+        return region.getLodFromCoordinate(posX, posZ, level);
         /*
         RegionPos pos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(chunkX, chunkZ));
 
         LodQuadTree region = getRegion(pos.x, pos.z);
 
-        if(region == null)
-            return null;
 
         return region.getNode(chunkX, chunkZ);
 

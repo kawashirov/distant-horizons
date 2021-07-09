@@ -171,10 +171,10 @@ public class LodQuadTree {
             return lodNodeData;
         } else if (targetLevel < currentLevel) {
             short widthRatio = (short) (lodNodeData.width / Math.pow(2, level));
-            int NS = (posX / widthRatio) % lodNodeData.posX;
-            int WE = (posZ / widthRatio) % lodNodeData.posZ;
+            int NS = Math.abs((posX / widthRatio) % lodNodeData.posX);
+            int WE = Math.abs((posZ / widthRatio) % lodNodeData.posZ);
             if (getChild(NS, WE) == null) {
-                return lodNodeData;
+                return null;
             }
             LodQuadTree child = getChild(NS, WE);
             return child.getNodeAtLevelPosition(posX, posZ, level);
@@ -183,6 +183,7 @@ public class LodQuadTree {
         }
 
     }
+
 
     public LodQuadTree getChild(int NS, int WE) {
         return children[NS][WE];
@@ -439,9 +440,14 @@ public class LodQuadTree {
         return (lodNodeData != null);
     }
 
+    public LodNodeData getLodFromCoordinate(int x, int z, byte level){
+
+    }
+
     public boolean isCoordinateInLevel(int x, int z){
         return !(lodNodeData.startX > x || lodNodeData.startZ > z || lodNodeData.endX < x || lodNodeData.endZ < z);
     }
+
     public String toString(){
         String s = lodNodeData.toString();
         return s;

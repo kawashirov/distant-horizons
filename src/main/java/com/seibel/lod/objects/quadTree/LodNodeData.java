@@ -204,7 +204,6 @@ public class LodNodeData {
     }
 
 
-
     public int hashCode(){
         return Objects.hash(this.real, this.level, this.posX, this.posZ, this.color, this.real, this.voidNode);
     }
