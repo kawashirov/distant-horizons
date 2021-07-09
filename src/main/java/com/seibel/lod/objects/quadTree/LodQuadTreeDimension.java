@@ -200,7 +200,7 @@ public class LodQuadTreeDimension {
             regions[xIndex][zIndex] = getRegionFromFile(regionX, regionZ);
             if (regions[xIndex][zIndex] == null)
             {
-                regions[xIndex][zIndex] = new LodQuadTree(regionX, regionZ);
+                regions[xIndex][zIndex] = new LodQuadTree(regionZ, regionX);
             }
         }
 
@@ -240,7 +240,7 @@ public class LodQuadTreeDimension {
                 if (region == null)
                 {
                     // if no region exists, create it
-                    region = new LodQuadTree(xIndex, zIndex);
+                    region = new LodQuadTree(zIndex, xIndex);
                     setRegion(region);
                 }
             }
@@ -271,7 +271,7 @@ public class LodQuadTreeDimension {
         if (region == null)
         {
             // if no region exists, create it
-            region = new LodQuadTree(pos.x, pos.z);
+            region = new LodQuadTree(pos.z, pos.x);
             setRegion(region);
         }
         boolean coorectlyAdded = region.setNodeAtLowerLevel(lodNodeData, true);
@@ -344,7 +344,7 @@ public class LodQuadTreeDimension {
                 zIndex = (zRegion + centerZ) - halfWidth;
                 region = getRegion(xIndex,zIndex);
                 if (region == null){
-                    region = new LodQuadTree(xIndex, zIndex);
+                    region = new LodQuadTree(zIndex, xIndex);
                     setRegion(region);
                 }
                 listOfQuadTree.addAll(region.getLevelToGenerate(x,z,level,maxDistance,minDistance));
