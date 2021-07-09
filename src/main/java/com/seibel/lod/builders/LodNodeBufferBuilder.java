@@ -1,6 +1,5 @@
 package com.seibel.lod.builders;
 
-import com.seibel.lod.builders.worldGeneration.LodChunkGenWorker;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
@@ -8,6 +7,7 @@ import com.seibel.lod.objects.NearFarBuffer;
 import com.seibel.lod.objects.quadTree.LodNodeData;
 import com.seibel.lod.objects.quadTree.LodQuadTree;
 import com.seibel.lod.objects.quadTree.LodQuadTreeDimension;
+import com.seibel.lod.render.LodNodeRenderer;
 import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.LodUtil;
 import net.minecraft.client.Minecraft;
@@ -19,6 +19,8 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.WorldWorkerManager;
 import org.lwjgl.opengl.GL11;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -35,7 +37,7 @@ public class LodNodeBufferBuilder
 	/** This holds the thread used to generate new LODs off the main thread. */
 	private ExecutorService genThread = Executors.newSingleThreadExecutor();
 
-	private LodChunkBuilder lodChunkBuilder;
+	private LodNodeBuilder lodChunkBuilder;
 
 	/** The buffers that are used to create LODs using near fog */
 	public volatile BufferBuilder buildableNearBuffer;
@@ -61,7 +63,7 @@ public class LodNodeBufferBuilder
 	public int maxChunkGenRequests = Runtime.getRuntime().availableProcessors();
 
 
-	public LodNodeBufferBuilder(LodChunkBuilder newLodBuilder)
+	public LodNodeBufferBuilder(LodNodeBuilder newLodBuilder)
 	{
 		mc = Minecraft.getInstance();
 		lodChunkBuilder = newLodBuilder;
@@ -69,7 +71,7 @@ public class LodNodeBufferBuilder
 	
 	
 	private BiomeContainer biomeContainer = null;
-	private LodDimension previousDimension = null;
+	private LodQuadTreeDimension previousDimension = null;
 	
 
 	/**
@@ -81,7 +83,7 @@ public class LodNodeBufferBuilder
 	 * After the buildable buffers have been generated they must be
 	 * swapped with the drawable buffers in the LodRenderer to be drawn.
 	 */
-	public void generateLodBuffersAsync(LodRenderer renderer, LodQuadTreeDimension lodDim,
+	public void generateLodBuffersAsync(LodNodeRenderer renderer, LodQuadTreeDimension lodDim,
 										double playerX, double playerZ, int numbChunksWide)
 	{
 		// only allow one generation process to happen at a time
@@ -130,8 +132,35 @@ public class LodNodeBufferBuilder
 			// generate our new buildable buffers
 			buildableNearBuffer.begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
 			buildableFarBuffer.begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
-			
+
+
+			List<LodNodeData> lodList = new ArrayList<>();
+			lodList.addAll(lodDim.getNodeToRender((int) playerX,(int)playerZ,(byte) 9, 100000,8000));
+			lodList.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 8, 8000,4000));
+			lodList.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 7, 4000,2000));
+			lodList.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 6, 2000,1000));
+			lodList.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 5, 1000,500));
+			lodList.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 4, 500,250));
+			lodList.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 3, 250,0));
+
+			for(LodNodeData data : lodList){
+				BufferBuilder currentBuffer = null;
+/*
+				if (isCoordinateInNearFogArea(i, j, numbChunksWide / 2))
+					currentBuffer = buildableNearBuffer;
+				else
+					currentBuffer = buildableFarBuffer;
+ */
+				currentBuffer = buildableFarBuffer;
+
+				// get the desired LodTemplate and
+				// add this LOD to the buffer
+				LodConfig.CLIENT.lodTemplate.get().
+						template.addLodToBuffer(currentBuffer, lodDim, data,
+						data.startX, 0, data.startZ, renderer.debugging);
+			}
 			// x axis
+			/*
 			for (int i = 0; i < numbChunksWide; i++)
 			{
 				// z axis
@@ -153,10 +182,10 @@ public class LodNodeBufferBuilder
 									startX; // offset so the center LOD block is centered underneath the player
 					double yOffset = 0;
 					double zOffset = (LodChunk.WIDTH * j) + startZ;
+
+					LodNodeData lod = lodDim.getLodFromCoordinates(chunkX, chunkZ, LodNodeData.CHUNK_LEVEL);
 					
-					LodChunk lod = lodDim.getLodFromCoordinates(chunkX, chunkZ, LodNodeData.CHUNK_LEVEL);
-					
-					if (lod == null || lod.isLodEmpty())
+					if (lod == null || lod.voidNode)
 					{
 						// generate a new chunk if no chunk currently exists
 						// and we aren't waiting on any other chunks to generate
@@ -197,23 +226,15 @@ public class LodNodeBufferBuilder
 						// don't render this null chunk
 						continue;
 					}
+
+
 					
-					
-					BufferBuilder currentBuffer = null;
-					if (isCoordinateInNearFogArea(i, j, numbChunksWide / 2))
-						currentBuffer = buildableNearBuffer;
-					else
-						currentBuffer = buildableFarBuffer;
-					
-					// get the desired LodTemplate and
-					// add this LOD to the buffer
-					LodConfig.CLIENT.lodTemplate.get().
-						template.addLodToBuffer(currentBuffer, lodDim, lod, 
-							xOffset, yOffset, zOffset, renderer.debugging);
+
 				}
 			}
-			
+			*/
 			// TODO add a way for a server side mod to generate chunks requested here
+			/*
 			if(mc.hasSingleplayerServer())
 			{
 		        ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(lodDim.dimension);
@@ -235,10 +256,11 @@ public class LodNodeBufferBuilder
 					
 					numberOfChunksWaitingToGenerate++;
 					
-					LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, renderer, lodChunkBuilder, this, lodDim, serverWorld, biomeContainer);
+					LodChunkGenWorker.java genWorker = new LodChunkGenWorker.java(chunkPos, renderer, lodChunkBuilder, this, lodDim, serverWorld, biomeContainer);
 					WorldWorkerManager.addWorker(genWorker);
 				}
 			}
+			*/
 			
 			// finish the buffer building
 			buildableNearBuffer.end();

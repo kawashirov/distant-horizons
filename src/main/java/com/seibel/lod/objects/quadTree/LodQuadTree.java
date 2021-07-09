@@ -440,9 +440,6 @@ public class LodQuadTree {
         return (lodNodeData != null);
     }
 
-    public LodNodeData getLodFromCoordinate(int x, int z, byte level){
-
-    }
 
     public boolean isCoordinateInLevel(int x, int z){
         return !(lodNodeData.startX > x || lodNodeData.startZ > z || lodNodeData.endX < x || lodNodeData.endZ < z);

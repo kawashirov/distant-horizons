@@ -15,6 +15,7 @@ import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarBuffer;
 import com.seibel.lod.objects.NearFarFogSettings;
 import com.seibel.lod.objects.quadTree.LodNodeData;
+import com.seibel.lod.objects.quadTree.LodQuadTreeDimension;
 import com.seibel.lod.proxy.ClientProxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
@@ -132,7 +133,7 @@ public class LodNodeRenderer
 	 * @param newDimension The dimension to draw, if null doesn't replace the current dimension.
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
-	public void drawLODs(LodDimension lodDim, float partialTicks, IProfiler newProfiler)
+	public void drawLODs(LodQuadTreeDimension lodDim, float partialTicks, IProfiler newProfiler)
 	{		
 		if (lodDim == null)
 		{
@@ -234,7 +235,7 @@ public class LodNodeRenderer
 		// replace the buffers used to draw and build,
 		// this is only done when the createLodBufferGenerationThread
 		// has finished executing on a parallel thread.
-		if (lodBufferBuilder.newBuffersAvaliable())
+		if (lodNodeBufferBuilder.newBuffersAvaliable())
 		{
 			swapBuffers();
 		}
@@ -549,7 +550,7 @@ public class LodNodeRenderer
 	/**
 	 * setup the lighting to be used for the LODs
 	 */
-	private void setupLighting(LodDimension lodDimension, float partialTicks)
+	private void setupLighting(LodQuadTreeDimension lodDimension, float partialTicks)
 	{
 		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.level.getSkyDarken(partialTicks) : 0.2f;
 		float gammaMultiplyer = (float)mc.options.gamma - 0.5f;
@@ -771,7 +772,7 @@ public class LodNodeRenderer
 	 * Get a HashSet of all ChunkPos within the normal render distance
 	 * that should not be rendered.
 	 */
-	private HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodDimension lodDim, BlockPos playerPos) 
+	private HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodQuadTreeDimension lodDim, BlockPos playerPos)
 	{
 		int chunkRenderDist = mc.options.renderDistance;
 		int blockRenderDist = chunkRenderDist * 16;
@@ -786,10 +787,10 @@ public class LodNodeRenderer
 		{
 			for(int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
 			{
-				LodNodeData lod = lodDim.getLodFromCoordinates(x, z);
+				LodNodeData lod = lodDim.getLodFromCoordinates(x, z, (byte) 4);
 				if (lod != null)
 				{
-					short lodHighestPoint = lod.height();
+					short lodHighestPoint = lod.height;
 					
 					if (playerPos.getY() < lodHighestPoint)
 					{
