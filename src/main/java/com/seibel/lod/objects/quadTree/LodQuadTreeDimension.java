@@ -253,7 +253,7 @@ public class LodQuadTreeDimension {
      * stored in the LOD. If an LOD already exists at the given
      * coordinates it will be overwritten.
      */
-    public void addNode(LodNodeData lodNodeData)
+    public Boolean addNode(LodNodeData lodNodeData)
     {
         RegionPos pos = new RegionPos(
                 lodNodeData.startX / 512,
@@ -274,7 +274,7 @@ public class LodQuadTreeDimension {
             region = new LodQuadTree(pos.x, pos.z);
             setRegion(region);
         }
-        region.setNodeAtLowerLevel(lodNodeData, true);
+        boolean coorectlyAdded = region.setNodeAtLowerLevel(lodNodeData, true);
 
         // don't save empty place holders to disk
         if (lodNodeData.real && fileHandler != null)
@@ -285,6 +285,7 @@ public class LodQuadTreeDimension {
             isRegionDirty[xIndex][zIndex] = true;
             fileHandler.saveDirtyRegionsToFileAsync();
         }
+        return coorectlyAdded;
     }
 
     /**

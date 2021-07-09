@@ -98,10 +98,11 @@ public class QuadTreeImage extends JPanel {
                 if (i == 9) {
                     dist = 10000;
                 } else {
-                    dist = 100;
+                    dist = 1000;
                 }
                 List<LodQuadTree> levelToGenerate = dim.getNodeToGenerate(playerX, playerZ, (byte) (9 - i), (int) dist, 0);
                 for (LodQuadTree level : levelToGenerate) {
+                    System.out.println(level);
                     Color color;
                     int startX = level.getLodNodeData().startX;
                     int startZ = level.getLodNodeData().startZ;
@@ -147,7 +148,7 @@ public class QuadTreeImage extends JPanel {
                             //color = BiomeColorsUtils.getColorFromBiomeManual(biomeSource.getBiome(posZ, 0, posX));
                             color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ, 0, posX).getId());
                             LodNodeData node = new LodNodeData(otherLevel, posX, posZ, 0, 0, color, true);
-                            dim.addNode(node);
+                            System.out.println(dim.addNode(node));
                         }
                     }
                 }
