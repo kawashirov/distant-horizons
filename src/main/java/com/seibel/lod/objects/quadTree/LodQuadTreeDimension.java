@@ -11,7 +11,8 @@ import net.minecraft.world.server.ServerWorld;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class LodQuadTreeDimension {
     public final DimensionType dimension;
@@ -227,7 +228,28 @@ public class LodQuadTreeDimension {
     }
 
 
-
+    /**
+     *this method create all the regions that are null
+     */
+    public void initializeNullRegions(LodNodeData lodNodeData){
+        int n = regions.length;
+        int xIndex;
+        int zIndex;
+        LodQuadTree region;
+        for(int xRegion=0; xRegion<n; xRegion++){
+            for(int zRegion=0; zRegion<n; zRegion++){
+                xIndex = (xRegion + centerX) - halfWidth;
+                zIndex = (zRegion + centerZ) - halfWidth;
+                region = getRegion(xIndex,zIndex);
+                if (region == null)
+                {
+                    // if no region exists, create it
+                    region = new LodQuadTree(xIndex, zIndex);
+                    setRegion(region);
+                }
+            }
+        }
+    }
 
 
     /**
@@ -298,24 +320,31 @@ public class LodQuadTreeDimension {
      * method to get all the nodes that have to be rendered based on the position of the player
      * @return list of nodes
      */
-    public List getNodeToRender(int x, int z){
-        //BASIC IDEA
-        //Get all the node to render from every region
-        //combine them toghether
-        return null;
+    public List<LodNodeData> getNodeToRender(int x, int z, byte level, int maxDistance, int minDistance){
+        int n = regions.length;
+        List<LodNodeData> listOfData = new ArrayList<>();
+        for(int i=0; i<n; i++){
+            for(int j=0; j<n; j++){
+                listOfData.addAll(regions[i][j].getNodeToRender(x,z,level,maxDistance,minDistance));
+            }
+        }
+        return listOfData;
     }
 
     /**
-     * method to get all the nodes that have to be generated based on the position of the player
-     * @return list of nodes
+     * method to get all the quadtree level that have to be generated based on the position of the player
+     * @return list of quadTrees
      */
-    public List getNodeToGenerate(int x, int z){
-        //BASIC IDEA
-        //Get all the node to generate from every region
-        //combine them toghether
-        //sort them based on the distance to player
-        //this way
-        return null;
+    public List<LodQuadTree> getNodeToGenerate(int x, int z, byte level, int maxDistance, int minDistance){
+        int n = regions.length;
+        List<Map.Entry<LodQuadTree,Integer>> listOfQuadTree = new ArrayList<>();
+        for(int i=0; i<n; i++){
+            for(int j=0; j<n; j++){
+                listOfQuadTree.addAll(regions[i][j].getLevelToGenerate(x,z,level,maxDistance,minDistance));
+            }
+        }
+        Collections.sort(listOfQuadTree,Map.Entry.comparingByValue());
+        return listOfQuadTree.stream().map(entry -> entry.getKey()).collect(Collectors.toList());
     }
 
     /**
@@ -343,12 +372,6 @@ public class LodQuadTreeDimension {
         return xIndex >= 0 && xIndex < width && zIndex >= 0 && zIndex < width;
     }
 
-
-
-
-
-
-
     public int getCenterX()
     {
         return centerX;
@@ -361,6 +384,7 @@ public class LodQuadTreeDimension {
 
 
     /**
+     * TODO THIS METHOD HAVE TO BE CHANGES. IS NOT THE SAME AS NUMER OF CHUNK
      * Returns how many non-null LodChunks
      * are stored in this LodDimension.
      */
