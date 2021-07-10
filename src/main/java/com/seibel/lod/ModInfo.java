@@ -28,5 +28,5 @@ public final class ModInfo
 	public static final String MODID = "lod";
 	public static final String MODNAME = "Level of Detail";
 	public static final String MODAPI = "LodAPI";
-	public static final String VERSION = "a1.3";
+	public static final String VERSION = "a1.3.1";
 }

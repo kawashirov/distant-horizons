@@ -3,7 +3,7 @@
   "modid": "lod",
   "name": "Level Of Detail",
   "description": "Generates and renders simplified chunks beyond the normal view distance, at a low performance cost.",
-  "version": "a1.3",
+  "version": "a1.3.1",
   "mcversion": "1.16.4",
   "url": "",
   "updateUrl": "",
