@@ -133,11 +133,11 @@ public class LodQuadTree {
         byte targetLevel = newLodNodeData.level;
         byte currentLevel = lodNodeData.level;
         if (targetLevel < currentLevel) {
-            int posX = newLodNodeData.posX;
-            int posZ = newLodNodeData.posZ;
+            int posX = Math.abs(newLodNodeData.posX);
+            int posZ = Math.abs(newLodNodeData.posZ);
             short widthRatio = (short) (lodNodeData.width / (2 * newLodNodeData.width));
-            int NS = Math.abs((posX / widthRatio) % 2);
-            int WE = Math.abs((posZ / widthRatio) % 2);
+            int WE = Math.abs((posX / widthRatio) % 2);
+            int NS = Math.abs((posZ / widthRatio) % 2);
             if (getChild(NS, WE) == null) {
                 setChild(NS, WE);
             }
@@ -171,8 +171,8 @@ public class LodQuadTree {
             return lodNodeData;
         } else if (targetLevel < currentLevel) {
             short widthRatio = (short) (lodNodeData.width / Math.pow(2, level));
-            int NS = Math.abs((posX / widthRatio) % lodNodeData.posX);
-            int WE = Math.abs((posZ / widthRatio) % lodNodeData.posZ);
+            int WE = Math.abs((posX / widthRatio) % lodNodeData.posX);
+            int NS = Math.abs((posZ / widthRatio) % lodNodeData.posZ);
             if (getChild(NS, WE) == null) {
                 return null;
             }
@@ -209,8 +209,8 @@ public class LodQuadTree {
      */
     public void setChild(LodNodeData newLodNodeData) {
         if (newLodNodeData.level == lodNodeData.level - 1) {
-            int NS = newLodNodeData.posX % lodNodeData.posX;
-            int WE = newLodNodeData.posZ % lodNodeData.posZ;
+            int WE = newLodNodeData.posX % lodNodeData.posX;
+            int NS = newLodNodeData.posZ % lodNodeData.posZ;
             children[NS][WE] = new LodQuadTree(this, lodNodeData);
         }
     }

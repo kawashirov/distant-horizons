@@ -1,5 +1,6 @@
 package com.seibel.lod.builders;
 
+import com.seibel.lod.builders.worldGeneration.LodChunkGenWorker;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
@@ -134,16 +135,18 @@ public class LodNodeBufferBuilder
 			buildableFarBuffer.begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
 
 
-			List<LodNodeData> lodList = new ArrayList<>();
-			lodList.addAll(lodDim.getNodeToRender((int) playerX,(int)playerZ,(byte) 9, 100000,8000));
-			lodList.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 8, 8000,4000));
-			lodList.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 7, 4000,2000));
-			lodList.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 6, 2000,1000));
-			lodList.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 5, 1000,500));
-			lodList.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 4, 500,250));
-			lodList.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 3, 250,0));
-
-			for(LodNodeData data : lodList){
+			List<LodNodeData> lodToRender = new ArrayList<>();
+			lodToRender.addAll(lodDim.getNodeToRender((int) playerX,(int)playerZ,(byte) 0, 100000,0));
+			/*
+			lodToRender.addAll(lodDim.getNodeToRender((int) playerX,(int)playerZ,(byte) 9, 100000,8000));
+			lodToRender.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 8, 8000,4000));
+			lodToRender.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 7, 4000,2000));
+			lodToRender.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 6, 2000,1000));
+			lodToRender.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 5, 1000,500));
+			lodToRender.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 4, 500,250));
+			lodToRender.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 3, 250,0));
+*/
+			for(LodNodeData data : lodToRender){
 				BufferBuilder currentBuffer = null;
 /*
 				if (isCoordinateInNearFogArea(i, j, numbChunksWide / 2))
@@ -156,6 +159,8 @@ public class LodNodeBufferBuilder
 				// get the desired LodTemplate and
 				// add this LOD to the buffer
 			}
+
+
 			// x axis
 			// finish the buffer building
 			buildableNearBuffer.end();
