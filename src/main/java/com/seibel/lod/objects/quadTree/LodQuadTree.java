@@ -143,8 +143,9 @@ public class LodQuadTree {
             /*
             if(posX<0) WE = 1 - WE;
             if(posZ<0) NS = 1 - NS;
-
-             */
+            */
+            if(posX<0) System.out.println(WE);
+            if(posZ<0) System.out.println(NS);
 
             if (getChild(NS, WE) == null) {
                 setChild(NS, WE);
@@ -246,8 +247,8 @@ public class LodQuadTree {
         List<LodNodeData> dataList = new ArrayList<>();
         for (int NS = 0; NS <= 1; NS++) {
             for (int WE = 0; WE <= 1; WE++) {
-                if (children[NS][WE] != null) {
-                    dataList.add(children[NS][WE].getLodNodeData());
+                if (getChild(NS,WE) != null) {
+                    dataList.add(getChild(NS,WE).getLodNodeData());
                     isEmpty = false;
                 } else {
                     isFull = false;
@@ -367,8 +368,7 @@ public class LodQuadTree {
         if ( targetLevel > lodNodeData.level ) {
             return nodeList;
         }
-        //
-        if ((min > maxDistance || max < minDistance) && !isCoordinateInLevel(x,z)){
+        if ((min > maxDistance || max < minDistance)/* && !isCoordinateInLevel(x,z)*/){
             return nodeList;
         }
         if(isNodeFull()) {
