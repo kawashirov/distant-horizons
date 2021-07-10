@@ -549,15 +549,16 @@ public class LodRenderer
 	         matrixStack.mulPose(vector3f.rotationDegrees(f2));
 	      }
 		
-		
-		
 		// this projection matrix allows us to see past the normal 
 		// world render distance
 		Matrix4f projectionMatrix = 
 				Matrix4f.perspective(
 				getFov(partialTicks, true), 
-				(float)this.mc.getWindow().getScreenWidth() / (float)this.mc.getWindow().getScreenHeight(), 
-				0.5F, 
+				(float)this.mc.getWindow().getScreenWidth() / (float)this.mc.getWindow().getScreenHeight(),
+				// it is possible to see the near clip plane, but
+				// you have to be flying quickly in spectator mode through ungenerated
+				// terrain, so I don't think it is much of an issue.
+				LodConfig.CLIENT.lodChunkRadiusMultiplier.get(),  
 				this.farPlaneDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 2);
 		
 		// add the screen space distortions
