@@ -133,11 +133,19 @@ public class LodQuadTree {
         byte targetLevel = newLodNodeData.level;
         byte currentLevel = lodNodeData.level;
         if (targetLevel < currentLevel) {
-            int posX = Math.abs(newLodNodeData.posX);
-            int posZ = Math.abs(newLodNodeData.posZ);
+            int posX = newLodNodeData.posX;
+            int posZ = newLodNodeData.posZ;
             short widthRatio = (short) (lodNodeData.width / (2 * newLodNodeData.width));
-            int WE = Math.abs((posX / widthRatio) % 2);
-            int NS = Math.abs((posZ / widthRatio) % 2);
+            int WE = Math.abs(Math.floorDiv(posX , widthRatio) % 2);
+            int NS = Math.abs(Math.floorDiv(posZ , widthRatio) % 2);
+            //These two if fix the negative coordinate problema
+            //I don't know why, there is some problem with the %2 operation
+            /*
+            if(posX<0) WE = 1 - WE;
+            if(posZ<0) NS = 1 - NS;
+
+             */
+
             if (getChild(NS, WE) == null) {
                 setChild(NS, WE);
             }
@@ -170,9 +178,9 @@ public class LodQuadTree {
         if (targetLevel == currentLevel) {
             return lodNodeData;
         } else if (targetLevel < currentLevel) {
-            short widthRatio = (short) (lodNodeData.width / Math.pow(2, level));
-            int WE = Math.abs((posX / widthRatio) % lodNodeData.posX);
-            int NS = Math.abs((posZ / widthRatio) % lodNodeData.posZ);
+            short widthRatio = (short) (lodNodeData.width / (2 * Math.pow(2, level)));
+            int WE = Math.abs(Math.floorDiv(posX , widthRatio) % 2);
+            int NS = Math.abs(Math.floorDiv(posZ , widthRatio) % 2);
             if (getChild(NS, WE) == null) {
                 return null;
             }
@@ -311,7 +319,7 @@ public class LodQuadTree {
         if (targetLevel > lodNodeData.level) {
             return nodeList;
         }
-        if ((min > maxDistance || max < minDistance) && !isCoordinateInLevel(x,z)){
+        if ((min > maxDistance || max < minDistance) /*&& !isCoordinateInLevel(x,z)*/){
             return nodeList;
         }
         if (targetLevel == lodNodeData.level || !isNodeFull()) {
@@ -325,7 +333,7 @@ public class LodQuadTree {
         } else {
             for (int NS = 0; NS <= 1; NS++) {
                 for (int WE = 0; WE <= 1; WE++) {
-                    LodQuadTree child = children[NS][WE];
+                    LodQuadTree child = getChild(NS,WE);
                     if (child != null) {
                         nodeList.addAll(child.getNodeToRender(x, z, targetLevel, maxDistance, minDistance));
                     }
@@ -368,10 +376,10 @@ public class LodQuadTree {
             if (targetLevel != lodNodeData.level) {
                 for (int NS = 0; NS <= 1; NS++) {
                     for (int WE = 0; WE <= 1; WE++) {
-                        if (children[NS][WE] == null) {
+                        if (getChild(NS,WE) == null) {
                             setChild(NS,WE);
                         }
-                        LodQuadTree child = children[NS][WE];
+                        LodQuadTree child = getChild(NS,WE);
                         nodeList.addAll(child.getLevelToGenerate(x, z, targetLevel, maxDistance, minDistance));
                     }
                 }

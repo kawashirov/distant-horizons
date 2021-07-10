@@ -75,11 +75,13 @@ public class QuadTreeImage extends JPanel {
     }
 
     private static void createAndShowGui() {
-        int playerX =-0*511;
-        int playerZ =-0*511;
+        int playerX =-40;
+        int playerZ =-250;
         LodQuadTreeDimension dim = new LodQuadTreeDimension(null, null, 16);
         System.out.println(dim.getRegion(0, 0));
-        dim.move(playerX/512,playerZ/512);
+        dim.move(Math.floorDiv(playerX,512),Math.floorDiv(playerZ,512));
+
+        System.out.println(playerX/512 + " " + playerZ/512);
         System.out.println(dim.getCenterX());
         System.out.println(dim.getCenterZ());
         System.out.println(dim.getWidth());
@@ -98,12 +100,6 @@ public class QuadTreeImage extends JPanel {
         int[] distances = {100000,8000,4000,2000,1000,500,250,100,50,25};
         for (int i = 0; i <= (9 - 2); i++) {
             for (int j = 0; j < 1; j++) {
-                int dist;
-                if (i == 0) {
-                    dist = 2000;
-                } else {
-                    dist = 32;
-                }
                 List<LodQuadTree> levelToGenerate = dim.getNodeToGenerate(playerX, playerZ, (byte) (9 - i), distances[i], 0);
                 System.out.println(levelToGenerate);
                 for (LodQuadTree level : levelToGenerate) {
@@ -135,7 +131,7 @@ public class QuadTreeImage extends JPanel {
                             int posX = posXI.intValue();
                             int posZ = posZI.intValue();
                             //System.out.println(posX + " " + posZ);
-                            color = BiomeColorsUtils.getColorFromBiomeManual(biomeSource.getBiome(posZ, 0, posX));
+                            color = BiomeColorsUtils.getColorFromBiomeManual(biomeSource.getBiome(posX, 0, posZ));
                             //color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ, 0, posX).getId());
                             LodNodeData node = new LodNodeData(otherLevel, posX, posZ, 0, 0, color, true);
                             dim.addNode(node);
@@ -144,13 +140,13 @@ public class QuadTreeImage extends JPanel {
                 }
             }
             List<LodNodeData> lodList = new ArrayList<>();
-            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 9, 100000,8000));
-            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 8, 8000,4000));
-            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 7, 4000,2000));
-            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 6, 2000,1000));
-            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 5, 1000,500));
-            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 4, 500,250));
             lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 3, 250,0));
+            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 4, 500,250));
+            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 5, 1000,500));
+            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 6, 2000,1000));
+            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 7, 4000,2000));
+            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 8, 8000,4000));
+            lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 9, 100000,8000));
             System.out.println(lodList.size());
             //Collection<LodNodeData> lodList = dim.getNodes(false,false,false);
             //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 2, 100, 0));
