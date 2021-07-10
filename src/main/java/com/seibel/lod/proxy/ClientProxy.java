@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.builders.LodChunkBuilder;
+import com.seibel.lod.builders.worldGeneration.LodChunkGenWorker;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
@@ -42,7 +43,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of this program.
  * 
  * @author James_Seibel
- * @version 06-27-2021
+ * @version 7-9-2021
  */
 public class ClientProxy
 {
@@ -111,6 +112,7 @@ public class ClientProxy
 		
 		
 		// for testing
+//		LodConfig.CLIENT.drawLODs.set(true);
 //		LodConfig.CLIENT.debugMode.set(false);
 		
 //		LodConfig.CLIENT.lodDetail.set(LodDetail.DOUBLE);
@@ -120,6 +122,7 @@ public class ClientProxy
 		
 //		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
 //		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
+//		LOGGER.info(lodBufferBuilder.numberOfChunksWaitingToGenerate.get());
 		
 		
 		// Note to self:
@@ -167,6 +170,10 @@ public class ClientProxy
 		
 		if(mc.getConnection().getLevel() == null)
 		{
+			// if this isn't done unfinished tasks may be left in the queue
+			// preventing new LodChunks form being generated
+			LodChunkGenWorker.restartExecuterService();
+			
 			lodBufferBuilder.numberOfChunksWaitingToGenerate.set(0);
 			// the player has disconnected from a server
 			lodWorld.deselectWorld();

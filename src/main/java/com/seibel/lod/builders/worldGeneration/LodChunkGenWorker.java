@@ -70,11 +70,11 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  * 
  * @author James Seibel
- * @version 7-5-2021
+ * @version 7-9-2021
  */
 public class LodChunkGenWorker implements IWorker
 {
-    public static final ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfWorldGenerationThreads.get());
+    public static ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfWorldGenerationThreads.get());
     
     private boolean threadStarted = false;
     private LodChunkGenThread thread;
@@ -124,6 +124,7 @@ public class LodChunkGenWorker implements IWorker
         	
     		// useful for debugging
 //        	ClientProxy.LOGGER.info(thread.lodDim.getNumberOfLods());
+//        	ClientProxy.LOGGER.info(genThreads.toString());
         }
         
         return false;
@@ -571,6 +572,28 @@ public class LodChunkGenWorker implements IWorker
 		}
 		
     }
+    
+    
+    /**
+     * Stops the current genThreads if they are running
+     * and then recreates the Executer service. <br><br>
+     * 
+     * This is done to clear any outstanding tasks
+     * that may exist after the player leaves their current world.
+     * If this isn't done unfinished tasks may be left in the queue
+     * preventing new LodChunks form being generated.
+     */
+    public static void restartExecuterService()
+	{
+    	if (genThreads != null && !genThreads.isShutdown())
+    	{
+    		genThreads.shutdownNow();
+    	}
+		genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfWorldGenerationThreads.get());
+	}
+
+
+	
     
     
     /*
