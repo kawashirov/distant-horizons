@@ -177,7 +177,7 @@ public class LodConfig
 							+ " This will also show player made structures if you \n"
 							+ " are adding the mod to a pre-existing world. \n"
 							+ " Singlethreaded - Slow (15-50 ms, with spikes up to 200 ms) \n")
-	                .defineEnum("distanceBiomeOnlyGeneration", DistanceGenerationMode.SURFACE);
+	                .defineEnum("distanceGenerationMode", DistanceGenerationMode.SURFACE);
 	        
 	        allowUnstableFeatureGeneration = builder
 	                .comment("\n\n"
