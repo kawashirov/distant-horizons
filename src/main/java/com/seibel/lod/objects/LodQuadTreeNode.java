@@ -1,4 +1,4 @@
-package com.seibel.lod.objects.quadTree;
+package com.seibel.lod.objects;
 
 import com.seibel.lod.handlers.LodQuadTreeDimensionFileHandler;
 
@@ -6,7 +6,7 @@ import java.awt.*;
 import java.util.*;
 import java.util.List;
 
-public class LodNodeData {
+public class LodQuadTreeNode {
     /** This is what separates each piece of data in the toData method */
     private static final char DATA_DELIMITER = LodQuadTreeDimensionFileHandler.DATA_DELIMITER;
 
@@ -16,6 +16,11 @@ public class LodNodeData {
     public static final int NUMBER_OF_DELIMITERS = 9;
 
     private static final Color INVISIBLE = new Color(0,0,0,0);
+
+    //Complexity indicate how complex is this node. For example a node that has been generated starting
+    //from a real chunk have the maximum complexity. A node that is generated starting from a fake approximated chunk
+    //has a low complexity
+    public byte complexity;
 
     //level height goes from 0 to 9 with 0 the deepest (block size) and 9 the highest (region size)
     public final byte level;
@@ -48,16 +53,9 @@ public class LodNodeData {
     public final int centerX;
     public final int centerZ;
 
-    /** highest point */
-    public short height;
+    public LodDataPoint lodDataPoint;
 
-    /** lowest point */
-    public short depth;
-
-    /** The average color for the 6 cardinal directions */
-    public Color color;
-
-    public boolean real;
+    //void node is used
     public boolean voidNode;
     //if dirty is true, then this node have unsaved changes
     public boolean dirty;
@@ -70,7 +68,7 @@ public class LodNodeData {
      * @param posX position x in the level
      * @param posZ posizion z in the level
      */
-    public LodNodeData(byte level, int posX, int posZ){
+    public LodQuadTreeNode(byte level, int posX, int posZ){
         this.level = level;
         this.posX = posX;
         this.posZ = posZ;
@@ -81,9 +79,7 @@ public class LodNodeData {
         endZ = startZ + width - 1;
         centerX = startX + width/2;
         centerZ = startZ + width/2;
-        height = -1;
-        depth = -1;
-        color = INVISIBLE;
+        lodDataPoint = new LodDataPoint()
         real = false;
         dirty = true;
         voidNode = true;
@@ -94,12 +90,9 @@ public class LodNodeData {
      * @param level level of this
      * @param posX
      * @param posZ
-     * @param height
-     * @param depth
-     * @param color
-     * @param real
+     * @param complexity
      */
-    public LodNodeData(byte level, int posX, int posZ, short height, short depth, Color color, boolean real){
+    public LodQuadTreeNode(byte level, int posX, int posZ, LodDataPoint lodDataPoint, byte complexity){
         this.level = level;
         this.posX = posX;
         this.posZ = posZ;
@@ -110,19 +103,13 @@ public class LodNodeData {
         endZ = startZ + width - 1;
         centerX = startX + width/2;
         centerZ = startZ + width/2;
-        this.height = height;
-        this.depth = depth;
-        this.color = color;
+        this.lodDataPoint = lodDataPoint;
         this.real = real;
         dirty = true;
         voidNode = false;
     }
 
-    public LodNodeData(byte level, int posX, int posZ, int height, int depth, Color color, boolean real)    {
-        this(level, posX, posZ, (short) height,(short) depth, color, real);
-    }
-
-    public LodNodeData(String data)
+    public LodQuadTreeNode(String data)
     {
         int index = 0;
         int lastIndex = 0;
@@ -160,7 +147,7 @@ public class LodNodeData {
         int a = Integer.parseInt(data.substring(lastIndex+1,index));
         this.color = new Color(r,g,b,a);
 
-        int val = Integer.parseInt(data.substring(lastIndex+1,index));
+        int complexity = Integer.parseInt(data.substring(lastIndex+1,index));
         this.real = (val == 1);
         width = (short) Math.pow(2, level);
 
@@ -175,29 +162,34 @@ public class LodNodeData {
         dirty = false;
     }
 
-    public void update(LodNodeData lodNodeData){
-        this.height = lodNodeData.height;
-        this.depth = lodNodeData.depth;
-        this.color = lodNodeData.color;
-        this.real = lodNodeData.real;
+    public void update(LodQuadTreeNode lodQuadTreeNode){
+        this.lodDataPoint = lodQuadTreeNode.lodDataPoint
+        this.complexity = lodQuadTreeNode.complexity;
+        this.voidNode = lodQuadTreeNode.voidNode;
         dirty = true;
     }
 
-    public void combineData(List<LodNodeData> dataList){
+    public LodDataPoint getLodDataPoint(){
+        return lodDataPoint;
+    }
+    public byte getComplexity(){
+        return complexity;
+    }
+
+    public void combineData(List<LodQuadTreeNode> dataList){
         if(dataList.isEmpty()){
-            height = -1;
-            depth = -1;
-            color = INVISIBLE;
+            lodDataPoint = new LodDataPoint();
         }else {
-            short height = (short) dataList.stream().mapToInt(x -> (int) x.height).min().getAsInt();
-            short depth = (short) dataList.stream().mapToInt(x -> (int) x.depth).max().getAsInt();
+            short height = (short) dataList.stream().mapToInt(x -> (int) x.getLodDataPoint().height).min().getAsInt();
+            short depth = (short) dataList.stream().mapToInt(x -> (int) x.getLodDataPoint().depth).max().getAsInt();
             height = height;
             depth = depth;
-            int red= dataList.stream().mapToInt(x -> x.color.getRed()).sum()/dataList.size();
-            int green= dataList.stream().mapToInt(x -> x.color.getGreen()).sum()/dataList.size();
-            int blue = dataList.stream().mapToInt(x -> x.color.getBlue()).sum()/dataList.size();
-            color = new Color(red,green,blue);
-            real = dataList.stream().filter(x -> x.real).count() == 4;
+            int red= dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getRed()).sum()/dataList.size();
+            int green= dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getGreen()).sum()/dataList.size();
+            int blue = dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getBlue()).sum()/dataList.size();
+            Color color = new Color(red,green,blue);
+            lodDataPoint = new LodDataPoint(height,depth,color);
+            complexity = (byte) dataList.stream().mapToInt(x -> x.complexity).max().getAsInt();
             voidNode = dataList.stream().filter(x -> !x.voidNode).count() == 0;
         }
         dirty = true;
@@ -205,12 +197,12 @@ public class LodNodeData {
 
 
     public int hashCode(){
-        return Objects.hash(this.real, this.level, this.posX, this.posZ, this.color, this.real, this.voidNode);
+        return Objects.hash(this.complexity, this.level, this.posX, this.posZ, this.color, this.real, this.voidNode);
     }
 
 
-    public boolean equals(LodNodeData other){
-        return (this.real == other.real
+    public boolean equals(LodQuadTreeNode other){
+        return (this.complexity == other.complexity
                 && this.level == other.level
                 && this.posX == other.posX
                 && this.posZ == other.posZ

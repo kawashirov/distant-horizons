@@ -1,6 +1,7 @@
 package com.seibel.lod.objects;
 
 import java.awt.Color;
+import java.util.Objects;
 
 import com.seibel.lod.handlers.LodDimensionFileHandler;
 
@@ -55,8 +56,17 @@ public class LodDataPoint
 		depth = (short) newDepth;
 		color = newColor;
 	}
-	
-	
+
+	public int hashCode(){
+		return Objects.hash(this.height, this.depth, this.color);
+	}
+
+	public boolean equals(LodDataPoint other){
+		return (this.height == other.height
+				&& this.depth == other.depth
+				&& this.color == other.color);
+	}
+
 	/**
 	 * Outputs all data in a csv format
 	 * with the given delimiter.
