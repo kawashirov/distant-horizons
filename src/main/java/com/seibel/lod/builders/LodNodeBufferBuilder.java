@@ -1,13 +1,9 @@
 package com.seibel.lod.builders;
 
-import com.seibel.lod.builders.worldGeneration.LodChunkGenWorker;
-import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
-import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarBuffer;
-import com.seibel.lod.objects.quadTree.LodNodeData;
-import com.seibel.lod.objects.quadTree.LodQuadTree;
-import com.seibel.lod.objects.quadTree.LodQuadTreeDimension;
+import com.seibel.lod.objects.LodQuadTreeNode;
+import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.render.LodNodeRenderer;
 import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.LodUtil;
@@ -16,8 +12,6 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.biome.BiomeContainer;
 import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.WorldWorkerManager;
 import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
@@ -135,7 +129,7 @@ public class LodNodeBufferBuilder
 			buildableFarBuffer.begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
 
 
-			List<LodNodeData> lodToRender = new ArrayList<>();
+			List<LodQuadTreeNode> lodToRender = new ArrayList<>();
 			lodToRender.addAll(lodDim.getNodeToRender((int) playerX,(int)playerZ,(byte) 0, 100000,0));
 			/*
 			lodToRender.addAll(lodDim.getNodeToRender((int) playerX,(int)playerZ,(byte) 9, 100000,8000));
@@ -146,7 +140,7 @@ public class LodNodeBufferBuilder
 			lodToRender.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 4, 500,250));
 			lodToRender.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 3, 250,0));
 */
-			for(LodNodeData data : lodToRender){
+			for(LodQuadTreeNode data : lodToRender){
 				BufferBuilder currentBuffer = null;
 /*
 				if (isCoordinateInNearFogArea(i, j, numbChunksWide / 2))

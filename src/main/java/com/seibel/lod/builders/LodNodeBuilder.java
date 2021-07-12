@@ -1,10 +1,8 @@
 package com.seibel.lod.builders;
 
-import com.seibel.lod.objects.LodChunk;
-import com.seibel.lod.objects.LodDimension;
-import com.seibel.lod.objects.quadTree.LodNodeData;
-import com.seibel.lod.objects.quadTree.LodQuadTreeDimension;
-import com.seibel.lod.objects.quadTree.LodQuadTreeWorld;
+import com.seibel.lod.objects.LodQuadTreeNode;
+import com.seibel.lod.objects.LodQuadTreeDimension;
+import com.seibel.lod.objects.LodQuadTreeWorld;
 import com.seibel.lod.util.LodUtil;
 import net.minecraft.block.*;
 import net.minecraft.world.DimensionType;
@@ -23,7 +21,7 @@ public class LodNodeBuilder {
     private long seed;
     private DimensionType dimension;
 
-    public static final int CHUNK_DATA_WIDTH = LodNodeData.CHUNK_WIDTH;
+    public static final int CHUNK_DATA_WIDTH = LodQuadTreeNode.CHUNK_WIDTH;
     public static final int CHUNK_SECTION_HEIGHT = 256;
     public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
 
@@ -77,7 +75,7 @@ public class LodNodeBuilder {
             try {
                 DimensionType dim = world.dimensionType();
 
-                LodNodeData node = generateLodNodeFromChunk(chunk);
+                LodQuadTreeNode node = generateLodNodeFromChunk(chunk);
 
                 LodQuadTreeDimension lodDim;
 
@@ -106,7 +104,7 @@ public class LodNodeBuilder {
      *
      * @throws IllegalArgumentException thrown if either the chunk or world is null.
      */
-    public LodNodeData generateLodNodeFromChunk(IChunk chunk) throws IllegalArgumentException {
+    public LodQuadTreeNode generateLodNodeFromChunk(IChunk chunk) throws IllegalArgumentException {
         return generateLodNodeFromChunk(chunk, new LodBuilderConfig());
     }
 
@@ -116,7 +114,7 @@ public class LodNodeBuilder {
      * @throws IllegalArgumentException thrown if either the chunk or world is null.
      * @return
      */
-    public LodNodeData generateLodNodeFromChunk(IChunk chunk, LodBuilderConfig config) throws IllegalArgumentException {
+    public LodQuadTreeNode generateLodNodeFromChunk(IChunk chunk, LodBuilderConfig config) throws IllegalArgumentException {
         if (chunk == null)
             throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
 
@@ -136,7 +134,7 @@ public class LodNodeBuilder {
         depth = determineBottomPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
 
 
-        return new LodNodeData(LodNodeData.CHUNK_LEVEL, chunk.getPos().x, chunk.getPos().z, height, depth, color, true);
+        return new LodQuadTreeNode(LodQuadTreeNode.CHUNK_LEVEL, chunk.getPos().x, chunk.getPos().z, height, depth, color, true);
     }
 
 

@@ -1,8 +1,8 @@
 package com.seibel.lod.handlers;
 
-import com.seibel.lod.objects.quadTree.LodNodeData;
-import com.seibel.lod.objects.quadTree.LodQuadTree;
-import com.seibel.lod.objects.quadTree.LodQuadTreeDimension;
+import com.seibel.lod.objects.LodQuadTreeNode;
+import com.seibel.lod.objects.LodQuadTree;
+import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.proxy.ClientProxy;
 
 import java.io.*;
@@ -83,7 +83,7 @@ public class LodQuadTreeDimensionFileHandler {
             return null;
         }
 
-        List<LodNodeData> dataList = new ArrayList<>();
+        List<LodQuadTreeNode> dataList = new ArrayList<>();
         try
         {
             BufferedReader br = new BufferedReader(new FileReader(f));
@@ -144,7 +144,7 @@ public class LodQuadTreeDimensionFileHandler {
             {
                 try
                 {
-                    dataList.add(new LodNodeData(s));
+                    dataList.add(new LodQuadTreeNode(s));
                 }
                 catch(IllegalArgumentException e)
                 {
@@ -275,9 +275,9 @@ public class LodQuadTreeDimensionFileHandler {
             fw.write(LOD_FILE_VERSION_PREFIX + " " + LOD_SAVE_FILE_VERSION + "\n");
 
             // add each LodChunk to the file
-            for(LodNodeData lodNodeData : Collections.unmodifiableList(region.getNodeList(false, true, true))) {
-                fw.write(lodNodeData.toData() + "\n");
-                lodNodeData.dirty = false;
+            for(LodQuadTreeNode lodQuadTreeNode : Collections.unmodifiableList(region.getNodeList(false, true, true))) {
+                fw.write(lodQuadTreeNode.toData() + "\n");
+                lodQuadTreeNode.dirty = false;
             }
             fw.close();
         }

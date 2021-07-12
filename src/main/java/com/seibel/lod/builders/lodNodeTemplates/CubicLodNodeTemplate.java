@@ -3,10 +3,8 @@ package com.seibel.lod.builders.lodNodeTemplates;
 import com.seibel.lod.enums.ColorDirection;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
-import com.seibel.lod.objects.LodChunk;
-import com.seibel.lod.objects.LodDimension;
-import com.seibel.lod.objects.quadTree.LodNodeData;
-import com.seibel.lod.objects.quadTree.LodQuadTreeDimension;
+import com.seibel.lod.objects.LodQuadTreeNode;
+import com.seibel.lod.objects.LodQuadTreeDimension;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.AxisAlignedBB;
 
@@ -27,7 +25,7 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate {
 
     @Override
     public void addLodToBuffer(BufferBuilder buffer,
-                               LodQuadTreeDimension lodDim, LodNodeData lod,
+                               LodQuadTreeDimension lodDim, LodQuadTreeNode lod,
                                double xOffset, double yOffset, double zOffset,
                                boolean debugging) {
         AxisAlignedBB bbox;

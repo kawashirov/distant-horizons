@@ -1,4 +1,4 @@
-package com.seibel.lod.objects.quadTree;
+package com.seibel.lod.objects;
 
 import net.minecraft.world.DimensionType;
 

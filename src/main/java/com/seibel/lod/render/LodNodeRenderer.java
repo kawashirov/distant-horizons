@@ -3,7 +3,6 @@ package com.seibel.lod.render;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.builders.LodNodeBufferBuilder;
 import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
@@ -11,11 +10,10 @@ import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodChunk;
-import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarBuffer;
 import com.seibel.lod.objects.NearFarFogSettings;
-import com.seibel.lod.objects.quadTree.LodNodeData;
-import com.seibel.lod.objects.quadTree.LodQuadTreeDimension;
+import com.seibel.lod.objects.LodQuadTreeNode;
+import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.proxy.ClientProxy;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
@@ -787,7 +785,7 @@ public class LodNodeRenderer
 		{
 			for(int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
 			{
-				LodNodeData lod = lodDim.getLodFromCoordinates(x, z, (byte) 4);
+				LodQuadTreeNode lod = lodDim.getLodFromCoordinates(x, z, (byte) 4);
 				if (lod != null)
 				{
 					short lodHighestPoint = lod.height;

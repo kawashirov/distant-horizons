@@ -4,13 +4,10 @@ import com.seibel.lod.builders.*;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
-import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
-import com.seibel.lod.objects.quadTree.LodNodeData;
-import com.seibel.lod.objects.quadTree.LodQuadTreeDimension;
-import com.seibel.lod.proxy.ClientProxy;
+import com.seibel.lod.objects.LodQuadTreeNode;
+import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.render.LodNodeRenderer;
-import com.seibel.lod.render.LodRenderer;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.WeightedList.Entry;
@@ -82,7 +79,7 @@ public class LodNodeGenWorker implements IWorker
         if (!threadStarted)
         {
         	// make sure we don't generate this chunk again
-        	thread.lodDim.addNode(new LodNodeData(LodNodeData.CHUNK_LEVEL,thread.pos.x, thread.pos.z));
+        	thread.lodDim.addNode(new LodQuadTreeNode(LodQuadTreeNode.CHUNK_LEVEL,thread.pos.x, thread.pos.z));
         	
         	thread.lodBufferBuilder.numberOfChunksWaitingToGenerate--;
         	
@@ -282,7 +279,7 @@ public class LodNodeGenWorker implements IWorker
 			chunk.setHeightmap(LodChunk.DEFAULT_HEIGHTMAP, heightmap.getRawData());
 			
 			
-			LodNodeData lod;
+			LodQuadTreeNode lod;
 			if (!inTheEnd)
 			{
 				lod = lodChunkBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
@@ -292,7 +289,7 @@ public class LodNodeGenWorker implements IWorker
 				// if we are in the end, don't generate any chunks.
 				// Since we don't know where the islands are, everything
 				// generates the same and it looks really bad.
-				lod = new LodNodeData(LodNodeData.CHUNK_LEVEL,chunk.getPos().x, chunk.getPos().z);
+				lod = new LodQuadTreeNode(LodQuadTreeNode.CHUNK_LEVEL,chunk.getPos().x, chunk.getPos().z);
 			}
 			lodDim.addNode(lod);
 		}
@@ -325,7 +322,7 @@ public class LodNodeGenWorker implements IWorker
 			IceAndSnowFeature snowFeature = new IceAndSnowFeature(NoFeatureConfig.CODEC);
 			snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
 
-			LodNodeData lod = lodChunkBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
+			LodQuadTreeNode lod = lodChunkBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
 			lodDim.addNode(lod);
 		}
 		
@@ -445,7 +442,7 @@ public class LodNodeGenWorker implements IWorker
 			
 			// generate a Lod like normal
 
-			LodNodeData lod = lodChunkBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
+			LodQuadTreeNode lod = lodChunkBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
 			lodDim.addNode(lod);
 		}
 		

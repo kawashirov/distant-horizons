@@ -1,8 +1,6 @@
-package com.seibel.lod.objects.quadTree;
+package com.seibel.lod.objects;
 
 import com.seibel.lod.util.BiomeColorsUtils;
-import kaptainwutax.biomeutils.biome.Biome;
-import kaptainwutax.biomeutils.source.EndBiomeSource;
 import kaptainwutax.biomeutils.source.OverworldBiomeSource;
 import kaptainwutax.mcutils.version.MCVersion;
 
@@ -16,14 +14,10 @@ import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -106,7 +100,7 @@ public class QuadTreeImage extends JPanel {
         frame.pack();
         frame.setLocationByPlatform(true);
         frame.setVisible(true);
-        List<List<LodNodeData>> listOfList = new ArrayList<>();
+        List<List<LodQuadTreeNode>> listOfList = new ArrayList<>();
         OverworldBiomeSource biomeSource = new OverworldBiomeSource(MCVersion.v1_16_5, 1000);
         //EndBiomeSource biomeSource = new EndBiomeSource(MCVersion.v1_16_5, 1000);
         int[] distances = {100000,8000,4000,2000,1000,500,250,100,50,25};
@@ -123,8 +117,8 @@ public class QuadTreeImage extends JPanel {
                     int centerX = level.getLodNodeData().centerX;
                     int centerZ = level.getLodNodeData().centerZ;
                     int width = level.getLodNodeData().width;
-                    byte otherLevel = LodNodeData.BLOCK_LEVEL;
-                    int otherWidth = LodNodeData.BLOCK_WIDTH;
+                    byte otherLevel = LodQuadTreeNode.BLOCK_LEVEL;
+                    int otherWidth = LodQuadTreeNode.BLOCK_WIDTH;
 
                     List<Integer> posXs = new ArrayList<>();
                     List<Integer> posZs = new ArrayList<>();
@@ -148,7 +142,7 @@ public class QuadTreeImage extends JPanel {
                             //System.out.println(posX + " " + posZ);
                             color = BiomeColorsUtils.getColorFromBiomeManual(biomeSource.getBiome(posX, 0, posZ));
                             //color = BiomeColorsUtils.getColorFromIdCB(biomeSource.getBiome(posZ, 0, posX).getId());
-                            LodNodeData node = new LodNodeData(otherLevel, posX, posZ, 0, 0, color, true);
+                            LodQuadTreeNode node = new LodQuadTreeNode(otherLevel, posX, posZ, 0, 0, color, true);
                             dim.addNode(node);
                         }
                     }
@@ -165,7 +159,7 @@ public class QuadTreeImage extends JPanel {
             lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 9, 100000,8000));
             System.out.println(lodList.size());
             */
-            List<LodNodeData> lodList = dim.getNodes(false,false,false);
+            List<LodQuadTreeNode> lodList = dim.getNodes(false,false,false);
             //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 2, 100, 0));
             //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 3, 200, 100));
             //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 4, 400, 200));
@@ -193,8 +187,8 @@ public class QuadTreeImage extends JPanel {
                     if(drawCount==0) quadTreeImage.clearAll();
                     final List<MyDrawable> myDrawables = new ArrayList<>();
                     double amp = 0.4;
-                    Collection<LodNodeData> lodList = listOfList.get(drawCount);
-                    for (LodNodeData data : lodList) {
+                    Collection<LodQuadTreeNode> lodList = listOfList.get(drawCount);
+                    for (LodQuadTreeNode data : lodList) {
                         myDrawables.add(new MyDrawable(new Rectangle2D.Double(
                                 ((data.startX - xOffset ) * amp),
                                 ((data.startZ - zOffset) * amp),
