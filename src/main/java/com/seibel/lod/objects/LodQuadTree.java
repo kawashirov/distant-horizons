@@ -149,14 +149,11 @@ public class LodQuadTree {
             if(posX<0) WE = 1 - WE;
             if(posZ<0) NS = 1 - NS;
             */
-            if(posX<0) System.out.println(WE);
-            if(posZ<0) System.out.println(NS);
-
             if (getChild(NS, WE) == null) {
                 setChild(NS, WE);
             }
             LodQuadTree child = getChild(NS, WE);
-            if (lodNode.compareComplexity(newLodNode) < 0) {
+            if (lodNode.compareComplexity(newLodNode) > 0) {
                 //the node we want to introduce is less complex than the current node
                 //we don't want to override higher complexity with lower complexity
                 return false;
@@ -318,7 +315,7 @@ public class LodQuadTree {
      */
     public List<LodQuadTreeNode> getNodeToRender(int x, int z, byte targetLevel, Set<DistanceGenerationMode> complexityMask, int maxDistance, int minDistance) {
         List<Integer> distances = new ArrayList();
-        distances.add((int) Math.sqrt(Math.pow(x - lodNode.getCenterX(), 2) + Math.pow(z - lodNode.getCenterX(), 2)));
+        distances.add((int) Math.sqrt(Math.pow(x - lodNode.getCenterX(), 2) + Math.pow(z - lodNode.getCenterZ(), 2)));
         distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStartX(), 2) + Math.pow(z - lodNode.getStartZ(), 2)));
         distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStartX(), 2) + Math.pow(z - lodNode.getEndZ(), 2)));
         distances.add((int) Math.sqrt(Math.pow(x - lodNode.getEndX(), 2) + Math.pow(z - lodNode.getStartZ(), 2)));
@@ -362,7 +359,7 @@ public class LodQuadTree {
     public List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> getLevelToGenerate(int x, int z, byte targetLevel, DistanceGenerationMode complexityToGenerate, int maxDistance, int minDistance) {
 
         List<Integer> distances = new ArrayList();
-        distances.add((int) Math.sqrt(Math.pow(x - lodNode.getCenterX(), 2) + Math.pow(z - lodNode.getCenterX(), 2)));
+        distances.add((int) Math.sqrt(Math.pow(x - lodNode.getCenterX(), 2) + Math.pow(z - lodNode.getCenterZ(), 2)));
         distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStartX(), 2) + Math.pow(z - lodNode.getStartZ(), 2)));
         distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStartX(), 2) + Math.pow(z - lodNode.getEndZ(), 2)));
         distances.add((int) Math.sqrt(Math.pow(x - lodNode.getEndX(), 2) + Math.pow(z - lodNode.getStartZ(), 2)));
@@ -389,7 +386,7 @@ public class LodQuadTree {
             }else{
                 if(this.lodNode.getComplexity().compareTo(complexityToGenerate) > 0) {
                     //we want to regenerate a level only if we ask for higher complexity
-                    nodeList.add(new AbstractMap.SimpleEntry<>(this, min)
+                    nodeList.add(new AbstractMap.SimpleEntry<>(this, min));
                 }
             }
         } else {

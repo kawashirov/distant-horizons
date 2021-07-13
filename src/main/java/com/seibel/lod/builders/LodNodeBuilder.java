@@ -1,5 +1,7 @@
 package com.seibel.lod.builders;
 
+import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeWorld;
@@ -134,7 +136,7 @@ public class LodNodeBuilder {
         depth = determineBottomPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
 
 
-        return new LodQuadTreeNode(LodQuadTreeNode.CHUNK_LEVEL, chunk.getPos().x, chunk.getPos().z, height, depth, color, true);
+        return new LodQuadTreeNode(LodQuadTreeNode.CHUNK_LEVEL, chunk.getPos().x, chunk.getPos().z, new LodDataPoint(height, depth, color) , DistanceGenerationMode.SERVER);
     }
 
 

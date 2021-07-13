@@ -14,6 +14,9 @@ package com.seibel.lod.enums;
  */
 public enum DistanceGenerationMode
 {
+	/** No generation has be used*/
+	NONE,
+
 	/** Only generate the biomes and use biome
 	 * grass/foliage color, water color, or ice color
 	 * to generate the color.

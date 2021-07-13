@@ -81,7 +81,7 @@ public class LodQuadTreeNode {
         centerX = startX + width/2;
         centerZ = startZ + width/2;
         lodDataPoint = new LodDataPoint();
-        complexity = null;
+        complexity = DistanceGenerationMode.NONE;
         dirty = true;
         voidNode = true;
     }
@@ -221,11 +221,11 @@ public class LodQuadTreeNode {
 
             //the new complexity equal to the lowest complexity of the list
             DistanceGenerationMode minComplexity = DistanceGenerationMode.SERVER;
-            dataList.forEach(x -> {
-                if (minComplexity.compareTo(x.complexity) < 0){
-                    minComplexity = x.complexity;
+            for(LodQuadTreeNode node: dataList){
+                if (minComplexity.compareTo(node.complexity) < 0){
+                    minComplexity = node.complexity;
                 }
-            });
+            }
             complexity = minComplexity;
 
             voidNode = dataList.stream().filter(x -> !x.voidNode).count() == 0;

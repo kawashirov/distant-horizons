@@ -128,7 +128,7 @@ public class LodNodeRenderer
 	 * Besides drawing the LODs this method also starts
 	 * the async process of generating the Buffers that hold those LODs.
 	 * 
-	 * @param newDimension The dimension to draw, if null doesn't replace the current dimension.
+	 * @param newDim The dimension to draw, if null doesn't replace the current dimension.
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
 	public void drawLODs(LodQuadTreeDimension lodDim, float partialTicks, IProfiler newProfiler)
@@ -788,7 +788,7 @@ public class LodNodeRenderer
 				LodQuadTreeNode lod = lodDim.getLodFromCoordinates(x, z, (byte) 4);
 				if (lod != null)
 				{
-					short lodHighestPoint = lod.height;
+					short lodHighestPoint = lod.lodDataPoint.height;
 					
 					if (playerPos.getY() < lodHighestPoint)
 					{

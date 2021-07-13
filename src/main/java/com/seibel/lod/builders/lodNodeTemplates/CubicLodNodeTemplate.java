@@ -42,15 +42,15 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate {
 
         // returns null if the lod is empty at the given location
         bbox = generateBoundingBox(
-                lod.height,
-                lod.height,
+                lod.lodDataPoint.height,
+                lod.lodDataPoint.height,
                 detail.dataPointWidth,
                 xOffset - (halfWidth / 2) + startX,
                 yOffset,
                 zOffset - (halfWidth / 2) + startZ);
 
         if (bbox != null) {
-            addBoundingBoxToBuffer(buffer, bbox, lod.color);
+            addBoundingBoxToBuffer(buffer, bbox, lod.lodDataPoint.color);
         }
     }
 

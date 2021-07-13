@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.api.distmarker.Dist;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +20,14 @@ public class LodQuadTreeDimension {
     private volatile int width;
     private volatile int halfWidth;
     public long seed;
+
+    public static final Set<DistanceGenerationMode> FULL_COMPLEXITY_MASK = new HashSet(){{
+        add(DistanceGenerationMode.BIOME_ONLY);
+        add(DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT);
+        add(DistanceGenerationMode.SURFACE);
+        add(DistanceGenerationMode.FEATURES);
+        add(DistanceGenerationMode.SERVER);
+    }};
 
     public volatile LodQuadTree regions[][];
     public volatile boolean isRegionDirty[][];
@@ -316,7 +325,7 @@ public class LodQuadTreeDimension {
      */
     public boolean hasThisPositionBeenGenerated(int posX, int posZ, byte level)
     {
-        return getLodFromCoordinates(posX,posZ,level).level == level
+        return getLodFromCoordinates(posX,posZ,level).level == level;
     }
 
     /**
@@ -338,7 +347,7 @@ public class LodQuadTreeDimension {
      * method to get all the quadtree level that have to be generated based on the position of the player
      * @return list of quadTrees
      */
-    public List<LodQuadTree> getNodeToGenerate(int x, int z, byte level, int maxDistance, int minDistance){
+    public List<LodQuadTree> getNodeToGenerate(int x, int z, byte level, DistanceGenerationMode complexity, int maxDistance, int minDistance){
 
         int n = regions.length;
         int xIndex;
@@ -354,7 +363,7 @@ public class LodQuadTreeDimension {
                     region = new LodQuadTree(xIndex, zIndex);
                     setRegion(region);
                 }
-                listOfQuadTree.addAll(region.getLevelToGenerate(x,z,level,maxDistance,minDistance));
+                listOfQuadTree.addAll(region.getLevelToGenerate(x,z,level,complexity,maxDistance,minDistance));
             }
         }
         Collections.sort(listOfQuadTree,Map.Entry.comparingByValue());
@@ -438,10 +447,9 @@ public class LodQuadTreeDimension {
                 if(region == null)
                     continue;
 
-                numbLods= region.getNodeList(false,false,true).size();
+                numbLods= region.getNodeList(FULL_COMPLEXITY_MASK,false,true).size();
             }
         }
-
         return numbLods;
     }
 

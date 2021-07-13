@@ -130,7 +130,7 @@ public class LodNodeBufferBuilder
 
 
 			List<LodQuadTreeNode> lodToRender = new ArrayList<>();
-			lodToRender.addAll(lodDim.getNodeToRender((int) playerX,(int)playerZ,(byte) 0, 100000,0));
+			lodToRender.addAll(lodDim.getNodeToRender((int) playerX,(int)playerZ,(byte) 0, LodQuadTreeDimension.FULL_COMPLEXITY_MASK, 100000,0));
 			/*
 			lodToRender.addAll(lodDim.getNodeToRender((int) playerX,(int)playerZ,(byte) 9, 100000,8000));
 			lodToRender.addAll(lodDim.getNodeToRender((int)playerX,(int)playerZ,(byte) 8, 8000,4000));

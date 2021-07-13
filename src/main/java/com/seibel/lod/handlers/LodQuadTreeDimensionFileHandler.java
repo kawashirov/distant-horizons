@@ -275,7 +275,7 @@ public class LodQuadTreeDimensionFileHandler {
             fw.write(LOD_FILE_VERSION_PREFIX + " " + LOD_SAVE_FILE_VERSION + "\n");
 
             // add each LodChunk to the file
-            for(LodQuadTreeNode lodQuadTreeNode : Collections.unmodifiableList(region.getNodeList(false, true, true))) {
+            for(LodQuadTreeNode lodQuadTreeNode : Collections.unmodifiableList(region.getNodeList(LodQuadTreeDimension.FULL_COMPLEXITY_MASK , true, true))) {
                 fw.write(lodQuadTreeNode.toData() + "\n");
                 lodQuadTreeNode.dirty = false;
             }
