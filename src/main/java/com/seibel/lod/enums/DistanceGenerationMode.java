@@ -47,5 +47,4 @@ public enum DistanceGenerationMode
 	 * are adding the mod to a pre-existing world. 
 	 * Singlethreaded - Slow (15-50 ms, with spikes up to 200 ms) */
 	SERVER;
-	
 }

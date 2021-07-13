@@ -1,5 +1,6 @@
 package com.seibel.lod.objects;
 
+import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodQuadTreeDimensionFileHandler;
 import com.seibel.lod.util.LodUtil;
 import net.minecraft.client.Minecraft;
@@ -251,11 +252,11 @@ public class LodQuadTreeDimension {
      * stored in the LOD. If an LOD already exists at the given
      * coordinates it will be overwritten.
      */
-    public Boolean addNode(LodQuadTreeNode lodQuadTreeNode)
+    public Boolean addNode(LodQuadTreeNode lodNode)
     {
         RegionPos pos = new RegionPos(
-                lodQuadTreeNode.startX / 512,
-                lodQuadTreeNode.startZ / 512
+                lodNode.getStartX() / 512,
+                lodNode.getStartZ() / 512
         );
 
         // don't continue if the region can't be saved
@@ -272,10 +273,10 @@ public class LodQuadTreeDimension {
             region = new LodQuadTree(pos.x, pos.z);
             setRegion(region);
         }
-        boolean coorectlyAdded = region.setNodeAtLowerLevel(lodQuadTreeNode, true);
+        boolean coorectlyAdded = region.setNodeAtLowerLevel(lodNode, true);
 
         // don't save empty place holders to disk
-        if (lodQuadTreeNode.real && fileHandler != null)
+        if (fileHandler != null)
         {
             // mark the region as dirty so it will be saved to disk
             int xIndex = (pos.x - centerX) + halfWidth;
@@ -311,15 +312,23 @@ public class LodQuadTreeDimension {
     }
 
     /**
+     * return true if and only if the node at that position exist
+     */
+    public boolean hasThisPositionBeenGenerated(int posX, int posZ, byte level)
+    {
+        return getLodFromCoordinates(posX,posZ,level).level == level
+    }
+
+    /**
      * method to get all the nodes that have to be rendered based on the position of the player
      * @return list of nodes
      */
-    public List<LodQuadTreeNode> getNodeToRender(int x, int z, byte level, int maxDistance, int minDistance){
+    public List<LodQuadTreeNode> getNodeToRender(int x, int z, byte level, Set<DistanceGenerationMode> complexityMask, int maxDistance, int minDistance){
         int n = regions.length;
         List<LodQuadTreeNode> listOfData = new ArrayList<>();
         for(int i=0; i<n; i++){
             for(int j=0; j<n; j++){
-                listOfData.addAll(regions[i][j].getNodeToRender(x,z,level,maxDistance,minDistance));
+                listOfData.addAll(regions[i][j].getNodeToRender(x,z,level,complexityMask,maxDistance,minDistance));
             }
         }
         return listOfData;
@@ -356,7 +365,7 @@ public class LodQuadTreeDimension {
      * getNodes
      * @return list of quadTrees
      */
-    public List<LodQuadTreeNode> getNodes(boolean getOnlyReal, boolean getOnlyDirty, boolean getOnlyLeaf){
+    public List<LodQuadTreeNode> getNodes(Set<DistanceGenerationMode> complexityMask, boolean getOnlyDirty, boolean getOnlyLeaf){
         int n = regions.length;
         List<LodQuadTreeNode> listOfNodes = new ArrayList<>();
         int xIndex;
@@ -368,7 +377,7 @@ public class LodQuadTreeDimension {
                 zIndex = (zRegion + centerZ) - halfWidth;
                 region = getRegion(xIndex,zIndex);
                 if (region != null){
-                    listOfNodes.addAll(region.getNodeList(getOnlyReal, getOnlyDirty, getOnlyLeaf));
+                    listOfNodes.addAll(region.getNodeList(complexityMask, getOnlyDirty, getOnlyLeaf));
                 }
             }
         }

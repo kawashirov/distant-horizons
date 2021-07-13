@@ -1,5 +1,6 @@
 package com.seibel.lod.objects;
 
+import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.util.BiomeColorsUtils;
 import kaptainwutax.biomeutils.source.OverworldBiomeSource;
 import kaptainwutax.mcutils.version.MCVersion;
@@ -18,9 +19,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -159,7 +158,13 @@ public class QuadTreeImage extends JPanel {
             lodList.addAll(dim.getNodeToRender(playerX,playerZ,(byte) 9, 100000,8000));
             System.out.println(lodList.size());
             */
-            List<LodQuadTreeNode> lodList = dim.getNodes(false,false,false);
+            Set<DistanceGenerationMode> complexityMask = new HashSet<>();
+            complexityMask.add(DistanceGenerationMode.SERVER);
+            complexityMask.add(DistanceGenerationMode.FEATURES);
+            complexityMask.add(DistanceGenerationMode.SURFACE);
+            complexityMask.add(DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT);
+            complexityMask.add(DistanceGenerationMode.BIOME_ONLY);
+            List<LodQuadTreeNode> lodList = dim.getNodes(complexityMask,false,false);
             //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 2, 100, 0));
             //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 3, 200, 100));
             //    lodList.addAll(lodQuadTree.getNodeToRender(playerX, playerZ, (byte) 4, 400, 200));
