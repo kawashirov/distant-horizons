@@ -63,8 +63,10 @@ public class LodNodeBuilder {
  */
 
     public void generateLodNodeAsync(IChunk chunk, LodQuadTreeWorld lodWorld, IWorld world) {
-        if (lodWorld == null || !lodWorld.getIsWorldLoaded())
+        if (lodWorld == null || !lodWorld.getIsWorldLoaded()) {
+            System.out.println("This case?");
             return;
+        }
 
         // don't try to create an LOD object
         // if for some reason we aren't
@@ -82,20 +84,24 @@ public class LodNodeBuilder {
                 LodQuadTreeDimension lodDim;
 
                 if (lodWorld.getLodDimension(dim) == null) {
+                    System.out.println("Adding");
                     lodDim = new LodQuadTreeDimension(dim, lodWorld, regionWidth);
                     lodWorld.addLodDimension(lodDim);
                 } else {
+                    System.out.println("Not adding");
                     lodDim = lodWorld.getLodDimension(dim);
                 }
 
                 lodDim.addNode(node);
             } catch (IllegalArgumentException | NullPointerException e) {
+                e.printStackTrace();
                 // if the world changes while LODs are being generated
                 // they will throw errors as they try to access things that no longer
                 // exist.
             }
         });
         lodGenThreadPool.execute(thread);
+        System.out.println("Is this ENDING?");
 
         return;
     }
@@ -266,6 +272,8 @@ public class LodNodeBuilder {
      *                                        otherwise use the
      */
     private Color generateLodColorForArea(IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ) {
+        return Color.BLUE;
+        /*
         ChunkSection[] chunkSections = chunk.getSections();
 
         int numbOfBlocks = 0;
@@ -345,6 +353,8 @@ public class LodNodeBuilder {
         blue /= numbOfBlocks;
 
         return new Color(red, green, blue);
+
+         */
     }
 
 

@@ -86,7 +86,7 @@ public class RenderUtil
 	 */
 	public static int getMaxRadiusMultiplierWithAvaliableMemory(LodTemplate lodTemplate, LodDetail lodDetail)
 	{
-		int maxNumberOfLods = LodRenderer.MAX_ALOCATEABLE_DIRECT_MEMORY / lodTemplate.getBufferMemoryForSingleLod(lodDetail); 
+		int maxNumberOfLods = LodNodeRenderer.MAX_ALOCATEABLE_DIRECT_MEMORY / lodTemplate.getBufferMemoryForSingleLod(lodDetail);
 		int numbLodsWide = (int) Math.sqrt(maxNumberOfLods);
 		
 		return numbLodsWide / (2 * mc.options.renderDistance);

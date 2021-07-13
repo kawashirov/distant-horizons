@@ -8,6 +8,8 @@ import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
 
+import com.seibel.lod.objects.LodQuadTreeDimension;
+import com.seibel.lod.objects.LodQuadTreeNode;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.AxisAlignedBB;
 
@@ -28,9 +30,9 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer,
-			LodDimension lodDim, LodChunk centerLod, 
-			double xOffset, double yOffset, double zOffset, 
-			boolean debugging)
+							   LodQuadTreeDimension lodDim, LodQuadTreeNode centerLod,
+							   double xOffset, double yOffset, double zOffset,
+							   boolean debugging)
 	{
 		AxisAlignedBB bbox;
 		
@@ -39,28 +41,19 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		LodDetail detail = LodConfig.CLIENT.lodDetail.get();
 		
 		int halfWidth = detail.dataPointWidth / 2;
-		
-		for(int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++)
-		{
-			int startX = detail.startX[i];
-			int startZ = detail.startZ[i];
-			int endX = detail.endX[i];
-			int endZ = detail.endZ[i];
-			
 			// returns null if the lod is empty at the given location
 			bbox = generateBoundingBox(
-					centerLod.getAverageHeightOverArea(startX, startZ, endX, endZ), 
-					centerLod.getAverageDepthOverArea(startX, startZ, endX, endZ), 
+					centerLod.lodDataPoint.height,
+					centerLod.lodDataPoint.depth,
 					detail.dataPointWidth, 
-					xOffset - (halfWidth / 2) + detail.startX[i],
+					xOffset - (centerLod.width / 2),
 					yOffset, 
-					zOffset - (halfWidth / 2) + detail.startZ[i]);
+					zOffset - (centerLod.width / 2));
 			
 			if (bbox != null)
 			{
-				addBoundingBoxToBuffer(buffer, bbox, centerLod.getAverageColorOverArea(startX, startZ, endX, endZ, debugging));
+				addBoundingBoxToBuffer(buffer, bbox, centerLod.lodDataPoint.color);
 			}
-		}
 	}
 	
 	

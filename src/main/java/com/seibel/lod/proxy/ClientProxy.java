@@ -1,16 +1,13 @@
 package com.seibel.lod.proxy;
 
+import com.seibel.lod.builders.LodNodeBufferBuilder;
+import com.seibel.lod.builders.LodNodeBuilder;
+import com.seibel.lod.objects.*;
+import com.seibel.lod.render.LodNodeRenderer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.seibel.lod.builders.LodBufferBuilder;
-import com.seibel.lod.builders.LodChunkBuilder;
 import com.seibel.lod.handlers.LodConfig;
-import com.seibel.lod.objects.LodChunk;
-import com.seibel.lod.objects.LodDimension;
-import com.seibel.lod.objects.LodRegion;
-import com.seibel.lod.objects.LodWorld;
-import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
@@ -31,10 +28,10 @@ public class ClientProxy
 {
 	public static final Logger LOGGER = LogManager.getLogger("LOD");
 	
-	private static LodWorld lodWorld = new LodWorld();
-	private static LodChunkBuilder lodChunkBuilder = new LodChunkBuilder();
-	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder(lodChunkBuilder);
-	private static LodRenderer renderer = new LodRenderer(lodBufferBuilder);
+	private static LodQuadTreeWorld lodWorld = new LodQuadTreeWorld();
+	private static LodNodeBuilder lodChunkBuilder = new LodNodeBuilder();
+	private static LodNodeBufferBuilder lodBufferBuilder = new LodNodeBufferBuilder(lodChunkBuilder);
+	private static LodNodeRenderer renderer = new LodNodeRenderer(lodBufferBuilder);
 	
 	Minecraft mc = Minecraft.getInstance();
 	
@@ -59,41 +56,39 @@ public class ClientProxy
 	{
 		if (mc == null || mc.player == null || !lodWorld.getIsWorldLoaded())
 			return;
-		
-		// update each regions' width to match the new render distance
-		int newWidth = Math.max(4, 
-				// TODO is this logic good?
-				(mc.options.renderDistance * LodChunk.WIDTH * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get()) / LodRegion.SIZE
-				);
-		if (lodChunkBuilder.regionWidth != newWidth)
-		{
-			lodWorld.resizeDimensionRegionWidth(newWidth);
-			lodChunkBuilder.regionWidth = newWidth;
-			
-			// skip this frame, hopefully the lodWorld
-			// should have everything set up by then
-			return;
-		}
-		
-		LodDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
-		if (lodDim == null)
-			return;
-		
-		
-		// offset the regions
-		double playerX = mc.player.getX();
-		double playerZ = mc.player.getZ();
-		
-		int xOffset = ((int)playerX / (LodChunk.WIDTH * LodRegion.SIZE)) - lodDim.getCenterX();
-		int zOffset = ((int)playerZ / (LodChunk.WIDTH * LodRegion.SIZE)) - lodDim.getCenterZ();
-		
-		if (xOffset != 0 || zOffset != 0)
-		{
-			lodDim.move(xOffset, zOffset);
-		}
-		
-		
-		// TODO for testing
+		try {
+			// update each regions' width to match the new render distance
+			int newWidth = Math.max(4,
+					// TODO is this logic good?
+					(mc.options.renderDistance * LodChunk.WIDTH * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get()) / LodRegion.SIZE
+			);
+			if (lodChunkBuilder.regionWidth != newWidth) {
+				lodWorld.resizeDimensionRegionWidth(newWidth);
+				lodChunkBuilder.regionWidth = newWidth;
+
+				// skip this frame, hopefully the lodWorld
+				// should have everything set up by then
+				return;
+			}
+
+			LodQuadTreeDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
+			if (lodDim == null)
+				return;
+
+
+			// offset the regions
+			double playerX = mc.player.getX();
+			double playerZ = mc.player.getZ();
+
+			int xOffset = ((int) playerX / (LodChunk.WIDTH * LodRegion.SIZE)) - lodDim.getCenterX();
+			int zOffset = ((int) playerZ / (LodChunk.WIDTH * LodRegion.SIZE)) - lodDim.getCenterZ();
+
+			if (xOffset != 0 || zOffset != 0) {
+				lodDim.move(xOffset, zOffset);
+			}
+
+
+			// TODO for testing
 //		LodConfig.CLIENT.debugMode.set(false);
 //		LodConfig.CLIENT.lodDetail.set(LodDetail.DOUBLE);
 //		LodConfig.CLIENT.lodColorStyle.set(LodColorStyle.INDIVIDUAL_SIDES);
@@ -101,19 +96,22 @@ public class ClientProxy
 //		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
 //		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 //		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
-		
-		// Note to self:
-		// if "unspecified" shows up in the pie chart, it is
-		// possibly because the amount of time between sections
-		// is too small for the profile to measure
-		IProfiler profiler = mc.getProfiler();
-		profiler.pop(); // get out of "terrain"
-		profiler.push("LOD");
-		
-		renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
-		
-		profiler.pop(); // end LOD
-		profiler.push("terrain"); // restart terrain
+
+			// Note to self:
+			// if "unspecified" shows up in the pie chart, it is
+			// possibly because the amount of time between sections
+			// is too small for the profile to measure
+			IProfiler profiler = mc.getProfiler();
+			profiler.pop(); // get out of "terrain"
+			profiler.push("LOD");
+
+			renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
+
+			profiler.pop(); // end LOD
+			profiler.push("terrain"); // restart terrain
+		}catch (Exception e){
+			return;
+		}
 	}	
 	
 	
@@ -126,13 +124,15 @@ public class ClientProxy
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
-		lodChunkBuilder.generateLodChunkAsync(event.getChunk(), lodWorld, event.getWorld());
+		lodChunkBuilder.generateLodNodeAsync(event.getChunk(), lodWorld, event.getWorld());
 	}
 	
 	
 	@SubscribeEvent
 	public void worldLoadEvent(WorldEvent.Load event)
 	{
+
+		System.out.println("Loading world");
 		// the player just loaded a new world/dimension
 		lodWorld.selectWorld(LodUtil.getWorldID(event.getWorld()));
 		// make sure the correct LODs are being rendered
@@ -164,7 +164,7 @@ public class ClientProxy
 			event.getClass() == BlockEvent.PortalSpawnEvent.class)
 		{
 			// recreate the LOD where the blocks were changed
-			lodChunkBuilder.generateLodChunkAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld());
+			lodChunkBuilder.generateLodNodeAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld());
 		}
 	}
 	
@@ -175,17 +175,17 @@ public class ClientProxy
 	// public getters //
 	//================//
 	
-	public static LodWorld getLodWorld()
+	public static LodQuadTreeWorld getLodWorld()
 	{
 		return lodWorld;
 	}
 	
-	public static LodChunkBuilder getLodBuilder()
+	public static LodNodeBuilder getLodBuilder()
 	{
 		return lodChunkBuilder;
 	}
 	
-	public static LodRenderer getRenderer()
+	public static LodNodeRenderer getRenderer()
 	{
 		return renderer;
 	}

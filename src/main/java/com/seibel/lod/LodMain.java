@@ -1,10 +1,10 @@
 package com.seibel.lod;
 
+import com.seibel.lod.render.LodNodeRenderer;
 import org.lwjgl.opengl.GL;
 
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.proxy.ClientProxy;
-import com.seibel.lod.render.LodRenderer;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -42,9 +42,9 @@ public class LodMain
 		
 		Thread setFancyFog = new Thread(() ->
 		{ 
-			LodRenderer.fancyFogAvailable = GL.getCapabilities().GL_NV_fog_distance;
+			LodNodeRenderer.fancyFogAvailable = GL.getCapabilities().GL_NV_fog_distance;
 			
-			if (!LodRenderer.fancyFogAvailable)
+			if (!LodNodeRenderer.fancyFogAvailable)
 			{
 				ClientProxy.LOGGER.info("This GPU does not support GL_NV_fog_distance. This means that fancy fog options will not be available.");
 			}
