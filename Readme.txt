@@ -1,5 +1,8 @@
 This branch is used only to test the QuadTree data structure. This branch cannot be used to compile the mode and the classes
 that are not listed below in the next section are not updated to the last version of the main branch.
+If you want to see an example of use check the method createAndShowGui in the QuadTreeImage class
+
+https://imgur.com/a/PwQnGZT check this for various test
 
 ========================
 QUADTREE VERSION - HOW IT WORK AND HOW TO USE
@@ -23,7 +26,7 @@ QuadTreeImage       uses the ChunkBase map generation to test the QuadTree. You 
 You should then update the builders, the renderer, the templates... to work with this.
 
 
---HOW IT WORK
+--HOW IT WORKs
 I've tried to make this classes as similar as possible to yours. This way you could even do the same stuff that you are doing now
 like using all the Lod with the same quality. LodDetail is not used anywhere and is replaced by a level value in
 LodQuadTreeNode.
@@ -44,12 +47,49 @@ on the distance.
 LodQuadTreeDimensionFileHandler is used to save all the region (quadTree). I've just converted your method of saving
 to work with this.
 
---HOW TO USE
+---HOW TO USE
 
 You can create the LodQuadTreeWorld and the LodQuadTreeDimension in the same way as yours.
 
 You can build a LodQuadTreeNode by specifying the level, the position in the level, the LodDataPoint, the complexity
 (the DistanceGenerationMode setting selected to generate the information of the node or NONE if the node is fake and empty).
 
-How to select the node that i want to generate?
-At the moment you can select this in two ways: the first is to use the getLodNodeToGenerate
+--How to select the node that i want to generate?
+At the moment you can select this in two ways:
+
+FIRST: use the getLodNodeToGenerate in lodQuadTreeDimension.
+getNodeToGenerate(int x, int z, byte level, DistanceGenerationMode complexity, int maxDistance, int minDistance)
+
+The x and z are the position of the player (or you could just put 0,0 to test the system) the level is the depth at witch
+we want to generate the LOD. The complexity indicate the complexity that we want to use to generate. So is a node "node1"
+has complexity SERVER and we want to use FEATURES complexity to generate the nodes then "node1" will not be selected
+because is more complex and we don't want do override it.  maxDistance and minDistance indicate the range of distances
+at witch we want to generate the nodes.
+IMPORTANT those nodes are given as LodQuadTree and not LodQuadTreeNode. The idea
+is that you take a LodQuadTree object, the you put in it 4 lodQuadTreeNode in the startX,startZ,centerX,centerZ coords,
+as done in the QuadTreeImage class. To put the node you use the setNodeAtLowerLevel with the UpdateHigherLevel set to true.
+
+SECOND: you do it in the same way you are doing it now.
+The getLodFromCoordinates has been converted to work with quadTree. So you could just threat the quadTree as a matrix
+for the generation step.
+
+
+--How to select the node that i want to render?
+At the moment you can select this in two ways:
+
+FIRST:  use the getNodeToRender in lodQuadTreeDimension.
+getNodeToRender(int x, int z, byte level, Set<DistanceGenerationMode> complexityMask, int maxDistance, int minDistance)
+
+Works in a similar way to getLodNodeToGenerate. The main difference is that you have to use a complexityMask, which
+indicate the complexity that you want to render (this way you could deselect the rendering of a precise type of complexity
+like the SERVER or FEATURE for the debug phase).
+This method return a list of LodQuadTreeNode. This node may have different width so you should convert the template to
+work with this correctly.
+
+SECOND:  you just use the getLodNodeToGenerate at a certain level to get the node that you want to render (if this
+node does not exist the it will return NULL)
+
+
+
+
+
