@@ -3,7 +3,8 @@ mode and the classes that are not listed below in the next section are not updat
 of the main branch. If you want to see an example of use check the method createAndShowGui in the
 QuadTreeImage class.
 
-https://imgur.com/a/PwQnGZT check this for various test
+https://imgur.com/a/PwQnGZT old test
+https://imgur.com/a/UCcI2Sc new test (check this)
 
 ========================
 QUADTREE VERSION - HOW IT WORK AND HOW TO USE
