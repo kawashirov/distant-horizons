@@ -146,9 +146,6 @@ public class LodQuadTreeNode {
 
         index = data.indexOf(DATA_DELIMITER, 0);
         this.level = (byte) Integer.parseInt(data.substring(0,index));
-        lastIndex = index;
-        index = data.indexOf(DATA_DELIMITER, lastIndex+1);
-        this.complexity = DistanceGenerationMode.valueOf(data.substring(lastIndex+1,index));
 
         lastIndex = index;
         index = data.indexOf(DATA_DELIMITER, lastIndex+1);
@@ -157,6 +154,10 @@ public class LodQuadTreeNode {
         lastIndex = index;
         index = data.indexOf(DATA_DELIMITER, lastIndex+1);
         this.posZ = Integer.parseInt(data.substring(lastIndex+1,index));
+
+        lastIndex = index;
+        index = data.indexOf(DATA_DELIMITER, lastIndex+1);
+        this.complexity = DistanceGenerationMode.valueOf(data.substring(lastIndex+1,index));
 
         lastIndex = index;
         index = data.indexOf(DATA_DELIMITER, lastIndex+1);
@@ -258,18 +259,18 @@ public class LodQuadTreeNode {
      * Outputs all data in a csv format
      */
     public String toData(){
-        String s = ((int) level) + DATA_DELIMITER
+        String s = Integer.toString((int) level) + DATA_DELIMITER
+                + Integer.toString(posX) + DATA_DELIMITER
+                + Integer.toString(posZ) + DATA_DELIMITER
                 + complexity.toString() + DATA_DELIMITER
-                + posX + DATA_DELIMITER
-                + posZ + DATA_DELIMITER
-                + ((int) lodDataPoint.height) + DATA_DELIMITER
-                + ((int) lodDataPoint.depth) + DATA_DELIMITER
-                + lodDataPoint.color.getRed() + DATA_DELIMITER
-                + lodDataPoint.color.getGreen() + DATA_DELIMITER
-                + lodDataPoint.color.getBlue() + DATA_DELIMITER
-                + lodDataPoint.color.getAlpha() + DATA_DELIMITER;
+                + Integer.toString(((int) lodDataPoint.height)) + DATA_DELIMITER
+                + Integer.toString(((int) lodDataPoint.depth)) + DATA_DELIMITER
+                + Integer.toString(lodDataPoint.color.getRed()) + DATA_DELIMITER
+                + Integer.toString(lodDataPoint.color.getGreen()) + DATA_DELIMITER
+                + Integer.toString(lodDataPoint.color.getBlue()) + DATA_DELIMITER
+                + Integer.toString(lodDataPoint.color.getAlpha()) + DATA_DELIMITER;
         int val = voidNode ? 1 : 0;
-        s += val + DATA_DELIMITER;
+        s += Integer.toString(val) + DATA_DELIMITER;
         return s;
     }
 

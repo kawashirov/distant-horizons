@@ -143,12 +143,6 @@ public class LodQuadTree {
             short widthRatio = (short) (lodNode.width / (2 * newLodNode.width));
             int WE = Math.abs(Math.floorDiv(posX , widthRatio) % 2);
             int NS = Math.abs(Math.floorDiv(posZ , widthRatio) % 2);
-            //These two if fix the negative coordinate problema
-            //I don't know why, there is some problem with the %2 operation
-            /*
-            if(posX<0) WE = 1 - WE;
-            if(posZ<0) NS = 1 - NS;
-            */
             if (getChild(NS, WE) == null) {
                 setChild(NS, WE);
             }

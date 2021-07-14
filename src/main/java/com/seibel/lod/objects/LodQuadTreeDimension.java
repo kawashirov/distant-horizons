@@ -4,6 +4,7 @@ import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodQuadTreeDimensionFileHandler;
 import com.seibel.lod.util.LodUtil;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
@@ -264,8 +265,8 @@ public class LodQuadTreeDimension {
     public Boolean addNode(LodQuadTreeNode lodNode)
     {
         RegionPos pos = new RegionPos(
-                lodNode.getStartX() / 512,
-                lodNode.getStartZ() / 512
+                Math.floorDiv(lodNode.getStartX(), 512),
+                Math.floorDiv(lodNode.getStartZ(), 512)
         );
 
         // don't continue if the region can't be saved
@@ -297,6 +298,19 @@ public class LodQuadTreeDimension {
     }
 
     /**
+     */
+    public LodQuadTreeNode getLodFromCoordinates(ChunkPos chunkPos)
+    {
+        return getLodFromCoordinates(chunkPos.x, chunkPos.z, LodQuadTreeNode.CHUNK_LEVEL);
+    }
+
+    /**
+     */
+    public LodQuadTreeNode getLodFromCoordinates(int chunkPosX, int chunkPosZ)
+    {
+        return getLodFromCoordinates(chunkPosX, chunkPosZ, LodQuadTreeNode.CHUNK_LEVEL);
+    }
+    /**
      * Get the LodNodeData at the given X and Z position in the level
      * in this dimension.
      * <br>
@@ -305,9 +319,11 @@ public class LodQuadTreeDimension {
      */
     public LodQuadTreeNode getLodFromCoordinates(int posX, int posZ, byte level)
     {
-        LodQuadTree region = getRegion((int) (posX/(512/Math.pow(level,2))),(int) (posZ/(512/Math.pow(level,2))));
-        if(region == null)
+        LodQuadTree region = getRegion((Math.floorDiv(posX, (int) (512/Math.pow(level,2)))),(Math.floorDiv(posZ, (int) (512/Math.pow(level,2)))));
+        if(region == null) {
+            System.out.println("THIS CASE");
             return null;
+        }
         return region.getNodeAtLevelPosition(posX, posZ, level);
         /*
         RegionPos pos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(chunkX, chunkZ));
