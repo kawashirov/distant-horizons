@@ -100,7 +100,7 @@ should convert the template to work with this correctly.
 SECOND:  you just use the getLodNodeToGenerate at a certain level to get the node that
 you want to render (if this node does not exist the it will return NULL)
 
-
-
-
-
+LATEST CHANGES:
+Now the getNodesToGenerate correctly works with any technique of node adding. I was adding 4 node,
+1 for each child, but now you could even add just one node and it will work in the same way
+(I still think that adding 4 child is the best technique)
