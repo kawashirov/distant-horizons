@@ -361,8 +361,6 @@ public class LodQuadTree {
             if(!isThereAnyChild() || targetLevel == lodNode.level){
                 if (this.lodNode.getComplexity().compareTo(complexityToGenerate) <= 0 ) {
                     nodeList.add(new AbstractMap.SimpleEntry<LodQuadTreeNode, Integer>(this.lodNode, min));
-                }else{
-                    System.out.println(toString());
                 }
             }else {
                 for (int NS = 0; NS <= 1; NS++) {
