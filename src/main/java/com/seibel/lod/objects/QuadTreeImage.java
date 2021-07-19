@@ -122,9 +122,9 @@ public class QuadTreeImage extends JPanel {
 
                     List<Integer> posXs = new ArrayList<>();
                     List<Integer> posZs = new ArrayList<>();
-                    posXs.add(Math.floorDiv(centerX-1, otherWidth));
+                    posXs.add(Math.floorDiv(startX, otherWidth));
                     posXs.add(Math.floorDiv(centerX, otherWidth));
-                    posZs.add(Math.floorDiv(centerZ-1, otherWidth));
+                    posZs.add(Math.floorDiv(startZ, otherWidth));
                     posZs.add(Math.floorDiv(centerZ, otherWidth));
 
                     for (Integer posXI : posXs) {
@@ -148,18 +148,18 @@ public class QuadTreeImage extends JPanel {
 
                 Set<DistanceGenerationMode> complexityMask = LodQuadTreeDimension.FULL_COMPLEXITY_MASK;
 
-/*
                 List<LodQuadTreeNode> lodList = new ArrayList<>();
                 //The min and max distances should increase quadratically
                 int[] distances2 = {100000, 8000, 4000, 2000, 1000, 500, 250, 0};
                 for (int h = 0; h <= (9 - 3); h++) {
                     lodList.addAll(dim.getNodeToRender(playerX, playerZ, (byte) (9-h), complexityMask, distances2[h], distances2[h+1]));
                 }
-                System.out.println(lodList.size());
-*/
+                System.out.println("Number of node to render "lodList.size());
 
+/*
                 List<LodQuadTreeNode> lodList = dim.getNodes(complexityMask, false, false); //USE THIS TO SEE AL THE LODS
                 listOfList.add(lodList);
+ */
 
             }
         }
@@ -278,8 +278,8 @@ class MyDrawable {
 
         g2.setColor(color);
 
-        //g2.fill(shape);
-        g2.setStroke(stroke);
+        g2.fill(shape);
+        //g2.setStroke(stroke);
         g2.draw(shape);
 
         g2.setColor(oldColor);
