@@ -223,7 +223,7 @@ public class LodQuadTreeNode {
             //the new complexity equal to the lowest complexity of the list
             DistanceGenerationMode minComplexity = DistanceGenerationMode.SERVER;
             for(LodQuadTreeNode node: dataList){
-                if (minComplexity.compareTo(node.complexity) < 0){
+                if (minComplexity.compareTo(node.complexity) > 0){
                     minComplexity = node.complexity;
                 }
             }

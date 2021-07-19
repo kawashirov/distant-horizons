@@ -3,10 +3,7 @@ package com.seibel.lod.objects;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import org.lwjgl.system.CallbackI;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * This object contains all data useful to render LodBlock in a region (32x32 chunk o 512x512 block)
@@ -362,8 +359,10 @@ public class LodQuadTree {
         List<AbstractMap.SimpleEntry<LodQuadTreeNode, Integer>> nodeList = new ArrayList<>();
         if (targetLevel <= lodNode.level && ((min <= maxDistance && max >= minDistance) || isCoordinateInLevel(x, z))) {
             if(!isThereAnyChild() || targetLevel == lodNode.level){
-                if (this.lodNode.getComplexity().compareTo(complexityToGenerate) <= 0) {
-                    nodeList.add(new AbstractMap.SimpleEntry<>(this.getLodNodeData(), min));
+                if (this.lodNode.getComplexity().compareTo(complexityToGenerate) <= 0 ) {
+                    nodeList.add(new AbstractMap.SimpleEntry<LodQuadTreeNode, Integer>(this.lodNode, min));
+                }else{
+                    System.out.println(toString());
                 }
             }else {
                 for (int NS = 0; NS <= 1; NS++) {
@@ -371,8 +370,7 @@ public class LodQuadTree {
                         if (getChild(NS, WE) == null) {
                             setChild(NS, WE);
                         }
-                        LodQuadTree child = getChild(NS, WE);
-                        nodeList.addAll(child.getNodesToGenerate(x, z, targetLevel, complexityToGenerate, maxDistance, minDistance));
+                        nodeList.addAll(getChild(NS, WE).getNodesToGenerate(x, z, targetLevel, complexityToGenerate, maxDistance, minDistance));
                     }
                 }
             }
