@@ -309,7 +309,6 @@ public class LodQuadTree {
      */
     public List<LodQuadTreeNode> getNodeToRender(int x, int z, byte targetLevel, Set<DistanceGenerationMode> complexityMask, int maxDistance, int minDistance) {
         List<Integer> distances = new ArrayList();
-        distances.add((int) Math.sqrt(Math.pow(x - lodNode.getCenterX(), 2) + Math.pow(z - lodNode.getCenterZ(), 2)));
         distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStartX(), 2) + Math.pow(z - lodNode.getStartZ(), 2)));
         distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStartX(), 2) + Math.pow(z - lodNode.getEndZ(), 2)));
         distances.add((int) Math.sqrt(Math.pow(x - lodNode.getEndX(), 2) + Math.pow(z - lodNode.getStartZ(), 2)));
@@ -319,7 +318,7 @@ public class LodQuadTree {
         int max = distances.stream().mapToInt(Integer::intValue).max().getAsInt();
         List<LodQuadTreeNode> nodeList = new ArrayList<>();
 
-        if (!(targetLevel > lodNode.level || ((min > maxDistance || max < minDistance) /*&& !isCoordinateInLevel(x,z)*/))) {
+        if (targetLevel <= lodNode.level && ((min <= maxDistance && max >= minDistance) || isCoordinateInLevel(x, z))) {
             if (targetLevel == lodNode.level || !isNodeFull()) {
                 if (!lodNode.isVoidNode() && complexityMask.contains(lodNode.getComplexity())) {
                     nodeList.add(lodNode);
@@ -353,7 +352,6 @@ public class LodQuadTree {
     public List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> getLevelToGenerate(int x, int z, byte targetLevel, DistanceGenerationMode complexityToGenerate, int maxDistance, int minDistance) {
 
         List<Integer> distances = new ArrayList();
-        distances.add((int) Math.sqrt(Math.pow(x - lodNode.getCenterX(), 2) + Math.pow(z - lodNode.getCenterZ(), 2)));
         distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStartX(), 2) + Math.pow(z - lodNode.getStartZ(), 2)));
         distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStartX(), 2) + Math.pow(z - lodNode.getEndZ(), 2)));
         distances.add((int) Math.sqrt(Math.pow(x - lodNode.getEndX(), 2) + Math.pow(z - lodNode.getStartZ(), 2)));
@@ -362,29 +360,22 @@ public class LodQuadTree {
         int min = distances.stream().mapToInt(Integer::intValue).min().getAsInt();
         int max = distances.stream().mapToInt(Integer::intValue).max().getAsInt();
         List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> nodeList = new ArrayList<>();
-        if ( targetLevel > lodNode.level || ((min > maxDistance || max < minDistance)/* && !isCoordinateInLevel(x,z)*/)) {
-            return nodeList;
-        }
-        if(isNodeFull()) {
-            //THIS LEVEL HAS CHILD SO IT'S GENERATED.
-            if (targetLevel != lodNode.level) {
+        if (targetLevel <= lodNode.level && ((min <= maxDistance && max >= minDistance) || isCoordinateInLevel(x, z))) {
+            if(!isThereAnyChild() || targetLevel == lodNode.level){
+                if (this.lodNode.getComplexity().compareTo(complexityToGenerate) <= 0) {
+                    nodeList.add(new AbstractMap.SimpleEntry<>(this, min));
+                }
+            }else {
                 for (int NS = 0; NS <= 1; NS++) {
                     for (int WE = 0; WE <= 1; WE++) {
-                        if (getChild(NS,WE) == null) {
-                            setChild(NS,WE);
+                        if (getChild(NS, WE) == null) {
+                            setChild(NS, WE);
                         }
-                        LodQuadTree child = getChild(NS,WE);
+                        LodQuadTree child = getChild(NS, WE);
                         nodeList.addAll(child.getLevelToGenerate(x, z, targetLevel, complexityToGenerate, maxDistance, minDistance));
                     }
                 }
-            }else{
-                if(this.lodNode.getComplexity().compareTo(complexityToGenerate) > 0) {
-                    //we want to regenerate a level only if we ask for higher complexity
-                    nodeList.add(new AbstractMap.SimpleEntry<>(this, min));
-                }
             }
-        } else {
-            nodeList.add(new AbstractMap.SimpleEntry<>(this, min));
         }
         return nodeList;
     }
@@ -429,7 +420,7 @@ public class LodQuadTree {
 
 
     public boolean isCoordinateInLevel(int x, int z){
-        return !(lodNode.getStartX() > x || lodNode.getStartZ() > z || lodNode.getEndX() < x || lodNode.getEndZ() < z);
+        return (lodNode.getStartX() * lodNode.width <= x && lodNode.getStartZ() * lodNode.width  <= z && lodNode.getEndX() * lodNode.width  >= x && lodNode.getEndZ() * lodNode.width  >= z);
     }
 
     public String toString(){
