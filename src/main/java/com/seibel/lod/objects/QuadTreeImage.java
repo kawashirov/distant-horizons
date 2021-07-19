@@ -106,17 +106,17 @@ public class QuadTreeImage extends JPanel {
 
             int[] distances = {100000, 8000, 4000, 2000, 1000, 500, 250, 100, 50, 25};
             for (int i = 0; i <= (9 - 2); i++) {
-                List<LodQuadTree> levelToGenerate = dim.getNodeToGenerate(playerX, playerZ, (byte) (9 - i), DistanceGenerationMode.SERVER, distances[i], 0);
+                List<LodQuadTreeNode> levelToGenerate = dim.getNodesToGenerate(playerX, playerZ, (byte) (9 - i), DistanceGenerationMode.SERVER, distances[i], 0);
                 //System.out.println(levelToGenerate);
-                for (LodQuadTree level : levelToGenerate) {
+                for (LodQuadTreeNode node : levelToGenerate) {
                     Color color;
-                    int startX = level.getLodNodeData().startX;
-                    int startZ = level.getLodNodeData().startZ;
-                    int endX = level.getLodNodeData().endX;
-                    int endZ = level.getLodNodeData().endZ;
-                    int centerX = level.getLodNodeData().centerX;
-                    int centerZ = level.getLodNodeData().centerZ;
-                    int width = level.getLodNodeData().width;
+                    int startX = node.startX;
+                    int startZ = node.startZ;
+                    int endX = node.endX;
+                    int endZ = node.endZ;
+                    int centerX = node.centerX;
+                    int centerZ = node.centerZ;
+                    int width = node.width;
                     byte otherLevel = LodQuadTreeNode.BLOCK_LEVEL;
                     int otherWidth = LodQuadTreeNode.BLOCK_WIDTH;
 
@@ -132,8 +132,8 @@ public class QuadTreeImage extends JPanel {
                             int posX = posXI.intValue();
                             int posZ = posZI.intValue();
                             color = BiomeColorsUtils.getColorFromBiomeManual(biomeSource.getBiome(posX, 0, posZ));
-                            LodQuadTreeNode node = new LodQuadTreeNode(otherLevel, posX, posZ, new LodDataPoint(0, 0, color), DistanceGenerationMode.SERVER);
-                            if (dim.addNode(node)) {
+                            LodQuadTreeNode newNode = new LodQuadTreeNode(otherLevel, posX, posZ, new LodDataPoint(0, 0, color), DistanceGenerationMode.SERVER);
+                            if (dim.addNode(newNode)) {
                             }
                         }
                     }

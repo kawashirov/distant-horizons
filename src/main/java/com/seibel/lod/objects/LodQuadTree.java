@@ -349,7 +349,7 @@ public class LodQuadTree {
      * @param minDistance
      * @return
      */
-    public List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> getLevelToGenerate(int x, int z, byte targetLevel, DistanceGenerationMode complexityToGenerate, int maxDistance, int minDistance) {
+    public List<AbstractMap.SimpleEntry<LodQuadTreeNode, Integer>> getNodesToGenerate(int x, int z, byte targetLevel, DistanceGenerationMode complexityToGenerate, int maxDistance, int minDistance) {
 
         List<Integer> distances = new ArrayList();
         distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStartX(), 2) + Math.pow(z - lodNode.getStartZ(), 2)));
@@ -359,11 +359,11 @@ public class LodQuadTree {
 
         int min = distances.stream().mapToInt(Integer::intValue).min().getAsInt();
         int max = distances.stream().mapToInt(Integer::intValue).max().getAsInt();
-        List<AbstractMap.SimpleEntry<LodQuadTree, Integer>> nodeList = new ArrayList<>();
+        List<AbstractMap.SimpleEntry<LodQuadTreeNode, Integer>> nodeList = new ArrayList<>();
         if (targetLevel <= lodNode.level && ((min <= maxDistance && max >= minDistance) || isCoordinateInLevel(x, z))) {
             if(!isThereAnyChild() || targetLevel == lodNode.level){
                 if (this.lodNode.getComplexity().compareTo(complexityToGenerate) <= 0) {
-                    nodeList.add(new AbstractMap.SimpleEntry<>(this, min));
+                    nodeList.add(new AbstractMap.SimpleEntry<>(this.getLodNodeData(), min));
                 }
             }else {
                 for (int NS = 0; NS <= 1; NS++) {
@@ -372,7 +372,7 @@ public class LodQuadTree {
                             setChild(NS, WE);
                         }
                         LodQuadTree child = getChild(NS, WE);
-                        nodeList.addAll(child.getLevelToGenerate(x, z, targetLevel, complexityToGenerate, maxDistance, minDistance));
+                        nodeList.addAll(child.getNodesToGenerate(x, z, targetLevel, complexityToGenerate, maxDistance, minDistance));
                     }
                 }
             }

@@ -363,13 +363,13 @@ public class LodQuadTreeDimension {
      * method to get all the quadtree level that have to be generated based on the position of the player
      * @return list of quadTrees
      */
-    public List<LodQuadTree> getNodeToGenerate(int x, int z, byte level, DistanceGenerationMode complexity, int maxDistance, int minDistance){
+    public List<LodQuadTreeNode> getNodesToGenerate(int x, int z, byte level, DistanceGenerationMode complexity, int maxDistance, int minDistance){
 
         int n = regions.length;
         int xIndex;
         int zIndex;
         LodQuadTree region;
-        List<Map.Entry<LodQuadTree,Integer>> listOfQuadTree = new ArrayList<>();
+        List<Map.Entry<LodQuadTreeNode,Integer>> listOfQuadTree = new ArrayList<>();
         for(int xRegion=0; xRegion<n; xRegion++){
             for(int zRegion=0; zRegion<n; zRegion++){
                 xIndex = (xRegion + centerX) - halfWidth;
@@ -379,7 +379,7 @@ public class LodQuadTreeDimension {
                     region = new LodQuadTree(xIndex, zIndex);
                     setRegion(region);
                 }
-                listOfQuadTree.addAll(region.getLevelToGenerate(x,z,level,complexity,maxDistance,minDistance));
+                listOfQuadTree.addAll(region.getNodesToGenerate(x,z,level,complexity,maxDistance,minDistance));
             }
         }
         Collections.sort(listOfQuadTree,Map.Entry.comparingByValue());
