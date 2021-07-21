@@ -315,7 +315,7 @@ public class LodQuadTree {
         int max = distances.stream().mapToInt(Integer::intValue).max().getAsInt();
         List<LodQuadTreeNode> nodeList = new ArrayList<>();
 
-        if (targetLevel <= lodNode.level && ((min <= maxDistance && max >= minDistance) || isCoordinateInLevel(x, z))) {
+        if (targetLevel <= lodNode.level && ((min <= maxDistance && max >= minDistance) /*|| isCoordinateInLevel(x, z)*/)) {
             if (targetLevel == lodNode.level || !isNodeFull()) {
                 if (!lodNode.isVoidNode() && complexityMask.contains(lodNode.getComplexity())) {
                     nodeList.add(lodNode);

@@ -62,6 +62,14 @@ public class LodQuadTreeNode {
     public boolean dirty;
 
 
+    /**TODO There should be a check for the level. Level must be positive, i could use runtime exception or simple if*/
+    /**TODO There should be a good way to create node that must not be saved
+     * For example loading a 64 region wide dimension that is fully generated is too much memory heavy.
+     * There should be a way to create Node that are approximated and at region level, so you could load those
+     * for far region, and then when you get closer you load the actual region from the file or you generate it.
+     * */
+
+
     /**
      * Creates and empty LodDataPoint
      * This LodDataPoint only contains the position data

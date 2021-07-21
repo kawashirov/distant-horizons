@@ -16,6 +16,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class LodQuadTreeDimension {
+
+    /**TODO a dimension should support two different type of quadTree.
+     * The ones that are near from the player should always be saved and can be fully generated (even at block level)
+     * The ones that are far from the player should always be non-savable and at a high level
+     * If this is not done then you could see how heavy a fully generated 64 region dimension can get.
+     * IDEA : use a mask like the "isRegionDirty" to achieve this*/
+
     public final DimensionType dimension;
 
     private volatile int width;
