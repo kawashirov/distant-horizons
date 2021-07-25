@@ -18,7 +18,7 @@
 package com.seibel.lod.objects;
 
 /**
- * A LodRegion is the a 32x32
+ * A LodRegion is a 32x32
  * 2D array of LodChunk objects.
  * Each LodRegion corresponds to
  * one file in the file system.
