@@ -31,6 +31,7 @@ import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.enums.LodTemplate;
+import com.seibel.lod.enums.ShadingMode;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -40,7 +41,7 @@ import net.minecraftforge.fml.config.ModConfig;
 /**
  * 
  * @author James Seibel
- * @version 7-5-2021
+ * @version 7-25-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -64,6 +65,8 @@ public class LodConfig
 		public ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
 		
 		public ForgeConfigSpec.IntValue numberOfWorldGenerationThreads;
+		
+		public ForgeConfigSpec.EnumValue<ShadingMode> shadingMode;
 		
 		/** this is multiplied by the default view distance
 		 * to determine how far out to generate/render LODs */
@@ -210,6 +213,18 @@ public class LodConfig
 	                		)
 	                .defineInRange("numberOfWorldGenerationThreads", Runtime.getRuntime().availableProcessors(), 1, Runtime.getRuntime().availableProcessors());
 	        
+	        shadingMode = builder
+	                .comment("\n\n"
+	                		+ " What kind of shading should LODs have? \n"
+	                		+ " " + ShadingMode.NONE.toString() + " \n"
+	                		+ " " + "LODs will have the same lighting on every side. \n" 
+	                		+ " " + "Can make large similarly colored areas hard to differentiate. \n"
+	                		+ " " + "Fastest"
+	                		+ "/n"
+            				+ " " + ShadingMode.DARKEN_SIDES.toString() + " \n"
+            				+ " " + "LODs will have darker sides and bottoms to simulate top down lighting."
+            				+ " " + "Fastest /n")
+	                .defineEnum("lightingMode", ShadingMode.DARKEN_SIDES);
 	        
 	        builder.pop();
 	    }
