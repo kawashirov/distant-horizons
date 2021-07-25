@@ -24,6 +24,7 @@ import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -105,17 +106,20 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	private void addBoundingBoxToBuffer(BufferBuilder buffer, AxisAlignedBB bb, Color c)
 	{
 		Color topColor = c;
-		Color sideColor = c;
+		Color northSouthColor = c;
+		Color eastWestColor = c;
 		Color bottomColor = c;
 		
 		// darken the bottom and side colors if requested
 		if (LodConfig.CLIENT.shadingMode.get() == ShadingMode.DARKEN_SIDES)
 		{
-			int sideDarkenAmount = 50;
-			int bottomDarkenAmount = sideDarkenAmount + 25;
+			int northSouthDarkenAmount = 25;
+			int eastWestDarkenAmount = 50;
+			int bottomDarkenAmount = 75;
 			
-			sideColor =   new Color(Math.max(0, c.getRed() - sideDarkenAmount),   Math.max(0, c.getGreen() - sideDarkenAmount),   Math.max(0, c.getBlue() - sideDarkenAmount),   Math.max(0, c.getAlpha() - sideDarkenAmount));
-			bottomColor = new Color(Math.max(0, c.getRed() - bottomDarkenAmount), Math.max(0, c.getGreen() - bottomDarkenAmount), Math.max(0, c.getBlue() - bottomDarkenAmount), Math.max(0, c.getAlpha() - bottomDarkenAmount));
+			northSouthColor = new Color(Math.max(0, c.getRed() - northSouthDarkenAmount), Math.max(0, c.getGreen() - northSouthDarkenAmount), Math.max(0, c.getBlue() - northSouthDarkenAmount), c.getAlpha());
+			eastWestColor = new Color(Math.max(0, c.getRed() - eastWestDarkenAmount), Math.max(0, c.getGreen() - eastWestDarkenAmount), Math.max(0, c.getBlue() - eastWestDarkenAmount), c.getAlpha());
+			bottomColor = new Color(Math.max(0, c.getRed() - bottomDarkenAmount), Math.max(0, c.getGreen() - bottomDarkenAmount), Math.max(0, c.getBlue() - bottomDarkenAmount), c.getAlpha());
 		}
 		
 		
@@ -131,26 +135,26 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, bottomColor.getRed(), bottomColor.getGreen(), bottomColor.getBlue(), bottomColor.getAlpha());
 
 		// south (facing -Z) 
-		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
-		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
-		addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
-		addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
 		// north (facing +Z)
-		addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
-		addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
-		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
-		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
 
 		// west (facing -X)
-		addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
-		addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
-		addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
-		addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
+		addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
 		// east (facing +X)
-		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
-		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
-		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
-		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, sideColor.getRed(), sideColor.getGreen(), sideColor.getBlue(), sideColor.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
+		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
 	}
 	
 

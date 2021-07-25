@@ -254,4 +254,32 @@ public class LodUtil
 	{
 		return color.getRGB();
 	}
+	
+	
+	/**
+	 * Clamps the given value between the min and max values.
+	 * May behave strangely if min > max.
+	 */
+	public static int clamp(int min, int value, int max)
+	{
+		return Math.min(max, Math.max(value, min));
+	}
+	
+	/**
+	 * Clamps the given value between the min and max values.
+	 * May behave strangely if min > max.
+	 */
+	public static float clamp(float min, float value, float max)
+	{
+		return Math.min(max, Math.max(value, min));
+	}
+	
+	/**
+	 * Clamps the given value between the min and max values.
+	 * May behave strangely if min > max.
+	 */
+	public static double clamp(double min, double value, double max)
+	{
+		return Math.min(max, Math.max(value, min));
+	}
 }
