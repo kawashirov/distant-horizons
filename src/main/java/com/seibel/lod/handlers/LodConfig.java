@@ -72,6 +72,9 @@ public class LodConfig
 		 * to determine how far out to generate/render LODs */
 		public ForgeConfigSpec.IntValue lodChunkRadiusMultiplier;
 		
+		public ForgeConfigSpec.DoubleValue brightnessMultiplier;
+		
+		public ForgeConfigSpec.DoubleValue saturationMultiplier;
 		
 		
 		Client(ForgeConfigSpec.Builder builder)
@@ -225,6 +228,24 @@ public class LodConfig
             				+ " " + "LODs will have darker sides and bottoms to simulate top down lighting."
             				+ " " + "Fastest /n")
 	                .defineEnum("lightingMode", ShadingMode.DARKEN_SIDES);
+	        
+	        
+	        
+	        brightnessMultiplier = builder
+	                .comment("\n\n"
+	                		+ " Change how bright LOD colors are. \n"
+	                		+ " 0 = black \n"
+	                		+ " 1 = normal color value \n"
+	                		+ " 2 = washed out colors \n")
+	                .defineInRange("brightnessMultiplier", 1.0, 0, 2);
+	        
+	        saturationMultiplier = builder
+	        		.comment("\n\n"
+	                		+ " Change how saturated LOD colors are. \n"
+	                		+ " 0 = black and white \n"
+	                		+ " 1 = normal saturation \n"
+	                		+ " 2 = very saturated \n")
+	                .defineInRange("saturationMultiplier", 1.0, 0, 2);
 	        
 	        builder.pop();
 	    }

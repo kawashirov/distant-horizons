@@ -120,6 +120,8 @@ public class ClientProxy
 //		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 //		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
 //		LodConfig.CLIENT.shadingMode.set(ShadingMode.DARKEN_SIDES);
+//		LodConfig.CLIENT.brightnessMultiplier.set(1.0);
+//		LodConfig.CLIENT.saturationMultiplier.set(1.0);
 		
 //		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
 //		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);

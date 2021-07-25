@@ -122,6 +122,14 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			bottomColor = new Color(Math.max(0, c.getRed() - bottomDarkenAmount), Math.max(0, c.getGreen() - bottomDarkenAmount), Math.max(0, c.getBlue() - bottomDarkenAmount), c.getAlpha());
 		}
 		
+		float saturationMultiplier = LodConfig.CLIENT.saturationMultiplier.get().floatValue();
+		float brightnessMultiplier = LodConfig.CLIENT.brightnessMultiplier.get().floatValue();
+		
+		topColor = applySaturationAndBrightnessMultipliers(topColor, saturationMultiplier, brightnessMultiplier);
+		northSouthColor = applySaturationAndBrightnessMultipliers(northSouthColor, saturationMultiplier, brightnessMultiplier);
+		bottomColor = applySaturationAndBrightnessMultipliers(bottomColor, saturationMultiplier, brightnessMultiplier);
+		
+		
 		
 		// top (facing up)
 		addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, topColor.getRed(), topColor.getGreen(), topColor.getBlue(), topColor.getAlpha());
@@ -157,6 +165,16 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
 	}
 	
+	
+	/**
+	 * Edit the given color in HSV mode.
+	 */
+	private Color applySaturationAndBrightnessMultipliers(Color color, float saturationMultiplier, float brightnessMultiplier)
+	{
+		float[] hsv = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+		return Color.getHSBColor(hsv[0], LodUtil.clamp(0.0f, hsv[1] * saturationMultiplier, 1.0f), LodUtil.clamp(0.0f, hsv[2] * brightnessMultiplier, 1.0f));
+	}
+
 
 	@Override
 	public int getBufferMemoryForSingleLod(LodDetail detail)
