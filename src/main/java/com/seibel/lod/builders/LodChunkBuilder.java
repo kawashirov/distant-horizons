@@ -36,6 +36,7 @@ import net.minecraft.block.BushBlock;
 import net.minecraft.block.GrassBlock;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.LeavesBlock;
+import net.minecraft.block.material.MaterialColor;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.biome.Biome;
@@ -456,12 +457,17 @@ public class LodChunkBuilder
 	{
 		int colorInt = 0;
 		
+		// block special cases
 		if (blockState == Blocks.AIR.defaultBlockState())
 		{
 			colorInt = biome.getGrassColor(x, z);
 		}
+		else if (blockState == Blocks.MYCELIUM.defaultBlockState())
+		{
+			colorInt = MaterialColor.COLOR_LIGHT_GRAY.col;
+		}
 		
-		
+		// plant life
 		else if (blockState.getBlock() instanceof LeavesBlock)
 		{
 			Color leafColor = LodUtil.intToColor(biome.getFoliageColor()).darker();
@@ -474,10 +480,14 @@ public class LodChunkBuilder
 		{
 			colorInt = biome.getGrassColor(x, z);
 		}
+		
+		// water
 		else if (blockState.getBlock() == Blocks.WATER)
 		{
 			colorInt = biome.getWaterColor();
 		}
+		
+		// everything else
 		else
 		{
 			colorInt = blockState.materialColor.col;
