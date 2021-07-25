@@ -34,8 +34,6 @@ import com.seibel.lod.util.LodUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.biome.BiomeContainer;
-import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.WorldWorkerManager;
 
@@ -43,7 +41,7 @@ import net.minecraftforge.common.WorldWorkerManager;
  * This object is used to create NearFarBuffer objects.
  * 
  * @author James Seibel
- * @version 06-19-2021
+ * @version 07-25-2021
  */
 public class LodBufferBuilder
 {
@@ -90,15 +88,11 @@ public class LodBufferBuilder
 	}
 	
 	
-	private BiomeContainer biomeContainer = null;
-	private LodDimension previousDimension = null;
-	
-
 	/**
 	 * Create a thread to asynchronously generate LOD buffers
 	 * centered around the given camera X and Z.
 	 * <br>
-	 * This method will write to the drawableNearBuffers and drawableFarBuffers.
+	 * This method will write to the drawable near and far buffers.
 	 * <br>
 	 * After the buildable buffers have been generated they must be
 	 * swapped with the drawable buffers in the LodRenderer to be drawn.
@@ -112,12 +106,6 @@ public class LodBufferBuilder
 		
 		if (buildableNearBuffer == null || buildableFarBuffer == null)
 			throw new IllegalStateException("generateLodBuffersAsync was called before the buildableNearBuffer and buildableFarBuffer were created.");
-		
-		if (previousDimension != lodDim)
-		{
-			biomeContainer = LodUtil.getServerWorldFromDimension(lodDim.dimension).getChunk(0, 0, ChunkStatus.EMPTY).getBiomes();
-			previousDimension = lodDim;
-		}
 		
 		generatingBuffers = true;
 		
@@ -209,8 +197,9 @@ public class LodBufferBuilder
 							// issue #40
 							// TODO optimize this code, 
 							// using the purely optimized code above we can achieve close to
-							// 100% CPU utilization, this code generally achieves 40 - 50 %
-							// I'm sure there is a better data structure for this.
+							// 100% CPU utilization, this code generally achieves 40 - 50%
+							// after a certain point; and I'm sure there is a better data
+							// structure for this.
 							if (newDistance < minChunkDist)
 							{
 								// this chunk is closer, clear any previous
@@ -269,11 +258,12 @@ public class LodBufferBuilder
 									chunkGenIndex++;
 								}
 							}
-							
-						}
-						// don't render this null chunk
+						} // lod null and can generate more chunks
+						
+						// don't render this null/empty chunk
 						continue;
-					}
+						
+					} // lod null or empty
 					
 					
 					BufferBuilder currentBuffer = null;
@@ -290,6 +280,7 @@ public class LodBufferBuilder
 				}
 			}
 			
+			// issue #19
 			// TODO add a way for a server side mod to generate chunks requested here
 			if(mc.hasSingleplayerServer())
 			{
@@ -315,7 +306,7 @@ public class LodBufferBuilder
 					
 					numberOfChunksWaitingToGenerate.addAndGet(1);
 					
-					LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, renderer, lodChunkBuilder, this, lodDim, serverWorld, biomeContainer);
+					LodChunkGenWorker genWorker = new LodChunkGenWorker(chunkPos, renderer, lodChunkBuilder, this, lodDim, serverWorld);
 					WorldWorkerManager.addWorker(genWorker);
 				}
 			}

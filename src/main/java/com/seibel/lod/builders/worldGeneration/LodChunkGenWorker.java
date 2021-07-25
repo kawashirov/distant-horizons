@@ -43,7 +43,6 @@ import net.minecraft.util.WeightedList.Entry;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.palette.UpgradeData;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeContainer;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
@@ -70,7 +69,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  * 
  * @author James Seibel
- * @version 7-9-2021
+ * @version 7-25-2021
  */
 public class LodChunkGenWorker implements IWorker
 {
@@ -88,12 +87,29 @@ public class LodChunkGenWorker implements IWorker
     
     public LodChunkGenWorker(ChunkPos newPos, LodRenderer newLodRenderer, 
     		LodChunkBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, 
-    		LodDimension newLodDimension, ServerWorld newServerWorld,
-    		BiomeContainer newBiomeContainer)
+    		LodDimension newLodDimension, ServerWorld newServerWorld)
     {
+    	// just a few sanity checks
+        if (newPos == null)
+        	throw new IllegalArgumentException("LodChunkGenWorker must have a non-null ChunkPos"); 
+        
+        if (newLodRenderer == null)
+        	throw new IllegalArgumentException("LodChunkGenWorker must have a non-null LodRenderer"); 
+        
+        if (newLodBuilder == null)
+			throw new IllegalArgumentException("LodChunkGenThread requires a non-null LodChunkBuilder");
+		
+        if (newLodBufferBuilder == null)
+			throw new IllegalArgumentException("LodChunkGenThread requires a non-null LodBufferBuilder");
+		
+        if (newLodDimension == null)
+			throw new IllegalArgumentException("LodChunkGenThread requires a non-null LodDimension");
+
         if (newServerWorld == null)
-        	throw new IllegalArgumentException("LodChunkGenWorker must have a non-null ServerWorld"); 
-        	
+			throw new IllegalArgumentException("LodChunkGenThread requires a non-null ServerWorld");
+        
+        
+        
         thread = new LodChunkGenThread(newPos, newLodRenderer, 
         		newLodBuilder, newLodBufferBuilder, 
         		newLodDimension, newServerWorld);
@@ -145,7 +161,7 @@ public class LodChunkGenWorker implements IWorker
         public final LodDimension lodDim;
         public final LodChunkBuilder lodChunkBuilder;
         public final LodRenderer lodRenderer;
-        private LodBufferBuilder lodBufferBuilder;
+        private final LodBufferBuilder lodBufferBuilder;
     	
     	private ChunkPos pos;
     	
