@@ -46,8 +46,8 @@ public class LodDimension
 	public volatile LodRegion regions[][];
 	public volatile boolean isRegionDirty[][];
 	
-	private int centerX;
-	private int centerZ;
+	private volatile int centerX;
+	private volatile int centerZ;
 	
 	private LodDimensionFileHandler fileHandler;
 	
@@ -108,7 +108,7 @@ public class LodDimension
 	 * Move the center of this LodDimension and move all owned
 	 * regions over by the given x and z offset.
 	 */
-	public void move(int xOffset, int zOffset)
+	public synchronized void move(int xOffset, int zOffset)
 	{		
 		// if the x or z offset is equal to or greater than
 		// the total size, just delete the current data
@@ -236,7 +236,7 @@ public class LodDimension
 	 * Overwrite the LodRegion at the location of newRegion with newRegion.
 	 * @throws ArrayIndexOutOfBoundsException if newRegion is outside what can be stored in this LodDimension.
 	 */
-	public void setRegion(LodRegion newRegion) throws ArrayIndexOutOfBoundsException
+	public void addOrOverwriteRegion(LodRegion newRegion) throws ArrayIndexOutOfBoundsException
 	{
 		int xIndex = (newRegion.x - centerX) + halfWidth;
 		int zIndex = (centerZ - newRegion.z) + halfWidth;
@@ -273,13 +273,13 @@ public class LodDimension
 		{
 			// if no region exists, create it
 			region = new LodRegion(pos.x, pos.z);
-			setRegion(region);
+			addOrOverwriteRegion(region);
 		}
 		
 		region.addLod(lod);
 		
-		// don't save empty place holders to disk
-		if (!lod.isPlaceholder() && fileHandler != null)
+		// only save valid LODs to disk
+		if (!(lod.isPlaceholder() || lod.dontSave) && fileHandler != null)
 		{
 			// mark the region as dirty so it will be saved to disk
 			int xIndex = (pos.x - centerX) + halfWidth;
