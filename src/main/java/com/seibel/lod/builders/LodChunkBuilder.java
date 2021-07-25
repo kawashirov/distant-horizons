@@ -33,7 +33,6 @@ import net.minecraft.block.AbstractPlantBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.BushBlock;
-import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.block.GrassBlock;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.LeavesBlock;
@@ -50,7 +49,7 @@ import net.minecraft.world.gen.Heightmap;
  * (specifically: Lod World, Dimension, Region, and Chunk objects)
  * 
  * @author James Seibel
- * @version 6-27-2021
+ * @version 7-25-2021
  */
 public class LodChunkBuilder
 {
@@ -475,7 +474,7 @@ public class LodChunkBuilder
 		{
 			colorInt = biome.getGrassColor(x, z);
 		}
-		else if (blockState.getBlock() instanceof FlowingFluidBlock)
+		else if (blockState.getBlock() == Blocks.WATER)
 		{
 			colorInt = biome.getWaterColor();
 		}
