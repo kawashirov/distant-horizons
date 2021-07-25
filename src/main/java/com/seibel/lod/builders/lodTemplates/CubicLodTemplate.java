@@ -113,6 +113,9 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		// darken the bottom and side colors if requested
 		if (LodConfig.CLIENT.shadingMode.get() == ShadingMode.DARKEN_SIDES)
 		{
+			// the side colors are different because
+			// when using fast lighting in Minecraft the north/south
+			// and east/west sides are different in a similar way
 			int northSouthDarkenAmount = 25;
 			int eastWestDarkenAmount = 50;
 			int bottomDarkenAmount = 75;
@@ -122,6 +125,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			bottomColor = new Color(Math.max(0, c.getRed() - bottomDarkenAmount), Math.max(0, c.getGreen() - bottomDarkenAmount), Math.max(0, c.getBlue() - bottomDarkenAmount), c.getAlpha());
 		}
 		
+		
+		// apply the user specified saturation and brightness
 		float saturationMultiplier = LodConfig.CLIENT.saturationMultiplier.get().floatValue();
 		float brightnessMultiplier = LodConfig.CLIENT.brightnessMultiplier.get().floatValue();
 		
@@ -167,12 +172,15 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	
 	
 	/**
-	 * Edit the given color in HSV mode.
+	 * Edit the given color as a HSV (Hue Saturation Value) color.
 	 */
 	private Color applySaturationAndBrightnessMultipliers(Color color, float saturationMultiplier, float brightnessMultiplier)
 	{
 		float[] hsv = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
-		return Color.getHSBColor(hsv[0], LodUtil.clamp(0.0f, hsv[1] * saturationMultiplier, 1.0f), LodUtil.clamp(0.0f, hsv[2] * brightnessMultiplier, 1.0f));
+		return Color.getHSBColor(
+				hsv[0], // hue
+				LodUtil.clamp(0.0f, hsv[1] * saturationMultiplier, 1.0f), 
+				LodUtil.clamp(0.0f, hsv[2] * brightnessMultiplier, 1.0f));
 	}
 
 
