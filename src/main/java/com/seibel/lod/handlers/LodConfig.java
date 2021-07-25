@@ -184,7 +184,7 @@ public class LodConfig
 	        
 	        allowUnstableFeatureGeneration = builder
 	                .comment("\n\n"
-	                		+ " When using the " + DistanceGenerationMode.FEATURES.toString() + "generation mode \n"
+	                		+ " When using the " + DistanceGenerationMode.FEATURES.toString() + " generation mode \n"
 	                		+ " some features may not be thread safe, which could \n"
 	                		+ " cause instability and crashes. \n"
 	                		+ " By default (false) those features are skipped, \n"
