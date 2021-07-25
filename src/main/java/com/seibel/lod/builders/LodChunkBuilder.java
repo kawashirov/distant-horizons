@@ -289,7 +289,7 @@ public class LodChunkBuilder
 								// enough blocks in this
 								// layer to count as an
 								// LOD point
-								return (short) (y + (section * CHUNK_SECTION_HEIGHT));
+								return (short) (y + 1 + (section * CHUNK_SECTION_HEIGHT));
 							}
 						}
 					}
