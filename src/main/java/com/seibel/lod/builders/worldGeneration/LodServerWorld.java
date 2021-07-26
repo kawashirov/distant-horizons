@@ -67,7 +67,7 @@ import net.minecraft.world.storage.IWorldInfo;
  * to multithread generation.
  * 
  * @author James Seibel
- * @version 7-4-2021
+ * @version 7-26-2021
  */
 public class LodServerWorld implements ISeedReader {
 	
@@ -101,7 +101,7 @@ public class LodServerWorld implements ISeedReader {
 	@Override
 	public Biome getBiome(BlockPos pos)
 	{
-		return chunk.getBiomes().getNoiseBiome(pos.getX(), pos.getY(), pos.getZ());
+		return chunk.getBiomes().getNoiseBiome(pos.getX() >> 2, pos.getY() >> 2, pos.getZ() >> 2);
 	}
 	
 	@Override

@@ -23,7 +23,7 @@ import com.seibel.lod.objects.LodDataPoint;
  * single, double, quad, half, full
  * 
  * @author James Seibel
- * @version 06-13-2021
+ * @version 07-26-2021
  */
 public enum LodDetail
 {
@@ -74,12 +74,6 @@ public enum LodDetail
 		dataPointWidth = 16 / dataPointLengthCount;
 		
 		offset = newOffset;
-		
-//		if(newLengthCount == LodChunk.WIDTH)
-//		{
-//			// this is to prevent overflow
-//			newLengthCount = LodChunk.WIDTH - 1;
-//		}
 		
 		startX = new int[dataPointLengthCount * dataPointLengthCount];
 		endX = new int[dataPointLengthCount * dataPointLengthCount];

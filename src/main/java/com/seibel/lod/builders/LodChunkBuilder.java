@@ -50,7 +50,7 @@ import net.minecraft.world.gen.Heightmap;
  * (specifically: Lod World, Dimension, Region, and Chunk objects)
  * 
  * @author James Seibel
- * @version 7-25-2021
+ * @version 7-26-2021
  */
 public class LodChunkBuilder
 {
@@ -62,6 +62,13 @@ public class LodChunkBuilder
 	
 	public static final int CHUNK_DATA_WIDTH = LodChunk.WIDTH;
 	public static final int CHUNK_SECTION_HEIGHT = LodChunk.WIDTH;
+	
+	
+
+	// reminder now how to access biome info
+//	String name = biome.getRegistryName().getPath();
+//	String deepColdName = Biomes.DEEP_COLD_OCEAN.location().getPath();
+//	Biome deepCold = WorldGenRegistries.BIOME.get(Biomes.DEEP_COLD_OCEAN);
 	
 	
 	
@@ -334,7 +341,7 @@ public class LodChunkBuilder
 	 * 			If true use biome foliage, water, and grass colors, <br>
 	 * 			otherwise only use the block's material color
 	 */
-	private Color  generateLodColorForArea(IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
+	private Color generateLodColorForArea(IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{
 		ChunkSection[] chunkSections = chunk.getSections();
 		
@@ -374,7 +381,8 @@ public class LodChunkBuilder
 							
 							if (config.useBiomeColors)
 							{
-								Biome biome = chunk.getBiomes().getNoiseBiome(x, y + i * chunkSections.length, z);
+								// the bit shift is equivalent to dividing by 4
+								Biome biome = chunk.getBiomes().getNoiseBiome(x >> 2, y + i * chunkSections.length >> 2, z >> 2);
 								
 								if (biome.getBiomeCategory() == Biome.Category.OCEAN ||
 									biome.getBiomeCategory() == Biome.Category.RIVER)
@@ -414,7 +422,9 @@ public class LodChunkBuilder
 							}
 							else
 							{
-								Biome biome = chunk.getBiomes().getNoiseBiome(x, y + i * chunkSections.length, z);
+								// I have no idea why I need to bit shift to the right, but
+								// if I don't the biomes don't show up correctly.
+								Biome biome = chunk.getBiomes().getNoiseBiome(x >> 2, y + i * chunkSections.length >> 2, z >> 2);
 								colorInt = getColorForBlock(x,z, blockState, biome);
 							}
 							
@@ -434,7 +444,6 @@ public class LodChunkBuilder
 						}
 					}
 				}
-				
 			}
 		}
 		

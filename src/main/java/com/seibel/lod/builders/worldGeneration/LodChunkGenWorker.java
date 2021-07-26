@@ -69,7 +69,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  * 
  * @author James Seibel
- * @version 7-25-2021
+ * @version 7-26-2021
  */
 public class LodChunkGenWorker implements IWorker
 {
@@ -263,7 +263,7 @@ public class LodChunkGenWorker implements IWorker
 						
 						// these heights are of course aren't super accurate,
 						// they are just to simulate height data where there isn't any
-						switch(chunk.getBiomes().getNoiseBiome(x, seaLevel, z).getBiomeCategory())
+						switch(chunk.getBiomes().getNoiseBiome(x >> 2, seaLevel >> 2, z >> 2).getBiomeCategory())
 						{
 						case NETHER:
 							heightmap.setHeight(x, z, serverWorld.getHeight() / 2);
@@ -400,7 +400,7 @@ public class LodChunkGenWorker implements IWorker
 			{
 				for (int z = 0; z < LodChunk.WIDTH; z++)
 				{
-					Biome biome = chunk.getBiomes().getNoiseBiome(x, serverWorld.getSeaLevel(), z);
+					Biome biome = chunk.getBiomes().getNoiseBiome(x >> 2, serverWorld.getSeaLevel() >> 2, z >> 2);
 					
 					// Issue #35
 					// For some reason Jungle biomes cause incredible lag
