@@ -388,13 +388,22 @@ public class LodDimension
 	
 	public int getWidth()
 	{
-		return width;
+		if (regions != null)
+		{
+			// we want to get the length directly from the
+			// source to make sure it is in sync with region
+			// and isRegionDirty
+			return regions.length;
+		}
+		else
+		{
+			return width;
+		}
 	}
 	
 	public void setRegionWidth(int newWidth)
 	{
 		width = newWidth;
-		halfWidth = (int)Math.floor(width / 2);
 		
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];
