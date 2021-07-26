@@ -17,7 +17,6 @@
  */
 package com.seibel.lod.enums;
 
-import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDataPoint;
 
 /**
@@ -29,19 +28,19 @@ import com.seibel.lod.objects.LodDataPoint;
 public enum LodDetail
 {
 	/** render 1 LOD for each chunk */
-	SINGLE(1),
+	SINGLE(1, 4),
 	
 	/** render 4 LODs for each chunk */
-	DOUBLE(2),
+	DOUBLE(2, 2),
 	
 	/** render 16 LODs for each chunk */
-	QUAD(4),
+	QUAD(4, 1),
 	
 	/** render 64 LODs for each chunk */
-	HALF(8),
+	HALF(8, 0),
 	
 	/** render 256 LODs for each chunk */
-	FULL(16);
+	FULL(16, 0);
 	
 	
 	/** How many DataPoints should 
@@ -62,19 +61,25 @@ public enum LodDetail
 	 * when creating a LodChunk with this detail level */
 	public final int lodChunkStringDelimiterCount;
 	
+	/** in LodBufferBuilder some of the detail don't render
+	 * in the correct spot, this number fixes that.
+	 * TODO find out why this is needed and see if it
+	 * needed / could be removed */
+	public final int offset;
 	
 	
-	
-	private LodDetail(int newLengthCount)
+	private LodDetail(int newLengthCount, int newOffset)
 	{
 		dataPointLengthCount = newLengthCount;
 		dataPointWidth = 16 / dataPointLengthCount;
 		
-		if(newLengthCount == LodChunk.WIDTH)
-		{
-			// this is to prevent overflow
-			newLengthCount = LodChunk.WIDTH - 1;
-		}
+		offset = newOffset;
+		
+//		if(newLengthCount == LodChunk.WIDTH)
+//		{
+//			// this is to prevent overflow
+//			newLengthCount = LodChunk.WIDTH - 1;
+//		}
 		
 		startX = new int[dataPointLengthCount * dataPointLengthCount];
 		endX = new int[dataPointLengthCount * dataPointLengthCount];

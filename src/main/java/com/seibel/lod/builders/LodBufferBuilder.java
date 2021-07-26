@@ -24,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.builders.worldGeneration.LodChunkGenWorker;
+import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
@@ -156,13 +157,14 @@ public class LodBufferBuilder
 						continue;
 					}
 					
+					LodDetail detail = LodConfig.CLIENT.lodDetail.get();
 					
 					// set where this square will be drawn in the world
 					double xOffset = (LodChunk.WIDTH * i) + // offset by the number of LOD blocks
 									startX + // offset so the center LOD block is centered underneath the player
-									2; // truncation(?) correction
+									detail.offset; // truncation(?) correction
 					double yOffset = 0;
-					double zOffset = (LodChunk.WIDTH * j) + startZ + 2;
+					double zOffset = (LodChunk.WIDTH * j) + startZ + detail.offset;
 					
 					LodChunk lod = lodDim.getLodFromCoordinates(chunkX, chunkZ);
 					
