@@ -575,7 +575,7 @@ public class LodRenderer
 	{
 		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.level.getSkyDarken(partialTicks) : 0.2f;
 		float gammaMultiplyer = (float)mc.options.gamma - 0.5f;
-		float lightStrength = ((sunBrightness / 2f) - 0.2f) + (gammaMultiplyer * 0.2f);
+		float lightStrength = ((sunBrightness / 2f) - 0.2f) + (gammaMultiplyer * 0.3f);
 		
 		float lightAmbient[] = {lightStrength, lightStrength, lightStrength, 1.0f};
 		
