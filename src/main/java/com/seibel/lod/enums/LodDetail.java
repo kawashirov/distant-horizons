@@ -61,7 +61,7 @@ public enum LodDetail
 	 * when creating a LodChunk with this detail level */
 	public final int lodChunkStringDelimiterCount;
 	
-	/** in LodBufferBuilder some of the detail don't render
+	/** in LodBufferBuilder some detail options don't render
 	 * in the correct spot, this number fixes that.
 	 * TODO find out why this is needed and see if it
 	 * needed / could be removed */
