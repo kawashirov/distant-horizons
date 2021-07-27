@@ -22,6 +22,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.HashSet;
 
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.NVFogDistance;
 
@@ -87,7 +88,7 @@ public class LodRenderer
 	public static final int MAX_ALOCATEABLE_DIRECT_MEMORY = 64 * 1024 * 1024;
 	
 	/** Does this computer's GPU support fancy fog? */
-	public static boolean fancyFogAvailable = false;
+	private static Boolean fancyFogAvailable = null;
 	
 	
 	
@@ -173,6 +174,20 @@ public class LodRenderer
 		
 		profiler = newProfiler;
 		profiler.push("LOD setup");
+		
+		
+		// only check the GPU capability's once
+		if (fancyFogAvailable == null)
+		{
+			// see if this GPU can run fancy fog
+			fancyFogAvailable = GL.getCapabilities().GL_NV_fog_distance;
+			
+			if (!LodRenderer.fancyFogAvailable)
+			{
+				ClientProxy.LOGGER.info("This GPU does not support GL_NV_fog_distance. This means that fancy fog options will not be available.");
+			}
+		}
+		
 		
 		ClientPlayerEntity player = mc.player;
 		
@@ -405,7 +420,7 @@ public class LodRenderer
 		
 		
 		// determine the fog distance mode to use
-		int glFogDistanceMode = NVFogDistance.GL_EYE_RADIAL_NV;
+		int glFogDistanceMode;
 		if (fogQuality == FogQuality.FANCY)
 		{
 			// fancy fog (fragment distance based fog)
