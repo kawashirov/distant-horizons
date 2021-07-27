@@ -487,7 +487,9 @@ public class LodChunkBuilder
 				blockState.getBlock() instanceof BushBlock ||
 				blockState.getBlock() instanceof IGrowable)
 		{
-			colorInt = biome.getGrassColor(x, z);
+			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
+			tmp = tmp.darker();
+			colorInt = LodUtil.colorToInt(tmp);
 		}
 		
 		// water

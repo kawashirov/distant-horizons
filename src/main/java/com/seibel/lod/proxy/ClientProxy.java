@@ -115,7 +115,7 @@ public class ClientProxy
 //		LodConfig.CLIENT.drawLODs.set(true);
 //		LodConfig.CLIENT.debugMode.set(false);
 		
-//		LodConfig.CLIENT.lodDetail.set(LodDetail.DOUBLE);
+//		LodConfig.CLIENT.lodDetail.set(LodDetail.QUAD);
 //		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
 //		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 //		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
