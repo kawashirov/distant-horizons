@@ -160,6 +160,17 @@ public class LodServerWorld implements ISeedReader {
 		return new WorldLightManager(null, false, false);
 	}
 	
+	@Override
+	public long getSeed()
+	{
+		return serverWorld.getSeed();
+	}
+	
+	@Override
+	public DynamicRegistries registryAccess()
+	{
+		return serverWorld.registryAccess();
+	}
 	
 	
 	
@@ -190,10 +201,6 @@ public class LodServerWorld implements ISeedReader {
 		throw new UnsupportedOperationException("Not Implemented");
 	}
 	@Override
-	public DynamicRegistries registryAccess() {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	@Override
 	public BiomeManager getBiomeManager() {
 		throw new UnsupportedOperationException("Not Implemented");
 	}
@@ -219,11 +226,6 @@ public class LodServerWorld implements ISeedReader {
 	
 	@Override
 	public boolean destroyBlock(BlockPos pos, boolean dropBlock, Entity entity, int recursionLeft) {
-		throw new UnsupportedOperationException("Not Implemented");
-	}
-	
-	@Override
-	public long getSeed() {
 		throw new UnsupportedOperationException("Not Implemented");
 	}
 
