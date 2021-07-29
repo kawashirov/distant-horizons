@@ -23,6 +23,8 @@ import org.apache.logging.log4j.Logger;
 import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.builders.LodChunkBuilder;
 import com.seibel.lod.builders.worldGeneration.LodChunkGenWorker;
+import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
@@ -115,7 +117,7 @@ public class ClientProxy
 //		LodConfig.CLIENT.drawLODs.set(true);
 //		LodConfig.CLIENT.debugMode.set(false);
 		
-//		LodConfig.CLIENT.lodDetail.set(LodDetail.QUAD);
+		LodConfig.CLIENT.lodDetail.set(LodDetail.QUAD);
 //		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
 //		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 //		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
@@ -123,7 +125,7 @@ public class ClientProxy
 //		LodConfig.CLIENT.brightnessMultiplier.set(1.0);
 //		LodConfig.CLIENT.saturationMultiplier.set(1.0);
 		
-//		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
+		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
 //		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
 		
 //		LOGGER.info(lodBufferBuilder.numberOfChunksWaitingToGenerate.get());
@@ -132,7 +134,7 @@ public class ClientProxy
 		// Note to self:
 		// if "unspecified" shows up in the pie chart, it is
 		// possibly because the amount of time between sections
-		// is too small for the profile to measure
+		// is too small for the profiler to measure
 		IProfiler profiler = mc.getProfiler();
 		profiler.pop(); // get out of "terrain"
 		profiler.push("LOD");

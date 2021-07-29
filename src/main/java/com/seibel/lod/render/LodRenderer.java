@@ -154,6 +154,7 @@ public class LodRenderer
 	 * @param newDimension The dimension to draw, if null doesn't replace the current dimension.
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
+	@SuppressWarnings("deprecation")
 	public void drawLODs(LodDimension lodDim, float partialTicks, IProfiler newProfiler)
 	{		
 		if (lodDim == null)
@@ -482,6 +483,7 @@ public class LodRenderer
 	/**
 	 * Revert any changes that were made to the fog.
 	 */
+	@SuppressWarnings("deprecation")
 	private void cleanupFog(NearFarFogSettings fogSettings, 
 			float defaultFogStartDist, float defaultFogEndDist, 
 			int defaultFogMode, int defaultFogDistance)
@@ -586,6 +588,7 @@ public class LodRenderer
 	/**
 	 * setup the lighting to be used for the LODs
 	 */
+	@SuppressWarnings("deprecation")
 	private void setupLighting(LodDimension lodDimension, float partialTicks)
 	{
 		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.level.getSkyDarken(partialTicks) : 0.2f;
