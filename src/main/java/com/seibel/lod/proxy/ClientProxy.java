@@ -20,17 +20,18 @@ package com.seibel.lod.proxy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.seibel.lod.builders.LodBufferBuilder;
-import com.seibel.lod.builders.LodChunkBuilder;
+import com.seibel.lod.builders.LodNodeBufferBuilder;
+import com.seibel.lod.builders.LodNodeBuilder;
 import com.seibel.lod.builders.worldGeneration.LodChunkGenWorker;
+import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
-import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LodQuadTreeDimension;
+import com.seibel.lod.objects.LodQuadTreeWorld;
 import com.seibel.lod.objects.LodRegion;
-import com.seibel.lod.objects.LodWorld;
-import com.seibel.lod.render.LodRenderer;
+import com.seibel.lod.render.LodNodeRenderer;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
@@ -51,10 +52,16 @@ public class ClientProxy
 {
 	public static final Logger LOGGER = LogManager.getLogger("LOD");
 	
-	private static LodWorld lodWorld = new LodWorld();
-	private static LodChunkBuilder lodChunkBuilder = new LodChunkBuilder();
-	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder(lodChunkBuilder);
-	private static LodRenderer renderer = new LodRenderer(lodBufferBuilder);
+//	private static LodWorld lodWorld = new LodWorld();
+//	private static LodChunkBuilder lodChunkBuilder = new LodChunkBuilder();
+//	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder(lodChunkBuilder);
+//	private static LodRenderer renderer = new LodRenderer(lodBufferBuilder);
+	
+	private static LodQuadTreeWorld lodWorld = new LodQuadTreeWorld();
+	private static LodNodeBuilder lodNodeBuilder = new LodNodeBuilder();
+	private static LodNodeBufferBuilder lodBufferBuilder = new LodNodeBufferBuilder(lodNodeBuilder);
+	private static LodNodeRenderer renderer = new LodNodeRenderer(lodBufferBuilder);
+	
 	
 	Minecraft mc = Minecraft.getInstance();
 	
@@ -85,17 +92,17 @@ public class ClientProxy
 				// TODO is this logic good?
 				(mc.options.renderDistance * LodChunk.WIDTH * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get()) / LodRegion.SIZE
 				);
-		if (lodChunkBuilder.regionWidth != newWidth)
+		if (lodNodeBuilder.regionWidth != newWidth)
 		{
 			lodWorld.resizeDimensionRegionWidth(newWidth);
-			lodChunkBuilder.regionWidth = newWidth;
+			lodNodeBuilder.regionWidth = newWidth;
 			
 			// skip this frame, hopefully the lodWorld
 			// should have everything set up by then
 			return;
 		}
 		
-		LodDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
+		LodQuadTreeDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
 		if (lodDim == null)
 			return;
 		
@@ -155,7 +162,8 @@ public class ClientProxy
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
-		lodChunkBuilder.generateLodChunkAsync(event.getChunk(), lodWorld, event.getWorld());
+		//lodChunkBuilder.generateLodChunkAsync(event.getChunk(), lodWorld, event.getWorld());
+		lodNodeBuilder.generateLodNodeAsync(event.getChunk(), lodWorld, event.getWorld());
 	}
 	
 	
@@ -179,6 +187,7 @@ public class ClientProxy
 			// if this isn't done unfinished tasks may be left in the queue
 			// preventing new LodChunks form being generated
 			LodChunkGenWorker.restartExecuterService();
+			LodNodeGenWorker.restartExecuterService();
 			
 			lodBufferBuilder.numberOfChunksWaitingToGenerate.set(0);
 			// the player has disconnected from a server
@@ -197,7 +206,8 @@ public class ClientProxy
 			event.getClass() == BlockEvent.PortalSpawnEvent.class)
 		{
 			// recreate the LOD where the blocks were changed
-			lodChunkBuilder.generateLodChunkAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld());
+			//lodChunkBuilder.generateLodChunkAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld());
+			lodNodeBuilder.generateLodNodeAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld());
 		}
 	}
 	
@@ -208,17 +218,17 @@ public class ClientProxy
 	// public getters //
 	//================//
 	
-	public static LodWorld getLodWorld()
+	public static LodQuadTreeWorld getLodWorld()
 	{
 		return lodWorld;
 	}
 	
-	public static LodChunkBuilder getLodBuilder()
+	public static LodNodeBuilder getLodBuilder()
 	{
-		return lodChunkBuilder;
+		return lodNodeBuilder;
 	}
 	
-	public static LodRenderer getRenderer()
+	public static LodNodeRenderer getRenderer()
 	{
 		return renderer;
 	}

@@ -15,9 +15,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.builders.lodTemplates;
+package com.seibel.lod.builders.lodNodeTemplates;
 
-import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 
@@ -32,11 +31,11 @@ import net.minecraft.client.renderer.BufferBuilder;
  * @author James Seibel
  * @version 06-16-2021
  */
-public class DynamicLodTemplate extends AbstractLodTemplate
+public class DynamicLodNodeTemplate extends AbstractLodNodeTemplate
 {
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer,
-							   LodQuadTreeDimension lodDim, LodQuadTreeNode centerLod,
+							   LodQuadTreeDimension lodDim, LodQuadTreeNode lod,
 							   double xOffset, double yOffset, double zOffset,
 							   boolean debugging)
 	{
@@ -44,7 +43,8 @@ public class DynamicLodTemplate extends AbstractLodTemplate
 	}
 
 	@Override
-	public int getBufferMemoryForSingleLod(LodDetail detail) {
+	public int getBufferMemoryForSingleLod(int detailLevel)
+	{
 		// TODO Auto-generated method stub
 		return 0;
 	}

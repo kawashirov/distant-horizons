@@ -17,9 +17,9 @@
  */
 package com.seibel.lod.render;
 
-import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.handlers.LodConfig;
+import com.seibel.lod.objects.LodQuadTreeNode;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.ChunkPos;
@@ -94,16 +94,16 @@ public class RenderUtil
 		// calculate the max amount of buffer memory needed (in bytes)
 		return numbChunksWide * numbChunksWide *
 				LodConfig.CLIENT.lodTemplate.get().
-				getBufferMemoryForSingleLod(LodConfig.CLIENT.lodDetail.get());
+				getBufferMemoryForSingleLod(LodQuadTreeNode.CHUNK_LEVEL);
 	}
 	
 	/**
 	 * Returns the maxViewDistanceMultiplier for the given LodTemplate
 	 * at the given LodDetail level.
 	 */
-	public static int getMaxRadiusMultiplierWithAvaliableMemory(LodTemplate lodTemplate, LodDetail lodDetail)
+	public static int getMaxRadiusMultiplierWithAvaliableMemory(LodTemplate lodTemplate, int detailLevel)
 	{
-		int maxNumberOfLods = LodRenderer.MAX_ALOCATEABLE_DIRECT_MEMORY / lodTemplate.getBufferMemoryForSingleLod(lodDetail); 
+		int maxNumberOfLods = LodNodeRenderer.MAX_ALOCATEABLE_DIRECT_MEMORY / lodTemplate.getBufferMemoryForSingleLod(detailLevel);
 		int numbLodsWide = (int) Math.sqrt(maxNumberOfLods);
 		
 		return numbLodsWide / (2 * mc.options.renderDistance);

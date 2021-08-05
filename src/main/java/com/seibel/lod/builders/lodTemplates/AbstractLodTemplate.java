@@ -18,8 +18,8 @@
 package com.seibel.lod.builders.lodTemplates;
 
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.objects.LodChunk;
-import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LodQuadTreeDimension;
+import com.seibel.lod.objects.LodQuadTreeNode;
 
 import net.minecraft.client.renderer.BufferBuilder;
 
@@ -32,10 +32,10 @@ import net.minecraft.client.renderer.BufferBuilder;
  */
 public abstract class AbstractLodTemplate
 {
-	public abstract void addLodToBuffer(BufferBuilder buffer, 
-			LodDimension lodDim, LodChunk lod, 
-			double xOffset, double yOffset, double zOffset, 
-			boolean debugging);
+	public abstract void addLodToBuffer(BufferBuilder buffer,
+										LodQuadTreeDimension lodDim, LodQuadTreeNode centerLod,
+										double xOffset, double yOffset, double zOffset,
+										boolean debugging);
 	
 	/** add the given position and color to the buffer */
 	protected void addPosAndColor(BufferBuilder buffer, 

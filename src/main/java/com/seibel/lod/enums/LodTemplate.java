@@ -17,16 +17,16 @@
  */
 package com.seibel.lod.enums;
 
-import com.seibel.lod.builders.lodTemplates.AbstractLodTemplate;
-import com.seibel.lod.builders.lodTemplates.CubicLodTemplate;
-import com.seibel.lod.builders.lodTemplates.DynamicLodTemplate;
-import com.seibel.lod.builders.lodTemplates.TriangularLodTemplate;
+import com.seibel.lod.builders.lodNodeTemplates.AbstractLodNodeTemplate;
+import com.seibel.lod.builders.lodNodeTemplates.CubicLodNodeTemplate;
+import com.seibel.lod.builders.lodNodeTemplates.DynamicLodNodeTemplate;
+import com.seibel.lod.builders.lodNodeTemplates.TriangularLodNodeTemplate;
 
 /**
  * Cubic, Triangular, Dynamic
  * 
  * @author James Seibel
- * @version 06-16-2021
+ * @version 8-4-2021
  */
 public enum LodTemplate
 {
@@ -34,28 +34,28 @@ public enum LodTemplate
 
 	/** Chunks are rendered as
 	 * rectangular prisms. */
-	CUBIC(new CubicLodTemplate()),
+	CUBIC(new CubicLodNodeTemplate()),
 	
 	/** Chunks smoothly transition between
 	 * each other. */
-	TRIANGULAR(new TriangularLodTemplate()),
+	TRIANGULAR(new TriangularLodNodeTemplate()),
 	
 	/** Chunks smoothly transition between
 	 * each other, unless a neighboring chunk
 	 * is at a significantly different height. */
-	DYNAMIC(new DynamicLodTemplate());
+	DYNAMIC(new DynamicLodNodeTemplate());
 	
 	
-	public final AbstractLodTemplate template;
+	public final AbstractLodNodeTemplate template;
 	
-	private LodTemplate(AbstractLodTemplate newTemplate)
+	private LodTemplate(AbstractLodNodeTemplate newTemplate)
 	{
 		template = newTemplate;
 	}
 	
 	
-	public int getBufferMemoryForSingleLod(LodDetail detail)
+	public int getBufferMemoryForSingleLod(int detailLevel)
 	{
-		return template.getBufferMemoryForSingleLod(detail);
+		return template.getBufferMemoryForSingleLod(detailLevel);
 	}
 }

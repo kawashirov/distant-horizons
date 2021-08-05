@@ -15,37 +15,39 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.builders.lodTemplates;
+package com.seibel.lod.builders.lodNodeTemplates;
 
-import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 
 import net.minecraft.client.renderer.BufferBuilder;
 
 /**
- * TODO DynamicLodTemplate
- * Chunks smoothly transition between
- * each other, unless a neighboring chunk
- * is at a significantly different height.
+ * This is the abstract class used to create different
+ * BufferBuilders.
  * 
  * @author James Seibel
  * @version 06-16-2021
  */
-public class DynamicLodTemplate extends AbstractLodTemplate
+public abstract class AbstractLodNodeTemplate
 {
-	@Override
-	public void addLodToBuffer(BufferBuilder buffer,
-							   LodQuadTreeDimension lodDim, LodQuadTreeNode centerLod,
-							   double xOffset, double yOffset, double zOffset,
-							   boolean debugging)
+	public abstract void addLodToBuffer(BufferBuilder buffer,
+										LodQuadTreeDimension lodDim, LodQuadTreeNode lod,
+										double xOffset, double yOffset, double zOffset,
+										boolean debugging);
+	
+	/** add the given position and color to the buffer */
+	protected void addPosAndColor(BufferBuilder buffer, 
+			double x, double y, double z, 
+			int red, int green, int blue, int alpha)
 	{
-		System.err.println("DynamicLodTemplate not implemented!");
+		buffer.vertex(x, y, z).color(red, green, blue, alpha).endVertex();
 	}
-
-	@Override
-	public int getBufferMemoryForSingleLod(LodDetail detail) {
-		// TODO Auto-generated method stub
-		return 0;
-	}
+	
+	/** Returns in bytes how much buffer memory is required
+	 * for one LOD object */
+	public abstract int getBufferMemoryForSingleLod(int level);
+	
+	
+	
 }

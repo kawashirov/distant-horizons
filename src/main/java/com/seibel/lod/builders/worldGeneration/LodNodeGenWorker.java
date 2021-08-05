@@ -26,15 +26,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
-import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.builders.LodBuilderConfig;
-import com.seibel.lod.builders.LodChunkBuilder;
+import com.seibel.lod.builders.LodNodeBufferBuilder;
+import com.seibel.lod.builders.LodNodeBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
-import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LodQuadTreeDimension;
+import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.LodRegion;
-import com.seibel.lod.render.LodRenderer;
+import com.seibel.lod.render.LodNodeRenderer;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -42,6 +43,7 @@ import net.minecraft.util.WeightedList.Entry;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.palette.UpgradeData;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeContainer;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
@@ -68,25 +70,26 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  * 
  * @author James Seibel
- * @version 7-26-2021
+ * @version 7-4-2021
  */
-public class LodChunkGenWorker implements IWorker
+public class LodNodeGenWorker implements IWorker
 {
     public static ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfWorldGenerationThreads.get());
-    
+
     private boolean threadStarted = false;
     private LodChunkGenThread thread;
-    
+
     /** If a configured feature fails for whatever reason,
      * add it to this list, this is to hopefully remove any
      * features that could cause issues down the line. */
     private static ConcurrentHashMap<Integer, ConfiguredFeature<?, ?>> configuredFeaturesToAvoid = new ConcurrentHashMap<>();
-    
-    
-    
-    public LodChunkGenWorker(ChunkPos newPos, LodRenderer newLodRenderer, 
-    		LodChunkBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, 
-    		LodDimension newLodDimension, ServerWorld newServerWorld)
+
+
+
+    public LodNodeGenWorker(ChunkPos newPos, LodNodeRenderer newLodRenderer,
+							LodNodeBuilder newLodBuilder, LodNodeBufferBuilder newLodBufferBuilder,
+							LodQuadTreeDimension newLodDimension, ServerWorld newServerWorld,
+							BiomeContainer newBiomeContainer)
     {
     	// just a few sanity checks
         if (newPos == null)
@@ -106,7 +109,7 @@ public class LodChunkGenWorker implements IWorker
 
         if (newServerWorld == null)
 			throw new IllegalArgumentException("LodChunkGenThread requires a non-null ServerWorld");
-        
+        	
         
         
         thread = new LodChunkGenThread(newPos, newLodRenderer, 
@@ -157,16 +160,16 @@ public class LodChunkGenWorker implements IWorker
     private class LodChunkGenThread implements Runnable
     {
     	public final ServerWorld serverWorld;
-        public final LodDimension lodDim;
-        public final LodChunkBuilder lodChunkBuilder;
-        public final LodRenderer lodRenderer;
-        private final LodBufferBuilder lodBufferBuilder;
+        public final LodQuadTreeDimension lodDim;
+        public final LodNodeBuilder lodChunkBuilder;
+        public final LodNodeRenderer lodRenderer;
+        private LodNodeBufferBuilder lodBufferBuilder;
     	
     	private ChunkPos pos;
     	
-    	public LodChunkGenThread(ChunkPos newPos, LodRenderer newLodRenderer, 
-        		LodChunkBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder, 
-        		LodDimension newLodDimension, ServerWorld newServerWorld)
+    	public LodChunkGenThread(ChunkPos newPos, LodNodeRenderer newLodRenderer,
+        		LodNodeBuilder newLodBuilder, LodNodeBufferBuilder newLodBufferBuilder,
+        		LodQuadTreeDimension newLodDimension, ServerWorld newServerWorld)
     	{
     		pos = newPos;
     		lodRenderer = newLodRenderer;
@@ -206,8 +209,6 @@ public class LodChunkGenWorker implements IWorker
 				case SERVER:
 					// very slow
 					generateWithServer();
-					break;
-				default:
 					break;
 				}
 				
@@ -323,19 +324,19 @@ public class LodChunkGenWorker implements IWorker
 			chunk.setHeightmap(LodChunk.DEFAULT_HEIGHTMAP, heightmap.getRawData());
 			
 			
-			LodChunk lod;
+			LodQuadTreeNode lod;
 			if (!inTheEnd)
 			{
-				lod = lodChunkBuilder.generateLodFromChunk(chunk, new LodBuilderConfig(true, true, false));
+				lod = lodChunkBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
 			}
 			else
 			{
 				// if we are in the end, don't generate any chunks.
 				// Since we don't know where the islands are, everything
 				// generates the same and it looks really bad.
-				lod = new LodChunk(chunk.getPos().x, chunk.getPos().z);
+				lod = new LodQuadTreeNode(LodQuadTreeNode.CHUNK_LEVEL,chunk.getPos().x, chunk.getPos().z);
 			}
-			lodDim.addLod(lod);
+			lodDim.addNode(lod);
 		}
 		
 		
@@ -365,10 +366,9 @@ public class LodChunkGenWorker implements IWorker
 			// so we will add it
 			IceAndSnowFeature snowFeature = new IceAndSnowFeature(NoFeatureConfig.CODEC);
 			snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
-			
-			
-			LodChunk lod = lodChunkBuilder.generateLodFromChunk(chunk);
-			lodDim.addLod(lod);
+
+			LodQuadTreeNode lod = lodChunkBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
+			lodDim.addNode(lod);
 		}
 		
 		
@@ -461,7 +461,7 @@ public class LodChunkGenWorker implements IWorker
 							//   https://github.com/EsotericSoftware/kryo )
 							
 							if (!allowUnstableFeatures)
-								configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
+							configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
 						}
 						catch(UnsupportedOperationException e)
@@ -471,7 +471,7 @@ public class LodChunkGenWorker implements IWorker
 							// generator needs
 							
 							if (!allowUnstableFeatures)
-								configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
+							configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
 						}
 						catch(Exception e)
@@ -485,7 +485,7 @@ public class LodChunkGenWorker implements IWorker
 							System.out.println();
 							
 							if (!allowUnstableFeatures)
-								configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
+							configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
 						}
 					}
@@ -493,8 +493,9 @@ public class LodChunkGenWorker implements IWorker
 			}
 			
 			// generate a Lod like normal
-			LodChunk lod = lodChunkBuilder.generateLodFromChunk(chunk);
-			lodDim.addLod(lod);
+
+			LodQuadTreeNode lod = lodChunkBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
+			lodDim.addNode(lod);
 		}
 		
 		
@@ -507,10 +508,8 @@ public class LodChunkGenWorker implements IWorker
 		 * Note this should not be multithreaded and does cause server/simulation lag
 		 * (Higher lag for generating than loading)
 		 */
-		private void generateWithServer()
-		{
-			throw new UnsupportedOperationException("Not Implemented");
-			//lodChunkBuilder.generateLodChunkAsync(serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES), ClientProxy.getLodWorld(), serverWorld);
+		private void generateWithServer() {
+			//lodChunkBuilder.generateLodNodeAsync(serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES), ClientProxy.getLodWorld(), serverWorld);
 		}
 		
 		
@@ -612,8 +611,8 @@ public class LodChunkGenWorker implements IWorker
     	}
 		genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfWorldGenerationThreads.get());
 	}
-
-
+	
+	
 	
     
     

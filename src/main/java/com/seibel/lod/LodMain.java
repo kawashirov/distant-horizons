@@ -47,7 +47,6 @@ public class LodMain
 	public static ClientProxy client_proxy;
 	
 	
-	@SuppressWarnings("deprecation")
 	private void init(final FMLCommonSetupEvent event)
 	{
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, LodConfig.clientSpec);

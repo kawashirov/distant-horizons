@@ -29,14 +29,13 @@ import org.lwjgl.opengl.NVFogDistance;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.seibel.lod.builders.LodBufferBuilder;
+import com.seibel.lod.builders.LodNodeBufferBuilder;
 import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.handlers.ReflectionHandler;
-import com.seibel.lod.objects.LodChunk;
-import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.NearFarBuffer;
 import com.seibel.lod.objects.NearFarFogSettings;
@@ -69,56 +68,56 @@ import net.minecraft.util.math.vector.Vector3f;
  * @author James Seibel
  * @version 07-4-2021
  */
-public class LodRenderer
+public class LodNodeRenderer
 {
 	/** this is the light used when rendering the LODs,
 	 * it should be something different than what is used by Minecraft */
 	private static final int LOD_GL_LIGHT_NUMBER = GL11.GL_LIGHT2;
-	
-	/** 
+
+	/**
 	 * 64 MB by default is the maximum amount of memory that
 	 * can be directly allocated. <br><br>
-	 * 
+	 *
 	 * I know there are commands to change that amount
 	 * (specifically "-XX:MaxDirectMemorySize"), but
-	 * I have no idea how to access that amount. <br> 
+	 * I have no idea how to access that amount. <br>
 	 * So I guess this will be the hard limit for now. <br><br>
-	 * 
+	 *
 	 * https://stackoverflow.com/questions/50499238/bytebuffer-allocatedirect-and-xmx
 	 */
 	public static final int MAX_ALOCATEABLE_DIRECT_MEMORY = 64 * 1024 * 1024;
-	
+
 	/** Does this computer's GPU support fancy fog? */
 	private static Boolean fancyFogAvailable = null;
-	
-	
-	
+
+
+
 	/** If true the LODs colors will be replaced with
 	 * a checkerboard, this can be used for debugging. */
 	public boolean debugging = false;
-	
+
 	private Minecraft mc;
 	private GameRenderer gameRender;
 	private IProfiler profiler;
 	private float farPlaneDistance;
 	private ReflectionHandler reflectionHandler;
-	
-	
+
+
 	/** This is used to generate the buildable buffers */
-	private LodBufferBuilder lodBufferBuilder;
-	
+	private LodNodeBufferBuilder lodNodeBufferBuilder;
+
 	/** The buffers that are used to draw LODs using near fog */
 	private volatile BufferBuilder drawableNearBuffer;
 	/** The buffers that are used to draw LODs using far fog */
 	private volatile BufferBuilder drawableFarBuffer;
-	
+
 	/** This is the VertexBuffer used to draw any LODs that use near fog */
 	private volatile VertexBuffer nearVbo;
 	/** This is the VertexBuffer used to draw any LODs that use far fog */
 	private volatile VertexBuffer farVbo;
 	public static final VertexFormat LOD_VERTEX_FORMAT = DefaultVertexFormats.POSITION_COLOR;
-	
-	
+
+
 	/** This is used to determine if the LODs should be regenerated */
 	private int previousChunkRenderDistance = 0;
 	/** This is used to determine if the LODs should be regenerated */
@@ -127,24 +126,24 @@ public class LodRenderer
 	private int prevChunkZ = 0;
 	/** This is used to determine if the LODs should be regenerated */
 	private FogDistance prevFogDistance = FogDistance.NEAR_AND_FAR;
-	
+
 	/** if this is true the LOD buffers should be regenerated,
 	 * provided they aren't already being regenerated. */
 	private volatile boolean regen = false;
-	
+
 	/** This HashSet contains every chunk that Vanilla Minecraft
 	 *  is going to render */
 	public HashSet<ChunkPos> vanillaRenderedChunks = new HashSet<>();
-	
-	
-	
-	public LodRenderer(LodBufferBuilder newLodBufferBuilder)
+
+
+
+	public LodNodeRenderer(LodNodeBufferBuilder newLodNodeBufferBuilder)
 	{
 		mc = Minecraft.getInstance();
 		gameRender = mc.gameRenderer;
 		
 		reflectionHandler = new ReflectionHandler();
-		lodBufferBuilder = newLodBufferBuilder;
+		lodNodeBufferBuilder = newLodNodeBufferBuilder;
 	}
 	
 	
@@ -152,11 +151,11 @@ public class LodRenderer
 	 * Besides drawing the LODs this method also starts
 	 * the async process of generating the Buffers that hold those LODs.
 	 * 
-	 * @param newDimension The dimension to draw, if null doesn't replace the current dimension.
+	 * @param newDim The dimension to draw, if null doesn't replace the current dimension.
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
 	@SuppressWarnings("deprecation")
-	public void drawLODs(LodDimension lodDim, float partialTicks, IProfiler newProfiler)
+	public void drawLODs(LodQuadTreeDimension lodDim, float partialTicks, IProfiler newProfiler)
 	{		
 		if (lodDim == null)
 		{
@@ -184,7 +183,7 @@ public class LodRenderer
 			// see if this GPU can run fancy fog
 			fancyFogAvailable = GL.getCapabilities().GL_NV_fog_distance;
 			
-			if (!LodRenderer.fancyFogAvailable)
+			if (!fancyFogAvailable)
 			{
 				ClientProxy.LOGGER.info("This GPU does not support GL_NV_fog_distance. This means that fancy fog options will not be available.");
 			}
@@ -194,16 +193,16 @@ public class LodRenderer
 		ClientPlayerEntity player = mc.player;
 		
 		// should LODs be regenerated?
-		if ((int)player.getX() / LodChunk.WIDTH != prevChunkX ||
-			(int)player.getZ() / LodChunk.WIDTH != prevChunkZ ||
+		if ((int)player.getX() / LodQuadTreeNode.CHUNK_WIDTH != prevChunkX ||
+			(int)player.getZ() / LodQuadTreeNode.CHUNK_WIDTH != prevChunkZ ||
 			previousChunkRenderDistance != mc.options.renderDistance ||
 			prevFogDistance != LodConfig.CLIENT.fogDistance.get())
 		{
 			// yes
 			regen = true;
 			
-			prevChunkX = (int)player.getX() / LodChunk.WIDTH;
-			prevChunkZ = (int)player.getZ() / LodChunk.WIDTH;
+			prevChunkX = (int)player.getX() / LodQuadTreeNode.CHUNK_WIDTH;
+			prevChunkZ = (int)player.getZ() / LodQuadTreeNode.CHUNK_WIDTH;
 			prevFogDistance = LodConfig.CLIENT.fogDistance.get();
 		}
 		else
@@ -223,11 +222,11 @@ public class LodRenderer
 		
 		// determine how far the game's render distance is currently set
 		int renderDistWidth = mc.options.renderDistance;
-		farPlaneDistance = renderDistWidth * LodChunk.WIDTH;
+		farPlaneDistance = renderDistWidth * LodQuadTreeNode.CHUNK_WIDTH;
 		
 		// set how big the LODs will be and how far they will go
-		int totalLength = (int) farPlaneDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 2;
-		int numbChunksWide = (totalLength / LodChunk.WIDTH);
+		int totalLength = (int) farPlaneDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 10;
+		int numbChunksWide = (totalLength / LodQuadTreeNode.CHUNK_WIDTH);
 		
 		// determine which LODs should not be rendered close to the player
 		HashSet<ChunkPos> chunkPosToSkip = getNearbyLodChunkPosToSkip(lodDim, player.blockPosition());
@@ -253,7 +252,7 @@ public class LodRenderer
 		// 2. we aren't already regenerating the LODs
 		// 3. we aren't waiting for the build and draw buffers to swap
 		//		(this is to prevent thread conflicts)
-		if (regen && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvaliable())
+		if (regen && !lodNodeBufferBuilder.generatingBuffers && !lodNodeBufferBuilder.newBuffersAvaliable())
 		{
 			// this will mainly happen when the view distance is changed
 			if (drawableNearBuffer == null || drawableFarBuffer == null || 
@@ -261,7 +260,7 @@ public class LodRenderer
 				setupBuffers(numbChunksWide);
 			
 			// generate the LODs on a separate thread to prevent stuttering or freezing
-			lodBufferBuilder.generateLodBuffersAsync(this, lodDim, player.getX(), player.getZ(), numbChunksWide);
+			lodNodeBufferBuilder.generateLodBuffersAsync(this, lodDim, player.getX(), player.getZ(), numbChunksWide);
 			
 			// the regen process has been started,
 			// it will be done when lodBufferBuilder.newBuffersAvaliable
@@ -272,7 +271,7 @@ public class LodRenderer
 		// replace the buffers used to draw and build,
 		// this is only done when the createLodBufferGenerationThread
 		// has finished executing on a parallel thread.
-		if (lodBufferBuilder.newBuffersAvaliable())
+		if (lodNodeBufferBuilder.newBuffersAvaliable())
 		{
 			swapBuffers();
 		}
@@ -567,12 +566,14 @@ public class LodRenderer
 	         matrixStack.mulPose(vector3f.rotationDegrees(f2));
 	      }
 		
+		
+		
 		// this projection matrix allows us to see past the normal 
 		// world render distance
 		Matrix4f projectionMatrix = 
 				Matrix4f.perspective(
 				getFov(partialTicks, true), 
-				(float)this.mc.getWindow().getScreenWidth() / (float)this.mc.getWindow().getScreenHeight(),
+				(float)this.mc.getWindow().getScreenWidth() / (float)this.mc.getWindow().getScreenHeight(), 
 				// it is possible to see the near clip plane, but
 				// you have to be flying quickly in spectator mode through ungenerated
 				// terrain, so I don't think it is much of an issue.
@@ -590,7 +591,7 @@ public class LodRenderer
 	 * setup the lighting to be used for the LODs
 	 */
 	@SuppressWarnings("deprecation")
-	private void setupLighting(LodDimension lodDimension, float partialTicks)
+	private void setupLighting(LodQuadTreeDimension lodDimension, float partialTicks)
 	{
 		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.level.getSkyDarken(partialTicks) : 0.2f;
 		float gammaMultiplyer = (float)mc.options.gamma - 0.5f;
@@ -639,7 +640,7 @@ public class LodRenderer
 		drawableNearBuffer = new BufferBuilder(bufferMemory);
 		drawableFarBuffer = new BufferBuilder(bufferMemory);
 		
-		lodBufferBuilder.setupBuffers(bufferMemory);
+		lodNodeBufferBuilder.setupBuffers(bufferMemory);
 	}
 	
 	
@@ -668,7 +669,7 @@ public class LodRenderer
 	{
 		// replace the drawable buffers with
 		// the newly created buffers from the lodBufferBuilder
-		NearFarBuffer newBuffers = lodBufferBuilder.swapBuffers(drawableNearBuffer, drawableFarBuffer);
+		NearFarBuffer newBuffers = lodNodeBufferBuilder.swapBuffers(drawableNearBuffer, drawableFarBuffer);
 		drawableNearBuffer = newBuffers.nearBuffer;
 		drawableFarBuffer = newBuffers.farBuffer;
 		
@@ -812,7 +813,7 @@ public class LodRenderer
 	 * Get a HashSet of all ChunkPos within the normal render distance
 	 * that should not be rendered.
 	 */
-	private HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodDimension lodDim, BlockPos playerPos) 
+	private HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodQuadTreeDimension lodDim, BlockPos playerPos)
 	{
 		int chunkRenderDist = mc.options.renderDistance;
 		int blockRenderDist = chunkRenderDist * 16;
@@ -827,10 +828,10 @@ public class LodRenderer
 		{
 			for(int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
 			{
-				LodChunk lod = lodDim.getLodFromCoordinates(x, z);
+				LodQuadTreeNode lod = lodDim.getLodFromCoordinates(x, z, 4);
 				if (lod != null)
 				{
-					short lodHighestPoint = lod.calculateHighestPoint();
+					short lodHighestPoint = lod.lodDataPoint.height;
 					
 					if (playerPos.getY() < lodHighestPoint)
 					{
