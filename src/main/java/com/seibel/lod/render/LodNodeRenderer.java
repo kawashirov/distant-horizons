@@ -225,7 +225,7 @@ public class LodNodeRenderer
 		farPlaneDistance = renderDistWidth * LodQuadTreeNode.CHUNK_WIDTH;
 		
 		// set how big the LODs will be and how far they will go
-		int totalLength = (int) farPlaneDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 10;
+		int totalLength = (int) farPlaneDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 2;
 		int numbChunksWide = (totalLength / LodQuadTreeNode.CHUNK_WIDTH);
 		
 		// determine which LODs should not be rendered close to the player

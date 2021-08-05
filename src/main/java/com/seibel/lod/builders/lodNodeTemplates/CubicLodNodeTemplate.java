@@ -50,17 +50,15 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 
         // Add this LOD to the BufferBuilder
         int halfWidth = lod.width / 2;
-        int startX = lod.startX;
-        int startZ = lod.startZ;
-
+        
         // returns null if the lod is empty at the given location
         bbox = generateBoundingBox(
                 lod.lodDataPoint.height,
                 lod.lodDataPoint.depth,
                 lod.width,
-                xOffset - halfWidth + startX,
+                xOffset - halfWidth,
                 yOffset,
-                zOffset - halfWidth + startZ);
+                zOffset - halfWidth);
 
         if (bbox != null) {
             addBoundingBoxToBuffer(buffer, bbox, lod.lodDataPoint.color);

@@ -177,7 +177,7 @@ public class LodNodeBufferBuilder
 							startX; // offset so the center LOD block is centered underneath the player
 					double yOffset = 0;
 					double zOffset = (LodQuadTreeNode.CHUNK_WIDTH * j) + startZ;
-
+					
 					LodQuadTreeNode lod = lodDim.getLodFromCoordinates(chunkX, chunkZ, LodQuadTreeNode.CHUNK_LEVEL);
 
 					if (lod == null || lod.getComplexity() == DistanceGenerationMode.NONE)
@@ -220,7 +220,6 @@ public class LodNodeBufferBuilder
 								// this chunk is closer, clear any previous
 								// positions and update the new minimum distance
 								minChunkDist = newDistance;
-								chunksToGenReserve = chunksToGen;
 								
 								// move all the old chunks into the reserve
 								ChunkPos[] newReserve = new ChunkPos[maxChunkGenRequests];

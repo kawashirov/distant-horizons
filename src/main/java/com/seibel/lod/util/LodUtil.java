@@ -20,6 +20,7 @@ package com.seibel.lod.util;
 import java.awt.Color;
 import java.io.File;
 
+import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.RegionPos;
 
 import net.minecraft.client.Minecraft;
@@ -95,21 +96,21 @@ public class LodUtil
 	public static RegionPos convertChunkPosToRegionPos(ChunkPos pos)
 	{
 		RegionPos rPos = new RegionPos();
-		rPos.x = pos.x / 512;
-		rPos.z = pos.z / 512;
+//		rPos.x = pos.x / 512;
+//		rPos.z = pos.z / 512;
+//		
+//		// prevent issues if X/Z is negative and less than 16
+//		if (pos.x < 0)
+//		{
+//			rPos.x = (Math.abs(rPos.x) * -1) - 1; 
+//		}
+//		if (pos.z < 0)
+//		{
+//			rPos.z = (Math.abs(rPos.z) * -1) - 1; 
+//		}
 		
-		// prevent issues if X/Z is negative and less than 16
-		if (pos.x < 0)
-		{
-			rPos.x = (Math.abs(rPos.x) * -1) - 1; 
-		}
-		if (pos.z < 0)
-		{
-			rPos.z = (Math.abs(rPos.z) * -1) - 1; 
-		}
-		
-		//rPos.x = (Math.floorDiv(pos.x, (int) (512/Math.pow(LodQuadTreeNode.CHUNK_LEVEL,2))));
-		//rPos.z = (Math.floorDiv(pos.z, (int) (512/Math.pow(LodQuadTreeNode.CHUNK_LEVEL,2))));
+		rPos.x = (Math.floorDiv(pos.x, (int) (512/Math.pow(LodQuadTreeNode.CHUNK_LEVEL,2))));
+		rPos.z = (Math.floorDiv(pos.z, (int) (512/Math.pow(LodQuadTreeNode.CHUNK_LEVEL,2))));
 		
 		return rPos;
 	}
