@@ -176,7 +176,7 @@ public class LodNodeBufferBuilder
 							startX + // offset so the center LOD block is centered underneath the player
 							8; // I'm not sure what this is correcting exactly but with it the chunks line up.
 							   // 8 works for LODs the size of chunks
-					double yOffset = 1;
+					double yOffset = 1; // TODO this offset should be done in the LOD generation
 					double zOffset = (LodQuadTreeNode.CHUNK_WIDTH * j) + startZ + 8;
 					
 					LodQuadTreeNode lod = lodDim.getLodFromCoordinates(chunkX, chunkZ, LodQuadTreeNode.CHUNK_LEVEL);
@@ -319,10 +319,7 @@ public class LodNodeBufferBuilder
 				{
 					if(chunkPos == null)
 						break;
-
-					// make sure we don't generate this chunk again
-		        	lodDim.addNode(new LodQuadTreeNode(chunkPos));
-
+					
 					numberOfChunksWaitingToGenerate.addAndGet(1);
 					
 					LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, renderer, LodQuadTreeNodeBuilder, this, lodDim, serverWorld, biomeContainer);
