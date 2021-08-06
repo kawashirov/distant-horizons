@@ -93,7 +93,9 @@ public class LodQuadTreeDimension
                     // the compiler from complaining
                     ServerChunkProvider provider = serverWorld.getChunkSource();
                     saveDir = new File(provider.dataStorage.dataFolder.getCanonicalFile().getPath() + File.separatorChar + "lod");
-                } else {
+                }
+                else
+                {
                     // connected to server
 
                     saveDir = new File(mc.gameDirectory.getCanonicalFile().getPath() +
@@ -102,7 +104,9 @@ public class LodQuadTreeDimension
 
                 fileHandler = new LodQuadTreeDimensionFileHandler(saveDir, this);
 
-            } catch (IOException e) {
+            }
+            catch (IOException e)
+            {
                 // the file handler wasn't able to be created
                 // we won't be able to read or write any files
             }
@@ -272,16 +276,20 @@ public class LodQuadTreeDimension
     /**
      *this method create all the regions that are null
      */
-    public void initializeNullRegions(){
+    public void initializeNullRegions()
+    {
         int n = regions.length;
         int xIndex;
         int zIndex;
         LodQuadTree region;
-        for(int xRegion=0; xRegion<n; xRegion++){
-            for(int zRegion=0; zRegion<n; zRegion++){
+        for(int xRegion=0; xRegion<n; xRegion++)
+        {
+            for(int zRegion=0; zRegion<n; zRegion++)
+            {
                 xIndex = (xRegion + centerX) - halfWidth;
                 zIndex = (zRegion + centerZ) - halfWidth;
                 region = getRegion(xIndex,zIndex);
+                
                 if (region == null)
                 {
                     // if no region exists, create it
@@ -300,44 +308,55 @@ public class LodQuadTreeDimension
      */
     public Boolean addNode(LodQuadTreeNode lodNode)
     {
-		RegionPos pos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(lodNode.centerX, lodNode.centerZ));
+		RegionPos regionPos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(lodNode.centerX, lodNode.centerZ));
 
         // don't continue if the region can't be saved
-        if (!regionIsInRange(pos.x, pos.z))
+        if (!regionIsInRange(regionPos.x, regionPos.z))
         {
             return false;
         }
 
-        LodQuadTree region = getRegion(pos.x, pos.z);
+        LodQuadTree region = getRegion(regionPos.x, regionPos.z);
 
         if (region == null)
         {
             // if no region exists, create it
-            region = new LodQuadTree(pos.x, pos.z);
+            region = new LodQuadTree(regionPos.x, regionPos.z);
             addOrOverwriteRegion(region);
         }
-        boolean coorectlyAdded = region.setNodeAtLowerLevel(lodNode, true);
+        boolean nodeAdded = region.setNodeAtLowerLevel(lodNode, true);
 
         // only save valid LODs to disk
         if (!lodNode.dontSave && fileHandler != null)
         {
             // mark the region as dirty so it will be saved to disk
-            int xIndex = (pos.x - centerX) + halfWidth;
-            int zIndex = (pos.z - centerZ) + halfWidth;
+            int xIndex = (regionPos.x - centerX) + halfWidth;
+            int zIndex = (regionPos.z - centerZ) + halfWidth;
             isRegionDirty[xIndex][zIndex] = true;
             fileHandler.saveDirtyRegionsToFileAsync();
         }
-        return coorectlyAdded;
+        return nodeAdded;
     }
-
+    
+    
     /**
+     * Get the LodNodeData at the given X and Z coordinates
+     * in this dimension.
+     * <br>
+     * Returns null if the LodChunk doesn't exist or
+     * is outside the loaded area.
      */
     public LodQuadTreeNode getLodFromCoordinates(ChunkPos chunkPos)
     {
         return getLodFromCoordinates(chunkPos.x, chunkPos.z, LodQuadTreeNode.CHUNK_LEVEL);
     }
-	
+
     /**
+     * Get the LodNodeData at the given X and Z coordinates
+     * in this dimension.
+     * <br>
+     * Returns null if the LodChunk doesn't exist or
+     * is outside the loaded area.
      */
     public LodQuadTreeNode getLodFromCoordinates(int chunkPosX, int chunkPosZ)
     {
@@ -351,12 +370,12 @@ public class LodQuadTreeDimension
      * Returns null if the LodChunk doesn't exist or
      * is outside the loaded area.
      */
-    public LodQuadTreeNode getLodFromCoordinates(int posX, int posZ, int detailLevel)
+    public LodQuadTreeNode getLodFromCoordinates(int chunkPosX, int chunkPosZ, int detailLevel)
     {
     	if (detailLevel > LodQuadTreeNode.REGION_LEVEL)
     		throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
     	
-    	RegionPos regionPos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(posX, posZ));
+    	RegionPos regionPos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(chunkPosX, chunkPosZ));
     	LodQuadTree region = getRegion(regionPos.x, regionPos.z);
         
         if(region == null)
@@ -365,7 +384,7 @@ public class LodQuadTreeDimension
             return null;
         }
         
-        return region.getNodeAtLevelPosition(posX, posZ, detailLevel);
+        return region.getNodeAtChunkPos(chunkPosX, chunkPosZ, detailLevel);
         
         /*
         RegionPos pos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(chunkX, chunkZ));
@@ -436,7 +455,8 @@ public class LodQuadTreeDimension
      * getNodes
      * @return list of quadTrees
      */
-    public List<LodQuadTreeNode> getNodes(Set<DistanceGenerationMode> complexityMask, boolean getOnlyDirty, boolean getOnlyLeaf){
+    public List<LodQuadTreeNode> getNodes(Set<DistanceGenerationMode> complexityMask, boolean getOnlyDirty, boolean getOnlyLeaf)
+    {
         int n = regions.length;
         List<LodQuadTreeNode> listOfNodes = new ArrayList<>();
         int xIndex;
@@ -540,13 +560,14 @@ public class LodQuadTreeDimension
 		}
 		else
 		{
-        return width;
-    }
+	        return width;
+	    }
 	}
 
     public void setRegionWidth(int newWidth)
     {
         width = newWidth;
+        halfWidth = (int)Math.floor(width / 2);
 
         regions = new LodQuadTree[width][width];
         isRegionDirty = new boolean[width][width];

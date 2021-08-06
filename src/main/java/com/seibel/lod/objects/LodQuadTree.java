@@ -149,7 +149,8 @@ public class LodQuadTree {
      * @param updateHigherLevel will update the color and height of higher level only if true
      * @return true only if the QuadTree has been changed
      */
-    public boolean setNodeAtLowerLevel(LodQuadTreeNode newLodNode, boolean updateHigherLevel) {
+    public boolean setNodeAtLowerLevel(LodQuadTreeNode newLodNode, boolean updateHigherLevel)
+    {
         //check if we try to introduce a level that is higher or equal than the current one
         byte targetLevel = newLodNode.detailLevel;
         byte currentLevel = lodNode.detailLevel;
@@ -163,31 +164,39 @@ public class LodQuadTree {
                 setChild(NS, WE);
             }
             LodQuadTree child = getChild(NS, WE);
-            if (lodNode.compareComplexity(newLodNode) > 0) {
+            if (lodNode.compareComplexity(newLodNode) > 0)
+            {
                 //the node we want to introduce is less complex than the current node
                 //we don't want to override higher complexity with lower complexity
                 return false;
-            } else {
-                if (targetLevel == currentLevel - 1) {
+            }
+            else
+            {
+                if (targetLevel == currentLevel - 1)
+                {
                     child.setLodNodeData(newLodNode, true);
                     return true;
-                } else {
+                }
+                else
+                {
                     return child.setNodeAtLowerLevel(newLodNode, updateHigherLevel);
                 }
             }
-        } else {
+        }
+        else
+        {
             return false;
         }
 
     }
 
     /**
-     * @param posX
-     * @param posZ
+     * @param chunkPosX
+     * @param chunkPosZ
      * @param targetLevel
      * @return
      */
-    public LodQuadTreeNode getNodeAtLevelPosition(int posX, int posZ, int targetLevel)
+    public LodQuadTreeNode getNodeAtChunkPos(int chunkPosX, int chunkPosZ, int targetLevel)
     {
     	if (targetLevel > LodQuadTreeNode.REGION_LEVEL)
     		throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + targetLevel + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
@@ -200,14 +209,14 @@ public class LodQuadTree {
         else if (targetLevel < currentLevel)
         {
             short widthRatio = (short) (lodNode.width / (2 * Math.pow(2, targetLevel)));
-            int WE = Math.abs(Math.floorDiv(posX , widthRatio) % 2);
-            int NS = Math.abs(Math.floorDiv(posZ , widthRatio) % 2);
+            int WE = Math.abs(Math.floorDiv(chunkPosX , widthRatio) % 2);
+            int NS = Math.abs(Math.floorDiv(chunkPosZ , widthRatio) % 2);
             if (getChild(NS, WE) == null)
             {
                 return null;
             }
             LodQuadTree child = getChild(NS, WE);
-            return child.getNodeAtLevelPosition(posX, posZ, targetLevel);
+            return child.getNodeAtChunkPos(chunkPosX, chunkPosZ, targetLevel);
         }
         else
         {
@@ -217,7 +226,8 @@ public class LodQuadTree {
     }
 
 
-    public LodQuadTree getChild(int NS, int WE) {
+    public LodQuadTree getChild(int NS, int WE)
+    {
         return children[NS][WE];
     }
 
