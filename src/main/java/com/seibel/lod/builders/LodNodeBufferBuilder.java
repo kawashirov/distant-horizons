@@ -29,7 +29,6 @@ import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.NearFarBuffer;
-import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodNodeRenderer;
 import com.seibel.lod.util.LodUtil;
 
@@ -174,9 +173,11 @@ public class LodNodeBufferBuilder
 
 					// set where this square will be drawn in the world
 					double xOffset = (LodQuadTreeNode.CHUNK_WIDTH * i) + // offset by the number of LOD blocks
-							startX; // offset so the center LOD block is centered underneath the player
-					double yOffset = 0;
-					double zOffset = (LodQuadTreeNode.CHUNK_WIDTH * j) + startZ;
+							startX + // offset so the center LOD block is centered underneath the player
+							8; // I'm not sure what this is correcting exactly but with it the chunks line up.
+							   // 8 works for LODs the size of chunks
+					double yOffset = 1;
+					double zOffset = (LodQuadTreeNode.CHUNK_WIDTH * j) + startZ + 8;
 					
 					LodQuadTreeNode lod = lodDim.getLodFromCoordinates(chunkX, chunkZ, LodQuadTreeNode.CHUNK_LEVEL);
 
@@ -189,6 +190,7 @@ public class LodNodeBufferBuilder
 							ChunkPos pos = new ChunkPos(chunkX, chunkZ);
 							
 							
+							// alternate determining logic that
 							// can be used for debugging
 //							if (chunksToGen == null)
 //							{
@@ -272,6 +274,7 @@ public class LodNodeBufferBuilder
 									chunkGenIndex++;
 								}
 							}
+							
 						} // lod null and can generate more chunks
 
 						// don't render this null/empty chunk
@@ -294,7 +297,7 @@ public class LodNodeBufferBuilder
 				}
 			}
 			
-			ClientProxy.LOGGER.info(numberOfChunksWaitingToGenerate.get());
+			//ClientProxy.LOGGER.info(numberOfChunksWaitingToGenerate.get());
 			
 			// issue #19
 			// TODO add a way for a server side mod to generate chunks requested here

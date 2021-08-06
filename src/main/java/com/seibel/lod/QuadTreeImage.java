@@ -15,7 +15,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.objects;
+package com.seibel.lod;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -30,6 +30,7 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -39,6 +40,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.objects.LodDataPoint;
+import com.seibel.lod.objects.LodQuadTreeDimension;
+import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.util.BiomeColorsUtils;
 
 import kaptainwutax.biomeutils.source.OverworldBiomeSource;
@@ -51,18 +55,21 @@ public class QuadTreeImage extends JPanel
     private static final int PREF_H = PREF_W;
     private List<MyDrawable> drawables = new ArrayList<>();
 
-    public QuadTreeImage() {
+    public QuadTreeImage()
+    {
         setBackground(Color.white);
     }
 
-    public void addMyDrawable(MyDrawable myDrawable) {
+    public void addMyDrawable(MyDrawable myDrawable)
+    {
         drawables.add(myDrawable);
         repaint();
     }
 
     @Override
     // make it bigger
-    public Dimension getPreferredSize() {
+    public Dimension getPreferredSize()
+    {
         if (isPreferredSizeSet()) {
             return super.getPreferredSize();
         }
@@ -70,7 +77,8 @@ public class QuadTreeImage extends JPanel
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
+    protected void paintComponent(Graphics g)
+    {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -80,12 +88,14 @@ public class QuadTreeImage extends JPanel
         }
     }
 
-    public void clearAll() {
+    public void clearAll()
+    {
         drawables.clear();
         repaint();
     }
 
-    private static void createAndShowGui() {
+    private static void createAndShowGui()
+    {
 
         final QuadTreeImage quadTreeImage = new QuadTreeImage();
 
@@ -106,7 +116,8 @@ public class QuadTreeImage extends JPanel
         //SIMULATING A PLAYER MOVING,
         int[] playerXs = {0, 100, 200, 300, 400, 1000};
         int[] playerZs = {0, 100, 200, 300, 400, 500};
-        for (int pos = 0; pos < 1; pos++) {
+        for (int pos = 0; pos < 1; pos++)
+        {
             int playerX = 0 + playerXs[pos]; //2097152
             int playerZ = 0 + playerZs[pos]/2;
 
@@ -266,7 +277,8 @@ public class QuadTreeImage extends JPanel
         }).start();
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         /*
         LodQuadTreeDimension dim2 = new LodQuadTreeDimension(null, null, 1);
         dim2.move(10000000,10000000);
