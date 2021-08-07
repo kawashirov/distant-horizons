@@ -90,43 +90,42 @@ public class LodQuadTreeDimension
 	 */
 	public LodQuadTreeDimension(DimensionType newDimension, LodQuadTreeWorld lodWorld, int newWidth)
 	{
-		if(newDimension != null && lodWorld != null)
-			throw new IllegalArgumentException("newDimension and/or lodWorld are null");
-		
 		dimension = newDimension;
 		width = newWidth;
 		halfWidth = (int)Math.floor(width / 2);
 		
-		
-		try {
-			Minecraft mc = Minecraft.getInstance();
-			
-			File saveDir;
-			if (mc.hasSingleplayerServer())
-			{
-				// local world
-				
-				ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(newDimension);
-				
-				// provider needs a separate variable to prevent
-				// the compiler from complaining
-				ServerChunkProvider provider = serverWorld.getChunkSource();
-				saveDir = new File(provider.dataStorage.dataFolder.getCanonicalFile().getPath() + File.separatorChar + "lod");
-			}
-			else
-			{
-				// connected to server
-				
-				saveDir = new File(mc.gameDirectory.getCanonicalFile().getPath() +
-						File.separatorChar + "lod server data" + File.separatorChar + LodUtil.getDimensionIDFromWorld(mc.level));
-			}
-			
-			fileHandler = new LodQuadTreeDimensionFileHandler(saveDir, this);
-		}
-		catch (IOException e)
+		if(newDimension != null && lodWorld != null)
 		{
-			// the file handler wasn't able to be created
-			// we won't be able to read or write any files
+			try {
+				Minecraft mc = Minecraft.getInstance();
+				
+				File saveDir;
+				if (mc.hasSingleplayerServer())
+				{
+					// local world
+					
+					ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(newDimension);
+					
+					// provider needs a separate variable to prevent
+					// the compiler from complaining
+					ServerChunkProvider provider = serverWorld.getChunkSource();
+					saveDir = new File(provider.dataStorage.dataFolder.getCanonicalFile().getPath() + File.separatorChar + "lod");
+				}
+				else
+				{
+					// connected to server
+					
+					saveDir = new File(mc.gameDirectory.getCanonicalFile().getPath() +
+							File.separatorChar + "lod server data" + File.separatorChar + LodUtil.getDimensionIDFromWorld(mc.level));
+				}
+				
+				fileHandler = new LodQuadTreeDimensionFileHandler(saveDir, this);
+			}
+			catch (IOException e)
+			{
+				// the file handler wasn't able to be created
+				// we won't be able to read or write any files
+			}
 		}
 		
 		
