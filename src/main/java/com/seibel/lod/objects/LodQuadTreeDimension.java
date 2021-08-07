@@ -370,21 +370,21 @@ public class LodQuadTreeDimension
      * Returns null if the LodChunk doesn't exist or
      * is outside the loaded area.
      */
-    public LodQuadTreeNode getLodFromCoordinates(int chunkPosX, int chunkPosZ, int detailLevel)
+    public LodQuadTreeNode getLodFromCoordinates(int posX, int posZ, int detailLevel)
     {
     	if (detailLevel > LodQuadTreeNode.REGION_LEVEL)
     		throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
-    	
-    	RegionPos regionPos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(chunkPosX, chunkPosZ));
-    	LodQuadTree region = getRegion(regionPos.x, regionPos.z);
-        
+
+        int regionPosX = Math.floorDiv(posX, (int) Math.pow(2,LodQuadTreeNode.REGION_LEVEL - detailLevel));
+        int regionPosZ = Math.floorDiv(posZ, (int) Math.pow(2,LodQuadTreeNode.REGION_LEVEL - detailLevel));
+    	LodQuadTree region = getRegion(regionPosX, regionPosZ);
+
         if(region == null)
         {
             //System.out.println("THIS CASE");
             return null;
         }
-        
-        return region.getNodeAtChunkPos(chunkPosX, chunkPosZ, detailLevel);
+        return region.getNodeAtChunkPos(posX, posZ, detailLevel);
         
         /*
         RegionPos pos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(chunkX, chunkZ));
