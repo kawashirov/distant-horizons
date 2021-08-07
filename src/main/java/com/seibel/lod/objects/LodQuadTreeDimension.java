@@ -532,8 +532,7 @@ public class LodQuadTreeDimension
 	
 	
 	/**
-	 * TODO THIS METHOD HAVE TO BE CHANGES. IS NOT THE SAME AS NUMER OF CHUNK
-	 * Is it good now? - James
+	 * TODO Double check that this method works as expected
 	 * 
 	 * Returns how many non-null LodChunks
 	 * are stored in this LodDimension.
