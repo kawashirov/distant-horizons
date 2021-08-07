@@ -287,29 +287,37 @@ public class LodQuadTreeNode
         return lodDataPoint;
     }
 
-    public void combineData(List<LodQuadTreeNode> dataList){
-        if(dataList.isEmpty()){
+    public void combineData(List<LodQuadTreeNode> dataList)
+    {
+        if(dataList.isEmpty())
+        {
             lodDataPoint = new LodDataPoint();
-        }else {
+        }
+        else
+        {
             short height = (short) dataList.stream().mapToInt(x -> (int) x.getLodDataPoint().height).min().getAsInt();
             short depth = (short) dataList.stream().mapToInt(x -> (int) x.getLodDataPoint().depth).max().getAsInt();
-            int red= dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getRed()).sum()/dataList.size();
-            int green= dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getGreen()).sum()/dataList.size();
+            int red = dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getRed()).sum()/dataList.size();
+            int green = dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getGreen()).sum()/dataList.size();
             int blue = dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getBlue()).sum()/dataList.size();
             Color color = new Color(red,green,blue);
             lodDataPoint = new LodDataPoint(height,depth,color);
 
             //the new complexity equal to the lowest complexity of the list
             DistanceGenerationMode minComplexity = DistanceGenerationMode.SERVER;
-            for(LodQuadTreeNode node: dataList){
-                if (minComplexity.compareTo(node.complexity) > 0){
+            for(LodQuadTreeNode node: dataList)
+            {
+                if (minComplexity.compareTo(node.complexity) > 0)
+                {
                     minComplexity = node.complexity;
                 }
             }
+            
             complexity = minComplexity;
 
             voidNode = dataList.stream().filter(x -> !x.voidNode).count() == 0;
         }
+        
         dirty = true;
         dontSave = false;
     }

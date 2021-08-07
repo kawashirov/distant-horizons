@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.seibel.lod.objects.LodQuadTreeRegion;
+import com.seibel.lod.objects.LodQuadTree;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.proxy.ClientProxy;
@@ -98,7 +98,7 @@ public class LodQuadTreeDimensionFileHandler {
      * Return the LodQuadTree region at the given coordinates.
      * (null if the file doesn't exist)
      */
-    public LodQuadTreeRegion loadRegionFromFile(int regionX, int regionZ)
+    public LodQuadTree loadRegionFromFile(int regionX, int regionZ)
     {
 
         String fileName = getFileNameAndPathForRegion(regionX, regionZ);
@@ -195,7 +195,7 @@ public class LodQuadTreeDimensionFileHandler {
             // problem reading the file
             return null;
         }
-        return new LodQuadTreeRegion(dataList,regionX, regionZ);
+        return new LodQuadTree(dataList,regionX, regionZ);
     }
 
 
@@ -240,7 +240,7 @@ public class LodQuadTreeDimensionFileHandler {
      * 2. This will save to the LodDimension that this
      * handler is associated with.
      */
-    private void saveRegionToDisk(LodQuadTreeRegion region)
+    private void saveRegionToDisk(LodQuadTree region)
     {
         // convert chunk coordinates to region
         // coordinates
