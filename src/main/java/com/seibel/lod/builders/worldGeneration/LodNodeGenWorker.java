@@ -122,8 +122,6 @@ public class LodNodeGenWorker implements IWorker
     {
         if (!threadStarted)
         {
-        	thread.lodBufferBuilder.numberOfChunksWaitingToGenerate.addAndGet(-1);
-        	
         	if (LodConfig.CLIENT.distanceGenerationMode.get() == DistanceGenerationMode.SERVER)
 			{
         		// if we are using SERVER generation that has to be done
@@ -182,48 +180,60 @@ public class LodNodeGenWorker implements IWorker
 		@Override
 		public void run()
 		{
-			// only generate LodChunks if they can
-            // be added to the current LodDimension
-			if (lodDim.regionIsInRange(pos.x / LodRegion.SIZE, pos.z / LodRegion.SIZE))
+			try
 			{
-//				long startTime = System.currentTimeMillis();
-				
-				switch(LodConfig.CLIENT.distanceGenerationMode.get())
+				// only generate LodChunks if they can
+		        // be added to the current LodDimension
+				if (lodDim.regionIsInRange(pos.x / LodRegion.SIZE, pos.z / LodRegion.SIZE))
 				{
-				case NONE:
-					// don't generate
-					break;
-				case BIOME_ONLY:
-				case BIOME_ONLY_SIMULATE_HEIGHT:
-					// fastest
-					generateUsingBiomesOnly();
-					break;
-				case SURFACE:
-					// faster
-					generateUsingSurface();
-					break;
-				case FEATURES:
-					// fast
-					generateUsingFeatures();
-					break;
-				case SERVER:
-					// very slow
-					generateWithServer();
-					break;
-				}
+//					long startTime = System.currentTimeMillis();
+					
+					switch(LodConfig.CLIENT.distanceGenerationMode.get())
+					{
+					case NONE:
+						// don't generate
+						break;
+					case BIOME_ONLY:
+					case BIOME_ONLY_SIMULATE_HEIGHT:
+						// fastest
+						generateUsingBiomesOnly();
+						break;
+					case SURFACE:
+						// faster
+						generateUsingSurface();
+						break;
+					case FEATURES:
+						// fast
+						generateUsingFeatures();
+						break;
+					case SERVER:
+						// very slow
+						generateWithServer();
+						break;
+					}
+					
+					lodRenderer.regenerateLODsNextFrame();
+					
+					
+//					if (lodDim.getLodFromCoordinates(pos) != null)
+//						ClientProxy.LOGGER.info(pos.x + " " + pos.z + " Success!");
+//					else
+//						ClientProxy.LOGGER.info(pos.x + " " + pos.z);
+					
+					// shows the pool size, active threads, queued tasks and completed tasks
+//					ClientProxy.LOGGER.info(genThreads.toString());
+					
+//					long endTime = System.currentTimeMillis();
+//					System.out.println(endTime - startTime);
+					
+				}// if in range
 				
-				lodRenderer.regenerateLODsNextFrame();
-				
-				
-//				if (lodDim.getLodFromCoordinates(pos.x, pos.z) != null)
-//					ClientProxy.LOGGER.info(pos.x + " " + pos.z + " Success!");
-//				else
-//					ClientProxy.LOGGER.info(pos.x + " " + pos.z);
-				
-//				long endTime = System.currentTimeMillis();
-//				System.out.println(endTime - startTime);
-				
-			}// if in range
+			}
+			finally
+			{
+				// decrement how many threads are running
+				thread.lodBufferBuilder.numberOfChunksWaitingToGenerate.addAndGet(-1);
+			}
 			
 		}// run
 		

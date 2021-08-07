@@ -189,7 +189,6 @@ public class LodNodeBufferBuilder
 						{
 							ChunkPos pos = new ChunkPos(chunkX, chunkZ);
 							
-							
 							// alternate determining logic that
 							// can be used for debugging
 //							if (chunksToGen == null)
@@ -317,8 +316,12 @@ public class LodNodeBufferBuilder
 				// start chunk generation
 				for(ChunkPos chunkPos : chunksToGen)
 				{
-					if(chunkPos == null)
+					// don't add null chunkPos (which shouldn't happen anyway)
+					// or add more to the generation queue 
+					if(chunkPos == null || numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
 						break;
+					
+					// TODO add a list of locations we are waiting to generate so we don't add the same position to the queue multiple times
 					
 					numberOfChunksWaitingToGenerate.addAndGet(1);
 					
