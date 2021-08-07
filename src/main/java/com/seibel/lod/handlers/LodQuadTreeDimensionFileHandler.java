@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.seibel.lod.objects.LodQuadTree;
+import com.seibel.lod.objects.LodQuadTreeRegion;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.proxy.ClientProxy;
@@ -98,7 +98,7 @@ public class LodQuadTreeDimensionFileHandler {
      * Return the LodQuadTree region at the given coordinates.
      * (null if the file doesn't exist)
      */
-    public LodQuadTree loadRegionFromFile(int regionX, int regionZ)
+    public LodQuadTreeRegion loadRegionFromFile(int regionX, int regionZ)
     {
 
         String fileName = getFileNameAndPathForRegion(regionX, regionZ);
@@ -195,7 +195,7 @@ public class LodQuadTreeDimensionFileHandler {
             // problem reading the file
             return null;
         }
-        return new LodQuadTree(dataList,regionX, regionZ);
+        return new LodQuadTreeRegion(dataList,regionX, regionZ);
     }
 
 
@@ -240,7 +240,7 @@ public class LodQuadTreeDimensionFileHandler {
      * 2. This will save to the LodDimension that this
      * handler is associated with.
      */
-    private void saveRegionToDisk(LodQuadTree region)
+    private void saveRegionToDisk(LodQuadTreeRegion region)
     {
         // convert chunk coordinates to region
         // coordinates
@@ -306,7 +306,7 @@ public class LodQuadTreeDimensionFileHandler {
             fw.write(LOD_FILE_VERSION_PREFIX + " " + LOD_SAVE_FILE_VERSION + "\n");
 
             // add each LodChunk to the file
-            for (LodQuadTreeNode lodQuadTreeNode : Collections.unmodifiableList(region.getNodeList(LodQuadTreeDimension.FULL_COMPLEXITY_MASK , true, true)))
+            for (LodQuadTreeNode lodQuadTreeNode : Collections.unmodifiableList(region.getNodeListWithMask(LodQuadTreeDimension.FULL_COMPLEXITY_MASK , true, true)))
 			{
                 fw.write(lodQuadTreeNode.toData() + "\n");
                 lodQuadTreeNode.dirty = false;

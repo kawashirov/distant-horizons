@@ -30,7 +30,6 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -43,11 +42,17 @@ import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
+import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.util.BiomeColorsUtils;
 
 import kaptainwutax.biomeutils.source.OverworldBiomeSource;
 import kaptainwutax.mcutils.version.MCVersion;
 
+/**
+ * 
+ * @author Leonardo Amato
+ *
+ */
 @SuppressWarnings("serial")
 public class QuadTreeImage extends JPanel
 {
@@ -122,7 +127,7 @@ public class QuadTreeImage extends JPanel
             int playerZ = 0 + playerZs[pos]/2;
 
             //int sizeOfTheWorld=512; //TRY THIS TO SEE A 250'000 BLOCK RENDER DISTANCE
-            dim.move(Math.floorDiv(playerX, 512), Math.floorDiv(playerZ, 512));
+            dim.move(new RegionPos(Math.floorDiv(playerX, 512), Math.floorDiv(playerZ, 512)));
 /*
             System.out.println(dim.getRegion(0, 0));
             System.out.println(dim.getCenterX());

@@ -28,7 +28,8 @@ import com.seibel.lod.enums.DistanceGenerationMode;
  * This object contains all data useful to render LodBlock in a region (32x32 chunk o 512x512 block)
  * for every node it contains the border of the block, the size, the position at it's level, the color, the height and the depth.
  */
-public class LodQuadTree {
+public class LodQuadTreeRegion
+{
     //notes
     //The term node correspond to a LodQuadTree object
 
@@ -79,10 +80,10 @@ public class LodQuadTree {
     //the four child based on the four diagonal cardinal direction
     //the first index is for N and S and the second index is for W and S
     //children should always be null for level 0.
-    private final LodQuadTree[][] children;
+    private final LodQuadTreeRegion[][] children;
 
     //parent should always be null for level 9, and always not null for other levels.
-    private final LodQuadTree parent;
+    private final LodQuadTreeRegion parent;
 
     /**
      * Constructor for level 0 without LodNodeData (region level constructor)
@@ -91,7 +92,8 @@ public class LodQuadTree {
      * @param regionZ indicate the z region position of the node
      */
     //maybe the use of useLevelCoordinate could be changed. I could use a builder to do all this work.
-    public LodQuadTree(int regionX, int regionZ) {
+    public LodQuadTreeRegion(int regionX, int regionZ)
+    {
         this(null, new LodQuadTreeNode(LodQuadTreeNode.REGION_LEVEL, regionX, regionZ));
     }
 
@@ -103,7 +105,7 @@ public class LodQuadTree {
      * @param posX   position x in the level
      * @param posZ   position z in the level
      */
-    public LodQuadTree(LodQuadTree parent, byte level, int posX, int posZ) {
+    public LodQuadTreeRegion(LodQuadTreeRegion parent, byte level, int posX, int posZ) {
         this(parent, new LodQuadTreeNode(level, posX, posZ));
     }
 
@@ -112,10 +114,10 @@ public class LodQuadTree {
      *
      * @param lodNode object containing all the information of this node
      */
-    public LodQuadTree(LodQuadTree parent, LodQuadTreeNode lodNode) {
+    public LodQuadTreeRegion(LodQuadTreeRegion parent, LodQuadTreeNode lodNode) {
         this.parent = parent;
         this.lodNode = lodNode;
-        this.children = new LodQuadTree[2][2];
+        this.children = new LodQuadTreeRegion[2][2];
         this.nodeEmpty = true;
         this.nodeFull = false;
     }
@@ -127,7 +129,7 @@ public class LodQuadTree {
      * @param regionX  x region coordinate
      * @param regionZ  z region coordinate
      */
-    public LodQuadTree(List<LodQuadTreeNode> dataList, int regionX, int regionZ) {
+    public LodQuadTreeRegion(List<LodQuadTreeNode> dataList, int regionX, int regionZ) {
         this(null, new LodQuadTreeNode(LodQuadTreeNode.REGION_LEVEL, regionX, regionZ));
         this.setNodesAtLowerLevel(dataList, true);
     }
@@ -163,7 +165,7 @@ public class LodQuadTree {
             if (getChild(NS, WE) == null) {
                 setChild(NS, WE);
             }
-            LodQuadTree child = getChild(NS, WE);
+            LodQuadTreeRegion child = getChild(NS, WE);
             if (lodNode.compareComplexity(newLodNode) > 0)
             {
                 //the node we want to introduce is less complex than the current node
@@ -215,7 +217,7 @@ public class LodQuadTree {
             {
                 return null;
             }
-            LodQuadTree child = getChild(NS, WE);
+            LodQuadTreeRegion child = getChild(NS, WE);
             return child.getNodeAtChunkPos(chunkPosX, chunkPosZ, targetLevel);
         }
         else
@@ -226,7 +228,7 @@ public class LodQuadTree {
     }
 
 
-    public LodQuadTree getChild(int NS, int WE)
+    public LodQuadTreeRegion getChild(int NS, int WE)
     {
         return children[NS][WE];
     }
@@ -240,7 +242,7 @@ public class LodQuadTree {
      */
     public void setChild(LodQuadTreeNode newLodNode, int NS, int WE) {
         if (newLodNode.detailLevel == lodNode.detailLevel - 1) {
-            children[NS][WE] = new LodQuadTree(this, lodNode);
+            children[NS][WE] = new LodQuadTreeRegion(this, lodNode);
         }
     }
 
@@ -253,7 +255,7 @@ public class LodQuadTree {
         if (newLodNode.detailLevel == lodNode.detailLevel - 1) {
             int WE = newLodNode.posX % lodNode.posX;
             int NS = newLodNode.posZ % lodNode.posZ;
-            children[NS][WE] = new LodQuadTree(this, lodNode);
+            children[NS][WE] = new LodQuadTreeRegion(this, lodNode);
         }
     }
 
@@ -266,7 +268,7 @@ public class LodQuadTree {
     public void setChild(int NS, int WE) {
         int childX = lodNode.posX * 2 + WE;
         int childZ = lodNode.posZ * 2 + NS;
-        children[NS][WE] = new LodQuadTree(this, (byte) (lodNode.detailLevel - 1), childX, childZ);
+        children[NS][WE] = new LodQuadTreeRegion(this, (byte) (lodNode.detailLevel - 1), childX, childZ);
     }
 
     /**
@@ -305,7 +307,7 @@ public class LodQuadTree {
      * @param getOnlyLeaf  if true it will return only leaf nodes
      * @return list of nodes
      */
-    public List<LodQuadTreeNode> getNodeList(Set<DistanceGenerationMode> complexityMask, boolean getOnlyDirty, boolean getOnlyLeaf) {
+    public List<LodQuadTreeNode> getNodeListWithMask(Set<DistanceGenerationMode> complexityMask, boolean getOnlyDirty, boolean getOnlyLeaf) {
         List<LodQuadTreeNode> nodeList = new ArrayList<>();
         if (isThereAnyChild()) {
             //There is at least 1 child
@@ -316,9 +318,9 @@ public class LodQuadTree {
             }
             for (int NS = 0; NS <= 1; NS++) {
                 for (int WE = 0; WE <= 1; WE++) {
-                    LodQuadTree child = children[NS][WE];
+                    LodQuadTreeRegion child = children[NS][WE];
                     if (child != null) {
-                        nodeList.addAll(child.getNodeList(complexityMask, getOnlyDirty, getOnlyLeaf));
+                        nodeList.addAll(child.getNodeListWithMask(complexityMask, getOnlyDirty, getOnlyLeaf));
                     }
                 }
             }
@@ -363,7 +365,7 @@ public class LodQuadTree {
             } else {
                 for (int NS = 0; NS <= 1; NS++) {
                     for (int WE = 0; WE <= 1; WE++) {
-                        LodQuadTree child = getChild(NS, WE);
+                        LodQuadTreeRegion child = getChild(NS, WE);
                         if (child != null) {
                             nodeList.addAll(child.getNodeToRender(x, z, targetLevel, complexityMask, maxDistance, minDistance));
                         }

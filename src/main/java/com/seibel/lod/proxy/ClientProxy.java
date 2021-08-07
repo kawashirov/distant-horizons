@@ -31,6 +31,7 @@ import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeWorld;
 import com.seibel.lod.objects.LodRegion;
+import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.render.LodNodeRenderer;
 import com.seibel.lod.util.LodUtil;
 
@@ -116,7 +117,7 @@ public class ClientProxy
 		
 		if (xOffset != 0 || zOffset != 0)
 		{
-			lodDim.move(xOffset, zOffset);
+			lodDim.move(new RegionPos(xOffset, zOffset));
 		}
 		
 		
