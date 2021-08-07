@@ -382,8 +382,10 @@ public class LodQuadTreeDimension
 		if (detailLevel > LodQuadTreeNode.REGION_LEVEL)
 			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
 		
-		RegionPos regionPos = LodUtil.convertChunkPosToRegionPos(chunkPos);
-		LodQuadTreeRegion region = getRegion(regionPos);
+		// TODO possibly put this in LodUtil
+		int regionPosX = Math.floorDiv(chunkPos.x, (int) Math.pow(2,LodQuadTreeNode.REGION_LEVEL - detailLevel));
+        int regionPosZ = Math.floorDiv(chunkPos.z, (int) Math.pow(2,LodQuadTreeNode.REGION_LEVEL - detailLevel));
+    	LodQuadTreeRegion region = getRegion(new RegionPos(regionPosX, regionPosZ));
 		
 		if(region == null)
 		{
