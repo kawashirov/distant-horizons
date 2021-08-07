@@ -179,7 +179,7 @@ public class LodNodeBufferBuilder
 					double yOffset = 1; // TODO this offset should be done in the LOD generation
 					double zOffset = (LodQuadTreeNode.CHUNK_WIDTH * j) + startZ + 8;
 					
-					LodQuadTreeNode lod = lodDim.getLodFromCoordinates(chunkX, chunkZ, LodQuadTreeNode.CHUNK_LEVEL);
+					LodQuadTreeNode lod = lodDim.getLodFromCoordinates(new ChunkPos(chunkX, chunkZ), LodQuadTreeNode.CHUNK_LEVEL);
 
 					if (lod == null || lod.getComplexity() == DistanceGenerationMode.NONE)
 					{

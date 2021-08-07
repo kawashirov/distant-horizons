@@ -47,6 +47,8 @@ import com.seibel.lod.util.BiomeColorsUtils;
 
 import kaptainwutax.biomeutils.source.OverworldBiomeSource;
 import kaptainwutax.mcutils.version.MCVersion;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 
 /**
  * 
@@ -141,7 +143,7 @@ public class QuadTreeImage extends JPanel
             DistanceGenerationMode[] complexities = {DistanceGenerationMode.BIOME_ONLY, DistanceGenerationMode.BIOME_ONLY, DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT, DistanceGenerationMode.SURFACE, DistanceGenerationMode.SURFACE, DistanceGenerationMode.FEATURES, DistanceGenerationMode.FEATURES, DistanceGenerationMode.FEATURES, DistanceGenerationMode.FEATURES, DistanceGenerationMode.FEATURES};
             int[] distances = {1000000, 8000, 4000, 2000, 1000, 500, 250, 100, 50, 25};
             for (int i = 0; i <= (9-2); i++) {
-                List<LodQuadTreeNode> levelToGenerate = dim.getNodesToGenerate(playerX, playerZ, (byte) (9 - i),  complexities[i], distances[i]*2, 0);
+                List<LodQuadTreeNode> levelToGenerate = dim.getNodesToGenerate(new BlockPos(playerX, 0, playerZ), (byte) (9 - i),  complexities[i], distances[i]*2, 0);
                 //System.out.println(levelToGenerate);
                 for (LodQuadTreeNode node : levelToGenerate) {
                     Color color;
@@ -187,7 +189,7 @@ public class QuadTreeImage extends JPanel
                 //int[] distances2 = {100000, 8000, 4000, 2000, 1000, 500, 250, 0};
                 int[] distances2 = {0, 250, 500, 1000, 2000, 4000, 8000, 100000};
                 for (int h = 0; h <= (9 - 3); h++) {
-                    lodList.addAll(dim.getNodeToRender(playerX, playerZ, (byte) (3+h), complexityMask, distances2[h+1], distances2[h]));
+                    lodList.addAll(dim.getNodeToRender(new BlockPos(playerX, 0, playerZ), (byte) (3+h), complexityMask, distances2[h+1], distances2[h]));
                 }
                 System.out.println("Number of node to render " + lodList.size());
                 listOfList.add(lodList);
@@ -201,7 +203,7 @@ public class QuadTreeImage extends JPanel
 
         }
         System.out.println("GETTING LOD FROM COORDINATE AFTER GENERETION");
-        System.out.println(dim.getLodFromCoordinates(0, 100, (byte) 1));
+        System.out.println(dim.getLodFromCoordinates(new ChunkPos(0, 100), (byte) 1));
         //FROM THIS POINT ON THE CODE JUST CREATE THE IMAGE
 
         int timerDelay = 1000;

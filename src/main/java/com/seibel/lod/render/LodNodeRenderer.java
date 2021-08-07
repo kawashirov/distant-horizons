@@ -828,7 +828,7 @@ public class LodNodeRenderer
 		{
 			for(int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
 			{
-				LodQuadTreeNode lod = lodDim.getLodFromCoordinates(x, z, 4);
+				LodQuadTreeNode lod = lodDim.getLodFromCoordinates(new ChunkPos(x, z), 4);
 				if (lod != null)
 				{
 					short lodHighestPoint = lod.lodDataPoint.height;
