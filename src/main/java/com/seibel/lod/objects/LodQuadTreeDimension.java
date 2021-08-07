@@ -96,7 +96,8 @@ public class LodQuadTreeDimension
 		
 		if(newDimension != null && lodWorld != null)
 		{
-			try {
+			try
+			{
 				Minecraft mc = Minecraft.getInstance();
 				
 				File saveDir;

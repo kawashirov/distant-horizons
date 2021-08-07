@@ -84,11 +84,10 @@ public class LodNodeBuilder {
     }
  */
 
-    public void generateLodNodeAsync(IChunk chunk, LodQuadTreeWorld lodWorld, IWorld world) {
-        if (lodWorld == null || !lodWorld.getIsWorldLoaded()) {
-            System.out.println("This case?");
+    public void generateLodNodeAsync(IChunk chunk, LodQuadTreeWorld lodWorld, IWorld world)
+    {
+        if (lodWorld == null || !lodWorld.getIsWorldLoaded())
             return;
-        }
 
         // don't try to create an LOD object
         // if for some reason we aren't
@@ -107,13 +106,11 @@ public class LodNodeBuilder {
 
                 if (lodWorld.getLodDimension(dim) == null)
                 {
-                    //System.out.println("Adding");
                     lodDim = new LodQuadTreeDimension(dim, lodWorld, regionWidth);
                     lodWorld.addLodDimension(lodDim);
                 }
                 else
                 {
-                    //System.out.println("Not adding");
                     lodDim = lodWorld.getLodDimension(dim);
                 }
 
@@ -126,7 +123,6 @@ public class LodNodeBuilder {
             }
         });
         lodGenThreadPool.execute(thread);
-        //System.out.println("Is this ENDING?");
 
         return;
     }
