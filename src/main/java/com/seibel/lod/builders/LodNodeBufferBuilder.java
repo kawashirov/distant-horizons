@@ -181,7 +181,7 @@ public class LodNodeBufferBuilder
 					
 					LodQuadTreeNode lod = lodDim.getLodFromCoordinates(new ChunkPos(chunkX, chunkZ), LodQuadTreeNode.CHUNK_LEVEL);
 
-					if (lod == null || lod.getComplexity() == DistanceGenerationMode.NONE)
+					if (lod == null || lod.complexity == DistanceGenerationMode.NONE)
 					{
 						// generate a new chunk if no chunk currently exists
 						// and we aren't waiting on any other chunks to generate

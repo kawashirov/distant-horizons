@@ -18,6 +18,7 @@
 package com.seibel.lod.enums;
 
 /**
+ * NONE <br>
  * BIOME_ONLY <br>
  * BIOME_ONLY_SIMULATE_HEIGHT <br>
  * SURFACE <br>
@@ -27,13 +28,14 @@ package com.seibel.lod.enums;
  * In order of fastest to slowest.
  * 
  * @author James Seibel
- * @version 6-27-2021
+ * @author Leonardo Amato
+ * @version 8-7-2021
  */
 public enum DistanceGenerationMode
 {
-	/** No generation has be used*/
+	/** Don't generate anything */
 	NONE(0),
-
+	
 	/** Only generate the biomes and use biome
 	 * grass/foliage color, water color, or ice color
 	 * to generate the color.
@@ -67,17 +69,13 @@ public enum DistanceGenerationMode
 	 * are adding the mod to a pre-existing world. 
 	 * Singlethreaded - Slow (15-50 ms, with spikes up to 200 ms) */
 	SERVER(5);
-
+	
+	
+	/** The higher the number the more complete the generation is. */
 	public final int complexity;
-
-	DistanceGenerationMode(int complexity) {
+	
+	DistanceGenerationMode(int complexity)
+	{
 		this.complexity = complexity;
 	}
-
-
-	/*
-	public int compareTo(DistanceGenerationMode other){
-		return Integer.compare(complexity, other.complexity);
-	)
-	 */
 }

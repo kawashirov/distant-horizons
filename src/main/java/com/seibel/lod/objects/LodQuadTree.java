@@ -347,7 +347,7 @@ public class LodQuadTree
 			
 			// this detail level's node
 			if (!getOnlyLeaf && !(getOnlyDirty && !lodNode.isDirty())
-					&& complexityMask.contains(lodNode.getComplexity())) 
+					&& complexityMask.contains(lodNode.complexity)) 
 			{
 				nodeList.add(lodNode);
 			}
@@ -370,7 +370,7 @@ public class LodQuadTree
 		{
 			// This tree has no children
 			
-			if (!(getOnlyDirty && !lodNode.isDirty()) && (complexityMask.contains(lodNode.getComplexity())))
+			if (!(getOnlyDirty && !lodNode.isDirty()) && (complexityMask.contains(lodNode.complexity)))
 			{
 				nodeList.add(lodNode);
 			}
@@ -395,10 +395,10 @@ public class LodQuadTree
 		int z = playerPos.getZ();
 		
 		List<Integer> distances = new ArrayList<>();
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStartX(), 2) + Math.pow(z - lodNode.getStartZ(), 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStartX(), 2) + Math.pow(z - lodNode.getEndZ(), 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getEndX(), 2) + Math.pow(z - lodNode.getStartZ(), 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getEndX(), 2) + Math.pow(z - lodNode.getEndZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startX, 2) + Math.pow(z - lodNode.startZ, 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startX, 2) + Math.pow(z - lodNode.endZ, 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endX, 2) + Math.pow(z - lodNode.startZ, 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endX, 2) + Math.pow(z - lodNode.endZ, 2)));
 		
 		int min = distances.stream().mapToInt(Integer::intValue).min().getAsInt();
 		int max = distances.stream().mapToInt(Integer::intValue).max().getAsInt();
@@ -412,7 +412,7 @@ public class LodQuadTree
 			{
 				// we have either reached the right detail level or this tree isn't full 
 				
-				if (!lodNode.isVoidNode() && complexityMask.contains(lodNode.getComplexity()))
+				if (!lodNode.isVoidNode() && complexityMask.contains(lodNode.complexity))
 				{
 					// this node isn't void and has the complexity level we are looking for
 					nodeList.add(lodNode);
@@ -449,10 +449,10 @@ public class LodQuadTree
 		int z = playerPos.getZ();
 		
 		List<Integer> distances = new ArrayList<>();
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStartX(), 2) + Math.pow(z - lodNode.getStartZ(), 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStartX(), 2) + Math.pow(z - lodNode.getEndZ(), 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getEndX(), 2) + Math.pow(z - lodNode.getStartZ(), 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getEndX(), 2) + Math.pow(z - lodNode.getEndZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startX, 2) + Math.pow(z - lodNode.startZ, 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startX, 2) + Math.pow(z - lodNode.endZ, 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endX, 2) + Math.pow(z - lodNode.startZ, 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endX, 2) + Math.pow(z - lodNode.endZ, 2)));
 		
 		int min = distances.stream().mapToInt(Integer::intValue).min().getAsInt();
 		int max = distances.stream().mapToInt(Integer::intValue).max().getAsInt();
@@ -465,7 +465,7 @@ public class LodQuadTree
 			// TODO shouldn't tagetLevel be != lodNode.detailLevel?
 			if(!hasChildren() || targetLevel == lodNode.detailLevel)
 			{
-				if (this.lodNode.getComplexity().compareTo(complexityToGenerate) <= 0 )
+				if (this.lodNode.complexity.compareTo(complexityToGenerate) <= 0 )
 				{
 					nodeList.add(new AbstractMap.SimpleEntry<LodQuadTreeNode, Integer>(this.lodNode, min));
 				}
@@ -522,10 +522,10 @@ public class LodQuadTree
 	 */
 	public boolean isCoordinateInQuadTree(BlockPos pos)
 	{
-		return (lodNode.getStartX() * lodNode.width <= pos.getX() && 
-				lodNode.getStartZ() * lodNode.width <= pos.getZ() && 
-				lodNode.getEndX() * lodNode.width  >= pos.getX() && 
-				lodNode.getEndZ() * lodNode.width  >= pos.getZ());
+		return (lodNode.startX * lodNode.width <= pos.getX() && 
+				lodNode.startZ * lodNode.width <= pos.getZ() && 
+				lodNode.endX * lodNode.width  >= pos.getX() && 
+				lodNode.endZ * lodNode.width  >= pos.getZ());
 	}
 	
 	
