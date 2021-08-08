@@ -24,7 +24,7 @@ import java.util.Objects;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodQuadTreeDimensionFileHandler;
 
-import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.Heightmap;
 
 /**
@@ -33,7 +33,7 @@ import net.minecraft.world.gen.Heightmap;
  * 
  * @author Leonardo Amato
  * @author James Seibel
- * @version 8-7-2021
+ * @version 8-8-2021
  */
 public class LodQuadTreeNode
 {
@@ -87,9 +87,11 @@ public class LodQuadTreeNode
 	/** detail level 0 */
 	public static final short BLOCK_WIDTH = 1;
 	
-	//this 2 values indicate the position of the LOD in the relative Level
-	//this will be useful in the generation process
+	// these 2 values indicate the position of the LOD in the relative Level
+	// this will be useful in the generation process
+	/** X position relative to the Quad tree. */
 	public final int posX;
+	/** Z position relative to the Quad tree */
 	public final int posZ;
 	
 	//these 4 value indicate the corner of the LOD block
@@ -97,20 +99,17 @@ public class LodQuadTreeNode
 	//the start values should always be smaller than the end values.
 	//All this value could be calculated from level, posx and posz
 	//so they could be removed and replaced with just a getter
-	public final int startX;
-	public final int startZ;
-	public final int endX;
-	public final int endZ;
+	public final BlockPos startBlockPos;
+	public final BlockPos endBlockPos;
 	//these 2 value indicate the center of the LodNode in real coordinate. This
 	//can be used to calculate the distance from the player
-	public final int centerX;
-	public final int centerZ;
+	public final BlockPos center;
 	
 	public LodDataPoint lodDataPoint;
 	
-	//void node is used
+	/** if true this node doesn't have any data */
 	public boolean voidNode;
-	//if dirty is true, then this node have unsaved changes
+	/** if dirty is true, then this node have unsaved changes */
 	public boolean dirty;
 	
 	
@@ -122,17 +121,6 @@ public class LodQuadTreeNode
 	 * */
 	
 	
-	/**
-	 * Creates and empty LodDataPoint
-	 * This LodDataPoint only contains the position data
-	 * @param detailLevel of the node
-	 * @param posX position x in the level
-	 * @param posZ position z in the level
-	 */
-	public LodQuadTreeNode(ChunkPos pos)
-	{
-		this(CHUNK_LEVEL, pos.x, pos.z);
-	}
 	
 	/**
 	 * Creates and empty LodDataPoint
@@ -150,13 +138,10 @@ public class LodQuadTreeNode
 		
 		width = (short) Math.pow(2, detailLevel);
 		
-		startX = posX * width;
-		startZ = posZ * width;
-		endX = startX + width - 1;
-		endZ = startZ + width - 1;
+		startBlockPos = new BlockPos(posX * width, 0, posZ * width);
+		endBlockPos = new BlockPos(startBlockPos.getX() + width - 1, 0, startBlockPos.getZ() + width - 1);
 		
-		centerX = startX + width/2;
-		centerZ = startZ + width/2;
+		center = new BlockPos(startBlockPos.getX() + width/2, 0, startBlockPos.getZ() + width/2);
 		
 		lodDataPoint = new LodDataPoint();
 		
@@ -214,13 +199,10 @@ public class LodQuadTreeNode
 		
 		width = (short) Math.pow(2, detailLevel);
 		
-		startX = posX * width;
-		startZ = posZ * width;
+		startBlockPos = new BlockPos(posX * width, 0, posZ * width);
 		
-		endX = startX + width - 1;
-		endZ = startZ + width - 1;
-		centerX = startX + width/2;
-		centerZ = startZ + width/2;
+		endBlockPos = new BlockPos(startBlockPos.getX() + width - 1, 0, startBlockPos.getZ() + width - 1);
+		center = new BlockPos(startBlockPos.getX() + width/2, 0, startBlockPos.getZ() + width/2);
 		
 		this.lodDataPoint = lodDataPoint;
 		this.complexity = complexity;
@@ -279,17 +261,17 @@ public class LodQuadTreeNode
 		
 		width = (short) Math.pow(2, detailLevel);
 		
-		startX = posX * width;
-		startZ = posZ * width;
-		endX = startX + width - 1;
-		endZ = startZ + width - 1;
+		startBlockPos = new BlockPos(posX * width, 0, posZ * width);
+		endBlockPos = new BlockPos(startBlockPos.getX() + width - 1, 0, startBlockPos.getZ() + width - 1);
 		
-		centerX = startX + width/2;
-		centerZ = startZ + width/2;
+		center = new BlockPos(startBlockPos.getX() + width/2, 0, startBlockPos.getZ() + width/2);
 		
 		dirty = false;
 		dontSave = false;
 	}
+	
+	
+	
 	
 	public void update(LodQuadTreeNode lodQuadTreeNode)
 	{
@@ -394,7 +376,7 @@ public class LodQuadTreeNode
 				+ Integer.toString(lodDataPoint.color.getGreen()) + DATA_DELIMITER
 				+ Integer.toString(lodDataPoint.color.getBlue()) + DATA_DELIMITER
 				+ Integer.toString(lodDataPoint.color.getAlpha()) + DATA_DELIMITER
-				+ Integer.toString(voidNode ? 1 : 0) + DATA_DELIMITER;
+				+ Integer.toString(voidNode ? 1 : 0);
 		return s;
 	}
 	

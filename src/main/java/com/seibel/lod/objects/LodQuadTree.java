@@ -395,10 +395,10 @@ public class LodQuadTree
 		int z = playerPos.getZ();
 		
 		List<Integer> distances = new ArrayList<>();
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startX, 2) + Math.pow(z - lodNode.startZ, 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startX, 2) + Math.pow(z - lodNode.endZ, 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endX, 2) + Math.pow(z - lodNode.startZ, 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endX, 2) + Math.pow(z - lodNode.endZ, 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startBlockPos.getX(), 2) + Math.pow(z - lodNode.startBlockPos.getZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startBlockPos.getX(), 2) + Math.pow(z - lodNode.endBlockPos.getZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endBlockPos.getX(), 2) + Math.pow(z - lodNode.startBlockPos.getZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endBlockPos.getX(), 2) + Math.pow(z - lodNode.endBlockPos.getZ(), 2)));
 		
 		int min = distances.stream().mapToInt(Integer::intValue).min().getAsInt();
 		int max = distances.stream().mapToInt(Integer::intValue).max().getAsInt();
@@ -449,10 +449,10 @@ public class LodQuadTree
 		int z = playerPos.getZ();
 		
 		List<Integer> distances = new ArrayList<>();
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startX, 2) + Math.pow(z - lodNode.startZ, 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startX, 2) + Math.pow(z - lodNode.endZ, 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endX, 2) + Math.pow(z - lodNode.startZ, 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endX, 2) + Math.pow(z - lodNode.endZ, 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startBlockPos.getX(), 2) + Math.pow(z - lodNode.startBlockPos.getZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startBlockPos.getX(), 2) + Math.pow(z - lodNode.endBlockPos.getZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endBlockPos.getX(), 2) + Math.pow(z - lodNode.startBlockPos.getZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endBlockPos.getX(), 2) + Math.pow(z - lodNode.endBlockPos.getZ(), 2)));
 		
 		int min = distances.stream().mapToInt(Integer::intValue).min().getAsInt();
 		int max = distances.stream().mapToInt(Integer::intValue).max().getAsInt();
@@ -522,10 +522,10 @@ public class LodQuadTree
 	 */
 	public boolean isCoordinateInQuadTree(BlockPos pos)
 	{
-		return (lodNode.startX * lodNode.width <= pos.getX() && 
-				lodNode.startZ * lodNode.width <= pos.getZ() && 
-				lodNode.endX * lodNode.width  >= pos.getX() && 
-				lodNode.endZ * lodNode.width  >= pos.getZ());
+		return (lodNode.startBlockPos.getX() * lodNode.width <= pos.getX() && 
+				lodNode.startBlockPos.getZ() * lodNode.width <= pos.getZ() && 
+				lodNode.endBlockPos.getX() * lodNode.width  >= pos.getX() && 
+				lodNode.endBlockPos.getZ() * lodNode.width  >= pos.getZ());
 	}
 	
 	

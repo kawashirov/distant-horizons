@@ -344,7 +344,7 @@ public class LodNodeGenWorker implements IWorker
 				// if we are in the end, don't generate any chunks.
 				// Since we don't know where the islands are, everything
 				// generates the same and it looks really bad.
-				lod = new LodQuadTreeNode(LodQuadTreeNode.CHUNK_LEVEL,chunk.getPos().x, chunk.getPos().z);
+				lod = lodChunkBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
 			}
 			lodDim.addNode(lod);
 		}

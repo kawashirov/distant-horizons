@@ -329,7 +329,7 @@ public class LodQuadTreeDimension
 	 */
 	public Boolean addNode(LodQuadTreeNode lodNode)
 	{
-		RegionPos regionPos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(lodNode.centerX, lodNode.centerZ));
+		RegionPos regionPos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(lodNode.center.getX(), lodNode.center.getZ()));
 		
 		// don't continue if the region can't be saved
 		if (!regionIsInRange(regionPos.x, regionPos.z))

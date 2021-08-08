@@ -133,7 +133,8 @@ public class LodNodeBuilder {
      *
      * @throws IllegalArgumentException thrown if either the chunk or world is null.
      */
-    public LodQuadTreeNode generateLodNodeFromChunk(IChunk chunk) throws IllegalArgumentException {
+    public LodQuadTreeNode generateLodNodeFromChunk(IChunk chunk) throws IllegalArgumentException
+    {
         return generateLodNodeFromChunk(chunk, new LodBuilderConfig());
     }
 
@@ -143,12 +144,13 @@ public class LodNodeBuilder {
      * @throws IllegalArgumentException thrown if either the chunk or world is null.
      * @return
      */
-    public LodQuadTreeNode generateLodNodeFromChunk(IChunk chunk, LodBuilderConfig config) throws IllegalArgumentException {
+    public LodQuadTreeNode generateLodNodeFromChunk(IChunk chunk, LodBuilderConfig config) throws IllegalArgumentException
+    {
         if (chunk == null)
         	throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
         
         // TODO startX/Z and endX/Z are relative coordinates
-        // getMin/Max appears to return world block coordinates
+        // getMin/Max appear to return world block coordinates
         int startX = 0; //chunk.getPos().getMinBlockX();
         int startZ = 0; //chunk.getPos().getMinBlockZ();
         int endX = 15; //chunk.getPos().getMaxBlockX();
@@ -163,8 +165,7 @@ public class LodNodeBuilder {
         height = determineHeightPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
         depth = determineBottomPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
         
-        
-        return new LodQuadTreeNode(LodQuadTreeNode.CHUNK_LEVEL, chunk.getPos().x, chunk.getPos().z, new LodDataPoint(height, depth, color) , DistanceGenerationMode.SERVER);
+        return new LodQuadTreeNode(LodQuadTreeNode.CHUNK_LEVEL, chunk.getPos().x, chunk.getPos().z, new LodDataPoint(height, depth, color), DistanceGenerationMode.SERVER);
     }
 
 

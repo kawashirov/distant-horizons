@@ -147,12 +147,12 @@ public class QuadTreeImage extends JPanel
                 //System.out.println(levelToGenerate);
                 for (LodQuadTreeNode node : levelToGenerate) {
                     Color color;
-                    int startX = node.startX;
-                    int startZ = node.startZ;
-                    int endX = node.endX;
-                    int endZ = node.endZ;
-                    int centerX = node.centerX;
-                    int centerZ = node.centerZ;
+                    int startX = node.startBlockPos.getX();
+                    int startZ = node.startBlockPos.getZ();
+                    int endX = node.endBlockPos.getX();
+                    int endZ = node.endBlockPos.getZ();
+                    int centerX = node.center.getX();
+                    int centerZ = node.center.getZ();
                     int width = node.width;
                     byte otherLevel = LodQuadTreeNode.BLOCK_LEVEL;
                     int otherWidth = LodQuadTreeNode.BLOCK_WIDTH;
@@ -210,10 +210,10 @@ public class QuadTreeImage extends JPanel
         System.out.println("STARTING");
         System.out.println(dim.getWidth());
         System.out.println(dim.getCenterX());
-        int xOffset = listOfList.stream().mapToInt(x -> x.stream().mapToInt(y -> y.startX).min().getAsInt()).min().getAsInt();
-        int zOffset = listOfList.stream().mapToInt(x -> x.stream().mapToInt(y -> y.startZ).min().getAsInt()).min().getAsInt();
-        int maxX = listOfList.stream().mapToInt(x -> x.stream().mapToInt(y -> y.startX).max().getAsInt()).min().getAsInt();
-        int maxZ = listOfList.stream().mapToInt(x -> x.stream().mapToInt(y -> y.startZ).max().getAsInt()).min().getAsInt();
+        int xOffset = listOfList.stream().mapToInt(x -> x.stream().mapToInt(y -> y.startBlockPos.getX()).min().getAsInt()).min().getAsInt();
+        int zOffset = listOfList.stream().mapToInt(x -> x.stream().mapToInt(y -> y.startBlockPos.getZ()).min().getAsInt()).min().getAsInt();
+        int maxX = listOfList.stream().mapToInt(x -> x.stream().mapToInt(y -> y.startBlockPos.getX()).max().getAsInt()).min().getAsInt();
+        int maxZ = listOfList.stream().mapToInt(x -> x.stream().mapToInt(y -> y.startBlockPos.getZ()).max().getAsInt()).min().getAsInt();
         int maxSize = Math.max(maxX - xOffset, maxZ - zOffset) / 512;
         System.out.println(xOffset);
         System.out.println(zOffset);
@@ -252,8 +252,8 @@ public class QuadTreeImage extends JPanel
                                 break;
                         }
                         myDrawables.add(new MyDrawable(new Rectangle2D.Double(
-                                ((data.startX - xOffset) * amp),
-                                ((data.startZ - zOffset) * amp),
+                                ((data.startBlockPos.getX() - xOffset) * amp),
+                                ((data.startBlockPos.getZ() - zOffset) * amp),
                                 data.width * amp,
                                 data.width * amp),
                                 data.lodDataPoint.color, new BasicStroke(1)));
