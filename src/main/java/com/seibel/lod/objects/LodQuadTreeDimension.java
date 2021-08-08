@@ -457,7 +457,7 @@ public class LodQuadTreeDimension
 					addOrOverwriteRegion(region);
 				}
 				
-				listOfQuadTree.addAll(region.getNodesToGenerate(playerPos.getX(), playerPos.getZ(), level, complexity, maxDistance, minDistance));
+				listOfQuadTree.addAll(region.getNodesToGenerate(playerPos, level, complexity, maxDistance, minDistance));
 			}
 		}
 		

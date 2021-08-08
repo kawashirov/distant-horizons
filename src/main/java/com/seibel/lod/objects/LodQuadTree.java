@@ -256,11 +256,6 @@ public class LodQuadTree
 	}
 	
 	
-	public LodQuadTree getChild(int NS, int WE)
-	{
-		return children[NS][WE];
-	}
-	
 	/**
 	 * Put a child with the given data into the given position.
 	 *
@@ -341,7 +336,8 @@ public class LodQuadTree
 	 * @param getOnlyLeaf  if true it will return only leaf nodes
 	 * @return list of nodes
 	 */
-	public List<LodQuadTreeNode> getNodeListWithMask(Set<DistanceGenerationMode> complexityMask, boolean getOnlyDirty, boolean getOnlyLeaf)
+	public List<LodQuadTreeNode> getNodeListWithMask(Set<DistanceGenerationMode> complexityMask, boolean getOnlyDirty, 
+			boolean getOnlyLeaf)
 	{
 		List<LodQuadTreeNode> nodeList = new ArrayList<>();
 		
@@ -392,7 +388,8 @@ public class LodQuadTree
 	 * @param minDistance minimum distance from the player
 	 * @return
 	 */
-	public List<LodQuadTreeNode> getNodeToRender(BlockPos playerPos, int targetLevel, Set<DistanceGenerationMode> complexityMask, int maxDistance, int minDistance)
+	public List<LodQuadTreeNode> getNodeToRender(BlockPos playerPos, int targetLevel, 
+			Set<DistanceGenerationMode> complexityMask, int maxDistance, int minDistance)
 	{
 		int x = playerPos.getX();
 		int z = playerPos.getZ();
@@ -410,6 +407,7 @@ public class LodQuadTree
 		
 		if (targetLevel <= lodNode.detailLevel && ((min <= maxDistance && max >= minDistance)))
 		{
+			// TODO why is !isNodeFull() here?
 			if (targetLevel == lodNode.detailLevel || !isNodeFull())
 			{
 				// we have either reached the right detail level or this tree isn't full 
@@ -422,7 +420,7 @@ public class LodQuadTree
 			}
 			else
 			{
-				//
+				// look for the correct targetLevel
 				for (int NS = 0; NS <= 1; NS++)
 				{
 					for (int WE = 0; WE <= 1; WE++)
@@ -441,17 +439,14 @@ public class LodQuadTree
 	
 	
 	/**
-	 * Nodes that can be generated in the approximated version
-	 * A level is generated only if it has child and is higher than the target level and in the distance range
-	 * @param x
-	 * @param z
-	 * @param targetLevel
-	 * @param complexityToGenerate
-	 * @param maxDistance
-	 * @param minDistance
-	 * @return
+	 * Returns nodes that should be generated. <br>
+	 * A node is generated only if it has child, is higher than the target level, and in the distance range.
 	 */
-	public List<AbstractMap.SimpleEntry<LodQuadTreeNode, Integer>> getNodesToGenerate(int x, int z, byte targetLevel, DistanceGenerationMode complexityToGenerate, int maxDistance, int minDistance) {
+	public List<AbstractMap.SimpleEntry<LodQuadTreeNode, Integer>> getNodesToGenerate(BlockPos playerPos, byte targetLevel, 
+			DistanceGenerationMode complexityToGenerate, int maxDistance, int minDistance)
+	{
+		int x = playerPos.getX();
+		int z = playerPos.getZ();
 		
 		List<Integer> distances = new ArrayList<>();
 		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStartX(), 2) + Math.pow(z - lodNode.getStartZ(), 2)));
@@ -462,53 +457,95 @@ public class LodQuadTree
 		int min = distances.stream().mapToInt(Integer::intValue).min().getAsInt();
 		int max = distances.stream().mapToInt(Integer::intValue).max().getAsInt();
 		List<AbstractMap.SimpleEntry<LodQuadTreeNode, Integer>> nodeList = new ArrayList<>();
-		if (targetLevel <= lodNode.detailLevel && ((min <= maxDistance && max >= minDistance) || isCoordinateInLevel(x, z))) {
-			if(!hasChildren() || targetLevel == lodNode.detailLevel){
-				if (this.lodNode.getComplexity().compareTo(complexityToGenerate) <= 0 ) {
+		
+		
+		// TODO what is the purpose of isCoordianteInLevel?
+		if (targetLevel <= lodNode.detailLevel && ((min <= maxDistance && max >= minDistance) || isCoordinateInQuadTree(playerPos)))
+		{
+			// TODO shouldn't tagetLevel be != lodNode.detailLevel?
+			if(!hasChildren() || targetLevel == lodNode.detailLevel)
+			{
+				if (this.lodNode.getComplexity().compareTo(complexityToGenerate) <= 0 )
+				{
 					nodeList.add(new AbstractMap.SimpleEntry<LodQuadTreeNode, Integer>(this.lodNode, min));
 				}
-			}else {
-				for (int NS = 0; NS <= 1; NS++) {
-					for (int WE = 0; WE <= 1; WE++) {
-						if (getChild(NS, WE) == null) {
+			}
+			else
+			{
+				// check if there are nodes further down that need generation
+				
+				for (int NS = 0; NS <= 1; NS++)
+				{
+					for (int WE = 0; WE <= 1; WE++)
+					{
+						if (getChild(NS, WE) == null)
+						{
 							setChild(NS, WE);
 						}
-						nodeList.addAll(getChild(NS, WE).getNodesToGenerate(x, z, targetLevel, complexityToGenerate, maxDistance, minDistance));
+						
+						nodeList.addAll(getChild(NS, WE).getNodesToGenerate(playerPos, targetLevel, complexityToGenerate, maxDistance, minDistance));
 					}
 				}
 			}
 		}
+		
 		return nodeList;
 	}
 	
-	
 	/**
-	 * simple getter for lodNodeData
-	 *
-	 * @return lodNodeData
-	 */
-	public LodQuadTreeNode getLodNodeData() {
-		return lodNode;
-	}
-	
-	/**
-	 * setter for lodNodeData, to maintain a correct relationship between level this method force update on all parent
+	 * setter for lodNodeData, to maintain a correct relationship between worlds 
+	 * this method forces an update on all parent nodes.
 	 *
 	 * @param newLodQuadTreeNode    data to set
-	 * @param updateHigherLevel if true it will update all the upper levels.
 	 */
 	public void setLodNodeData(LodQuadTreeNode newLodQuadTreeNode)
 	{
-		if (this.lodNode == null) {
+		if (this.lodNode == null)
+		{
 			this.lodNode = newLodQuadTreeNode;
-		} else {
+		}
+		else
+		{
 			this.lodNode.update(newLodQuadTreeNode);
 		}
-		//a recursive update is necessary to change higher level
-		if (parent != null && UPDATE_HIGHER_LEVEL) parent.updateRegion(true);
+		
+		//a recursive update is necessary to change the higher levels
+		if (parent != null && UPDATE_HIGHER_LEVEL) 
+		{
+			parent.updateRegion(true);
+		}
 	}
 	
-	public boolean isNodeFull() {
+	/**
+	 * Returns if the given BlockPos is within the boundary of
+	 * this LodQuadTree.
+	 */
+	public boolean isCoordinateInQuadTree(BlockPos pos)
+	{
+		return (lodNode.getStartX() * lodNode.width <= pos.getX() && 
+				lodNode.getStartZ() * lodNode.width <= pos.getZ() && 
+				lodNode.getEndX() * lodNode.width  >= pos.getX() && 
+				lodNode.getEndZ() * lodNode.width  >= pos.getZ());
+	}
+	
+	
+	
+	//================//
+	// simple getters //
+	//================//
+	
+	public LodQuadTree getChild(int NS, int WE)
+	{
+		return children[NS][WE];
+	}
+	
+	public LodQuadTreeNode getLodNodeData()
+	{
+		return lodNode;
+	}
+	
+	public boolean isNodeFull()
+	{
 		return treeFull;
 	}
 	
@@ -517,17 +554,15 @@ public class LodQuadTree
 		return !treeEmpty;
 	}
 	
-	public boolean isRenderable() {
+	public boolean isRenderable()
+	{
 		return (lodNode != null);
 	}
 	
 	
-	public boolean isCoordinateInLevel(int x, int z){
-		return (lodNode.getStartX() * lodNode.width <= x && lodNode.getStartZ() * lodNode.width  <= z && lodNode.getEndX() * lodNode.width  >= x && lodNode.getEndZ() * lodNode.width  >= z);
-	}
-	
 	@Override
-	public String toString(){
+	public String toString()
+	{
 		String s = lodNode.toString();
 		return s;
 		/*
@@ -542,6 +577,6 @@ public class LodQuadTree
             }
         }
         return s;
-		 */
+		*/
 	}
 }
