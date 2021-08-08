@@ -256,7 +256,7 @@ public class QuadTreeImage extends JPanel
                                 ((data.startBlockPos.getZ() - zOffset) * amp),
                                 data.width * amp,
                                 data.width * amp),
-                                data.lodDataPoint.color, new BasicStroke(1)));
+                                data.getLodDataPoint().color, new BasicStroke(1)));
                     }
                         myDrawables.add(new MyDrawable(new Rectangle2D.Double(
                                 (playerXs[0] - xOffset) * amp,

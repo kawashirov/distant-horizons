@@ -58,8 +58,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		
 		// returns null if the lod is empty at the given location
 		bbox = generateBoundingBox(
-				centerLod.lodDataPoint.height,
-				centerLod.lodDataPoint.depth,
+				centerLod.getLodDataPoint().height,
+				centerLod.getLodDataPoint().depth,
 				detail.dataPointWidth, 
 				xOffset - (centerLod.width / 2),
 				yOffset, 
@@ -67,7 +67,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		
 		if (bbox != null)
 		{
-			addBoundingBoxToBuffer(buffer, bbox, centerLod.lodDataPoint.color);
+			addBoundingBoxToBuffer(buffer, bbox, centerLod.getLodDataPoint().color);
 		}
 	}
 	

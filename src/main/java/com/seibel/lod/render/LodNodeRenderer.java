@@ -831,7 +831,7 @@ public class LodNodeRenderer
 				LodQuadTreeNode lod = lodDim.getLodFromCoordinates(new ChunkPos(x, z), 4);
 				if (lod != null)
 				{
-					short lodHighestPoint = lod.lodDataPoint.height;
+					short lodHighestPoint = lod.getLodDataPoint().height;
 					
 					if (playerPos.getY() < lodHighestPoint)
 					{

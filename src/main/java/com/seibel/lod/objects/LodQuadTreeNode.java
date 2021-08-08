@@ -28,7 +28,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.Heightmap;
 
 /**
- * This object contains position
+ * This object contains position, size,
  * and color data for an LOD object.
  * 
  * @author Leonardo Amato
@@ -38,31 +38,26 @@ import net.minecraft.world.gen.Heightmap;
 public class LodQuadTreeNode
 {
 	/** This is what separates each piece of data in the toData method */
-	private static final char DATA_DELIMITER = LodQuadTreeDimensionFileHandler.DATA_DELIMITER;
-	
-	/** alpha used when drawing chunks in debug mode */
-	private static final int DEBUG_ALPHA = 255; // 0 - 255
-	@SuppressWarnings("unused")
-	private static final Color DEBUG_BLACK = new Color(0, 0, 0, DEBUG_ALPHA);
-	@SuppressWarnings("unused")
-	private static final Color DEBUG_WHITE = new Color(255, 255, 255, DEBUG_ALPHA);
-	@SuppressWarnings("unused")
-	private static final Color INVISIBLE = new Color(0,0,0,0);
-	
+	private static final char DATA_DELIMITER_COUNT = LodQuadTreeDimensionFileHandler.DATA_DELIMITER;
 	
 	/** If we ever have to use a heightmap for any reason, use this one. */
 	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
 	
+	/** this is how many pieces of data are exported when toData is called */
+	public static final int NUMBER_OF_DELIMITERS = 10;
 	
+	
+
 	/** If this is set to true then toData will return
 	 * the empty string */
 	public boolean dontSave = false;
 	
-	
-	
-	/** this is how many pieces of data are exported when toData is called */
-	public static final int NUMBER_OF_DELIMITERS = 10;
-	
+	// these 2 values indicate the position of the LOD in the relative Level
+	// this will be useful in the generation process
+	/** X position relative to the Quad tree. */
+	public final int posX;
+	/** Z position relative to the Quad tree */
+	public final int posZ;
 	
 	//Complexity indicate how the block was built. This is important because we could use
 	public DistanceGenerationMode complexity;
@@ -87,25 +82,23 @@ public class LodQuadTreeNode
 	/** detail level 0 */
 	public static final short BLOCK_WIDTH = 1;
 	
-	// these 2 values indicate the position of the LOD in the relative Level
-	// this will be useful in the generation process
-	/** X position relative to the Quad tree. */
-	public final int posX;
-	/** Z position relative to the Quad tree */
-	public final int posZ;
 	
-	//these 4 value indicate the corner of the LOD block
-	//they can be named SW, SE, NW, NE as the cardinal direction.
-	//the start values should always be smaller than the end values.
-	//All this value could be calculated from level, posx and posz
-	//so they could be removed and replaced with just a getter
+	// these 4 value indicate the corner of the LOD block
+	// they can be named SW, SE, NW, NE as the cardinal direction.
+	// the start values should always be smaller than the end values.
+	// All this value could be calculated from level, posx, and posz
+	// so they could be removed and replaced with just a getter
 	public final BlockPos startBlockPos;
 	public final BlockPos endBlockPos;
-	//these 2 value indicate the center of the LodNode in real coordinate. This
-	//can be used to calculate the distance from the player
+	
+	/**
+	 * Indicates the center of the LodNode in absolute block coordinates. This
+	 * can be used to calculate distance from the player.
+	 */
 	public final BlockPos center;
 	
-	public LodDataPoint lodDataPoint;
+	/** holds the height, depth, and color data for this Node. */
+	private LodDataPoint lodDataPoint;
 	
 	/** if true this node doesn't have any data */
 	public boolean voidNode;
@@ -212,45 +205,61 @@ public class LodQuadTreeNode
 		dontSave = false;
 	}
 	
-	public LodQuadTreeNode(String data)
+	/**
+	 * @throws IllegalArgumentException if the data string doesn't have the correct number of delimited entries
+	 */
+	public LodQuadTreeNode(String data) throws IllegalArgumentException
 	{
+		// make sure there are the correct number of entries
+		// in the data string
+		int count = 0;
+		
+		for(int i = 0; i < data.length(); i++)
+			if(data.charAt(i) == DATA_DELIMITER_COUNT)
+				count++;
+		
+		if(count != DATA_DELIMITER_COUNT)
+			throw new IllegalArgumentException("LodQuadTreeNode constructor givin an invalid string. The data given had " + count + " delimiters when it should have had " + DATA_DELIMITER_COUNT + ".");
+		
+		
+		
 		int index = 0;
 		int lastIndex = 0;
 		
-		index = data.indexOf(DATA_DELIMITER, 0);
+		index = data.indexOf(DATA_DELIMITER_COUNT, 0);
 		this.detailLevel = (byte) Integer.parseInt(data.substring(0,index));
 		
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
+		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
 		this.posX = Integer.parseInt(data.substring(lastIndex+1,index));
 		
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
+		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
 		this.posZ = Integer.parseInt(data.substring(lastIndex+1,index));
 		
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
+		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
 		this.complexity = DistanceGenerationMode.valueOf(data.substring(lastIndex+1,index));
 		
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
+		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
 		short height = (short) Integer.parseInt(data.substring(lastIndex+1,index));
 		
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
+		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
 		short depth = (short) Integer.parseInt(data.substring(lastIndex+1,index));
 		
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
+		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
 		int r = Integer.parseInt(data.substring(lastIndex+1,index));
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
+		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
 		int g = Integer.parseInt(data.substring(lastIndex+1,index));
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
+		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
 		int b = Integer.parseInt(data.substring(lastIndex+1,index));
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
+		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
 		int a = Integer.parseInt(data.substring(lastIndex+1,index));
 		Color color = new Color(r,g,b,a);
 		lodDataPoint = new LodDataPoint(height,depth,color);
@@ -272,21 +281,29 @@ public class LodQuadTreeNode
 	
 	
 	
+	//================//
+	// data processes //
+	//================//
 	
-	public void update(LodQuadTreeNode lodQuadTreeNode)
+	/**
+	 * Replaces the data in this object.
+	 */
+	public void updateData(LodQuadTreeNode lodQuadTreeNode)
 	{
-		this.lodDataPoint = lodQuadTreeNode.lodDataPoint;
-		this.complexity = lodQuadTreeNode.complexity;
-		this.voidNode = lodQuadTreeNode.voidNode;
+		if (lodQuadTreeNode == null)
+			return;
+		
+		lodDataPoint = lodQuadTreeNode.lodDataPoint;
+		complexity = lodQuadTreeNode.complexity;
+		voidNode = lodQuadTreeNode.voidNode;
+		dontSave = lodQuadTreeNode.dontSave;
+		
 		dirty = true;
-		dontSave = false;
 	}
 	
-	public LodDataPoint getLodDataPoint()
-	{
-		return lodDataPoint;
-	}
-	
+	/**
+	 * Combines and averages the data from a list of LodQuadTreeNodes into this node.
+	 */
 	public void combineData(List<LodQuadTreeNode> dataList)
 	{
 		if(dataList.isEmpty())
@@ -295,15 +312,22 @@ public class LodQuadTreeNode
 		}
 		else
 		{
+			// TODO would it be better to use the average height/depth?
+			// get the lowest height from the all the given LodQuadTreeNodes
 			short height = (short) dataList.stream().mapToInt(x -> (int) x.getLodDataPoint().height).min().getAsInt();
+			// get the highest depth
 			short depth = (short) dataList.stream().mapToInt(x -> (int) x.getLodDataPoint().depth).max().getAsInt();
-			int red = dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getRed()).sum()/dataList.size();
-			int green = dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getGreen()).sum()/dataList.size();
-			int blue = dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getBlue()).sum()/dataList.size();
+			
+			// get the average color
+			int red = dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getRed()).sum() / dataList.size();
+			int green = dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getGreen()).sum() / dataList.size();
+			int blue = dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getBlue()).sum() / dataList.size();
 			Color color = new Color(red,green,blue);
+			
 			lodDataPoint = new LodDataPoint(height,depth,color);
 			
-			//the new complexity equal to the lowest complexity of the list
+			
+			// the new complexity is equal to the lowest complexity of the list
 			DistanceGenerationMode minComplexity = DistanceGenerationMode.SERVER;
 			for(LodQuadTreeNode node: dataList)
 			{
@@ -315,7 +339,7 @@ public class LodQuadTreeNode
 			
 			complexity = minComplexity;
 			
-			voidNode = dataList.stream().filter(x -> !x.voidNode).count() == 0;
+			voidNode = lodDataPoint.isEmpty();
 		}
 		
 		dirty = true;
@@ -323,17 +347,15 @@ public class LodQuadTreeNode
 	}
 	
 	
-	@Override
-	public int hashCode()
-	{
-		return Objects.hash(this.complexity, this.detailLevel, this.posX, this.posZ, this.lodDataPoint, this.voidNode);
-	}
+	
+	//===================//
+	// basic comparisons //
+	//===================//
 	
 	public int compareComplexity(LodQuadTreeNode other)
 	{
 		return this.complexity.compareTo(other.complexity);
 	}
-	
 	
 	public boolean equals(LodQuadTreeNode other)
 	{
@@ -347,6 +369,24 @@ public class LodQuadTreeNode
 	}
 	
 	
+	
+	//=========================//
+	// basic setters / getters //
+	//=========================//
+	
+	public LodDataPoint getLodDataPoint()
+	{
+		return lodDataPoint;
+	}
+	
+	public void setLodDataPoint(LodDataPoint newLodDataPoint)
+	{
+		lodDataPoint = newLodDataPoint;
+		
+		// update if this is node is currently void
+		voidNode = (lodDataPoint == null);
+	}
+	
 	public boolean isVoidNode()
 	{
 		return voidNode;
@@ -358,6 +398,18 @@ public class LodQuadTreeNode
 	}
 	
 	
+	
+	
+	//========//
+	// output //
+	//========//
+	
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(this.complexity, this.detailLevel, this.posX, this.posZ, this.lodDataPoint, this.voidNode);
+	}
+	
 	/**
 	 * Outputs all data in a csv format
 	 */
@@ -366,16 +418,16 @@ public class LodQuadTreeNode
 		if (dontSave)
 			return "";
 		
-		String s = Integer.toString(detailLevel) + DATA_DELIMITER
-				+ Integer.toString(posX) + DATA_DELIMITER
-				+ Integer.toString(posZ) + DATA_DELIMITER
-				+ complexity.toString() + DATA_DELIMITER
-				+ Integer.toString((lodDataPoint.height)) + DATA_DELIMITER
-				+ Integer.toString((lodDataPoint.depth)) + DATA_DELIMITER
-				+ Integer.toString(lodDataPoint.color.getRed()) + DATA_DELIMITER
-				+ Integer.toString(lodDataPoint.color.getGreen()) + DATA_DELIMITER
-				+ Integer.toString(lodDataPoint.color.getBlue()) + DATA_DELIMITER
-				+ Integer.toString(lodDataPoint.color.getAlpha()) + DATA_DELIMITER
+		String s = Integer.toString(detailLevel) + DATA_DELIMITER_COUNT
+				+ Integer.toString(posX) + DATA_DELIMITER_COUNT
+				+ Integer.toString(posZ) + DATA_DELIMITER_COUNT
+				+ complexity.toString() + DATA_DELIMITER_COUNT
+				+ Integer.toString((lodDataPoint.height)) + DATA_DELIMITER_COUNT
+				+ Integer.toString((lodDataPoint.depth)) + DATA_DELIMITER_COUNT
+				+ Integer.toString(lodDataPoint.color.getRed()) + DATA_DELIMITER_COUNT
+				+ Integer.toString(lodDataPoint.color.getGreen()) + DATA_DELIMITER_COUNT
+				+ Integer.toString(lodDataPoint.color.getBlue()) + DATA_DELIMITER_COUNT
+				+ Integer.toString(lodDataPoint.color.getAlpha()) + DATA_DELIMITER_COUNT
 				+ Integer.toString(voidNode ? 1 : 0);
 		return s;
 	}

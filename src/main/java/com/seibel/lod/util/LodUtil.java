@@ -34,15 +34,21 @@ import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 
 /**
- * This class holds methods that may be used in multiple places.
+ * This class holds methods and constants that may be used in multiple places.
  * 
  * @author James Seibel
- * @version 06-27-2021
+ * @version 8-8-2021
  */
 public class LodUtil
 {
 	private static Minecraft mc = Minecraft.getInstance();
 	
+	
+	/** alpha used when drawing chunks in debug mode */
+	public static final int DEBUG_ALPHA = 255; // 0 - 255
+	public static final Color COLOR_DEBUG_BLACK = new Color(0, 0, 0, DEBUG_ALPHA);
+	public static final Color COLOR_DEBUG_WHITE = new Color(255, 255, 255, DEBUG_ALPHA);
+	public static final Color COLOR_INVISIBLE = new Color(0,0,0,0);
 	
 	
 	/**

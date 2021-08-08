@@ -506,7 +506,7 @@ public class LodQuadTree
 		}
 		else
 		{
-			this.lodNode.update(newLodQuadTreeNode);
+			this.lodNode.updateData(newLodQuadTreeNode);
 		}
 		
 		//a recursive update is necessary to change the higher levels

@@ -21,13 +21,14 @@ import java.awt.Color;
 import java.util.Objects;
 
 import com.seibel.lod.handlers.LodDimensionFileHandler;
+import com.seibel.lod.util.LodUtil;
 
 /**
  * This stores the height and color
  * for a specific area in a LodChunk.
  * 
  * @author James Seibel
- * @version 6-19-2021
+ * @version 8-8-2021
  */
 public class LodDataPoint
 {
@@ -37,7 +38,9 @@ public class LodDataPoint
 	/** this is how many pieces of data are exported when toData is called */
 	public static final int NUMBER_OF_DELIMITERS = 5;
 	
-	private static final Color INVISIBLE = new Color(0,0,0,0);
+	/** a empty data point that can be used for comparisons */
+	public static final LodDataPoint EMPTY_DATA_POINT = new LodDataPoint();
+	
 	
 	/** highest point */
 	public short height;
@@ -50,13 +53,13 @@ public class LodDataPoint
 	
 	
 	/**
-	 * Creates and empty LodDataPoint
+	 * Creates an empty LodDataPoint
 	 */
 	public LodDataPoint()
 	{
 		height = -1;
 		depth = -1;
-		color = INVISIBLE;
+		color = LodUtil.COLOR_INVISIBLE;
 	}
 	
 	
@@ -74,14 +77,22 @@ public class LodDataPoint
 		color = newColor;
 	}
 
-	public int hashCode(){
+	@Override
+	public int hashCode()
+	{
 		return Objects.hash(this.height, this.depth, this.color);
 	}
 
-	public boolean equals(LodDataPoint other){
+	public boolean equals(LodDataPoint other)
+	{
 		return (this.height == other.height
 				&& this.depth == other.depth
 				&& this.color == other.color);
+	}
+	
+	public boolean isEmpty()
+	{
+		return this.equals(EMPTY_DATA_POINT);
 	}
 
 	/**
