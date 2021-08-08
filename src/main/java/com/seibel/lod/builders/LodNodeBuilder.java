@@ -42,8 +42,6 @@ import net.minecraft.world.gen.Heightmap;
 
 public class LodNodeBuilder {
     private ExecutorService lodGenThreadPool = Executors.newSingleThreadExecutor();
-    private long seed;
-    private DimensionType dimension;
 
     public static final int CHUNK_DATA_WIDTH = LodQuadTreeNode.CHUNK_WIDTH;
     public static final int CHUNK_SECTION_HEIGHT = CHUNK_DATA_WIDTH;
@@ -53,36 +51,12 @@ public class LodNodeBuilder {
      * Default size of any LOD regions we use
      */
     public int regionWidth = 5;
+    
 
-
-    /**
-     * fast biome calculator
-     */
-    //private BiomeSource biomeSource;
-    //Biome biome=biomeSource.getBiome(x,y,z); // here y is always 0 no matter what you pass
-
-    public LodNodeBuilder() {
-
+    public LodNodeBuilder()
+    {
+    	
     }
-/*
-    public setApproxGenerator(long seed){
-        //Dimension.OVERWORLD;
-        //Dimension.END;
-        //Dimension.NETHER;
-        biomeSource = BiomeSource.of(Dimension.OVERWORLD ,MCVersion.v1_16_4, seed);
-    }
-    public void generateLodNodeAsync(List<LodNodeData> dataList){
-        Thread thread = new Thread(() ->{
-            for(LodNodeData data : dataList){
-
-            }
-        });
-        thread.setPriority(4);
-        lodGenThreadPool.execute(thread);
-
-        return;
-    }
- */
 
     public void generateLodNodeAsync(IChunk chunk, LodQuadTreeWorld lodWorld, IWorld world)
     {
@@ -267,7 +241,8 @@ public class LodNodeBuilder {
     /**
      * Find the highest point from the Top
      */
-    private short determineHeightPoint(Heightmap heightmap,
+    @SuppressWarnings("unused")
+	private short determineHeightPoint(Heightmap heightmap,
                                        int startX, int startZ, int endX, int endZ)
     {
         short highest = 0;
