@@ -22,7 +22,6 @@ import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
-import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -107,7 +106,7 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 			northSouthColor = new Color(Math.max(0, c.getRed() - northSouthDarkenAmount), Math.max(0, c.getGreen() - northSouthDarkenAmount), Math.max(0, c.getBlue() - northSouthDarkenAmount), c.getAlpha());
 			eastWestColor = new Color(Math.max(0, c.getRed() - eastWestDarkenAmount), Math.max(0, c.getGreen() - eastWestDarkenAmount), Math.max(0, c.getBlue() - eastWestDarkenAmount), c.getAlpha());
 			bottomColor = new Color(Math.max(0, c.getRed() - bottomDarkenAmount), Math.max(0, c.getGreen() - bottomDarkenAmount), Math.max(0, c.getBlue() - bottomDarkenAmount), c.getAlpha());
-    }
+		}
 
 
 		// apply the user specified saturation and brightness
@@ -153,29 +152,14 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
 		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
     }
-
-
-	/**
-	 * Edit the given color as a HSV (Hue Saturation Value) color.
-	 */
-	private Color applySaturationAndBrightnessMultipliers(Color color, float saturationMultiplier, float brightnessMultiplier)
-	{
-		float[] hsv = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
-		return Color.getHSBColor(
-				hsv[0], // hue
-				LodUtil.clamp(0.0f, hsv[1] * saturationMultiplier, 1.0f), 
-				LodUtil.clamp(0.0f, hsv[2] * brightnessMultiplier, 1.0f));
-	}
-
-
+	
+	
+	
     @Override
-    public int getBufferMemoryForSingleLod(int detailLevel) // TODO maybe multiply by how many would be per chunk?
+    public int getBufferMemoryForSingleNode(int detailLevel)
     {
         // (sidesOnACube * pointsInASquare * (positionPoints + colorPoints))) * howManyPointsPerLodChunk
         return (6 * 4 * (3 + 4));
     }
-
-
-	
-	
+    
 }

@@ -222,6 +222,7 @@ public class LodQuadTreeNode
 			throw new IllegalArgumentException("LodQuadTreeNode constructor givin an invalid string. The data given had " + count + " delimiters when it should have had " + DATA_DELIMITER_COUNT + ".");
 		
 		
+		// start reading the data string
 		
 		int index = 0;
 		int lastIndex = 0;

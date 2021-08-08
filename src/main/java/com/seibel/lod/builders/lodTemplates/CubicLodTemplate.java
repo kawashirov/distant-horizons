@@ -33,7 +33,7 @@ import net.minecraft.util.math.AxisAlignedBB;
  * Builds LODs as rectangular prisms.
  * 
  * @author James Seibel
- * @version 07-25-2021
+ * @version 8-8-2021
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {

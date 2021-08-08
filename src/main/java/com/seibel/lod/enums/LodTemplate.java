@@ -56,6 +56,6 @@ public enum LodTemplate
 	
 	public int getBufferMemoryForSingleLod(int detailLevel)
 	{
-		return template.getBufferMemoryForSingleLod(detailLevel);
+		return template.getBufferMemoryForSingleNode(detailLevel);
 	}
 }

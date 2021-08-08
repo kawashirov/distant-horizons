@@ -17,8 +17,11 @@
  */
 package com.seibel.lod.builders.lodNodeTemplates;
 
+import java.awt.Color;
+
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
+import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.renderer.BufferBuilder;
 
@@ -32,9 +35,9 @@ import net.minecraft.client.renderer.BufferBuilder;
 public abstract class AbstractLodNodeTemplate
 {
 	public abstract void addLodToBuffer(BufferBuilder buffer,
-										LodQuadTreeDimension lodDim, LodQuadTreeNode lod,
-										double xOffset, double yOffset, double zOffset,
-										boolean debugging);
+			LodQuadTreeDimension lodDim, LodQuadTreeNode lod,
+			double xOffset, double yOffset, double zOffset,
+			boolean debugging);
 	
 	/** add the given position and color to the buffer */
 	protected void addPosAndColor(BufferBuilder buffer, 
@@ -46,8 +49,20 @@ public abstract class AbstractLodNodeTemplate
 	
 	/** Returns in bytes how much buffer memory is required
 	 * for one LOD object */
-	public abstract int getBufferMemoryForSingleLod(int level);
+	public abstract int getBufferMemoryForSingleNode(int level);
 	
+	
+	/**
+	 * Edit the given color as a HSV (Hue Saturation Value) color.
+	 */
+	protected Color applySaturationAndBrightnessMultipliers(Color color, float saturationMultiplier, float brightnessMultiplier)
+	{
+		float[] hsv = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
+		return Color.getHSBColor(
+				hsv[0], // hue
+				LodUtil.clamp(0.0f, hsv[1] * saturationMultiplier, 1.0f), 
+				LodUtil.clamp(0.0f, hsv[2] * brightnessMultiplier, 1.0f));
+	}
 	
 	
 }

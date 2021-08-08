@@ -138,39 +138,34 @@ public class LodUtil
 	
 	
 	
-	public static String getCurrentDimensionID()
+	/**
+	 * If on single player this will return the name of the user's
+	 * world, if in multiplayer it will return the server name, IP,
+	 * and game version.
+	 */
+	public static String getWorldID(IWorld world)
 	{
-
-		Minecraft mc = Minecraft.getInstance();
-		
 		if(mc.hasSingleplayerServer())
 		{
-			// this will return the world save location
-			// and the dimension folder
+			// chop off the dimension ID as it is not needed/wanted
+			String dimId = getDimensionIDFromWorld(world);
 			
-			if(mc.level == null)
-				return "";
-			
-			ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(mc.level.dimensionType());
-			if(serverWorld == null)
-				return "";
-			
-			ServerChunkProvider provider = serverWorld.getChunkSource();
-			if(provider == null)
-				return "";
-			
-			return provider.dataStorage.dataFolder.toString();
+			// get the world name
+			int saveIndex = dimId.indexOf("saves") + 1 + "saves".length();
+			int slashIndex = dimId.indexOf(File.separatorChar, saveIndex);
+			dimId = dimId.substring(saveIndex, slashIndex);
+			return dimId;
 		}
 		else
 		{
 			ServerData server = mc.getCurrentServer();
 			return server.name + ", IP " + 
 					server.ip + ", GameVersion " + 
-					server.version.getString() + File.separatorChar
-					+ "dim_" + mc.level.dimensionType().effectsLocation().getPath() + File.separatorChar;
+					server.version.getString();
 		}
 	}
-
+	
+	
 	
 	/**
 	 * If on single player this will return the name of the user's
@@ -206,33 +201,6 @@ public class LodUtil
 					server.ip + ", GameVersion " + 
 					server.version.getString() + File.separatorChar
 					+ "dim_" + world.dimensionType().effectsLocation().getPath() + File.separatorChar;
-		}
-	}
-	
-	/**
-	 * If on single player this will return the name of the user's
-	 * world, if in multiplayer it will return the server name
-	 * and game version.
-	 */
-	public static String getWorldID(IWorld world)
-	{
-		if(mc.hasSingleplayerServer())
-		{
-			// chop off the dimension ID as it is not needed/wanted
-			String dimId = getDimensionIDFromWorld(world);
-			
-			// get the world name
-			int saveIndex = dimId.indexOf("saves") + 1 + "saves".length();
-			int slashIndex = dimId.indexOf(File.separatorChar, saveIndex);
-			dimId = dimId.substring(saveIndex, slashIndex);
-			return dimId;
-		}
-		else
-		{
-			ServerData server = mc.getCurrentServer();
-			return server.name + ", IP " + 
-					server.ip + ", GameVersion " + 
-					server.version.getString();
 		}
 	}
 	
