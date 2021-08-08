@@ -44,7 +44,7 @@ import net.minecraftforge.common.WorldWorkerManager;
  * This object is used to create NearFarBuffer objects.
  * 
  * @author James Seibel
- * @version 06-19-2021
+ * @version 8-7-2021
  */
 public class LodNodeBufferBuilder
 {
