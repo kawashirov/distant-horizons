@@ -31,6 +31,7 @@ import java.util.concurrent.Executors;
 import com.seibel.lod.objects.LodQuadTree;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
+import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 
 /**
@@ -98,9 +99,11 @@ public class LodQuadTreeDimensionFileHandler {
      * Return the LodQuadTree region at the given coordinates.
      * (null if the file doesn't exist)
      */
-    public LodQuadTree loadRegionFromFile(int regionX, int regionZ)
+    public LodQuadTree loadRegionFromFile(RegionPos regionPos)
     {
-
+    	int regionX = regionPos.x;
+    	int regionZ = regionPos.z;
+    	
         String fileName = getFileNameAndPathForRegion(regionX, regionZ);
 
         File f = new File(fileName);

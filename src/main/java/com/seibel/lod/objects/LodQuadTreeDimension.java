@@ -264,7 +264,7 @@ public class LodQuadTreeDimension
 		
 		if (regions[xIndex][zIndex] == null)
 		{
-			regions[xIndex][zIndex] = getRegionFromFile(regionPos.x, regionPos.z);
+			regions[xIndex][zIndex] = getRegionFromFile(regionPos);
 			if (regions[xIndex][zIndex] == null)
 			{
 				regions[xIndex][zIndex] = new LodQuadTree(regionPos);
@@ -433,7 +433,8 @@ public class LodQuadTreeDimension
 	 * method to get all the quadtree levels that have to be generated based on the position of the player
 	 * @return list of quadTrees
 	 */
-	public List<LodQuadTreeNode> getNodesToGenerate(BlockPos playerPos, byte level, DistanceGenerationMode complexity, int maxDistance, int minDistance)
+	public List<LodQuadTreeNode> getNodesToGenerate(BlockPos playerPos, byte level, DistanceGenerationMode complexity, 
+			int maxDistance, int minDistance)
 	{
 		int regionX;
 		int regionZ;
@@ -461,7 +462,8 @@ public class LodQuadTreeDimension
 			}
 		}
 		
-		Collections.sort(listOfQuadTree,Map.Entry.comparingByValue());
+		// TODO why are we sorting the list?
+		Collections.sort(listOfQuadTree, Map.Entry.comparingByValue());
 		return listOfQuadTree.stream().map(entry -> entry.getKey()).collect(Collectors.toList());
 	}
 	
@@ -485,12 +487,14 @@ public class LodQuadTreeDimension
 				zIndex = (zRegion + center.z) - halfWidth;
 				region = getRegion(new RegionPos(xIndex,zIndex));
 				
+				// Recursively add any children
 				if (region != null)
 				{
 					listOfNodes.addAll(region.getNodeListWithMask(complexityMask, getOnlyDirty, getOnlyLeaf));
 				}
 			}
 		}
+		
 		return listOfNodes;
 	}
 	
@@ -498,10 +502,10 @@ public class LodQuadTreeDimension
 	 * Get the region at the given X and Z coordinates from the
 	 * RegionFileHandler.
 	 */
-	public LodQuadTree getRegionFromFile(int regionX, int regionZ)
+	public LodQuadTree getRegionFromFile(RegionPos regionPos)
 	{
 		if (fileHandler != null)
-			return fileHandler.loadRegionFromFile(regionX, regionZ);
+			return fileHandler.loadRegionFromFile(regionPos);
 		else
 			return null;
 	}
