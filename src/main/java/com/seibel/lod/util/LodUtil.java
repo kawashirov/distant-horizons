@@ -104,7 +104,17 @@ public class LodUtil
 		
 		return new int[] {relativePosX, relativePosZ};
 	}
-	
+
+	/**
+	 * Convert a 2D absolute position into a quad tree relative position.
+	 */
+	public static int[] convertAbsolutePosToQuadTreeRelativePos(int x, int z, int currectDetailLevel, int targetDetailLevel)
+	{
+		int relativePosX = Math.floorDiv(x, (int) Math.pow(2, targetDetailLevel - currectDetailLevel));
+		int relativePosZ = Math.floorDiv(z, (int) Math.pow(2, targetDetailLevel - currectDetailLevel));
+
+		return new int[] {relativePosX, relativePosZ};
+	}
 	/**
 	 * Return whether the given chunk
 	 * has any data in it.

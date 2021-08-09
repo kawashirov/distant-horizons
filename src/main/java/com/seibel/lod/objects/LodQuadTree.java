@@ -250,7 +250,6 @@ public class LodQuadTree
 			int NS = Math.abs(Math.floorDiv(posZ , widthRatio) % 2);
 			if (getChild(NS, WE) == null)
 			{
-				System.out.println(lodNode.detailLevel);
 				return null;
 			}
 			LodQuadTree child = getChild(NS, WE);
@@ -572,7 +571,7 @@ public class LodQuadTree
 	public String toString()
 	{
 		String s = lodNode.toString();
-		
+		/*
         if(hasChildren())
         {
             for (int NS = 0; NS <= 1; NS++)
@@ -586,7 +585,7 @@ public class LodQuadTree
                 }
             }
         }
-        
+        */
         
         return s;
 	}

@@ -330,9 +330,9 @@ public class LodQuadTreeDimension
 	 */
 	public Boolean addNode(LodQuadTreeNode lodNode)
 	{
-		RegionPos regionPos = new RegionPos(new ChunkPos(lodNode.center.getX(), lodNode.center.getZ()));
-		
+		int[] temp = LodUtil.convertAbsolutePosToQuadTreeRelativePos(lodNode.posX, lodNode.posZ, lodNode.detailLevel, LodQuadTreeNode.REGION_LEVEL);
 		// don't continue if the region can't be saved
+		RegionPos regionPos = new RegionPos(temp[0],temp[1]);
 		if (!regionIsInRange(regionPos.x, regionPos.z))
 		{
 			return false;
@@ -347,7 +347,7 @@ public class LodQuadTreeDimension
 			addOrOverwriteRegion(region);
 		}
 		boolean nodeAdded = region.setNodeAtLowerLevel(lodNode);
-		
+
 		// only save valid LODs to disk
 		if (!lodNode.dontSave && fileHandler != null)
 		{
@@ -389,13 +389,13 @@ public class LodQuadTreeDimension
 		// TODO this works, but only in all positive coordinates.
 		int[] relativePos = LodUtil.convertAbsolutePosToQuadTreeRelativePos(chunkPos.x, chunkPos.z, LodQuadTreeNode.CHUNK_LEVEL);
     	LodQuadTree region = getRegion(new RegionPos(relativePos[0], relativePos[1]));
-		
+
 		if(region == null)
 		{
 			return null;
 		}
-		
-		return region.getNodeAtChunkPos(chunkPos, detailLevel);
+
+		return region.getNodeAtChunkPos(chunkPos);
 	}
 	
 	/**

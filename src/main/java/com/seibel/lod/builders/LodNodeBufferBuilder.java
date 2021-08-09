@@ -160,8 +160,8 @@ public class LodNodeBufferBuilder
 				// z axis
 				for (int j = 0; j < numbChunksWide; j++)
 				{
-					int chunkX = i + (startX / LodQuadTreeNode.CHUNK_WIDTH);
-					int chunkZ = j + (startZ / LodQuadTreeNode.CHUNK_WIDTH);
+					int chunkX = i + Math.floorDiv(startX , LodQuadTreeNode.CHUNK_WIDTH);
+					int chunkZ = j + Math.floorDiv(startZ , LodQuadTreeNode.CHUNK_WIDTH);
 
 					// skip any chunks that Minecraft is going to render
 					if(isCoordInCenterArea(i, j, (numbChunksWide / 2))
