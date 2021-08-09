@@ -20,12 +20,11 @@ package com.seibel.lod.util;
 import java.awt.Color;
 import java.io.File;
 
-import com.seibel.lod.objects.RegionPos;
+import com.seibel.lod.objects.LodQuadTreeNode;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.chunk.ChunkSection;
@@ -96,25 +95,14 @@ public class LodUtil
 	}
 	
 	/**
-	 * Convert the given ChunkPos into a RegionPos.
+	 * Convert a 2D absolute position into a quad tree relative position. 
 	 */
-	public static RegionPos convertChunkPosToRegionPos(ChunkPos pos)
+	public static int[] convertAbsolutePosToQuadTreeRelativePos(int x, int z, int detailLevel)
 	{
-		RegionPos rPos = new RegionPos();
-		rPos.x = pos.x / 512;
-		rPos.z = pos.z / 512;
+		int relativePosX = Math.floorDiv(x, (int) Math.pow(2, LodQuadTreeNode.REGION_LEVEL - detailLevel));
+		int relativePosZ = Math.floorDiv(z, (int) Math.pow(2, LodQuadTreeNode.REGION_LEVEL - detailLevel));
 		
-		// prevent issues if X/Z is negative and less than 16
-		if (pos.x < 0)
-		{
-			rPos.x = (Math.abs(rPos.x) * -1) - 1; 
-		}
-		if (pos.z < 0)
-		{
-			rPos.z = (Math.abs(rPos.z) * -1) - 1; 
-		}
-		
-		return rPos;
+		return new int[] {relativePosX, relativePosZ};
 	}
 	
 	/**
