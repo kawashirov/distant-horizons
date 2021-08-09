@@ -25,7 +25,10 @@ import com.seibel.lod.builders.LodNodeBuilder;
 import com.seibel.lod.builders.worldGeneration.LodChunkGenWorker;
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.FogDistance;
+import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.LodDetail;
+import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodQuadTreeDimension;
@@ -37,6 +40,7 @@ import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.profiler.IProfiler;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -47,7 +51,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of this program.
  * 
  * @author James_Seibel
- * @version 7-9-2021
+ * @version 8-8-2021
  */
 public class ClientProxy
 {
@@ -63,6 +67,7 @@ public class ClientProxy
 	private static LodNodeBufferBuilder lodBufferBuilder = new LodNodeBufferBuilder(lodNodeBuilder);
 	private static LodNodeRenderer renderer = new LodNodeRenderer(lodBufferBuilder);
 	
+	private boolean configOverrideReminderPrinted = false;
 	
 	Minecraft mc = Minecraft.getInstance();
 	
@@ -121,22 +126,10 @@ public class ClientProxy
 		}
 		
 		
-		// for testing
-//		LodConfig.CLIENT.drawLODs.set(true);
-//		LodConfig.CLIENT.debugMode.set(false);
 		
-		LodConfig.CLIENT.lodDetail.set(LodDetail.QUAD);
-//		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
-//		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
-//		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
-//		LodConfig.CLIENT.shadingMode.set(ShadingMode.DARKEN_SIDES);
-//		LodConfig.CLIENT.brightnessMultiplier.set(1.0);
-//		LodConfig.CLIENT.saturationMultiplier.set(1.0);
+		// comment out when creating a release
+		applyConfigOverrides();
 		
-		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
-//		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
-		
-//		LOGGER.info(lodBufferBuilder.numberOfChunksWaitingToGenerate.get());
 		
 		
 		// Note to self:
@@ -154,6 +147,32 @@ public class ClientProxy
 	}	
 	
 	
+	
+	private void applyConfigOverrides()
+	{
+		// remind the developer(s). that config override is active
+		if (!configOverrideReminderPrinted)
+		{
+			mc.player.sendMessage(new StringTextComponent("Debug settings enabled!"), mc.player.getUUID());
+			configOverrideReminderPrinted = true;
+		}
+		
+//		LodConfig.CLIENT.drawLODs.set(true);
+//		LodConfig.CLIENT.debugMode.set(false);
+		
+		LodConfig.CLIENT.lodDetail.set(LodDetail.QUAD);
+		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
+		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
+		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
+		LodConfig.CLIENT.shadingMode.set(ShadingMode.DARKEN_SIDES);
+//		LodConfig.CLIENT.brightnessMultiplier.set(1.0);
+//		LodConfig.CLIENT.saturationMultiplier.set(1.0);
+		
+		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
+		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
+		
+//		LOGGER.info(lodBufferBuilder.numberOfChunksWaitingToGenerate.get());
+	}
 	
 	
 	//==============//
