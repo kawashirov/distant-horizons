@@ -219,15 +219,24 @@ public class LodQuadTree
 	}
 	
 	/**
-	 * Gets the LodQuadTreeNode at the given chunkPos and detailLevel.
+	 * Gets the LodQuadTreeNode at the given chunkPos.
 	 * Returns null if no such LodQuadTreeNode exists.
 	 */
-	public LodQuadTreeNode getNodeAtChunkPos(ChunkPos chunkPos, int detailLevel)
+	public LodQuadTreeNode getNodeAtChunkPos(ChunkPos chunkPos)
+	{
+		return getNodeAtPos(chunkPos.x, chunkPos.z, LodQuadTreeNode.CHUNK_LEVEL);
+	}
+
+	/**
+	 * Gets the LodQuadTreeNode at the given generic pos and detailLevel.
+	 * Returns null if no such LodQuadTreeNode exists.
+	 */
+	public LodQuadTreeNode getNodeAtPos(int posX, int posZ, int detailLevel)
 	{
 		if (detailLevel > LodQuadTreeNode.REGION_LEVEL)
 			throw new IllegalArgumentException("getNodeAtChunkPos given a level of \"" + detailLevel + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
-		
-		
+
+
 		byte currentDetailLevel = lodNode.detailLevel;
 		if (detailLevel == currentDetailLevel)
 		{
@@ -237,25 +246,24 @@ public class LodQuadTree
 		{
 			// the detail level we need is lower, go down a layer
 			short widthRatio = (short) (lodNode.width / (2 * Math.pow(2, detailLevel)));
-			int WE = Math.abs(Math.floorDiv(chunkPos.x , widthRatio) % 2);
-			int NS = Math.abs(Math.floorDiv(chunkPos.z , widthRatio) % 2);
+			int WE = Math.abs(Math.floorDiv(posX , widthRatio) % 2);
+			int NS = Math.abs(Math.floorDiv(posZ , widthRatio) % 2);
 			if (getChild(NS, WE) == null)
 			{
+				System.out.println(lodNode.detailLevel);
 				return null;
 			}
-			
 			LodQuadTree child = getChild(NS, WE);
-			return child.getNodeAtChunkPos(chunkPos, detailLevel);
+			return child.getNodeAtPos(posX, posZ, detailLevel);
 		}
 		else
 		{
 			// the detail level was higher than this region's
 			return null;
 		}
-		
+
 	}
-	
-	
+
 	/**
 	 * Put a child with the given data into the given position.
 	 *
