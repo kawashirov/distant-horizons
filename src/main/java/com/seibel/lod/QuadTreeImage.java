@@ -189,7 +189,7 @@ public class QuadTreeImage extends JPanel
                 //int[] distances2 = {100000, 8000, 4000, 2000, 1000, 500, 250, 0};
                 int[] distances2 = {0, 250, 500, 1000, 2000, 4000, 8000, 100000};
                 for (int h = 0; h <= (9 - 3); h++) {
-                    lodList.addAll(dim.getNodeToRender(new BlockPos(playerX, 0, playerZ), (byte) (3+h), complexityMask, distances2[h+1], distances2[h]));
+                    lodList.addAll(dim.getNodesToRender(new BlockPos(playerX, 0, playerZ), (byte) (3+h), complexityMask, distances2[h+1], distances2[h]));
                 }
                 System.out.println("Number of node to render " + lodList.size());
                 listOfList.add(lodList);

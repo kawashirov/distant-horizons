@@ -89,7 +89,9 @@ public class LodNodeBuilder {
                 }
 
                 lodDim.addNode(node);
-            } catch (IllegalArgumentException | NullPointerException e) {
+            }
+            catch (IllegalArgumentException | NullPointerException e)
+            {
                 e.printStackTrace();
                 // if the world changes while LODs are being generated
                 // they will throw errors as they try to access things that no longer

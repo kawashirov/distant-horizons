@@ -17,11 +17,13 @@
  */
 package com.seibel.lod.objects;
 
+import net.minecraft.util.math.ChunkPos;
+
 /**
  * This object is similar to ChunkPos or BlockPos.
  * 
  * @author James Seibel
- * @version 03-19-2021
+ * @version 8-8-2021
  */
 public class RegionPos
 {
@@ -45,4 +47,22 @@ public class RegionPos
 		x = newX;
 		z = newZ;
 	}
+	
+	public RegionPos(ChunkPos pos)
+	{
+		RegionPos rPos = new RegionPos();
+		x = pos.x / LodQuadTreeNode.REGION_WIDTH;
+		z = pos.z / LodQuadTreeNode.REGION_WIDTH;
+		
+		// prevent issues if X/Z is negative and less than 16
+		if (pos.x < 0)
+		{
+			x = (Math.abs(rPos.x) * -1) - 1; 
+		}
+		if (pos.z < 0)
+		{
+			z = (Math.abs(rPos.z) * -1) - 1; 
+		}
+	}
+	
 }

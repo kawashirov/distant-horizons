@@ -38,7 +38,7 @@ import net.minecraft.world.gen.Heightmap;
 public class LodQuadTreeNode
 {
 	/** This is what separates each piece of data in the toData method */
-	private static final char DATA_DELIMITER_COUNT = LodQuadTreeDimensionFileHandler.DATA_DELIMITER;
+	private static final char DATA_DELIMITER = LodQuadTreeDimensionFileHandler.DATA_DELIMITER;
 	
 	/** If we ever have to use a heightmap for any reason, use this one. */
 	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
@@ -52,8 +52,6 @@ public class LodQuadTreeNode
 	 * the empty string */
 	public boolean dontSave = false;
 	
-	// these 2 values indicate the position of the LOD in the relative Level
-	// this will be useful in the generation process
 	/** X position relative to the Quad tree. */
 	public final int posX;
 	/** Z position relative to the Quad tree */
@@ -215,11 +213,11 @@ public class LodQuadTreeNode
 		int count = 0;
 		
 		for(int i = 0; i < data.length(); i++)
-			if(data.charAt(i) == DATA_DELIMITER_COUNT)
+			if(data.charAt(i) == DATA_DELIMITER)
 				count++;
 		
-		if(count != DATA_DELIMITER_COUNT)
-			throw new IllegalArgumentException("LodQuadTreeNode constructor givin an invalid string. The data given had " + count + " delimiters when it should have had " + DATA_DELIMITER_COUNT + ".");
+		if(count != NUMBER_OF_DELIMITERS)
+			throw new IllegalArgumentException("LodQuadTreeNode constructor givin an invalid string. The data given had " + count + " delimiters when it should have had " + NUMBER_OF_DELIMITERS + ".");
 		
 		
 		// start reading the data string
@@ -227,46 +225,46 @@ public class LodQuadTreeNode
 		int index = 0;
 		int lastIndex = 0;
 		
-		index = data.indexOf(DATA_DELIMITER_COUNT, 0);
+		index = data.indexOf(DATA_DELIMITER, 0);
 		this.detailLevel = (byte) Integer.parseInt(data.substring(0,index));
 		
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
+		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
 		this.posX = Integer.parseInt(data.substring(lastIndex+1,index));
 		
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
+		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
 		this.posZ = Integer.parseInt(data.substring(lastIndex+1,index));
 		
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
+		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
 		this.complexity = DistanceGenerationMode.valueOf(data.substring(lastIndex+1,index));
 		
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
+		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
 		short height = (short) Integer.parseInt(data.substring(lastIndex+1,index));
 		
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
+		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
 		short depth = (short) Integer.parseInt(data.substring(lastIndex+1,index));
 		
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
-		int r = Integer.parseInt(data.substring(lastIndex+1,index));
+		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
+		int red = Integer.parseInt(data.substring(lastIndex+1,index));
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
-		int g = Integer.parseInt(data.substring(lastIndex+1,index));
+		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
+		int green = Integer.parseInt(data.substring(lastIndex+1,index));
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
-		int b = Integer.parseInt(data.substring(lastIndex+1,index));
+		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
+		int blue = Integer.parseInt(data.substring(lastIndex+1,index));
 		lastIndex = index;
-		index = data.indexOf(DATA_DELIMITER_COUNT, lastIndex+1);
-		int a = Integer.parseInt(data.substring(lastIndex+1,index));
-		Color color = new Color(r,g,b,a);
+		index = data.indexOf(DATA_DELIMITER, lastIndex+1);
+		int alpha = Integer.parseInt(data.substring(lastIndex+1,index));
+		Color color = new Color(red,green,blue,alpha);
 		lodDataPoint = new LodDataPoint(height,depth,color);
 		
-		int val = Integer.parseInt(data.substring(lastIndex+1,index));
-		this.voidNode = (val == 1);
+		int isVoid = Integer.parseInt(data.substring(lastIndex+1,index));
+		this.voidNode = (isVoid == 1);
 		
 		
 		width = (short) Math.pow(2, detailLevel);
@@ -419,16 +417,16 @@ public class LodQuadTreeNode
 		if (dontSave)
 			return "";
 		
-		String s = Integer.toString(detailLevel) + DATA_DELIMITER_COUNT
-				+ Integer.toString(posX) + DATA_DELIMITER_COUNT
-				+ Integer.toString(posZ) + DATA_DELIMITER_COUNT
-				+ complexity.toString() + DATA_DELIMITER_COUNT
-				+ Integer.toString((lodDataPoint.height)) + DATA_DELIMITER_COUNT
-				+ Integer.toString((lodDataPoint.depth)) + DATA_DELIMITER_COUNT
-				+ Integer.toString(lodDataPoint.color.getRed()) + DATA_DELIMITER_COUNT
-				+ Integer.toString(lodDataPoint.color.getGreen()) + DATA_DELIMITER_COUNT
-				+ Integer.toString(lodDataPoint.color.getBlue()) + DATA_DELIMITER_COUNT
-				+ Integer.toString(lodDataPoint.color.getAlpha()) + DATA_DELIMITER_COUNT
+		String s = Integer.toString(detailLevel) + DATA_DELIMITER
+				+ Integer.toString(posX) + DATA_DELIMITER
+				+ Integer.toString(posZ) + DATA_DELIMITER
+				+ complexity.toString() + DATA_DELIMITER
+				+ Integer.toString((lodDataPoint.height)) + DATA_DELIMITER
+				+ Integer.toString((lodDataPoint.depth)) + DATA_DELIMITER
+				+ Integer.toString(lodDataPoint.color.getRed()) + DATA_DELIMITER
+				+ Integer.toString(lodDataPoint.color.getGreen()) + DATA_DELIMITER
+				+ Integer.toString(lodDataPoint.color.getBlue()) + DATA_DELIMITER
+				+ Integer.toString(lodDataPoint.color.getAlpha()) + DATA_DELIMITER
 				+ Integer.toString(voidNode ? 1 : 0);
 		return s;
 	}

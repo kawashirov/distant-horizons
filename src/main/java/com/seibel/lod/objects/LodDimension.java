@@ -259,7 +259,7 @@ public class LodDimension
 	 */
 	public void addLod(LodChunk lod)
 	{
-		RegionPos pos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(lod.x, lod.z));
+		RegionPos pos = new RegionPos(new ChunkPos(lod.x, lod.z));
 		
 		// don't continue if the region can't be saved
 		if (!regionIsInRange(pos.x, pos.z))
@@ -298,7 +298,7 @@ public class LodDimension
 	 */
 	public LodChunk getLodFromCoordinates(int chunkX, int chunkZ)
 	{
-		RegionPos pos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(chunkX, chunkZ));
+		RegionPos pos = new RegionPos(new ChunkPos(chunkX, chunkZ));
 		
 		LodRegion region = getRegion(pos.x, pos.z);
 		

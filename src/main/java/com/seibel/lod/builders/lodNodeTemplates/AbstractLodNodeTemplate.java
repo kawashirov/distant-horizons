@@ -30,7 +30,7 @@ import net.minecraft.client.renderer.BufferBuilder;
  * BufferBuilders.
  * 
  * @author James Seibel
- * @version 06-16-2021
+ * @version 8-8-2021
  */
 public abstract class AbstractLodNodeTemplate
 {

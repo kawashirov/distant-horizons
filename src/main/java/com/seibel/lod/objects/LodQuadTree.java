@@ -130,20 +130,6 @@ public class LodQuadTree
 	}
 	
 	/**
-	 * Constructor for a generic world via the LodNodeData
-	 *
-	 * @param newLodNode LodQuadTreeNode containing all the information of this node
-	 */
-	public LodQuadTree(LodQuadTree newParent, LodQuadTreeNode newLodNode)
-	{
-		parent = newParent;
-		lodNode = newLodNode;
-		children = new LodQuadTree[2][2];
-		treeEmpty = true;
-		treeFull = false;
-	}
-	
-	/**
 	 * Constructor using a dataList
 	 *
 	 * @param dataList list of LodNodeData to put in this LodQuadTree
@@ -154,6 +140,20 @@ public class LodQuadTree
 	{
 		this(null, new LodQuadTreeNode(LodQuadTreeNode.REGION_LEVEL, regionX, regionZ));
 		setNodesAtLowerLevel(dataList);
+	}
+	
+	/**
+	 * Constructor for a generic LodQuadTree using a LodNodeData
+	 *
+	 * @param newLodNode LodQuadTreeNode containing all the information of this node
+	 */
+	public LodQuadTree(LodQuadTree newParent, LodQuadTreeNode newLodNode)
+	{
+		parent = newParent;
+		lodNode = newLodNode;
+		children = new LodQuadTree[2][2];
+		treeEmpty = true;
+		treeFull = false;
 	}
 	
 	
@@ -564,11 +564,13 @@ public class LodQuadTree
 	public String toString()
 	{
 		String s = lodNode.toString();
-		return s;
-		/*
-        if(isThereAnyChild()){
-            for (int NS = 0; NS <= 1; NS++) {
-                for (int WE = 0; WE <= 1; WE++) {
+		
+        if(hasChildren())
+        {
+            for (int NS = 0; NS <= 1; NS++)
+            {
+                for (int WE = 0; WE <= 1; WE++)
+                {
                     LodQuadTree child = children[NS][WE];
                     if (child != null) {
                         s += '\n' + child.toString();
@@ -576,7 +578,8 @@ public class LodQuadTree
                 }
             }
         }
+        
+        
         return s;
-		*/
 	}
 }

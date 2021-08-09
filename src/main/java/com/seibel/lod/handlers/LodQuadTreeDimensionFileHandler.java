@@ -34,6 +34,8 @@ import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 
+import net.minecraft.util.math.ChunkPos;
+
 /**
  * This object handles creating LodRegions
  * from files and saving LodRegion objects
@@ -199,7 +201,7 @@ public class LodQuadTreeDimensionFileHandler
 			// problem reading the file
 			return null;
 		}
-		return new LodQuadTree(dataList,regionX, regionZ);
+		return new LodQuadTree(dataList, regionX, regionZ);
 	}
 	
 	
@@ -246,10 +248,10 @@ public class LodQuadTreeDimensionFileHandler
 	 */
 	private void saveRegionToDisk(LodQuadTree region)
 	{
-		// convert chunk coordinates to region
-		// coordinates
-		int x = region.getLodNodeData().posX;
-		int z = region.getLodNodeData().posX;
+		// convert to region coordinates
+		RegionPos regionPos = new RegionPos(new ChunkPos(region.getLodNodeData().center));
+		int x = regionPos.x;
+		int z = regionPos.z;
 		
 		File f = new File(getFileNameAndPathForRegion(x, z));
 		
@@ -310,7 +312,8 @@ public class LodQuadTreeDimensionFileHandler
 			fw.write(LOD_FILE_VERSION_PREFIX + " " + LOD_SAVE_FILE_VERSION + "\n");
 			
 			// add each LodChunk to the file
-			for (LodQuadTreeNode lodQuadTreeNode : Collections.unmodifiableList(region.getNodeListWithMask(LodQuadTreeDimension.FULL_COMPLEXITY_MASK , true, true)))
+			List<LodQuadTreeNode> nodesToSave = Collections.unmodifiableList(region.getNodeListWithMask(LodQuadTreeDimension.FULL_COMPLEXITY_MASK, false, true));
+			for (LodQuadTreeNode lodQuadTreeNode : nodesToSave)
 			{
 				fw.write(lodQuadTreeNode.toData() + "\n");
 				lodQuadTreeNode.dirty = false;
@@ -350,7 +353,7 @@ public class LodQuadTreeDimensionFileHandler
 			// or
 			// ".\Super Flat\data"
 			return dimensionDataSaveFolder.getCanonicalPath() + File.separatorChar +
-					FILE_NAME_PREFIX + regionX + "." + regionZ + FILE_EXTENSION;
+					FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
 		}
 		catch(IOException e)
 		{

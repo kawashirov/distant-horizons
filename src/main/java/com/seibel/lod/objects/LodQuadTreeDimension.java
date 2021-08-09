@@ -44,7 +44,7 @@ import net.minecraft.world.server.ServerWorld;
  * 
  * @author Leonardo Amato
  * @author James Seibel
- * @version 8-7-2021
+ * @version 8-8-2021
  */
 public class LodQuadTreeDimension
 {
@@ -77,7 +77,6 @@ public class LodQuadTreeDimension
 	public volatile LodQuadTree regions[][];
 	public volatile boolean isRegionDirty[][];
 	
-	/** a chunk Position */
 	private volatile RegionPos center;
 	
 	private LodQuadTreeDimensionFileHandler fileHandler;
@@ -145,7 +144,9 @@ public class LodQuadTreeDimension
 	
 	/**
 	 * Move the center of this LodDimension and move all owned
-	 * regions over by the given x and z offset.
+	 * regions over by the given x and z offset. <br><br>
+	 * 
+	 * Synchronized to prevent multiple moves happening on top of each other.
 	 */
 	public synchronized void move(RegionPos regionOffset)
 	{
@@ -329,7 +330,7 @@ public class LodQuadTreeDimension
 	 */
 	public Boolean addNode(LodQuadTreeNode lodNode)
 	{
-		RegionPos regionPos = LodUtil.convertChunkPosToRegionPos(new ChunkPos(lodNode.center.getX(), lodNode.center.getZ()));
+		RegionPos regionPos = new RegionPos(new ChunkPos(lodNode.center.getX(), lodNode.center.getZ()));
 		
 		// don't continue if the region can't be saved
 		if (!regionIsInRange(regionPos.x, regionPos.z))
@@ -412,7 +413,7 @@ public class LodQuadTreeDimension
 	 * method to get all the nodes that have to be rendered based on the position of the player
 	 * @return list of nodes
 	 */
-	public List<LodQuadTreeNode> getNodeToRender(BlockPos playerPos, int detailLevel, 
+	public List<LodQuadTreeNode> getNodesToRender(BlockPos playerPos, int detailLevel, 
 			Set<DistanceGenerationMode> complexityMask, int maxDistance, int minDistance)
 	{
 		List<LodQuadTreeNode> listOfData = new ArrayList<>();
@@ -430,7 +431,7 @@ public class LodQuadTreeDimension
 	}
 	
 	/**
-	 * method to get all the quadtree levels that have to be generated based on the position of the player
+	 * Returns all LodQuadTreeNodes that need to be generated based on the position of the player
 	 * @return list of quadTrees
 	 */
 	public List<LodQuadTreeNode> getNodesToGenerate(BlockPos playerPos, byte level, DistanceGenerationMode complexity, 

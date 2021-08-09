@@ -35,6 +35,7 @@ import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.LodRegion;
+import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodNodeRenderer;
 
 import net.minecraft.block.Block;
@@ -159,7 +160,7 @@ public class LodNodeGenWorker implements IWorker
     {
     	public final ServerWorld serverWorld;
         public final LodQuadTreeDimension lodDim;
-        public final LodNodeBuilder lodChunkBuilder;
+        public final LodNodeBuilder lodNodeBuilder;
         public final LodNodeRenderer lodRenderer;
         private LodNodeBufferBuilder lodBufferBuilder;
     	
@@ -171,7 +172,7 @@ public class LodNodeGenWorker implements IWorker
     	{
     		pos = newPos;
     		lodRenderer = newLodRenderer;
-    		lodChunkBuilder = newLodBuilder;
+    		lodNodeBuilder = newLodBuilder;
     		lodBufferBuilder = newLodBufferBuilder;
     		lodDim = newLodDimension;
     		serverWorld = newServerWorld;
@@ -337,14 +338,14 @@ public class LodNodeGenWorker implements IWorker
 			LodQuadTreeNode lod;
 			if (!inTheEnd)
 			{
-				lod = lodChunkBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
+				lod = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
 			}
 			else
 			{
 				// if we are in the end, don't generate any chunks.
 				// Since we don't know where the islands are, everything
 				// generates the same and it looks really bad.
-				lod = lodChunkBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
+				lod = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
 			}
 			lodDim.addNode(lod);
 		}
@@ -377,7 +378,7 @@ public class LodNodeGenWorker implements IWorker
 			IceAndSnowFeature snowFeature = new IceAndSnowFeature(NoFeatureConfig.CODEC);
 			snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
 
-			LodQuadTreeNode lod = lodChunkBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
+			LodQuadTreeNode lod = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
 			lodDim.addNode(lod);
 		}
 		
@@ -504,7 +505,7 @@ public class LodNodeGenWorker implements IWorker
 			
 			// generate a Lod like normal
 
-			LodQuadTreeNode lod = lodChunkBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
+			LodQuadTreeNode lod = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
 			lodDim.addNode(lod);
 		}
 		
@@ -518,8 +519,9 @@ public class LodNodeGenWorker implements IWorker
 		 * Note this should not be multithreaded and does cause server/simulation lag
 		 * (Higher lag for generating than loading)
 		 */
-		private void generateWithServer() {
-			//lodChunkBuilder.generateLodNodeAsync(serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES), ClientProxy.getLodWorld(), serverWorld);
+		private void generateWithServer()
+		{
+			lodNodeBuilder.generateLodNodeAsync(serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES), ClientProxy.getLodWorld(), serverWorld);
 		}
 		
 		
