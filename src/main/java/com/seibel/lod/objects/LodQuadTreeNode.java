@@ -313,9 +313,9 @@ public class LodQuadTreeNode
 		{
 			// TODO would it be better to use the average height/depth?
 			// get the lowest height from the all the given LodQuadTreeNodes
-			short height = (short) dataList.stream().mapToInt(x -> (int) x.getLodDataPoint().height).max().getAsInt();
+			short height = (short) dataList.stream().mapToInt(x -> (int) x.getLodDataPoint().height).min().getAsInt();
 			// get the highest depth
-			short depth = (short) dataList.stream().mapToInt(x -> (int) x.getLodDataPoint().depth).min().getAsInt();
+			short depth = (short) dataList.stream().mapToInt(x -> (int) x.getLodDataPoint().depth).max().getAsInt();
 			
 			// get the average color
 			int red = dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getRed()).sum() / dataList.size();

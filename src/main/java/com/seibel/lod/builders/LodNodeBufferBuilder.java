@@ -276,15 +276,17 @@ public class LodNodeBufferBuilder
 					// add this LOD to the buffer
 					int distance = (int) Math.sqrt(Math.pow((mc.player.getX() - lod.startBlockPos.getX()),2) + Math.pow((mc.player.getZ() - lod.startBlockPos.getZ()),2));
 					LodDetail detail;
-					if(distance < 200){
+					/*
+					if(distance < 100){
 						detail = LodDetail.HALF;
-					}else if(distance < 400){
+					}else */if(distance < 200){
 						detail = LodDetail.QUAD;
-					}else if(distance < 600){
+					}else if(distance < 400){
 						detail = LodDetail.DOUBLE;
 					}else{
 						detail = LodDetail.SINGLE;
 					}
+					//detail = LodDetail.SINGLE;
 					LodConfig.CLIENT.lodTemplate.get().
 							template.addLodToBuffer(currentBuffer, lodDim, lod,
 							xOffset , yOffset, zOffset, renderer.debugging, detail);

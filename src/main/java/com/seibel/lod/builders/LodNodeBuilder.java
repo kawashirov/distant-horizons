@@ -131,7 +131,7 @@ public class LodNodeBuilder {
      * @throws IllegalArgumentException thrown if either the chunk or world is null.
      */
     public List<LodQuadTreeNode> generateLodNodeFromChunk(IChunk chunk, LodBuilderConfig config) throws IllegalArgumentException {
-        LodDetail detail = LodDetail.HALF;
+        LodDetail detail = LodDetail.QUAD;
         List<LodQuadTreeNode> lodNodeList = new ArrayList<>();
         if (chunk == null)
             throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
