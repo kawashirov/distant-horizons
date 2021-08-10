@@ -22,6 +22,7 @@ import java.io.File;
 
 import com.seibel.lod.objects.LodQuadTreeNode;
 
+import com.seibel.lod.objects.RegionPos;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.server.integrated.IntegratedServer;
@@ -97,23 +98,22 @@ public class LodUtil
 	/**
 	 * Convert a 2D absolute position into a quad tree relative position. 
 	 */
-	public static int[] convertAbsolutePosToQuadTreeRelativePos(int x, int z, int detailLevel)
+	public static RegionPos convertGenericPosToRegionPos(int x, int z, int detailLevel)
 	{
 		int relativePosX = Math.floorDiv(x, (int) Math.pow(2, LodQuadTreeNode.REGION_LEVEL - detailLevel));
 		int relativePosZ = Math.floorDiv(z, (int) Math.pow(2, LodQuadTreeNode.REGION_LEVEL - detailLevel));
 		
-		return new int[] {relativePosX, relativePosZ};
+		return new RegionPos(relativePosX, relativePosZ);
 	}
 
 	/**
 	 * Convert a 2D absolute position into a quad tree relative position.
 	 */
-	public static int[] convertAbsolutePosToQuadTreeRelativePos(int x, int z, int currectDetailLevel, int targetDetailLevel)
+	public static int convertLevelPos(int pos, int currectDetailLevel, int targetDetailLevel)
 	{
-		int relativePosX = Math.floorDiv(x, (int) Math.pow(2, targetDetailLevel - currectDetailLevel));
-		int relativePosZ = Math.floorDiv(z, (int) Math.pow(2, targetDetailLevel - currectDetailLevel));
+		int newPos = Math.floorDiv(pos, (int) Math.pow(2, targetDetailLevel - currectDetailLevel));
 
-		return new int[] {relativePosX, relativePosZ};
+		return newPos;
 	}
 	/**
 	 * Return whether the given chunk

@@ -249,12 +249,11 @@ public class LodQuadTreeDimensionFileHandler
 	private void saveRegionToDisk(LodQuadTree region)
 	{
 		// convert to region coordinates
-		RegionPos regionPos = new RegionPos(new ChunkPos(region.getLodNodeData().center));
-		int x = regionPos.x;
-		int z = regionPos.z;
+		int x = region.getLodNodeData().posX;
+		int z = region.getLodNodeData().posZ;
 		
 		File f = new File(getFileNameAndPathForRegion(x, z));
-		
+
 		try
 		{
 			// make sure the file and folder exists

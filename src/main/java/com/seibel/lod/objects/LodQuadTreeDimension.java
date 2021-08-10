@@ -330,9 +330,8 @@ public class LodQuadTreeDimension
 	 */
 	public Boolean addNode(LodQuadTreeNode lodNode)
 	{
-		int[] temp = LodUtil.convertAbsolutePosToQuadTreeRelativePos(lodNode.posX, lodNode.posZ, lodNode.detailLevel, LodQuadTreeNode.REGION_LEVEL);
 		// don't continue if the region can't be saved
-		RegionPos regionPos = new RegionPos(temp[0],temp[1]);
+		RegionPos regionPos = LodUtil.convertGenericPosToRegionPos(lodNode.posX, lodNode.posZ, lodNode.detailLevel);
 		if (!regionIsInRange(regionPos.x, regionPos.z))
 		{
 			return false;
@@ -385,8 +384,7 @@ public class LodQuadTreeDimension
 		if (detailLevel > LodQuadTreeNode.REGION_LEVEL)
 			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
 		
-		int[] relativePos = LodUtil.convertAbsolutePosToQuadTreeRelativePos(chunkPos.x, chunkPos.z, LodQuadTreeNode.CHUNK_LEVEL);
-    	LodQuadTree region = getRegion(new RegionPos(relativePos[0], relativePos[1]));
+    	LodQuadTree region = getRegion(LodUtil.convertGenericPosToRegionPos(chunkPos.x, chunkPos.z, LodQuadTreeNode.CHUNK_LEVEL));
 
 		if(region == null)
 		{
