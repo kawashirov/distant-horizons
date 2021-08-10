@@ -21,11 +21,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.seibel.lod.enums.LodDetail;
 import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
@@ -172,11 +172,10 @@ public class LodNodeBufferBuilder
 
 					// set where this square will be drawn in the world
 					double xOffset = (LodQuadTreeNode.CHUNK_WIDTH * i) + // offset by the number of LOD blocks
-							startX + // offset so the center LOD block is centered underneath the player
-							8; // I'm not sure what this is correcting exactly but with it the chunks line up.
+							startX;
 					// 8 works for LODs the size of chunks
 					double yOffset = 0;
-					double zOffset = (LodQuadTreeNode.CHUNK_WIDTH * j) + startZ + 8;
+					double zOffset = (LodQuadTreeNode.CHUNK_WIDTH * j) + startZ;
 
 					LodQuadTreeNode lod = lodDim.getLodFromCoordinates(new ChunkPos(chunkX, chunkZ), LodQuadTreeNode.CHUNK_LEVEL);
 
