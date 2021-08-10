@@ -71,8 +71,8 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 		for(int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++) {
 			int startX = detail.startX[i];
 			int startZ = detail.startZ[i];
-			int posX = LodUtil.convertLevelPos((int) xOffset+startX,0, detail.detailLevel);
-			int posZ = LodUtil.convertLevelPos((int) zOffset+startZ,0, detail.detailLevel);;
+			int posX = LodUtil.convertLevelPos((int) xOffset+startX-halfWidth,0, detail.detailLevel);
+			int posZ = LodUtil.convertLevelPos((int) zOffset+startZ-halfWidth,0, detail.detailLevel);;
 			//LodQuadTreeNode newLod = chunkTree.getNodeAtPos(posX ,posZ ,detail.detailLevel);
 			LodQuadTreeNode newLod = lodDim.getLodFromCoordinates(posX ,posZ ,detail.detailLevel);
 			if(newLod != null) {
@@ -80,9 +80,9 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 						newLod.getLodDataPoint().height,
 						newLod.getLodDataPoint().depth,
 						newLod.width,
-						xOffset + startX,
+						xOffset + startX - halfWidth,
 						yOffset,
-						zOffset + startZ);
+						zOffset + startZ - halfWidth);
 
 				if (bbox != null) {
 					addBoundingBoxToBuffer(buffer, bbox, newLod.getLodDataPoint().color);
