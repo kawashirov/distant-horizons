@@ -385,8 +385,6 @@ public class LodQuadTreeDimension
 		if (detailLevel > LodQuadTreeNode.REGION_LEVEL)
 			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
 		
-		// issue #54
-		// TODO this works, but only in all positive coordinates.
 		int[] relativePos = LodUtil.convertAbsolutePosToQuadTreeRelativePos(chunkPos.x, chunkPos.z, LodQuadTreeNode.CHUNK_LEVEL);
     	LodQuadTree region = getRegion(new RegionPos(relativePos[0], relativePos[1]));
 
