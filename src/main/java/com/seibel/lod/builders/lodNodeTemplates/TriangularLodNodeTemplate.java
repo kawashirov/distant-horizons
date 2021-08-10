@@ -17,6 +17,7 @@
  */
 package com.seibel.lod.builders.lodNodeTemplates;
 
+import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 
@@ -35,7 +36,7 @@ public class TriangularLodNodeTemplate extends AbstractLodNodeTemplate
 	public void addLodToBuffer(BufferBuilder buffer,
 							   LodQuadTreeDimension lodDim, LodQuadTreeNode lod,
 							   double xOffset, double yOffset, double zOffset,
-							   boolean debugging)
+							   boolean debugging, LodDetail detail)
 	{
 		System.err.println("DynamicLodTemplate not implemented!");
 	}

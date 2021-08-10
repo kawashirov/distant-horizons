@@ -19,6 +19,7 @@ package com.seibel.lod.builders.lodNodeTemplates;
 
 import java.awt.Color;
 
+import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.util.LodUtil;
@@ -37,7 +38,7 @@ public abstract class AbstractLodNodeTemplate
 	public abstract void addLodToBuffer(BufferBuilder buffer,
 			LodQuadTreeDimension lodDim, LodQuadTreeNode lod,
 			double xOffset, double yOffset, double zOffset,
-			boolean debugging);
+			boolean debugging, LodDetail detail) ;
 	
 	/** add the given position and color to the buffer */
 	protected void addPosAndColor(BufferBuilder buffer, 

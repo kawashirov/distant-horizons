@@ -47,12 +47,12 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
     public void addLodToBuffer(BufferBuilder buffer,
                                LodQuadTreeDimension lodDim, LodQuadTreeNode lod,
                                double xOffset, double yOffset, double zOffset,
-                               boolean debugging) {
+                               boolean debugging, LodDetail detail) {
         AxisAlignedBB bbox;
 
         // Add this LOD to the BufferBuilder
         int halfWidth = LodQuadTreeNode.CHUNK_WIDTH / 2;
-		LodDetail detail = LodConfig.CLIENT.lodDetail.get();
+		//LodDetail detail = LodConfig.CLIENT.lodDetail.get();
 /*
 		bbox = generateBoundingBox(
 				lod.getLodDataPoint().height,
