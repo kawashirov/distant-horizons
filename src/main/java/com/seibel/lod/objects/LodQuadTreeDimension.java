@@ -393,7 +393,51 @@ public class LodQuadTreeDimension
 
 		return region.getNodeAtChunkPos(chunkPos);
 	}
-	
+
+	/**
+	 * Get the LodNodeData at the given X and Z coordinates
+	 * in this dimension.
+	 * <br>
+	 * Returns null if the LodChunk doesn't exist or
+	 * is outside the loaded area.
+	 */
+	public LodQuadTreeNode getLodFromCoordinates(int posX, int posZ, int detailLevel)
+	{
+		if (detailLevel > LodQuadTreeNode.REGION_LEVEL)
+			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
+
+		LodQuadTree region = getRegion(LodUtil.convertGenericPosToRegionPos(posX, posZ, detailLevel));
+
+		if(region == null)
+		{
+			return null;
+		}
+
+		return region.getNodeAtPos(posX, posZ, detailLevel);
+	}
+
+	/**
+	 * Get the LodNodeData at the given X and Z coordinates
+	 * in this dimension.
+	 * <br>
+	 * Returns null if the LodChunk doesn't exist or
+	 * is outside the loaded area.
+	 */
+	public LodQuadTree getLevelFromPos(int posX, int posZ, int detailLevel)
+	{
+		if (detailLevel > LodQuadTreeNode.REGION_LEVEL)
+			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
+
+		LodQuadTree region = getRegion(LodUtil.convertGenericPosToRegionPos(posX, posZ, detailLevel));
+
+		if(region == null)
+		{
+			return null;
+		}
+
+		return region.getLevelAtPos(posX, posZ, detailLevel);
+	}
+
 	/**
 	 * return true if and only if the node at that position exist
 	 */

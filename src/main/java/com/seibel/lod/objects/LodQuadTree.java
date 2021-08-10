@@ -264,6 +264,42 @@ public class LodQuadTree
 	}
 
 	/**
+	 * Gets the LodQuadTree at the given generic pos and detailLevel.
+	 * Returns null if no such LodQuadTreeNode exists.
+	 */
+	public LodQuadTree getLevelAtPos(int posX, int posZ, int detailLevel)
+	{
+		if (detailLevel > LodQuadTreeNode.REGION_LEVEL)
+			throw new IllegalArgumentException("getNodeAtChunkPos given a level of \"" + detailLevel + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
+
+
+		byte currentDetailLevel = lodNode.detailLevel;
+		if (detailLevel == currentDetailLevel)
+		{
+			return this;
+		}
+		else if (detailLevel < currentDetailLevel)
+		{
+			// the detail level we need is lower, go down a layer
+			short widthRatio = (short) (lodNode.width / (2 * Math.pow(2, detailLevel)));
+			int WE = Math.abs(Math.floorDiv(posX , widthRatio) % 2);
+			int NS = Math.abs(Math.floorDiv(posZ , widthRatio) % 2);
+			if (getChild(NS, WE) == null)
+			{
+				return null;
+			}
+			LodQuadTree child = getChild(NS, WE);
+			return child.getLevelAtPos(posX, posZ, detailLevel);
+		}
+		else
+		{
+			// the detail level was higher than this region's
+			return null;
+		}
+
+	}
+
+	/**
 	 * Put a child with the given data into the given position.
 	 *
 	 * @param newLodNode data to put in the child

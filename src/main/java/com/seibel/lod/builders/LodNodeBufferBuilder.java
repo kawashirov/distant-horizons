@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.seibel.lod.enums.LodDetail;
 import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
@@ -158,15 +159,13 @@ public class LodNodeBufferBuilder
 			for (int i = 0; i < numbChunksWide; i++)
 			{
 				// z axis
-				for (int j = 0; j < numbChunksWide; j++)
-				{
-					int chunkX = i + Math.floorDiv(startX , LodQuadTreeNode.CHUNK_WIDTH);
-					int chunkZ = j + Math.floorDiv(startZ , LodQuadTreeNode.CHUNK_WIDTH);
+				for (int j = 0; j < numbChunksWide; j++) {
+					int chunkX = i + Math.floorDiv(startX, LodQuadTreeNode.CHUNK_WIDTH);
+					int chunkZ = j + Math.floorDiv(startZ, LodQuadTreeNode.CHUNK_WIDTH);
 
 					// skip any chunks that Minecraft is going to render
-					if(isCoordInCenterArea(i, j, (numbChunksWide / 2))
-							&& renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkX, chunkZ)))
-					{
+					if (isCoordInCenterArea(i, j, (numbChunksWide / 2))
+							&& renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkX, chunkZ))) {
 						continue;
 					}
 
@@ -175,20 +174,18 @@ public class LodNodeBufferBuilder
 					double xOffset = (LodQuadTreeNode.CHUNK_WIDTH * i) + // offset by the number of LOD blocks
 							startX + // offset so the center LOD block is centered underneath the player
 							8; // I'm not sure what this is correcting exactly but with it the chunks line up.
-							   // 8 works for LODs the size of chunks
+					// 8 works for LODs the size of chunks
 					double yOffset = 0;
 					double zOffset = (LodQuadTreeNode.CHUNK_WIDTH * j) + startZ + 8;
-					
+
 					LodQuadTreeNode lod = lodDim.getLodFromCoordinates(new ChunkPos(chunkX, chunkZ), LodQuadTreeNode.CHUNK_LEVEL);
 
-					if (lod == null || lod.complexity == DistanceGenerationMode.NONE)
-					{
+					if (lod == null || lod.complexity == DistanceGenerationMode.NONE) {
 						// generate a new chunk if no chunk currently exists
 						// and we aren't waiting on any other chunks to generate
-						if (lod == null && numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
-						{
+						if (lod == null && numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests) {
 							ChunkPos pos = new ChunkPos(chunkX, chunkZ);
-							
+
 							// alternate determining logic that
 							// can be used for debugging
 //							if (chunksToGen == null)
@@ -202,10 +199,8 @@ public class LodNodeBufferBuilder
 //								chunksToGen[chunkGenIndex] = pos;
 //								chunkGenIndex++;
 //							}
-							
-							
-							
-							
+
+
 							// determine if this position is closer to the player
 							// than the previous
 							int newDistance = playerChunkPos.getChessboardDistance(pos);
@@ -216,69 +211,58 @@ public class LodNodeBufferBuilder
 							// 100% CPU utilization, this code generally achieves 40 - 50%
 							// after a certain point; and I'm sure there is a better data
 							// structure for this.
-							if (newDistance < minChunkDist)
-							{
+							if (newDistance < minChunkDist) {
 								// this chunk is closer, clear any previous
 								// positions and update the new minimum distance
 								minChunkDist = newDistance;
-								
+
 								// move all the old chunks into the reserve
 								ChunkPos[] newReserve = new ChunkPos[maxChunkGenRequests];
 								int oldToGenIndex = 0;
 								int oldReserveIndex = 0;
-								for(int tmpIndex = 0; tmpIndex < newReserve.length; tmpIndex++)
-								{
+								for (int tmpIndex = 0; tmpIndex < newReserve.length; tmpIndex++) {
 									// we don't check if the boundaries are good since
 									// the tmp array will always be the same length
 									// as chunksToGen and chunksToGenReserve
-									
-									if (chunksToGen[oldToGenIndex] != null)
-									{
+
+									if (chunksToGen[oldToGenIndex] != null) {
 										// add all the closest chunks...
 										newReserve[tmpIndex] = chunksToGen[oldToGenIndex];
 										oldToGenIndex++;
-									}
-									else if (chunksToGenReserve[oldReserveIndex] != null)
-									{
+									} else if (chunksToGenReserve[oldReserveIndex] != null) {
 										// ...then add all the previous reserve chunks
 										// (which are farther away)
 										newReserve[tmpIndex] = chunksToGenReserve[oldToGenIndex];
 										oldReserveIndex++;
-									}
-									else
-									{
+									} else {
 										// we have moved all the items from
 										// the old chunksToGen and reserve
 										break;
 									}
 								}
 								chunksToGenReserve = newReserve;
-								
-								
+
 
 								chunkGenIndex = 0;
 								chunksToGen = new ChunkPos[maxChunkGenRequests];
 								chunksToGen[chunkGenIndex] = pos;
 								chunkGenIndex++;
-							}
-							else if (newDistance <= minChunkDist)
-							{
+							} else if (newDistance <= minChunkDist) {
 								// this chunk position is as close or closers than the
 								// minimum distance
-								if(chunkGenIndex < maxChunkGenRequests)
-								{
+								if (chunkGenIndex < maxChunkGenRequests) {
 									// we are still under the number of chunks to generate
 									// add this position to the list
 									chunksToGen[chunkGenIndex] = pos;
 									chunkGenIndex++;
 								}
 							}
-							
+
 						} // lod null and can generate more chunks
 
 						// don't render this null/empty chunk
 						continue;
-						
+
 					} // lod null or empty
 
 
@@ -290,9 +274,27 @@ public class LodNodeBufferBuilder
 
 					// get the desired LodTemplate and
 					// add this LOD to the buffer
+
 					LodConfig.CLIENT.lodTemplate.get().
 							template.addLodToBuffer(currentBuffer, lodDim, lod,
-							xOffset, yOffset, zOffset, renderer.debugging);
+							xOffset , yOffset, zOffset, renderer.debugging);
+					/*
+					LodDetail detail = LodConfig.CLIENT.lodDetail.get();
+					for(int x = 0; x < detail.dataPointLengthCount; x++){
+						for(int z = 0; z < detail.dataPointLengthCount; z++) {
+							int posX = LodUtil.convertLevelPos(lod.startBlockPos.getX() + (x*detail.dataPointWidth), 0, detail.detailLevel);
+							int posZ = LodUtil.convertLevelPos(lod.startBlockPos.getZ() + (z*detail.dataPointWidth), 0, detail.detailLevel);
+							LodQuadTreeNode newLod = lodDim.getLodFromCoordinates(posX, posZ, detail.detailLevel);
+							System.out.print("printing ");
+							System.out.println(newLod);
+							if(newLod != null) {
+								LodConfig.CLIENT.lodTemplate.get().
+										template.addLodToBuffer(currentBuffer, lodDim, newLod,
+										xOffset + (x*detail.dataPointWidth), yOffset, zOffset + (z*detail.dataPointWidth), renderer.debugging);
+							}
+						}
+					}
+					 */
 				}
 			}
 			

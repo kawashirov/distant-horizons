@@ -168,7 +168,7 @@ public class ClientProxy
 //		LodConfig.CLIENT.brightnessMultiplier.set(1.0);
 //		LodConfig.CLIENT.saturationMultiplier.set(1.0);
 		
-		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
+		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
 		
 //		LOGGER.info(lodBufferBuilder.numberOfChunksWaitingToGenerate.get());

@@ -88,7 +88,7 @@ public class LodNodeBuilder {
             try {
                 DimensionType dim = world.dimensionType();
 
-                List<LodQuadTreeNode>  nodeList = generateLodNodeFromChunk(chunk);
+                List<LodQuadTreeNode> nodeList = generateLodNodeFromChunk(chunk);
 
                 LodQuadTreeDimension lodDim;
 
@@ -98,8 +98,9 @@ public class LodNodeBuilder {
                 } else {
                     lodDim = lodWorld.getLodDimension(dim);
                 }
-                for(LodQuadTreeNode node : nodeList) {
+                for (LodQuadTreeNode node : nodeList) {
                     lodDim.addNode(node);
+
                 }
             } catch (IllegalArgumentException | NullPointerException e) {
                 e.printStackTrace();
@@ -130,37 +131,36 @@ public class LodNodeBuilder {
      * @throws IllegalArgumentException thrown if either the chunk or world is null.
      */
     public List<LodQuadTreeNode> generateLodNodeFromChunk(IChunk chunk, LodBuilderConfig config) throws IllegalArgumentException {
-        LodDetail detail = LodDetail.QUAD;
+        LodDetail detail = LodDetail.HALF;
         List<LodQuadTreeNode> lodNodeList = new ArrayList<>();
         if (chunk == null)
             throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
-        for (int x = 0; x < detail.dataPointLengthCount; x++) {
-            for (int z = 0; z < detail.dataPointLengthCount; z++) {
-                int startX = detail.startX[x];
-                int startZ = detail.startZ[z];
-                int endX = detail.endX[x];
-                int endZ = detail.endZ[z];
+        for (int i = 0; i < detail.dataPointLengthCount*detail.dataPointLengthCount; i++) {
+            int startX = detail.startX[i];
+            int startZ = detail.startZ[i];
+            int endX = detail.endX[i];
+            int endZ = detail.endZ[i];
 
-                // TODO startX/Z and endX/Z are relative coordinates
-                // getMin/Max appear to return world block coordinates
+            // TODO startX/Z and endX/Z are relative coordinates
+            // getMin/Max appear to return world block coordinates
 
-                Color color = generateLodColorForArea(chunk, config, startX, startZ, endX, endZ);
+            Color color = generateLodColorForArea(chunk, config, startX, startZ, endX, endZ);
 
-                short height;
-                short depth;
+            short height;
+            short depth;
 
-                if (!config.useHeightmap) {
-                    height = determineHeightPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
-                    depth = determineBottomPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
-                } else {
-                    height = determineHeightPoint(chunk.getOrCreateHeightmapUnprimed(LodChunk.DEFAULT_HEIGHTMAP), startX, startZ, endX, endZ);
-                    depth = 0;
-                }
-                lodNodeList.add(new LodQuadTreeNode((byte) detail.detailLevel,
-                        LodUtil.convertLevelPos(chunk.getPos().getMinBlockX() + startX,0,detail.detailLevel),
-                        LodUtil.convertLevelPos(chunk.getPos().getMinBlockZ() + startZ,0,detail.detailLevel) ,
-                        new LodDataPoint(height, depth, color), DistanceGenerationMode.SERVER));
+            if (!config.useHeightmap) {
+                height = determineHeightPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
+                depth = determineBottomPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
+            } else {
+                height = determineHeightPoint(chunk.getOrCreateHeightmapUnprimed(LodChunk.DEFAULT_HEIGHTMAP), startX, startZ, endX, endZ);
+                depth = 0;
             }
+            lodNodeList.add(new LodQuadTreeNode((byte) detail.detailLevel,
+                    LodUtil.convertLevelPos(chunk.getPos().getMinBlockX() + startX, 0, detail.detailLevel),
+                    LodUtil.convertLevelPos(chunk.getPos().getMinBlockZ() + startZ, 0, detail.detailLevel),
+                    new LodDataPoint(height, depth, color), DistanceGenerationMode.SERVER));
+
         }
 
         return lodNodeList;
