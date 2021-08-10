@@ -50,7 +50,7 @@ import net.minecraft.world.gen.Heightmap;
  * (specifically: Lod World, Dimension, Region, and Chunk objects)
  * 
  * @author James Seibel
- * @version 7-26-2021
+ * @version 8-9-2021
  */
 public class LodChunkBuilder
 {
@@ -417,7 +417,9 @@ public class LodChunkBuilder
 								}
 								else
 								{
-									colorInt = biome.getGrassColor(x, z);
+									Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
+									tmp = tmp.darker();
+									colorInt = LodUtil.colorToInt(tmp);
 								}
 							}
 							else
@@ -469,7 +471,9 @@ public class LodChunkBuilder
 		// block special cases
 		if (blockState == Blocks.AIR.defaultBlockState())
 		{
-			colorInt = biome.getGrassColor(x, z);
+			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
+			tmp = tmp.darker();
+			colorInt = LodUtil.colorToInt(tmp);
 		}
 		else if (blockState == Blocks.MYCELIUM.defaultBlockState())
 		{

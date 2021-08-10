@@ -44,7 +44,7 @@ import net.minecraftforge.common.WorldWorkerManager;
  * This object is used to create NearFarBuffer objects.
  * 
  * @author James Seibel
- * @version 8-7-2021
+ * @version 8-9-2021
  */
 public class LodNodeBufferBuilder
 {
@@ -176,7 +176,7 @@ public class LodNodeBufferBuilder
 							startX + // offset so the center LOD block is centered underneath the player
 							8; // I'm not sure what this is correcting exactly but with it the chunks line up.
 							   // 8 works for LODs the size of chunks
-					double yOffset = 1; // TODO this offset should be done in the LOD generation
+					double yOffset = 0;
 					double zOffset = (LodQuadTreeNode.CHUNK_WIDTH * j) + startZ + 8;
 					
 					LodQuadTreeNode lod = lodDim.getLodFromCoordinates(new ChunkPos(chunkX, chunkZ), LodQuadTreeNode.CHUNK_LEVEL);

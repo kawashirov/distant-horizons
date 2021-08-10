@@ -22,17 +22,21 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.LodQuadTreeWorld;
 import com.seibel.lod.util.LodUtil;
 
+import net.minecraft.block.AbstractPlantBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.FlowingFluidBlock;
+import net.minecraft.block.BushBlock;
 import net.minecraft.block.GrassBlock;
+import net.minecraft.block.IGrowable;
 import net.minecraft.block.LeavesBlock;
+import net.minecraft.block.material.MaterialColor;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.biome.Biome;
@@ -40,6 +44,14 @@ import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
 
+/**
+ * This object is in charge of creating Lod
+ * related objects. 
+ * (specifically: Lod World, Dimension, Region, and Chunk objects)
+ * 
+ * @author James Seibel
+ * @version 8-9-2021
+ */
 public class LodNodeBuilder {
     private ExecutorService lodGenThreadPool = Executors.newSingleThreadExecutor();
 
@@ -137,9 +149,16 @@ public class LodNodeBuilder {
         short height;
         short depth;
         
-        /**TODO I HAVE TO RE-ADD THE HEIGHTMAP**/
-        height = determineHeightPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
-        depth = determineBottomPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
+        if (!config.useHeightmap)
+		{
+        	height = determineHeightPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
+            depth = determineBottomPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
+		}
+		else
+		{
+			height = determineHeightPoint(chunk.getOrCreateHeightmapUnprimed(LodChunk.DEFAULT_HEIGHTMAP), startX, startZ, endX, endZ);
+			depth = 0;
+		}
         
         return new LodQuadTreeNode(LodQuadTreeNode.CHUNK_LEVEL, chunk.getPos().x, chunk.getPos().z, new LodDataPoint(height, depth, color), DistanceGenerationMode.SERVER);
     }
@@ -228,7 +247,7 @@ public class LodNodeBuilder {
                                 // enough blocks in this
                                 // layer to count as an
                                 // LOD point
-                                return (short) (y + (section * CHUNK_SECTION_HEIGHT));
+                                return (short) (y + 1 + (section * CHUNK_SECTION_HEIGHT));
                             }
                         }
                     }
@@ -243,7 +262,6 @@ public class LodNodeBuilder {
     /**
      * Find the highest point from the Top
      */
-    @SuppressWarnings("unused")
 	private short determineHeightPoint(Heightmap heightmap,
                                        int startX, int startZ, int endX, int endZ)
     {
@@ -312,49 +330,15 @@ public class LodNodeBuilder {
 							
 							if (config.useBiomeColors)
 							{
-								// the bit shift is equivalent to dividing by 4
-								Biome biome = chunk.getBiomes().getNoiseBiome(x >> 2, y + i * chunkSections.length >> 2, z >> 2);
-								
-								if (biome.getBiomeCategory() == Biome.Category.OCEAN ||
-									biome.getBiomeCategory() == Biome.Category.RIVER)
-								{
-									if (config.useSolidBlocksInColorGen &&
-											blockState != Blocks.WATER.defaultBlockState())
-									{
-										// non-water block
-										colorInt = getColorForBlock(x, z, blockState, biome);
-									}
-									else
-									{
-										// water block
-										colorInt = biome.getWaterColor();
-									}
-								}
-								else if (biome.getBiomeCategory() == Biome.Category.EXTREME_HILLS)
-								{
-									colorInt = Blocks.STONE.defaultMaterialColor().col;
-								}
-								else if (biome.getBiomeCategory() == Biome.Category.ICY)
-								{
-									colorInt = LodUtil.colorToInt(Color.WHITE);
-								}
-								else if (biome.getBiomeCategory() == Biome.Category.THEEND)
-								{
-									colorInt = Blocks.END_STONE.defaultBlockState().materialColor.col;
-								}
-								else if (config.useSolidBlocksInColorGen)
-								{
-									colorInt = getColorForBlock(x, z, blockState, biome);
-								}
-								else
-								{
-									colorInt = biome.getGrassColor(x, z);
-								}
+								// I have no idea why I need to bit shift to the right, but
+								// if I don't the biomes don't show up correctly.
+								Biome biome = chunk.getBiomes().getNoiseBiome(x >> 2, y + 1 * chunkSections.length >> 2, z >> 2);
+								colorInt = getColorForBiome(x,z, biome);
 							}
 							else
 							{
-								// I have no idea why I need to bit shift to the right, but
-								// if I don't the biomes don't show up correctly.
+								
+								// the bit shift is equivalent to dividing by 4
 								Biome biome = chunk.getBiomes().getNoiseBiome(x >> 2, y + i * chunkSections.length >> 2, z >> 2);
 								colorInt = getColorForBlock(x,z, blockState, biome);
 							}
@@ -389,30 +373,126 @@ public class LodNodeBuilder {
 	}
 
 
-    /**
+    
+
+	/**
      * Returns a color int for a given block.
      */
     private int getColorForBlock(int x, int z, BlockState blockState, Biome biome)
+	{
+		int colorInt = 0;
+		
+		// block special cases
+		if (blockState == Blocks.AIR.defaultBlockState())
+		{
+			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
+			tmp = tmp.darker();
+			colorInt = LodUtil.colorToInt(tmp);
+		}
+		else if (blockState == Blocks.MYCELIUM.defaultBlockState())
+		{
+			colorInt = MaterialColor.COLOR_LIGHT_GRAY.col;
+		}
+		
+		// plant life
+		else if (blockState.getBlock() instanceof LeavesBlock)
+		{
+			Color leafColor = LodUtil.intToColor(biome.getFoliageColor()).darker();
+			colorInt = LodUtil.colorToInt(leafColor);
+		}
+		else if (blockState.getBlock() instanceof GrassBlock ||
+				blockState.getBlock() instanceof AbstractPlantBlock ||
+				blockState.getBlock() instanceof BushBlock ||
+				blockState.getBlock() instanceof IGrowable)
+		{
+			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
+			tmp = tmp.darker();
+			colorInt = LodUtil.colorToInt(tmp);
+		}
+		
+		// water
+		else if (blockState.getBlock() == Blocks.WATER)
+		{
+			colorInt = biome.getWaterColor();
+		}
+		
+		// everything else
+		else
+		{
+			colorInt = blockState.materialColor.col;
+		}
+		
+		return colorInt;
+	}
+	
+    /**
+     * Returns a color int for the given biome.
+     */
+    private int getColorForBiome(int x, int z, Biome biome)
     {
-        int colorInt = 0;
-
-        if (blockState == Blocks.AIR.defaultBlockState()) {
-            colorInt = biome.getGrassColor(x, z);
-        } else if (blockState.getBlock() instanceof LeavesBlock) {
-            Color leafColor = LodUtil.intToColor(biome.getFoliageColor()).darker();
-            colorInt = LodUtil.colorToInt(leafColor);
-        } else if (blockState.getBlock() instanceof GrassBlock) {
-            colorInt = biome.getGrassColor(x, z);
-        } else if (blockState.getBlock() instanceof FlowingFluidBlock) {
-            colorInt = biome.getWaterColor();
-        } else {
-            colorInt = blockState.materialColor.col;
-        }
-
-        return colorInt;
-    }
-
-
+    	int colorInt = 0;
+    	
+		switch(biome.getBiomeCategory())
+		{
+		
+		case NETHER:
+			colorInt = Blocks.BEDROCK.defaultBlockState().materialColor.col;
+			break;
+		
+		case THEEND:
+			colorInt = Blocks.END_STONE.defaultBlockState().materialColor.col;
+			break;
+		
+			
+			
+		case BEACH:
+		case DESERT:
+			colorInt = Blocks.SAND.defaultBlockState().materialColor.col;
+			break;
+			
+		case EXTREME_HILLS:
+			colorInt = Blocks.STONE.defaultMaterialColor().col;
+			break;
+			
+		case MUSHROOM:
+			colorInt = MaterialColor.COLOR_LIGHT_GRAY.col;
+			break;
+			
+		case ICY:
+			colorInt = Blocks.SNOW.defaultMaterialColor().col;
+			break;
+			
+		case MESA:
+			colorInt = Blocks.RED_SAND.defaultMaterialColor().col;
+			break;
+		
+		case OCEAN:
+		case RIVER:
+			colorInt = biome.getWaterColor();
+			break;
+			
+			
+		case NONE:
+		case FOREST:
+		case TAIGA:
+		case JUNGLE:
+		case PLAINS:
+		case SAVANNA:
+		case SWAMP:
+		default:
+			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
+			tmp = tmp.darker();
+			colorInt = LodUtil.colorToInt(tmp);
+			break;
+		
+		}
+		
+		
+		return colorInt;
+	}
+    
+    
+	
     /**
      * Is the layer between the given X, Z, and dataIndex
      * values a valid LOD point?
@@ -439,4 +519,13 @@ public class LodNodeBuilder {
 
         return false;
     }
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

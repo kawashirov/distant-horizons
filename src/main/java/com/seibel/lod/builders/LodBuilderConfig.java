@@ -35,10 +35,10 @@ public class LodBuilderConfig
 	/** default true */
 	public boolean useSolidBlocksInColorGen;
 	
-	/** default settings for a normal chunk 
-	 * useHeightmap = false
-	 * useBiomeColors = false
-	 * useSolidBlocksInColorGen = true
+	/** default settings for a normal chunk <br>
+	 * useHeightmap = false <br>
+	 * useBiomeColors = false <br>
+	 * useSolidBlocksInColorGen = true <br>
 	 */
 	public LodBuilderConfig()
 	{

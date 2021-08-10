@@ -378,7 +378,7 @@ public class LodNodeGenWorker implements IWorker
 			IceAndSnowFeature snowFeature = new IceAndSnowFeature(NoFeatureConfig.CODEC);
 			snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
 
-			LodQuadTreeNode lod = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
+			LodQuadTreeNode lod = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig());
 			lodDim.addNode(lod);
 		}
 		
@@ -505,7 +505,7 @@ public class LodNodeGenWorker implements IWorker
 			
 			// generate a Lod like normal
 
-			LodQuadTreeNode lod = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
+			LodQuadTreeNode lod = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig());
 			lodDim.addNode(lod);
 		}
 		
