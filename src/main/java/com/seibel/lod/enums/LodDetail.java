@@ -28,19 +28,19 @@ import com.seibel.lod.objects.LodDataPoint;
 public enum LodDetail
 {
 	/** render 1 LOD for each chunk */
-	SINGLE(1, 4),
+	SINGLE(1, 4, 4),
 	
 	/** render 4 LODs for each chunk */
-	DOUBLE(2, 2),
+	DOUBLE(2, 2, 3),
 	
 	/** render 16 LODs for each chunk */
-	QUAD(4, 1),
+	QUAD(4, 1, 2),
 	
 	/** render 64 LODs for each chunk */
-	HALF(8, 0),
+	HALF(8, 0, 1),
 	
 	/** render 256 LODs for each chunk */
-	FULL(16, 0);
+	FULL(16, 0 , 0);
 	
 	
 	/** How many DataPoints should 
@@ -48,6 +48,7 @@ public enum LodDetail
 	public final int dataPointLengthCount;
 	/** How wide each LOD DataPoint is */
 	public final int dataPointWidth;
+	public final int detailLevel;
 	
 	/* Start/End X/Z give the block positions
 	 * for each individual dataPoint in a LodChunk */
@@ -68,8 +69,9 @@ public enum LodDetail
 	public final int offset;
 	
 	
-	private LodDetail(int newLengthCount, int newOffset)
+	private LodDetail(int newLengthCount, int newOffset, int newDetail)
 	{
+		detailLevel = newDetail;
 		dataPointLengthCount = newLengthCount;
 		dataPointWidth = 16 / dataPointLengthCount;
 		

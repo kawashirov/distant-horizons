@@ -335,19 +335,21 @@ public class LodNodeGenWorker implements IWorker
 			chunk.setHeightmap(LodChunk.DEFAULT_HEIGHTMAP, heightmap.getRawData());
 			
 			
-			LodQuadTreeNode lod;
+			List<LodQuadTreeNode> nodeList;
 			if (!inTheEnd)
 			{
-				lod = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
+				nodeList = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
 			}
 			else
 			{
 				// if we are in the end, don't generate any chunks.
 				// Since we don't know where the islands are, everything
 				// generates the same and it looks really bad.
-				lod = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
+				nodeList = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
 			}
-			lodDim.addNode(lod);
+			for(LodQuadTreeNode node : nodeList) {
+				lodDim.addNode(node);
+			}
 		}
 		
 		
@@ -378,8 +380,10 @@ public class LodNodeGenWorker implements IWorker
 			IceAndSnowFeature snowFeature = new IceAndSnowFeature(NoFeatureConfig.CODEC);
 			snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
 
-			LodQuadTreeNode lod = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig());
-			lodDim.addNode(lod);
+			List<LodQuadTreeNode> nodeList = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig());
+			for(LodQuadTreeNode node : nodeList) {
+				lodDim.addNode(node);
+			}
 		}
 		
 		
@@ -505,8 +509,11 @@ public class LodNodeGenWorker implements IWorker
 			
 			// generate a Lod like normal
 
-			LodQuadTreeNode lod = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig());
-			lodDim.addNode(lod);
+			List<LodQuadTreeNode> nodeList = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig());
+
+			for(LodQuadTreeNode node : nodeList) {
+				lodDim.addNode(node);
+			}
 		}
 		
 		
