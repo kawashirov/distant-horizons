@@ -21,8 +21,8 @@ import java.awt.Color;
 import java.io.File;
 
 import com.seibel.lod.objects.LodQuadTreeNode;
-
 import com.seibel.lod.objects.RegionPos;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.server.integrated.IntegratedServer;
@@ -37,7 +37,7 @@ import net.minecraft.world.server.ServerWorld;
  * This class holds methods and constants that may be used in multiple places.
  * 
  * @author James Seibel
- * @version 8-8-2021
+ * @version 8-10-2021
  */
 public class LodUtil
 {
@@ -49,6 +49,14 @@ public class LodUtil
 	public static final Color COLOR_DEBUG_BLACK = new Color(0, 0, 0, DEBUG_ALPHA);
 	public static final Color COLOR_DEBUG_WHITE = new Color(255, 255, 255, DEBUG_ALPHA);
 	public static final Color COLOR_INVISIBLE = new Color(0,0,0,0);
+	
+	/**
+	 * In order of nearest to farthest: <br>
+	 * Orange, Yellow, Green, Blue, Magenta, Red <br><br>
+	 * 
+	 * Black is included in index 0, but it shouldn't be used normally.
+	 */
+	public static final Color DEBUG_DETAIL_LEVEL_COLORS[] = new Color[] { Color.BLACK, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.RED};
 	
 	
 	/**

@@ -39,9 +39,10 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 
 /**
+ * This handles any configuration the user has access to.
  * 
  * @author James Seibel
- * @version 7-25-2021
+ * @version 8-10-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -106,11 +107,10 @@ public class LodConfig
 	        
 	        debugMode = builder
 	                .comment("\n\n"
-	                		+ " If false the LODs will draw with their normal world colors. \n"
-	                		+ " If true they will draw as a black and white checkerboard. \n"
-	                		+ " This can be used for debugging or imagining you are playing a \n"
-	                		+ " giant game of chess ;) \n")
-	                .define("drawCheckerBoard", false);
+	                		+ " If false the LODs will draw with their normal colors. \n"
+	                		+ " If true LODs colors will be based on their detail \n"
+	                		+ " level. \n")
+	                .define("debugMode", false);
 	        
 	        lodTemplate = builder
 	                .comment("\n\n"

@@ -21,11 +21,10 @@ import java.awt.Color;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.handlers.LodConfig;
-import com.seibel.lod.objects.LodQuadTree;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
-
 import com.seibel.lod.util.LodUtil;
+
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.AxisAlignedBB;
 
@@ -34,7 +33,7 @@ import net.minecraft.util.math.AxisAlignedBB;
  * Builds LODs as rectangular prisms.
  *
  * @author James Seibel
- * @version 8-8-2021
+ * @version 8-10-2021
  */
 public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 {
@@ -47,35 +46,24 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
     public void addLodToBuffer(BufferBuilder buffer,
                                LodQuadTreeDimension lodDim, LodQuadTreeNode lod,
                                double xOffset, double yOffset, double zOffset,
-                               boolean debugging, LodDetail detail) {
+                               boolean debugging, LodDetail detail)
+    {
         AxisAlignedBB bbox;
-
-        // Add this LOD to the BufferBuilder
-        int halfWidth = LodQuadTreeNode.CHUNK_WIDTH / 2;
-		//LodDetail detail = LodConfig.CLIENT.lodDetail.get();
-/*
-		bbox = generateBoundingBox(
-				lod.getLodDataPoint().height,
-				lod.getLodDataPoint().depth,
-				lod.width,
-				xOffset - halfWidth,
-				yOffset,
-				zOffset - halfWidth);
-
-		if (bbox != null) {
-			addBoundingBoxToBuffer(buffer, bbox, lod.getLodDataPoint().color);
-		}
-
- */
-		LodQuadTree chunkTree = lodDim.getLevelFromPos(lod.posX, lod.posZ, lod.detailLevel);
-		for(int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++) {
+        
+        // add each LOD for the detail level
+		for(int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++)
+		{
+			// how much to offset this LOD by
 			int startX = detail.startX[i];
 			int startZ = detail.startZ[i];
-			int posX = LodUtil.convertLevelPos((int) xOffset+startX,0, detail.detailLevel);
-			int posZ = LodUtil.convertLevelPos((int) zOffset+startZ,0, detail.detailLevel);;
-			//LodQuadTreeNode newLod = chunkTree.getNodeAtPos(posX ,posZ ,detail.detailLevel);
-			LodQuadTreeNode newLod = lodDim.getLodFromCoordinates(posX ,posZ ,detail.detailLevel);
-			if(newLod != null) {
+			
+			// get the QuadTree location of this LOD
+			int posX = LodUtil.convertLevelPos((int) xOffset + startX, 0, detail.detailLevel);
+			int posZ = LodUtil.convertLevelPos((int) zOffset + startZ, 0, detail.detailLevel);
+			
+			LodQuadTreeNode newLod = lodDim.getLodFromCoordinates(posX, posZ, detail.detailLevel);
+			if(newLod != null)
+			{
 				bbox = generateBoundingBox(
 						newLod.getLodDataPoint().height,
 						newLod.getLodDataPoint().depth,
@@ -83,9 +71,17 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 						xOffset + startX,
 						yOffset,
 						zOffset + startZ);
-
-				if (bbox != null) {
-					addBoundingBoxToBuffer(buffer, bbox, newLod.getLodDataPoint().color);
+				
+				
+				Color color = newLod.getLodDataPoint().color;
+				if (LodConfig.CLIENT.debugMode.get())
+				{
+					color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[detail.detailLevel];
+				}
+				
+				if (bbox != null)
+				{
+					addBoundingBoxToBuffer(buffer, bbox, color);
 				}
 			}
 		}
