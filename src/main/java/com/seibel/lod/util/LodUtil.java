@@ -52,11 +52,9 @@ public class LodUtil
 	
 	/**
 	 * In order of nearest to farthest: <br>
-	 * Orange, Yellow, Green, Blue, Magenta, Red <br><br>
-	 * 
-	 * Black is included in index 0, but it shouldn't be used normally.
+	 * Red, Orange, Yellow, Green, Blue, Magenta, Pink
 	 */
-	public static final Color DEBUG_DETAIL_LEVEL_COLORS[] = new Color[] { Color.BLACK, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.RED};
+	public static final Color DEBUG_DETAIL_LEVEL_COLORS[] = new Color[] { Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.pink};
 	
 	
 	/**
