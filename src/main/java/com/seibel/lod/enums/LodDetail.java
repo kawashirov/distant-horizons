@@ -92,17 +92,8 @@ public enum LodDetail
 				startX[index] = x * dataPointWidth;
 				startZ[index] = z * dataPointWidth;
 				
-				// special case for FULL
-				if(dataPointWidth != 1)
-				{
-					endX[index] = (x*dataPointWidth) + dataPointWidth - 1; 
-					endZ[index] = (z*dataPointWidth) + dataPointWidth - 1; 
-				}
-				else
-				{
-					endX[index] = (x*dataPointWidth) + dataPointWidth;
-					endZ[index] = (z*dataPointWidth) + dataPointWidth;
-				}
+				endX[index] = (x*dataPointWidth) + dataPointWidth;
+				endZ[index] = (z*dataPointWidth) + dataPointWidth;
 				
 				index++;
 			}
