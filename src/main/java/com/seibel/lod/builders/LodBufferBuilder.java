@@ -113,12 +113,12 @@ public class LodBufferBuilder
 		
 		// this seemingly useless math is required,
 		// just using (int) playerX/Z doesn't work
-		int playerXChunkOffset = ((int) playerX / LodChunk.WIDTH) * LodChunk.WIDTH;
-		int playerZChunkOffset = ((int) playerZ / LodChunk.WIDTH) * LodChunk.WIDTH;
+		int playerXChunkOffset = ((int) playerX / LodUtil.CHUNK_WIDTH) * LodUtil.CHUNK_WIDTH;
+		int playerZChunkOffset = ((int) playerZ / LodUtil.CHUNK_WIDTH) * LodUtil.CHUNK_WIDTH;
 		// this is where we will start drawing squares
 		// (exactly half the total width)
-		int startX = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerXChunkOffset;
-		int startZ = (-LodChunk.WIDTH * (numbChunksWide / 2)) + playerZChunkOffset;
+		int startX = (-LodUtil.CHUNK_WIDTH * (numbChunksWide / 2)) + playerXChunkOffset;
+		int startZ = (-LodUtil.CHUNK_WIDTH * (numbChunksWide / 2)) + playerZChunkOffset;
 		
 		
 		Thread thread = new Thread(()->
@@ -132,7 +132,7 @@ public class LodBufferBuilder
 			// we can top it off from the reserve
 			ChunkPos[] chunksToGenReserve = new ChunkPos[maxChunkGenRequests];
 			int minChunkDist = Integer.MAX_VALUE;
-			ChunkPos playerChunkPos = new ChunkPos((int)playerX / LodChunk.WIDTH, (int)playerZ / LodChunk.WIDTH);
+			ChunkPos playerChunkPos = new ChunkPos((int)playerX / LodUtil.CHUNK_WIDTH, (int)playerZ / LodUtil.CHUNK_WIDTH);
 			
 			
 			// generate our new buildable buffers
@@ -147,8 +147,8 @@ public class LodBufferBuilder
 				// z axis
 				for (int j = 0; j < numbChunksWide; j++)
 				{
-					int chunkX = i + (startX / LodChunk.WIDTH);
-					int chunkZ = j + (startZ / LodChunk.WIDTH);
+					int chunkX = i + (startX / LodUtil.CHUNK_WIDTH);
+					int chunkZ = j + (startZ / LodUtil.CHUNK_WIDTH);
 					
 					// skip any chunks that Minecraft is going to render
 					if(isCoordInCenterArea(i, j, (numbChunksWide / 2)) 
@@ -157,14 +157,14 @@ public class LodBufferBuilder
 						continue;
 					}
 					
-					LodDetail detail = LodConfig.CLIENT.lodDetail.get();
+					LodDetail detail = LodConfig.CLIENT.maxDrawDetail.get();
 					
 					// set where this square will be drawn in the world
-					double xOffset = (LodChunk.WIDTH * i) + // offset by the number of LOD blocks
+					double xOffset = (LodUtil.CHUNK_WIDTH * i) + // offset by the number of LOD blocks
 									startX + // offset so the center LOD block is centered underneath the player
 									8; //detail.offset; // truncation(?) correction
 					double yOffset = 0;
-					double zOffset = (LodChunk.WIDTH * j) + startZ + 8;//detail.offset;
+					double zOffset = (LodUtil.CHUNK_WIDTH * j) + startZ + 8;//detail.offset;
 					
 					LodChunk lod = lodDim.getLodFromCoordinates(chunkX, chunkZ);
 					

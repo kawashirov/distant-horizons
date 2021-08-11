@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -113,7 +114,7 @@ public class LodQuadTree
 	//maybe the use of useLevelCoordinate could be changed. I could use a builder to do all this work.
 	public LodQuadTree(RegionPos regionPos)
 	{
-		this(null, new LodQuadTreeNode(LodQuadTreeNode.REGION_LEVEL, regionPos.x, regionPos.z));
+		this(null, new LodQuadTreeNode(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z));
 	}
 	
 	/**
@@ -138,7 +139,7 @@ public class LodQuadTree
 	 */
 	public LodQuadTree(List<LodQuadTreeNode> dataList, int regionX, int regionZ)
 	{
-		this(null, new LodQuadTreeNode(LodQuadTreeNode.REGION_LEVEL, regionX, regionZ));
+		this(null, new LodQuadTreeNode(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ));
 		setNodesAtLowerLevel(dataList);
 	}
 	
@@ -224,7 +225,7 @@ public class LodQuadTree
 	 */
 	public LodQuadTreeNode getNodeAtChunkPos(ChunkPos chunkPos)
 	{
-		return getNodeAtPos(chunkPos.x, chunkPos.z, LodQuadTreeNode.CHUNK_LEVEL);
+		return getNodeAtPos(chunkPos.x, chunkPos.z, LodUtil.CHUNK_DETAIL_LEVEL);
 	}
 
 	/**
@@ -233,8 +234,8 @@ public class LodQuadTree
 	 */
 	public LodQuadTreeNode getNodeAtPos(int posX, int posZ, int detailLevel)
 	{
-		if (detailLevel > LodQuadTreeNode.REGION_LEVEL)
-			throw new IllegalArgumentException("getNodeAtChunkPos given a level of \"" + detailLevel + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
+		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
+			throw new IllegalArgumentException("getNodeAtChunkPos given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
 
 
 		byte currentDetailLevel = lodNode.detailLevel;
@@ -269,8 +270,8 @@ public class LodQuadTree
 	 */
 	public LodQuadTree getLevelAtPos(int posX, int posZ, int detailLevel)
 	{
-		if (detailLevel > LodQuadTreeNode.REGION_LEVEL)
-			throw new IllegalArgumentException("getNodeAtChunkPos given a level of \"" + detailLevel + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
+		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
+			throw new IllegalArgumentException("getNodeAtChunkPos given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
 
 
 		byte currentDetailLevel = lodNode.detailLevel;
@@ -365,7 +366,7 @@ public class LodQuadTree
 		lodNode.combineData(dataList);
 		
 		// update sub regions if requested
-		if (lodNode.detailLevel < LodQuadTreeNode.REGION_LEVEL && recursiveUpdate)
+		if (lodNode.detailLevel < LodUtil.REGION_DETAIL_LEVEL && recursiveUpdate)
 		{
 			this.parent.updateRegion(recursiveUpdate);
 		}

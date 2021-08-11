@@ -30,10 +30,8 @@ import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.handlers.LodConfig;
-import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeWorld;
-import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.render.LodNodeRenderer;
 import com.seibel.lod.util.LodUtil;
@@ -96,7 +94,7 @@ public class ClientProxy
 		// update each regions' width to match the new render distance
 		int newWidth = Math.max(4, 
 				// TODO is this logic good?
-				(mc.options.renderDistance * LodChunk.WIDTH * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get()) / LodRegion.SIZE
+				(mc.options.renderDistance * LodUtil.CHUNK_WIDTH * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get()) / LodUtil.REGION_WIDTH_IN_CHUNKS
 				);
 		if (lodNodeBuilder.regionWidth != newWidth)
 		{
@@ -117,8 +115,8 @@ public class ClientProxy
 		double playerX = mc.player.getX();
 		double playerZ = mc.player.getZ();
 		
-		int xOffset = ((int)playerX / (LodChunk.WIDTH * LodRegion.SIZE)) - lodDim.getCenterX();
-		int zOffset = ((int)playerZ / (LodChunk.WIDTH * LodRegion.SIZE)) - lodDim.getCenterZ();
+		int xOffset = ((int)playerX / (LodUtil.CHUNK_WIDTH * LodUtil.REGION_WIDTH_IN_CHUNKS)) - lodDim.getCenterX();
+		int zOffset = ((int)playerZ / (LodUtil.CHUNK_WIDTH * LodUtil.REGION_WIDTH_IN_CHUNKS)) - lodDim.getCenterZ();
 		
 		if (xOffset != 0 || zOffset != 0)
 		{
@@ -160,7 +158,9 @@ public class ClientProxy
 //		LodConfig.CLIENT.drawLODs.set(true);
 //		LodConfig.CLIENT.debugMode.set(false);
 		
-		LodConfig.CLIENT.lodDetail.set(LodDetail.QUAD);
+		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.QUAD);
+		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.QUAD);
+		
 		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
 		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);

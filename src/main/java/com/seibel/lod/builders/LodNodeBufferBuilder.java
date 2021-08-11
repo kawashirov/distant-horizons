@@ -129,12 +129,12 @@ public class LodNodeBufferBuilder
 		
 		// this seemingly useless math is required,
 		// just using (int) playerX/Z doesn't work
-		int playerXChunkOffset = ((int) playerX / LodQuadTreeNode.CHUNK_WIDTH) * LodQuadTreeNode.CHUNK_WIDTH;
-		int playerZChunkOffset = ((int) playerZ / LodQuadTreeNode.CHUNK_WIDTH) * LodQuadTreeNode.CHUNK_WIDTH;
+		int playerXChunkOffset = ((int) playerX / LodUtil.CHUNK_WIDTH) * LodUtil.CHUNK_WIDTH;
+		int playerZChunkOffset = ((int) playerZ / LodUtil.CHUNK_WIDTH) * LodUtil.CHUNK_WIDTH;
 		// this is where we will start drawing squares
 		// (exactly half the total width)
-		int startX = (-LodQuadTreeNode.CHUNK_WIDTH * (numbChunksWide / 2)) + playerXChunkOffset;
-		int startZ = (-LodQuadTreeNode.CHUNK_WIDTH * (numbChunksWide / 2)) + playerZChunkOffset;
+		int startX = (-LodUtil.CHUNK_WIDTH * (numbChunksWide / 2)) + playerXChunkOffset;
+		int startZ = (-LodUtil.CHUNK_WIDTH * (numbChunksWide / 2)) + playerZChunkOffset;
 		
 		
 		Thread thread = new Thread(() ->
@@ -148,7 +148,7 @@ public class LodNodeBufferBuilder
 			// we can top it off from the reserve
 			ChunkPos[] chunksToGenReserve = new ChunkPos[maxChunkGenRequests];
 			int minChunkDist = Integer.MAX_VALUE;
-			ChunkPos playerChunkPos = new ChunkPos((int)playerX / LodQuadTreeNode.CHUNK_WIDTH, (int)playerZ / LodQuadTreeNode.CHUNK_WIDTH);
+			ChunkPos playerChunkPos = new ChunkPos((int)playerX / LodUtil.CHUNK_WIDTH, (int)playerZ / LodUtil.CHUNK_WIDTH);
 			
 			
 			// generate our new buildable buffers
@@ -160,8 +160,8 @@ public class LodNodeBufferBuilder
 			{
 				// z axis
 				for (int j = 0; j < numbChunksWide; j++) {
-					int chunkX = i + Math.floorDiv(startX, LodQuadTreeNode.CHUNK_WIDTH);
-					int chunkZ = j + Math.floorDiv(startZ, LodQuadTreeNode.CHUNK_WIDTH);
+					int chunkX = i + Math.floorDiv(startX, LodUtil.CHUNK_WIDTH);
+					int chunkZ = j + Math.floorDiv(startZ, LodUtil.CHUNK_WIDTH);
 					
 					// skip any chunks that Minecraft is going to render
 					if (isCoordInCenterArea(i, j, (numbChunksWide / 2))
@@ -171,12 +171,12 @@ public class LodNodeBufferBuilder
 					
 					
 					// set where this square will be drawn in the world
-					double xOffset = (LodQuadTreeNode.CHUNK_WIDTH * i) + // offset by the number of LOD blocks
+					double xOffset = (LodUtil.CHUNK_WIDTH * i) + // offset by the number of LOD blocks
 							startX; // offset so the center LOD block is centered underneath the player
 					double yOffset = 0;
-					double zOffset = (LodQuadTreeNode.CHUNK_WIDTH * j) + startZ;
+					double zOffset = (LodUtil.CHUNK_WIDTH * j) + startZ;
 					
-					LodQuadTreeNode lod = lodDim.getLodFromCoordinates(new ChunkPos(chunkX, chunkZ), LodQuadTreeNode.CHUNK_LEVEL);
+					LodQuadTreeNode lod = lodDim.getLodFromCoordinates(new ChunkPos(chunkX, chunkZ), LodUtil.CHUNK_DETAIL_LEVEL);
 					
 					if (lod == null || lod.complexity == DistanceGenerationMode.NONE) {
 						// generate a new chunk if no chunk currently exists

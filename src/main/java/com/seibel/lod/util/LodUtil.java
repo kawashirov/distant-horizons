@@ -20,7 +20,6 @@ package com.seibel.lod.util;
 import java.awt.Color;
 import java.io.File;
 
-import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.RegionPos;
 
 import net.minecraft.client.Minecraft;
@@ -30,6 +29,7 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
+import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 
@@ -57,6 +57,33 @@ public class LodUtil
 	public static final Color DEBUG_DETAIL_LEVEL_COLORS[] = new Color[] { Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.pink};
 	
 	
+	/** 512 blocks wide */
+	public static final byte REGION_DETAIL_LEVEL = 9;
+	/** 16 blocks wide */
+	public static final byte CHUNK_DETAIL_LEVEL = 4;
+	/** 1 block wide */
+	public static final byte BLOCK_DETAIL_LEVEL = 0;
+	
+	
+	/** detail level 9 */
+	public static final short REGION_WIDTH = 512;
+	/** detail level 4 */
+	public static final short CHUNK_WIDTH = 16;
+	/** detail level 0 */
+	public static final short BLOCK_WIDTH = 1;
+	
+	
+	/** number of chunks wide */
+	public static final int REGION_WIDTH_IN_CHUNKS = 32;
+	
+	
+	/** If we ever have to use a heightmap for any reason, use this one. */
+	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
+	
+	
+	
+	
+	
 	/**
 	 * Gets the first valid ServerWorld.
 	 * 
@@ -71,7 +98,7 @@ public class LodUtil
 		
 		for (ServerWorld world : worlds)
 			return world;
-				
+		
 		return null;
 	}
 	
@@ -97,7 +124,7 @@ public class LodUtil
 				break;
 			}
 		}
-				
+		
 		return returnWorld;
 	}
 	
@@ -106,19 +133,19 @@ public class LodUtil
 	 */
 	public static RegionPos convertGenericPosToRegionPos(int x, int z, int detailLevel)
 	{
-		int relativePosX = Math.floorDiv(x, (int) Math.pow(2, LodQuadTreeNode.REGION_LEVEL - detailLevel));
-		int relativePosZ = Math.floorDiv(z, (int) Math.pow(2, LodQuadTreeNode.REGION_LEVEL - detailLevel));
+		int relativePosX = Math.floorDiv(x, (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel));
+		int relativePosZ = Math.floorDiv(z, (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel));
 		
 		return new RegionPos(relativePosX, relativePosZ);
 	}
-
+	
 	/**
 	 * Convert a 2D absolute position into a quad tree relative position.
 	 */
 	public static int convertLevelPos(int pos, int currectDetailLevel, int targetDetailLevel)
 	{
 		int newPos = Math.floorDiv(pos, (int) Math.pow(2, targetDetailLevel - currectDetailLevel));
-
+		
 		return newPos;
 	}
 	/**
@@ -164,8 +191,8 @@ public class LodUtil
 		{
 			ServerData server = mc.getCurrentServer();
 			return server.name + ", IP " + 
-					server.ip + ", GameVersion " + 
-					server.version.getString();
+			server.ip + ", GameVersion " + 
+			server.version.getString();
 		}
 	}
 	
@@ -202,9 +229,9 @@ public class LodUtil
 		{
 			ServerData server = mc.getCurrentServer();
 			return server.name + ", IP " + 
-					server.ip + ", GameVersion " + 
-					server.version.getString() + File.separatorChar
-					+ "dim_" + world.dimensionType().effectsLocation().getPath() + File.separatorChar;
+			server.ip + ", GameVersion " + 
+			server.version.getString() + File.separatorChar
+			+ "dim_" + world.dimensionType().effectsLocation().getPath() + File.separatorChar;
 		}
 	}
 	
@@ -259,4 +286,6 @@ public class LodUtil
 	{
 		return Math.min(max, Math.max(value, min));
 	}
+	
+	
 }

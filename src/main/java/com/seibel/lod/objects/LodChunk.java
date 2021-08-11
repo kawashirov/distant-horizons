@@ -20,10 +20,9 @@ package com.seibel.lod.objects;
 import java.awt.Color;
 
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.handlers.LodDimensionFileHandler;
+import com.seibel.lod.handlers.LodQuadTreeDimensionFileHandler;
 
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.gen.Heightmap;
 
 /**
  * This object contains position
@@ -35,20 +34,13 @@ import net.minecraft.world.gen.Heightmap;
 public class LodChunk
 {
 	/** This is what separates each piece of data in the toData method */
-	private static final char DATA_DELIMITER = LodDimensionFileHandler.DATA_DELIMITER;
-	
-	/** Width of a Minecraft Chunk */
-	public static final int WIDTH = 16;
+	private static final char DATA_DELIMITER = LodQuadTreeDimensionFileHandler.DATA_DELIMITER;
 	
 	/** alpha used when drawing chunks in debug mode */
 	private static final int DEBUG_ALPHA = 255; // 0 - 255
 	private static final Color DEBUG_BLACK = new Color(0, 0, 0, DEBUG_ALPHA);
 	private static final Color DEBUG_WHITE = new Color(255, 255, 255, DEBUG_ALPHA);
 	private static final Color INVISIBLE = new Color(0,0,0,0);
-	
-	/** If we ever have to use a heightmap for any reason, use this one. */
-	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
-	
 	
 	public LodDetail detail = LodDetail.SINGLE;
 	

@@ -31,12 +31,11 @@ import com.seibel.lod.builders.LodNodeBufferBuilder;
 import com.seibel.lod.builders.LodNodeBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodConfig;
-import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
-import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodNodeRenderer;
+import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -185,7 +184,7 @@ public class LodNodeGenWorker implements IWorker
 			{
 				// only generate LodChunks if they can
 		        // be added to the current LodDimension
-				if (lodDim.regionIsInRange(pos.x / LodRegion.SIZE, pos.z / LodRegion.SIZE))
+				if (lodDim.regionIsInRange(pos.x / LodUtil.REGION_WIDTH_IN_CHUNKS, pos.z / LodUtil.REGION_WIDTH_IN_CHUNKS))
 				{
 //					long startTime = System.currentTimeMillis();
 					
@@ -268,10 +267,10 @@ public class LodNodeGenWorker implements IWorker
 			boolean inTheEnd = false;
 			
 			// add fake heightmap data so our LODs aren't at height 0
-			Heightmap heightmap = new Heightmap(chunk, LodChunk.DEFAULT_HEIGHTMAP);
-			for(int x = 0; x < LodChunk.WIDTH && !inTheEnd; x++)
+			Heightmap heightmap = new Heightmap(chunk, LodUtil.DEFAULT_HEIGHTMAP);
+			for(int x = 0; x < LodUtil.CHUNK_WIDTH && !inTheEnd; x++)
 			{
-				for(int z = 0; z < LodChunk.WIDTH && !inTheEnd; z++)
+				for(int z = 0; z < LodUtil.CHUNK_WIDTH && !inTheEnd; z++)
 				{
 					if (simulateHeight)
 					{
@@ -332,7 +331,7 @@ public class LodNodeGenWorker implements IWorker
 				}// z
 			}// x
 			
-			chunk.setHeightmap(LodChunk.DEFAULT_HEIGHTMAP, heightmap.getRawData());
+			chunk.setHeightmap(LodUtil.DEFAULT_HEIGHTMAP, heightmap.getRawData());
 			
 			
 			List<LodQuadTreeNode> nodeList;
@@ -415,9 +414,9 @@ public class LodNodeGenWorker implements IWorker
 			
 			// get all the biomes in the chunk
 			HashSet<Biome> biomes = new HashSet<>();
-			for (int x = 0; x < LodChunk.WIDTH; x++)
+			for (int x = 0; x < LodUtil.CHUNK_WIDTH; x++)
 			{
-				for (int z = 0; z < LodChunk.WIDTH; z++)
+				for (int z = 0; z < LodUtil.CHUNK_WIDTH; z++)
 				{
 					Biome biome = chunk.getBiomes().getNoiseBiome(x >> 2, serverWorld.getSeaLevel() >> 2, z >> 2);
 					

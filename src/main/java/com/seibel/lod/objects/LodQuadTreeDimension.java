@@ -369,7 +369,7 @@ public class LodQuadTreeDimension
 	 */
 	public LodQuadTreeNode getLodFromCoordinates(ChunkPos chunkPos)
 	{
-		return getLodFromCoordinates(chunkPos, LodQuadTreeNode.CHUNK_LEVEL);
+		return getLodFromCoordinates(chunkPos, LodUtil.CHUNK_DETAIL_LEVEL);
 	}
 	
 	/**
@@ -381,10 +381,10 @@ public class LodQuadTreeDimension
 	 */
 	public LodQuadTreeNode getLodFromCoordinates(ChunkPos chunkPos, int detailLevel)
 	{
-		if (detailLevel > LodQuadTreeNode.REGION_LEVEL)
-			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
+		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
+			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
 		
-    	LodQuadTree region = getRegion(LodUtil.convertGenericPosToRegionPos(chunkPos.x, chunkPos.z, LodQuadTreeNode.CHUNK_LEVEL));
+    	LodQuadTree region = getRegion(LodUtil.convertGenericPosToRegionPos(chunkPos.x, chunkPos.z, LodUtil.CHUNK_DETAIL_LEVEL));
 
 		if(region == null)
 		{
@@ -403,8 +403,8 @@ public class LodQuadTreeDimension
 	 */
 	public LodQuadTreeNode getLodFromCoordinates(int posX, int posZ, int detailLevel)
 	{
-		if (detailLevel > LodQuadTreeNode.REGION_LEVEL)
-			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
+		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
+			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
 
 		LodQuadTree region = getRegion(LodUtil.convertGenericPosToRegionPos(posX, posZ, detailLevel));
 
@@ -425,8 +425,8 @@ public class LodQuadTreeDimension
 	 */
 	public LodQuadTree getLevelFromPos(int posX, int posZ, int detailLevel)
 	{
-		if (detailLevel > LodQuadTreeNode.REGION_LEVEL)
-			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
+		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
+			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
 
 		LodQuadTree region = getRegion(LodUtil.convertGenericPosToRegionPos(posX, posZ, detailLevel));
 
@@ -443,8 +443,8 @@ public class LodQuadTreeDimension
 	 */
 	public boolean hasThisPositionBeenGenerated(ChunkPos chunkPos, int level)
 	{
-		if (level > LodQuadTreeNode.REGION_LEVEL)
-			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + level + "\" when \"" + LodQuadTreeNode.REGION_LEVEL + "\" is the max.");
+		if (level > LodUtil.REGION_DETAIL_LEVEL)
+			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + level + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
 		
 		return getLodFromCoordinates(chunkPos, level).detailLevel == level;
 	}

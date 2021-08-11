@@ -61,25 +61,12 @@ public class LodQuadTreeNode
 	public DistanceGenerationMode complexity;
 	
 	/** Indicates how complicated this node is. <br>
-	 * Goes from 0 to 9, 0 being the deepest (block size) and 9 being the highest (region size) */
+	 * Goes from 0 to 9; 0 being the deepest (block size) and 9 being the highest (region size) */
 	public final byte detailLevel;
-	/** 512 blocks wide */
-	public static final byte REGION_LEVEL = 9;
-	/** 16 blocks wide */
-	public static final byte CHUNK_LEVEL = 4;
-	/** 1 block wide */
-	public static final byte BLOCK_LEVEL = 0;
 	
 	/** Indicates the width in blocks of this node. <br>
 	 * Goes from 1 to 512 */
 	public final short width;
-	/** detail level 9 */
-	public static final short REGION_WIDTH = 512;
-	/** detail level 4 */
-	public static final short CHUNK_WIDTH = 16;
-	/** detail level 0 */
-	public static final short BLOCK_WIDTH = 1;
-	
 	
 	// these 4 value indicate the corner of the LOD block
 	// they can be named SW, SE, NW, NE as the cardinal direction.

@@ -37,10 +37,10 @@ import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDimension;
-import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.NearFarBuffer;
 import com.seibel.lod.objects.NearFarFogSettings;
 import com.seibel.lod.proxy.ClientProxy;
+import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
@@ -194,16 +194,16 @@ public class LodRenderer
 		ClientPlayerEntity player = mc.player;
 		
 		// should LODs be regenerated?
-		if ((int)player.getX() / LodChunk.WIDTH != prevChunkX ||
-			(int)player.getZ() / LodChunk.WIDTH != prevChunkZ ||
+		if ((int)player.getX() / LodUtil.CHUNK_WIDTH != prevChunkX ||
+			(int)player.getZ() / LodUtil.CHUNK_WIDTH != prevChunkZ ||
 			previousChunkRenderDistance != mc.options.renderDistance ||
 			prevFogDistance != LodConfig.CLIENT.fogDistance.get())
 		{
 			// yes
 			regen = true;
 			
-			prevChunkX = (int)player.getX() / LodChunk.WIDTH;
-			prevChunkZ = (int)player.getZ() / LodChunk.WIDTH;
+			prevChunkX = (int)player.getX() / LodUtil.CHUNK_WIDTH;
+			prevChunkZ = (int)player.getZ() / LodUtil.CHUNK_WIDTH;
 			prevFogDistance = LodConfig.CLIENT.fogDistance.get();
 		}
 		else
@@ -223,11 +223,11 @@ public class LodRenderer
 		
 		// determine how far the game's render distance is currently set
 		int renderDistWidth = mc.options.renderDistance;
-		farPlaneDistance = renderDistWidth * LodChunk.WIDTH;
+		farPlaneDistance = renderDistWidth * LodUtil.CHUNK_WIDTH;
 		
 		// set how big the LODs will be and how far they will go
 		int totalLength = (int) farPlaneDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 2;
-		int numbChunksWide = (totalLength / LodChunk.WIDTH);
+		int numbChunksWide = (totalLength / LodUtil.CHUNK_WIDTH);
 		
 		// determine which LODs should not be rendered close to the player
 		HashSet<ChunkPos> chunkPosToSkip = getNearbyLodChunkPosToSkip(lodDim, player.blockPosition());
@@ -623,7 +623,7 @@ public class LodRenderer
 		// to fit.
 		if (bufferMemory > MAX_ALOCATEABLE_DIRECT_MEMORY)
 		{
-			int maxRadiusMultiplier = RenderUtil.getMaxRadiusMultiplierWithAvaliableMemory(LodConfig.CLIENT.lodTemplate.get(), LodQuadTreeNode.CHUNK_LEVEL);
+			int maxRadiusMultiplier = RenderUtil.getMaxRadiusMultiplierWithAvaliableMemory(LodConfig.CLIENT.lodTemplate.get(), LodUtil.CHUNK_DETAIL_LEVEL);
 			
 			ClientProxy.LOGGER.warn("The lodChunkRadiusMultiplier was set too high "
 					+ "and had to be lowered to fit memory constraints "

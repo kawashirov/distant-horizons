@@ -25,7 +25,6 @@ import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.objects.LodChunk;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
@@ -58,7 +57,7 @@ public class LodNodeBuilder
 {
 	private ExecutorService lodGenThreadPool = Executors.newSingleThreadExecutor();
 	
-	public static final int CHUNK_DATA_WIDTH = LodQuadTreeNode.CHUNK_WIDTH;
+	public static final int CHUNK_DATA_WIDTH = LodUtil.CHUNK_WIDTH;
 	public static final int CHUNK_SECTION_HEIGHT = CHUNK_DATA_WIDTH;
 	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
 	
@@ -166,7 +165,7 @@ public class LodNodeBuilder
 			}
 			else
 			{
-				height = determineHeightPoint(chunk.getOrCreateHeightmapUnprimed(LodChunk.DEFAULT_HEIGHTMAP), startX,
+				height = determineHeightPoint(chunk.getOrCreateHeightmapUnprimed(LodUtil.DEFAULT_HEIGHTMAP), startX,
 						startZ, endX, endZ);
 				depth = 0;
 			}

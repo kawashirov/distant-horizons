@@ -19,7 +19,7 @@ package com.seibel.lod.render;
 
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.handlers.LodConfig;
-import com.seibel.lod.objects.LodQuadTreeNode;
+import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.ChunkPos;
@@ -94,7 +94,7 @@ public class RenderUtil
 		// calculate the max amount of buffer memory needed (in bytes)
 		return numbChunksWide * numbChunksWide *
 				LodConfig.CLIENT.lodTemplate.get().
-				getBufferMemoryForSingleLod(LodQuadTreeNode.CHUNK_LEVEL);
+				getBufferMemoryForSingleLod(LodUtil.CHUNK_DETAIL_LEVEL);
 	}
 	
 	/**

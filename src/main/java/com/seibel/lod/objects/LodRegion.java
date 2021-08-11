@@ -17,6 +17,8 @@
  */
 package com.seibel.lod.objects;
 
+import com.seibel.lod.util.LodUtil;
+
 /**
  * A LodRegion is a 32x32
  * 2D array of LodChunk objects.
@@ -28,9 +30,6 @@ package com.seibel.lod.objects;
  */
 public class LodRegion
 {
-	/** number of chunks wide */
-	public static final int SIZE = 32;
-	
 	/**	X coordinate of this region */
 	public final int x;
 	/** Z coordinate of this region */
@@ -44,7 +43,7 @@ public class LodRegion
 		x = regionX;
 		z = regionZ;
 		
-		chunks = new LodChunk[SIZE][SIZE];
+		chunks = new LodChunk[LodUtil.REGION_WIDTH_IN_CHUNKS][LodUtil.REGION_WIDTH_IN_CHUNKS];
 	}
 	
 	
@@ -59,8 +58,8 @@ public class LodRegion
 		// the region will negative first, therefore we don't have to
 		// store the LOD chunks at negative indexes since we search 
 		// LOD the region first
-		int xIndex = Math.abs(lod.x % SIZE);
-		int zIndex = Math.abs(lod.z % SIZE);
+		int xIndex = Math.abs(lod.x % LodUtil.REGION_WIDTH_IN_CHUNKS);
+		int zIndex = Math.abs(lod.z % LodUtil.REGION_WIDTH_IN_CHUNKS);
 		
 		chunks[xIndex][zIndex] = lod;
 	}
@@ -75,8 +74,8 @@ public class LodRegion
 	public LodChunk getLod(int chunkX, int chunkZ)
 	{
 		// since we add LOD's with ABS, we get them the same way
-		int arrayX = Math.abs(chunkX % SIZE);
-		int arrayZ = Math.abs(chunkZ % SIZE);
+		int arrayX = Math.abs(chunkX % LodUtil.REGION_WIDTH_IN_CHUNKS);
+		int arrayZ = Math.abs(chunkZ % LodUtil.REGION_WIDTH_IN_CHUNKS);
 		
 		return chunks[arrayX][arrayZ];
 	}

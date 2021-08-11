@@ -17,6 +17,8 @@
  */
 package com.seibel.lod.objects;
 
+import com.seibel.lod.util.LodUtil;
+
 import net.minecraft.util.math.ChunkPos;
 
 /**
@@ -51,8 +53,8 @@ public class RegionPos
 	public RegionPos(ChunkPos pos)
 	{
 		RegionPos rPos = new RegionPos();
-		x = pos.x / LodQuadTreeNode.REGION_WIDTH;
-		z = pos.z / LodQuadTreeNode.REGION_WIDTH;
+		x = pos.x / LodUtil.REGION_WIDTH;
+		z = pos.z / LodUtil.REGION_WIDTH;
 		
 		// prevent issues if X/Z is negative and less than 16
 		if (pos.x < 0)

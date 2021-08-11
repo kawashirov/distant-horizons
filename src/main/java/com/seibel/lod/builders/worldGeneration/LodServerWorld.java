@@ -23,7 +23,7 @@ import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import com.seibel.lod.objects.LodChunk;
+import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -89,13 +89,13 @@ public class LodServerWorld implements ISeedReader {
 	public int getHeight(Type heightmapType, int x, int z)
 	{
 		// make sure the block position is set relative to the chunk
-		x = x % LodChunk.WIDTH;
+		x = x % LodUtil.CHUNK_WIDTH;
 		x = (x < 0) ? x + 16 : x;
 		
-		z = z % LodChunk.WIDTH;
+		z = z % LodUtil.CHUNK_WIDTH;
 		z = (z < 0) ? z + 16 : z;
 		
-		return chunk.getOrCreateHeightmapUnprimed(LodChunk.DEFAULT_HEIGHTMAP).getFirstAvailable(x, z);
+		return chunk.getOrCreateHeightmapUnprimed(LodUtil.DEFAULT_HEIGHTMAP).getFirstAvailable(x, z);
 	}
 	
 	@Override

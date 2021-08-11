@@ -20,7 +20,7 @@ package com.seibel.lod.objects;
 import java.awt.Color;
 import java.util.Objects;
 
-import com.seibel.lod.handlers.LodDimensionFileHandler;
+import com.seibel.lod.handlers.LodQuadTreeDimensionFileHandler;
 import com.seibel.lod.util.LodUtil;
 
 /**
@@ -33,7 +33,7 @@ import com.seibel.lod.util.LodUtil;
 public class LodDataPoint
 {
 	/** This is what separates each piece of data in the toData method */
-	private static final char DATA_DELIMITER = LodDimensionFileHandler.DATA_DELIMITER;
+	private static final char DATA_DELIMITER = LodQuadTreeDimensionFileHandler.DATA_DELIMITER;
 	
 	/** this is how many pieces of data are exported when toData is called */
 	public static final int NUMBER_OF_DELIMITERS = 5;

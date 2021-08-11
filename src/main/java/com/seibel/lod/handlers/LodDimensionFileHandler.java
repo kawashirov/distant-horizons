@@ -41,10 +41,6 @@ import com.seibel.lod.proxy.ClientProxy;
  */
 public class LodDimensionFileHandler
 {
-	/** This is what separates each piece of data */
-	public static final char DATA_DELIMITER = ',';
-	
-	
 	private LodDimension loadedDimension = null;
 	public long regionLastWriteTime[][];
 	
@@ -100,7 +96,7 @@ public class LodDimensionFileHandler
 	public LodRegion loadRegionFromFile(int regionX, int regionZ)
 	{
 		
-		String fileName = getFileNameAndPathForRegion(regionX, regionZ, LodConfig.CLIENT.lodDetail.get());
+		String fileName = getFileNameAndPathForRegion(regionX, regionZ, LodConfig.CLIENT.maxDrawDetail.get());
 		
 		File f = new File(fileName);
 		
@@ -175,7 +171,7 @@ public class LodDimensionFileHandler
 				try
 				{
 					// convert each line into an LOD object and add it to the region
-					LodChunk lod = new LodChunk(s, LodConfig.CLIENT.lodDetail.get());
+					LodChunk lod = new LodChunk(s, LodConfig.CLIENT.maxDrawDetail.get());
 					
 					region.addLod(lod);
 				}
@@ -251,7 +247,7 @@ public class LodDimensionFileHandler
 		int x = region.x;
 		int z = region.z;
 		
-		File f = new File(getFileNameAndPathForRegion(x, z, LodConfig.CLIENT.lodDetail.get()));
+		File f = new File(getFileNameAndPathForRegion(x, z, LodConfig.CLIENT.maxDrawDetail.get()));
 		
 		try
 		{

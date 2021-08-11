@@ -59,7 +59,9 @@ public class LodConfig
 		
 		public ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
 		
-		public ForgeConfigSpec.EnumValue<LodDetail> lodDetail;
+		public ForgeConfigSpec.EnumValue<LodDetail> maxDrawDetail;
+		
+		public ForgeConfigSpec.EnumValue<LodDetail> maxGenerationDetail;
 		
 		public ForgeConfigSpec.EnumValue<DistanceGenerationMode> distanceGenerationMode;
 		
@@ -76,6 +78,8 @@ public class LodConfig
 		public ForgeConfigSpec.DoubleValue brightnessMultiplier;
 		
 		public ForgeConfigSpec.DoubleValue saturationMultiplier;
+		
+		
 		
 		
 		Client(ForgeConfigSpec.Builder builder)
@@ -123,7 +127,8 @@ public class LodConfig
 	                		+ " " + "         unless a neighboring chunk is at a significantly different height. \n")
 	                .defineEnum("lodTemplate", LodTemplate.CUBIC);
 	        
-	        lodDetail = builder
+	        // TODO comment
+	        maxDrawDetail = builder
 	                .comment("\n\n"
 	                		+ " How detailed should the LODs be? \n"
 	                		+ " " + LodDetail.SINGLE.toString() + ": render 1 LOD for each Chunk. \n"
@@ -131,6 +136,17 @@ public class LodConfig
             				+ " " + LodDetail.QUAD.toString() +   ": render 16 LODs for each Chunk. \n"
             				+ " " + LodDetail.HALF.toString() +   ": render 64 LODs for each Chunk. \n")
 	                .defineEnum("lodGeometryQuality", LodDetail.DOUBLE);
+	        
+	        // TODO comment
+	        maxGenerationDetail = builder
+	                .comment("\n\n"
+	                		+ " How detailed should the LODs be? \n"
+	                		+ " " + LodDetail.SINGLE.toString() + ": render 1 LOD for each Chunk. \n"
+            				+ " " + LodDetail.DOUBLE.toString() + ": render 4 LODs for each Chunk. \n"
+            				+ " " + LodDetail.QUAD.toString() +   ": render 16 LODs for each Chunk. \n"
+            				+ " " + LodDetail.HALF.toString() +   ": render 64 LODs for each Chunk. \n")
+	                .defineEnum("lodGeometryQuality", LodDetail.DOUBLE);
+	        
 	        
 	        lodChunkRadiusMultiplier = builder
 	                .comment("\n\n"

@@ -60,8 +60,8 @@ public class LodChunkBuilder
 	public int regionWidth = 5;
 	
 	
-	public static final int CHUNK_DATA_WIDTH = LodChunk.WIDTH;
-	public static final int CHUNK_SECTION_HEIGHT = LodChunk.WIDTH;
+	public static final int CHUNK_DATA_WIDTH = LodUtil.CHUNK_WIDTH;
+	public static final int CHUNK_SECTION_HEIGHT = LodUtil.CHUNK_WIDTH;
 	
 	
 
@@ -155,7 +155,7 @@ public class LodChunkBuilder
 			throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
 		
 		
-		LodDetail detail = LodConfig.CLIENT.lodDetail.get();
+		LodDetail detail = LodConfig.CLIENT.maxGenerationDetail.get();
 		LodDataPoint[][] dataPoints = new LodDataPoint[detail.dataPointLengthCount][detail.dataPointLengthCount];
 		
 		for(int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++)
@@ -180,7 +180,7 @@ public class LodChunkBuilder
 			}
 			else
 			{
-				height = determineHeightPoint(chunk.getOrCreateHeightmapUnprimed(LodChunk.DEFAULT_HEIGHTMAP), startX, startZ, endX, endZ);
+				height = determineHeightPoint(chunk.getOrCreateHeightmapUnprimed(LodUtil.DEFAULT_HEIGHTMAP), startX, startZ, endX, endZ);
 				depth = 0;
 			}
 			

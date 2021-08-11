@@ -34,8 +34,6 @@ import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 
-import net.minecraft.util.math.ChunkPos;
-
 /**
  * This object handles creating LodRegions
  * from files and saving LodRegion objects

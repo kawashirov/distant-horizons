@@ -54,7 +54,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		
 		// Add this LOD to the BufferBuilder
 		// using the quality setting set by the config
-		LodDetail detail = LodConfig.CLIENT.lodDetail.get();
+		LodDetail detail = LodConfig.CLIENT.maxDrawDetail.get();
 		
 		// returns null if the lod is empty at the given location
 		bbox = generateBoundingBox(

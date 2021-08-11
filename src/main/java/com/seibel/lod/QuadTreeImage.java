@@ -44,6 +44,7 @@ import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.util.BiomeColorsUtils;
+import com.seibel.lod.util.LodUtil;
 
 import kaptainwutax.biomeutils.source.OverworldBiomeSource;
 import kaptainwutax.mcutils.version.MCVersion;
@@ -154,8 +155,8 @@ public class QuadTreeImage extends JPanel
                     int centerX = node.center.getX();
                     int centerZ = node.center.getZ();
                     int width = node.width;
-                    byte otherLevel = LodQuadTreeNode.BLOCK_LEVEL;
-                    int otherWidth = LodQuadTreeNode.BLOCK_WIDTH;
+                    byte otherLevel = LodUtil.BLOCK_DETAIL_LEVEL;
+                    int otherWidth = LodUtil.BLOCK_WIDTH;
 
                     List<Integer> posXs = new ArrayList<>();
                     List<Integer> posZs = new ArrayList<>();
