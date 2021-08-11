@@ -172,7 +172,7 @@ public class LodNodeBufferBuilder
 					
 					// set where this square will be drawn in the world
 					double xOffset = (LodQuadTreeNode.CHUNK_WIDTH * i) + // offset by the number of LOD blocks
-							startX;
+							startX; // offset so the center LOD block is centered underneath the player
 					double yOffset = 0;
 					double zOffset = (LodQuadTreeNode.CHUNK_WIDTH * j) + startZ;
 					
