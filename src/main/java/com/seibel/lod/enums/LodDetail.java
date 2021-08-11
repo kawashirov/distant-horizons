@@ -23,24 +23,24 @@ import com.seibel.lod.objects.LodDataPoint;
  * single, double, quad, half, full
  * 
  * @author James Seibel
- * @version 07-26-2021
+ * @version 8-10-2021
  */
 public enum LodDetail
 {
 	/** render 1 LOD for each chunk */
-	SINGLE(1, 4, 4),
+	SINGLE(1, 4),
 	
 	/** render 4 LODs for each chunk */
-	DOUBLE(2, 2, 3),
+	DOUBLE(2, 3),
 	
 	/** render 16 LODs for each chunk */
-	QUAD(4, 1, 2),
+	QUAD(4, 2),
 	
 	/** render 64 LODs for each chunk */
-	HALF(8, 0, 1),
+	HALF(8, 1),
 	
 	/** render 256 LODs for each chunk */
-	FULL(16, 0 , 0);
+	FULL(16, 0);
 	
 	
 	/** How many DataPoints should 
@@ -48,6 +48,7 @@ public enum LodDetail
 	public final int dataPointLengthCount;
 	/** How wide each LOD DataPoint is */
 	public final int dataPointWidth;
+	/** This is the same as detailLevel in LodQuadTreeNode */
 	public final int detailLevel;
 	
 	/* Start/End X/Z give the block positions
@@ -62,20 +63,12 @@ public enum LodDetail
 	 * when creating a LodChunk with this detail level */
 	public final int lodChunkStringDelimiterCount;
 	
-	/** in LodBufferBuilder some detail options don't render
-	 * in the correct spot, this number fixes that.
-	 * TODO find out why this is needed and see if it
-	 * needed / could be removed */
-	public final int offset;
 	
-	
-	private LodDetail(int newLengthCount, int newOffset, int newDetail)
+	private LodDetail(int newLengthCount, int newDetailLevel)
 	{
-		detailLevel = newDetail;
+		detailLevel = newDetailLevel;
 		dataPointLengthCount = newLengthCount;
 		dataPointWidth = 16 / dataPointLengthCount;
-		
-		offset = newOffset;
 		
 		startX = new int[dataPointLengthCount * dataPointLengthCount];
 		endX = new int[dataPointLengthCount * dataPointLengthCount];

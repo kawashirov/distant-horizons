@@ -162,9 +162,9 @@ public class LodBufferBuilder
 					// set where this square will be drawn in the world
 					double xOffset = (LodChunk.WIDTH * i) + // offset by the number of LOD blocks
 									startX + // offset so the center LOD block is centered underneath the player
-									detail.offset; // truncation(?) correction
+									8; //detail.offset; // truncation(?) correction
 					double yOffset = 0;
-					double zOffset = (LodChunk.WIDTH * j) + startZ + detail.offset;
+					double zOffset = (LodChunk.WIDTH * j) + startZ + 8;//detail.offset;
 					
 					LodChunk lod = lodDim.getLodFromCoordinates(chunkX, chunkZ);
 					
