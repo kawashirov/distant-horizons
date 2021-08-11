@@ -297,6 +297,23 @@ public class LodNodeBufferBuilder
 					LodConfig.CLIENT.lodTemplate.get().
 					template.addLodToBuffer(currentBuffer, lodDim, lod,
 							xOffset , yOffset, zOffset, renderer.debugging, detail);
+					/*
+					LodDetail detail = LodConfig.CLIENT.lodDetail.get();
+					for(int x = 0; x < detail.dataPointLengthCount; x++){
+						for(int z = 0; z < detail.dataPointLengthCount; z++) {
+							int posX = LodUtil.convertLevelPos(lod.startBlockPos.getX() + (x*detail.dataPointWidth), 0, detail.detailLevel);
+							int posZ = LodUtil.convertLevelPos(lod.startBlockPos.getZ() + (z*detail.dataPointWidth), 0, detail.detailLevel);
+							LodQuadTreeNode newLod = lodDim.getLodFromCoordinates(posX, posZ, detail.detailLevel);
+							System.out.print("printing ");
+							System.out.println(newLod);
+							if(newLod != null) {
+								LodConfig.CLIENT.lodTemplate.get().
+										template.addLodToBuffer(currentBuffer, lodDim, newLod,
+										xOffset + (x*detail.dataPointWidth), yOffset, zOffset + (z*detail.dataPointWidth), renderer.debugging);
+							}
+						}
+					}
+					 */
 				}
 			}
 			
