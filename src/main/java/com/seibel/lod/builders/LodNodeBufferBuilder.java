@@ -275,15 +275,20 @@ public class LodNodeBufferBuilder
 					// what detail level should this LOD be drawn at?
 					int distance = (int) Math.sqrt(Math.pow((mc.player.getX() - lod.startBlockPos.getX()),2) + Math.pow((mc.player.getZ() - lod.startBlockPos.getZ()),2));
 					LodDetail detail;
+					
 					if(distance < (numbChunksWide / 2) * 16 * 0.2)
+					{
+						detail = LodDetail.FULL;
+					}
+					else if(distance < (numbChunksWide / 2) * 16 * 0.4)
 					{
 						detail = LodDetail.HALF;
 					}
-					else if(distance < (numbChunksWide / 2) * 16 * 0.5)
+					else if(distance < (numbChunksWide / 2) * 16 * 0.6)
 					{
 						detail = LodDetail.QUAD;
 					}
-					else if(distance < (numbChunksWide / 2) * 16 * 0.75)
+					else if(distance < (numbChunksWide / 2) * 16 * 0.8)
 					{
 						detail = LodDetail.DOUBLE;
 					}
