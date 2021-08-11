@@ -37,7 +37,7 @@ import net.minecraft.world.server.ServerWorld;
  * This class holds methods and constants that may be used in multiple places.
  * 
  * @author James Seibel
- * @version 8-10-2021
+ * @version 8-11-2021
  */
 public class LodUtil
 {
@@ -77,7 +77,7 @@ public class LodUtil
 	public static final int REGION_WIDTH_IN_CHUNKS = 32;
 	
 	
-	/** If we ever have to use a heightmap for any reason, use this one. */
+	/** If we ever need to use a heightmap for any reason, use this one. */
 	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
 	
 	

@@ -22,7 +22,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.seibel.lod.builders.LodNodeBufferBuilder;
 import com.seibel.lod.builders.LodNodeBuilder;
-import com.seibel.lod.builders.worldGeneration.LodChunkGenWorker;
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.FogDistance;
@@ -206,7 +205,6 @@ public class ClientProxy
 		{
 			// if this isn't done unfinished tasks may be left in the queue
 			// preventing new LodChunks form being generated
-			LodChunkGenWorker.restartExecuterService();
 			LodNodeGenWorker.restartExecuterService();
 			
 			lodBufferBuilder.numberOfChunksWaitingToGenerate.set(0);
