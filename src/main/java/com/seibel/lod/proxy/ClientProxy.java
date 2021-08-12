@@ -48,16 +48,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of this program.
  * 
  * @author James_Seibel
- * @version 8-8-2021
+ * @version 8-11-2021
  */
 public class ClientProxy
 {
 	public static final Logger LOGGER = LogManager.getLogger("LOD");
-	
-//	private static LodWorld lodWorld = new LodWorld();
-//	private static LodChunkBuilder lodChunkBuilder = new LodChunkBuilder();
-//	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder(lodChunkBuilder);
-//	private static LodRenderer renderer = new LodRenderer(lodBufferBuilder);
 	
 	private static LodQuadTreeWorld lodWorld = new LodQuadTreeWorld();
 	private static LodNodeBuilder lodNodeBuilder = new LodNodeBuilder();
@@ -157,8 +152,8 @@ public class ClientProxy
 //		LodConfig.CLIENT.drawLODs.set(true);
 //		LodConfig.CLIENT.debugMode.set(false);
 		
-		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.QUAD);
-		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.QUAD);
+		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.FULL);
+		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.FULL);
 		
 		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
 		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);

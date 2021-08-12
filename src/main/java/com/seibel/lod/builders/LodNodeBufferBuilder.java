@@ -150,6 +150,9 @@ public class LodNodeBufferBuilder
 			int minChunkDist = Integer.MAX_VALUE;
 			ChunkPos playerChunkPos = new ChunkPos((int)playerX / LodUtil.CHUNK_WIDTH, (int)playerZ / LodUtil.CHUNK_WIDTH);
 			
+			// numbChunksWide / 2 = radius
+			// * 16 = to block coordinates
+			int maxDistance = (numbChunksWide / 2) * 16;
 			
 			// generate our new buildable buffers
 			buildableNearBuffer.begin(GL11.GL_QUADS, LodNodeRenderer.LOD_VERTEX_FORMAT);
@@ -165,7 +168,8 @@ public class LodNodeBufferBuilder
 					
 					// skip any chunks that Minecraft is going to render
 					if (isCoordInCenterArea(i, j, (numbChunksWide / 2))
-							&& renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkX, chunkZ))) {
+							&& renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkX, chunkZ)))
+					{
 						continue;
 					}
 					
@@ -272,30 +276,10 @@ public class LodNodeBufferBuilder
 						currentBuffer = buildableFarBuffer;
 					
 					
-					// what detail level should this LOD be drawn at?
-					int distance = (int) Math.sqrt(Math.pow((mc.player.getX() - lod.startBlockPos.getX()),2) + Math.pow((mc.player.getZ() - lod.startBlockPos.getZ()),2));
-					LodDetail detail;
+					// determine detail level should this LOD be drawn at
+					int distance = (int) Math.sqrt(Math.pow((mc.player.getX() - lod.center.getX()),2) + Math.pow((mc.player.getZ() - lod.center.getZ()),2));
+					LodDetail detail = LodDetail.getDetailForDistance(LodConfig.CLIENT.maxDrawDetail.get(), distance, maxDistance);
 					
-					if(distance < (numbChunksWide / 2) * 16 * 0.2)
-					{
-						detail = LodDetail.FULL;
-					}
-					else if(distance < (numbChunksWide / 2) * 16 * 0.4)
-					{
-						detail = LodDetail.HALF;
-					}
-					else if(distance < (numbChunksWide / 2) * 16 * 0.6)
-					{
-						detail = LodDetail.QUAD;
-					}
-					else if(distance < (numbChunksWide / 2) * 16 * 0.8)
-					{
-						detail = LodDetail.DOUBLE;
-					}
-					else
-					{
-						detail = LodDetail.SINGLE;
-					}
 					
 					// get the desired LodTemplate and
 					// add this LOD to the buffer
