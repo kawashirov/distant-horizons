@@ -229,7 +229,7 @@ public class LodQuadTreeDimensionFileHandler
 			{
 				if(loadedDimension.isRegionDirty[i][j] && loadedDimension.regions[i][j] != null)
 				{
-					saveRegionToDisk(loadedDimension.regions[i][j]);
+					saveRegionToFile(loadedDimension.regions[i][j]);
 					loadedDimension.isRegionDirty[i][j] = false;
 				}
 			}
@@ -244,7 +244,7 @@ public class LodQuadTreeDimensionFileHandler
 	 * 2. This will save to the LodDimension that this
 	 * handler is associated with.
 	 */
-	private void saveRegionToDisk(LodQuadTree region)
+	private void saveRegionToFile(LodQuadTree region)
 	{
 		// convert to region coordinates
 		int x = region.getLodNodeData().posX;
