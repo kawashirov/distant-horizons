@@ -135,7 +135,7 @@ public class LodConfig
             				+ " " + LodDetail.DOUBLE.toString() + ": render 4 LODs for each Chunk. \n"
             				+ " " + LodDetail.QUAD.toString() +   ": render 16 LODs for each Chunk. \n"
             				+ " " + LodDetail.HALF.toString() +   ": render 64 LODs for each Chunk. \n")
-	                .defineEnum("lodGeometryQuality", LodDetail.DOUBLE);
+	                .defineEnum("lodDrawQuality", LodDetail.DOUBLE);
 	        
 	        // TODO comment
 	        maxGenerationDetail = builder
@@ -145,7 +145,7 @@ public class LodConfig
             				+ " " + LodDetail.DOUBLE.toString() + ": render 4 LODs for each Chunk. \n"
             				+ " " + LodDetail.QUAD.toString() +   ": render 16 LODs for each Chunk. \n"
             				+ " " + LodDetail.HALF.toString() +   ": render 64 LODs for each Chunk. \n")
-	                .defineEnum("lodGeometryQuality", LodDetail.DOUBLE);
+	                .defineEnum("lodGenerationQuality", LodDetail.DOUBLE);
 	        
 	        
 	        lodChunkRadiusMultiplier = builder
