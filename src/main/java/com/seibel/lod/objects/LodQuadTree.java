@@ -108,8 +108,7 @@ public class LodQuadTree
 	/**
 	 * Constructor for level 0 without LodNodeData (region level constructor)
 	 *
-	 * @param regionX indicate the x region position of the node
-	 * @param regionZ indicate the z region position of the node
+	 * @param regionPos indicate the region position of the node
 	 */
 	//maybe the use of useLevelCoordinate could be changed. I could use a builder to do all this work.
 	public LodQuadTree(RegionPos regionPos)
@@ -122,8 +121,7 @@ public class LodQuadTree
 	 *
 	 * @param parent parent of this node
 	 * @param level  level of this note
-	 * @param posX   position x in the level
-	 * @param posZ   position z in the level
+	 * @param regionPos position of the node
 	 */
 	public LodQuadTree(LodQuadTree parent, byte level, RegionPos regionPos)
 	{
@@ -366,7 +364,7 @@ public class LodQuadTree
 		lodNode.combineData(dataList);
 		
 		// update sub regions if requested
-		if (lodNode.detailLevel < LodUtil.REGION_DETAIL_LEVEL && recursiveUpdate)
+		if (lodNode.detailLevel < LodUtil.CHUNK_DETAIL_LEVEL && recursiveUpdate)
 		{
 			this.parent.updateRegion(recursiveUpdate);
 		}
@@ -439,10 +437,10 @@ public class LodQuadTree
 		int z = playerPos.getZ();
 		
 		List<Integer> distances = new ArrayList<>();
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startBlockPos.getX(), 2) + Math.pow(z - lodNode.startBlockPos.getZ(), 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startBlockPos.getX(), 2) + Math.pow(z - lodNode.endBlockPos.getZ(), 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endBlockPos.getX(), 2) + Math.pow(z - lodNode.startBlockPos.getZ(), 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endBlockPos.getX(), 2) + Math.pow(z - lodNode.endBlockPos.getZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStart().getX(), 2) + Math.pow(z - lodNode.getStart().getZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStart().getX(), 2) + Math.pow(z - lodNode.getEnd().getZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getEnd().getX(), 2) + Math.pow(z - lodNode.getStart().getZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getEnd().getX(), 2) + Math.pow(z - lodNode.getEnd().getZ(), 2)));
 		
 		int min = distances.stream().mapToInt(Integer::intValue).min().getAsInt();
 		int max = distances.stream().mapToInt(Integer::intValue).max().getAsInt();
@@ -451,7 +449,8 @@ public class LodQuadTree
 		
 		if (targetLevel <= lodNode.detailLevel && ((min <= maxDistance && max >= minDistance)))
 		{
-			// TODO why is !isNodeFull() here?
+			// TODO why is !isNodeFull() here? Becouse if a node is not full then at least one child is missing.
+			// if one child is missing then there would be a hole if you try to render all the other child
 			if (targetLevel == lodNode.detailLevel || !isNodeFull())
 			{
 				// we have either reached the right detail level or this tree isn't full 
@@ -493,10 +492,10 @@ public class LodQuadTree
 		int z = playerPos.getZ();
 		
 		List<Integer> distances = new ArrayList<>();
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startBlockPos.getX(), 2) + Math.pow(z - lodNode.startBlockPos.getZ(), 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.startBlockPos.getX(), 2) + Math.pow(z - lodNode.endBlockPos.getZ(), 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endBlockPos.getX(), 2) + Math.pow(z - lodNode.startBlockPos.getZ(), 2)));
-		distances.add((int) Math.sqrt(Math.pow(x - lodNode.endBlockPos.getX(), 2) + Math.pow(z - lodNode.endBlockPos.getZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStart().getX(), 2) + Math.pow(z - lodNode.getStart().getZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getStart().getX(), 2) + Math.pow(z - lodNode.getEnd().getZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getEnd().getX(), 2) + Math.pow(z - lodNode.getStart().getZ(), 2)));
+		distances.add((int) Math.sqrt(Math.pow(x - lodNode.getEnd().getX(), 2) + Math.pow(z - lodNode.getEnd().getZ(), 2)));
 		
 		int min = distances.stream().mapToInt(Integer::intValue).min().getAsInt();
 		int max = distances.stream().mapToInt(Integer::intValue).max().getAsInt();
@@ -566,10 +565,10 @@ public class LodQuadTree
 	 */
 	public boolean isCoordinateInQuadTree(BlockPos pos)
 	{
-		return (lodNode.startBlockPos.getX() * lodNode.width <= pos.getX() && 
-				lodNode.startBlockPos.getZ() * lodNode.width <= pos.getZ() && 
-				lodNode.endBlockPos.getX() * lodNode.width  >= pos.getX() && 
-				lodNode.endBlockPos.getZ() * lodNode.width  >= pos.getZ());
+		return (lodNode.getStart().getX() * lodNode.width <= pos.getX() &&
+				lodNode.getStart().getZ() * lodNode.width <= pos.getZ() &&
+				lodNode.getEnd().getX() * lodNode.width  >= pos.getX() &&
+				lodNode.getEnd().getZ() * lodNode.width  >= pos.getZ());
 	}
 	
 	

@@ -277,7 +277,7 @@ public class LodNodeBufferBuilder
 					
 					
 					// determine detail level should this LOD be drawn at
-					int distance = (int) Math.sqrt(Math.pow((mc.player.getX() - lod.center.getX()),2) + Math.pow((mc.player.getZ() - lod.center.getZ()),2));
+					int distance = (int) Math.sqrt(Math.pow((mc.player.getX() - lod.getCenter().getX()),2) + Math.pow((mc.player.getZ() - lod.getCenter().getZ()),2));
 					LodDetail detail = LodDetail.getDetailForDistance(LodConfig.CLIENT.maxDrawDetail.get(), distance, maxDistance);
 					
 					
