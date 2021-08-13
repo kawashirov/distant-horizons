@@ -24,6 +24,7 @@ import java.util.Objects;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodQuadTreeDimensionFileHandler;
 
+import kaptainwutax.mcutils.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.Heightmap;
 
@@ -67,20 +68,7 @@ public class LodQuadTreeNode
 	/** Indicates the width in blocks of this node. <br>
 	 * Goes from 1 to 512 */
 	public final short width;
-	
-	// these 4 value indicate the corner of the LOD block
-	// they can be named SW, SE, NW, NE as the cardinal direction.
-	// the start values should always be smaller than the end values.
-	// All this value could be calculated from level, posx, and posz
-	// so they could be removed and replaced with just a getter
-	public final BlockPos startBlockPos;
-	public final BlockPos endBlockPos;
-	
-	/**
-	 * Indicates the center of the LodNode in absolute block coordinates. This
-	 * can be used to calculate distance from the player.
-	 */
-	public final BlockPos center;
+
 	
 	/** holds the height, depth, and color data for this Node. */
 	private LodDataPoint lodDataPoint;
@@ -115,11 +103,6 @@ public class LodQuadTreeNode
 		this.posZ = posZ;
 		
 		width = (short) Math.pow(2, detailLevel);
-		
-		startBlockPos = new BlockPos(posX * width, 0, posZ * width);
-		endBlockPos = new BlockPos(startBlockPos.getX() + width - 1, 0, startBlockPos.getZ() + width - 1);
-		
-		center = new BlockPos(startBlockPos.getX() + width/2, 0, startBlockPos.getZ() + width/2);
 		
 		lodDataPoint = new LodDataPoint();
 		
@@ -176,11 +159,7 @@ public class LodQuadTreeNode
 		this.posZ = posZ;
 		
 		width = (short) Math.pow(2, detailLevel);
-		
-		startBlockPos = new BlockPos(posX * width, 0, posZ * width);
-		
-		endBlockPos = new BlockPos(startBlockPos.getX() + width - 1, 0, startBlockPos.getZ() + width - 1);
-		center = new BlockPos(startBlockPos.getX() + width/2, 0, startBlockPos.getZ() + width/2);
+
 		
 		this.lodDataPoint = lodDataPoint;
 		this.complexity = complexity;
@@ -189,7 +168,19 @@ public class LodQuadTreeNode
 		voidNode = false;
 		dontSave = false;
 	}
-	
+
+	public BlockPos getStart(){
+		return new BlockPos(posX * width, 0, posZ * width);
+	}
+
+	public BlockPos getEnd(){
+		return new BlockPos(posX * (width + 1) - 1, 0, posZ * (width + 1) - 1);
+	}
+
+	public BlockPos getCenter(){
+		return new BlockPos(posX * width + width/2, 0, posZ * width + width/2);
+	}
+
 	/**
 	 * @throws IllegalArgumentException if the data string doesn't have the correct number of delimited entries
 	 */
@@ -255,11 +246,6 @@ public class LodQuadTreeNode
 		
 		
 		width = (short) Math.pow(2, detailLevel);
-		
-		startBlockPos = new BlockPos(posX * width, 0, posZ * width);
-		endBlockPos = new BlockPos(startBlockPos.getX() + width - 1, 0, startBlockPos.getZ() + width - 1);
-		
-		center = new BlockPos(startBlockPos.getX() + width/2, 0, startBlockPos.getZ() + width/2);
 		
 		dirty = false;
 		dontSave = false;
