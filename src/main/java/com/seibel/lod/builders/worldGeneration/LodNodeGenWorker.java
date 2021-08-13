@@ -229,6 +229,10 @@ public class LodNodeGenWorker implements IWorker
 				}// if in range
 				
 			}
+			catch (Exception e)
+			{
+				//e.printStackTrace();
+			}
 			finally
 			{
 				// decrement how many threads are running
@@ -250,7 +254,6 @@ public class LodNodeGenWorker implements IWorker
 			
 			ServerChunkProvider chunkSource = serverWorld.getChunkSource();
 			ChunkGenerator chunkGen = chunkSource.generator;
-			
 			
 			// generate the terrain (this is thread safe)
 			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
@@ -346,7 +349,9 @@ public class LodNodeGenWorker implements IWorker
 				// generates the same and it looks really bad.
 				nodeList = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
 			}
-			for(LodQuadTreeNode node : nodeList) {
+			
+			for(LodQuadTreeNode node : nodeList)
+			{
 				lodDim.addNode(node);
 			}
 		}
