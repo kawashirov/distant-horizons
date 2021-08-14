@@ -336,7 +336,7 @@ public class LodQuadTree
 	{
 		for (int NS = 0; NS <= 1; NS++) {
 			for (int WE = 0; WE <= 1; WE++) {
-				setChild(NS,WE,null);
+				children[NS][WE] = null;
 			}
 		}
 	}
