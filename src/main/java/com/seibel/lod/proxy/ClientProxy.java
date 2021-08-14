@@ -49,7 +49,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of this program.
  * 
  * @author James_Seibel
- * @version 8-11-2021
+ * @version 8-14-2021
  */
 public class ClientProxy
 {
@@ -232,7 +232,6 @@ public class ClientProxy
 			event.getClass() == BlockEvent.PortalSpawnEvent.class)
 		{
 			// recreate the LOD where the blocks were changed
-			//lodChunkBuilder.generateLodChunkAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld());
 			lodNodeBuilder.generateLodNodeAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld());
 		}
 	}
