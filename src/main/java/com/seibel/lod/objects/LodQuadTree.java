@@ -328,7 +328,32 @@ public class LodQuadTree
 		
 		children[NS][WE] = new LodQuadTree(this, (byte) (lodNode.detailLevel - 1), new RegionPos(childRegionX, childRegionZ));
 	}
-	
+
+	/**
+	 * Delete all the children
+	 */
+	public void deleteChildren()
+	{
+		children = new LodQuadTree[2][2];
+	}
+
+	/**
+	 * Cut the tree at the given target level
+	 */
+	public void cutTreeAtLevel(byte targetLevel) {
+		if (targetLevel <= lodNode.detailLevel) {
+			deleteChildren();
+		} else {
+			for (int NS = 0; NS <= 1; NS++) {
+				for (int WE = 0; WE <= 1; WE++) {
+					if (getChild(NS, WE) != null) {
+						getChild(NS, WE).cutTreeAtLevel(targetLevel);
+					}
+				}
+			}
+		}
+	}
+
 	/**
 	 * Update this region's data, specifically levelFull and lodNodeData.
 	 *
