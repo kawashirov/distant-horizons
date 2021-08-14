@@ -19,13 +19,14 @@ package com.seibel.lod.objects;
 
 import com.seibel.lod.util.LodUtil;
 
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 
 /**
  * This object is similar to ChunkPos or BlockPos.
  * 
  * @author James Seibel
- * @version 8-8-2021
+ * @version 8-14-2021
  */
 public class RegionPos
 {
@@ -50,21 +51,15 @@ public class RegionPos
 		z = newZ;
 	}
 	
+	public RegionPos(BlockPos pos)
+	{
+		this(new ChunkPos(pos));
+	}
+	
 	public RegionPos(ChunkPos pos)
 	{
-		RegionPos rPos = new RegionPos();
-		x = pos.x / LodUtil.REGION_WIDTH;
-		z = pos.z / LodUtil.REGION_WIDTH;
-		
-		// prevent issues if X/Z is negative and less than 16
-		if (pos.x < 0)
-		{
-			x = (Math.abs(rPos.x) * -1) - 1; 
-		}
-		if (pos.z < 0)
-		{
-			z = (Math.abs(rPos.z) * -1) - 1; 
-		}
+		x = Math.floorDiv(pos.x, LodUtil.REGION_WIDTH_IN_CHUNKS);
+		z = Math.floorDiv(pos.z, LodUtil.REGION_WIDTH_IN_CHUNKS);
 	}
 	
 }
