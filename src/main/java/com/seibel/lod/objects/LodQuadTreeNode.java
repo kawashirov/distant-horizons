@@ -24,7 +24,6 @@ import java.util.Objects;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodQuadTreeDimensionFileHandler;
 
-import kaptainwutax.mcutils.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.Heightmap;
 
@@ -284,7 +283,9 @@ public class LodQuadTreeNode
 		}
 		else
 		{
-			// TODO would it be better to use the average height/depth?
+			// TODO use the average height/depth, otherwise some areas look flat
+			// 		when they shouldn't.
+			
 			// get the lowest height from the all the given LodQuadTreeNodes
 			short height = (short) dataList.stream().mapToInt(x -> (int) x.getLodDataPoint().height).min().getAsInt();
 			// get the highest depth
