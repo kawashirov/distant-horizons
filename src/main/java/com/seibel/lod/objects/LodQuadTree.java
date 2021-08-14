@@ -334,7 +334,11 @@ public class LodQuadTree
 	 */
 	public void deleteChildren()
 	{
-		children = new LodQuadTree[2][2];
+		for (int NS = 0; NS <= 1; NS++) {
+			for (int WE = 0; WE <= 1; WE++) {
+				setChild(NS,WE,null);
+			}
+		}
 	}
 
 	/**
