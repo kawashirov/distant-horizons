@@ -364,7 +364,7 @@ public class LodQuadTree
 		lodNode.combineData(dataList);
 		
 		// update sub regions if requested
-		if (lodNode.detailLevel < LodUtil.CHUNK_DETAIL_LEVEL && recursiveUpdate)
+		if (lodNode.detailLevel < LodUtil.REGION_DETAIL_LEVEL && recursiveUpdate)
 		{
 			this.parent.updateRegion(recursiveUpdate);
 		}
