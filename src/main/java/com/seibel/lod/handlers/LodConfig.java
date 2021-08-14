@@ -127,24 +127,24 @@ public class LodConfig
 	                		+ " " + "         unless a neighboring chunk is at a significantly different height. \n")
 	                .defineEnum("lodTemplate", LodTemplate.CUBIC);
 	        
-	        // TODO comment
 	        maxDrawDetail = builder
 	                .comment("\n\n"
-	                		+ " How detailed should the LODs be? \n"
+	                		+ " What is the maximum detail level that LODs should be drawn at? \n"
 	                		+ " " + LodDetail.SINGLE.toString() + ": render 1 LOD for each Chunk. \n"
             				+ " " + LodDetail.DOUBLE.toString() + ": render 4 LODs for each Chunk. \n"
             				+ " " + LodDetail.QUAD.toString() +   ": render 16 LODs for each Chunk. \n"
-            				+ " " + LodDetail.HALF.toString() +   ": render 64 LODs for each Chunk. \n")
+            				+ " " + LodDetail.HALF.toString() +   ": render 64 LODs for each Chunk. \n"
+            				+ " " + LodDetail.FULL.toString() +   ": render 256 LODs for each Chunk. \n")
 	                .defineEnum("lodDrawQuality", LodDetail.DOUBLE);
 	        
-	        // TODO comment
 	        maxGenerationDetail = builder
 	                .comment("\n\n"
-	                		+ " How detailed should the LODs be? \n"
+	                		+ " What is the maximum detail level that LODs should be generated at? \n"
 	                		+ " " + LodDetail.SINGLE.toString() + ": render 1 LOD for each Chunk. \n"
             				+ " " + LodDetail.DOUBLE.toString() + ": render 4 LODs for each Chunk. \n"
             				+ " " + LodDetail.QUAD.toString() +   ": render 16 LODs for each Chunk. \n"
-            				+ " " + LodDetail.HALF.toString() +   ": render 64 LODs for each Chunk. \n")
+            				+ " " + LodDetail.HALF.toString() +   ": render 64 LODs for each Chunk. \n"
+            				+ " " + LodDetail.FULL.toString() +   ": render 256 LODs for each Chunk. \n")
 	                .defineEnum("lodGenerationQuality", LodDetail.DOUBLE);
 	        
 	        
