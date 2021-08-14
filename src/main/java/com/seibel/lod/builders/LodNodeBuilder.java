@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
+import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
@@ -139,7 +140,7 @@ public class LodNodeBuilder
 	public List<LodQuadTreeNode> generateLodNodeFromChunk(IChunk chunk, LodBuilderConfig config)
 			throws IllegalArgumentException
 	{
-		LodDetail detail = LodDetail.FULL;
+		LodDetail detail = LodConfig.CLIENT.maxGenerationDetail.get();
 		List<LodQuadTreeNode> lodNodeList = new ArrayList<>();
 		if (chunk == null)
 			throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
