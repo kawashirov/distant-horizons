@@ -116,6 +116,8 @@ public class LodQuadTreeWorld
 		if (lodDimensions == null)
 			throw new IllegalStateException("LodWorld hasn't been given a world yet.");
 		
+		saveAllDimensions();
+		
 		for (DimensionType key : lodDimensions.keySet())
 			lodDimensions.get(key).setRegionWidth(newWidth);
 	}

@@ -86,15 +86,18 @@ public class ClientProxy
 		if (mc == null || mc.player == null || !lodWorld.getIsWorldLoaded())
 			return;
 		
-		// update each regions' width to match the new render distance
-		int newWidth = Math.max(4, 
-				// TODO is this logic good?
-				(mc.options.renderDistance * LodUtil.CHUNK_WIDTH * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get()) / LodUtil.REGION_WIDTH_IN_CHUNKS
-				);
+		
+		// calculate how wide the dimension(s) should be in regions
+		int chunksWide = (mc.options.renderDistance * 2) * LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
+		int newWidth = (int)Math.ceil(chunksWide / (float) LodUtil.REGION_WIDTH_IN_CHUNKS);
+		newWidth = (newWidth % 2 == 0) ? (newWidth += 1) : (newWidth += 2); // make sure we have a odd number of regions
+		
 		if (lodNodeBuilder.regionWidth != newWidth)
 		{
 			lodWorld.resizeDimensionRegionWidth(newWidth);
 			lodNodeBuilder.regionWidth = newWidth;
+			
+			LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );
 			
 			// skip this frame, hopefully the lodWorld
 			// should have everything set up by then
@@ -105,18 +108,15 @@ public class ClientProxy
 		if (lodDim == null)
 			return;
 		
-		
-		// offset the regions
-		double playerX = mc.player.getX();
-		double playerZ = mc.player.getZ();
-		
-		int xOffset = ((int)playerX / (LodUtil.CHUNK_WIDTH * LodUtil.REGION_WIDTH_IN_CHUNKS)) - lodDim.getCenterX();
-		int zOffset = ((int)playerZ / (LodUtil.CHUNK_WIDTH * LodUtil.REGION_WIDTH_IN_CHUNKS)) - lodDim.getCenterZ();
-		
-		if (xOffset != 0 || zOffset != 0)
+		// make sure the dimension is centered
+		RegionPos playerRegionPos = new RegionPos(mc.player.blockPosition());
+		RegionPos worldRegionOffset = new RegionPos(playerRegionPos.x - lodDim.getCenterX(), playerRegionPos.z - lodDim.getCenterZ()); 
+		if (worldRegionOffset.x != 0 || worldRegionOffset.z != 0)
 		{
 			lodWorld.saveAllDimensions();
-			lodDim.move(new RegionPos(xOffset, zOffset));
+			lodDim.move(worldRegionOffset);
+			
+			//LOGGER.info("offset: " + worldRegionOffset.x + "," + worldRegionOffset.z + "\t center: " + lodDim.getCenterX() + "," + lodDim.getCenterZ());
 		}
 		
 		// just here to prevent eclipse removing the imports when I save the file
@@ -143,7 +143,7 @@ public class ClientProxy
 		renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
 		
 		profiler.pop(); // end LOD
-		profiler.push("terrain"); // restart terrain
+		profiler.push("terrain"); // restart "terrain"
 	}	
 	
 	
@@ -160,10 +160,10 @@ public class ClientProxy
 //		LodConfig.CLIENT.drawLODs.set(true);
 //		LodConfig.CLIENT.debugMode.set(false);
 		
-		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.FULL);
-		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.FULL);
+		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.SINGLE);
+		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.SINGLE);
 		
-		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
+		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(16);
 		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.NEVER_DRAW_FOG);
 		LodConfig.CLIENT.shadingMode.set(ShadingMode.DARKEN_SIDES);
