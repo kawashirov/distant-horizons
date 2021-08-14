@@ -34,6 +34,7 @@ import com.seibel.lod.objects.LodQuadTreeWorld;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.render.LodNodeRenderer;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.ObjectSizeCalculator;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.profiler.IProfiler;
@@ -117,6 +118,12 @@ public class ClientProxy
 			lodDim.move(new RegionPos(xOffset, zOffset));
 		}
 		
+		// just here to prevent eclipse removing the imports when I save the file
+		ObjectSizeCalculator.getObjectSize(null);
+		
+		// uncomment once the LODs have fully generated to see the memory usage
+//		long size = ObjectSizeCalculator.getObjectSize(lodDim);
+//		LOGGER.info(size);
 		
 		
 		// comment out when creating a release
@@ -157,15 +164,15 @@ public class ClientProxy
 		
 		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
 		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
-		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
+		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.NEVER_DRAW_FOG);
 		LodConfig.CLIENT.shadingMode.set(ShadingMode.DARKEN_SIDES);
 //		LodConfig.CLIENT.brightnessMultiplier.set(1.0);
 //		LodConfig.CLIENT.saturationMultiplier.set(1.0);
 		
-		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
+		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
 		
-//		LOGGER.info(lodBufferBuilder.numberOfChunksWaitingToGenerate.get());
+		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(16);
 	}
 	
 	
@@ -176,7 +183,6 @@ public class ClientProxy
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
-		//lodChunkBuilder.generateLodChunkAsync(event.getChunk(), lodWorld, event.getWorld());
 		lodNodeBuilder.generateLodNodeAsync(event.getChunk(), lodWorld, event.getWorld());
 	}
 	
