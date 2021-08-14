@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,7 +42,7 @@ import com.seibel.lod.proxy.ClientProxy;
  * to file.
  * 
  * @author James Seibel
- * @version 8-7-2021
+ * @version 8-14-2021
  */
 public class LodQuadTreeDimensionFileHandler
 {
@@ -54,9 +56,15 @@ public class LodQuadTreeDimensionFileHandler
 	private File dimensionDataSaveFolder;
 	
 	/** lod */
-	private final String FILE_NAME_PREFIX = "lod";
+	private static final String FILE_NAME_PREFIX = "lod";
 	/** .txt */
-	private final String FILE_EXTENSION = ".txt";
+	private static final String FILE_EXTENSION = ".txt";
+	/** .tmp <br>
+	 * Added to the end of the file path when saving to prevent
+	 * nulling a currently existing file. <br>
+	 * After the file finishes saving it will end with
+	 * FILE_EXTENSION. */
+	private static final String TMP_FILE_EXTENSION = ".tmp";
 	
 	/** This is the file version currently accepted by this
 	 * file handler, older versions (smaller numbers) will be deleted and overwritten,
@@ -250,18 +258,19 @@ public class LodQuadTreeDimensionFileHandler
 		int x = region.getLodNodeData().posX;
 		int z = region.getLodNodeData().posZ;
 		
-		File f = new File(getFileNameAndPathForRegion(x, z));
+		
+		File oldFile = new File(getFileNameAndPathForRegion(x, z));
 
 		try
 		{
 			// make sure the file and folder exists
-			if (!f.exists())
+			if (!oldFile.exists())
 			{
 				// the file doesn't exist,
 				// create it and the folder if need be
-				if(!f.getParentFile().exists())
-					f.getParentFile().mkdirs();
-				f.createNewFile();
+				if(!oldFile.getParentFile().exists())
+					oldFile.getParentFile().mkdirs();
+				oldFile.createNewFile();
 			}
 			else
 			{
@@ -270,7 +279,7 @@ public class LodQuadTreeDimensionFileHandler
 				// (to make sure we don't overwrite a newer
 				// version file if it exists)
 				
-				BufferedReader br = new BufferedReader(new FileReader(f));
+				BufferedReader br = new BufferedReader(new FileReader(oldFile));
 				String s = br.readLine();
 				int fileVersion = LOD_SAVE_FILE_VERSION;
 				
@@ -303,7 +312,10 @@ public class LodQuadTreeDimensionFileHandler
 				}
 			}
 			
-			FileWriter fw = new FileWriter(f);
+			// the old file is good, now create a new save file
+			File newFile = new File(getFileNameAndPathForRegion(x, z) + TMP_FILE_EXTENSION);
+			
+			FileWriter fw = new FileWriter(newFile);
 			
 			// add the version of this file
 			fw.write(LOD_FILE_VERSION_PREFIX + " " + LOD_SAVE_FILE_VERSION + "\n");
@@ -316,10 +328,15 @@ public class LodQuadTreeDimensionFileHandler
 				lodQuadTreeNode.dirty = false;
 			}
 			fw.close();
+			
+			
+			// overwrite the old file with the new one
+			Files.move(newFile.toPath(), oldFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
 		}
 		catch(Exception e)
 		{
-			ClientProxy.LOGGER.error("LOD file write error: " + e.getMessage());
+			ClientProxy.LOGGER.error("LOD file write error: ");
+			e.printStackTrace();
 		}
 	}
 	
