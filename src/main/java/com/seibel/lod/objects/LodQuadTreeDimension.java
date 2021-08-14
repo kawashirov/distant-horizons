@@ -354,7 +354,6 @@ public class LodQuadTreeDimension
 			int xIndex = (regionPos.x - center.x) + halfWidth;
 			int zIndex = (regionPos.z - center.z) + halfWidth;
 			isRegionDirty[xIndex][zIndex] = true;
-			fileHandler.saveDirtyRegionsToFileAsync();
 		}
 		return nodeAdded;
 	}
@@ -549,6 +548,14 @@ public class LodQuadTreeDimension
 			return fileHandler.loadRegionFromFile(regionPos);
 		else
 			return null;
+	}
+	
+	/**
+	 * Save all dirty regions in this LodDimension to file.
+	 */
+	public void saveDirtyRegionsToFileAsync()
+	{
+		fileHandler.saveDirtyRegionsToFileAsync();
 	}
 	
 	

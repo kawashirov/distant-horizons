@@ -115,6 +115,7 @@ public class ClientProxy
 		
 		if (xOffset != 0 || zOffset != 0)
 		{
+			lodWorld.saveAllDimensions();
 			lodDim.move(new RegionPos(xOffset, zOffset));
 		}
 		
@@ -186,6 +187,12 @@ public class ClientProxy
 		lodNodeBuilder.generateLodNodeAsync(event.getChunk(), lodWorld, event.getWorld());
 	}
 	
+	@SubscribeEvent
+	public void worldSaveEvent(WorldEvent.Save event)
+	{
+		if (lodWorld != null)
+			lodWorld.saveAllDimensions();
+	}
 	
 	@SubscribeEvent
 	public void worldLoadEvent(WorldEvent.Load event)

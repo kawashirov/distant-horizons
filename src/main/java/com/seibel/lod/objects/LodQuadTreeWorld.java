@@ -27,7 +27,7 @@ import net.minecraft.world.DimensionType;
  * 
  * @author James Seibel
  * @author Leonardo Amato
- * @version 8-7-2021
+ * @version 8-14-2021
  */
 public class LodQuadTreeWorld
 {
@@ -118,6 +118,18 @@ public class LodQuadTreeWorld
 		
 		for (DimensionType key : lodDimensions.keySet())
 			lodDimensions.get(key).setRegionWidth(newWidth);
+	}
+	
+	/**
+	 * Requests all dimensions save any dirty regions they may have.
+	 */
+	public void saveAllDimensions()
+	{
+		if (lodDimensions == null)
+			throw new IllegalStateException("LodWorld hasn't been given a world yet.");
+		
+		for (DimensionType key : lodDimensions.keySet())
+			lodDimensions.get(key).saveDirtyRegionsToFileAsync();
 	}
 	
 	
