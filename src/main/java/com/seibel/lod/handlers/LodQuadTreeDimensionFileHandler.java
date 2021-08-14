@@ -329,7 +329,6 @@ public class LodQuadTreeDimensionFileHandler
 			}
 			fw.close();
 			
-			
 			// overwrite the old file with the new one
 			Files.move(newFile.toPath(), oldFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
 		}
