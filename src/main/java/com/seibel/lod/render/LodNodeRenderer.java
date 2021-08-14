@@ -100,7 +100,7 @@ public class LodNodeRenderer
 	private Minecraft mc;
 	private GameRenderer gameRender;
 	private IProfiler profiler;
-	private float farPlaneDistance;
+	private int farPlaneBlockDistance;
 	private ReflectionHandler reflectionHandler;
 
 
@@ -222,12 +222,10 @@ public class LodNodeRenderer
 		
 		
 		// determine how far the game's render distance is currently set
-		int renderDistWidth = mc.options.renderDistance;
-		farPlaneDistance = renderDistWidth * LodUtil.CHUNK_WIDTH;
+		farPlaneBlockDistance = mc.options.renderDistance * LodUtil.CHUNK_WIDTH;
 		
-		// set how big the LODs will be and how far they will go
-		int totalLength = (int) farPlaneDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 2;
-		int numbChunksWide = (totalLength / LodUtil.CHUNK_WIDTH);
+		// set how how far the LODs will go
+		int numbChunksWide = mc.options.renderDistance * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
 		
 		// determine which LODs should not be rendered close to the player
 		HashSet<ChunkPos> chunkPosToSkip = getNearbyLodChunkPosToSkip(lodDim, player.blockPosition());
@@ -446,8 +444,8 @@ public class LodNodeRenderer
 			
 			if (fogQuality == FogQuality.FANCY)
 			{
-				RenderSystem.fogEnd(farPlaneDistance * 1.75f);
-				RenderSystem.fogStart(farPlaneDistance * 1.95f);
+				RenderSystem.fogEnd(farPlaneBlockDistance * 1.75f);
+				RenderSystem.fogStart(farPlaneBlockDistance * 1.95f);
 			}
 			else if(fogQuality == FogQuality.FAST)
 			{
@@ -455,21 +453,21 @@ public class LodNodeRenderer
 				// to start right where the LODs' end use:
 				// end = 0.8f, start = 1.5f
 				
-				RenderSystem.fogEnd(farPlaneDistance * 1.5f);
-				RenderSystem.fogStart(farPlaneDistance * 2.0f);
+				RenderSystem.fogEnd(farPlaneBlockDistance * 1.5f);
+				RenderSystem.fogStart(farPlaneBlockDistance * 2.0f);
 			}
 		}
 		else if(fogDistance == FogDistance.FAR)
 		{
 			if (fogQuality == FogQuality.FANCY)
 			{
-				RenderSystem.fogStart(farPlaneDistance * 0.85f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
-				RenderSystem.fogEnd(farPlaneDistance * 1.0f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
+				RenderSystem.fogStart(farPlaneBlockDistance * 0.85f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
+				RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
 			}
 			else if(fogQuality == FogQuality.FAST)
 			{
-				RenderSystem.fogStart(farPlaneDistance * 0.5f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
-				RenderSystem.fogEnd(farPlaneDistance * 0.75f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
+				RenderSystem.fogStart(farPlaneBlockDistance * 0.5f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
+				RenderSystem.fogEnd(farPlaneBlockDistance * 0.75f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
 			}
 		}
 		
@@ -579,7 +577,7 @@ public class LodNodeRenderer
 				// you have to be flying quickly in spectator mode through ungenerated
 				// terrain, so I don't think it is much of an issue.
 				LodConfig.CLIENT.lodChunkRadiusMultiplier.get(),  
-				this.farPlaneDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 2);
+				this.farPlaneBlockDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 2);
 		
 		// add the screen space distortions
 		projectionMatrix.multiply(matrixStack.last().pose());
