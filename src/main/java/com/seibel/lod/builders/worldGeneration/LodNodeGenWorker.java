@@ -42,6 +42,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.WeightedList.Entry;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.palette.UpgradeData;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeContainer;
 import net.minecraft.world.chunk.ChunkPrimer;
@@ -259,8 +260,10 @@ public class LodNodeGenWorker implements IWorker
 			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			// override the chunk status so we can run the next generator stage
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
-			ChunkStatus.BIOMES.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
+			chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
+			
+			
 			
 			
 			// generate fake height data for this LOD
@@ -350,10 +353,16 @@ public class LodNodeGenWorker implements IWorker
 				nodeList = lodNodeBuilder.generateLodNodeFromChunk(chunk, new LodBuilderConfig(true, true, false));
 			}
 			
+			
+//			long startTime = System.currentTimeMillis();
+			
 			for(LodQuadTreeNode node : nodeList)
 			{
 				lodDim.addNode(node);
 			}
+			
+//			long endTime = System.currentTimeMillis();
+//			System.out.println(endTime - startTime);
 		}
 		
 		
@@ -375,7 +384,7 @@ public class LodNodeGenWorker implements IWorker
 			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			// override the chunk status so we can run the next generator stage
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
-			ChunkStatus.BIOMES.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
+			chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
 			ChunkStatus.NOISE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			ChunkStatus.SURFACE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			
@@ -412,7 +421,7 @@ public class LodNodeGenWorker implements IWorker
 			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			// override the chunk status so we can run the next generator stage
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
-			ChunkStatus.BIOMES.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
+			chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
 			ChunkStatus.NOISE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			ChunkStatus.SURFACE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			
