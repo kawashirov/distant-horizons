@@ -350,10 +350,18 @@ public class LodQuadTreeDimension
 		// only save valid LODs to disk
 		if (!lodNode.dontSave && fileHandler != null)
 		{
-			// mark the region as dirty so it will be saved to disk
-			int xIndex = (regionPos.x - center.x) + halfWidth;
-			int zIndex = (regionPos.z - center.z) + halfWidth;
-			isRegionDirty[xIndex][zIndex] = true;
+			try
+			{
+				// mark the region as dirty so it will be saved to disk
+				int xIndex = (regionPos.x - center.x) + halfWidth;
+				int zIndex = (regionPos.z - center.z) + halfWidth;
+				isRegionDirty[xIndex][zIndex] = true;
+			}
+			catch(ArrayIndexOutOfBoundsException e)
+			{
+				// This method was probably called when the dimension was changing size.
+				// Hopefully this shouldn't be an issue.
+			}
 		}
 		return nodeAdded;
 	}
