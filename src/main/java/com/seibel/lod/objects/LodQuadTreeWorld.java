@@ -91,7 +91,7 @@ public class LodQuadTreeWorld
 	public void addLodDimension(LodQuadTreeDimension newStorage)
 	{
 		if (lodDimensions == null)
-			throw new IllegalStateException("LodWorld hasn't been given a world yet.");
+			return;
 		
 		lodDimensions.put(newStorage.dimension, newStorage);
 	}
@@ -101,9 +101,9 @@ public class LodQuadTreeWorld
 	 */
 	public LodQuadTreeDimension getLodDimension(DimensionType dimension)
 	{
-		if (lodDimensions == null) {
-			throw new IllegalStateException("LodWorld hasn't been given a world yet.");
-		}
+		if (lodDimensions == null)
+			return null;
+		
 		return lodDimensions.get(dimension);
 	}
 	
@@ -114,7 +114,7 @@ public class LodQuadTreeWorld
 	public void resizeDimensionRegionWidth(int newWidth)
 	{
 		if (lodDimensions == null)
-			throw new IllegalStateException("LodWorld hasn't been given a world yet.");
+			return;
 		
 		saveAllDimensions();
 		
@@ -128,7 +128,7 @@ public class LodQuadTreeWorld
 	public void saveAllDimensions()
 	{
 		if (lodDimensions == null)
-			throw new IllegalStateException("LodWorld hasn't been given a world yet.");
+			return;
 		
 		for (DimensionType key : lodDimensions.keySet())
 			lodDimensions.get(key).saveDirtyRegionsToFileAsync();
