@@ -35,6 +35,7 @@ import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.biome.BiomeContainer;
 import net.minecraft.world.chunk.ChunkStatus;
@@ -45,7 +46,7 @@ import net.minecraftforge.common.WorldWorkerManager;
  * This object is used to create NearFarBuffer objects.
  * 
  * @author James Seibel
- * @version 8-9-2021
+ * @version 8-14-2021
  */
 public class LodNodeBufferBuilder
 {
@@ -106,7 +107,7 @@ public class LodNodeBufferBuilder
 	 * swapped with the drawable buffers in the LodRenderer to be drawn.
 	 */
 	public void generateLodBuffersAsync(LodNodeRenderer renderer, LodQuadTreeDimension lodDim,
-			double playerX, double playerZ, int numbChunksWide)
+			BlockPos playerBlockPos, int numbChunksWide)
 	{
 		// only allow one generation process to happen at a time
 		if (generatingBuffers)
@@ -126,15 +127,14 @@ public class LodNodeBufferBuilder
 		generatingBuffers = true;
 		
 		
+		// round the player's block position down to the nearest chunk BlockPos
+		ChunkPos playerChunkPos = new ChunkPos(playerBlockPos);
+		playerBlockPos = playerChunkPos.getWorldPosition();
 		
-		// this seemingly useless math is required,
-		// just using (int) playerX/Z doesn't work
-		int playerXChunkOffset = ((int) playerX / LodUtil.CHUNK_WIDTH) * LodUtil.CHUNK_WIDTH;
-		int playerZChunkOffset = ((int) playerZ / LodUtil.CHUNK_WIDTH) * LodUtil.CHUNK_WIDTH;
 		// this is where we will start drawing squares
 		// (exactly half the total width)
-		int startX = (-LodUtil.CHUNK_WIDTH * (numbChunksWide / 2)) + playerXChunkOffset;
-		int startZ = (-LodUtil.CHUNK_WIDTH * (numbChunksWide / 2)) + playerZChunkOffset;
+		BlockPos startBlockPos = new BlockPos(-(numbChunksWide * 16 / 2) + playerBlockPos.getX(), 0, -(numbChunksWide * 16 / 2) + playerBlockPos.getZ());
+		ChunkPos startChunkPos = new ChunkPos(startBlockPos);
 		
 		
 		Thread thread = new Thread(() ->
@@ -147,24 +147,24 @@ public class LodNodeBufferBuilder
 			// if we don't have a full number of chunks to generate in chunksToGen
 			// we can top it off from the reserve
 			ChunkPos[] chunksToGenReserve = new ChunkPos[maxChunkGenRequests];
-			int minChunkDist = Integer.MAX_VALUE;
-			ChunkPos playerChunkPos = new ChunkPos((int)playerX / LodUtil.CHUNK_WIDTH, (int)playerZ / LodUtil.CHUNK_WIDTH);
 			
-			// numbChunksWide / 2 = radius
-			// * 16 = to block coordinates
-			int maxDistance = (numbChunksWide / 2) * 16;
+			// Used when determining what detail level to use at what distance
+			int maxBlockDistance = (numbChunksWide / 2) * 16;
 			
 			// generate our new buildable buffers
 			buildableNearBuffer.begin(GL11.GL_QUADS, LodNodeRenderer.LOD_VERTEX_FORMAT);
 			buildableFarBuffer.begin(GL11.GL_QUADS, LodNodeRenderer.LOD_VERTEX_FORMAT);
+			
+			// used when determining which chunks are closer when queuing distance generation
+			int minChunkDist = Integer.MAX_VALUE;
 			
 			// x axis
 			for (int i = 0; i < numbChunksWide; i++)
 			{
 				// z axis
 				for (int j = 0; j < numbChunksWide; j++) {
-					int chunkX = i + Math.floorDiv(startX, LodUtil.CHUNK_WIDTH);
-					int chunkZ = j + Math.floorDiv(startZ, LodUtil.CHUNK_WIDTH);
+					int chunkX = i + startChunkPos.x;
+					int chunkZ = j + startChunkPos.z;
 					
 					// skip any chunks that Minecraft is going to render
 					if (isCoordInCenterArea(i, j, (numbChunksWide / 2))
@@ -176,9 +176,9 @@ public class LodNodeBufferBuilder
 					
 					// set where this square will be drawn in the world
 					double xOffset = (LodUtil.CHUNK_WIDTH * i) + // offset by the number of LOD blocks
-							startX; // offset so the center LOD block is centered underneath the player
+							startBlockPos.getX(); // offset so the center LOD block is centered underneath the player
 					double yOffset = 0;
-					double zOffset = (LodUtil.CHUNK_WIDTH * j) + startZ;
+					double zOffset = (LodUtil.CHUNK_WIDTH * j) + startBlockPos.getZ();
 					
 					LodQuadTreeNode lod = lodDim.getLodFromCoordinates(new ChunkPos(chunkX, chunkZ), LodUtil.CHUNK_DETAIL_LEVEL);
 					
@@ -278,7 +278,7 @@ public class LodNodeBufferBuilder
 					
 					// determine detail level should this LOD be drawn at
 					int distance = (int) Math.sqrt(Math.pow((mc.player.getX() - lod.getCenter().getX()),2) + Math.pow((mc.player.getZ() - lod.getCenter().getZ()),2));
-					LodDetail detail = LodDetail.getDetailForDistance(LodConfig.CLIENT.maxDrawDetail.get(), distance, maxDistance);
+					LodDetail detail = LodDetail.getDetailForDistance(LodConfig.CLIENT.maxDrawDetail.get(), distance, maxBlockDistance);
 					
 					
 					// get the desired LodTemplate and

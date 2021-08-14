@@ -259,7 +259,7 @@ public class LodNodeRenderer
 				setupBuffers(numbChunksWide);
 			
 			// generate the LODs on a separate thread to prevent stuttering or freezing
-			lodNodeBufferBuilder.generateLodBuffersAsync(this, lodDim, player.getX(), player.getZ(), numbChunksWide);
+			lodNodeBufferBuilder.generateLodBuffersAsync(this, lodDim, player.blockPosition(), numbChunksWide);
 			
 			// the regen process has been started,
 			// it will be done when lodBufferBuilder.newBuffersAvaliable
