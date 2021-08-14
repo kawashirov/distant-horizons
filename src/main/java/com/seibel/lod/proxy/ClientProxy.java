@@ -97,7 +97,7 @@ public class ClientProxy
 			lodWorld.resizeDimensionRegionWidth(newWidth);
 			lodNodeBuilder.regionWidth = newWidth;
 			
-			LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );
+			//LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );
 			
 			// skip this frame, hopefully the lodWorld
 			// should have everything set up by then
