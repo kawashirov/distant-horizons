@@ -44,7 +44,6 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.palette.UpgradeData;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeContainer;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
@@ -89,8 +88,7 @@ public class LodNodeGenWorker implements IWorker
 
     public LodNodeGenWorker(ChunkPos newPos, LodNodeRenderer newLodRenderer,
 							LodNodeBuilder newLodBuilder, LodNodeBufferBuilder newLodBufferBuilder,
-							LodQuadTreeDimension newLodDimension, ServerWorld newServerWorld,
-							BiomeContainer newBiomeContainer)
+							LodQuadTreeDimension newLodDimension, ServerWorld newServerWorld)
     {
     	// just a few sanity checks
         if (newPos == null)

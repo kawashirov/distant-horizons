@@ -37,8 +37,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.biome.BiomeContainer;
-import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.WorldWorkerManager;
 
@@ -93,7 +91,6 @@ public class LodNodeBufferBuilder
 	}
 	
 	
-	private BiomeContainer biomeContainer = null;
 	private LodQuadTreeDimension previousDimension = null;
 	
 	
@@ -118,7 +115,6 @@ public class LodNodeBufferBuilder
 		
 		if (previousDimension != lodDim)
 		{
-			biomeContainer = LodUtil.getServerWorldFromDimension(lodDim.dimension).getChunk(0, 0, ChunkStatus.EMPTY).getBiomes();
 			previousDimension = lodDim;
 		}
 		
@@ -334,7 +330,7 @@ public class LodNodeBufferBuilder
 					
 					numberOfChunksWaitingToGenerate.addAndGet(1);
 					
-					LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, renderer, LodQuadTreeNodeBuilder, this, lodDim, serverWorld, biomeContainer);
+					LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, renderer, LodQuadTreeNodeBuilder, this, lodDim, serverWorld);
 					WorldWorkerManager.addWorker(genWorker);
 				}
 			}
