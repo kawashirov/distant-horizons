@@ -17,7 +17,7 @@
  */
 package com.seibel.lod.objects;
 
-import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.vertex.VertexBuffer;
 
 /**
  * This object is just a replacement for an array
@@ -25,21 +25,21 @@ import net.minecraft.client.renderer.BufferBuilder;
  * and BuildBufferThread.
  * 
  * @author James Seibel
- * @version 03-25-2021
+ * @version 08-15-2021
  */
-public class NearFarBuffer
+public class NearFarVbos
 {
-	public BufferBuilder nearBuffer;
+	public VertexBuffer nearVbo;
 	
-	public BufferBuilder farBuffer;
+	public VertexBuffer farVbo;
 	
 	/**
-	 * @param newNearBuffer
-	 * @param newFarBuffer
+	 * @param newNearVbo
+	 * @param newFarVbo
 	 */
-	public NearFarBuffer(BufferBuilder newNearBuffer, BufferBuilder newFarBuffer)
+	public NearFarVbos(VertexBuffer newNearVbo, VertexBuffer newFarVbo)
 	{
-		nearBuffer = newNearBuffer;
-		farBuffer = newFarBuffer;
+		nearVbo = newNearVbo;
+		farVbo = newFarVbo;
 	}
 }

@@ -37,15 +37,14 @@ import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
-import com.seibel.lod.objects.NearFarBuffer;
 import com.seibel.lod.objects.NearFarFogSettings;
+import com.seibel.lod.objects.NearFarVbos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.WorldRenderer;
@@ -67,7 +66,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world. 
  * 
  * @author James Seibel
- * @version 07-4-2021
+ * @version 8-15-2021
  */
 public class LodNodeRenderer
 {
@@ -106,16 +105,11 @@ public class LodNodeRenderer
 
 	/** This is used to generate the buildable buffers */
 	private LodNodeBufferBuilder lodNodeBufferBuilder;
-
-	/** The buffers that are used to draw LODs using near fog */
-	private volatile BufferBuilder drawableNearBuffer;
-	/** The buffers that are used to draw LODs using far fog */
-	private volatile BufferBuilder drawableFarBuffer;
-
+	
 	/** This is the VertexBuffer used to draw any LODs that use near fog */
-	private volatile VertexBuffer nearVbo;
+	private VertexBuffer nearVbo;
 	/** This is the VertexBuffer used to draw any LODs that use far fog */
-	private volatile VertexBuffer farVbo;
+	private VertexBuffer farVbo;
 	public static final VertexFormat LOD_VERTEX_FORMAT = DefaultVertexFormats.POSITION_COLOR;
 
 
@@ -254,8 +248,7 @@ public class LodNodeRenderer
 		if (regen && !lodNodeBufferBuilder.generatingBuffers && !lodNodeBufferBuilder.newBuffersAvaliable())
 		{
 			// this will mainly happen when the view distance is changed
-			if (drawableNearBuffer == null || drawableFarBuffer == null || 
-				previousChunkRenderDistance != mc.options.renderDistance)
+			if (previousChunkRenderDistance != mc.options.renderDistance)
 				setupBuffers(numbChunksWide);
 			
 			// generate the LODs on a separate thread to prevent stuttering or freezing
@@ -636,9 +629,6 @@ public class LodNodeRenderer
 			bufferMemory = RenderUtil.getBufferMemoryForRadiusMultiplier(maxRadiusMultiplier);
 		}
 		
-		drawableNearBuffer = new BufferBuilder(bufferMemory);
-		drawableFarBuffer = new BufferBuilder(bufferMemory);
-		
 		lodNodeBufferBuilder.setupBuffers(bufferMemory);
 	}
 	
@@ -661,31 +651,18 @@ public class LodNodeRenderer
 	
 	
 	/**
-	 * Replace the current drawable buffers with the newly
+	 * Replace the current Vertex Buffers with the newly
 	 * created buffers from the lodBufferBuilder.
 	 */
 	private void swapBuffers()
 	{
 		// replace the drawable buffers with
 		// the newly created buffers from the lodBufferBuilder
-		NearFarBuffer newBuffers = lodNodeBufferBuilder.swapBuffers(drawableNearBuffer, drawableFarBuffer);
-		drawableNearBuffer = newBuffers.nearBuffer;
-		drawableFarBuffer = newBuffers.farBuffer;
+		NearFarVbos newVbos = lodNodeBufferBuilder.getVertexBuffers();
 		
-		
-		// bind the buffers with their respective VBOs
-		if (nearVbo != null)
-			nearVbo.close();
-		
-		nearVbo = new VertexBuffer(LOD_VERTEX_FORMAT);
-		nearVbo.upload(drawableNearBuffer);
-		
-		
-		if (farVbo != null)
-			farVbo.close();
-		
-		farVbo = new VertexBuffer(LOD_VERTEX_FORMAT);
-		farVbo.upload(drawableFarBuffer);
+		// bind the buffers with their respective VBOs		
+		nearVbo = newVbos.nearVbo;
+		farVbo = newVbos.farVbo;
 	}
 	
 	
