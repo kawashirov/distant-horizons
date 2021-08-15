@@ -34,7 +34,6 @@ import com.seibel.lod.objects.LodQuadTreeWorld;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.render.LodNodeRenderer;
 import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.util.ObjectSizeCalculator;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.profiler.IProfiler;
@@ -119,13 +118,6 @@ public class ClientProxy
 			//LOGGER.info("offset: " + worldRegionOffset.x + "," + worldRegionOffset.z + "\t center: " + lodDim.getCenterX() + "," + lodDim.getCenterZ());
 		}
 		
-		// just here to prevent eclipse removing the imports when I save the file
-		ObjectSizeCalculator.getObjectSize(null);
-		
-		// uncomment once the LODs have fully generated to see the memory usage
-//		long size = ObjectSizeCalculator.getObjectSize(lodDim);
-//		LOGGER.info(size);
-		
 		
 		// comment out when creating a release
 		applyConfigOverrides();
@@ -140,7 +132,7 @@ public class ClientProxy
 		profiler.pop(); // get out of "terrain"
 		profiler.push("LOD");
 		
-		renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
+
 		
 		profiler.pop(); // end LOD
 		profiler.push("terrain"); // restart "terrain"
