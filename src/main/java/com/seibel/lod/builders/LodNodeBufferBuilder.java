@@ -21,6 +21,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.seibel.lod.objects.LodQuadTree;
 import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
@@ -153,7 +154,6 @@ public class LodNodeBufferBuilder
 			
 			// used when determining which chunks are closer when queuing distance generation
 			int minChunkDist = Integer.MAX_VALUE;
-			
 			// x axis
 			for (int i = 0; i < numbChunksWide; i++)
 			{
@@ -279,30 +279,29 @@ public class LodNodeBufferBuilder
 					
 					// get the desired LodTemplate and
 					// add this LOD to the buffer
-					LodConfig.CLIENT.lodTemplate.get().
-					template.addLodToBuffer(currentBuffer, lodDim, lod,
-							xOffset , yOffset, zOffset, renderer.debugging, detail);
-					/*
-					LodDetail detail = LodConfig.CLIENT.lodDetail.get();
-					for(int x = 0; x < detail.dataPointLengthCount; x++){
-						for(int z = 0; z < detail.dataPointLengthCount; z++) {
-							int posX = LodUtil.convertLevelPos(lod.startBlockPos.getX() + (x*detail.dataPointWidth), 0, detail.detailLevel);
-							int posZ = LodUtil.convertLevelPos(lod.startBlockPos.getZ() + (z*detail.dataPointWidth), 0, detail.detailLevel);
-							LodQuadTreeNode newLod = lodDim.getLodFromCoordinates(posX, posZ, detail.detailLevel);
-							System.out.print("printing ");
-							System.out.println(newLod);
-							if(newLod != null) {
-								LodConfig.CLIENT.lodTemplate.get().
-										template.addLodToBuffer(currentBuffer, lodDim, newLod,
-										xOffset + (x*detail.dataPointWidth), yOffset, zOffset + (z*detail.dataPointWidth), renderer.debugging);
-							}
+
+					for (int k = 0; k < detail.dataPointLengthCount * detail.dataPointLengthCount; k++) {
+						// how much to offset this LOD by
+						int startX = detail.startX[k];
+						int startZ = detail.startZ[k];
+
+						// get the QuadTree location of this
+						LodQuadTree lodTree = lodDim.getLevelFromPos(
+								LodUtil.convertLevelPos((int) xOffset + startX, 0, LodUtil.CHUNK_DETAIL_LEVEL),
+								LodUtil.convertLevelPos((int) zOffset + startZ, 0, LodUtil.CHUNK_DETAIL_LEVEL),
+								LodUtil.CHUNK_DETAIL_LEVEL);
+						LodQuadTreeNode newLod = lodTree.getNodeAtPos(
+								LodUtil.convertLevelPos((int) xOffset + startX, 0, detail.detailLevel),
+								LodUtil.convertLevelPos((int) zOffset + startZ, 0, detail.detailLevel),
+								detail.detailLevel);
+						if (newLod != null) {
+							LodConfig.CLIENT.lodTemplate.get().
+									template.addLodToBuffer(currentBuffer, lodDim, newLod,
+									xOffset + startX, yOffset, zOffset + startZ, renderer.debugging, detail);
 						}
 					}
-					 */
 				}
 			}
-			
-			
 			// issue #19
 			// TODO add a way for a server side mod to generate chunks requested here
 			if(mc.hasSingleplayerServer())
