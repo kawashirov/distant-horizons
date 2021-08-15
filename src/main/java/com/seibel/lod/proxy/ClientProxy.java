@@ -132,7 +132,7 @@ public class ClientProxy
 		profiler.pop(); // get out of "terrain"
 		profiler.push("LOD");
 		
-
+		renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
 		
 		profiler.pop(); // end LOD
 		profiler.push("terrain"); // restart "terrain"
