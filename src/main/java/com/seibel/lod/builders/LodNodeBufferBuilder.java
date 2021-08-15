@@ -27,6 +27,7 @@ import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
+import com.seibel.lod.objects.LodQuadTree;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.NearFarVbos;
@@ -302,10 +303,37 @@ public class LodNodeBufferBuilder
 						int distance = (int) Math.sqrt(Math.pow((playerBlockPosRounded.getX() - lod.getCenter().getX()), 2) + Math.pow((playerBlockPosRounded.getZ() - lod.getCenter().getZ()), 2));
 						LodDetail detail = LodDetail.getDetailForDistance(LodConfig.CLIENT.maxDrawDetail.get(), distance, maxBlockDistance);
 						
-						// get the desired LodTemplate and
-						// add this LOD to the buffer
-						LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, lodDim, lod,
-								xOffset, yOffset, zOffset, renderer.debugging, detail);
+						
+						for (int k = 0; k < detail.dataPointLengthCount * detail.dataPointLengthCount; k++)
+						{
+							// how much to offset this LOD by
+							int startX = detail.startX[k];
+							int startZ = detail.startZ[k];
+							
+							// get the QuadTree location of this
+							LodQuadTree lodTree = lodDim.getLevelFromPos(
+									LodUtil.convertLevelPos((int) xOffset + startX, 0, LodUtil.CHUNK_DETAIL_LEVEL),
+									LodUtil.convertLevelPos((int) zOffset + startZ, 0, LodUtil.CHUNK_DETAIL_LEVEL),
+									LodUtil.CHUNK_DETAIL_LEVEL);
+							
+							if (lodTree == null)
+								continue;
+							
+							LodQuadTreeNode newLod = lodTree.getNodeAtPos(
+									LodUtil.convertLevelPos((int) xOffset + startX, 0, detail.detailLevel),
+									LodUtil.convertLevelPos((int) zOffset + startZ, 0, detail.detailLevel),
+									detail.detailLevel);
+							
+							if (newLod != null)
+							{
+								// get the desired LodTemplate and
+								// add this LOD to the buffer
+								LodConfig.CLIENT.lodTemplate.get().
+								template.addLodToBuffer(currentBuffer, lodDim, newLod,
+										xOffset + startX, yOffset, zOffset + startZ, renderer.debugging, detail);
+							}
+						}
+
 					}
 				}
 				
@@ -333,7 +361,7 @@ public class LodNodeBufferBuilder
 							break;
 						
 						// TODO add a list of locations we are waiting to generate so we don't add the
-					// same position to the queue multiple times
+						// same position to the queue multiple times
 						
 						numberOfChunksWaitingToGenerate.addAndGet(1);
 						
@@ -370,6 +398,14 @@ public class LodNodeBufferBuilder
 				// regardless of if we successfully created the buffers or not
 				// we are done generating.
 				generatingBuffers = false;
+				
+				
+				// clean up any potentially open resources
+				if (buildableNearBuffer != null && buildableNearBuffer.building())
+					buildableNearBuffer.end();
+				
+				if (buildableFarBuffer != null && buildableFarBuffer.building())
+					buildableFarBuffer.end();
 			}
 			
 		});
