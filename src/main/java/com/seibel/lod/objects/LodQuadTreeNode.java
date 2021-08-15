@@ -283,13 +283,10 @@ public class LodQuadTreeNode
 		}
 		else
 		{
-			// TODO use the average height/depth, otherwise some areas look flat
-			// 		when they shouldn't.
-			
 			// get the lowest height from the all the given LodQuadTreeNodes
-			short height = (short) dataList.stream().mapToInt(x -> (int) x.getLodDataPoint().height).min().getAsInt();
+			short height = (short) (dataList.stream().mapToInt(x -> (int) x.getLodDataPoint().height).sum() / dataList.size());
 			// get the highest depth
-			short depth = (short) dataList.stream().mapToInt(x -> (int) x.getLodDataPoint().depth).max().getAsInt();
+			short depth = (short) (dataList.stream().mapToInt(x -> (int) x.getLodDataPoint().depth).sum() / dataList.size());
 			
 			// get the average color
 			int red = dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getRed()).sum() / dataList.size();
@@ -297,7 +294,7 @@ public class LodQuadTreeNode
 			int blue = dataList.stream().mapToInt(x -> x.getLodDataPoint().color.getBlue()).sum() / dataList.size();
 			Color color = new Color(red,green,blue);
 			
-			lodDataPoint = new LodDataPoint(height,depth,color);
+			lodDataPoint = new LodDataPoint(height, depth, color);
 			
 			
 			// the new complexity is equal to the lowest complexity of the list

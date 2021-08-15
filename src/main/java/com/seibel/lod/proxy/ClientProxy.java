@@ -160,10 +160,10 @@ public class ClientProxy
 //		LodConfig.CLIENT.drawLODs.set(true);
 //		LodConfig.CLIENT.debugMode.set(false);
 		
-		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.SINGLE);
-		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.SINGLE);
+		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.FULL);
+		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.FULL);
 		
-		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(16);
+		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
 		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.NEVER_DRAW_FOG);
 		LodConfig.CLIENT.shadingMode.set(ShadingMode.DARKEN_SIDES);
@@ -184,7 +184,7 @@ public class ClientProxy
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
-		lodNodeBuilder.generateLodNodeAsync(event.getChunk(), lodWorld, event.getWorld());
+		lodNodeBuilder.generateLodNodeAsync(event.getChunk(), lodWorld, event.getWorld(), DistanceGenerationMode.SERVER);
 	}
 	
 	@SubscribeEvent

@@ -17,6 +17,8 @@
  */
 package com.seibel.lod.builders;
 
+import com.seibel.lod.enums.DistanceGenerationMode;
+
 /**
  * This is used to easily configure how LodChunks are generated.
  * Generally this will only be used if we want to generate a
@@ -24,7 +26,7 @@ package com.seibel.lod.builders;
  * work best for a fully generated chunk (IE has correct surface blocks).
  * 
  * @author James Seibel
- * @version 6-27-2021
+ * @version 8-14-2021
  */
 public class LodBuilderConfig
 {
@@ -34,28 +36,61 @@ public class LodBuilderConfig
 	public boolean useBiomeColors;
 	/** default true */
 	public boolean useSolidBlocksInColorGen;
+	/** default server */
+	public DistanceGenerationMode distanceGenerationMode;
 	
 	/** default settings for a normal chunk <br>
 	 * useHeightmap = false <br>
 	 * useBiomeColors = false <br>
 	 * useSolidBlocksInColorGen = true <br>
+	 * generationMode = Server <br>
 	 */
 	public LodBuilderConfig()
 	{
 		useHeightmap = false;
 		useBiomeColors = false;
 		useSolidBlocksInColorGen = true;
+		distanceGenerationMode = DistanceGenerationMode.SERVER;
 	}
 	
 	/**
 	 * @param newUseHeightmap default = false
 	 * @param newUseBiomeColors default = false
 	 * @param newUseSolidBlocksInBiomeColor default = true
+	 * @param newDistanceGenerationMode default = Server
 	 */
-	public LodBuilderConfig(boolean newUseHeightmap, boolean newUseBiomeColors, boolean newUseSolidBlocksInBiomeColor)
+	public LodBuilderConfig(boolean newUseHeightmap, boolean newUseBiomeColors, 
+			boolean newUseSolidBlocksInBiomeColor, DistanceGenerationMode newDistanceGenerationMode)
 	{
 		useHeightmap = newUseHeightmap;
 		useBiomeColors = newUseBiomeColors;
 		useSolidBlocksInColorGen = newUseSolidBlocksInBiomeColor;
+		distanceGenerationMode = newDistanceGenerationMode;
+	}
+	
+	/**
+	 * @param newUseHeightmap default = false
+	 * @param newUseBiomeColors default = false
+	 * @param newUseSolidBlocksInBiomeColor default = true
+	 * @param newDistanceGenerationMode default = Server
+	 */
+	public LodBuilderConfig(boolean newUseHeightmap, boolean newUseBiomeColors, boolean newUseSolidBlocksInBiomeColor)
+	{
+		this();
+		useHeightmap = newUseHeightmap;
+		useBiomeColors = newUseBiomeColors;
+		useSolidBlocksInColorGen = newUseSolidBlocksInBiomeColor;
+	}
+	
+	/**
+	 * @param newUseHeightmap default = false
+	 * @param newUseBiomeColors default = false
+	 * @param newUseSolidBlocksInBiomeColor default = true
+	 * @param newDistanceGenerationMode default = Server
+	 */
+	public LodBuilderConfig(DistanceGenerationMode newDistanceGenerationMode)
+	{
+		this();
+		distanceGenerationMode = newDistanceGenerationMode;
 	}
 }

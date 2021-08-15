@@ -51,8 +51,9 @@ import net.minecraft.world.gen.Heightmap;
  * This object is in charge of creating Lod related objects. (specifically: Lod
  * World, Dimension, Region, and Chunk objects)
  *
+ * @author Leonardo Amato
  * @author James Seibel
- * @version 8-10-2021
+ * @version 8-14-2021
  */
 public class LodNodeBuilder
 {
@@ -74,6 +75,11 @@ public class LodNodeBuilder
 	
 	public void generateLodNodeAsync(IChunk chunk, LodQuadTreeWorld lodWorld, IWorld world)
 	{
+		generateLodNodeAsync(chunk, lodWorld, world, DistanceGenerationMode.SERVER);
+	}
+	
+	public void generateLodNodeAsync(IChunk chunk, LodQuadTreeWorld lodWorld, IWorld world, DistanceGenerationMode generationMode)
+	{
 		if (lodWorld == null || !lodWorld.getIsWorldLoaded())
 			return;
 			
@@ -89,7 +95,7 @@ public class LodNodeBuilder
 			{
 				DimensionType dim = world.dimensionType();
 				
-				List<LodQuadTreeNode> nodeList = generateLodNodeFromChunk(chunk);
+				List<LodQuadTreeNode> nodeList = generateLodNodeFromChunk(chunk, new LodBuilderConfig(generationMode));
 				
 				LodQuadTreeDimension lodDim;
 				
@@ -102,6 +108,7 @@ public class LodNodeBuilder
 				{
 					lodDim = lodWorld.getLodDimension(dim);
 				}
+				
 				for (LodQuadTreeNode node : nodeList)
 				{
 					lodDim.addNode(node);
@@ -134,7 +141,6 @@ public class LodNodeBuilder
 	/**
 	 * Creates a LodChunk for a chunk in the given world.
 	 *
-	 * @return
 	 * @throws IllegalArgumentException thrown if either the chunk or world is null.
 	 */
 	public List<LodQuadTreeNode> generateLodNodeFromChunk(IChunk chunk, LodBuilderConfig config)
@@ -142,17 +148,17 @@ public class LodNodeBuilder
 	{
 		LodDetail detail = LodConfig.CLIENT.maxGenerationDetail.get();
 		List<LodQuadTreeNode> lodNodeList = new ArrayList<>();
+		
 		if (chunk == null)
 			throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
+		
+		
 		for (int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++)
 		{
 			int startX = detail.startX[i];
 			int startZ = detail.startZ[i];
 			int endX = detail.endX[i];
 			int endZ = detail.endZ[i];
-			
-			// TODO startX/Z and endX/Z are relative coordinates
-			// getMin/Max appear to return world block coordinates
 			
 			Color color = generateLodColorForArea(chunk, config, startX, startZ, endX, endZ);
 			
@@ -170,10 +176,11 @@ public class LodNodeBuilder
 						startZ, endX, endZ);
 				depth = 0;
 			}
+			
 			lodNodeList.add(new LodQuadTreeNode((byte) detail.detailLevel,
 					LodUtil.convertLevelPos(chunk.getPos().getMinBlockX() + startX, 0, detail.detailLevel),
 					LodUtil.convertLevelPos(chunk.getPos().getMinBlockZ() + startZ, 0, detail.detailLevel),
-					new LodDataPoint(height, depth, color), DistanceGenerationMode.SERVER));
+					new LodDataPoint(height, depth, color), config.distanceGenerationMode));
 			
 		}
 		

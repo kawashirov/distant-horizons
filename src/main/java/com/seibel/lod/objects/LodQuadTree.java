@@ -568,7 +568,7 @@ public class LodQuadTree
 	 * setter for lodNodeData, to maintain a correct relationship between worlds 
 	 * this method forces an update on all parent nodes.
 	 *
-	 * @param newLodQuadTreeNode    data to set
+	 * @param newLodQuadTreeNode data to set
 	 */
 	public void setLodNodeData(LodQuadTreeNode newLodQuadTreeNode)
 	{
