@@ -636,6 +636,13 @@ public class LodQuadTree
 	public String toString()
 	{
 		String s = lodNode.toString();
+		
+		s += treeFull ? "Full and " : ""; 
+		s += treeEmpty ? "Empty " : "";		
+		
+		if (lodNode != null)
+			s += "detail: " + lodNode.detailLevel;	
+		
 		/*
         if(hasChildren())
         {

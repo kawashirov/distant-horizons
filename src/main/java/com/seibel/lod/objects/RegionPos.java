@@ -62,4 +62,11 @@ public class RegionPos
 		z = Math.floorDiv(pos.z, LodUtil.REGION_WIDTH_IN_CHUNKS);
 	}
 	
+	
+	
+	@Override
+	public String toString()
+	{
+		return "(" + x + "," + z + ")";
+	}
 }
