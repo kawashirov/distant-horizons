@@ -18,6 +18,7 @@
 package com.seibel.lod.objects;
 
 import java.awt.Color;
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,7 +36,7 @@ import net.minecraft.world.gen.Heightmap;
  * @author James Seibel
  * @version 8-8-2021
  */
-public class LodQuadTreeNode
+public class LodQuadTreeNode implements Serializable
 {
 	/** This is what separates each piece of data in the toData method */
 	private static final char DATA_DELIMITER = LodQuadTreeDimensionFileHandler.DATA_DELIMITER;

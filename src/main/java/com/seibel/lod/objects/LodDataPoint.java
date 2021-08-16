@@ -17,7 +17,8 @@
  */
 package com.seibel.lod.objects;
 
-import java.awt.Color;
+import java.awt.*;
+import java.io.Serializable;
 import java.util.Objects;
 
 import com.seibel.lod.handlers.LodQuadTreeDimensionFileHandler;
@@ -30,7 +31,7 @@ import com.seibel.lod.util.LodUtil;
  * @author James Seibel
  * @version 8-8-2021
  */
-public class LodDataPoint
+public class LodDataPoint implements Serializable
 {
 	/** This is what separates each piece of data in the toData method */
 	private static final char DATA_DELIMITER = LodQuadTreeDimensionFileHandler.DATA_DELIMITER;
