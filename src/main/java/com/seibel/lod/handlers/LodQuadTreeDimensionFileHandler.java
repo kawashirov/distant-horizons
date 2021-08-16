@@ -35,6 +35,7 @@ import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
+import com.seibel.lod.util.LodThreadFactory;
 
 /**
  * This object handles creating LodRegions
@@ -76,7 +77,7 @@ public class LodQuadTreeDimensionFileHandler
 	
 	/** Allow saving asynchronously, but never try to save multiple regions
 	 * at a time */
-	private ExecutorService fileWritingThreadPool = Executors.newSingleThreadExecutor();
+	private ExecutorService fileWritingThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
 	
 	
 	public LodQuadTreeDimensionFileHandler(File newSaveFolder, LodQuadTreeDimension newLoadedDimension)

@@ -33,6 +33,7 @@ import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.NearFarVbos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodNodeRenderer;
+import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
@@ -54,7 +55,7 @@ public class LodNodeBufferBuilder
 	private Minecraft mc;
 	
 	/** This holds the thread used to generate new LODs off the main thread. */
-	private ExecutorService genThread = Executors.newSingleThreadExecutor();
+	private ExecutorService genThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
 	
 	private LodNodeBuilder LodQuadTreeNodeBuilder;
 	
@@ -382,7 +383,7 @@ public class LodNodeBufferBuilder
 				long buildTime = endTime - startTime;
 				if (buildTime > 1000)
 				{
-					ClientProxy.LOGGER.info("\"LodNodeBufferBuilder.generateLodBuffersAsync\" took " + buildTime + " milliseconds, consider lowering the render quality.");
+//					ClientProxy.LOGGER.info("\"LodNodeBufferBuilder.generateLodBuffersAsync\" took " + buildTime + " milliseconds, consider lowering the render quality.");
 				}
 				
 				// mark that the buildable buffers as ready to swap

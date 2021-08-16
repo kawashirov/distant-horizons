@@ -30,6 +30,7 @@ import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.LodQuadTreeWorld;
+import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.block.AbstractPlantBlock;
@@ -57,7 +58,7 @@ import net.minecraft.world.gen.Heightmap;
  */
 public class LodNodeBuilder
 {
-	private ExecutorService lodGenThreadPool = Executors.newSingleThreadExecutor();
+	private ExecutorService lodGenThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
 	
 	public static final int CHUNK_DATA_WIDTH = LodUtil.CHUNK_WIDTH;
 	public static final int CHUNK_SECTION_HEIGHT = CHUNK_DATA_WIDTH;

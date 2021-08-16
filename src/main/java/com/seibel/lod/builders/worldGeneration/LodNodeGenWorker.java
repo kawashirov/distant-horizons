@@ -35,6 +35,7 @@ import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodNodeRenderer;
+import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.block.Block;
@@ -74,7 +75,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  */
 public class LodNodeGenWorker implements IWorker
 {
-    public static ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfWorldGenerationThreads.get());
+    public static ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfWorldGenerationThreads.get(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
 
     private boolean threadStarted = false;
     private LodChunkGenThread thread;
@@ -639,7 +640,7 @@ public class LodNodeGenWorker implements IWorker
     	{
     		genThreads.shutdownNow();
     	}
-		genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfWorldGenerationThreads.get());
+		genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfWorldGenerationThreads.get(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
 	}
 	
 	
