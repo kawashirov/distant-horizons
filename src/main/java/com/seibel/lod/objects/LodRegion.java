@@ -12,17 +12,16 @@ import java.io.Serializable;
  * 0 for x, 1 for y, 2 for z in 3D
  */
 
-public class LodRegion implements Serializable {
+public class LodRegion{
     //x coord,
     private byte minLevelOfDetail;
-
+    private static final byte POSSIBLE_LOD = 10;
     private int numberOfPoints;
-
-    private byte[] sizes;
-    private short[] widths;
 
     //For each of the following field the first slot is for the level of detail
     //Important: byte have a [-128, 127] range. When converting from or to int a 128 should be added or removed
+    //If there is a bug with color then it's probably caused by this.
+    //in the future other fields like transparency and light level could be added
     private byte[][][][] colors;
 
     private short[][][] height;
@@ -30,29 +29,28 @@ public class LodRegion implements Serializable {
     private short[][][] depth;
 
     //a new node will have 0 as generationType
+    //a node with 1 is node
     private byte[][][] generationType;
 
-    private final RegionPos regionPos;
+    private int regionPosX;
+    private int regionPosZ;
 
-    public LodRegion(byte levelOfDetail, RegionPos regionPos){
-        this.regionPos = regionPos;
-
-        sizes =             new byte[LodUtil.REGION_DETAIL_LEVEL];
-        widths =            new short[LodUtil.REGION_DETAIL_LEVEL];
+    public LodRegion(byte minimumLevelOfDetail, RegionPos regionPos){
+        this.regionPosX = regionPos.x;
+        this.regionPosZ = regionPos.z;
 
         //Array of matrices of arrays
-        colors =            new byte[LodUtil.REGION_DETAIL_LEVEL][][][];
+        colors =            new byte[POSSIBLE_LOD][][][];
 
         //Arrays of matrices
-        height =            new short[LodUtil.REGION_DETAIL_LEVEL][][];
-        depth =             new short[LodUtil.REGION_DETAIL_LEVEL][][];
-        generationType =    new byte[LodUtil.REGION_DETAIL_LEVEL][][];
+        height =            new short[POSSIBLE_LOD][][];
+        depth =             new short[POSSIBLE_LOD][][];
+        generationType =    new byte[POSSIBLE_LOD][][];
 
 
         //Initialize all the different matrices
-        for(int lod = levelOfDetail; lod <= LodUtil.REGION_DETAIL_LEVEL; lod ++){
+        for(byte lod = minimumLevelOfDetail; lod <= LodUtil.REGION_DETAIL_LEVEL; lod ++){
             int size = (short) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - lod);
-            int width = (short) Math.pow(2, lod);
             colors[lod] = new byte[size][size][3];
             height[lod] = new short[size][size];
             depth[lod] = new short[size][size];
@@ -60,7 +58,6 @@ public class LodRegion implements Serializable {
 
         }
     }
-
 
     /**
      * This method can be used to insert data into the LodRegion
@@ -91,6 +88,8 @@ public class LodRegion implements Serializable {
      * @return
      */
     public boolean setData(byte lod, int posX, int posZ, byte red, byte green, byte blue, short height, short depth, byte generationType, boolean update){
+        posX = Math.floorMod(posX, (int) Math.pow(2,lod));
+        posZ = Math.floorMod(posZ, (int) Math.pow(2,lod));
         if( (this.generationType[lod][posX][posZ] == 0) || (generationType < this.generationType[lod][posX][posZ]) ) {
 
             //update the number of node present
@@ -110,10 +109,10 @@ public class LodRegion implements Serializable {
 
             //update could be stopped and a single big update could be done at the end
             if(update) {
-                for (int tempLod = lod + 1; tempLod <= LodUtil.REGION_DETAIL_LEVEL; tempLod++) {
+                for (byte tempLod = (byte) (lod + 1); tempLod <= LodUtil.REGION_DETAIL_LEVEL; tempLod++) {
                     tempPosX = Math.floorDiv(tempPosX, 2);
                     tempPosZ = Math.floorDiv(tempPosZ, 2);
-                    update((byte) tempLod, tempPosX, tempPosZ);
+                    update(tempLod, tempPosX, tempPosZ);
                 }
             }
             return true; //added
@@ -144,8 +143,11 @@ public class LodRegion implements Serializable {
     }
 */
     private void update(byte lod, int posX, int posZ){
+        posX = Math.floorMod(posX, (int) Math.pow(2,lod));
+        posZ = Math.floorMod(posZ, (int) Math.pow(2,lod));
         boolean[][] children = getChildren(lod, posX, posZ);
         int numberOfChild = 0;
+
         for(int x = 0; x <= 1; x++) {
             for (int z = 0; z <= 1; z++) {
                 if(children[x][z]){
@@ -153,9 +155,14 @@ public class LodRegion implements Serializable {
                 }
             }
         }
+
         if(numberOfChild>0) {
+
+            //int minDepth = Integer.MAX_VALUE;
             //int maxDepth = Integer.MIN_VALUE;
             //int minHeight = Integer.MAX_VALUE;
+            //int maxHeight = Integer.MIN_VALUE;
+
             byte minGenerationType = 0;
             for (int x = 0; x <= 1; x++) {
                 for (int z = 0; z <= 1; z++) {
@@ -163,21 +170,32 @@ public class LodRegion implements Serializable {
                         int newPosX = 2 * posX + x;
                         int newPosZ = 2 * posZ + z;
                         for (int col = 0; col <= 2; col++) {
-                            colors[lod][posX][posZ][col] = (byte) (colors[lod - 1][newPosX][newPosZ][col] / numberOfChild);
+                            colors[lod][posX][posZ][col] += (byte) (colors[lod - 1][newPosX][newPosZ][col] / numberOfChild);
                         }
 
-                        depth[lod][posX][posZ] = (short) (depth[lod - 1][newPosX][newPosZ] / numberOfChild);
+                        //TODO ability to change between mean, max and min.
 
-                        height[lod][posX][posZ] = (short) (height[lod - 1][newPosX][newPosZ] / numberOfChild);
-                        minGenerationType = (byte) Math.min(minGenerationType, generationType[lod][posX][posZ]);
+                        height[lod][posX][posZ] += (short) (height[lod - 1][newPosX][newPosZ] / numberOfChild);
+                        //minHeight = Math.min( height[lod - 1][newPosX][newPosZ] , maxHeight);
+                        //maxHeight = Math.max( height[lod - 1][newPosX][newPosZ] , minHeight);
+
+                        depth[lod][posX][posZ] += (short) (depth[lod - 1][newPosX][newPosZ] / numberOfChild);
+                        //minDepth = Math.min( depth[lod - 1][newPosX][newPosZ] , maxDepth);
+                        //maxDepth = Math.max( depth[lod - 1][newPosX][newPosZ] , minDepth);
+
+                        minGenerationType = (byte) Math.max(minGenerationType, generationType[lod - 1][newPosX][newPosZ]);
                     }
                 }
             }
+            //height[lod][posX][posZ] = minHeight;
+            //depth[lod][posX][posZ] = maxDepth;
             generationType[lod][posX][posZ] = minGenerationType;
         }
     }
 
     private boolean[][] getChildren(byte lod, int posX, int posZ){
+        posX = Math.floorMod(posX, (int) Math.pow(2,lod));
+        posZ = Math.floorMod(posZ, (int) Math.pow(2,lod));
         boolean[][] children = new boolean[2][2];
         int numberOfChild=0;
         if(minLevelOfDetail == lod){
@@ -189,5 +207,11 @@ public class LodRegion implements Serializable {
             }
         }
         return children;
+    }
+
+    private void removeDetailLevel(byte lod, byte[][][] colors, short[][] height, short[][] depth, byte[][] generationType){
+    }
+
+    private void addDetailLevel(byte lod, int posX, int posZ){
     }
 }
