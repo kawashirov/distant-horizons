@@ -17,6 +17,8 @@
  */
 package com.seibel.lod.proxy;
 
+import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LodWorld;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,8 +31,6 @@ import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.handlers.LodConfig;
-import com.seibel.lod.objects.LodQuadTreeDimension;
-import com.seibel.lod.objects.LodQuadTreeWorld;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.render.LodNodeRenderer;
 import com.seibel.lod.util.LodUtil;
@@ -54,7 +54,7 @@ public class ClientProxy
 {
 	public static final Logger LOGGER = LogManager.getLogger("LOD");
 	
-	private static LodQuadTreeWorld lodWorld = new LodQuadTreeWorld();
+	private static LodWorld lodWorld = new LodWorld();
 	private static LodNodeBuilder lodNodeBuilder = new LodNodeBuilder();
 	private static LodNodeBufferBuilder lodBufferBuilder = new LodNodeBufferBuilder(lodNodeBuilder);
 	private static LodNodeRenderer renderer = new LodNodeRenderer(lodBufferBuilder);
@@ -93,7 +93,7 @@ public class ClientProxy
 		
 		viewDistanceChangedEvent();
 		
-		LodQuadTreeDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
+		LodDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
 		if (lodDim == null)
 			return;
 		
@@ -224,7 +224,7 @@ public class ClientProxy
 	/**
 	 * Re-centers the given LodDimension if it needs to be.
 	 */
-	private void playerMoveEvent(LodQuadTreeDimension lodDim)
+	private void playerMoveEvent(LodDimension lodDim)
 	{
 		// make sure the dimension is centered
 		RegionPos playerRegionPos = new RegionPos(mc.player.blockPosition());
@@ -267,7 +267,7 @@ public class ClientProxy
 	// public getters //
 	//================//
 	
-	public static LodQuadTreeWorld getLodWorld()
+	public static LodWorld getLodWorld()
 	{
 		return lodWorld;
 	}

@@ -17,6 +17,13 @@
  */
 package com.seibel.lod.handlers;
 
+import com.seibel.lod.objects.LevelContainer;
+import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LodRegion;
+import com.seibel.lod.objects.RegionPos;
+import com.seibel.lod.proxy.ClientProxy;
+import com.seibel.lod.util.LodThreadFactory;
+
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
@@ -26,63 +33,56 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.seibel.lod.objects.LodQuadTree;
-import com.seibel.lod.objects.LodQuadTreeDimension;
-import com.seibel.lod.objects.LodQuadTreeNode;
-import com.seibel.lod.objects.RegionPos;
-import com.seibel.lod.proxy.ClientProxy;
-import com.seibel.lod.util.LodThreadFactory;
-
 /**
  * This object handles creating LodRegions
  * from files and saving LodRegion objects
  * to file.
- * 
+ *
  * @author James Seibel
  * @version 8-14-2021
  */
-public class LodQuadTreeDimensionFileHandler
+public class LodDimensionFileHandler
 {
 	/** This is what separates each piece of data */
 	public static final char DATA_DELIMITER = ',';
-	
-	
-	private LodQuadTreeDimension loadedDimension = null;
+
+
+	private LodDimension loadedDimension = null;
 	public long regionLastWriteTime[][];
-	
+
 	private File dimensionDataSaveFolder;
-	
+
 	/** lod */
 	private static final String FILE_NAME_PREFIX = "lod";
 	/** .txt */
-	private static final String FILE_EXTENSION = ".txt";
+	private static final String FILE_EXTENSION = ".bin";
 	/** .tmp <br>
 	 * Added to the end of the file path when saving to prevent
 	 * nulling a currently existing file. <br>
 	 * After the file finishes saving it will end with
 	 * FILE_EXTENSION. */
 	private static final String TMP_FILE_EXTENSION = ".tmp";
-	
+
 	/** This is the file version currently accepted by this
 	 * file handler, older versions (smaller numbers) will be deleted and overwritten,
 	 * newer versions (larger numbers) will be ignored and won't be read. */
 	public static final int LOD_SAVE_FILE_VERSION = 3;
-	
+
 	/** This is the string written before the file version */
 	private static final String LOD_FILE_VERSION_PREFIX = "lod_save_file_version";
-	
+
 	/** Allow saving asynchronously, but never try to save multiple regions
 	 * at a time */
 	private ExecutorService fileWritingThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
-	
-	
-	public LodQuadTreeDimensionFileHandler(File newSaveFolder, LodQuadTreeDimension newLoadedDimension)
+
+
+	public LodDimensionFileHandler(File newSaveFolder, LodDimension newLoadedDimension)
 	{
 		if (newSaveFolder == null)
 			throw new IllegalArgumentException("LodDimensionFileHandler requires a valid File location to read and write to.");
-		
+
 		dimensionDataSaveFolder = newSaveFolder;
-		
+
 		loadedDimension = newLoadedDimension;
 		// these two variable are used in sync with the LodDimension
 		regionLastWriteTime = new long[loadedDimension.getWidth()][loadedDimension.getWidth()];
@@ -90,35 +90,36 @@ public class LodQuadTreeDimensionFileHandler
 			for(int j = 0; j < loadedDimension.getWidth(); j++)
 				regionLastWriteTime[i][j] = -1;
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 	//================//
 	// read from file //
 	//================//
-	
-	
-	
+
+
+
 	/**
-	 * Return the LodQuadTree region at the given coordinates.
+	 * Return the LodRegion region at the given coordinates.
 	 * (null if the file doesn't exist)
 	 */
-	public LodQuadTree loadRegionFromFile(RegionPos regionPos)
+	public LodRegion loadRegionFromFile(RegionPos regionPos)
 	{
 		int regionX = regionPos.x;
 		int regionZ = regionPos.z;
-		
+
 		String fileName = getFileNameAndPathForRegion(regionX, regionZ);
 		if(FILE_EXTENSION == ".bin"){
 			try {
+				System.out.println(fileName);
 				ObjectInputStream is = new ObjectInputStream(new FileInputStream(fileName));
-				List<LodQuadTreeNode> dataList = (List<LodQuadTreeNode>) is.readObject();
-				//LodQuadTree region = (LodQuadTree) is.readObject();
+
+
+				LodRegion region = (LodRegion) is.readObject();
 				is.close();
-				return new LodQuadTree(dataList, regionX, regionZ);
-				//return region;
+				return region;
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -126,10 +127,9 @@ public class LodQuadTreeDimensionFileHandler
 			} catch (ClassNotFoundException e) {
 				e.printStackTrace();
 			}
-			return new LodQuadTree(new ArrayList<>(), regionX, regionZ);
-			//return null;
 		}
-
+		return null;
+		/*
 		if(FILE_EXTENSION == ".txt") {
 			File f = new File(fileName);
 
@@ -210,19 +210,20 @@ public class LodQuadTreeDimensionFileHandler
 		}
 
 		return null;
+		*/
 	}
-	
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
+
 	//==============//
 	// Save to File //
 	//==============//
-	
+
 	/**
 	 * Save all dirty regions in this LodDimension to file.
 	 */
@@ -230,7 +231,7 @@ public class LodQuadTreeDimensionFileHandler
 	{
 		fileWritingThreadPool.execute(saveDirtyRegionsThread);
 	}
-	
+
 	private Thread saveDirtyRegionsThread = new Thread(() ->
 	{
 		for(int i = 0; i < loadedDimension.getWidth(); i++)
@@ -245,7 +246,7 @@ public class LodQuadTreeDimensionFileHandler
 			}
 		}
 	});
-	
+
 	/**
 	 * Save a specific region to disk.<br>
 	 * Note: <br>
@@ -254,20 +255,20 @@ public class LodQuadTreeDimensionFileHandler
 	 * 2. This will save to the LodDimension that this
 	 * handler is associated with.
 	 */
-	private void saveRegionToFile(LodQuadTree region)
+	private void saveRegionToFile(LodRegion region)
 	{
 		// convert to region coordinates
-		int x = region.getLodNodeData().posX;
-		int z = region.getLodNodeData().posZ;
+		int x = region.regionPosX;
+		int z = region.regionPosZ;
 
 
 		File oldFile = new File(getFileNameAndPathForRegion(x, z));
-
+		if (!oldFile.getParentFile().exists())
+			oldFile.getParentFile().mkdirs();
 		if(FILE_EXTENSION == ".bin"){
 			try {
 				ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(getFileNameAndPathForRegion(x, z)));
-				os.writeObject(region.getNodeListWithMask(LodQuadTreeDimension.FULL_COMPLEXITY_MASK, false, true));
-				//os.writeObject(region);
+				os.writeObject(region);
 				os.close();
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
@@ -275,6 +276,7 @@ public class LodQuadTreeDimensionFileHandler
 				e.printStackTrace();
 			}
 		}
+		/*
 		if(FILE_EXTENSION == ".txt") {
 			try {
 				// make sure the file and folder exists
@@ -340,19 +342,20 @@ public class LodQuadTreeDimensionFileHandler
 				e.printStackTrace();
 			}
 		}
+		 */
 	}
-	
-	
-	
-	
-	
-	
-	
+
+
+
+
+
+
+
 	//================//
 	// helper methods //
 	//================//
-	
-	
+
+
 	/**
 	 * Return the name of the file that should contain the
 	 * region at the given x and z. <br>
@@ -376,5 +379,5 @@ public class LodQuadTreeDimensionFileHandler
 			return null;
 		}
 	}
-	
+
 }

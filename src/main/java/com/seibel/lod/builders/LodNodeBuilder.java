@@ -26,10 +26,10 @@ import java.util.concurrent.Executors;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
+import com.seibel.lod.objects.LevelPos;
 import com.seibel.lod.objects.LodDataPoint;
-import com.seibel.lod.objects.LodQuadTreeDimension;
-import com.seibel.lod.objects.LodQuadTreeNode;
-import com.seibel.lod.objects.LodQuadTreeWorld;
+import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 
@@ -72,47 +72,43 @@ public class LodNodeBuilder
 		
 	}
 	
-	public void generateLodNodeAsync(IChunk chunk, LodQuadTreeWorld lodWorld, IWorld world)
+	public void generateLodNodeAsync(IChunk chunk, LodWorld lodWorld, IWorld world)
 	{
 		generateLodNodeAsync(chunk, lodWorld, world, DistanceGenerationMode.SERVER);
 	}
-	
-	public void generateLodNodeAsync(IChunk chunk, LodQuadTreeWorld lodWorld, IWorld world, DistanceGenerationMode generationMode)
+
+
+	public void generateLodNodeAsync(IChunk chunk, LodWorld lodWorld, IWorld world, DistanceGenerationMode generationMode)
 	{
 		if (lodWorld == null || !lodWorld.getIsWorldLoaded())
 			return;
-			
+
 		// don't try to create an LOD object
 		// if for some reason we aren't
 		// given a valid chunk object
 		if (chunk == null)
 			return;
-		
+
 		Thread thread = new Thread(() ->
 		{
 			try
 			{
 				DimensionType dim = world.dimensionType();
-				
-				List<LodQuadTreeNode> nodeList = generateLodNodeFromChunk(chunk, new LodBuilderConfig(generationMode));
-				
-				LodQuadTreeDimension lodDim;
-				
+
+
+				LodDimension lodDim;
+
 				if (lodWorld.getLodDimension(dim) == null)
 				{
-					lodDim = new LodQuadTreeDimension(dim, lodWorld, defaultDimensionWidthInRegions);
+					lodDim = new LodDimension(dim, lodWorld, defaultDimensionWidthInRegions);
 					lodWorld.addLodDimension(lodDim);
 				}
 				else
 				{
 					lodDim = lodWorld.getLodDimension(dim);
 				}
-				
-				for (LodQuadTreeNode node : nodeList)
-				{
-					lodDim.addNode(node);
-					
-				}
+
+				generateLodNodeFromChunk(lodDim ,chunk, new LodBuilderConfig(generationMode));
 			}
 			catch (IllegalArgumentException | NullPointerException e)
 			{
@@ -123,47 +119,46 @@ public class LodNodeBuilder
 			}
 		});
 		lodGenThreadPool.execute(thread);
-		
+
 		return;
 	}
-	
+
 	/**
 	 * Creates a LodChunk for a chunk in the given world.
 	 *
 	 * @throws IllegalArgumentException thrown if either the chunk or world is null.
 	 */
-	public List<LodQuadTreeNode> generateLodNodeFromChunk(IChunk chunk) throws IllegalArgumentException
+	public void generateLodNodeFromChunk(LodDimension lodDim, IChunk chunk) throws IllegalArgumentException
 	{
-		return generateLodNodeFromChunk(chunk, new LodBuilderConfig());
+		generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig());
 	}
-	
+
 	/**
 	 * Creates a LodChunk for a chunk in the given world.
 	 *
 	 * @throws IllegalArgumentException thrown if either the chunk or world is null.
 	 */
-	public List<LodQuadTreeNode> generateLodNodeFromChunk(IChunk chunk, LodBuilderConfig config)
+	public void generateLodNodeFromChunk(LodDimension lodDim, IChunk chunk, LodBuilderConfig config)
 			throws IllegalArgumentException
 	{
 		LodDetail detail = LodConfig.CLIENT.maxGenerationDetail.get();
-		List<LodQuadTreeNode> lodNodeList = new ArrayList<>();
-		
+
 		if (chunk == null)
 			throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
-		
-		
+
+
 		for (int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++)
 		{
 			int startX = detail.startX[i];
 			int startZ = detail.startZ[i];
 			int endX = detail.endX[i];
 			int endZ = detail.endZ[i];
-			
+
 			Color color = generateLodColorForArea(chunk, config, startX, startZ, endX, endZ);
-			
+
 			short height;
 			short depth;
-			
+
 			if (!config.useHeightmap)
 			{
 				height = determineHeightPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
@@ -175,21 +170,22 @@ public class LodNodeBuilder
 						startZ, endX, endZ);
 				depth = 0;
 			}
-			
-			lodNodeList.add(new LodQuadTreeNode((byte) detail.detailLevel,
-					LodUtil.convertLevelPos(chunk.getPos().getMinBlockX() + startX, 0, detail.detailLevel),
-					LodUtil.convertLevelPos(chunk.getPos().getMinBlockZ() + startZ, 0, detail.detailLevel),
-					new LodDataPoint(height, depth, color), config.distanceGenerationMode));
-			
+			LevelPos levelPos = new LevelPos((byte)0 ,
+					chunk.getPos().x*16 + startX,
+					chunk.getPos().z*16 + startZ);
+			LodDataPoint data = new LodDataPoint(height, depth, color);
+			lodDim.addData(levelPos.convert((byte) detail.detailLevel),
+					data,
+					config.distanceGenerationMode,
+					true,
+					false);
 		}
-		
-		return lodNodeList;
 	}
-	
+
 	// =====================//
 	// constructor helpers //
 	// =====================//
-	
+
 	/**
 	 * Find the lowest valid point from the bottom.
 	 *
@@ -202,14 +198,14 @@ public class LodNodeBuilder
 	private short determineBottomPointForArea(ChunkSection[] chunkSections, int startX, int startZ, int endX, int endZ)
 	{
 		int numberOfBlocksRequired = ((endX - startX) * (endZ - startZ) / 2);
-		
+
 		// search from the bottom up
 		for (int section = 0; section < CHUNK_DATA_WIDTH; section++)
 		{
 			for (int y = 0; y < CHUNK_SECTION_HEIGHT; y++)
 			{
 				int numberOfBlocksFound = 0;
-				
+
 				for (int x = startX; x < endX; x++)
 				{
 					for (int z = startZ; z < endZ; z++)
@@ -217,7 +213,7 @@ public class LodNodeBuilder
 						if (isLayerValidLodPoint(chunkSections, section, y, x, z))
 						{
 							numberOfBlocksFound++;
-							
+
 							if (numberOfBlocksFound >= numberOfBlocksRequired)
 							{
 								// we found
@@ -231,11 +227,11 @@ public class LodNodeBuilder
 				}
 			}
 		}
-		
+
 		// we never found a valid LOD point
 		return -1;
 	}
-	
+
 	/**
 	 * Find the lowest valid point from the bottom.
 	 */
@@ -246,7 +242,7 @@ public class LodNodeBuilder
 		// doesn't have any info about how low they go
 		return 0;
 	}
-	
+
 	/**
 	 * Find the highest valid point from the Top
 	 *
@@ -265,7 +261,7 @@ public class LodNodeBuilder
 			for (int y = CHUNK_DATA_WIDTH - 1; y >= 0; y--)
 			{
 				int numberOfBlocksFound = 0;
-				
+
 				for (int x = startX; x < endX; x++)
 				{
 					for (int z = startZ; z < endZ; z++)
@@ -273,7 +269,7 @@ public class LodNodeBuilder
 						if (isLayerValidLodPoint(chunkSections, section, y, x, z))
 						{
 							numberOfBlocksFound++;
-							
+
 							if (numberOfBlocksFound >= numberOfBlocksRequired)
 							{
 								// we found
@@ -287,11 +283,11 @@ public class LodNodeBuilder
 				}
 			}
 		}
-		
+
 		// we never found a valid LOD point
 		return -1;
 	}
-	
+
 	/**
 	 * Find the highest point from the Top
 	 */
@@ -307,10 +303,10 @@ public class LodNodeBuilder
 					highest = newHeight;
 			}
 		}
-		
+
 		return highest;
 	}
-	
+
 	/**
 	 * Generate the color for the given chunk using biome water color, foliage
 	 * color, and grass color.
@@ -330,21 +326,21 @@ public class LodNodeBuilder
 	 *                                        material color
 	 */
 	private Color generateLodColorForArea(IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX,
-			int endZ)
+										  int endZ)
 	{
 		ChunkSection[] chunkSections = chunk.getSections();
-		
+
 		int numbOfBlocks = 0;
 		int red = 0;
 		int green = 0;
 		int blue = 0;
-		
+
 		for (int x = startX; x < endX; x++)
 		{
 			for (int z = startZ; z < endZ; z++)
 			{
 				boolean foundBlock = false;
-				
+
 				// go top down
 				for (int i = chunkSections.length - 1; !foundBlock && i >= 0; i--)
 				{
@@ -354,19 +350,19 @@ public class LodNodeBuilder
 						{
 							int colorInt = 0;
 							BlockState blockState = null;
-							
+
 							if (chunkSections[i] != null)
 							{
 								blockState = chunkSections[i].getBlockState(x, y, z);
 								colorInt = blockState.materialColor.col;
 							}
-							
+
 							if (colorInt == 0 && config.useSolidBlocksInColorGen)
 							{
 								// skip air or invisible blocks
 								continue;
 							}
-							
+
 							if (config.useBiomeColors)
 							{
 								// I have no idea why I need to bit shift to the right, but
@@ -377,21 +373,21 @@ public class LodNodeBuilder
 							}
 							else
 							{
-								
+
 								// the bit shift is equivalent to dividing by 4
 								Biome biome = chunk.getBiomes().getNoiseBiome(x >> 2, y + i * chunkSections.length >> 2,
 										z >> 2);
 								colorInt = getColorForBlock(x, z, blockState, biome);
 							}
-							
+
 							Color c = LodUtil.intToColor(colorInt);
-							
+
 							red += c.getRed();
 							green += c.getGreen();
 							blue += c.getBlue();
-							
+
 							numbOfBlocks++;
-							
+
 							// we found a valid block, skip to the
 							// next x and z
 							foundBlock = true;
@@ -400,24 +396,24 @@ public class LodNodeBuilder
 				}
 			}
 		}
-		
+
 		if (numbOfBlocks == 0)
 			numbOfBlocks = 1;
-		
+
 		red /= numbOfBlocks;
 		green /= numbOfBlocks;
 		blue /= numbOfBlocks;
-		
+
 		return new Color(red, green, blue);
 	}
-	
+
 	/**
 	 * Returns a color int for a given block.
 	 */
 	private int getColorForBlock(int x, int z, BlockState blockState, Biome biome)
 	{
 		int colorInt = 0;
-		
+
 		// block special cases
 		if (blockState == Blocks.AIR.defaultBlockState())
 		{
@@ -429,7 +425,7 @@ public class LodNodeBuilder
 		{
 			colorInt = MaterialColor.COLOR_LIGHT_GRAY.col;
 		}
-		
+
 		// plant life
 		else if (blockState.getBlock() instanceof LeavesBlock)
 		{
@@ -443,84 +439,84 @@ public class LodNodeBuilder
 			tmp = tmp.darker();
 			colorInt = LodUtil.colorToInt(tmp);
 		}
-		
+
 		// water
 		else if (blockState.getBlock() == Blocks.WATER)
 		{
 			colorInt = biome.getWaterColor();
 		}
-		
+
 		// everything else
 		else
 		{
 			colorInt = blockState.materialColor.col;
 		}
-		
+
 		return colorInt;
 	}
-	
+
 	/**
 	 * Returns a color int for the given biome.
 	 */
 	private int getColorForBiome(int x, int z, Biome biome)
 	{
 		int colorInt = 0;
-		
+
 		switch (biome.getBiomeCategory())
 		{
-		
-		case NETHER:
-			colorInt = Blocks.BEDROCK.defaultBlockState().materialColor.col;
-			break;
-		
-		case THEEND:
-			colorInt = Blocks.END_STONE.defaultBlockState().materialColor.col;
-			break;
-		
-		case BEACH:
-		case DESERT:
-			colorInt = Blocks.SAND.defaultBlockState().materialColor.col;
-			break;
-		
-		case EXTREME_HILLS:
-			colorInt = Blocks.STONE.defaultMaterialColor().col;
-			break;
-		
-		case MUSHROOM:
-			colorInt = MaterialColor.COLOR_LIGHT_GRAY.col;
-			break;
-		
-		case ICY:
-			colorInt = Blocks.SNOW.defaultMaterialColor().col;
-			break;
-		
-		case MESA:
-			colorInt = Blocks.RED_SAND.defaultMaterialColor().col;
-			break;
-		
-		case OCEAN:
-		case RIVER:
-			colorInt = biome.getWaterColor();
-			break;
-		
-		case NONE:
-		case FOREST:
-		case TAIGA:
-		case JUNGLE:
-		case PLAINS:
-		case SAVANNA:
-		case SWAMP:
-		default:
-			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
-			tmp = tmp.darker();
-			colorInt = LodUtil.colorToInt(tmp);
-			break;
-		
+
+			case NETHER:
+				colorInt = Blocks.BEDROCK.defaultBlockState().materialColor.col;
+				break;
+
+			case THEEND:
+				colorInt = Blocks.END_STONE.defaultBlockState().materialColor.col;
+				break;
+
+			case BEACH:
+			case DESERT:
+				colorInt = Blocks.SAND.defaultBlockState().materialColor.col;
+				break;
+
+			case EXTREME_HILLS:
+				colorInt = Blocks.STONE.defaultMaterialColor().col;
+				break;
+
+			case MUSHROOM:
+				colorInt = MaterialColor.COLOR_LIGHT_GRAY.col;
+				break;
+
+			case ICY:
+				colorInt = Blocks.SNOW.defaultMaterialColor().col;
+				break;
+
+			case MESA:
+				colorInt = Blocks.RED_SAND.defaultMaterialColor().col;
+				break;
+
+			case OCEAN:
+			case RIVER:
+				colorInt = biome.getWaterColor();
+				break;
+
+			case NONE:
+			case FOREST:
+			case TAIGA:
+			case JUNGLE:
+			case PLAINS:
+			case SAVANNA:
+			case SWAMP:
+			default:
+				Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
+				tmp = tmp.darker();
+				colorInt = LodUtil.colorToInt(tmp);
+				break;
+
 		}
-		
+
 		return colorInt;
 	}
-	
+
 	/**
 	 * Is the layer between the given X, Z, and dataIndex values a valid LOD point?
 	 */
@@ -540,8 +536,8 @@ public class LodNodeBuilder
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 }

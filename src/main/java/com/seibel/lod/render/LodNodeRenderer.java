@@ -22,6 +22,7 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.HashSet;
 
+import com.seibel.lod.objects.LevelPos;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.NVFogDistance;
@@ -35,8 +36,7 @@ import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.handlers.ReflectionHandler;
-import com.seibel.lod.objects.LodQuadTreeDimension;
-import com.seibel.lod.objects.LodQuadTreeNode;
+import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
@@ -146,7 +146,7 @@ public class LodNodeRenderer
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
 	@SuppressWarnings("deprecation")
-	public void drawLODs(LodQuadTreeDimension lodDim, float partialTicks, IProfiler newProfiler)
+	public void drawLODs(LodDimension lodDim, float partialTicks, IProfiler newProfiler)
 	{		
 		if (lodDim == null)
 		{
@@ -585,7 +585,7 @@ public class LodNodeRenderer
 	 * setup the lighting to be used for the LODs
 	 */
 	@SuppressWarnings("deprecation")
-	private void setupLighting(LodQuadTreeDimension lodDimension, float partialTicks)
+	private void setupLighting(LodDimension lodDimension, float partialTicks)
 	{
 		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.level.getSkyDarken(partialTicks) : 0.2f;
 		float gammaMultiplyer = (float)mc.options.gamma - 0.5f;
@@ -778,7 +778,7 @@ public class LodNodeRenderer
 	 * Get a HashSet of all ChunkPos within the normal render distance
 	 * that should not be rendered.
 	 */
-	private HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodQuadTreeDimension lodDim, BlockPos playerPos)
+	private HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodDimension lodDim, BlockPos playerPos)
 	{
 		int chunkRenderDist = mc.options.renderDistance;
 		int blockRenderDist = chunkRenderDist * 16;
@@ -793,11 +793,12 @@ public class LodNodeRenderer
 		{
 			for(int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
 			{
-				LodQuadTreeNode lod = lodDim.getLodFromCoordinates(new ChunkPos(x, z), 4);
-				if (lod != null)
+
+				LevelPos levelPos = new LevelPos((byte) 4, x, z);
+				if (lodDim.doesDataExist(levelPos))
 				{
-					short lodHighestPoint = lod.getLodDataPoint().height;
-					
+					short lodHighestPoint = lodDim.getData(levelPos).height;
+
 					if (playerPos.getY() < lodHighestPoint)
 					{
 						// don't draw Lod's that are taller than the player

@@ -20,8 +20,8 @@ package com.seibel.lod.builders.lodNodeTemplates;
 import java.awt.Color;
 
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.objects.LodQuadTreeDimension;
-import com.seibel.lod.objects.LodQuadTreeNode;
+import com.seibel.lod.objects.LodDataPoint;
+import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.renderer.BufferBuilder;
@@ -29,30 +29,30 @@ import net.minecraft.client.renderer.BufferBuilder;
 /**
  * This is the abstract class used to create different
  * BufferBuilders.
- * 
+ *
  * @author James Seibel
  * @version 8-8-2021
  */
 public abstract class AbstractLodNodeTemplate
 {
 	public abstract void addLodToBuffer(BufferBuilder buffer,
-			LodQuadTreeDimension lodDim, LodQuadTreeNode lod,
-			double xOffset, double yOffset, double zOffset,
-			boolean debugging, LodDetail detail) ;
-	
+										LodDimension lodDim, LodDataPoint lod,
+										double xOffset, double yOffset, double zOffset,
+										boolean debugging, LodDetail detail);
+
 	/** add the given position and color to the buffer */
-	protected void addPosAndColor(BufferBuilder buffer, 
-			double x, double y, double z, 
-			int red, int green, int blue, int alpha)
+	protected void addPosAndColor(BufferBuilder buffer,
+								  double x, double y, double z,
+								  int red, int green, int blue, int alpha)
 	{
 		buffer.vertex(x, y, z).color(red, green, blue, alpha).endVertex();
 	}
-	
+
 	/** Returns in bytes how much buffer memory is required
 	 * for one LOD object */
 	public abstract int getBufferMemoryForSingleNode(int level);
-	
-	
+
+
 	/**
 	 * Edit the given color as a HSV (Hue Saturation Value) color.
 	 */
@@ -61,9 +61,9 @@ public abstract class AbstractLodNodeTemplate
 		float[] hsv = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
 		return Color.getHSBColor(
 				hsv[0], // hue
-				LodUtil.clamp(0.0f, hsv[1] * saturationMultiplier, 1.0f), 
+				LodUtil.clamp(0.0f, hsv[1] * saturationMultiplier, 1.0f),
 				LodUtil.clamp(0.0f, hsv[2] * brightnessMultiplier, 1.0f));
 	}
-	
-	
+
+
 }
