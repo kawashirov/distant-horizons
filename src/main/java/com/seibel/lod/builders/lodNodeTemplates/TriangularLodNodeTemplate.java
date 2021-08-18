@@ -18,8 +18,8 @@
 package com.seibel.lod.builders.lodNodeTemplates;
 
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.objects.LodQuadTreeDimension;
-import com.seibel.lod.objects.LodQuadTreeNode;
+import com.seibel.lod.objects.LodDataPoint;
+import com.seibel.lod.objects.LodDimension;
 
 import net.minecraft.client.renderer.BufferBuilder;
 
@@ -34,9 +34,9 @@ public class TriangularLodNodeTemplate extends AbstractLodNodeTemplate
 {
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer,
-							   LodQuadTreeDimension lodDim, LodQuadTreeNode lod,
-							   double xOffset, double yOffset, double zOffset,
-							   boolean debugging, LodDetail detail)
+											LodDimension lodDim, LodDataPoint lod,
+											double xOffset, double yOffset, double zOffset,
+											boolean debugging, LodDetail detail)
 	{
 		System.err.println("DynamicLodTemplate not implemented!");
 	}

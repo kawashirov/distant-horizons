@@ -31,11 +31,11 @@ import net.minecraft.world.DimensionType;
  * @author Leonardo Amato
  * @version 8-17-2021
  */
-public class LodQuadTreeWorld
+public class LodWorld
 {
 	private String worldName;
 	
-	private Map<DimensionType, LodQuadTreeDimension> lodDimensions;
+	private Map<DimensionType, LodDimension> lodDimensions;
 	
 	/** If true then the LOD world is setup and ready to use */
 	private boolean isWorldLoaded = false;
@@ -44,7 +44,7 @@ public class LodQuadTreeWorld
 	
 	
 	
-	public LodQuadTreeWorld()
+	public LodWorld()
 	{
 		worldName = NO_WORLD_LOADED;
 	}
@@ -69,7 +69,7 @@ public class LodQuadTreeWorld
 			return;
 		
 		worldName = newWorldName;
-		lodDimensions = new Hashtable<DimensionType, LodQuadTreeDimension>();
+		lodDimensions = new Hashtable<DimensionType, LodDimension>();
 		isWorldLoaded = true;
 	}
 	
@@ -90,7 +90,7 @@ public class LodQuadTreeWorld
 	 * Adds newStorage to this world, if a LodQuadTreeDimension
 	 * already exists for the given dimension it is replaced.
 	 */
-	public void addLodDimension(LodQuadTreeDimension newStorage)
+	public void addLodDimension(LodDimension newStorage)
 	{
 		if (lodDimensions == null)
 			return;
@@ -101,7 +101,7 @@ public class LodQuadTreeWorld
 	/**
 	 * Returns null if no LodQuadTreeDimension exists for the given dimension
 	 */
-	public LodQuadTreeDimension getLodDimension(DimensionType dimension)
+	public LodDimension getLodDimension(DimensionType dimension)
 	{
 		if (lodDimensions == null)
 			return null;

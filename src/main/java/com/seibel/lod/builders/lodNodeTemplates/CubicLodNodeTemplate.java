@@ -22,8 +22,8 @@ import java.awt.Color;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.handlers.LodConfig;
-import com.seibel.lod.objects.LodQuadTreeDimension;
-import com.seibel.lod.objects.LodQuadTreeNode;
+import com.seibel.lod.objects.LodDataPoint;
+import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.renderer.BufferBuilder;
@@ -39,77 +39,77 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 {
 	public CubicLodNodeTemplate()
 	{
-		
+
 	}
-	
+
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer,
-			LodQuadTreeDimension lodDim, LodQuadTreeNode lod,
-			double xOffset, double yOffset, double zOffset,
-			boolean debugging, LodDetail detail)
+							   LodDimension lodDim, LodDataPoint lod,
+							   double xOffset, double yOffset, double zOffset,
+							   boolean debugging, LodDetail detail)
 	{
 		AxisAlignedBB bbox;
-		
+
 		// add each LOD for the detail level
 		bbox = generateBoundingBox(
-				lod.getLodDataPoint().height,
-				lod.getLodDataPoint().depth,
-				lod.width,
+				lod.height,
+				lod.depth,
+				detail.dataPointWidth,
 				xOffset,
 				yOffset,
 				zOffset);
-		
-		Color color = lod.getLodDataPoint().color;
+
+		Color color = lod.color;
 		if (LodConfig.CLIENT.debugMode.get())
 		{
 			color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[detail.detailLevel];
 		}
-		
+
 		if (bbox != null)
 		{
 			addBoundingBoxToBuffer(buffer, bbox, color);
 		}
-		
+
 	}
-	
+
 	/*
 	 * @Override public void addLodToBuffer(BufferBuilder buffer,
 	 * LodQuadTreeDimension lodDim, LodQuadTreeNode lod, double xOffset, double
 	 * yOffset, double zOffset, boolean debugging) { AxisAlignedBB bbox;
-	 * 
+	 *
 	 * bbox = generateBoundingBox( lod.getLodDataPoint().height,
 	 * lod.getLodDataPoint().depth, lod.width, xOffset, yOffset, zOffset);
-	 * 
+	 *
 	 * Color color = lod.getLodDataPoint().color;
-	 * 
+	 *
 	 * if (bbox != null) { addBoundingBoxToBuffer(buffer, bbox, color); }
-	 * 
+	 *
 	 * }
 	 */
-	
+
 	private AxisAlignedBB generateBoundingBox(int height, int depth, int width, double xOffset, double yOffset, double zOffset)
 	{
 		// don't add an LOD if it is empty
 		if (height == -1 && depth == -1)
 			return null;
-		
+
 		if (depth == height)
 		{
 			// if the top and bottom points are at the same height
 			// render this LOD as 1 block thick
 			height++;
 		}
-		
+
 		return new AxisAlignedBB(0, depth, 0, width, height, width).move(xOffset, yOffset, zOffset);
 	}
-	
+
 	private void addBoundingBoxToBuffer(BufferBuilder buffer, AxisAlignedBB bb, Color c)
 	{
 		Color topColor = c;
 		Color northSouthColor = c;
 		Color eastWestColor = c;
 		Color bottomColor = c;
-		
+
 		// darken the bottom and side colors if requested
 		if (LodConfig.CLIENT.shadingMode.get() == ShadingMode.DARKEN_SIDES)
 		{
@@ -119,20 +119,20 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 			int northSouthDarkenAmount = 25;
 			int eastWestDarkenAmount = 50;
 			int bottomDarkenAmount = 75;
-			
+
 			northSouthColor = new Color(Math.max(0, c.getRed() - northSouthDarkenAmount), Math.max(0, c.getGreen() - northSouthDarkenAmount), Math.max(0, c.getBlue() - northSouthDarkenAmount), c.getAlpha());
 			eastWestColor = new Color(Math.max(0, c.getRed() - eastWestDarkenAmount), Math.max(0, c.getGreen() - eastWestDarkenAmount), Math.max(0, c.getBlue() - eastWestDarkenAmount), c.getAlpha());
 			bottomColor = new Color(Math.max(0, c.getRed() - bottomDarkenAmount), Math.max(0, c.getGreen() - bottomDarkenAmount), Math.max(0, c.getBlue() - bottomDarkenAmount), c.getAlpha());
 		}
-		
+
 		// apply the user specified saturation and brightness
 		float saturationMultiplier = LodConfig.CLIENT.saturationMultiplier.get().floatValue();
 		float brightnessMultiplier = LodConfig.CLIENT.brightnessMultiplier.get().floatValue();
-		
+
 		topColor = applySaturationAndBrightnessMultipliers(topColor, saturationMultiplier, brightnessMultiplier);
 		northSouthColor = applySaturationAndBrightnessMultipliers(northSouthColor, saturationMultiplier, brightnessMultiplier);
 		bottomColor = applySaturationAndBrightnessMultipliers(bottomColor, saturationMultiplier, brightnessMultiplier);
-		
+
 		// top (facing up)
 		addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, topColor.getRed(), topColor.getGreen(), topColor.getBlue(), topColor.getAlpha());
 		addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, topColor.getRed(), topColor.getGreen(), topColor.getBlue(), topColor.getAlpha());
@@ -143,7 +143,7 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, bottomColor.getRed(), bottomColor.getGreen(), bottomColor.getBlue(), bottomColor.getAlpha());
 		addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, bottomColor.getRed(), bottomColor.getGreen(), bottomColor.getBlue(), bottomColor.getAlpha());
 		addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, bottomColor.getRed(), bottomColor.getGreen(), bottomColor.getBlue(), bottomColor.getAlpha());
-		
+
 		// south (facing -Z)
 		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
 		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
@@ -154,7 +154,7 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 		addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
 		addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
 		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
-		
+
 		// west (facing -X)
 		addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
 		addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
@@ -166,7 +166,7 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 		addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
 		addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
 	}
-	
+
 	@Override
 	public int getBufferMemoryForSingleNode(int detailLevel)
 	{
@@ -174,5 +174,5 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 		// howManyPointsPerLodChunk
 		return (6 * 4 * (3 + 4));
 	}
-	
+
 }

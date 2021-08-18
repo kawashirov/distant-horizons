@@ -17,6 +17,8 @@
  */
 package com.seibel.lod.proxy;
 
+import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LodWorld;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,8 +31,6 @@ import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.handlers.LodConfig;
-import com.seibel.lod.objects.LodQuadTreeDimension;
-import com.seibel.lod.objects.LodQuadTreeWorld;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.render.LodNodeRenderer;
 import com.seibel.lod.util.LodUtil;
@@ -54,7 +54,7 @@ public class ClientProxy
 {
 	public static final Logger LOGGER = LogManager.getLogger("LOD");
 	
-	private static LodQuadTreeWorld lodWorld = new LodQuadTreeWorld();
+	private static LodWorld lodWorld = new LodWorld();
 	private static LodNodeBuilder lodNodeBuilder = new LodNodeBuilder();
 	private static LodNodeBufferBuilder lodBufferBuilder = new LodNodeBufferBuilder(lodNodeBuilder);
 	private static LodNodeRenderer renderer = new LodNodeRenderer(lodBufferBuilder);
@@ -89,11 +89,11 @@ public class ClientProxy
 	{
 		if (mc == null || mc.player == null || !lodWorld.getIsWorldLoaded())
 			return;
-		
-		
+
+
 		viewDistanceChangedEvent();
-		
-		LodQuadTreeDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
+
+		LodDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
 		if (lodDim == null)
 			return;
 		
@@ -142,14 +142,14 @@ public class ClientProxy
 		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.FULL);
 		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.FULL);
 		
-		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(20);
+		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(16);
 		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
-		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.NEVER_DRAW_FOG);
+		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
 		LodConfig.CLIENT.shadingMode.set(ShadingMode.DARKEN_SIDES);
 //		LodConfig.CLIENT.brightnessMultiplier.set(1.0);
 //		LodConfig.CLIENT.saturationMultiplier.set(1.0);
 		
-		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
+		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
 		
 		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(16);
@@ -224,7 +224,7 @@ public class ClientProxy
 	/**
 	 * Re-centers the given LodDimension if it needs to be.
 	 */
-	private void playerMoveEvent(LodQuadTreeDimension lodDim)
+	private void playerMoveEvent(LodDimension lodDim)
 	{
 		// make sure the dimension is centered
 		RegionPos playerRegionPos = new RegionPos(mc.player.blockPosition());
@@ -237,15 +237,16 @@ public class ClientProxy
 			//LOGGER.info("offset: " + worldRegionOffset.x + "," + worldRegionOffset.z + "\t center: " + lodDim.getCenterX() + "," + lodDim.getCenterZ());
 		}
 	}
-	
-	
+
+
 	/**
 	 * Re-sizes all LodDimensions if they needs to be.
 	 */
 	private void viewDistanceChangedEvent()
 	{
 		// calculate how wide the dimension(s) should be in regions
-		int chunksWide = (mc.options.renderDistance * 2) * LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
+		//int chunksWide = (mc.options.renderDistance * 2) * LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
+		int chunksWide = 8 * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() + 1;
 		int newWidth = (int)Math.ceil(chunksWide / (float) LodUtil.REGION_WIDTH_IN_CHUNKS);
 		newWidth = (newWidth % 2 == 0) ? (newWidth += 1) : (newWidth += 2); // make sure we have a odd number of regions
 		
@@ -262,13 +263,13 @@ public class ClientProxy
 			//LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );
 		}
 	}
-	
+
 	
 	//================//
 	// public getters //
 	//================//
 	
-	public static LodQuadTreeWorld getLodWorld()
+	public static LodWorld getLodWorld()
 	{
 		return lodWorld;
 	}

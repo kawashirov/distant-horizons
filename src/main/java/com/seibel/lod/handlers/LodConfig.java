@@ -74,6 +74,10 @@ public class LodConfig
 		/** this is multiplied by the default view distance
 		 * to determine how far out to generate/render LODs */
 		public ForgeConfigSpec.IntValue lodChunkRadiusMultiplier;
+
+		public ForgeConfigSpec.IntValue lodQuality;
+
+		public ForgeConfigSpec.IntValue lodChunkRenderDistane;
 		
 		public ForgeConfigSpec.DoubleValue brightnessMultiplier;
 		
@@ -146,8 +150,8 @@ public class LodConfig
             				+ " " + LodDetail.HALF.toString() +   ": render 64 LODs for each Chunk. \n"
             				+ " " + LodDetail.FULL.toString() +   ": render 256 LODs for each Chunk. \n")
 	                .defineEnum("lodGenerationQuality", LodDetail.DOUBLE);
-	        
-	        
+
+
 	        lodChunkRadiusMultiplier = builder
 	                .comment("\n\n"
 	                		+ " This is multiplied by the default view distance \n"
@@ -155,7 +159,7 @@ public class LodConfig
 	                		+ " A value of 2 means that there is 1 render distance worth \n"
 	                		+ " of LODs in each cardinal direction. \n")
 	                .defineInRange("lodChunkRadiusMultiplier", 8, 2, 16);
-	        
+
 	        distanceGenerationMode = builder
 	                .comment("\n\n"
 	                		+ " Note: The times listed here are the amount of time it took \n"
