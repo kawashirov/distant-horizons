@@ -38,7 +38,6 @@ import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
 import com.seibel.lod.objects.NearFarFogSettings;
-import com.seibel.lod.objects.NearFarVbos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
 
@@ -66,7 +65,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world. 
  * 
  * @author James Seibel
- * @version 8-15-2021
+ * @version 8-17-2021
  */
 public class LodNodeRenderer
 {
@@ -106,15 +105,12 @@ public class LodNodeRenderer
 	/** This is used to generate the buildable buffers */
 	private LodNodeBufferBuilder lodNodeBufferBuilder;
 	
-	/** This is the VertexBuffer used to draw any LODs that use near fog */
-	private VertexBuffer nearVbo;
-	/** This is the VertexBuffer used to draw any LODs that use far fog */
-	private VertexBuffer farVbo;
+	/** Each VertexBuffer represents 1 region */
+	private VertexBuffer[][] vbos;
 	public static final VertexFormat LOD_VERTEX_FORMAT = DefaultVertexFormats.POSITION_COLOR;
 
 
-	/** This is used to determine if the LODs should be regenerated */
-	private int previousChunkRenderDistance = 0;
+	
 	/** This is used to determine if the LODs should be regenerated */
 	private int prevChunkX = 0;
 	/** This is used to determine if the LODs should be regenerated */
@@ -189,9 +185,10 @@ public class LodNodeRenderer
 		
 		// should LODs be regenerated?
 		if ((int)player.getX() / LodUtil.CHUNK_WIDTH != prevChunkX ||
-			(int)player.getZ() / LodUtil.CHUNK_WIDTH != prevChunkZ ||
-			previousChunkRenderDistance != mc.options.renderDistance ||
-			prevFogDistance != LodConfig.CLIENT.fogDistance.get())
+				(int)player.getZ() / LodUtil.CHUNK_WIDTH != prevChunkZ ||
+				ClientProxy.previousChunkRenderDistance != mc.options.renderDistance ||
+				ClientProxy.previousLodMultiplierDistance != LodConfig.CLIENT.lodChunkRadiusMultiplier.get() ||
+				prevFogDistance != LodConfig.CLIENT.fogDistance.get())
 		{
 			// yes
 			regen = true;
@@ -248,8 +245,11 @@ public class LodNodeRenderer
 		if (regen && !lodNodeBufferBuilder.generatingBuffers && !lodNodeBufferBuilder.newBuffersAvaliable())
 		{
 			// this will mainly happen when the view distance is changed
-			if (previousChunkRenderDistance != mc.options.renderDistance)
-				setupBuffers(numbChunksWide);
+			int renderDistance = mc.options.renderDistance;
+			int lodMultiplier = LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
+			if (renderDistance != ClientProxy.previousChunkRenderDistance || 
+					lodMultiplier != ClientProxy.previousLodMultiplierDistance)
+				setupBuffers(lodDim.getWidth());
 			
 			// generate the LODs on a separate thread to prevent stuttering or freezing
 			lodNodeBufferBuilder.generateLodBuffersAsync(this, lodDim, player.blockPosition(), numbChunksWide);
@@ -317,11 +317,17 @@ public class LodNodeRenderer
 		//===========//
 		profiler.popPush("LOD draw");
 		
-		setupFog(fogSettings.near.distance, fogSettings.near.quality);
-		sendLodsToGpuAndDraw(nearVbo, modelViewMatrix);
-		
-		setupFog(fogSettings.far.distance, fogSettings.far.quality);
-		sendLodsToGpuAndDraw(farVbo, modelViewMatrix);
+		if (vbos != null)
+		{
+			for (int i = 0; i < vbos.length; i++)
+			{
+				for (int j = 0; j < vbos.length; j++)
+				{
+					setupFog(fogSettings.near.distance, fogSettings.near.quality);
+					sendLodsToGpuAndDraw(vbos[i][j], modelViewMatrix);
+				}
+			}
+		}
 		
 		
 		
@@ -340,10 +346,6 @@ public class LodNodeRenderer
 		GL11.glEnable(GL11.GL_LIGHT0);
 		GL11.glEnable(GL11.GL_LIGHT1);
 		RenderSystem.disableLighting();
-		
-		// this can't be called until after the buffers are built
-		// because otherwise the buffers may be set to the wrong size
-		previousChunkRenderDistance = mc.options.renderDistance;
 		
 		// reset the fog settings so the normal chunks
 		// will be drawn correctly
@@ -606,30 +608,21 @@ public class LodNodeRenderer
 	/**
 	 * Create all buffers that will be used.
 	 */
-	private void setupBuffers(int numbChunksWide)
+	private void setupBuffers(int numbRegionsWide)
 	{
 		// calculate the max amount of memory needed (in bytes)
-		int bufferMemory = RenderUtil.getBufferMemoryForRadiusMultiplier(LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
+		int bufferMemory = RenderUtil.getBufferMemoryForRegion();
 		
 		// if the required memory is greater than the 
 		// MAX_ALOCATEABLE_DIRECT_MEMORY lower the lodChunkRadiusMultiplier
 		// to fit.
 		if (bufferMemory > MAX_ALOCATEABLE_DIRECT_MEMORY)
 		{
-			int maxRadiusMultiplier = RenderUtil.getMaxRadiusMultiplierWithAvaliableMemory(LodConfig.CLIENT.lodTemplate.get(), LodUtil.CHUNK_DETAIL_LEVEL);
-			
-			ClientProxy.LOGGER.warn("The lodChunkRadiusMultiplier was set too high "
-					+ "and had to be lowered to fit memory constraints "
-					+ "from " + LodConfig.CLIENT.lodChunkRadiusMultiplier.get() + " " 
-					+ "to " + maxRadiusMultiplier);
-			
-			LodConfig.CLIENT.lodChunkRadiusMultiplier.set(
-					maxRadiusMultiplier);
-			
-			bufferMemory = RenderUtil.getBufferMemoryForRadiusMultiplier(maxRadiusMultiplier);
+			ClientProxy.LOGGER.warn("setupBuffers tried to allocate too much memory for the BufferBuilders."
+					+ " It tried to allocate \"" + bufferMemory + "\" bytes, when \"" + MAX_ALOCATEABLE_DIRECT_MEMORY + "\" is the max.");
 		}
 		
-		lodNodeBufferBuilder.setupBuffers(bufferMemory);
+		lodNodeBufferBuilder.setupBuffers(numbRegionsWide, bufferMemory);
 	}
 	
 	
@@ -658,11 +651,7 @@ public class LodNodeRenderer
 	{
 		// replace the drawable buffers with
 		// the newly created buffers from the lodBufferBuilder
-		NearFarVbos newVbos = lodNodeBufferBuilder.getVertexBuffers();
-		
-		// bind the buffers with their respective VBOs		
-		nearVbo = newVbos.nearVbo;
-		farVbo = newVbos.farVbo;
+		 vbos = lodNodeBufferBuilder.getVertexBuffers();
 	}
 	
 	

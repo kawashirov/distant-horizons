@@ -20,6 +20,8 @@ package com.seibel.lod.objects;
 import java.util.Hashtable;
 import java.util.Map;
 
+import com.seibel.lod.proxy.ClientProxy;
+
 import net.minecraft.world.DimensionType;
 
 /**
@@ -27,7 +29,7 @@ import net.minecraft.world.DimensionType;
  * 
  * @author James Seibel
  * @author Leonardo Amato
- * @version 8-14-2021
+ * @version 8-17-2021
  */
 public class LodQuadTreeWorld
 {
@@ -129,6 +131,8 @@ public class LodQuadTreeWorld
 	{
 		if (lodDimensions == null)
 			return;
+		
+		ClientProxy.LOGGER.info("Saving LODs");
 		
 		for (DimensionType key : lodDimensions.keySet())
 			lodDimensions.get(key).saveDirtyRegionsToFileAsync();

@@ -30,7 +30,7 @@ import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodQuadTree;
 import com.seibel.lod.objects.LodQuadTreeDimension;
 import com.seibel.lod.objects.LodQuadTreeNode;
-import com.seibel.lod.objects.NearFarVbos;
+import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodNodeRenderer;
 import com.seibel.lod.util.LodThreadFactory;
@@ -48,31 +48,27 @@ import net.minecraftforge.common.WorldWorkerManager;
  * This object is used to create NearFarBuffer objects.
  * 
  * @author James Seibel
- * @version 8-15-2021
+ * @version 8-17-2021
  */
 public class LodNodeBufferBuilder
 {
 	private Minecraft mc;
 	
 	/** This holds the thread used to generate new LODs off the main thread. */
-	private ExecutorService genThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
+	private ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " - main"));
+	/** This holds the threads used to generate the buffers. */
+	private ExecutorService bufferGenThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new LodThreadFactory(this.getClass().getSimpleName() + " - buffer"));
 	
 	private LodNodeBuilder LodQuadTreeNodeBuilder;
 	
-	/** The buffers that are used to create LODs using near fog */
-	public BufferBuilder buildableNearBuffer;
 	/** The buffers that are used to create LODs using far fog */
-	public BufferBuilder buildableFarBuffer;
+	public volatile BufferBuilder[][] buildableBuffers;
 	
-	/** Used when building a new VBO */
-	public VertexBuffer buildableNearVbo;
-	/** Used when building a new VBO */
-	public VertexBuffer buildableFarVbo;
+	/** Used when building new VBOs */
+	public volatile VertexBuffer[][] buildableVbos;
 	
-	/** VBO that is sent over to the LodNodeRenderer */
-	public VertexBuffer drawableNearVbo;
-	/** VBO that is sent over to the LodNodeRenderer */
-	public VertexBuffer drawableFarVbo;
+	/** VBOs that are sent over to the LodNodeRenderer */
+	public volatile VertexBuffer[][] drawableVbos;
 	
 	/** if this is true the LOD buffers are currently being
 	 * regenerated. */
@@ -124,7 +120,7 @@ public class LodNodeBufferBuilder
 		if (generatingBuffers)
 			return;
 		
-		if (buildableNearBuffer == null)
+		if (buildableBuffers == null)
 			throw new IllegalStateException("\"generateLodBuffersAsync\" was called before the \"setupBuffers\" method was called.");
 		
 		if (previousDimension != lodDim)
@@ -132,6 +128,9 @@ public class LodNodeBufferBuilder
 			previousDimension = lodDim;
 		}
 		
+		
+		// TODO
+		maxChunkGenRequests = LodConfig.CLIENT.numberOfWorldGenerationThreads.get() * 8;
 		
 		
 		generatingBuffers = true;
@@ -151,7 +150,6 @@ public class LodNodeBufferBuilder
 		{
 			try
 			{
-				
 				long startTime = System.currentTimeMillis();
 				
 				// index of the chunk currently being added to the
@@ -166,9 +164,7 @@ public class LodNodeBufferBuilder
 				// Used when determining what detail level to use at what distance
 				int maxBlockDistance = (numbChunksWide / 2) * 16;
 				
-				// generate our new buildable buffers
-				buildableNearBuffer.begin(GL11.GL_QUADS, LodNodeRenderer.LOD_VERTEX_FORMAT);
-				buildableFarBuffer.begin(GL11.GL_QUADS, LodNodeRenderer.LOD_VERTEX_FORMAT);
+				startBuffers();
 				
 				// used when determining which chunks are closer when queuing distance
 				// generation
@@ -293,12 +289,19 @@ public class LodNodeBufferBuilder
 							
 						} // lod null or empty
 						
-						// should we draw near or far fog?
 						BufferBuilder currentBuffer = null;
-						if (isCoordinateInNearFogArea(i, j, numbChunksWide / 2))
-							currentBuffer = buildableNearBuffer;
-						else
-							currentBuffer = buildableFarBuffer;
+						try
+						{
+							// local position in the vbo and bufferBuilder arrays
+							RegionPos regionArrayPos = new RegionPos(new ChunkPos(i, j));
+							currentBuffer = buildableBuffers[regionArrayPos.x][regionArrayPos.z];
+						}
+						catch(Exception e)
+						{
+							e.printStackTrace();
+							continue;
+						}
+						
 						
 						// determine detail level should this LOD be drawn at
 						int distance = (int) Math.sqrt(Math.pow((playerBlockPosRounded.getX() - lod.getCenter().getX()), 2) + Math.pow((playerBlockPosRounded.getZ() - lod.getCenter().getZ()), 2));
@@ -372,46 +375,39 @@ public class LodNodeBufferBuilder
 				}
 				
 				// finish the buffer building
-				buildableNearBuffer.end();
-				buildableFarBuffer.end();
+				closeBuffers();
 				
 				// upload the new buffers
-				buildableNearVbo.upload(buildableNearBuffer);
-				buildableFarVbo.upload(buildableFarBuffer);
+				uploadBuffers();
+				
 				
 				long endTime = System.currentTimeMillis();
 				long buildTime = endTime - startTime;
-				if (buildTime > 1000)
-				{
-//					ClientProxy.LOGGER.info("\"LodNodeBufferBuilder.generateLodBuffersAsync\" took " + buildTime + " milliseconds, consider lowering the render quality.");
-				}
+				ClientProxy.LOGGER.info("Buffer Build time: " + buildTime + " ms");
 				
 				// mark that the buildable buffers as ready to swap
 				switchVbos = true;
 			}
 			catch (Exception e)
 			{
-				ClientProxy.LOGGER.warn("\"LodNodeBufferBuilder.generateLodBuffersAsync\" ran into trouble: " + e.getMessage());
+				ClientProxy.LOGGER.warn("\"LodNodeBufferBuilder.generateLodBuffersAsync\" ran into trouble: ");
 				e.printStackTrace();
 			}
 			finally
 			{
-				// regardless of if we successfully created the buffers or not
+				// regardless of if we successfully created the buffers
 				// we are done generating.
 				generatingBuffers = false;
 				
 				
 				// clean up any potentially open resources
-				if (buildableNearBuffer != null && buildableNearBuffer.building())
-					buildableNearBuffer.end();
-				
-				if (buildableFarBuffer != null && buildableFarBuffer.building())
-					buildableFarBuffer.end();
+				if (buildableBuffers != null)
+					closeBuffers();
 			}
 			
 		});
 		
-		genThread.execute(thread);
+		mainGenThread.execute(thread);
 		
 		return;
 	}
@@ -443,22 +439,6 @@ public class LodNodeBufferBuilder
 	}
 	
 	
-	/**
-	 * Find the coordinates that are in the center half of the given
-	 * 2D matrix, starting at (0,0) and going to (2 * lodRadius, 2 * lodRadius).
-	 */
-	private static boolean isCoordinateInNearFogArea(int chunkX, int chunkZ, int lodRadius)
-	{
-		int halfRadius = lodRadius / 2;
-		
-		return (chunkX >= lodRadius - halfRadius 
-				&& chunkX <= lodRadius + halfRadius) 
-				&& 
-				(chunkZ >= lodRadius - halfRadius
-				&& chunkZ <= lodRadius + halfRadius);
-	}
-	
-	
 	
 	
 	
@@ -469,44 +449,78 @@ public class LodNodeBufferBuilder
 	
 	/**
 	 * Called from the LodRenderer to create the
+	 * BufferBuilders.
+	 */
+	public void setupBuffers(int numbRegionsWide, int bufferMaxCapacity)
+	{
+		buildableBuffers = new BufferBuilder[numbRegionsWide][numbRegionsWide];
+		
+		buildableVbos = new VertexBuffer[numbRegionsWide][numbRegionsWide];
+		drawableVbos = new VertexBuffer[numbRegionsWide][numbRegionsWide];
+		
+		for (int x = 0; x < numbRegionsWide; x++)
+		{
+			for (int z = 0; z < numbRegionsWide; z++)
+			{
+				buildableBuffers[x][z] = new BufferBuilder(bufferMaxCapacity);
+				buildableVbos[x][z] = new VertexBuffer(LodNodeRenderer.LOD_VERTEX_FORMAT);
+				drawableVbos[x][z] = new VertexBuffer(LodNodeRenderer.LOD_VERTEX_FORMAT);
+			}
+		}
+	}
+	
+	/**
+	 * Calls begin on each of the buildable BufferBuilders.
+	 */
+	public void startBuffers()
+	{
+		for (int x = 0; x < buildableBuffers.length; x++)
+			for (int z = 0; z < buildableBuffers.length; z++)
+				buildableBuffers[x][z].begin(GL11.GL_QUADS, LodNodeRenderer.LOD_VERTEX_FORMAT);
+	}
+	
+	/**
+	 * Calls end on each of the buildable BufferBuilders.
+	 */
+	public void closeBuffers()
+	{
+		for (int x = 0; x < buildableBuffers.length; x++)
+			for (int z = 0; z < buildableBuffers.length; z++)
+				if (buildableBuffers[x][z].building())
+					buildableBuffers[x][z].end();
+	}
+	
+	/**
+	 * Called from the LodRenderer to create the
 	 * BufferBuilders at the right size.
 	 * 
 	 * @param bufferMaxCapacity
 	 */
-	public void setupBuffers(int bufferMaxCapacity)
+	public void uploadBuffers()
 	{
-		buildableNearBuffer = new BufferBuilder(bufferMaxCapacity);
-		buildableFarBuffer = new BufferBuilder(bufferMaxCapacity);
-		
-		buildableNearVbo = new VertexBuffer(LodNodeRenderer.LOD_VERTEX_FORMAT);
-		buildableFarVbo = new VertexBuffer(LodNodeRenderer.LOD_VERTEX_FORMAT);
-
-		drawableNearVbo = new VertexBuffer(LodNodeRenderer.LOD_VERTEX_FORMAT);
-		drawableFarVbo = new VertexBuffer(LodNodeRenderer.LOD_VERTEX_FORMAT);
+		for (int x = 0; x < buildableVbos.length; x++)
+		{
+			for (int z = 0; z < buildableVbos.length; z++)
+			{
+				buildableVbos[x][z].upload(buildableBuffers[x][z]);
+			}
+		}
 	}
+	
 	
 	/**
 	 * Get the newly created VBOs
 	 */
-	public NearFarVbos getVertexBuffers()
+	public VertexBuffer[][] getVertexBuffers()
 	{
-		NearFarVbos vbos = new NearFarVbos(buildableNearVbo, buildableFarVbo);
-		
-		VertexBuffer tmp = null;
-		
-		tmp = drawableNearVbo;
-		drawableNearVbo = buildableNearVbo;
-		buildableNearVbo = tmp;
-		
-		tmp = buildableNearVbo;
-		buildableNearVbo = drawableNearVbo;
-		drawableNearVbo = tmp;
-		
+		VertexBuffer[][] tmp = drawableVbos;
+		drawableVbos = buildableVbos;
+		buildableVbos = tmp;
 		
 		// the vbos have been swapped
 		switchVbos = false;
 		
-		return vbos;
+		return drawableVbos;
 	}
 	
 	/**

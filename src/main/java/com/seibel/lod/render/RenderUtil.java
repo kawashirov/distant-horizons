@@ -29,7 +29,7 @@ import net.minecraft.util.math.ChunkPos;
  * to be used in the rendering process.
  * 
  * @author James Seibel
- * @version 6-17-2021
+ * @version 8-17-2021
  */
 public class RenderUtil
 {
@@ -86,13 +86,10 @@ public class RenderUtil
 	/**
 	 * Get how much buffer memory would be required for the given radius multiplier
 	 */
-	public static int getBufferMemoryForRadiusMultiplier(int radiusMultiplier)
-	{ 
-		int numbChunksWide = mc.options.renderDistance * 
-							radiusMultiplier * 2;
-		
+	public static int getBufferMemoryForRegion()
+	{
 		// calculate the max amount of buffer memory needed (in bytes)
-		return numbChunksWide * numbChunksWide *
+		return LodUtil.REGION_WIDTH_IN_CHUNKS * LodUtil.REGION_WIDTH_IN_CHUNKS *
 				LodConfig.CLIENT.lodTemplate.get().
 				getBufferMemoryForSingleLod(LodUtil.CHUNK_DETAIL_LEVEL);
 	}

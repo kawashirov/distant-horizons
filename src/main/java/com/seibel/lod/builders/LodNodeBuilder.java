@@ -54,7 +54,7 @@ import net.minecraft.world.gen.Heightmap;
  *
  * @author Leonardo Amato
  * @author James Seibel
- * @version 8-14-2021
+ * @version 8-17-2021
  */
 public class LodNodeBuilder
 {
@@ -64,10 +64,8 @@ public class LodNodeBuilder
 	public static final int CHUNK_SECTION_HEIGHT = CHUNK_DATA_WIDTH;
 	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
 	
-	/**
-	 * Default size of any LOD regions we use
-	 */
-	public int regionWidth = 5;
+	/** How wide LodDimensions should be in regions */
+	public int defaultDimensionWidthInRegions = 5;
 	
 	public LodNodeBuilder()
 	{
@@ -102,7 +100,7 @@ public class LodNodeBuilder
 				
 				if (lodWorld.getLodDimension(dim) == null)
 				{
-					lodDim = new LodQuadTreeDimension(dim, lodWorld, regionWidth);
+					lodDim = new LodQuadTreeDimension(dim, lodWorld, defaultDimensionWidthInRegions);
 					lodWorld.addLodDimension(lodDim);
 				}
 				else

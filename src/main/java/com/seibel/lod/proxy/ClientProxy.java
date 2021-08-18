@@ -48,7 +48,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of this program.
  * 
  * @author James_Seibel
- * @version 8-14-2021
+ * @version 8-17-2021
  */
 public class ClientProxy
 {
@@ -62,6 +62,11 @@ public class ClientProxy
 	private boolean configOverrideReminderPrinted = false;
 	
 	Minecraft mc = Minecraft.getInstance();
+	
+	/** This is used to determine if the LODs should be regenerated */
+	public static int previousChunkRenderDistance = 0;
+	/** This is used to determine if the LODs should be regenerated */
+	public static int previousLodMultiplierDistance = 0;
 	
 	
 	public ClientProxy()
@@ -86,37 +91,13 @@ public class ClientProxy
 			return;
 		
 		
-		// calculate how wide the dimension(s) should be in regions
-		int chunksWide = (mc.options.renderDistance * 2) * LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
-		int newWidth = (int)Math.ceil(chunksWide / (float) LodUtil.REGION_WIDTH_IN_CHUNKS);
-		newWidth = (newWidth % 2 == 0) ? (newWidth += 1) : (newWidth += 2); // make sure we have a odd number of regions
-		
-		if (lodNodeBuilder.regionWidth != newWidth)
-		{
-			lodWorld.resizeDimensionRegionWidth(newWidth);
-			lodNodeBuilder.regionWidth = newWidth;
-			
-			//LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );
-			
-			// skip this frame, hopefully the lodWorld
-			// should have everything set up by then
-			return;
-		}
+		viewDistanceChangedEvent();
 		
 		LodQuadTreeDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
 		if (lodDim == null)
 			return;
 		
-		// make sure the dimension is centered
-		RegionPos playerRegionPos = new RegionPos(mc.player.blockPosition());
-		RegionPos worldRegionOffset = new RegionPos(playerRegionPos.x - lodDim.getCenterX(), playerRegionPos.z - lodDim.getCenterZ()); 
-		if (worldRegionOffset.x != 0 || worldRegionOffset.z != 0)
-		{
-			lodWorld.saveAllDimensions();
-			lodDim.move(worldRegionOffset);
-			
-			//LOGGER.info("offset: " + worldRegionOffset.x + "," + worldRegionOffset.z + "\t center: " + lodDim.getCenterX() + "," + lodDim.getCenterZ());
-		}
+		playerMoveEvent(lodDim);
 		
 		
 		// comment out when creating a release
@@ -136,10 +117,16 @@ public class ClientProxy
 		
 		profiler.pop(); // end LOD
 		profiler.push("terrain"); // restart "terrain"
-	}	
+		
+		
+		// these can't be set until after the buffers are built (in renderer.drawLODs)
+		// otherwise the buffers may be set to the wrong size, or not changed at all
+		previousChunkRenderDistance = mc.options.renderDistance;
+		previousLodMultiplierDistance = LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
+	}
+
 	
-	
-	
+
 	private void applyConfigOverrides()
 	{
 		// remind the developer(s). that config override is active
@@ -155,7 +142,7 @@ public class ClientProxy
 		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.FULL);
 		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.FULL);
 		
-		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(12);
+		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(20);
 		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.NEVER_DRAW_FOG);
 		LodConfig.CLIENT.shadingMode.set(ShadingMode.DARKEN_SIDES);
@@ -229,6 +216,51 @@ public class ClientProxy
 	}
 	
 	
+	
+	//==================//
+	// frame LOD events //
+	//==================//
+	
+	/**
+	 * Re-centers the given LodDimension if it needs to be.
+	 */
+	private void playerMoveEvent(LodQuadTreeDimension lodDim)
+	{
+		// make sure the dimension is centered
+		RegionPos playerRegionPos = new RegionPos(mc.player.blockPosition());
+		RegionPos worldRegionOffset = new RegionPos(playerRegionPos.x - lodDim.getCenterX(), playerRegionPos.z - lodDim.getCenterZ()); 
+		if (worldRegionOffset.x != 0 || worldRegionOffset.z != 0)
+		{
+			lodWorld.saveAllDimensions();
+			lodDim.move(worldRegionOffset);
+			
+			//LOGGER.info("offset: " + worldRegionOffset.x + "," + worldRegionOffset.z + "\t center: " + lodDim.getCenterX() + "," + lodDim.getCenterZ());
+		}
+	}
+	
+	
+	/**
+	 * Re-sizes all LodDimensions if they needs to be.
+	 */
+	private void viewDistanceChangedEvent()
+	{
+		// calculate how wide the dimension(s) should be in regions
+		int chunksWide = (mc.options.renderDistance * 2) * LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
+		int newWidth = (int)Math.ceil(chunksWide / (float) LodUtil.REGION_WIDTH_IN_CHUNKS);
+		newWidth = (newWidth % 2 == 0) ? (newWidth += 1) : (newWidth += 2); // make sure we have a odd number of regions
+		
+		// do the dimensions need to change in size?
+		if (lodNodeBuilder.defaultDimensionWidthInRegions != newWidth)
+		{
+			// TODO make this async
+			
+			// update the dimensions to fit the new width
+			lodWorld.resizeDimensionRegionWidth(newWidth);
+			lodNodeBuilder.defaultDimensionWidthInRegions = newWidth;
+			
+			//LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );
+		}
+	}
 	
 	
 	//================//
