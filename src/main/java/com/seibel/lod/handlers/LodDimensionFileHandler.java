@@ -17,12 +17,10 @@
  */
 package com.seibel.lod.handlers;
 
-import com.seibel.lod.objects.LevelContainer;
-import com.seibel.lod.objects.LodDimension;
-import com.seibel.lod.objects.LodRegion;
-import com.seibel.lod.objects.RegionPos;
+import com.seibel.lod.objects.*;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodThreadFactory;
+import com.seibel.lod.util.LodUtil;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -41,94 +39,101 @@ import java.util.concurrent.Executors;
  * @author James Seibel
  * @version 8-14-2021
  */
-public class LodDimensionFileHandler
-{
-	/** This is what separates each piece of data */
-	public static final char DATA_DELIMITER = ',';
+public class LodDimensionFileHandler {
+    /**
+     * This is what separates each piece of data
+     */
+    public static final char DATA_DELIMITER = ',';
 
 
-	private LodDimension loadedDimension = null;
-	public long regionLastWriteTime[][];
+    private LodDimension loadedDimension = null;
+    public long regionLastWriteTime[][];
 
-	private File dimensionDataSaveFolder;
+    private File dimensionDataSaveFolder;
 
-	/** lod */
-	private static final String FILE_NAME_PREFIX = "lod";
-	/** .txt */
-	private static final String FILE_EXTENSION = ".bin";
-	/** .tmp <br>
-	 * Added to the end of the file path when saving to prevent
-	 * nulling a currently existing file. <br>
-	 * After the file finishes saving it will end with
-	 * FILE_EXTENSION. */
-	private static final String TMP_FILE_EXTENSION = ".tmp";
+    /**
+     * lod
+     */
+    private static final String FILE_NAME_PREFIX = "lod";
+    /**
+     * .txt
+     */
+    private static final String FILE_EXTENSION = ".bin";
+    /**
+     * .tmp <br>
+     * Added to the end of the file path when saving to prevent
+     * nulling a currently existing file. <br>
+     * After the file finishes saving it will end with
+     * FILE_EXTENSION.
+     */
+    private static final String TMP_FILE_EXTENSION = ".tmp";
 
-	/** This is the file version currently accepted by this
-	 * file handler, older versions (smaller numbers) will be deleted and overwritten,
-	 * newer versions (larger numbers) will be ignored and won't be read. */
-	public static final int LOD_SAVE_FILE_VERSION = 3;
+    /**
+     * This is the file version currently accepted by this
+     * file handler, older versions (smaller numbers) will be deleted and overwritten,
+     * newer versions (larger numbers) will be ignored and won't be read.
+     */
+    public static final int LOD_SAVE_FILE_VERSION = 3;
 
-	/** This is the string written before the file version */
-	private static final String LOD_FILE_VERSION_PREFIX = "lod_save_file_version";
+    /**
+     * This is the string written before the file version
+     */
+    private static final String LOD_FILE_VERSION_PREFIX = "lod_save_file_version";
 
-	/** Allow saving asynchronously, but never try to save multiple regions
-	 * at a time */
-	private ExecutorService fileWritingThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
-
-
-	public LodDimensionFileHandler(File newSaveFolder, LodDimension newLoadedDimension)
-	{
-		if (newSaveFolder == null)
-			throw new IllegalArgumentException("LodDimensionFileHandler requires a valid File location to read and write to.");
-
-		dimensionDataSaveFolder = newSaveFolder;
-
-		loadedDimension = newLoadedDimension;
-		// these two variable are used in sync with the LodDimension
-		regionLastWriteTime = new long[loadedDimension.getWidth()][loadedDimension.getWidth()];
-		for(int i = 0; i < loadedDimension.getWidth(); i++)
-			for(int j = 0; j < loadedDimension.getWidth(); j++)
-				regionLastWriteTime[i][j] = -1;
-	}
+    /**
+     * Allow saving asynchronously, but never try to save multiple regions
+     * at a time
+     */
+    private ExecutorService fileWritingThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
 
 
+    public LodDimensionFileHandler(File newSaveFolder, LodDimension newLoadedDimension) {
+        if (newSaveFolder == null)
+            throw new IllegalArgumentException("LodDimensionFileHandler requires a valid File location to read and write to.");
+
+        dimensionDataSaveFolder = newSaveFolder;
+
+        loadedDimension = newLoadedDimension;
+        // these two variable are used in sync with the LodDimension
+        regionLastWriteTime = new long[loadedDimension.getWidth()][loadedDimension.getWidth()];
+        for (int i = 0; i < loadedDimension.getWidth(); i++)
+            for (int j = 0; j < loadedDimension.getWidth(); j++)
+                regionLastWriteTime[i][j] = -1;
+    }
 
 
-
-	//================//
-	// read from file //
-	//================//
-
+    //================//
+    // read from file //
+    //================//
 
 
-	/**
-	 * Return the LodRegion region at the given coordinates.
-	 * (null if the file doesn't exist)
-	 */
-	public LodRegion loadRegionFromFile(RegionPos regionPos)
-	{
-		int regionX = regionPos.x;
-		int regionZ = regionPos.z;
+    /**
+     * Return the LodRegion region at the given coordinates.
+     * (null if the file doesn't exist)
+     */
+    public LodRegion loadRegionFromFile(RegionPos regionPos) {
+        int regionX = regionPos.x;
+        int regionZ = regionPos.z;
 
-		String fileName = getFileNameAndPathForRegion(regionX, regionZ);
-		if(FILE_EXTENSION == ".bin"){
-			try {
-				System.out.println(fileName);
-				ObjectInputStream is = new ObjectInputStream(new FileInputStream(fileName));
+        String fileName = getFileNameAndPathForRegion(regionX, regionZ);
+        if (FILE_EXTENSION == ".bin") {
+            try {
+                System.out.println(fileName);
+                ObjectInputStream is = new ObjectInputStream(new FileInputStream(fileName));
 
 
-				LodRegion region = (LodRegion) is.readObject();
-				is.close();
-				return region;
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
-		}
-		return null;
+                LevelContainer levelContainer = (LevelContainer) is.readObject();
+                is.close();
+                return new LodRegion(levelContainer, regionPos);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
 		/*
 		if(FILE_EXTENSION == ".txt") {
 			File f = new File(fileName);
@@ -211,71 +216,63 @@ public class LodDimensionFileHandler
 
 		return null;
 		*/
-	}
+    }
 
 
+    //==============//
+    // Save to File //
+    //==============//
 
+    /**
+     * Save all dirty regions in this LodDimension to file.
+     */
+    public void saveDirtyRegionsToFileAsync() {
+        fileWritingThreadPool.execute(saveDirtyRegionsThread);
+    }
 
+    private Thread saveDirtyRegionsThread = new Thread(() ->
+    {
+        for (int i = 0; i < loadedDimension.getWidth(); i++) {
+            for (int j = 0; j < loadedDimension.getWidth(); j++) {
+                if (loadedDimension.isRegionDirty[i][j] && loadedDimension.regions[i][j] != null) {
+                    saveRegionToFile(loadedDimension.regions[i][j]);
+                    loadedDimension.isRegionDirty[i][j] = false;
+                }
+            }
+        }
+    });
 
+    /**
+     * Save a specific region to disk.<br>
+     * Note: <br>
+     * 1. If a file already exists for a newer version
+     * the file won't be written.<br>
+     * 2. This will save to the LodDimension that this
+     * handler is associated with.
+     */
+    private void saveRegionToFile(LodRegion region) {
+        // convert to region coordinates
+        int x = region.regionPosX;
+        int z = region.regionPosZ;
 
+        // get minimum level
 
+        byte minDetailLevel = region.getMinDetailLevel();
 
-	//==============//
-	// Save to File //
-	//==============//
-
-	/**
-	 * Save all dirty regions in this LodDimension to file.
-	 */
-	public void saveDirtyRegionsToFileAsync()
-	{
-		fileWritingThreadPool.execute(saveDirtyRegionsThread);
-	}
-
-	private Thread saveDirtyRegionsThread = new Thread(() ->
-	{
-		for(int i = 0; i < loadedDimension.getWidth(); i++)
-		{
-			for(int j = 0; j < loadedDimension.getWidth(); j++)
-			{
-				if(loadedDimension.isRegionDirty[i][j] && loadedDimension.regions[i][j] != null)
-				{
-					saveRegionToFile(loadedDimension.regions[i][j]);
-					loadedDimension.isRegionDirty[i][j] = false;
-				}
-			}
-		}
-	});
-
-	/**
-	 * Save a specific region to disk.<br>
-	 * Note: <br>
-	 * 1. If a file already exists for a newer version
-	 * the file won't be written.<br>
-	 * 2. This will save to the LodDimension that this
-	 * handler is associated with.
-	 */
-	private void saveRegionToFile(LodRegion region)
-	{
-		// convert to region coordinates
-		int x = region.regionPosX;
-		int z = region.regionPosZ;
-
-
-		File oldFile = new File(getFileNameAndPathForRegion(x, z));
-		if (!oldFile.getParentFile().exists())
-			oldFile.getParentFile().mkdirs();
-		if(FILE_EXTENSION == ".bin"){
-			try {
-				ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(getFileNameAndPathForRegion(x, z)));
-				os.writeObject(region);
-				os.close();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
+        File oldFile = new File(getFileNameAndPathForRegion(x, z));
+        if (!oldFile.getParentFile().exists())
+            oldFile.getParentFile().mkdirs();
+        if (FILE_EXTENSION == ".bin") {
+            try {
+                ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(getFileNameAndPathForRegion(x, z)));
+                os.writeObject(region.getLevel((byte) 0));
+                os.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 		/*
 		if(FILE_EXTENSION == ".txt") {
 			try {
@@ -343,41 +340,32 @@ public class LodDimensionFileHandler
 			}
 		}
 		 */
-	}
+    }
 
 
+    //================//
+    // helper methods //
+    //================//
 
 
-
-
-
-	//================//
-	// helper methods //
-	//================//
-
-
-	/**
-	 * Return the name of the file that should contain the
-	 * region at the given x and z. <br>
-	 * Returns null if this object isn't ready to read and write. <br><br>
-	 *
-	 * example: "lod.0.0.txt"
-	 */
-	private String getFileNameAndPathForRegion(int regionX, int regionZ)
-	{
-		try
-		{
-			// saveFolder is something like
-			// ".\Super Flat\DIM-1\data"
-			// or
-			// ".\Super Flat\data"
-			return dimensionDataSaveFolder.getCanonicalPath() + File.separatorChar +
-					FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
-		}
-		catch(IOException e)
-		{
-			return null;
-		}
-	}
+    /**
+     * Return the name of the file that should contain the
+     * region at the given x and z. <br>
+     * Returns null if this object isn't ready to read and write. <br><br>
+     * <p>
+     * example: "lod.0.0.txt"
+     */
+    private String getFileNameAndPathForRegion(int regionX, int regionZ) {
+        try {
+            // saveFolder is something like
+            // ".\Super Flat\DIM-1\data"
+            // or
+            // ".\Super Flat\data"
+            return dimensionDataSaveFolder.getCanonicalPath() + File.separatorChar +
+                    FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
+        } catch (IOException e) {
+            return null;
+        }
+    }
 
 }

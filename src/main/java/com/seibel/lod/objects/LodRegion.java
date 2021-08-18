@@ -18,7 +18,7 @@ import java.io.Serializable;
 
 public class LodRegion implements Serializable {
     //x coord,
-    private byte minLevelOfDetail;
+    private byte minDetailLevel;
     private static final byte POSSIBLE_LOD = 10;
     private int numberOfPoints;
 
@@ -41,7 +41,47 @@ public class LodRegion implements Serializable {
     public final int regionPosX;
     public final int regionPosZ;
 
-    public LodRegion(byte minimumLevelOfDetail, RegionPos regionPos) {
+    public LodRegion(LevelContainer levelContainer, RegionPos regionPos) {
+        this.regionPosX = regionPos.x;
+        this.regionPosZ = regionPos.z;
+        this.minDetailLevel = levelContainer.detailLevel;
+
+        //Array of matrices of arrays
+        colors = new byte[POSSIBLE_LOD][][][];
+
+        //Arrays of matrices
+        height = new short[POSSIBLE_LOD][][];
+        depth = new short[POSSIBLE_LOD][][];
+        generationType = new byte[POSSIBLE_LOD][][];
+        dataExistence = new boolean[POSSIBLE_LOD][][];
+
+        colors[minDetailLevel] = levelContainer.colors;
+        height[minDetailLevel] = levelContainer.height;
+        depth[minDetailLevel] = levelContainer.depth;
+        generationType[minDetailLevel] = levelContainer.generationType;
+        dataExistence[minDetailLevel] = levelContainer.dataExistence;
+
+        //Initialize all the different matrices
+        for (byte lod = (byte) (minDetailLevel + 1); lod <= LodUtil.REGION_DETAIL_LEVEL; lod++) {
+            int size = (short) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - lod);
+            colors[lod] = new byte[size][size][3];
+            height[lod] = new short[size][size];
+            depth[lod] = new short[size][size];
+            generationType[lod] = new byte[size][size];
+            dataExistence[lod] = new boolean[size][size];
+        }
+        int sizeDiff = (int) Math.pow(2,LodUtil.REGION_DETAIL_LEVEL - (minDetailLevel + 1));
+        LevelPos levelPos;
+        for(int x = 0; x < sizeDiff; x++){
+            for(int z = 0; z < sizeDiff; z++){
+                levelPos = new LevelPos((byte) (minDetailLevel+1), x, z);
+                update(levelPos);
+            }
+        }
+    }
+
+    public LodRegion(byte minDetailLevel, RegionPos regionPos) {
+        this.minDetailLevel = minDetailLevel;
         this.regionPosX = regionPos.x;
         this.regionPosZ = regionPos.z;
 
@@ -56,7 +96,7 @@ public class LodRegion implements Serializable {
 
 
         //Initialize all the different matrices
-        for (byte lod = minimumLevelOfDetail; lod <= LodUtil.REGION_DETAIL_LEVEL; lod++) {
+        for (byte lod = minDetailLevel; lod <= LodUtil.REGION_DETAIL_LEVEL; lod++) {
             int size = (short) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - lod);
             colors[lod] = new byte[size][size][3];
             height[lod] = new short[size][size];
@@ -143,7 +183,6 @@ public class LodRegion implements Serializable {
 
     /**TODO a method to update a whole area, to be used as a single big update*/
     /**
-     *
      * @param levelPos
      */
     private void updateArea(LevelPos levelPos) {
@@ -169,7 +208,6 @@ public class LodRegion implements Serializable {
     }
 
     /**
-     *
      * @param levelPos
      */
     private void update(LevelPos levelPos) {
@@ -219,11 +257,15 @@ public class LodRegion implements Serializable {
         }
     }
 
+    /**
+     * @param levelPos
+     * @return
+     */
     private boolean[][] getChildren(LevelPos levelPos) {
         levelPos = levelPos.regionModule();
         boolean[][] children = new boolean[2][2];
         int numberOfChild = 0;
-        if (minLevelOfDetail == levelPos.detailLevel) {
+        if (minDetailLevel == levelPos.detailLevel) {
             return children;
         }
         for (int x = 0; x <= 1; x++) {
@@ -234,19 +276,31 @@ public class LodRegion implements Serializable {
         return children;
     }
 
+    /**
+     * @param chunkPos
+     * @return
+     */
     public boolean doesDataExist(ChunkPos chunkPos) {
         return doesDataExist(new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunkPos.x, chunkPos.z));
     }
 
+    /**
+     * @param levelPos
+     * @return
+     */
     public boolean doesDataExist(LevelPos levelPos) {
         levelPos = levelPos.regionModule();
         return dataExistence[levelPos.detailLevel][levelPos.posX][levelPos.posZ];
     }
 
+    /**
+     * @param levelPos
+     * @return
+     */
     public DistanceGenerationMode getGenerationMode(LevelPos levelPos) {
         levelPos = levelPos.regionModule();
         DistanceGenerationMode generationMode = DistanceGenerationMode.NONE;
-        switch(generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ]){
+        switch (generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ]) {
             case 0:
                 generationMode = DistanceGenerationMode.NONE;
                 break;
@@ -273,10 +327,19 @@ public class LodRegion implements Serializable {
         return generationMode;
     }
 
+    /**
+     * @param levelPos
+     * @return
+     */
     public boolean hasDataBeenGenerated(LevelPos levelPos) {
         levelPos = levelPos.regionModule();
         return (generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] != 0);
     }
+
+    public byte getMinDetailLevel() {
+        return minDetailLevel;
+    }
+
     /**
      * This will be used to save a level
      *
@@ -287,19 +350,25 @@ public class LodRegion implements Serializable {
         return new LevelContainer(lod, colors[lod], height[lod], depth[lod], generationType[lod], dataExistence[lod]);
     }
 
-    public void addLevel(byte lod, LevelContainer levelContainer) {
-        if (lod < minLevelOfDetail - 1) {
+    /**
+     * @param levelContainer
+     */
+    public void addLevel(LevelContainer levelContainer) {
+        if (levelContainer.detailLevel < minDetailLevel - 1) {
             throw new IllegalArgumentException("addLevel requires a level that is at least the minimum level of the region -1 ");
         }
-        if (lod == minLevelOfDetail - 1) minLevelOfDetail = lod;
-        colors[lod] = levelContainer.colors;
-        height[lod] = levelContainer.height;
-        depth[lod] = levelContainer.depth;
-        generationType[lod] = levelContainer.generationType;
-        dataExistence[lod] = levelContainer.dataExistence;
+        if (levelContainer.detailLevel == minDetailLevel - 1) minDetailLevel = levelContainer.detailLevel;
+        colors[levelContainer.detailLevel] = levelContainer.colors;
+        height[levelContainer.detailLevel] = levelContainer.height;
+        depth[levelContainer.detailLevel] = levelContainer.depth;
+        generationType[levelContainer.detailLevel] = levelContainer.generationType;
+        dataExistence[levelContainer.detailLevel] = levelContainer.dataExistence;
 
     }
 
+    /**
+     * @param lod
+     */
     public void removeDetailLevel(byte lod) {
         for (byte tempLod = 0; tempLod <= lod; tempLod++) {
             colors[tempLod] = new byte[0][0][0];

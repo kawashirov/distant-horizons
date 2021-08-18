@@ -213,10 +213,12 @@ public class LodNodeRenderer
 		
 		
 		// determine how far the game's render distance is currently set
-		farPlaneBlockDistance = mc.options.renderDistance * LodUtil.CHUNK_WIDTH;
+		//farPlaneBlockDistance = mc.options.renderDistance * LodUtil.CHUNK_WIDTH;
+		farPlaneBlockDistance = 8 * LodUtil.CHUNK_WIDTH;
 		
 		// set how how far the LODs will go
-		int numbChunksWide = mc.options.renderDistance * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
+		//int numbChunksWide = mc.options.renderDistance * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
+		int numbChunksWide = 8 * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() + 1;
 		
 		// determine which LODs should not be rendered close to the player
 		HashSet<ChunkPos> chunkPosToSkip = getNearbyLodChunkPosToSkip(lodDim, player.blockPosition());

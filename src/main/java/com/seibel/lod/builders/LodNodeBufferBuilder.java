@@ -307,7 +307,7 @@ public class LodNodeBufferBuilder
 						int posZ;
 						LevelPos levelPos;
 						LodDataPoint lodData;
-						LodDetail detail = LodDetail.getDetailForDistance(LodConfig.CLIENT.maxDrawDetail.get(), distance, maxBlockDistance);
+						LodDetail detail = LodDetail.getDetailForDistance(LodConfig.CLIENT.maxDrawDetail.get(), distance, 16*128);
 
 						for (int k = 0; k < detail.dataPointLengthCount * detail.dataPointLengthCount; k++)
 						{

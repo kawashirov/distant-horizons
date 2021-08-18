@@ -89,10 +89,10 @@ public class ClientProxy
 	{
 		if (mc == null || mc.player == null || !lodWorld.getIsWorldLoaded())
 			return;
-		
-		
+
+
 		viewDistanceChangedEvent();
-		
+
 		LodDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
 		if (lodDim == null)
 			return;
@@ -142,14 +142,14 @@ public class ClientProxy
 		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.FULL);
 		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.FULL);
 		
-		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(20);
+		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(16);
 		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
-		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.NEVER_DRAW_FOG);
+		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
 		LodConfig.CLIENT.shadingMode.set(ShadingMode.DARKEN_SIDES);
 //		LodConfig.CLIENT.brightnessMultiplier.set(1.0);
 //		LodConfig.CLIENT.saturationMultiplier.set(1.0);
 		
-		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
+		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
 		
 		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(16);
@@ -237,15 +237,16 @@ public class ClientProxy
 			//LOGGER.info("offset: " + worldRegionOffset.x + "," + worldRegionOffset.z + "\t center: " + lodDim.getCenterX() + "," + lodDim.getCenterZ());
 		}
 	}
-	
-	
+
+
 	/**
 	 * Re-sizes all LodDimensions if they needs to be.
 	 */
 	private void viewDistanceChangedEvent()
 	{
 		// calculate how wide the dimension(s) should be in regions
-		int chunksWide = (mc.options.renderDistance * 2) * LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
+		//int chunksWide = (mc.options.renderDistance * 2) * LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
+		int chunksWide = 8 * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() + 1;
 		int newWidth = (int)Math.ceil(chunksWide / (float) LodUtil.REGION_WIDTH_IN_CHUNKS);
 		newWidth = (newWidth % 2 == 0) ? (newWidth += 1) : (newWidth += 2); // make sure we have a odd number of regions
 		
@@ -261,7 +262,7 @@ public class ClientProxy
 			//LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );
 		}
 	}
-	
+
 	
 	//================//
 	// public getters //
