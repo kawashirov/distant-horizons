@@ -244,13 +244,6 @@ public class LodNodeRenderer
 		//		(this is to prevent thread conflicts)
 		if (regen && !lodNodeBufferBuilder.generatingBuffers && !lodNodeBufferBuilder.newBuffersAvaliable())
 		{
-			// this will mainly happen when the view distance is changed
-			int renderDistance = mc.options.renderDistance;
-			int lodMultiplier = LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
-			if (renderDistance != ClientProxy.previousChunkRenderDistance || 
-					lodMultiplier != ClientProxy.previousLodMultiplierDistance)
-				setupBuffers(lodDim.getWidth());
-			
 			// generate the LODs on a separate thread to prevent stuttering or freezing
 			lodNodeBufferBuilder.generateLodBuffersAsync(this, lodDim, player.blockPosition(), numbChunksWide);
 			
@@ -608,7 +601,7 @@ public class LodNodeRenderer
 	/**
 	 * Create all buffers that will be used.
 	 */
-	private void setupBuffers(int numbRegionsWide)
+	public void setupBuffers(int numbRegionsWide)
 	{
 		// calculate the max amount of memory needed (in bytes)
 		int bufferMemory = RenderUtil.getBufferMemoryForRegion();
