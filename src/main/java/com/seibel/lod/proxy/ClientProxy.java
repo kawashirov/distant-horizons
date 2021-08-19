@@ -258,6 +258,7 @@ public class ClientProxy
 			// update the dimensions to fit the new width
 			lodWorld.resizeDimensionRegionWidth(newWidth);
 			lodNodeBuilder.defaultDimensionWidthInRegions = newWidth;
+			renderer.setupBuffers(newWidth);
 			
 			//LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );
 		}
