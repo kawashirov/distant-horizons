@@ -21,6 +21,8 @@ import com.seibel.lod.objects.*;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
+import net.minecraft.util.FileUtil;
+import org.apache.commons.io.FileUtils;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -58,7 +60,7 @@ public class LodDimensionFileHandler {
     /**
      * .txt
      */
-    private static final String FILE_EXTENSION = ".bin";
+    private static final String FILE_EXTENSION = ".txt";
     /**
      * .tmp <br>
      * Added to the end of the file path when saving to prevent
@@ -73,7 +75,7 @@ public class LodDimensionFileHandler {
      * file handler, older versions (smaller numbers) will be deleted and overwritten,
      * newer versions (larger numbers) will be ignored and won't be read.
      */
-    public static final int LOD_SAVE_FILE_VERSION = 3;
+    public static final int LOD_SAVE_FILE_VERSION = 4;
 
     /**
      * This is the string written before the file version
@@ -114,108 +116,70 @@ public class LodDimensionFileHandler {
     public LodRegion loadRegionFromFile(RegionPos regionPos) {
         int regionX = regionPos.x;
         int regionZ = regionPos.z;
-
         String fileName = getFileNameAndPathForRegion(regionX, regionZ);
-        if (FILE_EXTENSION == ".bin") {
-            try {
-                System.out.println(fileName);
-                ObjectInputStream is = new ObjectInputStream(new FileInputStream(fileName));
 
+        File f = new File(fileName);
 
-                LevelContainer levelContainer = (LevelContainer) is.readObject();
-                is.close();
-                return new LodRegion(levelContainer, regionPos);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
+        if (!f.exists()) {
+            // there wasn't a file, don't
+            // return anything
+            return null;
         }
-        return null;
-		/*
-		if(FILE_EXTENSION == ".txt") {
-			File f = new File(fileName);
+        String data = "";
+        try {
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
+            data = bufferedReader.readLine();
+            int fileVersion = -1;
 
-			if (!f.exists()) {
-				// there wasn't a file, don't
-				// return anything
-				return null;
-			}
+            if (data != null && !data.isEmpty()) {
+                // try to get the file version
+                try {
+                    fileVersion = Integer.parseInt(data.substring(data.indexOf(' ')).trim());
+                } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+                    // this file doesn't have a version
+                    // keep the version as -1
+                    fileVersion = -1;
+                }
 
-			List<LodQuadTreeNode> dataList = new ArrayList<>();
-			try {
-				BufferedReader br = new BufferedReader(new FileReader(f));
-				String s = br.readLine();
-				int fileVersion = -1;
+                // check if this file can be read by this file handler
+                if (fileVersion < LOD_SAVE_FILE_VERSION) {
+                    // the file we are reading is an older version,
+                    // close the reader and delete the file.
+                    bufferedReader.close();
+                    f.delete();
+                    ClientProxy.LOGGER.info("Outdated LOD region file for region: (" + regionX + "," + regionZ + ") version: " + fileVersion +
+                            ", version requested: " + LOD_SAVE_FILE_VERSION +
+                            " File was been deleted.");
 
-				if (s != null && !s.isEmpty()) {
-					// try to get the file version
-					try {
-						fileVersion = Integer.parseInt(s.substring(s.indexOf(' ')).trim());
-					} catch (NumberFormatException | StringIndexOutOfBoundsException e) {
-						// this file doesn't have a version
-						// keep the version as -1
-						fileVersion = -1;
-					}
+                    return null;
+                } else if (fileVersion > LOD_SAVE_FILE_VERSION) {
+                    // the file we are reading is a newer version,
+                    // close the reader and ignore the file, we don't
+                    // want to accidently delete anything the user may want.
+                    bufferedReader.close();
+                    ClientProxy.LOGGER.info("Newer LOD region file for region: (" + regionX + "," + regionZ + ") version: " + fileVersion +
+                            ", version requested: " + LOD_SAVE_FILE_VERSION +
+                            " this region will not be written to in order to protect the newer file.");
 
-					// check if this file can be read by this file handler
-					if (fileVersion < LOD_SAVE_FILE_VERSION) {
-						// the file we are reading is an older version,
-						// close the reader and delete the file.
-						br.close();
-						f.delete();
-						ClientProxy.LOGGER.info("Outdated LOD region file for region: (" + regionX + "," + regionZ + ") version: " + fileVersion +
-								", version requested: " + LOD_SAVE_FILE_VERSION +
-								" File was been deleted.");
-
-						return null;
-					} else if (fileVersion > LOD_SAVE_FILE_VERSION) {
-						// the file we are reading is a newer version,
-						// close the reader and ignore the file, we don't
-						// want to accidently delete anything the user may want.
-						br.close();
-						ClientProxy.LOGGER.info("Newer LOD region file for region: (" + regionX + "," + regionZ + ") version: " + fileVersion +
-								", version requested: " + LOD_SAVE_FILE_VERSION +
-								" this region will not be written to in order to protect the newer file.");
-
-						return null;
-					}
-				} else {
-					// there is no data in this file
-					br.close();
-					return null;
-				}
+                    return null;
+                }
+            } else {
+                // there is no data in this file
+                bufferedReader.close();
+                return null;
+            }
 
 
-				// this file is a readable version, begin reading the file
-				s = br.readLine();
+            // this file is a readable version, begin reading the file
+            data = bufferedReader.readLine();
 
-				while (s != null && !s.isEmpty()) {
-					try {
-						dataList.add(new LodQuadTreeNode(s));
-					} catch (IllegalArgumentException e) {
-						// we were unable to create this chunk
-						// for whatever reason.
-						// skip to the next chunk
-						ClientProxy.LOGGER.warn(e.getMessage());
-					}
-
-					s = br.readLine();
-				}
-
-				br.close();
-			} catch (IOException e) {
-				// the buffered reader encountered a
-				// problem reading the file
-				return null;
-			}
-			return new LodQuadTree(dataList, regionX, regionZ);
-		}
-
-		return null;
-		*/
+            bufferedReader.close();
+        } catch (IOException e) {
+            // the buffered reader encountered a
+            // problem reading the file
+            return null;
+        }
+        return new LodRegion(new LevelContainer(data), regionPos);
     }
 
 
@@ -260,86 +224,65 @@ public class LodDimensionFileHandler {
         byte minDetailLevel = region.getMinDetailLevel();
 
         File oldFile = new File(getFileNameAndPathForRegion(x, z));
-        if (!oldFile.getParentFile().exists())
-            oldFile.getParentFile().mkdirs();
-        if (FILE_EXTENSION == ".bin") {
-            try {
-                ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(getFileNameAndPathForRegion(x, z)));
-                os.writeObject(region.getLevel((byte) 0));
-                os.close();
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
+        try {
+            // make sure the file and folder exists
+            if (!oldFile.exists()) {
+                // the file doesn't exist,
+                // create it and the folder if need be
+                if (!oldFile.getParentFile().exists())
+                    oldFile.getParentFile().mkdirs();
+                oldFile.createNewFile();
+            } else {
+                // the file exists, make sure it
+                // is the correct version.
+                // (to make sure we don't overwrite a newer
+                // version file if it exists)
+
+                BufferedReader br = new BufferedReader(new FileReader(oldFile));
+                String s = br.readLine();
+                int fileVersion = LOD_SAVE_FILE_VERSION;
+
+                if (s != null && !s.isEmpty()) {
+                    // try to get the file version
+                    try {
+                        fileVersion = Integer.parseInt(s.substring(s.indexOf(' ')).trim());
+                    } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+                        // this file doesn't have a correctly formated version
+                        // just overwrite the file
+                    }
+                }
+                br.close();
+
+                // check if this file can be written to by the file handler
+                if (fileVersion <= LOD_SAVE_FILE_VERSION) {
+                    // we are good to continue and overwrite the old file
+                } else //if(fileVersion > LOD_SAVE_FILE_VERSION)
+                {
+                    // the file we are reading is a newer version,
+                    // don't write anything, we don't want to accidently
+                    // delete anything the user may want.
+                    return;
+                }
             }
+
+            // the old file is good, now create a new save file
+            File newFile = new File(getFileNameAndPathForRegion(x, z) + TMP_FILE_EXTENSION);
+
+            FileWriter fw = new FileWriter(newFile);
+
+            // add the version of this file
+            fw.write(LOD_FILE_VERSION_PREFIX + " " + LOD_SAVE_FILE_VERSION + "\n");
+
+            // add each LodChunk to the file
+            fw.write(region.getLevel((byte) 0).toString());
+            fw.close();
+
+            // overwrite the old file with the new one
+            Files.move(newFile.toPath(), oldFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e) {
+            ClientProxy.LOGGER.error("LOD file write error: ");
+            e.printStackTrace();
         }
-		/*
-		if(FILE_EXTENSION == ".txt") {
-			try {
-				// make sure the file and folder exists
-				if (!oldFile.exists()) {
-					// the file doesn't exist,
-					// create it and the folder if need be
-					if (!oldFile.getParentFile().exists())
-						oldFile.getParentFile().mkdirs();
-					oldFile.createNewFile();
-				} else {
-					// the file exists, make sure it
-					// is the correct version.
-					// (to make sure we don't overwrite a newer
-					// version file if it exists)
-
-					BufferedReader br = new BufferedReader(new FileReader(oldFile));
-					String s = br.readLine();
-					int fileVersion = LOD_SAVE_FILE_VERSION;
-
-					if (s != null && !s.isEmpty()) {
-						// try to get the file version
-						try {
-							fileVersion = Integer.parseInt(s.substring(s.indexOf(' ')).trim());
-						} catch (NumberFormatException | StringIndexOutOfBoundsException e) {
-							// this file doesn't have a correctly formated version
-							// just overwrite the file
-						}
-					}
-					br.close();
-
-					// check if this file can be written to by the file handler
-					if (fileVersion <= LOD_SAVE_FILE_VERSION) {
-						// we are good to continue and overwrite the old file
-					} else //if(fileVersion > LOD_SAVE_FILE_VERSION)
-					{
-						// the file we are reading is a newer version,
-						// don't write anything, we don't want to accidently
-						// delete anything the user may want.
-						return;
-					}
-				}
-
-				// the old file is good, now create a new save file
-				File newFile = new File(getFileNameAndPathForRegion(x, z) + TMP_FILE_EXTENSION);
-
-				FileWriter fw = new FileWriter(newFile);
-
-				// add the version of this file
-				fw.write(LOD_FILE_VERSION_PREFIX + " " + LOD_SAVE_FILE_VERSION + "\n");
-
-				// add each LodChunk to the file
-				List<LodQuadTreeNode> nodesToSave = Collections.unmodifiableList(region.getNodeListWithMask(LodQuadTreeDimension.FULL_COMPLEXITY_MASK, false, true));
-				for (LodQuadTreeNode lodQuadTreeNode : nodesToSave) {
-					fw.write(lodQuadTreeNode.toData() + "\n");
-					lodQuadTreeNode.dirty = false;
-				}
-				fw.close();
-
-				// overwrite the old file with the new one
-				Files.move(newFile.toPath(), oldFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-			} catch (Exception e) {
-				ClientProxy.LOGGER.error("LOD file write error: ");
-				e.printStackTrace();
-			}
-		}
-		 */
     }
 
 

@@ -132,7 +132,9 @@ public class LodNodeGenWorker implements IWorker
 			{
 				// Every other method can
 				// be done asynchronously
-				genThreads.execute(thread);
+				Thread newThread = new Thread(thread);
+				newThread.setPriority(3);
+				genThreads.execute(newThread);
 			}
 
 			threadStarted = true;

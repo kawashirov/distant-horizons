@@ -149,10 +149,10 @@ public class ClientProxy
 //		LodConfig.CLIENT.brightnessMultiplier.set(1.0);
 //		LodConfig.CLIENT.saturationMultiplier.set(1.0);
 		
-		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
+		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
 		
-		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(16);
+		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(2);
 	}
 	
 	
