@@ -21,8 +21,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.HashSet;
+import java.util.Iterator;
 
-import com.seibel.lod.objects.LevelPos;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.NVFogDistance;
@@ -36,6 +36,7 @@ import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.handlers.ReflectionHandler;
+import com.seibel.lod.objects.LevelPos;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
 import com.seibel.lod.proxy.ClientProxy;
@@ -50,6 +51,7 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.math.BlockPos;
@@ -65,7 +67,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world.
  *
  * @author James Seibel
- * @version 8-17-2021
+ * @version 8-20-2021
  */
 public class LodNodeRenderer
 {
@@ -572,7 +574,25 @@ public class LodNodeRenderer
     @SuppressWarnings("deprecation")
     private void setupLighting(LodDimension lodDimension, float partialTicks)
     {
+    	// Determine if the player has night vision
+    	boolean playerHasNightVision = false;
+		if (this.mc.player != null)
+		{
+	    	Iterator<EffectInstance> iterator = this.mc.player.getActiveEffects().iterator();
+	    	while(iterator.hasNext())
+	    	{
+	    		EffectInstance instance = iterator.next();
+	    		if (instance.getEffect() == Effects.NIGHT_VISION)
+	    		{
+	    			playerHasNightVision = true;
+	    			break;
+	    		}
+	    	}
+		}
+    	
+		
         float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.level.getSkyDarken(partialTicks) : 0.2f;
+        sunBrightness = playerHasNightVision ? 1.0f : sunBrightness;
         float gammaMultiplyer = (float) mc.options.gamma - 0.5f;
         float lightStrength = ((sunBrightness / 2f) - 0.2f) + (gammaMultiplyer * 0.3f);
 
