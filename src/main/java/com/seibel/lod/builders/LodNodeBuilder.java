@@ -18,8 +18,6 @@
 package com.seibel.lod.builders;
 
 import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -424,17 +422,19 @@ public class LodNodeBuilder
         }
 
         // plant life
-        else if (blockState.getBlock() instanceof LeavesBlock)
-        {
-            Color leafColor = LodUtil.intToColor(biome.getFoliageColor()).darker();
-            colorInt = LodUtil.colorToInt(leafColor);
-        } else if (blockState.getBlock() instanceof GrassBlock || blockState.getBlock() instanceof AbstractPlantBlock
-                || blockState.getBlock() instanceof BushBlock || blockState.getBlock() instanceof IGrowable)
-        {
-            Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
-            tmp = tmp.darker();
-            colorInt = LodUtil.colorToInt(tmp);
-        }
+		else if (blockState.getBlock() instanceof LeavesBlock)
+		{
+			Color leafColor = LodUtil.intToColor(biome.getFoliageColor()).darker();
+			colorInt = LodUtil.colorToInt(leafColor);
+		}
+		else if ((blockState.getBlock() instanceof GrassBlock || blockState.getBlock() instanceof AbstractPlantBlock
+				|| blockState.getBlock() instanceof BushBlock || blockState.getBlock() instanceof IGrowable)
+				&& !(blockState.getBlock() == Blocks.BROWN_MUSHROOM || blockState.getBlock() == Blocks.RED_MUSHROOM))
+		{
+			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
+			tmp = tmp.darker();
+			colorInt = LodUtil.colorToInt(tmp);
+		}
 
         // water
         else if (blockState.getBlock() == Blocks.WATER)
