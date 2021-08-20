@@ -21,15 +21,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.seibel.lod.objects.LevelPos;
-import com.seibel.lod.objects.LodDataPoint;
-import com.seibel.lod.objects.LodDimension;
 import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
-import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
+import com.seibel.lod.objects.LevelPos;
+import com.seibel.lod.objects.LodDataPoint;
+import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodNodeRenderer;
@@ -192,7 +191,7 @@ public class LodNodeBufferBuilder
 						double yOffset = 0;
 						double zOffset = (LodUtil.CHUNK_WIDTH * j) + startBlockPos.getZ();
 
-						if (!lodDim.doesDataExist(new LevelPos((byte) LodUtil.CHUNK_DETAIL_LEVEL, chunkX, chunkZ)))
+						if (!lodDim.doesDataExist(new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunkX, chunkZ)))
 						{
 							// generate a new chunk if no chunk currently exists
 							// and we aren't waiting on any other chunks to generate
@@ -373,7 +372,7 @@ public class LodNodeBufferBuilder
 				
 				long endTime = System.currentTimeMillis();
 				long buildTime = endTime - startTime;
-				ClientProxy.LOGGER.info("Buffer Build time: " + buildTime + " ms");
+				//ClientProxy.LOGGER.info("Buffer Build time: " + buildTime + " ms");
 				
 				// mark that the buildable buffers as ready to swap
 				switchVbos = true;
