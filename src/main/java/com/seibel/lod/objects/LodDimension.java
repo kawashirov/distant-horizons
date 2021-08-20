@@ -42,9 +42,13 @@ public class LodDimension
 
     public final DimensionType dimension;
 
-    /** measured in regions */
+    /**
+     * measured in regions
+     */
     private volatile int width;
-    /** measured in regions */
+    /**
+     * measured in regions
+     */
     private volatile int halfWidth;
 
 
@@ -65,9 +69,9 @@ public class LodDimension
     {
         dimension = newDimension;
         width = newWidth;
-        halfWidth = (int)Math.floor(width / 2);
+        halfWidth = (int) Math.floor(width / 2);
 
-        if(newDimension != null && lodWorld != null)
+        if (newDimension != null && lodWorld != null)
         {
             try
             {
@@ -84,8 +88,7 @@ public class LodDimension
                     // the compiler from complaining
                     ServerChunkProvider provider = serverWorld.getChunkSource();
                     saveDir = new File(provider.dataStorage.dataFolder.getCanonicalFile().getPath() + File.separatorChar + "lod");
-                }
-                else
+                } else
                 {
                     // connected to server
 
@@ -94,8 +97,7 @@ public class LodDimension
                 }
 
                 fileHandler = new LodDimensionFileHandler(saveDir, this);
-            }
-            catch (IOException e)
+            } catch (IOException e)
             {
                 // the file handler wasn't able to be created
                 // we won't be able to read or write any files
@@ -103,23 +105,22 @@ public class LodDimension
         }
 
 
-
         regions = new LodRegion[width][width];
         isRegionDirty = new boolean[width][width];
 
         // populate isRegionDirty
-        for(int i = 0; i < width; i++)
-            for(int j = 0; j < width; j++)
+        for (int i = 0; i < width; i++)
+            for (int j = 0; j < width; j++)
                 isRegionDirty[i][j] = false;
 
-        center = new RegionPos(0,0);
+        center = new RegionPos(0, 0);
     }
 
 
     /**
      * Move the center of this LodDimension and move all owned
      * regions over by the given x and z offset. <br><br>
-     *
+     * <p>
      * Synchronized to prevent multiple moves happening on top of each other.
      */
     public synchronized void move(RegionPos regionOffset)
@@ -132,9 +133,9 @@ public class LodDimension
         // and update the centerX and/or centerZ
         if (Math.abs(xOffset) >= width || Math.abs(zOffset) >= width)
         {
-            for(int x = 0; x < width; x++)
+            for (int x = 0; x < width; x++)
             {
-                for(int z = 0; z < width; z++)
+                for (int z = 0; z < width; z++)
                 {
                     regions[x][z] = null;
                 }
@@ -149,77 +150,69 @@ public class LodDimension
 
 
         // X
-        if(xOffset > 0)
+        if (xOffset > 0)
         {
             // move everything over to the left (as the center moves to the right)
-            for(int x = 0; x < width; x++)
+            for (int x = 0; x < width; x++)
             {
-                for(int z = 0; z < width; z++)
+                for (int z = 0; z < width; z++)
                 {
-                    if(x + xOffset < width)
+                    if (x + xOffset < width)
                         regions[x][z] = regions[x + xOffset][z];
                     else
                         regions[x][z] = null;
                 }
             }
-        }
-        else
+        } else
         {
             // move everything over to the right (as the center moves to the left)
-            for(int x = width - 1; x >= 0; x--)
+            for (int x = width - 1; x >= 0; x--)
             {
-                for(int z = 0; z < width; z++)
+                for (int z = 0; z < width; z++)
                 {
-                    if(x + xOffset >= 0)
+                    if (x + xOffset >= 0)
                         regions[x][z] = regions[x + xOffset][z];
                     else
                         regions[x][z] = null;
                 }
             }
         }
-
 
 
         // Z
-        if(zOffset > 0)
+        if (zOffset > 0)
         {
             // move everything up (as the center moves down)
-            for(int x = 0; x < width; x++)
+            for (int x = 0; x < width; x++)
             {
-                for(int z = 0; z < width; z++)
+                for (int z = 0; z < width; z++)
                 {
-                    if(z + zOffset < width)
+                    if (z + zOffset < width)
                         regions[x][z] = regions[x][z + zOffset];
                     else
                         regions[x][z] = null;
                 }
             }
-        }
-        else
+        } else
         {
             // move everything down (as the center moves up)
-            for(int x = 0; x < width; x++)
+            for (int x = 0; x < width; x++)
             {
-                for(int z = width - 1; z >= 0; z--)
+                for (int z = width - 1; z >= 0; z--)
                 {
-                    if(z + zOffset >= 0)
+                    if (z + zOffset >= 0)
                         regions[x][z] = regions[x][z + zOffset];
                     else
                         regions[x][z] = null;
                 }
             }
         }
-
 
 
         // update the new center
         center.x += xOffset;
         center.z += zOffset;
     }
-
-
-
-
 
 
     /**
@@ -244,7 +237,7 @@ public class LodDimension
             if (regions[xIndex][zIndex] == null)
             {
                 /**TODO the value is currently 0 but should be determinated by the distance of the player)*/
-                regions[xIndex][zIndex] = new LodRegion((byte) 0,regionPos);
+                regions[xIndex][zIndex] = new LodRegion((byte) 0, regionPos);
             }
         }
 
@@ -270,7 +263,7 @@ public class LodDimension
 
 
     /**
-     *this method creates all null regions
+     * this method creates all null regions
      */
     public void initializeNullRegions()
     {
@@ -279,19 +272,19 @@ public class LodDimension
         RegionPos regionPos;
         LodRegion region;
 
-        for(int x = 0; x < regions.length; x++)
+        for (int x = 0; x < regions.length; x++)
         {
-            for(int z = 0; z < regions.length; z++)
+            for (int z = 0; z < regions.length; z++)
             {
                 regionX = (x + center.x) - halfWidth;
                 regionZ = (z + center.z) - halfWidth;
-                regionPos = new RegionPos(regionX,regionZ);
+                regionPos = new RegionPos(regionX, regionZ);
                 region = getRegion(regionPos);
 
                 if (region == null)
                 {
                     // if no region exists, create it
-                    region = new LodRegion((byte) 0,regionPos);
+                    region = new LodRegion((byte) 0, regionPos);
                     addOrOverwriteRegion(region);
                 }
             }
@@ -318,10 +311,10 @@ public class LodDimension
         if (region == null)
         {
             // if no region exists, create it
-            region = new LodRegion((byte) 0,regionPos);
+            region = new LodRegion((byte) 0, regionPos);
             addOrOverwriteRegion(region);
         }
-        boolean nodeAdded = region.setData(levelPos,lodDataPoint,(byte) generationMode.complexity,true);
+        boolean nodeAdded = region.setData(levelPos, lodDataPoint, (byte) generationMode.complexity, true);
         // only save valid LODs to disk
         if (!dontSave && fileHandler != null)
         {
@@ -331,8 +324,7 @@ public class LodDimension
                 int xIndex = (regionPos.x - center.x) + halfWidth;
                 int zIndex = (regionPos.z - center.z) + halfWidth;
                 isRegionDirty[xIndex][zIndex] = true;
-            }
-            catch(ArrayIndexOutOfBoundsException e)
+            } catch (ArrayIndexOutOfBoundsException e)
             {
                 // This method was probably called when the dimension was changing size.
                 // Hopefully this shouldn't be an issue.
@@ -370,7 +362,7 @@ public class LodDimension
         LodRegion region = getRegion(levelPos.getRegionPos());
 
 
-        if(region == null)
+        if (region == null)
         {
             return null;
         }
@@ -385,7 +377,7 @@ public class LodDimension
     {
         LodRegion region = getRegion(LodUtil.convertGenericPosToRegionPos(chunkPos.x, chunkPos.z, LodUtil.CHUNK_DETAIL_LEVEL));
 
-        if(region == null)
+        if (region == null)
         {
             return false;
         }
@@ -401,7 +393,7 @@ public class LodDimension
     {
         LodRegion region = getRegion(levelPos.getRegionPos());
 
-        if(region == null)
+        if (region == null)
         {
             return false;
         }
@@ -416,7 +408,7 @@ public class LodDimension
     {
         LodRegion region = getRegion(levelPos.getRegionPos());
 
-        if(region == null)
+        if (region == null)
         {
             return false;
         }
@@ -431,7 +423,7 @@ public class LodDimension
     {
         LodRegion region = getRegion(levelPos.getRegionPos());
 
-        if(region == null)
+        if (region == null)
         {
             return DistanceGenerationMode.NONE;
         }
@@ -473,11 +465,6 @@ public class LodDimension
     }
 
 
-
-
-
-
-
     public int getCenterX()
     {
         return center.x;
@@ -491,7 +478,7 @@ public class LodDimension
 
     /**
      * TODO Double check that this method works as expected
-     *
+     * <p>
      * Returns how many non-null LodChunks
      * are stored in this LodDimension.
      */
@@ -511,8 +498,7 @@ public class LodDimension
             // source to make sure it is in sync with region
             // and isRegionDirty
             return regions.length;
-        }
-        else
+        } else
         {
             return width;
         }
@@ -521,14 +507,14 @@ public class LodDimension
     public void setRegionWidth(int newWidth)
     {
         width = newWidth;
-        halfWidth = (int)Math.floor(width / 2);
+        halfWidth = (int) Math.floor(width / 2);
 
         regions = new LodRegion[width][width];
         isRegionDirty = new boolean[width][width];
 
         // populate isRegionDirty
-        for(int i = 0; i < width; i++)
-            for(int j = 0; j < width; j++)
+        for (int i = 0; i < width; i++)
+            for (int j = 0; j < width; j++)
                 isRegionDirty[i][j] = false;
     }
 

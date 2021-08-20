@@ -41,7 +41,8 @@ import java.util.concurrent.Executors;
  * @author James Seibel
  * @version 8-14-2021
  */
-public class LodDimensionFileHandler {
+public class LodDimensionFileHandler
+{
     /**
      * This is what separates each piece of data
      */
@@ -89,7 +90,8 @@ public class LodDimensionFileHandler {
     private ExecutorService fileWritingThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
 
 
-    public LodDimensionFileHandler(File newSaveFolder, LodDimension newLoadedDimension) {
+    public LodDimensionFileHandler(File newSaveFolder, LodDimension newLoadedDimension)
+    {
         if (newSaveFolder == null)
             throw new IllegalArgumentException("LodDimensionFileHandler requires a valid File location to read and write to.");
 
@@ -113,36 +115,43 @@ public class LodDimensionFileHandler {
      * Return the LodRegion region at the given coordinates.
      * (null if the file doesn't exist)
      */
-    public LodRegion loadRegionFromFile(RegionPos regionPos) {
+    public LodRegion loadRegionFromFile(RegionPos regionPos)
+    {
         int regionX = regionPos.x;
         int regionZ = regionPos.z;
         String fileName = getFileNameAndPathForRegion(regionX, regionZ);
 
         File f = new File(fileName);
 
-        if (!f.exists()) {
+        if (!f.exists())
+        {
             // there wasn't a file, don't
             // return anything
             return null;
         }
         String data = "";
-        try {
+        try
+        {
             BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
             data = bufferedReader.readLine();
             int fileVersion = -1;
 
-            if (data != null && !data.isEmpty()) {
+            if (data != null && !data.isEmpty())
+            {
                 // try to get the file version
-                try {
+                try
+                {
                     fileVersion = Integer.parseInt(data.substring(data.indexOf(' ')).trim());
-                } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+                } catch (NumberFormatException | StringIndexOutOfBoundsException e)
+                {
                     // this file doesn't have a version
                     // keep the version as -1
                     fileVersion = -1;
                 }
 
                 // check if this file can be read by this file handler
-                if (fileVersion < LOD_SAVE_FILE_VERSION) {
+                if (fileVersion < LOD_SAVE_FILE_VERSION)
+                {
                     // the file we are reading is an older version,
                     // close the reader and delete the file.
                     bufferedReader.close();
@@ -152,7 +161,8 @@ public class LodDimensionFileHandler {
                             " File was been deleted.");
 
                     return null;
-                } else if (fileVersion > LOD_SAVE_FILE_VERSION) {
+                } else if (fileVersion > LOD_SAVE_FILE_VERSION)
+                {
                     // the file we are reading is a newer version,
                     // close the reader and ignore the file, we don't
                     // want to accidently delete anything the user may want.
@@ -163,7 +173,8 @@ public class LodDimensionFileHandler {
 
                     return null;
                 }
-            } else {
+            } else
+            {
                 // there is no data in this file
                 bufferedReader.close();
                 return null;
@@ -174,7 +185,8 @@ public class LodDimensionFileHandler {
             data = bufferedReader.readLine();
 
             bufferedReader.close();
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             // the buffered reader encountered a
             // problem reading the file
             return null;
@@ -190,15 +202,19 @@ public class LodDimensionFileHandler {
     /**
      * Save all dirty regions in this LodDimension to file.
      */
-    public void saveDirtyRegionsToFileAsync() {
+    public void saveDirtyRegionsToFileAsync()
+    {
         fileWritingThreadPool.execute(saveDirtyRegionsThread);
     }
 
     private Thread saveDirtyRegionsThread = new Thread(() ->
     {
-        for (int i = 0; i < loadedDimension.getWidth(); i++) {
-            for (int j = 0; j < loadedDimension.getWidth(); j++) {
-                if (loadedDimension.isRegionDirty[i][j] && loadedDimension.regions[i][j] != null) {
+        for (int i = 0; i < loadedDimension.getWidth(); i++)
+        {
+            for (int j = 0; j < loadedDimension.getWidth(); j++)
+            {
+                if (loadedDimension.isRegionDirty[i][j] && loadedDimension.regions[i][j] != null)
+                {
                     saveRegionToFile(loadedDimension.regions[i][j]);
                     loadedDimension.isRegionDirty[i][j] = false;
                 }
@@ -214,7 +230,8 @@ public class LodDimensionFileHandler {
      * 2. This will save to the LodDimension that this
      * handler is associated with.
      */
-    private void saveRegionToFile(LodRegion region) {
+    private void saveRegionToFile(LodRegion region)
+    {
         // convert to region coordinates
         int x = region.regionPosX;
         int z = region.regionPosZ;
@@ -224,15 +241,18 @@ public class LodDimensionFileHandler {
         byte minDetailLevel = region.getMinDetailLevel();
 
         File oldFile = new File(getFileNameAndPathForRegion(x, z));
-        try {
+        try
+        {
             // make sure the file and folder exists
-            if (!oldFile.exists()) {
+            if (!oldFile.exists())
+            {
                 // the file doesn't exist,
                 // create it and the folder if need be
                 if (!oldFile.getParentFile().exists())
                     oldFile.getParentFile().mkdirs();
                 oldFile.createNewFile();
-            } else {
+            } else
+            {
                 // the file exists, make sure it
                 // is the correct version.
                 // (to make sure we don't overwrite a newer
@@ -242,11 +262,14 @@ public class LodDimensionFileHandler {
                 String s = br.readLine();
                 int fileVersion = LOD_SAVE_FILE_VERSION;
 
-                if (s != null && !s.isEmpty()) {
+                if (s != null && !s.isEmpty())
+                {
                     // try to get the file version
-                    try {
+                    try
+                    {
                         fileVersion = Integer.parseInt(s.substring(s.indexOf(' ')).trim());
-                    } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+                    } catch (NumberFormatException | StringIndexOutOfBoundsException e)
+                    {
                         // this file doesn't have a correctly formated version
                         // just overwrite the file
                     }
@@ -254,7 +277,8 @@ public class LodDimensionFileHandler {
                 br.close();
 
                 // check if this file can be written to by the file handler
-                if (fileVersion <= LOD_SAVE_FILE_VERSION) {
+                if (fileVersion <= LOD_SAVE_FILE_VERSION)
+                {
                     // we are good to continue and overwrite the old file
                 } else //if(fileVersion > LOD_SAVE_FILE_VERSION)
                 {
@@ -279,7 +303,8 @@ public class LodDimensionFileHandler {
 
             // overwrite the old file with the new one
             Files.move(newFile.toPath(), oldFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-        } catch (Exception e) {
+        } catch (Exception e)
+        {
             ClientProxy.LOGGER.error("LOD file write error: ");
             e.printStackTrace();
         }
@@ -298,15 +323,18 @@ public class LodDimensionFileHandler {
      * <p>
      * example: "lod.0.0.txt"
      */
-    private String getFileNameAndPathForRegion(int regionX, int regionZ) {
-        try {
+    private String getFileNameAndPathForRegion(int regionX, int regionZ)
+    {
+        try
+        {
             // saveFolder is something like
             // ".\Super Flat\DIM-1\data"
             // or
             // ".\Super Flat\data"
             return dimensionDataSaveFolder.getCanonicalPath() + File.separatorChar +
                     FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
-        } catch (IOException e) {
+        } catch (IOException e)
+        {
             return null;
         }
     }

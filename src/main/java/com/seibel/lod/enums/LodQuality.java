@@ -24,27 +24,29 @@ package com.seibel.lod.enums;
  * SURFACE <br>
  * FEATURES <br>
  * SERVER <br><br>
- * 
+ * <p>
  * In order of fastest to slowest.
- * 
+ *
  * @author James Seibel
  * @author Leonardo Amato
  * @version 8-7-2021
  */
 public enum LodQuality
 {
-	LOW(1),
+    LOW(1),
 
-	MEDIUM(2),
+    MEDIUM(2),
 
-	HIGH(3);
+    HIGH(3);
 
 
-	/** The higher the number the more complete the generation is. */
-	public final int quality;
+    /**
+     * The higher the number the more complete the generation is.
+     */
+    public final int quality;
 
-	LodQuality(int quality)
-	{
-		this.quality = quality;
-	}
+    LodQuality(int quality)
+    {
+        this.quality = quality;
+    }
 }
