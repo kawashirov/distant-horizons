@@ -223,25 +223,13 @@ public class LodRegion implements Serializable
 
         //here i calculate the the LevelPos is in range
         //This is important to avoid any kind of hole in the generation
-        int posX = regionPosX * 512 + levelPos.posX * width + width / 2;
-        int posZ = regionPosZ * 512 + levelPos.posZ * width + width / 2;
-        int distance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2));
-        int maxDistance = distance;
-        int minDistance = distance;
-        for (int x = 0; x <= 1; x++)
-        {
-            for (int z = 0; z <= 1; z++)
-            {
-                posX = regionPosX * 512 + levelPos.posX * width + width * x;
-                posZ = regionPosZ * 512 + levelPos.posZ * width + width * z;
-                distance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2));
-                minDistance = Math.min(minDistance, distance);
-                maxDistance = Math.max(maxDistance, distance);
-            }
-        }
+        int maxDistance = levelPos.maxDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
+        int minDistance = levelPos.minDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
 
-        if (!(minDistance >= start && distance <= maxDistance) || levelPos.detailLevel < detailLevel)
+        if (!(start <= maxDistance && minDistance <= end) || levelPos.detailLevel < detailLevel)
         {
+            System.out.println(maxDistance);
+            System.out.println(minDistance);
             return levelPosList;
         }
 
@@ -269,20 +257,7 @@ public class LodRegion implements Serializable
                     {
                         childPos = new LevelPos((byte) (levelPos.detailLevel - 1), childPosX + x, childPosZ + z);
 
-                        /**TODO remove this distance calculator in some way, from here*/
-                        posX = regionPosX * 512 + childPos.posX * width + width / 2;
-                        posZ = regionPosZ * 512 + childPos.posZ * width + width / 2;
-                        maxDistance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2));
-                        for (int xi = 0; xi <= 1; xi++)
-                        {
-                            for (int zi = 0; zi <= 1; zi++)
-                            {
-                                posX = regionPosX * 512 + childPos.posX * width + width * xi;
-                                posZ = regionPosZ * 512 + childPos.posZ * width + width * zi;
-                                maxDistance = Math.max(maxDistance, (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2)));
-                            }
-                        }
-                        /**to here*/
+                        maxDistance = childPos.maxDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
 
                         if (generationType[childPos.detailLevel][childPos.posX][childPos.posZ] < generation || !doesDataExist(childPos))
                         {
@@ -311,20 +286,7 @@ public class LodRegion implements Serializable
                 childPos = levelPos.convert((byte) (levelPos.detailLevel - 1));
                 if (generationType[childPos.detailLevel][childPos.posX][childPos.posZ] < generation)
                 {
-                    /**TODO remove this distance calculator in some way, from here*/
-                    posX = regionPosX * 512 + childPos.posX * width + width / 2;
-                    posZ = regionPosZ * 512 + childPos.posZ * width + width / 2;
-                    maxDistance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2));
-                    for (int x = 0; x <= 1; x++)
-                    {
-                        for (int z = 0; z <= 1; z++)
-                        {
-                            posX = regionPosX * 512 + childPos.posX * width + width * x;
-                            posZ = regionPosZ * 512 + childPos.posZ * width + width * z;
-                            maxDistance = Math.max(maxDistance, (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2)));
-                        }
-                    }
-                    /**to here*/
+                    maxDistance = childPos.maxDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
 
                     levelPosList.add(
                             new AbstractMap.SimpleEntry<LevelPos, Integer>(
@@ -364,41 +326,25 @@ public class LodRegion implements Serializable
 
         //here i calculate the the LevelPos is in range
         //This is important to avoid any kind of hole in the rendering
-        int posX = regionPosX * 512 + playerPosX * width + width / 2;
-        int posZ = regionPosZ * 512 + playerPosZ * width + width / 2;
-        int distance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2));
-        int maxDistance = distance;
-        int minDistance = distance;
-        for (int x = 0; x <= 1; x++)
-        {
-            for (int z = 0; z <= 1; z++)
-            {
-                posX = regionPosX * 512 + playerPosX * width + width * x;
-                posZ = regionPosZ * 512 + playerPosZ * width + width * z;
-                distance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2));
-                minDistance = Math.min(minDistance, distance);
-                maxDistance = Math.max(maxDistance, distance);
-            }
-        }
+        int maxDistance = levelPos.maxDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
+        int minDistance = levelPos.minDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
 
-        if (minDistance < start || distance > maxDistance || levelPos.detailLevel < detailLevel)
+
+        if (!(start <= maxDistance && minDistance <= end)  || levelPos.detailLevel < detailLevel)
         {
-            System.out.println(levelPos);
             return levelPosList;
         }
 
-        int childPosX = levelPos.posX * 2;
-        int childPosZ = levelPos.posZ * 2;
-        LevelPos childPos;
-        int childrenCount;
-        int childSize = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel + 1);
         //we have reached the target detail level
         if (detailLevel == levelPos.detailLevel)
         {
             levelPosList.add(new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * size, levelPos.posZ + regionPosZ * size));
         } else
         {
-            childrenCount=0;
+            int childPosX = levelPos.posX * 2;
+            int childPosZ = levelPos.posZ * 2;
+            LevelPos childPos;
+            int childrenCount = 0;
             for (int x = 0; x <= 1; x++)
             {
                 for (int z = 0; z <= 1; z++)
