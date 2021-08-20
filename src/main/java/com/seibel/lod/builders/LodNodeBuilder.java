@@ -107,7 +107,7 @@ public class LodNodeBuilder
                     lodDim = lodWorld.getLodDimension(dim);
                 }
 
-                generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(generationMode));
+                generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(generationMode), LodDetail.FULL);
             } catch (IllegalArgumentException | NullPointerException e)
             {
                 e.printStackTrace();
@@ -126,9 +126,9 @@ public class LodNodeBuilder
      *
      * @throws IllegalArgumentException thrown if either the chunk or world is null.
      */
-    public void generateLodNodeFromChunk(LodDimension lodDim, IChunk chunk) throws IllegalArgumentException
+    public void generateLodNodeFromChunk(LodDimension lodDim, IChunk chunk, LodDetail detailLevel) throws IllegalArgumentException
     {
-        generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig());
+        generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(),detailLevel);
     }
 
     /**
@@ -136,10 +136,9 @@ public class LodNodeBuilder
      *
      * @throws IllegalArgumentException thrown if either the chunk or world is null.
      */
-    public void generateLodNodeFromChunk(LodDimension lodDim, IChunk chunk, LodBuilderConfig config)
+    public void generateLodNodeFromChunk(LodDimension lodDim, IChunk chunk, LodBuilderConfig config, LodDetail detail)
             throws IllegalArgumentException
     {
-        LodDetail detail = LodConfig.CLIENT.maxGenerationDetail.get();
 
         if (chunk == null)
             throw new IllegalArgumentException("generateLodFromChunk given a null chunk");

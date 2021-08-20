@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.seibel.lod.enums.DistanceGenerationMode;
 import kaptainwutax.mathutils.decomposition.LUDecomposition;
 import org.lwjgl.opengl.GL11;
 
@@ -163,7 +164,12 @@ public class LodNodeBufferBuilder
 				// if we don't have a full number of chunks to generate in chunksToGen
 				// we can top it off from the reserve
 				ChunkPos[] chunksToGenReserve = new ChunkPos[maxChunkGenRequests];
-				
+
+				LevelPos[] levelPosToGen = new LevelPos[maxChunkGenRequests];
+				// if we don't have a full number of chunks to generate in chunksToGen
+				// we can top it off from the reserve
+				LevelPos[] levelPosToGenReserve = new LevelPos[maxChunkGenRequests];
+
 				// Used when determining what detail level to use at what distance
 				int maxBlockDistance = (numbChunksWide / 2) * 16;
 				
@@ -172,7 +178,7 @@ public class LodNodeBufferBuilder
 				// used when determining which chunks are closer when queuing distance
 				// generation
 				int minChunkDist = Integer.MAX_VALUE;
-				
+				/*
 				// x axis
 				for (int i = 0; i < numbChunksWide; i++)
 				{
@@ -289,7 +295,6 @@ public class LodNodeBufferBuilder
 							continue;
 							
 						} // lod null or empty
-						/*
 						BufferBuilder currentBuffer = null;
 						try
 						{
@@ -330,12 +335,12 @@ public class LodNodeBufferBuilder
 									posX, yOffset, posZ, renderer.debugging, (byte) detail.detailLevel);
 
 						}
-						*/
 
 					}
 				}
+				*/
 				int width;
-				List<LevelPos> posList = new ArrayList<>();
+				List<LevelPos> posListToRender = new ArrayList<>();
 				LodDataPoint lodData;
 				for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
 				{
@@ -353,13 +358,13 @@ public class LodNodeBufferBuilder
 							e.printStackTrace();
 							continue;
 						}
-						posList.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  200, (byte) 0));
-						posList.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 200,  400, (byte) 1));
-						posList.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 400,  600, (byte) 2));
-						posList.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 600,  800, (byte) 3));
-						posList.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 800,  1000, (byte) 4));
-						posList.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 1000,  10000000, (byte) 5));
-						for(LevelPos pos : posList){
+						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  200, (byte) 0));
+						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 200,  400, (byte) 1));
+						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 400,  600, (byte) 2));
+						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 600,  800, (byte) 3));
+						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 800,  1000, (byte) 4));
+						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 1000,  10000000, (byte) 5));
+						for(LevelPos pos : posListToRender){
 							LevelPos chunkPos = pos.convert((byte) 3);
 							int chunkX = chunkPos.posX + startChunkPos.x;
 							int chunkZ = chunkPos.posZ + startChunkPos.z;
@@ -383,10 +388,24 @@ public class LodNodeBufferBuilder
 							}
 
 						}
-						posList.clear();
+						posListToRender.clear();
 					}
 				}
-				
+
+
+				List<LevelPos> posListToGenerate = new ArrayList<>();
+
+				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  10000000, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 0, 14));
+				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  10000000, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 9, 2));
+				/*
+				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 200,  400, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 1, 2));
+				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 400,  600, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 2, 2));
+				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 600,  800, (byte) DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT.complexity, (byte) 3, 2));
+				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 800,  1000, (byte) DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT.complexity, (byte) 4, 2));
+				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 1000,  10000000, (byte) DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT.complexity, (byte) 5, 2));*/
+
+
+
 				// issue #19
 				// TODO add a way for a server side mod to generate chunks requested here
 				if (mc.hasSingleplayerServer())
@@ -401,10 +420,13 @@ public class LodNodeBufferBuilder
 							chunksToGen[i] = chunksToGenReserve[j];
 						}
 					}
-					
+					LevelPos levelPos;
+					ChunkPos chunkPos;
 					// start chunk generation
-					for (ChunkPos chunkPos : chunksToGen)
+					for (LevelPos pos : posListToGenerate)
 					{
+						levelPos = pos.convert((byte) 3);
+						chunkPos = new ChunkPos(levelPos.posX, levelPos.posZ);
 						// don't add null chunkPos (which shouldn't happen anyway)
 						// or add more to the generation queue
 						if (chunkPos == null || numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
@@ -415,7 +437,7 @@ public class LodNodeBufferBuilder
 						
 						numberOfChunksWaitingToGenerate.addAndGet(1);
 						
-						LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, renderer, LodQuadTreeNodeBuilder, this, lodDim, serverWorld);
+						LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, DistanceGenerationMode.FEATURES, LodDetail.FULL, renderer, LodQuadTreeNodeBuilder, this, lodDim, serverWorld);
 						WorldWorkerManager.addWorker(genWorker);
 					}
 				}
