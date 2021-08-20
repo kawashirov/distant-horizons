@@ -1,10 +1,8 @@
 package com.seibel.lod.objects;
 
-import com.seibel.lod.handlers.LodDimensionFileHandler;
-import com.seibel.lod.util.LodUtil;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-
 import java.io.Serializable;
+
+import com.seibel.lod.util.LodUtil;
 
 public class LevelContainer implements Serializable {
 
@@ -76,7 +74,8 @@ public class LevelContainer implements Serializable {
 
     }
 
-    public String toString() {
+    @Override
+	public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
         int combinedCol;
         int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
