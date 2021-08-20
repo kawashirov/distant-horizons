@@ -46,7 +46,7 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 	public void addLodToBuffer(BufferBuilder buffer,
 							   LodDimension lodDim, LodDataPoint lod,
 							   double xOffset, double yOffset, double zOffset,
-							   boolean debugging, LodDetail detail)
+							   boolean debugging, byte detail)
 	{
 		AxisAlignedBB bbox;
 
@@ -54,7 +54,7 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 		bbox = generateBoundingBox(
 				lod.height,
 				lod.depth,
-				detail.dataPointWidth,
+				(int) Math.pow(2, detail),
 				xOffset,
 				yOffset,
 				zOffset);
@@ -62,7 +62,7 @@ public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
 		Color color = lod.color;
 		if (LodConfig.CLIENT.debugMode.get())
 		{
-			color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[detail.detailLevel];
+			color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[detail];
 		}
 
 		if (bbox != null)

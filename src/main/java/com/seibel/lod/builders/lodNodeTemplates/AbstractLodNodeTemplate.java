@@ -38,7 +38,7 @@ public abstract class AbstractLodNodeTemplate
 	public abstract void addLodToBuffer(BufferBuilder buffer,
 										LodDimension lodDim, LodDataPoint lod,
 										double xOffset, double yOffset, double zOffset,
-										boolean debugging, LodDetail detail);
+										boolean debugging, byte detail);
 
 	/** add the given position and color to the buffer */
 	protected void addPosAndColor(BufferBuilder buffer,

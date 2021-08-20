@@ -8,10 +8,9 @@ import net.minecraft.util.math.ChunkPos;
 
 import java.awt.*;
 import java.io.Serializable;
-import java.util.AbstractMap;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * STANDARD TO FOLLOW
@@ -208,13 +207,17 @@ public class LodRegion implements Serializable
     /**
      * @return
      */
-    public List<Map.Entry<LevelPos,Integer>> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel)
+    public List<Map.Entry<LevelPos,Integer>> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel, int dataNumber)
     {
         LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
-        return getDataToGenerate(levelPos, playerPosX, playerPosZ, start, end, generation, detailLevel);
+        List<Map.Entry<LevelPos,Integer>> listOfPos = getDataToGenerate(levelPos, playerPosX, playerPosZ, start, end, generation, detailLevel);
+        Collections.sort(listOfPos,Map.Entry.comparingByValue());
+        dataNumber = Math.min(dataNumber, listOfPos.size());
+        return listOfPos.subList(0,dataNumber);
+
     }
 
-    public List<Map.Entry<LevelPos,Integer>> getDataToGenerate(LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel)
+    private List<Map.Entry<LevelPos,Integer>> getDataToGenerate(LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel)
     {
         List<Map.Entry<LevelPos,Integer>> levelPosList = new ArrayList<>();
 
@@ -317,7 +320,7 @@ public class LodRegion implements Serializable
     /**
      * @return
      */
-    public List<LevelPos> getDataToRender(LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
+    private List<LevelPos> getDataToRender(LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
     {
         List<LevelPos> levelPosList = new ArrayList<>();
 

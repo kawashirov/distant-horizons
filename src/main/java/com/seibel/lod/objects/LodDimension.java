@@ -355,53 +355,65 @@ public class LodDimension
 
     /**
      * method to get all the quadtree level that have to be generated based on the position of the player
+     *
      * @return list of quadTrees
      */
-    public List<LevelPos> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel){
+    public List<LevelPos> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel, int dataNumber)
+    {
 
         int n = regions.length;
         int xIndex;
         int zIndex;
         LodRegion region;
-        List<Map.Entry<LevelPos,Integer>> listOfData = new ArrayList<>();
-        for(int xRegion=0; xRegion<n; xRegion++){
-            for(int zRegion=0; zRegion<n; zRegion++){
+        List<Map.Entry<LevelPos, Integer>> listOfData = new ArrayList<>();
+        for (int xRegion = 0; xRegion < n; xRegion++)
+        {
+            for (int zRegion = 0; zRegion < n; zRegion++)
+            {
                 xIndex = (xRegion + center.x) - halfWidth;
                 zIndex = (zRegion + center.z) - halfWidth;
                 RegionPos regionPos = new RegionPos(xIndex, zIndex);
                 region = getRegion(regionPos);
-                if (region == null){
+                if (region == null)
+                {
                     region = new LodRegion((byte) 0, regionPos);
                     addOrOverwriteRegion(region);
                 }
-                listOfData.addAll(region.getDataToGenerate(playerPosX, playerPosZ, start, end, generation, detailLevel));
+                listOfData.addAll(region.getDataToGenerate(playerPosX, playerPosZ, start, end, generation, detailLevel, dataNumber));
             }
         }
-        Collections.sort(listOfData,Map.Entry.comparingByValue());
-        return listOfData.stream().map(entry -> entry.getKey()).collect(Collectors.toList());
+        Collections.sort(listOfData, Map.Entry.comparingByValue());
+        dataNumber = Math.min(dataNumber, listOfData.size());
+        return listOfData.stream().map(entry -> entry.getKey()).collect(Collectors.toList()).subList(0, dataNumber);
     }
 
 
     /**
      * method to get all the nodes that have to be rendered based on the position of the player
+     *
      * @return list of nodes
      */
-    public List<LevelPos> getDataToRender(int playerPosX, int playerPosZ, int start, int end, byte detailLevel){
+    public List<LevelPos> getDataToRender(int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
+    {
         int n = regions.length;
         List<LevelPos> listOfData = new ArrayList<>();
         int xIndex;
         int zIndex;
         LodRegion region;
-        for(int xRegion=0; xRegion<n; xRegion++){
-            for(int zRegion=0; zRegion<n; zRegion++){
+        for (int xRegion = 0; xRegion < n; xRegion++)
+        {
+            for (int zRegion = 0; zRegion < n; zRegion++)
+            {
                 xIndex = (xRegion + center.x) - halfWidth;
                 zIndex = (zRegion + center.z) - halfWidth;
                 RegionPos regionPos = new RegionPos(xIndex, zIndex);
                 region = getRegion(regionPos);
-                if (region == null){
+                if (region == null)
+                {
                     region = new LodRegion((byte) 0, regionPos);
                     addOrOverwriteRegion(region);
-                }else{
+                } else
+                {
                     listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel));
                 }
             }
@@ -409,6 +421,26 @@ public class LodDimension
         return listOfData;
     }
 
+    /**
+     * method to get all the nodes that have to be rendered based on the position of the player
+     *
+     * @return list of nodes
+     */
+    public List<LevelPos> getDataToRender(RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
+    {
+        int n = regions.length;
+        List<LevelPos> listOfData = new ArrayList<>();
+        LodRegion region = getRegion(regionPos);
+        if (region == null)
+        {
+            region = new LodRegion((byte) 0, regionPos);
+            addOrOverwriteRegion(region);
+        } else
+        {
+            listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel));
+        }
+        return listOfData;
+    }
 
     /**
      * Get the data point at the given X and Z coordinates

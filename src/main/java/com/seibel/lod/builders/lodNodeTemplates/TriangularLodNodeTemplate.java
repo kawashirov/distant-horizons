@@ -36,7 +36,7 @@ public class TriangularLodNodeTemplate extends AbstractLodNodeTemplate
 	public void addLodToBuffer(BufferBuilder buffer,
 											LodDimension lodDim, LodDataPoint lod,
 											double xOffset, double yOffset, double zOffset,
-											boolean debugging, LodDetail detail)
+											boolean debugging, byte detail)
 	{
 		System.err.println("DynamicLodTemplate not implemented!");
 	}

@@ -63,12 +63,12 @@ public class LevelPos implements Cloneable
         int blockPosX = regionPosX * 512 + posX * width + width / 2;
         int blockPosZ = regionPosZ * 512 + posZ * width + width / 2;
         int maxDistance = (int) Math.sqrt(Math.pow(playerPosX - blockPosX, 2) + Math.pow(playerPosZ - blockPosZ, 2));
-        for (int x = 0; x <= 1; x++)
+        for (int x = 0; x <= 3; x++)
         {
-            for (int z = 0; z <= 1; z++)
+            for (int z = 0; z <= 3; z++)
             {
-                blockPosX = regionPosX * 512 + posX * width + width * x;
-                blockPosZ = regionPosZ * 512 + posZ * width + width * z;
+                blockPosX = regionPosX * 512 + posX * width + width/2 * x;
+                blockPosZ = regionPosZ * 512 + posZ * width + width/2 * z;
                 maxDistance = Math.max(maxDistance, (int) Math.sqrt(Math.pow(playerPosX - blockPosX, 2) + Math.pow(playerPosZ - blockPosZ, 2)));
             }
         }
@@ -85,12 +85,12 @@ public class LevelPos implements Cloneable
         int blockPosX = regionPosX * 512 + posX * width + width / 2;
         int blockPosZ = regionPosZ * 512 + posZ * width + width / 2;
         int minDistance = (int) Math.sqrt(Math.pow(playerPosX - blockPosX, 2) + Math.pow(playerPosZ - blockPosZ, 2));
-        for (int x = 0; x <= 1; x++)
+        for (int x = 0; x <= 3; x++)
         {
-            for (int z = 0; z <= 1; z++)
+            for (int z = 0; z <= 3; z++)
             {
-                blockPosX = regionPosX * 512 + posX * width + width * x;
-                blockPosZ = regionPosZ * 512 + posZ * width + width * z;
+                blockPosX = regionPosX * 512 + posX * width + width/2 * x;
+                blockPosZ = regionPosZ * 512 + posZ * width + width/2 * z;
                 minDistance = Math.min(minDistance, (int) Math.sqrt(Math.pow(playerPosX - blockPosX, 2) + Math.pow(playerPosZ - blockPosZ, 2)));
             }
         }
