@@ -8,8 +8,10 @@ import net.minecraft.util.math.ChunkPos;
 
 import java.awt.*;
 import java.io.Serializable;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * STANDARD TO FOLLOW
@@ -206,23 +208,23 @@ public class LodRegion implements Serializable
     /**
      * @return
      */
-    public List<LevelPos> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel)
+    public List<Map.Entry<LevelPos,Integer>> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel)
     {
         LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
         return getDataToGenerate(levelPos, playerPosX, playerPosZ, start, end, generation, detailLevel);
     }
 
-    public List<LevelPos> getDataToGenerate(LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel)
+    public List<Map.Entry<LevelPos,Integer>> getDataToGenerate(LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel)
     {
-        List<LevelPos> levelPosList = new ArrayList<>();
+        List<Map.Entry<LevelPos,Integer>> levelPosList = new ArrayList<>();
 
         int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel);
         int width = (int) Math.pow(2, levelPos.detailLevel);
 
         //here i calculate the the LevelPos is in range
         //This is important to avoid any kind of hole in the generation
-        int posX = regionPosX * 512 + playerPosX * width + width / 2;
-        int posZ = regionPosZ * 512 + playerPosZ * width + width / 2;
+        int posX = regionPosX * 512 + levelPos.posX * width + width / 2;
+        int posZ = regionPosZ * 512 + levelPos.posZ * width + width / 2;
         int distance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2));
         int maxDistance = distance;
         int minDistance = distance;
@@ -230,15 +232,15 @@ public class LodRegion implements Serializable
         {
             for (int z = 0; z <= 1; z++)
             {
-                posX = regionPosX * 512 + playerPosX * width + width * x;
-                posZ = regionPosZ * 512 + playerPosZ * width + width * z;
+                posX = regionPosX * 512 + levelPos.posX * width + width * x;
+                posZ = regionPosZ * 512 + levelPos.posZ * width + width * z;
                 distance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2));
                 minDistance = Math.min(minDistance, distance);
                 maxDistance = Math.max(maxDistance, distance);
             }
         }
 
-        if (minDistance < start || distance > maxDistance || levelPos.detailLevel < detailLevel)
+        if (!(minDistance >= start && distance <= maxDistance) || levelPos.detailLevel < detailLevel)
         {
             return levelPosList;
         }
@@ -251,7 +253,10 @@ public class LodRegion implements Serializable
         //we have reached the target detail level
         if (detailLevel == levelPos.detailLevel || generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] < generation)
         {
-            levelPosList.add(new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * size, levelPos.posZ + regionPosZ * size));
+            levelPosList.add(
+                    new AbstractMap.SimpleEntry<LevelPos, Integer>(
+                            new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * size, levelPos.posZ + regionPosZ * size),
+                            maxDistance));
         } else
         {
             //we want max a request per chunk. So for lod smaller than chunk we explore only the top rigth child
@@ -263,9 +268,28 @@ public class LodRegion implements Serializable
                     for (int z = 0; z <= 1; z++)
                     {
                         childPos = new LevelPos((byte) (levelPos.detailLevel - 1), childPosX + x, childPosZ + z);
-                        if (generationType[childPos.detailLevel][childPos.posX][childPos.posZ] < generation)
+
+                        /**TODO remove this distance calculator in some way, from here*/
+                        posX = regionPosX * 512 + childPos.posX * width + width / 2;
+                        posZ = regionPosZ * 512 + childPos.posZ * width + width / 2;
+                        maxDistance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2));
+                        for (int xi = 0; xi <= 1; xi++)
                         {
-                            levelPosList.add(new LevelPos(childPos.detailLevel, childPos.posX + regionPosX * childSize, childPos.posZ + regionPosZ * childSize));
+                            for (int zi = 0; zi <= 1; zi++)
+                            {
+                                posX = regionPosX * 512 + childPos.posX * width + width * xi;
+                                posZ = regionPosZ * 512 + childPos.posZ * width + width * zi;
+                                maxDistance = Math.max(maxDistance, (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2)));
+                            }
+                        }
+                        /**to here*/
+
+                        if (generationType[childPos.detailLevel][childPos.posX][childPos.posZ] < generation || !doesDataExist(childPos))
+                        {
+                            levelPosList.add(
+                                    new AbstractMap.SimpleEntry<LevelPos, Integer>(
+                                            new LevelPos(childPos.detailLevel, childPos.posX + regionPosX * childSize, childPos.posZ + regionPosZ * childSize),
+                                            maxDistance));
                         }
                     }
                 }
@@ -287,7 +311,25 @@ public class LodRegion implements Serializable
                 childPos = levelPos.convert((byte) (levelPos.detailLevel - 1));
                 if (generationType[childPos.detailLevel][childPos.posX][childPos.posZ] < generation)
                 {
-                    levelPosList.add(new LevelPos(childPos.detailLevel, childPos.posX + regionPosX * childSize, childPos.posZ + regionPosZ * childSize));
+                    /**TODO remove this distance calculator in some way, from here*/
+                    posX = regionPosX * 512 + childPos.posX * width + width / 2;
+                    posZ = regionPosZ * 512 + childPos.posZ * width + width / 2;
+                    maxDistance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2));
+                    for (int x = 0; x <= 1; x++)
+                    {
+                        for (int z = 0; z <= 1; z++)
+                        {
+                            posX = regionPosX * 512 + childPos.posX * width + width * x;
+                            posZ = regionPosZ * 512 + childPos.posZ * width + width * z;
+                            maxDistance = Math.max(maxDistance, (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2)));
+                        }
+                    }
+                    /**to here*/
+
+                    levelPosList.add(
+                            new AbstractMap.SimpleEntry<LevelPos, Integer>(
+                                    new LevelPos(childPos.detailLevel, childPos.posX + regionPosX * childSize, childPos.posZ + regionPosZ * childSize),
+                                    maxDistance));
                 } else
                 {
                     if (childPos.detailLevel != detailLevel)

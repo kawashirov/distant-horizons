@@ -45,6 +45,9 @@ public class LevelPos implements Cloneable{
         return new LevelPos(detailLevel,posX,posZ);
     }
 
+
+    /**TODO add max and min distance to point calculator*/
+
     public String toString(){
         String s = (detailLevel + " " + posX + " " + posZ);
         return s;
