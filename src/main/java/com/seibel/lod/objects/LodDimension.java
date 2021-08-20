@@ -28,6 +28,7 @@ import net.minecraft.world.server.ServerWorld;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * This object holds all loaded LOD regions
@@ -346,6 +347,51 @@ public class LodDimension
         LevelPos levelPos = new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunkPos.x, chunkPos.z);
         return getData(levelPos);
     }
+
+
+    /**
+     * method to get all the quadtree level that have to be generated based on the position of the player
+     * @return list of quadTrees
+     */
+    public List<LevelPos> getDataToGenerate(int x, int z, byte level, DistanceGenerationMode complexity, int maxDistance, int minDistance){
+
+        int n = regions.length;
+        int xIndex;
+        int zIndex;
+        LodQuadTree region;
+        List<Map.Entry<LodQuadTreeNode,Integer>> listOfQuadTree = new ArrayList<>();
+        for(int xRegion=0; xRegion<n; xRegion++){
+            for(int zRegion=0; zRegion<n; zRegion++){
+                xIndex = (xRegion + centerX) - halfWidth;
+                zIndex = (zRegion + centerZ) - halfWidth;
+                region = getRegion(xIndex,zIndex);
+                if (region == null){
+                    region = new LodQuadTree(xIndex, zIndex);
+                    setRegion(region);
+                }
+                listOfQuadTree.addAll(region.getNodesToGenerate(x,z,level,complexity,maxDistance,minDistance));
+            }
+        }
+        Collections.sort(listOfQuadTree,Map.Entry.comparingByValue());
+        return listOfQuadTree.stream().map(entry -> entry.getKey()).collect(Collectors.toList());
+    }
+
+
+    /**
+     * method to get all the nodes that have to be rendered based on the position of the player
+     * @return list of nodes
+     */
+    public List<LodQuadTreeNode> getNodeToRender(int x, int z, byte level, Set<DistanceGenerationMode> complexityMask, int maxDistance, int minDistance){
+        int n = regions.length;
+        List<LodQuadTreeNode> listOfData = new ArrayList<>();
+        for(int i=0; i<n; i++){
+            for(int j=0; j<n; j++){
+                listOfData.addAll(regions[i][j].getNodeToRender(x,z,level,complexityMask,maxDistance,minDistance));
+            }
+        }
+        return listOfData;
+    }
+
 
     /**
      * Get the data point at the given X and Z coordinates

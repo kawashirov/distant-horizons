@@ -214,7 +214,6 @@ public class LodRegion implements Serializable
 
     public List<LevelPos> getDataToGenerate(LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel)
     {
-
         List<LevelPos> levelPosList = new ArrayList<>();
 
         int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel);
@@ -231,8 +230,8 @@ public class LodRegion implements Serializable
         {
             for (int z = 0; z <= 1; z++)
             {
-                posX = regionPosX * 512 + playerPosX * width + width*x;
-                posZ = regionPosZ * 512 + playerPosZ * width + width*z;
+                posX = regionPosX * 512 + playerPosX * width + width * x;
+                posZ = regionPosZ * 512 + playerPosZ * width + width * z;
                 distance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2));
                 minDistance = Math.min(minDistance, distance);
                 maxDistance = Math.max(maxDistance, distance);
@@ -289,9 +288,10 @@ public class LodRegion implements Serializable
                 if (generationType[childPos.detailLevel][childPos.posX][childPos.posZ] < generation)
                 {
                     levelPosList.add(new LevelPos(childPos.detailLevel, childPos.posX + regionPosX * childSize, childPos.posZ + regionPosZ * childSize));
-                }else
+                } else
                 {
-                    if(childPos.detailLevel != detailLevel){
+                    if (childPos.detailLevel != detailLevel)
+                    {
                         levelPosList.addAll(getDataToGenerate(childPos, playerPosX, playerPosZ, start, end, generation, detailLevel));
                     }
                 }
@@ -300,27 +300,90 @@ public class LodRegion implements Serializable
         return levelPosList;
     }
 
+
     /**
      * @return
-     *//*
+     */
     public List<LevelPos> getDataToRender(int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
     {
-        if(detailLevel < minDetailLevel) detailLevel = minDetailLevel;
-        int size;
-        int width;
-        int posX;
-        int posZ;
-        for(int tempLod = detailLevel; tempLod <= LodUtil.REGION_DETAIL_LEVEL; tempLod++){
-            size = (int) Math.pow(2,LodUtil.REGION_DETAIL_LEVEL-tempLod);
-            width = (int) Math.pow(2,tempLod);
-            for(int x = 0; x < size; x++){
-                for(int z = 0; z < size; z++){
-                    dataExistence[][]
-                }
+        LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
+        return getDataToRender(levelPos, playerPosX, playerPosZ, start, end, detailLevel);
+    }
+
+    /**
+     * @return
+     */
+    public List<LevelPos> getDataToRender(LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
+    {
+        List<LevelPos> levelPosList = new ArrayList<>();
+
+        int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel);
+        int width = (int) Math.pow(2, levelPos.detailLevel);
+
+        //here i calculate the the LevelPos is in range
+        //This is important to avoid any kind of hole in the rendering
+        int posX = regionPosX * 512 + playerPosX * width + width / 2;
+        int posZ = regionPosZ * 512 + playerPosZ * width + width / 2;
+        int distance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2));
+        int maxDistance = distance;
+        int minDistance = distance;
+        for (int x = 0; x <= 1; x++)
+        {
+            for (int z = 0; z <= 1; z++)
+            {
+                posX = regionPosX * 512 + playerPosX * width + width * x;
+                posZ = regionPosZ * 512 + playerPosZ * width + width * z;
+                distance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2));
+                minDistance = Math.min(minDistance, distance);
+                maxDistance = Math.max(maxDistance, distance);
             }
         }
+
+        if (minDistance < start || distance > maxDistance || levelPos.detailLevel < detailLevel)
+        {
+            System.out.println(levelPos);
+            return levelPosList;
+        }
+
+        int childPosX = levelPos.posX * 2;
+        int childPosZ = levelPos.posZ * 2;
+        LevelPos childPos;
+        int childrenCount;
+        int childSize = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel + 1);
+        //we have reached the target detail level
+        if (detailLevel == levelPos.detailLevel)
+        {
+            levelPosList.add(new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * size, levelPos.posZ + regionPosZ * size));
+        } else
+        {
+            childrenCount=0;
+            for (int x = 0; x <= 1; x++)
+            {
+                for (int z = 0; z <= 1; z++)
+                {
+                    childPos = new LevelPos((byte) (levelPos.detailLevel - 1), childPosX + x, childPosZ + z);
+                    if(doesDataExist(childPos)) childrenCount++;
+                }
+            }
+
+            //If all the four children exist we go deeper
+            if (childrenCount == 4)
+            {
+                levelPosList.clear();
+                for (int x = 0; x <= 1; x++)
+                {
+                    for (int z = 0; z <= 1; z++)
+                    {
+                        childPos = new LevelPos((byte) (levelPos.detailLevel - 1), childPosX + x, childPosZ + z);
+                        levelPosList.addAll(getDataToRender(childPos, playerPosX, playerPosZ, start, end, detailLevel));
+                    }
+                }
+            }else{
+                levelPosList.add(new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * size, levelPos.posZ + regionPosZ * size));
+            }
+        }
+        return levelPosList;
     }
-    */
 
     /**TODO a method to update a whole area, to be used as a single big update*/
     /**
