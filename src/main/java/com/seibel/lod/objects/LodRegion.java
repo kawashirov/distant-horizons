@@ -1,12 +1,15 @@
 package com.seibel.lod.objects;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.util.LodUtil;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 
 import java.awt.*;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * STANDARD TO FOLLOW
@@ -203,23 +206,99 @@ public class LodRegion implements Serializable
     /**
      * @return
      */
-    /*
-    public List<LevelPos> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generetion, byte detailLevel)
+    public List<LevelPos> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel)
     {
-        if (detailLevel < minDetailLevel) detailLevel = minDetailLevel;
-        LevelPos levelPos;
-        int size;
-        int width;
-        int posX;
-        int posZ;
-        int distance;
-        size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - tempLod);
-        width = (int) Math.pow(2, tempLod);
-        posX = regionPosX * 512 + width / 2;
-        posZ = regionPosZ * 512 + width / 2;
-        distance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2))
+        LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
+        return getDataToGenerate(levelPos, playerPosX, playerPosZ, start, end, generation, detailLevel);
     }
-    */
+
+    public List<LevelPos> getDataToGenerate(LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel)
+    {
+
+        List<LevelPos> levelPosList = new ArrayList<>();
+
+        int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel);
+        int width = (int) Math.pow(2, levelPos.detailLevel);
+
+        //here i calculate the the LevelPos is in range
+        //This is important to avoid any kind of hole in the generation
+        int posX = regionPosX * 512 + playerPosX * width + width / 2;
+        int posZ = regionPosZ * 512 + playerPosZ * width + width / 2;
+        int distance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2));
+        int maxDistance = distance;
+        int minDistance = distance;
+        for (int x = 0; x <= 1; x++)
+        {
+            for (int z = 0; z <= 1; z++)
+            {
+                posX = regionPosX * 512 + playerPosX * width + width*x;
+                posZ = regionPosZ * 512 + playerPosZ * width + width*z;
+                distance = (int) Math.sqrt(Math.pow(playerPosX - posX, 2) + Math.pow(playerPosZ - posZ, 2));
+                minDistance = Math.min(minDistance, distance);
+                maxDistance = Math.max(maxDistance, distance);
+            }
+        }
+
+        if (minDistance < start || distance > maxDistance || levelPos.detailLevel < detailLevel)
+        {
+            return levelPosList;
+        }
+
+        int childPosX = levelPos.posX * 2;
+        int childPosZ = levelPos.posZ * 2;
+        LevelPos childPos;
+
+        int childSize = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel + 1);
+        //we have reached the target detail level
+        if (detailLevel == levelPos.detailLevel || generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] < generation)
+        {
+            levelPosList.add(new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * size, levelPos.posZ + regionPosZ * size));
+        } else
+        {
+            //we want max a request per chunk. So for lod smaller than chunk we explore only the top rigth child
+            if (levelPos.detailLevel > LodUtil.CHUNK_DETAIL_LEVEL)
+            {
+                //We take all the children that are not generated to at least the generation level taken in input
+                for (int x = 0; x <= 1; x++)
+                {
+                    for (int z = 0; z <= 1; z++)
+                    {
+                        childPos = new LevelPos((byte) (levelPos.detailLevel - 1), childPosX + x, childPosZ + z);
+                        if (generationType[childPos.detailLevel][childPos.posX][childPos.posZ] < generation)
+                        {
+                            levelPosList.add(new LevelPos(childPos.detailLevel, childPos.posX + regionPosX * childSize, childPos.posZ + regionPosZ * childSize));
+                        }
+                    }
+                }
+
+                //only if all the children are correctly generated we go deeper
+                if (levelPosList.isEmpty())
+                {
+                    for (int x = 0; x <= 1; x++)
+                    {
+                        for (int z = 0; z <= 1; z++)
+                        {
+                            childPos = new LevelPos((byte) (levelPos.detailLevel - 1), childPosX + x, childPosZ + z);
+                            levelPosList.addAll(getDataToGenerate(childPos, playerPosX, playerPosZ, start, end, generation, detailLevel));
+                        }
+                    }
+                }
+            } else
+            {
+                childPos = levelPos.convert((byte) (levelPos.detailLevel - 1));
+                if (generationType[childPos.detailLevel][childPos.posX][childPos.posZ] < generation)
+                {
+                    levelPosList.add(new LevelPos(childPos.detailLevel, childPos.posX + regionPosX * childSize, childPos.posZ + regionPosZ * childSize));
+                }else
+                {
+                    if(childPos.detailLevel != detailLevel){
+                        levelPosList.addAll(getDataToGenerate(childPos, playerPosX, playerPosZ, start, end, generation, detailLevel));
+                    }
+                }
+            }
+        }
+        return levelPosList;
+    }
 
     /**
      * @return
@@ -288,7 +367,6 @@ public class LodRegion implements Serializable
     {
 
         levelPos = levelPos.regionModule();
-        boolean[][] children = getChildren(levelPos);
         int numberOfChildren = 0;
 
         /**TODO add the ability to change how the heigth and depth are determinated (for example min or max)**/
