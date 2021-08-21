@@ -17,8 +17,6 @@
  */
 package com.seibel.lod.proxy;
 
-import com.seibel.lod.objects.LodDimension;
-import com.seibel.lod.objects.LodWorld;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,6 +29,8 @@ import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.handlers.LodConfig;
+import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.LodUtil;
@@ -137,7 +137,7 @@ public class ClientProxy
         }
 
 //		LodConfig.CLIENT.drawLODs.set(true);
-//		LodConfig.CLIENT.debugMode.set(false);
+		LodConfig.CLIENT.debugMode.set(false);
 
         LodConfig.CLIENT.maxDrawDetail.set(LodDetail.FULL);
         LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.FULL);
@@ -152,7 +152,8 @@ public class ClientProxy
         LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
         LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
 
-        LodConfig.CLIENT.numberOfWorldGenerationThreads.set(16);
+        // has to be set in the config file
+//      LodConfig.CLIENT.numberOfWorldGenerationThreads.set(16);
     }
 
 
