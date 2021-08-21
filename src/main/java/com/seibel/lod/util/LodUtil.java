@@ -65,11 +65,14 @@ public class LodUtil
 	public static final byte BLOCK_DETAIL_LEVEL = 0;
 	
 	
-	/** detail level 9 */
+	/** measured in Blocks <br>
+	 * detail level 9 */
 	public static final short REGION_WIDTH = 512;
-	/** detail level 4 */
+	/** measured in Blocks <br>
+	 * detail level 4 */
 	public static final short CHUNK_WIDTH = 16;
-	/** detail level 0 */
+	/** measured in Blocks <br> 
+	 * detail level 0 */
 	public static final short BLOCK_WIDTH = 1;
 	
 	
