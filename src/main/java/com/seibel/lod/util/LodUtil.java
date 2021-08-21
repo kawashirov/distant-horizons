@@ -52,9 +52,9 @@ public class LodUtil
 	
 	/**
 	 * In order of nearest to farthest: <br>
-	 * Red, Orange, Yellow, Green, Blue, Magenta, Pink
+	 * Red, Orange, Yellow, Green, Cyan, Blue, Magenta, white, gray, black
 	 */
-	public static final Color DEBUG_DETAIL_LEVEL_COLORS[] = new Color[] { Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.BLUE, Color.MAGENTA, Color.pink};
+	public static final Color DEBUG_DETAIL_LEVEL_COLORS[] = new Color[] { Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA, Color.WHITE, Color.GRAY, Color.BLACK };
 	
 	
 	/** 512 blocks wide */
