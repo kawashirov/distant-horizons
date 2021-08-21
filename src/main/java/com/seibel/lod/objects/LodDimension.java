@@ -383,7 +383,7 @@ public class LodDimension
                 listOfData.addAll(region.getDataToGenerate(playerPosX, playerPosZ, start, end, generation, detailLevel, dataNumber));
             }
         }
-        Collections.sort(listOfData, LevelPos.getPosComparator());
+        Collections.sort(listOfData, LevelPos.getPosAndDetailComparator());
         dataNumber = Math.min(dataNumber, listOfData.size());
         return listOfData.stream().map(entry -> entry.getKey()).collect(Collectors.toList()).subList(0, dataNumber);
     }

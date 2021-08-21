@@ -233,7 +233,14 @@ public class LodBufferBuilder
 
 				List<LevelPos> posListToGenerate = new ArrayList<>();
 
-				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  10000000, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 0, 12 - posListToGenerate.size()));
+				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  10000000, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 9, 2));
+				if(posListToGenerate.isEmpty())
+				{
+					posListToGenerate.addAll(lodDim.getDataToGenerate(playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0, 400, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 0, 2));
+				}
+				if(posListToGenerate.isEmpty()){
+					posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  10000000, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 0, 2));
+				}
 
 				for(LevelPos levelPos : posListToGenerate){
 					LevelPos chunkLevelPos = levelPos.convert((byte) 3);

@@ -211,7 +211,7 @@ public class LodRegion implements Serializable
     {
         LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
         List<Map.Entry<LevelPos,Integer>> listOfPos = getDataToGenerate(levelPos, playerPosX, playerPosZ, start, end, generation, detailLevel);
-        Collections.sort(listOfPos, LevelPos.getPosComparator());
+        Collections.sort(listOfPos, LevelPos.getPosAndDetailComparator());
         dataNumber = Math.min(dataNumber, listOfPos.size());
         return listOfPos.subList(0,dataNumber);
 
@@ -229,7 +229,7 @@ public class LodRegion implements Serializable
         int maxDistance = levelPos.maxDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
         int minDistance = levelPos.minDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
 
-        if (!(start <= maxDistance && minDistance <= end) || levelPos.detailLevel < detailLevel)
+        if (!(start <= maxDistance && minDistance < end) || levelPos.detailLevel < detailLevel)
         {
             return levelPosList;
         }
@@ -334,7 +334,7 @@ public class LodRegion implements Serializable
         int minDistance = levelPos.minDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
 
 
-        if (!(start <= maxDistance && minDistance <= end)  || levelPos.detailLevel < detailLevel)
+        if (!(start <= maxDistance && minDistance < end)  || levelPos.detailLevel < detailLevel)
         {
             return levelPosList;
         }
