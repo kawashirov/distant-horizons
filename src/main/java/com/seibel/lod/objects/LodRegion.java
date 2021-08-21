@@ -333,6 +333,11 @@ public class LodRegion implements Serializable
         int maxDistance = levelPos.maxDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
         int minDistance = levelPos.minDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
 
+        //To avoid z fighting: if the pos is touching the end radius at detailLevel + 1 then we stop
+        //cause this area will be occupied by bigger block
+        if(levelPos.detailLevel == detailLevel + 1 && end <= maxDistance && minDistance <= end){
+            return levelPosList;
+        }
 
         if (!(start <= maxDistance && minDistance < end)  || levelPos.detailLevel < detailLevel)
         {
