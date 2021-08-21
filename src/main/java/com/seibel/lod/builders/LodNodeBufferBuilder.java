@@ -178,167 +178,7 @@ public class LodNodeBufferBuilder
 				// used when determining which chunks are closer when queuing distance
 				// generation
 				int minChunkDist = Integer.MAX_VALUE;
-				/*
-				// x axis
-				for (int i = 0; i < numbChunksWide; i++)
-				{
-					// z axis
-					for (int j = 0; j < numbChunksWide; j++)
-					{
-						int chunkX = i + startChunkPos.x;
-						int chunkZ = j + startChunkPos.z;
-						
-						// skip any chunks that Minecraft is going to render
-						if (isCoordInCenterArea(i, j, (numbChunksWide / 2))
-								&& renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkX, chunkZ)))
-						{
-							continue;
-						}
-						
-						// set where this square will be drawn in the world
-						double xOffset = (LodUtil.CHUNK_WIDTH * i) + // offset by the number of LOD blocks
-								startBlockPos.getX(); // offset so the center LOD block is centered underneath the player
-						double yOffset = 0;
-						double zOffset = (LodUtil.CHUNK_WIDTH * j) + startBlockPos.getZ();
 
-						if (!lodDim.doesDataExist(new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunkX, chunkZ)))
-						{
-							// generate a new chunk if no chunk currently exists
-							// and we aren't waiting on any other chunks to generate
-							if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
-							{
-								ChunkPos pos = new ChunkPos(chunkX, chunkZ);
-								
-								// alternate determining logic that
-								// can be used for debugging
-//								if (chunksToGen == null)
-//								{
-//									chunkGenIndex = 0;
-//									chunksToGen = new ChunkPos[maxChunkGenRequests];
-//								}
-//								
-//								if (chunkGenIndex < maxChunkGenRequests)
-//								{
-//									chunksToGen[chunkGenIndex] = pos;
-//									chunkGenIndex++;
-//								}
-								
-								// determine if this position is closer to the player
-								// than the previous
-								int newDistance = playerChunkPos.getChessboardDistance(pos);
-								
-								// issue #40
-								// TODO optimize this code,
-								// using the purely optimized code above we can achieve close to
-								// 100% CPU utilization, this code generally achieves 40 - 50%
-								// after a certain point; and I'm sure there is a better data
-								// structure for this.
-								if (newDistance < minChunkDist)
-								{
-									// this chunk is closer, clear any previous
-									// positions and update the new minimum distance
-									minChunkDist = newDistance;
-									
-									// move all the old chunks into the reserve
-									ChunkPos[] newReserve = new ChunkPos[maxChunkGenRequests];
-									int oldToGenIndex = 0;
-									int oldReserveIndex = 0;
-									for (int tmpIndex = 0; tmpIndex < newReserve.length; tmpIndex++)
-									{
-										// we don't check if the boundaries are good since
-										// the tmp array will always be the same length
-										// as chunksToGen and chunksToGenReserve
-										
-										if (chunksToGen[oldToGenIndex] != null)
-										{
-											// add all the closest chunks...
-											newReserve[tmpIndex] = chunksToGen[oldToGenIndex];
-											oldToGenIndex++;
-										}
-										else if (chunksToGenReserve[oldReserveIndex] != null)
-										{
-											// ...then add all the previous reserve chunks
-											// (which are farther away)
-											newReserve[tmpIndex] = chunksToGenReserve[oldToGenIndex];
-											oldReserveIndex++;
-										}
-										else
-										{
-											// we have moved all the items from
-											// the old chunksToGen and reserve
-											break;
-										}
-									}
-									chunksToGenReserve = newReserve;
-									
-									chunkGenIndex = 0;
-									chunksToGen = new ChunkPos[maxChunkGenRequests];
-									chunksToGen[chunkGenIndex] = pos;
-									chunkGenIndex++;
-								}
-								else if (newDistance <= minChunkDist)
-								{
-									// this chunk position is as close or closers than the
-									// minimum distance
-									if (chunkGenIndex < maxChunkGenRequests)
-									{
-										// we are still under the number of chunks to generate
-										// add this position to the list
-										chunksToGen[chunkGenIndex] = pos;
-										chunkGenIndex++;
-									}
-								}
-								
-							} // lod null and can generate more chunks
-							
-							// don't render this null/empty chunk
-							continue;
-							
-						} // lod null or empty
-						BufferBuilder currentBuffer = null;
-						try
-						{
-							// local position in the vbo and bufferBuilder arrays
-							RegionPos regionArrayPos = new RegionPos(new ChunkPos(i, j));
-							currentBuffer = buildableBuffers[regionArrayPos.x][regionArrayPos.z];
-						}
-						catch(Exception e)
-						{
-							e.printStackTrace();
-							continue;
-						}
-						
-						
-						// determine detail level should this LOD be drawn at
-						int distance = (int) Math.sqrt(Math.pow((playerBlockPosRounded.getX() - chunkX*16 + 8), 2) + Math.pow((playerBlockPosRounded.getZ() - chunkZ*16 + 8), 2));
-						int posX;
-						int posZ;
-						LevelPos levelPos;
-						LodDataPoint lodData;
-						LodDetail detail = LodDetail.getDetailForDistance(LodConfig.CLIENT.maxDrawDetail.get(), distance, 16*64);
-
-						for (int k = 0; k < detail.dataPointLengthCount * detail.dataPointLengthCount; k++)
-						{
-							// how much to offset this LOD by
-							posX = (int) (xOffset + detail.startX[k] - 8);
-							posZ = (int) (zOffset + detail.startZ[k] - 8);
-							levelPos = new LevelPos((byte) 0, posX, posZ).convert((byte) detail.detailLevel);
-							if (lodDim.hasThisPositionBeenGenerated(levelPos)) {
-								lodData = lodDim.getData(levelPos);
-							}else {
-								lodData = lodDim.getData(levelPos);
-							}
-							// get the desired LodTemplate and
-							// add this LOD to the buffer
-							LodConfig.CLIENT.lodTemplate.get().
-									template.addLodToBuffer(currentBuffer, lodDim, lodData,
-									posX, yOffset, posZ, renderer.debugging, (byte) detail.detailLevel);
-
-						}
-
-					}
-				}
-				*/
 				int width;
 				List<LevelPos> posListToRender = new ArrayList<>();
 				LodDataPoint lodData;
@@ -351,13 +191,14 @@ public class LodNodeBufferBuilder
 						try
 						{
 							// local position in the vbo and bufferBuilder arrays
-							currentBuffer = buildableBuffers[regionPos.x][regionPos.z];
+							currentBuffer = buildableBuffers[xRegion][zRegion];
 						}
 						catch(Exception e)
 						{
 							e.printStackTrace();
 							continue;
 						}
+						/**TODO make this automatic and config dependant*/
 						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  200, (byte) 0));
 						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 200,  400, (byte) 1));
 						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 400,  600, (byte) 2));
@@ -394,16 +235,92 @@ public class LodNodeBufferBuilder
 
 
 				List<LevelPos> posListToGenerate = new ArrayList<>();
+				//posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  10000000, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 9, 8));
+				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  10000000, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 0, 16));
 
-				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  10000000, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 0, 14));
-				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  10000000, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 9, 2));
-				/*
-				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 200,  400, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 1, 2));
-				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 400,  600, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 2, 2));
-				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 600,  800, (byte) DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT.complexity, (byte) 3, 2));
-				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 800,  1000, (byte) DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT.complexity, (byte) 4, 2));
-				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 1000,  10000000, (byte) DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT.complexity, (byte) 5, 2));*/
+				for(LevelPos levelPos : posListToGenerate){
+					LevelPos chunkLevelPos = levelPos.convert((byte) 3);
+					int chunkX = chunkLevelPos.posX;
+					int chunkZ = chunkLevelPos.posZ;
 
+						// generate a new chunk if no chunk currently exists
+						// and we aren't waiting on any other chunks to generate
+						if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
+						{
+							ChunkPos pos = new ChunkPos(chunkX, chunkZ);
+
+							// alternate determining logic that
+							// can be used for debugging
+
+							// determine if this position is closer to the player
+							// than the previous
+							int newDistance = playerChunkPos.getChessboardDistance(pos);
+
+							// issue #40
+							// TODO optimize this code,
+							// using the purely optimized code above we can achieve close to
+							// 100% CPU utilization, this code generally achieves 40 - 50%
+							// after a certain point; and I'm sure there is a better data
+							// structure for this.
+							if (newDistance < minChunkDist)
+							{
+								// this chunk is closer, clear any previous
+								// positions and update the new minimum distance
+								minChunkDist = newDistance;
+
+								// move all the old chunks into the reserve
+								ChunkPos[] newReserve = new ChunkPos[maxChunkGenRequests];
+								int oldToGenIndex = 0;
+								int oldReserveIndex = 0;
+								for (int tmpIndex = 0; tmpIndex < newReserve.length; tmpIndex++)
+								{
+									// we don't check if the boundaries are good since
+									// the tmp array will always be the same length
+									// as chunksToGen and chunksToGenReserve
+
+									if (chunksToGen[oldToGenIndex] != null)
+									{
+										// add all the closest chunks...
+										newReserve[tmpIndex] = chunksToGen[oldToGenIndex];
+										oldToGenIndex++;
+									}
+									else if (chunksToGenReserve[oldReserveIndex] != null)
+									{
+										// ...then add all the previous reserve chunks
+										// (which are farther away)
+										newReserve[tmpIndex] = chunksToGenReserve[oldToGenIndex];
+										oldReserveIndex++;
+									}
+									else
+									{
+										// we have moved all the items from
+										// the old chunksToGen and reserve
+										break;
+									}
+								}
+								chunksToGenReserve = newReserve;
+
+								chunkGenIndex = 0;
+								chunksToGen = new ChunkPos[maxChunkGenRequests];
+								chunksToGen[chunkGenIndex] = pos;
+								chunkGenIndex++;
+							}
+							else if (newDistance <= minChunkDist)
+							{
+								// this chunk position is as close or closers than the
+								// minimum distance
+								if (chunkGenIndex < maxChunkGenRequests)
+								{
+									// we are still under the number of chunks to generate
+									// add this position to the list
+									chunksToGen[chunkGenIndex] = pos;
+									chunkGenIndex++;
+								}
+							}
+
+						} // lod null and can generate more chunks
+
+				}
 
 
 				// issue #19
@@ -420,13 +337,9 @@ public class LodNodeBufferBuilder
 							chunksToGen[i] = chunksToGenReserve[j];
 						}
 					}
-					LevelPos levelPos;
-					ChunkPos chunkPos;
 					// start chunk generation
-					for (LevelPos pos : posListToGenerate)
+					for (ChunkPos chunkPos : chunksToGen)
 					{
-						levelPos = pos.convert((byte) 3);
-						chunkPos = new ChunkPos(levelPos.posX, levelPos.posZ);
 						// don't add null chunkPos (which shouldn't happen anyway)
 						// or add more to the generation queue
 						if (chunkPos == null || numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
@@ -437,11 +350,11 @@ public class LodNodeBufferBuilder
 						
 						numberOfChunksWaitingToGenerate.addAndGet(1);
 						
-						LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, DistanceGenerationMode.FEATURES, LodDetail.FULL, renderer, LodQuadTreeNodeBuilder, this, lodDim, serverWorld);
+						LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, DistanceGenerationMode.SURFACE, LodDetail.HALF, renderer, LodQuadTreeNodeBuilder, this, lodDim, serverWorld);
 						WorldWorkerManager.addWorker(genWorker);
 					}
 				}
-				
+
 				// finish the buffer building
 				closeBuffers();
 				
