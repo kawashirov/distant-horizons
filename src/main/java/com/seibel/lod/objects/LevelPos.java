@@ -57,6 +57,7 @@ public class LevelPos implements Cloneable
         return new LevelPos(detailLevel, posX, posZ);
     }
 
+/**TODO fix the region disappearing for a second*/
 
     public int maxDistance(int playerPosX, int playerPosZ, int regionPosX, int regionPosZ)
     {

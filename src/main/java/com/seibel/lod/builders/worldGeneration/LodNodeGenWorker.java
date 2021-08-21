@@ -400,6 +400,9 @@ public class LodNodeGenWorker implements IWorker
 			snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
 
 			lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(DistanceGenerationMode.SURFACE), detailLevel);
+
+			/**TODO if we want to use Biome utils and terrain utils for overworld
+			 * lodBuilder.generateLodNodeFromChunk(lodDim, pos ,detailLevel, serverWorld.getSeed());*/
 		}
 
 
