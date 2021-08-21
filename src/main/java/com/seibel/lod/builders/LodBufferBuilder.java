@@ -159,7 +159,34 @@ public class LodBufferBuilder
 				// if we don't have a full number of chunks to generate in chunksToGen
 				// we can top it off from the reserve
 				ArrayList<ChunkPos> chunksToGenReserve = new ArrayList<>(maxChunkGenRequests);
-				
+
+/*
+                DistanceGenerationMode[] distancesGenerators = {DistanceGenerationMode.FEATURES,
+                        DistanceGenerationMode.FEATURES,
+                        DistanceGenerationMode.SURFACE,
+                        DistanceGenerationMode.SURFACE,
+                        DistanceGenerationMode.SURFACE,
+                        DistanceGenerationMode.BIOME_ONLY,
+                        DistanceGenerationMode.BIOME_ONLY,
+                        DistanceGenerationMode.BIOME_ONLY,
+                        DistanceGenerationMode.BIOME_ONLY,
+                        DistanceGenerationMode.BIOME_ONLY}
+
+ */
+
+				DistanceGenerationMode[] distancesGenerators = {
+						DistanceGenerationMode.SURFACE,
+						DistanceGenerationMode.SURFACE,
+						DistanceGenerationMode.SURFACE,
+						DistanceGenerationMode.SURFACE,
+						DistanceGenerationMode.SURFACE,
+						DistanceGenerationMode.SURFACE,
+						DistanceGenerationMode.SURFACE,
+						DistanceGenerationMode.SURFACE,
+						DistanceGenerationMode.SURFACE,
+						DistanceGenerationMode.SURFACE};
+				int[] distancesLinear = {0, 200, 400, 600, 800, 1000, 1500, 2000, 3000, 4000, 8000};
+				int[] distancesExponential = {0, 100, 200, 400, 800, 1600, 3200, 3200, 3200, 3200, 8000};
 				
 				startBuffers();
 				
@@ -183,16 +210,13 @@ public class LodBufferBuilder
 						// changed while we were running this method
 						if (currentBuffer == null || (currentBuffer != null && !currentBuffer.building()))
 							return;
-							
-							
-						/**TODO make this automatic and config dependant*/
-						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0, 200, (byte) 0));
-						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 200, 400, (byte) 1));
-						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 400, 600, (byte) 2));
-						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 600, 800, (byte) 3));
-						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 800, 1000, (byte) 4));
-						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 1000, 10000000, (byte) 5));
-						
+
+						/**TODO make this automatic and config dependent*/
+						for (byte detail = LodUtil.BLOCK_DETAIL_LEVEL; detail <= LodUtil.REGION_DETAIL_LEVEL; detail++)
+						{
+							posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), distancesLinear[detail], distancesLinear[detail + 1], detail));
+						}
+
 						for (LevelPos pos : posListToRender)
 						{
 							LevelPos chunkPos = pos.convert((byte) 3);
@@ -215,13 +239,42 @@ public class LodBufferBuilder
 					}
 				}
 
-
-				/**TODO make this automatic and config dependant*/
+				/**TODO make this automatic and config dependent*/
 				List<LevelPos> posListToGenerate = new ArrayList<>();
-				
-				if(posListToGenerate.isEmpty())
-					posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  1000, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 0, maxChunkGenRequests));
-				
+
+				/**TODO this order can be inverted*/
+                /*
+                for (byte detail = LodUtil.BLOCK_DETAIL_LEVEL; detail <= LodUtil.REGION_DETAIL_LEVEL; detail++)
+                {
+                    if (!posListToGenerate.isEmpty()) break;
+                    for (byte detailGen = LodUtil.BLOCK_DETAIL_LEVEL; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
+                    {
+                        if (!posListToGenerate.isEmpty()) break;
+                        posListToGenerate.addAll(lodDim.getDataToGenerate(
+                                playerBlockPosRounded.getX(),
+                                playerBlockPosRounded.getZ(),
+                                (int) (distancesLinear[detailGen]*1.5),
+                                (int) (distancesLinear[detailGen+1]*1.5),
+                                (byte) distancesGenerators[detailGen].complexity,
+                                detail,
+                                16));
+                        System.out.println("HERE");
+                    }
+                }
+*/
+				for (byte detailGen = LodUtil.BLOCK_DETAIL_LEVEL; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
+				{
+					if (!posListToGenerate.isEmpty()) break;
+					posListToGenerate.addAll(lodDim.getDataToGenerate(
+							playerBlockPosRounded.getX(),
+							playerBlockPosRounded.getZ(),
+							(int) (distancesLinear[detailGen]*1.5),
+							(int) (distancesLinear[detailGen+1]*1.5),
+							(byte) distancesGenerators[detailGen].complexity,
+							(byte) 0,
+							16));
+				}
+
 				
 				for (LevelPos levelPos : posListToGenerate)
 				{
