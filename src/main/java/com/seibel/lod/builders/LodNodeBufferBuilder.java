@@ -18,17 +18,15 @@
 package com.seibel.lod.builders;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.seibel.lod.enums.DistanceGenerationMode;
-import kaptainwutax.mathutils.decomposition.LUDecomposition;
 import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
+import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LevelPos;
@@ -187,17 +185,13 @@ public class LodNodeBufferBuilder
 					for (int zRegion = 0; zRegion < lodDim.regions.length; zRegion++)
 					{
 						RegionPos regionPos = new RegionPos(xRegion + lodDim.getCenterX() - lodDim.getWidth()/2, zRegion + lodDim.getCenterZ() - lodDim.getWidth()/2);
-						BufferBuilder currentBuffer = null;
-						try
-						{
-							// local position in the vbo and bufferBuilder arrays
-							currentBuffer = buildableBuffers[xRegion][zRegion];
-						}
-						catch(Exception e)
-						{
-							e.printStackTrace();
+						
+						// local position in the vbo and bufferBuilder arrays
+						BufferBuilder currentBuffer = buildableBuffers[xRegion][zRegion];
+						if (currentBuffer == null)
 							continue;
-						}
+							
+							
 						/**TODO make this automatic and config dependant*/
 						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  200, (byte) 0));
 						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 200,  400, (byte) 1));
@@ -205,29 +199,32 @@ public class LodNodeBufferBuilder
 						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 600,  800, (byte) 3));
 						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 800,  1000, (byte) 4));
 						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 1000,  10000000, (byte) 5));
-						for(LevelPos pos : posListToRender){
+						for (LevelPos pos : posListToRender)
+						{
 							LevelPos chunkPos = pos.convert((byte) 3);
 							int chunkX = chunkPos.posX + startChunkPos.x;
 							int chunkZ = chunkPos.posZ + startChunkPos.z;
-
+							
 							// skip any chunks that Minecraft is going to render
 							if (isCoordInCenterArea(pos.convert((byte) 3).posX, pos.convert((byte) 3).posZ, (numbChunksWide / 2))
 									&& renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkX, chunkZ)))
 							{
-							}else{
+								
+							}
+							else
+							{
 								// set where this square will be drawn in the world
 								double xOffset = (LodUtil.CHUNK_WIDTH * chunkPos.posX) + // offset by the number of LOD blocks
 										startBlockPos.getX(); // offset so the center LOD block is centered underneath the player
 								double yOffset = 0;
 								double zOffset = (LodUtil.CHUNK_WIDTH * chunkPos.posZ) + startBlockPos.getZ();
-
+								
 								width = (int) Math.pow(2, pos.detailLevel);
 								lodData = lodDim.getData(pos);
-								LodConfig.CLIENT.lodTemplate.get().
-										template.addLodToBuffer(currentBuffer, lodDim, lodData,
+								LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, lodDim, lodData,
 										pos.posX * width, 0, pos.posZ * width, renderer.debugging, pos.detailLevel);
 							}
-
+							
 						}
 						posListToRender.clear();
 					}
@@ -467,7 +464,7 @@ public class LodNodeBufferBuilder
 	{
 		for (int x = 0; x < buildableBuffers.length; x++)
 			for (int z = 0; z < buildableBuffers.length; z++)
-				if (buildableBuffers[x][z].building())
+				if (buildableBuffers[x][z] != null && buildableBuffers[x][z].building())
 					buildableBuffers[x][z].end();
 	}
 	
