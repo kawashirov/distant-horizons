@@ -281,9 +281,23 @@ public class LodBufferBuilder
                     }
                 }
 */
+                int requesting = maxChunkGenRequests;
                 for (byte detailGen = LodUtil.BLOCK_DETAIL_LEVEL; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
                 {
-                    if (!posListToGenerate.isEmpty()) break;
+                    if (requesting == 0) break;
+                    posListToGenerate.addAll(lodDim.getDataToGenerate(
+                            playerBlockPosRounded.getX(),
+                            playerBlockPosRounded.getZ(),
+                            (int) (distancesLinear[detailGen] * 1.5),
+                            (int) (distancesLinear[detailGen + 1] * 1.5),
+                            (byte) distancesGenerators[detailGen].complexity,
+                            (byte) 8,
+                            requesting));
+                    requesting = maxChunkGenRequests - posListToGenerate.size();
+                }
+                for (byte detailGen = LodUtil.BLOCK_DETAIL_LEVEL; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
+                {
+                    if (requesting == 0) break;
                     posListToGenerate.addAll(lodDim.getDataToGenerate(
                             playerBlockPosRounded.getX(),
                             playerBlockPosRounded.getZ(),
@@ -292,6 +306,7 @@ public class LodBufferBuilder
                             (byte) distancesGenerators[detailGen].complexity,
                             (byte) 0,
                             maxChunkGenRequests));
+                    requesting = maxChunkGenRequests - posListToGenerate.size();
                 }
 
 
