@@ -26,7 +26,7 @@ import net.minecraft.util.math.ChunkPos;
  * This object is similar to ChunkPos or BlockPos.
  * 
  * @author James Seibel
- * @version 8-14-2021
+ * @version 8-21-2021
  */
 public class RegionPos
 {
@@ -60,6 +60,17 @@ public class RegionPos
 	{
 		x = Math.floorDiv(pos.x, LodUtil.REGION_WIDTH_IN_CHUNKS);
 		z = Math.floorDiv(pos.z, LodUtil.REGION_WIDTH_IN_CHUNKS);
+	}
+	
+	
+	public ChunkPos chunkPos()
+	{
+		return new ChunkPos(x * LodUtil.REGION_WIDTH_IN_CHUNKS, z * LodUtil.REGION_WIDTH_IN_CHUNKS);
+	}
+	
+	public BlockPos blockPos()
+	{
+		return chunkPos().getWorldPosition();
 	}
 	
 	
