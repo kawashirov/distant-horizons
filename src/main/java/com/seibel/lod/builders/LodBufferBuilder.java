@@ -202,12 +202,12 @@ public class LodBufferBuilder
 							
 							
 						/**TODO make this automatic and config dependant*/
-						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  200, (byte) 0));
-						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 200,  400, (byte) 1));
-						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 400,  600, (byte) 2));
-						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 600,  800, (byte) 3));
-						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 800,  1000, (byte) 4));
-						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 1000,  10000000, (byte) 5));
+						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0, 200, (byte) 0));
+						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 200, 400, (byte) 1));
+						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 400, 600, (byte) 2));
+						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 600, 800, (byte) 3));
+						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 800, 1000, (byte) 4));
+						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 1000, 10000000, (byte) 5));
 						for (LevelPos pos : posListToRender)
 						{
 							LevelPos chunkPos = pos.convert((byte) 3);
