@@ -110,7 +110,7 @@ public class RenderUtil
 	
 	
 	/**
-	 * Returns true if one of the regions 4 corners is in front
+	 * Returns true if one of the region's 4 corners is in front
 	 * of the camera.
 	 */
 	public static boolean isRegionInViewFrustum(BlockPos playerBlockPos, Vector3d cameraDir, BlockPos vboCenterPos)
@@ -124,17 +124,17 @@ public class RenderUtil
 		
     	int halfRegionWidth = LodUtil.REGION_WIDTH / 2;
     	
-    	Vector3d vboSeVec = new Vector3d(vboCenterVec.x + halfRegionWidth, 0, vboCenterVec.z + halfRegionWidth).normalize();
-    	Vector3d vboSwVec = new Vector3d(vboCenterVec.x - halfRegionWidth, 0, vboCenterVec.z + halfRegionWidth).normalize();
-    	Vector3d vboNwVec = new Vector3d(vboCenterVec.x - halfRegionWidth, 0, vboCenterVec.z - halfRegionWidth).normalize();
-    	Vector3d vboNeVec = new Vector3d(vboCenterVec.x + halfRegionWidth, 0, vboCenterVec.z - halfRegionWidth).normalize();
+    	// calculate the 4 corners
+    	Vector3d vboSeVec = new Vector3d(vboCenterVec.x + halfRegionWidth, vboCenterVec.y, vboCenterVec.z + halfRegionWidth);//.normalize();
+    	Vector3d vboSwVec = new Vector3d(vboCenterVec.x - halfRegionWidth, vboCenterVec.y, vboCenterVec.z + halfRegionWidth);//.normalize();
+    	Vector3d vboNwVec = new Vector3d(vboCenterVec.x - halfRegionWidth, vboCenterVec.y, vboCenterVec.z - halfRegionWidth);//.normalize();
+    	Vector3d vboNeVec = new Vector3d(vboCenterVec.x + halfRegionWidth, vboCenterVec.y, vboCenterVec.z - halfRegionWidth);//.normalize();
     	
+    	// if any corner is visible, this region should be rendered
     	return isNormalizedVectorInViewFrustum(vboSeVec, cameraDir) ||
     			isNormalizedVectorInViewFrustum(vboSwVec, cameraDir) ||
     			isNormalizedVectorInViewFrustum(vboNwVec, cameraDir) ||
     			isNormalizedVectorInViewFrustum(vboNeVec, cameraDir);
-    	
-//    	return isNormalizedVectorInViewFrustum(vboCenterVec.normalize(), cameraDir);
 	}
     
 	/**
@@ -143,8 +143,9 @@ public class RenderUtil
 	 */
     private static boolean isNormalizedVectorInViewFrustum(Vector3d objectVector, Vector3d cameraDir)
 	{
-    	// take the dot product
-    	double dot = objectVector.dot(cameraDir);
-    	return dot > 0;
+    	// the -0.1 is to offer a slight buffer so we are
+    	// more likely to render LODs and thus, hopefully prevent
+    	// flickering or odd disappearences
+    	return objectVector.dot(cameraDir) > -0.1;
 	}
 }

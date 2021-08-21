@@ -62,15 +62,16 @@ public class RegionPos
 		z = Math.floorDiv(pos.z, LodUtil.REGION_WIDTH_IN_CHUNKS);
 	}
 	
-	
+	/** Returns the ChunkPos at the center of this region */
 	public ChunkPos chunkPos()
 	{
-		return new ChunkPos(x * LodUtil.REGION_WIDTH_IN_CHUNKS, z * LodUtil.REGION_WIDTH_IN_CHUNKS);
+		return new ChunkPos((x * LodUtil.REGION_WIDTH_IN_CHUNKS) + LodUtil.REGION_WIDTH_IN_CHUNKS/2, (z * LodUtil.REGION_WIDTH_IN_CHUNKS) + LodUtil.REGION_WIDTH_IN_CHUNKS/2);
 	}
 	
+	/** Returns the BlockPos at the center of this region */
 	public BlockPos blockPos()
 	{
-		return chunkPos().getWorldPosition();
+		return chunkPos().getWorldPosition().offset(LodUtil.CHUNK_WIDTH/2, 0, LodUtil.CHUNK_WIDTH/2);
 	}
 	
 	
