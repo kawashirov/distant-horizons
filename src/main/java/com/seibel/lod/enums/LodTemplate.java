@@ -17,10 +17,10 @@
  */
 package com.seibel.lod.enums;
 
-import com.seibel.lod.builders.lodNodeTemplates.AbstractLodNodeTemplate;
-import com.seibel.lod.builders.lodNodeTemplates.CubicLodNodeTemplate;
-import com.seibel.lod.builders.lodNodeTemplates.DynamicLodNodeTemplate;
-import com.seibel.lod.builders.lodNodeTemplates.TriangularLodNodeTemplate;
+import com.seibel.lod.builders.lodTemplates.AbstractLodTemplate;
+import com.seibel.lod.builders.lodTemplates.CubicLodTemplate;
+import com.seibel.lod.builders.lodTemplates.DynamicLodTemplate;
+import com.seibel.lod.builders.lodTemplates.TriangularLodTemplate;
 
 /**
  * Cubic, Triangular, Dynamic
@@ -34,21 +34,21 @@ public enum LodTemplate
 
 	/** Chunks are rendered as
 	 * rectangular prisms. */
-	CUBIC(new CubicLodNodeTemplate()),
+	CUBIC(new CubicLodTemplate()),
 	
 	/** Chunks smoothly transition between
 	 * each other. */
-	TRIANGULAR(new TriangularLodNodeTemplate()),
+	TRIANGULAR(new TriangularLodTemplate()),
 	
 	/** Chunks smoothly transition between
 	 * each other, unless a neighboring chunk
 	 * is at a significantly different height. */
-	DYNAMIC(new DynamicLodNodeTemplate());
+	DYNAMIC(new DynamicLodTemplate());
 	
 	
-	public final AbstractLodNodeTemplate template;
+	public final AbstractLodTemplate template;
 	
-	private LodTemplate(AbstractLodNodeTemplate newTemplate)
+	private LodTemplate(AbstractLodTemplate newTemplate)
 	{
 		template = newTemplate;
 	}

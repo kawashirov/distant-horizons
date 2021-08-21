@@ -15,7 +15,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.builders.lodNodeTemplates;
+package com.seibel.lod.builders.lodTemplates;
 
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.LodDataPoint;
@@ -32,7 +32,7 @@ import net.minecraft.client.renderer.BufferBuilder;
  * @author James Seibel
  * @version 06-16-2021
  */
-public class DynamicLodNodeTemplate extends AbstractLodNodeTemplate
+public class DynamicLodTemplate extends AbstractLodTemplate
 {
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer,

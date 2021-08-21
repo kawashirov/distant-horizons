@@ -15,7 +15,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.builders.lodNodeTemplates;
+package com.seibel.lod.builders.lodTemplates;
 
 import java.awt.Color;
 
@@ -33,7 +33,7 @@ import net.minecraft.client.renderer.BufferBuilder;
  * @author James Seibel
  * @version 8-8-2021
  */
-public abstract class AbstractLodNodeTemplate
+public abstract class AbstractLodTemplate
 {
 	public abstract void addLodToBuffer(BufferBuilder buffer,
 										LodDimension lodDim, LodDataPoint lod,

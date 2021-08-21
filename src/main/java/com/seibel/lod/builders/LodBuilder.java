@@ -54,7 +54,7 @@ import net.minecraft.world.gen.Heightmap;
  * @author James Seibel
  * @version 8-17-2021
  */
-public class LodNodeBuilder
+public class LodBuilder
 {
     private ExecutorService lodGenThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
 
@@ -67,7 +67,7 @@ public class LodNodeBuilder
      */
     public int defaultDimensionWidthInRegions = 5;
 
-    public LodNodeBuilder()
+    public LodBuilder()
     {
 
     }

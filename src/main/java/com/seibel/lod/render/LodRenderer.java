@@ -30,7 +30,7 @@ import org.lwjgl.opengl.NVFogDistance;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.seibel.lod.builders.LodNodeBufferBuilder;
+import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.FogQuality;
@@ -69,7 +69,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * @author James Seibel
  * @version 8-20-2021
  */
-public class LodNodeRenderer
+public class LodRenderer
 {
     /**
      * this is the light used when rendering the LODs,
@@ -112,7 +112,7 @@ public class LodNodeRenderer
     /**
      * This is used to generate the buildable buffers
      */
-    private LodNodeBufferBuilder lodNodeBufferBuilder;
+    private LodBufferBuilder lodBufferBuilder;
 
     /**
      * Each VertexBuffer represents 1 region
@@ -147,13 +147,13 @@ public class LodNodeRenderer
     public HashSet<ChunkPos> vanillaRenderedChunks = new HashSet<>();
 
 
-    public LodNodeRenderer(LodNodeBufferBuilder newLodNodeBufferBuilder)
+    public LodRenderer(LodBufferBuilder newLodNodeBufferBuilder)
     {
         mc = Minecraft.getInstance();
         gameRender = mc.gameRenderer;
 
         reflectionHandler = new ReflectionHandler();
-        lodNodeBufferBuilder = newLodNodeBufferBuilder;
+        lodBufferBuilder = newLodNodeBufferBuilder;
     }
 
 
@@ -255,10 +255,10 @@ public class LodNodeRenderer
         // 2. we aren't already regenerating the LODs
         // 3. we aren't waiting for the build and draw buffers to swap
         //		(this is to prevent thread conflicts)
-        if (regen && !lodNodeBufferBuilder.generatingBuffers && !lodNodeBufferBuilder.newBuffersAvaliable())
+        if (regen && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvaliable())
         {
             // generate the LODs on a separate thread to prevent stuttering or freezing
-            lodNodeBufferBuilder.generateLodBuffersAsync(this, lodDim, player.blockPosition(), numbChunksWide);
+            lodBufferBuilder.generateLodBuffersAsync(this, lodDim, player.blockPosition(), numbChunksWide);
 
             // the regen process has been started,
             // it will be done when lodBufferBuilder.newBuffersAvaliable
@@ -269,7 +269,7 @@ public class LodNodeRenderer
         // replace the buffers used to draw and build,
         // this is only done when the createLodBufferGenerationThread
         // has finished executing on a parallel thread.
-        if (lodNodeBufferBuilder.newBuffersAvaliable())
+        if (lodBufferBuilder.newBuffersAvaliable())
         {
             swapBuffers();
         }
@@ -627,7 +627,7 @@ public class LodNodeRenderer
                     + " It tried to allocate \"" + bufferMemory + "\" bytes, when \"" + MAX_ALOCATEABLE_DIRECT_MEMORY + "\" is the max.");
         }
 
-        lodNodeBufferBuilder.setupBuffers(numbRegionsWide, bufferMemory);
+        lodBufferBuilder.setupBuffers(numbRegionsWide, bufferMemory);
     }
 
 
@@ -653,7 +653,7 @@ public class LodNodeRenderer
     {
         // replace the drawable buffers with
         // the newly created buffers from the lodBufferBuilder
-        vbos = lodNodeBufferBuilder.getVertexBuffers();
+        vbos = lodBufferBuilder.getVertexBuffers();
     }
 
 

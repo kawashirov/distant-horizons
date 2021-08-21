@@ -22,8 +22,8 @@ import com.seibel.lod.objects.LodWorld;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.seibel.lod.builders.LodNodeBufferBuilder;
-import com.seibel.lod.builders.LodNodeBuilder;
+import com.seibel.lod.builders.LodBufferBuilder;
+import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.FogDistance;
@@ -32,7 +32,7 @@ import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.RegionPos;
-import com.seibel.lod.render.LodNodeRenderer;
+import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
@@ -55,9 +55,9 @@ public class ClientProxy
     public static final Logger LOGGER = LogManager.getLogger("LOD");
 
     private static LodWorld lodWorld = new LodWorld();
-    private static LodNodeBuilder lodNodeBuilder = new LodNodeBuilder();
-    private static LodNodeBufferBuilder lodBufferBuilder = new LodNodeBufferBuilder(lodNodeBuilder);
-    private static LodNodeRenderer renderer = new LodNodeRenderer(lodBufferBuilder);
+    private static LodBuilder lodBuilder = new LodBuilder();
+    private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder(lodBuilder);
+    private static LodRenderer renderer = new LodRenderer(lodBufferBuilder);
 
     private boolean configOverrideReminderPrinted = false;
 
@@ -163,7 +163,7 @@ public class ClientProxy
     @SubscribeEvent
     public void chunkLoadEvent(ChunkEvent.Load event)
     {
-        lodNodeBuilder.generateLodNodeAsync(event.getChunk(), lodWorld, event.getWorld(), DistanceGenerationMode.SERVER);
+        lodBuilder.generateLodNodeAsync(event.getChunk(), lodWorld, event.getWorld(), DistanceGenerationMode.SERVER);
     }
 
     @SubscribeEvent
@@ -211,7 +211,7 @@ public class ClientProxy
                 event.getClass() == BlockEvent.PortalSpawnEvent.class)
         {
             // recreate the LOD where the blocks were changed
-            lodNodeBuilder.generateLodNodeAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld());
+            lodBuilder.generateLodNodeAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld());
         }
     }
 
@@ -250,13 +250,13 @@ public class ClientProxy
         newWidth = (newWidth % 2 == 0) ? (newWidth += 1) : (newWidth += 2); // make sure we have a odd number of regions
 
         // do the dimensions need to change in size?
-        if (lodNodeBuilder.defaultDimensionWidthInRegions != newWidth)
+        if (lodBuilder.defaultDimensionWidthInRegions != newWidth)
         {
             // TODO make this async
 
             // update the dimensions to fit the new width
             lodWorld.resizeDimensionRegionWidth(newWidth);
-            lodNodeBuilder.defaultDimensionWidthInRegions = newWidth;
+            lodBuilder.defaultDimensionWidthInRegions = newWidth;
             renderer.setupBuffers(newWidth);
 
             //LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );
@@ -273,12 +273,12 @@ public class ClientProxy
         return lodWorld;
     }
 
-    public static LodNodeBuilder getLodBuilder()
+    public static LodBuilder getLodBuilder()
     {
-        return lodNodeBuilder;
+        return lodBuilder;
     }
 
-    public static LodNodeRenderer getRenderer()
+    public static LodRenderer getRenderer()
     {
         return renderer;
     }

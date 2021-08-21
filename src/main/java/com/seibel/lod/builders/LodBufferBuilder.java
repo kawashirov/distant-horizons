@@ -34,7 +34,7 @@ import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
-import com.seibel.lod.render.LodNodeRenderer;
+import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 
@@ -52,7 +52,7 @@ import net.minecraftforge.common.WorldWorkerManager;
  * @author James Seibel
  * @version 8-17-2021
  */
-public class LodNodeBufferBuilder
+public class LodBufferBuilder
 {
 	private Minecraft mc;
 	
@@ -61,7 +61,7 @@ public class LodNodeBufferBuilder
 	/** This holds the threads used to generate the buffers. */
 	private ExecutorService bufferGenThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new LodThreadFactory(this.getClass().getSimpleName() + " - buffer"));
 	
-	private LodNodeBuilder LodQuadTreeNodeBuilder;
+	private LodBuilder LodQuadTreeNodeBuilder;
 	
 	/** The buffers that are used to create LODs using far fog */
 	public volatile BufferBuilder[][] buildableBuffers;
@@ -96,7 +96,7 @@ public class LodNodeBufferBuilder
 	public int maxChunkGenRequests = LodConfig.CLIENT.numberOfWorldGenerationThreads.get() * 8;
 	
 	
-	public LodNodeBufferBuilder(LodNodeBuilder newLodBuilder)
+	public LodBufferBuilder(LodBuilder newLodBuilder)
 	{
 		mc = Minecraft.getInstance();
 		LodQuadTreeNodeBuilder = newLodBuilder;
@@ -115,7 +115,7 @@ public class LodNodeBufferBuilder
 	 * After the buildable buffers have been generated they must be
 	 * swapped with the drawable buffers in the LodRenderer to be drawn.
 	 */
-	public void generateLodBuffersAsync(LodNodeRenderer renderer, LodDimension lodDim,
+	public void generateLodBuffersAsync(LodRenderer renderer, LodDimension lodDim,
 			BlockPos playerBlockPos, int numbChunksWide)
 	{
 		// only allow one generation process to happen at a time
@@ -444,8 +444,8 @@ public class LodNodeBufferBuilder
 			for (int z = 0; z < numbRegionsWide; z++)
 			{
 				buildableBuffers[x][z] = new BufferBuilder(bufferMaxCapacity);
-				buildableVbos[x][z] = new VertexBuffer(LodNodeRenderer.LOD_VERTEX_FORMAT);
-				drawableVbos[x][z] = new VertexBuffer(LodNodeRenderer.LOD_VERTEX_FORMAT);
+				buildableVbos[x][z] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
+				drawableVbos[x][z] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
 			}
 		}
 	}
@@ -457,7 +457,7 @@ public class LodNodeBufferBuilder
 	{
 		for (int x = 0; x < buildableBuffers.length; x++)
 			for (int z = 0; z < buildableBuffers.length; z++)
-				buildableBuffers[x][z].begin(GL11.GL_QUADS, LodNodeRenderer.LOD_VERTEX_FORMAT);
+				buildableBuffers[x][z].begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
 	}
 	
 	/**

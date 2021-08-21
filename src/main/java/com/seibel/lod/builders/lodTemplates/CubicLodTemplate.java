@@ -15,7 +15,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.builders.lodNodeTemplates;
+package com.seibel.lod.builders.lodTemplates;
 
 import java.awt.Color;
 
@@ -35,9 +35,9 @@ import net.minecraft.util.math.AxisAlignedBB;
  * @author James Seibel
  * @version 8-10-2021
  */
-public class CubicLodNodeTemplate extends AbstractLodNodeTemplate
+public class CubicLodTemplate extends AbstractLodTemplate
 {
-	public CubicLodNodeTemplate()
+	public CubicLodTemplate()
 	{
 
 	}
