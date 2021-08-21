@@ -32,8 +32,6 @@ import com.seibel.lod.builders.LodBuilderConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
-import com.seibel.lod.objects.LevelPos;
-import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodRenderer;
@@ -73,7 +71,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  *
  * @author James Seibel
- * @version 7-4-2021
+ * @version 8-21-2021
  */
 public class LodNodeGenWorker implements IWorker
 {
@@ -248,6 +246,9 @@ public class LodNodeGenWorker implements IWorker
 			{
 				// decrement how many threads are running
 				thread.lodBufferBuilder.numberOfChunksWaitingToGenerate.addAndGet(-1);
+				
+				// this position is no longer being generated
+				lodBufferBuilder.positionWaitingToBeGenerated.remove(pos);
 			}
 
 		}// run

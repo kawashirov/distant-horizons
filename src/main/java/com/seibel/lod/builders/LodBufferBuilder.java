@@ -19,6 +19,7 @@ package com.seibel.lod.builders;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -52,7 +53,7 @@ import net.minecraftforge.common.WorldWorkerManager;
  * This object is used to create NearFarBuffer objects.
  * 
  * @author James Seibel
- * @version 8-17-2021
+ * @version 8-21-2021
  */
 public class LodBufferBuilder
 {
@@ -60,8 +61,6 @@ public class LodBufferBuilder
 	
 	/** This holds the thread used to generate new LODs off the main thread. */
 	private ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " - main"));
-	/** This holds the threads used to generate the buffers. */
-	private ExecutorService bufferGenThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new LodThreadFactory(this.getClass().getSimpleName() + " - buffer"));
 	
 	private LodBuilder LodQuadTreeNodeBuilder;
 	
@@ -137,10 +136,6 @@ public class LodBufferBuilder
 		}
 		
 		
-		// TODO
-		maxChunkGenRequests = LodConfig.CLIENT.numberOfWorldGenerationThreads.get() * 8;
-		
-		
 		generatingBuffers = true;
 		
 		
@@ -159,23 +154,12 @@ public class LodBufferBuilder
 			try
 			{
 				long startTime = System.currentTimeMillis();
-				
-				// index of the chunk currently being added to the
-				// generation list
-				int chunkGenIndex = 0;
-				
-				ChunkPos[] chunksToGen = new ChunkPos[maxChunkGenRequests];
+								
+				ArrayList<ChunkPos> chunksToGen = new ArrayList<>(maxChunkGenRequests);
 				// if we don't have a full number of chunks to generate in chunksToGen
 				// we can top it off from the reserve
-				ChunkPos[] chunksToGenReserve = new ChunkPos[maxChunkGenRequests];
-
-				LevelPos[] levelPosToGen = new LevelPos[maxChunkGenRequests];
-				// if we don't have a full number of chunks to generate in chunksToGen
-				// we can top it off from the reserve
-				LevelPos[] levelPosToGenReserve = new LevelPos[maxChunkGenRequests];
-
-				// Used when determining what detail level to use at what distance
-				int maxBlockDistance = (numbChunksWide / 2) * 16;
+				ArrayList<ChunkPos> chunksToGenReserve = new ArrayList<>(maxChunkGenRequests);
+				
 				
 				startBuffers();
 				
@@ -208,6 +192,7 @@ public class LodBufferBuilder
 						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 600,  800, (byte) 3));
 						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 800,  1000, (byte) 4));
 						posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 1000,  10000000, (byte) 5));
+						
 						for (LevelPos pos : posListToRender)
 						{
 							LevelPos chunkPos = pos.convert((byte) 3);
@@ -218,12 +203,6 @@ public class LodBufferBuilder
 							if (!(isCoordInCenterArea(pos.convert((byte) 3).posX, pos.convert((byte) 3).posZ, (numbChunksWide / 2))
 									&& renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkX, chunkZ))) && lodDim.doesDataExist(pos))
 							{
-								// set where this square will be drawn in the world
-								double xOffset = (LodUtil.CHUNK_WIDTH * chunkPos.posX) + // offset by the number of LOD blocks
-										startBlockPos.getX(); // offset so the center LOD block is centered underneath the player
-								double yOffset = 0;
-								double zOffset = (LodUtil.CHUNK_WIDTH * chunkPos.posZ) + startBlockPos.getZ();
-								
 								width = (int) Math.pow(2, pos.detailLevel);
 								lodData = lodDim.getData(pos);
 								LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, lodDim, lodData,
@@ -231,6 +210,7 @@ public class LodBufferBuilder
 							}
 							
 						}
+						
 						posListToRender.clear();
 					}
 				}
@@ -238,102 +218,75 @@ public class LodBufferBuilder
 
 				/**TODO make this automatic and config dependant*/
 				List<LevelPos> posListToGenerate = new ArrayList<>();
-
-				//posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  1500, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 9, 16));
-				if(posListToGenerate.isEmpty()){
-					posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  1000, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 0, 16));
-				}
-
-				for(LevelPos levelPos : posListToGenerate){
+				
+				if(posListToGenerate.isEmpty())
+					posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  1000, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 0, maxChunkGenRequests));
+				
+				
+				for (LevelPos levelPos : posListToGenerate)
+				{
 					LevelPos chunkLevelPos = levelPos.convert((byte) 3);
 					int chunkX = chunkLevelPos.posX / 2;
 					int chunkZ = chunkLevelPos.posZ / 2;
-						// generate a new chunk if no chunk currently exists
-						// and we aren't waiting on any other chunks to generate
-						if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
+					
+					if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
+					{
+						ChunkPos pos = new ChunkPos(chunkX, chunkZ);
+						
+						if (positionWaitingToBeGenerated.contains(pos))
 						{
-							ChunkPos pos = new ChunkPos(chunkX, chunkZ);
-
-							if(positionWaitingToBeGenerated.contains(pos)){
-								System.out.println(pos + " asked again");
-								continue;
-							}
-							// alternate determining logic that
-							// can be used for debugging
-
-							// determine if this position is closer to the player
-							// than the previous
-							int newDistance = playerChunkPos.getChessboardDistance(pos);
-
-							// issue #40
-							// TODO optimize this code,
-							// using the purely optimized code above we can achieve close to
-							// 100% CPU utilization, this code generally achieves 40 - 50%
-							// after a certain point; and I'm sure there is a better data
-							// structure for this.
-							if (newDistance < minChunkDist)
+							ClientProxy.LOGGER.debug(pos + " asked to be generated again.");
+							continue;
+						}
+						
+						
+						// determine if this position is closer to the player
+						// than the previous
+						int newDistance = playerChunkPos.getChessboardDistance(pos);
+						
+						if (newDistance < minChunkDist)
+						{
+							// this chunk is closer, clear any previous
+							// positions and update the new minimum distance
+							minChunkDist = newDistance;
+							
+							// move all the old chunks into the reserve
+							ArrayList<ChunkPos> oldReserve = new ArrayList<>(chunksToGenReserve);
+							chunksToGenReserve.clear();
+							chunksToGenReserve.addAll(chunksToGen);
+							// top off reserve with whatever was in oldReerve
+							for (int i = 0; i < oldReserve.size(); i++)
 							{
-								// this chunk is closer, clear any previous
-								// positions and update the new minimum distance
-								minChunkDist = newDistance;
-
-								// move all the old chunks into the reserve
-								ChunkPos[] newReserve = new ChunkPos[maxChunkGenRequests];
-								int oldToGenIndex = 0;
-								int oldReserveIndex = 0;
-								for (int tmpIndex = 0; tmpIndex < newReserve.length; tmpIndex++)
-								{
-									// we don't check if the boundaries are good since
-									// the tmp array will always be the same length
-									// as chunksToGen and chunksToGenReserve
-
-									if (chunksToGen[oldToGenIndex] != null)
-									{
-										// add all the closest chunks...
-										newReserve[tmpIndex] = chunksToGen[oldToGenIndex];
-										oldToGenIndex++;
-									}
-									else if (chunksToGenReserve[oldReserveIndex] != null)
-									{
-										// ...then add all the previous reserve chunks
-										// (which are farther away)
-										newReserve[tmpIndex] = chunksToGenReserve[oldToGenIndex];
-										oldReserveIndex++;
-									}
-									else
-									{
-										// we have moved all the items from
-										// the old chunksToGen and reserve
-										break;
-									}
-								}
-								chunksToGenReserve = newReserve;
-
-								chunkGenIndex = 0;
-								chunksToGen = new ChunkPos[maxChunkGenRequests];
-								chunksToGen[chunkGenIndex] = pos;
-								positionWaitingToBeGenerated.add(pos);
-								chunkGenIndex++;
+								if (chunksToGenReserve.size() < maxChunkGenRequests)
+									chunksToGenReserve.add(oldReserve.get(i));
+								else
+									break;
 							}
-							else if (newDistance <= minChunkDist)
+							
+							chunksToGen.clear();
+							chunksToGen.add(pos);
+						}
+						else if (newDistance == minChunkDist)
+						{
+							// this chunk position as close as the minimum distance
+							if (chunksToGen.size() < maxChunkGenRequests)
 							{
-								// this chunk position is as close or closers than the
-								// minimum distance
-								if (chunkGenIndex < maxChunkGenRequests)
-								{
-									// we are still under the number of chunks to generate
-									// add this position to the list
-									chunksToGen[chunkGenIndex] = pos;
-									positionWaitingToBeGenerated.add(pos);
-									chunkGenIndex++;
-								}
+								// we are still under the number of chunks to generate
+								// add this position to the list
+								chunksToGen.add(pos);
 							}
-
-						} // lod null and can generate more chunks
-
-				}
-
-
+						}
+						else
+						{
+							// this chunk is farther away than the minimum distance,
+							// add it to the reserve to make sure we always have a full reserve
+							chunksToGenReserve.add(pos);
+						}
+						
+					} // lod null and can generate more chunks
+				} // positions to generate
+				
+				
 				// issue #19
 				// TODO add a way for a server side mod to generate chunks requested here
 				if (mc.hasSingleplayerServer())
@@ -341,30 +294,27 @@ public class LodBufferBuilder
 					ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(lodDim.dimension);
 					
 					// make sure we have as many chunks to generate as we are allowed
-					if (chunkGenIndex < maxChunkGenRequests)
+					if (chunksToGen.size() < maxChunkGenRequests)
 					{
-						for (int i = chunkGenIndex, j = 0; i < maxChunkGenRequests; i++, j++)
+						Iterator<ChunkPos> reserveIterator = chunksToGenReserve.iterator();
+						while (chunksToGen.size() < maxChunkGenRequests && reserveIterator.hasNext())
 						{
-							chunksToGen[i] = chunksToGenReserve[j];
+							chunksToGen.add(reserveIterator.next());
 						}
 					}
+					
 					// start chunk generation
-
 					for (ChunkPos chunkPos : chunksToGen)
 					{
 						// don't add null chunkPos (which shouldn't happen anyway)
 						// or add more to the generation queue
 						if (chunkPos == null || numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
 							continue;
-
-						// TODO add a list of locations we are waiting to generate so we don't add the
-						// same position to the queue multiple times
 						
+						positionWaitingToBeGenerated.add(chunkPos);
 						numberOfChunksWaitingToGenerate.addAndGet(1);
 						LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, DistanceGenerationMode.SURFACE, LodDetail.FULL, renderer, LodQuadTreeNodeBuilder, this, lodDim, serverWorld);
 						WorldWorkerManager.addWorker(genWorker);
-						/**TODO optimize the use of positionWaitingToBeGenerated*/
-						positionWaitingToBeGenerated.remove(chunkPos);
 					}
 				}
 
