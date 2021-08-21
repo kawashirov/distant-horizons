@@ -117,12 +117,12 @@ public class RenderUtil
 	{
     	// convert the vbo position into a direction vector
     	// starting from the player's position
-		Vector3d vboVec = new Vector3d(playerBlockPos.getX(), 0, playerBlockPos.getZ());
-		Vector3d playerVec = new Vector3d(vboCenterPos.getX(), vboCenterPos.getY(), vboCenterPos.getZ());
-		Vector3d vboCenterVec = playerVec.subtract(vboVec);
+		Vector3d vboVec = new Vector3d(vboCenterPos.getX(), 0, vboCenterPos.getZ());
+		Vector3d playerVec = new Vector3d(playerBlockPos.getX(), playerBlockPos.getY(), playerBlockPos.getZ());
+		Vector3d vboCenterVec = vboVec.subtract(playerVec);
 		
 		
-    	int halfRegionWidth = LodUtil.REGION_WIDTH;
+    	int halfRegionWidth = LodUtil.REGION_WIDTH / 2;
     	
     	Vector3d vboSeVec = new Vector3d(vboCenterVec.x + halfRegionWidth, 0, vboCenterVec.z + halfRegionWidth).normalize();
     	Vector3d vboSwVec = new Vector3d(vboCenterVec.x - halfRegionWidth, 0, vboCenterVec.z + halfRegionWidth).normalize();
@@ -145,6 +145,6 @@ public class RenderUtil
 	{
     	// take the dot product
     	double dot = objectVector.dot(cameraDir);
-    	return dot >= 0;
+    	return dot > 0;
 	}
 }
