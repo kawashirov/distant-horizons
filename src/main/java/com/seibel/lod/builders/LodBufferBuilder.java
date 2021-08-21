@@ -18,11 +18,15 @@
 package com.seibel.lod.builders;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.sun.glass.ui.Window;
+import net.minecraft.world.chunk.Chunk;
 import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
@@ -75,7 +79,11 @@ public class LodBufferBuilder
 	/** if this is true the LOD buffers are currently being
 	 * regenerated. */
 	public boolean generatingBuffers = false;
-	
+
+	/** if this is true the LOD buffers are currently being
+	 * regenerated. */
+	public Set<ChunkPos> positionWaitingToBeGenerated = new HashSet<>();
+
 	/** if this is true new LOD buffers have been generated
 	 * and are waiting to be swapped with the drawable buffers*/
 	private boolean switchVbos = false;
@@ -230,28 +238,28 @@ public class LodBufferBuilder
 				}
 
 
+				/**TODO make this automatic and config dependant*/
 				List<LevelPos> posListToGenerate = new ArrayList<>();
 
-				posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  10000000, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 9, 2));
-				if(posListToGenerate.isEmpty())
-				{
-					posListToGenerate.addAll(lodDim.getDataToGenerate(playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0, 400, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 0, 2));
-				}
+				//posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  1500, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 9, 16));
 				if(posListToGenerate.isEmpty()){
-					posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  10000000, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 0, 2));
+					posListToGenerate.addAll(lodDim.getDataToGenerate( playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), 0,  1000, (byte) DistanceGenerationMode.SURFACE.complexity, (byte) 0, 16));
 				}
 
 				for(LevelPos levelPos : posListToGenerate){
 					LevelPos chunkLevelPos = levelPos.convert((byte) 3);
 					int chunkX = chunkLevelPos.posX / 2;
 					int chunkZ = chunkLevelPos.posZ / 2;
-
 						// generate a new chunk if no chunk currently exists
 						// and we aren't waiting on any other chunks to generate
 						if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
 						{
 							ChunkPos pos = new ChunkPos(chunkX, chunkZ);
 
+							if(positionWaitingToBeGenerated.contains(pos)){
+								System.out.println(pos + " asked again");
+								continue;
+							}
 							// alternate determining logic that
 							// can be used for debugging
 
@@ -306,6 +314,7 @@ public class LodBufferBuilder
 								chunkGenIndex = 0;
 								chunksToGen = new ChunkPos[maxChunkGenRequests];
 								chunksToGen[chunkGenIndex] = pos;
+								positionWaitingToBeGenerated.add(pos);
 								chunkGenIndex++;
 							}
 							else if (newDistance <= minChunkDist)
@@ -317,6 +326,7 @@ public class LodBufferBuilder
 									// we are still under the number of chunks to generate
 									// add this position to the list
 									chunksToGen[chunkGenIndex] = pos;
+									positionWaitingToBeGenerated.add(pos);
 									chunkGenIndex++;
 								}
 							}
@@ -355,6 +365,8 @@ public class LodBufferBuilder
 						numberOfChunksWaitingToGenerate.addAndGet(1);
 						LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, DistanceGenerationMode.SURFACE, LodDetail.FULL, renderer, LodQuadTreeNodeBuilder, this, lodDim, serverWorld);
 						WorldWorkerManager.addWorker(genWorker);
+						/**TODO optimize the use of positionWaitingToBeGenerated*/
+						positionWaitingToBeGenerated.remove(chunkPos);
 					}
 				}
 

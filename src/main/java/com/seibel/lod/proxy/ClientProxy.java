@@ -152,7 +152,7 @@ public class ClientProxy
         LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
         LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
 
-        LodConfig.CLIENT.numberOfWorldGenerationThreads.set(2);
+        LodConfig.CLIENT.numberOfWorldGenerationThreads.set(16);
     }
 
 

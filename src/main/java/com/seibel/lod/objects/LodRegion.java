@@ -211,7 +211,7 @@ public class LodRegion implements Serializable
     {
         LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
         List<Map.Entry<LevelPos,Integer>> listOfPos = getDataToGenerate(levelPos, playerPosX, playerPosZ, start, end, generation, detailLevel);
-        Collections.sort(listOfPos, LevelPos.getPosAndDetailComparator());
+        Collections.sort(listOfPos, LevelPos.getPosComparator());
         dataNumber = Math.min(dataNumber, listOfPos.size());
         return listOfPos.subList(0,dataNumber);
 

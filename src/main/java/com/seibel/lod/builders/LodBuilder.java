@@ -179,7 +179,7 @@ public class LodBuilder
                     chunk.getPos().x * 16 + startX,
                     chunk.getPos().z * 16 + startZ);
             data = new LodDataPoint(height, depth, color);
-            check = lodDim.addData(levelPos.convert((byte) detail.detailLevel),
+            lodDim.addData(levelPos.convert((byte) detail.detailLevel),
                     data,
                     config.distanceGenerationMode,
                     true,

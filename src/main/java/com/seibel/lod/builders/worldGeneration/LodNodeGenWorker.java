@@ -193,8 +193,9 @@ public class LodNodeGenWorker implements IWorker
 				// only generate LodChunks if they can
 				// be added to the current LodDimension
 
-				if (lodDim.regionIsInRange(pos.x / LodUtil.REGION_WIDTH_IN_CHUNKS, pos.z / LodUtil.REGION_WIDTH_IN_CHUNKS))
-				{
+				/**TODO i must disable this if, i will find a way to replace it*/
+				//if (lodDim.regionIsInRange(pos.x / LodUtil.REGION_WIDTH_IN_CHUNKS, pos.z / LodUtil.REGION_WIDTH_IN_CHUNKS))
+				//{
 //					long startTime = System.currentTimeMillis();
 
 					switch(generationMode)
@@ -236,7 +237,7 @@ public class LodNodeGenWorker implements IWorker
 //					long endTime = System.currentTimeMillis();
 //					System.out.println(endTime - startTime);
 
-				}// if in range
+				//}// if in range
 
 			}
 			catch (Exception e)

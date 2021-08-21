@@ -200,6 +200,22 @@ public class LevelPos implements Cloneable
         }
     }
 
+    public int hashCode()
+    {
+        int hash = 7;
+        hash = 31 * hash + (int) detailLevel;
+        hash = 31 * hash + posX;
+        hash = 31 * hash + posZ;
+        return hash;
+    }
+
+    public boolean equals(LevelPos other)
+    {
+        return (this.detailLevel == other.detailLevel &&
+                this.posX == other.posX &&
+                this.posZ == other.posZ);
+    }
+
     @Override
     public String toString()
     {
