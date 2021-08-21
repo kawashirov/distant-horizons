@@ -254,7 +254,7 @@ public class LodDimension
      *
      * @throws ArrayIndexOutOfBoundsException if newRegion is outside what can be stored in this LodDimension.
      */
-    public void addOrOverwriteRegion(LodRegion newRegion) throws ArrayIndexOutOfBoundsException
+    public synchronized void addOrOverwriteRegion(LodRegion newRegion) throws ArrayIndexOutOfBoundsException
     {
         int xIndex = (newRegion.regionPosX - center.x) + halfWidth;
         int zIndex = (center.z - newRegion.regionPosZ) + halfWidth;
@@ -304,6 +304,7 @@ public class LodDimension
      */
     public synchronized Boolean addData(LevelPos levelPos, LodDataPoint lodDataPoint, DistanceGenerationMode generationMode, boolean update, boolean dontSave)
     {
+
         // don't continue if the region can't be saved
         RegionPos regionPos = levelPos.getRegionPos();
         if (!regionIsInRange(regionPos.x, regionPos.z))
@@ -358,7 +359,7 @@ public class LodDimension
      *
      * @return list of quadTrees
      */
-    public List<LevelPos> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel, int dataNumber)
+    public synchronized List<LevelPos> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel, int dataNumber)
     {
 
         int n = regions.length;
@@ -382,7 +383,7 @@ public class LodDimension
                 listOfData.addAll(region.getDataToGenerate(playerPosX, playerPosZ, start, end, generation, detailLevel, dataNumber));
             }
         }
-        Collections.sort(listOfData, Map.Entry.comparingByValue());
+        Collections.sort(listOfData, LevelPos.getPosComparator());
         dataNumber = Math.min(dataNumber, listOfData.size());
         return listOfData.stream().map(entry -> entry.getKey()).collect(Collectors.toList()).subList(0, dataNumber);
     }
@@ -393,7 +394,7 @@ public class LodDimension
      *
      * @return list of nodes
      */
-    public List<LevelPos> getDataToRender(int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
+    public synchronized List<LevelPos> getDataToRender(int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
     {
         int n = regions.length;
         List<LevelPos> listOfData = new ArrayList<>();
@@ -426,7 +427,7 @@ public class LodDimension
      *
      * @return list of nodes
      */
-    public List<LevelPos> getDataToRender(RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
+    public synchronized List<LevelPos> getDataToRender(RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
     {
         int n = regions.length;
         List<LevelPos> listOfData = new ArrayList<>();

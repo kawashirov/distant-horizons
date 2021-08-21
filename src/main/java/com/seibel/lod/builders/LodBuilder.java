@@ -20,6 +20,7 @@ package com.seibel.lod.builders;
 import java.awt.Color;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
@@ -143,18 +144,26 @@ public class LodBuilder
         if (chunk == null)
             throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
 
+        boolean check = false;
+
+        int startX;
+        int startZ;
+        int endX;
+        int endZ;
+        Color color;
+        short height;
+        short depth;
+        LevelPos levelPos;
+        LodDataPoint data = null;
 
         for (int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++)
         {
-            int startX = detail.startX[i];
-            int startZ = detail.startZ[i];
-            int endX = detail.endX[i];
-            int endZ = detail.endZ[i];
+            startX = detail.startX[i];
+            startZ = detail.startZ[i];
+            endX = detail.endX[i];
+            endZ = detail.endZ[i];
 
-            Color color = generateLodColorForArea(chunk, config, startX, startZ, endX, endZ);
-
-            short height;
-            short depth;
+            color = generateLodColorForArea(chunk, config, startX, startZ, endX, endZ);
 
             if (!config.useHeightmap)
             {
@@ -166,11 +175,11 @@ public class LodBuilder
                         startZ, endX, endZ);
                 depth = 0;
             }
-            LevelPos levelPos = new LevelPos((byte) 0,
+            levelPos = new LevelPos((byte) 0,
                     chunk.getPos().x * 16 + startX,
                     chunk.getPos().z * 16 + startZ);
-            LodDataPoint data = new LodDataPoint(height, depth, color);
-            lodDim.addData(levelPos.convert((byte) detail.detailLevel),
+            data = new LodDataPoint(height, depth, color);
+            check = lodDim.addData(levelPos.convert((byte) detail.detailLevel),
                     data,
                     config.distanceGenerationMode,
                     true,

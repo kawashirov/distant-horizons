@@ -32,6 +32,7 @@ import com.seibel.lod.builders.LodBuilderConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
+import com.seibel.lod.objects.LevelPos;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.proxy.ClientProxy;
@@ -191,6 +192,7 @@ public class LodNodeGenWorker implements IWorker
 			{
 				// only generate LodChunks if they can
 				// be added to the current LodDimension
+
 				if (lodDim.regionIsInRange(pos.x / LodUtil.REGION_WIDTH_IN_CHUNKS, pos.z / LodUtil.REGION_WIDTH_IN_CHUNKS))
 				{
 //					long startTime = System.currentTimeMillis();
@@ -221,13 +223,13 @@ public class LodNodeGenWorker implements IWorker
 
 					lodRenderer.regenerateLODsNextFrame();
 
-
-					LodDataPoint data = lodDim.getData(pos);
-					if (data != null && !data.isEmpty())
+/*
+					boolean dataExistence = lodDim.doesDataExist(new LevelPos((byte) 3, pos.x, pos.z));
+					if (dataExistence)
 						ClientProxy.LOGGER.info(pos.x + " " + pos.z + " Success!");
 					else
 						ClientProxy.LOGGER.info(pos.x + " " + pos.z);
-
+*/
 					// shows the pool size, active threads, queued tasks and completed tasks
 //					ClientProxy.LOGGER.info(genThreads.toString());
 

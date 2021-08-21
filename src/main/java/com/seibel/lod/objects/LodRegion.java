@@ -211,7 +211,7 @@ public class LodRegion implements Serializable
     {
         LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
         List<Map.Entry<LevelPos,Integer>> listOfPos = getDataToGenerate(levelPos, playerPosX, playerPosZ, start, end, generation, detailLevel);
-        Collections.sort(listOfPos,Map.Entry.comparingByValue());
+        Collections.sort(listOfPos, LevelPos.getPosComparator());
         dataNumber = Math.min(dataNumber, listOfPos.size());
         return listOfPos.subList(0,dataNumber);
 
@@ -231,8 +231,6 @@ public class LodRegion implements Serializable
 
         if (!(start <= maxDistance && minDistance <= end) || levelPos.detailLevel < detailLevel)
         {
-            System.out.println(maxDistance);
-            System.out.println(minDistance);
             return levelPosList;
         }
 
@@ -242,12 +240,15 @@ public class LodRegion implements Serializable
 
         int childSize = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel + 1);
         //we have reached the target detail level
-        if (detailLevel == levelPos.detailLevel || generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] < generation)
+        if (detailLevel == levelPos.detailLevel)
         {
-            levelPosList.add(
-                    new AbstractMap.SimpleEntry<LevelPos, Integer>(
-                            new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * size, levelPos.posZ + regionPosZ * size),
-                            maxDistance));
+            if(generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] < generation)
+            {
+                levelPosList.add(
+                        new AbstractMap.SimpleEntry<LevelPos, Integer>(
+                                new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * size, levelPos.posZ + regionPosZ * size),
+                                minDistance));
+            }
         } else
         {
             //we want max a request per chunk. So for lod smaller than chunk we explore only the top rigth child
@@ -260,14 +261,14 @@ public class LodRegion implements Serializable
                     {
                         childPos = new LevelPos((byte) (levelPos.detailLevel - 1), childPosX + x, childPosZ + z);
 
-                        maxDistance = childPos.maxDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
+                        minDistance = childPos.minDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
 
                         if (generationType[childPos.detailLevel][childPos.posX][childPos.posZ] < generation || !doesDataExist(childPos))
                         {
                             levelPosList.add(
                                     new AbstractMap.SimpleEntry<LevelPos, Integer>(
                                             new LevelPos(childPos.detailLevel, childPos.posX + regionPosX * childSize, childPos.posZ + regionPosZ * childSize),
-                                            maxDistance));
+                                            minDistance));
                         }
                     }
                 }
@@ -289,12 +290,12 @@ public class LodRegion implements Serializable
                 childPos = levelPos.convert((byte) (levelPos.detailLevel - 1));
                 if (generationType[childPos.detailLevel][childPos.posX][childPos.posZ] < generation)
                 {
-                    maxDistance = childPos.maxDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
+                    minDistance = childPos.minDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
 
                     levelPosList.add(
                             new AbstractMap.SimpleEntry<LevelPos, Integer>(
                                     new LevelPos(childPos.detailLevel, childPos.posX + regionPosX * childSize, childPos.posZ + regionPosZ * childSize),
-                                    maxDistance));
+                                    minDistance));
                 } else
                 {
                     if (childPos.detailLevel != detailLevel)
@@ -424,7 +425,7 @@ public class LodRegion implements Serializable
         int numberOfChildren = 0;
 
         /**TODO add the ability to change how the heigth and depth are determinated (for example min or max)**/
-        byte minGenerationType = 10;
+        byte minGenerationType = 5;
         int tempRed = 0;
         int tempGreen = 0;
         int tempBlue = 0;
