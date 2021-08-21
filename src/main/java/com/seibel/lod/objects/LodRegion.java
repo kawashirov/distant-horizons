@@ -210,10 +210,18 @@ public class LodRegion implements Serializable
     public List<Map.Entry<LevelPos,Integer>> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel, int dataNumber)
     {
         LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
-        List<Map.Entry<LevelPos,Integer>> listOfPos = getDataToGenerate(levelPos, playerPosX, playerPosZ, start, end, generation, detailLevel);
-        Collections.sort(listOfPos, LevelPos.getPosComparator());
-        dataNumber = Math.min(dataNumber, listOfPos.size());
-        return listOfPos.subList(0,dataNumber);
+        List<Map.Entry<LevelPos,Integer>> levelPosList = getDataToGenerate(levelPos, playerPosX, playerPosZ, start, end, generation, detailLevel);
+        List<Map.Entry<LevelPos,Integer>> levelMinPosList = new ArrayList<>();
+        dataNumber = Math.min(dataNumber, levelPosList.size());
+
+        for(int i=0; i<dataNumber; i++)
+        {
+            Map.Entry<LevelPos,Integer> min = Collections.min(levelPosList, LevelPos.getPosAndDetailComparator());
+            levelPosList.remove(min);
+            levelMinPosList.add(min);
+        }
+
+        return levelMinPosList;
 
     }
 

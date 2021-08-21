@@ -383,9 +383,17 @@ public class LodDimension
                 listOfData.addAll(region.getDataToGenerate(playerPosX, playerPosZ, start, end, generation, detailLevel, dataNumber));
             }
         }
-        Collections.sort(listOfData, LevelPos.getPosComparator());
+
+        List<Map.Entry<LevelPos,Integer>> levelMinPosList = new ArrayList<>();
         dataNumber = Math.min(dataNumber, listOfData.size());
-        return listOfData.stream().map(entry -> entry.getKey()).collect(Collectors.toList()).subList(0, dataNumber);
+
+        for(int i=0; i<dataNumber; i++)
+        {
+            Map.Entry<LevelPos,Integer> min = Collections.min(listOfData, LevelPos.getPosAndDetailComparator());
+            listOfData.remove(min);
+            levelMinPosList.add(min);
+        }
+        return levelMinPosList.stream().map(entry -> entry.getKey()).collect(Collectors.toList()).subList(0, dataNumber);
     }
 
 
