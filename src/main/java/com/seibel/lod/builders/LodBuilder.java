@@ -29,9 +29,13 @@ import com.seibel.lod.objects.LevelPos;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
+//import com.seibel.lod.util.BiomeColorsUtils;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 
+//import kaptainwutax.biomeutils.source.OverworldBiomeSource;
+//import kaptainwutax.mcutils.version.MCVersion;
+//import kaptainwutax.terrainutils.TerrainGenerator;
 import net.minecraft.block.AbstractPlantBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -40,6 +44,7 @@ import net.minecraft.block.GrassBlock;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.material.MaterialColor;
+//import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.biome.Biome;
@@ -187,6 +192,53 @@ public class LodBuilder
         }
     }
 
+    /**
+     * Creates a LodChunk for a chunk in the given world.
+     *
+     * @throws IllegalArgumentException thrown if either the chunk or world is null.
+     */
+    /**TODO if we want to test biome utils and terrain utils
+    public void generateLodNodeFromChunk(LodDimension lodDim, ChunkPos chunkPos , LodDetail detail, long seed)
+            throws IllegalArgumentException
+    {
+
+        if (chunkPos == null)
+            throw new IllegalArgumentException("generateLodFromChunk given a null chunk pos");
+
+        int startX;
+        int startZ;
+        int endX;
+        int endZ;
+        Color color;
+        short height;
+        short depth;
+        LevelPos levelPos;
+        LodDataPoint data;
+
+        OverworldBiomeSource biomeSource = new OverworldBiomeSource(MCVersion.v1_16_5, seed);
+        TerrainGenerator terrainGenerator= TerrainGenerator.of(biomeSource);
+
+        for (int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++)
+        {
+            startX =  detail.startX[i];
+            startZ = detail.startZ[i];
+            endX = detail.endX[i];
+            endZ = detail.endZ[i];
+
+            color = generateLodColorForArea(biomeSource, chunkPos, startX, startZ, endX, endZ);
+            height = determineHeightPoint(terrainGenerator, chunkPos, startX, startZ, endX, endZ);
+            levelPos = new LevelPos((byte) 0,
+                    chunkPos.x * 16 + startX,
+                    chunkPos.z * 16 + startZ);
+            data = new LodDataPoint(height, 0, color);
+            lodDim.addData(levelPos.convert((byte) detail.detailLevel),
+                    data,
+                    DistanceGenerationMode.SURFACE,
+                    true,
+                    false);
+        }
+    }*/
+
     // =====================//
     // constructor helpers //
     // =====================//
@@ -313,6 +365,26 @@ public class LodBuilder
     }
 
     /**
+     * Find the highest point from the Top
+     */
+    /**TODO if we want to test biome utils and terrain utils
+    private short determineHeightPoint(TerrainGenerator terrainGenerator, ChunkPos chunkPos, int startX, int startZ, int endX, int endZ)
+    {
+        short newHeight = 0;
+        int num = 0;
+        for (int x = startX; x < endX; x++)
+        {
+            for (int z = startZ; z < endZ; z++)
+            {
+                num++;
+                newHeight += (short) terrainGenerator.getFirstHeightInColumn(chunkPos.x*16 + x,chunkPos.z*16 + z, TerrainGenerator.WORLD_SURFACE_WG);;
+            }
+        }
+
+        return (short) (newHeight/num);
+    }*/
+
+    /**
      * Generate the color for the given chunk using biome water color, foliage
      * color, and grass color.
      *
@@ -410,6 +482,39 @@ public class LodBuilder
 
         return new Color(red, green, blue);
     }
+
+/**TODO if we want to test biome utils and terrain utils
+    private Color generateLodColorForArea(OverworldBiomeSource biomeSource, ChunkPos chunkPos, int startX, int startZ, int endX,
+                                          int endZ)
+    {
+
+        int numbOfBlocks = 0;
+        int red = 0;
+        int green = 0;
+        int blue = 0;
+
+        for (int x = startX; x < endX; x++)
+        {
+            for (int z = startZ; z < endZ; z++)
+            {
+                Color color = BiomeColorsUtils.getColorFromBiomeManual(biomeSource.getBiome(chunkPos.x*16 + x,0,chunkPos.z*16 + z));
+                red += color.getBlue();
+                green += color.getGreen();
+                blue += color.getBlue();
+            }
+        }
+
+        if (numbOfBlocks == 0)
+            numbOfBlocks = 1;
+
+        red /= numbOfBlocks;
+        green /= numbOfBlocks;
+        blue /= numbOfBlocks;
+
+        return new Color(red, green, blue);
+    }
+
+ */
 
     /**
      * Returns a color int for a given block.
@@ -542,5 +647,4 @@ public class LodBuilder
 
         return false;
     }
-
 }
