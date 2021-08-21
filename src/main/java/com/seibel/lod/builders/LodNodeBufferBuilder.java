@@ -188,8 +188,11 @@ public class LodNodeBufferBuilder
 						
 						// local position in the vbo and bufferBuilder arrays
 						BufferBuilder currentBuffer = buildableBuffers[xRegion][zRegion];
-						if (currentBuffer == null)
-							continue;
+						
+						// make sure the buffers weren't 
+						// changed while we were running this method
+						if (currentBuffer == null || (currentBuffer != null && !currentBuffer.building()))
+							return;
 							
 							
 						/**TODO make this automatic and config dependant*/
