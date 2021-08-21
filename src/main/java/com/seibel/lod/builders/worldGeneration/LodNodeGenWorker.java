@@ -26,12 +26,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
-import com.seibel.lod.builders.LodBuilderConfig;
 import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.builders.LodBuilder;
+import com.seibel.lod.builders.LodBuilderConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
+import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodRenderer;
@@ -221,10 +222,11 @@ public class LodNodeGenWorker implements IWorker
 					lodRenderer.regenerateLODsNextFrame();
 
 
-//					if (lodDim.getLodFromCoordinates(pos) != null)
-//						ClientProxy.LOGGER.info(pos.x + " " + pos.z + " Success!");
-//					else
-//						ClientProxy.LOGGER.info(pos.x + " " + pos.z);
+					LodDataPoint data = lodDim.getData(pos);
+					if (data != null && !data.isEmpty())
+						ClientProxy.LOGGER.info(pos.x + " " + pos.z + " Success!");
+					else
+						ClientProxy.LOGGER.info(pos.x + " " + pos.z);
 
 					// shows the pool size, active threads, queued tasks and completed tasks
 //					ClientProxy.LOGGER.info(genThreads.toString());
