@@ -50,7 +50,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.WorldWorkerManager;
 
 /**
- * This object is used to create NearFarBuffer objects.
+ * This object is used to create VertexBuffer objects.
  * 
  * @author James Seibel
  * @version 8-21-2021
@@ -115,7 +115,7 @@ public class LodBufferBuilder
 	 * Create a thread to asynchronously generate LOD buffers
 	 * centered around the given camera X and Z.
 	 * <br>
-	 * This method will write to the drawable near and far buffers.
+	 * This method will write to the drawable buffers.
 	 * <br>
 	 * After the buildable buffers have been generated they must be
 	 * swapped with the drawable buffers in the LodRenderer to be drawn.
@@ -468,7 +468,7 @@ public class LodBufferBuilder
 	}
 	
 	/**
-	 * If this is true the buildable near and far
+	 * If this is true the buildable
 	 * buffers have been generated and are ready to be
 	 * sent to the LodRenderer. 
 	 */
