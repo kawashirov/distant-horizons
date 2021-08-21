@@ -22,14 +22,16 @@ import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.vector.Vector3d;
 
 /**
  * This holds miscellaneous helper code
  * to be used in the rendering process.
  * 
  * @author James Seibel
- * @version 8-17-2021
+ * @version 8-21-2021
  */
 public class RenderUtil
 {
@@ -104,5 +106,45 @@ public class RenderUtil
 		int numbLodsWide = (int) Math.sqrt(maxNumberOfLods);
 		
 		return numbLodsWide / (2 * mc.options.renderDistance);
+	}
+	
+	
+	/**
+	 * Returns true if one of the regions 4 corners is in front
+	 * of the camera.
+	 */
+	public static boolean isRegionInViewFrustum(BlockPos playerBlockPos, Vector3d cameraDir, BlockPos vboCenterPos)
+	{
+    	// convert the vbo position into a direction vector
+    	// starting from the player's position
+		Vector3d vboVec = new Vector3d(playerBlockPos.getX(), 0, playerBlockPos.getZ());
+		Vector3d playerVec = new Vector3d(vboCenterPos.getX(), vboCenterPos.getY(), vboCenterPos.getZ());
+		Vector3d vboCenterVec = playerVec.subtract(vboVec);
+		
+		
+    	int halfRegionWidth = LodUtil.REGION_WIDTH;
+    	
+    	Vector3d vboSeVec = new Vector3d(vboCenterVec.x + halfRegionWidth, 0, vboCenterVec.z + halfRegionWidth).normalize();
+    	Vector3d vboSwVec = new Vector3d(vboCenterVec.x - halfRegionWidth, 0, vboCenterVec.z + halfRegionWidth).normalize();
+    	Vector3d vboNwVec = new Vector3d(vboCenterVec.x - halfRegionWidth, 0, vboCenterVec.z - halfRegionWidth).normalize();
+    	Vector3d vboNeVec = new Vector3d(vboCenterVec.x + halfRegionWidth, 0, vboCenterVec.z - halfRegionWidth).normalize();
+    	
+    	return isNormalizedVectorInViewFrustum(vboSeVec, cameraDir) ||
+    			isNormalizedVectorInViewFrustum(vboSwVec, cameraDir) ||
+    			isNormalizedVectorInViewFrustum(vboNwVec, cameraDir) ||
+    			isNormalizedVectorInViewFrustum(vboNeVec, cameraDir);
+    	
+//    	return isNormalizedVectorInViewFrustum(vboCenterVec.normalize(), cameraDir);
+	}
+    
+	/**
+	 * Currently takes the dot product of the two vectors,
+	 * but in the future could do more complicated frustum culling tests.
+	 */
+    private static boolean isNormalizedVectorInViewFrustum(Vector3d objectVector, Vector3d cameraDir)
+	{
+    	// take the dot product
+    	double dot = objectVector.dot(cameraDir);
+    	return dot >= 0;
 	}
 }

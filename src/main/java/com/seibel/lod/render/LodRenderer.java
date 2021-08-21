@@ -39,6 +39,7 @@ import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LevelPos;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
+import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
 
@@ -67,7 +68,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world.
  *
  * @author James Seibel
- * @version 8-20-2021
+ * @version 8-21-2021
  */
 public class LodRenderer
 {
@@ -318,14 +319,39 @@ public class LodRenderer
 
         if (vbos != null)
         {
+        	int rendered = 0;
+        	int skipped = 0;
+        	
+        	Vector3d cameraDir = mc.cameraEntity.getLookAngle();
+        	
+        	// used to determine what type of fog to render
+        	int halfWidth = vbos.length/2;
+        	int quarterWidth = vbos.length/4;
+        	
             for (int i = 0; i < vbos.length; i++)
             {
                 for (int j = 0; j < vbos.length; j++)
                 {
-                    setupFog(fogSettings.near.distance, fogSettings.near.quality);
-                    sendLodsToGpuAndDraw(vbos[i][j], modelViewMatrix);
+                	RegionPos vboPos = new RegionPos(i + lodDim.getCenterX() - lodDim.getWidth()/2, j + lodDim.getCenterZ() - lodDim.getWidth()/2);
+	            	if (RenderUtil.isRegionInViewFrustum(player.blockPosition(), cameraDir, vboPos.blockPos()))
+	            	{
+	                	if ((i > halfWidth - quarterWidth && i < halfWidth + quarterWidth) && (j > halfWidth - quarterWidth && j < halfWidth + quarterWidth))
+	                		setupFog(fogSettings.near.distance, fogSettings.near.quality);
+	                	else
+	                		setupFog(fogSettings.far.distance, fogSettings.far.quality);
+	                    
+	                	
+	            		sendLodsToGpuAndDraw(vbos[i][j], modelViewMatrix);
+	            		rendered++;
+	                }
+	            	else
+	            	{
+	            		skipped++;
+	            	}
                 }
             }
+            
+            ClientProxy.LOGGER.info(rendered + " - " + skipped);
         }
 
 
@@ -361,9 +387,10 @@ public class LodRenderer
         // end of internal LOD profiling
         profiler.pop();
     }
-
-
-    /**
+    
+    
+    
+	/**
      * This is where the actual drawing happens.
      *
      * @param buffers the buffers sent to the GPU to draw
