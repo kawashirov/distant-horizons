@@ -210,7 +210,7 @@ public class LodBufferBuilder
                         if (currentBuffer == null || (currentBuffer != null && !currentBuffer.building()))
                             return;
 
-                        for (byte detail = LodUtil.BLOCK_DETAIL_LEVEL; detail <= LodUtil.REGION_DETAIL_LEVEL; detail++)
+                        for (byte detail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detail <= LodUtil.REGION_DETAIL_LEVEL; detail++)
                         {
                             posListToRender.addAll(lodDim.getDataToRender(
                                     regionPos,
@@ -290,7 +290,7 @@ public class LodBufferBuilder
                     int requesting = maxChunkGenRequests;
 
                     //we firstly make sure that the world is filled with half region wide block
-                    for (byte detailGen = LodUtil.BLOCK_DETAIL_LEVEL; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
+                    for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
                     {
                         if (requesting == 0) break;
                         posListToGenerate.addAll(lodDim.getDataToGenerate(
@@ -305,7 +305,7 @@ public class LodBufferBuilder
                     }
 
                     //we then fill the world with the rest of the block
-                    for (byte detailGen = LodUtil.BLOCK_DETAIL_LEVEL; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
+                    for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
                     {
                         if (requesting == 0) break;
                         posListToGenerate.addAll(lodDim.getDataToGenerate(
@@ -314,7 +314,7 @@ public class LodBufferBuilder
                                 DetailUtil.getDistanceGeneration(detailGen),
                                 DetailUtil.getDistanceGeneration(detailGen + 1),
                                 LodConfig.CLIENT.distanceGenerationMode.get().complexity,
-                                (byte) 0,
+                                LodConfig.CLIENT.maxGenerationDetail.get().detailLevel,
                                 maxChunkGenRequests));
                         requesting = maxChunkGenRequests - posListToGenerate.size();
                     }
@@ -409,7 +409,7 @@ public class LodBufferBuilder
 
                             positionWaitingToBeGenerated.add(chunkPos);
                             numberOfChunksWaitingToGenerate.addAndGet(1);
-                            LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, LodConfig.CLIENT.distanceGenerationMode.get(), LodDetail.FULL, renderer, LodQuadTreeNodeBuilder, this, lodDim, serverWorld);
+                            LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, LodConfig.CLIENT.distanceGenerationMode.get(), LodConfig.CLIENT.maxGenerationDetail.get(), renderer, LodQuadTreeNodeBuilder, this, lodDim, serverWorld);
                             WorldWorkerManager.addWorker(genWorker);
                         }
                     }

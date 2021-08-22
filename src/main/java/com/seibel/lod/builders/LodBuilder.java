@@ -23,6 +23,7 @@ import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
+import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LevelPos;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
@@ -106,7 +107,7 @@ public class LodBuilder
                     lodDim = lodWorld.getLodDimension(dim);
                 }
 
-                generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(generationMode), LodDetail.FULL);
+                generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(generationMode), LodConfig.CLIENT.maxGenerationDetail.get());
             } catch (IllegalArgumentException | NullPointerException e)
             {
                 e.printStackTrace();
@@ -177,7 +178,7 @@ public class LodBuilder
                     chunk.getPos().x * 16 + startX,
                     chunk.getPos().z * 16 + startZ);
             data = new LodDataPoint(height, depth, color);
-            lodDim.addData(levelPos.convert((byte) detail.detailLevel),
+            lodDim.addData(levelPos.convert(detail.detailLevel),
                     data,
                     config.distanceGenerationMode,
                     true,

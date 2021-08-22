@@ -54,7 +54,7 @@ public enum LodDetail
 	public final int dataPointWidth;
 	/** This is the same as detailLevel in LodQuadTreeNode, 
 	 * lowest is 0 highest is 9 */
-	public final int detailLevel;
+	public final byte detailLevel;
 	
 	/* Start/End X/Z give the block positions
 	 * for each individual dataPoint in a LodChunk */
@@ -80,7 +80,7 @@ public enum LodDetail
 	
 	private LodDetail(int newLengthCount, int newDetailLevel)
 	{
-		detailLevel = newDetailLevel;
+		detailLevel = (byte) newDetailLevel;
 		dataPointLengthCount = newLengthCount;
 		dataPointWidth = 16 / dataPointLengthCount;
 		

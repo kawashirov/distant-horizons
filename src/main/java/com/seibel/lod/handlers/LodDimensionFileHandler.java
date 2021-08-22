@@ -317,7 +317,7 @@ public class LodDimensionFileHandler
     		fw.write(LOD_FILE_VERSION_PREFIX + " " + LOD_SAVE_FILE_VERSION + "\n");
     		
     		// add each LodChunk to the file
-    		fw.write(region.getLevel((byte) 0).toString());
+    		fw.write(region.getLevel(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel).toString());
     		fw.close();
     		
     		// overwrite the old file with the new one
@@ -353,7 +353,7 @@ public class LodDimensionFileHandler
             // ".\Super Flat\DIM-1\data"
             // or
             // ".\Super Flat\data"
-            return dimensionDataSaveFolder.getCanonicalPath() + File.separatorChar +
+            return dimensionDataSaveFolder.getCanonicalPath() + File.separatorChar + LodConfig.CLIENT.maxGenerationDetail.get().detailLevel + File.separatorChar +
                     FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
         }
         catch (IOException | SecurityException e)

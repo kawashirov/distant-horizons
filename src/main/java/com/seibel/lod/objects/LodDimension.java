@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
@@ -244,7 +245,7 @@ public class LodDimension
             if (regions[xIndex][zIndex] == null)
             {
                 /**TODO the value is currently 0 but should be determinated by the distance of the player)*/
-                regions[xIndex][zIndex] = new LodRegion((byte) 0, regionPos);
+                regions[xIndex][zIndex] = new LodRegion(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel, regionPos);
             }
         }
 
@@ -291,7 +292,7 @@ public class LodDimension
                 if (region == null)
                 {
                     // if no region exists, create it
-                    region = new LodRegion((byte) 0, regionPos);
+                    region = new LodRegion(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel, regionPos);
                     addOrOverwriteRegion(region);
                 }
             }
@@ -319,7 +320,7 @@ public class LodDimension
         if (region == null)
         {
             // if no region exists, create it
-            region = new LodRegion((byte) 0, regionPos);
+            region = new LodRegion(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel, regionPos);
             addOrOverwriteRegion(region);
         }
         boolean nodeAdded = region.setData(levelPos, lodDataPoint, generationMode.complexity, true);
@@ -379,7 +380,7 @@ public class LodDimension
                 region = getRegion(regionPos);
                 if (region == null)
                 {
-                    region = new LodRegion((byte) 0, regionPos);
+                    region = new LodRegion(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel, regionPos);
                     addOrOverwriteRegion(region);
                 }
                 listOfData.addAll(region.getDataToGenerate(playerPosX, playerPosZ, start, end, generation, detailLevel, dataNumber));
@@ -421,7 +422,7 @@ public class LodDimension
                 region = getRegion(regionPos);
                 if (region == null)
                 {
-                    region = new LodRegion((byte) 0, regionPos);
+                    region = new LodRegion(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel, regionPos);
                     addOrOverwriteRegion(region);
                 } else
                 {
@@ -445,7 +446,7 @@ public class LodDimension
         {
         	try
         	{
-	            region = new LodRegion((byte) 0, regionPos);
+	            region = new LodRegion(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel, regionPos);
 	            addOrOverwriteRegion(region);
         	}
         	catch (ArrayIndexOutOfBoundsException e)

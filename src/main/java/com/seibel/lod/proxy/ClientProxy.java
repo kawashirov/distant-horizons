@@ -139,10 +139,10 @@ public class ClientProxy
 		//		LodConfig.CLIENT.drawLODs.set(true);
 		LodConfig.CLIENT.debugMode.set(false);
 		
-		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.FULL);
-		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.FULL);
+		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.SINGLE);
+		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.SINGLE);
 
-		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
+		LodConfig.CLIENT.fogDistance.set(FogDistance.NEAR);
 		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
 		LodConfig.CLIENT.shadingMode.set(ShadingMode.DARKEN_SIDES);
 		//		LodConfig.CLIENT.brightnessMultiplier.set(1.0);
