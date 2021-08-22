@@ -27,7 +27,7 @@ public class DetailUtil
     public static int getDistanceRendering(int detail)
     {
         int distance = 0;
-        int initial = LodConfig.CLIENT.lodQuality.get() * 128;
+        int initial = LodConfig.CLIENT.lodQuality.get() * 256;
         switch (LodConfig.CLIENT.lodDistanceCalculatorType.get())
         {
             case LINEAR:
