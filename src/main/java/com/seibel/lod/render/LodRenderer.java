@@ -234,7 +234,7 @@ public class LodRenderer
 
         // see if the chunks Minecraft is going to render are the
         // same as last time
-        if (!vanillaRenderedChunks.containsAll(chunkPosToSkip))
+        if (!vanillaRenderedChunks.containsAll(chunkPosToSkip) || vanillaRenderedChunks.size() != chunkPosToSkip.size())
         {
             regen = true;
             vanillaRenderedChunks = chunkPosToSkip;

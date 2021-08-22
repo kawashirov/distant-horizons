@@ -22,6 +22,7 @@ import java.io.File;
 import java.util.HashSet;
 
 import com.seibel.lod.objects.LevelPos;
+import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
 
@@ -308,7 +309,6 @@ public class LodUtil
 		public static HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodDimension lodDim, BlockPos playerPos)
 		{
 			int chunkRenderDist = mc.options.renderDistance;
-			int blockRenderDist = chunkRenderDist * 16;
 			ChunkPos centerChunk = new ChunkPos(playerPos);
 			
 			// skip chunks that are already going to be rendered by Minecraft
@@ -319,23 +319,20 @@ public class LodUtil
 			{
 				for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
 				{
+					LevelPos levelPos = new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, x, z);
+					if (!lodDim.doesDataExist(levelPos))
+						continue;
 					
-					LevelPos levelPos = new LevelPos((byte) 4, x, z);
-					if (lodDim.doesDataExist(levelPos))
+					LodDataPoint data = lodDim.getData(levelPos);
+					if (data == null)
+						continue;
+					
+					short lodAverageHeight = data.height;
+					if (playerPos.getY() <= lodAverageHeight)
 					{
-						short lodHighestPoint = lodDim.getData(levelPos).height;
-						
-						if (playerPos.getY() < lodHighestPoint)
-						{
-							// don't draw Lod's that are taller than the player
-							// to prevent LODs being drawn on top of the player
-							posToSkip.add(new ChunkPos(x, z));
-						}
-						else if (blockRenderDist < Math.abs(playerPos.getY() - lodHighestPoint))
-						{
-							// draw Lod's that are lower than the player's view range
-							posToSkip.remove(new ChunkPos(x, z));
-						}
+						// don't draw Lod's that are taller than the player
+						// to prevent LODs being drawn on top of the player
+						posToSkip.add(new ChunkPos(x, z));
 					}
 				}
 			}
