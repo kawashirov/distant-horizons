@@ -573,8 +573,8 @@ public class LodRenderer
                         // it is possible to see the near clip plane, but
                         // you have to be flying quickly in spectator mode through ungenerated
                         // terrain, so I don't think it is much of an issue.
-                        LodConfig.CLIENT.lodChunkRenderDistance.get() / mc.options.renderDistance,
-                        mc.options.renderDistance * LodUtil.CHUNK_WIDTH * 2);
+                        mc.options.renderDistance,
+                        farPlaneBlockDistance * LodUtil.CHUNK_WIDTH * 2);
 
         // add the screen space distortions
         projectionMatrix.multiply(matrixStack.last().pose());
