@@ -534,7 +534,7 @@ public class LodBuilder
 		}
 		
 		// plant life
-		else if (blockState.getBlock() instanceof LeavesBlock)
+		else if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() == Blocks.VINE)
 		{
 			Color leafColor = LodUtil.intToColor(biome.getFoliageColor()).darker();
 			leafColor = leafColor.darker();
