@@ -673,6 +673,14 @@ public class LodRenderer
         // the newly created buffers from the lodBufferBuilder
         vbos = lodBufferBuilder.getVertexBuffers();
     }
+    
+    /**
+     * Calls the BufferBuilder's destroyBuffers method.
+     */
+    public void destroyBuffers()
+    {
+        lodBufferBuilder.destroyBuffers();
+    }
 
 
     private double getFov(float partialTicks, boolean useFovSetting)
