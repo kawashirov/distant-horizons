@@ -162,7 +162,7 @@ public class LodRenderer
      * Besides drawing the LODs this method also starts
      * the async process of generating the Buffers that hold those LODs.
      *
-     * @param newDim       The dimension to draw, if null doesn't replace the current dimension.
+     * @param lodDim       The dimension to draw, if null doesn't replace the current dimension.
      * @param partialTicks how far into the current tick this method was called.
      */
     @SuppressWarnings("deprecation")
@@ -384,7 +384,6 @@ public class LodRenderer
 	/**
      * This is where the actual drawing happens.
      *
-     * @param buffers the buffers sent to the GPU to draw
      */
     private void sendLodsToGpuAndDraw(VertexBuffer vbo, Matrix4f modelViewMatrix)
     {
@@ -446,8 +445,8 @@ public class LodRenderer
 
             if (fogQuality == FogQuality.FANCY)
             {
-                RenderSystem.fogStart(farPlaneBlockDistance * 1.21f);
-                RenderSystem.fogEnd(farPlaneBlockDistance * 1.41f);
+                RenderSystem.fogStart(farPlaneBlockDistance * 1.5f);
+                RenderSystem.fogEnd(farPlaneBlockDistance * 2.0f);
             } else if (fogQuality == FogQuality.FAST)
             {
                 // for the far fog of the normal chunks
