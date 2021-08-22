@@ -20,11 +20,9 @@ package com.seibel.lod.builders;
 import java.awt.Color;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LevelPos;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
@@ -520,49 +518,51 @@ public class LodBuilder
      * Returns a color int for a given block.
      */
     private int getColorForBlock(int x, int z, BlockState blockState, Biome biome)
-    {
-        int colorInt = 0;
-
-        // block special cases
-        if (blockState == Blocks.AIR.defaultBlockState())
-        {
-            Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
-            tmp = tmp.darker();
-            colorInt = LodUtil.colorToInt(tmp);
-        } else if (blockState == Blocks.MYCELIUM.defaultBlockState())
-        {
-            colorInt = MaterialColor.COLOR_LIGHT_GRAY.col;
-        }
-
-        // plant life
+	{
+		int colorInt = 0;
+		
+		// block special cases
+		if (blockState == Blocks.AIR.defaultBlockState() || blockState == Blocks.CAVE_AIR.defaultBlockState())
+		{
+			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
+			tmp = tmp.darker();
+			colorInt = LodUtil.colorToInt(tmp);
+		}
+		else if (blockState == Blocks.MYCELIUM.defaultBlockState())
+		{
+			colorInt = MaterialColor.COLOR_LIGHT_GRAY.col;
+		}
+		
+		// plant life
 		else if (blockState.getBlock() instanceof LeavesBlock)
 		{
 			Color leafColor = LodUtil.intToColor(biome.getFoliageColor()).darker();
+			leafColor = leafColor.darker();
 			colorInt = LodUtil.colorToInt(leafColor);
 		}
 		else if ((blockState.getBlock() instanceof GrassBlock || blockState.getBlock() instanceof AbstractPlantBlock
 				|| blockState.getBlock() instanceof BushBlock || blockState.getBlock() instanceof IGrowable)
 				&& !(blockState.getBlock() == Blocks.BROWN_MUSHROOM || blockState.getBlock() == Blocks.RED_MUSHROOM))
 		{
-			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
-			tmp = tmp.darker();
-			colorInt = LodUtil.colorToInt(tmp);
+			Color plantColor = LodUtil.intToColor(biome.getGrassColor(x, z));
+			plantColor = plantColor.darker();
+			colorInt = LodUtil.colorToInt(plantColor);
 		}
-
-        // water
-        else if (blockState.getBlock() == Blocks.WATER)
-        {
-            colorInt = biome.getWaterColor();
-        }
-
-        // everything else
-        else
-        {
-            colorInt = blockState.materialColor.col;
-        }
-
-        return colorInt;
-    }
+		
+		// water
+		else if (blockState.getBlock() == Blocks.WATER)
+		{
+			colorInt = biome.getWaterColor();
+		}
+		
+		// everything else
+		else
+		{
+			colorInt = blockState.materialColor.col;
+		}
+		
+		return colorInt;
+	}
 
     /**
      * Returns a color int for the given biome.
@@ -639,7 +639,8 @@ public class LodBuilder
         } else
         {
             if (chunkSections[sectionIndex].getBlockState(x, y, z) != null
-                    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.AIR)
+                    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.AIR 
+                    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.CAVE_AIR)
             {
                 return true;
             }
