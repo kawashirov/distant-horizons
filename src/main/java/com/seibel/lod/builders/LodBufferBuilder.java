@@ -60,26 +60,18 @@ public class LodBufferBuilder
 {
     private Minecraft mc;
 
-    /**
-     * This holds the thread used to generate new LODs off the main thread.
-     */
+    /** This holds the thread used to generate new LODs off the main thread. */
     private ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " - main"));
 
     private LodBuilder LodQuadTreeNodeBuilder;
 
-    /**
-     * The buffers that are used to create LODs using far fog
-     */
+    /** The buffers that are used to create LODs using far fog */
     public volatile BufferBuilder[][] buildableBuffers;
 
-    /**
-     * Used when building new VBOs
-     */
+    /** Used when building new VBOs */
     public volatile VertexBuffer[][] buildableVbos;
 
-    /**
-     * VBOs that are sent over to the LodNodeRenderer
-     */
+    /** VBOs that are sent over to the LodNodeRenderer */
     public volatile VertexBuffer[][] drawableVbos;
 
     /**
@@ -118,14 +110,10 @@ public class LodBufferBuilder
      */
     public int maxChunkGenRequests = LodConfig.CLIENT.numberOfWorldGenerationThreads.get() * 8;
 
-    /**
-     * Size of the buffer builders in bytes last time we created them
-     */
+    /** Size of the buffer builders in bytes last time we created them */
     public int previousBufferSize = 0;
 
-    /**
-     * Width of the dimension in regions last time we created the buffers
-     */
+    /** Width of the dimension in regions last time we created the buffers */
     public int previousRegionWidth = 0;
     
     /** this is used to prevent multiple threads creating, destroying, or using the buffers at the same time */
