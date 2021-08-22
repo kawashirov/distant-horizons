@@ -305,43 +305,43 @@ public class LodUtil
      * Get a HashSet of all ChunkPos within the normal render distance
      * that should not be rendered.
      */
-    public static HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodDimension lodDim, BlockPos playerPos)
-    {
-        int chunkRenderDist = mc.options.renderDistance;
-        int blockRenderDist = chunkRenderDist * 16;
-        ChunkPos centerChunk = new ChunkPos(playerPos);
-
-        // skip chunks that are already going to be rendered by Minecraft
-        HashSet<ChunkPos> posToSkip = getRenderedChunks();
-
-
-        // go through each chunk within the normal view distance
-        for (int x = centerChunk.x - chunkRenderDist; x < centerChunk.x + chunkRenderDist; x++)
-        {
-            for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
-            {
-
-                LevelPos levelPos = new LevelPos((byte) 4, x, z);
-                if (lodDim.doesDataExist(levelPos))
-                {
-                    short lodHighestPoint = lodDim.getData(levelPos).height;
-
-                    if (playerPos.getY() < lodHighestPoint)
-                    {
-                        // don't draw Lod's that are taller than the player
-                        // to prevent LODs being drawn on top of the player
-                        posToSkip.add(new ChunkPos(x, z));
-                    } else if (blockRenderDist < Math.abs(playerPos.getY() - lodHighestPoint))
-                    {
-                        // draw Lod's that are lower than the player's view range
-                        posToSkip.remove(new ChunkPos(x, z));
-                    }
-                }
-            }
-        }
-
-        return posToSkip;
-    }
+		public static HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodDimension lodDim, BlockPos playerPos)
+		{
+			int chunkRenderDist = mc.options.renderDistance;
+			int blockRenderDist = chunkRenderDist * 16;
+			ChunkPos centerChunk = new ChunkPos(playerPos);
+			
+			// skip chunks that are already going to be rendered by Minecraft
+			HashSet<ChunkPos> posToSkip = getRenderedChunks();
+			
+			// go through each chunk within the normal view distance
+			for (int x = centerChunk.x - chunkRenderDist; x < centerChunk.x + chunkRenderDist; x++)
+			{
+				for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
+				{
+					
+					LevelPos levelPos = new LevelPos((byte) 4, x, z);
+					if (lodDim.doesDataExist(levelPos))
+					{
+						short lodHighestPoint = lodDim.getData(levelPos).height;
+						
+						if (playerPos.getY() < lodHighestPoint)
+						{
+							// don't draw Lod's that are taller than the player
+							// to prevent LODs being drawn on top of the player
+							posToSkip.add(new ChunkPos(x, z));
+						}
+						else if (blockRenderDist < Math.abs(playerPos.getY() - lodHighestPoint))
+						{
+							// draw Lod's that are lower than the player's view range
+							posToSkip.remove(new ChunkPos(x, z));
+						}
+					}
+				}
+			}
+			
+			return posToSkip;
+		}
 
     /**
      * This method returns the ChunkPos of all chunks that Minecraft
@@ -351,26 +351,28 @@ public class LodUtil
      * the clipping plane. (For example, if you are high above the ground some chunks
      * will be incorrectly added, even though they are outside render range).
      */
-    public static HashSet<ChunkPos> getRenderedChunks()
-    {
-        HashSet<ChunkPos> loadedPos = new HashSet<>();
-
-        Minecraft mc = Minecraft.getInstance();
-
-        // Wow those are some long names!
-
-        // go through every RenderInfo to get the compiled chunks
-        for (WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer : mc.levelRenderer.renderChunks)
-        {
-            if (!worldrenderer$localrenderinformationcontainer.chunk.getCompiledChunk().hasNoRenderableLayers())
-            {
-                // add the ChunkPos for every empty compiled chunk
-                BlockPos bpos = worldrenderer$localrenderinformationcontainer.chunk.getOrigin();
-
-                loadedPos.add(new ChunkPos(bpos.getX() / 16, bpos.getZ() / 16));
-            }
-        }
-
-        return loadedPos;
-    }
+	public static HashSet<ChunkPos> getRenderedChunks()
+	{
+		HashSet<ChunkPos> loadedPos = new HashSet<>();
+		
+		Minecraft mc = Minecraft.getInstance();
+		
+		// Wow those are some long names!
+		
+		// go through every RenderInfo to get the compiled chunks
+		for (WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer : mc.levelRenderer.renderChunks)
+		{
+			if (!worldrenderer$localrenderinformationcontainer.chunk.getCompiledChunk().hasNoRenderableLayers())
+			{
+				// add the ChunkPos for every empty compiled chunk
+				BlockPos bpos = worldrenderer$localrenderinformationcontainer.chunk.getOrigin();
+				
+				loadedPos.add(new ChunkPos(bpos));
+			}
+		}
+		
+		return loadedPos;
+	}
+	
+	
 }
