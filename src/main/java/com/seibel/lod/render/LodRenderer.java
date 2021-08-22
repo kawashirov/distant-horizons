@@ -459,12 +459,12 @@ public class LodRenderer
         {
             if (fogQuality == FogQuality.FANCY)
             {
-                RenderSystem.fogStart(farPlaneBlockDistance * 0.85f);
-                RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
+                RenderSystem.fogEnd(mc.options.renderDistance * 16 * 1.41f);
+                RenderSystem.fogStart(mc.options.renderDistance * 16 * 1.6f);
             } else if (fogQuality == FogQuality.FAST)
             {
-                RenderSystem.fogStart(farPlaneBlockDistance * 0.5f);
-                RenderSystem.fogEnd(farPlaneBlockDistance * 0.75f);
+                RenderSystem.fogEnd(mc.options.renderDistance * 16 * 1.0f);
+                RenderSystem.fogStart(mc.options.renderDistance * 16 * 1.5f);
             }
         }
 
