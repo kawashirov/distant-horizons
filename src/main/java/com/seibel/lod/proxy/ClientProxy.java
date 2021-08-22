@@ -114,9 +114,8 @@ public class ClientProxy
 		IProfiler profiler = mc.getProfiler();
 		profiler.pop(); // get out of "terrain"
 		profiler.push("LOD");
-		
 		renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
-		
+
 		profiler.pop(); // end LOD
 		profiler.push("terrain"); // restart "terrain"
 		
@@ -149,12 +148,13 @@ public class ClientProxy
 		//		LodConfig.CLIENT.brightnessMultiplier.set(1.0);
 		//		LodConfig.CLIENT.saturationMultiplier.set(1.0);
 		
-		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
+		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
-		LodConfig.CLIENT.lodChunkRenderDistance.set(96);
-		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.QUADRATIC);
-		LodConfig.CLIENT.lodQuality.set(1);
+		LodConfig.CLIENT.lodChunkRenderDistance.set(128);
+		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
+		LodConfig.CLIENT.lodQuality.set(2);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
+		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(12);
 		
 		// has to be set in the config file
 		//      LodConfig.CLIENT.numberOfWorldGenerationThreads.set(16);

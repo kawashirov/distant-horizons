@@ -202,7 +202,6 @@ public class LodRenderer
         // should LODs be regenerated?
         if ((int) player.getX() / LodUtil.CHUNK_WIDTH != prevChunkX ||
                 (int) player.getZ() / LodUtil.CHUNK_WIDTH != prevChunkZ ||
-                ClientProxy.previousChunkRenderDistance != mc.options.renderDistance ||
                 ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.lodChunkRenderDistance.get() ||
                 prevFogDistance != LodConfig.CLIENT.fogDistance.get())
         {
@@ -228,7 +227,6 @@ public class LodRenderer
 
 
         // determine how far the game's render distance is currently set
-        //farPlaneBlockDistance = mc.options.renderDistance * LodUtil.CHUNK_WIDTH;
         farPlaneBlockDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
 
         // set how how far the LODs will go
@@ -320,12 +318,12 @@ public class LodRenderer
         {
         	Vector3d cameraDir = mc.cameraEntity.getLookAngle().normalize();
         	cameraDir = mc.options.getCameraType().isMirrored() ? cameraDir.reverse() : cameraDir;
-            
-        	
+
+
         	// used to determine what type of fog to render
         	int halfWidth = vbos.length/2;
         	int quarterWidth = vbos.length/4;
-        	
+
         	for (int i = 0; i < vbos.length; i++)
             {
                 for (int j = 0; j < vbos.length; j++)
@@ -337,8 +335,8 @@ public class LodRenderer
 	                		setupFog(fogSettings.near.distance, fogSettings.near.quality);
 	                	else
 	                		setupFog(fogSettings.far.distance, fogSettings.far.quality);
-	                    
-	                	
+
+
 	            		sendLodsToGpuAndDraw(vbos[i][j], modelViewMatrix);
 	                }
                 }
