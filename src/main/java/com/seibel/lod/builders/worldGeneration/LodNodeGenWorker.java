@@ -394,7 +394,7 @@ public class LodNodeGenWorker implements IWorker
 			ChunkStatus.NOISE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			ChunkStatus.SURFACE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 
-			// this feature has proved to be thread safe
+			// this feature has been proven to be thread safe
 			// so we will add it
 			IceAndSnowFeature snowFeature = new IceAndSnowFeature(NoFeatureConfig.CODEC);
 			snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
