@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
+import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
@@ -438,14 +439,22 @@ public class LodDimension
      */
     public List<LevelPos> getDataToRender(RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
     {
-        int n = regions.length;
         List<LevelPos> listOfData = new ArrayList<>();
         LodRegion region = getRegion(regionPos);
         if (region == null)
         {
-            region = new LodRegion((byte) 0, regionPos);
-            addOrOverwriteRegion(region);
-        } else
+        	try
+        	{
+	            region = new LodRegion((byte) 0, regionPos);
+	            addOrOverwriteRegion(region);
+        	}
+        	catch (ArrayIndexOutOfBoundsException e)
+        	{
+        		ClientProxy.LOGGER.warn("getDataToRender was unable to add the region at the pos [" + regionPos.x + ", " + regionPos.z + "]");
+        		return listOfData; // this list should be empty
+        	}
+        }
+        else
         {
             listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel));
         }
