@@ -30,7 +30,6 @@ import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LevelPos;
 import com.seibel.lod.objects.LodDataPoint;
@@ -451,27 +450,9 @@ public class LodBufferBuilder
 
         return;
     }
-
-
-    //====================//
-    // generation helpers //
-    //====================//
-
-    /**
-     * Returns if the given coordinate is in the loaded area of the world.
-     *
-     * @param centerCoordinate the center of the loaded world
-     */
-    private boolean isCoordInCenterArea(int i, int j, int centerCoordinate)
-    {
-        return (i >= centerCoordinate - (mc.options.renderDistance + 2)
-                && i <= centerCoordinate + (mc.options.renderDistance + 2))
-                &&
-                (j >= centerCoordinate - (mc.options.renderDistance + 2)
-                        && j <= centerCoordinate + (mc.options.renderDistance + 2));
-    }
-
-
+    
+    
+    
     //===============================//
     // BufferBuilder related methods //
     //===============================//
