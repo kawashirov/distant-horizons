@@ -437,7 +437,7 @@ public class LodRenderer
 
         // the multipliers are percentages
         // of the regular view distance.
-        if (fogDistance == FogDistance.NEAR)
+        if (fogDistance == FogDistance.FAR)
         {
             // the reason that I wrote fogEnd then fogStart backwards
             // is because we are using fog backwards to how
@@ -446,18 +446,17 @@ public class LodRenderer
 
             if (fogQuality == FogQuality.FANCY)
             {
-                RenderSystem.fogEnd(farPlaneBlockDistance * 1.75f);
-                RenderSystem.fogStart(farPlaneBlockDistance * 1.95f);
+                RenderSystem.fogStart(farPlaneBlockDistance * 1.21f);
+                RenderSystem.fogEnd(farPlaneBlockDistance * 1.41f);
             } else if (fogQuality == FogQuality.FAST)
             {
                 // for the far fog of the normal chunks
                 // to start right where the LODs' end use:
                 // end = 0.8f, start = 1.5f
-
-                RenderSystem.fogEnd(farPlaneBlockDistance * 1.5f);
-                RenderSystem.fogStart(farPlaneBlockDistance * 2.0f);
+                RenderSystem.fogStart(farPlaneBlockDistance * 1.5f);
+                RenderSystem.fogEnd(farPlaneBlockDistance * 2.0f);
             }
-        } else if (fogDistance == FogDistance.FAR)
+        } else if (fogDistance == FogDistance.NEAR)
         {
             if (fogQuality == FogQuality.FANCY)
             {

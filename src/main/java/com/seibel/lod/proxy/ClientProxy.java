@@ -147,7 +147,7 @@ public class ClientProxy
 
         LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
         LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
-        LodConfig.CLIENT.lodChunkRenderDistane.set(96);
+        LodConfig.CLIENT.lodChunkRenderDistane.set(128);
         LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.QUADRATIC);
         LodConfig.CLIENT.lodQuality.set(1);
         LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
