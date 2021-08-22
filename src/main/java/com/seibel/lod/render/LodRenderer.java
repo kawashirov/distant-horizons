@@ -320,6 +320,8 @@ public class LodRenderer
         if (vbos != null)
         {
         	Vector3d cameraDir = mc.cameraEntity.getLookAngle().normalize();
+        	cameraDir = mc.options.getCameraType().isMirrored() ? cameraDir.reverse() : cameraDir;
+            
         	
         	// used to determine what type of fog to render
         	int halfWidth = vbos.length/2;
