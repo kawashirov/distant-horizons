@@ -230,24 +230,25 @@ public class LodBufferBuilder
                             }
 
                             if (lodDim.doesDataExist(pos))
-                            {
-                                try
-                                {
-                                    width = (int) Math.pow(2, pos.detailLevel);
-                                    lodData = lodDim.getData(pos);
-
-                                    if (lodData != null)
-                                    {
-                                        LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, lodDim, lodData,
-                                                pos.posX * width, 0, pos.posZ * width, renderer.debugging, pos.detailLevel);
-                                    }
-                                } catch (ArrayIndexOutOfBoundsException e)
-                                {
-                                    ClientProxy.LOGGER.warn("LodBufferBuilder ran into trouble and had to start over.");
-                                    closeBuffers();
-                                    return;
-                                }
-                            }
+							{
+								try
+								{
+									width = (int) Math.pow(2, pos.detailLevel);
+									lodData = lodDim.getData(pos);
+									
+									if (lodData != null)
+									{
+										LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, lodDim, lodData,
+												pos.posX * width, 0, pos.posZ * width, renderer.debugging, pos.detailLevel);
+									}
+								}
+								catch (ArrayIndexOutOfBoundsException e)
+								{
+									ClientProxy.LOGGER.warn("LodBufferBuilder ran into trouble and had to start over.");
+									closeBuffers();
+									return;
+								}
+							}
 
                         }
 
@@ -361,21 +362,23 @@ public class LodBufferBuilder
 
                                 chunksToGen.clear();
                                 chunksToGen.add(pos);
-                            } else if (newDistance == minChunkDist)
-                            {
-                                // this chunk position as close as the minimum distance
-                                if (chunksToGen.size() < maxChunkGenRequests)
-                                {
-                                    // we are still under the number of chunks to generate
-                                    // add this position to the list
-                                    chunksToGen.add(pos);
-                                }
-                            } else
-                            {
-                                // this chunk is farther away than the minimum distance,
-                                // add it to the reserve to make sure we always have a full reserve
-                                chunksToGenReserve.add(pos);
-                            }
+							}
+							else if (newDistance == minChunkDist)
+							{
+								// this chunk position as close as the minimum distance
+								if (chunksToGen.size() < maxChunkGenRequests)
+								{
+									// we are still under the number of chunks to generate
+									// add this position to the list
+									chunksToGen.add(pos);
+								}
+							}
+							else
+							{
+								// this chunk is farther away than the minimum distance,
+								// add it to the reserve to make sure we always have a full reserve
+								chunksToGenReserve.add(pos);
+							}
 
                         } // lod null and can generate more chunks
                     } // positions to generate
@@ -428,21 +431,22 @@ public class LodBufferBuilder
 
                 // mark that the buildable buffers as ready to swap
                 switchVbos = true;
-            } catch (Exception e)
-            {
-                ClientProxy.LOGGER.warn("\"LodNodeBufferBuilder.generateLodBuffersAsync\" ran into trouble: ");
-                e.printStackTrace();
-            } finally
-            {
-                // regardless of if we successfully created the buffers
-                // we are done generating.
-                generatingBuffers = false;
-
-
-                // clean up any potentially open resources
-                if (buildableBuffers != null)
-                    closeBuffers();
-            }
+			}
+			catch (Exception e)
+			{
+				ClientProxy.LOGGER.warn("\"LodNodeBufferBuilder.generateLodBuffersAsync\" ran into trouble: ");
+				e.printStackTrace();
+			}
+			finally
+			{
+				// regardless of if we successfully created the buffers
+				// we are done generating.
+				generatingBuffers = false;
+				
+				// clean up any potentially open resources
+				if (buildableBuffers != null)
+					closeBuffers();
+			}
 
         });
 
