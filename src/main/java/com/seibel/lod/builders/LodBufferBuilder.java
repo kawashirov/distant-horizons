@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.lwjgl.opengl.GL11;
 
@@ -126,7 +127,12 @@ public class LodBufferBuilder
      * Width of the dimension in regions last time we created the buffers
      */
     public int previousRegionWidth = 0;
-
+    
+    /** this is used to prevent multiple threads creating, destroying, or using the buffers at the same time */
+    private ReentrantLock bufferLock = new ReentrantLock();
+    
+    
+    
 
     public LodBufferBuilder(LodBuilder newLodBuilder)
     {
@@ -173,6 +179,8 @@ public class LodBufferBuilder
 
         Thread thread = new Thread(() ->
         {
+        	bufferLock.lock();
+        	
             try
             {
                 long startTime = System.currentTimeMillis();
@@ -427,7 +435,7 @@ public class LodBufferBuilder
 
                 long endTime = System.currentTimeMillis();
                 long buildTime = endTime - startTime;
-                //ClientProxy.LOGGER.info("Buffer Build time: " + buildTime + " ms");
+                ClientProxy.LOGGER.info("Buffer Build time: " + buildTime + " ms");
 
                 // mark that the buildable buffers as ready to swap
                 switchVbos = true;
@@ -446,6 +454,8 @@ public class LodBufferBuilder
 				// clean up any potentially open resources
 				if (buildableBuffers != null)
 					closeBuffers();
+				
+				bufferLock.unlock();
 			}
 
         });
@@ -457,6 +467,7 @@ public class LodBufferBuilder
     
     
     
+    
     //===============================//
     // BufferBuilder related methods //
     //===============================//
@@ -464,10 +475,14 @@ public class LodBufferBuilder
 
     /**
      * Called from the LodRenderer to create the
-     * BufferBuilders.
+     * BufferBuilders. <br><br>
+     * 
+     * May have to wait for the bufferLock to open.
      */
     public void setupBuffers(int numbRegionsWide, int bufferMaxCapacity)
     {
+    	bufferLock.lock();
+    	
         previousRegionWidth = numbRegionsWide;
         previousBufferSize = bufferMaxCapacity;
 
@@ -486,24 +501,31 @@ public class LodBufferBuilder
                 drawableVbos[x][z] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
             }
         }
+        
+        bufferLock.unlock();
     }
 
     /**
-     * sets the buffers and Vbos to null, forcing them to be recreated.
+     * sets the buffers and Vbos to null, forcing them to be recreated. <br><br>
+     * 
+     * May have to wait for the bufferLock to open.
      */
     public void destroyBuffers()
     {
+    	bufferLock.lock();
+    	
         buildableBuffers = null;
-
         buildableVbos = null;
         drawableVbos = null;
+        
+        bufferLock.unlock();
     }
 
 
     /**
      * Calls begin on each of the buildable BufferBuilders.
      */
-    public void startBuffers()
+    private void startBuffers()
     {
         for (int x = 0; x < buildableBuffers.length; x++)
             for (int z = 0; z < buildableBuffers.length; z++)
@@ -513,7 +535,7 @@ public class LodBufferBuilder
     /**
      * Calls end on each of the buildable BufferBuilders.
      */
-    public void closeBuffers()
+    private void closeBuffers()
     {
         for (int x = 0; x < buildableBuffers.length; x++)
             for (int z = 0; z < buildableBuffers.length; z++)
@@ -527,7 +549,7 @@ public class LodBufferBuilder
      *
      * @param bufferMaxCapacity
      */
-    public void uploadBuffers()
+    private void uploadBuffers()
     {
         for (int x = 0; x < buildableVbos.length; x++)
         {
@@ -540,18 +562,24 @@ public class LodBufferBuilder
 
 
     /**
-     * Get the newly created VBOs
+     * Get the newly created VBOs 
      */
-    public VertexBuffer[][] getVertexBuffers()
+    public VertexBuffer[][] getVertexBuffers() 
     {
-        VertexBuffer[][] tmp = drawableVbos;
-        drawableVbos = buildableVbos;
-        buildableVbos = tmp;
-
-        // the vbos have been swapped
-        switchVbos = false;
-
-        return drawableVbos;
+    	// don't wait for the lock to open
+    	// since this is called on the main render thread
+		if (bufferLock.tryLock())
+		{
+	    	VertexBuffer[][] tmp = drawableVbos;
+	    	drawableVbos = buildableVbos;
+	    	buildableVbos = tmp;
+	    	
+	    	// the vbos have been swapped
+	    	switchVbos = false;
+	    	bufferLock.unlock();
+		}
+    	
+    	return drawableVbos;
     }
 
     /**
