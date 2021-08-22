@@ -530,7 +530,7 @@ public class LodBuilder
 		}
 		else if (blockState == Blocks.MYCELIUM.defaultBlockState())
 		{
-			colorInt = MaterialColor.COLOR_LIGHT_GRAY.col;
+			colorInt = LodUtil.MYCELIUM_COLOR_INT;
 		}
 		
 		// plant life

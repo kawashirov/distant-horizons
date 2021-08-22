@@ -50,6 +50,9 @@ public class LodUtil
 	public static final Color COLOR_DEBUG_WHITE = new Color(255, 255, 255, DEBUG_ALPHA);
 	public static final Color COLOR_INVISIBLE = new Color(0,0,0,0);
 	
+	/** a gray-purple color */
+	public static final int MYCELIUM_COLOR_INT = LodUtil.colorToInt(Color.decode("#6E6166"));
+	
 	/**
 	 * In order of nearest to farthest: <br>
 	 * Red, Orange, Yellow, Green, Cyan, Blue, Magenta, white, gray, black
