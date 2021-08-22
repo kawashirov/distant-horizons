@@ -17,15 +17,6 @@
  */
 package com.seibel.lod.objects;
 
-import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.handlers.LodDimensionFileHandler;
-import com.seibel.lod.util.LodUtil;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.server.ServerChunkProvider;
-import net.minecraft.world.server.ServerWorld;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,6 +24,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.handlers.LodDimensionFileHandler;
+import com.seibel.lod.util.LodUtil;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
 
 /**
  * This object holds all loaded LOD regions
@@ -347,7 +348,7 @@ public class LodDimension
      * Returns null if the LodChunk doesn't exist or
      * is outside the loaded area.
      */
-    public synchronized LodDataPoint getData(ChunkPos chunkPos)
+    public LodDataPoint getData(ChunkPos chunkPos)
     {
         LevelPos levelPos = new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunkPos.x, chunkPos.z);
         return getData(levelPos);
@@ -359,7 +360,7 @@ public class LodDimension
      *
      * @return list of quadTrees
      */
-    public synchronized List<LevelPos> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel, int dataNumber)
+    public List<LevelPos> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel, int dataNumber)
     {
 
         int n = regions.length;
@@ -402,7 +403,7 @@ public class LodDimension
      *
      * @return list of nodes
      */
-    public synchronized List<LevelPos> getDataToRender(int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
+    public List<LevelPos> getDataToRender(int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
     {
         int n = regions.length;
         List<LevelPos> listOfData = new ArrayList<>();
@@ -435,7 +436,7 @@ public class LodDimension
      *
      * @return list of nodes
      */
-    public synchronized List<LevelPos> getDataToRender(RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
+    public List<LevelPos> getDataToRender(RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
     {
         int n = regions.length;
         List<LevelPos> listOfData = new ArrayList<>();
@@ -458,7 +459,7 @@ public class LodDimension
      * Returns null if the LodChunk doesn't exist or
      * is outside the loaded area.
      */
-    public synchronized LodDataPoint getData(LevelPos levelPos)
+    public LodDataPoint getData(LevelPos levelPos)
     {
         if (levelPos.detailLevel > LodUtil.REGION_DETAIL_LEVEL)
             throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + levelPos.detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
@@ -477,7 +478,7 @@ public class LodDimension
     /**
      * return true if and only if the node at that position exist
      */
-    public synchronized boolean hasThisPositionBeenGenerated(ChunkPos chunkPos)
+    public boolean hasThisPositionBeenGenerated(ChunkPos chunkPos)
     {
         LodRegion region = getRegion(LodUtil.convertGenericPosToRegionPos(chunkPos.x, chunkPos.z, LodUtil.CHUNK_DETAIL_LEVEL));
 
@@ -493,7 +494,7 @@ public class LodDimension
      * return true if and only if the node at that position exist
      */
 
-    public synchronized boolean hasThisPositionBeenGenerated(LevelPos levelPos)
+    public boolean hasThisPositionBeenGenerated(LevelPos levelPos)
     {
         LodRegion region = getRegion(levelPos.getRegionPos());
 
@@ -508,7 +509,7 @@ public class LodDimension
     /**
      * return true if and only if the node at that position exist
      */
-    public synchronized boolean doesDataExist(LevelPos levelPos)
+    public boolean doesDataExist(LevelPos levelPos)
     {
         LodRegion region = getRegion(levelPos.getRegionPos());
 
@@ -523,7 +524,7 @@ public class LodDimension
     /**
      * return true if and only if the node at that position exist
      */
-    public synchronized DistanceGenerationMode getGenerationMode(LevelPos levelPos)
+    public DistanceGenerationMode getGenerationMode(LevelPos levelPos)
     {
         LodRegion region = getRegion(levelPos.getRegionPos());
 
@@ -539,7 +540,7 @@ public class LodDimension
      * Get the region at the given X and Z coordinates from the
      * RegionFileHandler.
      */
-    public synchronized LodRegion getRegionFromFile(RegionPos regionPos)
+    public LodRegion getRegionFromFile(RegionPos regionPos)
     {
         if (fileHandler != null)
             return fileHandler.loadRegionFromFile(regionPos);
