@@ -219,11 +219,9 @@ public class LodBufferBuilder
                         for (LevelPos pos : posListToRender)
                         {
                             LevelPos chunkPos = pos.convert(LodUtil.CHUNK_DETAIL_LEVEL);
-                            int chunkX = chunkPos.posX;
-                            int chunkZ = chunkPos.posZ;
                             // skip any chunks that Minecraft is going to render
 
-                            if (isCoordInCenterArea(chunkPos.posX, chunkPos.posZ, (numbChunksWide / 2)) || renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkX, chunkZ)))
+                            if (renderer.vanillaRenderedChunks.contains(new ChunkPos( chunkPos.posX,  chunkPos.posZ)))
                             {
                                 continue;
                             }
@@ -314,7 +312,6 @@ public class LodBufferBuilder
                             maxChunkGenRequests));
                     requesting = maxChunkGenRequests - posListToGenerate.size();
                 }
-
 
                 if (LodConfig.CLIENT.distanceGenerationMode.get() != DistanceGenerationMode.NONE)
                 {
@@ -463,11 +460,11 @@ public class LodBufferBuilder
      */
     private boolean isCoordInCenterArea(int i, int j, int centerCoordinate)
     {
-        return (i >= centerCoordinate - mc.options.renderDistance
-                && i <= centerCoordinate + mc.options.renderDistance)
+        return (i >= centerCoordinate - (mc.options.renderDistance + 2)
+                && i <= centerCoordinate + (mc.options.renderDistance + 2))
                 &&
-                (j >= centerCoordinate - mc.options.renderDistance
-                        && j <= centerCoordinate + mc.options.renderDistance);
+                (j >= centerCoordinate - (mc.options.renderDistance + 2)
+                        && j <= centerCoordinate + (mc.options.renderDistance + 2));
     }
 
 

@@ -205,6 +205,8 @@ public class LodRegion implements Serializable
     }
 
     /**
+     * This method will return all the levelPos that are renderable according to the requisite given in input
+     *
      * @return
      */
     public List<Map.Entry<LevelPos,Integer>> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel, int dataNumber)

@@ -17,17 +17,13 @@
  */
 package com.seibel.lod.proxy;
 
+import com.seibel.lod.enums.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
-import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.FogDistance;
-import com.seibel.lod.enums.FogDrawOverride;
-import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
@@ -150,6 +146,10 @@ public class ClientProxy
 //		LodConfig.CLIENT.saturationMultiplier.set(1.0);
 
         LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
+        LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
+        LodConfig.CLIENT.lodChunkRenderDistane.set(96);
+        LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
+        LodConfig.CLIENT.lodQuality.set(1);
         LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
 
         // has to be set in the config file
