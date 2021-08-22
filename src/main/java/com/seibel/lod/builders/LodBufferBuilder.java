@@ -26,6 +26,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.seibel.lod.util.DetailUtil;
 import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
@@ -177,41 +178,17 @@ public class LodBufferBuilder
                 // we can top it off from the reserve
                 ArrayList<ChunkPos> chunksToGenReserve = new ArrayList<>(maxChunkGenRequests);
 
-/*
-                DistanceGenerationMode[] distancesGenerators = {DistanceGenerationMode.FEATURES,
-                        DistanceGenerationMode.FEATURES,
-                        DistanceGenerationMode.SURFACE,
-                        DistanceGenerationMode.SURFACE,
-                        DistanceGenerationMode.SURFACE,
-                        DistanceGenerationMode.BIOME_ONLY,
-                        DistanceGenerationMode.BIOME_ONLY,
-                        DistanceGenerationMode.BIOME_ONLY,
-                        DistanceGenerationMode.BIOME_ONLY,
-                        DistanceGenerationMode.BIOME_ONLY}
-
- */
-
-                DistanceGenerationMode[] distancesGenerators = {
-                        DistanceGenerationMode.SURFACE,
-                        DistanceGenerationMode.SURFACE,
-                        DistanceGenerationMode.SURFACE,
-                        DistanceGenerationMode.SURFACE,
-                        DistanceGenerationMode.SURFACE,
-                        DistanceGenerationMode.SURFACE,
-                        DistanceGenerationMode.SURFACE,
-                        DistanceGenerationMode.SURFACE,
-                        DistanceGenerationMode.SURFACE,
-                        DistanceGenerationMode.SURFACE};
-                int[] distancesLinear = {0, 200, 400, 600, 800, 1000, 1500, 2000, 3000, 4000, 8000};
-                int[] distancesExponential = {0, 100, 200, 400, 800, 1600, 3200, 3200, 3200, 3200, 8000};
-
                 startBuffers();
 
                 // used when determining which chunks are closer when queuing distance
                 // generation
                 int minChunkDist = Integer.MAX_VALUE;
-
                 int width;
+
+                // =====================//
+                //    RENDERING PART    //
+                // =====================//
+
                 List<LevelPos> posListToRender = new ArrayList<>();
                 LodDataPoint lodData;
                 for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
@@ -231,34 +208,38 @@ public class LodBufferBuilder
                         /**TODO make this automatic and config dependent*/
                         for (byte detail = LodUtil.BLOCK_DETAIL_LEVEL; detail <= LodUtil.REGION_DETAIL_LEVEL; detail++)
                         {
-                            posListToRender.addAll(lodDim.getDataToRender(regionPos, playerBlockPosRounded.getX(), playerBlockPosRounded.getZ(), distancesLinear[detail], distancesLinear[detail + 1], detail));
+                            posListToRender.addAll(lodDim.getDataToRender(
+                                    regionPos,
+                                    playerBlockPosRounded.getX(),
+                                    playerBlockPosRounded.getZ(),
+                                    DetailUtil.getDistanceRendering(detail),
+                                    DetailUtil.getDistanceRendering(detail + 1),
+                                    detail));
                         }
                         for (LevelPos pos : posListToRender)
                         {
-                            LevelPos chunkPos = pos.convert((byte) 2);
-                            int chunkX = chunkPos.posX + startChunkPos.x;
-                            int chunkZ = chunkPos.posZ + startChunkPos.z;
+                            LevelPos chunkPos = pos.convert(LodUtil.CHUNK_DETAIL_LEVEL);
                             // skip any chunks that Minecraft is going to render
-                            if (isCoordInCenterArea(chunkPos.posX, chunkPos.posZ, (numbChunksWide / 2)) || renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkX, chunkZ)))
+
+                            if (renderer.vanillaRenderedChunks.contains(new ChunkPos( chunkPos.posX,  chunkPos.posZ)))
                             {
                                 continue;
                             }
 
                             if (lodDim.doesDataExist(pos))
                             {
-                            	try
-                            	{
-                                width = (int) Math.pow(2, pos.detailLevel);
-                                lodData = lodDim.getData(pos);
-                                LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, lodDim, lodData,
-                                        pos.posX * width, 0, pos.posZ * width, renderer.debugging, pos.detailLevel);
-                            	}
-                            	catch (ArrayIndexOutOfBoundsException e)
-                            	{
-                            		ClientProxy.LOGGER.warn("LodBufferBuilder ran into trouble and had to start over.");
-                            		closeBuffers();
-                            		return;
-                            	}
+                                try
+                                {
+                                    width = (int) Math.pow(2, pos.detailLevel);
+                                    lodData = lodDim.getData(pos);
+                                    LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, lodDim, lodData,
+                                            pos.posX * width, 0, pos.posZ * width, renderer.debugging, pos.detailLevel);
+                                } catch (ArrayIndexOutOfBoundsException e)
+                                {
+                                    ClientProxy.LOGGER.warn("LodBufferBuilder ran into trouble and had to start over.");
+                                    closeBuffers();
+                                    return;
+                                }
                             }
 
                         }
@@ -267,10 +248,15 @@ public class LodBufferBuilder
                     }
                 }
 
-                /**TODO make this automatic and config dependent*/
+
+                // =====================//
+                //    GENERATION PART   //
+                // =====================//
+
+
                 List<LevelPos> posListToGenerate = new ArrayList<>();
 
-                /**TODO this order can be inverted*/
+                /**TODO can give a totally different generation*/
                 /*
                 for (byte detail = LodUtil.BLOCK_DETAIL_LEVEL; detail <= LodUtil.REGION_DETAIL_LEVEL; detail++)
                 {
@@ -289,139 +275,143 @@ public class LodBufferBuilder
                         System.out.println("HERE");
                     }
                 }
-*/
+                 */
                 int requesting = maxChunkGenRequests;
+
+                //we firstly make sure that the world is filled with half region wide block
                 for (byte detailGen = LodUtil.BLOCK_DETAIL_LEVEL; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
                 {
                     if (requesting == 0) break;
                     posListToGenerate.addAll(lodDim.getDataToGenerate(
                             playerBlockPosRounded.getX(),
                             playerBlockPosRounded.getZ(),
-                            (int) (distancesLinear[detailGen] * 1.5),
-                            (int) (distancesLinear[detailGen + 1] * 1.5),
-                            (byte) distancesGenerators[detailGen].complexity,
-                            (byte) 8,
+                            DetailUtil.getDistanceGeneration(detailGen),
+                            DetailUtil.getDistanceGeneration(detailGen + 1),
+                            DetailUtil.getDistanceGenerationMode(detailGen).complexity,
+                            (byte) 7,
                             requesting));
                     requesting = maxChunkGenRequests - posListToGenerate.size();
+
+                    for (LevelPos levelPos : posListToGenerate)
+                    {
+                    }
+
                 }
+
+                //we then fill the world with the rest of the block
                 for (byte detailGen = LodUtil.BLOCK_DETAIL_LEVEL; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
                 {
                     if (requesting == 0) break;
                     posListToGenerate.addAll(lodDim.getDataToGenerate(
                             playerBlockPosRounded.getX(),
                             playerBlockPosRounded.getZ(),
-                            (int) (distancesLinear[detailGen] * 1.5),
-                            (int) (distancesLinear[detailGen + 1] * 1.5),
-                            (byte) distancesGenerators[detailGen].complexity,
+                            DetailUtil.getDistanceGeneration(detailGen),
+                            DetailUtil.getDistanceGeneration(detailGen + 1),
+                            DetailUtil.getDistanceGenerationMode(detailGen).complexity,
                             (byte) 0,
                             maxChunkGenRequests));
                     requesting = maxChunkGenRequests - posListToGenerate.size();
                 }
-                
-                
-                 
-				if (LodConfig.CLIENT.distanceGenerationMode.get() != DistanceGenerationMode.NONE)
-				{
-					// determine which points in the posListToGenerate
-					// should actually be queued up
-					for (LevelPos levelPos : posListToGenerate)
-					{
-						LevelPos chunkLevelPos = levelPos.convert((byte) 3);
-						int chunkX = Math.floorDiv(chunkLevelPos.posX, 2);
-						int chunkZ = Math.floorDiv(chunkLevelPos.posZ, 2);
-						
-						if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
-						{
-							ChunkPos pos = new ChunkPos(chunkX, chunkZ);
-							
-							if (positionWaitingToBeGenerated.contains(pos))
-							{
-								ClientProxy.LOGGER.debug(pos + " asked to be generated again.");
-								continue;
-							}
-							
-							// determine if this position is closer to the player
-							// than the previous
-							int newDistance = playerChunkPos.getChessboardDistance(pos);
-							
-							if (newDistance < minChunkDist)
-							{
-								// this chunk is closer, clear any previous
-								// positions and update the new minimum distance
-								minChunkDist = newDistance;
-								
-								// move all the old chunks into the reserve
-								ArrayList<ChunkPos> oldReserve = new ArrayList<>(chunksToGenReserve);
-								chunksToGenReserve.clear();
-								chunksToGenReserve.addAll(chunksToGen);
-								// top off reserve with whatever was in oldReerve
-								for (int i = 0; i < oldReserve.size(); i++)
-								{
-									if (chunksToGenReserve.size() < maxChunkGenRequests)
-										chunksToGenReserve.add(oldReserve.get(i));
-									else
-										break;
-								}
-								
-								chunksToGen.clear();
-								chunksToGen.add(pos);
-							}
-							else if (newDistance == minChunkDist)
-							{
-								// this chunk position as close as the minimum distance
-								if (chunksToGen.size() < maxChunkGenRequests)
-								{
-									// we are still under the number of chunks to generate
-									// add this position to the list
-									chunksToGen.add(pos);
-								}
-							}
-							else
-							{
-								// this chunk is farther away than the minimum distance,
-								// add it to the reserve to make sure we always have a full reserve
-								chunksToGenReserve.add(pos);
-							}
-							
-						} // lod null and can generate more chunks
-					} // positions to generate
-					
-					
-					
-					// queue up chunks to be generated
-					if (mc.hasSingleplayerServer())
-					{
-						// issue #19
-						// TODO add a way for a server side mod to generate chunks requested here
-						ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(lodDim.dimension);
-						
-						// make sure we have as many chunks to generate as we are allowed
-						if (chunksToGen.size() < maxChunkGenRequests)
-						{
-							Iterator<ChunkPos> reserveIterator = chunksToGenReserve.iterator();
-							while (chunksToGen.size() < maxChunkGenRequests && reserveIterator.hasNext())
-							{
-								chunksToGen.add(reserveIterator.next());
-							}
-						}
-						
-						// start chunk generation
-						for (ChunkPos chunkPos : chunksToGen)
-						{
-							// don't add null chunkPos (which shouldn't happen anyway)
-							// or add more to the generation queue
-							if (chunkPos == null || numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
-								continue;
-							
-							positionWaitingToBeGenerated.add(chunkPos);
-							numberOfChunksWaitingToGenerate.addAndGet(1);
-							LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, DistanceGenerationMode.SURFACE, LodDetail.FULL, renderer, LodQuadTreeNodeBuilder, this, lodDim, serverWorld);
-							WorldWorkerManager.addWorker(genWorker);
-						}
-					}
-				} // if distanceGenerationMode != DistanceGenerationMode.NONE
-				
-				
+
+                if (LodConfig.CLIENT.distanceGenerationMode.get() != DistanceGenerationMode.NONE)
+                {
+                    // determine which points in the posListToGenerate
+                    // should actually be queued up
+                    for (LevelPos levelPos : posListToGenerate)
+                    {
+                        LevelPos chunkLevelPos = levelPos.convert(LodUtil.CHUNK_DETAIL_LEVEL);
+                        int chunkX = chunkLevelPos.posX;
+                        int chunkZ = chunkLevelPos.posZ;
+
+                        if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
+                        {
+                            ChunkPos pos = new ChunkPos(chunkX, chunkZ);
+
+                            if (positionWaitingToBeGenerated.contains(pos))
+                            {
+                                //ClientProxy.LOGGER.debug(pos + " asked to be generated again.");
+                                continue;
+                            }
+
+                            // determine if this position is closer to the player
+                            // than the previous
+                            int newDistance = playerChunkPos.getChessboardDistance(pos);
+
+                            if (newDistance < minChunkDist)
+                            {
+                                // this chunk is closer, clear any previous
+                                // positions and update the new minimum distance
+                                minChunkDist = newDistance;
+
+                                // move all the old chunks into the reserve
+                                ArrayList<ChunkPos> oldReserve = new ArrayList<>(chunksToGenReserve);
+                                chunksToGenReserve.clear();
+                                chunksToGenReserve.addAll(chunksToGen);
+                                // top off reserve with whatever was in oldReerve
+                                for (int i = 0; i < oldReserve.size(); i++)
+                                {
+                                    if (chunksToGenReserve.size() < maxChunkGenRequests)
+                                        chunksToGenReserve.add(oldReserve.get(i));
+                                    else
+                                        break;
+                                }
+
+                                chunksToGen.clear();
+                                chunksToGen.add(pos);
+                            } else if (newDistance == minChunkDist)
+                            {
+                                // this chunk position as close as the minimum distance
+                                if (chunksToGen.size() < maxChunkGenRequests)
+                                {
+                                    // we are still under the number of chunks to generate
+                                    // add this position to the list
+                                    chunksToGen.add(pos);
+                                }
+                            } else
+                            {
+                                // this chunk is farther away than the minimum distance,
+                                // add it to the reserve to make sure we always have a full reserve
+                                chunksToGenReserve.add(pos);
+                            }
+
+                        } // lod null and can generate more chunks
+                    } // positions to generate
+
+
+                    // queue up chunks to be generated
+                    if (mc.hasSingleplayerServer())
+                    {
+                        // issue #19
+                        // TODO add a way for a server side mod to generate chunks requested here
+                        ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(lodDim.dimension);
+
+                        // make sure we have as many chunks to generate as we are allowed
+                        if (chunksToGen.size() < maxChunkGenRequests)
+                        {
+                            Iterator<ChunkPos> reserveIterator = chunksToGenReserve.iterator();
+                            while (chunksToGen.size() < maxChunkGenRequests && reserveIterator.hasNext())
+                            {
+                                chunksToGen.add(reserveIterator.next());
+                            }
+                        }
+
+                        // start chunk generation
+                        for (ChunkPos chunkPos : chunksToGen)
+                        {
+                            // don't add null chunkPos (which shouldn't happen anyway)
+                            // or add more to the generation queue
+                            if (chunkPos == null || numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
+                                continue;
+
+                            positionWaitingToBeGenerated.add(chunkPos);
+                            numberOfChunksWaitingToGenerate.addAndGet(1);
+                            LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, DistanceGenerationMode.SURFACE, LodDetail.FULL, renderer, LodQuadTreeNodeBuilder, this, lodDim, serverWorld);
+                            WorldWorkerManager.addWorker(genWorker);
+                        }
+                    }
+                } // if distanceGenerationMode != DistanceGenerationMode.NONE
+
+
                 // finish the buffer building
                 closeBuffers();
 
@@ -434,15 +424,13 @@ public class LodBufferBuilder
                 //ClientProxy.LOGGER.info("Buffer Build time: " + buildTime + " ms");
 
                 // mark that the buildable buffers as ready to swap
-				switchVbos = true;
-			}
-			catch (Exception e)
-			{
-				ClientProxy.LOGGER.warn("\"LodNodeBufferBuilder.generateLodBuffersAsync\" ran into trouble: ");
-				e.printStackTrace();
-			}
-			finally
-			{
+                switchVbos = true;
+            } catch (Exception e)
+            {
+                ClientProxy.LOGGER.warn("\"LodNodeBufferBuilder.generateLodBuffersAsync\" ran into trouble: ");
+                e.printStackTrace();
+            } finally
+            {
                 // regardless of if we successfully created the buffers
                 // we are done generating.
                 generatingBuffers = false;
@@ -472,11 +460,11 @@ public class LodBufferBuilder
      */
     private boolean isCoordInCenterArea(int i, int j, int centerCoordinate)
     {
-        return (i >= centerCoordinate - mc.options.renderDistance
-                && i <= centerCoordinate + mc.options.renderDistance)
+        return (i >= centerCoordinate - (mc.options.renderDistance + 2)
+                && i <= centerCoordinate + (mc.options.renderDistance + 2))
                 &&
-                (j >= centerCoordinate - mc.options.renderDistance
-                        && j <= centerCoordinate + mc.options.renderDistance);
+                (j >= centerCoordinate - (mc.options.renderDistance + 2)
+                        && j <= centerCoordinate + (mc.options.renderDistance + 2));
     }
 
 

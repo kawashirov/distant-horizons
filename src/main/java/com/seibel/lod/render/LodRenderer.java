@@ -229,11 +229,11 @@ public class LodRenderer
 
         // determine how far the game's render distance is currently set
         //farPlaneBlockDistance = mc.options.renderDistance * LodUtil.CHUNK_WIDTH;
-        farPlaneBlockDistance = 8 * LodUtil.CHUNK_WIDTH;
+        farPlaneBlockDistance = LodConfig.CLIENT.lodChunkRenderDistane.get() * LodUtil.CHUNK_WIDTH;
 
         // set how how far the LODs will go
         //int numbChunksWide = mc.options.renderDistance * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
-        int numbChunksWide = 8 * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() + 1;
+        int numbChunksWide =LodConfig.CLIENT.lodChunkRenderDistane.get() * 2;
 
         // determine which LODs should not be rendered close to the player
         HashSet<ChunkPos> chunkPosToSkip = getNearbyLodChunkPosToSkip(lodDim, player.blockPosition());
@@ -461,12 +461,12 @@ public class LodRenderer
         {
             if (fogQuality == FogQuality.FANCY)
             {
-                RenderSystem.fogStart(farPlaneBlockDistance * 0.85f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
-                RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
+                RenderSystem.fogStart(farPlaneBlockDistance * 0.85f);
+                RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
             } else if (fogQuality == FogQuality.FAST)
             {
-                RenderSystem.fogStart(farPlaneBlockDistance * 0.5f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
-                RenderSystem.fogEnd(farPlaneBlockDistance * 0.75f * LodConfig.CLIENT.lodChunkRadiusMultiplier.get());
+                RenderSystem.fogStart(farPlaneBlockDistance * 0.5f);
+                RenderSystem.fogEnd(farPlaneBlockDistance * 0.75f);
             }
         }
 

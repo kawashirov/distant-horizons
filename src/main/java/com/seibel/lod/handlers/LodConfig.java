@@ -20,18 +20,13 @@ package com.seibel.lod.handlers;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import com.seibel.lod.enums.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.seibel.lod.ModInfo;
-import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.FogDistance;
-import com.seibel.lod.enums.FogDrawOverride;
-import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.enums.LodTemplate;
-import com.seibel.lod.enums.ShadingMode;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -76,6 +71,8 @@ public class LodConfig
          * to determine how far out to generate/render LODs
          */
         public ForgeConfigSpec.IntValue lodChunkRadiusMultiplier;
+
+        public ForgeConfigSpec.EnumValue<DistanceCalculatorType> lodDistanceCalculatorType;
 
         public ForgeConfigSpec.IntValue lodQuality;
 
@@ -159,6 +156,29 @@ public class LodConfig
                             + " A value of 2 means that there is 1 render distance worth \n"
                             + " of LODs in each cardinal direction. \n")
                     .defineInRange("lodChunkRadiusMultiplier", 8, 2, 16);
+
+            lodDistanceCalculatorType = builder
+                    .comment("\n\n"
+                            + " " + DistanceCalculatorType.LINEAR + " \n"
+                            + " with LINEAR calculator the quality of block decrease \n"
+                            + " linearly to the distance of the player \n"
+
+                            + "\n"
+                            + " " + DistanceCalculatorType.QUADRATIC + " \n"
+                            + " with LINEAR calculator the quality of block decrease \n"
+                            + " quadratically to the distance of the player \n")
+                    .defineEnum("lodDistanceComputation", DistanceCalculatorType.LINEAR);
+
+            lodQuality = builder
+                    .comment("\n\n"
+                            + " this value is multiplied by 128 and determine \n"
+                            + " how much the quality decrease over distance \n")
+                    .defineInRange("lodChunkRadiusMultiplier", 1, 1, 4);
+
+            lodChunkRenderDistane = builder
+                    .comment("\n\n"
+                            + " This is the render distance of the mod \n")
+                    .defineInRange("lodChunkRadiusMultiplier", 128, 32, 128);
 
             distanceGenerationMode = builder
                     .comment("\n\n"
