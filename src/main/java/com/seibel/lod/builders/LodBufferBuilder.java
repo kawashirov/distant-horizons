@@ -183,8 +183,12 @@ public class LodBufferBuilder
                 // used when determining which chunks are closer when queuing distance
                 // generation
                 int minChunkDist = Integer.MAX_VALUE;
-
                 int width;
+
+                // =====================//
+                //    RENDERING PART    //
+                // =====================//
+
                 List<LevelPos> posListToRender = new ArrayList<>();
                 LodDataPoint lodData;
                 for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
@@ -215,9 +219,10 @@ public class LodBufferBuilder
                         for (LevelPos pos : posListToRender)
                         {
                             LevelPos chunkPos = pos.convert(LodUtil.CHUNK_DETAIL_LEVEL);
-                            int chunkX = chunkPos.posX + startChunkPos.x;
-                            int chunkZ = chunkPos.posZ + startChunkPos.z;
+                            int chunkX = chunkPos.posX;
+                            int chunkZ = chunkPos.posZ;
                             // skip any chunks that Minecraft is going to render
+
                             if (isCoordInCenterArea(chunkPos.posX, chunkPos.posZ, (numbChunksWide / 2)) || renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkX, chunkZ)))
                             {
                                 continue;
@@ -245,10 +250,15 @@ public class LodBufferBuilder
                     }
                 }
 
-                /**TODO make this automatic and config dependent*/
+
+                // =====================//
+                //    GENERATION PART   //
+                // =====================//
+
+
                 List<LevelPos> posListToGenerate = new ArrayList<>();
 
-                /**TODO this order can be inverted*/
+                /**TODO can give a totally different generation*/
                 /*
                 for (byte detail = LodUtil.BLOCK_DETAIL_LEVEL; detail <= LodUtil.REGION_DETAIL_LEVEL; detail++)
                 {
@@ -267,9 +277,10 @@ public class LodBufferBuilder
                         System.out.println("HERE");
                     }
                 }
-*/
+                 */
                 int requesting = maxChunkGenRequests;
 
+                //we firstly make sure that the world is filled with half region wide block
                 for (byte detailGen = LodUtil.BLOCK_DETAIL_LEVEL; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
                 {
                     if (requesting == 0) break;
@@ -279,7 +290,7 @@ public class LodBufferBuilder
                             DetailUtil.getDistanceGeneration(detailGen),
                             DetailUtil.getDistanceGeneration(detailGen + 1),
                             DetailUtil.getDistanceGenerationMode(detailGen).complexity,
-                            (byte) 8,
+                            (byte) 7,
                             requesting));
                     requesting = maxChunkGenRequests - posListToGenerate.size();
 
@@ -288,6 +299,8 @@ public class LodBufferBuilder
                     }
 
                 }
+
+                //we then fill the world with the rest of the block
                 for (byte detailGen = LodUtil.BLOCK_DETAIL_LEVEL; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
                 {
                     if (requesting == 0) break;
@@ -319,7 +332,7 @@ public class LodBufferBuilder
 
                             if (positionWaitingToBeGenerated.contains(pos))
                             {
-                                ClientProxy.LOGGER.debug(pos + " asked to be generated again.");
+                                //ClientProxy.LOGGER.debug(pos + " asked to be generated again.");
                                 continue;
                             }
 

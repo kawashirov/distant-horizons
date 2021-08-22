@@ -2,6 +2,7 @@ package com.seibel.lod.builders;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.objects.LevelPos;
+import com.seibel.lod.util.LodUtil;
 import net.minecraft.util.math.ChunkPos;
 
 /**
@@ -21,7 +22,7 @@ public class GenerationRequest
 
     public ChunkPos getChunkPos()
     {
-        LevelPos chunkLevelPos = levelPos.convert((byte) 3);
+        LevelPos chunkLevelPos = levelPos.convert(LodUtil.CHUNK_DETAIL_LEVEL);
         return new ChunkPos(chunkLevelPos.posX, chunkLevelPos.posZ);
     }
 }

@@ -20,6 +20,7 @@ public class DetailUtil
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE,
+            DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE};
 
     public static int getDistanceRendering(int detail)
