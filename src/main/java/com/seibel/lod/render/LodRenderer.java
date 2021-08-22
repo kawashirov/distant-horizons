@@ -203,7 +203,7 @@ public class LodRenderer
         if ((int) player.getX() / LodUtil.CHUNK_WIDTH != prevChunkX ||
                 (int) player.getZ() / LodUtil.CHUNK_WIDTH != prevChunkZ ||
                 ClientProxy.previousChunkRenderDistance != mc.options.renderDistance ||
-                ClientProxy.previousLodMultiplierDistance != LodConfig.CLIENT.lodChunkRadiusMultiplier.get() ||
+                ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.lodChunkRenderDistance.get() ||
                 prevFogDistance != LodConfig.CLIENT.fogDistance.get())
         {
             // yes
@@ -229,11 +229,10 @@ public class LodRenderer
 
         // determine how far the game's render distance is currently set
         //farPlaneBlockDistance = mc.options.renderDistance * LodUtil.CHUNK_WIDTH;
-        farPlaneBlockDistance = LodConfig.CLIENT.lodChunkRenderDistane.get() * LodUtil.CHUNK_WIDTH;
+        farPlaneBlockDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
 
         // set how how far the LODs will go
-        //int numbChunksWide = mc.options.renderDistance * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
-        int numbChunksWide =LodConfig.CLIENT.lodChunkRenderDistane.get() * 2;
+        int numbChunksWide =LodConfig.CLIENT.lodChunkRenderDistance.get() * 2;
 
         // determine which LODs should not be rendered close to the player
         HashSet<ChunkPos> chunkPosToSkip = getNearbyLodChunkPosToSkip(lodDim, player.blockPosition());
@@ -574,8 +573,8 @@ public class LodRenderer
                         // it is possible to see the near clip plane, but
                         // you have to be flying quickly in spectator mode through ungenerated
                         // terrain, so I don't think it is much of an issue.
-                        LodConfig.CLIENT.lodChunkRadiusMultiplier.get(),
-                        this.farPlaneBlockDistance * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() * 2);
+                        LodConfig.CLIENT.lodChunkRenderDistance.get() / mc.options.renderDistance,
+                        mc.options.renderDistance * LodUtil.CHUNK_WIDTH * 2);
 
         // add the screen space distortions
         projectionMatrix.multiply(matrixStack.last().pose());

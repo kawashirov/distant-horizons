@@ -66,17 +66,11 @@ public class LodConfig
 
         public ForgeConfigSpec.EnumValue<ShadingMode> shadingMode;
 
-        /**
-         * this is multiplied by the default view distance
-         * to determine how far out to generate/render LODs
-         */
-        public ForgeConfigSpec.IntValue lodChunkRadiusMultiplier;
-
         public ForgeConfigSpec.EnumValue<DistanceCalculatorType> lodDistanceCalculatorType;
 
         public ForgeConfigSpec.IntValue lodQuality;
 
-        public ForgeConfigSpec.IntValue lodChunkRenderDistane;
+        public ForgeConfigSpec.IntValue lodChunkRenderDistance;
 
         public ForgeConfigSpec.DoubleValue brightnessMultiplier;
 
@@ -148,15 +142,6 @@ public class LodConfig
                             + " " + LodDetail.FULL.toString() + ": render 256 LODs for each Chunk. \n")
                     .defineEnum("lodGenerationQuality", LodDetail.DOUBLE);
 
-
-            lodChunkRadiusMultiplier = builder
-                    .comment("\n\n"
-                            + " This is multiplied by the default view distance \n"
-                            + " to determine how far out to generate/render LODs. \n"
-                            + " A value of 2 means that there is 1 render distance worth \n"
-                            + " of LODs in each cardinal direction. \n")
-                    .defineInRange("lodChunkRadiusMultiplier", 8, 2, 16);
-
             lodDistanceCalculatorType = builder
                     .comment("\n\n"
                             + " " + DistanceCalculatorType.LINEAR + " \n"
@@ -173,12 +158,12 @@ public class LodConfig
                     .comment("\n\n"
                             + " this value is multiplied by 128 and determine \n"
                             + " how much the quality decrease over distance \n")
-                    .defineInRange("lodChunkRadiusMultiplier", 1, 1, 4);
+                    .defineInRange("lodQuality", 1, 1, 4);
 
-            lodChunkRenderDistane = builder
+            lodChunkRenderDistance = builder
                     .comment("\n\n"
                             + " This is the render distance of the mod \n")
-                    .defineInRange("lodChunkRadiusMultiplier", 128, 32, 128);
+                    .defineInRange("lodChunkRenderDistane", 128, 32, 128);
 
             distanceGenerationMode = builder
                     .comment("\n\n"

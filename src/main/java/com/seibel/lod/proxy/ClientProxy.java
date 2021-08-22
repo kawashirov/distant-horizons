@@ -67,7 +67,7 @@ public class ClientProxy
 	/** This is used to determine if the LODs should be regenerated */
 	public static int previousChunkRenderDistance = 0;
 	/** This is used to determine if the LODs should be regenerated */
-	public static int previousLodMultiplierDistance = 0;
+	public static int previousLodRenderDistance = 0;
 	
 	/** can be set if we want to recalculate variables related
 	 * to the LOD view distance */
@@ -124,7 +124,7 @@ public class ClientProxy
 		// these can't be set until after the buffers are built (in renderer.drawLODs)
 		// otherwise the buffers may be set to the wrong size, or not changed at all
 		previousChunkRenderDistance = mc.options.renderDistance;
-		previousLodMultiplierDistance = LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
+		previousLodRenderDistance = LodConfig.CLIENT.lodChunkRenderDistance.get();
 	}
 	
 	
@@ -142,9 +142,8 @@ public class ClientProxy
 		
 		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.FULL);
 		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.FULL);
-		
-		LodConfig.CLIENT.lodChunkRadiusMultiplier.set(16);
-		LodConfig.CLIENT.fogDistance.set(FogDistance.NEAR);
+
+		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
 		LodConfig.CLIENT.shadingMode.set(ShadingMode.DARKEN_SIDES);
 		//		LodConfig.CLIENT.brightnessMultiplier.set(1.0);
@@ -152,7 +151,7 @@ public class ClientProxy
 		
 		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.FEATURES);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
-		LodConfig.CLIENT.lodChunkRenderDistane.set(96);
+		LodConfig.CLIENT.lodChunkRenderDistance.set(96);
 		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.QUADRATIC);
 		LodConfig.CLIENT.lodQuality.set(1);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
@@ -256,8 +255,7 @@ public class ClientProxy
 	private void viewDistanceChangedEvent()
 	{
 		// calculate how wide the dimension(s) should be in regions
-		//int chunksWide = (mc.options.renderDistance * 2) * LodConfig.CLIENT.lodChunkRadiusMultiplier.get();
-		int chunksWide = 8 * 2 * LodConfig.CLIENT.lodChunkRadiusMultiplier.get() + 1;
+		int chunksWide = LodConfig.CLIENT.lodChunkRenderDistance.get() * 2 + 1;
 		int newWidth = (int) Math.ceil(chunksWide / (float) LodUtil.REGION_WIDTH_IN_CHUNKS);
 		newWidth = (newWidth % 2 == 0) ? (newWidth += 1) : (newWidth += 2); // make sure we have a odd number of regions
 		
