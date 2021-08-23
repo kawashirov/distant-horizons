@@ -218,7 +218,7 @@ public class LodRegion implements Serializable
 
         for(int i=0; i<dataNumber; i++)
         {
-            Map.Entry<LevelPos,Integer> min = Collections.min(levelPosList, LevelPos.getPosAndDetailComparator());
+            Map.Entry<LevelPos,Integer> min = Collections.min(levelPosList, LevelPos.getPosComparator());
             levelPosList.remove(min);
             levelMinPosList.add(min);
         }
@@ -580,15 +580,15 @@ public class LodRegion implements Serializable
     /**
      * This will be used to save a level
      *
-     * @param lod
+     * @param detailLevel
      * @return
      */
-    public LevelContainer getLevel(byte lod)
+    public LevelContainer getLevel(byte detailLevel)
     {
-        if(lod < minDetailLevel){
-            throw new IllegalArgumentException("getLevel asked for a level that does not exist: minimum " + minDetailLevel + " level requested " + lod);
+        if(detailLevel < minDetailLevel){
+            throw new IllegalArgumentException("getLevel asked for a level that does not exist: minimum " + minDetailLevel + " level requested " + detailLevel);
         }
-        return new LevelContainer(lod, colors[lod], height[lod], depth[lod], generationType[lod], dataExistence[lod]);
+        return new LevelContainer(detailLevel, colors[detailLevel], height[detailLevel], depth[detailLevel], generationType[detailLevel], dataExistence[detailLevel]);
     }
 
     /**
@@ -616,7 +616,6 @@ public class LodRegion implements Serializable
     {
         if(minDetailLevel < detailLevel)
         {
-            System.out.println("cutting at " + regionPosX + " " + regionPosZ + " " + detailLevel);
             for (byte tempLod = 0; tempLod < detailLevel; tempLod++)
             {
                 colors[tempLod] = new byte[0][0][0];

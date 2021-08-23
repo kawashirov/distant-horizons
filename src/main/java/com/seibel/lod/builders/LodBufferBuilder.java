@@ -318,7 +318,8 @@ public class LodBufferBuilder
 				if (LodConfig.CLIENT.distanceGenerationMode.get() != DistanceGenerationMode.NONE)
 				{
 					int requesting = maxChunkGenRequests;
-					
+
+					/*
 					//we firstly make sure that the world is filled with half region wide block
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
@@ -337,6 +338,7 @@ public class LodBufferBuilder
 						requesting = maxChunkGenRequests - generationRequestList.size();
 
 					}
+					 */
 					
 					//we then fill the world with the rest of the block
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)

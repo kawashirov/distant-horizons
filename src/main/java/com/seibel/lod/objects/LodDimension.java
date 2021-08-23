@@ -296,8 +296,8 @@ public class LodDimension
                 levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ);
                 for(byte index = LodUtil.BLOCK_DETAIL_LEVEL; index <= LodUtil.REGION_DETAIL_LEVEL; index++){
                     if(DetailUtil.getDistanceGeneration(index+1) > levelPos.minDistance(posX, posZ)){
-                        region = getRegion(levelPos.convert(DetailUtil.getLodDetail(index+1).detailLevel));
-                        region.cuteTree(DetailUtil.getLodDetail(index).detailLevel);
+                        region = getRegion(levelPos.convert(DetailUtil.getLodDetail(index).detailLevel));
+                        region.cuteTree(DetailUtil.getLodDetail(index-1).detailLevel);
                         break;
                     }
                 }
@@ -387,7 +387,7 @@ public class LodDimension
 
         for(int i=0; i<dataNumber; i++)
         {
-            Map.Entry<LevelPos,Integer> min = Collections.min(listOfData, LevelPos.getPosAndDetailComparator());
+            Map.Entry<LevelPos,Integer> min = Collections.min(listOfData, LevelPos.getPosComparator());
             listOfData.remove(min);
             levelMinPosList.add(min);
         }
@@ -417,7 +417,7 @@ public class LodDimension
                 region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
                 if (region == null)
                 {
-                    region = new LodRegion(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel, regionPos);
+                    region = new LodRegion(DetailUtil.getLodDetail(detailLevel).detailLevel, regionPos);
                     addOrOverwriteRegion(region);
                 } else
                 {
@@ -441,7 +441,7 @@ public class LodDimension
         {
         	try
         	{
-	            region = new LodRegion(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel, regionPos);
+	            region = new LodRegion(DetailUtil.getLodDetail(detailLevel).detailLevel, regionPos);
 	            addOrOverwriteRegion(region);
         	}
         	catch (ArrayIndexOutOfBoundsException e)

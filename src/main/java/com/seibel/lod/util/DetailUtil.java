@@ -25,13 +25,13 @@ public class DetailUtil
 
     private static LodDetail[] lodDetails = {
             LodDetail.FULL,
-            LodDetail.FULL,
-            LodDetail.HALF,
             LodDetail.HALF,
             LodDetail.QUAD,
-            LodDetail.QUAD,
             LodDetail.DOUBLE,
-            LodDetail.DOUBLE,
+            LodDetail.SINGLE,
+            LodDetail.SINGLE,
+            LodDetail.SINGLE,
+            LodDetail.SINGLE,
             LodDetail.SINGLE,
             LodDetail.SINGLE,
             LodDetail.SINGLE};
@@ -68,6 +68,9 @@ public class DetailUtil
 
     public static LodDetail getLodDetail(int detail)
     {
-        return lodDetails[detail];
+        if(detail < minDetail)
+            return lodDetails[minDetail];
+        else
+            return lodDetails[detail];
     }
 }
