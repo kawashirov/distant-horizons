@@ -248,9 +248,7 @@ public class LodDimension
             {
                 /**TODO the value is currently 0 but should be determinated by the distance of the player)*/
                 regions[xIndex][zIndex] = new LodRegion(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel, regionPos);
-            }
-
-            if (regions[xIndex][zIndex].getMinDetailLevel() > levelPos.detailLevel)
+            }else if (regions[xIndex][zIndex].getMinDetailLevel() > levelPos.detailLevel)
             {
                 regions[xIndex][zIndex].expand(levelPos.detailLevel);
             }

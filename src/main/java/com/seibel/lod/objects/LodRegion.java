@@ -606,7 +606,6 @@ public class LodRegion implements Serializable
     {
         if(minDetailLevel < detailLevel)
         {
-            System.out.println("cutting at " + detailLevel);
             for (byte tempLod = 0; tempLod < detailLevel; tempLod++)
             {
                 colors[tempLod] = new byte[0][0][0];
