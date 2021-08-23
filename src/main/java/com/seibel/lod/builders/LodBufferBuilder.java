@@ -66,8 +66,7 @@ public class LodBufferBuilder
 	/** This holds the thread used to generate new LODs off the main thread. */
 	private ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " - main"));
 	/** This holds the threads used to generate buffers. */
-	private ExecutorService bufferBuilderThreads = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " - buffer builder"));
-	//private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
+	private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
 	
 	private LodBuilder LodQuadTreeNodeBuilder;
 	
@@ -174,50 +173,54 @@ public class LodBufferBuilder
 		Thread thread = new Thread(() ->
 		{
 			bufferLock.lock();
+
+			long treeStart = System.currentTimeMillis();
 			lodDim.treeCutter(playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
+
+			long treeEnd = System.currentTimeMillis();
 			
 			try
 			{
 				long startTime = System.currentTimeMillis();
-				
+
 				ArrayList<GenerationRequest> chunksToGen = new ArrayList<>(maxChunkGenRequests);
 				// if we don't have a full number of chunks to generate in chunksToGen
 				// we can top it off from the reserve
 				ArrayList<GenerationRequest> chunksToGenReserve = new ArrayList<>(maxChunkGenRequests);
 				ArrayList<Callable<Boolean>> builderThreads = new ArrayList<>(lodDim.regions.length * lodDim.regions.length);
-				
+
 				startBuffers();
-				
+
 				// used when determining which chunks are closer when queuing distance
 				// generation
 				int minChunkDist = Integer.MAX_VALUE;
-				
+
 				// =====================//
 				//    RENDERING PART    //
 				// =====================//
-				
-				
+
+				long renderRequestStart = System.currentTimeMillis();
 				for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
 				{
 					for (int zRegion = 0; zRegion < lodDim.regions.length; zRegion++)
 					{
 						RegionPos regionPos = new RegionPos(xRegion + lodDim.getCenterX() - lodDim.getWidth() / 2, zRegion + lodDim.getCenterZ() - lodDim.getWidth() / 2);
-						
+
 						// local position in the vbo and bufferBuilder arrays
 						BufferBuilder currentBuffer = buildableBuffers[xRegion][zRegion];
-						
+
 						// make sure the buffers weren't
 						// changed while we were running this method
 						if (currentBuffer == null || (currentBuffer != null && !currentBuffer.building()))
 							return;
-						
-						
+
+
 						byte detailLevel = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
-						
+
 						Callable<Boolean> bufferBuildingThread = () ->
 						{
-							List<LevelPos> posListToRender = new ArrayList<>();		
-							
+							List<LevelPos> posListToRender = new ArrayList<>();
+
 							for (byte detail = detailLevel; detail <= LodUtil.REGION_DETAIL_LEVEL; detail++)
 							{
 								posListToRender.addAll(lodDim.getDataToRender(
@@ -228,25 +231,25 @@ public class LodBufferBuilder
 										DetailUtil.getDistanceRendering(detail + 1),
 										detail));
 							}
-							
-							
+
+
 							for (LevelPos pos : posListToRender)
 							{
 								LevelPos chunkPos = pos.convert(LodUtil.CHUNK_DETAIL_LEVEL);
 								// skip any chunks that Minecraft is going to render
-								
+
 								if (renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkPos.posX, chunkPos.posZ)))
 								{
 									continue;
 								}
-								
+
 								if (lodDim.doesDataExist(pos))
 								{
 									try
 									{
 										int width = (int) Math.pow(2, pos.detailLevel);
 										LodDataPoint lodData = lodDim.getData(pos);
-										
+
 										if (lodData != null)
 										{
 											LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, lodDim, lodData,
@@ -258,20 +261,22 @@ public class LodBufferBuilder
 										return false;
 									}
 								}
-								
+
 							}// for pos to in list to render
-							
+
 							// the thread executed successfully
 							return true;
 						};// buffer builder worker thread
-						
-						
+
+
 						builderThreads.add(bufferBuildingThread);
-						
+
 					}// region z
 				}// region z
-				
-				
+
+				long renderRequestEnd = System.currentTimeMillis();
+
+				long renderStart = System.currentTimeMillis();
 				// wait for all threads to finish
 				List<Future<Boolean>> futures = bufferBuilderThreads.invokeAll(builderThreads);
 				for(Future<Boolean> future : futures)
@@ -284,14 +289,15 @@ public class LodBufferBuilder
 						return;
 					}
 				}
-				
-				
+				long renderEnd = System.currentTimeMillis();
+
+
 				// =====================//
 				//    GENERATION PART   //
 				// =====================//
 				
 				
-				List<LevelPos> posListToGenerate = new ArrayList<>();
+				List<LevelPos> posListToGenerate;
 				List<GenerationRequest> generationRequestList = new ArrayList<>();
 				
 				/**TODO can give a totally different generation*/
@@ -314,11 +320,17 @@ public class LodBufferBuilder
                     }
                 }
 				 */
-				
+
+				long genReqStart = 0;
+				long genReqEnd = 0;
+				long genStart = 0;
+				long genEnd = 0;
+
 				if (LodConfig.CLIENT.distanceGenerationMode.get() != DistanceGenerationMode.NONE)
 				{
 					int requesting = maxChunkGenRequests;
 
+					genReqStart = System.currentTimeMillis();
 					/*
 					//we firstly make sure that the world is filled with half region wide block
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
@@ -338,8 +350,9 @@ public class LodBufferBuilder
 						requesting = maxChunkGenRequests - generationRequestList.size();
 
 					}
+
 					 */
-					
+
 					//we then fill the world with the rest of the block
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
@@ -418,8 +431,10 @@ public class LodBufferBuilder
 							
 						} // lod null and can generate more chunks
 					} // positions to generate
-					
-					
+
+					genReqEnd = System.currentTimeMillis();
+
+					genStart = System.currentTimeMillis();
 					// queue up chunks to be generated
 					if (mc.hasSingleplayerServer())
 					{
@@ -452,6 +467,7 @@ public class LodBufferBuilder
 							WorldWorkerManager.addWorker(genWorker);
 						}
 					}
+					genEnd = System.currentTimeMillis();
 				} // if distanceGenerationMode != DistanceGenerationMode.NONE
 				
 				
@@ -464,7 +480,23 @@ public class LodBufferBuilder
 				
 				long endTime = System.currentTimeMillis();
 				long buildTime = endTime - startTime;
-				ClientProxy.LOGGER.info("Buffer Build time: " + buildTime + " ms");
+
+				long treeTime = treeEnd - treeStart;
+
+				long renderingRequestTime = renderRequestEnd - renderRequestStart;
+
+				long renderingTime = renderEnd - renderStart;
+
+				long genReqTime = genReqEnd - genReqStart;
+
+				long genTime = genEnd - genStart;
+
+				ClientProxy.LOGGER.info("Buffer Build time: " + buildTime + " ms" + '\n' +
+						"Tree cutting time: " + treeTime + " ms" + '\n' +
+						"Rendering request time: " + renderingRequestTime + " ms" + '\n' +
+						"Rendering time: " + renderingTime + " ms" + '\n' +
+						"Generation request time: " + genReqTime + " ms" + '\n' +
+						"Generation time: " + genTime + " ms");
 				
 				// mark that the buildable buffers as ready to swap
 				switchVbos = true;
