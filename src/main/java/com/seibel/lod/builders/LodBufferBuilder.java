@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.logging.Level;
 
 import org.lwjgl.opengl.GL11;
 
@@ -172,15 +173,16 @@ public class LodBufferBuilder
 		Thread thread = new Thread(() ->
 		{
 			bufferLock.lock();
+			lodDim.treeCutter(playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
 			
 			try
 			{
 				long startTime = System.currentTimeMillis();
 				
-				ArrayList<ChunkPos> chunksToGen = new ArrayList<>(maxChunkGenRequests);
+				ArrayList<GenerationRequest> chunksToGen = new ArrayList<>(maxChunkGenRequests);
 				// if we don't have a full number of chunks to generate in chunksToGen
 				// we can top it off from the reserve
-				ArrayList<ChunkPos> chunksToGenReserve = new ArrayList<>(maxChunkGenRequests);
+				ArrayList<GenerationRequest> chunksToGenReserve = new ArrayList<>(maxChunkGenRequests);
 				ArrayList<Callable<Boolean>> builderThreads = new ArrayList<>(lodDim.regions.length * lodDim.regions.length);
 				
 				startBuffers();
@@ -289,6 +291,7 @@ public class LodBufferBuilder
 				
 				
 				List<LevelPos> posListToGenerate = new ArrayList<>();
+				List<GenerationRequest> generationRequestList = new ArrayList<>();
 				
 				/**TODO can give a totally different generation*/
 				/*
@@ -319,45 +322,49 @@ public class LodBufferBuilder
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
 						if (requesting == 0) break;
-						posListToGenerate.addAll(lodDim.getDataToGenerate(
+						posListToGenerate = lodDim.getDataToGenerate(
 								playerBlockPosRounded.getX(),
 								playerBlockPosRounded.getZ(),
 								DetailUtil.getDistanceGeneration(detailGen),
 								DetailUtil.getDistanceGeneration(detailGen + 1),
 								LodConfig.CLIENT.distanceGenerationMode.get().complexity,
-								(byte) 7,
-								requesting));
-						requesting = maxChunkGenRequests - posListToGenerate.size();
+								(byte) 9,
+								requesting);
+						for(LevelPos levelPos : posListToGenerate){
+							generationRequestList.add(new GenerationRequest(levelPos,LodConfig.CLIENT.distanceGenerationMode.get(), DetailUtil.getLodDetail(detailGen)));
+						}
+						requesting = maxChunkGenRequests - generationRequestList.size();
+
 					}
 					
 					//we then fill the world with the rest of the block
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
 						if (requesting == 0) break;
-						posListToGenerate.addAll(lodDim.getDataToGenerate(
+						posListToGenerate = lodDim.getDataToGenerate(
 								playerBlockPosRounded.getX(),
 								playerBlockPosRounded.getZ(),
 								DetailUtil.getDistanceGeneration(detailGen),
 								DetailUtil.getDistanceGeneration(detailGen + 1),
 								LodConfig.CLIENT.distanceGenerationMode.get().complexity,
 								LodConfig.CLIENT.maxGenerationDetail.get().detailLevel,
-								maxChunkGenRequests));
-						requesting = maxChunkGenRequests - posListToGenerate.size();
+								maxChunkGenRequests);
+						for(LevelPos levelPos : posListToGenerate){
+							generationRequestList.add(new GenerationRequest(levelPos,LodConfig.CLIENT.distanceGenerationMode.get(), DetailUtil.getLodDetail(detailGen)));
+						}
+						requesting = maxChunkGenRequests - generationRequestList.size();
 					}
 					
 					// determine which points in the posListToGenerate
 					// should actually be queued up
-					for (LevelPos levelPos : posListToGenerate)
+					for (GenerationRequest generationRequest : generationRequestList)
 					{
-						LevelPos chunkLevelPos = levelPos.convert(LodUtil.CHUNK_DETAIL_LEVEL);
-						int chunkX = chunkLevelPos.posX;
-						int chunkZ = chunkLevelPos.posZ;
+						ChunkPos chunkPos = generationRequest.getChunkPos();
 						
 						if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
 						{
-							ChunkPos pos = new ChunkPos(chunkX, chunkZ);
 							
-							if (positionWaitingToBeGenerated.contains(pos))
+							if (positionWaitingToBeGenerated.contains(chunkPos))
 							{
 								//ClientProxy.LOGGER.debug(pos + " asked to be generated again.");
 								continue;
@@ -365,7 +372,7 @@ public class LodBufferBuilder
 							
 							// determine if this position is closer to the player
 							// than the previous
-							int newDistance = playerChunkPos.getChessboardDistance(pos);
+							int newDistance = playerChunkPos.getChessboardDistance(chunkPos);
 							
 							if (newDistance < minChunkDist)
 							{
@@ -374,7 +381,7 @@ public class LodBufferBuilder
 								minChunkDist = newDistance;
 								
 								// move all the old chunks into the reserve
-								ArrayList<ChunkPos> oldReserve = new ArrayList<>(chunksToGenReserve);
+								ArrayList<GenerationRequest> oldReserve = new ArrayList<>(chunksToGenReserve);
 								chunksToGenReserve.clear();
 								chunksToGenReserve.addAll(chunksToGen);
 								// top off reserve with whatever was in oldReerve
@@ -387,7 +394,7 @@ public class LodBufferBuilder
 								}
 								
 								chunksToGen.clear();
-								chunksToGen.add(pos);
+								chunksToGen.add(generationRequest);
 							}
 							else if (newDistance == minChunkDist)
 							{
@@ -396,14 +403,14 @@ public class LodBufferBuilder
 								{
 									// we are still under the number of chunks to generate
 									// add this position to the list
-									chunksToGen.add(pos);
+									chunksToGen.add(generationRequest);
 								}
 							}
 							else
 							{
 								// this chunk is farther away than the minimum distance,
 								// add it to the reserve to make sure we always have a full reserve
-								chunksToGenReserve.add(pos);
+								chunksToGenReserve.add(generationRequest);
 							}
 							
 						} // lod null and can generate more chunks
@@ -420,7 +427,7 @@ public class LodBufferBuilder
 						// make sure we have as many chunks to generate as we are allowed
 						if (chunksToGen.size() < maxChunkGenRequests)
 						{
-							Iterator<ChunkPos> reserveIterator = chunksToGenReserve.iterator();
+							Iterator<GenerationRequest> reserveIterator = chunksToGenReserve.iterator();
 							while (chunksToGen.size() < maxChunkGenRequests && reserveIterator.hasNext())
 							{
 								chunksToGen.add(reserveIterator.next());
@@ -428,10 +435,11 @@ public class LodBufferBuilder
 						}
 						
 						// start chunk generation
-						for (ChunkPos chunkPos : chunksToGen)
+						for (GenerationRequest generationRequest : generationRequestList)
 						{
 							// don't add null chunkPos (which shouldn't happen anyway)
 							// or add more to the generation queue
+							ChunkPos chunkPos = generationRequest.getChunkPos();
 							if (chunkPos == null || numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
 								continue;
 							

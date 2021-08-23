@@ -27,12 +27,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.seibel.lod.objects.LevelContainer;
-import com.seibel.lod.objects.LodDimension;
-import com.seibel.lod.objects.LodRegion;
-import com.seibel.lod.objects.RegionPos;
+import com.seibel.lod.objects.*;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodThreadFactory;
+import com.seibel.lod.util.LodUtil;
 
 /**
  * This object handles creating LodRegions
@@ -116,11 +114,12 @@ public class LodDimensionFileHandler
      * Return the LodRegion region at the given coordinates.
      * (null if the file doesn't exist)
      */
-    public LodRegion loadRegionFromFile(RegionPos regionPos)
+    public LodRegion loadRegionFromFile(LevelPos levelPos)
 	{
+		RegionPos regionPos = levelPos.getRegionPos();
     	int regionX = regionPos.x;
     	int regionZ = regionPos.z;
-    	String fileName = getFileNameAndPathForRegion(regionX, regionZ);
+    	String fileName = getFileNameAndPathForRegion(regionX, regionZ, levelPos.detailLevel);
     	
     	// if the fileName was null that means the folder is inaccessible
     	// for some reason
@@ -246,88 +245,87 @@ public class LodDimensionFileHandler
     	// convert to region coordinates
     	int x = region.regionPosX;
     	int z = region.regionPosZ;
-    	String fileName = getFileNameAndPathForRegion(x, z);
-    	File oldFile = new File(fileName);
-    	
-    	// if the fileName was null that means the folder is inaccessible
-    	// for some reason
-    	if (fileName == null)
-    	{
-    		ClientProxy.LOGGER.warn("Unable to save region [" + x + ", " + z + "] to file." );
-    		return;
-    	}
-    	
-    	
-    	try
-    	{
-    		// make sure the file and folder exists
-    		if (!oldFile.exists())
-    		{
-    			// the file doesn't exist,
-    			// create it and the folder if need be
-    			if (!oldFile.getParentFile().exists())
-    				oldFile.getParentFile().mkdirs();
-    			oldFile.createNewFile();
-    		}
-    		else
-    		{
-    			// the file exists, make sure it
-    			// is the correct version.
-    			// (to make sure we don't overwrite a newer
-    			// version file if it exists)
-    			
-    			BufferedReader br = new BufferedReader(new FileReader(oldFile));
-    			String s = br.readLine();
-    			int fileVersion = LOD_SAVE_FILE_VERSION;
-    			
-    			if (s != null && !s.isEmpty())
-    			{
-    				// try to get the file version
-    				try
-    				{
-    					fileVersion = Integer.parseInt(s.substring(s.indexOf(' ')).trim());
-    				}
-    				catch (NumberFormatException | StringIndexOutOfBoundsException e)
-    				{
-    					// this file doesn't have a correctly formated version
-    					// just overwrite the file
-    				}
-    			}
-    			br.close();
-    			
-    			// check if this file can be written to by the file handler
-    			if (fileVersion <= LOD_SAVE_FILE_VERSION)
-    			{
-    				// we are good to continue and overwrite the old file
-    			}
-    			else // if(fileVersion > LOD_SAVE_FILE_VERSION)
-    			{
-    				// the file we are reading is a newer version,
-    				// don't write anything, we don't want to accidently
-    				// delete anything the user may want.
-    				return;
-    			}
-    		}
-    		
-    		// the old file is good, now create a new save file
-    		File newFile = new File(fileName + TMP_FILE_EXTENSION);
-    		FileWriter fw = new FileWriter(newFile);
-    		
-    		// add the version of this file
-    		fw.write(LOD_FILE_VERSION_PREFIX + " " + LOD_SAVE_FILE_VERSION + "\n");
-    		
-    		// add each LodChunk to the file
-    		fw.write(region.getLevel(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel).toString());
-    		fw.close();
-    		
-    		// overwrite the old file with the new one
-    		Files.move(newFile.toPath(), oldFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-    	}
-    	catch (Exception e)
-    	{
-    		ClientProxy.LOGGER.error("LOD file write error: ");
-    		e.printStackTrace();
-    	}
+    	for(byte detailLevel = region.getMinDetailLevel(); detailLevel <= LodUtil.REGION_DETAIL_LEVEL; detailLevel++)
+		{
+			String fileName = getFileNameAndPathForRegion(x, z, detailLevel);
+			File oldFile = new File(fileName);
+
+			// if the fileName was null that means the folder is inaccessible
+			// for some reason
+			if (fileName == null)
+			{
+				ClientProxy.LOGGER.warn("Unable to save region [" + x + ", " + z + "] to file.");
+				return;
+			}
+
+
+			try
+			{
+				// make sure the file and folder exists
+				if (!oldFile.exists())
+				{
+					// the file doesn't exist,
+					// create it and the folder if need be
+					if (!oldFile.getParentFile().exists())
+						oldFile.getParentFile().mkdirs();
+					oldFile.createNewFile();
+				} else
+				{
+					// the file exists, make sure it
+					// is the correct version.
+					// (to make sure we don't overwrite a newer
+					// version file if it exists)
+
+					BufferedReader br = new BufferedReader(new FileReader(oldFile));
+					String s = br.readLine();
+					int fileVersion = LOD_SAVE_FILE_VERSION;
+
+					if (s != null && !s.isEmpty())
+					{
+						// try to get the file version
+						try
+						{
+							fileVersion = Integer.parseInt(s.substring(s.indexOf(' ')).trim());
+						} catch (NumberFormatException | StringIndexOutOfBoundsException e)
+						{
+							// this file doesn't have a correctly formated version
+							// just overwrite the file
+						}
+					}
+					br.close();
+
+					// check if this file can be written to by the file handler
+					if (fileVersion <= LOD_SAVE_FILE_VERSION)
+					{
+						// we are good to continue and overwrite the old file
+					} else // if(fileVersion > LOD_SAVE_FILE_VERSION)
+					{
+						// the file we are reading is a newer version,
+						// don't write anything, we don't want to accidently
+						// delete anything the user may want.
+						return;
+					}
+				}
+
+				// the old file is good, now create a new save file
+				File newFile = new File(fileName + TMP_FILE_EXTENSION);
+				FileWriter fw = new FileWriter(newFile);
+
+				// add the version of this file
+				fw.write(LOD_FILE_VERSION_PREFIX + " " + LOD_SAVE_FILE_VERSION + "\n");
+
+				// add each LodChunk to the file
+				fw.write(region.getLevel(detailLevel).toString());
+				fw.close();
+
+				// overwrite the old file with the new one
+				Files.move(newFile.toPath(), oldFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+			} catch (Exception e)
+			{
+				ClientProxy.LOGGER.error("LOD file write error: ");
+				e.printStackTrace();
+			}
+		}
     }
 
 
@@ -345,7 +343,7 @@ public class LodDimensionFileHandler
      * 
      * Returns null if there is an IO Exception.
      */
-    private String getFileNameAndPathForRegion(int regionX, int regionZ)
+    private String getFileNameAndPathForRegion(int regionX, int regionZ, byte detailLevel)
     {
         try
         {
@@ -353,7 +351,7 @@ public class LodDimensionFileHandler
             // ".\Super Flat\DIM-1\data"
             // or
             // ".\Super Flat\data"
-            return dimensionDataSaveFolder.getCanonicalPath() + File.separatorChar + LodConfig.CLIENT.maxGenerationDetail.get().detailLevel + File.separatorChar +
+            return dimensionDataSaveFolder.getCanonicalPath() + detailLevel + File.separatorChar +
                     FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
         }
         catch (IOException | SecurityException e)

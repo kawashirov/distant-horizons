@@ -607,17 +607,38 @@ public class LodRegion implements Serializable
     }
 
     /**
-     * @param lod
+     * @param detailLevel
      */
-    public void removeDetailLevel(byte lod)
+    public void cuteTree(byte detailLevel)
     {
-        for (byte tempLod = 0; tempLod <= lod; tempLod++)
+        if(minDetailLevel < detailLevel)
         {
-            colors[tempLod] = new byte[0][0][0];
-            height[tempLod] = new short[0][0];
-            depth[tempLod] = new short[0][0];
-            generationType[tempLod] = new byte[0][0];
-            dataExistence[tempLod] = new boolean[0][0];
+            for (byte tempLod = 0; tempLod < detailLevel; tempLod++)
+            {
+                colors[tempLod] = new byte[0][0][0];
+                height[tempLod] = new short[0][0];
+                depth[tempLod] = new short[0][0];
+                generationType[tempLod] = new byte[0][0];
+                dataExistence[tempLod] = new boolean[0][0];
+            }
+            minDetailLevel = detailLevel;
+        }
+    }
+
+    /**
+     * @param detailLevel
+     */
+    public void expand(byte detailLevel)
+    {
+        if(detailLevel < minDetailLevel){
+            for(byte tempLod =  detailLevel; tempLod < minDetailLevel; tempLod++){
+                int size = (short) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - tempLod);
+                colors[tempLod] = new byte[size][size][3];
+                height[tempLod] = new short[size][size];
+                depth[tempLod] = new short[size][size];
+                generationType[tempLod] = new byte[size][size];
+                dataExistence[tempLod] = new boolean[size][size];
+            }
         }
     }
 

@@ -29,6 +29,7 @@ import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
 import com.seibel.lod.proxy.ClientProxy;
+import com.seibel.lod.util.DetailUtil;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
@@ -229,8 +230,9 @@ public class LodDimension
      * Returns null if the region doesn't exist
      * or is outside the loaded area.
      */
-    public LodRegion getRegion(RegionPos regionPos)
+    public LodRegion getRegion(LevelPos levelPos)
     {
+        RegionPos regionPos = levelPos.getRegionPos();
         int xIndex = (regionPos.x - center.x) + halfWidth;
         int zIndex = (regionPos.z - center.z) + halfWidth;
 
@@ -238,14 +240,19 @@ public class LodDimension
             // out of range
             return null;
 
-        if (regions[xIndex][zIndex] == null)
+        if (regions[xIndex][zIndex] == null || regions[xIndex][zIndex].getMinDetailLevel() > levelPos.detailLevel)
         {
 
-            regions[xIndex][zIndex] = getRegionFromFile(regionPos);
+            regions[xIndex][zIndex] = getRegionFromFile(levelPos);
             if (regions[xIndex][zIndex] == null)
             {
                 /**TODO the value is currently 0 but should be determinated by the distance of the player)*/
                 regions[xIndex][zIndex] = new LodRegion(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel, regionPos);
+            }
+
+            if (regions[xIndex][zIndex].getMinDetailLevel() > levelPos.detailLevel)
+            {
+                regions[xIndex][zIndex].expand(levelPos.detailLevel);
             }
         }
 
@@ -273,11 +280,11 @@ public class LodDimension
     /**
      * this method creates all null regions
      */
-    public void initializeNullRegions()
+    public void treeCutter(int posX, int posZ)
     {
         int regionX;
         int regionZ;
-        RegionPos regionPos;
+        LevelPos levelPos;
         LodRegion region;
 
         for (int x = 0; x < regions.length; x++)
@@ -286,14 +293,13 @@ public class LodDimension
             {
                 regionX = (x + center.x) - halfWidth;
                 regionZ = (z + center.z) - halfWidth;
-                regionPos = new RegionPos(regionX, regionZ);
-                region = getRegion(regionPos);
-
-                if (region == null)
-                {
-                    // if no region exists, create it
-                    region = new LodRegion(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel, regionPos);
-                    addOrOverwriteRegion(region);
+                levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ);
+                for(byte index = LodUtil.BLOCK_DETAIL_LEVEL; index <= LodUtil.REGION_DETAIL_LEVEL; index++){
+                    if(DetailUtil.getDistanceGeneration(index+1) > levelPos.minDistance(posX, posZ)){
+                        region = getRegion(levelPos.convert(DetailUtil.getLodDetail(index+1).detailLevel));
+                        region.cuteTree(DetailUtil.getLodDetail(index).detailLevel);
+                        break;
+                    }
                 }
             }
         }
@@ -315,14 +321,8 @@ public class LodDimension
             return false;
         }
 
-        LodRegion region = getRegion(regionPos);
+        LodRegion region = getRegion(levelPos);
 
-        if (region == null)
-        {
-            // if no region exists, create it
-            region = new LodRegion(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel, regionPos);
-            addOrOverwriteRegion(region);
-        }
         boolean nodeAdded = region.setData(levelPos, lodDataPoint, generationMode.complexity, true);
         // only save valid LODs to disk
         if (!dontSave && fileHandler != null)
@@ -377,12 +377,7 @@ public class LodDimension
                 xIndex = (xRegion + center.x) - halfWidth;
                 zIndex = (zRegion + center.z) - halfWidth;
                 RegionPos regionPos = new RegionPos(xIndex, zIndex);
-                region = getRegion(regionPos);
-                if (region == null)
-                {
-                    region = new LodRegion(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel, regionPos);
-                    addOrOverwriteRegion(region);
-                }
+                region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
                 listOfData.addAll(region.getDataToGenerate(playerPosX, playerPosZ, start, end, generation, detailLevel, dataNumber));
             }
         }
@@ -419,7 +414,7 @@ public class LodDimension
                 xIndex = (xRegion + center.x) - halfWidth;
                 zIndex = (zRegion + center.z) - halfWidth;
                 RegionPos regionPos = new RegionPos(xIndex, zIndex);
-                region = getRegion(regionPos);
+                region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
                 if (region == null)
                 {
                     region = new LodRegion(LodConfig.CLIENT.maxGenerationDetail.get().detailLevel, regionPos);
@@ -441,7 +436,7 @@ public class LodDimension
     public List<LevelPos> getDataToRender(RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
     {
         List<LevelPos> listOfData = new ArrayList<>();
-        LodRegion region = getRegion(regionPos);
+        LodRegion region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
         if (region == null)
         {
         	try
@@ -474,7 +469,7 @@ public class LodDimension
         if (levelPos.detailLevel > LodUtil.REGION_DETAIL_LEVEL)
             throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + levelPos.detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
 
-        LodRegion region = getRegion(levelPos.getRegionPos());
+        LodRegion region = getRegion(levelPos);
 
 
         if (region == null)
@@ -488,25 +483,10 @@ public class LodDimension
     /**
      * return true if and only if the node at that position exist
      */
-    public boolean hasThisPositionBeenGenerated(ChunkPos chunkPos)
-    {
-        LodRegion region = getRegion(LodUtil.convertGenericPosToRegionPos(chunkPos.x, chunkPos.z, LodUtil.CHUNK_DETAIL_LEVEL));
-
-        if (region == null)
-        {
-            return false;
-        }
-
-        return region.hasDataBeenGenerated(new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunkPos.x, chunkPos.z));
-    }
-
-    /**
-     * return true if and only if the node at that position exist
-     */
 
     public boolean hasThisPositionBeenGenerated(LevelPos levelPos)
     {
-        LodRegion region = getRegion(levelPos.getRegionPos());
+        LodRegion region = getRegion(levelPos);
 
         if (region == null)
         {
@@ -521,7 +501,7 @@ public class LodDimension
      */
     public boolean doesDataExist(LevelPos levelPos)
     {
-        LodRegion region = getRegion(levelPos.getRegionPos());
+        LodRegion region = getRegion(levelPos);
 
         if (region == null)
         {
@@ -536,7 +516,7 @@ public class LodDimension
      */
     public DistanceGenerationMode getGenerationMode(LevelPos levelPos)
     {
-        LodRegion region = getRegion(levelPos.getRegionPos());
+        LodRegion region = getRegion(levelPos);
 
         if (region == null)
         {
@@ -550,10 +530,10 @@ public class LodDimension
      * Get the region at the given X and Z coordinates from the
      * RegionFileHandler.
      */
-    public LodRegion getRegionFromFile(RegionPos regionPos)
+    public LodRegion getRegionFromFile(LevelPos levelPos)
     {
         if (fileHandler != null)
-            return fileHandler.loadRegionFromFile(regionPos);
+            return fileHandler.loadRegionFromFile(levelPos);
         else
             return null;
     }

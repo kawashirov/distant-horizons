@@ -1,6 +1,7 @@
 package com.seibel.lod.util;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
 
 public class DetailUtil
@@ -22,6 +23,17 @@ public class DetailUtil
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE};
 
+    private static LodDetail[] lodDetails = {
+            LodDetail.FULL,
+            LodDetail.FULL,
+            LodDetail.HALF,
+            LodDetail.HALF,
+            LodDetail.QUAD,
+            LodDetail.QUAD,
+            LodDetail.DOUBLE,
+            LodDetail.DOUBLE,
+            LodDetail.SINGLE,
+            LodDetail.SINGLE};
 
     public static int getDistanceRendering(int detail)
     {
@@ -51,5 +63,10 @@ public class DetailUtil
     public static DistanceGenerationMode getDistanceGenerationMode(int detail)
     {
         return distancesGenerators[detail];
+    }
+
+    public static LodDetail getLodDetail(int detail)
+    {
+        return lodDetails[detail];
     }
 }
