@@ -8,11 +8,11 @@ public class DetailDistanceUtil
 {
     private static double genMultiplier = 1.25;
     private static double cutMultiplier = 1.5;
-    private static final int minDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
-    private static final int maxDetail = LodUtil.REGION_DETAIL_LEVEL + 1;
-    private static final int minDistance = 0;
-    private static final int maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16 * 2;
-    private static final DistanceGenerationMode[] distancesGenerators = {
+    private static int minDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
+    private static int maxDetail = LodUtil.REGION_DETAIL_LEVEL + 1;
+    private static int minDistance = 0;
+    private static int maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16 * 2;
+    private static  DistanceGenerationMode[] distancesGenerators = {
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE,
@@ -24,7 +24,7 @@ public class DetailDistanceUtil
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE};
 
-    private static final LodDetail[] lodDetails = {
+    private static LodDetail[] lodDetails = {
             LodDetail.FULL,
             LodDetail.HALF,
             LodDetail.QUAD,
@@ -37,18 +37,18 @@ public class DetailDistanceUtil
             LodDetail.SINGLE,
             LodDetail.SINGLE};
 
-    private static final LodDetail[] lodDetailsCut = {
+    private static LodDetail[] lodDetailsCut = {
             LodDetail.FULL,
             LodDetail.FULL,
             LodDetail.HALF,
             LodDetail.QUAD,
             LodDetail.DOUBLE,
-            LodDetail.DOUBLE,
-            LodDetail.DOUBLE,
-            LodDetail.DOUBLE,
-            LodDetail.DOUBLE,
-            LodDetail.DOUBLE,
-            LodDetail.DOUBLE};
+            LodDetail.SINGLE,
+            LodDetail.SINGLE,
+            LodDetail.SINGLE,
+            LodDetail.SINGLE,
+            LodDetail.SINGLE,
+            LodDetail.SINGLE};
 
     public static int getDistanceRendering(int detail)
     {

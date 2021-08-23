@@ -129,10 +129,8 @@ public class LodBufferBuilder
 	
 	public LodBufferBuilder(LodBuilder newLodBuilder)
 	{
-		System.out.println("start building con");
 		mc = Minecraft.getInstance();
 		LodQuadTreeNodeBuilder = newLodBuilder;
-		System.out.println("end building con");
 	}
 	
 	
@@ -151,7 +149,6 @@ public class LodBufferBuilder
 	public void generateLodBuffersAsync(LodRenderer renderer, LodDimension lodDim,
 			BlockPos playerBlockPos, int numbChunksWide)
 	{
-		System.out.println("start building process");
 		// only allow one generation process to happen at a time
 		if (generatingBuffers)
 			return;
@@ -181,9 +178,6 @@ public class LodBufferBuilder
 			try
 			{
 				long treeStart = System.currentTimeMillis();
-				lodDim.treeGenerator(playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
-				lodDim.treeCutter(playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
-				System.out.println("memory needed " + lodDim.getMinMemoryNeeded() + " byte");
 				long treeEnd = System.currentTimeMillis();
 
 				long startTime = System.currentTimeMillis();

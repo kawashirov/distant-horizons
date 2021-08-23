@@ -36,6 +36,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
+import org.lwjgl.system.CallbackI;
 
 /**
  * This object holds all loaded LOD regions
@@ -75,16 +76,14 @@ public class LodDimension
      */
     public LodDimension(DimensionType newDimension, LodWorld lodWorld, int newWidth)
     {
-        System.out.println("start lod dim");
         dimension = newDimension;
         width = newWidth;
         halfWidth = (int) Math.floor(width / 2);
-
+        Minecraft mc = Minecraft.getInstance();
         if (newDimension != null && lodWorld != null)
         {
             try
             {
-                Minecraft mc = Minecraft.getInstance();
 
                 File saveDir;
                 if (mc.hasSingleplayerServer())
@@ -117,13 +116,14 @@ public class LodDimension
         regions = new LodRegion[width][width];
         isRegionDirty = new boolean[width][width];
 
+        //treeGenerator((int) mc.player.getX(),(int) mc.player.getZ());
+
         // populate isRegionDirty
         for (int i = 0; i < width; i++)
             for (int j = 0; j < width; j++)
                 isRegionDirty[i][j] = false;
 
         center = new RegionPos(0, 0);
-        System.out.println("end lod dim");
     }
 
 
@@ -315,6 +315,8 @@ public class LodDimension
         LevelPos levelPos;
         LodRegion region;
 
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("cutting tree : \n");
         for (int x = 0; x < regions.length; x++)
         {
             for (int z = 0; z < regions.length; z++)
@@ -329,8 +331,10 @@ public class LodDimension
                     if(DetailDistanceUtil.getDistanceCut(index + 1) > levelPos.minDistance(playerPosX, playerPosZ)){
                         region = regions[x][z];
 
-                        byte cutDetailLevel = DetailDistanceUtil.getCutLodDetail(index).detailLevel;
+                        byte cutDetailLevel = (byte) (DetailDistanceUtil.getCutLodDetail(index).detailLevel);
 
+                        stringBuilder.append(cutDetailLevel);
+                        stringBuilder.append("\t");
                         if(region != null && cutDetailLevel > 0)
                         {
                             region.cutTree(cutDetailLevel);
@@ -340,7 +344,9 @@ public class LodDimension
                     }
                 }
             }
+            stringBuilder.append("\n");
         }
+        System.out.println(stringBuilder);
     }
 
     /**
@@ -353,7 +359,8 @@ public class LodDimension
         RegionPos regionPos;
         LodRegion region;
         byte targetDetailLevel;
-
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("generating tree : \n");
         for (int x = 0; x < regions.length; x++)
         {
             for (int z = 0; z < regions.length; z++)
@@ -370,7 +377,7 @@ public class LodDimension
 
                         region = regions[x][z];
                         //We require that the region we are checking is loaded with at least this level
-                        targetDetailLevel = DetailDistanceUtil.getLodDetail(index).detailLevel;
+                        targetDetailLevel = (byte) (DetailDistanceUtil.getLodDetail(index).detailLevel);
 
                         if (region == null)
                         {
@@ -381,18 +388,32 @@ public class LodDimension
 
                             //if there is no file we initialize the region
                             if (region == null)
+                            {
                                 regions[x][z] = new LodRegion(targetDetailLevel, regionPos);
+                                stringBuilder.append(targetDetailLevel);
+                                stringBuilder.append("i");
+                                stringBuilder.append("\t");
+                            }else{
+                                stringBuilder.append(targetDetailLevel);
+                                stringBuilder.append("l");
+                                stringBuilder.append("\t");
+                            }
 
                         }else if(region.getMinDetailLevel() > targetDetailLevel){
                             //Second case, region has been initialized but at a higher level
                             //We expand the region by introducing the missing layer
+                            stringBuilder.append(targetDetailLevel);
+                            stringBuilder.append("e");
+                            stringBuilder.append("\t");
                             region.expand(targetDetailLevel);
                         }
                         break;
                     }
                 }
             }
+            stringBuilder.append("\n");
         }
+        System.out.println(stringBuilder);
     }
 
     /**
@@ -517,14 +538,7 @@ public class LodDimension
                         start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
                 {
                     region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
-                    if (region == null)
-                    {
-                        //region = new LodRegion(DetailUtil.getLodDetail(detailLevel).detailLevel, regionPos);
-                        //addOrOverwriteRegion(region);
-                    } else
-                    {
-                        listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel));
-                    }
+                    listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel));
                 }
             }
         }
@@ -544,25 +558,7 @@ public class LodDimension
                 start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
         {
             LodRegion region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
-            if (region == null)
-            {
-            /*
-        	try
-        	{
-	            region = new LodRegion(DetailUtil.getLodDetail(detailLevel).detailLevel, regionPos);
-	            addOrOverwriteRegion(region);
-        	}
-        	catch (ArrayIndexOutOfBoundsException e)
-        	{
-        		ClientProxy.LOGGER.warn("getDataToRender was unable to add the region at the pos [" + regionPos.x + ", " + regionPos.z + "]");
-        		return listOfData; // this list should be empty
-        	}
-             */
-                return listOfData;
-            } else
-            {
-                listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel));
-            }
+            listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel));
         }
         return listOfData;
     }
