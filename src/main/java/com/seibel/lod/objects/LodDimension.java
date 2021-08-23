@@ -480,6 +480,29 @@ public class LodDimension
         return region.getData(levelPos);
     }
 
+
+    /**
+     * Get the data point at the given X and Z coordinates
+     * in this dimension.
+     * <br>
+     * Returns null if the LodChunk doesn't exist or
+     * is outside the loaded area.
+     */
+    public void updateData(LevelPos levelPos)
+    {
+        if (levelPos.detailLevel > LodUtil.REGION_DETAIL_LEVEL)
+            throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + levelPos.detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
+
+        LodRegion region = getRegion(levelPos);
+
+
+        if (region == null)
+        {
+            return;
+        }
+        region.updateArea(levelPos);
+    }
+
     /**
      * return true if and only if the node at that position exist
      */

@@ -181,9 +181,10 @@ public class LodBuilder
             lodDim.addData(levelPos.convert(detail.detailLevel),
                     data,
                     config.distanceGenerationMode,
-                    true,
+                    false,
                     false);
         }
+        lodDim.updateData(new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z));
     }
 
 

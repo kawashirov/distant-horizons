@@ -392,18 +392,17 @@ public class LodRegion implements Serializable
         return levelPosList;
     }
 
-    /**TODO a method to update a whole area, to be used as a single big update*/
     /**
      * @param levelPos
      */
-    private void updateArea(LevelPos levelPos)
+    public void updateArea(LevelPos levelPos)
     {
-        /*
-        LevelPos tempLevelPos = levelPos;
+
+        LevelPos tempLevelPos;
         int sizeDiff;
         int startX;
         int startZ;
-        for(int bottom = minLevelOfDetail + 1 ; bottom < levelPos.detailLevel ; bottom ++){
+        for(byte bottom = (byte) (minDetailLevel + 1); bottom < levelPos.detailLevel ; bottom++){
             tempLevelPos = levelPos.convert(bottom);
             startX = tempLevelPos.posX;
             startZ = tempLevelPos.posZ;
@@ -415,19 +414,10 @@ public class LodRegion implements Serializable
             }
 
         }
-
-        int sizeDiff;
-        LevelPos levelPos;
-        for (byte tempLod = (byte) (minDetailLevel + 1); tempLod <= LodUtil.REGION_DETAIL_LEVEL; tempLod++) {
-            sizeDiff = (int) Math.pow(2,LodUtil.REGION_DETAIL_LEVEL - tempLod);
-            for (int x = 0; x < sizeDiff; x++) {
-                for (int z = 0; z < sizeDiff; z++) {
-                    levelPos = new LevelPos(tempLod, x, z);
-                    update(levelPos);
-                }
-            }
+        for (byte tempLod = levelPos.detailLevel; tempLod <= LodUtil.REGION_DETAIL_LEVEL; tempLod++) {
+            tempLevelPos = levelPos.convert(tempLod);
+            update(tempLevelPos);
         }
-         */
     }
 
     /**
