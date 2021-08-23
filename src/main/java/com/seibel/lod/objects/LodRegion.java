@@ -602,7 +602,7 @@ public class LodRegion implements Serializable
     /**
      * @param detailLevel
      */
-    public void cuteTree(byte detailLevel)
+    public void cutTree(byte detailLevel)
     {
         if(minDetailLevel < detailLevel)
         {
@@ -633,6 +633,30 @@ public class LodRegion implements Serializable
                 dataExistence[tempLod] = new boolean[size][size];
             }
         }
+    }
+
+    /**
+     * return RegionPos of this lod region
+     */
+    public RegionPos getRegionPos()
+    {
+        return new RegionPos(regionPosX, regionPosZ);
+    }
+
+    /**
+     * return needed memory in byte
+     */
+    public int getMinMemoryNeeded()
+    {
+        int count = 0;
+        for(byte tempLod = LodUtil.REGION_DETAIL_LEVEL; tempLod > minDetailLevel; tempLod--){
+            //i'm doing a upper limit of the minimum
+            //Color should be just 3 byte but i'm gonna calculate as 12 byte
+            //Height and depth should be just 4 byte but i'm gonna calculate as 8 byte
+            //count += Math.pow(2,LodUtil.REGION_DETAIL_LEVEL-tempLod) * (8 + 3 + 2 + 2 + 1 + 1)
+            count += Math.pow(2,LodUtil.REGION_DETAIL_LEVEL-tempLod) * (24 + 8 + 8 + 8 + 8 + 8);
+        }
+        return count;
     }
 
     public String toString()

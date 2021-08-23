@@ -28,7 +28,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.logging.Level;
 
 import org.lwjgl.opengl.GL11;
 
@@ -41,7 +40,7 @@ import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodRenderer;
-import com.seibel.lod.util.DetailUtil;
+import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 
@@ -66,7 +65,8 @@ public class LodBufferBuilder
 	/** This holds the thread used to generate new LODs off the main thread. */
 	private ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " - main"));
 	/** This holds the threads used to generate buffers. */
-	private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
+	//private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
+	private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(2, new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
 	
 	private LodBuilder LodQuadTreeNodeBuilder;
 	
@@ -129,8 +129,10 @@ public class LodBufferBuilder
 	
 	public LodBufferBuilder(LodBuilder newLodBuilder)
 	{
+		System.out.println("start building con");
 		mc = Minecraft.getInstance();
 		LodQuadTreeNodeBuilder = newLodBuilder;
+		System.out.println("end building con");
 	}
 	
 	
@@ -149,6 +151,7 @@ public class LodBufferBuilder
 	public void generateLodBuffersAsync(LodRenderer renderer, LodDimension lodDim,
 			BlockPos playerBlockPos, int numbChunksWide)
 	{
+		System.out.println("start building process");
 		// only allow one generation process to happen at a time
 		if (generatingBuffers)
 			return;
@@ -174,13 +177,15 @@ public class LodBufferBuilder
 		{
 			bufferLock.lock();
 
-			long treeStart = System.currentTimeMillis();
-			lodDim.treeCutter(playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
-
-			long treeEnd = System.currentTimeMillis();
 			
 			try
 			{
+				long treeStart = System.currentTimeMillis();
+				lodDim.treeGenerator(playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
+				lodDim.treeCutter(playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
+				System.out.println("memory needed " + lodDim.getMinMemoryNeeded() + " byte");
+				long treeEnd = System.currentTimeMillis();
+
 				long startTime = System.currentTimeMillis();
 
 				ArrayList<GenerationRequest> chunksToGen = new ArrayList<>(maxChunkGenRequests);
@@ -226,8 +231,8 @@ public class LodBufferBuilder
 										regionPos,
 										playerBlockPosRounded.getX(),
 										playerBlockPosRounded.getZ(),
-										DetailUtil.getDistanceRendering(detail),
-										DetailUtil.getDistanceRendering(detail + 1),
+										DetailDistanceUtil.getDistanceRendering(detail),
+										DetailDistanceUtil.getDistanceRendering(detail + 1),
 										detail));
 							}
 
@@ -335,13 +340,13 @@ public class LodBufferBuilder
 						posListToGenerate = lodDim.getDataToGenerate(
 								playerBlockPosRounded.getX(),
 								playerBlockPosRounded.getZ(),
-								DetailUtil.getDistanceGeneration(detailGen),
-								DetailUtil.getDistanceGeneration(detailGen + 1),
+								DetailDistanceUtil.getDistanceGeneration(detailGen),
+								DetailDistanceUtil.getDistanceGeneration(detailGen + 1),
 								LodConfig.CLIENT.distanceGenerationMode.get().complexity,
 								(byte) 9,
-								requesting);
+								requesting/2);
 						for(LevelPos levelPos : posListToGenerate){
-							generationRequestList.add(new GenerationRequest(levelPos,LodConfig.CLIENT.distanceGenerationMode.get(), DetailUtil.getLodDetail(detailGen)));
+							generationRequestList.add(new GenerationRequest(levelPos,LodConfig.CLIENT.distanceGenerationMode.get(), DetailDistanceUtil.getLodDetail(detailGen)));
 						}
 						requesting = maxChunkGenRequests - generationRequestList.size();
 
@@ -354,13 +359,13 @@ public class LodBufferBuilder
 						posListToGenerate = lodDim.getDataToGenerate(
 								playerBlockPosRounded.getX(),
 								playerBlockPosRounded.getZ(),
-								DetailUtil.getDistanceGeneration(detailGen),
-								DetailUtil.getDistanceGeneration(detailGen + 1),
+								DetailDistanceUtil.getDistanceGeneration(detailGen),
+								DetailDistanceUtil.getDistanceGeneration(detailGen + 1),
 								LodConfig.CLIENT.distanceGenerationMode.get().complexity,
-								LodConfig.CLIENT.maxGenerationDetail.get().detailLevel,
+								DetailDistanceUtil.getLodDetail(detailGen).detailLevel,
 								maxChunkGenRequests);
 						for(LevelPos levelPos : posListToGenerate){
-							generationRequestList.add(new GenerationRequest(levelPos,LodConfig.CLIENT.distanceGenerationMode.get(), DetailUtil.getLodDetail(detailGen)));
+							generationRequestList.add(new GenerationRequest(levelPos,LodConfig.CLIENT.distanceGenerationMode.get(), DetailDistanceUtil.getLodDetail(detailGen)));
 						}
 						requesting = maxChunkGenRequests - generationRequestList.size();
 					}

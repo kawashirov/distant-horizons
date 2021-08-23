@@ -4,14 +4,15 @@ import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
 
-public class DetailUtil
+public class DetailDistanceUtil
 {
-    private static double genMultiplier = 1.5;
+    private static double genMultiplier = 1.25;
+    private static double cutMultiplier = 1.5;
     private static final int minDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
     private static final int maxDetail = LodUtil.REGION_DETAIL_LEVEL + 1;
     private static final int minDistance = 0;
     private static final int maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16 * 2;
-    private static DistanceGenerationMode[] distancesGenerators = {
+    private static final DistanceGenerationMode[] distancesGenerators = {
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE,
@@ -23,7 +24,7 @@ public class DetailUtil
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE};
 
-    private static LodDetail[] lodDetails = {
+    private static final LodDetail[] lodDetails = {
             LodDetail.FULL,
             LodDetail.HALF,
             LodDetail.QUAD,
@@ -35,6 +36,19 @@ public class DetailUtil
             LodDetail.SINGLE,
             LodDetail.SINGLE,
             LodDetail.SINGLE};
+
+    private static final LodDetail[] lodDetailsCut = {
+            LodDetail.FULL,
+            LodDetail.FULL,
+            LodDetail.HALF,
+            LodDetail.QUAD,
+            LodDetail.DOUBLE,
+            LodDetail.DOUBLE,
+            LodDetail.DOUBLE,
+            LodDetail.DOUBLE,
+            LodDetail.DOUBLE,
+            LodDetail.DOUBLE,
+            LodDetail.DOUBLE};
 
     public static int getDistanceRendering(int detail)
     {
@@ -58,6 +72,10 @@ public class DetailUtil
     {
         return (int) (getDistanceRendering(detail) * genMultiplier);
     }
+    public static int getDistanceCut(int detail)
+    {
+        return (int) (getDistanceRendering(detail) * cutMultiplier);
+    }
 
     public static DistanceGenerationMode getDistanceGenerationMode(int detail)
     {
@@ -67,8 +85,25 @@ public class DetailUtil
     public static LodDetail getLodDetail(int detail)
     {
         if(detail < minDetail)
+        {
             return lodDetails[minDetail];
+        }
         else
+        {
             return lodDetails[detail];
+        }
+    }
+
+
+    public static LodDetail getCutLodDetail(int detail)
+    {
+        if(detail < minDetail)
+        {
+            return lodDetailsCut[minDetail];
+        }
+        else
+        {
+            return lodDetailsCut[detail];
+        }
     }
 }

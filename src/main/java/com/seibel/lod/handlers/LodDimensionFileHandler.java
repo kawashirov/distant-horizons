@@ -114,12 +114,11 @@ public class LodDimensionFileHandler
      * Return the LodRegion region at the given coordinates.
      * (null if the file doesn't exist)
      */
-    public LodRegion loadRegionFromFile(LevelPos levelPos)
+    public LodRegion loadRegionFromFile(RegionPos regionPos, byte detailLevel)
 	{
-		RegionPos regionPos = levelPos.getRegionPos();
     	int regionX = regionPos.x;
     	int regionZ = regionPos.z;
-    	String fileName = getFileNameAndPathForRegion(regionX, regionZ, levelPos.detailLevel);
+    	String fileName = getFileNameAndPathForRegion(regionX, regionZ, detailLevel);
     	
     	// if the fileName was null that means the folder is inaccessible
     	// for some reason
@@ -219,17 +218,22 @@ public class LodDimensionFileHandler
 
     private Thread saveDirtyRegionsThread = new Thread(() ->
     {
-        for (int i = 0; i < loadedDimension.getWidth(); i++)
-        {
-            for (int j = 0; j < loadedDimension.getWidth(); j++)
-            {
-                if (loadedDimension.isRegionDirty[i][j] && loadedDimension.regions[i][j] != null)
-                {
-                    saveRegionToFile(loadedDimension.regions[i][j]);
-                    loadedDimension.isRegionDirty[i][j] = false;
-                }
-            }
-        }
+    	try
+		{
+			for (int i = 0; i < loadedDimension.getWidth(); i++)
+			{
+				for (int j = 0; j < loadedDimension.getWidth(); j++)
+				{
+					if (loadedDimension.isRegionDirty[i][j] && loadedDimension.regions[i][j] != null)
+					{
+						saveRegionToFile(loadedDimension.regions[i][j]);
+						loadedDimension.isRegionDirty[i][j] = false;
+					}
+				}
+			}
+		}catch (Exception e){
+    		e.printStackTrace();
+		}
     });
 
     /**
