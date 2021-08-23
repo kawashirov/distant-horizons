@@ -585,6 +585,9 @@ public class LodRegion implements Serializable
      */
     public LevelContainer getLevel(byte lod)
     {
+        if(lod < minDetailLevel){
+            throw new IllegalArgumentException("getLevel asked for a level that does not exist: minimum " + minDetailLevel + " level requested " + lod);
+        }
         return new LevelContainer(lod, colors[lod], height[lod], depth[lod], generationType[lod], dataExistence[lod]);
     }
 
@@ -613,6 +616,7 @@ public class LodRegion implements Serializable
     {
         if(minDetailLevel < detailLevel)
         {
+            System.out.println("cutting at " + regionPosX + " " + regionPosZ + " " + detailLevel);
             for (byte tempLod = 0; tempLod < detailLevel; tempLod++)
             {
                 colors[tempLod] = new byte[0][0][0];

@@ -66,7 +66,8 @@ public class LodBufferBuilder
 	/** This holds the thread used to generate new LODs off the main thread. */
 	private ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " - main"));
 	/** This holds the threads used to generate buffers. */
-	private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
+	private ExecutorService bufferBuilderThreads = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " - buffer builder"));
+	//private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
 	
 	private LodBuilder LodQuadTreeNodeBuilder;
 	
@@ -445,7 +446,7 @@ public class LodBufferBuilder
 							
 							positionWaitingToBeGenerated.add(chunkPos);
 							numberOfChunksWaitingToGenerate.addAndGet(1);
-							LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, LodConfig.CLIENT.distanceGenerationMode.get(), LodConfig.CLIENT.maxGenerationDetail.get(), renderer, LodQuadTreeNodeBuilder, this, lodDim, serverWorld);
+							LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos,generationRequest.generationMode, generationRequest.detail, renderer, LodQuadTreeNodeBuilder, this, lodDim, serverWorld);
 							WorldWorkerManager.addWorker(genWorker);
 						}
 					}

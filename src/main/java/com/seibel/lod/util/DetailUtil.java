@@ -33,6 +33,7 @@ public class DetailUtil
             LodDetail.DOUBLE,
             LodDetail.DOUBLE,
             LodDetail.SINGLE,
+            LodDetail.SINGLE,
             LodDetail.SINGLE};
 
     public static int getDistanceRendering(int detail)
