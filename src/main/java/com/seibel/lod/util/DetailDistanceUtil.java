@@ -6,7 +6,7 @@ import com.seibel.lod.handlers.LodConfig;
 
 public class DetailDistanceUtil
 {
-    private static double genMultiplier = 1.25;
+    private static double genMultiplier = 1;
     private static double cutMultiplier = 1.5;
     private static int minDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
     private static int maxDetail = LodUtil.REGION_DETAIL_LEVEL + 1;
@@ -39,10 +39,10 @@ public class DetailDistanceUtil
 
     private static LodDetail[] lodDetailsCut = {
             LodDetail.FULL,
-            LodDetail.FULL,
             LodDetail.HALF,
             LodDetail.QUAD,
             LodDetail.DOUBLE,
+            LodDetail.SINGLE,
             LodDetail.SINGLE,
             LodDetail.SINGLE,
             LodDetail.SINGLE,
@@ -53,8 +53,8 @@ public class DetailDistanceUtil
     public static int getDistanceRendering(int detail)
     {
         int distance = 0;
-        int initial = LodConfig.CLIENT.lodQuality.get() * 256;
-        if(detail == minDetail)
+        int initial = LodConfig.CLIENT.lodQuality.get() * 128;
+        if(detail <= minDetail)
             return minDistance;
         if(detail == maxDetail)
             return maxDistance;

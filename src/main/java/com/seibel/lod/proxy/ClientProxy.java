@@ -99,9 +99,14 @@ public class ClientProxy
 		LodDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
 		if (lodDim == null)
 			return;
-		
+
+
 		playerMoveEvent(lodDim);
-		
+		//System.out.println("memory needed " + lodDim.getMinMemoryNeeded() + " byte");
+
+		lodDim.treeCutter((int) mc.player.getX(),(int) mc.player.getZ());
+		lodDim.treeGenerator((int) mc.player.getX(),(int) mc.player.getZ());
+		System.out.println(lodDim);
 		
 		// comment out when creating a release
 		applyConfigOverrides();
@@ -243,7 +248,7 @@ public class ClientProxy
 		{
 			lodWorld.saveAllDimensions();
 			lodDim.move(worldRegionOffset);
-			//LOGGER.info("offset: " + worldRegionOffset.x + "," + worldRegionOffset.z + "\t center: " + lodDim.getCenterX() + "," + lodDim.getCenterZ());
+			LOGGER.info("offset: " + worldRegionOffset.x + "," + worldRegionOffset.z + "\t center: " + lodDim.getCenterX() + "," + lodDim.getCenterZ());
 		}
 	}
 	

@@ -315,8 +315,6 @@ public class LodDimension
         LevelPos levelPos;
         LodRegion region;
 
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("cutting tree : \n");
         for (int x = 0; x < regions.length; x++)
         {
             for (int z = 0; z < regions.length; z++)
@@ -331,10 +329,8 @@ public class LodDimension
                     if(DetailDistanceUtil.getDistanceCut(index + 1) > levelPos.minDistance(playerPosX, playerPosZ)){
                         region = regions[x][z];
 
-                        byte cutDetailLevel = (byte) (DetailDistanceUtil.getCutLodDetail(index).detailLevel);
+                        byte cutDetailLevel = DetailDistanceUtil.getCutLodDetail(index).detailLevel;
 
-                        stringBuilder.append(cutDetailLevel);
-                        stringBuilder.append("\t");
                         if(region != null && cutDetailLevel > 0)
                         {
                             region.cutTree(cutDetailLevel);
@@ -344,9 +340,7 @@ public class LodDimension
                     }
                 }
             }
-            stringBuilder.append("\n");
         }
-        System.out.println(stringBuilder);
     }
 
     /**
@@ -359,8 +353,6 @@ public class LodDimension
         RegionPos regionPos;
         LodRegion region;
         byte targetDetailLevel;
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("generating tree : \n");
         for (int x = 0; x < regions.length; x++)
         {
             for (int z = 0; z < regions.length; z++)
@@ -377,43 +369,31 @@ public class LodDimension
 
                         region = regions[x][z];
                         //We require that the region we are checking is loaded with at least this level
-                        targetDetailLevel = (byte) (DetailDistanceUtil.getLodDetail(index).detailLevel);
+                        targetDetailLevel = DetailDistanceUtil.getLodDetail(index).detailLevel;
 
                         if (region == null)
                         {
                             //First case, region has to be initialized
 
                             //We check if there is a file at the target level
-                            region = getRegionFromFile(regionPos, targetDetailLevel);
+                            regions[x][z] = getRegionFromFile(regionPos, targetDetailLevel);
 
                             //if there is no file we initialize the region
-                            if (region == null)
+                            if (regions[x][z] == null)
                             {
                                 regions[x][z] = new LodRegion(targetDetailLevel, regionPos);
-                                stringBuilder.append(targetDetailLevel);
-                                stringBuilder.append("i");
-                                stringBuilder.append("\t");
-                            }else{
-                                stringBuilder.append(targetDetailLevel);
-                                stringBuilder.append("l");
-                                stringBuilder.append("\t");
                             }
 
                         }else if(region.getMinDetailLevel() > targetDetailLevel){
                             //Second case, region has been initialized but at a higher level
                             //We expand the region by introducing the missing layer
-                            stringBuilder.append(targetDetailLevel);
-                            stringBuilder.append("e");
-                            stringBuilder.append("\t");
                             region.expand(targetDetailLevel);
                         }
                         break;
                     }
                 }
             }
-            stringBuilder.append("\n");
         }
-        System.out.println(stringBuilder);
     }
 
     /**
@@ -746,11 +726,32 @@ public class LodDimension
     @Override
     public String toString()
     {
-        String s = "";
+        int regionX;
+        int regionZ;
+        LevelPos levelPos;
+        LodRegion region;
 
-        s += "dim: " + dimension.toString() + "\t";
-        s += "(" + center.x + "," + center.z + ")";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Dimension : \n");
+        for (int x = 0; x < regions.length; x++)
+        {
+            for (int z = 0; z < regions.length; z++)
+            {
+                region = regions[x][z];
+                if(region == null)
+                {
+                    stringBuilder.append("n");
+                    stringBuilder.append("\t");
 
-        return s;
+                }else
+                {
+                    stringBuilder.append(region.getMinDetailLevel());
+                    stringBuilder.append("\t");
+                }
+            }
+            stringBuilder.append("\n");
+        }
+        System.out.println(stringBuilder);
+        return stringBuilder.toString();
     }
 }
