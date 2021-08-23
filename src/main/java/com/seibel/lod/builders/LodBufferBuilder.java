@@ -199,7 +199,6 @@ public class LodBufferBuilder
 				//    RENDERING PART    //
 				// =====================//
 
-				long renderRequestStart = System.currentTimeMillis();
 				for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
 				{
 					for (int zRegion = 0; zRegion < lodDim.regions.length; zRegion++)
@@ -274,8 +273,6 @@ public class LodBufferBuilder
 					}// region z
 				}// region z
 
-				long renderRequestEnd = System.currentTimeMillis();
-
 				long renderStart = System.currentTimeMillis();
 				// wait for all threads to finish
 				List<Future<Boolean>> futures = bufferBuilderThreads.invokeAll(builderThreads);
@@ -331,7 +328,6 @@ public class LodBufferBuilder
 					int requesting = maxChunkGenRequests;
 
 					genReqStart = System.currentTimeMillis();
-					/*
 					//we firstly make sure that the world is filled with half region wide block
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
@@ -350,8 +346,6 @@ public class LodBufferBuilder
 						requesting = maxChunkGenRequests - generationRequestList.size();
 
 					}
-
-					 */
 
 					//we then fill the world with the rest of the block
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
@@ -483,7 +477,6 @@ public class LodBufferBuilder
 
 				long treeTime = treeEnd - treeStart;
 
-				long renderingRequestTime = renderRequestEnd - renderRequestStart;
 
 				long renderingTime = renderEnd - renderStart;
 
@@ -493,7 +486,6 @@ public class LodBufferBuilder
 
 				ClientProxy.LOGGER.info("Buffer Build time: " + buildTime + " ms" + '\n' +
 						"Tree cutting time: " + treeTime + " ms" + '\n' +
-						"Rendering request time: " + renderingRequestTime + " ms" + '\n' +
 						"Rendering time: " + renderingTime + " ms" + '\n' +
 						"Generation request time: " + genReqTime + " ms" + '\n' +
 						"Generation time: " + genTime + " ms");

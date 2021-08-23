@@ -139,8 +139,8 @@ public class ClientProxy
 		//		LodConfig.CLIENT.drawLODs.set(true);
 		LodConfig.CLIENT.debugMode.set(false);
 		
-		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.QUAD);
-		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.QUAD);
+		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.SINGLE);
+		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.SINGLE);
 
 		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
@@ -150,7 +150,7 @@ public class ClientProxy
 		
 		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
-		LodConfig.CLIENT.lodChunkRenderDistance.set(128);
+		LodConfig.CLIENT.lodChunkRenderDistance.set(512);
 		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
 		LodConfig.CLIENT.lodQuality.set(1);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);

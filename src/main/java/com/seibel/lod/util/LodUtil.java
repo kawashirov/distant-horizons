@@ -73,7 +73,9 @@ public class LodUtil
 	public static final byte CHUNK_DETAIL_LEVEL = 4;
 	/** 1 block wide */
 	public static final byte BLOCK_DETAIL_LEVEL = 0;
-	
+
+
+	public static final byte DETAIL_OPTIONS = 10;
 	
 	/** measured in Blocks <br>
 	 * detail level 9 */

@@ -110,6 +110,7 @@ public class LodBuilder
                 generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(generationMode), LodConfig.CLIENT.maxGenerationDetail.get());
             } catch (IllegalArgumentException | NullPointerException e)
             {
+                System.out.println("Chunk pos " + chunk.getPos());
                 e.printStackTrace();
                 // if the world changes while LODs are being generated
                 // they will throw errors as they try to access things that no longer

@@ -417,8 +417,8 @@ public class LodDimension
                 region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
                 if (region == null)
                 {
-                    region = new LodRegion(DetailUtil.getLodDetail(detailLevel).detailLevel, regionPos);
-                    addOrOverwriteRegion(region);
+                    //region = new LodRegion(DetailUtil.getLodDetail(detailLevel).detailLevel, regionPos);
+                    //addOrOverwriteRegion(region);
                 } else
                 {
                     listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel));
@@ -439,6 +439,7 @@ public class LodDimension
         LodRegion region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
         if (region == null)
         {
+            /*
         	try
         	{
 	            region = new LodRegion(DetailUtil.getLodDetail(detailLevel).detailLevel, regionPos);
@@ -449,6 +450,8 @@ public class LodDimension
         		ClientProxy.LOGGER.warn("getDataToRender was unable to add the region at the pos [" + regionPos.x + ", " + regionPos.z + "]");
         		return listOfData; // this list should be empty
         	}
+             */
+            return listOfData;
         }
         else
         {
