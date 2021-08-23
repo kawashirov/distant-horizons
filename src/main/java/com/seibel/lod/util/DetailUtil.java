@@ -10,7 +10,7 @@ public class DetailUtil
     private static final int minDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
     private static final int maxDetail = LodUtil.REGION_DETAIL_LEVEL + 1;
     private static final int minDistance = 0;
-    private static final int maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16;
+    private static final int maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16 * 2;
     private static DistanceGenerationMode[] distancesGenerators = {
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE,
@@ -43,15 +43,13 @@ public class DetailUtil
         if(detail == minDetail)
             return minDistance;
         if(detail == maxDetail)
-            distance = maxDistance;
+            return maxDistance;
         switch (LodConfig.CLIENT.lodDistanceCalculatorType.get())
         {
             case LINEAR:
-                distance = (detail * initial);
-            break;
+                return (detail * initial);
             case QUADRATIC:
-                distance = (int) (Math.pow(2, detail) * initial);
-            break;
+                return (int) (Math.pow(2, detail) * initial);
         }
         return distance;
     }
