@@ -154,11 +154,11 @@ public class ClientProxy
 		
 		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
-		LodConfig.CLIENT.lodChunkRenderDistance.set(512);
+		LodConfig.CLIENT.lodChunkRenderDistance.set(128);
 		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
-		LodConfig.CLIENT.lodQuality.set(2);
+		LodConfig.CLIENT.lodQuality.set(1);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
-		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(8);
+		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(Runtime.getRuntime().availableProcessors());
 		
 		// has to be set in the config file
 		//      LodConfig.CLIENT.numberOfWorldGenerationThreads.set(16);

@@ -282,7 +282,7 @@ public class LodNodeGenWorker implements IWorker
 			// generate fake height data for this LOD
 			int seaLevel = serverWorld.getSeaLevel();
 
-			boolean simulateHeight = LodConfig.CLIENT.distanceGenerationMode.get() == DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
+			boolean simulateHeight = generationMode == DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
 			boolean inTheEnd = false;
 
 			// add fake heightmap data so our LODs aren't at height 0

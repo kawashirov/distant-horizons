@@ -36,7 +36,6 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
-import org.lwjgl.system.CallbackI;
 
 /**
  * This object holds all loaded LOD regions
@@ -324,10 +323,10 @@ public class LodDimension
                 //we start checking from the first circle. If the whole region is in the circle
                 //we proceed to cut all the level lower than the level of circle 1 and we break
                 //if this is not the case w
-                for(byte index = LodUtil.BLOCK_DETAIL_LEVEL; index <= LodUtil.REGION_DETAIL_LEVEL; index++){
-                    if(DetailDistanceUtil.getDistanceCut(index + 1) > levelPos.minDistance(playerPosX, playerPosZ)){
+                for(byte index = LodUtil.BLOCK_DETAIL_LEVEL; index <= LodUtil.DETAIL_OPTIONS; index++){
+                    if(DetailDistanceUtil.getDistanceTreeCut(index + 1) > levelPos.minDistance(playerPosX, playerPosZ)){
 
-                        byte cutDetailLevel = DetailDistanceUtil.getCutLodDetail(index).detailLevel;
+                        byte cutDetailLevel = DetailDistanceUtil.getCutLodDetail(index);
 
                         if(regions[x][z] != null)
                         {
@@ -365,7 +364,7 @@ public class LodDimension
                 for(byte index = LodUtil.BLOCK_DETAIL_LEVEL; index <= LodUtil.REGION_DETAIL_LEVEL; index++){
 
                     //As soon as we find in which circle the region should be we analyze it
-                    if(DetailDistanceUtil.getDistanceGeneration(index + 1) > levelPos.minDistance(playerPosX, playerPosZ)){
+                    if(DetailDistanceUtil.getDistanceTreeGen(index + 1) > levelPos.minDistance(playerPosX, playerPosZ)){
 
                         region = regions[x][z];
                         //We require that the region we are checking is loaded with at least this level
@@ -502,46 +501,7 @@ public class LodDimension
      *
      * @return list of nodes
      */
-    public List<LevelPos> getDataToRender(int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
-    {
-        int n = regions.length;
-        List<LevelPos> listOfData = new ArrayList<>();
-        int xIndex;
-        int zIndex;
-        LodRegion region;
-        RegionPos regionPos;
-        LevelPos regionLevelPos;
-        for (int xRegion = 0; xRegion < n; xRegion++)
-        {
-            for (int zRegion = 0; zRegion < n; zRegion++)
-            {
-                try
-                {
-                    xIndex = (xRegion + center.x) - halfWidth;
-                    zIndex = (zRegion + center.z) - halfWidth;
-                    regionPos = new RegionPos(xIndex, zIndex);
-                    regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
-                    if (end >= regionLevelPos.minDistance(playerPosX, playerPosZ) &&
-                            start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
-                    {
-                        region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
-                        listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel));
-                    }
-                }catch (Exception e)
-                {
-                    //e.printStackTrace();
-                }
-            }
-        }
-        return listOfData;
-    }
-
-    /**
-     * method to get all the nodes that have to be rendered based on the position of the player
-     *
-     * @return list of nodes
-     */
-    public List<LevelPos> getDataToRender(RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
+    public List<LevelPos> getDataToRender(RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
     {
         List<LevelPos> listOfData = new ArrayList<>();
         LevelPos regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
@@ -551,7 +511,7 @@ public class LodDimension
                     start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
             {
                 LodRegion region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
-                listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel));
+                listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel,zFix));
             }
         }catch (Exception e){
             //e.printStackTrace();

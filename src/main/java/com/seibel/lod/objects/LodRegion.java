@@ -322,16 +322,16 @@ public class LodRegion implements Serializable
     /**
      * @return
      */
-    public List<LevelPos> getDataToRender(int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
+    public List<LevelPos> getDataToRender(int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
     {
         LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
-        return getDataToRender(levelPos, playerPosX, playerPosZ, start, end, detailLevel);
+        return getDataToRender(levelPos, playerPosX, playerPosZ, start, end, detailLevel, zFix);
     }
 
     /**
      * @return
      */
-    private List<LevelPos> getDataToRender(LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel)
+    private List<LevelPos> getDataToRender(LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
     {
         List<LevelPos> levelPosList = new ArrayList<>();
 
@@ -345,7 +345,7 @@ public class LodRegion implements Serializable
 
         //To avoid z fighting: if the pos is touching the end radius at detailLevel + 1 then we stop
         //cause this area will be occupied by bigger block
-        if(levelPos.detailLevel == detailLevel + 1 && end <= maxDistance && minDistance <= end){
+        if(levelPos.detailLevel == detailLevel + 1 && end <= maxDistance && minDistance <= end && zFix){
             return levelPosList;
         }
 
@@ -382,7 +382,7 @@ public class LodRegion implements Serializable
                     for (int z = 0; z <= 1; z++)
                     {
                         childPos = new LevelPos((byte) (levelPos.detailLevel - 1), childPosX + x, childPosZ + z);
-                        levelPosList.addAll(getDataToRender(childPos, playerPosX, playerPosZ, start, end, detailLevel));
+                        levelPosList.addAll(getDataToRender(childPos, playerPosX, playerPosZ, start, end, detailLevel, zFix));
                     }
                 }
             }else{
@@ -624,6 +624,10 @@ public class LodRegion implements Serializable
     public void expand(byte detailLevel)
     {
         if(detailLevel < minDetailLevel){
+            for(byte tempLod =  minDetailLevel; tempLod < LodUtil.REGION_DETAIL_LEVEL; tempLod++){
+                int size = (short) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - tempLod);
+                generationType[tempLod] = new byte[size][size];
+            }
             for(byte tempLod =  detailLevel; tempLod < minDetailLevel; tempLod++){
                 int size = (short) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - tempLod);
                 colors[tempLod] = new byte[size][size][3];
