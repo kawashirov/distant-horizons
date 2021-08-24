@@ -92,8 +92,9 @@ public class ClientProxy
 	{
 		if (mc == null || mc.player == null || !lodWorld.getIsWorldLoaded())
 			return;
-		
-		
+
+
+		applyConfigOverrides();
 		viewDistanceChangedEvent();
 		
 		LodDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
@@ -106,10 +107,8 @@ public class ClientProxy
 
 		lodDim.treeCutter((int) mc.player.getX(),(int) mc.player.getZ());
 		lodDim.treeGenerator((int) mc.player.getX(),(int) mc.player.getZ());
-		System.out.println(lodDim);
 		
 		// comment out when creating a release
-		applyConfigOverrides();
 		
 		
 		// Note to self:
@@ -144,8 +143,8 @@ public class ClientProxy
 		//		LodConfig.CLIENT.drawLODs.set(true);
 		LodConfig.CLIENT.debugMode.set(false);
 		
-		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.FULL);
-		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.FULL);
+		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.SINGLE);
+		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.SINGLE);
 
 		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
@@ -155,9 +154,9 @@ public class ClientProxy
 		
 		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
-		LodConfig.CLIENT.lodChunkRenderDistance.set(128);
-		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
-		LodConfig.CLIENT.lodQuality.set(1);
+		LodConfig.CLIENT.lodChunkRenderDistance.set(512);
+		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.QUADRATIC);
+		LodConfig.CLIENT.lodQuality.set(2);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
 		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(12);
 		

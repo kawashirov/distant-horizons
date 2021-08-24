@@ -65,8 +65,8 @@ public class LodBufferBuilder
 	/** This holds the thread used to generate new LODs off the main thread. */
 	private ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " - main"));
 	/** This holds the threads used to generate buffers. */
-	//private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
-	private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(2, new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
+	private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
+	//private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(2, new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
 	
 	private LodBuilder LodQuadTreeNodeBuilder;
 	
