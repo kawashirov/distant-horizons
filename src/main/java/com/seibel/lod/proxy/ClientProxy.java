@@ -72,7 +72,7 @@ public class ClientProxy
 	/** can be set if we want to recalculate variables related
 	 * to the LOD view distance */
 	private boolean recalculateWidths = false;
-	
+
 	
 	public ClientProxy()
 	{
@@ -104,10 +104,10 @@ public class ClientProxy
 
 		playerMoveEvent(lodDim);
 		//System.out.println("memory needed " + lodDim.getMinMemoryNeeded() + " byte");
+		//System.out.println(lodDim);
 
 		lodDim.treeCutter((int) mc.player.getX(),(int) mc.player.getZ());
 		lodDim.treeGenerator((int) mc.player.getX(),(int) mc.player.getZ());
-		
 		// comment out when creating a release
 		
 		
@@ -143,8 +143,8 @@ public class ClientProxy
 		//		LodConfig.CLIENT.drawLODs.set(true);
 		LodConfig.CLIENT.debugMode.set(false);
 		
-		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.SINGLE);
-		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.SINGLE);
+		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.FULL);
+		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.FULL);
 
 		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
@@ -155,10 +155,10 @@ public class ClientProxy
 		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
 		LodConfig.CLIENT.lodChunkRenderDistance.set(512);
-		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.QUADRATIC);
+		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
 		LodConfig.CLIENT.lodQuality.set(2);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
-		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(12);
+		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(8);
 		
 		// has to be set in the config file
 		//      LodConfig.CLIENT.numberOfWorldGenerationThreads.set(16);

@@ -632,6 +632,7 @@ public class LodRegion implements Serializable
                 generationType[tempLod] = new byte[size][size];
                 dataExistence[tempLod] = new boolean[size][size];
             }
+            minDetailLevel = detailLevel;
         }
     }
 

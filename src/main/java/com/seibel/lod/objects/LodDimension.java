@@ -313,7 +313,6 @@ public class LodDimension
         int regionX;
         int regionZ;
         LevelPos levelPos;
-        LodRegion region;
 
         for (int x = 0; x < regions.length; x++)
         {
@@ -327,13 +326,14 @@ public class LodDimension
                 //if this is not the case w
                 for(byte index = LodUtil.BLOCK_DETAIL_LEVEL; index <= LodUtil.REGION_DETAIL_LEVEL; index++){
                     if(DetailDistanceUtil.getDistanceCut(index + 1) > levelPos.minDistance(playerPosX, playerPosZ)){
-                        region = regions[x][z];
 
                         byte cutDetailLevel = DetailDistanceUtil.getCutLodDetail(index).detailLevel;
 
-                        if(region != null && cutDetailLevel > 0)
+                        if(regions[x][z] != null)
                         {
-                            region.cutTree(cutDetailLevel);
+                            if(regions[x][z].getMinDetailLevel() > cutDetailLevel){
+                                regions[x][z].cutTree(cutDetailLevel);
+                            }
                         }
                         //once we
                         break;
@@ -466,15 +466,20 @@ public class LodDimension
         {
             for (int zRegion = 0; zRegion < n; zRegion++)
             {
-                xIndex = (xRegion + center.x) - halfWidth;
-                zIndex = (zRegion + center.z) - halfWidth;
-                regionPos = new RegionPos(xIndex, zIndex);
-                regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
-                if(end >= regionLevelPos.minDistance(playerPosX, playerPosZ) &&
-                    start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
+                try
                 {
-                    region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
-                    listOfData.addAll(region.getDataToGenerate(playerPosX, playerPosZ, start, end, generation, detailLevel, dataNumber));
+                    xIndex = (xRegion + center.x) - halfWidth;
+                    zIndex = (zRegion + center.z) - halfWidth;
+                    regionPos = new RegionPos(xIndex, zIndex);
+                    regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
+                    if (end >= regionLevelPos.minDistance(playerPosX, playerPosZ) &&
+                            start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
+                    {
+                        region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
+                        listOfData.addAll(region.getDataToGenerate(playerPosX, playerPosZ, start, end, generation, detailLevel, dataNumber));
+                    }
+                }catch (Exception e){
+                    //e.printStackTrace();
                 }
             }
         }
@@ -510,15 +515,21 @@ public class LodDimension
         {
             for (int zRegion = 0; zRegion < n; zRegion++)
             {
-                xIndex = (xRegion + center.x) - halfWidth;
-                zIndex = (zRegion + center.z) - halfWidth;
-                regionPos = new RegionPos(xIndex, zIndex);
-                regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
-                if(end >= regionLevelPos.minDistance(playerPosX, playerPosZ) &&
-                        start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
+                try
                 {
-                    region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
-                    listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel));
+                    xIndex = (xRegion + center.x) - halfWidth;
+                    zIndex = (zRegion + center.z) - halfWidth;
+                    regionPos = new RegionPos(xIndex, zIndex);
+                    regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
+                    if (end >= regionLevelPos.minDistance(playerPosX, playerPosZ) &&
+                            start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
+                    {
+                        region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
+                        listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel));
+                    }
+                }catch (Exception e)
+                {
+                    //e.printStackTrace();
                 }
             }
         }
@@ -534,13 +545,21 @@ public class LodDimension
     {
         List<LevelPos> listOfData = new ArrayList<>();
         LevelPos regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
-        if(end >= regionLevelPos.minDistance(playerPosX, playerPosZ) &&
-                start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
+        try
         {
-            LodRegion region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
-            listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel));
+            if (end >= regionLevelPos.minDistance(playerPosX, playerPosZ) &&
+                    start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
+            {
+                LodRegion region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
+                listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel));
+            }
+        }catch (Exception e){
+            //e.printStackTrace();
+        }finally
+        {
+
+            return listOfData;
         }
-        return listOfData;
     }
 
     /**
@@ -610,14 +629,19 @@ public class LodDimension
      */
     public boolean doesDataExist(LevelPos levelPos)
     {
-        LodRegion region = getRegion(levelPos);
-
-        if (region == null)
+        try
         {
+            LodRegion region = getRegion(levelPos);
+
+            if (region == null)
+            {
+                return false;
+            }
+
+            return region.doesDataExist(levelPos);
+        }catch (Exception e){
             return false;
         }
-
-        return region.doesDataExist(levelPos);
     }
 
     /**
