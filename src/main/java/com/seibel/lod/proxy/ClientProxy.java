@@ -265,8 +265,6 @@ public class ClientProxy
 		// do the dimensions need to change in size?
 		if (lodBuilder.defaultDimensionWidthInRegions != newWidth || recalculateWidths)
 		{
-			// TODO make this async
-			
 			// update the dimensions to fit the new width
 			lodWorld.resizeDimensionRegionWidth(newWidth);
 			lodBuilder.defaultDimensionWidthInRegions = newWidth;

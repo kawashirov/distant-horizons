@@ -17,7 +17,6 @@
  */
 package com.seibel.lod.builders.lodTemplates;
 
-import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
 
@@ -46,7 +45,6 @@ public class DynamicLodTemplate extends AbstractLodTemplate
 	@Override
 	public int getBufferMemoryForSingleNode(int detailLevel)
 	{
-		// TODO Auto-generated method stub
 		return 0;
 	}
 }

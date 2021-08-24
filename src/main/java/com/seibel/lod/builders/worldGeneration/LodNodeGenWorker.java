@@ -293,8 +293,6 @@ public class LodNodeGenWorker implements IWorker
 				{
 					if (simulateHeight)
 					{
-						// TODO use the biomes around each block to smooth out the transition
-
 						// these heights are of course aren't super accurate,
 						// they are just to simulate height data where there isn't any
 						switch(chunk.getBiomes().getNoiseBiome(x >> 2, seaLevel >> 2, z >> 2).getBiomeCategory())

@@ -36,7 +36,6 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
-import org.lwjgl.system.CallbackI;
 
 /**
  * This object holds all loaded LOD regions
@@ -701,20 +700,6 @@ public class LodDimension
     public int getCenterZ()
     {
         return center.z;
-    }
-
-
-    /**
-     * TODO Double check that this method works as expected
-     * <p>
-     * Returns how many non-null LodChunks
-     * are stored in this LodDimension.
-     */
-    public int getNumberOfLods()
-    {
-        /**TODO **/
-        int numbLods = 0;
-        return numbLods;
     }
 
 
