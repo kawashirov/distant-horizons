@@ -17,10 +17,14 @@
  */
 package com.seibel.lod.builders.lodTemplates;
 
+import com.seibel.lod.objects.LevelPos;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
 
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.util.math.BlockPos;
+
+import java.util.Set;
 
 /**
  * TODO #21 TriangularLodTemplate
@@ -32,10 +36,8 @@ import net.minecraft.client.renderer.BufferBuilder;
 public class TriangularLodTemplate extends AbstractLodTemplate
 {
 	@Override
-	public void addLodToBuffer(BufferBuilder buffer,
-											LodDimension lodDim, LodDataPoint lod,
-											double xOffset, double yOffset, double zOffset,
-											boolean debugging, byte detail)
+	public void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, LodDataPoint data, LodDataPoint[][] adjData,
+							   LevelPos levelPos, boolean debugging)
 	{
 		System.err.println("DynamicLodTemplate not implemented!");
 	}

@@ -57,7 +57,6 @@ public class LodBufferBuilder
 	private ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " - main"));
 	/** This holds the threads used to generate buffers. */
 	private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
-	//private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(2, new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
 	
 	/** The buffers that are used to create LODs using far fog */
 	public volatile BufferBuilder[][] buildableBuffers;
@@ -171,7 +170,7 @@ public class LodBufferBuilder
 						{
 							byte detailToRender;
 							boolean zFix;
-							Set<LevelPos> posListToRender = new HashSet<>();
+							Set<LevelPos> setOfPosToRender = new HashSet<>();
 
 							for (byte detail = detailLevel; detail <= LodUtil.REGION_DETAIL_LEVEL; detail++)
 							{
@@ -182,7 +181,7 @@ public class LodBufferBuilder
 									detailToRender = detail;
 									zFix = true;
 								}
-								posListToRender.addAll(lodDim.getDataToRender(
+								setOfPosToRender.addAll(lodDim.getDataToRender(
 										regionPos,
 										playerBlockPosRounded.getX(),
 										playerBlockPosRounded.getZ(),
@@ -193,9 +192,9 @@ public class LodBufferBuilder
 							}
 
 
-							for (LevelPos pos : posListToRender)
+							for (LevelPos posToRender : setOfPosToRender)
 							{
-								LevelPos chunkPos = pos.convert(LodUtil.CHUNK_DETAIL_LEVEL);
+								LevelPos chunkPos = posToRender.convert(LodUtil.CHUNK_DETAIL_LEVEL);
 								// skip any chunks that Minecraft is going to render
 
 								if (renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkPos.posX, chunkPos.posZ)))
@@ -203,17 +202,37 @@ public class LodBufferBuilder
 									continue;
 								}
 
-								if (lodDim.doesDataExist(pos))
+								if (lodDim.doesDataExist(posToRender))
 								{
 									try
 									{
-										int width = (int) Math.pow(2, pos.detailLevel);
-										LodDataPoint lodData = lodDim.getData(pos);
+										LodDataPoint lodData = lodDim.getData(posToRender);
 
 										if (lodData != null)
 										{
-											LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, lodDim, lodData,
-													pos.posX * width, 0, pos.posZ * width, renderer.debugging, pos.detailLevel);
+											/*We check for adjacent data*/
+											LodDataPoint[][] adjData = new LodDataPoint[2][2];
+											LevelPos adjPos;
+											for(int x : new int[]{0,1}){
+												adjPos = new LevelPos(posToRender.detailLevel, posToRender.posX + x*2-1, posToRender.posZ);
+												adjData[0][x] = lodDim.getData(adjPos);/*
+												if(setOfPosToRender.contains(adjPos)){
+													System.out.println("yup");
+													adjData[0][x] = lodDim.getData(adjPos);
+												}*/
+											}
+
+											for(int z : new int[]{0,1}){
+												adjPos = new LevelPos(posToRender.detailLevel, posToRender.posX, posToRender.posZ + z*2-1);
+												adjData[1][z] = lodDim.getData(adjPos);/*
+												if(setOfPosToRender.contains(adjPos)){
+													System.out.println("yup2");
+													adjData[1][z] = lodDim.getData(adjPos);
+												}*/
+											}
+
+											LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,
+													posToRender, renderer.debugging);
 										}
 									}
 									catch (ArrayIndexOutOfBoundsException e)

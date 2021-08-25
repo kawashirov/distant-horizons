@@ -534,15 +534,20 @@ public class LodDimension
         if (levelPos.detailLevel > LodUtil.REGION_DETAIL_LEVEL)
             throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + levelPos.detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
 
-        LodRegion region = getRegion(levelPos);
-
-
-        if (region == null)
+        try
         {
+            LodRegion region = getRegion(levelPos);
+
+            if (region == null)
+            {
+                return null;
+            }
+
+            return region.getData(levelPos);
+
+        }catch (Exception e){
             return null;
         }
-
-        return region.getData(levelPos);
     }
 
 

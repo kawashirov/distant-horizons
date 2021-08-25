@@ -18,13 +18,16 @@
 package com.seibel.lod.builders.lodTemplates;
 
 import java.awt.Color;
+import java.util.Set;
 
 import com.seibel.lod.enums.LodDetail;
+import com.seibel.lod.objects.LevelPos;
 import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.util.math.BlockPos;
 
 /**
  * This is the abstract class used to create different
@@ -35,10 +38,8 @@ import net.minecraft.client.renderer.BufferBuilder;
  */
 public abstract class AbstractLodTemplate
 {
-	public abstract void addLodToBuffer(BufferBuilder buffer,
-										LodDimension lodDim, LodDataPoint lod,
-										double xOffset, double yOffset, double zOffset,
-										boolean debugging, byte detail);
+	public abstract void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, LodDataPoint data, LodDataPoint[][] adjData,
+										 LevelPos levelPos, boolean debugging);
 
 	/** add the given position and color to the buffer */
 	protected void addPosAndColor(BufferBuilder buffer,
