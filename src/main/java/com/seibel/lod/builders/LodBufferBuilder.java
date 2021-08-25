@@ -175,12 +175,16 @@ public class LodBufferBuilder
 							for (byte detail = detailLevel; detail <= LodUtil.REGION_DETAIL_LEVEL; detail++)
 							{
 								detailToRender = detail;
+								zFix = true;
+								/*
+								detailToRender = (byte) 4;
 								if(detail > detailToRender){
 									zFix = false;
 								}else{
 									detailToRender = detail;
 									zFix = true;
 								}
+								 */
 								setOfPosToRender.addAll(lodDim.getDataToRender(
 										regionPos,
 										playerBlockPosRounded.getX(),
@@ -215,7 +219,9 @@ public class LodBufferBuilder
 											LevelPos adjPos;
 											for(int x : new int[]{0,1}){
 												adjPos = new LevelPos(posToRender.detailLevel, posToRender.posX + x*2-1, posToRender.posZ);
-												adjData[0][x] = lodDim.getData(adjPos);/*
+												if (!renderer.vanillaRenderedChunks.contains(new ChunkPos(adjPos.convert(LodUtil.CHUNK_DETAIL_LEVEL).posX, adjPos.convert(LodUtil.CHUNK_DETAIL_LEVEL).posZ)));
+													adjData[0][x] = lodDim.getData(adjPos);
+												/*
 												if(setOfPosToRender.contains(adjPos)){
 													System.out.println("yup");
 													adjData[0][x] = lodDim.getData(adjPos);
@@ -224,7 +230,9 @@ public class LodBufferBuilder
 
 											for(int z : new int[]{0,1}){
 												adjPos = new LevelPos(posToRender.detailLevel, posToRender.posX, posToRender.posZ + z*2-1);
-												adjData[1][z] = lodDim.getData(adjPos);/*
+												if (!renderer.vanillaRenderedChunks.contains(new ChunkPos(adjPos.convert(LodUtil.CHUNK_DETAIL_LEVEL).posX, adjPos.convert(LodUtil.CHUNK_DETAIL_LEVEL).posZ)))
+													adjData[1][z] = lodDim.getData(adjPos);
+												/*
 												if(setOfPosToRender.contains(adjPos)){
 													System.out.println("yup2");
 													adjData[1][z] = lodDim.getData(adjPos);
