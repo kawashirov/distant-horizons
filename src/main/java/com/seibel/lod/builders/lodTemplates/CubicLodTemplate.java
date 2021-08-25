@@ -155,7 +155,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
             addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, bottomColor.getRed(), bottomColor.getGreen(), bottomColor.getBlue(), bottomColor.getAlpha());
         }
 
-        if (playerBlockPos.getZ() > bb.minZ + CULL_OFFSET)
+        if (playerBlockPos.getZ() > bb.minZ - CULL_OFFSET)
         {
             // south (facing -Z)
 
@@ -189,7 +189,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
             }
         }
 
-        if (playerBlockPos.getZ() < bb.maxZ - CULL_OFFSET)
+        if (playerBlockPos.getZ() < bb.maxZ + CULL_OFFSET)
         {
             data = adjData[1][0];
             // north (facing +Z)
@@ -222,7 +222,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
             }
         }
 
-        if (playerBlockPos.getX() < bb.maxX - CULL_OFFSET)
+        if (playerBlockPos.getX() < bb.maxX + CULL_OFFSET)
         {
             // west (facing -X)
             data = adjData[0][0];
@@ -255,7 +255,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
             }
         }
 
-        if (playerBlockPos.getX() > bb.minX + CULL_OFFSET)
+        if (playerBlockPos.getX() > bb.minX - CULL_OFFSET)
         {
             // east (facing +X)
             data = adjData[0][1];
