@@ -84,7 +84,9 @@ public class LodWorldGenerator
 			generatorThreadRunning = true;
 			
 			// just in case the config is changed
-			maxChunkGenRequests = LodConfig.CLIENT.numberOfWorldGenerationThreads.get() * 8;
+
+			//maxChunkGenRequests = LodConfig.CLIENT.numberOfWorldGenerationThreads.get() * 8;
+			maxChunkGenRequests = Runtime.getRuntime().availableProcessors() * 8;
 			
 			Thread generatorThread = new Thread(() ->
 			{
@@ -132,7 +134,7 @@ public class LodWorldGenerator
 					int farRequesting = maxChunkGenRequests/2;
 
 					//we firstly make sure that the world is filled with half region wide block
-
+					/*
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
 						if (farRequesting <= 0){
@@ -152,11 +154,11 @@ public class LodWorldGenerator
 						}
 						farRequesting = farRequesting - levelPosListToGen.size();
 
-					}
+					}*/
 					
 					// ...then once the world is filled with half-region sized blocks
 					// fill in the rest
-
+					int t = generationRequestList.size();
 					int nearRequesting = maxChunkGenRequests - maxChunkGenRequests/2 + farRequesting;
 					System.out.println("clear slot " + nearRequesting);
 					//we then fill the world with the rest of the block
@@ -177,7 +179,7 @@ public class LodWorldGenerator
 						nearRequesting = nearRequesting - levelPosListToGen.size();
 						System.out.println("adding " + levelPosListToGen.size());
 					}
-					System.out.println("generating " + nearRequesting);
+					System.out.println("generating " + generationRequestList.size() + " and " + t);
 					
 					
 					//====================================//

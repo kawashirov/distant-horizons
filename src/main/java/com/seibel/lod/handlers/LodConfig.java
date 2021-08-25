@@ -93,7 +93,7 @@ public class LodConfig
                             + " At what distance should Fog be drawn on the LODs? \n"
                             + " If the fog cuts off ubruptly or you are using Optifine's \"fast\" \n"
                             + " fog option set this to " + FogDistance.NEAR.toString() + " or " + FogDistance.FAR.toString() + ". \n")
-                    .defineEnum("fogDistance", FogDistance.NEAR_AND_FAR);
+                    .defineEnum("fogDistance", FogDistance.FAR);
 
             fogDrawOverride = builder
                     .comment("\n\n"
@@ -130,7 +130,7 @@ public class LodConfig
                             + " " + LodDetail.QUAD.toString() + ": render 16 LODs for each Chunk. \n"
                             + " " + LodDetail.HALF.toString() + ": render 64 LODs for each Chunk. \n"
                             + " " + LodDetail.FULL.toString() + ": render 256 LODs for each Chunk. \n")
-                    .defineEnum("lodDrawQuality", LodDetail.DOUBLE);
+                    .defineEnum("lodDrawQuality", LodDetail.FULL);
 
             maxGenerationDetail = builder
                     .comment("\n\n"
@@ -140,7 +140,7 @@ public class LodConfig
                             + " " + LodDetail.QUAD.toString() + ": render 16 LODs for each Chunk. \n"
                             + " " + LodDetail.HALF.toString() + ": render 64 LODs for each Chunk. \n"
                             + " " + LodDetail.FULL.toString() + ": render 256 LODs for each Chunk. \n")
-                    .defineEnum("lodGenerationQuality", LodDetail.DOUBLE);
+                    .defineEnum("lodGenerationQuality", LodDetail.FULL);
 
             lodDistanceCalculatorType = builder
                     .comment("\n\n"
@@ -157,7 +157,7 @@ public class LodConfig
                             + " " + DistanceCalculatorType.RENDER_DEPENDANT + " \n"
                             + " with LINEAR calculator the quality of block decrease \n"
                             + " quadratically to the distance of the player \n")
-                    .defineEnum("lodDistanceComputation", DistanceCalculatorType.RENDER_DEPENDANT);
+                    .defineEnum("lodDistanceComputation", DistanceCalculatorType.LINEAR);
 
             lodQuality = builder
                     .comment("\n\n"
@@ -168,7 +168,7 @@ public class LodConfig
             lodChunkRenderDistance = builder
                     .comment("\n\n"
                             + " This is the render distance of the mod \n")
-                    .defineInRange("lodChunkRenderDistane", 128, 32, 128);
+                    .defineInRange("lodChunkRenderDistane", 128, 32, 256);
 
             distanceGenerationMode = builder
                     .comment("\n\n"

@@ -16,7 +16,7 @@ public class DetailDistanceUtil
     private static int maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16;
 
 
-    /*private static  DistanceGenerationMode[] distancesGenerators = {
+    private static  DistanceGenerationMode[] distancesGenerators = {
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE,
@@ -26,7 +26,7 @@ public class DetailDistanceUtil
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE,
-            DistanceGenerationMode.SURFACE};*/
+            DistanceGenerationMode.SURFACE};
 
     /*private static  DistanceGenerationMode[] distancesGenerators = {
             DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
@@ -39,17 +39,6 @@ public class DetailDistanceUtil
             DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
             DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
             DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT};*/
-    private static  DistanceGenerationMode[] distancesGenerators = {
-            DistanceGenerationMode.SURFACE,
-            DistanceGenerationMode.SURFACE,
-            DistanceGenerationMode.SURFACE,
-            DistanceGenerationMode.SURFACE,
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT};
 
     private static LodDetail[] lodDetails = {
             LodDetail.FULL,
@@ -90,7 +79,7 @@ public class DetailDistanceUtil
         switch (LodConfig.CLIENT.lodDistanceCalculatorType.get())
         {
             case LINEAR:
-                initial = Math.min(maxDistance*2/maxDetail, 1024);
+                initial = LodConfig.CLIENT.lodQuality.get() * 128;
                 return (detail * initial);
             case QUADRATIC:
                 initial = LodConfig.CLIENT.lodQuality.get() * 128;
