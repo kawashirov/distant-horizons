@@ -664,20 +664,6 @@ public class LodDimension
     }
 
 
-    /**
-     * TODO Double check that this method works as expected
-     * <p>
-     * Returns how many non-null LodChunks
-     * are stored in this LodDimension.
-     */
-    public int getNumberOfLods()
-    {
-        /**TODO **/
-        int numbLods = 0;
-        return numbLods;
-    }
-
-
     public int getWidth()
     {
         if (regions != null)

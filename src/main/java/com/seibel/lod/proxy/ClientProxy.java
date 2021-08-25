@@ -23,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
+import com.seibel.lod.builders.worldGeneration.LodWorldGenerator;
 import com.seibel.lod.enums.DistanceCalculatorType;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.FogDistance;
@@ -39,6 +40,7 @@ import com.seibel.lod.util.LodUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -49,7 +51,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of this program.
  *
  * @author James_Seibel
- * @version 8-17-2021
+ * @version 8-24-2021
  */
 public class ClientProxy
 {
@@ -57,8 +59,9 @@ public class ClientProxy
 	
 	private static LodWorld lodWorld = new LodWorld();
 	private static LodBuilder lodBuilder = new LodBuilder();
-	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder(lodBuilder);
+	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder();
 	private static LodRenderer renderer = new LodRenderer(lodBufferBuilder);
+	private static LodWorldGenerator lodWorldGenerator = LodWorldGenerator.INSTANCE;
 	
 	private boolean configOverrideReminderPrinted = false;
 	
@@ -141,7 +144,7 @@ public class ClientProxy
 		}
 		
 		//		LodConfig.CLIENT.drawLODs.set(true);
-		LodConfig.CLIENT.debugMode.set(false);
+		LodConfig.CLIENT.debugMode.set(true);
 		
 		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.FULL);
 		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.FULL);
@@ -154,11 +157,11 @@ public class ClientProxy
 		
 		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
-		LodConfig.CLIENT.lodChunkRenderDistance.set(128);
+		LodConfig.CLIENT.lodChunkRenderDistance.set(512);
 		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
-		LodConfig.CLIENT.lodQuality.set(1);
+		LodConfig.CLIENT.lodQuality.set(2);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
-		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(Runtime.getRuntime().availableProcessors());
+		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(16);
 		
 		// has to be set in the config file
 		//      LodConfig.CLIENT.numberOfWorldGenerationThreads.set(16);
@@ -168,6 +171,19 @@ public class ClientProxy
 	//==============//
 	// forge events //
 	//==============//
+	
+	@SubscribeEvent
+	public void serverTickEvent(TickEvent.ServerTickEvent event)
+	{
+		if (mc == null || mc.player == null || !lodWorld.getIsWorldLoaded())
+			return;
+		
+		LodDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
+		if (lodDim == null)
+			return;
+		
+		lodWorldGenerator.queueGenerationRequests(lodDim, renderer, lodBuilder);
+	}
 	
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)
@@ -203,7 +219,7 @@ public class ClientProxy
 			// preventing new LodChunks form being generated
 			LodNodeGenWorker.restartExecuterService();
 			
-			lodBufferBuilder.numberOfChunksWaitingToGenerate.set(0);
+			LodWorldGenerator.INSTANCE.numberOfChunksWaitingToGenerate.set(0);
 			// the player has disconnected from a server
 			lodWorld.deselectWorld();
 			
@@ -265,8 +281,6 @@ public class ClientProxy
 		// do the dimensions need to change in size?
 		if (lodBuilder.defaultDimensionWidthInRegions != newWidth || recalculateWidths)
 		{
-			// TODO make this async
-			
 			// update the dimensions to fit the new width
 			lodWorld.resizeDimensionRegionWidth(newWidth);
 			lodBuilder.defaultDimensionWidthInRegions = newWidth;
