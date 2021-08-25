@@ -3,6 +3,7 @@ package com.seibel.lod.util;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
+import net.minecraft.client.Minecraft;
 
 public class DetailDistanceUtil
 {
@@ -89,11 +90,20 @@ public class DetailDistanceUtil
         switch (LodConfig.CLIENT.lodDistanceCalculatorType.get())
         {
             case LINEAR:
-                initial = Math.min(maxDistance/maxDetail, 1024);
+                initial = Math.min(maxDistance*2/maxDetail, 1024);
                 return (detail * initial);
             case QUADRATIC:
                 initial = LodConfig.CLIENT.lodQuality.get() * 128;
                 return (int) (Math.pow(2, detail) * initial);
+            case RENDER_DEPENDANT:
+                int realRenderDistance = Minecraft.getInstance().options.renderDistance * 16;
+                int border = 128;
+                byte detailAtBorder = (byte) 4;
+                if(detail > detailAtBorder){
+                    return (detail * (border-realRenderDistance)/detailAtBorder + realRenderDistance);
+                }else{
+                    return ((maxDetail - detail) * (maxDistance-border)/(maxDetail - detailAtBorder) + border);
+                }
         }
         return distance;
     }

@@ -145,7 +145,7 @@ public class LodWorldGenerator
 								DetailDistanceUtil.getDistanceGeneration(detailGen),
 								DetailDistanceUtil.getDistanceGeneration(detailGen + 1),
 								DetailDistanceUtil.getDistanceGenerationMode(detailGen).complexity,
-								(byte) 9,
+								(byte) 7,
 								farRequesting);
 						for(LevelPos levelPos : levelPosListToGen){
 							generationRequestList.add(new GenerationRequest(levelPos,DetailDistanceUtil.getDistanceGenerationMode(detailGen), DetailDistanceUtil.getLodDetail(detailGen)));

@@ -151,8 +151,13 @@ public class LodConfig
                             + "\n"
                             + " " + DistanceCalculatorType.QUADRATIC + " \n"
                             + " with LINEAR calculator the quality of block decrease \n"
+                            + " quadratically to the distance of the player \n"
+
+                            + "\n"
+                            + " " + DistanceCalculatorType.RENDER_DEPENDANT + " \n"
+                            + " with LINEAR calculator the quality of block decrease \n"
                             + " quadratically to the distance of the player \n")
-                    .defineEnum("lodDistanceComputation", DistanceCalculatorType.LINEAR);
+                    .defineEnum("lodDistanceComputation", DistanceCalculatorType.RENDER_DEPENDANT);
 
             lodQuality = builder
                     .comment("\n\n"
