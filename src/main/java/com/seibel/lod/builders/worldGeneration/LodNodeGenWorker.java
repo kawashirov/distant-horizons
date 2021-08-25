@@ -26,7 +26,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
-import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.builders.LodBuilderConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
@@ -71,7 +70,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  *
  * @author James Seibel
- * @version 8-21-2021
+ * @version 8-24-2021
  */
 public class LodNodeGenWorker implements IWorker
 {
@@ -88,7 +87,7 @@ public class LodNodeGenWorker implements IWorker
 
 
 	public LodNodeGenWorker(ChunkPos newPos, DistanceGenerationMode newGenerationMode, LodDetail newDetaillevel, LodRenderer newLodRenderer,
-							LodBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder,
+							LodBuilder newLodBuilder,
 							LodDimension newLodDimension, ServerWorld newServerWorld)
 	{
 		// just a few sanity checks
@@ -101,9 +100,6 @@ public class LodNodeGenWorker implements IWorker
 		if (newLodBuilder == null)
 			throw new IllegalArgumentException("LodChunkGenThread requires a non-null LodChunkBuilder");
 
-		if (newLodBufferBuilder == null)
-			throw new IllegalArgumentException("LodChunkGenThread requires a non-null LodBufferBuilder");
-
 		if (newLodDimension == null)
 			throw new IllegalArgumentException("LodChunkGenThread requires a non-null LodDimension");
 
@@ -113,7 +109,7 @@ public class LodNodeGenWorker implements IWorker
 
 
 		thread = new LodChunkGenThread(newPos, newGenerationMode, newDetaillevel, newLodRenderer,
-				newLodBuilder, newLodBufferBuilder,
+				newLodBuilder,
 				newLodDimension, newServerWorld);
 	}
 
@@ -165,12 +161,11 @@ public class LodNodeGenWorker implements IWorker
 		public final LodDetail detailLevel;
 		public final LodBuilder lodBuilder;
 		public final LodRenderer lodRenderer;
-		private LodBufferBuilder lodBufferBuilder;
 
 		private ChunkPos pos;
 
 		public LodChunkGenThread(ChunkPos newPos, DistanceGenerationMode newGenerationMode, LodDetail newDetailLevel, LodRenderer newLodRenderer,
-								 LodBuilder newLodBuilder, LodBufferBuilder newLodBufferBuilder,
+								 LodBuilder newLodBuilder,
 								 LodDimension newLodDimension, ServerWorld newServerWorld)
 		{
 			pos = newPos;
@@ -178,7 +173,6 @@ public class LodNodeGenWorker implements IWorker
 			detailLevel = newDetailLevel;
 			lodRenderer = newLodRenderer;
 			lodBuilder = newLodBuilder;
-			lodBufferBuilder = newLodBufferBuilder;
 			lodDim = newLodDimension;
 			serverWorld = newServerWorld;
 		}
@@ -247,10 +241,10 @@ public class LodNodeGenWorker implements IWorker
 			finally
 			{
 				// decrement how many threads are running
-				thread.lodBufferBuilder.numberOfChunksWaitingToGenerate.addAndGet(-1);
+				LodWorldGenerator.INSTANCE.numberOfChunksWaitingToGenerate.addAndGet(-1);
 				
 				// this position is no longer being generated
-				lodBufferBuilder.positionWaitingToBeGenerated.remove(pos);
+				LodWorldGenerator.INSTANCE.positionWaitingToBeGenerated.remove(pos);
 			}
 
 		}// run
