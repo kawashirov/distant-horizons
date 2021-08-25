@@ -129,36 +129,40 @@ public class LodWorldGenerator
 					//=======================================//
 					
 					// start by generating half-region sized blocks...
-					int farRequesting = 0;
+					int farRequesting = maxChunkGenRequests/2;
 
 					//we firstly make sure that the world is filled with half region wide block
 
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
-						if (farRequesting <= maxChunkGenRequests/2) break;
+						if (farRequesting <= 0){
+							farRequesting=0;
+							break;
+						}
 						levelPosListToGen = lodDim.getDataToGenerate(
 								playerBlockPosRounded.getX(),
 								playerBlockPosRounded.getZ(),
 								DetailDistanceUtil.getDistanceGeneration(detailGen),
 								DetailDistanceUtil.getDistanceGeneration(detailGen + 1),
 								DetailDistanceUtil.getDistanceGenerationMode(detailGen).complexity,
-								(byte) 7,
+								(byte) 9,
 								farRequesting);
 						for(LevelPos levelPos : levelPosListToGen){
 							generationRequestList.add(new GenerationRequest(levelPos,DetailDistanceUtil.getDistanceGenerationMode(detailGen), DetailDistanceUtil.getLodDetail(detailGen)));
 						}
-						farRequesting = farRequesting + generationRequestList.size();
+						farRequesting = farRequesting - levelPosListToGen.size();
 
 					}
 					
 					// ...then once the world is filled with half-region sized blocks
 					// fill in the rest
 
-					int nearRequesting = farRequesting;
+					int nearRequesting = maxChunkGenRequests - maxChunkGenRequests/2 + farRequesting;
+					System.out.println("clear slot " + nearRequesting);
 					//we then fill the world with the rest of the block
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
-						if (nearRequesting <= maxChunkGenRequests) break;
+						if (nearRequesting <= 0) break;
 						levelPosListToGen = lodDim.getDataToGenerate(
 								playerBlockPosRounded.getX(),
 								playerBlockPosRounded.getZ(),
@@ -170,9 +174,10 @@ public class LodWorldGenerator
 						for(LevelPos levelPos : levelPosListToGen){
 							generationRequestList.add(new GenerationRequest(levelPos,DetailDistanceUtil.getDistanceGenerationMode(detailGen), DetailDistanceUtil.getLodDetail(detailGen)));
 						}
-						nearRequesting = nearRequesting + generationRequestList.size();
+						nearRequesting = nearRequesting - levelPosListToGen.size();
+						System.out.println("adding " + levelPosListToGen.size());
 					}
-					
+					System.out.println("generating " + nearRequesting);
 					
 					
 					//====================================//
