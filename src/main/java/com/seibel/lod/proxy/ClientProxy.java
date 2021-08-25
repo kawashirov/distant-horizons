@@ -144,7 +144,7 @@ public class ClientProxy
 		}
 		
 		//		LodConfig.CLIENT.drawLODs.set(true);
-		LodConfig.CLIENT.debugMode.set(true);
+		LodConfig.CLIENT.debugMode.set(false);
 		
 		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.FULL);
 		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.FULL);

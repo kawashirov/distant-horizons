@@ -129,50 +129,49 @@ public class LodWorldGenerator
 					//=======================================//
 					
 					// start by generating half-region sized blocks...
+					int farRequesting = maxChunkGenRequests/2;
+					int nearRequesting;
+
+					//we firstly make sure that the world is filled with half region wide block
+
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
-						if (requesting == 0)
-							break;
-						
+						if (farRequesting <= 0) break;
 						levelPosListToGen = lodDim.getDataToGenerate(
 								playerBlockPosRounded.getX(),
 								playerBlockPosRounded.getZ(),
 								DetailDistanceUtil.getDistanceGeneration(detailGen),
 								DetailDistanceUtil.getDistanceGeneration(detailGen + 1),
-								LodConfig.CLIENT.distanceGenerationMode.get().complexity,
+								DetailDistanceUtil.getDistanceGenerationMode(detailGen).complexity,
 								(byte) 9,
-								requesting / 2);
-						
-						for (LevelPos levelPos : levelPosListToGen)
-						{
-							generationRequestList.add(new GenerationRequest(levelPos, LodConfig.CLIENT.distanceGenerationMode.get(), DetailDistanceUtil.getLodDetail(detailGen)));
+								farRequesting);
+						for(LevelPos levelPos : levelPosListToGen){
+							generationRequestList.add(new GenerationRequest(levelPos,DetailDistanceUtil.getDistanceGenerationMode(detailGen), DetailDistanceUtil.getLodDetail(detailGen)));
 						}
-						requesting = maxChunkGenRequests - generationRequestList.size();
-						
+						farRequesting = farRequesting - generationRequestList.size();
+
 					}
 					
 					// ...then once the world is filled with half-region sized blocks
 					// fill in the rest
+
+					nearRequesting = maxChunkGenRequests - farRequesting;
+					//we then fill the world with the rest of the block
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
-						if (requesting == 0)
-							break;
-						
+						if (nearRequesting <= 0) break;
 						levelPosListToGen = lodDim.getDataToGenerate(
 								playerBlockPosRounded.getX(),
 								playerBlockPosRounded.getZ(),
 								DetailDistanceUtil.getDistanceGeneration(detailGen),
 								DetailDistanceUtil.getDistanceGeneration(detailGen + 1),
-								LodConfig.CLIENT.distanceGenerationMode.get().complexity,
+								DetailDistanceUtil.getDistanceGenerationMode(detailGen).complexity,
 								DetailDistanceUtil.getLodDetail(detailGen).detailLevel,
-								maxChunkGenRequests);
-						
-						for (LevelPos levelPos : levelPosListToGen)
-						{
-							generationRequestList.add(new GenerationRequest(levelPos, LodConfig.CLIENT.distanceGenerationMode.get(), DetailDistanceUtil.getLodDetail(detailGen)));
+								nearRequesting);
+						for(LevelPos levelPos : levelPosListToGen){
+							generationRequestList.add(new GenerationRequest(levelPos,DetailDistanceUtil.getDistanceGenerationMode(detailGen), DetailDistanceUtil.getLodDetail(detailGen)));
 						}
-						
-						requesting = maxChunkGenRequests - generationRequestList.size();
+						nearRequesting = nearRequesting - generationRequestList.size();
 					}
 					
 					

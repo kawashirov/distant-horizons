@@ -18,7 +18,9 @@
 package com.seibel.lod.builders;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -167,17 +169,27 @@ public class LodBufferBuilder
 
 						Callable<Boolean> bufferBuildingThread = () ->
 						{
-							List<LevelPos> posListToRender = new ArrayList<>();
+							byte detailToRender;
+							boolean zFix;
+							Set<LevelPos> posListToRender = new HashSet<>();
 
 							for (byte detail = detailLevel; detail <= LodUtil.REGION_DETAIL_LEVEL; detail++)
 							{
+								detailToRender = detail;
+								if(detail > detailToRender){
+									zFix = false;
+								}else{
+									detailToRender = detail;
+									zFix = true;
+								}
 								posListToRender.addAll(lodDim.getDataToRender(
 										regionPos,
 										playerBlockPosRounded.getX(),
 										playerBlockPosRounded.getZ(),
 										DetailDistanceUtil.getDistanceRendering(detail),
 										DetailDistanceUtil.getDistanceRendering(detail + 1),
-										detail));
+										detailToRender,
+										zFix));
 							}
 
 
@@ -366,7 +378,6 @@ public class LodBufferBuilder
 	 * Called from the LodRenderer to create the
 	 * BufferBuilders at the right size.
 	 *
-	 * @param bufferMaxCapacity
 	 */
 	private void uploadBuffers()
 	{

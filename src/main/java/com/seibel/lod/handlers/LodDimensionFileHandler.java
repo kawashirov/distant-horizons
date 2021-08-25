@@ -113,116 +113,127 @@ public class LodDimensionFileHandler
     // read from file //
     //================//
 
-
-    /**
-     * Return the LodRegion region at the given coordinates.
-     * (null if the file doesn't exist)
-     */
-    public LodRegion loadRegionFromFile(RegionPos regionPos, byte detailLevel)
+	/**
+	 * Return the LodRegion region at the given coordinates.
+	 * (null if the file doesn't exist)
+	 */
+	public LodRegion loadRegionFromFile(RegionPos regionPos, byte detailLevel)
 	{
-    	int regionX = regionPos.x;
-    	int regionZ = regionPos.z;
-    	String fileName = getFileNameAndPathForRegion(regionX, regionZ, detailLevel);
-    	
-    	// if the fileName was null that means the folder is inaccessible
-    	// for some reason
-    	if (fileName == null)
-    		return null;
-    	
-    	
-		File f = new File(fileName);
-		
-		if (!f.exists())
+		int regionX = regionPos.x;
+		int regionZ = regionPos.z;
+		LodRegion region = null;
+		for (byte tempDetailLevel = detailLevel; tempDetailLevel <= LodUtil.REGION_DETAIL_LEVEL; tempDetailLevel++)
 		{
-			// there wasn't a file, don't
-			// return anything
-			return null;
-		}
-		String data = "";
-		try
-		{
-			BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
-			data = bufferedReader.readLine();
-			int fileVersion = -1;
-			
-			if (data != null && !data.isEmpty())
+			try
 			{
-				// try to get the file version
-				try
+				String fileName = getFileNameAndPathForRegion(regionX, regionZ, tempDetailLevel);
+
+				// if the fileName was null that means the folder is inaccessible
+				// for some reason
+				if (fileName == null)
+					throw new IllegalArgumentException("Game folder is not accessible");
+
+
+				File f = new File(fileName);
+
+				if (!f.exists())
 				{
-					fileVersion = Integer.parseInt(data.substring(data.indexOf(' ')).trim());
+					// there wasn't a file, don't
+					// return anything
+					continue;
 				}
-				catch (NumberFormatException | StringIndexOutOfBoundsException e)
+				String data = "";
+				BufferedReader bufferedReader = new BufferedReader(new FileReader(f));
+				data = bufferedReader.readLine();
+				int fileVersion = -1;
+
+				if (data != null && !data.isEmpty())
 				{
-					// this file doesn't have a version
-					// keep the version as -1
-					fileVersion = -1;
-				}
-				
-				// check if this file can be read by this file handler
-				if (fileVersion < LOD_SAVE_FILE_VERSION)
+					// try to get the file version
+					try
+					{
+						fileVersion = Integer.parseInt(data.substring(data.indexOf(' ')).trim());
+					} catch (NumberFormatException | StringIndexOutOfBoundsException e)
+					{
+						// this file doesn't have a version
+						// keep the version as -1
+						fileVersion = -1;
+					}
+
+					// check if this file can be read by this file handler
+					if (fileVersion < LOD_SAVE_FILE_VERSION)
+					{
+						// the file we are reading is an older version,
+						// close the reader and delete the file.
+						bufferedReader.close();
+						f.delete();
+						ClientProxy.LOGGER.info("Outdated LOD region file for region: (" + regionX + "," + regionZ + ") version: " + fileVersion +
+								", version requested: " + LOD_SAVE_FILE_VERSION +
+								" File was been deleted.");
+
+						continue;
+					} else if (fileVersion > LOD_SAVE_FILE_VERSION)
+					{
+						// the file we are reading is a newer version,
+						// close the reader and ignore the file, we don't
+						// want to accidently delete anything the user may want.
+						bufferedReader.close();
+						ClientProxy.LOGGER.info("Newer LOD region file for region: (" + regionX + "," + regionZ + ") version: " + fileVersion +
+								", version requested: " + LOD_SAVE_FILE_VERSION +
+								" this region will not be written to in order to protect the newer file.");
+
+						continue;
+					}
+				} else
 				{
-					// the file we are reading is an older version,
-					// close the reader and delete the file.
+					// there is no data in this file
 					bufferedReader.close();
-					f.delete();
-					ClientProxy.LOGGER.info("Outdated LOD region file for region: (" + regionX + "," + regionZ + ") version: " + fileVersion +
-							", version requested: " + LOD_SAVE_FILE_VERSION +
-							" File was been deleted.");
-					
-					return null;
+					continue;
 				}
-				else if (fileVersion > LOD_SAVE_FILE_VERSION)
-				{
-					// the file we are reading is a newer version,
-					// close the reader and ignore the file, we don't
-					// want to accidently delete anything the user may want.
-					bufferedReader.close();
-					ClientProxy.LOGGER.info("Newer LOD region file for region: (" + regionX + "," + regionZ + ") version: " + fileVersion +
-							", version requested: " + LOD_SAVE_FILE_VERSION +
-							" this region will not be written to in order to protect the newer file.");
-					
-					return null;
-				}
-			}
-			else
-			{
-				// there is no data in this file
+
+				// this file is a readable version, begin reading the file
+				data = bufferedReader.readLine();
+
 				bufferedReader.close();
-				return null;
+				region = new LodRegion(new LevelContainer(data), regionPos);
+				if (tempDetailLevel >= detailLevel)
+					region.expand(detailLevel);
+				break;
+			} catch (Exception e)
+			{
+				// the buffered reader encountered a
+				// problem reading the file
+				e.printStackTrace();
 			}
-			
-			// this file is a readable version, begin reading the file
-			data = bufferedReader.readLine();
-			
-			bufferedReader.close();
+            /*catch (IOException e)
+            {
+                // the buffered reader encountered a
+                // problem reading the file
+                e.printStackTrace();
+            } catch (IllegalArgumentException e)
+            {
+                e.printStackTrace();
+            }*/
 		}
-		catch (IOException e)
-		{
-			// the buffered reader encountered a
-			// problem reading the file
-			return null;
-		}
-		
-		return new LodRegion(new LevelContainer(data), regionPos);
+		return region;
 	}
 
 
-    //==============//
-    // Save to File //
-    //==============//
+	//==============//
+	// Save to File //
+	//==============//
 
-    /**
-     * Save all dirty regions in this LodDimension to file.
-     */
-    public void saveDirtyRegionsToFileAsync()
-    {
-        fileWritingThreadPool.execute(saveDirtyRegionsThread);
-    }
+	/**
+	 * Save all dirty regions in this LodDimension to file.
+	 */
+	public void saveDirtyRegionsToFileAsync()
+	{
+		fileWritingThreadPool.execute(saveDirtyRegionsThread);
+	}
 
-    private Thread saveDirtyRegionsThread = new Thread(() ->
-    {
-    	try
+	private Thread saveDirtyRegionsThread = new Thread(() ->
+	{
+		try
 		{
 			for (int i = 0; i < loadedDimension.getWidth(); i++)
 			{
@@ -235,25 +246,26 @@ public class LodDimensionFileHandler
 					}
 				}
 			}
-		}catch (Exception e){
-    		e.printStackTrace();
+		} catch (Exception e)
+		{
+			e.printStackTrace();
 		}
-    });
+	});
 
-    /**
-     * Save a specific region to disk.<br>
-     * Note: <br>
-     * 1. If a file already exists for a newer version
-     * the file won't be written.<br>
-     * 2. This will save to the LodDimension that this
-     * handler is associated with.
-     */
-    private void saveRegionToFile(LodRegion region)
-    {
-    	// convert to region coordinates
-    	int x = region.regionPosX;
-    	int z = region.regionPosZ;
-    	for(byte detailLevel = region.getMinDetailLevel(); detailLevel <= LodUtil.REGION_DETAIL_LEVEL; detailLevel++)
+	/**
+	 * Save a specific region to disk.<br>
+	 * Note: <br>
+	 * 1. If a file already exists for a newer version
+	 * the file won't be written.<br>
+	 * 2. This will save to the LodDimension that this
+	 * handler is associated with.
+	 */
+	private void saveRegionToFile(LodRegion region)
+	{
+		// convert to region coordinates
+		int x = region.regionPosX;
+		int z = region.regionPosZ;
+		for (byte detailLevel = region.getMinDetailLevel(); detailLevel <= LodUtil.REGION_DETAIL_LEVEL; detailLevel++)
 		{
 			String fileName = getFileNameAndPathForRegion(x, z, detailLevel);
 			File oldFile = new File(fileName);
@@ -334,7 +346,7 @@ public class LodDimensionFileHandler
 				e.printStackTrace();
 			}
 		}
-    }
+	}
 
 
     //================//
