@@ -27,7 +27,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.seibel.lod.objects.*;
+import com.seibel.lod.objects.LevelContainer;
+import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LodRegion;
+import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
@@ -38,7 +41,7 @@ import com.seibel.lod.util.LodUtil;
  * to file.
  *
  * @author James Seibel
- * @version 8-22-2021
+ * @version 8-24-2021
  */
 public class LodDimensionFileHandler
 {
@@ -53,14 +56,15 @@ public class LodDimensionFileHandler
 
     private File dimensionDataSaveFolder;
 
-    /**
-     * lod
-     */
+    /** lod */
     private static final String FILE_NAME_PREFIX = "lod";
-    /**
-     * .txt
-     */
+    /** .txt */
     private static final String FILE_EXTENSION = ".txt";
+    /** lod/ */
+    private static final String LOD_FOLDER_NAME = "lod";
+    /** detail-# */
+    private static final String DETAIL_FOLDER_NAME_PREFIX = "detail-";
+    
     /**
      * .tmp <br>
      * Added to the end of the file path when saving to prevent
@@ -355,8 +359,9 @@ public class LodDimensionFileHandler
             // ".\Super Flat\DIM-1\data"
             // or
             // ".\Super Flat\data"
-            return dimensionDataSaveFolder.getCanonicalPath() + detailLevel + File.separatorChar +
-                    FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
+            return dimensionDataSaveFolder.getCanonicalPath() + File.separatorChar + 
+            		DETAIL_FOLDER_NAME_PREFIX + detailLevel + File.separatorChar + 
+            		FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
         }
         catch (IOException | SecurityException e)
         {
