@@ -37,6 +37,7 @@ import net.minecraft.util.math.BlockPos;
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {
+    private final int CULL_OFFSET = 16;
 
     public CubicLodTemplate()
     {
@@ -137,7 +138,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
         int maxY;
         LodDataPoint data;
         /**TODO make all of this more automatic if possible*/
-        if (playerBlockPos.getY() > bb.maxY)
+        if (playerBlockPos.getY() > bb.maxY - CULL_OFFSET)
         {
             // top (facing up)
             addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, topColor.getRed(), topColor.getGreen(), topColor.getBlue(), topColor.getAlpha());
@@ -145,7 +146,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
             addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, topColor.getRed(), topColor.getGreen(), topColor.getBlue(), topColor.getAlpha());
             addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, topColor.getRed(), topColor.getGreen(), topColor.getBlue(), topColor.getAlpha());
         }
-        if (playerBlockPos.getY() < bb.minY)
+        if (playerBlockPos.getY() < bb.minY + CULL_OFFSET)
         {
             // bottom (facing down)
             addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, bottomColor.getRed(), bottomColor.getGreen(), bottomColor.getBlue(), bottomColor.getAlpha());
@@ -154,7 +155,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
             addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, bottomColor.getRed(), bottomColor.getGreen(), bottomColor.getBlue(), bottomColor.getAlpha());
         }
 
-        if (playerBlockPos.getZ() > bb.minZ)
+        if (playerBlockPos.getZ() > bb.minZ + CULL_OFFSET)
         {
             // south (facing -Z)
 
@@ -188,7 +189,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
             }
         }
 
-        if (playerBlockPos.getZ() < bb.maxZ)
+        if (playerBlockPos.getZ() < bb.maxZ - CULL_OFFSET)
         {
             data = adjData[1][0];
             // north (facing +Z)
@@ -221,7 +222,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
             }
         }
 
-        if (playerBlockPos.getX() < bb.maxX)
+        if (playerBlockPos.getX() < bb.maxX - CULL_OFFSET)
         {
             // west (facing -X)
             data = adjData[0][0];
@@ -254,7 +255,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
             }
         }
 
-        if (playerBlockPos.getX() > bb.minX)
+        if (playerBlockPos.getX() > bb.minX + CULL_OFFSET)
         {
             // east (facing +X)
             data = adjData[0][1];
