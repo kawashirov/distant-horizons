@@ -129,37 +129,36 @@ public class LodWorldGenerator
 					//=======================================//
 					
 					// start by generating half-region sized blocks...
-					int farRequesting = maxChunkGenRequests/2;
-					int nearRequesting;
+					int farRequesting = 0;
 
 					//we firstly make sure that the world is filled with half region wide block
 
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
-						if (farRequesting <= 0) break;
+						if (farRequesting <= maxChunkGenRequests/2) break;
 						levelPosListToGen = lodDim.getDataToGenerate(
 								playerBlockPosRounded.getX(),
 								playerBlockPosRounded.getZ(),
 								DetailDistanceUtil.getDistanceGeneration(detailGen),
 								DetailDistanceUtil.getDistanceGeneration(detailGen + 1),
 								DetailDistanceUtil.getDistanceGenerationMode(detailGen).complexity,
-								(byte) 9,
+								(byte) 7,
 								farRequesting);
 						for(LevelPos levelPos : levelPosListToGen){
 							generationRequestList.add(new GenerationRequest(levelPos,DetailDistanceUtil.getDistanceGenerationMode(detailGen), DetailDistanceUtil.getLodDetail(detailGen)));
 						}
-						farRequesting = farRequesting - generationRequestList.size();
+						farRequesting = farRequesting + generationRequestList.size();
 
 					}
 					
 					// ...then once the world is filled with half-region sized blocks
 					// fill in the rest
 
-					nearRequesting = maxChunkGenRequests - farRequesting;
+					int nearRequesting = farRequesting;
 					//we then fill the world with the rest of the block
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
-						if (nearRequesting <= 0) break;
+						if (nearRequesting <= maxChunkGenRequests) break;
 						levelPosListToGen = lodDim.getDataToGenerate(
 								playerBlockPosRounded.getX(),
 								playerBlockPosRounded.getZ(),
@@ -171,7 +170,7 @@ public class LodWorldGenerator
 						for(LevelPos levelPos : levelPosListToGen){
 							generationRequestList.add(new GenerationRequest(levelPos,DetailDistanceUtil.getDistanceGenerationMode(detailGen), DetailDistanceUtil.getLodDetail(detailGen)));
 						}
-						nearRequesting = nearRequesting - generationRequestList.size();
+						nearRequesting = nearRequesting + generationRequestList.size();
 					}
 					
 					
