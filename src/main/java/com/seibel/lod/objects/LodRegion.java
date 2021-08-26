@@ -203,7 +203,7 @@ public class LodRegion implements Serializable
         LevelPos min;
         for (int i = 0; i < dataNumber; i++)
         {
-            min = Collections.min(levelPosList, LevelPos.getPosComparator());
+            min = Collections.min(levelPosList, LevelPos.getPosComparator(playerPosX,playerPosZ));
             levelPosList.remove(min);
             levelMinPosList.add(min);
         }

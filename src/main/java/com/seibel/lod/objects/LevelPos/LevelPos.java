@@ -265,9 +265,9 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
         }
 
         @Override
-        public int compare(Map.Entry<LevelPos, Integer> first, Map.Entry<LevelPos, Integer> second)
+        public int compare(LevelPos first, LevelPos second)
         {
-            return Integer.compare(first.getValue(), second.getValue());
+            return Integer.compare(first.getRegionModuleLevelPos().minDistance(playerPosX,playerPosZ), second.getRegionModuleLevelPos().minDistance(playerPosX,playerPosZ));
         }
     }
 
@@ -281,12 +281,14 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
         }
 
         @Override
-        public int compare(Map.Entry<LevelPos, Integer> first, Map.Entry<LevelPos, Integer> second)
+        public int compare(LevelPos first, LevelPos second)
         {
-            int compareResult = Integer.compare(first.getKey().detailLevel, second.getKey().detailLevel);
+            int compareResult = Integer.compare(first.detailLevel, second.detailLevel);
             if (compareResult != 0)
             {
-                compareResult = Integer.compare(first.getValue(), second.getValue());
+                compareResult = Integer.compare(
+                        first.getRegionModuleLevelPos().minDistance(playerPosX,playerPosZ),
+                        second.getRegionModuleLevelPos().minDistance(playerPosX,playerPosZ));
             }
             return compareResult;
         }
