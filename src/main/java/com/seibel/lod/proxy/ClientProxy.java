@@ -17,6 +17,8 @@
  */
 package com.seibel.lod.proxy;
 
+import net.minecraft.util.Direction;
+import net.minecraft.world.lighting.WorldLightManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,11 +64,12 @@ public class ClientProxy
 	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder();
 	private static LodRenderer renderer = new LodRenderer(lodBufferBuilder);
 	private static LodWorldGenerator lodWorldGenerator = LodWorldGenerator.INSTANCE;
-	
+
 	private boolean configOverrideReminderPrinted = false;
 	
 	Minecraft mc = Minecraft.getInstance();
-	
+
+
 	/** This is used to determine if the LODs should be regenerated */
 	public static int previousChunkRenderDistance = 0;
 	/** This is used to determine if the LODs should be regenerated */
@@ -125,8 +128,6 @@ public class ClientProxy
 		profiler.pop(); // end LOD
 		profiler.push("terrain"); // restart "terrain"
 
-
-		applyConfigOverrides();
 		
 		// these can't be set until after the buffers are built (in renderer.drawLODs)
 		// otherwise the buffers may be set to the wrong size, or not changed at all
@@ -153,13 +154,13 @@ public class ClientProxy
 		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
 		LodConfig.CLIENT.shadingMode.set(ShadingMode.DARKEN_SIDES);
-		LodConfig.CLIENT.brightnessMultiplier.set(1.2);
-		LodConfig.CLIENT.saturationMultiplier.set(1.1);
+		LodConfig.CLIENT.brightnessMultiplier.set(1.0);
+		LodConfig.CLIENT.saturationMultiplier.set(1.0);
 		
 		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 		LodConfig.CLIENT.lodChunkRenderDistance.set(128);
-		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.QUADRATIC);
-		LodConfig.CLIENT.lodQuality.set(1);
+		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
+		LodConfig.CLIENT.lodQuality.set(2);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
 		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(Runtime.getRuntime().availableProcessors());
 		

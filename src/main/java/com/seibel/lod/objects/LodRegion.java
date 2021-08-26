@@ -378,20 +378,24 @@ public class LodRegion implements Serializable
         byte detailLevel = levelPos.detailLevel;
         int posX = levelPos.posX;
         int posZ = levelPos.posZ;
-        for(byte bottom = (byte) (minDetailLevel + 1); bottom <= detailLevel ; bottom++){
+        for (byte bottom = (byte) (minDetailLevel + 1); bottom <= detailLevel; bottom++)
+        {
             levelPos.convert(bottom);
             startX = levelPos.posX;
             startZ = levelPos.posZ;
             width = 1 << (detailLevel - bottom);
-            for(int x = 0; x < width; x++){
-                for(int z = 0; z < width; z++) {
-                    levelPos.changeParameters(bottom,startX+x,startZ+z);
+            for (int x = 0; x < width; x++)
+            {
+                for (int z = 0; z < width; z++)
+                {
+                    levelPos.changeParameters(bottom, startX + x, startZ + z);
                     update(levelPos);
                 }
             }
-            levelPos.changeParameters(detailLevel,posX,posZ);
+            levelPos.changeParameters(detailLevel, posX, posZ);
         }
-        for (byte tempLod = (byte) (detailLevel + 1); tempLod <= LodUtil.REGION_DETAIL_LEVEL; tempLod++) {
+        for (byte tempLod = (byte) (detailLevel + 1); tempLod <= LodUtil.REGION_DETAIL_LEVEL; tempLod++)
+        {
             levelPos.convert(tempLod);
             update(levelPos);
         }
@@ -539,7 +543,8 @@ public class LodRegion implements Serializable
         try
         {
             return (generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] != 0);
-        }catch(Exception e){
+        } catch (Exception e)
+        {
             System.out.println(levelPos);
             e.printStackTrace();
             throw e;

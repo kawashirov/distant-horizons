@@ -130,7 +130,7 @@ public class LodBuilder
      */
     public void generateLodNodeFromChunk(LodDimension lodDim, IChunk chunk, LodDetail detailLevel) throws IllegalArgumentException
     {
-        generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(),detailLevel);
+        generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(), detailLevel);
     }
 
     /**
@@ -154,7 +154,7 @@ public class LodBuilder
         short[] color;
         short height;
         short depth;
-        LevelPos levelPos = new LevelPos((byte) 0,0,0);
+        LevelPos levelPos = new LevelPos((byte) 0, 0, 0);
         short[] data;
         try
         {
@@ -190,9 +190,11 @@ public class LodBuilder
             //levelPos.changeParameters(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
 
             lodDim.updateData(new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z));
-        }catch (NullPointerException e){
+        } catch (NullPointerException e)
+        {
             e.printStackTrace();
-        }catch (ArrayIndexOutOfBoundsException e){
+        } catch (ArrayIndexOutOfBoundsException e)
+        {
             e.printStackTrace();
         }
     }
@@ -248,6 +250,7 @@ public class LodBuilder
         return -1;
     }
 
+
     /**
      * Find the lowest valid point from the bottom.
      */
@@ -270,6 +273,8 @@ public class LodBuilder
      */
     private short determineHeightPointForArea(ChunkSection[] chunkSections, int startX, int startZ, int endX, int endZ)
     {
+
+        //blockState.getBlock().isAir();
         int numberOfBlocksRequired = ((endX - startX) * (endZ - startZ) / 2);
         // search from the top down
         for (int section = chunkSections.length - 1; section >= 0; section--)
@@ -303,6 +308,7 @@ public class LodBuilder
         // we never found a valid LOD point
         return -1;
     }
+
 
     /**
      * Find the highest point from the Top
@@ -342,7 +348,7 @@ public class LodBuilder
      *                                        material color
      */
     private short[] generateLodColorForArea(IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX,
-                                          int endZ)
+                                            int endZ)
     {
         ChunkSection[] chunkSections = chunk.getSections();
 
@@ -424,51 +430,49 @@ public class LodBuilder
      * Returns a color int for a given block.
      */
     private int getColorForBlock(int x, int z, BlockState blockState, Biome biome)
-	{
-		int colorInt = 0;
-		
-		// block special cases
-		if (blockState == Blocks.AIR.defaultBlockState() || blockState == Blocks.CAVE_AIR.defaultBlockState())
-		{
-			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
-			tmp = tmp.darker();
-			colorInt = LodUtil.colorToInt(tmp);
-		}
-		else if (blockState == Blocks.MYCELIUM.defaultBlockState())
-		{
-			colorInt = LodUtil.MYCELIUM_COLOR_INT;
-		}
-		
-		// plant life
-		else if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() == Blocks.VINE)
-		{
-			Color leafColor = LodUtil.intToColor(biome.getFoliageColor()).darker();
-			leafColor = leafColor.darker();
-			colorInt = LodUtil.colorToInt(leafColor);
-		}
-		else if ((blockState.getBlock() instanceof GrassBlock || blockState.getBlock() instanceof AbstractPlantBlock
-				|| blockState.getBlock() instanceof BushBlock || blockState.getBlock() instanceof IGrowable)
-				&& !(blockState.getBlock() == Blocks.BROWN_MUSHROOM || blockState.getBlock() == Blocks.RED_MUSHROOM))
-		{
-			Color plantColor = LodUtil.intToColor(biome.getGrassColor(x, z));
-			plantColor = plantColor.darker();
-			colorInt = LodUtil.colorToInt(plantColor);
-		}
-		
-		// water
-		else if (blockState.getBlock() == Blocks.WATER)
-		{
-			colorInt = biome.getWaterColor();
-		}
-		
-		// everything else
-		else
-		{
-			colorInt = blockState.materialColor.col;
-		}
-		
-		return colorInt;
-	}
+    {
+        int colorInt = 0;
+
+        // block special cases
+        if (blockState == Blocks.AIR.defaultBlockState() || blockState == Blocks.CAVE_AIR.defaultBlockState())
+        {
+            Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
+            tmp = tmp.darker();
+            colorInt = LodUtil.colorToInt(tmp);
+        } else if (blockState == Blocks.MYCELIUM.defaultBlockState())
+        {
+            colorInt = LodUtil.MYCELIUM_COLOR_INT;
+        }
+
+        // plant life
+        else if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() == Blocks.VINE)
+        {
+            Color leafColor = LodUtil.intToColor(biome.getFoliageColor()).darker();
+            leafColor = leafColor.darker();
+            colorInt = LodUtil.colorToInt(leafColor);
+        } else if ((blockState.getBlock() instanceof GrassBlock || blockState.getBlock() instanceof AbstractPlantBlock
+                || blockState.getBlock() instanceof BushBlock || blockState.getBlock() instanceof IGrowable)
+                && !(blockState.getBlock() == Blocks.BROWN_MUSHROOM || blockState.getBlock() == Blocks.RED_MUSHROOM))
+        {
+            Color plantColor = LodUtil.intToColor(biome.getGrassColor(x, z));
+            plantColor = plantColor.darker();
+            colorInt = LodUtil.colorToInt(plantColor);
+        }
+
+        // water
+        else if (blockState.getBlock() == Blocks.WATER)
+        {
+            colorInt = biome.getWaterColor();
+        }
+
+        // everything else
+        else
+        {
+            colorInt = blockState.materialColor.col;
+        }
+
+        return colorInt;
+    }
 
     /**
      * Returns a color int for the given biome.
@@ -545,7 +549,7 @@ public class LodBuilder
         } else
         {
             if (chunkSections[sectionIndex].getBlockState(x, y, z) != null
-                    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.AIR 
+                    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.AIR
                     && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.CAVE_AIR)
             {
                 return true;

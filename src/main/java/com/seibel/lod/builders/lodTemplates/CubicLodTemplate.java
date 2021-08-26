@@ -26,7 +26,9 @@ import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.LodUtil;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 
@@ -109,9 +111,11 @@ public class CubicLodTemplate extends AbstractLodTemplate
     private void addBoundingBoxToBuffer(BufferBuilder buffer, AxisAlignedBB bb, int c, BlockPos playerBlockPos, short[][][] adjData)
     {
         int topColor = c;
-        int northSouthColor = c;
-        int eastWestColor = c;
         int bottomColor = c;
+        int northColor = c;
+        int southColor = c;
+        int westColor = c;
+        int eastColor = c;
 
         // darken the bottom and side colors if requested
         if (LodConfig.CLIENT.shadingMode.get() == ShadingMode.DARKEN_SIDES)
@@ -127,23 +131,32 @@ public class CubicLodTemplate extends AbstractLodTemplate
             northSouthColor = ColorUtil.applyShade(c,northSouthDarkenAmount);
             eastWestColor = ColorUtil.applyShade(c,eastWestDarkenAmount);
             bottomColor = ColorUtil.applyShade(c,bottomDarkenAmount);*/
-
+/*
             float northSouthDarkenAmount = 0.80f;
             float eastWestDarkenAmount = 0.60f;
-            float bottomDarkenAmount = 0.40f;
-
-            northSouthColor = ColorUtil.applyShade(c,northSouthDarkenAmount);
-            eastWestColor = ColorUtil.applyShade(c,eastWestDarkenAmount);
-            bottomColor = ColorUtil.applyShade(c,bottomDarkenAmount);
+            float bottomDarkenAmount = 0.40f;*/
+/**TODO OPTIMIZE THIS STEP*
+            topColor = ColorUtil.applyShade(c, Minecraft.getInstance().level.getShade(Direction.UP,true));
+            bottomColor = ColorUtil.applyShade(c, Minecraft.getInstance().level.getShade(Direction.DOWN,true));
+            northColor = ColorUtil.applyShade(c, Minecraft.getInstance().level.getShade(Direction.NORTH,true));
+            southColor = ColorUtil.applyShade(c, Minecraft.getInstance().level.getShade(Direction.SOUTH,true));
+            westColor = ColorUtil.applyShade(c, Minecraft.getInstance().level.getShade(Direction.WEST,true));
+            eastColor = ColorUtil.applyShade(c, Minecraft.getInstance().level.getShade(Direction.EAST,true));
         }
 
         // apply the user specified saturation and brightness
         float saturationMultiplier = LodConfig.CLIENT.saturationMultiplier.get().floatValue();
         float brightnessMultiplier = LodConfig.CLIENT.brightnessMultiplier.get().floatValue();
 
-        topColor = ColorUtil.applySaturationAndBrightnessMultipliers(topColor, saturationMultiplier, brightnessMultiplier);
-        northSouthColor = ColorUtil.applySaturationAndBrightnessMultipliers(northSouthColor, saturationMultiplier, brightnessMultiplier);
-        bottomColor = ColorUtil.applySaturationAndBrightnessMultipliers(bottomColor, saturationMultiplier, brightnessMultiplier);
+        if(saturationMultiplier != 1 || brightnessMultiplier != 1)
+        {
+            topColor = ColorUtil.applySaturationAndBrightnessMultipliers(topColor, saturationMultiplier, brightnessMultiplier);
+            bottomColor = ColorUtil.applySaturationAndBrightnessMultipliers(bottomColor, saturationMultiplier, brightnessMultiplier);
+            northColor = ColorUtil.applySaturationAndBrightnessMultipliers(northColor, saturationMultiplier, brightnessMultiplier);
+            southColor = ColorUtil.applySaturationAndBrightnessMultipliers(southColor, saturationMultiplier, brightnessMultiplier);
+            westColor = ColorUtil.applySaturationAndBrightnessMultipliers(westColor, saturationMultiplier, brightnessMultiplier);
+            eastColor = ColorUtil.applySaturationAndBrightnessMultipliers(eastColor, saturationMultiplier, brightnessMultiplier);
+        }
         int minY;
         int maxY;
         short[] data;
@@ -180,10 +193,10 @@ public class CubicLodTemplate extends AbstractLodTemplate
 
         if (playerBlockPos.getZ() > bb.minZ - CULL_OFFSET)
         {
-            red = ColorUtil.getRed(northSouthColor);
-            green = ColorUtil.getGreen(northSouthColor);
-            blue = ColorUtil.getBlue(northSouthColor);
-            alpha = ColorUtil.getAlpha(northSouthColor);
+            red = ColorUtil.getRed(northColor);
+            green = ColorUtil.getGreen(northColor);
+            blue = ColorUtil.getBlue(northColor);
+            alpha = ColorUtil.getAlpha(northColor);
             // south (facing -Z)
             data = adjData[1][1];
             if (data == null)
@@ -217,10 +230,10 @@ public class CubicLodTemplate extends AbstractLodTemplate
 
         if (playerBlockPos.getZ() < bb.maxZ + CULL_OFFSET)
         {
-            red = ColorUtil.getRed(northSouthColor);
-            green = ColorUtil.getGreen(northSouthColor);
-            blue = ColorUtil.getBlue(northSouthColor);
-            alpha = ColorUtil.getAlpha(northSouthColor);
+            red = ColorUtil.getRed(southColor);
+            green = ColorUtil.getGreen(southColor);
+            blue = ColorUtil.getBlue(southColor);
+            alpha = ColorUtil.getAlpha(southColor);
             data = adjData[1][0];
             // north (facing +Z)
             if (data == null)
@@ -254,10 +267,10 @@ public class CubicLodTemplate extends AbstractLodTemplate
 
         if (playerBlockPos.getX() < bb.maxX + CULL_OFFSET)
         {
-            red = ColorUtil.getRed(eastWestColor);
-            green = ColorUtil.getGreen(eastWestColor);
-            blue = ColorUtil.getBlue(eastWestColor);
-            alpha = ColorUtil.getAlpha(eastWestColor);
+            red = ColorUtil.getRed(westColor);
+            green = ColorUtil.getGreen(westColor);
+            blue = ColorUtil.getBlue(westColor);
+            alpha = ColorUtil.getAlpha(westColor);
             // west (facing -X)
             data = adjData[0][0];
             if (data == null)
@@ -291,10 +304,10 @@ public class CubicLodTemplate extends AbstractLodTemplate
 
         if (playerBlockPos.getX() > bb.minX - CULL_OFFSET)
         {
-            red = ColorUtil.getRed(eastWestColor);
-            green = ColorUtil.getGreen(eastWestColor);
-            blue = ColorUtil.getBlue(eastWestColor);
-            alpha = ColorUtil.getAlpha(eastWestColor);
+            red = ColorUtil.getRed(eastColor);
+            green = ColorUtil.getGreen(eastColor);
+            blue = ColorUtil.getBlue(eastColor);
+            alpha = ColorUtil.getAlpha(eastColor);
             // east (facing +X)
             data = adjData[0][1];
             if (data == null)

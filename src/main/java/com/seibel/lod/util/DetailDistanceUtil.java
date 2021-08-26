@@ -7,9 +7,9 @@ import net.minecraft.client.Minecraft;
 
 public class DetailDistanceUtil
 {
-    private static double genMultiplier = 2;
-    private static double treeGenMultiplier = 2;
-    private static double treeCutMultiplier = 1.5;
+    private static double genMultiplier = 1.25;
+    private static double treeGenMultiplier = 1.5;
+    private static double treeCutMultiplier = 1.25;
     private static int minDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
     private static int maxDetail = LodUtil.REGION_DETAIL_LEVEL + 1;
     private static int minDistance = 0;

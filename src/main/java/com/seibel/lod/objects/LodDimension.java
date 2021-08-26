@@ -68,7 +68,6 @@ public class LodDimension
 
     private LodDimensionFileHandler fileHandler;
 
-
     /**
      * Creates the dimension centered at (0,0)
      *
