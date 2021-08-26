@@ -140,7 +140,7 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
 
     public int maxDistance(int playerPosX, int playerPosZ, int regionPosX, int regionPosZ)
     {
-        int width = (int) Math.pow(2, detailLevel);
+        int width = 1 << detailLevel;
 
         int startPosX = regionPosX * 512 + posX * width;
         int startPosZ = regionPosZ * 512 + posZ * width;
@@ -157,7 +157,7 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
 
     public int maxDistance(int playerPosX, int playerPosZ)
     {
-        int width = (int) Math.pow(2, detailLevel);
+        int width = 1 << detailLevel;
 
         int startPosX = posX * width;
         int startPosZ = posZ * width;
@@ -174,7 +174,7 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
 
     public int minDistance(int playerPosX, int playerPosZ, int regionPosX, int regionPosZ)
     {
-        int width = (int) Math.pow(2, detailLevel);
+        int width = 1 << detailLevel;
 
         int startPosX = regionPosX * 512 + posX * width;
         int startPosZ = regionPosZ * 512 + posZ * width;
@@ -210,7 +210,7 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
 
     public int minDistance(int playerPosX, int playerPosZ)
     {
-        int width = (int) Math.pow(2, detailLevel);
+        int width = 1 << detailLevel;
 
         int startPosX = posX * width;
         int startPosZ = posZ * width;
@@ -219,7 +219,6 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
 
         boolean inXArea = playerPosX >= startPosX && playerPosX <= endPosX;
         boolean inZArea = playerPosZ >= startPosZ && playerPosZ <= endPosZ;
-
         if (inXArea && inZArea)
         {
             return 0;
@@ -267,7 +266,9 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
         @Override
         public int compare(LevelPos first, LevelPos second)
         {
-            return Integer.compare(first.getRegionModuleLevelPos().minDistance(playerPosX,playerPosZ), second.getRegionModuleLevelPos().minDistance(playerPosX,playerPosZ));
+            return Integer.compare(
+                    first.minDistance(playerPosX,playerPosZ),
+                    second.minDistance(playerPosX,playerPosZ));
         }
     }
 
@@ -287,8 +288,8 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
             if (compareResult != 0)
             {
                 compareResult = Integer.compare(
-                        first.getRegionModuleLevelPos().minDistance(playerPosX,playerPosZ),
-                        second.getRegionModuleLevelPos().minDistance(playerPosX,playerPosZ));
+                        first.minDistance(playerPosX,playerPosZ),
+                        second.minDistance(playerPosX,playerPosZ));
             }
             return compareResult;
         }
