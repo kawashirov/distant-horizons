@@ -188,16 +188,6 @@ public class LodBufferBuilder
                             for (byte detail = detailLevel; detail <= LodUtil.REGION_DETAIL_LEVEL; detail++)
                             {
                                 detailToRender = detail;
-                                zFix = true;
-								/*
-								detailToRender = (byte) 4;
-								if(detail > detailToRender){
-									zFix = false;
-								}else{
-									detailToRender = detail;
-									zFix = true;
-								}
-								 */
                                 setOfPosToRender.addAll(lodDim.getDataToRender(
                                         regionPos,
                                         playerBlockPosRounded.getX(),
@@ -205,7 +195,7 @@ public class LodBufferBuilder
                                         DetailDistanceUtil.getDistanceRendering(detail),
                                         DetailDistanceUtil.getDistanceRendering(detail + 1),
                                         detailToRender,
-                                        zFix));
+                                        true));
                             }
 
 

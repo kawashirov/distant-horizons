@@ -245,18 +245,24 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
         }
     }
 
-    public static LevelPosComparator getPosComparator()
+    public static LevelPosComparator getPosComparator(int playerPosX, int playerPosZ)
     {
-        return new LevelPosComparator();
+        return new LevelPosComparator(playerPosX,playerPosZ);
     }
 
-    public static LevelPosDetailComparator getPosAndDetailComparator()
+    public static LevelPosDetailComparator getPosAndDetailComparator(int playerPosX, int playerPosZ)
     {
-        return new LevelPosDetailComparator();
+        return new LevelPosDetailComparator(playerPosX,playerPosZ);
     }
 
-    public static class LevelPosComparator implements Comparator<Map.Entry<LevelPos, Integer>>
+    public static class LevelPosComparator implements Comparator<LevelPos>
     {
+        int playerPosX;
+        int playerPosZ;
+        public LevelPosComparator(int playerPosX, int playerPosZ){
+            this.playerPosX = playerPosX;
+            this.playerPosZ = playerPosZ;
+        }
 
         @Override
         public int compare(Map.Entry<LevelPos, Integer> first, Map.Entry<LevelPos, Integer> second)
@@ -265,8 +271,14 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
         }
     }
 
-    public static class LevelPosDetailComparator implements Comparator<Map.Entry<LevelPos, Integer>>
+    public static class LevelPosDetailComparator implements Comparator<LevelPos>
     {
+        int playerPosX;
+        int playerPosZ;
+        public LevelPosDetailComparator(int playerPosX, int playerPosZ){
+            this.playerPosX = playerPosX;
+            this.playerPosZ = playerPosZ;
+        }
 
         @Override
         public int compare(Map.Entry<LevelPos, Integer> first, Map.Entry<LevelPos, Integer> second)

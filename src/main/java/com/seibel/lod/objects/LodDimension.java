@@ -447,7 +447,7 @@ public class LodDimension
         LodRegion region;
         RegionPos regionPos;
         LevelPos regionLevelPos;
-        List<Map.Entry<LevelPos, Integer>> listOfData = new ArrayList<>();
+        List<LevelPos> listOfData = new ArrayList<>();
         for (int xRegion = 0; xRegion < n; xRegion++)
         {
             for (int zRegion = 0; zRegion < n; zRegion++)
@@ -470,16 +470,16 @@ public class LodDimension
             }
         }
 
-        List<Map.Entry<LevelPos,Integer>> levelMinPosList = new ArrayList<>();
+        List<LevelPos> levelMinPosList = new ArrayList<>();
         dataNumber = Math.min(dataNumber, listOfData.size());
 
         for(int i=0; i<dataNumber; i++)
         {
-            Map.Entry<LevelPos,Integer> min = Collections.min(listOfData, LevelPos.getPosComparator());
+            LevelPos min = Collections.min(listOfData, LevelPos.getPosComparator(playerPosX,playerPosZ));
             listOfData.remove(min);
             levelMinPosList.add(min);
         }
-        return levelMinPosList.stream().map(entry -> entry.getKey()).collect(Collectors.toList()).subList(0, dataNumber);
+        return levelMinPosList;
     }
 
 
