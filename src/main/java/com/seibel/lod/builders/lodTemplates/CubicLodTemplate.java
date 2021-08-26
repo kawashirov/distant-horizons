@@ -17,8 +17,6 @@
  */
 package com.seibel.lod.builders.lodTemplates;
 
-import java.awt.Color;
-
 import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.DataPoint;
@@ -135,7 +133,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
             float northSouthDarkenAmount = 0.80f;
             float eastWestDarkenAmount = 0.60f;
             float bottomDarkenAmount = 0.40f;*/
-/**TODO OPTIMIZE THIS STEP*
+        	/**TODO OPTIMIZE THIS STEP*/
             topColor = ColorUtil.applyShade(c, Minecraft.getInstance().level.getShade(Direction.UP,true));
             bottomColor = ColorUtil.applyShade(c, Minecraft.getInstance().level.getShade(Direction.DOWN,true));
             northColor = ColorUtil.applyShade(c, Minecraft.getInstance().level.getShade(Direction.NORTH,true));
