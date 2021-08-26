@@ -228,7 +228,6 @@ public class LodBufferBuilder
                                         {
                                             short[] lodData = lodDim.getData(posToRender);
                                             short[][][] adjData = new short[2][2][];
-                                            /*
                                             for (int x : new int[]{0, 1})
                                             {
                                                 adjPos.changeParameters(posToRender.detailLevel, posToRender.posX + x * 2 - 1, posToRender.posZ);
@@ -241,7 +240,7 @@ public class LodBufferBuilder
                                                 adjPos.changeParameters(posToRender.detailLevel, posToRender.posX, posToRender.posZ + z * 2 - 1);
                                                 if (!renderer.vanillaRenderedChunks.contains(adjPos.getChunkPos()))
                                                     adjData[1][z] = lodDim.getData(adjPos);
-                                            }*/
+                                            }
 
                                             LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,
                                                     posToRender, renderer.debugging);

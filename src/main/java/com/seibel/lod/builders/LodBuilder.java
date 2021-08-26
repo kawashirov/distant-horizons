@@ -155,37 +155,45 @@ public class LodBuilder
         short depth;
         LevelPos levelPos = new LevelPos((byte) 0,0,0);
         short[] data;
-
-        for (int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++)
+        try
         {
-            startX = detail.startX[i];
-            startZ = detail.startZ[i];
-            endX = detail.endX[i];
-            endZ = detail.endZ[i];
-
-            color = generateLodColorForArea(chunk, config, startX, startZ, endX, endZ);
-
-            if (!config.useHeightmap)
+            for (int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++)
             {
-                height = determineHeightPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
-                depth = determineBottomPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
-            } else
-            {
-                height = determineHeightPoint(chunk.getOrCreateHeightmapUnprimed(LodUtil.DEFAULT_HEIGHTMAP), startX,
-                        startZ, endX, endZ);
-                depth = 0;
+                startX = detail.startX[i];
+                startZ = detail.startZ[i];
+                endX = detail.endX[i];
+                endZ = detail.endZ[i];
+
+                color = generateLodColorForArea(chunk, config, startX, startZ, endX, endZ);
+
+                if (!config.useHeightmap)
+                {
+                    height = determineHeightPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
+                    depth = determineBottomPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
+                } else
+                {
+                    height = determineHeightPoint(chunk.getOrCreateHeightmapUnprimed(LodUtil.DEFAULT_HEIGHTMAP), startX,
+                            startZ, endX, endZ);
+                    depth = 0;
+                }
+                levelPos.changeParameters((byte) 0,
+                        chunk.getPos().x * 16 + startX,
+                        chunk.getPos().z * 16 + startZ);
+                levelPos.convert(detail.detailLevel);
+                data = DataPoint.createDataPoint(height, depth, color[0], color[1], color[2]);
+                lodDim.addData(levelPos,
+                        data,
+                        config.distanceGenerationMode,
+                        false);
             }
-            levelPos.changeParameters((byte) 0,
-                    chunk.getPos().x * 16 + startX,
-                    chunk.getPos().z * 16 + startZ);
-            levelPos.convert(detail.detailLevel);
-            data = DataPoint.createDataPoint(height, depth, color[0], color[1], color[2]);
-            lodDim.addData(levelPos,
-                    data,
-                    config.distanceGenerationMode,
-                    false);
+            //levelPos.changeParameters(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
+
+            lodDim.updateData(new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z));
+        }catch (NullPointerException e){
+            e.printStackTrace();
+        }catch (ArrayIndexOutOfBoundsException e){
+            e.printStackTrace();
         }
-        lodDim.updateData(new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z));
     }
 
 
