@@ -381,33 +381,34 @@ public class LodRegion implements Serializable
 
     public void updateArea(LevelPos levelPos)
     {
-
-        LevelPos tempLevelPos;
         int width;
         int startX;
         int startZ;
-        for(byte bottom = (byte) (minDetailLevel + 1); bottom <= levelPos.detailLevel ; bottom++){
-            tempLevelPos = levelPos.getConvertedLevelPos(bottom);
-            startX = tempLevelPos.posX;
-            startZ = tempLevelPos.posZ;
-            width = 1 << (levelPos.detailLevel - bottom);
+        byte detailLevel = levelPos.detailLevel;
+        int posX = levelPos.posX;
+        int posZ = levelPos.posZ;
+        for(byte bottom = (byte) (minDetailLevel + 1); bottom <= detailLevel ; bottom++){
+            levelPos.convert(bottom);
+            startX = levelPos.posX;
+            startZ = levelPos.posZ;
+            width = 1 << (detailLevel - bottom);
             for(int x = 0; x < width; x++){
                 for(int z = 0; z < width; z++) {
-                    update(new LevelPos(bottom, startX+x, startZ+z));
+                    levelPos.changeParameters(bottom,startX+x,startZ+z);
+                    update(levelPos);
                 }
             }
-
+            levelPos.changeParameters(detailLevel,posX,posZ);
         }
-        for (byte tempLod = (byte) (levelPos.detailLevel + 1); tempLod <= LodUtil.REGION_DETAIL_LEVEL; tempLod++) {
-            tempLevelPos = levelPos.getConvertedLevelPos(tempLod);
-            update(tempLevelPos);
+        for (byte tempLod = (byte) (detailLevel + 1); tempLod <= LodUtil.REGION_DETAIL_LEVEL; tempLod++) {
+            levelPos.convert(tempLod);
+            update(levelPos);
         }
     }
 
     private void update(LevelPos levelPos)
     {
-
-        levelPos = levelPos.getRegionModuleLevelPos();
+        levelPos.performRegionModule();
         int numberOfChildren = 0;
 
         byte minGenerationType = 5;
@@ -418,39 +419,41 @@ public class LodRegion implements Serializable
         int tempDepth = 0;
         int newPosX;
         int newPosZ;
-        byte newLod;
-        LevelPos childPos;
+        byte newDetailLevel;
+        int detailLevel = levelPos.detailLevel;
+        int posX = levelPos.posX;
+        int posZ = levelPos.posZ;
         for (int x = 0; x <= 1; x++)
         {
             for (int z = 0; z <= 1; z++)
             {
-                newPosX = 2 * levelPos.posX + x;
-                newPosZ = 2 * levelPos.posZ + z;
-                newLod = (byte) (levelPos.detailLevel - 1);
-                childPos = new LevelPos(newLod, newPosX, newPosZ);
-                if (hasDataBeenGenerated(childPos))
+                newPosX = 2 * posX + x;
+                newPosZ = 2 * posZ + z;
+                newDetailLevel = (byte) (detailLevel - 1);
+                levelPos.changeParameters(newDetailLevel, newPosX, newPosZ);
+                if (hasDataBeenGenerated(levelPos))
                 {
                     numberOfChildren++;
 
-                    tempRed += colors[newLod][newPosX][newPosZ][0];
-                    tempGreen += colors[newLod][newPosX][newPosZ][1];
-                    tempBlue += colors[newLod][newPosX][newPosZ][2];
-                    tempHeight += height[newLod][newPosX][newPosZ];
-                    tempDepth += depth[newLod][newPosX][newPosZ];
-                    minGenerationType = (byte) Math.min(minGenerationType, generationType[newLod][newPosX][newPosZ]);
+                    tempRed += colors[newDetailLevel][newPosX][newPosZ][0];
+                    tempGreen += colors[newDetailLevel][newPosX][newPosZ][1];
+                    tempBlue += colors[newDetailLevel][newPosX][newPosZ][2];
+                    tempHeight += height[newDetailLevel][newPosX][newPosZ];
+                    tempDepth += depth[newDetailLevel][newPosX][newPosZ];
+                    minGenerationType = (byte) Math.min(minGenerationType, generationType[newDetailLevel][newPosX][newPosZ]);
                 }
             }
         }
 
         if (numberOfChildren > 0)
         {
-            colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][0] = (byte) (tempRed / numberOfChildren);
-            colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][1] = (byte) (tempGreen / numberOfChildren);
-            colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][2] = (byte) (tempBlue / numberOfChildren);
-            height[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = (short) (tempHeight / numberOfChildren);
-            depth[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = (short) (tempDepth / numberOfChildren);
-            generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = minGenerationType;
-            dataExistence[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = true;
+            colors[detailLevel][posX][posZ][0] = (byte) (tempRed / numberOfChildren);
+            colors[detailLevel][posX][posZ][1] = (byte) (tempGreen / numberOfChildren);
+            colors[detailLevel][posX][posZ][2] = (byte) (tempBlue / numberOfChildren);
+            height[detailLevel][posX][posZ] = (short) (tempHeight / numberOfChildren);
+            depth[detailLevel][posX][posZ] = (short) (tempDepth / numberOfChildren);
+            generationType[detailLevel][posX][posZ] = minGenerationType;
+            dataExistence[detailLevel][posX][posZ] = true;
         }
     }
 
