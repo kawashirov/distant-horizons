@@ -24,6 +24,7 @@ import java.util.concurrent.Executors;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
+import com.seibel.lod.objects.DataPoint;
 import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
@@ -152,7 +153,7 @@ public class LodBuilder
         short[] color;
         short height;
         short depth;
-        LevelPos levelPos = new LevelPos();
+        LevelPos levelPos = new LevelPos((byte) 0,0,0);
         short[] data;
 
         for (int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++)
@@ -178,7 +179,7 @@ public class LodBuilder
                     chunk.getPos().x * 16 + startX,
                     chunk.getPos().z * 16 + startZ);
             levelPos.convert(detail.detailLevel);
-            data = new short[]{height, depth, color[0], color[1], color[2]};
+            data = DataPoint.createDataPoint(height, depth, color[0], color[1], color[2]);
             lodDim.addData(levelPos,
                     data,
                     config.distanceGenerationMode,
@@ -385,9 +386,9 @@ public class LodBuilder
                                 colorInt = getColorForBlock(x, z, blockState, biome);
                             }
 
-                            red += (colorInt)&0xFF;;
+                            red += (colorInt>>16)&0xFF;
                             green += (colorInt>>8)&0xFF;
-                            blue += (colorInt>>16)&0xFF;
+                            blue += (colorInt)&0xFF;
 
                             numbOfBlocks++;
 

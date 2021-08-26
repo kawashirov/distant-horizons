@@ -87,7 +87,7 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
     {
         int width = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
         posX = Math.floorMod(posX, width);
-        posX = Math.floorMod(posZ, width);
+        posZ = Math.floorMod(posZ, width);
     }
 
     /**
@@ -106,7 +106,7 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
     {
         detailLevel = newDetailLevel;
         posX = newPosX;
-        posX = newPosZ;
+        posZ = newPosZ;
     }
 
     public RegionPos getRegionPos()

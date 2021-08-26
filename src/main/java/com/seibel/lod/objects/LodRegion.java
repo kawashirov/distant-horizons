@@ -128,7 +128,7 @@ public class LodRegion implements Serializable
      * @param generationType
      * @return
      */
-    public boolean setData(LevelPos levelPos, short[] dataPoint, byte generationType)
+    public boolean addData(LevelPos levelPos, short[] dataPoint, byte generationType)
     {
         levelPos.performRegionModule();
         if ((this.generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] == 0) || (generationType >= this.generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ]))
@@ -138,11 +138,11 @@ public class LodRegion implements Serializable
             if (this.dataExistence[levelPos.detailLevel][levelPos.posX][levelPos.posZ]) numberOfPoints++;
 
             //add the node data
-            this.height[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = dataPoint[0];
-            this.depth[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = dataPoint[1];
-            this.colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][0] = (byte) (dataPoint[2] - 128);
-            this.colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][1] = (byte) (dataPoint[3] - 128);
-            this.colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][2] = (byte) (dataPoint[4] - 128);
+            this.height[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = DataPoint.getHeight(dataPoint);
+            this.depth[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = DataPoint.getDepth(dataPoint);
+            this.colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][0] = (byte) (DataPoint.getRed(dataPoint) - 128);
+            this.colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][1] = (byte) (DataPoint.getGreen(dataPoint) - 128);
+            this.colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][2] = (byte) (DataPoint.getBlue(dataPoint) - 128);
             this.generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = generationType;
             this.dataExistence[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = true;
             return true;

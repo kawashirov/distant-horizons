@@ -413,7 +413,7 @@ public class LodDimension
 
         LodRegion region = getRegion(levelPos);
 
-        boolean nodeAdded = region.setData(levelPos, lodDataPoint, generationMode.complexity);
+        boolean nodeAdded = region.addData(levelPos, lodDataPoint, generationMode.complexity);
         // only save valid LODs to disk
         if (!dontSave && fileHandler != null)
         {
