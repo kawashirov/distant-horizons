@@ -92,7 +92,7 @@ public class LevelContainer implements Serializable
             for (int z = 0; z < size; z++)
             {
                 //Converting the colors to intColor and then to HEX
-                combinedCol = ((colors[x][z][0] + 128) << 16) | ((colors[x][z][1] + 128) << 8) | ((colors[x][z][2] + 128) & 0xFF);
+                combinedCol = ((colors[x][z][0] + 128) << 16) | ((colors[x][z][1] + 128) << 8) | ((colors[x][z][2] + 128));
                 stringBuilder.append(Integer.toHexString(combinedCol));
                 stringBuilder.append(DATA_DELIMITER);
                 stringBuilder.append(Integer.toHexString(height[x][z]));

@@ -86,7 +86,7 @@ public class DetailDistanceUtil
                 return (int) (Math.pow(2, detail) * initial);
             case RENDER_DEPENDANT:
                 int realRenderDistance = Minecraft.getInstance().options.renderDistance * 16;
-                int border = 128;
+                int border = 64;
                 byte detailAtBorder = (byte) 4;
                 if(detail > detailAtBorder){
                     return (detail * (border-realRenderDistance)/detailAtBorder + realRenderDistance);
