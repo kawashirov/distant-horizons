@@ -442,8 +442,8 @@ public class LodRenderer
 
             if (fogQuality == FogQuality.FANCY)
             {
-                RenderSystem.fogStart(farPlaneBlockDistance * 1.2f);
-                RenderSystem.fogEnd(farPlaneBlockDistance * 1.41f);
+                RenderSystem.fogStart(farPlaneBlockDistance * 0.8f);
+                RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
             } else if (fogQuality == FogQuality.FAST)
             {
                 // for the far fog of the normal chunks
