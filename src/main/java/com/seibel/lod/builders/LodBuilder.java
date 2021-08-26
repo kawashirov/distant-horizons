@@ -28,6 +28,7 @@ import com.seibel.lod.objects.DataPoint;
 import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
+import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 
@@ -394,9 +395,9 @@ public class LodBuilder
                                 colorInt = getColorForBlock(x, z, blockState, biome);
                             }
 
-                            red += (colorInt>>16)&0xFF;
-                            green += (colorInt>>8)&0xFF;
-                            blue += (colorInt)&0xFF;
+                            red += ColorUtil.getRed(colorInt);
+                            green += ColorUtil.getGreen(colorInt);
+                            blue += ColorUtil.getBlue(colorInt);
 
                             numbOfBlocks++;
 

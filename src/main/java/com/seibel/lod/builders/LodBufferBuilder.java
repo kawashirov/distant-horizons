@@ -27,6 +27,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.seibel.lod.objects.DataPoint;
 import net.minecraft.world.chunk.Chunk;
 import org.lwjgl.opengl.GL11;
 
@@ -44,6 +45,8 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+
+import javax.xml.crypto.Data;
 
 /**
  * This object is used to create NearFarBuffer objects.
@@ -209,36 +212,32 @@ public class LodBufferBuilder
                                     continue;
                                 }
 
-                                if (lodDim.doesDataExist(posToRender))
+                                try
                                 {
-                                    try
+                                    if (lodDim.doesDataExist(posToRender))
                                     {
-                                        ChunkPos adjChunkPos = new ChunkPos(0, 0);
-                                        if (lodDim.doesDataExist(posToRender))
+                                        short[] lodData = lodDim.getData(posToRender);
+                                        short[][][] adjData = new short[2][2][];
+                                        for (int x : new int[]{0, 1})
                                         {
-                                            short[] lodData = lodDim.getData(posToRender);
-                                            short[][][] adjData = new short[2][2][];
-                                            for (int x : new int[]{0, 1})
-                                            {
-                                                adjPos.changeParameters(posToRender.detailLevel, posToRender.posX + x * 2 - 1, posToRender.posZ);
-                                                if (!renderer.vanillaRenderedChunks.contains(adjPos.getChunkPos()))
-                                                    adjData[0][x] = lodDim.getData(adjPos);
-                                            }
-
-                                            for (int z : new int[]{0, 1})
-                                            {
-                                                adjPos.changeParameters(posToRender.detailLevel, posToRender.posX, posToRender.posZ + z * 2 - 1);
-                                                if (!renderer.vanillaRenderedChunks.contains(adjPos.getChunkPos()))
-                                                    adjData[1][z] = lodDim.getData(adjPos);
-                                            }
-
-                                            LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,
-                                                    posToRender, renderer.debugging);
+                                            adjPos.changeParameters(posToRender.detailLevel, posToRender.posX + x * 2 - 1, posToRender.posZ);
+                                            if (!renderer.vanillaRenderedChunks.contains(adjPos.getChunkPos()))
+                                                adjData[0][x] = lodDim.getData(adjPos);
                                         }
-                                    } catch (ArrayIndexOutOfBoundsException e)
-                                    {
-                                        return false;
+
+                                        for (int z : new int[]{0, 1})
+                                        {
+                                            adjPos.changeParameters(posToRender.detailLevel, posToRender.posX, posToRender.posZ + z * 2 - 1);
+                                            if (!renderer.vanillaRenderedChunks.contains(adjPos.getChunkPos()))
+                                                adjData[1][z] = lodDim.getData(adjPos);
+                                        }
+
+                                        LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,
+                                                posToRender, renderer.debugging);
                                     }
+                                } catch (ArrayIndexOutOfBoundsException e)
+                                {
+                                    return false;
                                 }
 
                             }// for pos to in list to render

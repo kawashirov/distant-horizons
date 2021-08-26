@@ -48,19 +48,4 @@ public abstract class AbstractLodTemplate
 	/** Returns in bytes how much buffer memory is required
 	 * for one LOD object */
 	public abstract int getBufferMemoryForSingleNode(int level);
-
-
-	/**
-	 * Edit the given color as a HSV (Hue Saturation Value) color.
-	 */
-	protected Color applySaturationAndBrightnessMultipliers(Color color, float saturationMultiplier, float brightnessMultiplier)
-	{
-		float[] hsv = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
-		return Color.getHSBColor(
-				hsv[0], // hue
-				LodUtil.clamp(0.0f, hsv[1] * saturationMultiplier, 1.0f),
-				LodUtil.clamp(0.0f, hsv[2] * brightnessMultiplier, 1.0f));
-	}
-
-
 }

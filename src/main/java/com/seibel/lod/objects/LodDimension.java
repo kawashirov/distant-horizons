@@ -479,6 +479,7 @@ public class LodDimension
             listOfData.remove(min);
             levelMinPosList.add(min);
         }
+        Collections.sort(levelMinPosList, LevelPos.getPosComparator(playerPosX,playerPosZ));
         return levelMinPosList;
     }
 
