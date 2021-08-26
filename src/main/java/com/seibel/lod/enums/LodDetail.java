@@ -20,7 +20,6 @@ package com.seibel.lod.enums;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import com.seibel.lod.objects.LodDataPoint;
 import com.seibel.lod.util.LodUtil;
 
 /**
@@ -63,10 +62,7 @@ public enum LodDetail
 	
 	public final int[] endX;
 	public final int[] endZ;
-	
-	/** This is how many pieces of data should be expected
-	 * when creating a LodChunk with this detail level */
-	public final int lodChunkStringDelimiterCount;
+
 	
 	/** 
 	 * 1st dimension: LodDetail.detailLevel <br>
@@ -105,9 +101,6 @@ public enum LodDetail
 				index++;
 			}
 		}
-		
-		
-		lodChunkStringDelimiterCount = 2 + (dataPointLengthCount * dataPointLengthCount * LodDataPoint.NUMBER_OF_DELIMITERS);
 		
 	}// constructor
 	

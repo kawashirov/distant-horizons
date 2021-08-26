@@ -21,8 +21,8 @@ import java.awt.Color;
 
 import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.handlers.LodConfig;
-import com.seibel.lod.objects.LevelPos;
-import com.seibel.lod.objects.LodDataPoint;
+import com.seibel.lod.objects.DataPoint;
+import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.renderer.BufferBuilder;
@@ -45,23 +45,23 @@ public class CubicLodTemplate extends AbstractLodTemplate
     }
 
     @Override
-    public void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, LodDataPoint data, LodDataPoint[][] adjData,
+    public void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, short[] data, short[][][] adjData,
                                LevelPos levelPos, boolean debugging)
     {
         AxisAlignedBB bbox;
 
-        int width = (int) Math.pow(2, levelPos.detailLevel);
+        int width = 1 << levelPos.detailLevel;
 
         // add each LOD for the detail level
         bbox = generateBoundingBox(
-                data.height,
-                data.depth,
+                DataPoint.getHeight(data),
+                DataPoint.getDepth(data),
                 width,
                 levelPos.posX * width,
                 0,
                 levelPos.posZ * width);
 
-        Color color = data.color;
+        Color color = new Color(DataPoint.getColor(data));
         if (LodConfig.CLIENT.debugMode.get())
         {
             color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[levelPos.detailLevel];
@@ -105,7 +105,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
         return new AxisAlignedBB(0, depth, 0, width, height, width).move(xOffset, yOffset, zOffset);
     }
 
-    private void addBoundingBoxToBuffer(BufferBuilder buffer, AxisAlignedBB bb, Color c, BlockPos playerBlockPos, LodDataPoint[][] adjData)
+    private void addBoundingBoxToBuffer(BufferBuilder buffer, AxisAlignedBB bb, Color c, BlockPos playerBlockPos, short[][][] adjData)
     {
         Color topColor = c;
         Color northSouthColor = c;
@@ -136,7 +136,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
         bottomColor = applySaturationAndBrightnessMultipliers(bottomColor, saturationMultiplier, brightnessMultiplier);
         int minY;
         int maxY;
-        LodDataPoint data;
+        short[] data;
         /**TODO make all of this more automatic if possible*/
         if (playerBlockPos.getY() > bb.maxY - CULL_OFFSET)
         {
@@ -168,7 +168,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
                 addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
             } else
             {
-                maxY = data.height;
+                maxY = DataPoint.getHeight(data);
                 if (maxY < bb.maxY)
                 {
                     minY = (int) Math.max(maxY, bb.minY);
@@ -177,7 +177,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
                     addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
                     addPosAndColor(buffer, bb.minX, minY, bb.maxZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
                 }
-                minY = data.depth;
+                minY = DataPoint.getDepth(data);
                 if (minY > bb.minY)
                 {
                     maxY = (int) Math.min(minY, bb.maxX);
@@ -201,7 +201,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
                 addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
             } else
             {
-                maxY = data.height;
+                maxY = DataPoint.getHeight(data);
                 if (maxY < bb.maxY)
                 {
                     minY = (int) Math.max(maxY, bb.minY);
@@ -210,7 +210,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
                     addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
                     addPosAndColor(buffer, bb.maxX, minY, bb.minZ, northSouthColor.getRed(), northSouthColor.getGreen(), northSouthColor.getBlue(), northSouthColor.getAlpha());
                 }
-                minY = data.depth;
+                minY = DataPoint.getDepth(data);
                 if (minY > bb.minY)
                 {
                     maxY = (int) Math.min(minY, bb.maxX);
@@ -234,7 +234,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
                 addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
             } else
             {
-                maxY = data.height;
+                maxY = DataPoint.getHeight(data);
                 if (maxY < bb.maxY)
                 {
                     minY = (int) Math.max(maxY, bb.minY);
@@ -243,7 +243,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
                     addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
                     addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
                 }
-                minY = data.depth;
+                minY = DataPoint.getDepth(data);
                 if (minY > bb.minY)
                 {
                     maxY = (int) Math.min(minY, bb.maxX);
@@ -267,7 +267,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
                 addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
             } else
             {
-                maxY = data.height;
+                maxY = DataPoint.getHeight(data);
                 if (maxY < bb.maxY)
                 {
                     minY = (int) Math.max(maxY, bb.minY);
@@ -276,7 +276,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
                     addPosAndColor(buffer, bb.maxX, minY, bb.maxZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
                     addPosAndColor(buffer, bb.maxX, minY, bb.minZ, eastWestColor.getRed(), eastWestColor.getGreen(), eastWestColor.getBlue(), eastWestColor.getAlpha());
                 }
-                minY = data.depth;
+                minY = DataPoint.getDepth(data);
                 if (minY > bb.minY)
                 {
                     maxY = (int) Math.min(minY, bb.maxX);

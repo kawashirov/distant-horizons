@@ -1,15 +1,23 @@
-package com.seibel.lod.objects;
+package com.seibel.lod.objects.LevelPos;
 
+import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.util.LodUtil;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.chunk.Chunk;
 
 import java.util.Comparator;
 import java.util.Map;
 
-public class LevelPos implements Cloneable
+public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
 {
-    public final byte detailLevel;
-    public final int posX;
-    public final int posZ;
+    public byte detailLevel;
+    public int posX;
+    public int posZ;
+
+
+    public LevelPos()
+    {
+    }
 
     public LevelPos(byte detailLevel, int posX, int posZ)
     {
@@ -18,46 +26,117 @@ public class LevelPos implements Cloneable
         this.detailLevel = detailLevel;
     }
 
-    public LevelPos convert(byte newDetailLevel)
+    /**
+     * this operation does not change the state
+     */
+    public LevelPos getConvertedLevelPos(byte newDetailLevel)
     {
         if (newDetailLevel >= detailLevel)
         {
+            int width = 1 << (newDetailLevel - detailLevel);
             return new LevelPos(
                     newDetailLevel,
-                    Math.floorDiv(posX, (int) Math.pow(2, newDetailLevel - detailLevel)),
-                    Math.floorDiv(posZ, (int) Math.pow(2, newDetailLevel - detailLevel)));
+                    Math.floorDiv(posX, width),
+                    Math.floorDiv(posZ, width));
         } else
         {
+            int width = 1 << (detailLevel - newDetailLevel);
             return new LevelPos(
                     newDetailLevel,
-                    posX * (int) Math.pow(2, detailLevel - newDetailLevel),
-                    posZ * (int) Math.pow(2, detailLevel - newDetailLevel));
+                    posX * width,
+                    posZ * width);
         }
     }
 
-    public LevelPos regionModule()
+    /**
+     * this operation does not change the state
+     */
+    public LevelPos getRegionModuleLevelPos()
     {
+        int width = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
         return new LevelPos(
                 detailLevel,
-                Math.floorMod(posX, (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel)),
-                Math.floorMod(posZ, (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel)));
+                Math.floorMod(posX, width),
+                Math.floorMod(posZ, width));
+    }
+
+    /**
+     * this operation changes the state
+     */
+    public void convert(byte newDetailLevel)
+    {
+        if (newDetailLevel >= detailLevel)
+        {
+            int width = 1 << (newDetailLevel - detailLevel);
+            detailLevel = newDetailLevel;
+            posX = Math.floorDiv(posX, width);
+            posZ = Math.floorDiv(posZ, width);
+        } else
+        {
+            int width = 1 << (detailLevel - newDetailLevel);
+            detailLevel = newDetailLevel;
+            posX = posX * width;
+            posZ = posZ * width;
+        }
+    }
+
+    /**
+     * this operation changes the state
+     */
+    public void performRegionModule()
+    {
+        int width = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
+        posX = Math.floorMod(posX, width);
+        posX = Math.floorMod(posZ, width);
+    }
+
+    /**
+     * this operation changes the state
+     */
+    public void applyOffset(int xOffset, int zOffset)
+    {
+        posX = posX + xOffset;
+        posX = posZ + zOffset;
+    }
+
+    /**
+     * this operation changes the state
+     */
+    public void changeParameters(byte newDetailLevel, int newPosX, int newPosZ)
+    {
+        detailLevel = newDetailLevel;
+        posX = newPosX;
+        posX = newPosZ;
     }
 
     public RegionPos getRegionPos()
     {
+        int width = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
         return new RegionPos(
-                Math.floorDiv(posX, (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel)),
-                Math.floorDiv(posZ, (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel)));
+                Math.floorDiv(posX, width),
+                Math.floorDiv(posZ, width));
     }
 
-
-    @Override
-    public LevelPos clone()
+    public ChunkPos getChunkPos()
     {
-        return new LevelPos(detailLevel, posX, posZ);
+        if (LodUtil.CHUNK_DETAIL_LEVEL >= detailLevel)
+        {
+            int width = 1 << (LodUtil.CHUNK_DETAIL_LEVEL - detailLevel);
+            return new ChunkPos(
+                    Math.floorDiv(posX, width),
+                    Math.floorDiv(posZ, width));
+        } else
+        {
+            int width = 1 << (detailLevel - LodUtil.CHUNK_DETAIL_LEVEL);
+            return new ChunkPos(
+                    posX * width,
+                    posZ * width);
+        }
     }
 
-/**TODO fix the region disappearing for a second*/
+    /**
+     * TODO fix the region disappearing for a second
+     */
 
     public int maxDistance(int playerPosX, int playerPosZ, int regionPosX, int regionPosZ)
     {
@@ -192,7 +271,7 @@ public class LevelPos implements Cloneable
         @Override
         public int compare(Map.Entry<LevelPos, Integer> first, Map.Entry<LevelPos, Integer> second)
         {
-            Integer compareResult = Integer.compare(first.getKey().detailLevel, second.getKey().detailLevel);
+            int compareResult = Integer.compare(first.getKey().detailLevel, second.getKey().detailLevel);
             if (compareResult != 0)
             {
                 compareResult = Integer.compare(first.getValue(), second.getValue());
@@ -201,6 +280,14 @@ public class LevelPos implements Cloneable
         }
     }
 
+
+    @Override
+    public LevelPos clone()
+    {
+        return new LevelPos(detailLevel, posX, posZ);
+    }
+
+    @Override
     public int hashCode()
     {
         int hash = 7;
@@ -210,11 +297,12 @@ public class LevelPos implements Cloneable
         return hash;
     }
 
-    public boolean equals(LevelPos other)
+    @Override
+    public boolean equals(Object other)
     {
-        return (this.detailLevel == other.detailLevel &&
-                this.posX == other.posX &&
-                this.posZ == other.posZ);
+        return (this.detailLevel == ((LevelPos) other).detailLevel &&
+                this.posX == ((LevelPos) other).posX &&
+                this.posZ == ((LevelPos) other).posZ);
     }
 
     @Override

@@ -24,8 +24,7 @@ import java.util.concurrent.Executors;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
-import com.seibel.lod.objects.LevelPos;
-import com.seibel.lod.objects.LodDataPoint;
+import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.util.LodThreadFactory;
@@ -150,11 +149,11 @@ public class LodBuilder
         int startZ;
         int endX;
         int endZ;
-        Color color;
+        short[] color;
         short height;
         short depth;
-        LevelPos levelPos;
-        LodDataPoint data = null;
+        LevelPos levelPos = new LevelPos();
+        short[] data;
 
         for (int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++)
         {
@@ -175,14 +174,14 @@ public class LodBuilder
                         startZ, endX, endZ);
                 depth = 0;
             }
-            levelPos = new LevelPos((byte) 0,
+            levelPos.changeParameters((byte) 0,
                     chunk.getPos().x * 16 + startX,
                     chunk.getPos().z * 16 + startZ);
-            data = new LodDataPoint(height, depth, color);
-            lodDim.addData(levelPos.convert(detail.detailLevel),
+            levelPos.convert(detail.detailLevel);
+            data = new short[]{height, depth, color[0], color[1], color[2]};
+            lodDim.addData(levelPos,
                     data,
                     config.distanceGenerationMode,
-                    false,
                     false);
         }
         lodDim.updateData(new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z));
@@ -332,7 +331,7 @@ public class LodBuilder
      *                                        otherwise only use the block's
      *                                        material color
      */
-    private Color generateLodColorForArea(IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX,
+    private short[] generateLodColorForArea(IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX,
                                           int endZ)
     {
         ChunkSection[] chunkSections = chunk.getSections();
@@ -386,11 +385,9 @@ public class LodBuilder
                                 colorInt = getColorForBlock(x, z, blockState, biome);
                             }
 
-                            Color c = LodUtil.intToColor(colorInt);
-
-                            red += c.getRed();
-                            green += c.getGreen();
-                            blue += c.getBlue();
+                            red += (colorInt)&0xFF;;
+                            green += (colorInt>>8)&0xFF;
+                            blue += (colorInt>>16)&0xFF;
 
                             numbOfBlocks++;
 
@@ -410,7 +407,7 @@ public class LodBuilder
         green /= numbOfBlocks;
         blue /= numbOfBlocks;
 
-        return new Color(red, green, blue);
+        return new short[]{(short) red, (short) green, (short) blue};
     }
 
     /**

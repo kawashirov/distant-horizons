@@ -95,9 +95,8 @@ public class ClientProxy
 	{
 		if (mc == null || mc.player == null || !lodWorld.getIsWorldLoaded())
 			return;
-
-
 		applyConfigOverrides();
+
 		viewDistanceChangedEvent();
 		
 		LodDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
@@ -125,7 +124,9 @@ public class ClientProxy
 
 		profiler.pop(); // end LOD
 		profiler.push("terrain"); // restart "terrain"
-		
+
+
+		applyConfigOverrides();
 		
 		// these can't be set until after the buffers are built (in renderer.drawLODs)
 		// otherwise the buffers may be set to the wrong size, or not changed at all
@@ -156,10 +157,9 @@ public class ClientProxy
 		//		LodConfig.CLIENT.saturationMultiplier.set(1.0);
 		
 		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
-		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
-		LodConfig.CLIENT.lodChunkRenderDistance.set(256);
+		LodConfig.CLIENT.lodChunkRenderDistance.set(128);
 		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
-		LodConfig.CLIENT.lodQuality.set(1);
+		LodConfig.CLIENT.lodQuality.set(2);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
 		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(Runtime.getRuntime().availableProcessors());
 		

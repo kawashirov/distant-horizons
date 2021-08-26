@@ -21,8 +21,7 @@ import java.awt.Color;
 import java.io.File;
 import java.util.HashSet;
 
-import com.seibel.lod.objects.LevelPos;
-import com.seibel.lod.objects.LodDataPoint;
+import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
 
@@ -325,11 +324,9 @@ public class LodUtil
 					if (!lodDim.doesDataExist(levelPos))
 						continue;
 					
-					LodDataPoint data = lodDim.getData(levelPos);
-					if (data == null)
-						continue;
+					short[] data = lodDim.getData(levelPos);
 					
-					short lodAverageHeight = data.height;
+					short lodAverageHeight = data[0];
 					if (playerPos.getY() <= lodAverageHeight)
 					{
 						// don't draw Lod's that are taller than the player

@@ -17,14 +17,10 @@
  */
 package com.seibel.lod.builders.lodTemplates;
 
-import com.seibel.lod.objects.LevelPos;
-import com.seibel.lod.objects.LodDataPoint;
-import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LevelPos.LevelPos;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.Set;
 
 /**
  * TODO DynamicLodTemplate
@@ -38,7 +34,7 @@ import java.util.Set;
 public class DynamicLodTemplate extends AbstractLodTemplate
 {
 	@Override
-	public void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, LodDataPoint data, LodDataPoint[][] adjData,
+	public void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, short[] data, short[][][] adjData,
 							   LevelPos levelPos, boolean debugging)
 	{
 		System.err.println("DynamicLodTemplate not implemented!");

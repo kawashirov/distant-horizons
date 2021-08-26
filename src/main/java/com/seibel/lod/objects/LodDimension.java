@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
+import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
 
@@ -400,7 +401,7 @@ public class LodDimension
      * stored in the LOD. If an LOD already exists at the given
      * coordinates it will be overwritten.
      */
-    public synchronized Boolean addData(LevelPos levelPos, LodDataPoint lodDataPoint, DistanceGenerationMode generationMode, boolean update, boolean dontSave)
+    public synchronized Boolean addData(LevelPos levelPos, short[] lodDataPoint, DistanceGenerationMode generationMode, boolean dontSave)
     {
 
         // don't continue if the region can't be saved
@@ -412,7 +413,7 @@ public class LodDimension
 
         LodRegion region = getRegion(levelPos);
 
-        boolean nodeAdded = region.setData(levelPos, lodDataPoint, generationMode.complexity, true);
+        boolean nodeAdded = region.setData(levelPos, lodDataPoint, generationMode.complexity);
         // only save valid LODs to disk
         if (!dontSave && fileHandler != null)
         {
@@ -429,20 +430,6 @@ public class LodDimension
             }
         }
         return nodeAdded;
-    }
-
-
-    /**
-     * Get the LodNodeData at the given X and Z coordinates
-     * in this dimension.
-     * <br>
-     * Returns null if the LodChunk doesn't exist or
-     * is outside the loaded area.
-     */
-    public LodDataPoint getData(ChunkPos chunkPos)
-    {
-        LevelPos levelPos = new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunkPos.x, chunkPos.z);
-        return getData(levelPos);
     }
 
 
@@ -474,7 +461,7 @@ public class LodDimension
                     if (end >= regionLevelPos.minDistance(playerPosX, playerPosZ) &&
                             start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
                     {
-                        region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
+                        region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).getConvertedLevelPos(detailLevel));
                         listOfData.addAll(region.getDataToGenerate(playerPosX, playerPosZ, start, end, generation, detailLevel, dataNumber));
                     }
                 }catch (Exception e){
@@ -510,7 +497,7 @@ public class LodDimension
             if (end >= regionLevelPos.minDistance(playerPosX, playerPosZ) &&
                     start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
             {
-                LodRegion region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).convert(detailLevel));
+                LodRegion region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).getConvertedLevelPos(detailLevel));
                 listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel,zFix));
             }
         }catch (Exception e){
@@ -523,13 +510,26 @@ public class LodDimension
     }
 
     /**
+     * Get the LodNodeData at the given X and Z coordinates
+     * in this dimension.
+     * <br>
+     * Returns null if the LodChunk doesn't exist or
+     * is outside the loaded area.
+     */
+    public short[] getData(ChunkPos chunkPos)
+    {
+        LevelPos levelPos = new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunkPos.x, chunkPos.z);
+        return getData(levelPos);
+    }
+
+    /**
      * Get the data point at the given X and Z coordinates
      * in this dimension.
      * <br>
      * Returns null if the LodChunk doesn't exist or
      * is outside the loaded area.
      */
-    public LodDataPoint getData(LevelPos levelPos)
+    public short[] getData(LevelPos levelPos)
     {
         if (levelPos.detailLevel > LodUtil.REGION_DETAIL_LEVEL)
             throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + levelPos.detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");

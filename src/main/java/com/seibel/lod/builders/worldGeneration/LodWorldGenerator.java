@@ -13,7 +13,7 @@ import com.seibel.lod.builders.GenerationRequest;
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodConfig;
-import com.seibel.lod.objects.LevelPos;
+import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.DetailDistanceUtil;
@@ -131,14 +131,13 @@ public class LodWorldGenerator
 					//=======================================//
 					
 					// start by generating half-region sized blocks...
-					int farRequesting = maxChunkGenRequests/2;
+					int farRequesting = maxChunkGenRequests/4;
 
 					//we firstly make sure that the world is filled with half region wide block
-					/*
+
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
 						if (farRequesting <= 0){
-							farRequesting=0;
 							break;
 						}
 						levelPosListToGen = lodDim.getDataToGenerate(
@@ -147,20 +146,19 @@ public class LodWorldGenerator
 								DetailDistanceUtil.getDistanceGeneration(detailGen),
 								DetailDistanceUtil.getDistanceGeneration(detailGen + 1),
 								DetailDistanceUtil.getDistanceGenerationMode(detailGen).complexity,
-								(byte) 7,
+								(byte) 8,
 								farRequesting);
 						for(LevelPos levelPos : levelPosListToGen){
 							generationRequestList.add(new GenerationRequest(levelPos,DetailDistanceUtil.getDistanceGenerationMode(detailGen), DetailDistanceUtil.getLodDetail(detailGen)));
 						}
 						farRequesting = farRequesting - levelPosListToGen.size();
 
-					}*/
+					}
 					
 					// ...then once the world is filled with half-region sized blocks
 					// fill in the rest
 					int t = generationRequestList.size();
-					int nearRequesting = maxChunkGenRequests - maxChunkGenRequests/2 + farRequesting;
-					System.out.println("clear slot " + nearRequesting);
+					int nearRequesting = maxChunkGenRequests - maxChunkGenRequests/4 + farRequesting;
 					//we then fill the world with the rest of the block
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
@@ -177,9 +175,7 @@ public class LodWorldGenerator
 							generationRequestList.add(new GenerationRequest(levelPos,DetailDistanceUtil.getDistanceGenerationMode(detailGen), DetailDistanceUtil.getLodDetail(detailGen)));
 						}
 						nearRequesting = nearRequesting - levelPosListToGen.size();
-						System.out.println("adding " + levelPosListToGen.size());
 					}
-					System.out.println("generating " + generationRequestList.size() + " and " + t);
 					
 					
 					//====================================//

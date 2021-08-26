@@ -1,16 +1,14 @@
 package com.seibel.lod.objects;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.handlers.LodConfig;
+import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.util.LodUtil;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 
-import java.awt.*;
 import java.io.Serializable;
 import java.util.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * STANDARD TO FOLLOW
@@ -128,12 +126,11 @@ public class LodRegion implements Serializable
      * @param levelPos
      * @param dataPoint
      * @param generationType
-     * @param update
      * @return
      */
-    public boolean setData(LevelPos levelPos, LodDataPoint dataPoint, byte generationType, boolean update)
+    public boolean setData(LevelPos levelPos, short[] dataPoint, byte generationType)
     {
-        levelPos = levelPos.regionModule();
+        levelPos.performRegionModule();
         if ((this.generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] == 0) || (generationType >= this.generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ]))
         {
 
@@ -141,24 +138,13 @@ public class LodRegion implements Serializable
             if (this.dataExistence[levelPos.detailLevel][levelPos.posX][levelPos.posZ]) numberOfPoints++;
 
             //add the node data
-            this.colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][0] = (byte) (dataPoint.color.getRed() - 128);
-            this.colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][1] = (byte) (dataPoint.color.getGreen() - 128);
-            this.colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][2] = (byte) (dataPoint.color.getBlue() - 128);
-            this.height[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = dataPoint.height;
-            this.depth[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = dataPoint.depth;
+            this.height[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = dataPoint[0];
+            this.depth[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = dataPoint[1];
+            this.colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][0] = (byte) (dataPoint[2] - 128);
+            this.colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][1] = (byte) (dataPoint[3] - 128);
+            this.colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][2] = (byte) (dataPoint[4] - 128);
             this.generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = generationType;
             this.dataExistence[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = true;
-
-            //update could be stopped and a single big update could be done at the end
-            LevelPos tempLevelPos = levelPos;
-            if (update)
-            {
-                for (byte tempLod = (byte) (levelPos.detailLevel + 1); tempLod <= LodUtil.REGION_DETAIL_LEVEL; tempLod++)
-                {
-                    tempLevelPos = tempLevelPos.convert(tempLod);
-                    update(tempLevelPos);
-                }
-            }
             return true;
         } else
         {
@@ -167,7 +153,7 @@ public class LodRegion implements Serializable
     }
 
 
-    public LodDataPoint getData(ChunkPos chunkPos)
+    public short[] getData(ChunkPos chunkPos)
     {
         return getData(new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunkPos.x, chunkPos.z));
     }
@@ -178,7 +164,7 @@ public class LodRegion implements Serializable
      * @param lod
      * @return the data at the relative pos and level
      */
-    public LodDataPoint getData(byte lod, BlockPos blockPos)
+    public short[] getData(byte lod, BlockPos blockPos)
     {
         int posX = Math.floorMod(blockPos.getX(), (int) Math.pow(2, lod));
         int posZ = Math.floorMod(blockPos.getZ(), (int) Math.pow(2, lod));
@@ -191,17 +177,15 @@ public class LodRegion implements Serializable
      * @param levelPos
      * @return the data at the relative pos and level
      */
-    public LodDataPoint getData(LevelPos levelPos)
+    public short[] getData(LevelPos levelPos)
     {
-        levelPos = levelPos.regionModule();
-        return new LodDataPoint(
-                height[levelPos.detailLevel][levelPos.posX][levelPos.posZ],
+        levelPos = levelPos.getRegionModuleLevelPos();
+        return new short[]{height[levelPos.detailLevel][levelPos.posX][levelPos.posZ],
                 depth[levelPos.detailLevel][levelPos.posX][levelPos.posZ],
-                new Color(colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][0] + 128,
-                        colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][1] + 128,
-                        colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][2] + 128
-                )
-        );
+                (short) (colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][0] + 128),
+                (short) (colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][1] + 128),
+                (short) (colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][2] + 128)
+        };
     }
 
     /**
@@ -296,8 +280,9 @@ public class LodRegion implements Serializable
                     }
                 }
             } else
+            //now we keep exploring the top right child
             {
-                childPos = levelPos.convert((byte) (levelPos.detailLevel - 1));
+                childPos = levelPos.getConvertedLevelPos((byte) (levelPos.detailLevel - 1));
                 if (generationType[childPos.detailLevel][childPos.posX][childPos.posZ] < generation)
                 {
                     minDistance = childPos.minDistance(playerPosX,playerPosZ,regionPosX,regionPosZ);
@@ -403,7 +388,7 @@ public class LodRegion implements Serializable
         int startX;
         int startZ;
         for(byte bottom = (byte) (minDetailLevel + 1); bottom < levelPos.detailLevel ; bottom++){
-            tempLevelPos = levelPos.convert(bottom);
+            tempLevelPos = levelPos.getConvertedLevelPos(bottom);
             startX = tempLevelPos.posX;
             startZ = tempLevelPos.posZ;
             sizeDiff = (int) Math.pow(2, levelPos.detailLevel - bottom);
@@ -415,7 +400,7 @@ public class LodRegion implements Serializable
 
         }
         for (byte tempLod = levelPos.detailLevel; tempLod <= LodUtil.REGION_DETAIL_LEVEL; tempLod++) {
-            tempLevelPos = levelPos.convert(tempLod);
+            tempLevelPos = levelPos.getConvertedLevelPos(tempLod);
             update(tempLevelPos);
         }
     }
@@ -426,7 +411,7 @@ public class LodRegion implements Serializable
     private void update(LevelPos levelPos)
     {
 
-        levelPos = levelPos.regionModule();
+        levelPos = levelPos.getRegionModuleLevelPos();
         int numberOfChildren = 0;
 
         /**TODO add the ability to change how the heigth and depth are determinated (for example min or max)**/
@@ -480,7 +465,7 @@ public class LodRegion implements Serializable
      */
     private boolean[][] getChildren(LevelPos levelPos)
     {
-        levelPos = levelPos.regionModule();
+        levelPos = levelPos.getRegionModuleLevelPos();
         boolean[][] children = new boolean[2][2];
         int numberOfChild = 0;
         if (minDetailLevel == levelPos.detailLevel)
@@ -512,7 +497,7 @@ public class LodRegion implements Serializable
      */
     public boolean doesDataExist(LevelPos levelPos)
     {
-        levelPos = levelPos.regionModule();
+        levelPos = levelPos.getRegionModuleLevelPos();
         return dataExistence[levelPos.detailLevel][levelPos.posX][levelPos.posZ];
     }
 
@@ -522,7 +507,7 @@ public class LodRegion implements Serializable
      */
     public DistanceGenerationMode getGenerationMode(LevelPos levelPos)
     {
-        levelPos = levelPos.regionModule();
+        levelPos = levelPos.getRegionModuleLevelPos();
         DistanceGenerationMode generationMode = DistanceGenerationMode.NONE;
         switch (generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ])
         {
@@ -558,7 +543,7 @@ public class LodRegion implements Serializable
      */
     public boolean hasDataBeenGenerated(LevelPos levelPos)
     {
-        levelPos = levelPos.regionModule();
+        levelPos = levelPos.getRegionModuleLevelPos();
         return (generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] != 0);
     }
 
