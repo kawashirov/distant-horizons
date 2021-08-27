@@ -303,21 +303,21 @@ public class LodRegion implements Serializable
 	/**
 	 * @return
 	 */
-	public ConcurrentSkipListSet<LevelPos> getDataToRender(ConcurrentSkipListSet<LevelPos> dataToRender, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
+	public void getDataToRender(SortedSet<LevelPos>  dataToRender, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
 	{
 		LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
-		return getDataToRender(dataToRender, levelPos, playerPosX, playerPosZ, start, end, detailLevel, zFix);
+		getDataToRender(dataToRender, levelPos, playerPosX, playerPosZ, start, end, detailLevel, zFix);
 	}
 
 	/**
 	 * @return
 	 */
-	private ConcurrentSkipListSet<LevelPos> getDataToRender(ConcurrentSkipListSet<LevelPos> dataToRender, LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte targetDetailLevel, boolean zFix)
+	private void getDataToRender(SortedSet<LevelPos>  dataToRender, LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte targetDetailLevel, boolean zFix)
 	{
 
 		if (dataToRender.contains(levelPos))
 		{
-			return dataToRender;
+			return;
 		}
 
 
@@ -334,13 +334,13 @@ public class LodRegion implements Serializable
 
 		if (detailLevel == targetDetailLevel + 1 && end <= maxDistance && minDistance <= end && zFix)
 		{
-			return dataToRender;
+			return;
 		}
 		//To avoid z fighting: if the pos is touching the end radius at detailLevel + 1 then we stop
 		//cause this area will be occupied by bigger block
 
 		if (!(start <= maxDistance && minDistance < end) || detailLevel < targetDetailLevel)
-			return dataToRender;
+			return;
 
 		//we have reached the target detail level
 		if (targetDetailLevel == detailLevel)
@@ -376,7 +376,7 @@ public class LodRegion implements Serializable
 				dataToRender.add(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size));
 			}
 		}
-		return dataToRender;
+		return;
 	}
 
 	/**
@@ -579,7 +579,6 @@ public class LodRegion implements Serializable
 			return (generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] != 0);
 		} catch (Exception e)
 		{
-			System.out.println(levelPos);
 			e.printStackTrace();
 			throw e;
 		}

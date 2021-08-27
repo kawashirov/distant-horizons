@@ -522,7 +522,7 @@ public class LodDimension
 	 *
 	 * @return list of nodes
 	 */
-	public ConcurrentSkipListSet<LevelPos> getDataToRender(ConcurrentSkipListSet<LevelPos> dataToRender, RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
+	public void getDataToRender(SortedSet<LevelPos>  dataToRender, RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
 	{
 		LevelPos regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
 		try
@@ -532,9 +532,6 @@ public class LodDimension
 		} catch (Exception e)
 		{
 			e.printStackTrace();
-		}finally
-		{
-			return dataToRender;
 		}
 	}
 
