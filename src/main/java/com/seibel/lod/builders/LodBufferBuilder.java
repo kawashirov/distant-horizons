@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.seibel.lod.objects.DataPoint;
 import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.handlers.LodConfig;
@@ -154,7 +155,7 @@ public class LodBufferBuilder
 				// =====================//
 				//    RENDERING PART    //
 				// =====================//
-
+				ConcurrentMap<LevelPos, List<Short>> adjMap = new ConcurrentSkipListMap<>();
 
 				for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
 				{
@@ -173,7 +174,7 @@ public class LodBufferBuilder
 							return;
 						Callable<Boolean> dataToRenderThread = () ->
 						{
-							SortedSet<LevelPos> nodeToRender = new TreeSet();
+							Set<LevelPos> nodeToRender = new HashSet<>();
 							lodDim.getDataToRender(
 									nodeToRender,
 									regionPos,
@@ -193,6 +194,7 @@ public class LodBufferBuilder
 
 								try
 								{
+									boolean disableFix = false;
 									if (lodDim.doesDataExist(posToRender.clone()))
 									{
 										short[] lodData = lodDim.getData(posToRender);
@@ -200,14 +202,16 @@ public class LodBufferBuilder
 										for (int x : new int[]{0, 1})
 										{
 											adjPos.changeParameters(posToRender.detailLevel, posToRender.posX + x * 2 - 1, posToRender.posZ);
-											if (!renderer.vanillaRenderedChunks.contains(adjPos.getChunkPos()))
+											if (!renderer.vanillaRenderedChunks.contains(adjPos.getChunkPos())
+													     && (nodeToRender.contains(adjPos) || disableFix))
 												adjData[0][x] = lodDim.getData(adjPos);
 										}
 
 										for (int z : new int[]{0, 1})
 										{
 											adjPos.changeParameters(posToRender.detailLevel, posToRender.posX, posToRender.posZ + z * 2 - 1);
-											if (!renderer.vanillaRenderedChunks.contains(adjPos.getChunkPos()))
+											if (!renderer.vanillaRenderedChunks.contains(adjPos.getChunkPos())
+													     && (nodeToRender.contains(adjPos) || disableFix))
 												adjData[1][z] = lodDim.getData(adjPos);
 										}
 										LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,
@@ -265,11 +269,14 @@ public class LodBufferBuilder
 
 				// mark that the buildable buffers as ready to swap
 				switchVbos = true;
-			} catch (Exception e)
+			} catch (
+					  Exception e)
+
 			{
 				ClientProxy.LOGGER.warn("\"LodNodeBufferBuilder.generateLodBuffersAsync\" ran into trouble: ");
 				e.printStackTrace();
 			} finally
+
 			{
 				// regardless of if we successfully created the buffers
 				// we are done generating.
@@ -290,9 +297,9 @@ public class LodBufferBuilder
 	}
 
 
-	//===============================//
-	// BufferBuilder related methods //
-	//===============================//
+//===============================//
+// BufferBuilder related methods //
+//===============================//
 
 
 	/**

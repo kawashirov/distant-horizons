@@ -304,7 +304,7 @@ public class LodRegion implements Serializable
 	/**
 	 * @return
 	 */
-	public void getDataToRender(SortedSet<LevelPos>  dataToRender, int playerPosX, int playerPosZ)
+	public void getDataToRender(Set<LevelPos>  dataToRender, int playerPosX, int playerPosZ)
 	{
 		LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
 		getDataToRender(dataToRender, levelPos, playerPosX, playerPosZ);
@@ -313,7 +313,7 @@ public class LodRegion implements Serializable
 	/**
 	 * @return
 	 */
-	private void getDataToRender(SortedSet<LevelPos>  dataToRender, LevelPos levelPos, int playerPosX, int playerPosZ)
+	private void getDataToRender(Set<LevelPos>  dataToRender, LevelPos levelPos, int playerPosX, int playerPosZ)
 	{
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel);
 

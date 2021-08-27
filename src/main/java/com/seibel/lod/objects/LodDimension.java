@@ -522,7 +522,7 @@ public class LodDimension
 	 *
 	 * @return list of nodes
 	 */
-	public void getDataToRender(SortedSet<LevelPos>  dataToRender, RegionPos regionPos, int playerPosX, int playerPosZ)
+	public void getDataToRender(Set<LevelPos>  dataToRender, RegionPos regionPos, int playerPosX, int playerPosZ)
 	{
 		LevelPos regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
 		try
