@@ -20,8 +20,12 @@ package com.seibel.lod.objects;
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
@@ -714,7 +718,7 @@ public class LodDimension
 	public void setRegionWidth(int newWidth)
 	{
 		width = newWidth;
-		halfWidth = (int) Math.floorDiv(width, 2);
+		halfWidth = Math.floorDiv(width, 2);
 
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];
