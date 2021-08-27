@@ -17,20 +17,26 @@
  */
 package com.seibel.lod.builders;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.seibel.lod.objects.DataPoint;
 import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.handlers.LodConfig;
-import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
+import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodRenderer;
-import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 
