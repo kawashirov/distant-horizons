@@ -21,13 +21,13 @@ import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.*;
-import java.util.concurrent.ConcurrentNavigableMap;
-import java.util.stream.Collectors;
+import java.util.concurrent.*;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
 import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.util.DetailDistanceUtil;
+import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
@@ -35,6 +35,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
+
 
 /**
  * This object holds all loaded LOD regions
@@ -63,8 +64,10 @@ public class LodDimension
     public volatile boolean isRegionDirty[][];
 
     private volatile RegionPos center;
-
+    private volatile ChunkPos lastGenChunk;
+    private volatile ChunkPos lastCutChunk;
     private LodDimensionFileHandler fileHandler;
+    private ExecutorService cutAndGenThreads = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " - cutAndGen"));
 
     /**
      * Creates the dimension centered at (0,0)
@@ -73,6 +76,8 @@ public class LodDimension
      */
     public LodDimension(DimensionType newDimension, LodWorld lodWorld, int newWidth)
     {
+        lastCutChunk = null;
+        lastGenChunk = null;
         dimension = newDimension;
         width = newWidth;
         halfWidth = (int) Math.floor(width / 2);
@@ -237,7 +242,8 @@ public class LodDimension
             for (int z = 0; z < regions.length; z++)
             {
                 region = regions[x][z];
-                if(region != null){
+                if (region != null)
+                {
                     count += region.getMinMemoryNeeded();
                 }
             }
@@ -304,92 +310,124 @@ public class LodDimension
 
 
     /**
+     *
      */
     public void treeCutter(int playerPosX, int playerPosZ)
     {
-        int regionX;
-        int regionZ;
-        LevelPos levelPos = new LevelPos();
-
-        for (int x = 0; x < regions.length; x++)
+        ChunkPos newPlayerChunk = (new LevelPos((byte) 0, playerPosX, playerPosZ)).getChunkPos();
+        if (lastCutChunk == null)
+            lastCutChunk = new ChunkPos(newPlayerChunk.x + 1, newPlayerChunk.z - 1);
+        if (newPlayerChunk.x != lastCutChunk.x || newPlayerChunk.z != lastCutChunk.z)
         {
-            for (int z = 0; z < regions.length; z++)
+            lastCutChunk = newPlayerChunk;
+            Thread thread = new Thread(() ->
             {
-                regionX = (x + center.x) - halfWidth;
-                regionZ = (z + center.z) - halfWidth;
-                levelPos.changeParameters(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ);
-                //we start checking from the first circle. If the whole region is in the circle
-                //we proceed to cut all the level lower than the level of circle 1 and we break
-                //if this is not the case w
-                for(byte index = LodUtil.BLOCK_DETAIL_LEVEL; index <= LodUtil.DETAIL_OPTIONS; index++){
-                    if(DetailDistanceUtil.getDistanceTreeCut(index + 1) > levelPos.minDistance(playerPosX, playerPosZ)){
+                int regionX;
+                int regionZ;
+                LevelPos levelPos = new LevelPos();
 
-                        byte cutDetailLevel = DetailDistanceUtil.getCutLodDetail(index);
-
-                        if(regions[x][z] != null)
+                for (int x = 0; x < regions.length; x++)
+                {
+                    for (int z = 0; z < regions.length; z++)
+                    {
+                        regionX = (x + center.x) - halfWidth;
+                        regionZ = (z + center.z) - halfWidth;
+                        levelPos.changeParameters(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ);
+                        //we start checking from the first circle. If the whole region is in the circle
+                        //we proceed to cut all the level lower than the level of circle 1 and we break
+                        //if this is not the case w
+                        for (byte index = LodUtil.BLOCK_DETAIL_LEVEL; index <= LodUtil.DETAIL_OPTIONS; index++)
                         {
-                            if(regions[x][z].getMinDetailLevel() > cutDetailLevel){
-                                regions[x][z].cutTree(cutDetailLevel);
+                            if (DetailDistanceUtil.getDistanceTreeCut(index + 1) > levelPos.minDistance(playerPosX, playerPosZ))
+                            {
+
+                                byte cutDetailLevel = DetailDistanceUtil.getCutLodDetail(index);
+
+                                if (regions[x][z] != null)
+                                {
+                                    if (regions[x][z].getMinDetailLevel() > cutDetailLevel)
+                                    {
+                                        regions[x][z].cutTree(cutDetailLevel);
+                                    }
+                                }
+                                //once we
+                                break;
                             }
                         }
-                        //once we
-                        break;
-                    }
-                }
-            }
+                    }// region z
+                }// region z
+
+            });
+            cutAndGenThreads.execute(thread);
         }
     }
 
     /**
+     *
      */
     public void treeGenerator(int playerPosX, int playerPosZ)
     {
-        int regionX;
-        int regionZ;
-        LevelPos levelPos = new LevelPos();
-        RegionPos regionPos;
-        LodRegion region;
-        byte targetDetailLevel;
-        for (int x = 0; x < regions.length; x++)
+
+        ChunkPos newPlayerChunk = (new LevelPos((byte) 0, playerPosX, playerPosZ)).getChunkPos();
+
+        if (lastGenChunk == null)
+            lastGenChunk = new ChunkPos(newPlayerChunk.x + 1, newPlayerChunk.z - 1);
+        if (newPlayerChunk.x != lastGenChunk.x || newPlayerChunk.z != lastGenChunk.z)
         {
-            for (int z = 0; z < regions.length; z++)
+            lastGenChunk = newPlayerChunk;
+            Thread thread = new Thread(() ->
             {
-                regionX = (x + center.x) - halfWidth;
-                regionZ = (z + center.z) - halfWidth;
-                levelPos.changeParameters(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ);
-                regionPos = new RegionPos(regionX, regionZ);
-
-                for(byte index = LodUtil.BLOCK_DETAIL_LEVEL; index <= LodUtil.REGION_DETAIL_LEVEL; index++){
-
-                    //As soon as we find in which circle the region should be we analyze it
-                    if(DetailDistanceUtil.getDistanceTreeGen(index + 1) > levelPos.minDistance(playerPosX, playerPosZ)){
-
-                        region = regions[x][z];
-                        //We require that the region we are checking is loaded with at least this level
-                        targetDetailLevel = DetailDistanceUtil.getLodDetail(index).detailLevel;
-
-                        if (region == null)
+                int regionX;
+                int regionZ;
+                LodRegion region;
+                LevelPos levelPos = new LevelPos();
+                List<Callable<Boolean>> genThreads = new ArrayList<>();
+                for (int x = 0; x < regions.length; x++)
+                {
+                    for (int z = 0; z < regions.length; z++)
+                    {
+                        regionX = (x + center.x) - halfWidth;
+                        regionZ = (z + center.z) - halfWidth;
+                        levelPos.changeParameters(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ);
+                        final RegionPos regionPos = new RegionPos(regionX, regionZ);
+                        for (byte index = LodUtil.BLOCK_DETAIL_LEVEL; index <= LodUtil.REGION_DETAIL_LEVEL; index++)
                         {
-                            //First case, region has to be initialized
 
-                            //We check if there is a file at the target level
-                            regions[x][z] = getRegionFromFile(regionPos, targetDetailLevel);
-
-                            //if there is no file we initialize the region
-                            if (regions[x][z] == null)
+                            //As soon as we find in which circle the region should be we analyze it
+                            if (DetailDistanceUtil.getDistanceTreeGen(index + 1) > levelPos.minDistance(playerPosX, playerPosZ))
                             {
-                                regions[x][z] = new LodRegion(targetDetailLevel, regionPos);
-                            }
 
-                        }else if(region.getMinDetailLevel() > targetDetailLevel){
-                            //Second case, region has been initialized but at a higher level
-                            //We expand the region by introducing the missing layer
-                            region.expand(targetDetailLevel);
+                                region = regions[x][z];
+                                //We require that the region we are checking is loaded with at least this level
+                                byte targetDetailLevel = DetailDistanceUtil.getLodDetail(index).detailLevel;
+
+                                if (region == null)
+                                {
+                                    //First case, region has to be initialized
+
+                                    //We check if there is a file at the target level
+                                    regions[x][z] = getRegionFromFile(regionPos, targetDetailLevel);
+
+                                    //if there is no file we initialize the region
+                                    if (regions[x][z] == null)
+                                    {
+                                        regions[x][z] = new LodRegion(targetDetailLevel, regionPos);
+                                    }
+
+                                } else if (region.getMinDetailLevel() > targetDetailLevel)
+                                {
+                                    //Second case, region has been initialized but at a higher level
+                                    //We expand the region by introducing the missing layer
+                                    region.expand(targetDetailLevel);
+                                }
+                                break;
+                            }
                         }
-                        break;
                     }
                 }
-            }
+                ;
+            });
+            cutAndGenThreads.execute(thread);
         }
     }
 
@@ -461,7 +499,8 @@ public class LodDimension
                         region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).getConvertedLevelPos(detailLevel));
                         listOfData.addAll(region.getDataToGenerate(playerPosX, playerPosZ, start, end, generation, detailLevel, dataNumber));
                     }
-                }catch (Exception e){
+                } catch (Exception e)
+                {
                     //e.printStackTrace();
                 }
             }
@@ -470,9 +509,9 @@ public class LodDimension
         List<LevelPos> levelMinPosList = new ArrayList<>();
         dataNumber = Math.min(dataNumber, listOfData.size());
 
-        for(int i=0; i<dataNumber; i++)
+        for (int i = 0; i < dataNumber; i++)
         {
-            LevelPos min = Collections.min(listOfData, LevelPos.getPosComparator(playerPosX,playerPosZ));
+            LevelPos min = Collections.min(listOfData, LevelPos.getPosComparator(playerPosX, playerPosZ));
             listOfData.remove(min);
             levelMinPosList.add(min);
         }
@@ -484,7 +523,7 @@ public class LodDimension
      *
      * @return list of nodes
      */
-    public void getDataToRender(ConcurrentNavigableMap<LevelPos,List<Integer>> dataToRender, RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
+    public void getDataToRender(ConcurrentNavigableMap<LevelPos, List<Integer>> dataToRender, RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
     {
         LevelPos regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
         try
@@ -493,9 +532,10 @@ public class LodDimension
                     start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
             {
                 LodRegion region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).getConvertedLevelPos(detailLevel));
-                region.getDataToRender(dataToRender,playerPosX, playerPosZ, start, end, detailLevel,zFix);
+                region.getDataToRender(dataToRender, playerPosX, playerPosZ, start, end, detailLevel, zFix);
             }
-        }catch (Exception e){
+        } catch (Exception e)
+        {
             e.printStackTrace();
         }
     }
@@ -536,7 +576,8 @@ public class LodDimension
 
             return region.getData(levelPos);
 
-        }catch (Exception e){
+        } catch (Exception e)
+        {
             return null;
         }
     }
@@ -595,7 +636,8 @@ public class LodDimension
             }
 
             return region.doesDataExist(levelPos.clone());
-        }catch (Exception e){
+        } catch (Exception e)
+        {
             return false;
         }
     }
@@ -704,12 +746,12 @@ public class LodDimension
             for (int z = 0; z < regions.length; z++)
             {
                 region = regions[x][z];
-                if(region == null)
+                if (region == null)
                 {
                     stringBuilder.append("n");
                     stringBuilder.append("\t");
 
-                }else
+                } else
                 {
                     stringBuilder.append(region.getMinDetailLevel());
                     stringBuilder.append("\t");

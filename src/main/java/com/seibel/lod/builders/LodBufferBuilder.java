@@ -60,7 +60,7 @@ public class LodBufferBuilder
     /**
      * This holds the threads used to generate buffers.
      */
-    private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
+    private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfWorldGenerationThreads.get(), new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
 
     /**
      * The buffers that are used to create LODs using far fog
