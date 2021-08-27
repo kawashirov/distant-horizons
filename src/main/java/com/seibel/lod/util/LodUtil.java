@@ -321,7 +321,7 @@ public class LodUtil
 				for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
 				{
 					LevelPos levelPos = new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, x, z);
-					if (!lodDim.doesDataExist(levelPos))
+					if (!lodDim.doesDataExist(levelPos.clone()))
 						continue;
 					
 					short[] data = lodDim.getData(levelPos);

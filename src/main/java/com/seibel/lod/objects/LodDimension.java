@@ -594,7 +594,7 @@ public class LodDimension
                 return false;
             }
 
-            return region.doesDataExist(levelPos);
+            return region.doesDataExist(levelPos.clone());
         }catch (Exception e){
             return false;
         }

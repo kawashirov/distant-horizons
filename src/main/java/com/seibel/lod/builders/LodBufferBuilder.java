@@ -258,7 +258,7 @@ public class LodBufferBuilder
 
                                 try
                                 {
-                                    if (lodDim.doesDataExist(posToRender))
+                                    if (lodDim.doesDataExist(posToRender.clone()))
                                     {
                                         short[] lodData = lodDim.getData(posToRender);
                                         short[][][] adjData = new short[2][2][];
