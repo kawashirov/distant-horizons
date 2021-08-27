@@ -659,7 +659,7 @@ public class LodDimension
 	public LodRegion getRegionFromFile(RegionPos regionPos, byte detailLevel)
 	{
 		if (fileHandler != null)
-			return fileHandler.loadRegionFromFile(regionPos, detailLevel);
+			return fileHandler.loadRegionFromFile(detailLevel, regionPos);
 		else
 			return null;
 	}

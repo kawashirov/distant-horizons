@@ -125,12 +125,12 @@ public class LodDimensionFileHandler
 	 * Return the LodRegion region at the given coordinates.
 	 * (null if the file doesn't exist)
 	 */
-	public LodRegion loadRegionFromFile(RegionPos regionPos, byte detailLevel)
+	public LodRegion loadRegionFromFile(byte detailLevel, RegionPos regionPos)
 	{
 		int regionX = regionPos.x;
 		int regionZ = regionPos.z;
-		LodRegion region = null;
-		for (byte tempDetailLevel = detailLevel; tempDetailLevel <= LodUtil.REGION_DETAIL_LEVEL; tempDetailLevel++)
+		LodRegion region = new LodRegion(LodUtil.REGION_DETAIL_LEVEL,regionPos);
+		for (byte tempDetailLevel = LodUtil.REGION_DETAIL_LEVEL; tempDetailLevel >= detailLevel; tempDetailLevel--)
 		{
 			try
 			{
@@ -179,7 +179,7 @@ public class LodDimensionFileHandler
 								                        ", version requested: " + LOD_SAVE_FILE_VERSION +
 								                        " File was been deleted.");
 
-						continue;
+						break;
 					} else if (fileVersion > LOD_SAVE_FILE_VERSION)
 					{
 						// the file we are reading is a newer version,
@@ -190,23 +190,20 @@ public class LodDimensionFileHandler
 								                        ", version requested: " + LOD_SAVE_FILE_VERSION +
 								                        " this region will not be written to in order to protect the newer file.");
 
-						continue;
+						break;
 					}
 				} else
 				{
 					// there is no data in this file
 					bufferedReader.close();
-					continue;
+					break;
 				}
 
 				// this file is a readable version, begin reading the file
 				data = bufferedReader.readLine();
 
 				bufferedReader.close();
-				region = new LodRegion(new LevelContainer(data), regionPos);
-				if (tempDetailLevel >= detailLevel)
-					region.expand(detailLevel);
-				break;
+				region.addLevel(new LevelContainer(data));
 			} catch (Exception e)
 			{
 				// the buffered reader encountered a
@@ -215,6 +212,8 @@ public class LodDimensionFileHandler
 				e.printStackTrace();
 			}
 		}
+		if (region.getMinDetailLevel() >= detailLevel)
+			region.expand(detailLevel);
 		return region;
 	}
 
