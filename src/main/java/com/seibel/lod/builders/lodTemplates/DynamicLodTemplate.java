@@ -27,7 +27,7 @@ import net.minecraft.util.math.BlockPos;
  * Chunks smoothly transition between
  * each other, unless a neighboring chunk
  * is at a significantly different height.
- * 
+ *
  * @author James Seibel
  * @version 06-16-2021
  */
@@ -35,7 +35,7 @@ public class DynamicLodTemplate extends AbstractLodTemplate
 {
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, short[] data, short[][][] adjData,
-							   LevelPos levelPos, boolean debugging)
+	                           LevelPos levelPos, boolean debugging)
 	{
 		System.err.println("DynamicLodTemplate not implemented!");
 	}

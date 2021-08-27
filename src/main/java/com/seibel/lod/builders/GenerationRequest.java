@@ -12,20 +12,20 @@ import net.minecraft.util.math.ChunkPos;
  */
 public class GenerationRequest
 {
-    public final LevelPos levelPos;
-    public final DistanceGenerationMode generationMode;
-    public final LodDetail detail;
+	public final LevelPos levelPos;
+	public final DistanceGenerationMode generationMode;
+	public final LodDetail detail;
 
-    public GenerationRequest(LevelPos levelPos, DistanceGenerationMode generationMode, LodDetail detail)
-    {
-        this.levelPos = levelPos;
-        this.generationMode = generationMode;
-        this.detail = detail;
-    }
+	public GenerationRequest(LevelPos levelPos, DistanceGenerationMode generationMode, LodDetail detail)
+	{
+		this.levelPos = levelPos;
+		this.generationMode = generationMode;
+		this.detail = detail;
+	}
 
-    public ChunkPos getChunkPos()
-    {
-        LevelPos chunkLevelPos = levelPos.getConvertedLevelPos(LodUtil.CHUNK_DETAIL_LEVEL);
-        return new ChunkPos(chunkLevelPos.posX, chunkLevelPos.posZ);
-    }
+	public ChunkPos getChunkPos()
+	{
+		LevelPos chunkLevelPos = levelPos.getConvertedLevelPos(LodUtil.CHUNK_DETAIL_LEVEL);
+		return new ChunkPos(chunkLevelPos.posX, chunkLevelPos.posZ);
+	}
 }

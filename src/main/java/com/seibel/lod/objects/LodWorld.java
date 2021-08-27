@@ -33,127 +33,127 @@ import net.minecraft.world.DimensionType;
  */
 public class LodWorld
 {
-    private String worldName;
+	private String worldName;
 
-    private Map<DimensionType, LodDimension> lodDimensions;
+	private Map<DimensionType, LodDimension> lodDimensions;
 
-    /**
-     * If true then the LOD world is setup and ready to use
-     */
-    private boolean isWorldLoaded = false;
+	/**
+	 * If true then the LOD world is setup and ready to use
+	 */
+	private boolean isWorldLoaded = false;
 
-    public static final String NO_WORLD_LOADED = "No world loaded";
-
-
-    public LodWorld()
-    {
-        worldName = NO_WORLD_LOADED;
-    }
-
-    /**
-     * Set up the LodQuadTreeWorld with the given newWorldName. <br>
-     * This should be done whenever loading a new world.
-     *
-     * @param newWorldName name of the world
-     */
-    public void selectWorld(String newWorldName)
-    {
-        if (newWorldName.isEmpty())
-        {
-            deselectWorld();
-            return;
-        }
-
-        if (worldName.equals(newWorldName))
-            // don't recreate everything if we
-            // didn't actually change worlds
-            return;
-
-        worldName = newWorldName;
-        lodDimensions = new Hashtable<DimensionType, LodDimension>();
-        isWorldLoaded = true;
-    }
-
-    /**
-     * Set the worldName to "No world loaded"
-     * and clear the lodDimensions Map. <br>
-     * This should be done whenever unloaded a world.
-     */
-    public void deselectWorld()
-    {
-        worldName = NO_WORLD_LOADED;
-        lodDimensions = null;
-        isWorldLoaded = false;
-    }
+	public static final String NO_WORLD_LOADED = "No world loaded";
 
 
-    /**
-     * Adds newStorage to this world, if a LodQuadTreeDimension
-     * already exists for the given dimension it is replaced.
-     */
-    public void addLodDimension(LodDimension newStorage)
-    {
-        if (lodDimensions == null)
-            return;
+	public LodWorld()
+	{
+		worldName = NO_WORLD_LOADED;
+	}
 
-        lodDimensions.put(newStorage.dimension, newStorage);
-    }
+	/**
+	 * Set up the LodQuadTreeWorld with the given newWorldName. <br>
+	 * This should be done whenever loading a new world.
+	 *
+	 * @param newWorldName name of the world
+	 */
+	public void selectWorld(String newWorldName)
+	{
+		if (newWorldName.isEmpty())
+		{
+			deselectWorld();
+			return;
+		}
 
-    /**
-     * Returns null if no LodQuadTreeDimension exists for the given dimension
-     */
-    public LodDimension getLodDimension(DimensionType dimension)
-    {
-        if (lodDimensions == null)
-            return null;
+		if (worldName.equals(newWorldName))
+			// don't recreate everything if we
+			// didn't actually change worlds
+			return;
 
-        return lodDimensions.get(dimension);
-    }
+		worldName = newWorldName;
+		lodDimensions = new Hashtable<DimensionType, LodDimension>();
+		isWorldLoaded = true;
+	}
 
-    /**
-     * Resizes the max width in regions that each LodDimension
-     * should use.
-     */
-    public void resizeDimensionRegionWidth(int newWidth)
-    {
-        if (lodDimensions == null)
-            return;
-
-        saveAllDimensions();
-
-        for (DimensionType key : lodDimensions.keySet())
-            lodDimensions.get(key).setRegionWidth(newWidth);
-    }
-
-    /**
-     * Requests all dimensions save any dirty regions they may have.
-     */
-    public void saveAllDimensions()
-    {
-        if (lodDimensions == null)
-            return;
-
-        ClientProxy.LOGGER.info("Saving LODs");
-
-        for (DimensionType key : lodDimensions.keySet())
-            lodDimensions.get(key).saveDirtyRegionsToFileAsync();
-    }
+	/**
+	 * Set the worldName to "No world loaded"
+	 * and clear the lodDimensions Map. <br>
+	 * This should be done whenever unloaded a world.
+	 */
+	public void deselectWorld()
+	{
+		worldName = NO_WORLD_LOADED;
+		lodDimensions = null;
+		isWorldLoaded = false;
+	}
 
 
-    public boolean getIsWorldLoaded()
-    {
-        return isWorldLoaded;
-    }
+	/**
+	 * Adds newStorage to this world, if a LodQuadTreeDimension
+	 * already exists for the given dimension it is replaced.
+	 */
+	public void addLodDimension(LodDimension newStorage)
+	{
+		if (lodDimensions == null)
+			return;
 
-    public String getWorldName()
-    {
-        return worldName;
-    }
+		lodDimensions.put(newStorage.dimension, newStorage);
+	}
 
-    @Override
-    public String toString()
-    {
-        return "World name: " + worldName;
-    }
+	/**
+	 * Returns null if no LodQuadTreeDimension exists for the given dimension
+	 */
+	public LodDimension getLodDimension(DimensionType dimension)
+	{
+		if (lodDimensions == null)
+			return null;
+
+		return lodDimensions.get(dimension);
+	}
+
+	/**
+	 * Resizes the max width in regions that each LodDimension
+	 * should use.
+	 */
+	public void resizeDimensionRegionWidth(int newWidth)
+	{
+		if (lodDimensions == null)
+			return;
+
+		saveAllDimensions();
+
+		for (DimensionType key : lodDimensions.keySet())
+			lodDimensions.get(key).setRegionWidth(newWidth);
+	}
+
+	/**
+	 * Requests all dimensions save any dirty regions they may have.
+	 */
+	public void saveAllDimensions()
+	{
+		if (lodDimensions == null)
+			return;
+
+		ClientProxy.LOGGER.info("Saving LODs");
+
+		for (DimensionType key : lodDimensions.keySet())
+			lodDimensions.get(key).saveDirtyRegionsToFileAsync();
+	}
+
+
+	public boolean getIsWorldLoaded()
+	{
+		return isWorldLoaded;
+	}
+
+	public String getWorldName()
+	{
+		return worldName;
+	}
+
+	@Override
+	public String toString()
+	{
+		return "World name: " + worldName;
+	}
 }
 

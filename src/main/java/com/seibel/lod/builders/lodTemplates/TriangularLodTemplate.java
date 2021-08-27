@@ -25,7 +25,7 @@ import net.minecraft.util.math.BlockPos;
 /**
  * TODO #21 TriangularLodTemplate
  * Builds each LOD chunk as a singular rectangular prism.
- * 
+ *
  * @author James Seibel
  * @version 06-16-2021
  */
@@ -33,7 +33,7 @@ public class TriangularLodTemplate extends AbstractLodTemplate
 {
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, short[] data, short[][][] adjData,
-							   LevelPos levelPos, boolean debugging)
+	                           LevelPos levelPos, boolean debugging)
 	{
 		System.err.println("DynamicLodTemplate not implemented!");
 	}

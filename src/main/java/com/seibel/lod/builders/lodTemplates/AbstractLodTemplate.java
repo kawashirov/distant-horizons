@@ -35,17 +35,21 @@ import net.minecraft.util.math.BlockPos;
 public abstract class AbstractLodTemplate
 {
 	public abstract void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, short[] data, short[][][] adjData,
-										LevelPos levelPos, boolean debugging);
+	                                    LevelPos levelPos, boolean debugging);
 
-	/** add the given position and color to the buffer */
+	/**
+	 * add the given position and color to the buffer
+	 */
 	protected void addPosAndColor(BufferBuilder buffer,
-								  double x, double y, double z,
-								  int red, int green, int blue, int alpha)
+	                              double x, double y, double z,
+	                              int red, int green, int blue, int alpha)
 	{
 		buffer.vertex(x, y, z).color(red, green, blue, alpha).endVertex();
 	}
 
-	/** Returns in bytes how much buffer memory is required
-	 * for one LOD object */
+	/**
+	 * Returns in bytes how much buffer memory is required
+	 * for one LOD object
+	 */
 	public abstract int getBufferMemoryForSingleNode(int level);
 }

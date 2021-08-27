@@ -28,20 +28,24 @@ import net.minecraftforge.common.WorldWorkerManager;
 
 /**
  * A singleton that handles all long distance LOD world generation.
- * 
+ *
  * @author James Seibel
  * @version 8-24-2021
  */
 public class LodWorldGenerator
 {
 	public Minecraft mc = Minecraft.getInstance();
-	
-	/** This holds the thread used to generate new LODs off the main thread. */
+
+	/**
+	 * This holds the thread used to generate new LODs off the main thread.
+	 */
 	private ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " world generator"));
-	
-	/** we only want to queue up one generator thread at a time */
+
+	/**
+	 * we only want to queue up one generator thread at a time
+	 */
 	private boolean generatorThreadRunning = false;
-	
+
 	/**
 	 * how many chunks to generate outside of the player's view distance at one
 	 * time. (or more specifically how many requests to make at one time). I
@@ -50,42 +54,44 @@ public class LodWorldGenerator
 	 * possible.
 	 */
 	public int maxChunkGenRequests;
-	
+
 	/**
 	 * This keeps track of how many chunk generation requests are on going. This is
 	 * to limit how many chunks are queued at once. To prevent chunks from being
 	 * generated for a long time in an area the player is no longer in.
 	 */
 	public AtomicInteger numberOfChunksWaitingToGenerate = new AtomicInteger(0);
-	
+
 	public Set<ChunkPos> positionWaitingToBeGenerated = new HashSet<>();
-	
-	/** Singleton copy of this object */
+
+	/**
+	 * Singleton copy of this object
+	 */
 	public static final LodWorldGenerator INSTANCE = new LodWorldGenerator();
-	
+
 	private LodWorldGenerator()
 	{
-		
+
 	}
-	
+
 	/**
 	 * Queues up LodNodeGenWorkers for the given lodDimension.
-	 * 
+	 *
 	 * @param renderer needed so the LodNodeGenWorkers can flag that the
-	 * 					buffers need to be rebuilt.
+	 *                 buffers need to be rebuilt.
 	 */
 	public void queueGenerationRequests(LodDimension lodDim, LodRenderer renderer, LodBuilder lodBuilder)
 	{
-		if (LodConfig.CLIENT.distanceGenerationMode.get() != DistanceGenerationMode.NONE 
-				&& !generatorThreadRunning
-				&& mc.hasSingleplayerServer())
+		if (LodConfig.CLIENT.distanceGenerationMode.get() != DistanceGenerationMode.NONE
+				    && !generatorThreadRunning
+				    && mc.hasSingleplayerServer())
 		{
 			// the thread is now running, don't queue up another thread
 			generatorThreadRunning = true;
-			
+
 			// just in case the config changed
 			maxChunkGenRequests = LodConfig.CLIENT.numberOfWorldGenerationThreads.get() * 8;
-			
+
 			Thread generatorThread = new Thread(() ->
 			{
 				try
@@ -93,23 +99,23 @@ public class LodWorldGenerator
 					// round the player's block position down to the nearest chunk BlockPos
 					ChunkPos playerChunkPos = new ChunkPos(mc.player.blockPosition());
 					BlockPos playerBlockPosRounded = playerChunkPos.getWorldPosition();
-					
+
 					// used when determining which chunks are closer when queuing distance
 					// generation
 					int minChunkDist = Integer.MAX_VALUE;
-					
+
 					List<LevelPos> levelPosListToGen;
 					List<GenerationRequest> generationRequestList = new ArrayList<>();
-					
+
 					ArrayList<GenerationRequest> chunksToGen = new ArrayList<>(maxChunkGenRequests);
 					// if we don't have a full number of chunks to generate in chunksToGen
 					// we can top it off from this reserve
 					ArrayList<GenerationRequest> chunksToGenReserve = new ArrayList<>(maxChunkGenRequests);
-					
+
 					// how many level positions to 
 					int requesting = maxChunkGenRequests;
-					
-					
+
+
 					/** TODO can give a totally different generation */
 					/*
 					 * for (byte detail = LodUtil.BLOCK_DETAIL_LEVEL; detail <=
@@ -122,20 +128,21 @@ public class LodWorldGenerator
 					 * (byte) distancesGenerators[detailGen].complexity, detail, 16));
 					 * System.out.println("HERE"); } }
 					 */
-					
-					
+
+
 					//=======================================//
 					// create the generation Request objects //
 					//=======================================//
-					
+
 					// start by generating half-region sized blocks...
-					int farRequesting = maxChunkGenRequests/4;
+					int farRequesting = maxChunkGenRequests / 4;
 
 					//we firstly make sure that the world is filled with half region wide block
 
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
-						if (farRequesting <= 0){
+						if (farRequesting <= 0)
+						{
 							break;
 						}
 						levelPosListToGen = lodDim.getDataToGenerate(
@@ -146,17 +153,18 @@ public class LodWorldGenerator
 								DetailDistanceUtil.getDistanceGenerationMode(detailGen).complexity,
 								(byte) 8,
 								farRequesting);
-						for(LevelPos levelPos : levelPosListToGen){
-							generationRequestList.add(new GenerationRequest(levelPos,DetailDistanceUtil.getDistanceGenerationMode(detailGen), DetailDistanceUtil.getLodDetail(detailGen)));
+						for (LevelPos levelPos : levelPosListToGen)
+						{
+							generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(detailGen), DetailDistanceUtil.getLodDetail(detailGen)));
 						}
 						farRequesting = farRequesting - levelPosListToGen.size();
 
 					}
-					
+
 					// ...then once the world is filled with half-region sized blocks
 					// fill in the rest
 					int t = generationRequestList.size();
-					int nearRequesting = maxChunkGenRequests - maxChunkGenRequests/4 + farRequesting;
+					int nearRequesting = maxChunkGenRequests - maxChunkGenRequests / 4 + farRequesting;
 					//we then fill the world with the rest of the block
 					for (byte detailGen = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detailGen <= LodUtil.REGION_DETAIL_LEVEL; detailGen++)
 					{
@@ -169,23 +177,24 @@ public class LodWorldGenerator
 								DetailDistanceUtil.getDistanceGenerationMode(detailGen).complexity,
 								DetailDistanceUtil.getLodDetail(detailGen).detailLevel,
 								nearRequesting);
-						for(LevelPos levelPos : levelPosListToGen){
-							generationRequestList.add(new GenerationRequest(levelPos,DetailDistanceUtil.getDistanceGenerationMode(detailGen), DetailDistanceUtil.getLodDetail(detailGen)));
+						for (LevelPos levelPos : levelPosListToGen)
+						{
+							generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(detailGen), DetailDistanceUtil.getLodDetail(detailGen)));
 						}
 						nearRequesting = nearRequesting - levelPosListToGen.size();
 					}
-					
-					
+
+
 					//====================================//
 					// get the closet generation requests //
 					//====================================//
-					
+
 					// determine which points in the posListToGenerate
 					// should actually be queued to generate
 					for (GenerationRequest generationRequest : generationRequestList)
 					{
 						ChunkPos chunkPos = generationRequest.getChunkPos();
-						
+
 						if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
 						{
 							// prevent generating the same chunk multiple times
@@ -194,17 +203,17 @@ public class LodWorldGenerator
 								// ClientProxy.LOGGER.debug(pos + " asked to be generated again.");
 								continue;
 							}
-							
+
 							// determine if this position is closer to the player
 							// than the previous
 							int newDistance = playerChunkPos.getChessboardDistance(chunkPos);
-							
+
 							if (newDistance < minChunkDist)
 							{
 								// this chunk is closer, clear any previous
 								// positions and update the new minimum distance
 								minChunkDist = newDistance;
-								
+
 								// move all the old chunks into the reserve
 								ArrayList<GenerationRequest> oldReserve = new ArrayList<>(chunksToGenReserve);
 								chunksToGenReserve.clear();
@@ -217,11 +226,10 @@ public class LodWorldGenerator
 									else
 										break;
 								}
-								
+
 								chunksToGen.clear();
 								chunksToGen.add(generationRequest);
-							}
-							else if (newDistance == minChunkDist)
+							} else if (newDistance == minChunkDist)
 							{
 								// this chunk position as close as the minimum distance
 								if (chunksToGen.size() < maxChunkGenRequests)
@@ -230,17 +238,16 @@ public class LodWorldGenerator
 									// add this position to the list
 									chunksToGen.add(generationRequest);
 								}
-							}
-							else
+							} else
 							{
 								// this chunk is farther away than the minimum distance,
 								// add it to the reserve to make sure we always have a full reserve
 								chunksToGenReserve.add(generationRequest);
 							}
-							
+
 						} // lod null and can generate more chunks
 					} // positions to generate
-					
+
 					// fill up chunksToGen from the reserve if it isn't full
 					// already
 					if (chunksToGen.size() < maxChunkGenRequests)
@@ -251,18 +258,16 @@ public class LodWorldGenerator
 							chunksToGen.add(reserveIterator.next());
 						}
 					}
-					
-					
-					
-					
+
+
 					//=============================//
 					// start the LodNodeGenWorkers //
 					//=============================//
-					
+
 					// issue #19
 					// TODO add a way for a server side mod to generate chunks requested here
 					ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(lodDim.dimension);
-					
+
 					// start chunk generation
 					for (GenerationRequest generationRequest : generationRequestList)
 					{
@@ -271,27 +276,25 @@ public class LodWorldGenerator
 						ChunkPos chunkPos = generationRequest.getChunkPos();
 						if (chunkPos == null || numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
 							continue;
-						
+
 						positionWaitingToBeGenerated.add(chunkPos);
 						numberOfChunksWaitingToGenerate.addAndGet(1);
 						LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, generationRequest.generationMode, generationRequest.detail, renderer, lodBuilder, lodDim, serverWorld);
 						WorldWorkerManager.addWorker(genWorker);
 					}
-					
-				}
-				catch (Exception e)
+
+				} catch (Exception e)
 				{
 					// this shouldn't ever happen, but just in case
 					e.printStackTrace();
-				}
-				finally
+				} finally
 				{
 					generatorThreadRunning = false;
 				}
 			});
-			
+
 			mainGenThread.execute(generatorThread);
 		} // if distanceGenerationMode != DistanceGenerationMode.NONE && !generatorThreadRunning
 	}
-	
+
 }

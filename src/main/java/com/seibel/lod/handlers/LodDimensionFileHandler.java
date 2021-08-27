@@ -45,73 +45,81 @@ import com.seibel.lod.util.LodUtil;
  */
 public class LodDimensionFileHandler
 {
-    /**
-     * This is what separates each piece of data
-     */
-    public static final char DATA_DELIMITER = ',';
+	/**
+	 * This is what separates each piece of data
+	 */
+	public static final char DATA_DELIMITER = ',';
 
 
-    private LodDimension loadedDimension = null;
-    public long regionLastWriteTime[][];
+	private LodDimension loadedDimension = null;
+	public long regionLastWriteTime[][];
 
-    private File dimensionDataSaveFolder;
+	private File dimensionDataSaveFolder;
 
-    /** lod */
-    private static final String FILE_NAME_PREFIX = "lod";
-    /** .txt */
-    private static final String FILE_EXTENSION = ".txt";
-    /** lod/ */
-    private static final String LOD_FOLDER_NAME = "lod";
-    /** detail-# */
-    private static final String DETAIL_FOLDER_NAME_PREFIX = "detail-";
-    
-    /**
-     * .tmp <br>
-     * Added to the end of the file path when saving to prevent
-     * nulling a currently existing file. <br>
-     * After the file finishes saving it will end with
-     * FILE_EXTENSION.
-     */
-    private static final String TMP_FILE_EXTENSION = ".tmp";
+	/**
+	 * lod
+	 */
+	private static final String FILE_NAME_PREFIX = "lod";
+	/**
+	 * .txt
+	 */
+	private static final String FILE_EXTENSION = ".txt";
+	/**
+	 * lod/
+	 */
+	private static final String LOD_FOLDER_NAME = "lod";
+	/**
+	 * detail-#
+	 */
+	private static final String DETAIL_FOLDER_NAME_PREFIX = "detail-";
 
-    /**
-     * This is the file version currently accepted by this
-     * file handler, older versions (smaller numbers) will be deleted and overwritten,
-     * newer versions (larger numbers) will be ignored and won't be read.
-     */
-    public static final int LOD_SAVE_FILE_VERSION = 4;
+	/**
+	 * .tmp <br>
+	 * Added to the end of the file path when saving to prevent
+	 * nulling a currently existing file. <br>
+	 * After the file finishes saving it will end with
+	 * FILE_EXTENSION.
+	 */
+	private static final String TMP_FILE_EXTENSION = ".tmp";
 
-    /**
-     * This is the string written before the file version
-     */
-    private static final String LOD_FILE_VERSION_PREFIX = "lod_save_file_version";
+	/**
+	 * This is the file version currently accepted by this
+	 * file handler, older versions (smaller numbers) will be deleted and overwritten,
+	 * newer versions (larger numbers) will be ignored and won't be read.
+	 */
+	public static final int LOD_SAVE_FILE_VERSION = 4;
 
-    /**
-     * Allow saving asynchronously, but never try to save multiple regions
-     * at a time
-     */
-    private ExecutorService fileWritingThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
+	/**
+	 * This is the string written before the file version
+	 */
+	private static final String LOD_FILE_VERSION_PREFIX = "lod_save_file_version";
 
-
-    public LodDimensionFileHandler(File newSaveFolder, LodDimension newLoadedDimension)
-    {
-        if (newSaveFolder == null)
-            throw new IllegalArgumentException("LodDimensionFileHandler requires a valid File location to read and write to.");
-
-        dimensionDataSaveFolder = newSaveFolder;
-
-        loadedDimension = newLoadedDimension;
-        // these two variable are used in sync with the LodDimension
-        regionLastWriteTime = new long[loadedDimension.getWidth()][loadedDimension.getWidth()];
-        for (int i = 0; i < loadedDimension.getWidth(); i++)
-            for (int j = 0; j < loadedDimension.getWidth(); j++)
-                regionLastWriteTime[i][j] = -1;
-    }
+	/**
+	 * Allow saving asynchronously, but never try to save multiple regions
+	 * at a time
+	 */
+	private ExecutorService fileWritingThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
 
 
-    //================//
-    // read from file //
-    //================//
+	public LodDimensionFileHandler(File newSaveFolder, LodDimension newLoadedDimension)
+	{
+		if (newSaveFolder == null)
+			throw new IllegalArgumentException("LodDimensionFileHandler requires a valid File location to read and write to.");
+
+		dimensionDataSaveFolder = newSaveFolder;
+
+		loadedDimension = newLoadedDimension;
+		// these two variable are used in sync with the LodDimension
+		regionLastWriteTime = new long[loadedDimension.getWidth()][loadedDimension.getWidth()];
+		for (int i = 0; i < loadedDimension.getWidth(); i++)
+			for (int j = 0; j < loadedDimension.getWidth(); j++)
+				regionLastWriteTime[i][j] = -1;
+	}
+
+
+	//================//
+	// read from file //
+	//================//
 
 	/**
 	 * Return the LodRegion region at the given coordinates.
@@ -168,8 +176,8 @@ public class LodDimensionFileHandler
 						bufferedReader.close();
 						f.delete();
 						ClientProxy.LOGGER.info("Outdated LOD region file for region: (" + regionX + "," + regionZ + ") version: " + fileVersion +
-								", version requested: " + LOD_SAVE_FILE_VERSION +
-								" File was been deleted.");
+								                        ", version requested: " + LOD_SAVE_FILE_VERSION +
+								                        " File was been deleted.");
 
 						continue;
 					} else if (fileVersion > LOD_SAVE_FILE_VERSION)
@@ -179,8 +187,8 @@ public class LodDimensionFileHandler
 						// want to accidently delete anything the user may want.
 						bufferedReader.close();
 						ClientProxy.LOGGER.info("Newer LOD region file for region: (" + regionX + "," + regionZ + ") version: " + fileVersion +
-								", version requested: " + LOD_SAVE_FILE_VERSION +
-								" this region will not be written to in order to protect the newer file.");
+								                        ", version requested: " + LOD_SAVE_FILE_VERSION +
+								                        " this region will not be written to in order to protect the newer file.");
 
 						continue;
 					}
@@ -349,38 +357,37 @@ public class LodDimensionFileHandler
 	}
 
 
-    //================//
-    // helper methods //
-    //================//
+	//================//
+	// helper methods //
+	//================//
 
 
-    /**
-     * Return the name of the file that should contain the
-     * region at the given x and z. <br>
-     * Returns null if this object isn't ready to read and write. <br><br>
-     * 
-     * example: "lod.0.0.txt" <br><br>
-     * 
-     * Returns null if there is an IO Exception.
-     */
-    private String getFileNameAndPathForRegion(int regionX, int regionZ, byte detailLevel)
-    {
-        try
-        {
-            // saveFolder is something like
-            // ".\Super Flat\DIM-1\data"
-            // or
-            // ".\Super Flat\data"
-            return dimensionDataSaveFolder.getCanonicalPath() + File.separatorChar + 
-            		DETAIL_FOLDER_NAME_PREFIX + detailLevel + File.separatorChar + 
-            		FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
-        }
-        catch (IOException | SecurityException e)
-        {
-        	ClientProxy.LOGGER.warn("Unable to get the filename for the region [" + regionX + ", " + regionZ + "], error: [" + e.getMessage() + "], stacktrace: ");
-        	e.printStackTrace();
-            return null;
-        }
-    }
+	/**
+	 * Return the name of the file that should contain the
+	 * region at the given x and z. <br>
+	 * Returns null if this object isn't ready to read and write. <br><br>
+	 * <p>
+	 * example: "lod.0.0.txt" <br><br>
+	 * <p>
+	 * Returns null if there is an IO Exception.
+	 */
+	private String getFileNameAndPathForRegion(int regionX, int regionZ, byte detailLevel)
+	{
+		try
+		{
+			// saveFolder is something like
+			// ".\Super Flat\DIM-1\data"
+			// or
+			// ".\Super Flat\data"
+			return dimensionDataSaveFolder.getCanonicalPath() + File.separatorChar +
+					       DETAIL_FOLDER_NAME_PREFIX + detailLevel + File.separatorChar +
+					       FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
+		} catch (IOException | SecurityException e)
+		{
+			ClientProxy.LOGGER.warn("Unable to get the filename for the region [" + regionX + ", " + regionZ + "], error: [" + e.getMessage() + "], stacktrace: ");
+			e.printStackTrace();
+			return null;
+		}
+	}
 
 }

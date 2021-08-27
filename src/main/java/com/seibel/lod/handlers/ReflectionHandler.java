@@ -27,7 +27,7 @@ import net.minecraft.client.Minecraft;
  * This object is used to get variables from methods
  * where they are private. Specifically the fog setting
  * in Optifine.
- * 
+ *
  * @author James Seibel
  * @version 7-03-2021
  */
@@ -35,15 +35,13 @@ public class ReflectionHandler
 {
 	private Minecraft mc = Minecraft.getInstance();
 	public Field ofFogField = null;
-	
+
 	public ReflectionHandler()
 	{
 		setupFogField();
 	}
-	
-	
-	
-	
+
+
 	/**
 	 * Similar to setupFovMethod.
 	 */
@@ -51,27 +49,24 @@ public class ReflectionHandler
 	{
 		// get every variable from the entity renderer
 		Field[] optionFields = mc.options.getClass().getDeclaredFields();
-				
+
 		// try and find the ofFogType variable in gameSettings
-		for(Field field : optionFields)
+		for (Field field : optionFields)
 		{
-			if(field.getName().equals("ofFogType"))
+			if (field.getName().equals("ofFogType"))
 			{
 				ofFogField = field;
 				return;
 			}
 		}
-		
+
 		// we didn't find the field,
 		// either optifine isn't installed, or
 		// optifine changed the name of the variable
 		ofFogField = null;
 	}
-	
-	
-	
-	
-	
+
+
 	/**
 	 * Get what type of fog optifine is currently set to render.
 	 */
@@ -84,25 +79,24 @@ public class ReflectionHandler
 			// the setup method wasn't called yet.
 			return FogQuality.FANCY;
 		}
-		
+
 		int returnNum = 0;
-		
+
 		try
 		{
-			returnNum = (int)ofFogField.get(mc.options);
-		}
-		catch (IllegalArgumentException | IllegalAccessException e)
+			returnNum = (int) ofFogField.get(mc.options);
+		} catch (IllegalArgumentException | IllegalAccessException e)
 		{
 			e.printStackTrace();
 		}
-		
+
 		switch (returnNum)
 		{
 			// optifine's "default" option,
 			// it should never be called in this case
 			case 0:
 				return FogQuality.FAST;
-				
+
 			// normal options
 			case 1:
 				return FogQuality.FAST;
@@ -110,10 +104,10 @@ public class ReflectionHandler
 				return FogQuality.FANCY;
 			case 3:
 				return FogQuality.OFF;
-				
+
 			default:
 				return FogQuality.FAST;
 		}
 	}
-	
+
 }

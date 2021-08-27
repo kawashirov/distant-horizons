@@ -6,12 +6,18 @@ package com.seibel.lod.enums;
  */
 public enum DistanceCalculatorType
 {
-    /** different Lod detail render and generate linearly to the distance */
-    LINEAR,
+	/**
+	 * different Lod detail render and generate linearly to the distance
+	 */
+	LINEAR,
 
-    /** different Lod detail render and generate quadratically to the distance */
-    QUADRATIC,
+	/**
+	 * different Lod detail render and generate quadratically to the distance
+	 */
+	QUADRATIC,
 
-    /** we calculate the distance based on game render distance and mod render distance*/
-    RENDER_DEPENDANT;
+	/**
+	 * we calculate the distance based on game render distance and mod render distance
+	 */
+	RENDER_DEPENDANT;
 }
