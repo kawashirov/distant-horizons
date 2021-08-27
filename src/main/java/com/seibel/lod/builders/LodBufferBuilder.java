@@ -21,10 +21,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.seibel.lod.objects.DataPoint;
@@ -156,6 +153,7 @@ public class LodBufferBuilder
                 long startTime = System.currentTimeMillis();
 
 
+                ArrayList<Callable<Boolean>> nodeToRenderThreads = new ArrayList<>(lodDim.regions.length * lodDim.regions.length);
                 ArrayList<Callable<Boolean>> builderThreads = new ArrayList<>(lodDim.regions.length * lodDim.regions.length);
 
                 startBuffers();
@@ -163,6 +161,68 @@ public class LodBufferBuilder
                 // =====================//
                 //    RENDERING PART    //
                 // =====================//
+                Object[][] nodeToRenderMatrix = new Object[lodDim.regions.length][lodDim.regions.length];
+
+                for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
+                {
+                    for (int zRegion = 0; zRegion < lodDim.regions.length; zRegion++)
+                    {
+                        nodeToRenderMatrix[xRegion][zRegion] = new ConcurrentSkipListMap<>(LevelPos.getComparator());
+                        RegionPos regionPos = new RegionPos(xRegion + lodDim.getCenterX() - lodDim.getWidth() / 2, zRegion + lodDim.getCenterZ() - lodDim.getWidth() / 2);
+
+                        // local position in the vbo and bufferBuilder arrays
+                        BufferBuilder currentBuffer = buildableBuffers[xRegion][zRegion];
+
+                        // make sure the buffers weren't
+                        // changed while we were running this method
+                        if (currentBuffer == null || (currentBuffer != null && !currentBuffer.building()))
+                            return;
+
+                        byte detailLevel = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
+                        final int xR = xRegion;
+                        final int zR = zRegion;
+                        Callable<Boolean> dataToRenderThread = () ->
+                        {
+                            byte detailToRender;
+                            boolean zFix;
+
+                            for (byte detail = detailLevel; detail <= LodUtil.REGION_DETAIL_LEVEL; detail++)
+                            {
+                                detailToRender = detail;
+                                lodDim.getDataToRender(
+                                        (ConcurrentSkipListMap<LevelPos, List<Integer>>) nodeToRenderMatrix[xR][zR],
+                                        regionPos,
+                                        playerBlockPosRounded.getX(),
+                                        playerBlockPosRounded.getZ(),
+                                        DetailDistanceUtil.getDistanceRendering(detail),
+                                        DetailDistanceUtil.getDistanceRendering(detail + 1),
+                                        detailToRender,
+                                        true);
+                            }
+                            // the thread executed successfully
+                            return true;
+                        };// buffer builder worker thread
+
+
+                        nodeToRenderThreads.add(dataToRenderThread);
+
+                    }// region z
+                }// region z
+
+                long renderStart = System.currentTimeMillis();
+                // wait for all threads to finish
+                List<Future<Boolean>> futures = bufferBuilderThreads.invokeAll(nodeToRenderThreads);
+                for (Future<Boolean> future : futures)
+                {
+                    // the future will be false if its thread failed
+                    if (!future.get())
+                    {
+                        ClientProxy.LOGGER.warn("LodBufferBuilder ran into trouble and had to start over.");
+                        closeBuffers();
+                        return;
+                    }
+                }
+                long renderEnd = System.currentTimeMillis();
 
                 for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
                 {
@@ -181,28 +241,12 @@ public class LodBufferBuilder
 
                         byte detailLevel = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
 
+                        final int xR = xRegion;
+                        final int zR = zRegion;
                         Callable<Boolean> bufferBuildingThread = () ->
                         {
-                            byte detailToRender;
-                            boolean zFix;
                             LevelPos adjPos = new LevelPos();
-                            Set<LevelPos> setOfPosToRender = new HashSet<>();
-
-                            for (byte detail = detailLevel; detail <= LodUtil.REGION_DETAIL_LEVEL; detail++)
-                            {
-                                detailToRender = detail;
-                                setOfPosToRender.addAll(lodDim.getDataToRender(
-                                        regionPos,
-                                        playerBlockPosRounded.getX(),
-                                        playerBlockPosRounded.getZ(),
-                                        DetailDistanceUtil.getDistanceRendering(detail),
-                                        DetailDistanceUtil.getDistanceRendering(detail + 1),
-                                        detailToRender,
-                                        true));
-                            }
-
-
-                            for (LevelPos posToRender : setOfPosToRender)
+                            for (LevelPos posToRender : ((ConcurrentSkipListMap<LevelPos, List<Integer>>) nodeToRenderMatrix[xR][zR]).keySet())
                             {
                                 LevelPos chunkPos = posToRender.getConvertedLevelPos(LodUtil.CHUNK_DETAIL_LEVEL);
                                 // skip any chunks that Minecraft is going to render
@@ -252,10 +296,10 @@ public class LodBufferBuilder
                     }// region z
                 }// region z
 
-                long renderStart = System.currentTimeMillis();
+                long renderBufferStart = System.currentTimeMillis();
                 // wait for all threads to finish
-                List<Future<Boolean>> futures = bufferBuilderThreads.invokeAll(builderThreads);
-                for (Future<Boolean> future : futures)
+                List<Future<Boolean>> futuresBuffer = bufferBuilderThreads.invokeAll(builderThreads);
+                for (Future<Boolean> future : futuresBuffer)
                 {
                     // the future will be false if its thread failed
                     if (!future.get())
@@ -265,7 +309,7 @@ public class LodBufferBuilder
                         return;
                     }
                 }
-                long renderEnd = System.currentTimeMillis();
+                long renderBufferEnd = System.currentTimeMillis();
 
 
                 // finish the buffer building

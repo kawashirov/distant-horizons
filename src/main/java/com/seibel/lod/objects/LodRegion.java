@@ -1,9 +1,8 @@
 package com.seibel.lod.objects;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentNavigableMap;
 
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
@@ -298,76 +297,81 @@ public class LodRegion implements Serializable
     /**
      * @return
      */
-    public List<LevelPos> getDataToRender(int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
+    public void getDataToRender(ConcurrentNavigableMap<LevelPos,List<Integer>> dataToRender, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
     {
         LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
-        return getDataToRender(levelPos, playerPosX, playerPosZ, start, end, detailLevel, zFix);
+        getDataToRender(dataToRender, levelPos, playerPosX, playerPosZ, start, end, detailLevel, zFix);
     }
 
     /**
      * @return
      */
-    private List<LevelPos> getDataToRender(LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
+    private void getDataToRender(ConcurrentNavigableMap<LevelPos,List<Integer>> dataToRender, LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
     {
-        List<LevelPos> levelPosList = new ArrayList<>();
 
-        int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel);
-        int width = (int) Math.pow(2, levelPos.detailLevel);
-
-        //here i calculate the the LevelPos is in range
-        //This is important to avoid any kind of hole in the rendering
-        int maxDistance = levelPos.maxDistance(playerPosX, playerPosZ, regionPosX, regionPosZ);
-        int minDistance = levelPos.minDistance(playerPosX, playerPosZ, regionPosX, regionPosZ);
-
-        //To avoid z fighting: if the pos is touching the end radius at detailLevel + 1 then we stop
-        //cause this area will be occupied by bigger block
-        if (levelPos.detailLevel == detailLevel + 1 && end <= maxDistance && minDistance <= end && zFix)
+        try
         {
-            return levelPosList;
-        }
+            int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel);
+            int width = (int) Math.pow(2, levelPos.detailLevel);
 
-        if (!(start <= maxDistance && minDistance < end) || levelPos.detailLevel < detailLevel)
-        {
-            return levelPosList;
-        }
+            //here i calculate the the LevelPos is in range
+            //This is important to avoid any kind of hole in the rendering
+            int maxDistance = levelPos.maxDistance(playerPosX, playerPosZ, regionPosX, regionPosZ);
+            int minDistance = levelPos.minDistance(playerPosX, playerPosZ, regionPosX, regionPosZ);
 
-        //we have reached the target detail level
-        if (detailLevel == levelPos.detailLevel)
-        {
-            levelPosList.add(new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * size, levelPos.posZ + regionPosZ * size));
-        } else
-        {
-            int childPosX = levelPos.posX * 2;
-            int childPosZ = levelPos.posZ * 2;
-            LevelPos childPos;
-            int childrenCount = 0;
-            for (int x = 0; x <= 1; x++)
+            //To avoid z fighting: if the pos is touching the end radius at detailLevel + 1 then we stop
+            //cause this area will be occupied by bigger block
+            if (levelPos.detailLevel == detailLevel + 1 && end <= maxDistance && minDistance <= end && zFix)
             {
-                for (int z = 0; z <= 1; z++)
-                {
-                    childPos = new LevelPos((byte) (levelPos.detailLevel - 1), childPosX + x, childPosZ + z);
-                    if (doesDataExist(childPos)) childrenCount++;
-                }
+                return;
             }
 
-            //If all the four children exist we go deeper
-            if (childrenCount == 4)
+            if (!(start <= maxDistance && minDistance < end) || levelPos.detailLevel < detailLevel)
             {
-                levelPosList.clear();
+                return;
+            }
+
+            //we have reached the target detail level
+            if (detailLevel == levelPos.detailLevel)
+            {
+                dataToRender.put(new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * size, levelPos.posZ + regionPosZ * size), new ArrayList<>());
+            } else
+            {
+                int childPosX = levelPos.posX * 2;
+                int childPosZ = levelPos.posZ * 2;
+                LevelPos childPos;
+                int childrenCount = 0;
                 for (int x = 0; x <= 1; x++)
                 {
                     for (int z = 0; z <= 1; z++)
                     {
                         childPos = new LevelPos((byte) (levelPos.detailLevel - 1), childPosX + x, childPosZ + z);
-                        levelPosList.addAll(getDataToRender(childPos, playerPosX, playerPosZ, start, end, detailLevel, zFix));
+                        if (doesDataExist(childPos)) childrenCount++;
                     }
                 }
-            } else
-            {
-                levelPosList.add(new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * size, levelPos.posZ + regionPosZ * size));
+
+                //If all the four children exist we go deeper
+                if (childrenCount == 4)
+                {
+                    for (int x = 0; x <= 1; x++)
+                    {
+                        for (int z = 0; z <= 1; z++)
+                        {
+                            childPos = new LevelPos((byte) (levelPos.detailLevel - 1), childPosX + x, childPosZ + z);
+                            getDataToRender(dataToRender, childPos, playerPosX, playerPosZ, start, end, detailLevel, zFix);
+                        }
+                    }
+                } else
+                {
+                    dataToRender.put(new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * size, levelPos.posZ + regionPosZ * size), new ArrayList<>());
+                }
             }
+            return;
+        }catch(ClassCastException e){
+            System.out.println(dataToRender);
+            e.printStackTrace();
+            throw e;
         }
-        return levelPosList;
     }
 
     /**

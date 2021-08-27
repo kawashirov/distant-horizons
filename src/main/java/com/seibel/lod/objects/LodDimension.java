@@ -20,10 +20,8 @@ package com.seibel.lod.objects;
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.stream.Collectors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
@@ -311,7 +309,7 @@ public class LodDimension
     {
         int regionX;
         int regionZ;
-        LevelPos levelPos;
+        LevelPos levelPos = new LevelPos();
 
         for (int x = 0; x < regions.length; x++)
         {
@@ -319,7 +317,7 @@ public class LodDimension
             {
                 regionX = (x + center.x) - halfWidth;
                 regionZ = (z + center.z) - halfWidth;
-                levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ);
+                levelPos.changeParameters(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ);
                 //we start checking from the first circle. If the whole region is in the circle
                 //we proceed to cut all the level lower than the level of circle 1 and we break
                 //if this is not the case w
@@ -348,7 +346,7 @@ public class LodDimension
     {
         int regionX;
         int regionZ;
-        LevelPos levelPos;
+        LevelPos levelPos = new LevelPos();
         RegionPos regionPos;
         LodRegion region;
         byte targetDetailLevel;
@@ -358,7 +356,7 @@ public class LodDimension
             {
                 regionX = (x + center.x) - halfWidth;
                 regionZ = (z + center.z) - halfWidth;
-                levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ);
+                levelPos.changeParameters(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ);
                 regionPos = new RegionPos(regionX, regionZ);
 
                 for(byte index = LodUtil.BLOCK_DETAIL_LEVEL; index <= LodUtil.REGION_DETAIL_LEVEL; index++){
@@ -445,7 +443,7 @@ public class LodDimension
         int zIndex;
         LodRegion region;
         RegionPos regionPos;
-        LevelPos regionLevelPos;
+        LevelPos regionLevelPos = new LevelPos();
         List<LevelPos> listOfData = new ArrayList<>();
         for (int xRegion = 0; xRegion < n; xRegion++)
         {
@@ -456,7 +454,7 @@ public class LodDimension
                     xIndex = (xRegion + center.x) - halfWidth;
                     zIndex = (zRegion + center.z) - halfWidth;
                     regionPos = new RegionPos(xIndex, zIndex);
-                    regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
+                    regionLevelPos.changeParameters(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
                     if (end >= regionLevelPos.minDistance(playerPosX, playerPosZ) &&
                             start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
                     {
@@ -481,15 +479,13 @@ public class LodDimension
         return levelMinPosList;
     }
 
-
     /**
      * method to get all the nodes that have to be rendered based on the position of the player
      *
      * @return list of nodes
      */
-    public List<LevelPos> getDataToRender(RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
+    public void getDataToRender(ConcurrentNavigableMap<LevelPos,List<Integer>> dataToRender, RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
     {
-        List<LevelPos> listOfData = new ArrayList<>();
         LevelPos regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
         try
         {
@@ -497,14 +493,10 @@ public class LodDimension
                     start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
             {
                 LodRegion region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).getConvertedLevelPos(detailLevel));
-                listOfData.addAll(region.getDataToRender(playerPosX, playerPosZ, start, end, detailLevel,zFix));
+                region.getDataToRender(dataToRender,playerPosX, playerPosZ, start, end, detailLevel,zFix);
             }
         }catch (Exception e){
-            //e.printStackTrace();
-        }finally
-        {
-
-            return listOfData;
+            e.printStackTrace();
         }
     }
 

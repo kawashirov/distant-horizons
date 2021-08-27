@@ -16,7 +16,7 @@ public class DetailDistanceUtil
     private static int maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16;
 
 
-    private static  DistanceGenerationMode[] distancesGenerators = {
+   private static  DistanceGenerationMode[] distancesGenerators = {
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE,
             DistanceGenerationMode.SURFACE,

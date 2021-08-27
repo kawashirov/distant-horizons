@@ -3,12 +3,10 @@ package com.seibel.lod.objects.LevelPos;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.util.LodUtil;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.chunk.Chunk;
 
 import java.util.Comparator;
-import java.util.Map;
 
-public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
+public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos, Comparable<LevelPos>
 {
     public byte detailLevel;
     public int posX;
@@ -115,6 +113,18 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
         return new RegionPos(
                 Math.floorDiv(posX, width),
                 Math.floorDiv(posZ, width));
+    }
+
+    public int getRegionPosX()
+    {
+        int width = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
+        return Math.floorDiv(posX, width);
+    }
+
+    public int getRegionPosZ()
+    {
+        int width = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
+        return Math.floorDiv(posZ, width);
     }
 
     public ChunkPos getChunkPos()
@@ -244,21 +254,23 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
         }
     }
 
-    public static LevelPosComparator getPosComparator(int playerPosX, int playerPosZ)
+    public static LevelPosDistanceComparator getPosComparator(int playerPosX, int playerPosZ)
     {
-        return new LevelPosComparator(playerPosX,playerPosZ);
+        return new LevelPosDistanceComparator(playerPosX, playerPosZ);
     }
 
     public static LevelPosDetailComparator getPosAndDetailComparator(int playerPosX, int playerPosZ)
     {
-        return new LevelPosDetailComparator(playerPosX,playerPosZ);
+        return new LevelPosDetailComparator(playerPosX, playerPosZ);
     }
 
-    public static class LevelPosComparator implements Comparator<LevelPos>
+    public static class LevelPosDistanceComparator implements Comparator<LevelPos>
     {
         int playerPosX;
         int playerPosZ;
-        public LevelPosComparator(int playerPosX, int playerPosZ){
+
+        public LevelPosDistanceComparator(int playerPosX, int playerPosZ)
+        {
             this.playerPosX = playerPosX;
             this.playerPosZ = playerPosZ;
         }
@@ -267,8 +279,8 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
         public int compare(LevelPos first, LevelPos second)
         {
             return Integer.compare(
-                    first.minDistance(playerPosX,playerPosZ),
-                    second.minDistance(playerPosX,playerPosZ));
+                    first.minDistance(playerPosX, playerPosZ),
+                    second.minDistance(playerPosX, playerPosZ));
         }
     }
 
@@ -276,7 +288,9 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
     {
         int playerPosX;
         int playerPosZ;
-        public LevelPosDetailComparator(int playerPosX, int playerPosZ){
+
+        public LevelPosDetailComparator(int playerPosX, int playerPosZ)
+        {
             this.playerPosX = playerPosX;
             this.playerPosZ = playerPosZ;
         }
@@ -285,14 +299,60 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos
         public int compare(LevelPos first, LevelPos second)
         {
             int compareResult = Integer.compare(first.detailLevel, second.detailLevel);
-            if (compareResult != 0)
+            if (compareResult == 0)
             {
                 compareResult = Integer.compare(
-                        first.minDistance(playerPosX,playerPosZ),
-                        second.minDistance(playerPosX,playerPosZ));
+                        first.minDistance(playerPosX, playerPosZ),
+                        second.minDistance(playerPosX, playerPosZ));
             }
             return compareResult;
         }
+    }
+
+    public static LevelPosComparator getComparator()
+    {
+        return new LevelPosComparator();
+    }
+
+    public static class LevelPosComparator implements Comparator<LevelPos>
+    {
+        @Override
+        public int compare(LevelPos first, LevelPos second)
+        {
+            int compareResult = Integer.compare(first.detailLevel, second.detailLevel);
+            if (compareResult == 0)
+            {
+                compareResult = Integer.compare(
+                        first.posX,
+                        second.posX);
+            }
+            if (compareResult == 0)
+            {
+                compareResult = Integer.compare(
+                        first.posZ,
+                        second.posZ);
+            }
+            return compareResult;
+        }
+    }
+
+    @Override
+    public int compareTo(LevelPos other)
+    {
+        int compareResult = Integer.compare(this.detailLevel, other.detailLevel);
+        if (compareResult == 0)
+        {
+            compareResult = Integer.compare(
+                    this.posX,
+                    other.posX);
+        }
+        if (compareResult == 0)
+        {
+            compareResult = Integer.compare(
+                    this.posZ,
+                    other.posZ);
+        }
+        return compareResult;
     }
 
 
