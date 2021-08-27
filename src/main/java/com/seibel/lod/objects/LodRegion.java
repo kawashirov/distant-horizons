@@ -198,7 +198,8 @@ public class LodRegion implements Serializable
     public List<LevelPos> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel, int dataNumber)
     {
         LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
-        List<LevelPos> levelPosList = getDataToGenerate(levelPos, playerPosX, playerPosZ, start, end, generation, detailLevel);
+        List<LevelPos> levelPosList = new ArrayList<>();
+        getDataToGenerate(levelPosList, levelPos, playerPosX, playerPosZ, start, end, generation, detailLevel);
         List<LevelPos> levelMinPosList = new ArrayList<>();
         dataNumber = Math.min(dataNumber, levelPosList.size());
 
@@ -214,10 +215,8 @@ public class LodRegion implements Serializable
 
     }
 
-    private List<LevelPos> getDataToGenerate(LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel)
+    private void getDataToGenerate(List<LevelPos> levelPosList, LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel)
     {
-        List<LevelPos> levelPosList = new ArrayList<>();
-
         int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel);
 
         //here i calculate the the LevelPos is in range
@@ -227,7 +226,7 @@ public class LodRegion implements Serializable
 
         if (!(start <= maxDistance && minDistance < end) || levelPos.detailLevel < detailLevel)
         {
-            return levelPosList;
+            return;
         }
 
         int childPosX = levelPos.posX * 2;
@@ -247,6 +246,7 @@ public class LodRegion implements Serializable
             //we want max a request per chunk. So for lod smaller than chunk we explore only the top rigth child
             if (levelPos.detailLevel > LodUtil.CHUNK_DETAIL_LEVEL)
             {
+                int num = 0;
                 //We take all the children that are not generated to at least the generation level taken in input
                 for (int x = 0; x <= 1; x++)
                 {
@@ -256,20 +256,21 @@ public class LodRegion implements Serializable
 
                         if (generationType[childPos.detailLevel][childPos.posX][childPos.posZ] < generation || !doesDataExist(childPos))
                         {
+                            num++;
                             levelPosList.add(new LevelPos(childPos.detailLevel, childPos.posX + regionPosX * childSize, childPos.posZ + regionPosZ * childSize));
                         }
                     }
                 }
 
                 //only if all the children are correctly generated we go deeper
-                if (levelPosList.isEmpty())
+                if (num == 0)
                 {
                     for (int x = 0; x <= 1; x++)
                     {
                         for (int z = 0; z <= 1; z++)
                         {
-                            levelPosList.addAll(getDataToGenerate(new LevelPos((byte) (levelPos.detailLevel - 1), childPosX + x, childPosZ + z)
-                                    , playerPosX, playerPosZ, start, end, generation, detailLevel));
+                            getDataToGenerate(levelPosList, new LevelPos((byte) (levelPos.detailLevel - 1), childPosX + x, childPosZ + z)
+                                    , playerPosX, playerPosZ, start, end, generation, detailLevel);
                         }
                     }
                 }
@@ -285,12 +286,12 @@ public class LodRegion implements Serializable
                 {
                     if (childPos.detailLevel != detailLevel)
                     {
-                        levelPosList.addAll(getDataToGenerate(childPos.clone(), playerPosX, playerPosZ, start, end, generation, detailLevel));
+                        getDataToGenerate(levelPosList, childPos.clone(), playerPosX, playerPosZ, start, end, generation, detailLevel);
                     }
                 }
             }
         }
-        return levelPosList;
+        return;
     }
 
 
