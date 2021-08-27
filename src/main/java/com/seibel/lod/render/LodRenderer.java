@@ -253,7 +253,7 @@ public class LodRenderer
         if (regen && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvaliable())
         {
             // generate the LODs on a separate thread to prevent stuttering or freezing
-            lodBufferBuilder.generateLodBuffersAsync(this, lodDim, player.blockPosition(), numbChunksWide);
+            lodBufferBuilder.generateLodBuffersAsync(this, lodDim, player.blockPosition(), Math.floorMod((int) player.xRot,360), Math.floorMod((int) player.yRot,360), numbChunksWide);
 
             // the regen process has been started,
             // it will be done when lodBufferBuilder.newBuffersAvaliable

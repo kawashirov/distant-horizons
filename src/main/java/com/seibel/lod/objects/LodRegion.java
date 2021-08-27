@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.objects.LevelPos.LevelPos;
+import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.util.math.BlockPos;
@@ -303,24 +304,17 @@ public class LodRegion implements Serializable
 	/**
 	 * @return
 	 */
-	public void getDataToRender(SortedSet<LevelPos>  dataToRender, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
+	public void getDataToRender(SortedSet<LevelPos>  dataToRender, int playerPosX, int playerPosZ)
 	{
 		LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
-		getDataToRender(dataToRender, levelPos, playerPosX, playerPosZ, start, end, detailLevel, zFix);
+		getDataToRender(dataToRender, levelPos, playerPosX, playerPosZ);
 	}
 
 	/**
 	 * @return
 	 */
-	private void getDataToRender(SortedSet<LevelPos>  dataToRender, LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte targetDetailLevel, boolean zFix)
+	private void getDataToRender(SortedSet<LevelPos>  dataToRender, LevelPos levelPos, int playerPosX, int playerPosZ)
 	{
-
-		if (dataToRender.contains(levelPos))
-		{
-			return;
-		}
-
-
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel);
 
 		int posX = levelPos.posX;
@@ -330,23 +324,14 @@ public class LodRegion implements Serializable
 		//here i calculate the the LevelPos is in range
 		//This is important to avoid any kind of hole in the rendering
 		int maxDistance = levelPos.maxDistance(playerPosX, playerPosZ, regionPosX, regionPosZ);
-		int minDistance = levelPos.minDistance(playerPosX, playerPosZ, regionPosX, regionPosZ);
 
-		if (detailLevel == targetDetailLevel + 1 && end <= maxDistance && minDistance <= end && zFix)
-		{
+		byte supposedLevel = DetailDistanceUtil.getDistanceRenderingInverse(maxDistance);
+		if (supposedLevel > detailLevel)
 			return;
-		}
-		//To avoid z fighting: if the pos is touching the end radius at detailLevel + 1 then we stop
-		//cause this area will be occupied by bigger block
-
-		if (!(start <= maxDistance && minDistance < end) || detailLevel < targetDetailLevel)
-			return;
-
-		//we have reached the target detail level
-		if (targetDetailLevel == detailLevel)
+		else if (supposedLevel == detailLevel)
 		{
 			dataToRender.add(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size));
-		} else
+		} else //case where (detailLevel > supposedLevel)
 		{
 			int childPosX = posX * 2;
 			int childPosZ = posZ * 2;
@@ -368,7 +353,7 @@ public class LodRegion implements Serializable
 					for (int z = 0; z <= 1; z++)
 					{
 						levelPos.changeParameters((byte) (detailLevel - 1), childPosX + x, childPosZ + z);
-						getDataToRender(dataToRender, levelPos, playerPosX, playerPosZ, start, end, targetDetailLevel, zFix);
+						getDataToRender(dataToRender, levelPos, playerPosX, playerPosZ);
 					}
 				}
 			} else

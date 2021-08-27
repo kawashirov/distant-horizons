@@ -116,7 +116,7 @@ public class LodBufferBuilder
 	 * swapped with the drawable buffers in the LodRenderer to be drawn.
 	 */
 	public void generateLodBuffersAsync(LodRenderer renderer, LodDimension lodDim,
-	                                    BlockPos playerBlockPos, int numbChunksWide)
+	                                    BlockPos playerBlockPos, int xAngle, int yAngle, int numbChunksWide)
 	{
 		// only allow one generation process to happen at a time
 		if (generatingBuffers)
@@ -174,20 +174,11 @@ public class LodBufferBuilder
 						Callable<Boolean> dataToRenderThread = () ->
 						{
 							SortedSet<LevelPos> nodeToRender = new TreeSet();
-							for (byte detail = LodUtil.REGION_DETAIL_LEVEL; detail >= LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detail--)
-							{
-								lodDim.getDataToRender(
-										nodeToRender,
-										regionPos,
-										playerBlockPosRounded.getX(),
-										playerBlockPosRounded.getZ(),
-										DetailDistanceUtil.getDistanceRendering(detail),
-										DetailDistanceUtil.getDistanceRendering(detail + 1),
-										detail,
-										true);
-								if(regionPos.x == 0 && regionPos.z == 0)
-									System.out.println(nodeToRender);
-							}
+							lodDim.getDataToRender(
+									nodeToRender,
+									regionPos,
+									playerBlockPosRounded.getX(),
+									playerBlockPosRounded.getZ());
 
 							LevelPos adjPos = new LevelPos();
 							for (LevelPos posToRender : nodeToRender)

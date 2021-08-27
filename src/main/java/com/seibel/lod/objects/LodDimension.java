@@ -522,13 +522,13 @@ public class LodDimension
 	 *
 	 * @return list of nodes
 	 */
-	public void getDataToRender(SortedSet<LevelPos>  dataToRender, RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
+	public void getDataToRender(SortedSet<LevelPos>  dataToRender, RegionPos regionPos, int playerPosX, int playerPosZ)
 	{
 		LevelPos regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
 		try
 		{
 			LodRegion region = getRegion(regionPos);
-			region.getDataToRender(dataToRender, playerPosX, playerPosZ, start, end, detailLevel, zFix);
+			region.getDataToRender(dataToRender, playerPosX, playerPosZ);
 		} catch (Exception e)
 		{
 			e.printStackTrace();
