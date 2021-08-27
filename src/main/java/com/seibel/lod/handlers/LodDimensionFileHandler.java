@@ -211,17 +211,9 @@ public class LodDimensionFileHandler
 			{
 				// the buffered reader encountered a
 				// problem reading the file
+
 				e.printStackTrace();
 			}
-            /*catch (IOException e)
-            {
-                // the buffered reader encountered a
-                // problem reading the file
-                e.printStackTrace();
-            } catch (IllegalArgumentException e)
-            {
-                e.printStackTrace();
-            }*/
 		}
 		return region;
 	}

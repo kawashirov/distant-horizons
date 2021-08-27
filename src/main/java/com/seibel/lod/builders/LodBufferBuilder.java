@@ -21,9 +21,6 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.seibel.lod.objects.DataPoint;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import net.minecraft.world.chunk.Chunk;
 import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.handlers.LodConfig;
@@ -41,7 +38,6 @@ import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 
-import javax.xml.crypto.Data;
 
 /**
  * This object is used to create NearFarBuffer objects.
@@ -152,7 +148,6 @@ public class LodBufferBuilder
 
 
 				ArrayList<Callable<Boolean>> nodeToRenderThreads = new ArrayList<>(lodDim.regions.length * lodDim.regions.length);
-				ArrayList<Callable<Boolean>> builderThreads = new ArrayList<>(lodDim.regions.length * lodDim.regions.length);
 
 				startBuffers();
 
@@ -160,15 +155,11 @@ public class LodBufferBuilder
 				//    RENDERING PART    //
 				// =====================//
 
-				ConcurrentMap<RegionPos, SortedSet<LevelPos>> nodeToRenderMap = new ConcurrentHashMap();
 
 				for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
 				{
 					for (int zRegion = 0; zRegion < lodDim.regions.length; zRegion++)
 					{
-						final RegionPos regionPosIndex = new RegionPos(
-								xRegion,
-								zRegion);
 						RegionPos regionPos = new RegionPos(
 								xRegion + lodDim.getCenterX() - Math.floorDiv(lodDim.getWidth(), 2),
 								zRegion + lodDim.getCenterZ() - Math.floorDiv(lodDim.getWidth(), 2));
@@ -180,8 +171,6 @@ public class LodBufferBuilder
 						// changed while we were running this method
 						if (currentBuffer == null || (currentBuffer != null && !currentBuffer.building()))
 							return;
-						final int xR = xRegion;
-						final int zR = zRegion;
 						Callable<Boolean> dataToRenderThread = () ->
 						{
 							SortedSet<LevelPos> nodeToRender = new TreeSet();
@@ -196,8 +185,10 @@ public class LodBufferBuilder
 										DetailDistanceUtil.getDistanceRendering(detail + 1),
 										detail,
 										true);
+								if(regionPos.x == 0 && regionPos.z == 0)
+									System.out.println(nodeToRender);
 							}
-							// the thread executed successfully
+
 							LevelPos adjPos = new LevelPos();
 							for (LevelPos posToRender : nodeToRender)
 							{
