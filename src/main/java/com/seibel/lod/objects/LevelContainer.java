@@ -95,11 +95,11 @@ public class LevelContainer implements Serializable
                 combinedCol = ((colors[x][z][0] + 128) << 16) | ((colors[x][z][1] + 128) << 8) | ((colors[x][z][2] + 128));
                 stringBuilder.append(Integer.toHexString(combinedCol));
                 stringBuilder.append(DATA_DELIMITER);
-                stringBuilder.append(Integer.toHexString(height[x][z]));
+                stringBuilder.append(height[x][z]);
                 stringBuilder.append(DATA_DELIMITER);
-                stringBuilder.append(Integer.toHexString(depth[x][z]));
+                stringBuilder.append(depth[x][z]);
                 stringBuilder.append(DATA_DELIMITER);
-                stringBuilder.append(Integer.toHexString(generationType[x][z]));
+                stringBuilder.append(generationType[x][z]);
                 stringBuilder.append(DATA_DELIMITER);
                 stringBuilder.append(dataExistence[x][z]);
                 stringBuilder.append(DATA_DELIMITER);
