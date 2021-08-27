@@ -617,7 +617,7 @@ public class LodRenderer
 
         ByteBuffer temp = ByteBuffer.allocateDirect(16);
         temp.order(ByteOrder.nativeOrder());
-        GL11.glLightfv(LOD_GL_LIGHT_NUMBER, GL11.GL_AMBIENT, (FloatBuffer) temp.asFloatBuffer().put(lightAmbient).flip());
+        GL11.glLightfv(LOD_GL_LIGHT_NUMBER, GL11.GL_AMBIENT, (FloatBuffer) temp.asFloatBuffer().put(lightAmbient).flip()); // TODO, could put return null? this crashed on James' laptop
         GL11.glEnable(LOD_GL_LIGHT_NUMBER); // Enable the above lighting
 
         RenderSystem.enableLighting();
