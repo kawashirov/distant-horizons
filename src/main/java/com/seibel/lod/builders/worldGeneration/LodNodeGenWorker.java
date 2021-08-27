@@ -70,15 +70,16 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  *
  * @author James Seibel
- * @version 8-24-2021
+ * @version 8-26-2021
  */
 public class LodNodeGenWorker implements IWorker
 {
-	public static ExecutorService genThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
+	public static ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfWorldGenerationThreads.get(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
 
 	private boolean threadStarted = false;
 	private LodChunkGenThread thread;
-
+	
+	
 	/** If a configured feature fails for whatever reason,
 	 * add it to this list, this is to hopefully remove any
 	 * features that could cause issues down the line. */
@@ -635,7 +636,7 @@ public class LodNodeGenWorker implements IWorker
 		{
 			genThreads.shutdownNow();
 		}
-		genThreads = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
+		genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfWorldGenerationThreads.get(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
 	}
 
 

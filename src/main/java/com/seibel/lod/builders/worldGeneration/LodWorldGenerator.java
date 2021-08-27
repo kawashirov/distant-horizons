@@ -13,8 +13,8 @@ import com.seibel.lod.builders.GenerationRequest;
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodConfig;
-import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodThreadFactory;
@@ -83,10 +83,8 @@ public class LodWorldGenerator
 			// the thread is now running, don't queue up another thread
 			generatorThreadRunning = true;
 			
-			// just in case the config is changed
-
-			//maxChunkGenRequests = LodConfig.CLIENT.numberOfWorldGenerationThreads.get() * 8;
-			maxChunkGenRequests = Runtime.getRuntime().availableProcessors() * 8;
+			// just in case the config changed
+			maxChunkGenRequests = LodConfig.CLIENT.numberOfWorldGenerationThreads.get() * 8;
 			
 			Thread generatorThread = new Thread(() ->
 			{
