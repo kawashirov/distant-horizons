@@ -1,14 +1,17 @@
 package com.seibel.lod.objects;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.util.LodUtil;
+
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-
-import java.io.Serializable;
-import java.util.*;
-import java.util.List;
 
 /**
  * STANDARD TO FOLLOW
@@ -408,6 +411,7 @@ public class LodRegion implements Serializable
     {
         levelPos.performRegionModule();
         int numberOfChildren = 0;
+        int numberOfVoidChildren = 0;
 
         byte minGenerationType = 5;
         int tempRed = 0;
@@ -431,13 +435,24 @@ public class LodRegion implements Serializable
                 levelPos.changeParameters(newDetailLevel, newPosX, newPosZ);
                 if (hasDataBeenGenerated(levelPos))
                 {
-                    numberOfChildren++;
-
-                    tempRed += colors[newDetailLevel][newPosX][newPosZ][0];
-                    tempGreen += colors[newDetailLevel][newPosX][newPosZ][1];
-                    tempBlue += colors[newDetailLevel][newPosX][newPosZ][2];
-                    tempHeight += height[newDetailLevel][newPosX][newPosZ];
-                    tempDepth += depth[newDetailLevel][newPosX][newPosZ];
+                	if (height[newDetailLevel][newPosX][newPosZ] != LodBuilder.DEFAULT_HEIGHT 
+                		&& depth[newDetailLevel][newPosX][newPosZ] != LodBuilder.DEFAULT_DEPTH)
+                	{
+	                    numberOfChildren++;
+	                    
+	                    tempRed += colors[newDetailLevel][newPosX][newPosZ][0];
+	                    tempGreen += colors[newDetailLevel][newPosX][newPosZ][1];
+	                    tempBlue += colors[newDetailLevel][newPosX][newPosZ][2];
+	                    tempHeight += height[newDetailLevel][newPosX][newPosZ];
+	                    tempDepth += depth[newDetailLevel][newPosX][newPosZ];
+                	}
+                	else
+                	{
+                		// void children have the default height (most likely -1)
+                		// and represent a LOD with no blocks in it
+                		numberOfVoidChildren++;
+                	}
+                	
                     minGenerationType = (byte) Math.min(minGenerationType, generationType[newDetailLevel][newPosX][newPosZ]);
                 }
             }
@@ -452,6 +467,18 @@ public class LodRegion implements Serializable
             depth[detailLevel][posX][posZ] = (short) (tempDepth / numberOfChildren);
             generationType[detailLevel][posX][posZ] = minGenerationType;
             dataExistence[detailLevel][posX][posZ] = true;
+        }
+        else if (numberOfVoidChildren > 0)
+        {
+        	colors[detailLevel][posX][posZ][0] = (byte) 0;
+        	colors[detailLevel][posX][posZ][1] = (byte) 0;
+        	colors[detailLevel][posX][posZ][2] = (byte) 0;
+        	
+        	height[detailLevel][posX][posZ] = LodBuilder.DEFAULT_HEIGHT;
+            depth[detailLevel][posX][posZ] = LodBuilder.DEFAULT_DEPTH;
+        	
+        	generationType[detailLevel][posX][posZ] = minGenerationType;
+        	dataExistence[detailLevel][posX][posZ] = true;
         }
     }
 
@@ -658,7 +685,8 @@ public class LodRegion implements Serializable
         return count;
     }
 
-    public String toString()
+    @Override
+	public String toString()
     {
         return getLevel(LodUtil.REGION_DETAIL_LEVEL).toString();
     }

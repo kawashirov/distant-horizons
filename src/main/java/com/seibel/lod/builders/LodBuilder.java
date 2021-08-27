@@ -25,9 +25,9 @@ import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.DataPoint;
-import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
+import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
@@ -49,11 +49,11 @@ import net.minecraft.world.gen.Heightmap;
 
 /**
  * This object is in charge of creating Lod related objects. (specifically: Lod
- * World, Dimension, Region, and Chunk objects)
+ * World, Dimension, and Region objects)
  *
  * @author Leonardo Amato
  * @author James Seibel
- * @version 8-17-2021
+ * @version 8-26-2021
  */
 public class LodBuilder
 {
@@ -63,6 +63,11 @@ public class LodBuilder
     public static final int CHUNK_SECTION_HEIGHT = CHUNK_DATA_WIDTH;
     public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
 
+    /** If no blocks are found in the area in determineBottomPointForArea return this */
+    public static final short DEFAULT_DEPTH = -1;
+    /** If no blocks are found in the area in determineHeightPointForArea return this */
+	public static final short DEFAULT_HEIGHT = -1;
+    
     /**
      * How wide LodDimensions should be in regions
      */
@@ -206,12 +211,6 @@ public class LodBuilder
 
     /**
      * Find the lowest valid point from the bottom.
-     *
-     * @param chunkSections
-     * @param startX
-     * @param startZ
-     * @param endX
-     * @param endZ
      */
     private short determineBottomPointForArea(ChunkSection[] chunkSections, int startX, int startZ, int endX, int endZ)
     {
@@ -247,7 +246,7 @@ public class LodBuilder
         }
 
         // we never found a valid LOD point
-        return -1;
+        return DEFAULT_DEPTH;
     }
 
 
@@ -264,17 +263,9 @@ public class LodBuilder
 
     /**
      * Find the highest valid point from the Top
-     *
-     * @param chunkSections
-     * @param startX
-     * @param startZ
-     * @param endX
-     * @param endZ
      */
     private short determineHeightPointForArea(ChunkSection[] chunkSections, int startX, int startZ, int endX, int endZ)
     {
-
-        //blockState.getBlock().isAir();
         int numberOfBlocksRequired = ((endX - startX) * (endZ - startZ) / 2);
         // search from the top down
         for (int section = chunkSections.length - 1; section >= 0; section--)
@@ -306,7 +297,7 @@ public class LodBuilder
         }
 
         // we never found a valid LOD point
-        return -1;
+        return DEFAULT_HEIGHT;
     }
 
 
