@@ -217,7 +217,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
                 minY = DataPoint.getDepth(data);
                 if (minY > bb.minY)
                 {
-                    maxY = (int) Math.min(minY, bb.maxX);
+                    maxY = (int) Math.min(minY, bb.maxY);
                     addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
                     addPosAndColor(buffer, bb.maxX, maxY, bb.maxZ, red, green, blue, alpha);
                     addPosAndColor(buffer, bb.minX, maxY, bb.maxZ, red, green, blue, alpha);
@@ -254,7 +254,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
                 minY = DataPoint.getDepth(data);
                 if (minY > bb.minY)
                 {
-                    maxY = (int) Math.min(minY, bb.maxX);
+                    maxY = (int) Math.min(minY, bb.maxY);
                     addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
                     addPosAndColor(buffer, bb.minX, maxY, bb.minZ, red, green, blue, alpha);
                     addPosAndColor(buffer, bb.maxX, maxY, bb.minZ, red, green, blue, alpha);
@@ -291,7 +291,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
                 minY = DataPoint.getDepth(data);
                 if (minY > bb.minY)
                 {
-                    maxY = (int) Math.min(minY, bb.maxX);
+                    maxY = (int) Math.min(minY, bb.maxY);
                     addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
                     addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
                     addPosAndColor(buffer, bb.minX, maxY, bb.maxZ, red, green, blue, alpha);
@@ -328,7 +328,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
                 minY = DataPoint.getDepth(data);
                 if (minY > bb.minY)
                 {
-                    maxY = (int) Math.min(minY, bb.maxX);
+                    maxY = (int) Math.min(minY, bb.maxY);
                     addPosAndColor(buffer, bb.maxX, maxY, bb.minZ, red, green, blue, alpha);
                     addPosAndColor(buffer, bb.maxX, maxY, bb.maxZ, red, green, blue, alpha);
                     addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
