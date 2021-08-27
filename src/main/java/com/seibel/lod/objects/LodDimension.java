@@ -381,7 +381,6 @@ public class LodDimension
 				int regionZ;
 				LodRegion region;
 				LevelPos levelPos = new LevelPos();
-				List<Callable<Boolean>> genThreads = new ArrayList<>();
 				for (int x = 0; x < regions.length; x++)
 				{
 					for (int z = 0; z < regions.length; z++)
@@ -496,7 +495,7 @@ public class LodDimension
 					if (end >= regionLevelPos.minDistance(playerPosX, playerPosZ) &&
 							    start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
 					{
-						region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).getConvertedLevelPos(detailLevel));
+						region = getRegion(regionPos);
 						listOfData.addAll(region.getDataToGenerate(playerPosX, playerPosZ, start, end, generation, detailLevel, dataNumber));
 					}
 				} catch (Exception e)
@@ -523,20 +522,19 @@ public class LodDimension
 	 *
 	 * @return list of nodes
 	 */
-	public void getDataToRender(ConcurrentNavigableMap<LevelPos, List<Integer>> dataToRender, RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
+	public ConcurrentSkipListSet<LevelPos> getDataToRender(ConcurrentSkipListSet<LevelPos> dataToRender, RegionPos regionPos, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
 	{
 		LevelPos regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
 		try
 		{
-			if (end >= regionLevelPos.minDistance(playerPosX, playerPosZ) &&
-					    start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
-			{
-				LodRegion region = getRegion(new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z).getConvertedLevelPos(detailLevel));
-				region.getDataToRender(dataToRender, playerPosX, playerPosZ, start, end, detailLevel, zFix);
-			}
+			LodRegion region = getRegion(regionPos);
+			region.getDataToRender(dataToRender, playerPosX, playerPosZ, start, end, detailLevel, zFix);
 		} catch (Exception e)
 		{
 			e.printStackTrace();
+		}finally
+		{
+			return dataToRender;
 		}
 	}
 
@@ -719,7 +717,7 @@ public class LodDimension
 	public void setRegionWidth(int newWidth)
 	{
 		width = newWidth;
-		halfWidth = (int) Math.floor(width / 2);
+		halfWidth = (int) Math.floorDiv(width, 2);
 
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];

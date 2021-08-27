@@ -3,6 +3,7 @@ package com.seibel.lod.objects;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ConcurrentNavigableMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
@@ -302,20 +303,25 @@ public class LodRegion implements Serializable
 	/**
 	 * @return
 	 */
-	public void getDataToRender(ConcurrentNavigableMap<LevelPos, List<Integer>> dataToRender, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
+	public ConcurrentSkipListSet<LevelPos> getDataToRender(ConcurrentSkipListSet<LevelPos> dataToRender, int playerPosX, int playerPosZ, int start, int end, byte detailLevel, boolean zFix)
 	{
 		LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
-		getDataToRender(dataToRender, levelPos, playerPosX, playerPosZ, start, end, detailLevel, zFix);
+		return getDataToRender(dataToRender, levelPos, playerPosX, playerPosZ, start, end, detailLevel, zFix);
 	}
 
 	/**
 	 * @return
 	 */
-	private void getDataToRender(ConcurrentNavigableMap<LevelPos, List<Integer>> dataToRender, LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte targetDetailLevel, boolean zFix)
+	private ConcurrentSkipListSet<LevelPos> getDataToRender(ConcurrentSkipListSet<LevelPos> dataToRender, LevelPos levelPos, int playerPosX, int playerPosZ, int start, int end, byte targetDetailLevel, boolean zFix)
 	{
 
-		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel);
+		if (dataToRender.contains(levelPos))
+		{
+			return dataToRender;
+		}
 
+
+		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel);
 
 		int posX = levelPos.posX;
 		int posZ = levelPos.posZ;
@@ -326,22 +332,20 @@ public class LodRegion implements Serializable
 		int maxDistance = levelPos.maxDistance(playerPosX, playerPosZ, regionPosX, regionPosZ);
 		int minDistance = levelPos.minDistance(playerPosX, playerPosZ, regionPosX, regionPosZ);
 
-		//To avoid z fighting: if the pos is touching the end radius at detailLevel + 1 then we stop
-		//cause this area will be occupied by bigger block
 		if (detailLevel == targetDetailLevel + 1 && end <= maxDistance && minDistance <= end && zFix)
 		{
-			return;
+			return dataToRender;
 		}
+		//To avoid z fighting: if the pos is touching the end radius at detailLevel + 1 then we stop
+		//cause this area will be occupied by bigger block
 
 		if (!(start <= maxDistance && minDistance < end) || detailLevel < targetDetailLevel)
-		{
-			return;
-		}
+			return dataToRender;
 
 		//we have reached the target detail level
 		if (targetDetailLevel == detailLevel)
 		{
-			dataToRender.put(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size), new ArrayList<>());
+			dataToRender.add(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size));
 		} else
 		{
 			int childPosX = posX * 2;
@@ -369,10 +373,10 @@ public class LodRegion implements Serializable
 				}
 			} else
 			{
-				dataToRender.put(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size), new ArrayList<>());
+				dataToRender.add(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size));
 			}
 		}
-		return;
+		return dataToRender;
 	}
 
 	/**

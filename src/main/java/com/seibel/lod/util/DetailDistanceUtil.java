@@ -1,6 +1,7 @@
 package com.seibel.lod.util;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.LodCorner;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
 import net.minecraft.client.Minecraft;
@@ -13,47 +14,11 @@ public class DetailDistanceUtil
 	private static int minDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
 	private static int maxDetail = LodUtil.REGION_DETAIL_LEVEL + 1;
 	private static int minDistance = 0;
-	private static int maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16;
+	private static int maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16 * 2;
 
 
-	private static DistanceGenerationMode[] distancesGenerators = {
-			DistanceGenerationMode.SURFACE,
-			DistanceGenerationMode.SURFACE,
-			DistanceGenerationMode.SURFACE,
-			DistanceGenerationMode.SURFACE,
-			DistanceGenerationMode.SURFACE,
-			DistanceGenerationMode.SURFACE,
-			DistanceGenerationMode.SURFACE,
-			DistanceGenerationMode.SURFACE,
-			DistanceGenerationMode.SURFACE,
-			DistanceGenerationMode.SURFACE};
-
-    /*private static  DistanceGenerationMode[] distancesGenerators = {
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT,
-            DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT};*/
 
 	private static LodDetail[] lodDetails = {
-			LodDetail.FULL,
-			LodDetail.HALF,
-			LodDetail.QUAD,
-			LodDetail.DOUBLE,
-			LodDetail.SINGLE,
-			LodDetail.SINGLE,
-			LodDetail.SINGLE,
-			LodDetail.SINGLE,
-			LodDetail.SINGLE,
-			LodDetail.SINGLE,
-			LodDetail.SINGLE};
-
-	private static LodDetail[] lodDetailsCut = {
 			LodDetail.FULL,
 			LodDetail.HALF,
 			LodDetail.QUAD,
@@ -73,9 +38,9 @@ public class DetailDistanceUtil
 		if (detail <= minDetail)
 			return minDistance;
 		if (detail == maxDetail)
-			return maxDistance * 2;
+			return maxDistance;
 		if (detail == maxDetail + 1)
-			return maxDistance * 3;
+			return maxDistance;
 		switch (LodConfig.CLIENT.lodDistanceCalculatorType.get())
 		{
 			case LINEAR:
@@ -122,7 +87,7 @@ public class DetailDistanceUtil
 
 	public static DistanceGenerationMode getDistanceGenerationMode(int detail)
 	{
-		return distancesGenerators[detail];
+		return LodConfig.CLIENT.distanceGenerationMode.get();
 	}
 
 	public static LodDetail getLodDetail(int detail)
@@ -141,13 +106,13 @@ public class DetailDistanceUtil
 	{
 		if (detail < minDetail)
 		{
-			return lodDetailsCut[minDetail].detailLevel;
+			return lodDetails[minDetail].detailLevel;
 		} else if (detail == maxDetail)
 		{
 			return LodUtil.REGION_DETAIL_LEVEL;
 		} else
 		{
-			return lodDetailsCut[detail].detailLevel;
+			return lodDetails[detail].detailLevel;
 		}
 	}
 }

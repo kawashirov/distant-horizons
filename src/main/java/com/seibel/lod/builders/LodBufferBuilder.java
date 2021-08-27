@@ -17,10 +17,7 @@
  */
 package com.seibel.lod.builders;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -167,8 +164,9 @@ public class LodBufferBuilder
 				{
 					for (int zRegion = 0; zRegion < lodDim.regions.length; zRegion++)
 					{
-						nodeToRenderMatrix[xRegion][zRegion] = new ConcurrentSkipListMap<>(LevelPos.getComparator());
-						RegionPos regionPos = new RegionPos(xRegion + lodDim.getCenterX() - lodDim.getWidth() / 2, zRegion + lodDim.getCenterZ() - lodDim.getWidth() / 2);
+						RegionPos regionPos = new RegionPos(
+								xRegion + lodDim.getCenterX() - Math.floorDiv(lodDim.getWidth(), 2),
+								zRegion + lodDim.getCenterZ() - Math.floorDiv(lodDim.getWidth(), 2));
 
 						// local position in the vbo and bufferBuilder arrays
 						BufferBuilder currentBuffer = buildableBuffers[xRegion][zRegion];
@@ -177,27 +175,38 @@ public class LodBufferBuilder
 						// changed while we were running this method
 						if (currentBuffer == null || (currentBuffer != null && !currentBuffer.building()))
 							return;
-
-						byte detailLevel = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
 						final int xR = xRegion;
 						final int zR = zRegion;
+						nodeToRenderMatrix[xR][zR] = new ConcurrentSkipListSet(LevelPos.getComparator());
 						Callable<Boolean> dataToRenderThread = () ->
 						{
 							byte detailToRender;
 							boolean zFix;
-
-							for (byte detail = detailLevel; detail <= LodUtil.REGION_DETAIL_LEVEL; detail++)
+							for (byte detail = LodUtil.REGION_DETAIL_LEVEL; detail >= LodConfig.CLIENT.maxGenerationDetail.get().detailLevel; detail--)
 							{
+
+								detailToRender = (byte) 4;
+								if (detail < detailToRender)
+								{
+									zFix = true;
+								} else
+								{
+									detailToRender = detail;
+									zFix = false;
+								}
+
 								detailToRender = detail;
-								lodDim.getDataToRender(
-										(ConcurrentSkipListMap<LevelPos, List<Integer>>) nodeToRenderMatrix[xR][zR],
+								nodeToRenderMatrix[xR][zR] = lodDim.getDataToRender(
+										(ConcurrentSkipListSet<LevelPos>) nodeToRenderMatrix[xR][zR],
 										regionPos,
 										playerBlockPosRounded.getX(),
 										playerBlockPosRounded.getZ(),
 										DetailDistanceUtil.getDistanceRendering(detail),
 										DetailDistanceUtil.getDistanceRendering(detail + 1),
-										detailToRender,
-										true);
+										DetailDistanceUtil.getLodDetail(detail).detailLevel,
+										zFix);
+								/**DetailDistanceUtil.getLodDetail(detail).detailLevel has to be used otherwise the zfix won't work
+								 * i'll fix this in the future*/
 							}
 							// the thread executed successfully
 							return true;
@@ -224,6 +233,66 @@ public class LodBufferBuilder
 				}
 				long renderEnd = System.currentTimeMillis();
 
+
+				/**THIS SHOULD AVOID Z-FIGHTING AND BLANK SPOT*/
+				/**TODO it could be improved*/
+				/*
+				ConcurrentNavigableMap<LevelPos, List<List<Integer>>> adjMap = new ConcurrentSkipListMap<>();
+				LevelPos tempPos;
+				LevelPos tempAdj;
+				for (byte tempDetailLevel = LodConfig.CLIENT.maxDrawDetail.get().detailLevel; tempDetailLevel <= LodUtil.REGION_DETAIL_LEVEL; tempDetailLevel++)
+				{
+					for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
+					{
+						for (int zRegion = 0; zRegion < lodDim.regions.length; zRegion++)
+						{
+							byte detailLevel;
+							int posX;
+							int posZ;
+							boolean contain;
+							SortedSet<LevelPos> set = (SortedSet<LevelPos>) nodeToRenderMatrix[xRegion][zRegion];
+							while (detailLevel != set.first().detailLevel)
+							{
+								tempPos = set.first();
+								detailLevel = tempPos.detailLevel;
+								posX = tempPos.posX;
+								posZ = tempPos.posZ;
+								contain = false;
+								/**First step, check if there is any bigger block in same position*/
+				/*
+								for (byte higherLevel = (byte) (detailLevel + 1); higherLevel <= LodUtil.REGION_DETAIL_LEVEL; higherLevel++)
+								{
+									tempPos.convert(higherLevel);
+									if (set.contains(tempPos)){
+										contain = true;
+									}
+								}
+								if(!contain)
+									adjMap.put(tempPos,null);
+								else
+									set.remove(tempPos);
+							}
+						}
+					}
+				}
+				((SortedSet<LevelPos>) nodeToRenderMatrix[xRegion][zRegion])
+				LevelPos adjLevelPos;
+				for(LevelPos levelPos : adjMap.keySet()){
+					if(adjMap.get(levelPos) == null){
+						for (int x : new int[]{0, 1})
+						{
+							adjLevelPos.changeParameters(posToRender.detailLevel, posToRender.posX + x * 2 - 1, posToRender.posZ);
+							if (!renderer.vanillaRenderedChunks.contains(adjPos.getChunkPos()))
+								adjData[0][x] = lodDim.getData(adjLevelPos);
+						}
+
+						for (int z : new int[]{0, 1})
+						{
+
+						}
+					}
+				}*/
+
 				for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
 				{
 					for (int zRegion = 0; zRegion < lodDim.regions.length; zRegion++)
@@ -246,7 +315,7 @@ public class LodBufferBuilder
 						Callable<Boolean> bufferBuildingThread = () ->
 						{
 							LevelPos adjPos = new LevelPos();
-							for (LevelPos posToRender : ((ConcurrentSkipListMap<LevelPos, List<Integer>>) nodeToRenderMatrix[xR][zR]).keySet())
+							for (LevelPos posToRender : (SortedSet<LevelPos>) nodeToRenderMatrix[xR][zR])
 							{
 								LevelPos chunkPos = posToRender.getConvertedLevelPos(LodUtil.CHUNK_DETAIL_LEVEL);
 								// skip any chunks that Minecraft is going to render
