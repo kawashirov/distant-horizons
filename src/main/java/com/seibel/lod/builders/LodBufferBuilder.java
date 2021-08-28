@@ -17,21 +17,16 @@
  */
 package com.seibel.lod.builders;
 
-import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.lwjgl.opengl.GL11;
@@ -112,7 +107,7 @@ public class LodBufferBuilder
 	private ReentrantLock bufferLock = new ReentrantLock();
 
 	private Object[][] setsToRender;
-	private RegionPos lastRegionPos;
+	private RegionPos center;
 
 	public LodBufferBuilder()
 	{
@@ -169,17 +164,21 @@ public class LodBufferBuilder
 				//    RENDERING PART    //
 				// =====================//
 
-				RegionPos newRegionPos = new RegionPos(playerChunkPos);
-				if(lastRegionPos == null)
-					lastRegionPos = newRegionPos;
+				RegionPos playerRegionPos = new RegionPos(playerChunkPos);
+				if(center == null)
+					center = playerRegionPos;
 
 				if (setsToRender == null)
 					setsToRender = new Object[lodDim.regions.length][lodDim.regions.length];
 
-				if (setsToRender.length != lodDim.regions.length || lastRegionPos == newRegionPos)
-				{
-					lastRegionPos = newRegionPos;
+				if (setsToRender.length != lodDim.regions.length)
 					setsToRender = new Object[lodDim.regions.length][lodDim.regions.length];
+
+
+				RegionPos worldRegionOffset = new RegionPos(playerRegionPos.x - lodDim.getCenterX(), playerRegionPos.z - lodDim.getCenterZ());
+				if (worldRegionOffset.x != 0 || worldRegionOffset.z != 0)
+				{
+					move(worldRegionOffset, Math.floorDiv(lodDim.getWidth(), 2));
 				}
 
 				for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
@@ -212,7 +211,10 @@ public class LodBufferBuilder
 									playerBlockPosRounded.getX(),
 									playerBlockPosRounded.getZ());
 
-							LevelPos adjPos = new LevelPos();
+
+							int posX;
+							int posZ;
+							byte detailLevel;
 							for (LevelPos posToRender : nodeToRender.keySet())
 							{
 								if (!nodeToRender.get(posToRender).booleanValue())
@@ -227,6 +229,9 @@ public class LodBufferBuilder
 								{
 									continue;
 								}
+								posX = posToRender.posX;
+								posZ = posToRender.posZ;
+								detailLevel = posToRender.detailLevel;
 
 								LevelPos chunkPos = posToRender.getConvertedLevelPos(LodUtil.CHUNK_DETAIL_LEVEL);
 								// skip any chunks that Minecraft is going to render
@@ -245,19 +250,21 @@ public class LodBufferBuilder
 										short[][][] adjData = new short[2][2][];
 										for (int x : new int[]{0, 1})
 										{
-											adjPos.changeParameters(posToRender.detailLevel, posToRender.posX + x * 2 - 1, posToRender.posZ);
-											if (!renderer.vanillaRenderedChunks.contains(adjPos.getChunkPos())
-													     && (nodeToRender.containsKey(adjPos) || disableFix))
-												adjData[0][x] = lodDim.getData(adjPos);
+											posToRender.changeParameters(detailLevel, posX + x * 2 - 1, posZ);
+											if (!renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos())
+													     && (nodeToRender.containsKey(posToRender) || disableFix))
+												adjData[0][x] = lodDim.getData(posToRender);
 										}
 
 										for (int z : new int[]{0, 1})
 										{
-											adjPos.changeParameters(posToRender.detailLevel, posToRender.posX, posToRender.posZ + z * 2 - 1);
-											if (!renderer.vanillaRenderedChunks.contains(adjPos.getChunkPos())
-													     && (nodeToRender.containsKey(adjPos) || disableFix))
-												adjData[1][z] = lodDim.getData(adjPos);
+											posToRender.changeParameters(detailLevel, posX, posZ + z * 2 - 1);
+											if (!renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos())
+													     && (nodeToRender.containsKey(posToRender) || disableFix))
+												adjData[1][z] = lodDim.getData(posToRender);
 										}
+										posToRender.changeParameters(detailLevel, posX, posZ);
+
 										LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,
 												posToRender, renderer.previousDebugMode);
 									}
@@ -340,6 +347,103 @@ public class LodBufferBuilder
 		return;
 	}
 
+
+	/**
+	 * Move the center of this LodDimension and move all owned
+	 * regions over by the given x and z offset. <br><br>
+	 * <p>
+	 * Synchronized to prevent multiple moves happening on top of each other.
+	 */
+	public synchronized void move(RegionPos regionOffset,int width)
+	{
+		int xOffset = regionOffset.x;
+		int zOffset = regionOffset.z;
+
+		// if the x or z offset is equal to or greater than
+		// the total size, just delete the current data
+		// and update the centerX and/or centerZ
+		if (Math.abs(xOffset) >= width || Math.abs(zOffset) >= width)
+		{
+			for (int x = 0; x < width; x++)
+			{
+				for (int z = 0; z < width; z++)
+				{
+					setsToRender[x][z] = null;
+				}
+			}
+
+			// update the new center
+			center.x += xOffset;
+			center.z += zOffset;
+
+			return;
+		}
+
+
+		// X
+		if (xOffset > 0)
+		{
+			// move everything over to the left (as the center moves to the right)
+			for (int x = 0; x < width; x++)
+			{
+				for (int z = 0; z < width; z++)
+				{
+					if (x + xOffset < width)
+						setsToRender[x][z] = setsToRender[x + xOffset][z];
+					else
+						setsToRender[x][z] = null;
+				}
+			}
+		} else
+		{
+			// move everything over to the right (as the center moves to the left)
+			for (int x = width - 1; x >= 0; x--)
+			{
+				for (int z = 0; z < width; z++)
+				{
+					if (x + xOffset >= 0)
+						setsToRender[x][z] = setsToRender[x + xOffset][z];
+					else
+						setsToRender[x][z] = null;
+				}
+			}
+		}
+
+
+		// Z
+		if (zOffset > 0)
+		{
+			// move everything up (as the center moves down)
+			for (int x = 0; x < width; x++)
+			{
+				for (int z = 0; z < width; z++)
+				{
+					if (z + zOffset < width)
+						setsToRender[x][z] = setsToRender[x][z + zOffset];
+					else
+						setsToRender[x][z] = null;
+				}
+			}
+		} else
+		{
+			// move everything down (as the center moves up)
+			for (int x = 0; x < width; x++)
+			{
+				for (int z = width - 1; z >= 0; z--)
+				{
+					if (z + zOffset >= 0)
+						setsToRender[x][z] = setsToRender[x][z + zOffset];
+					else
+						setsToRender[x][z] = null;
+				}
+			}
+		}
+
+
+		// update the new center
+		center.x += xOffset;
+		center.z += zOffset;
+	}
 
 	//===============================//
 	// BufferBuilder related methods //
