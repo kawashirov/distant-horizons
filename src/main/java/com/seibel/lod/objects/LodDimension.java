@@ -431,7 +431,7 @@ public class LodDimension
 	 * stored in the LOD. If an LOD already exists at the given
 	 * coordinates it will be overwritten.
 	 */
-	public synchronized Boolean addData(LevelPos levelPos, short[] lodDataPoint, boolean dontSave)
+	public synchronized Boolean addData(LevelPos levelPos, short[] lodDataPoint, boolean dontSave, boolean serverQuality)
 	{
 
 		// don't continue if the region can't be saved
@@ -443,7 +443,7 @@ public class LodDimension
 
 		LodRegion region = getRegion(levelPos);
 
-		boolean nodeAdded = region.addData(levelPos, lodDataPoint);
+		boolean nodeAdded = region.addData(levelPos, lodDataPoint, serverQuality);
 		// only save valid LODs to disk
 		if (!dontSave && fileHandler != null)
 		{

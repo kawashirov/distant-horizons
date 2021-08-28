@@ -46,6 +46,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
+import org.lwjgl.system.CallbackI;
 
 /**
  * This object is in charge of creating Lod related objects. (specifically: Lod
@@ -190,10 +191,12 @@ public class LodBuilder
 						chunk.getPos().x * 16 + startX,
 						chunk.getPos().z * 16 + startZ);
 				levelPos.convert(detail.detailLevel);
+				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
 				data = DataPoint.createDataPoint(height, depth, color[0], color[1], color[2]);
 				lodDim.addData(levelPos,
 						data,
-						false);
+						false,
+						isServer);
 			}
 			//levelPos.changeParameters(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
 

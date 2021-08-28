@@ -41,6 +41,7 @@ public class LodRegion implements Serializable
 
 	private boolean[][][] dataExistence;
 
+
 	public final int regionPosX;
 	public final int regionPosZ;
 
@@ -124,10 +125,10 @@ public class LodRegion implements Serializable
 	 * @param dataPoint
 	 * @return
 	 */
-	public boolean addData(LevelPos levelPos, short[] dataPoint)
+	public boolean addData(LevelPos levelPos, short[] dataPoint, boolean serverQuality)
 	{
 		levelPos.performRegionModule();
-		if (!doesDataExist(levelPos))
+		if (!doesDataExist(levelPos) || serverQuality)
 		{
 
 			//update the number of node present
@@ -145,25 +146,6 @@ public class LodRegion implements Serializable
 		{
 			return false;
 		}
-	}
-
-
-	public short[] getData(ChunkPos chunkPos)
-	{
-		return getData(new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunkPos.x, chunkPos.z));
-	}
-
-	/**
-	 * This method will return the data in the position relative to the level of detail
-	 *
-	 * @param lod
-	 * @return the data at the relative pos and level
-	 */
-	public short[] getData(byte lod, BlockPos blockPos)
-	{
-		int posX = Math.floorMod(blockPos.getX(), (int) Math.pow(2, lod));
-		int posZ = Math.floorMod(blockPos.getZ(), (int) Math.pow(2, lod));
-		return getData(new LevelPos(lod, posX, posZ));
 	}
 
 	/**
@@ -456,38 +438,6 @@ public class LodRegion implements Serializable
 
 			dataExistence[detailLevel][posX][posZ] = true;
 		}
-	}
-
-	/**
-	 * @param levelPos
-	 * @return
-	 */
-	private boolean[][] getChildren(LevelPos levelPos)
-	{
-		levelPos = levelPos.getRegionModuleLevelPos();
-		boolean[][] children = new boolean[2][2];
-		int numberOfChild = 0;
-		if (minDetailLevel == levelPos.detailLevel)
-		{
-			return children;
-		}
-		for (int x = 0; x <= 1; x++)
-		{
-			for (int z = 0; z <= 1; z++)
-			{
-				children[x][z] = (dataExistence[levelPos.detailLevel - 1][2 * levelPos.posX + x][2 * levelPos.posZ + z]);
-			}
-		}
-		return children;
-	}
-
-	/**
-	 * @param chunkPos
-	 * @return
-	 */
-	public boolean doesDataExist(ChunkPos chunkPos)
-	{
-		return doesDataExist(new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunkPos.x, chunkPos.z));
 	}
 
 	/**
