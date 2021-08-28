@@ -42,7 +42,7 @@ public class DynamicLodTemplate extends AbstractLodTemplate
 	}
 
 	@Override
-	public int getBufferMemoryForSingleNode(int detailLevel)
+	public int getBufferMemoryForSingleNode()
 	{
 		return 0;
 	}

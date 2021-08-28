@@ -318,10 +318,9 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	}
 	
 	@Override
-	public int getBufferMemoryForSingleNode(int detailLevel)
+	public int getBufferMemoryForSingleNode()
 	{
-		// (sidesOnACube * pointsInASquare * (positionPoints + colorPoints))) *
-		// howManyPointsPerLodChunk
+		// (sidesOnACube * pointsInASquare * (positionPoints + colorPoints)))
 		return (6 * 4 * (3 + 4));
 	}
 	

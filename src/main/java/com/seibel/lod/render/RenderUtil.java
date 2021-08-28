@@ -87,13 +87,14 @@ public class RenderUtil
 	
 	/**
 	 * Get how much buffer memory would be required for the given radius multiplier
+	 * 
+	 * TODO check if this is actually returning the correct memory needed
 	 */
 	public static int getBufferMemoryForRegion()
 	{
 		// calculate the max amount of buffer memory needed (in bytes)
 		return LodUtil.REGION_WIDTH_IN_CHUNKS * LodUtil.REGION_WIDTH_IN_CHUNKS *
-				LodConfig.CLIENT.lodTemplate.get().
-				getBufferMemoryForSingleLod(LodUtil.CHUNK_DETAIL_LEVEL);
+				LodConfig.CLIENT.lodTemplate.get().getBufferMemoryForSingleLod();
 	}
 	
 	/**
@@ -102,7 +103,7 @@ public class RenderUtil
 	 */
 	public static int getMaxRadiusMultiplierWithAvaliableMemory(LodTemplate lodTemplate, int detailLevel)
 	{
-		int maxNumberOfLods = LodRenderer.MAX_ALOCATEABLE_DIRECT_MEMORY / lodTemplate.getBufferMemoryForSingleLod(detailLevel);
+		int maxNumberOfLods = LodRenderer.MAX_ALOCATEABLE_DIRECT_MEMORY / lodTemplate.getBufferMemoryForSingleLod();
 		int numbLodsWide = (int) Math.sqrt(maxNumberOfLods);
 		
 		return numbLodsWide / (2 * mc.options.renderDistance);

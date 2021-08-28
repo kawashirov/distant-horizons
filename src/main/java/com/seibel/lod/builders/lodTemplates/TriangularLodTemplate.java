@@ -40,7 +40,7 @@ public class TriangularLodTemplate extends AbstractLodTemplate
 	}
 
 	@Override
-	public int getBufferMemoryForSingleNode(int detailLevel)
+	public int getBufferMemoryForSingleNode()
 	{
 		return 0;
 	}
