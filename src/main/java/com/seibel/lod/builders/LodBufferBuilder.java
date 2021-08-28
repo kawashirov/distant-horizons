@@ -269,9 +269,9 @@ public class LodBufferBuilder
 
 				long renderingTime = renderEnd - renderStart;
 
-				ClientProxy.LOGGER.info("Buffer Build time: " + buildTime + " ms" + '\n' +
-						                        "Tree cutting time: " + treeTime + " ms" + '\n' +
-						                        "Rendering time: " + renderingTime + " ms");
+//				ClientProxy.LOGGER.info("Buffer Build time: " + buildTime + " ms" + '\n' +
+//						                        "Tree cutting time: " + treeTime + " ms" + '\n' +
+//						                        "Rendering time: " + renderingTime + " ms");
 
 				// mark that the buildable buffers as ready to swap
 				switchVbos = true;
@@ -303,9 +303,9 @@ public class LodBufferBuilder
 	}
 
 
-//===============================//
-// BufferBuilder related methods //
-//===============================//
+	//===============================//
+	// BufferBuilder related methods //
+	//===============================//
 
 
 	/**
