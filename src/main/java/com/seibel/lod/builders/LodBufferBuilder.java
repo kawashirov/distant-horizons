@@ -17,16 +17,15 @@
  */
 package com.seibel.lod.builders;
 
-import java.util.concurrent.*;
-import java.util.concurrent.locks.ReentrantLock;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.lwjgl.opengl.GL11;
@@ -130,9 +129,11 @@ public class LodBufferBuilder
 		// only allow one generation process to happen at a time
 		if (generatingBuffers)
 			return;
-
+		
 		if (buildableBuffers == null)
-			throw new IllegalStateException("\"generateLodBuffersAsync\" was called before the \"setupBuffers\" method was called.");
+			// setupBuffers hasn't been called yet
+			return;
+		
 
 
 		generatingBuffers = true;
@@ -308,10 +309,11 @@ public class LodBufferBuilder
 
 
 				long endTime = System.currentTimeMillis();
+				@SuppressWarnings("unused")
 				long buildTime = endTime - startTime;
-
+				@SuppressWarnings("unused")
 				long treeTime = treeEnd - treeStart;
-
+				@SuppressWarnings("unused")
 				long renderingTime = renderEnd - renderStart;
 
 //				ClientProxy.LOGGER.info("Buffer Build time: " + buildTime + " ms" + '\n' +
