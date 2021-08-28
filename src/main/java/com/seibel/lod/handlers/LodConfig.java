@@ -26,6 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.seibel.lod.ModInfo;
+import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.enums.DistanceCalculatorType;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.FogDistance;
@@ -56,7 +57,7 @@ public class LodConfig
 		
 		public ForgeConfigSpec.EnumValue<FogDrawOverride> fogDrawOverride;
 		
-		public ForgeConfigSpec.BooleanValue debugMode;
+		public ForgeConfigSpec.EnumValue<DebugMode> debugMode;
 		
 		public ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
 		
@@ -111,10 +112,11 @@ public class LodConfig
 			
 			debugMode = builder
 					.comment("\n\n"
-							+ " If false the LODs will draw with their normal colors. \n"
-							+ " If true LODs colors will be based on their detail \n"
-							+ " level. \n")
-					.define("debugMode", false);
+							+ " This can be changed using the F4 key. \n"
+							+ " " + DebugMode.OFF.toString() + ": LODs will draw with their normal colors. \n"
+							+ " " + DebugMode.SHOW_DETAIL.toString() + ": LOD colors will be based on their detail. \n"
+							+ " " + DebugMode.SHOW_DETAIL_WIREFRAME.toString() + ": LOD colors will be based on their detail, drawn with wireframe. \n")
+					.defineEnum("debugMode", DebugMode.OFF);
 			
 			lodTemplate = builder
 					.comment("\n\n"

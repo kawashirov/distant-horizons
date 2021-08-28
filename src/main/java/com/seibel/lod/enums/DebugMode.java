@@ -15,33 +15,36 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.builders.lodTemplates;
-
-import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.objects.LevelPos.LevelPos;
-
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.util.math.BlockPos;
+package com.seibel.lod.enums;
 
 /**
- * TODO #21 TriangularLodTemplate
- * Builds each LOD chunk as a singular rectangular prism.
- *
+ * off, detail, detail wireframe
+ * 
  * @author James Seibel
- * @version 06-16-2021
+ * @version 8-28-2021
  */
-public class TriangularLodTemplate extends AbstractLodTemplate
+public enum DebugMode
 {
-	@Override
-	public void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, short[] data, short[][][] adjData,
-	                           LevelPos levelPos, DebugMode debugging)
+	OFF,
+	
+	/** LOD colors are based on their detail */
+	SHOW_DETAIL,
+	
+	/** LOD colors are based on their detail, and draws in wireframe. */
+	SHOW_DETAIL_WIREFRAME;
+	
+	/** used when cycling through the different modes */
+	private DebugMode next;
+	static 
 	{
-		System.err.println("DynamicLodTemplate not implemented!");
+		OFF.next = SHOW_DETAIL;
+		SHOW_DETAIL.next = SHOW_DETAIL_WIREFRAME;
+		SHOW_DETAIL_WIREFRAME.next = OFF;
 	}
-
-	@Override
-	public int getBufferMemoryForSingleNode(int detailLevel)
+	
+	/** returns the next debug mode */
+	public DebugMode getNext()
 	{
-		return 0;
+		return this.next;
 	}
 }

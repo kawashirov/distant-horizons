@@ -259,7 +259,7 @@ public class ClientProxy
 		//f4 is key 293, the 1 action mean that the key just got pressed
 		if(event.getKey() == 293 && event.getAction() == 1)
 		{
-			LodConfig.CLIENT.debugMode.set(!LodConfig.CLIENT.debugMode.get());
+			LodConfig.CLIENT.debugMode.set(LodConfig.CLIENT.debugMode.get().getNext());
 		}
 	}
 	

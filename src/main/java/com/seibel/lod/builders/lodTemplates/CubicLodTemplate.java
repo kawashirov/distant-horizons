@@ -17,6 +17,7 @@
  */
 package com.seibel.lod.builders.lodTemplates;
 
+import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.DataPoint;
@@ -47,7 +48,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, short[] data, short[][][] adjData,
-	                           LevelPos levelPos, boolean debugging)
+	                           LevelPos levelPos, DebugMode debugging)
 	{
 		AxisAlignedBB bbox;
 
@@ -63,7 +64,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				levelPos.posZ * width);
 
 		int color = DataPoint.getColor(data);
-		if (LodConfig.CLIENT.debugMode.get())
+		if (debugging != DebugMode.OFF)
 		{
 			color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[levelPos.detailLevel].getRGB();
 		}
@@ -74,21 +75,6 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		}
 
 	}
-
-	/*
-	 * @Override public void addLodToBuffer(BufferBuilder buffer,
-	 * LodQuadTreeDimension lodDim, LodQuadTreeNode lod, double xOffset, double
-	 * yOffset, double zOffset, boolean debugging) { AxisAlignedBB bbox;
-	 *
-	 * bbox = generateBoundingBox( lod.getLodDataPoint().height,
-	 * lod.getLodDataPoint().depth, lod.width, xOffset, yOffset, zOffset);
-	 *
-	 * Color color = lod.getLodDataPoint().color;
-	 *
-	 * if (bbox != null) { addBoundingBoxToBuffer(buffer, bbox, color); }
-	 *
-	 * }
-	 */
 
 	private AxisAlignedBB generateBoundingBox(int height, int depth, int width, double xOffset, double yOffset, double zOffset)
 	{
@@ -121,25 +107,14 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			// the side colors are different because
 			// when using fast lighting in Minecraft the north/south
 			// and east/west sides are different in a similar way
-/*
-            int northSouthDarkenAmount = -25;
-            int eastWestDarkenAmount = -50;
-            int bottomDarkenAmount = -75;
-
-            northSouthColor = ColorUtil.applyShade(c,northSouthDarkenAmount);
-            eastWestColor = ColorUtil.applyShade(c,eastWestDarkenAmount);
-            bottomColor = ColorUtil.applyShade(c,bottomDarkenAmount);*/
-/*
-            float northSouthDarkenAmount = 0.80f;
-            float eastWestDarkenAmount = 0.60f;
-            float bottomDarkenAmount = 0.40f;*/
 			/**TODO OPTIMIZE THIS STEP*/
-			topColor = ColorUtil.applyShade(c, Minecraft.getInstance().level.getShade(Direction.UP, true));
-			bottomColor = ColorUtil.applyShade(c, Minecraft.getInstance().level.getShade(Direction.DOWN, true));
-			northColor = ColorUtil.applyShade(c, Minecraft.getInstance().level.getShade(Direction.NORTH, true));
-			southColor = ColorUtil.applyShade(c, Minecraft.getInstance().level.getShade(Direction.SOUTH, true));
-			westColor = ColorUtil.applyShade(c, Minecraft.getInstance().level.getShade(Direction.WEST, true));
-			eastColor = ColorUtil.applyShade(c, Minecraft.getInstance().level.getShade(Direction.EAST, true));
+			Minecraft mc = Minecraft.getInstance();
+			topColor = ColorUtil.applyShade(c, mc.level.getShade(Direction.UP, true));
+			bottomColor = ColorUtil.applyShade(c, mc.level.getShade(Direction.DOWN, true));
+			northColor = ColorUtil.applyShade(c, mc.level.getShade(Direction.NORTH, true));
+			southColor = ColorUtil.applyShade(c, mc.level.getShade(Direction.SOUTH, true));
+			westColor = ColorUtil.applyShade(c, mc.level.getShade(Direction.WEST, true));
+			eastColor = ColorUtil.applyShade(c, mc.level.getShade(Direction.EAST, true));
 		}
 
 		// apply the user specified saturation and brightness

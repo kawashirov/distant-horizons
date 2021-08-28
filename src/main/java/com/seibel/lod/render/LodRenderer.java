@@ -31,6 +31,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.builders.LodBufferBuilder;
+import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.FogQuality;
@@ -98,7 +99,7 @@ public class LodRenderer
      * If true the LODs colors will be replaced with
      * a checkerboard, this can be used for debugging.
      */
-    public boolean debugging = false;
+    public DebugMode previousDebugMode = DebugMode.OFF;
 
     private Minecraft mc;
     private GameRenderer gameRender;
@@ -216,9 +217,9 @@ public class LodRenderer
         }
 
         // did the user change the debug setting?
-        if (LodConfig.CLIENT.debugMode.get() != debugging)
+        if (LodConfig.CLIENT.debugMode.get() != previousDebugMode)
         {
-            debugging = LodConfig.CLIENT.debugMode.get();
+            previousDebugMode = LodConfig.CLIENT.debugMode.get();
             regen = true;
         }
 
@@ -275,19 +276,15 @@ public class LodRenderer
         //===========================//
 
         // set the required open GL settings
-        if(LodConfig.CLIENT.debugMode.get()){
-            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
-        }else{
-            GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
-        }
-        //GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
-        //GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        
+		if (LodConfig.CLIENT.debugMode.get() == DebugMode.SHOW_DETAIL_WIREFRAME)
+			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+		else
+			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
         GL11.glDisable(GL11.GL_TEXTURE_2D);
         GL11.glEnable(GL11.GL_CULL_FACE);
         GL11.glEnable(GL11.GL_COLOR_MATERIAL);
         GL11.glEnable(GL11.GL_DEPTH_TEST);
-        //GL11.glEnable(GL11.GL_BLEND);
-        //GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 
         // disable the lights Minecraft uses
         GL11.glDisable(GL11.GL_LIGHT0);

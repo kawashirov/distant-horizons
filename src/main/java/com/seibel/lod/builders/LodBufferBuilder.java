@@ -221,7 +221,7 @@ public class LodBufferBuilder
 												adjData[1][z] = lodDim.getData(adjPos);
 										}
 										LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,
-												posToRender, renderer.debugging);
+												posToRender, renderer.previousDebugMode);
 									}
 								} catch (ArrayIndexOutOfBoundsException e)
 								{

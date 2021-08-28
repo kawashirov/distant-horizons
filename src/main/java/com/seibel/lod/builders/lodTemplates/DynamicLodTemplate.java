@@ -17,6 +17,7 @@
  */
 package com.seibel.lod.builders.lodTemplates;
 
+import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.objects.LevelPos.LevelPos;
 
 import net.minecraft.client.renderer.BufferBuilder;
@@ -35,7 +36,7 @@ public class DynamicLodTemplate extends AbstractLodTemplate
 {
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, short[] data, short[][][] adjData,
-	                           LevelPos levelPos, boolean debugging)
+	                           LevelPos levelPos, DebugMode debugging)
 	{
 		System.err.println("DynamicLodTemplate not implemented!");
 	}
