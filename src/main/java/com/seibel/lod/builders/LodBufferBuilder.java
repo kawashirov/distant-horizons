@@ -17,6 +17,10 @@
  */
 package com.seibel.lod.builders;
 
+import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantLock;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -29,6 +33,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.handlers.LodConfig;
@@ -106,6 +111,8 @@ public class LodBufferBuilder
 	 */
 	private ReentrantLock bufferLock = new ReentrantLock();
 
+	private Object[][] setsToRender;
+	private RegionPos lastRegionPos;
 
 	public LodBufferBuilder()
 	{
@@ -161,7 +168,19 @@ public class LodBufferBuilder
 				// =====================//
 				//    RENDERING PART    //
 				// =====================//
-				ConcurrentMap<LevelPos, List<Short>> adjMap = new ConcurrentSkipListMap<>();
+
+				RegionPos newRegionPos = new RegionPos(playerChunkPos);
+				if(lastRegionPos == null)
+					lastRegionPos = newRegionPos;
+
+				if (setsToRender == null)
+					setsToRender = new Object[lodDim.regions.length][lodDim.regions.length];
+
+				if (setsToRender.length != lodDim.regions.length || lastRegionPos == newRegionPos)
+				{
+					lastRegionPos = newRegionPos;
+					setsToRender = new Object[lodDim.regions.length][lodDim.regions.length];
+				}
 
 				for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
 				{
@@ -178,9 +197,15 @@ public class LodBufferBuilder
 						// changed while we were running this method
 						if (currentBuffer == null || (currentBuffer != null && !currentBuffer.building()))
 							return;
+
+						if (setsToRender[xRegion][zRegion] == null)
+						{
+							setsToRender[xRegion][zRegion] = new ConcurrentHashMap<LevelPos, MutableBoolean>();
+						}
+						ConcurrentMap<LevelPos, MutableBoolean> nodeToRender = (ConcurrentMap<LevelPos, MutableBoolean>) setsToRender[xRegion][zRegion];
+
 						Callable<Boolean> dataToRenderThread = () ->
 						{
-							Set<LevelPos> nodeToRender = new HashSet<>();
 							lodDim.getDataToRender(
 									nodeToRender,
 									regionPos,
@@ -188,8 +213,21 @@ public class LodBufferBuilder
 									playerBlockPosRounded.getZ());
 
 							LevelPos adjPos = new LevelPos();
-							for (LevelPos posToRender : nodeToRender)
+							for (LevelPos posToRender : nodeToRender.keySet())
 							{
+								if (!nodeToRender.get(posToRender).booleanValue())
+								{
+									nodeToRender.remove(posToRender);
+									continue;
+								}
+								nodeToRender.get(posToRender).setFalse();
+								// skip any chunks that Minecraft is going to render
+
+								if (renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos()))
+								{
+									continue;
+								}
+
 								LevelPos chunkPos = posToRender.getConvertedLevelPos(LodUtil.CHUNK_DETAIL_LEVEL);
 								// skip any chunks that Minecraft is going to render
 
@@ -209,7 +247,7 @@ public class LodBufferBuilder
 										{
 											adjPos.changeParameters(posToRender.detailLevel, posToRender.posX + x * 2 - 1, posToRender.posZ);
 											if (!renderer.vanillaRenderedChunks.contains(adjPos.getChunkPos())
-													     && (nodeToRender.contains(adjPos) || disableFix))
+													     && (nodeToRender.containsKey(adjPos) || disableFix))
 												adjData[0][x] = lodDim.getData(adjPos);
 										}
 
@@ -217,7 +255,7 @@ public class LodBufferBuilder
 										{
 											adjPos.changeParameters(posToRender.detailLevel, posToRender.posX, posToRender.posZ + z * 2 - 1);
 											if (!renderer.vanillaRenderedChunks.contains(adjPos.getChunkPos())
-													     && (nodeToRender.contains(adjPos) || disableFix))
+													     && (nodeToRender.containsKey(adjPos) || disableFix))
 												adjData[1][z] = lodDim.getData(adjPos);
 										}
 										LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,

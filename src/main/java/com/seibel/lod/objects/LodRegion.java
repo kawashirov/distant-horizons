@@ -2,6 +2,7 @@ package com.seibel.lod.objects;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListSet;
 
@@ -13,6 +14,7 @@ import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 /**
  * STANDARD TO FOLLOW
@@ -275,7 +277,7 @@ public class LodRegion implements Serializable
 	/**
 	 * @return
 	 */
-	public void getDataToRender(Set<LevelPos>  dataToRender, int playerPosX, int playerPosZ)
+	public void getDataToRender(ConcurrentMap<LevelPos, MutableBoolean> dataToRender, int playerPosX, int playerPosZ)
 	{
 		LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
 		getDataToRender(dataToRender, levelPos, playerPosX, playerPosZ);
@@ -284,7 +286,7 @@ public class LodRegion implements Serializable
 	/**
 	 * @return
 	 */
-	private void getDataToRender(Set<LevelPos>  dataToRender, LevelPos levelPos, int playerPosX, int playerPosZ)
+	private void getDataToRender(ConcurrentMap<LevelPos, MutableBoolean> dataToRender, LevelPos levelPos, int playerPosX, int playerPosZ)
 	{
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel);
 
@@ -301,7 +303,14 @@ public class LodRegion implements Serializable
 			return;
 		else if (supposedLevel == detailLevel)
 		{
-			dataToRender.add(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size));
+			if (dataToRender.containsKey(levelPos))
+			{
+				//levelPos.changeParameters(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size);
+				dataToRender.get(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size)).setTrue();
+			}else
+			{
+				dataToRender.put(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size), new MutableBoolean(true));
+			}
 		} else //case where (detailLevel > supposedLevel)
 		{
 			int childPosX = posX * 2;
@@ -329,11 +338,17 @@ public class LodRegion implements Serializable
 				}
 			} else
 			{
-				dataToRender.add(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size));
+
+				levelPos.changeParameters(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size);
+				if (dataToRender.containsKey(levelPos))
+					dataToRender.get(levelPos).setTrue();
+				else
+					dataToRender.put(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size), new MutableBoolean(true));
 			}
 		}
 		return;
 	}
+
 
 	/**
 	 * @param levelPos

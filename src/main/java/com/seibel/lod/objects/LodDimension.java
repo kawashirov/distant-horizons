@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -40,6 +41,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 
 /**
@@ -513,9 +515,8 @@ public class LodDimension
 	 *
 	 * @return list of nodes
 	 */
-	public void getDataToRender(Set<LevelPos> dataToRender, RegionPos regionPos, int playerPosX, int playerPosZ)
+	public void getDataToRender(ConcurrentMap<LevelPos, MutableBoolean> dataToRender, RegionPos regionPos, int playerPosX, int playerPosZ)
 	{
-		LevelPos regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
 		try
 		{
 			LodRegion region = getRegion(regionPos);
