@@ -19,12 +19,20 @@ apply plugin: 'org.spongepowered.mixin'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'java' // needed for compileJava
 
 version = 'a1.3.2'
-group = 'com.backsun.lod'
+group = 'com.seibel.lod'
 archivesBaseName = 'lod_1.16.5'
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+
+compileJava {
+    // release 8 is needed because otherwise FloatBuffer.flip() will crash
+    // on some machines
+    // example thread: https://github.com/eclipse/jetty.project/issues/3244
+    options.compilerArgs.addAll(['--release', '8', '-Xlint:unchecked', '-Xlint:deprecation']) 
+}
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
