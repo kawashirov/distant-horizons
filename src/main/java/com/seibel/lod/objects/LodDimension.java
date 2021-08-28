@@ -476,7 +476,7 @@ public class LodDimension
 	 *
 	 * @return list of quadTrees
 	 */
-	public List<LevelPos> getDataToGenerate(int playerPosX, int playerPosZ, int start, int end, byte generation, byte detailLevel, int dataNumber)
+	public List<LevelPos> getDataToGenerate(int playerPosX, int playerPosZ, byte generation, byte detailLevel, int dataNumber)
 	{
 
 		int n = regions.length;
@@ -484,7 +484,6 @@ public class LodDimension
 		int zIndex;
 		LodRegion region;
 		RegionPos regionPos;
-		LevelPos regionLevelPos = new LevelPos();
 		List<LevelPos> listOfData = new ArrayList<>();
 		for (int xRegion = 0; xRegion < n; xRegion++)
 		{
@@ -495,13 +494,9 @@ public class LodDimension
 					xIndex = (xRegion + center.x) - halfWidth;
 					zIndex = (zRegion + center.z) - halfWidth;
 					regionPos = new RegionPos(xIndex, zIndex);
-					regionLevelPos.changeParameters(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
-					if (end >= regionLevelPos.minDistance(playerPosX, playerPosZ) &&
-							    start <= regionLevelPos.maxDistance(playerPosX, playerPosZ))
-					{
-						region = getRegion(regionPos);
-						listOfData.addAll(region.getDataToGenerate(playerPosX, playerPosZ, start, end, generation, detailLevel, dataNumber));
-					}
+					region = getRegion(regionPos);
+					listOfData.addAll(region.getDataToGenerate(playerPosX, playerPosZ, generation, detailLevel, dataNumber));
+
 				} catch (Exception e)
 				{
 					//e.printStackTrace();
@@ -526,7 +521,7 @@ public class LodDimension
 	 *
 	 * @return list of nodes
 	 */
-	public void getDataToRender(Set<LevelPos>  dataToRender, RegionPos regionPos, int playerPosX, int playerPosZ)
+	public void getDataToRender(Set<LevelPos> dataToRender, RegionPos regionPos, int playerPosX, int playerPosZ)
 	{
 		LevelPos regionLevelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, regionPos.x, regionPos.z);
 		try

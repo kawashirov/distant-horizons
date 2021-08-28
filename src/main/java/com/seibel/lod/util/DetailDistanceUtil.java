@@ -14,12 +14,10 @@ public class DetailDistanceUtil
 	private static double genMultiplier = 1.0;
 	private static double treeGenMultiplier = 1.0;
 	private static double treeCutMultiplier = 1.0;
-	//private static int minDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
-	private static int minDetail = LodDetail.FULL.detailLevel;
+	private static int minDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
 	private static int maxDetail = LodUtil.REGION_DETAIL_LEVEL + 1;
 	private static int minDistance = 0;
-	//private static int maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16 * 2;
-	private static int maxDistance = 128 * 16 * 2;
+	private static int maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16 * 2;
 	private static int base = 2;
 	private static double logBase = Math.log(2);
 
@@ -35,6 +33,12 @@ public class DetailDistanceUtil
 			LodDetail.SINGLE,
 			LodDetail.SINGLE,
 			LodDetail.SINGLE};
+
+
+	public static void updateSettings(){
+		minDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
+		maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16 * 2;
+	}
 
 	public static int getDistanceRendering(int detail)
 	{
@@ -94,6 +98,12 @@ public class DetailDistanceUtil
 		return (byte) Math.min(detail, LodUtil.REGION_DETAIL_LEVEL);
 	}
 
+	public static byte getDistanceGenerationInverse(int distance, byte minDetailLevel)
+	{
+		return (byte) Math.max(getDistanceRenderingInverse((int) (distance * genMultiplier))
+				,minDetailLevel);
+	}
+
 	public static int getDistanceGeneration(int detail)
 	{
 		if (detail == maxDetail)
@@ -147,7 +157,7 @@ public class DetailDistanceUtil
 	}
 
 
-	public static boolean regionInView(int playerPosX, int playerPosY, int playerPosZ, int alpha, int beta, int fov, RegionPos regionPos)
+	public static boolean regionInView(int playerPosX, int playerPosY, int playerPosZ, int xRot, int yRot, int fov, RegionPos regionPos)
 	{
 
 		//System.out.println(Math.floorMod((int) mc.player.xRot,360) + " " + Math.floorMod((int) mc.player.yRot,360) + " " + mc.options.fov);

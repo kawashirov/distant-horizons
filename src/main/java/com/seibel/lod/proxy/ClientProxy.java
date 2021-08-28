@@ -17,6 +17,7 @@
  */
 package com.seibel.lod.proxy;
 
+import com.seibel.lod.util.DetailDistanceUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -100,6 +101,7 @@ public class ClientProxy
 	 */
 	public void renderLods(float partialTicks)
 	{
+		DetailDistanceUtil.updateSettings();
 		if (mc == null || mc.player == null || !lodWorld.getIsWorldLoaded())
 			return;
 
@@ -119,7 +121,7 @@ public class ClientProxy
 
 
 		// comment out when creating a release
-		applyConfigOverrides();
+		//applyConfigOverrides();
 
 
 		// Note to self:
@@ -294,6 +296,7 @@ public class ClientProxy
 			recalculateWidths = false;
 			//LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );
 		}
+		DetailDistanceUtil.updateSettings();
 	}
 
 

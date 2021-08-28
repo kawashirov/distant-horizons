@@ -173,7 +173,7 @@ public class LodConfig
 			lodChunkRenderDistance = builder
 					.comment("\n\n"
 							+ " This is the render distance of the mod \n")
-					.defineInRange("lodChunkRenderDistane", 128, 32, 256);
+					.defineInRange("lodChunkRenderDistane", 128, 32, 512);
 			
 			distanceGenerationMode = builder
 					.comment("\n\n"
