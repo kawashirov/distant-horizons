@@ -522,7 +522,7 @@ public class LodDimension
 			region.getDataToRender(dataToRender, playerPosX, playerPosZ);
 		} catch (Exception e)
 		{
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 

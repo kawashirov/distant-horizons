@@ -201,12 +201,9 @@ public class LodBuilder
 			//levelPos.changeParameters(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
 
 			lodDim.updateData(new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z));
-		} catch (NullPointerException e)
+		} catch (Exception e)
 		{
-			e.printStackTrace();
-		} catch (ArrayIndexOutOfBoundsException e)
-		{
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 
