@@ -17,8 +17,6 @@
  */
 package com.seibel.lod.proxy;
 
-import com.seibel.lod.util.DetailDistanceUtil;
-import net.minecraftforge.client.event.InputEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -37,11 +35,13 @@ import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.render.LodRenderer;
+import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
@@ -239,7 +239,6 @@ public class ClientProxy
 		}
 	}
 
-
 	@SubscribeEvent
 	public void blockChangeEvent(BlockEvent event)
 	{
@@ -253,7 +252,18 @@ public class ClientProxy
 			lodBuilder.generateLodNodeAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld());
 		}
 	}
-
+	
+	@SubscribeEvent
+	public void onKeyInput(InputEvent.KeyInputEvent event) 
+	{
+		//f4 is key 293, the 1 action mean that the key just got pressed
+		if(event.getKey() == 293 && event.getAction() == 1)
+		{
+			LodConfig.CLIENT.debugMode.set(!LodConfig.CLIENT.debugMode.get());
+		}
+	}
+	
+	
 
 	//==================//
 	// frame LOD events //
@@ -271,7 +281,7 @@ public class ClientProxy
 		{
 			lodWorld.saveAllDimensions();
 			lodDim.move(worldRegionOffset);
-			LOGGER.info("offset: " + worldRegionOffset.x + "," + worldRegionOffset.z + "\t center: " + lodDim.getCenterX() + "," + lodDim.getCenterZ());
+			//LOGGER.info("offset: " + worldRegionOffset.x + "," + worldRegionOffset.z + "\t center: " + lodDim.getCenterX() + "," + lodDim.getCenterZ());
 		}
 	}
 
@@ -289,6 +299,8 @@ public class ClientProxy
 		// do the dimensions need to change in size?
 		if (lodBuilder.defaultDimensionWidthInRegions != newWidth || recalculateWidths)
 		{
+			lodWorld.saveAllDimensions();
+			
 			// update the dimensions to fit the new width
 			lodWorld.resizeDimensionRegionWidth(newWidth);
 			lodBuilder.defaultDimensionWidthInRegions = newWidth;
@@ -300,14 +312,7 @@ public class ClientProxy
 		DetailDistanceUtil.updateSettings();
 	}
 
-	@SubscribeEvent
-	public void onKeyInput(InputEvent.KeyInputEvent event) {
-		//f4 is key 293, the 1 action mean that the key just got pressed
-		if(event.getKey() == 293 && event.getAction() == 1)
-		{
-			LodConfig.CLIENT.debugMode.set(!LodConfig.CLIENT.debugMode.get());
-		}
-	}
+	
 
 	//================//
 	// public getters //
