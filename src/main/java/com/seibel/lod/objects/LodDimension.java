@@ -328,6 +328,9 @@ public class LodDimension
 			{
 				int regionX;
 				int regionZ;
+				int minDistance;
+				byte detail;
+				byte levelToCut;
 				LevelPos levelPos = new LevelPos();
 
 				for (int x = 0; x < regions.length; x++)
@@ -336,28 +339,21 @@ public class LodDimension
 					{
 						regionX = (x + center.x) - halfWidth;
 						regionZ = (z + center.z) - halfWidth;
-						levelPos.changeParameters(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ);
 						//we start checking from the first circle. If the whole region is in the circle
 						//we proceed to cut all the level lower than the level of circle 1 and we break
 						//if this is not the case w
-						for (byte index = LodUtil.BLOCK_DETAIL_LEVEL; index <= LodUtil.DETAIL_OPTIONS; index++)
+						if (regions[x][z] != null)
 						{
-							if (DetailDistanceUtil.getDistanceTreeCut(index + 1) > levelPos.minDistance(playerPosX, playerPosZ))
+							levelPos.changeParameters(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ);
+							minDistance = levelPos.minDistance(playerPosX, playerPosZ);
+							detail = DetailDistanceUtil.getDistanceTreeCutInverse(minDistance);
+							levelToCut = DetailDistanceUtil.getCutLodDetail(detail);
+							if (regions[x][z].getMinDetailLevel() > levelToCut)
 							{
-
-								byte cutDetailLevel = DetailDistanceUtil.getCutLodDetail(index);
-
-								if (regions[x][z] != null)
-								{
-									if (regions[x][z].getMinDetailLevel() > cutDetailLevel)
-									{
-										regions[x][z].cutTree(cutDetailLevel);
-									}
-								}
-								//once we
-								break;
+								regions[x][z].cutTree(levelToCut);
 							}
 						}
+
 					}// region z
 				}// region z
 
@@ -384,6 +380,9 @@ public class LodDimension
 				int regionX;
 				int regionZ;
 				LodRegion region;
+				int minDistance;
+				byte detail;
+				byte levelToGen;
 				LevelPos levelPos = new LevelPos();
 				for (int x = 0; x < regions.length; x++)
 				{
@@ -393,42 +392,34 @@ public class LodDimension
 						regionZ = (z + center.z) - halfWidth;
 						levelPos.changeParameters(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ);
 						final RegionPos regionPos = new RegionPos(regionX, regionZ);
-						for (byte index = LodUtil.BLOCK_DETAIL_LEVEL; index <= LodUtil.REGION_DETAIL_LEVEL; index++)
+						region = regions[x][z];
+						//We require that the region we are checking is loaded with at least this level
+
+						levelPos.changeParameters(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ);
+						minDistance = levelPos.minDistance(playerPosX, playerPosZ);
+						detail = DetailDistanceUtil.getDistanceTreeGenInverse(minDistance);
+						levelToGen = DetailDistanceUtil.getLodDetail(detail).detailLevel;
+						if (region == null)
 						{
+							//First case, region has to be initialized
 
-							//As soon as we find in which circle the region should be we analyze it
-							if (DetailDistanceUtil.getDistanceTreeGen(index + 1) > levelPos.minDistance(playerPosX, playerPosZ))
+							//We check if there is a file at the target level
+							regions[x][z] = getRegionFromFile(regionPos, levelToGen);
+
+							//if there is no file we initialize the region
+							if (regions[x][z] == null)
 							{
-
-								region = regions[x][z];
-								//We require that the region we are checking is loaded with at least this level
-								byte targetDetailLevel = DetailDistanceUtil.getLodDetail(index).detailLevel;
-
-								if (region == null)
-								{
-									//First case, region has to be initialized
-
-									//We check if there is a file at the target level
-									regions[x][z] = getRegionFromFile(regionPos, targetDetailLevel);
-
-									//if there is no file we initialize the region
-									if (regions[x][z] == null)
-									{
-										regions[x][z] = new LodRegion(targetDetailLevel, regionPos);
-									}
-
-								} else if (region.getMinDetailLevel() > targetDetailLevel)
-								{
-									//Second case, region has been initialized but at a higher level
-									//We expand the region by introducing the missing layer
-									region.expand(targetDetailLevel);
-								}
-								break;
+								regions[x][z] = new LodRegion(levelToGen, regionPos);
 							}
+
+						} else if (region.getMinDetailLevel() > levelToGen)
+						{
+							//Second case, region has been initialized but at a higher level
+							//We expand the region by introducing the missing layer
+							region.expand(levelToGen);
 						}
 					}
 				}
-				;
 			});
 			cutAndGenThreads.execute(thread);
 		}

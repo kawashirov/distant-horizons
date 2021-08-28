@@ -151,23 +151,23 @@ public class LodWorldGenerator
 					byte circle;
 					LevelPos levelPos;
 					//We alternate the generation between fast and near to make everything more smooth
-					while(!nearLevelPosListToGen.isEmpty() && !farLevelPosListToGen.isEmpty()){
-						if(!farLevelPosListToGen.isEmpty())
+					while(!nearLevelPosListToGen.isEmpty() || !farLevelPosListToGen.isEmpty()){
+						if(!nearLevelPosListToGen.isEmpty())
 						{
-							levelPos = farLevelPosListToGen.get(0);
-							farLevelPosListToGen.remove(0);
-							minDetail = maxDetailFar;
+							levelPos = nearLevelPosListToGen.get(0);
+							nearLevelPosListToGen.remove(0);
+							minDetail = (byte) 0;
 							maxDistance = levelPos.maxDistance(
 									playerBlockPosRounded.getX(),
 									playerBlockPosRounded.getZ());
 							circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance, minDetail);
 							generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(circle), DetailDistanceUtil.getLodDetail(circle)));
 						}
-						if(!nearLevelPosListToGen.isEmpty())
+						if(!farLevelPosListToGen.isEmpty())
 						{
-							levelPos = nearLevelPosListToGen.get(0);
-							nearLevelPosListToGen.remove(0);
-							minDetail = (byte) 0;
+							levelPos = farLevelPosListToGen.get(0);
+							farLevelPosListToGen.remove(0);
+							minDetail = maxDetailFar;
 							maxDistance = levelPos.maxDistance(
 									playerBlockPosRounded.getX(),
 									playerBlockPosRounded.getZ());

@@ -104,6 +104,18 @@ public class DetailDistanceUtil
 				,minDetailLevel);
 	}
 
+
+	public static byte getDistanceTreeCutInverse(int distance)
+	{
+		return getDistanceRenderingInverse((int) (distance * treeCutMultiplier));
+	}
+
+
+	public static byte getDistanceTreeGenInverse(int distance)
+	{
+		return getDistanceRenderingInverse((int) (distance * treeGenMultiplier));
+	}
+
 	public static int getDistanceGeneration(int detail)
 	{
 		if (detail == maxDetail)
