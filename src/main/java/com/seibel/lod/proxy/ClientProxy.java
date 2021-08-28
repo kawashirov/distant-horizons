@@ -58,18 +58,18 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 public class ClientProxy
 {
 	public static final Logger LOGGER = LogManager.getLogger("LOD");
-
+	
 	private static LodWorld lodWorld = new LodWorld();
 	private static LodBuilder lodBuilder = new LodBuilder();
 	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder();
 	private static LodRenderer renderer = new LodRenderer(lodBufferBuilder);
 	private static LodWorldGenerator lodWorldGenerator = LodWorldGenerator.INSTANCE;
-
+	
 	private boolean configOverrideReminderPrinted = false;
-
+	
 	Minecraft mc = Minecraft.getInstance();
-
-
+	
+	
 	/**
 	 * This is used to determine if the LODs should be regenerated
 	 */
@@ -78,24 +78,24 @@ public class ClientProxy
 	 * This is used to determine if the LODs should be regenerated
 	 */
 	public static int previousLodRenderDistance = 0;
-
+	
 	/**
 	 * can be set if we want to recalculate variables related
 	 * to the LOD view distance
 	 */
 	private boolean recalculateWidths = false;
-
-
+	
+	
 	public ClientProxy()
 	{
-
+		
 	}
-
-
+	
+	
 	//==============//
 	// render event //
 	//==============//
-
+	
 	/**
 	 * Do any setup that is required to draw LODs
 	 * and then tell the LodRenderer to draw.
@@ -105,26 +105,26 @@ public class ClientProxy
 		DetailDistanceUtil.updateSettings();
 		if (mc == null || mc.player == null || !lodWorld.getIsWorldLoaded())
 			return;
-
+		
 		viewDistanceChangedEvent();
-
+		
 		LodDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
 		if (lodDim == null)
 			return;
-
-
+		
+		
 		playerMoveEvent(lodDim);
 		//System.out.println("memory needed " + lodDim.getMinMemoryNeeded() + " byte");
 		//System.out.println(lodDim);
-
+		
 		lodDim.treeCutter((int) mc.player.getX(), (int) mc.player.getZ());
 		lodDim.treeGenerator((int) mc.player.getX(), (int) mc.player.getZ());
-
-
+		
+		
 		// comment out when creating a release
-		//applyConfigOverrides();
-
-
+		applyConfigOverrides();
+		
+		
 		// Note to self:
 		// if "unspecified" shows up in the pie chart, it is
 		// possibly because the amount of time between sections
@@ -133,18 +133,18 @@ public class ClientProxy
 		profiler.pop(); // get out of "terrain"
 		profiler.push("LOD");
 		renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
-
+		
 		profiler.pop(); // end LOD
 		profiler.push("terrain"); // restart "terrain"
-
-
+		
+		
 		// these can't be set until after the buffers are built (in renderer.drawLODs)
 		// otherwise the buffers may be set to the wrong size, or not changed at all
 		previousChunkRenderDistance = mc.options.renderDistance;
 		previousLodRenderDistance = LodConfig.CLIENT.lodChunkRenderDistance.get();
 	}
-
-
+	
+	
 	private void applyConfigOverrides()
 	{
 		// remind the developer(s). that config override is active
@@ -153,59 +153,59 @@ public class ClientProxy
 			mc.player.sendMessage(new StringTextComponent("Debug settings enabled!"), mc.player.getUUID());
 			configOverrideReminderPrinted = true;
 		}
-
-		//		LodConfig.CLIENT.drawLODs.set(true);
-		LodConfig.CLIENT.debugMode.set(false);
-
+		
+		//LodConfig.CLIENT.drawLODs.set(true);
+		//LodConfig.CLIENT.debugMode.set(true);
+		
 		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.FULL);
 		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.FULL);
-
+		
 		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
 		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
 		LodConfig.CLIENT.shadingMode.set(ShadingMode.DARKEN_SIDES);
 		LodConfig.CLIENT.brightnessMultiplier.set(1.0);
 		LodConfig.CLIENT.saturationMultiplier.set(1.0);
-
+		
 		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
-		LodConfig.CLIENT.lodChunkRenderDistance.set(128);
+		LodConfig.CLIENT.lodChunkRenderDistance.set(256);
 		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
-		LodConfig.CLIENT.lodQuality.set(2);
+		LodConfig.CLIENT.lodQuality.set(3);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
 		// has to be set in the config file
 		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(Runtime.getRuntime().availableProcessors());
 	}
-
-
+	
+	
 	//==============//
 	// forge events //
 	//==============//
-
+	
 	@SubscribeEvent
 	public void serverTickEvent(TickEvent.ServerTickEvent event)
 	{
 		if (mc == null || mc.player == null || !lodWorld.getIsWorldLoaded())
 			return;
-
+		
 		LodDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
 		if (lodDim == null)
 			return;
-
+		
 		lodWorldGenerator.queueGenerationRequests(lodDim, renderer, lodBuilder);
 	}
-
+	
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
 		lodBuilder.generateLodNodeAsync(event.getChunk(), lodWorld, event.getWorld(), DistanceGenerationMode.SERVER);
 	}
-
+	
 	@SubscribeEvent
 	public void worldSaveEvent(WorldEvent.Save event)
 	{
 		if (lodWorld != null)
 			lodWorld.saveAllDimensions();
 	}
-
+	
 	@SubscribeEvent
 	public void worldLoadEvent(WorldEvent.Load event)
 	{
@@ -215,38 +215,38 @@ public class ClientProxy
 		// (if this isn't done the previous world's LODs may be drawn)
 		renderer.regenerateLODsNextFrame();
 	}
-
+	
 	@SubscribeEvent
 	public void worldUnloadEvent(WorldEvent.Unload event)
 	{
 		// the player just unloaded a world/dimension
-
+		
 		if (mc.getConnection().getLevel() == null)
 		{
 			// if this isn't done unfinished tasks may be left in the queue
 			// preventing new LodChunks form being generated
 			LodNodeGenWorker.restartExecuterService();
-
+			
 			LodWorldGenerator.INSTANCE.numberOfChunksWaitingToGenerate.set(0);
 			// the player has disconnected from a server
 			lodWorld.deselectWorld();
-
-
+			
+			
 			// hopefully this should reduce issues related to the buffer builder
 			// breaking when changing worlds.
 			renderer.destroyBuffers();
 			recalculateWidths = true;
 		}
 	}
-
+	
 	@SubscribeEvent
 	public void blockChangeEvent(BlockEvent event)
 	{
 		if (event.getClass() == BlockEvent.BreakEvent.class ||
-				    event.getClass() == BlockEvent.EntityPlaceEvent.class ||
-				    event.getClass() == BlockEvent.EntityMultiPlaceEvent.class ||
-				    event.getClass() == BlockEvent.FluidPlaceBlockEvent.class ||
-				    event.getClass() == BlockEvent.PortalSpawnEvent.class)
+				event.getClass() == BlockEvent.EntityPlaceEvent.class ||
+				event.getClass() == BlockEvent.EntityMultiPlaceEvent.class ||
+				event.getClass() == BlockEvent.FluidPlaceBlockEvent.class ||
+				event.getClass() == BlockEvent.PortalSpawnEvent.class)
 		{
 			// recreate the LOD where the blocks were changed
 			lodBuilder.generateLodNodeAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld());
@@ -264,11 +264,11 @@ public class ClientProxy
 	}
 	
 	
-
+	
 	//==================//
 	// frame LOD events //
 	//==================//
-
+	
 	/**
 	 * Re-centers the given LodDimension if it needs to be.
 	 */
@@ -284,8 +284,8 @@ public class ClientProxy
 			//LOGGER.info("offset: " + worldRegionOffset.x + "," + worldRegionOffset.z + "\t center: " + lodDim.getCenterX() + "," + lodDim.getCenterZ());
 		}
 	}
-
-
+	
+	
 	/**
 	 * Re-sizes all LodDimensions if they needs to be.
 	 */
@@ -295,7 +295,7 @@ public class ClientProxy
 		int chunksWide = LodConfig.CLIENT.lodChunkRenderDistance.get() * 2 + 1;
 		int newWidth = (int) Math.ceil(chunksWide / (float) LodUtil.REGION_WIDTH_IN_CHUNKS);
 		newWidth = (newWidth % 2 == 0) ? (newWidth += 1) : (newWidth += 2); // make sure we have a odd number of regions
-
+		
 		// do the dimensions need to change in size?
 		if (lodBuilder.defaultDimensionWidthInRegions != newWidth || recalculateWidths)
 		{
@@ -305,29 +305,29 @@ public class ClientProxy
 			lodWorld.resizeDimensionRegionWidth(newWidth);
 			lodBuilder.defaultDimensionWidthInRegions = newWidth;
 			renderer.setupBuffers(newWidth);
-
+			
 			recalculateWidths = false;
 			//LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );
 		}
 		DetailDistanceUtil.updateSettings();
 	}
-
 	
-
+	
+	
 	//================//
 	// public getters //
 	//================//
-
+	
 	public static LodWorld getLodWorld()
 	{
 		return lodWorld;
 	}
-
+	
 	public static LodBuilder getLodBuilder()
 	{
 		return lodBuilder;
 	}
-
+	
 	public static LodRenderer getRenderer()
 	{
 		return renderer;
