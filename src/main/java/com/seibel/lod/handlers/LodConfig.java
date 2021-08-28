@@ -97,9 +97,9 @@ public class LodConfig
 			fogDistance = builder
 					.comment("\n\n"
 							+ " At what distance should Fog be drawn on the LODs? \n"
-							+ " If the fog cuts off ubruptly or you are using Optifine's \"fast\" \n"
-							+ " fog option set this to " + FogDistance.NEAR.toString() + " or " + FogDistance.FAR.toString() + ". \n")
-					.defineEnum("fogDistance", FogDistance.FAR);
+							+ " If the fog cuts off ubruptly or you are using Optifine's \"fast\" fog option \n"
+							+ " set this to " + FogDistance.NEAR.toString() + " or " + FogDistance.FAR.toString() + ". \n")
+					.defineEnum("fogDistance", FogDistance.NEAR_AND_FAR);
 			
 			fogDrawOverride = builder
 					.comment("\n\n"
@@ -147,7 +147,7 @@ public class LodConfig
 							+ " " + LodDetail.QUAD.toString() + ": render 16 LODs for each Chunk. \n"
 							+ " " + LodDetail.HALF.toString() + ": render 64 LODs for each Chunk. \n"
 							+ " " + LodDetail.FULL.toString() + ": render 256 LODs for each Chunk. \n")
-					.defineEnum("lodGenerationQuality", LodDetail.FULL);
+					.defineEnum("lodGenerationQuality", LodDetail.HALF);
 			
 			lodDistanceCalculatorType = builder
 					.comment("\n\n"
@@ -170,12 +170,12 @@ public class LodConfig
 					.comment("\n\n"
 							+ " this value is multiplied by 128 and determine \n"
 							+ " how much the quality decrease over distance \n")
-					.defineInRange("lodQuality", 1, 1, 4);
+					.defineInRange("lodQuality", 1, 2, 4);
 			
 			lodChunkRenderDistance = builder
 					.comment("\n\n"
 							+ " This is the render distance of the mod \n")
-					.defineInRange("lodChunkRenderDistane", 128, 32, 256);
+					.defineInRange("lodChunkRenderDistane", 64, 32, 256);
 			
 			distanceGenerationMode = builder
 					.comment("\n\n"
@@ -184,6 +184,9 @@ public class LodConfig
 							+ "       and are included so you can compare the \n"
 							+ "       different generation options. Your mileage may vary. \n"
 							+ "\n"
+
+							+ " " + DistanceGenerationMode.NONE.toString() + " \n"
+							+ " Don't run the distance generator. \n"
 							
 							+ " " + DistanceGenerationMode.BIOME_ONLY.toString() + " \n"
 							+ " Only generate the biomes and use biome \n"
@@ -250,19 +253,18 @@ public class LodConfig
 							+ " The max is the number of processors on your CPU. \n"
 							+ "\n"
 							+ " Requires a restart to take effect. \n")
-					.defineInRange("numberOfWorldGenerationThreads", Runtime.getRuntime().availableProcessors(), 1, Runtime.getRuntime().availableProcessors());
+					.defineInRange("numberOfWorldGenerationThreads", Runtime.getRuntime().availableProcessors() / 2, 1, Runtime.getRuntime().availableProcessors());
 			
 			shadingMode = builder
 					.comment("\n\n"
-							+ " What kind of shading should LODs have? \n"
+							+ " What kind of shading should the LODs have? \n"
+							+ " \n"
 							+ " " + ShadingMode.NONE.toString() + " \n"
 							+ " " + "LODs will have the same lighting on every side. \n"
 							+ " " + "Can make large similarly colored areas hard to differentiate. \n"
-							+ " " + "Fastest"
 							+ "/n"
 							+ " " + ShadingMode.DARKEN_SIDES.toString() + " \n"
-							+ " " + "LODs will have darker sides and bottoms to simulate top down lighting."
-							+ " " + "Fastest /n")
+							+ " " + "LODs will have darker sides and bottoms to simulate Minecraft's flat lighting.")
 					.defineEnum("lightingMode", ShadingMode.DARKEN_SIDES);
 			
 			brightnessMultiplier = builder
