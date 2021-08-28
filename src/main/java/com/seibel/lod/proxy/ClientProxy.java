@@ -17,8 +17,6 @@
  */
 package com.seibel.lod.proxy;
 
-import net.minecraft.util.Direction;
-import net.minecraft.world.lighting.WorldLightManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -170,10 +168,8 @@ public class ClientProxy
 		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
 		LodConfig.CLIENT.lodQuality.set(2);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
-		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(Runtime.getRuntime().availableProcessors());
-
 		// has to be set in the config file
-		//      LodConfig.CLIENT.numberOfWorldGenerationThreads.set(16);
+		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(Runtime.getRuntime().availableProcessors());
 	}
 
 
