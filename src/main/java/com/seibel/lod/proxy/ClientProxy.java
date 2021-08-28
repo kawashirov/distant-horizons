@@ -18,6 +18,7 @@
 package com.seibel.lod.proxy;
 
 import com.seibel.lod.util.DetailDistanceUtil;
+import net.minecraftforge.client.event.InputEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -299,6 +300,14 @@ public class ClientProxy
 		DetailDistanceUtil.updateSettings();
 	}
 
+	@SubscribeEvent
+	public void onKeyInput(InputEvent.KeyInputEvent event) {
+		//f4 is key 293, the 1 action mean that the key just got pressed
+		if(event.getKey() == 293 && event.getAction() == 1)
+		{
+			LodConfig.CLIENT.debugMode.set(!LodConfig.CLIENT.debugMode.get());
+		}
+	}
 
 	//================//
 	// public getters //

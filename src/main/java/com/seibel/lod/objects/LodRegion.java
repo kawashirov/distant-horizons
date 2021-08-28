@@ -606,8 +606,8 @@ public class LodRegion implements Serializable
 			//i'm doing a upper limit of the minimum
 			//Color should be just 3 byte but i'm gonna calculate as 12 byte
 			//Height and depth should be just 4 byte but i'm gonna calculate as 8 byte
-			//count += Math.pow(2,LodUtil.REGION_DETAIL_LEVEL-tempLod) * (8 + 3 + 2 + 2 + 1 + 1)
-			count += Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - tempLod) * (24 + 8 + 8 + 8 + 8 + 8);
+			count += Math.pow(2,LodUtil.REGION_DETAIL_LEVEL-tempLod) * (8 + 3 + 2 + 2 + 1);
+			//count += Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - tempLod) * (24 + 8 + 8 + 8 + 8);
 		}
 		return count;
 	}
