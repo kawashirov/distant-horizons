@@ -40,20 +40,20 @@ import net.minecraft.util.math.BlockPos;
 public class CubicLodTemplate extends AbstractLodTemplate
 {
 	private final int CULL_OFFSET = 16;
-
+	
 	public CubicLodTemplate()
 	{
-
+		
 	}
-
+	
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, short[] data, short[][][] adjData,
-	                           LevelPos levelPos, DebugMode debugging)
+			LevelPos levelPos, DebugMode debugging)
 	{
 		AxisAlignedBB bbox;
-
+		
 		int width = 1 << levelPos.detailLevel;
-
+		
 		// add each LOD for the detail level
 		bbox = generateBoundingBox(
 				DataPoint.getHeight(data),
@@ -62,36 +62,36 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				levelPos.posX * width,
 				0,
 				levelPos.posZ * width);
-
+		
 		int color = DataPoint.getColor(data);
 		if (debugging != DebugMode.OFF)
 		{
 			color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[levelPos.detailLevel].getRGB();
 		}
-
+		
 		if (bbox != null)
 		{
 			addBoundingBoxToBuffer(buffer, bbox, color, playerBlockPos, adjData);
 		}
-
+		
 	}
-
+	
 	private AxisAlignedBB generateBoundingBox(int height, int depth, int width, double xOffset, double yOffset, double zOffset)
 	{
 		// don't add an LOD if it is empty
 		if (height == -1 && depth == -1)
 			return null;
-
+		
 		if (depth == height)
 		{
 			// if the top and bottom points are at the same height
 			// render this LOD as 1 block thick
 			height++;
 		}
-
+		
 		return new AxisAlignedBB(0, depth, 0, width, height, width).move(xOffset, yOffset, zOffset);
 	}
-
+	
 	private void addBoundingBoxToBuffer(BufferBuilder buffer, AxisAlignedBB bb, int c, BlockPos playerBlockPos, short[][][] adjData)
 	{
 		int topColor = c;
@@ -100,7 +100,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		int southColor = c;
 		int westColor = c;
 		int eastColor = c;
-
+		
 		// darken the bottom and side colors if requested
 		if (LodConfig.CLIENT.shadingMode.get() == ShadingMode.DARKEN_SIDES)
 		{
@@ -116,11 +116,11 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			westColor = ColorUtil.applyShade(c, mc.level.getShade(Direction.WEST, true));
 			eastColor = ColorUtil.applyShade(c, mc.level.getShade(Direction.EAST, true));
 		}
-
+		
 		// apply the user specified saturation and brightness
 		float saturationMultiplier = LodConfig.CLIENT.saturationMultiplier.get().floatValue();
 		float brightnessMultiplier = LodConfig.CLIENT.brightnessMultiplier.get().floatValue();
-
+		
 		if (saturationMultiplier != 1 || brightnessMultiplier != 1)
 		{
 			topColor = ColorUtil.applySaturationAndBrightnessMultipliers(topColor, saturationMultiplier, brightnessMultiplier);
@@ -133,7 +133,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		int minY;
 		int maxY;
 		short[] data;
-
+		
 		int red;
 		int green;
 		int blue;
@@ -163,7 +163,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
 			addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
 		}
-
+		
 		if (playerBlockPos.getZ() > bb.minZ - CULL_OFFSET)
 		{
 			red = ColorUtil.getRed(northColor);
@@ -178,7 +178,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, red, green, blue, alpha);
 				addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, red, green, blue, alpha);
 				addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
-			} else
+			}
+			else
 			{
 				maxY = DataPoint.getHeight(data);
 				if (maxY < bb.maxY)
@@ -200,7 +201,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				}
 			}
 		}
-
+		
 		if (playerBlockPos.getZ() < bb.maxZ + CULL_OFFSET)
 		{
 			red = ColorUtil.getRed(southColor);
@@ -215,7 +216,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, red, green, blue, alpha);
 				addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, red, green, blue, alpha);
 				addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
-			} else
+			}
+			else
 			{
 				maxY = DataPoint.getHeight(data);
 				if (maxY < bb.maxY)
@@ -237,7 +239,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				}
 			}
 		}
-
+		
 		if (playerBlockPos.getX() < bb.maxX + CULL_OFFSET)
 		{
 			red = ColorUtil.getRed(westColor);
@@ -252,7 +254,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				addPosAndColor(buffer, bb.minX, bb.minY, bb.maxZ, red, green, blue, alpha);
 				addPosAndColor(buffer, bb.minX, bb.maxY, bb.maxZ, red, green, blue, alpha);
 				addPosAndColor(buffer, bb.minX, bb.maxY, bb.minZ, red, green, blue, alpha);
-			} else
+			}
+			else
 			{
 				maxY = DataPoint.getHeight(data);
 				if (maxY < bb.maxY)
@@ -274,7 +277,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				}
 			}
 		}
-
+		
 		if (playerBlockPos.getX() > bb.minX - CULL_OFFSET)
 		{
 			red = ColorUtil.getRed(eastColor);
@@ -289,7 +292,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, red, green, blue, alpha);
 				addPosAndColor(buffer, bb.maxX, bb.minY, bb.maxZ, red, green, blue, alpha);
 				addPosAndColor(buffer, bb.maxX, bb.minY, bb.minZ, red, green, blue, alpha);
-			} else
+			}
+			else
 			{
 				maxY = DataPoint.getHeight(data);
 				if (maxY < bb.maxY)
@@ -312,7 +316,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			}
 		}
 	}
-
+	
 	@Override
 	public int getBufferMemoryForSingleNode(int detailLevel)
 	{
@@ -320,5 +324,5 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		// howManyPointsPerLodChunk
 		return (6 * 4 * (3 + 4));
 	}
-
+	
 }
