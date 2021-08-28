@@ -193,7 +193,6 @@ public class LodBuilder
 				data = DataPoint.createDataPoint(height, depth, color[0], color[1], color[2]);
 				lodDim.addData(levelPos,
 						data,
-						config.distanceGenerationMode,
 						false);
 			}
 			//levelPos.changeParameters(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);

@@ -27,6 +27,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.objects.LevelContainer;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
@@ -125,16 +126,16 @@ public class LodDimensionFileHandler
 	 * Return the LodRegion region at the given coordinates.
 	 * (null if the file doesn't exist)
 	 */
-	public LodRegion loadRegionFromFile(byte detailLevel, RegionPos regionPos)
+	public LodRegion loadRegionFromFile(byte detailLevel, RegionPos regionPos, DistanceGenerationMode generationMode)
 	{
 		int regionX = regionPos.x;
 		int regionZ = regionPos.z;
-		LodRegion region = new LodRegion(LodUtil.REGION_DETAIL_LEVEL,regionPos);
+		LodRegion region = new LodRegion(LodUtil.REGION_DETAIL_LEVEL,regionPos, generationMode);
 		for (byte tempDetailLevel = LodUtil.REGION_DETAIL_LEVEL; tempDetailLevel >= detailLevel; tempDetailLevel--)
 		{
 			try
 			{
-				String fileName = getFileNameAndPathForRegion(regionX, regionZ, tempDetailLevel);
+				String fileName = getFileNameAndPathForRegion(regionX, regionZ, generationMode, tempDetailLevel);
 
 				// if the fileName was null that means the folder is inaccessible
 				// for some reason
@@ -266,7 +267,7 @@ public class LodDimensionFileHandler
 		int z = region.regionPosZ;
 		for (byte detailLevel = region.getMinDetailLevel(); detailLevel <= LodUtil.REGION_DETAIL_LEVEL; detailLevel++)
 		{
-			String fileName = getFileNameAndPathForRegion(x, z, detailLevel);
+			String fileName = getFileNameAndPathForRegion(x, z, region.getGenerationMode(), detailLevel);
 			File oldFile = new File(fileName);
 
 			// if the fileName was null that means the folder is inaccessible
@@ -362,7 +363,7 @@ public class LodDimensionFileHandler
 	 * <p>
 	 * Returns null if there is an IO Exception.
 	 */
-	private String getFileNameAndPathForRegion(int regionX, int regionZ, byte detailLevel)
+	private String getFileNameAndPathForRegion(int regionX, int regionZ, DistanceGenerationMode generationMode, byte detailLevel)
 	{
 		try
 		{
@@ -371,6 +372,7 @@ public class LodDimensionFileHandler
 			// or
 			// ".\Super Flat\data"
 			return dimensionDataSaveFolder.getCanonicalPath() + File.separatorChar +
+					       generationMode.toString() + File.separatorChar +
 					       DETAIL_FOLDER_NAME_PREFIX + detailLevel + File.separatorChar +
 					       FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
 		} catch (IOException | SecurityException e)

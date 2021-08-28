@@ -17,17 +17,14 @@ public class LevelContainer implements Serializable
 
 	public final short[][] depth;
 
-	public final byte[][] generationType;
-
 	public final boolean[][] dataExistence;
 
-	public LevelContainer(byte detailLevel, byte[][][] colors, short[][] height, short[][] depth, byte[][] generationType, boolean[][] dataExistence)
+	public LevelContainer(byte detailLevel, byte[][][] colors, short[][] height, short[][] depth, boolean[][] dataExistence)
 	{
 		this.detailLevel = detailLevel;
 		this.colors = colors;
 		this.height = height;
 		this.depth = depth;
-		this.generationType = generationType;
 		this.dataExistence = dataExistence;
 	}
 
@@ -45,7 +42,6 @@ public class LevelContainer implements Serializable
 		this.colors = new byte[size][size][3];
 		this.height = new short[size][size];
 		this.depth = new short[size][size];
-		this.generationType = new byte[size][size];
 		this.dataExistence = new boolean[size][size];
 		int intCol;
 		for (int x = 0; x < size; x++)
@@ -66,10 +62,6 @@ public class LevelContainer implements Serializable
 				lastIndex = index;
 				index = data.indexOf(DATA_DELIMITER, lastIndex + 1);
 				depth[x][z] = Short.parseShort(data.substring(lastIndex + 1, index), 16);
-
-				lastIndex = index;
-				index = data.indexOf(DATA_DELIMITER, lastIndex + 1);
-				generationType[x][z] = Byte.parseByte(data.substring(lastIndex + 1, index), 16);
 
 				lastIndex = index;
 				index = data.indexOf(DATA_DELIMITER, lastIndex + 1);
@@ -98,8 +90,6 @@ public class LevelContainer implements Serializable
 				stringBuilder.append(Integer.toHexString(height[x][z] & 0xffff));
 				stringBuilder.append(DATA_DELIMITER);
 				stringBuilder.append(Integer.toHexString(depth[x][z] & 0xffff));
-				stringBuilder.append(DATA_DELIMITER);
-				stringBuilder.append(Integer.toHexString(generationType[x][z] & 0xffff));
 				stringBuilder.append(DATA_DELIMITER);
 				stringBuilder.append(dataExistence[x][z]);
 				stringBuilder.append(DATA_DELIMITER);

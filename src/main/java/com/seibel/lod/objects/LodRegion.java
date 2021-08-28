@@ -28,7 +28,7 @@ public class LodRegion implements Serializable
 	private byte minDetailLevel;
 	private static final byte POSSIBLE_LOD = 10;
 	private int numberOfPoints;
-
+	private DistanceGenerationMode generationMode;
 	//For each of the following field the first slot is for the level of detail
 	//Important: byte have a [-128, 127] range. When converting from or to int a 128 should be added or removed
 	//If there is a bug with color then it's probably caused by this.
@@ -39,17 +39,14 @@ public class LodRegion implements Serializable
 
 	private short[][][] depth;
 
-	//a new node will have 0 as generationType
-	//a node with 1 is node
-	private byte[][][] generationType;
-
 	private boolean[][][] dataExistence;
 
 	public final int regionPosX;
 	public final int regionPosZ;
 
-	public LodRegion(LevelContainer levelContainer, RegionPos regionPos)
+	public LodRegion(LevelContainer levelContainer, RegionPos regionPos, DistanceGenerationMode generationMode)
 	{
+		this.generationMode = generationMode;
 		this.regionPosX = regionPos.x;
 		this.regionPosZ = regionPos.z;
 		this.minDetailLevel = levelContainer.detailLevel;
@@ -60,13 +57,11 @@ public class LodRegion implements Serializable
 		//Arrays of matrices
 		height = new short[POSSIBLE_LOD][][];
 		depth = new short[POSSIBLE_LOD][][];
-		generationType = new byte[POSSIBLE_LOD][][];
 		dataExistence = new boolean[POSSIBLE_LOD][][];
 
 		colors[minDetailLevel] = levelContainer.colors;
 		height[minDetailLevel] = levelContainer.height;
 		depth[minDetailLevel] = levelContainer.depth;
-		generationType[minDetailLevel] = levelContainer.generationType;
 		dataExistence[minDetailLevel] = levelContainer.dataExistence;
 
 		//Initialize all the different matrices
@@ -76,7 +71,6 @@ public class LodRegion implements Serializable
 			colors[lod] = new byte[size][size][3];
 			height[lod] = new short[size][size];
 			depth[lod] = new short[size][size];
-			generationType[lod] = new byte[size][size];
 			dataExistence[lod] = new boolean[size][size];
 		}
 		int width;
@@ -95,8 +89,9 @@ public class LodRegion implements Serializable
 		}
 	}
 
-	public LodRegion(byte minDetailLevel, RegionPos regionPos)
+	public LodRegion(byte minDetailLevel, RegionPos regionPos, DistanceGenerationMode generationMode)
 	{
+		this.generationMode = generationMode;
 		this.minDetailLevel = minDetailLevel;
 		this.regionPosX = regionPos.x;
 		this.regionPosZ = regionPos.z;
@@ -107,7 +102,6 @@ public class LodRegion implements Serializable
 		//Arrays of matrices
 		height = new short[POSSIBLE_LOD][][];
 		depth = new short[POSSIBLE_LOD][][];
-		generationType = new byte[POSSIBLE_LOD][][];
 		dataExistence = new boolean[POSSIBLE_LOD][][];
 
 
@@ -118,7 +112,6 @@ public class LodRegion implements Serializable
 			colors[lod] = new byte[size][size][3];
 			height[lod] = new short[size][size];
 			depth[lod] = new short[size][size];
-			generationType[lod] = new byte[size][size];
 			dataExistence[lod] = new boolean[size][size];
 
 		}
@@ -129,13 +122,12 @@ public class LodRegion implements Serializable
 	 *
 	 * @param levelPos
 	 * @param dataPoint
-	 * @param generationType
 	 * @return
 	 */
-	public boolean addData(LevelPos levelPos, short[] dataPoint, byte generationType)
+	public boolean addData(LevelPos levelPos, short[] dataPoint)
 	{
 		levelPos.performRegionModule();
-		if ((this.generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] == 0) || (generationType >= this.generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ]))
+		if (!doesDataExist(levelPos))
 		{
 
 			//update the number of node present
@@ -147,7 +139,6 @@ public class LodRegion implements Serializable
 			this.colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][0] = (byte) (DataPoint.getRed(dataPoint) - 128);
 			this.colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][1] = (byte) (DataPoint.getGreen(dataPoint) - 128);
 			this.colors[levelPos.detailLevel][levelPos.posX][levelPos.posZ][2] = (byte) (DataPoint.getBlue(dataPoint) - 128);
-			this.generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = generationType;
 			this.dataExistence[levelPos.detailLevel][levelPos.posX][levelPos.posZ] = true;
 			return true;
 		} else
@@ -241,7 +232,7 @@ public class LodRegion implements Serializable
 		}
 		else if (DetailDistanceUtil.getDistanceGenerationInverse(maxDistance,targetDetailLevel) == levelPos.detailLevel)
 		{
-			if (generationType[detailLevel][posX][posZ] < generation)
+			if (!doesDataExist(levelPos))
 			{
 				levelPosList.add(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size));
 			}
@@ -258,7 +249,7 @@ public class LodRegion implements Serializable
 					{
 						levelPos.changeParameters((byte) (detailLevel - 1), childPosX + x, childPosZ + z);
 
-						if (generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] < generation || !doesDataExist(levelPos))
+						if (!doesDataExist(levelPos))
 						{
 							num++;
 							levelPosList.add(new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * childSize, levelPos.posZ + regionPosZ * childSize));
@@ -284,7 +275,7 @@ public class LodRegion implements Serializable
 			{
 				levelPos.changeParameters(levelPos.detailLevel, levelPos.posX, levelPos.posZ);
 				levelPos.convert((byte) (levelPos.detailLevel - 1));
-				if (generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] < generation)
+				if (!doesDataExist(levelPos))
 				{
 					levelPosList.add(new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * childSize, levelPos.posZ + regionPosZ * childSize));
 				} else
@@ -296,7 +287,6 @@ public class LodRegion implements Serializable
 				}
 			}
 		}
-		return;
 	}
 
 
@@ -406,7 +396,6 @@ public class LodRegion implements Serializable
 		int numberOfChildren = 0;
 		int numberOfVoidChildren = 0;
 
-		byte minGenerationType = 5;
 		int tempRed = 0;
 		int tempGreen = 0;
 		int tempBlue = 0;
@@ -426,7 +415,7 @@ public class LodRegion implements Serializable
 				newPosZ = 2 * posZ + z;
 				newDetailLevel = (byte) (detailLevel - 1);
 				levelPos.changeParameters(newDetailLevel, newPosX, newPosZ);
-				if (hasDataBeenGenerated(levelPos))
+				if (doesDataExist(levelPos))
 				{
 					if (height[newDetailLevel][newPosX][newPosZ] != LodBuilder.DEFAULT_HEIGHT
 							    && depth[newDetailLevel][newPosX][newPosZ] != LodBuilder.DEFAULT_DEPTH)
@@ -444,8 +433,6 @@ public class LodRegion implements Serializable
 						// and represent a LOD with no blocks in it
 						numberOfVoidChildren++;
 					}
-
-					minGenerationType = (byte) Math.min(minGenerationType, generationType[newDetailLevel][newPosX][newPosZ]);
 				}
 			}
 		}
@@ -457,7 +444,6 @@ public class LodRegion implements Serializable
 			colors[detailLevel][posX][posZ][2] = (byte) (tempBlue / numberOfChildren);
 			height[detailLevel][posX][posZ] = (short) (tempHeight / numberOfChildren);
 			depth[detailLevel][posX][posZ] = (short) (tempDepth / numberOfChildren);
-			generationType[detailLevel][posX][posZ] = minGenerationType;
 			dataExistence[detailLevel][posX][posZ] = true;
 		} else if (numberOfVoidChildren > 0)
 		{
@@ -468,7 +454,6 @@ public class LodRegion implements Serializable
 			height[detailLevel][posX][posZ] = LodBuilder.DEFAULT_HEIGHT;
 			depth[detailLevel][posX][posZ] = LodBuilder.DEFAULT_DEPTH;
 
-			generationType[detailLevel][posX][posZ] = minGenerationType;
 			dataExistence[detailLevel][posX][posZ] = true;
 		}
 	}
@@ -511,61 +496,21 @@ public class LodRegion implements Serializable
 	 */
 	public boolean doesDataExist(LevelPos levelPos)
 	{
-		levelPos = levelPos.getRegionModuleLevelPos();
-		return dataExistence[levelPos.detailLevel][levelPos.posX][levelPos.posZ];
-	}
-
-	/**
-	 * @param levelPos
-	 * @return
-	 */
-	public DistanceGenerationMode getGenerationMode(LevelPos levelPos)
-	{
-		levelPos = levelPos.getRegionModuleLevelPos();
-		DistanceGenerationMode generationMode = DistanceGenerationMode.NONE;
-		switch (generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ])
-		{
-			case 0:
-				generationMode = DistanceGenerationMode.NONE;
-				break;
-			case 1:
-				generationMode = DistanceGenerationMode.BIOME_ONLY;
-				break;
-			case 2:
-				generationMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
-				break;
-			case 3:
-				generationMode = DistanceGenerationMode.SURFACE;
-				break;
-			case 4:
-				generationMode = DistanceGenerationMode.FEATURES;
-				break;
-			case 5:
-				generationMode = DistanceGenerationMode.SERVER;
-				break;
-			default:
-				generationMode = DistanceGenerationMode.NONE;
-				break;
-
-		}
-		return generationMode;
-	}
-
-	/**
-	 * @param levelPos
-	 * @return
-	 */
-	public boolean hasDataBeenGenerated(LevelPos levelPos)
-	{
-		levelPos.performRegionModule();
 		try
 		{
-			return (generationType[levelPos.detailLevel][levelPos.posX][levelPos.posZ] != 0);
-		} catch (Exception e)
-		{
-			e.printStackTrace();
-			throw e;
+			levelPos = levelPos.getRegionModuleLevelPos();
+			return dataExistence[levelPos.detailLevel][levelPos.posX][levelPos.posZ];
+		}catch (NullPointerException e){
+			return false;
 		}
+	}
+
+	/**
+	 * @return
+	 */
+	public DistanceGenerationMode getGenerationMode()
+	{
+		return generationMode;
 	}
 
 	public byte getMinDetailLevel()
@@ -585,7 +530,7 @@ public class LodRegion implements Serializable
 		{
 			throw new IllegalArgumentException("getLevel asked for a level that does not exist: minimum " + minDetailLevel + " level requested " + detailLevel);
 		}
-		return new LevelContainer(detailLevel, colors[detailLevel], height[detailLevel], depth[detailLevel], generationType[detailLevel], dataExistence[detailLevel]);
+		return new LevelContainer(detailLevel, colors[detailLevel], height[detailLevel], depth[detailLevel], dataExistence[detailLevel]);
 	}
 
 	/**
@@ -601,7 +546,6 @@ public class LodRegion implements Serializable
 		colors[levelContainer.detailLevel] = levelContainer.colors;
 		height[levelContainer.detailLevel] = levelContainer.height;
 		depth[levelContainer.detailLevel] = levelContainer.depth;
-		generationType[levelContainer.detailLevel] = levelContainer.generationType;
 		dataExistence[levelContainer.detailLevel] = levelContainer.dataExistence;
 
 	}
@@ -618,7 +562,6 @@ public class LodRegion implements Serializable
 				colors[tempLod] = new byte[0][0][0];
 				height[tempLod] = new short[0][0];
 				depth[tempLod] = new short[0][0];
-				generationType[tempLod] = new byte[0][0];
 				dataExistence[tempLod] = new boolean[0][0];
 			}
 			minDetailLevel = detailLevel;
@@ -638,7 +581,6 @@ public class LodRegion implements Serializable
 				colors[tempLod] = new byte[size][size][3];
 				height[tempLod] = new short[size][size];
 				depth[tempLod] = new short[size][size];
-				generationType[tempLod] = new byte[size][size];
 				dataExistence[tempLod] = new boolean[size][size];
 			}
 			minDetailLevel = detailLevel;

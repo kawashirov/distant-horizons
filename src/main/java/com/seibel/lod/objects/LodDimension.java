@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
 import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.util.DetailDistanceUtil;
@@ -367,7 +368,7 @@ public class LodDimension
 	 */
 	public void treeGenerator(int playerPosX, int playerPosZ)
 	{
-
+		DistanceGenerationMode generationMode = LodConfig.CLIENT.distanceGenerationMode.get();
 		ChunkPos newPlayerChunk = (new LevelPos((byte) 0, playerPosX, playerPosZ)).getChunkPos();
 
 		if (lastGenChunk == null)
@@ -399,17 +400,17 @@ public class LodDimension
 						minDistance = levelPos.minDistance(playerPosX, playerPosZ);
 						detail = DetailDistanceUtil.getDistanceTreeGenInverse(minDistance);
 						levelToGen = DetailDistanceUtil.getLodDetail(detail).detailLevel;
-						if (region == null)
+						if (region == null || region.getGenerationMode() != generationMode)
 						{
 							//First case, region has to be initialized
 
 							//We check if there is a file at the target level
-							regions[x][z] = getRegionFromFile(regionPos, levelToGen);
+							regions[x][z] = getRegionFromFile(regionPos, levelToGen, generationMode);
 
 							//if there is no file we initialize the region
 							if (regions[x][z] == null)
 							{
-								regions[x][z] = new LodRegion(levelToGen, regionPos);
+								regions[x][z] = new LodRegion(levelToGen, regionPos, generationMode);
 							}
 
 						} else if (region.getMinDetailLevel() > levelToGen)
@@ -430,7 +431,7 @@ public class LodDimension
 	 * stored in the LOD. If an LOD already exists at the given
 	 * coordinates it will be overwritten.
 	 */
-	public synchronized Boolean addData(LevelPos levelPos, short[] lodDataPoint, DistanceGenerationMode generationMode, boolean dontSave)
+	public synchronized Boolean addData(LevelPos levelPos, short[] lodDataPoint, boolean dontSave)
 	{
 
 		// don't continue if the region can't be saved
@@ -442,7 +443,7 @@ public class LodDimension
 
 		LodRegion region = getRegion(levelPos);
 
-		boolean nodeAdded = region.addData(levelPos, lodDataPoint, generationMode.complexity);
+		boolean nodeAdded = region.addData(levelPos, lodDataPoint);
 		// only save valid LODs to disk
 		if (!dontSave && fileHandler != null)
 		{
@@ -593,22 +594,6 @@ public class LodDimension
 	/**
 	 * return true if and only if the node at that position exist
 	 */
-
-	public boolean hasThisPositionBeenGenerated(LevelPos levelPos)
-	{
-		LodRegion region = getRegion(levelPos);
-
-		if (region == null)
-		{
-			return false;
-		}
-
-		return region.hasDataBeenGenerated(levelPos);
-	}
-
-	/**
-	 * return true if and only if the node at that position exist
-	 */
 	public boolean doesDataExist(LevelPos levelPos)
 	{
 		try
@@ -628,28 +613,13 @@ public class LodDimension
 	}
 
 	/**
-	 * return true if and only if the node at that position exist
-	 */
-	public DistanceGenerationMode getGenerationMode(LevelPos levelPos)
-	{
-		LodRegion region = getRegion(levelPos);
-
-		if (region == null)
-		{
-			return DistanceGenerationMode.NONE;
-		}
-
-		return region.getGenerationMode(levelPos);
-	}
-
-	/**
 	 * Get the region at the given X and Z coordinates from the
 	 * RegionFileHandler.
 	 */
-	public LodRegion getRegionFromFile(RegionPos regionPos, byte detailLevel)
+	public LodRegion getRegionFromFile(RegionPos regionPos, byte detailLevel, DistanceGenerationMode generationMode)
 	{
 		if (fileHandler != null)
-			return fileHandler.loadRegionFromFile(detailLevel, regionPos);
+			return fileHandler.loadRegionFromFile(detailLevel, regionPos, generationMode);
 		else
 			return null;
 	}
