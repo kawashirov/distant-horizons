@@ -88,7 +88,10 @@ public class RenderUtil
 	/**
 	 * Get how much buffer memory would be required for the given radius multiplier
 	 * 
+	 * issue #62
 	 * TODO check if this is actually returning the correct memory needed
+	 * it is possible (albeit unlikely) to have a buffer indexOutOfBounds exception
+	 * which is caused by the buffer not being big enough.
 	 */
 	public static int getBufferMemoryForRegion()
 	{
