@@ -71,6 +71,8 @@ public class LodConfig
 		
 		public ForgeConfigSpec.IntValue numberOfWorldGenerationThreads;
 		
+		public ForgeConfigSpec.IntValue numberOfBufferBuilderThreads;
+		
 		public ForgeConfigSpec.EnumValue<ShadingMode> shadingMode;
 		
 		public ForgeConfigSpec.EnumValue<DistanceCalculatorType> lodDistanceCalculatorType;
@@ -246,14 +248,26 @@ public class LodConfig
 			
 			numberOfWorldGenerationThreads = builder
 					.comment("\n\n"
-							+ " This is how many threads are used when generating terrain. \n"
-							+ " If you experience stuttering when generating terrain, decrease \n"
+							+ " This is how many threads are used when generating LODs outside \n"
+							+ " the normal render distance. \n"
+							+ " If you experience stuttering when generating distant LODs, decrease \n"
 							+ " this number. If you want to increase LOD generation speed, \n"
-							+ " increase the number. \n"
-							+ " The max is the number of processors on your CPU. \n"
-							+ "\n"
+							+ " increase this number. \n"
+							+ " \n"
+							+ " The maximum value is the number of processors on your CPU. \n"
 							+ " Requires a restart to take effect. \n")
 					.defineInRange("numberOfWorldGenerationThreads", Runtime.getRuntime().availableProcessors() / 2, 1, Runtime.getRuntime().availableProcessors());
+			
+			numberOfBufferBuilderThreads = builder
+					.comment("\n\n"
+							+ " This is how many threads are used when building vertex buffers \n"
+							+ " (The things I send to the GPU to draw the LODs). \n"
+							+ " If you experience high CPU useage when NOT generating distant \n"
+							+ " LODs lower this number. \n"
+							+ " \n"
+							+ " The maximum value is the number of processors on your CPU. \n"
+							+ " Requires a restart to take effect. \n")
+					.defineInRange("numberOfBufferBuilderThreads", Runtime.getRuntime().availableProcessors(), 1, Runtime.getRuntime().availableProcessors());
 			
 			shadingMode = builder
 					.comment("\n\n"
