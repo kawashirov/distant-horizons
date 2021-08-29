@@ -138,8 +138,9 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		int green;
 		int blue;
 		int alpha;
+		boolean disableCulling = true;
 		/**TODO make all of this more automatic if possible*/
-		if (playerBlockPos.getY() > bb.maxY - CULL_OFFSET)
+		if (playerBlockPos.getY() > bb.maxY - CULL_OFFSET || disableCulling)
 		{
 			red = ColorUtil.getRed(topColor);
 			green = ColorUtil.getGreen(topColor);
@@ -151,7 +152,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			addPosAndColor(buffer, bb.maxX, bb.maxY, bb.maxZ, red, green, blue, alpha);
 			addPosAndColor(buffer, bb.maxX, bb.maxY, bb.minZ, red, green, blue, alpha);
 		}
-		if (playerBlockPos.getY() < bb.minY + CULL_OFFSET)
+		if (playerBlockPos.getY() < bb.minY + CULL_OFFSET || disableCulling)
 		{
 			red = ColorUtil.getRed(bottomColor);
 			green = ColorUtil.getGreen(bottomColor);
@@ -164,7 +165,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			addPosAndColor(buffer, bb.minX, bb.minY, bb.minZ, red, green, blue, alpha);
 		}
 		
-		if (playerBlockPos.getZ() > bb.minZ - CULL_OFFSET)
+		if (playerBlockPos.getZ() > bb.minZ - CULL_OFFSET || disableCulling)
 		{
 			red = ColorUtil.getRed(northColor);
 			green = ColorUtil.getGreen(northColor);
@@ -202,7 +203,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			}
 		}
 		
-		if (playerBlockPos.getZ() < bb.maxZ + CULL_OFFSET)
+		if (playerBlockPos.getZ() < bb.maxZ + CULL_OFFSET || disableCulling)
 		{
 			red = ColorUtil.getRed(southColor);
 			green = ColorUtil.getGreen(southColor);
@@ -240,7 +241,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			}
 		}
 		
-		if (playerBlockPos.getX() < bb.maxX + CULL_OFFSET)
+		if (playerBlockPos.getX() < bb.maxX + CULL_OFFSET || disableCulling)
 		{
 			red = ColorUtil.getRed(westColor);
 			green = ColorUtil.getGreen(westColor);
@@ -278,7 +279,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			}
 		}
 		
-		if (playerBlockPos.getX() > bb.minX - CULL_OFFSET)
+		if (playerBlockPos.getX() > bb.minX - CULL_OFFSET || disableCulling)
 		{
 			red = ColorUtil.getRed(eastColor);
 			green = ColorUtil.getGreen(eastColor);
