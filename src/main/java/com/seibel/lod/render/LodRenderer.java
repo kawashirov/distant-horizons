@@ -126,7 +126,11 @@ public class LodRenderer
 	 * This is used to determine if the LODs should be regenerated
 	 */
 	private LevelPos previousPos = new LevelPos((byte) 0,0,0);
-	private static long prevTime = 0;
+	private static long prevPlayerPosTime = 0;
+	private static long prevVanillaChunkTime = 0;
+	private static long prevChunkTime = 0;
+
+
 	/**
 	 * This is used to determine if the LODs should be regenerated
 	 */
@@ -143,7 +147,8 @@ public class LodRenderer
 	 * is going to render
 	 */
 	public HashSet<ChunkPos> vanillaRenderedChunks = new HashSet<>();
-	
+	public HashSet<ChunkPos> previousVanillaRenderedChunks = new HashSet<>();
+
 	
 	public LodRenderer(LodBufferBuilder newLodNodeBufferBuilder)
 	{
@@ -198,29 +203,40 @@ public class LodRenderer
 
 		// should LODs be regenerated?
 		long newTime = System.currentTimeMillis();
-		if(newTime - prevTime > 5000)
+		if(newTime - prevPlayerPosTime > 5000)
 		{
 			if (previousPos.detailLevel == 0 ||
-							player.xChunk != previousPos.posX ||
-							player.zChunk != previousPos.posZ ||
-							ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.lodChunkRenderDistance.get() ||
-							prevFogDistance != LodConfig.CLIENT.fogDistance.get())
+					    player.xChunk != previousPos.posX ||
+					    player.zChunk != previousPos.posZ ||
+					    ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.lodChunkRenderDistance.get() ||
+					    prevFogDistance != LodConfig.CLIENT.fogDistance.get())
 			{
-				System.out.println("changing " + previousPos);
 				// yes
 				regen = true;
 				previousPos.changeParameters((byte) 4, player.xChunk, player.zChunk);
 				prevFogDistance = LodConfig.CLIENT.fogDistance.get();
+				//should use this when it's ready
+				//vanillaRenderedChunks.stream().filter(pos -> ((Math.abs(pos.x - player.xChunk) > mc.options.renderDistance) || (Math.abs(pos.z - player.zChunk) > mc.options.renderDistance)));
 				vanillaRenderedChunks.clear();
 			}
-
+			prevPlayerPosTime = newTime;
+		}
+		if(newTime - prevVanillaChunkTime > 5000)
+		{
+			if (previousVanillaRenderedChunks.equals(vanillaRenderedChunks)){
+				regen = true;
+				vanillaRenderedChunks = previousVanillaRenderedChunks;
+			}
+			prevVanillaChunkTime = newTime;
+		}
+		if(newTime - prevChunkTime > 5000)
+		{
 			if(lodDim.regenDimension)
 			{
 				regen = true;
 				lodDim.regenDimension = false;
 			}
-			prevTime = newTime;
-			System.out.println(newTime - prevTime);
+			prevChunkTime = newTime;
 		}
 
 		// determine which LODs should not be rendered close to the player
@@ -269,7 +285,6 @@ public class LodRenderer
 		//		(this is to prevent thread conflicts)
 		if (regen && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvaliable())
 		{
-			System.out.println("redrawing");
 			// generate the LODs on a separate thread to prevent stuttering or freezing
 			lodBufferBuilder.generateLodBuffersAsync(this, lodDim, player.blockPosition(), Math.floorMod((int) player.xRot,360), Math.floorMod((int) player.yRot,360), numbChunksWide);
 			
