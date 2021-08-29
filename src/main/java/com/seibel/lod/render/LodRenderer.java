@@ -23,6 +23,7 @@ import java.nio.FloatBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import net.minecraft.world.chunk.Chunk;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.NVFogDistance;
@@ -209,6 +210,7 @@ public class LodRenderer
 			prevChunkX = (int) player.getX() / LodUtil.CHUNK_WIDTH;
 			prevChunkZ = (int) player.getZ() / LodUtil.CHUNK_WIDTH;
 			prevFogDistance = LodConfig.CLIENT.fogDistance.get();
+			vanillaRenderedChunks.clear();
 		} else
 		{
 			// nope, the player hasn't moved, the
@@ -229,18 +231,27 @@ public class LodRenderer
 		
 		// set how how far the LODs will go
 		int numbChunksWide =LodConfig.CLIENT.lodChunkRenderDistance.get() * 2;
-		
+
 		// determine which LODs should not be rendered close to the player
 		HashSet<ChunkPos> chunkPosToSkip = LodUtil.getNearbyLodChunkPosToSkip(lodDim, player.blockPosition());
-		
+
+		for(ChunkPos pos : chunkPosToSkip){
+			if(!vanillaRenderedChunks.contains(pos))
+			{
+				vanillaRenderedChunks.add(pos);
+				System.out.println(pos);
+				lodDim.setToRegen(pos.getRegionX(),pos.getRegionZ());
+			}
+		}
 		// see if the chunks Minecraft is going to render are the
 		// same as last time
+		/*
 		if (!vanillaRenderedChunks.containsAll(chunkPosToSkip) || vanillaRenderedChunks.size() != chunkPosToSkip.size())
 		{
 			regen = true;
 			vanillaRenderedChunks = chunkPosToSkip;
-		}
-		
+		}*/
+
 		
 		//=================//
 		// create the LODs //

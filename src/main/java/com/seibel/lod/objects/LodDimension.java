@@ -69,6 +69,7 @@ public class LodDimension
 
 	public volatile LodRegion regions[][];
 	public volatile boolean isRegionDirty[][];
+	public volatile boolean regen[][];
 
 	private volatile RegionPos center;
 	private volatile ChunkPos lastGenChunk;
@@ -124,6 +125,7 @@ public class LodDimension
 
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];
+		regen = new boolean[width][width];
 
 		//treeGenerator((int) mc.player.getX(),(int) mc.player.getZ());
 
@@ -192,7 +194,9 @@ public class LodDimension
 					if (x + xOffset >= 0)
 						regions[x][z] = regions[x + xOffset][z];
 					else
+					{
 						regions[x][z] = null;
+					}
 				}
 			}
 		}
@@ -414,6 +418,7 @@ public class LodDimension
 							{
 								regions[x][z] = new LodRegion(levelToGen, regionPos, generationMode);
 							}
+							regen[x][z] = true;
 
 						} else if (region.getMinDetailLevel() > levelToGen)
 						{
@@ -455,6 +460,7 @@ public class LodDimension
 				int xIndex = (regionPos.x - center.x) + halfWidth;
 				int zIndex = (regionPos.z - center.z) + halfWidth;
 				isRegionDirty[xIndex][zIndex] = true;
+				regen[xIndex][zIndex] = true;
 			} catch (ArrayIndexOutOfBoundsException e)
 			{
 				// This method was probably called when the dimension was changing size.
@@ -464,6 +470,11 @@ public class LodDimension
 		return nodeAdded;
 	}
 
+	public void setToRegen(int xRegion, int zRegion){
+		int xIndex = (xRegion - center.x) + halfWidth;
+		int zIndex = (zRegion - center.z) + halfWidth;
+		regen[xIndex][zIndex] = true;
+	}
 
 	/**
 	 * method to get all the quadtree level that have to be generated based on the position of the player
@@ -679,6 +690,7 @@ public class LodDimension
 
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];
+		regen = new boolean[width][width];
 
 		// populate isRegionDirty
 		for (int i = 0; i < width; i++)

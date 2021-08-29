@@ -190,99 +190,101 @@ public class LodBufferBuilder
 								xRegion + lodDim.getCenterX() - Math.floorDiv(lodDim.getWidth(), 2),
 								zRegion + lodDim.getCenterZ() - Math.floorDiv(lodDim.getWidth(), 2));
 
-						// local position in the vbo and bufferBuilder arrays
-						BufferBuilder currentBuffer = buildableBuffers[xRegion][zRegion];
-
-						// make sure the buffers weren't
-						// changed while we were running this method
-						if (currentBuffer == null || (currentBuffer != null && !currentBuffer.building()))
-							return;
-
-						if (setsToRender[xRegion][zRegion] == null)
+						if(lodDim.regen[xRegion][zRegion])
 						{
-							setsToRender[xRegion][zRegion] = new ConcurrentHashMap<LevelPos, MutableBoolean>();
-						}
-						ConcurrentMap<LevelPos, MutableBoolean> nodeToRender = (ConcurrentMap<LevelPos, MutableBoolean>) setsToRender[xRegion][zRegion];
+							// local position in the vbo and bufferBuilder arrays
+							BufferBuilder currentBuffer = buildableBuffers[xRegion][zRegion];
 
-						Callable<Boolean> dataToRenderThread = () ->
-						{
-							lodDim.getDataToRender(
-									nodeToRender,
-									regionPos,
-									playerBlockPosRounded.getX(),
-									playerBlockPosRounded.getZ());
+							// make sure the buffers weren't
+							// changed while we were running this method
+							if (currentBuffer == null || (currentBuffer != null && !currentBuffer.building()))
+								return;
 
-
-							int posX;
-							int posZ;
-							byte detailLevel;
-							for (LevelPos posToRender : nodeToRender.keySet())
+							if (setsToRender[xRegion][zRegion] == null)
 							{
-								if (!nodeToRender.get(posToRender).booleanValue())
-								{
-									nodeToRender.remove(posToRender);
-									continue;
-								}
-								nodeToRender.get(posToRender).setFalse();
-								// skip any chunks that Minecraft is going to render
+								setsToRender[xRegion][zRegion] = new ConcurrentHashMap<LevelPos, MutableBoolean>();
+							}
+							ConcurrentMap<LevelPos, MutableBoolean> nodeToRender = (ConcurrentMap<LevelPos, MutableBoolean>) setsToRender[xRegion][zRegion];
 
-								if (renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos()))
-								{
-									continue;
-								}
-								posX = posToRender.posX;
-								posZ = posToRender.posZ;
-								detailLevel = posToRender.detailLevel;
+							Callable<Boolean> dataToRenderThread = () ->
+							{
+								lodDim.getDataToRender(
+										nodeToRender,
+										regionPos,
+										playerBlockPosRounded.getX(),
+										playerBlockPosRounded.getZ());
 
-								LevelPos chunkPos = posToRender.getConvertedLevelPos(LodUtil.CHUNK_DETAIL_LEVEL);
-								// skip any chunks that Minecraft is going to render
 
-								if (renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkPos.posX, chunkPos.posZ)))
+								int posX;
+								int posZ;
+								byte detailLevel;
+								for (LevelPos posToRender : nodeToRender.keySet())
 								{
-									continue;
-								}
-
-								try
-								{
-									boolean disableFix = false;
-									if (lodDim.doesDataExist(posToRender.clone()))
+									if (!nodeToRender.get(posToRender).booleanValue())
 									{
-										short[] lodData = lodDim.getData(posToRender);
-										short[][][] adjData = new short[2][2][];
-										for (int x : new int[]{0, 1})
-										{
-											posToRender.changeParameters(detailLevel, posX + x * 2 - 1, posZ);
-											if (!renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos())
-													     && (nodeToRender.containsKey(posToRender) || disableFix))
-												adjData[0][x] = lodDim.getData(posToRender);
-										}
-
-										for (int z : new int[]{0, 1})
-										{
-											posToRender.changeParameters(detailLevel, posX, posZ + z * 2 - 1);
-											if (!renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos())
-													     && (nodeToRender.containsKey(posToRender) || disableFix))
-												adjData[1][z] = lodDim.getData(posToRender);
-										}
-										posToRender.changeParameters(detailLevel, posX, posZ);
-
-										LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,
-												posToRender, renderer.previousDebugMode);
+										nodeToRender.remove(posToRender);
+										continue;
 									}
-								} catch (ArrayIndexOutOfBoundsException e)
-								{
-									return false;
-								}
+									nodeToRender.get(posToRender).setFalse();
+									// skip any chunks that Minecraft is going to render
 
-							}// for pos to in list to render
+									if (renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos()))
+									{
+										continue;
+									}
+									posX = posToRender.posX;
+									posZ = posToRender.posZ;
+									detailLevel = posToRender.detailLevel;
 
-							// the thread executed successfully
-							return true;
-						};// buffer builder worker thread
+									LevelPos chunkPos = posToRender.getConvertedLevelPos(LodUtil.CHUNK_DETAIL_LEVEL);
+									// skip any chunks that Minecraft is going to render
+
+									if (renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkPos.posX, chunkPos.posZ)))
+									{
+										continue;
+									}
+
+									try
+									{
+										boolean disableFix = false;
+										if (lodDim.doesDataExist(posToRender.clone()))
+										{
+											short[] lodData = lodDim.getData(posToRender);
+											short[][][] adjData = new short[2][2][];
+											for (int x : new int[]{0, 1})
+											{
+												posToRender.changeParameters(detailLevel, posX + x * 2 - 1, posZ);
+												if (!renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos())
+														    && (nodeToRender.containsKey(posToRender) || disableFix))
+													adjData[0][x] = lodDim.getData(posToRender);
+											}
+
+											for (int z : new int[]{0, 1})
+											{
+												posToRender.changeParameters(detailLevel, posX, posZ + z * 2 - 1);
+												if (!renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos())
+														    && (nodeToRender.containsKey(posToRender) || disableFix))
+													adjData[1][z] = lodDim.getData(posToRender);
+											}
+											posToRender.changeParameters(detailLevel, posX, posZ);
+
+											LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,
+													posToRender, renderer.previousDebugMode);
+										}
+									} catch (ArrayIndexOutOfBoundsException e)
+									{
+										return false;
+									}
+
+								}// for pos to in list to render
+
+								// the thread executed successfully
+								return true;
+							};// buffer builder worker thread
 
 
-						nodeToRenderThreads.add(dataToRenderThread);
-
+							nodeToRenderThreads.add(dataToRenderThread);
+						}
 					}// region z
 				}// region z
 				long renderStart = System.currentTimeMillis();
