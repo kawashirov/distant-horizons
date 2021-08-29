@@ -223,6 +223,17 @@ public class LodRenderer
 			System.out.println(newTime - prevTime);
 		}
 
+		// determine which LODs should not be rendered close to the player
+		HashSet<ChunkPos> chunkPosToSkip = LodUtil.getNearbyLodChunkPosToSkip(lodDim, player.blockPosition());
+
+		for(ChunkPos pos : chunkPosToSkip){
+			if(!vanillaRenderedChunks.contains(pos))
+			{
+				vanillaRenderedChunks.add(pos);
+				lodDim.setToRegen(pos.getRegionX(),pos.getRegionZ());
+			}
+		}
+
 		// did the user change the debug setting?
 		if (LodConfig.CLIENT.debugMode.get() != previousDebugMode)
 		{
@@ -237,16 +248,6 @@ public class LodRenderer
 		// set how how far the LODs will go
 		int numbChunksWide =LodConfig.CLIENT.lodChunkRenderDistance.get() * 2;
 
-		// determine which LODs should not be rendered close to the player
-		HashSet<ChunkPos> chunkPosToSkip = LodUtil.getNearbyLodChunkPosToSkip(lodDim, player.blockPosition());
-
-		for(ChunkPos pos : chunkPosToSkip){
-			if(!vanillaRenderedChunks.contains(pos))
-			{
-				vanillaRenderedChunks.add(pos);
-				lodDim.setToRegen(pos.getRegionX(),pos.getRegionZ());
-			}
-		}
 		// see if the chunks Minecraft is going to render are the
 		// same as last time
 		/*
