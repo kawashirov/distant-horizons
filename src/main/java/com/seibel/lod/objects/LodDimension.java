@@ -70,6 +70,7 @@ public class LodDimension
 	public volatile LodRegion regions[][];
 	public volatile boolean isRegionDirty[][];
 	public volatile boolean regen[][];
+	public volatile boolean regenDimension = false;
 
 	private volatile RegionPos center;
 	private volatile ChunkPos lastGenChunk;
@@ -419,6 +420,7 @@ public class LodDimension
 								regions[x][z] = new LodRegion(levelToGen, regionPos, generationMode);
 							}
 							regen[x][z] = true;
+							regenDimension = true;
 
 						} else if (region.getMinDetailLevel() > levelToGen)
 						{
@@ -461,6 +463,7 @@ public class LodDimension
 				int zIndex = (regionPos.z - center.z) + halfWidth;
 				isRegionDirty[xIndex][zIndex] = true;
 				regen[xIndex][zIndex] = true;
+				regenDimension = true;
 			} catch (ArrayIndexOutOfBoundsException e)
 			{
 				// This method was probably called when the dimension was changing size.

@@ -23,6 +23,7 @@ import java.nio.FloatBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import com.seibel.lod.objects.LevelPos.LevelPos;
 import net.minecraft.world.chunk.Chunk;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
@@ -124,11 +125,8 @@ public class LodRenderer
 	/**
 	 * This is used to determine if the LODs should be regenerated
 	 */
-	private int prevChunkX = 0;
-	/**
-	 * This is used to determine if the LODs should be regenerated
-	 */
-	private int prevChunkZ = 0;
+	private LevelPos previousPos = new LevelPos((byte) 0,0,0);
+	private static long prevTime = 0;
 	/**
 	 * This is used to determine if the LODs should be regenerated
 	 */
@@ -197,27 +195,34 @@ public class LodRenderer
 		
 		
 		ClientPlayerEntity player = mc.player;
-		
+
 		// should LODs be regenerated?
-		if ((int) player.getX() / LodUtil.CHUNK_WIDTH != prevChunkX ||
-				(int) player.getZ() / LodUtil.CHUNK_WIDTH != prevChunkZ ||
-				ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.lodChunkRenderDistance.get() ||
-				prevFogDistance != LodConfig.CLIENT.fogDistance.get())
+		long newTime = System.currentTimeMillis();
+		if(newTime - prevTime > 5000)
 		{
-			// yes
-			regen = true;
-			
-			prevChunkX = (int) player.getX() / LodUtil.CHUNK_WIDTH;
-			prevChunkZ = (int) player.getZ() / LodUtil.CHUNK_WIDTH;
-			prevFogDistance = LodConfig.CLIENT.fogDistance.get();
-			vanillaRenderedChunks.clear();
-		} else
-		{
-			// nope, the player hasn't moved, the
-			// render distance hasn't changed, and
-			// the dimension is the same
+			if (previousPos.detailLevel == 0 ||
+							player.xChunk != previousPos.posX ||
+							player.zChunk != previousPos.posZ ||
+							ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.lodChunkRenderDistance.get() ||
+							prevFogDistance != LodConfig.CLIENT.fogDistance.get())
+			{
+				System.out.println("changing " + previousPos);
+				// yes
+				regen = true;
+				previousPos.changeParameters((byte) 4, player.xChunk, player.zChunk);
+				prevFogDistance = LodConfig.CLIENT.fogDistance.get();
+				vanillaRenderedChunks.clear();
+			}
+
+			if(lodDim.regenDimension)
+			{
+				regen = true;
+				lodDim.regenDimension = false;
+			}
+			prevTime = newTime;
+			System.out.println(newTime - prevTime);
 		}
-		
+
 		// did the user change the debug setting?
 		if (LodConfig.CLIENT.debugMode.get() != previousDebugMode)
 		{
@@ -239,7 +244,6 @@ public class LodRenderer
 			if(!vanillaRenderedChunks.contains(pos))
 			{
 				vanillaRenderedChunks.add(pos);
-				System.out.println(pos);
 				lodDim.setToRegen(pos.getRegionX(),pos.getRegionZ());
 			}
 		}
@@ -264,6 +268,7 @@ public class LodRenderer
 		//		(this is to prevent thread conflicts)
 		if (regen && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvaliable())
 		{
+			System.out.println("redrawing");
 			// generate the LODs on a separate thread to prevent stuttering or freezing
 			lodBufferBuilder.generateLodBuffersAsync(this, lodDim, player.blockPosition(), Math.floorMod((int) player.xRot,360), Math.floorMod((int) player.yRot,360), numbChunksWide);
 			

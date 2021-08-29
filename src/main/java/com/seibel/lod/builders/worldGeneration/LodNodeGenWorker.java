@@ -215,7 +215,7 @@ public class LodNodeGenWorker implements IWorker
 							break;
 					}
 
-					lodRenderer.regenerateLODsNextFrame();
+					//lodRenderer.regenerateLODsNextFrame();
 
 /*
 					boolean dataExistence = lodDim.doesDataExist(new LevelPos((byte) 3, pos.x, pos.z));
