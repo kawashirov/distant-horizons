@@ -23,8 +23,6 @@ import java.nio.FloatBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import com.seibel.lod.objects.LevelPos.LevelPos;
-import net.minecraft.world.chunk.Chunk;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.NVFogDistance;
@@ -42,6 +40,7 @@ import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
 import com.seibel.lod.objects.RegionPos;
+import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
 
@@ -167,7 +166,6 @@ public class LodRenderer
 	 * @param lodDim       The dimension to draw, if null doesn't replace the current dimension.
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
-	@SuppressWarnings("deprecation")
 	public void drawLODs(LodDimension lodDim, float partialTicks, IProfiler newProfiler)
 	{
 		if (lodDim == null)
@@ -206,10 +204,10 @@ public class LodRenderer
 		if(newTime - prevPlayerPosTime > 5000)
 		{
 			if (previousPos.detailLevel == 0 ||
-					    player.xChunk != previousPos.posX ||
-					    player.zChunk != previousPos.posZ ||
-					    ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.lodChunkRenderDistance.get() ||
-					    prevFogDistance != LodConfig.CLIENT.fogDistance.get())
+			    player.xChunk != previousPos.posX ||
+			    player.zChunk != previousPos.posZ ||
+			    ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.lodChunkRenderDistance.get() ||
+			    prevFogDistance != LodConfig.CLIENT.fogDistance.get())
 			{
 				// yes
 				regen = true;
