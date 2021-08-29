@@ -122,7 +122,7 @@ public class ClientProxy
 		
 		
 		// comment out when creating a release
-		applyConfigOverrides();
+		//applyConfigOverrides();
 		
 		
 		// Note to self:
@@ -171,8 +171,6 @@ public class ClientProxy
 		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
 		LodConfig.CLIENT.lodQuality.set(3);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
-		// has to be set in the config file
-		LodConfig.CLIENT.numberOfWorldGenerationThreads.set(Runtime.getRuntime().availableProcessors());
 	}
 	
 	
