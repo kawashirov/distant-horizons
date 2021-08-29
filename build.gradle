@@ -21,7 +21,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'java' // needed for compileJava
 
-version = 'a1.3.2'
+version = 'a1.4'
 group = 'com.seibel.lod'
 archivesBaseName = 'lod_1.16.5'
 
@@ -140,24 +140,25 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.16.5-36.1.0'
 	
-	implementation ('com.github.KaptainWutax:TerrainUtils:1.0.0'){
-        transitive = false
-    }
-	implementation ('com.github.KaptainWutax:BiomeUtils:1.0.0'){
-        transitive = false
-    }
-    implementation ('com.github.KaptainWutax:SeedUtils:-SNAPSHOT'){
-        transitive = false
-    }
-    implementation ('com.github.KaptainWutax:MCUtils:1.0.0'){
-        transitive = false
-    }
-    implementation ('com.github.KaptainWutax:NoiseUtils:1.0.0'){
-        transitive = false
-    }
-    implementation ('com.github.KaptainWutax:MathUtils:-SNAPSHOT'){
-        transitive = false
-    }
+	// these aren't needed right now
+	//implementation ('com.github.KaptainWutax:TerrainUtils:1.0.0'){
+    //    transitive = false
+    //}
+	//implementation ('com.github.KaptainWutax:BiomeUtils:1.0.0'){
+    //    transitive = false
+    //}
+    //implementation ('com.github.KaptainWutax:SeedUtils:-SNAPSHOT'){
+    //    transitive = false
+    //}
+    //implementation ('com.github.KaptainWutax:MCUtils:1.0.0'){
+    //    transitive = false
+    //}
+    //implementation ('com.github.KaptainWutax:NoiseUtils:1.0.0'){
+    //    transitive = false
+    //}
+    //implementation ('com.github.KaptainWutax:MathUtils:-SNAPSHOT'){
+    //    transitive = false
+    //}
     
     // these were added to hopefully allow for cloning
     // configuredFeatures to allow for safe
@@ -196,7 +197,7 @@ dependencies {
 jar {
     manifest {
         attributes([
-            "Specification-Title": "Level of Detail",
+            "Specification-Title": "LOD",
             "Specification-Version": "1", // We are version 1 of ourselves
             "Implementation-Title": project.name,
             "Implementation-Version": "{version}",
