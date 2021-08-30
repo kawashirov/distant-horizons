@@ -124,7 +124,7 @@ public class LodBufferBuilder
 	 * swapped with the drawable buffers in the LodRenderer to be drawn.
 	 */
 	public void generateLodBuffersAsync(LodRenderer renderer, LodDimension lodDim,
-	                                    BlockPos playerBlockPos, int xAngle, int yAngle, int numbChunksWide)
+	                                    BlockPos playerBlockPos, boolean fullRegen)
 	{
 		// only allow one generation process to happen at a time
 		if (generatingBuffers)
@@ -158,7 +158,7 @@ public class LodBufferBuilder
 
 				ArrayList<Callable<Boolean>> nodeToRenderThreads = new ArrayList<>(lodDim.regions.length * lodDim.regions.length);
 
-				startBuffers();
+				startBuffers(fullRegen, lodDim);
 
 				// =====================//
 				//    RENDERING PART    //
@@ -185,6 +185,8 @@ public class LodBufferBuilder
 				{
 					for (int zRegion = 0; zRegion < lodDim.regions.length; zRegion++)
 					{
+						//if (lodDim.regen[xRegion][zRegion])
+						//	ClientProxy.LOGGER.debug("Rendering region " + xRegion + " " + zRegion);
 						RegionPos regionPos = new RegionPos(
 								xRegion + lodDim.getCenterX() - Math.floorDiv(lodDim.getWidth(), 2),
 								zRegion + lodDim.getCenterZ() - Math.floorDiv(lodDim.getWidth(), 2));
@@ -202,15 +204,19 @@ public class LodBufferBuilder
 							setsToRender[xRegion][zRegion] = new ConcurrentHashMap<LevelPos, MutableBoolean>();
 						}
 						ConcurrentMap<LevelPos, MutableBoolean> nodeToRender = (ConcurrentMap<LevelPos, MutableBoolean>) setsToRender[xRegion][zRegion];
-
+						final boolean regen = fullRegen;
+						final boolean regenReg = lodDim.regen[xRegion][zRegion];
 						Callable<Boolean> dataToRenderThread = () ->
 						{
-							lodDim.getDataToRender(
-									nodeToRender,
-									regionPos,
-									playerBlockPosRounded.getX(),
-									playerBlockPosRounded.getZ());
 
+							if (regen || regenReg)
+							{
+								lodDim.getDataToRender(
+										nodeToRender,
+										regionPos,
+										playerBlockPosRounded.getX(),
+										playerBlockPosRounded.getZ());
+							}
 
 							int posX;
 							int posZ;
@@ -281,7 +287,6 @@ public class LodBufferBuilder
 
 
 						nodeToRenderThreads.add(dataToRenderThread);
-
 					}// region z
 				}// region z
 				long renderStart = System.currentTimeMillis();
@@ -293,18 +298,11 @@ public class LodBufferBuilder
 					if (!future.get())
 					{
 						ClientProxy.LOGGER.warn("LodBufferBuilder ran into trouble and had to start over.");
-						closeBuffers();
+						closeBuffers(fullRegen, lodDim);
 						return;
 					}
 				}
 				long renderEnd = System.currentTimeMillis();
-
-
-				// finish the buffer building
-				closeBuffers();
-
-				// upload the new buffers
-				uploadBuffers();
 
 
 				long endTime = System.currentTimeMillis();
@@ -328,7 +326,6 @@ public class LodBufferBuilder
 				ClientProxy.LOGGER.warn("\"LodNodeBufferBuilder.generateLodBuffersAsync\" ran into trouble: ");
 				e.printStackTrace();
 			} finally
-
 			{
 				// regardless of if we successfully created the buffers
 				// we are done generating.
@@ -336,8 +333,10 @@ public class LodBufferBuilder
 
 				// clean up any potentially open resources
 				if (buildableBuffers != null)
-					closeBuffers();
+					closeBuffers(fullRegen, lodDim);
 
+				// upload the new buffers
+				uploadBuffers();
 				bufferLock.unlock();
 			}
 
@@ -503,22 +502,35 @@ public class LodBufferBuilder
 	/**
 	 * Calls begin on each of the buildable BufferBuilders.
 	 */
-	private void startBuffers()
+	private void startBuffers(boolean fullRegen, LodDimension lodDim)
 	{
 		for (int x = 0; x < buildableBuffers.length; x++)
 			for (int z = 0; z < buildableBuffers.length; z++)
+			{
+				//if (fullRegen || lodDim.regen[x][z])
+				//{
+				//if (lodDim.regen[x][z])
+				//	ClientProxy.LOGGER.debug("Starting region " + x + " " + z);
 				buildableBuffers[x][z].begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
+				//}
+			}
 	}
 
 	/**
 	 * Calls end on each of the buildable BufferBuilders.
 	 */
-	private void closeBuffers()
+	private void closeBuffers(boolean fullRegen, LodDimension lodDim)
 	{
 		for (int x = 0; x < buildableBuffers.length; x++)
 			for (int z = 0; z < buildableBuffers.length; z++)
-				if (buildableBuffers[x][z] != null && buildableBuffers[x][z].building())
+
+				if (buildableBuffers[x][z] != null && buildableBuffers[x][z].building() /*&& (fullRegen || lodDim.regen[x][z])*/)
+				{
+					//if(lodDim.regen[x][z])
+					//	ClientProxy.LOGGER.debug("Closing region " + x + " " + z);
+					lodDim.regen[x][z] = false;
 					buildableBuffers[x][z].end();
+				}
 	}
 
 	/**
