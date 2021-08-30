@@ -238,7 +238,7 @@ public class LodRenderer
 			if (!previousVanillaRenderedChunks.equals(vanillaRenderedChunks))
 			{
 				partialRegen = true;
-				previousVanillaRenderedChunks = vanillaRenderedChunks;
+				previousVanillaRenderedChunks = (HashSet<ChunkPos>) vanillaRenderedChunks.clone();
 			}
 			prevVanillaChunkTime = newTime;
 		}
@@ -263,6 +263,9 @@ public class LodRenderer
 				lodDim.setToRegen(pos.getRegionX(), pos.getRegionZ());
 			}
 		}
+
+		if(chunkPosToSkip.isEmpty() && player.position().y>256)
+			vanillaRenderedChunks.clear();
 		// did the user change the debug setting?
 		if (LodConfig.CLIENT.debugMode.get() != previousDebugMode)
 		{
