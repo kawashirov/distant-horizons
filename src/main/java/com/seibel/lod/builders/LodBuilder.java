@@ -46,7 +46,6 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
-import org.lwjgl.system.CallbackI;
 
 /**
  * This object is in charge of creating Lod related objects. (specifically: Lod
@@ -54,7 +53,7 @@ import org.lwjgl.system.CallbackI;
  *
  * @author Leonardo Amato
  * @author James Seibel
- * @version 8-26-2021
+ * @version 8-29-2021
  */
 public class LodBuilder
 {
@@ -421,7 +420,7 @@ public class LodBuilder
 	}
 
 	/**
-	 * Returns a color int for a given block.
+	 * Returns a color int for the given block.
 	 */
 	private int getColorForBlock(int x, int z, BlockState blockState, Biome biome)
 	{
@@ -433,7 +432,12 @@ public class LodBuilder
 			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
 			tmp = tmp.darker();
 			colorInt = LodUtil.colorToInt(tmp);
-		} else if (blockState == Blocks.MYCELIUM.defaultBlockState())
+		}
+		else if (blockState == Blocks.STONE.defaultBlockState())
+		{
+			colorInt = LodUtil.STONE_COLOR_INT;
+		}
+		else if (blockState == Blocks.MYCELIUM.defaultBlockState())
 		{
 			colorInt = LodUtil.MYCELIUM_COLOR_INT;
 		}

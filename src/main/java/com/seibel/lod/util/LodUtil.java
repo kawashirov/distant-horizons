@@ -21,9 +21,9 @@ import java.awt.Color;
 import java.io.File;
 import java.util.HashSet;
 
-import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
+import com.seibel.lod.objects.LevelPos.LevelPos;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ServerData;
@@ -43,7 +43,7 @@ import net.minecraft.world.server.ServerWorld;
  * This class holds methods and constants that may be used in multiple places.
  * 
  * @author James Seibel
- * @version 8-11-2021
+ * @version 8-29-2021
  */
 public class LodUtil
 {
@@ -58,6 +58,10 @@ public class LodUtil
 	
 	/** a gray-purple color */
 	public static final int MYCELIUM_COLOR_INT = LodUtil.colorToInt(Color.decode("#6E6166"));
+	/** TODO, add a better way to override material colors
+	 * and/or add a method to generate colors based on texture
+	 * issue #64 */
+	public static final int STONE_COLOR_INT = LodUtil.colorToInt(new Color(150, 150, 150));
 	
 	/**
 	 * In order of nearest to farthest: <br>
