@@ -305,8 +305,8 @@ public class LodRegion implements Serializable
 		{
 			if (dataToRender.containsKey(levelPos))
 			{
-				//levelPos.changeParameters(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size);
-				dataToRender.get(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size)).setTrue();
+				levelPos.changeParameters(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size);
+				dataToRender.get(levelPos).setTrue();
 			}else
 			{
 				dataToRender.put(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size), new MutableBoolean(true));
