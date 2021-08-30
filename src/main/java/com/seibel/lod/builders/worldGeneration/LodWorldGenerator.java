@@ -120,34 +120,26 @@ public class LodWorldGenerator
 					if (nodeToGenerate == null)
 						nodeToGenerate = new ConcurrentHashMap<>();
 
-					// start by generating half-region sized blocks...
-					//int farRequest = maxChunkGenRequests / 4;
-					//int nearRequest = maxChunkGenRequests * 3 /4;
-					//we firstly make sure that the world is filled with half region wide block
 
-					Comparator<LevelPos> posComparator = LevelPos.getPosComparator(
+					Comparator<LevelPos> posNearComparator = LevelPos.getPosComparator(
 							playerBlockPosRounded.getX(),
 							playerBlockPosRounded.getZ());
-					Comparator<LevelPos> posLevelComparator = LevelPos.getPosAndDetailComparator(
+					Comparator<LevelPos> posFarComparator = LevelPos.getPosAndDetailComparator(
 							playerBlockPosRounded.getX(),
 							playerBlockPosRounded.getZ());
-					nodeToGenerateListNear = new TreeSet(posComparator);
-					nodeToGenerateListFar = new TreeSet(posLevelComparator);
-					// ...then once the world is filled with big sized blocks
-					// fill in the rest
-					//int nearRequesting = maxChunkGenRequests - maxChunkGenRequests / 4 + farRequesting;
-					//we then fill the world with the rest of the block
+					nodeToGenerateListNear = new TreeSet(posNearComparator);
+					nodeToGenerateListFar = new TreeSet(posFarComparator);
 
 					lodDim.getDataToGenerate(
 							nodeToGenerate,
 							playerBlockPosRounded.getX(),
 							playerBlockPosRounded.getZ());
 
-					// how many level positions to
-					int requesting = maxChunkGenRequests;
 
+					//here we prepare two sorted set
+					//the first contains the near pos to render
+					//the second contain the far pos to render
 					byte farDetail = (byte) 7;
-					//We alternate the generation between fast and near to make everything more smooth
 					for (LevelPos pos : nodeToGenerate.keySet())
 					{
 						if (!nodeToGenerate.get(pos).booleanValue())
@@ -166,10 +158,12 @@ public class LodWorldGenerator
 					int maxDistance;
 					byte circle;
 					LevelPos levelPos;
+					int requesting = maxChunkGenRequests;
 					int requestingFar = maxChunkGenRequests / 4;
 					while (requesting > 0 && !nodeToGenerateListNear.isEmpty())
 					{
 						levelPos = nodeToGenerateListNear.first();
+						System.out.println(levelPos);
 						nodeToGenerate.remove(levelPos);
 						nodeToGenerateListNear.remove(levelPos);
 
