@@ -44,7 +44,7 @@ import net.minecraftforge.fml.config.ModConfig;
  * This handles any configuration the user has access to.
  *
  * @author James Seibel
- * @version 8-10-2021
+ * @version 8-29-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -58,6 +58,8 @@ public class LodConfig
 		public ForgeConfigSpec.EnumValue<FogDrawOverride> fogDrawOverride;
 		
 		public ForgeConfigSpec.EnumValue<DebugMode> debugMode;
+		
+		public ForgeConfigSpec.BooleanValue enableDebugKeybinding;
 		
 		public ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
 		
@@ -84,6 +86,7 @@ public class LodConfig
 		public ForgeConfigSpec.DoubleValue brightnessMultiplier;
 		
 		public ForgeConfigSpec.DoubleValue saturationMultiplier;
+		
 		
 		Client(ForgeConfigSpec.Builder builder)
 		{
@@ -114,11 +117,15 @@ public class LodConfig
 			
 			debugMode = builder
 					.comment("\n\n"
-							+ " This can be changed using the F4 key. \n"
 							+ " " + DebugMode.OFF.toString() + ": LODs will draw with their normal colors. \n"
 							+ " " + DebugMode.SHOW_DETAIL.toString() + ": LOD colors will be based on their detail. \n"
 							+ " " + DebugMode.SHOW_DETAIL_WIREFRAME.toString() + ": LOD colors will be based on their detail, drawn with wireframe. \n")
 					.defineEnum("debugMode", DebugMode.OFF);
+			
+			enableDebugKeybinding = builder
+					.comment("\n\n"
+							+ " If true the F4 key can be used to cycle through the different debug modes. \n")
+					.define("enableDebugKeybinding", false);
 			
 			lodTemplate = builder
 					.comment("\n\n"

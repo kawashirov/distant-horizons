@@ -19,6 +19,7 @@ package com.seibel.lod.proxy;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.lwjgl.glfw.GLFW;
 
 import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.builders.LodBuilder;
@@ -171,6 +172,8 @@ public class ClientProxy
 		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
 		LodConfig.CLIENT.lodQuality.set(3);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
+		
+		LodConfig.CLIENT.enableDebugKeybinding.set(true);
 	}
 	
 	
@@ -254,8 +257,8 @@ public class ClientProxy
 	@SubscribeEvent
 	public void onKeyInput(InputEvent.KeyInputEvent event) 
 	{
-		//f4 is key 293, the 1 action mean that the key just got pressed
-		if(event.getKey() == 293 && event.getAction() == 1)
+		if(LodConfig.CLIENT.enableDebugKeybinding.get()
+			&& event.getKey() == GLFW.GLFW_KEY_F4 && event.getAction() == GLFW.GLFW_PRESS)
 		{
 			LodConfig.CLIENT.debugMode.set(LodConfig.CLIENT.debugMode.get().getNext());
 		}
