@@ -179,12 +179,12 @@ public class LodConfig
 					.comment("\n\n"
 							+ " this value is multiplied by 128 and determine \n"
 							+ " how much the quality decrease over distance \n")
-					.defineInRange("lodQuality", 1, 2, 4);
+					.defineInRange("lodQuality", 1, 1, 4);
 			
 			lodChunkRenderDistance = builder
 					.comment("\n\n"
 							+ " This is the render distance of the mod \n")
-					.defineInRange("lodChunkRenderDistane", 64, 32, 256);
+					.defineInRange("lodChunkRenderDistane", 64, 32, 512);
 			
 			distanceGenerationMode = builder
 					.comment("\n\n"

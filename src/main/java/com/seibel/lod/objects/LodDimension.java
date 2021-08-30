@@ -20,10 +20,7 @@ package com.seibel.lod.objects;
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -484,7 +481,7 @@ public class LodDimension
 	 *
 	 * @return list of quadTrees
 	 */
-	public List<LevelPos> getDataToGenerate(int playerPosX, int playerPosZ, byte generation, byte detailLevel, int dataNumber)
+	public void getDataToGenerate(ConcurrentMap<LevelPos, MutableBoolean> dataToGenerate, int playerPosX, int playerPosZ)
 	{
 
 		int n = regions.length;
@@ -492,7 +489,6 @@ public class LodDimension
 		int zIndex;
 		LodRegion region;
 		RegionPos regionPos;
-		List<LevelPos> listOfData = new ArrayList<>();
 		for (int xRegion = 0; xRegion < n; xRegion++)
 		{
 			for (int zRegion = 0; zRegion < n; zRegion++)
@@ -503,7 +499,7 @@ public class LodDimension
 					zIndex = (zRegion + center.z) - halfWidth;
 					regionPos = new RegionPos(xIndex, zIndex);
 					region = getRegion(regionPos);
-					listOfData.addAll(region.getDataToGenerate(playerPosX, playerPosZ, generation, detailLevel, dataNumber));
+					region.getDataToGenerate(dataToGenerate, playerPosX, playerPosZ);
 
 				} catch (Exception e)
 				{
@@ -511,17 +507,6 @@ public class LodDimension
 				}
 			}
 		}
-
-		List<LevelPos> levelMinPosList = new ArrayList<>();
-		dataNumber = Math.min(dataNumber, listOfData.size());
-
-		for (int i = 0; i < dataNumber; i++)
-		{
-			LevelPos min = Collections.min(listOfData, LevelPos.getPosComparator(playerPosX, playerPosZ));
-			listOfData.remove(min);
-			levelMinPosList.add(min);
-		}
-		return levelMinPosList;
 	}
 
 	/**

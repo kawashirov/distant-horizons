@@ -172,33 +172,20 @@ public class LodRegion implements Serializable
 	 *
 	 * @return
 	 */
-	public List<LevelPos> getDataToGenerate(int playerPosX, int playerPosZ, byte generation, byte detailLevel, int dataNumber)
+	public void getDataToGenerate(ConcurrentMap<LevelPos, MutableBoolean> dataToGenerate, int playerPosX, int playerPosZ)
 	{
 		LevelPos levelPos = new LevelPos(LodUtil.REGION_DETAIL_LEVEL, 0, 0);
-		List<LevelPos> levelPosList = new ArrayList<>();
-		getDataToGenerate(levelPosList, levelPos, playerPosX, playerPosZ, generation, detailLevel);
-		List<LevelPos> levelMinPosList = new ArrayList<>();
-		dataNumber = Math.min(dataNumber, levelPosList.size());
-
-		LevelPos min;
-		for (int i = 0; i < dataNumber; i++)
-		{
-			min = Collections.min(levelPosList, LevelPos.getPosComparator(playerPosX, playerPosZ));
-			levelPosList.remove(min);
-			levelMinPosList.add(min);
-		}
-
-		return levelMinPosList;
+		getDataToGenerate(dataToGenerate, levelPos, playerPosX, playerPosZ);
 
 	}
 
-	private void getDataToGenerate(List<LevelPos> levelPosList, LevelPos levelPos, int playerPosX, int playerPosZ, byte generation, byte targetDetailLevel)
+	private void getDataToGenerate(ConcurrentMap<LevelPos, MutableBoolean>  dataToGenerate, LevelPos levelPos, int playerPosX, int playerPosZ)
 	{
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel);
 
 		//here i calculate the the LevelPos is in range
 		//This is important to avoid any kind of hole in the generation
-		int maxDistance = levelPos.maxDistance(playerPosX, playerPosZ, regionPosX, regionPosZ);
+		int minDistance = levelPos.minDistance(playerPosX, playerPosZ, regionPosX, regionPosZ);
 
 
 		int posX = levelPos.posX;
@@ -210,15 +197,21 @@ public class LodRegion implements Serializable
 		int childSize = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel + 1);
 		//we have reached the target detail level
 
-		if (DetailDistanceUtil.getDistanceGenerationInverse(maxDistance,targetDetailLevel) > detailLevel)
+		if (DetailDistanceUtil.getDistanceGenerationInverse(minDistance) > detailLevel)
 		{
 			return;
 		}
-		else if (DetailDistanceUtil.getDistanceGenerationInverse(maxDistance,targetDetailLevel) == levelPos.detailLevel)
+		else if (DetailDistanceUtil.getDistanceGenerationInverse(minDistance) == detailLevel)
 		{
 			if (!doesDataExist(levelPos))
 			{
-				levelPosList.add(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size));
+				levelPos.changeParameters(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size);
+				if(dataToGenerate.containsKey(levelPos)){
+					dataToGenerate.get(levelPos).setTrue();
+				}else
+				{
+					dataToGenerate.put(levelPos.clone(), new MutableBoolean(true));
+				}
 			}
 		} else
 		{
@@ -236,7 +229,13 @@ public class LodRegion implements Serializable
 						if (!doesDataExist(levelPos))
 						{
 							num++;
-							levelPosList.add(new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * childSize, levelPos.posZ + regionPosZ * childSize));
+							levelPos.changeParameters(levelPos.detailLevel, levelPos.posX + regionPosX * childSize, levelPos.posZ + regionPosZ * childSize);
+							if(dataToGenerate.containsKey(levelPos)){
+								dataToGenerate.get(levelPos).setTrue();
+							}else
+							{
+								dataToGenerate.put(levelPos.clone(), new MutableBoolean(true));
+							}
 						}
 					}
 				}
@@ -249,25 +248,25 @@ public class LodRegion implements Serializable
 						for (int z = 0; z <= 1; z++)
 						{
 							levelPos.changeParameters((byte) (detailLevel - 1), childPosX + x, childPosZ + z);
-							getDataToGenerate(levelPosList, levelPos,
-									playerPosX, playerPosZ, generation, targetDetailLevel);
+							getDataToGenerate(dataToGenerate, levelPos,	playerPosX, playerPosZ);
 						}
 					}
 				}
 			} else
 			//now we keep exploring the top right child
 			{
-				levelPos.changeParameters(levelPos.detailLevel, levelPos.posX, levelPos.posZ);
-				levelPos.convert((byte) (levelPos.detailLevel - 1));
+				levelPos.changeParameters((byte) (detailLevel-1), levelPos.posX*2 + regionPosX * childSize, levelPos.posZ*2 + regionPosZ * childSize);
 				if (!doesDataExist(levelPos))
 				{
-					levelPosList.add(new LevelPos(levelPos.detailLevel, levelPos.posX + regionPosX * childSize, levelPos.posZ + regionPosZ * childSize));
+					if(dataToGenerate.containsKey(levelPos)){
+						dataToGenerate.get(levelPos).setTrue();
+					}else
+					{
+						dataToGenerate.put(levelPos.clone(), new MutableBoolean(true));
+					}
 				} else
 				{
-					if (levelPos.detailLevel != targetDetailLevel)
-					{
-						getDataToGenerate(levelPosList, levelPos, playerPosX, playerPosZ, generation, targetDetailLevel);
-					}
+					getDataToGenerate(dataToGenerate, levelPos, playerPosX, playerPosZ);
 				}
 			}
 		}

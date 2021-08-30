@@ -217,7 +217,7 @@ public class LodRenderer
 		// should LODs be regenerated?
 		long newTime = System.currentTimeMillis();
 		//We check if the player has moved
-		if (newTime - prevPlayerPosTime > 2000)
+		if (newTime - prevPlayerPosTime > 5000)
 		{
 			if (previousPos.detailLevel == 0 ||
 					    player.xChunk != previousPos.posX ||
@@ -233,7 +233,7 @@ public class LodRenderer
 			prevPlayerPosTime = newTime;
 		}
 		//We check if the vanilla rendered chunks are changed
-		if (newTime - prevVanillaChunkTime > 1000)
+		if (newTime - prevVanillaChunkTime > 5000)
 		{
 			if (previousVanillaRenderedChunks.equals(vanillaRenderedChunks))
 			{

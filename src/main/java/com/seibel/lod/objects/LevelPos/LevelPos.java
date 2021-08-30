@@ -11,7 +11,7 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos, 
     public byte detailLevel;
     public int posX;
     public int posZ;
-
+    public boolean flag;
 
     public LevelPos()
     {
@@ -298,7 +298,7 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos, 
         @Override
         public int compare(LevelPos first, LevelPos second)
         {
-            int compareResult = Integer.compare(first.detailLevel, second.detailLevel);
+            int compareResult = Integer.compare(second.detailLevel, first.detailLevel);
             if (compareResult == 0)
             {
                 compareResult = Integer.compare(

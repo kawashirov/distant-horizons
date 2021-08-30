@@ -98,12 +98,10 @@ public class DetailDistanceUtil
 		return (byte) Math.min(detail, LodUtil.REGION_DETAIL_LEVEL);
 	}
 
-	public static byte getDistanceGenerationInverse(int distance, byte minDetailLevel)
+	public static byte getDistanceGenerationInverse(int distance)
 	{
-		return (byte) Math.max(getDistanceRenderingInverse((int) (distance * genMultiplier))
-				,minDetailLevel);
+		return getDistanceRenderingInverse((int) (distance * genMultiplier));
 	}
-
 
 	public static byte getDistanceTreeCutInverse(int distance)
 	{

@@ -1,13 +1,9 @@
 package com.seibel.lod.builders.worldGeneration;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import com.seibel.lod.builders.GenerationRequest;
 import com.seibel.lod.builders.LodBuilder;
@@ -20,11 +16,13 @@ import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 
+import javafx.collections.transformation.SortedList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.WorldWorkerManager;
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 /**
  * A singleton that handles all long distance LOD world generation.
@@ -69,6 +67,11 @@ public class LodWorldGenerator
 	 */
 	public static final LodWorldGenerator INSTANCE = new LodWorldGenerator();
 
+	public volatile ConcurrentMap<LevelPos, MutableBoolean> nodeToGenerate;
+
+	SortedSet<LevelPos> nodeToGenerateListNear;
+	SortedSet<LevelPos> nodeToGenerateListFar;
+
 	private LodWorldGenerator()
 	{
 
@@ -107,72 +110,84 @@ public class LodWorldGenerator
 					ArrayList<GenerationRequest> chunksToGen = new ArrayList<>(maxChunkGenRequests);
 					// if we don't have a full number of chunks to generate in chunksToGen
 					// we can top it off from this reserve
-					ArrayList<GenerationRequest> chunksToGenReserve = new ArrayList<>(maxChunkGenRequests);
-
-					// how many level positions to 
-					int requesting = maxChunkGenRequests;
 
 
 					//=======================================//
 					// create the generation Request objects //
 					//=======================================//
+					List<GenerationRequest> generationRequestList = new ArrayList<>(maxChunkGenRequests);
 
-					List<LevelPos> farLevelPosListToGen;
-					List<LevelPos> nearLevelPosListToGen;
-					List<GenerationRequest> generationRequestList = new ArrayList<>();
+					if (nodeToGenerate == null)
+						nodeToGenerate = new ConcurrentHashMap<>();
 
 					// start by generating half-region sized blocks...
-					int farRequesting = maxChunkGenRequests / 4;
-					byte maxDetailFar = (byte) 8;
+					//int farRequest = maxChunkGenRequests / 4;
+					//int nearRequest = maxChunkGenRequests * 3 /4;
 					//we firstly make sure that the world is filled with half region wide block
 
-					farLevelPosListToGen = lodDim.getDataToGenerate(
+					Comparator<LevelPos> posComparator = LevelPos.getPosComparator(
 							playerBlockPosRounded.getX(),
-							playerBlockPosRounded.getZ(),
-							DetailDistanceUtil.getDistanceGenerationMode(maxDetailFar).complexity,
-							maxDetailFar,
-							farRequesting);
-					farRequesting = farRequesting - farLevelPosListToGen.size();
-
+							playerBlockPosRounded.getZ());
+					Comparator<LevelPos> posLevelComparator = LevelPos.getPosAndDetailComparator(
+							playerBlockPosRounded.getX(),
+							playerBlockPosRounded.getZ());
+					nodeToGenerateListNear = new TreeSet(posComparator);
+					nodeToGenerateListFar = new TreeSet(posLevelComparator);
 					// ...then once the world is filled with big sized blocks
 					// fill in the rest
-					int nearRequesting = maxChunkGenRequests - maxChunkGenRequests / 4 + farRequesting;
+					//int nearRequesting = maxChunkGenRequests - maxChunkGenRequests / 4 + farRequesting;
 					//we then fill the world with the rest of the block
 
-					nearLevelPosListToGen = lodDim.getDataToGenerate(
+					lodDim.getDataToGenerate(
+							nodeToGenerate,
 							playerBlockPosRounded.getX(),
-							playerBlockPosRounded.getZ(),
-							DetailDistanceUtil.getDistanceGenerationMode(0).complexity,
-							DetailDistanceUtil.getLodDetail(0).detailLevel,
-							nearRequesting);
+							playerBlockPosRounded.getZ());
 
-					byte minDetail;
+					// how many level positions to
+					int requesting = maxChunkGenRequests;
+
+					byte farDetail = (byte) 7;
+					//We alternate the generation between fast and near to make everything more smooth
+					for (LevelPos pos : nodeToGenerate.keySet())
+					{
+						if (!nodeToGenerate.get(pos).booleanValue())
+						{
+							nodeToGenerate.remove(pos);
+						} else
+						{
+							if (pos.detailLevel > farDetail){
+								nodeToGenerateListFar.add(pos);
+							}
+							nodeToGenerateListNear.add(pos);
+							nodeToGenerate.get(pos).setFalse();
+						}
+					}
+
 					int maxDistance;
 					byte circle;
 					LevelPos levelPos;
-					//We alternate the generation between fast and near to make everything more smooth
-					while(!nearLevelPosListToGen.isEmpty() || !farLevelPosListToGen.isEmpty()){
-						if(!nearLevelPosListToGen.isEmpty())
+					int requestingFar = maxChunkGenRequests / 4;
+					while (requesting > 0 && !nodeToGenerateListNear.isEmpty())
+					{
+						levelPos = nodeToGenerateListNear.first();
+						nodeToGenerate.remove(levelPos);
+						nodeToGenerateListNear.remove(levelPos);
+
+						maxDistance = levelPos.maxDistance(	playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
+						circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance);
+						generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(circle), DetailDistanceUtil.getLodDetail(circle)));
+						requesting--;
+						if (requestingFar > 0 && !nodeToGenerateListFar.isEmpty())
 						{
-							levelPos = nearLevelPosListToGen.get(0);
-							nearLevelPosListToGen.remove(0);
-							minDetail = (byte) 0;
-							maxDistance = levelPos.maxDistance(
-									playerBlockPosRounded.getX(),
-									playerBlockPosRounded.getZ());
-							circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance, minDetail);
-							generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(circle), DetailDistanceUtil.getLodDetail(circle)));
-						}
-						if(!farLevelPosListToGen.isEmpty())
-						{
-							levelPos = farLevelPosListToGen.get(0);
-							farLevelPosListToGen.remove(0);
-							minDetail = maxDetailFar;
-							maxDistance = levelPos.maxDistance(
-									playerBlockPosRounded.getX(),
-									playerBlockPosRounded.getZ());
-							circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance, minDetail);
-							generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(circle), DetailDistanceUtil.getLodDetail(circle)));
+							levelPos = nodeToGenerateListFar.first();
+							if (levelPos.detailLevel >= farDetail)
+							{
+								maxDistance = levelPos.maxDistance(	playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
+								circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance);
+								generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(circle), DetailDistanceUtil.getLodDetail(circle)));
+								requestingFar--;
+								requesting--;
+							}
 						}
 					}
 
@@ -186,70 +201,17 @@ public class LodWorldGenerator
 					for (GenerationRequest generationRequest : generationRequestList)
 					{
 						ChunkPos chunkPos = generationRequest.getChunkPos();
-
 						if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
 						{
 							// prevent generating the same chunk multiple times
 							if (positionWaitingToBeGenerated.contains(chunkPos))
 							{
-								// ClientProxy.LOGGER.debug(pos + " asked to be generated again.");
 								continue;
 							}
-
-							// determine if this position is closer to the player
-							// than the previous
-							int newDistance = playerChunkPos.getChessboardDistance(chunkPos);
-
-							if (newDistance < minChunkDist)
-							{
-								// this chunk is closer, clear any previous
-								// positions and update the new minimum distance
-								minChunkDist = newDistance;
-
-								// move all the old chunks into the reserve
-								ArrayList<GenerationRequest> oldReserve = new ArrayList<>(chunksToGenReserve);
-								chunksToGenReserve.clear();
-								chunksToGenReserve.addAll(chunksToGen);
-								// top off reserve with whatever was in oldReerve
-								for (int i = 0; i < oldReserve.size(); i++)
-								{
-									if (chunksToGenReserve.size() < maxChunkGenRequests)
-										chunksToGenReserve.add(oldReserve.get(i));
-									else
-										break;
-								}
-
-								chunksToGen.clear();
-								chunksToGen.add(generationRequest);
-							} else if (newDistance == minChunkDist)
-							{
-								// this chunk position as close as the minimum distance
-								if (chunksToGen.size() < maxChunkGenRequests)
-								{
-									// we are still under the number of chunks to generate
-									// add this position to the list
-									chunksToGen.add(generationRequest);
-								}
-							} else
-							{
-								// this chunk is farther away than the minimum distance,
-								// add it to the reserve to make sure we always have a full reserve
-								chunksToGenReserve.add(generationRequest);
-							}
+							chunksToGen.add(generationRequest);
 
 						} // lod null and can generate more chunks
 					} // positions to generate
-
-					// fill up chunksToGen from the reserve if it isn't full
-					// already
-					if (chunksToGen.size() < maxChunkGenRequests)
-					{
-						Iterator<GenerationRequest> reserveIterator = chunksToGenReserve.iterator();
-						while (chunksToGen.size() < maxChunkGenRequests && reserveIterator.hasNext())
-						{
-							chunksToGen.add(reserveIterator.next());
-						}
-					}
 
 
 					//=============================//
