@@ -185,108 +185,102 @@ public class LodBufferBuilder
 				{
 					for (int zRegion = 0; zRegion < lodDim.regions.length; zRegion++)
 					{
-						//if (lodDim.regen[xRegion][zRegion])
-						//	ClientProxy.LOGGER.debug("Rendering region " + xRegion + " " + zRegion);
-						RegionPos regionPos = new RegionPos(
-								xRegion + lodDim.getCenterX() - Math.floorDiv(lodDim.getWidth(), 2),
-								zRegion + lodDim.getCenterZ() - Math.floorDiv(lodDim.getWidth(), 2));
-
-						// local position in the vbo and bufferBuilder arrays
-						BufferBuilder currentBuffer = buildableBuffers[xRegion][zRegion];
-
-						// make sure the buffers weren't
-						// changed while we were running this method
-						if (currentBuffer == null || (currentBuffer != null && !currentBuffer.building()))
-							return;
-
-						if (setsToRender[xRegion][zRegion] == null)
+						if (lodDim.regen[xRegion][zRegion] || fullRegen)
 						{
-							setsToRender[xRegion][zRegion] = new ConcurrentHashMap<LevelPos, MutableBoolean>();
-						}
-						ConcurrentMap<LevelPos, MutableBoolean> nodeToRender = (ConcurrentMap<LevelPos, MutableBoolean>) setsToRender[xRegion][zRegion];
-						final boolean regen = fullRegen;
-						final boolean regenReg = lodDim.regen[xRegion][zRegion];
-						Callable<Boolean> dataToRenderThread = () ->
-						{
+							RegionPos regionPos = new RegionPos(
+									xRegion + lodDim.getCenterX() - Math.floorDiv(lodDim.getWidth(), 2),
+									zRegion + lodDim.getCenterZ() - Math.floorDiv(lodDim.getWidth(), 2));
 
-							if (regen || regenReg)
+							// local position in the vbo and bufferBuilder arrays
+							BufferBuilder currentBuffer = buildableBuffers[xRegion][zRegion];
+
+							// make sure the buffers weren't
+							// changed while we were running this method
+							if (currentBuffer == null || (currentBuffer != null && !currentBuffer.building()))
+								return;
+
+							//previous setToRender chache
+							if (setsToRender[xRegion][zRegion] == null)
+							{
+								setsToRender[xRegion][zRegion] = new ConcurrentHashMap<LevelPos, MutableBoolean>();
+							}
+							ConcurrentMap<LevelPos, MutableBoolean> nodeToRender = (ConcurrentMap<LevelPos, MutableBoolean>) setsToRender[xRegion][zRegion];
+							Callable<Boolean> dataToRenderThread = () ->
 							{
 								lodDim.getDataToRender(
 										nodeToRender,
 										regionPos,
 										playerBlockPosRounded.getX(),
 										playerBlockPosRounded.getZ());
-							}
 
-							int posX;
-							int posZ;
-							byte detailLevel;
-							for (LevelPos posToRender : nodeToRender.keySet())
-							{
-								if (!nodeToRender.get(posToRender).booleanValue())
+								int posX;
+								int posZ;
+								byte detailLevel;
+								for (LevelPos posToRender : nodeToRender.keySet())
 								{
-									nodeToRender.remove(posToRender);
-									continue;
-								}
-								nodeToRender.get(posToRender).setFalse();
-								// skip any chunks that Minecraft is going to render
-
-								if (renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos()))
-								{
-									continue;
-								}
-								posX = posToRender.posX;
-								posZ = posToRender.posZ;
-								detailLevel = posToRender.detailLevel;
-
-								LevelPos chunkPos = posToRender.getConvertedLevelPos(LodUtil.CHUNK_DETAIL_LEVEL);
-								// skip any chunks that Minecraft is going to render
-
-								if (renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkPos.posX, chunkPos.posZ)))
-								{
-									continue;
-								}
-
-								try
-								{
-									boolean disableFix = false;
-									if (lodDim.doesDataExist(posToRender.clone()))
+									if (!nodeToRender.get(posToRender).booleanValue())
 									{
-										short[] lodData = lodDim.getData(posToRender);
-										short[][][] adjData = new short[2][2][];
-										for (int x : new int[]{0, 1})
-										{
-											posToRender.changeParameters(detailLevel, posX + x * 2 - 1, posZ);
-											if (!renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos())
-													    && (nodeToRender.containsKey(posToRender) || disableFix))
-												adjData[0][x] = lodDim.getData(posToRender);
-										}
-
-										for (int z : new int[]{0, 1})
-										{
-											posToRender.changeParameters(detailLevel, posX, posZ + z * 2 - 1);
-											if (!renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos())
-													    && (nodeToRender.containsKey(posToRender) || disableFix))
-												adjData[1][z] = lodDim.getData(posToRender);
-										}
-										posToRender.changeParameters(detailLevel, posX, posZ);
-
-										LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,
-												posToRender, renderer.previousDebugMode);
+										nodeToRender.remove(posToRender);
+										continue;
 									}
-								} catch (ArrayIndexOutOfBoundsException e)
-								{
-									return false;
-								}
+									nodeToRender.get(posToRender).setFalse();
+									// skip any chunks that Minecraft is going to render
 
-							}// for pos to in list to render
+									if (renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos()))
+									{
+										continue;
+									}
+									posX = posToRender.posX;
+									posZ = posToRender.posZ;
+									detailLevel = posToRender.detailLevel;
 
-							// the thread executed successfully
-							return true;
-						};// buffer builder worker thread
+									LevelPos chunkPos = posToRender.getConvertedLevelPos(LodUtil.CHUNK_DETAIL_LEVEL);
+									// skip any chunks that Minecraft is going to render
 
+									if (renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkPos.posX, chunkPos.posZ)))
+									{
+										continue;
+									}
 
-						nodeToRenderThreads.add(dataToRenderThread);
+									try
+									{
+										boolean disableFix = false;
+										if (lodDim.doesDataExist(posToRender.clone()))
+										{
+											short[] lodData = lodDim.getData(posToRender);
+											short[][][] adjData = new short[2][2][];
+											for (int x : new int[]{0, 1})
+											{
+												posToRender.changeParameters(detailLevel, posX + x * 2 - 1, posZ);
+												if (!renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos())
+														    && (nodeToRender.containsKey(posToRender) || disableFix))
+													adjData[0][x] = lodDim.getData(posToRender);
+											}
+
+											for (int z : new int[]{0, 1})
+											{
+												posToRender.changeParameters(detailLevel, posX, posZ + z * 2 - 1);
+												if (!renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos())
+														    && (nodeToRender.containsKey(posToRender) || disableFix))
+													adjData[1][z] = lodDim.getData(posToRender);
+											}
+											posToRender.changeParameters(detailLevel, posX, posZ);
+
+											LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,
+													posToRender, renderer.previousDebugMode);
+										}
+									} catch (ArrayIndexOutOfBoundsException e)
+									{
+										return false;
+									}
+
+								}// for pos to in list to render
+
+								// the thread executed successfully
+								return true;
+							};
+							nodeToRenderThreads.add(dataToRenderThread);
+						}
 					}// region z
 				}// region z
 				long renderStart = System.currentTimeMillis();
@@ -319,9 +313,7 @@ public class LodBufferBuilder
 
 				// mark that the buildable buffers as ready to swap
 				switchVbos = true;
-			} catch (
-					  Exception e)
-
+			} catch (Exception e)
 			{
 				ClientProxy.LOGGER.warn("\"LodNodeBufferBuilder.generateLodBuffersAsync\" ran into trouble: ");
 				e.printStackTrace();
@@ -336,7 +328,7 @@ public class LodBufferBuilder
 					closeBuffers(fullRegen, lodDim);
 
 				// upload the new buffers
-				uploadBuffers();
+				uploadBuffers(fullRegen, lodDim);
 				bufferLock.unlock();
 			}
 
@@ -507,12 +499,10 @@ public class LodBufferBuilder
 		for (int x = 0; x < buildableBuffers.length; x++)
 			for (int z = 0; z < buildableBuffers.length; z++)
 			{
-				//if (fullRegen || lodDim.regen[x][z])
-				//{
-				//if (lodDim.regen[x][z])
-				//	ClientProxy.LOGGER.debug("Starting region " + x + " " + z);
-				buildableBuffers[x][z].begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
-				//}
+				if (fullRegen || lodDim.regen[x][z])
+				{
+					buildableBuffers[x][z].begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
+				}
 			}
 	}
 
@@ -524,11 +514,8 @@ public class LodBufferBuilder
 		for (int x = 0; x < buildableBuffers.length; x++)
 			for (int z = 0; z < buildableBuffers.length; z++)
 
-				if (buildableBuffers[x][z] != null && buildableBuffers[x][z].building() /*&& (fullRegen || lodDim.regen[x][z])*/)
+				if (buildableBuffers[x][z] != null && buildableBuffers[x][z].building() && (fullRegen || lodDim.regen[x][z]))
 				{
-					//if(lodDim.regen[x][z])
-					//	ClientProxy.LOGGER.debug("Closing region " + x + " " + z);
-					lodDim.regen[x][z] = false;
 					buildableBuffers[x][z].end();
 				}
 	}
@@ -537,13 +524,17 @@ public class LodBufferBuilder
 	 * Called from the LodRenderer to create the
 	 * BufferBuilders at the right size.
 	 */
-	private void uploadBuffers()
+	private void uploadBuffers(boolean fullRegen, LodDimension lodDim)
 	{
 		for (int x = 0; x < buildableVbos.length; x++)
 		{
 			for (int z = 0; z < buildableVbos.length; z++)
 			{
-				buildableVbos[x][z].upload(buildableBuffers[x][z]);
+				if (fullRegen || lodDim.regen[x][z])
+				{
+					buildableVbos[x][z].upload(buildableBuffers[x][z]);
+					lodDim.regen[x][z] = false;
+				}
 			}
 		}
 	}
