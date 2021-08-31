@@ -229,7 +229,7 @@ public class LodRegion implements Serializable
 						if (!doesDataExist(levelPos))
 						{
 							num++;
-							levelPos.changeParameters(levelPos.detailLevel, levelPos.posX + regionPosX * childSize, levelPos.posZ + regionPosZ * childSize);
+							levelPos.changeParameters((byte) (detailLevel - 1), childPosX + x + regionPosX * childSize, childPosZ + z + regionPosZ * childSize);
 							if(dataToGenerate.containsKey(levelPos)){
 								dataToGenerate.get(levelPos).setTrue();
 							}else
@@ -255,9 +255,11 @@ public class LodRegion implements Serializable
 			} else
 			//now we keep exploring the top right child
 			{
-				levelPos.changeParameters((byte) (detailLevel-1), levelPos.posX*2 + regionPosX * childSize, levelPos.posZ*2 + regionPosZ * childSize);
+				levelPos.changeParameters(detailLevel, posX, posZ);
+				levelPos.convert((byte) (detailLevel - 1));
 				if (!doesDataExist(levelPos))
 				{
+					levelPos.changeParameters(levelPos.detailLevel, levelPos.posX + regionPosX * childSize, levelPos.posZ + regionPosZ * childSize);
 					if(dataToGenerate.containsKey(levelPos)){
 						dataToGenerate.get(levelPos).setTrue();
 					}else
@@ -345,7 +347,6 @@ public class LodRegion implements Serializable
 					dataToRender.put(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size), new MutableBoolean(true));
 			}
 		}
-		return;
 	}
 
 

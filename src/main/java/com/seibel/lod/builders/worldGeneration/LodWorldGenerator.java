@@ -166,14 +166,20 @@ public class LodWorldGenerator
 						System.out.println(levelPos);
 						nodeToGenerate.remove(levelPos);
 						nodeToGenerateListNear.remove(levelPos);
+						nodeToGenerateListFar.remove(levelPos);
 
-						maxDistance = levelPos.maxDistance(	playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
+						maxDistance = levelPos.maxDistance(
+								playerBlockPosRounded.getX(),
+								playerBlockPosRounded.getZ());
 						circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance);
 						generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(circle), DetailDistanceUtil.getLodDetail(circle)));
 						requesting--;
 						if (requestingFar > 0 && !nodeToGenerateListFar.isEmpty())
 						{
 							levelPos = nodeToGenerateListFar.first();
+							nodeToGenerate.remove(levelPos);
+							nodeToGenerateListNear.remove(levelPos);
+							nodeToGenerateListFar.remove(levelPos);
 							if (levelPos.detailLevel >= farDetail)
 							{
 								maxDistance = levelPos.maxDistance(	playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
