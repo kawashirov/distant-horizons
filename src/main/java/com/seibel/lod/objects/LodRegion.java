@@ -313,7 +313,14 @@ public class LodRegion implements Serializable
 			if (dataToRender.containsKey(levelPos))
 			{
 				levelPos.changeParameters(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size);
-				dataToRender.get(levelPos).setTrue();
+				try
+				{
+					dataToRender.get(levelPos).setTrue();
+				}catch (Exception e){
+					/*TODO Fix this exception*/
+					System.out.println("error happened " + levelPos.getRegionPos());
+					dataToRender.put(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size), new MutableBoolean(true));
+				}
 			} else
 			{
 				dataToRender.put(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size), new MutableBoolean(true));
@@ -348,9 +355,14 @@ public class LodRegion implements Serializable
 
 				levelPos.changeParameters(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size);
 				if (dataToRender.containsKey(levelPos))
+				{
+					if (dataToRender.get(levelPos) == null)
+						dataToRender.replace(levelPos, new MutableBoolean());
 					dataToRender.get(levelPos).setTrue();
-				else
+				} else
+				{
 					dataToRender.put(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size), new MutableBoolean(true));
+				}
 			}
 		}
 	}

@@ -522,6 +522,10 @@ public class LodDimension
 		{
 			LodRegion region = getRegion(regionPos);
 			region.getDataToRender(dataToRender, playerPosX, playerPosZ);
+		} catch (NullPointerException e)
+		{
+			System.out.println(regionPos);
+			e.printStackTrace();
 		} catch (Exception e)
 		{
 			//e.printStackTrace();

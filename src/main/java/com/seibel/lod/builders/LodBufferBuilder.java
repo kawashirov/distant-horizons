@@ -105,8 +105,8 @@ public class LodBufferBuilder
 	 */
 	private ReentrantLock bufferLock = new ReentrantLock();
 
-	private Object[][] setsToRender;
-	private RegionPos center;
+	private volatile Object[][] setsToRender;
+	private volatile RegionPos center;
 
 	public LodBufferBuilder()
 	{
@@ -346,7 +346,7 @@ public class LodBufferBuilder
 	 * <p>
 	 * Synchronized to prevent multiple moves happening on top of each other.
 	 */
-	public synchronized void move(RegionPos regionOffset, int width)
+	public void move(RegionPos regionOffset, int width)
 	{
 		int xOffset = regionOffset.x;
 		int zOffset = regionOffset.z;
