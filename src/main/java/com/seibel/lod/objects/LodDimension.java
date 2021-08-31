@@ -20,10 +20,11 @@ package com.seibel.lod.objects;
 import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.util.*;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodConfig;
@@ -38,7 +39,6 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 
 
 /**
@@ -67,6 +67,8 @@ public class LodDimension
 	public volatile LodRegion regions[][];
 	public volatile boolean isRegionDirty[][];
 	public volatile boolean regen[][];
+	/** if true that means there are regions in this dimension
+	 * that need to have their buffers rebuilt. */
 	public volatile boolean regenDimension = false;
 
 	private volatile RegionPos center;

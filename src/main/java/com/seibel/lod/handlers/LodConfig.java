@@ -44,11 +44,13 @@ import net.minecraftforge.fml.config.ModConfig;
  * This handles any configuration the user has access to.
  *
  * @author James Seibel
- * @version 8-29-2021
+ * @version 8-30-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
 {
+	// TODO break this up into multiple classes,
+	// there are way to many options here
 	public static class Client
 	{
 		public ForgeConfigSpec.BooleanValue drawLODs;
@@ -64,7 +66,6 @@ public class LodConfig
 		public ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
 		
 		public ForgeConfigSpec.EnumValue<LodDetail> maxDrawDetail;
-		
 		public ForgeConfigSpec.EnumValue<LodDetail> maxGenerationDetail;
 		
 		public ForgeConfigSpec.EnumValue<DistanceGenerationMode> distanceGenerationMode;
@@ -72,7 +73,6 @@ public class LodConfig
 		public ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
 		
 		public ForgeConfigSpec.IntValue numberOfWorldGenerationThreads;
-		
 		public ForgeConfigSpec.IntValue numberOfBufferBuilderThreads;
 		
 		public ForgeConfigSpec.EnumValue<ShadingMode> shadingMode;
@@ -84,8 +84,11 @@ public class LodConfig
 		public ForgeConfigSpec.IntValue lodChunkRenderDistance;
 		
 		public ForgeConfigSpec.DoubleValue brightnessMultiplier;
-		
 		public ForgeConfigSpec.DoubleValue saturationMultiplier;
+		
+		public ForgeConfigSpec.IntValue bufferRebuildPlayerMoveTimeout;
+		public ForgeConfigSpec.IntValue bufferRebuildChunkChangeTimeout;
+		public ForgeConfigSpec.IntValue bufferRebuildLodChangeTimeout;
 		
 		
 		Client(ForgeConfigSpec.Builder builder)
@@ -303,6 +306,27 @@ public class LodConfig
 							+ " 1 = normal saturation \n"
 							+ " 2 = very saturated \n")
 					.defineInRange("saturationMultiplier", 1.0, 0, 2);
+			
+			bufferRebuildPlayerMoveTimeout = builder
+					.comment("\n\n"
+							+ " How long in milliseconds should we wait to \n"
+							+ " rebuild the buffers when the player moves \n"
+							+ " a chunk or more? \n")
+					.defineInRange("bufferRebuildPlayerMoveTimeout", 2000, 1, 60000);
+			
+			bufferRebuildChunkChangeTimeout = builder
+					.comment("\n\n"
+							+ " How long in milliseconds should we wait to \n"
+							+ " rebuild the buffers when the vanilla rendered \n"
+							+ " chunks change? \n")
+					.defineInRange("bufferRebuildChunkChangeTimeout", 1000, 1, 60000);
+			
+			bufferRebuildLodChangeTimeout = builder
+					.comment("\n\n"
+							+ " How long in milliseconds should we wait to \n"
+							+ " rebuild the buffers when the LOD regions change? \n")
+					.defineInRange("bufferRebuildLodChangeTimeout", 5000, 1, 60000);
+			
 			
 			builder.pop();
 		}

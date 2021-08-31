@@ -45,7 +45,6 @@ import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -67,7 +66,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world.
  *
  * @author James Seibel
- * @version 8-21-2021
+ * @version 8-30-2021
  */
 public class LodRenderer
 {
@@ -198,96 +197,10 @@ public class LodRenderer
 			}
 		}
 
-
-		ClientPlayerEntity player = mc.player;
-
-		if (ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.lodChunkRenderDistance.get() ||
-				    mc.options.renderDistance != prevRenderDistance ||
-				    prevFogDistance != LodConfig.CLIENT.fogDistance.get())
-		{
-			// yes
-			fullRegen = true;
-			previousPos.changeParameters((byte) 4, player.xChunk, player.zChunk);
-			prevFogDistance = LodConfig.CLIENT.fogDistance.get();
-			prevRenderDistance = mc.options.renderDistance;
-			//should use this when it's ready
-			//vanillaRenderedChunks.stream().filter(pos -> ((Math.abs(pos.x - player.xChunk) > mc.options.renderDistance) || (Math.abs(pos.z - player.zChunk) > mc.options.renderDistance)));
-			vanillaRenderedChunks.clear();
-		}
-		// should LODs be regenerated?
-		long newTime = System.currentTimeMillis();
-		//We check if the player has moved
-		if (newTime - prevPlayerPosTime > 2000)
-		{
-			if (previousPos.detailLevel == 0 ||
-					    player.xChunk != previousPos.posX ||
-					    player.zChunk != previousPos.posZ)
-			{
-				// yes
-				fullRegen = true;
-				previousPos.changeParameters((byte) 4, player.xChunk, player.zChunk);
-				//should use this when it's ready
-				//vanillaRenderedChunks.stream().filter(pos -> ((Math.abs(pos.x - player.xChunk) > mc.options.renderDistance) || (Math.abs(pos.z - player.zChunk) > mc.options.renderDistance)));
-				vanillaRenderedChunks.clear();
-			}
-			prevPlayerPosTime = newTime;
-		}
-		//We check if the vanilla rendered chunks are changed
-		if (newTime - prevVanillaChunkTime > 1000)
-		{
-			if (!previousVanillaRenderedChunks.equals(vanillaRenderedChunks))
-			{
-				partialRegen = true;
-				previousVanillaRenderedChunks = (HashSet<ChunkPos>) vanillaRenderedChunks.clone();
-			}
-			prevVanillaChunkTime = newTime;
-		}
-		//We check if there is any newly generated terrain to show
-		if (newTime - prevChunkTime > 5000)
-		{
-			if (lodDim.regenDimension)
-			{
-				partialRegen = true;
-				lodDim.regenDimension = false;
-			}
-			prevChunkTime = newTime;
-		}
-
-		HashSet<ChunkPos> chunkPosToSkip = LodUtil.getNearbyLodChunkPosToSkip(lodDim, player.blockPosition());
-		// determine which LODs should not be rendered close to the player
-		for (ChunkPos pos : chunkPosToSkip)
-		{
-			if (!vanillaRenderedChunks.contains(pos))
-			{
-				vanillaRenderedChunks.add(pos);
-				lodDim.setToRegen(pos.getRegionX(), pos.getRegionZ());
-			}
-		}
-
-		if(chunkPosToSkip.isEmpty() && player.position().y>256)
-			vanillaRenderedChunks.clear();
-		// did the user change the debug setting?
-		if (LodConfig.CLIENT.debugMode.get() != previousDebugMode)
-		{
-			previousDebugMode = LodConfig.CLIENT.debugMode.get();
-			fullRegen = true;
-		}
-
-		// determine how far the game's render distance is currently set
-		farPlaneBlockDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
-
-		// set how how far the LODs will go
-		int numbChunksWide = LodConfig.CLIENT.lodChunkRenderDistance.get() * 2;
-
-		// see if the chunks Minecraft is going to render are the
-		// same as last time
-		/*
-		if (!vanillaRenderedChunks.containsAll(chunkPosToSkip) || vanillaRenderedChunks.size() != chunkPosToSkip.size())
-		{
-			regen = true;
-			vanillaRenderedChunks = chunkPosToSkip;
-		}*/
-
+		
+		// TODO move the buffer regeneration logic into its own class (probably called in the client proxy instead)
+		// starting here...
+		determineIfLodsShouldRegenerate(lodDim);
 
 		//=================//
 		// create the LODs //
@@ -301,14 +214,17 @@ public class LodRenderer
 		if ((partialRegen || fullRegen) && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvaliable())
 		{
 			// generate the LODs on a separate thread to prevent stuttering or freezing
-			lodBufferBuilder.generateLodBuffersAsync(this, lodDim, player.blockPosition(), true);
+			lodBufferBuilder.generateLodBuffersAsync(this, lodDim, mc.player.blockPosition(), true);
 
 			// the regen process has been started,
-			// it will be done when lodBufferBuilder.newBuffersAvaliable
+			// it will be done when lodBufferBuilder.newBuffersAvaliable()
 			// is true
 			fullRegen = false;
 			partialRegen = false;
 		}
+		
+		// TODO move the buffer regeneration logic into its own class (probably called in the client proxy instead)
+		// ...ending here
 
 		// replace the buffers used to draw and build,
 		// this is only done when the createLodBufferGenerationThread
@@ -317,8 +233,9 @@ public class LodRenderer
 		{
 			swapBuffers();
 		}
-
-
+		
+		
+		
 		//===========================//
 		// GL settings for rendering //
 		//===========================//
@@ -425,8 +342,8 @@ public class LodRenderer
 		// end of internal LOD profiling
 		profiler.pop();
 	}
-
-
+	
+	
 	/**
 	 * This is where the actual drawing happens.
 	 */
@@ -459,26 +376,27 @@ public class LodRenderer
 			RenderSystem.disableFog();
 			return;
 		}
-
+		
 		if (fogDistance == FogDistance.NEAR_AND_FAR)
 		{
 			throw new IllegalArgumentException("setupFog doesn't accept the NEAR_AND_FAR fog distance.");
 		}
-
-
+		
 		// determine the fog distance mode to use
 		int glFogDistanceMode;
 		if (fogQuality == FogQuality.FANCY)
 		{
 			// fancy fog (fragment distance based fog)
 			glFogDistanceMode = NVFogDistance.GL_EYE_RADIAL_NV;
-		} else
+		}
+		else
 		{
 			// fast fog (frustum distance based fog)
 			glFogDistanceMode = NVFogDistance.GL_EYE_PLANE_ABSOLUTE_NV;
 		}
-
-
+		
+		farPlaneBlockDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
+		
 		// the multipliers are percentages
 		// of the regular view distance.
 		if (fogDistance == FogDistance.FAR)
@@ -487,12 +405,13 @@ public class LodRenderer
 			// is because we are using fog backwards to how
 			// it is normally used, with it hiding near objects
 			// instead of far objects.
-
+			
 			if (fogQuality == FogQuality.FANCY)
 			{
 				RenderSystem.fogStart(farPlaneBlockDistance * 0.1f);
 				RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
-			} else if (fogQuality == FogQuality.FAST)
+			}
+			else if (fogQuality == FogQuality.FAST)
 			{
 				// for the far fog of the normal chunks
 				// to start right where the LODs' end use:
@@ -500,20 +419,21 @@ public class LodRenderer
 				RenderSystem.fogStart(farPlaneBlockDistance * 1.5f);
 				RenderSystem.fogEnd(farPlaneBlockDistance * 2.0f);
 			}
-		} else if (fogDistance == FogDistance.NEAR)
+		}
+		else if (fogDistance == FogDistance.NEAR)
 		{
 			if (fogQuality == FogQuality.FANCY)
 			{
 				RenderSystem.fogEnd(mc.options.renderDistance * 16 * 1.41f);
 				RenderSystem.fogStart(mc.options.renderDistance * 16 * 1.6f);
-			} else if (fogQuality == FogQuality.FAST)
+			}
+			else if (fogQuality == FogQuality.FAST)
 			{
 				RenderSystem.fogEnd(mc.options.renderDistance * 16 * 1.0f);
 				RenderSystem.fogStart(mc.options.renderDistance * 16 * 1.5f);
 			}
 		}
-
-
+		
 		GL11.glEnable(GL11.GL_FOG);
 		RenderSystem.enableFog();
 		RenderSystem.setupNvFogDistance();
@@ -524,7 +444,6 @@ public class LodRenderer
 	/**
 	 * Revert any changes that were made to the fog.
 	 */
-	@SuppressWarnings("deprecation")
 	private void cleanupFog(NearFarFogSettings fogSettings,
 	                        float defaultFogStartDist, float defaultFogEndDist,
 	                        int defaultFogMode, int defaultFogDistance)
@@ -537,8 +456,8 @@ public class LodRenderer
 		// disable fog if Minecraft wasn't rendering fog
 		// but we were
 		if (!fogSettings.vanillaIsRenderingFog &&
-				    (fogSettings.near.quality != FogQuality.OFF ||
-						     fogSettings.far.quality != FogQuality.OFF))
+				(fogSettings.near.quality != FogQuality.OFF ||
+				fogSettings.far.quality != FogQuality.OFF))
 		{
 			GL11.glDisable(GL11.GL_FOG);
 		}
@@ -632,7 +551,6 @@ public class LodRenderer
 	/**
 	 * setup the lighting to be used for the LODs
 	 */
-	@SuppressWarnings("deprecation")
 	private void setupLighting(LodDimension lodDimension, float partialTicks)
 	{
 		// Determine if the player has night vision
@@ -665,7 +583,7 @@ public class LodRenderer
 
 		ByteBuffer temp = ByteBuffer.allocateDirect(16);
 		temp.order(ByteOrder.nativeOrder());
-		GL11.glLightfv(LOD_GL_LIGHT_NUMBER, GL11.GL_AMBIENT, (FloatBuffer) temp.asFloatBuffer().put(lightAmbient).flip()); // TODO, could put return null? this crashed on James' laptop
+		GL11.glLightfv(LOD_GL_LIGHT_NUMBER, GL11.GL_AMBIENT, (FloatBuffer) temp.asFloatBuffer().put(lightAmbient).flip());
 		GL11.glEnable(LOD_GL_LIGHT_NUMBER); // Enable the above lighting
 
 		RenderSystem.enableLighting();
@@ -842,6 +760,112 @@ public class LodRenderer
 
 		return fogSettings;
 	}
-
-
+	
+	
+	/**
+	 * Determines if the LODs should have a fullRegen or partialRegen
+	 */
+	@SuppressWarnings("unchecked")
+	private void determineIfLodsShouldRegenerate(LodDimension lodDim)
+	{
+		//=============//
+		// full regens //
+		//=============//
+		
+		// check if the view distance changed
+		if (ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.lodChunkRenderDistance.get()
+			    || mc.options.renderDistance != prevRenderDistance
+			    || prevFogDistance != LodConfig.CLIENT.fogDistance.get())
+		{
+			fullRegen = true;
+			previousPos.changeParameters((byte) 4, mc.player.xChunk, mc.player.zChunk);
+			prevFogDistance = LodConfig.CLIENT.fogDistance.get();
+			prevRenderDistance = mc.options.renderDistance;
+			//should use this when it's ready
+			//vanillaRenderedChunks.stream().filter(pos -> ((Math.abs(pos.x - player.xChunk) > mc.options.renderDistance) || (Math.abs(pos.z - player.zChunk) > mc.options.renderDistance)));
+			vanillaRenderedChunks.clear();
+		}
+		
+		// did the user change the debug setting?
+		if (LodConfig.CLIENT.debugMode.get() != previousDebugMode)
+		{
+			previousDebugMode = LodConfig.CLIENT.debugMode.get();
+			fullRegen = true;
+		}
+		
+		
+		long newTime = System.currentTimeMillis();
+		
+		// check if the player has moved
+		if (newTime - prevPlayerPosTime > LodConfig.CLIENT.bufferRebuildPlayerMoveTimeout.get())
+		{
+			if (previousPos.detailLevel == 0
+				|| mc.player.xChunk != previousPos.posX
+				|| mc.player.zChunk != previousPos.posZ)
+			{
+				fullRegen = true;
+				previousPos.changeParameters((byte) 4, mc.player.xChunk, mc.player.zChunk);
+				//should use this when it's ready
+				//vanillaRenderedChunks.stream().filter(pos -> ((Math.abs(pos.x - player.xChunk) > mc.options.renderDistance) || (Math.abs(pos.z - player.zChunk) > mc.options.renderDistance)));
+				vanillaRenderedChunks.clear();
+			}
+			prevPlayerPosTime = newTime;
+		}
+		
+		
+		
+		//================//
+		// partial regens //
+		//================//
+		
+		
+		// check if the vanilla rendered chunks changed
+		if (newTime - prevVanillaChunkTime > LodConfig.CLIENT.bufferRebuildChunkChangeTimeout.get())
+		{
+			if (!previousVanillaRenderedChunks.equals(vanillaRenderedChunks))
+			{
+				partialRegen = true;
+				previousVanillaRenderedChunks = (HashSet<ChunkPos>) vanillaRenderedChunks.clone();
+			}
+			prevVanillaChunkTime = newTime;
+		}
+		
+		
+		// check if there is any newly generated terrain to show
+		if (newTime - prevChunkTime > LodConfig.CLIENT.bufferRebuildLodChangeTimeout.get())
+		{
+			if (lodDim.regenDimension)
+			{
+				partialRegen = true;
+				lodDim.regenDimension = false;
+			}
+			prevChunkTime = newTime;
+		}
+		
+		
+		
+		
+		//==============//
+		// LOD skipping //
+		//==============//
+		
+		// determine which LODs should not be rendered close to the player
+		HashSet<ChunkPos> chunkPosToSkip = LodUtil.getNearbyLodChunkPosToSkip(lodDim, mc.player.blockPosition());
+		for (ChunkPos pos : chunkPosToSkip)
+		{
+			if (!vanillaRenderedChunks.contains(pos))
+			{
+				vanillaRenderedChunks.add(pos);
+				lodDim.setToRegen(pos.getRegionX(), pos.getRegionZ());
+			}
+		}
+		
+		
+		// if the player is high enough, draw all LODs
+		if(chunkPosToSkip.isEmpty() && mc.player.position().y > 256)
+		{
+			vanillaRenderedChunks.clear();
+		}
+	}
+	
 }
