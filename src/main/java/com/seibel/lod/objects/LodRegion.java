@@ -179,7 +179,7 @@ public class LodRegion implements Serializable
 
 	}
 
-	private void getDataToGenerate(ConcurrentMap<LevelPos, MutableBoolean>  dataToGenerate, LevelPos levelPos, int playerPosX, int playerPosZ)
+	private void getDataToGenerate(ConcurrentMap<LevelPos, MutableBoolean> dataToGenerate, LevelPos levelPos, int playerPosX, int playerPosZ)
 	{
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel);
 
@@ -191,24 +191,25 @@ public class LodRegion implements Serializable
 		int posX = levelPos.posX;
 		int posZ = levelPos.posZ;
 		byte detailLevel = levelPos.detailLevel;
+		byte childDetailLevel = (byte) (detailLevel - 1);
 		int childPosX = posX * 2;
 		int childPosZ = posZ * 2;
 
-		int childSize = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelPos.detailLevel + 1);
+		int childSize = 1 << (LodUtil.REGION_DETAIL_LEVEL - childDetailLevel);
 		//we have reached the target detail level
 
 		if (DetailDistanceUtil.getDistanceGenerationInverse(minDistance) > detailLevel)
 		{
 			return;
-		}
-		else if (DetailDistanceUtil.getDistanceGenerationInverse(minDistance) == detailLevel)
+		} else if (DetailDistanceUtil.getDistanceGenerationInverse(minDistance) == detailLevel)
 		{
 			if (!doesDataExist(levelPos))
 			{
 				levelPos.changeParameters(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size);
-				if(dataToGenerate.containsKey(levelPos)){
+				if (dataToGenerate.containsKey(levelPos))
+				{
 					dataToGenerate.get(levelPos).setTrue();
-				}else
+				} else
 				{
 					dataToGenerate.put(levelPos.clone(), new MutableBoolean(true));
 				}
@@ -230,9 +231,10 @@ public class LodRegion implements Serializable
 						{
 							num++;
 							levelPos.changeParameters((byte) (detailLevel - 1), childPosX + x + regionPosX * childSize, childPosZ + z + regionPosZ * childSize);
-							if(dataToGenerate.containsKey(levelPos)){
+							if (dataToGenerate.containsKey(levelPos))
+							{
 								dataToGenerate.get(levelPos).setTrue();
-							}else
+							} else
 							{
 								dataToGenerate.put(levelPos.clone(), new MutableBoolean(true));
 							}
@@ -248,27 +250,31 @@ public class LodRegion implements Serializable
 						for (int z = 0; z <= 1; z++)
 						{
 							levelPos.changeParameters((byte) (detailLevel - 1), childPosX + x, childPosZ + z);
-							getDataToGenerate(dataToGenerate, levelPos,	playerPosX, playerPosZ);
+							getDataToGenerate(dataToGenerate, levelPos, playerPosX, playerPosZ);
 						}
 					}
 				}
 			} else
 			//now we keep exploring the top right child
 			{
-				levelPos.changeParameters(detailLevel, posX, posZ);
-				levelPos.convert((byte) (detailLevel - 1));
-				if (!doesDataExist(levelPos))
+				if (DetailDistanceUtil.getLodDetail(childDetailLevel).detailLevel <= (childDetailLevel))
 				{
-					levelPos.changeParameters(levelPos.detailLevel, levelPos.posX + regionPosX * childSize, levelPos.posZ + regionPosZ * childSize);
-					if(dataToGenerate.containsKey(levelPos)){
-						dataToGenerate.get(levelPos).setTrue();
-					}else
+					levelPos.changeParameters(detailLevel, posX, posZ);
+					levelPos.convert(childDetailLevel);
+					if (!doesDataExist(levelPos))
 					{
-						dataToGenerate.put(levelPos.clone(), new MutableBoolean(true));
+						levelPos.changeParameters(levelPos.detailLevel, levelPos.posX + regionPosX * childSize, levelPos.posZ + regionPosZ * childSize);
+						if (dataToGenerate.containsKey(levelPos))
+						{
+							dataToGenerate.get(levelPos).setTrue();
+						} else
+						{
+							dataToGenerate.put(levelPos.clone(), new MutableBoolean(true));
+						}
+					} else
+					{
+						getDataToGenerate(dataToGenerate, levelPos, playerPosX, playerPosZ);
 					}
-				} else
-				{
-					getDataToGenerate(dataToGenerate, levelPos, playerPosX, playerPosZ);
 				}
 			}
 		}
@@ -308,7 +314,7 @@ public class LodRegion implements Serializable
 			{
 				levelPos.changeParameters(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size);
 				dataToRender.get(levelPos).setTrue();
-			}else
+			} else
 			{
 				dataToRender.put(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size), new MutableBoolean(true));
 			}
@@ -465,7 +471,8 @@ public class LodRegion implements Serializable
 		{
 			levelPos = levelPos.getRegionModuleLevelPos();
 			return dataExistence[levelPos.detailLevel][levelPos.posX][levelPos.posZ];
-		}catch (NullPointerException e){
+		} catch (NullPointerException e)
+		{
 			return false;
 		}
 	}
@@ -571,7 +578,7 @@ public class LodRegion implements Serializable
 			//i'm doing a upper limit of the minimum
 			//Color should be just 3 byte but i'm gonna calculate as 12 byte
 			//Height and depth should be just 4 byte but i'm gonna calculate as 8 byte
-			count += Math.pow(2,LodUtil.REGION_DETAIL_LEVEL-tempLod) * (8 + 3 + 2 + 2 + 1);
+			count += Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - tempLod) * (8 + 3 + 2 + 2 + 1);
 			//count += Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - tempLod) * (24 + 8 + 8 + 8 + 8);
 		}
 		return count;

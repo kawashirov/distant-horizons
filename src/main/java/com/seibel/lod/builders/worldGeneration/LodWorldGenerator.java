@@ -163,16 +163,16 @@ public class LodWorldGenerator
 					while (requesting > 0 && !nodeToGenerateListNear.isEmpty())
 					{
 						levelPos = nodeToGenerateListNear.first();
-						System.out.println(levelPos);
+						//.out.println(levelPos);
 						nodeToGenerate.remove(levelPos);
 						nodeToGenerateListNear.remove(levelPos);
 						nodeToGenerateListFar.remove(levelPos);
 
-						maxDistance = levelPos.maxDistance(
-								playerBlockPosRounded.getX(),
-								playerBlockPosRounded.getZ());
-						circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance);
-						generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(circle), DetailDistanceUtil.getLodDetail(circle)));
+						//maxDistance = levelPos.maxDistance(
+						//		playerBlockPosRounded.getX(),
+						//		playerBlockPosRounded.getZ());
+						//circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance);
+						generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(levelPos.detailLevel), DetailDistanceUtil.getLodDetail(levelPos.detailLevel)));
 						requesting--;
 						if (requestingFar > 0 && !nodeToGenerateListFar.isEmpty())
 						{
@@ -182,9 +182,9 @@ public class LodWorldGenerator
 							nodeToGenerateListFar.remove(levelPos);
 							if (levelPos.detailLevel >= farDetail)
 							{
-								maxDistance = levelPos.maxDistance(	playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
-								circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance);
-								generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(circle), DetailDistanceUtil.getLodDetail(circle)));
+								//maxDistance = levelPos.maxDistance(	playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
+								//circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance);
+								generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(levelPos.detailLevel), DetailDistanceUtil.getLodDetail(levelPos.detailLevel)));
 								requestingFar--;
 								requesting--;
 							}
