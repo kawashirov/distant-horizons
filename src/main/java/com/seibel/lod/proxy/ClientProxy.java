@@ -173,6 +173,10 @@ public class ClientProxy
 		LodConfig.CLIENT.lodQuality.set(3);
 		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
 		
+		LodConfig.CLIENT.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
+		LodConfig.CLIENT.bufferRebuildChunkChangeTimeout.set(1000); // 1000
+		LodConfig.CLIENT.bufferRebuildLodChangeTimeout.set(50); // 5000
+		
 		LodConfig.CLIENT.enableDebugKeybinding.set(true);
 	}
 	
