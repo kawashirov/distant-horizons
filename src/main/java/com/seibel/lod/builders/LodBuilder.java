@@ -25,7 +25,6 @@ import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.DataPoint;
-import com.seibel.lod.objects.LevelPosUtil;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.objects.LevelPos.LevelPos;
@@ -164,7 +163,7 @@ public class LodBuilder
 		short[] color;
 		short height;
 		short depth;
-		int[] levelPos;
+		LevelPos levelPos = new LevelPos((byte) 0, 0, 0);
 		short[] data;
 		try
 		{
@@ -187,23 +186,20 @@ public class LodBuilder
 							startZ, endX, endZ);
 					depth = 0;
 				}
-				levelPos = LevelPosUtil.convert(
-						LevelPosUtil.createLevelPos((byte) 0,
-								chunk.getPos().x * 16 + startX,
-								chunk.getPos().z * 16 + startZ),
-						detail.detailLevel
-						);
+				levelPos.changeParameters((byte) 0,
+						chunk.getPos().x * 16 + startX,
+						chunk.getPos().z * 16 + startZ);
+				levelPos.convert(detail.detailLevel);
 				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
 				data = DataPoint.createDataPoint(height, depth, color[0], color[1], color[2]);
-				boolean added = lodDim.addData(levelPos,
+				lodDim.addData(levelPos,
 						data,
 						false,
 						isServer);
-				System.out.println(added);
 			}
 			//levelPos.changeParameters(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
 
-			lodDim.updateData(LevelPosUtil.createLevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z));
+			lodDim.updateData(new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z));
 		} catch (Exception e)
 		{
 			//e.printStackTrace();
@@ -436,10 +432,12 @@ public class LodBuilder
 			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
 			tmp = tmp.darker();
 			colorInt = LodUtil.colorToInt(tmp);
-		} else if (blockState == Blocks.STONE.defaultBlockState())
+		}
+		else if (blockState == Blocks.STONE.defaultBlockState())
 		{
 			colorInt = LodUtil.STONE_COLOR_INT;
-		} else if (blockState == Blocks.MYCELIUM.defaultBlockState())
+		}
+		else if (blockState == Blocks.MYCELIUM.defaultBlockState())
 		{
 			colorInt = LodUtil.MYCELIUM_COLOR_INT;
 		}
