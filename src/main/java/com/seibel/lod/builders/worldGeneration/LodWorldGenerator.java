@@ -1,9 +1,19 @@
 package com.seibel.lod.builders.worldGeneration;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import com.seibel.lod.builders.GenerationRequest;
 import com.seibel.lod.builders.LodBuilder;
@@ -16,13 +26,11 @@ import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 
-import javafx.collections.transformation.SortedList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.WorldWorkerManager;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 
 /**
  * A singleton that handles all long distance LOD world generation.
