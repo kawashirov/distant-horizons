@@ -66,7 +66,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world.
  *
  * @author James Seibel
- * @version 8-30-2021
+ * @version 8-31-2021
  */
 public class LodRenderer
 {
@@ -246,6 +246,7 @@ public class LodRenderer
 			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
 		else
 			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+		
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
@@ -261,12 +262,15 @@ public class LodRenderer
 		GL11.glGetFloatv(GL11.GL_PROJECTION_MATRIX, defaultProjMatrix);
 
 		Matrix4f modelViewMatrix = generateModelViewMatrix(partialTicks);
-
+		
+		// required for setupFog and setupProjectionMatrix
+		farPlaneBlockDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
+		
 		setupProjectionMatrix(partialTicks);
 		setupLighting(lodDim, partialTicks);
 
 		NearFarFogSettings fogSettings = determineFogSettings();
-
+		
 		// determine the current fog settings so they can be
 		// reset after drawing the LODs
 		float defaultFogStartDist = GL11.glGetFloat(GL11.GL_FOG_START);
@@ -394,8 +398,6 @@ public class LodRenderer
 			// fast fog (frustum distance based fog)
 			glFogDistanceMode = NVFogDistance.GL_EYE_PLANE_ABSOLUTE_NV;
 		}
-		
-		farPlaneBlockDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
 		
 		// the multipliers are percentages
 		// of the regular view distance.
