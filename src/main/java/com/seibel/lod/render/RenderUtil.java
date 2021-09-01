@@ -121,7 +121,7 @@ public class RenderUtil
 	{
     	// convert the vbo position into a direction vector
     	// starting from the player's position
-		Vector3d vboVec = new Vector3d(vboCenterPos.getX(), 0, vboCenterPos.getZ());
+		Vector3d vboVec = new Vector3d(vboCenterPos.getX(), 64, vboCenterPos.getZ());
 		Vector3d playerVec = new Vector3d(playerBlockPos.getX(), playerBlockPos.getY(), playerBlockPos.getZ());
 		Vector3d vboCenterVec = vboVec.subtract(playerVec);
 		

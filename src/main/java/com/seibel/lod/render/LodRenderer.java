@@ -773,7 +773,7 @@ public class LodRenderer
 		//=============//
 		// full regens //
 		//=============//
-		
+
 		// check if the view distance changed
 		if (ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.lodChunkRenderDistance.get()
 			    || mc.options.renderDistance != prevRenderDistance
@@ -787,13 +787,7 @@ public class LodRenderer
 			//vanillaRenderedChunks.stream().filter(pos -> ((Math.abs(pos.x - player.xChunk) > mc.options.renderDistance) || (Math.abs(pos.z - player.zChunk) > mc.options.renderDistance)));
 			vanillaRenderedChunks.clear();
 		}
-		
-		// did the user change the debug setting?
-		if (LodConfig.CLIENT.debugMode.get() != previousDebugMode)
-		{
-			previousDebugMode = LodConfig.CLIENT.debugMode.get();
-			fullRegen = true;
-		}
+
 		
 		
 		long newTime = System.currentTimeMillis();
@@ -867,6 +861,14 @@ public class LodRenderer
 		if(chunkPosToSkip.isEmpty() && mc.player.position().y > 256)
 		{
 			vanillaRenderedChunks.clear();
+		}
+
+
+		// did the user change the debug setting?
+		if (LodConfig.CLIENT.debugMode.get() != previousDebugMode)
+		{
+			previousDebugMode = LodConfig.CLIENT.debugMode.get();
+			fullRegen = true;
 		}
 	}
 	
