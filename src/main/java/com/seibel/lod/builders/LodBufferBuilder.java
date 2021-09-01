@@ -216,6 +216,9 @@ public class LodBufferBuilder
 								int posX;
 								int posZ;
 								byte detailLevel;
+								int chunkXdist;
+								int chunkZdist;
+								short gameChunkRenderDistance = (short) (renderer.vanillaRenderedChunks.length/2 - 1);
 								for (LevelPos posToRender : nodeToRender.keySet())
 								{
 									if (!nodeToRender.get(posToRender).booleanValue())
@@ -225,10 +228,14 @@ public class LodBufferBuilder
 									}
 									nodeToRender.get(posToRender).setFalse();
 									// skip any chunks that Minecraft is going to render
-
-									if (renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos()))
+									chunkXdist = posToRender.getChunkPosX() - playerChunkPos.x;
+									chunkZdist = posToRender.getChunkPosZ() - playerChunkPos.z;
+									if(gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >=  Math.abs(chunkZdist))
 									{
-										continue;
+										if (renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance][chunkZdist + gameChunkRenderDistance])
+										{
+											continue;
+										}
 									}
 									posX = posToRender.posX;
 									posZ = posToRender.posZ;
@@ -237,10 +244,6 @@ public class LodBufferBuilder
 									LevelPos chunkPos = posToRender.getConvertedLevelPos(LodUtil.CHUNK_DETAIL_LEVEL);
 									// skip any chunks that Minecraft is going to render
 
-									if (renderer.vanillaRenderedChunks.contains(new ChunkPos(chunkPos.posX, chunkPos.posZ)))
-									{
-										continue;
-									}
 
 									try
 									{
@@ -252,17 +255,43 @@ public class LodBufferBuilder
 											for (int x : new int[]{0, 1})
 											{
 												posToRender.changeParameters(detailLevel, posX + x * 2 - 1, posZ);
-												if (!renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos())
-														    && (nodeToRender.containsKey(posToRender) || disableFix))
-													adjData[0][x] = lodDim.getData(posToRender);
+												chunkXdist = posToRender.getChunkPosX() - playerChunkPos.x;
+												chunkZdist = posToRender.getChunkPosZ() - playerChunkPos.z;
+												if(gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >=  Math.abs(chunkZdist))
+												{
+													if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance][chunkZdist + gameChunkRenderDistance]
+													&& (nodeToRender.containsKey(posToRender) || disableFix))
+													{
+														adjData[0][x] = lodDim.getData(posToRender);
+													}
+												}else{
+													if (nodeToRender.containsKey(posToRender) || disableFix)
+													{
+														adjData[0][x] = lodDim.getData(posToRender);
+
+													}
+												}
 											}
 
 											for (int z : new int[]{0, 1})
 											{
 												posToRender.changeParameters(detailLevel, posX, posZ + z * 2 - 1);
-												if (!renderer.vanillaRenderedChunks.contains(posToRender.getChunkPos())
-														    && (nodeToRender.containsKey(posToRender) || disableFix))
-													adjData[1][z] = lodDim.getData(posToRender);
+												chunkXdist = posToRender.getChunkPosX() - playerChunkPos.x;
+												chunkZdist = posToRender.getChunkPosZ() - playerChunkPos.z;
+												if(gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >=  Math.abs(chunkZdist))
+												{
+													if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance][chunkZdist + gameChunkRenderDistance]
+															    && (nodeToRender.containsKey(posToRender) || disableFix))
+													{
+														adjData[1][z] = lodDim.getData(posToRender);
+													}
+												}else{
+													if (nodeToRender.containsKey(posToRender) || disableFix)
+													{
+														adjData[1][z] = lodDim.getData(posToRender);
+
+													}
+												}
 											}
 											posToRender.changeParameters(detailLevel, posX, posZ);
 

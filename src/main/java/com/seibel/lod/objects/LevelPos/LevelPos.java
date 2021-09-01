@@ -127,6 +127,32 @@ public class LevelPos implements Cloneable, ImmutableLevelPos, MutableLevelPos, 
         return Math.floorDiv(posZ, width);
     }
 
+    public int getChunkPosX()
+    {
+        if (LodUtil.CHUNK_DETAIL_LEVEL >= detailLevel)
+        {
+            int width = 1 << (LodUtil.CHUNK_DETAIL_LEVEL - detailLevel);
+            return Math.floorDiv(posX, width);
+        } else
+        {
+            int width = 1 << (detailLevel - LodUtil.CHUNK_DETAIL_LEVEL);
+            return posX * width;
+        }
+    }
+
+    public int getChunkPosZ()
+    {
+        if (LodUtil.CHUNK_DETAIL_LEVEL >= detailLevel)
+        {
+            int width = 1 << (LodUtil.CHUNK_DETAIL_LEVEL - detailLevel);
+            return Math.floorDiv(posZ, width);
+        } else
+        {
+            int width = 1 << (detailLevel - LodUtil.CHUNK_DETAIL_LEVEL);
+            return posZ * width;
+        }
+    }
+
     public ChunkPos getChunkPos()
     {
         if (LodUtil.CHUNK_DETAIL_LEVEL >= detailLevel)

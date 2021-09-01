@@ -146,8 +146,8 @@ public class LodRenderer
 	 * This HashSet contains every chunk that Vanilla Minecraft
 	 * is going to render
 	 */
-	public HashSet<ChunkPos> vanillaRenderedChunks = new HashSet<>();
-	public HashSet<ChunkPos> previousVanillaRenderedChunks = new HashSet<>();
+	public boolean[][] vanillaRenderedChunks;
+	public boolean vanillaRenderedChunksChanged;
 
 
 	public LodRenderer(LodBufferBuilder newLodNodeBufferBuilder)
@@ -770,10 +770,11 @@ public class LodRenderer
 	@SuppressWarnings("unchecked")
 	private void determineIfLodsShouldRegenerate(LodDimension lodDim)
 	{
+
+		short renderDistance = (short) mc.options.renderDistance;
 		//=============//
 		// full regens //
 		//=============//
-		
 		// check if the view distance changed
 		if (ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.lodChunkRenderDistance.get()
 			    || mc.options.renderDistance != prevRenderDistance
@@ -784,8 +785,7 @@ public class LodRenderer
 			prevFogDistance = LodConfig.CLIENT.fogDistance.get();
 			prevRenderDistance = mc.options.renderDistance;
 			//should use this when it's ready
-			//vanillaRenderedChunks.stream().filter(pos -> ((Math.abs(pos.x - player.xChunk) > mc.options.renderDistance) || (Math.abs(pos.z - player.zChunk) > mc.options.renderDistance)));
-			vanillaRenderedChunks.clear();
+			vanillaRenderedChunks = new boolean[renderDistance*2+2][renderDistance*2+2];
 		}
 		
 		// did the user change the debug setting?
@@ -808,8 +808,7 @@ public class LodRenderer
 				fullRegen = true;
 				previousPos.changeParameters((byte) 4, mc.player.xChunk, mc.player.zChunk);
 				//should use this when it's ready
-				//vanillaRenderedChunks.stream().filter(pos -> ((Math.abs(pos.x - player.xChunk) > mc.options.renderDistance) || (Math.abs(pos.z - player.zChunk) > mc.options.renderDistance)));
-				vanillaRenderedChunks.clear();
+				vanillaRenderedChunks = new boolean[renderDistance*2+2][renderDistance*2+2];
 			}
 			prevPlayerPosTime = newTime;
 		}
@@ -824,10 +823,11 @@ public class LodRenderer
 		// check if the vanilla rendered chunks changed
 		if (newTime - prevVanillaChunkTime > LodConfig.CLIENT.bufferRebuildChunkChangeTimeout.get())
 		{
-			if (!previousVanillaRenderedChunks.equals(vanillaRenderedChunks))
+			if (vanillaRenderedChunksChanged)
 			{
 				partialRegen = true;
-				previousVanillaRenderedChunks = (HashSet<ChunkPos>) vanillaRenderedChunks.clone();
+				vanillaRenderedChunksChanged = false;
+
 			}
 			prevVanillaChunkTime = newTime;
 		}
@@ -853,11 +853,16 @@ public class LodRenderer
 		
 		// determine which LODs should not be rendered close to the player
 		HashSet<ChunkPos> chunkPosToSkip = LodUtil.getNearbyLodChunkPosToSkip(lodDim, mc.player.blockPosition());
+		int chunkX;
+		int chunkZ;
 		for (ChunkPos pos : chunkPosToSkip)
 		{
-			if (!vanillaRenderedChunks.contains(pos))
+			chunkX = pos.x - mc.player.xChunk + renderDistance;
+			chunkZ = pos.z - mc.player.zChunk + renderDistance;
+			if(!vanillaRenderedChunks[chunkX][chunkZ])
 			{
-				vanillaRenderedChunks.add(pos);
+				vanillaRenderedChunks[chunkX][chunkZ] = true;
+				vanillaRenderedChunksChanged = true;
 				lodDim.setToRegen(pos.getRegionX(), pos.getRegionZ());
 			}
 		}
@@ -866,7 +871,8 @@ public class LodRenderer
 		// if the player is high enough, draw all LODs
 		if(chunkPosToSkip.isEmpty() && mc.player.position().y > 256)
 		{
-			vanillaRenderedChunks.clear();
+			vanillaRenderedChunks = new boolean[renderDistance*2][renderDistance*2];
+			vanillaRenderedChunksChanged = true;
 		}
 	}
 	
