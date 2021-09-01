@@ -60,6 +60,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
+import org.lwjgl.system.CallbackI;
 
 
 /**
@@ -861,11 +862,17 @@ public class LodRenderer
 		{
 			chunkX = pos.x - mc.player.xChunk + renderDistance + 1;
 			chunkZ = pos.z - mc.player.zChunk + renderDistance + 1;
-			if(!vanillaRenderedChunks[chunkX][chunkZ])
+			try
 			{
-				vanillaRenderedChunks[chunkX][chunkZ] = true;
-				vanillaRenderedChunksChanged = true;
-				lodDim.setToRegen(pos.getRegionX(), pos.getRegionZ());
+				if (!vanillaRenderedChunks[chunkX][chunkZ])
+				{
+					vanillaRenderedChunks[chunkX][chunkZ] = true;
+					vanillaRenderedChunksChanged = true;
+					lodDim.setToRegen(pos.getRegionX(), pos.getRegionZ());
+				}
+			}catch (Exception e){
+				System.out.println(vanillaRenderedChunks.length);
+				e.printStackTrace();
 			}
 		}
 		
@@ -873,7 +880,7 @@ public class LodRenderer
 		// if the player is high enough, draw all LODs
 		if(chunkPosToSkip.isEmpty() && mc.player.position().y > 256)
 		{
-			vanillaRenderedChunks = new boolean[renderDistance*2][renderDistance*2];
+			vanillaRenderedChunks = new boolean[renderDistance*2+2][renderDistance*2+2];
 			vanillaRenderedChunksChanged = true;
 		}
 	}
