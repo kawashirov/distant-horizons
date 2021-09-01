@@ -232,7 +232,7 @@ public class LodBufferBuilder
 									chunkZdist = posToRender.getChunkPosZ() - playerChunkPos.z;
 									if(gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >=  Math.abs(chunkZdist))
 									{
-										if (renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance][chunkZdist + gameChunkRenderDistance])
+										if (renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance  + 1][chunkZdist + gameChunkRenderDistance + 1])
 										{
 											continue;
 										}
@@ -252,6 +252,7 @@ public class LodBufferBuilder
 										{
 											short[] lodData = lodDim.getData(posToRender);
 											short[][][] adjData = new short[2][2][];
+											/**TODO The following two for are too complex*/
 											for (int x : new int[]{0, 1})
 											{
 												posToRender.changeParameters(detailLevel, posX + x * 2 - 1, posZ);
@@ -259,7 +260,7 @@ public class LodBufferBuilder
 												chunkZdist = posToRender.getChunkPosZ() - playerChunkPos.z;
 												if(gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >=  Math.abs(chunkZdist))
 												{
-													if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance][chunkZdist + gameChunkRenderDistance]
+													if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
 													&& (nodeToRender.containsKey(posToRender) || disableFix))
 													{
 														adjData[0][x] = lodDim.getData(posToRender);
@@ -280,7 +281,7 @@ public class LodBufferBuilder
 												chunkZdist = posToRender.getChunkPosZ() - playerChunkPos.z;
 												if(gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >=  Math.abs(chunkZdist))
 												{
-													if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance][chunkZdist + gameChunkRenderDistance]
+													if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance+ 1]
 															    && (nodeToRender.containsKey(posToRender) || disableFix))
 													{
 														adjData[1][z] = lodDim.getData(posToRender);

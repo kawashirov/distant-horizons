@@ -857,8 +857,8 @@ public class LodRenderer
 		int chunkZ;
 		for (ChunkPos pos : chunkPosToSkip)
 		{
-			chunkX = pos.x - mc.player.xChunk + renderDistance;
-			chunkZ = pos.z - mc.player.zChunk + renderDistance;
+			chunkX = pos.x - mc.player.xChunk + renderDistance + 1;
+			chunkZ = pos.z - mc.player.zChunk + renderDistance + 1;
 			if(!vanillaRenderedChunks[chunkX][chunkZ])
 			{
 				vanillaRenderedChunks[chunkX][chunkZ] = true;
