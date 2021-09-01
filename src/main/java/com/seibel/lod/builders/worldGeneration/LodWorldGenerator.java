@@ -180,7 +180,7 @@ public class LodWorldGenerator
 						//		playerBlockPosRounded.getX(),
 						//		playerBlockPosRounded.getZ());
 						//circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance);
-						generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(levelPos.detailLevel), DetailDistanceUtil.getLodDetail(levelPos.detailLevel)));
+						generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(levelPos.detailLevel), DetailDistanceUtil.getLodGenDetail(levelPos.detailLevel)));
 						requesting--;
 						if (requestingFar > 0 && !nodeToGenerateListFar.isEmpty())
 						{
@@ -192,7 +192,7 @@ public class LodWorldGenerator
 							{
 								//maxDistance = levelPos.maxDistance(	playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
 								//circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance);
-								generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(levelPos.detailLevel), DetailDistanceUtil.getLodDetail(levelPos.detailLevel)));
+								generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(levelPos.detailLevel), DetailDistanceUtil.getLodGenDetail(levelPos.detailLevel)));
 								requestingFar--;
 								requesting--;
 							}

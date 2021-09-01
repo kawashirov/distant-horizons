@@ -405,7 +405,7 @@ public class LodDimension
 						levelPos.changeParameters(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ);
 						minDistance = levelPos.minDistance(playerPosX, playerPosZ);
 						detail = DetailDistanceUtil.getDistanceTreeGenInverse(minDistance);
-						levelToGen = DetailDistanceUtil.getLodDetail(detail).detailLevel;
+						levelToGen = DetailDistanceUtil.getLodGenDetail(detail).detailLevel;
 						if (region == null || region.getGenerationMode() != generationMode)
 						{
 							//First case, region has to be initialized

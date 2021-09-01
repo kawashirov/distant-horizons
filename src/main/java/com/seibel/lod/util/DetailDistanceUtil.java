@@ -14,7 +14,8 @@ public class DetailDistanceUtil
 	private static double genMultiplier = 1.0;
 	private static double treeGenMultiplier = 1.0;
 	private static double treeCutMultiplier = 1.0;
-	private static int minDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
+	private static int minGenDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
+	private static int minDrawDetail = Math.max(LodConfig.CLIENT.maxDrawDetail.get().detailLevel,LodConfig.CLIENT.maxGenerationDetail.get().detailLevel);
 	private static int maxDetail = LodUtil.REGION_DETAIL_LEVEL + 1;
 	private static int minDistance = 0;
 	private static int maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16 * 2;
@@ -36,7 +37,8 @@ public class DetailDistanceUtil
 
 
 	public static void updateSettings(){
-		minDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
+		minGenDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
+		minDrawDetail = Math.max(LodConfig.CLIENT.maxDrawDetail.get().detailLevel,LodConfig.CLIENT.maxGenerationDetail.get().detailLevel);
 		maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16 * 2;
 	}
 
@@ -44,7 +46,7 @@ public class DetailDistanceUtil
 	{
 		int initial;
 		int distance = 0;
-		if (detail <= minDetail)
+		if (detail <= minGenDetail)
 			return minDistance;
 		if (detail == maxDetail)
 			return maxDistance;
@@ -73,7 +75,7 @@ public class DetailDistanceUtil
 		return distance;
 	}
 
-	public static byte getDistanceRenderingInverse(int distance)
+	public static byte baseInverse(int distance, int minDetail)
 	{
 		int initial;
 		byte detail = 0;
@@ -98,20 +100,25 @@ public class DetailDistanceUtil
 		return (byte) Math.min(detail, LodUtil.REGION_DETAIL_LEVEL);
 	}
 
+	public static byte getDistanceRenderingInverse(int distance)
+	{
+		return baseInverse(distance, minDrawDetail);
+	}
+
 	public static byte getDistanceGenerationInverse(int distance)
 	{
-		return getDistanceRenderingInverse((int) (distance * genMultiplier));
+		return baseInverse((int) (distance * genMultiplier), minGenDetail);
 	}
 
 	public static byte getDistanceTreeCutInverse(int distance)
 	{
-		return getDistanceRenderingInverse((int) (distance * treeCutMultiplier));
+		return baseInverse((int) (distance * treeCutMultiplier), minGenDetail);
 	}
 
 
 	public static byte getDistanceTreeGenInverse(int distance)
 	{
-		return getDistanceRenderingInverse((int) (distance * treeGenMultiplier));
+		return baseInverse((int) (distance * treeGenMultiplier), minGenDetail);
 	}
 
 	public static int getDistanceGeneration(int detail)
@@ -140,11 +147,16 @@ public class DetailDistanceUtil
 		return LodConfig.CLIENT.distanceGenerationMode.get();
 	}
 
-	public static LodDetail getLodDetail(int detail)
+	public static byte getLodDrawDetail(int detail)
 	{
-		if (detail < minDetail)
+		return (byte) Math.max(detail, minDrawDetail);
+	}
+
+	public static LodDetail getLodGenDetail(int detail)
+	{
+		if (detail < minGenDetail)
 		{
-			return lodDetails[minDetail];
+			return lodDetails[minGenDetail];
 		} else
 		{
 			return lodDetails[detail];
@@ -154,9 +166,9 @@ public class DetailDistanceUtil
 
 	public static byte getCutLodDetail(int detail)
 	{
-		if (detail < minDetail)
+		if (detail < minGenDetail)
 		{
-			return lodDetails[minDetail].detailLevel;
+			return lodDetails[minGenDetail].detailLevel;
 		} else if (detail == maxDetail)
 		{
 			return LodUtil.REGION_DETAIL_LEVEL;

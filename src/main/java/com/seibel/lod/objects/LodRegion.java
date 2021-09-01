@@ -1,10 +1,7 @@
 package com.seibel.lod.objects;
 
 import java.io.Serializable;
-import java.util.*;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ConcurrentNavigableMap;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
@@ -12,8 +9,6 @@ import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 /**
@@ -257,7 +252,7 @@ public class LodRegion implements Serializable
 			} else
 			//now we keep exploring the top right child
 			{
-				if (DetailDistanceUtil.getLodDetail(childDetailLevel).detailLevel <= (childDetailLevel))
+				if (DetailDistanceUtil.getLodGenDetail(childDetailLevel).detailLevel <= (childDetailLevel))
 				{
 					levelPos.changeParameters(detailLevel, posX, posZ);
 					levelPos.convert(childDetailLevel);
@@ -305,7 +300,7 @@ public class LodRegion implements Serializable
 		//This is important to avoid any kind of hole in the rendering
 		int maxDistance = levelPos.maxDistance(playerPosX, playerPosZ, regionPosX, regionPosZ);
 
-		byte supposedLevel = DetailDistanceUtil.getDistanceRenderingInverse(maxDistance);
+		byte supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDistanceRenderingInverse(maxDistance));
 		if (supposedLevel > detailLevel)
 			return;
 		else if (supposedLevel == detailLevel)

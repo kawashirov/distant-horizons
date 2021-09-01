@@ -230,7 +230,7 @@ public class LodBufferBuilder
 									// skip any chunks that Minecraft is going to render
 									chunkXdist = posToRender.getChunkPosX() - playerChunkPos.x;
 									chunkZdist = posToRender.getChunkPosZ() - playerChunkPos.z;
-									if(gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >=  Math.abs(chunkZdist))
+									if(gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >=  Math.abs(chunkZdist) && posToRender.detailLevel <= LodUtil.CHUNK_DETAIL_LEVEL)
 									{
 										if (renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance  + 1][chunkZdist + gameChunkRenderDistance + 1])
 										{

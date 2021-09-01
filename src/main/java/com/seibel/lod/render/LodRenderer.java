@@ -23,6 +23,7 @@ import java.nio.FloatBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import com.seibel.lod.util.DetailDistanceUtil;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.NVFogDistance;
@@ -780,6 +781,7 @@ public class LodRenderer
 			    || mc.options.renderDistance != prevRenderDistance
 			    || prevFogDistance != LodConfig.CLIENT.fogDistance.get())
 		{
+			DetailDistanceUtil.updateSettings();
 			fullRegen = true;
 			previousPos.changeParameters((byte) 4, mc.player.xChunk, mc.player.zChunk);
 			prevFogDistance = LodConfig.CLIENT.fogDistance.get();
