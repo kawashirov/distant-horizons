@@ -240,8 +240,6 @@ public class LodBufferBuilder
 									posX = posToRender.posX;
 									posZ = posToRender.posZ;
 									detailLevel = posToRender.detailLevel;
-
-									LevelPos chunkPos = posToRender.getConvertedLevelPos(LodUtil.CHUNK_DETAIL_LEVEL);
 									// skip any chunks that Minecraft is going to render
 
 
