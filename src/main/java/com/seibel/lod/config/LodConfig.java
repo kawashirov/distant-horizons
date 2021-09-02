@@ -15,7 +15,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.handlers;
+package com.seibel.lod.config;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -44,40 +44,51 @@ import net.minecraftforge.fml.config.ModConfig;
  * This handles any configuration the user has access to.
  *
  * @author James Seibel
- * @version 8-30-2021
+ * @version 9-1-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
 {
-	// TODO break this up into multiple classes,
-	// there are way to many options here
 	public static class Client
+    {
+        public final Graphics graphics;
+        public final WorldGenerator worldGenerator;
+        public final Threading threading;
+        public final Debugging debugging;
+        public final Buffers buffers;
+
+        public Client(ForgeConfigSpec.Builder builder)
+        {
+            builder.push("client");
+            {
+                graphics = new Graphics(builder);
+                worldGenerator = new WorldGenerator(builder);
+                threading = new Threading(builder);
+                debugging = new Debugging(builder);
+                buffers = new Buffers(builder);
+            }
+            builder.pop();
+        }
+    }
+	
+	
+	
+	//================//
+	// Client Configs //
+	//================//
+	
+	public static class Graphics
 	{
 		public ForgeConfigSpec.BooleanValue drawLODs;
 		
 		public ForgeConfigSpec.EnumValue<FogDistance> fogDistance;
-		
 		public ForgeConfigSpec.EnumValue<FogDrawOverride> fogDrawOverride;
-		
-		public ForgeConfigSpec.EnumValue<DebugMode> debugMode;
-		
-		public ForgeConfigSpec.BooleanValue enableDebugKeybinding;
 		
 		public ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
 		
 		public ForgeConfigSpec.EnumValue<LodDetail> maxDrawDetail;
-		public ForgeConfigSpec.EnumValue<LodDetail> maxGenerationDetail;
-		
-		public ForgeConfigSpec.EnumValue<DistanceGenerationMode> distanceGenerationMode;
-		
-		public ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
-		
-		public ForgeConfigSpec.IntValue numberOfWorldGenerationThreads;
-		public ForgeConfigSpec.IntValue numberOfBufferBuilderThreads;
 		
 		public ForgeConfigSpec.EnumValue<ShadingMode> shadingMode;
-		
-		public ForgeConfigSpec.EnumValue<DistanceCalculatorType> lodDistanceCalculatorType;
 		
 		public ForgeConfigSpec.IntValue lodQuality;
 		
@@ -86,14 +97,10 @@ public class LodConfig
 		public ForgeConfigSpec.DoubleValue brightnessMultiplier;
 		public ForgeConfigSpec.DoubleValue saturationMultiplier;
 		
-		public ForgeConfigSpec.IntValue bufferRebuildPlayerMoveTimeout;
-		public ForgeConfigSpec.IntValue bufferRebuildChunkChangeTimeout;
-		public ForgeConfigSpec.IntValue bufferRebuildLodChangeTimeout;
 		
-		
-		Client(ForgeConfigSpec.Builder builder)
+		Graphics(ForgeConfigSpec.Builder builder)
 		{
-			builder.comment(ModInfo.MODNAME + " configuration settings").push("client");
+			builder.comment("These settings control how the LODs look.").push(this.getClass().getSimpleName());
 			
 			drawLODs = builder
 					.comment("\n\n"
@@ -118,18 +125,6 @@ public class LodConfig
 							+ " " + FogDrawOverride.ALWAYS_DRAW_FOG_FANCY.toString() + ": Always draw fancy fog on the LODs (if your graphics card supports it) \n")
 					.defineEnum("fogDrawOverride", FogDrawOverride.USE_OPTIFINE_FOG_SETTING);
 			
-			debugMode = builder
-					.comment("\n\n"
-							+ " " + DebugMode.OFF.toString() + ": LODs will draw with their normal colors. \n"
-							+ " " + DebugMode.SHOW_DETAIL.toString() + ": LOD colors will be based on their detail. \n"
-							+ " " + DebugMode.SHOW_DETAIL_WIREFRAME.toString() + ": LOD colors will be based on their detail, drawn with wireframe. \n")
-					.defineEnum("debugMode", DebugMode.OFF);
-			
-			enableDebugKeybinding = builder
-					.comment("\n\n"
-							+ " If true the F4 key can be used to cycle through the different debug modes. \n")
-					.define("enableDebugKeybinding", false);
-			
 			lodTemplate = builder
 					.comment("\n\n"
 							+ " How should the LODs be drawn? \n"
@@ -150,6 +145,62 @@ public class LodConfig
 							+ " " + LodDetail.HALF.toString() + ": render 64 LODs for each Chunk. \n"
 							+ " " + LodDetail.FULL.toString() + ": render 256 LODs for each Chunk. \n")
 					.defineEnum("lodDrawQuality", LodDetail.FULL);
+			
+			lodQuality = builder
+					.comment("\n\n"
+							+ " this value is multiplied by 128 and determine \n"
+							+ " how much the quality decrease over distance \n")
+					.defineInRange("lodQuality", 1, 1, 4);
+			
+			lodChunkRenderDistance = builder
+					.comment("\n\n"
+							+ " This is the render distance of the mod \n")
+					.defineInRange("lodChunkRenderDistane", 64, 32, 512);
+			
+			shadingMode = builder
+					.comment("\n\n"
+							+ " What kind of shading should the LODs have? \n"
+							+ " \n"
+							+ " " + ShadingMode.NONE.toString() + " \n"
+							+ " " + "LODs will have the same lighting on every side. \n"
+							+ " " + "Can make large similarly colored areas hard to differentiate. \n"
+							+ "\n"
+							+ " " + ShadingMode.DARKEN_SIDES.toString() + " \n"
+							+ " " + "LODs will have darker sides and bottoms to simulate Minecraft's flat lighting.")
+					.defineEnum("lightingMode", ShadingMode.DARKEN_SIDES);
+			
+			brightnessMultiplier = builder
+					.comment("\n\n"
+							+ " Change how bright LOD colors are. \n"
+							+ " 0 = black \n"
+							+ " 1 = normal color value \n"
+							+ " 2 = washed out colors \n")
+					.defineInRange("brightnessMultiplier", 1.0, 0, 2);
+			
+			saturationMultiplier = builder
+					.comment("\n\n"
+							+ " Change how saturated LOD colors are. \n"
+							+ " 0 = black and white \n"
+							+ " 1 = normal saturation \n"
+							+ " 2 = very saturated \n")
+					.defineInRange("saturationMultiplier", 1.0, 0, 2);
+			
+			
+			builder.pop();
+		}
+	}
+	
+	public static class WorldGenerator
+	{
+		public ForgeConfigSpec.EnumValue<LodDetail> maxGenerationDetail;
+		public ForgeConfigSpec.EnumValue<DistanceGenerationMode> distanceGenerationMode;
+		public ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
+		public ForgeConfigSpec.EnumValue<DistanceCalculatorType> lodDistanceCalculatorType;
+		
+		
+		WorldGenerator(ForgeConfigSpec.Builder builder)
+		{
+			builder.comment("These settings control how LODs outside your normal view range are generated.").push(this.getClass().getSimpleName());
 			
 			maxGenerationDetail = builder
 					.comment("\n\n"
@@ -177,17 +228,6 @@ public class LodConfig
 							+ " with LINEAR calculator the quality of block decrease \n"
 							+ " quadratically to the distance of the player \n")
 					.defineEnum("lodDistanceComputation", DistanceCalculatorType.LINEAR);
-			
-			lodQuality = builder
-					.comment("\n\n"
-							+ " this value is multiplied by 128 and determine \n"
-							+ " how much the quality decrease over distance \n")
-					.defineInRange("lodQuality", 1, 1, 4);
-			
-			lodChunkRenderDistance = builder
-					.comment("\n\n"
-							+ " This is the render distance of the mod \n")
-					.defineInRange("lodChunkRenderDistane", 64, 32, 512);
 			
 			distanceGenerationMode = builder
 					.comment("\n\n"
@@ -256,6 +296,20 @@ public class LodConfig
 							+ " https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues/35 \n")
 					.define("allowUnstableFeatureGeneration", false);
 			
+			
+			builder.pop();
+		}
+	}
+	
+	public static class Threading
+	{
+		public ForgeConfigSpec.IntValue numberOfWorldGenerationThreads;
+		public ForgeConfigSpec.IntValue numberOfBufferBuilderThreads;
+		
+		Threading(ForgeConfigSpec.Builder builder)
+		{
+			builder.comment("These settings control how many CPU threads the mod uses for different tasks.").push(this.getClass().getSimpleName());
+			
 			numberOfWorldGenerationThreads = builder
 					.comment("\n\n"
 							+ " This is how many threads are used when generating LODs outside \n"
@@ -271,60 +325,71 @@ public class LodConfig
 			numberOfBufferBuilderThreads = builder
 					.comment("\n\n"
 							+ " This is how many threads are used when building vertex buffers \n"
-							+ " (The things I send to the GPU to draw the LODs). \n"
+							+ " (The things sent to your GPU to draw the LODs). \n"
 							+ " If you experience high CPU useage when NOT generating distant \n"
-							+ " LODs lower this number. \n"
+							+ " LODs, lower this number. \n"
 							+ " \n"
 							+ " The maximum value is the number of processors on your CPU. \n"
 							+ " Requires a restart to take effect. \n")
 					.defineInRange("numberOfBufferBuilderThreads", Runtime.getRuntime().availableProcessors(), 1, Runtime.getRuntime().availableProcessors());
 			
-			shadingMode = builder
-					.comment("\n\n"
-							+ " What kind of shading should the LODs have? \n"
-							+ " \n"
-							+ " " + ShadingMode.NONE.toString() + " \n"
-							+ " " + "LODs will have the same lighting on every side. \n"
-							+ " " + "Can make large similarly colored areas hard to differentiate. \n"
-							+ "/n"
-							+ " " + ShadingMode.DARKEN_SIDES.toString() + " \n"
-							+ " " + "LODs will have darker sides and bottoms to simulate Minecraft's flat lighting.")
-					.defineEnum("lightingMode", ShadingMode.DARKEN_SIDES);
+			builder.pop();
+		}
+	}
+	
+	public static class Debugging
+	{
+		public ForgeConfigSpec.EnumValue<DebugMode> debugMode;
+		public ForgeConfigSpec.BooleanValue enableDebugKeybinding;
+		
+		Debugging(ForgeConfigSpec.Builder builder)
+		{
+			builder.comment("These settings can be used by to look for bugs, or see how certain parts of the mod are working.").push(this.getClass().getSimpleName());
 			
-			brightnessMultiplier = builder
+			debugMode = builder
 					.comment("\n\n"
-							+ " Change how bright LOD colors are. \n"
-							+ " 0 = black \n"
-							+ " 1 = normal color value \n"
-							+ " 2 = washed out colors \n")
-					.defineInRange("brightnessMultiplier", 1.0, 0, 2);
+							+ " " + DebugMode.OFF.toString() + ": LODs will draw with their normal colors. \n"
+							+ " " + DebugMode.SHOW_DETAIL.toString() + ": LOD colors will be based on their detail. \n"
+							+ " " + DebugMode.SHOW_DETAIL_WIREFRAME.toString() + ": LOD colors will be based on their detail, drawn with wireframe. \n")
+					.defineEnum("debugMode", DebugMode.OFF);
 			
-			saturationMultiplier = builder
+			enableDebugKeybinding = builder
 					.comment("\n\n"
-							+ " Change how saturated LOD colors are. \n"
-							+ " 0 = black and white \n"
-							+ " 1 = normal saturation \n"
-							+ " 2 = very saturated \n")
-					.defineInRange("saturationMultiplier", 1.0, 0, 2);
+							+ " If true the F4 key can be used to cycle through the different debug modes. \n")
+					.define("enableDebugKeybinding", false);
+			
+			builder.pop();
+		}
+	}
+	
+	public static class Buffers
+	{
+		public ForgeConfigSpec.IntValue bufferRebuildPlayerMoveTimeout;
+		public ForgeConfigSpec.IntValue bufferRebuildChunkChangeTimeout;
+		public ForgeConfigSpec.IntValue bufferRebuildLodChangeTimeout;
+		
+		Buffers(ForgeConfigSpec.Builder builder)
+		{
+			builder.comment("These settings affect when Vertex Buffers are built.").push(this.getClass().getSimpleName());
 			
 			bufferRebuildPlayerMoveTimeout = builder
 					.comment("\n\n"
 							+ " How long in milliseconds should we wait to \n"
-							+ " rebuild the buffers when the player moves \n"
+							+ " rebuild the vertex buffers when the player moves \n"
 							+ " a chunk or more? \n")
 					.defineInRange("bufferRebuildPlayerMoveTimeout", 2000, 1, 60000);
 			
 			bufferRebuildChunkChangeTimeout = builder
 					.comment("\n\n"
 							+ " How long in milliseconds should we wait to \n"
-							+ " rebuild the buffers when the vanilla rendered \n"
+							+ " rebuild the vertex buffers when the vanilla rendered \n"
 							+ " chunks change? \n")
 					.defineInRange("bufferRebuildChunkChangeTimeout", 1000, 1, 60000);
 			
 			bufferRebuildLodChangeTimeout = builder
 					.comment("\n\n"
 							+ " How long in milliseconds should we wait to \n"
-							+ " rebuild the buffers when the LOD regions change? \n")
+							+ " rebuild the vertex buffers when the LOD regions change? \n")
 					.defineInRange("bufferRebuildLodChangeTimeout", 5000, 1, 60000);
 			
 			
@@ -332,27 +397,32 @@ public class LodConfig
 		}
 	}
 	
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * {@link Path} to the configuration file of this mod
 	 */
 	private static final Path CONFIG_PATH = Paths.get("config", ModInfo.MODID + ".toml");
 	
-	public static final ForgeConfigSpec clientSpec;
+	public static final ForgeConfigSpec CLIENT_SPEC;
 	public static final Client CLIENT;
 	
 	static
 	{
 		final Pair<Client, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Client::new);
-		clientSpec = specPair.getRight();
+		CLIENT_SPEC = specPair.getRight();
 		CLIENT = specPair.getLeft();
-		
-		// setup the config file
-		CommentedFileConfig config = CommentedFileConfig.builder(CONFIG_PATH)
+		CommentedFileConfig clientConfig = CommentedFileConfig.builder(CONFIG_PATH)
 				.writingMode(WritingMode.REPLACE)
 				.build();
-		config.load();
-		config.save();
-		clientSpec.setConfig(config);
+		clientConfig.load();
+		clientConfig.save();
+		CLIENT_SPEC.setConfig(clientConfig);
 	}
 	
 	@SubscribeEvent

@@ -30,7 +30,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.lwjgl.opengl.GL11;
 
-import com.seibel.lod.handlers.LodConfig;
+import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.objects.LevelPos.LevelPos;
@@ -60,7 +60,7 @@ public class LodBufferBuilder
 	/**
 	 * This holds the threads used to generate buffers.
 	 */
-	private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfBufferBuilderThreads.get(), new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
+	private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfBufferBuilderThreads.get(), new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
 
 	/**
 	 * The buffers that are used to create LODs using far fog
@@ -294,7 +294,7 @@ public class LodBufferBuilder
 											}
 											posToRender.changeParameters(detailLevel, posX, posZ);
 
-											LodConfig.CLIENT.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,
+											LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,
 													posToRender, renderer.previousDebugMode);
 										}
 									} catch (ArrayIndexOutOfBoundsException e)

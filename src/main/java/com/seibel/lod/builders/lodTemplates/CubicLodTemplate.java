@@ -17,9 +17,9 @@
  */
 package com.seibel.lod.builders.lodTemplates;
 
+import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.enums.ShadingMode;
-import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.DataPoint;
 import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.util.ColorUtil;
@@ -102,7 +102,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		int eastColor = c;
 		
 		// darken the bottom and side colors if requested
-		if (LodConfig.CLIENT.shadingMode.get() == ShadingMode.DARKEN_SIDES)
+		if (LodConfig.CLIENT.graphics.shadingMode.get() == ShadingMode.DARKEN_SIDES)
 		{
 			// the side colors are different because
 			// when using fast lighting in Minecraft the north/south
@@ -118,8 +118,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		}
 		
 		// apply the user specified saturation and brightness
-		float saturationMultiplier = LodConfig.CLIENT.saturationMultiplier.get().floatValue();
-		float brightnessMultiplier = LodConfig.CLIENT.brightnessMultiplier.get().floatValue();
+		float saturationMultiplier = LodConfig.CLIENT.graphics.saturationMultiplier.get().floatValue();
+		float brightnessMultiplier = LodConfig.CLIENT.graphics.brightnessMultiplier.get().floatValue();
 		
 		if (saturationMultiplier != 1 || brightnessMultiplier != 1)
 		{

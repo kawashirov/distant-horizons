@@ -26,8 +26,8 @@ import java.util.concurrent.Executors;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
+import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
 import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.util.DetailDistanceUtil;
@@ -374,7 +374,7 @@ public class LodDimension
 	 */
 	public void treeGenerator(int playerPosX, int playerPosZ)
 	{
-		DistanceGenerationMode generationMode = LodConfig.CLIENT.distanceGenerationMode.get();
+		DistanceGenerationMode generationMode = LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get();
 		ChunkPos newPlayerChunk = (new LevelPos((byte) 0, playerPosX, playerPosZ)).getChunkPos();
 
 		if (lastGenChunk == null)

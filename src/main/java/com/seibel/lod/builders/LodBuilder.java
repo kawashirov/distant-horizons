@@ -21,9 +21,9 @@ import java.awt.Color;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.DataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
@@ -117,7 +117,7 @@ public class LodBuilder
 					lodDim = lodWorld.getLodDimension(dim);
 				}
 
-				generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(generationMode), LodConfig.CLIENT.maxGenerationDetail.get());
+				generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(generationMode), LodConfig.CLIENT.worldGenerator.maxGenerationDetail.get());
 			} catch (IllegalArgumentException | NullPointerException e)
 			{
 				System.out.println("Chunk pos " + chunk.getPos());

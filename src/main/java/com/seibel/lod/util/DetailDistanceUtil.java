@@ -1,12 +1,10 @@
 package com.seibel.lod.util;
 
-import com.ibm.icu.util.IslamicCalendar;
-import com.seibel.lod.enums.DistanceCalculatorType;
+import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.LodCorner;
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.RegionPos;
+
 import net.minecraft.client.Minecraft;
 
 public class DetailDistanceUtil
@@ -14,11 +12,11 @@ public class DetailDistanceUtil
 	private static double genMultiplier = 1.0;
 	private static double treeGenMultiplier = 1.0;
 	private static double treeCutMultiplier = 1.0;
-	private static int minGenDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
-	private static int minDrawDetail = Math.max(LodConfig.CLIENT.maxDrawDetail.get().detailLevel,LodConfig.CLIENT.maxGenerationDetail.get().detailLevel);
+	private static int minGenDetail = LodConfig.CLIENT.worldGenerator.maxGenerationDetail.get().detailLevel;
+	private static int minDrawDetail = Math.max(LodConfig.CLIENT.graphics.maxDrawDetail.get().detailLevel,LodConfig.CLIENT.worldGenerator.maxGenerationDetail.get().detailLevel);
 	private static int maxDetail = LodUtil.REGION_DETAIL_LEVEL + 1;
 	private static int minDistance = 0;
-	private static int maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16 * 2;
+	private static int maxDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 16 * 2;
 	private static int base = 2;
 	private static double logBase = Math.log(2);
 
@@ -37,9 +35,9 @@ public class DetailDistanceUtil
 
 
 	public static void updateSettings(){
-		minGenDetail = LodConfig.CLIENT.maxGenerationDetail.get().detailLevel;
-		minDrawDetail = Math.max(LodConfig.CLIENT.maxDrawDetail.get().detailLevel,LodConfig.CLIENT.maxGenerationDetail.get().detailLevel);
-		maxDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * 16 * 2;
+		minGenDetail = LodConfig.CLIENT.worldGenerator.maxGenerationDetail.get().detailLevel;
+		minDrawDetail = Math.max(LodConfig.CLIENT.graphics.maxDrawDetail.get().detailLevel,LodConfig.CLIENT.worldGenerator.maxGenerationDetail.get().detailLevel);
+		maxDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 16 * 2;
 	}
 
 	public static int getDistanceRendering(int detail)
@@ -52,13 +50,13 @@ public class DetailDistanceUtil
 			return maxDistance;
 		if (detail == maxDetail + 1)
 			return maxDistance;
-		switch (LodConfig.CLIENT.lodDistanceCalculatorType.get())
+		switch (LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.get())
 		{
 			case LINEAR:
-				initial = LodConfig.CLIENT.lodQuality.get() * 128;
+				initial = LodConfig.CLIENT.graphics.lodQuality.get() * 128;
 				return (detail * initial);
 			case QUADRATIC:
-				initial = LodConfig.CLIENT.lodQuality.get() * 128;
+				initial = LodConfig.CLIENT.graphics.lodQuality.get() * 128;
 				return (int) (Math.pow(base, detail) * initial);
 			case RENDER_DEPENDANT:
 				int realRenderDistance = Minecraft.getInstance().options.renderDistance * 16;
@@ -83,14 +81,14 @@ public class DetailDistanceUtil
 			detail = (byte) minDetail;
 		if (distance > maxDistance)
 			detail = (byte) (maxDetail-1);
-		switch (LodConfig.CLIENT.lodDistanceCalculatorType.get())
+		switch (LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.get())
 		{
 			case LINEAR:
-				initial = LodConfig.CLIENT.lodQuality.get() * 128;
+				initial = LodConfig.CLIENT.graphics.lodQuality.get() * 128;
 				detail = (byte) Math.floorDiv(distance, initial);
 				break;
 			case QUADRATIC:
-				initial = LodConfig.CLIENT.lodQuality.get() * 128;
+				initial = LodConfig.CLIENT.graphics.lodQuality.get() * 128;
 				detail = (byte) (Math.log(Math.floorDiv(distance, initial))/logBase);
 				break;
 			case RENDER_DEPENDANT:
@@ -144,7 +142,7 @@ public class DetailDistanceUtil
 
 	public static DistanceGenerationMode getDistanceGenerationMode(int detail)
 	{
-		return LodConfig.CLIENT.distanceGenerationMode.get();
+		return LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get();
 	}
 
 	public static byte getLodDrawDetail(int detail)

@@ -23,7 +23,6 @@ import java.nio.FloatBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import com.seibel.lod.util.DetailDistanceUtil;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.NVFogDistance;
@@ -32,17 +31,18 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.builders.LodBufferBuilder;
+import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.FogQuality;
-import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.proxy.ClientProxy;
+import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
@@ -60,7 +60,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
-import org.lwjgl.system.CallbackI;
 
 
 /**
@@ -244,7 +243,7 @@ public class LodRenderer
 
 		// set the required open GL settings
 
-		if (LodConfig.CLIENT.debugMode.get() == DebugMode.SHOW_DETAIL_WIREFRAME)
+		if (LodConfig.CLIENT.debugging.debugMode.get() == DebugMode.SHOW_DETAIL_WIREFRAME)
 			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
 		else
 			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
@@ -266,7 +265,7 @@ public class LodRenderer
 		Matrix4f modelViewMatrix = generateModelViewMatrix(partialTicks);
 		
 		// required for setupFog and setupProjectionMatrix
-		farPlaneBlockDistance = LodConfig.CLIENT.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
+		farPlaneBlockDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
 		
 		setupProjectionMatrix(partialTicks);
 		setupLighting(lodDim, partialTicks);
@@ -663,7 +662,7 @@ public class LodRenderer
 
 
 		FogQuality quality = reflectionHandler.getFogQuality();
-		FogDrawOverride override = LodConfig.CLIENT.fogDrawOverride.get();
+		FogDrawOverride override = LodConfig.CLIENT.graphics.fogDrawOverride.get();
 
 
 		if (quality == FogQuality.OFF)
@@ -707,7 +706,7 @@ public class LodRenderer
 				fogSettings.near.quality = FogQuality.FANCY;
 				fogSettings.far.quality = FogQuality.FANCY;
 
-				switch (LodConfig.CLIENT.fogDistance.get())
+				switch (LodConfig.CLIENT.graphics.fogDistance.get())
 				{
 					case NEAR_AND_FAR:
 						fogSettings.near.distance = FogDistance.NEAR;
@@ -734,7 +733,7 @@ public class LodRenderer
 				// fog, since the LODs are separated into a near
 				// and far portion; and fast fog is rendered from the
 				// frustrum's perspective instead of the camera
-				switch (LodConfig.CLIENT.fogDistance.get())
+				switch (LodConfig.CLIENT.graphics.fogDistance.get())
 				{
 					case NEAR_AND_FAR:
 						fogSettings.near.distance = FogDistance.NEAR;
@@ -778,23 +777,23 @@ public class LodRenderer
 		// full regens //
 		//=============//
 		// check if the view distance changed
-		if (ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.lodChunkRenderDistance.get()
+		if (ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.graphics.lodChunkRenderDistance.get()
 			    || mc.options.renderDistance != prevRenderDistance
-			    || prevFogDistance != LodConfig.CLIENT.fogDistance.get())
+			    || prevFogDistance != LodConfig.CLIENT.graphics.fogDistance.get())
 		{
 			DetailDistanceUtil.updateSettings();
 			fullRegen = true;
 			previousPos.changeParameters((byte) 4, mc.player.xChunk, mc.player.zChunk);
-			prevFogDistance = LodConfig.CLIENT.fogDistance.get();
+			prevFogDistance = LodConfig.CLIENT.graphics.fogDistance.get();
 			prevRenderDistance = mc.options.renderDistance;
 			//should use this when it's ready
 			vanillaRenderedChunks = new boolean[renderDistance*2+2][renderDistance*2+2];
 		}
 		
 		// did the user change the debug setting?
-		if (LodConfig.CLIENT.debugMode.get() != previousDebugMode)
+		if (LodConfig.CLIENT.debugging.debugMode.get() != previousDebugMode)
 		{
-			previousDebugMode = LodConfig.CLIENT.debugMode.get();
+			previousDebugMode = LodConfig.CLIENT.debugging.debugMode.get();
 			fullRegen = true;
 		}
 		
@@ -802,7 +801,7 @@ public class LodRenderer
 		long newTime = System.currentTimeMillis();
 		
 		// check if the player has moved
-		if (newTime - prevPlayerPosTime > LodConfig.CLIENT.bufferRebuildPlayerMoveTimeout.get())
+		if (newTime - prevPlayerPosTime > LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.get())
 		{
 			if (previousPos.detailLevel == 0
 				|| mc.player.xChunk != previousPos.posX
@@ -824,7 +823,7 @@ public class LodRenderer
 		
 		
 		// check if the vanilla rendered chunks changed
-		if (newTime - prevVanillaChunkTime > LodConfig.CLIENT.bufferRebuildChunkChangeTimeout.get())
+		if (newTime - prevVanillaChunkTime > LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.get())
 		{
 			if (vanillaRenderedChunksChanged)
 			{
@@ -837,7 +836,7 @@ public class LodRenderer
 		
 		
 		// check if there is any newly generated terrain to show
-		if (newTime - prevChunkTime > LodConfig.CLIENT.bufferRebuildLodChangeTimeout.get())
+		if (newTime - prevChunkTime > LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.get())
 		{
 			if (lodDim.regenDimension)
 			{

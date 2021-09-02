@@ -17,7 +17,7 @@
  */
 package com.seibel.lod;
 
-import com.seibel.lod.handlers.LodConfig;
+import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.proxy.ClientProxy;
 
 import net.minecraftforge.common.MinecraftForge;
@@ -49,7 +49,7 @@ public class LodMain
 	
 	private void init(final FMLCommonSetupEvent event)
 	{
-		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, LodConfig.clientSpec);
+		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, LodConfig.CLIENT_SPEC);
 	}
 	
 	

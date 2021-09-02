@@ -17,8 +17,8 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import com.seibel.lod.builders.GenerationRequest;
 import com.seibel.lod.builders.LodBuilder;
+import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.render.LodRenderer;
@@ -93,7 +93,7 @@ public class LodWorldGenerator
 	 */
 	public void queueGenerationRequests(LodDimension lodDim, LodRenderer renderer, LodBuilder lodBuilder)
 	{
-		if (LodConfig.CLIENT.distanceGenerationMode.get() != DistanceGenerationMode.NONE
+		if (LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get() != DistanceGenerationMode.NONE
 				    && !generatorThreadRunning
 				    && mc.hasSingleplayerServer())
 		{
@@ -101,7 +101,7 @@ public class LodWorldGenerator
 			generatorThreadRunning = true;
 
 			// just in case the config changed
-			maxChunkGenRequests = LodConfig.CLIENT.numberOfWorldGenerationThreads.get() * 8;
+			maxChunkGenRequests = LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get() * 8;
 
 			Thread generatorThread = new Thread(() ->
 			{

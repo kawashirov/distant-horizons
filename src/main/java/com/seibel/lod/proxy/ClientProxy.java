@@ -25,13 +25,13 @@ import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.builders.worldGeneration.LodWorldGenerator;
+import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceCalculatorType;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.enums.ShadingMode;
-import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.objects.RegionPos;
@@ -142,7 +142,7 @@ public class ClientProxy
 		// these can't be set until after the buffers are built (in renderer.drawLODs)
 		// otherwise the buffers may be set to the wrong size, or not changed at all
 		previousChunkRenderDistance = mc.options.renderDistance;
-		previousLodRenderDistance = LodConfig.CLIENT.lodChunkRenderDistance.get();
+		previousLodRenderDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get();
 	}
 	
 	
@@ -158,26 +158,26 @@ public class ClientProxy
 		//LodConfig.CLIENT.drawLODs.set(true);
 		//LodConfig.CLIENT.debugMode.set(true);
 		
-		LodConfig.CLIENT.maxDrawDetail.set(LodDetail.FULL);
-		LodConfig.CLIENT.maxGenerationDetail.set(LodDetail.FULL);
+		LodConfig.CLIENT.graphics.maxDrawDetail.set(LodDetail.FULL);
+		LodConfig.CLIENT.worldGenerator.maxGenerationDetail.set(LodDetail.FULL);
 		
-		LodConfig.CLIENT.fogDistance.set(FogDistance.FAR);
-		LodConfig.CLIENT.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
-		LodConfig.CLIENT.shadingMode.set(ShadingMode.DARKEN_SIDES);
-		LodConfig.CLIENT.brightnessMultiplier.set(1.0);
-		LodConfig.CLIENT.saturationMultiplier.set(1.0);
+		LodConfig.CLIENT.graphics.fogDistance.set(FogDistance.FAR);
+		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
+		LodConfig.CLIENT.graphics.shadingMode.set(ShadingMode.DARKEN_SIDES);
+		LodConfig.CLIENT.graphics.brightnessMultiplier.set(1.0);
+		LodConfig.CLIENT.graphics.saturationMultiplier.set(1.0);
 		
-		LodConfig.CLIENT.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
-		LodConfig.CLIENT.lodChunkRenderDistance.set(256);
-		LodConfig.CLIENT.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
-		LodConfig.CLIENT.lodQuality.set(3);
-		LodConfig.CLIENT.allowUnstableFeatureGeneration.set(false);
+		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
+		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(256);
+		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
+		LodConfig.CLIENT.graphics.lodQuality.set(3);
+		LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.set(false);
 		
-		LodConfig.CLIENT.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
-		LodConfig.CLIENT.bufferRebuildChunkChangeTimeout.set(1000); // 1000
-		LodConfig.CLIENT.bufferRebuildLodChangeTimeout.set(50); // 5000
+		LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
+		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
+		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(50); // 5000
 		
-		LodConfig.CLIENT.enableDebugKeybinding.set(true);
+		LodConfig.CLIENT.debugging.enableDebugKeybinding.set(true);
 	}
 	
 	
@@ -261,10 +261,10 @@ public class ClientProxy
 	@SubscribeEvent
 	public void onKeyInput(InputEvent.KeyInputEvent event) 
 	{
-		if(LodConfig.CLIENT.enableDebugKeybinding.get()
+		if(LodConfig.CLIENT.debugging.enableDebugKeybinding.get()
 			&& event.getKey() == GLFW.GLFW_KEY_F4 && event.getAction() == GLFW.GLFW_PRESS)
 		{
-			LodConfig.CLIENT.debugMode.set(LodConfig.CLIENT.debugMode.get().getNext());
+			LodConfig.CLIENT.debugging.debugMode.set(LodConfig.CLIENT.debugging.debugMode.get().getNext());
 		}
 	}
 	
@@ -297,7 +297,7 @@ public class ClientProxy
 	private void viewDistanceChangedEvent()
 	{
 		// calculate how wide the dimension(s) should be in regions
-		int chunksWide = LodConfig.CLIENT.lodChunkRenderDistance.get() * 2 + 1;
+		int chunksWide = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 2 + 1;
 		int newWidth = (int) Math.ceil(chunksWide / (float) LodUtil.REGION_WIDTH_IN_CHUNKS);
 		newWidth = (newWidth % 2 == 0) ? (newWidth += 1) : (newWidth += 2); // make sure we have a odd number of regions
 		

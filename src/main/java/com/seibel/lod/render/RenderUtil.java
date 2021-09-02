@@ -17,8 +17,8 @@
  */
 package com.seibel.lod.render;
 
+import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.LodTemplate;
-import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.Minecraft;
@@ -97,7 +97,7 @@ public class RenderUtil
 	{
 		// calculate the max amount of buffer memory needed (in bytes)
 		return LodUtil.REGION_WIDTH_IN_CHUNKS * LodUtil.REGION_WIDTH_IN_CHUNKS *
-				LodConfig.CLIENT.lodTemplate.get().getBufferMemoryForSingleLod();
+				LodConfig.CLIENT.graphics.lodTemplate.get().getBufferMemoryForSingleLod();
 	}
 	
 	/**

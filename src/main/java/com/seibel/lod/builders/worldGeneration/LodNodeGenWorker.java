@@ -28,9 +28,9 @@ import java.util.function.Supplier;
 
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.builders.LodBuilderConfig;
+import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.handlers.LodConfig;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodRenderer;
@@ -74,7 +74,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  */
 public class LodNodeGenWorker implements IWorker
 {
-	public static ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfWorldGenerationThreads.get(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
+	public static ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
 
 	private boolean threadStarted = false;
 	private LodChunkGenThread thread;
@@ -119,7 +119,7 @@ public class LodNodeGenWorker implements IWorker
 	{
 		if (!threadStarted)
 		{
-			if (LodConfig.CLIENT.distanceGenerationMode.get() == DistanceGenerationMode.SERVER)
+			if (LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get() == DistanceGenerationMode.SERVER)
 			{
 				// if we are using SERVER generation that has to be done
 				// synchronously to prevent crashing and harmful
@@ -448,7 +448,7 @@ public class LodNodeGenWorker implements IWorker
 				}
 			}
 
-			boolean allowUnstableFeatures = LodConfig.CLIENT.allowUnstableFeatureGeneration.get();
+			boolean allowUnstableFeatures = LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.get();
 
 			// generate all the features related to this chunk.
 			// this may or may not be thread safe
@@ -636,7 +636,7 @@ public class LodNodeGenWorker implements IWorker
 		{
 			genThreads.shutdownNow();
 		}
-		genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.numberOfWorldGenerationThreads.get(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
+		genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
 	}
 
 

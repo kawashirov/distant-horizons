@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.seibel.lod.LodMain;
-import com.seibel.lod.handlers.LodConfig;
+import com.seibel.lod.config.LodConfig;
 
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.WorldRenderer;
@@ -56,7 +56,7 @@ public class MixinWorldRenderer
 	{
 		// only render if LODs are enabled and
 		// only render before solid blocks
-		if (LodConfig.CLIENT.drawLODs.get() && renderType.equals(RenderType.solid()))
+		if (LodConfig.CLIENT.graphics.drawLODs.get() && renderType.equals(RenderType.solid()))
 			LodMain.client_proxy.renderLods(previousPartialTicks);
 	}
 }
