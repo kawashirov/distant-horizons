@@ -411,8 +411,12 @@ public class LodRenderer
 			
 			if (fogQuality == FogQuality.FANCY)
 			{
-				RenderSystem.fogStart(farPlaneBlockDistance * 0.1f);
-				RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
+				// for more realistic fog when using FAR
+//				RenderSystem.fogStart(farPlaneBlockDistance * 0.1f);
+//				RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
+				
+				RenderSystem.fogStart(farPlaneBlockDistance * 1.5f);
+				RenderSystem.fogEnd(farPlaneBlockDistance * 1.8f);
 			}
 			else if (fogQuality == FogQuality.FAST)
 			{
