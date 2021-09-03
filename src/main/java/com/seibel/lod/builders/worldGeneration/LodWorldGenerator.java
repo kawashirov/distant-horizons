@@ -180,7 +180,7 @@ public class LodWorldGenerator
 						//		playerBlockPosRounded.getX(),
 						//		playerBlockPosRounded.getZ());
 						//circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance);
-						generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(levelPos.detailLevel), DetailDistanceUtil.getLodGenDetail(levelPos.detailLevel)));
+						generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(levelPos.detailLevel)));
 						requesting--;
 						if (requestingFar > 0 && !nodeToGenerateListFar.isEmpty())
 						{
@@ -192,7 +192,7 @@ public class LodWorldGenerator
 							{
 								//maxDistance = levelPos.maxDistance(	playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
 								//circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance);
-								generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(levelPos.detailLevel), DetailDistanceUtil.getLodGenDetail(levelPos.detailLevel)));
+								generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(levelPos.detailLevel)));
 								requestingFar--;
 								requesting--;
 							}
@@ -241,7 +241,7 @@ public class LodWorldGenerator
 
 						positionWaitingToBeGenerated.add(chunkPos);
 						numberOfChunksWaitingToGenerate.addAndGet(1);
-						LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, generationRequest.generationMode, generationRequest.detail, renderer, lodBuilder, lodDim, serverWorld);
+						LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, generationRequest.generationMode, renderer, lodBuilder, lodDim, serverWorld);
 						WorldWorkerManager.addWorker(genWorker);
 					}
 

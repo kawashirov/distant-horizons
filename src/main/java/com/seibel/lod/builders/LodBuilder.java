@@ -111,11 +111,12 @@ public class LodBuilder
 
 				int playerPosX;
 				int playerPosZ;
-				if(Minecraft.getInstance().player == null)
+				if (Minecraft.getInstance().player == null)
 				{
 					playerPosX = chunk.getPos().getMinBlockX();
 					playerPosZ = chunk.getPos().getMinBlockZ();
-				}else{
+				} else
+				{
 					playerPosX = (int) world.players().get(0).getX();
 					playerPosZ = (int) world.players().get(0).getZ();
 				}
@@ -128,14 +129,7 @@ public class LodBuilder
 				{
 					lodDim = lodWorld.getLodDimension(dim);
 				}
-				LevelPos chunkPos = new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
-				generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(generationMode),
-						DetailDistanceUtil.getLodGenDetail(
-								DetailDistanceUtil.getDistanceGenerationInverse(
-										chunkPos.maxDistance(
-												playerPosX,
-												playerPosZ
-										))));
+				generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(generationMode));
 			} catch (IllegalArgumentException | NullPointerException e)
 			{
 				System.out.println("Chunk pos " + chunk.getPos());
@@ -155,9 +149,9 @@ public class LodBuilder
 	 *
 	 * @throws IllegalArgumentException thrown if either the chunk or world is null.
 	 */
-	public void generateLodNodeFromChunk(LodDimension lodDim, IChunk chunk, LodDetail detailLevel) throws IllegalArgumentException
+	public void generateLodNodeFromChunk(LodDimension lodDim, IChunk chunk) throws IllegalArgumentException
 	{
-		generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(), detailLevel);
+		generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig());
 	}
 
 	/**
@@ -165,14 +159,12 @@ public class LodBuilder
 	 *
 	 * @throws IllegalArgumentException thrown if either the chunk or world is null.
 	 */
-	public void generateLodNodeFromChunk(LodDimension lodDim, IChunk chunk, LodBuilderConfig config, LodDetail detail)
+	public void generateLodNodeFromChunk(LodDimension lodDim, IChunk chunk, LodBuilderConfig config)
 			throws IllegalArgumentException
 	{
 
 		if (chunk == null)
 			throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
-
-		boolean check = false;
 
 		int startX;
 		int startZ;
@@ -181,10 +173,14 @@ public class LodBuilder
 		short[] color;
 		short height;
 		short depth;
-		LevelPos levelPos = new LevelPos((byte) 0, 0, 0);
 		short[] data;
+		LevelPos levelPos = new LevelPos((byte) 0, 0, 0);
+		levelPos.changeParameters(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
+		levelPos.convert(LodUtil.REGION_DETAIL_LEVEL);
 		try
 		{
+			byte minDetailLevel = lodDim.getRegion(levelPos).getMinDetailLevel();
+			LodDetail detail = DetailDistanceUtil.getLodGenDetail(minDetailLevel);
 			for (int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++)
 			{
 				startX = detail.startX[i];
@@ -215,9 +211,8 @@ public class LodBuilder
 						false,
 						isServer);
 			}
-			//levelPos.changeParameters(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
-
-			lodDim.updateData(new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z));
+			levelPos.changeParameters(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
+			lodDim.updateData(levelPos);
 		} catch (Exception e)
 		{
 			//e.printStackTrace();
@@ -450,12 +445,10 @@ public class LodBuilder
 			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
 			tmp = tmp.darker();
 			colorInt = LodUtil.colorToInt(tmp);
-		}
-		else if (blockState == Blocks.STONE.defaultBlockState())
+		} else if (blockState == Blocks.STONE.defaultBlockState())
 		{
 			colorInt = LodUtil.STONE_COLOR_INT;
-		}
-		else if (blockState == Blocks.MYCELIUM.defaultBlockState())
+		} else if (blockState == Blocks.MYCELIUM.defaultBlockState())
 		{
 			colorInt = LodUtil.MYCELIUM_COLOR_INT;
 		}

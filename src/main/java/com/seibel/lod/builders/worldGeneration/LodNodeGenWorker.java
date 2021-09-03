@@ -30,7 +30,6 @@ import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.builders.LodBuilderConfig;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodRenderer;
@@ -87,7 +86,7 @@ public class LodNodeGenWorker implements IWorker
 
 
 
-	public LodNodeGenWorker(ChunkPos newPos, DistanceGenerationMode newGenerationMode, LodDetail newDetaillevel, LodRenderer newLodRenderer,
+	public LodNodeGenWorker(ChunkPos newPos, DistanceGenerationMode newGenerationMode, LodRenderer newLodRenderer,
 							LodBuilder newLodBuilder,
 							LodDimension newLodDimension, ServerWorld newServerWorld)
 	{
@@ -109,7 +108,7 @@ public class LodNodeGenWorker implements IWorker
 
 
 
-		thread = new LodChunkGenThread(newPos, newGenerationMode, newDetaillevel, newLodRenderer,
+		thread = new LodChunkGenThread(newPos, newGenerationMode, newLodRenderer,
 				newLodBuilder,
 				newLodDimension, newServerWorld);
 	}
@@ -159,19 +158,17 @@ public class LodNodeGenWorker implements IWorker
 		public final ServerWorld serverWorld;
 		public final LodDimension lodDim;
 		public final DistanceGenerationMode generationMode;
-		public final LodDetail detailLevel;
 		public final LodBuilder lodBuilder;
 		public final LodRenderer lodRenderer;
 
 		private ChunkPos pos;
 
-		public LodChunkGenThread(ChunkPos newPos, DistanceGenerationMode newGenerationMode, LodDetail newDetailLevel, LodRenderer newLodRenderer,
+		public LodChunkGenThread(ChunkPos newPos, DistanceGenerationMode newGenerationMode, LodRenderer newLodRenderer,
 								 LodBuilder newLodBuilder,
 								 LodDimension newLodDimension, ServerWorld newServerWorld)
 		{
 			pos = newPos;
 			generationMode = newGenerationMode;
-			detailLevel = newDetailLevel;
 			lodRenderer = newLodRenderer;
 			lodBuilder = newLodBuilder;
 			lodDim = newLodDimension;
@@ -348,14 +345,14 @@ public class LodNodeGenWorker implements IWorker
 
 			if (!inTheEnd)
 			{
-				lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(true, true, false), detailLevel);
+				lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(true, true, false));
 			}
 			else
 			{
 				// if we are in the end, don't generate any chunks.
 				// Since we don't know where the islands are, everything
 				// generates the same and it looks really bad.
-				lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(true, true, false), detailLevel);
+				lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(true, true, false));
 			}
 
 
@@ -392,7 +389,7 @@ public class LodNodeGenWorker implements IWorker
 			IceAndSnowFeature snowFeature = new IceAndSnowFeature(NoFeatureConfig.CODEC);
 			snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
 
-			lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(DistanceGenerationMode.SURFACE), detailLevel);
+			lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(DistanceGenerationMode.SURFACE));
 
 			/**TODO if we want to use Biome utils and terrain utils for overworld
 			 * lodBuilder.generateLodNodeFromChunk(lodDim, pos ,detailLevel, serverWorld.getSeed());*/
@@ -521,7 +518,7 @@ public class LodNodeGenWorker implements IWorker
 
 			// generate a Lod like normal
 
-			lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(DistanceGenerationMode.FEATURES), detailLevel);
+			lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(DistanceGenerationMode.FEATURES));
 		}
 
 
