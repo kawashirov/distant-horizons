@@ -29,6 +29,7 @@ import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.util.ColorUtil;
+import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 
@@ -40,6 +41,7 @@ import net.minecraft.block.GrassBlock;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.material.MaterialColor;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.biome.Biome;
@@ -105,19 +107,35 @@ public class LodBuilder
 			{
 				DimensionType dim = world.dimensionType();
 
-
 				LodDimension lodDim;
 
+				int playerPosX;
+				int playerPosZ;
+				if(Minecraft.getInstance().player == null)
+				{
+					playerPosX = chunk.getPos().getMinBlockX();
+					playerPosZ = chunk.getPos().getMinBlockZ();
+				}else{
+					playerPosX = (int) world.players().get(0).getX();
+					playerPosZ = (int) world.players().get(0).getZ();
+				}
 				if (lodWorld.getLodDimension(dim) == null)
 				{
 					lodDim = new LodDimension(dim, lodWorld, defaultDimensionWidthInRegions);
 					lodWorld.addLodDimension(lodDim);
+					lodDim.treeGenerator(playerPosX, playerPosZ);
 				} else
 				{
 					lodDim = lodWorld.getLodDimension(dim);
 				}
-
-				generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(generationMode), LodConfig.CLIENT.worldGenerator.maxGenerationDetail.get());
+				LevelPos chunkPos = new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
+				generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(generationMode),
+						DetailDistanceUtil.getLodGenDetail(
+								DetailDistanceUtil.getDistanceGenerationInverse(
+										chunkPos.maxDistance(
+												playerPosX,
+												playerPosZ
+										))));
 			} catch (IllegalArgumentException | NullPointerException e)
 			{
 				System.out.println("Chunk pos " + chunk.getPos());
