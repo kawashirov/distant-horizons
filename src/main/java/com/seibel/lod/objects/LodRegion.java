@@ -3,13 +3,14 @@ package com.seibel.lod.objects;
 import java.io.Serializable;
 import java.util.concurrent.ConcurrentMap;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
+
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.objects.LevelPos.LevelPos;
+import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
-
-import org.apache.commons.lang3.mutable.MutableBoolean;
 
 /**
  * STANDARD TO FOLLOW
@@ -313,7 +314,9 @@ public class LodRegion implements Serializable
 					dataToRender.get(levelPos).setTrue();
 				}catch (Exception e){
 					/*TODO Fix this exception*/
-					System.out.println("error happened " + levelPos.getRegionPos());
+					// This seems to happen more often when using an elytra in an amplified world
+					// maybe it has something to do with the dimensions moving?
+					ClientProxy.LOGGER.error("getDataToRender had a error at " + levelPos.getRegionPos() + ". Exception: " + e.getMessage());
 					dataToRender.put(new LevelPos(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size), new MutableBoolean(true));
 				}
 			} else
