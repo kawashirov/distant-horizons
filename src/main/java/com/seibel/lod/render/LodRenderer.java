@@ -77,7 +77,7 @@ public class LodRenderer
 	 * it should be something different than what is used by Minecraft
 	 */
 	private static final int LOD_GL_LIGHT_NUMBER = GL11.GL_LIGHT2;
-
+	
 	/**
 	 * 64 MB by default is the maximum amount of memory that
 	 * can be directly allocated. <br><br>
@@ -90,38 +90,38 @@ public class LodRenderer
 	 * https://stackoverflow.com/questions/50499238/bytebuffer-allocatedirect-and-xmx
 	 */
 	public static final int MAX_ALOCATEABLE_DIRECT_MEMORY = 64 * 1024 * 1024;
-
+	
 	/**
 	 * Does this computer's GPU support fancy fog?
 	 */
 	private static Boolean fancyFogAvailable = null;
-
-
+	
+	
 	/**
 	 * If true the LODs colors will be replaced with
 	 * a checkerboard, this can be used for debugging.
 	 */
 	public DebugMode previousDebugMode = DebugMode.OFF;
-
+	
 	private MinecraftWrapper mc;
 	private GameRenderer gameRender;
 	private IProfiler profiler;
 	private int farPlaneBlockDistance;
 	private ReflectionHandler reflectionHandler;
-
-
+	
+	
 	/**
 	 * This is used to generate the buildable buffers
 	 */
 	private LodBufferBuilder lodBufferBuilder;
-
+	
 	/**
 	 * Each VertexBuffer represents 1 region
 	 */
 	private VertexBuffer[][] vbos;
 	public static final VertexFormat LOD_VERTEX_FORMAT = DefaultVertexFormats.POSITION_COLOR;
-
-
+	
+	
 	/**
 	 * This is used to determine if the LODs should be regenerated
 	 */
@@ -130,38 +130,38 @@ public class LodRenderer
 	private long prevPlayerPosTime = 0;
 	private long prevVanillaChunkTime = 0;
 	private long prevChunkTime = 0;
-
-
+	
+	
 	/**
 	 * This is used to determine if the LODs should be regenerated
 	 */
 	private FogDistance prevFogDistance = FogDistance.NEAR_AND_FAR;
-
+	
 	/**
 	 * if this is true the LOD buffers should be regenerated,
 	 * provided they aren't already being regenerated.
 	 */
 	private volatile boolean partialRegen = false;
 	private volatile boolean fullRegen = true;
-
+	
 	/**
 	 * This HashSet contains every chunk that Vanilla Minecraft
 	 * is going to render
 	 */
 	public boolean[][] vanillaRenderedChunks;
 	public boolean vanillaRenderedChunksChanged;
-
-
+	
+	
 	public LodRenderer(LodBufferBuilder newLodNodeBufferBuilder)
 	{
 		mc = MinecraftWrapper.INSTANCE;
 		gameRender = mc.getGameRenderer();
-
+		
 		reflectionHandler = new ReflectionHandler();
 		lodBufferBuilder = newLodNodeBufferBuilder;
 	}
-
-
+	
+	
 	/**
 	 * Besides drawing the LODs this method also starts
 	 * the async process of generating the Buffers that hold those LODs.
@@ -177,37 +177,37 @@ public class LodRenderer
 			// don't try drawing anything
 			return;
 		}
-
-
+		
+		
 		//===============//
 		// initial setup //
 		//===============//
-
+		
 		profiler = newProfiler;
 		profiler.push("LOD setup");
-
-
+		
+		
 		// only check the GPU capability's once
 		if (fancyFogAvailable == null)
 		{
 			// see if this GPU can run fancy fog
 			fancyFogAvailable = GL.getCapabilities().GL_NV_fog_distance;
-
+			
 			if (!fancyFogAvailable)
 			{
 				ClientProxy.LOGGER.info("This GPU does not support GL_NV_fog_distance. This means that fancy fog options will not be available.");
 			}
 		}
-
+		
 		
 		// TODO move the buffer regeneration logic into its own class (probably called in the client proxy instead)
 		// starting here...
 		determineIfLodsShouldRegenerate(lodDim);
-
+		
 		//=================//
 		// create the LODs //
 		//=================//
-
+		
 		// only regenerate the LODs if:
 		// 1. we want to regenerate LODs
 		// 2. we aren't already regenerating the LODs
@@ -217,7 +217,7 @@ public class LodRenderer
 		{
 			// generate the LODs on a separate thread to prevent stuttering or freezing
 			lodBufferBuilder.generateLodBuffersAsync(this, lodDim, mc.getPlayer().blockPosition(), true);
-
+			
 			// the regen process has been started,
 			// it will be done when lodBufferBuilder.newBuffersAvaliable()
 			// is true
@@ -227,7 +227,7 @@ public class LodRenderer
 		
 		// TODO move the buffer regeneration logic into its own class (probably called in the client proxy instead)
 		// ...ending here
-
+		
 		// replace the buffers used to draw and build,
 		// this is only done when the createLodBufferGenerationThread
 		// has finished executing on a parallel thread.
@@ -241,9 +241,9 @@ public class LodRenderer
 		//===========================//
 		// GL settings for rendering //
 		//===========================//
-
+		
 		// set the required open GL settings
-
+		
 		if (LodConfig.CLIENT.debugging.debugMode.get() == DebugMode.SHOW_DETAIL_WIREFRAME)
 			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
 		else
@@ -253,16 +253,16 @@ public class LodRenderer
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
-
+		
 		// disable the lights Minecraft uses
 		GL11.glDisable(GL11.GL_LIGHT0);
 		GL11.glDisable(GL11.GL_LIGHT1);
-
+		
 		// get the default projection matrix so we can
 		// reset it after drawing the LODs
 		float[] defaultProjMatrix = new float[16];
 		GL11.glGetFloatv(GL11.GL_PROJECTION_MATRIX, defaultProjMatrix);
-
+		
 		Matrix4f modelViewMatrix = generateModelViewMatrix(partialTicks);
 		
 		// required for setupFog and setupProjectionMatrix
@@ -270,7 +270,7 @@ public class LodRenderer
 		
 		setupProjectionMatrix(partialTicks);
 		setupLighting(lodDim, partialTicks);
-
+		
 		NearFarFogSettings fogSettings = determineFogSettings();
 		
 		// determine the current fog settings so they can be
@@ -279,24 +279,24 @@ public class LodRenderer
 		float defaultFogEndDist = GL11.glGetFloat(GL11.GL_FOG_END);
 		int defaultFogMode = GL11.glGetInteger(GL11.GL_FOG_MODE);
 		int defaultFogDistance = GL11.glGetInteger(NVFogDistance.GL_FOG_DISTANCE_MODE_NV);
-
-
+		
+		
 		//===========//
 		// rendering //
 		//===========//
 		profiler.popPush("LOD draw");
-
+		
 		if (vbos != null)
 		{
 			Entity cameraEntity = mc.getCameraEntity();
 			Vector3d cameraDir = cameraEntity.getLookAngle().normalize();
 			cameraDir = mc.getOptions().getCameraType().isMirrored() ? cameraDir.reverse() : cameraDir;
-
-
+			
+			
 			// used to determine what type of fog to render
 			int halfWidth = vbos.length / 2;
 			int quarterWidth = vbos.length / 4;
-
+			
 			for (int i = 0; i < vbos.length; i++)
 			{
 				for (int j = 0; j < vbos.length; j++)
@@ -308,21 +308,21 @@ public class LodRenderer
 							setupFog(fogSettings.near.distance, fogSettings.near.quality);
 						else
 							setupFog(fogSettings.far.distance, fogSettings.far.quality);
-
-
+						
+						
 						sendLodsToGpuAndDraw(vbos[i][j], modelViewMatrix);
 					}
 				}
 			}
 		}
-
-
+		
+		
 		//=========//
 		// cleanup //
 		//=========//
-
+		
 		profiler.popPush("LOD cleanup");
-
+		
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(LOD_GL_LIGHT_NUMBER);
@@ -330,22 +330,22 @@ public class LodRenderer
 		GL11.glEnable(GL11.GL_LIGHT0);
 		GL11.glEnable(GL11.GL_LIGHT1);
 		RenderSystem.disableLighting();
-
+		
 		// reset the fog settings so the normal chunks
 		// will be drawn correctly
 		cleanupFog(fogSettings, defaultFogStartDist, defaultFogEndDist, defaultFogMode, defaultFogDistance);
-
+		
 		// reset the projection matrix so anything drawn after
 		// the LODs will use the correct projection matrix
 		Matrix4f mvm = new Matrix4f(defaultProjMatrix);
 		mvm.transpose();
 		gameRender.resetProjectionMatrix(mvm);
-
+		
 		// clear the depth buffer so anything drawn is drawn
 		// over the LODs
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-
-
+		
+		
 		// end of internal LOD profiling
 		profiler.pop();
 	}
@@ -358,22 +358,22 @@ public class LodRenderer
 	{
 		if (vbo == null)
 			return;
-
+		
 		vbo.bind();
 		// 0L is the starting pointer
 		LOD_VERTEX_FORMAT.setupBufferState(0L);
-
+		
 		vbo.draw(modelViewMatrix, GL11.GL_QUADS);
-
+		
 		VertexBuffer.unbind();
 		LOD_VERTEX_FORMAT.clearBufferState();
 	}
-
-
+	
+	
 	//=================//
 	// Setup Functions //
 	//=================//
-
+	
 	@SuppressWarnings("deprecation")
 	private void setupFog(FogDistance fogDistance, FogQuality fogQuality)
 	{
@@ -452,19 +452,19 @@ public class LodRenderer
 		RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
 		GL11.glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, glFogDistanceMode);
 	}
-
+	
 	/**
 	 * Revert any changes that were made to the fog.
 	 */
 	private void cleanupFog(NearFarFogSettings fogSettings,
-	                        float defaultFogStartDist, float defaultFogEndDist,
-	                        int defaultFogMode, int defaultFogDistance)
+			float defaultFogStartDist, float defaultFogEndDist,
+			int defaultFogMode, int defaultFogDistance)
 	{
 		RenderSystem.fogStart(defaultFogStartDist);
 		RenderSystem.fogEnd(defaultFogEndDist);
 		RenderSystem.fogMode(defaultFogMode);
 		GL11.glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, defaultFogDistance);
-
+		
 		// disable fog if Minecraft wasn't rendering fog
 		// but we were
 		if (!fogSettings.vanillaIsRenderingFog &&
@@ -474,8 +474,8 @@ public class LodRenderer
 			GL11.glDisable(GL11.GL_FOG);
 		}
 	}
-
-
+	
+	
 	/**
 	 * Create the model view matrix to move the LODs
 	 * from object space into world space.
@@ -485,8 +485,8 @@ public class LodRenderer
 		// get all relevant camera info
 		ActiveRenderInfo renderInfo = mc.getGameRenderer().getMainCamera();
 		Vector3d projectedView = renderInfo.getPosition();
-
-
+		
+		
 		// generate the model view matrix
 		MatrixStack matrixStack = new MatrixStack();
 		matrixStack.pushPose();
@@ -494,11 +494,11 @@ public class LodRenderer
 		matrixStack.mulPose(Vector3f.XP.rotationDegrees(renderInfo.getXRot()));
 		matrixStack.mulPose(Vector3f.YP.rotationDegrees(renderInfo.getYRot() + 180));
 		matrixStack.translate(-projectedView.x, -projectedView.y, -projectedView.z);
-
+		
 		return matrixStack.last().pose();
 	}
-
-
+	
+	
 	/**
 	 * create a new projection matrix and send it over to the GPU
 	 * <br><br>
@@ -516,16 +516,16 @@ public class LodRenderer
 		// Note: if the LOD objects don't distort correctly
 		// compared to regular minecraft terrain, make sure
 		// all the transformations in renderWorld are here too
-
+		
 		MatrixStack matrixStack = new MatrixStack();
 		matrixStack.pushPose();
-
+		
 		gameRender.bobHurt(matrixStack, partialTicks);
 		if (this.mc.getOptions().bobView)
 		{
 			gameRender.bobView(matrixStack, partialTicks);
 		}
-
+		
 		// potion and nausea effects
 		float f = MathHelper.lerp(partialTicks, this.mc.getPlayer().oPortalTime, this.mc.getPlayer().portalTime) * this.mc.getOptions().screenEffectScale * this.mc.getOptions().screenEffectScale;
 		if (f > 0.0F)
@@ -539,8 +539,8 @@ public class LodRenderer
 			float f2 = -(gameRender.tick + partialTicks) * i;
 			matrixStack.mulPose(vector3f.rotationDegrees(f2));
 		}
-
-
+		
+		
 		// this projection matrix allows us to see past the normal
 		// world render distance
 		Matrix4f projectionMatrix =
@@ -552,14 +552,14 @@ public class LodRenderer
 						// terrain, so I don't think it is much of an issue.
 						mc.getRenderDistance(),
 						farPlaneBlockDistance * LodUtil.CHUNK_WIDTH * 2);
-
+		
 		// add the screen space distortions
 		projectionMatrix.multiply(matrixStack.last().pose());
 		gameRender.resetProjectionMatrix(projectionMatrix);
 		return;
 	}
-
-
+	
+	
 	/**
 	 * setup the lighting to be used for the LODs
 	 */
@@ -580,27 +580,27 @@ public class LodRenderer
 				}
 			}
 		}
-
-
+		
+		
 		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.getSkyDarken(partialTicks) : 0.2f;
 		sunBrightness = playerHasNightVision ? 1.0f : sunBrightness;
 		float gammaMultiplyer = (float) mc.getOptions().gamma - 0.5f;
 		float lightStrength = ((sunBrightness / 2f) - 0.2f) + (gammaMultiplyer * 0.3f);
-
+		
 		float lightAmbient[] = {lightStrength, lightStrength, lightStrength, 1.0f};
-
+		
 		// can be used for debugging
 		//		if (partialTicks < 0.005)
 		//			ClientProxy.LOGGER.debug(lightStrength);
-
+		
 		ByteBuffer temp = ByteBuffer.allocateDirect(16);
 		temp.order(ByteOrder.nativeOrder());
 		GL11.glLightfv(LOD_GL_LIGHT_NUMBER, GL11.GL_AMBIENT, (FloatBuffer) temp.asFloatBuffer().put(lightAmbient).flip());
 		GL11.glEnable(LOD_GL_LIGHT_NUMBER); // Enable the above lighting
-
+		
 		RenderSystem.enableLighting();
 	}
-
+	
 	/**
 	 * Create all buffers that will be used.
 	 */
@@ -608,24 +608,24 @@ public class LodRenderer
 	{
 		// calculate the max amount of memory needed (in bytes)
 		int bufferMemory = RenderUtil.getBufferMemoryForRegion();
-
+		
 		// if the required memory is greater than the
 		// MAX_ALOCATEABLE_DIRECT_MEMORY lower the lodChunkRadiusMultiplier
 		// to fit.
 		if (bufferMemory > MAX_ALOCATEABLE_DIRECT_MEMORY)
 		{
 			ClientProxy.LOGGER.warn("setupBuffers tried to allocate too much memory for the BufferBuilders."
-					                        + " It tried to allocate \"" + bufferMemory + "\" bytes, when \"" + MAX_ALOCATEABLE_DIRECT_MEMORY + "\" is the max.");
+					+ " It tried to allocate \"" + bufferMemory + "\" bytes, when \"" + MAX_ALOCATEABLE_DIRECT_MEMORY + "\" is the max.");
 		}
-
+		
 		lodBufferBuilder.setupBuffers(numbRegionsWide, bufferMemory);
 	}
-
-
+	
+	
 	//======================//
 	// Other Misc Functions //
 	//======================//
-
+	
 	/**
 	 * If this is called then the next time "drawLODs" is called
 	 * the LODs will be regenerated; the same as if the player moved.
@@ -634,8 +634,8 @@ public class LodRenderer
 	{
 		fullRegen = true;
 	}
-
-
+	
+	
 	/**
 	 * Replace the current Vertex Buffers with the newly
 	 * created buffers from the lodBufferBuilder.
@@ -646,7 +646,7 @@ public class LodRenderer
 		// the newly created buffers from the lodBufferBuilder
 		vbos = lodBufferBuilder.getVertexBuffers();
 	}
-
+	
 	/**
 	 * Calls the BufferBuilder's destroyBuffers method.
 	 */
@@ -654,122 +654,122 @@ public class LodRenderer
 	{
 		lodBufferBuilder.destroyBuffers();
 	}
-
-
+	
+	
 	private double getFov(float partialTicks, boolean useFovSetting)
 	{
 		return mc.getGameRenderer().getFov(mc.getGameRenderer().getMainCamera(), partialTicks, useFovSetting);
 	}
-
-
+	
+	
 	/**
 	 * Return what fog settings should be used when rendering.
 	 */
 	private NearFarFogSettings determineFogSettings()
 	{
 		NearFarFogSettings fogSettings = new NearFarFogSettings();
-
-
+		
+		
 		FogQuality quality = reflectionHandler.getFogQuality();
 		FogDrawOverride override = LodConfig.CLIENT.graphics.fogDrawOverride.get();
-
-
+		
+		
 		if (quality == FogQuality.OFF)
 			fogSettings.vanillaIsRenderingFog = false;
 		else
 			fogSettings.vanillaIsRenderingFog = true;
-
-
+		
+		
 		// use any fog overrides the user may have set
 		switch (override)
 		{
-			case ALWAYS_DRAW_FOG_FANCY:
-				quality = FogQuality.FANCY;
-				break;
-
-			case NEVER_DRAW_FOG:
-				quality = FogQuality.OFF;
-				break;
-
-			case ALWAYS_DRAW_FOG_FAST:
-				quality = FogQuality.FAST;
-				break;
-
-			case USE_OPTIFINE_FOG_SETTING:
-				// don't override anything
-				break;
+		case ALWAYS_DRAW_FOG_FANCY:
+			quality = FogQuality.FANCY;
+			break;
+			
+		case NEVER_DRAW_FOG:
+			quality = FogQuality.OFF;
+			break;
+			
+		case ALWAYS_DRAW_FOG_FAST:
+			quality = FogQuality.FAST;
+			break;
+			
+		case USE_OPTIFINE_FOG_SETTING:
+			// don't override anything
+			break;
 		}
-
-
+		
+		
 		// only use fancy fog if the user's GPU can deliver
 		if (!fancyFogAvailable && quality == FogQuality.FANCY)
 		{
 			quality = FogQuality.FAST;
 		}
-
-
+		
+		
 		// how different distances are drawn depends on the quality set
 		switch (quality)
 		{
-			case FANCY:
-				fogSettings.near.quality = FogQuality.FANCY;
-				fogSettings.far.quality = FogQuality.FANCY;
-
-				switch (LodConfig.CLIENT.graphics.fogDistance.get())
-				{
-					case NEAR_AND_FAR:
-						fogSettings.near.distance = FogDistance.NEAR;
-						fogSettings.far.distance = FogDistance.FAR;
-						break;
-
-					case NEAR:
-						fogSettings.near.distance = FogDistance.NEAR;
-						fogSettings.far.distance = FogDistance.NEAR;
-						break;
-
-					case FAR:
-						fogSettings.near.distance = FogDistance.FAR;
-						fogSettings.far.distance = FogDistance.FAR;
-						break;
-				}
+		case FANCY:
+			fogSettings.near.quality = FogQuality.FANCY;
+			fogSettings.far.quality = FogQuality.FANCY;
+			
+			switch (LodConfig.CLIENT.graphics.fogDistance.get())
+			{
+			case NEAR_AND_FAR:
+				fogSettings.near.distance = FogDistance.NEAR;
+				fogSettings.far.distance = FogDistance.FAR;
 				break;
-
-			case FAST:
-				fogSettings.near.quality = FogQuality.FAST;
-				fogSettings.far.quality = FogQuality.FAST;
-
-				// fast fog setting should only have one type of
-				// fog, since the LODs are separated into a near
-				// and far portion; and fast fog is rendered from the
-				// frustrum's perspective instead of the camera
-				switch (LodConfig.CLIENT.graphics.fogDistance.get())
-				{
-					case NEAR_AND_FAR:
-						fogSettings.near.distance = FogDistance.NEAR;
-						fogSettings.far.distance = FogDistance.NEAR;
-						break;
-
-					case NEAR:
-						fogSettings.near.distance = FogDistance.NEAR;
-						fogSettings.far.distance = FogDistance.NEAR;
-						break;
-
-					case FAR:
-						fogSettings.near.distance = FogDistance.FAR;
-						fogSettings.far.distance = FogDistance.FAR;
-						break;
-				}
+				
+			case NEAR:
+				fogSettings.near.distance = FogDistance.NEAR;
+				fogSettings.far.distance = FogDistance.NEAR;
 				break;
-
-			case OFF:
-
-				fogSettings.near.quality = FogQuality.OFF;
-				fogSettings.far.quality = FogQuality.OFF;
+				
+			case FAR:
+				fogSettings.near.distance = FogDistance.FAR;
+				fogSettings.far.distance = FogDistance.FAR;
 				break;
-
+			}
+			break;
+			
+		case FAST:
+			fogSettings.near.quality = FogQuality.FAST;
+			fogSettings.far.quality = FogQuality.FAST;
+			
+			// fast fog setting should only have one type of
+			// fog, since the LODs are separated into a near
+			// and far portion; and fast fog is rendered from the
+			// frustrum's perspective instead of the camera
+			switch (LodConfig.CLIENT.graphics.fogDistance.get())
+			{
+			case NEAR_AND_FAR:
+				fogSettings.near.distance = FogDistance.NEAR;
+				fogSettings.far.distance = FogDistance.NEAR;
+				break;
+				
+			case NEAR:
+				fogSettings.near.distance = FogDistance.NEAR;
+				fogSettings.far.distance = FogDistance.NEAR;
+				break;
+				
+			case FAR:
+				fogSettings.near.distance = FogDistance.FAR;
+				fogSettings.far.distance = FogDistance.FAR;
+				break;
+			}
+			break;
+			
+		case OFF:
+			
+			fogSettings.near.quality = FogQuality.OFF;
+			fogSettings.far.quality = FogQuality.OFF;
+			break;
+			
 		}
-
-
+		
+		
 		return fogSettings;
 	}
 	
@@ -779,15 +779,15 @@ public class LodRenderer
 	 */
 	private void determineIfLodsShouldRegenerate(LodDimension lodDim)
 	{
-
+		
 		short renderDistance = (short) mc.getRenderDistance();
 		//=============//
 		// full regens //
 		//=============//
 		// check if the view distance changed
 		if (ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.graphics.lodChunkRenderDistance.get()
-			    || mc.getRenderDistance() != prevRenderDistance
-			    || prevFogDistance != LodConfig.CLIENT.graphics.fogDistance.get())
+				|| mc.getRenderDistance() != prevRenderDistance
+				|| prevFogDistance != LodConfig.CLIENT.graphics.fogDistance.get())
 		{
 			DetailDistanceUtil.updateSettings();
 			fullRegen = true;
@@ -812,8 +812,8 @@ public class LodRenderer
 		if (newTime - prevPlayerPosTime > LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.get())
 		{
 			if (previousPos.detailLevel == 0
-				|| mc.getPlayer().xChunk != previousPos.posX
-				|| mc.getPlayer().zChunk != previousPos.posZ)
+					|| mc.getPlayer().xChunk != previousPos.posX
+					|| mc.getPlayer().zChunk != previousPos.posZ)
 			{
 				fullRegen = true;
 				previousPos.changeParameters((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
@@ -837,7 +837,7 @@ public class LodRenderer
 			{
 				partialRegen = true;
 				vanillaRenderedChunksChanged = false;
-
+				
 			}
 			prevVanillaChunkTime = newTime;
 		}
