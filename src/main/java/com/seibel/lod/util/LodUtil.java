@@ -357,22 +357,20 @@ public class LodUtil
 		
 		// Wow those are some long names!
 		
-		// auto close the LevelRenderer once it is done being used (similar to using in C#)
-		try (WorldRenderer renderer = mc.getLevelRenderer())
+		// go through every RenderInfo to get the compiled chunks
+		WorldRenderer renderer = mc.getLevelRenderer();
+		ObjectList<LocalRenderInformationContainer> chunks = renderer.renderChunks;
+		for (WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer : chunks)
 		{
-			// go through every RenderInfo to get the compiled chunks
-			ObjectList<LocalRenderInformationContainer> chunks = renderer.renderChunks;
-			for (WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer : chunks)
+			if (!worldrenderer$localrenderinformationcontainer.chunk.getCompiledChunk().hasNoRenderableLayers())
 			{
-				if (!worldrenderer$localrenderinformationcontainer.chunk.getCompiledChunk().hasNoRenderableLayers())
-				{
-					// add the ChunkPos for every empty compiled chunk
-					BlockPos bpos = worldrenderer$localrenderinformationcontainer.chunk.getOrigin();
-					
-					loadedPos.add(new ChunkPos(bpos));
-				}
+				// add the ChunkPos for every empty compiled chunk
+				BlockPos bpos = worldrenderer$localrenderinformationcontainer.chunk.getOrigin();
+				
+				loadedPos.add(new ChunkPos(bpos));
 			}
 		}
+		
 		
 		return loadedPos;
 	}
