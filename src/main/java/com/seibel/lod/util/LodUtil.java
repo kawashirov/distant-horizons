@@ -24,10 +24,12 @@ import java.util.HashSet;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.objects.LevelPos.LevelPos;
+import com.seibel.lod.wrapper.MinecraftWrapper;
 
-import net.minecraft.client.Minecraft;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.WorldRenderer.LocalRenderInformationContainer;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -47,7 +49,7 @@ import net.minecraft.world.server.ServerWorld;
  */
 public class LodUtil
 {
-	private static Minecraft mc = Minecraft.getInstance();
+	private static MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	
 	/** alpha used when drawing chunks in debug mode */
@@ -226,8 +228,6 @@ public class LodUtil
 	 */
 	public static String getDimensionIDFromWorld(IWorld world)
 	{
-		Minecraft mc = Minecraft.getInstance();
-		
 		if(mc.hasSingleplayerServer())
 		{
 			// this will return the world save location
@@ -313,7 +313,7 @@ public class LodUtil
      */
 		public static HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodDimension lodDim, BlockPos playerPos)
 		{
-			int chunkRenderDist = mc.options.renderDistance;
+			int chunkRenderDist = mc.getRenderDistance();
 			ChunkPos centerChunk = new ChunkPos(playerPos);
 			
 			// skip chunks that are already going to be rendered by Minecraft
@@ -355,19 +355,22 @@ public class LodUtil
 	{
 		HashSet<ChunkPos> loadedPos = new HashSet<>();
 		
-		Minecraft mc = Minecraft.getInstance();
-		
 		// Wow those are some long names!
 		
-		// go through every RenderInfo to get the compiled chunks
-		for (WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer : mc.levelRenderer.renderChunks)
+		// auto close the LevelRenderer once it is done being used (similar to using in C#)
+		try (WorldRenderer renderer = mc.getLevelRenderer())
 		{
-			if (!worldrenderer$localrenderinformationcontainer.chunk.getCompiledChunk().hasNoRenderableLayers())
+			// go through every RenderInfo to get the compiled chunks
+			ObjectList<LocalRenderInformationContainer> chunks = renderer.renderChunks;
+			for (WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer : chunks)
 			{
-				// add the ChunkPos for every empty compiled chunk
-				BlockPos bpos = worldrenderer$localrenderinformationcontainer.chunk.getOrigin();
-				
-				loadedPos.add(new ChunkPos(bpos));
+				if (!worldrenderer$localrenderinformationcontainer.chunk.getCompiledChunk().hasNoRenderableLayers())
+				{
+					// add the ChunkPos for every empty compiled chunk
+					BlockPos bpos = worldrenderer$localrenderinformationcontainer.chunk.getOrigin();
+					
+					loadedPos.add(new ChunkPos(bpos));
+				}
 			}
 		}
 		

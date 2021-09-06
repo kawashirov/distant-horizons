@@ -33,8 +33,8 @@ import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrapper.MinecraftWrapper;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
@@ -47,7 +47,7 @@ import net.minecraft.world.server.ServerWorld;
  *
  * @author Leonardo Amato
  * @author James Seibel
- * @version 8-8-2021
+ * @version 9-6-2021
  */
 public class LodDimension
 {
@@ -89,7 +89,7 @@ public class LodDimension
 		dimension = newDimension;
 		width = newWidth;
 		halfWidth = (int) Math.floor(width / 2);
-		Minecraft mc = Minecraft.getInstance();
+		MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 		if (newDimension != null && lodWorld != null)
 		{
 			try
@@ -110,8 +110,8 @@ public class LodDimension
 				{
 					// connected to server
 
-					saveDir = new File(mc.gameDirectory.getCanonicalFile().getPath() +
-							                   File.separatorChar + "lod server data" + File.separatorChar + LodUtil.getDimensionIDFromWorld(mc.level));
+					saveDir = new File(mc.getGameDirectory().getCanonicalFile().getPath() +
+							                   File.separatorChar + "lod server data" + File.separatorChar + mc.getCurrentDimensionId());
 				}
 
 				fileHandler = new LodDimensionFileHandler(saveDir, this);
@@ -243,8 +243,6 @@ public class LodDimension
 	 */
 	public int getMinMemoryNeeded()
 	{
-		int regionX;
-		int regionZ;
 		int count = 0;
 		LodRegion region;
 
@@ -696,9 +694,6 @@ public class LodDimension
 	@Override
 	public String toString()
 	{
-		int regionX;
-		int regionZ;
-		LevelPos levelPos;
 		LodRegion region;
 
 		StringBuilder stringBuilder = new StringBuilder();

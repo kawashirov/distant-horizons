@@ -4,8 +4,7 @@ import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.RegionPos;
-
-import net.minecraft.client.Minecraft;
+import com.seibel.lod.wrapper.MinecraftWrapper;
 
 public class DetailDistanceUtil
 {
@@ -59,7 +58,7 @@ public class DetailDistanceUtil
 				initial = LodConfig.CLIENT.graphics.lodQuality.get() * 128;
 				return (int) (Math.pow(base, detail) * initial);
 			case RENDER_DEPENDANT:
-				int realRenderDistance = Minecraft.getInstance().options.renderDistance * 16;
+				int realRenderDistance = MinecraftWrapper.INSTANCE.getRenderDistance() * 16;
 				int border = 64;
 				byte detailAtBorder = (byte) 4;
 				if (detail > detailAtBorder)

@@ -21,7 +21,6 @@ import java.awt.Color;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.DataPoint;
@@ -32,6 +31,7 @@ import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrapper.MinecraftWrapper;
 
 import net.minecraft.block.AbstractPlantBlock;
 import net.minecraft.block.BlockState;
@@ -41,7 +41,6 @@ import net.minecraft.block.GrassBlock;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.material.MaterialColor;
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.biome.Biome;
@@ -111,7 +110,7 @@ public class LodBuilder
 
 				int playerPosX;
 				int playerPosZ;
-				if (Minecraft.getInstance().player == null)
+				if (MinecraftWrapper.INSTANCE.getPlayer() == null)
 				{
 					playerPosX = chunk.getPos().getMinBlockX();
 					playerPosZ = chunk.getPos().getMinBlockZ();

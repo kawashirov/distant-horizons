@@ -20,8 +20,8 @@ package com.seibel.lod.render;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrapper.MinecraftWrapper;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -35,7 +35,7 @@ import net.minecraft.util.math.vector.Vector3d;
  */
 public class RenderUtil
 {
-	private static final Minecraft mc = Minecraft.getInstance();
+	private static final MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	
 	/**
@@ -44,28 +44,24 @@ public class RenderUtil
 	 */
 	public static boolean isChunkPosInLoadedArea(ChunkPos pos, ChunkPos center)
 	{
-		Minecraft mc = Minecraft.getInstance();
-		
-		return (pos.x >= center.x - mc.options.renderDistance 
-				&& pos.x <= center.x + mc.options.renderDistance) 
+		return (pos.x >= center.x - mc.getRenderDistance() 
+				&& pos.x <= center.x + mc.getRenderDistance()) 
 				&& 
-				(pos.z >= center.z - mc.options.renderDistance 
-				&& pos.z <= center.z + mc.options.renderDistance);
+				(pos.z >= center.z - mc.getRenderDistance() 
+				&& pos.z <= center.z + mc.getRenderDistance());
 	}
 	
 	/**
 	 * Returns if the given coordinate is in the loaded area of the world.
 	 * @param centerCoordinate the center of the loaded world
 	 */
-	public static boolean isCoordinateInLoadedArea(int i, int j, int centerCoordinate)
+	public static boolean isCoordinateInLoadedArea(int x, int z, int centerCoordinate)
 	{
-		Minecraft mc = Minecraft.getInstance();
-		
-		return (i >= centerCoordinate - mc.options.renderDistance 
-				&& i <= centerCoordinate + mc.options.renderDistance) 
+		return (x >= centerCoordinate - mc.getRenderDistance() 
+				&& x <= centerCoordinate + mc.getRenderDistance()) 
 				&& 
-				(j >= centerCoordinate - mc.options.renderDistance 
-				&& j <= centerCoordinate + mc.options.renderDistance);
+				(z >= centerCoordinate - mc.getRenderDistance() 
+				&& z <= centerCoordinate + mc.getRenderDistance());
 	}
 	
 	
@@ -109,7 +105,7 @@ public class RenderUtil
 		int maxNumberOfLods = LodRenderer.MAX_ALOCATEABLE_DIRECT_MEMORY / lodTemplate.getBufferMemoryForSingleLod();
 		int numbLodsWide = (int) Math.sqrt(maxNumberOfLods);
 		
-		return numbLodsWide / (2 * mc.options.renderDistance);
+		return numbLodsWide / (2 * mc.getRenderDistance());
 	}
 	
 	

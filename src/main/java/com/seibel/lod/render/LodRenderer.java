@@ -44,14 +44,15 @@ import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrapper.MinecraftWrapper;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.client.renderer.vertex.VertexFormat;
+import net.minecraft.entity.Entity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.profiler.IProfiler;
@@ -102,7 +103,7 @@ public class LodRenderer
 	 */
 	public DebugMode previousDebugMode = DebugMode.OFF;
 
-	private Minecraft mc;
+	private MinecraftWrapper mc;
 	private GameRenderer gameRender;
 	private IProfiler profiler;
 	private int farPlaneBlockDistance;
@@ -153,8 +154,8 @@ public class LodRenderer
 
 	public LodRenderer(LodBufferBuilder newLodNodeBufferBuilder)
 	{
-		mc = Minecraft.getInstance();
-		gameRender = mc.gameRenderer;
+		mc = MinecraftWrapper.INSTANCE;
+		gameRender = mc.getGameRenderer();
 
 		reflectionHandler = new ReflectionHandler();
 		lodBufferBuilder = newLodNodeBufferBuilder;
@@ -215,7 +216,7 @@ public class LodRenderer
 		if ((partialRegen || fullRegen) && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvaliable())
 		{
 			// generate the LODs on a separate thread to prevent stuttering or freezing
-			lodBufferBuilder.generateLodBuffersAsync(this, lodDim, mc.player.blockPosition(), true);
+			lodBufferBuilder.generateLodBuffersAsync(this, lodDim, mc.getPlayer().blockPosition(), true);
 
 			// the regen process has been started,
 			// it will be done when lodBufferBuilder.newBuffersAvaliable()
@@ -287,8 +288,9 @@ public class LodRenderer
 
 		if (vbos != null)
 		{
-			Vector3d cameraDir = mc.cameraEntity.getLookAngle().normalize();
-			cameraDir = mc.options.getCameraType().isMirrored() ? cameraDir.reverse() : cameraDir;
+			Entity cameraEntity = mc.getCameraEntity();
+			Vector3d cameraDir = cameraEntity.getLookAngle().normalize();
+			cameraDir = mc.getOptions().getCameraType().isMirrored() ? cameraDir.reverse() : cameraDir;
 
 
 			// used to determine what type of fog to render
@@ -300,7 +302,7 @@ public class LodRenderer
 				for (int j = 0; j < vbos.length; j++)
 				{
 					RegionPos vboPos = new RegionPos(i + lodDim.getCenterX() - lodDim.getWidth() / 2, j + lodDim.getCenterZ() - lodDim.getWidth() / 2);
-					if (RenderUtil.isRegionInViewFrustum(mc.cameraEntity.blockPosition(), cameraDir, vboPos.blockPos()))
+					if (RenderUtil.isRegionInViewFrustum(cameraEntity.blockPosition(), cameraDir, vboPos.blockPos()))
 					{
 						if ((i > halfWidth - quarterWidth && i < halfWidth + quarterWidth) && (j > halfWidth - quarterWidth && j < halfWidth + quarterWidth))
 							setupFog(fogSettings.near.distance, fogSettings.near.quality);
@@ -434,13 +436,13 @@ public class LodRenderer
 		{
 			if (fogQuality == FogQuality.FANCY)
 			{
-				RenderSystem.fogEnd(mc.options.renderDistance * 16 * 1.41f);
-				RenderSystem.fogStart(mc.options.renderDistance * 16 * 1.6f);
+				RenderSystem.fogEnd(mc.getRenderDistance() * 16 * 1.41f);
+				RenderSystem.fogStart(mc.getRenderDistance() * 16 * 1.6f);
 			}
 			else if (fogQuality == FogQuality.FAST)
 			{
-				RenderSystem.fogEnd(mc.options.renderDistance * 16 * 1.0f);
-				RenderSystem.fogStart(mc.options.renderDistance * 16 * 1.5f);
+				RenderSystem.fogEnd(mc.getRenderDistance() * 16 * 1.0f);
+				RenderSystem.fogStart(mc.getRenderDistance() * 16 * 1.5f);
 			}
 		}
 		
@@ -481,7 +483,7 @@ public class LodRenderer
 	private Matrix4f generateModelViewMatrix(float partialTicks)
 	{
 		// get all relevant camera info
-		ActiveRenderInfo renderInfo = mc.gameRenderer.getMainCamera();
+		ActiveRenderInfo renderInfo = mc.getGameRenderer().getMainCamera();
 		Vector3d projectedView = renderInfo.getPosition();
 
 
@@ -519,16 +521,16 @@ public class LodRenderer
 		matrixStack.pushPose();
 
 		gameRender.bobHurt(matrixStack, partialTicks);
-		if (this.mc.options.bobView)
+		if (this.mc.getOptions().bobView)
 		{
 			gameRender.bobView(matrixStack, partialTicks);
 		}
 
 		// potion and nausea effects
-		float f = MathHelper.lerp(partialTicks, this.mc.player.oPortalTime, this.mc.player.portalTime) * this.mc.options.screenEffectScale * this.mc.options.screenEffectScale;
+		float f = MathHelper.lerp(partialTicks, this.mc.getPlayer().oPortalTime, this.mc.getPlayer().portalTime) * this.mc.getOptions().screenEffectScale * this.mc.getOptions().screenEffectScale;
 		if (f > 0.0F)
 		{
-			int i = this.mc.player.hasEffect(Effects.CONFUSION) ? 7 : 20;
+			int i = this.mc.getPlayer().hasEffect(Effects.CONFUSION) ? 7 : 20;
 			float f1 = 5.0F / (f * f + 5.0F) - f * 0.04F;
 			f1 = f1 * f1;
 			Vector3f vector3f = new Vector3f(0.0F, MathHelper.SQRT_OF_TWO / 2.0F, MathHelper.SQRT_OF_TWO / 2.0F);
@@ -548,7 +550,7 @@ public class LodRenderer
 						// it is possible to see the near clip plane, but
 						// you have to be flying quickly in spectator mode through ungenerated
 						// terrain, so I don't think it is much of an issue.
-						mc.options.renderDistance,
+						mc.getRenderDistance(),
 						farPlaneBlockDistance * LodUtil.CHUNK_WIDTH * 2);
 
 		// add the screen space distortions
@@ -565,9 +567,9 @@ public class LodRenderer
 	{
 		// Determine if the player has night vision
 		boolean playerHasNightVision = false;
-		if (this.mc.player != null)
+		if (this.mc.getPlayer() != null)
 		{
-			Iterator<EffectInstance> iterator = this.mc.player.getActiveEffects().iterator();
+			Iterator<EffectInstance> iterator = this.mc.getPlayer().getActiveEffects().iterator();
 			while (iterator.hasNext())
 			{
 				EffectInstance instance = iterator.next();
@@ -580,9 +582,9 @@ public class LodRenderer
 		}
 
 
-		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.level.getSkyDarken(partialTicks) : 0.2f;
+		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.getSkyDarken(partialTicks) : 0.2f;
 		sunBrightness = playerHasNightVision ? 1.0f : sunBrightness;
-		float gammaMultiplyer = (float) mc.options.gamma - 0.5f;
+		float gammaMultiplyer = (float) mc.getOptions().gamma - 0.5f;
 		float lightStrength = ((sunBrightness / 2f) - 0.2f) + (gammaMultiplyer * 0.3f);
 
 		float lightAmbient[] = {lightStrength, lightStrength, lightStrength, 1.0f};
@@ -656,7 +658,7 @@ public class LodRenderer
 
 	private double getFov(float partialTicks, boolean useFovSetting)
 	{
-		return mc.gameRenderer.getFov(mc.gameRenderer.getMainCamera(), partialTicks, useFovSetting);
+		return mc.getGameRenderer().getFov(mc.getGameRenderer().getMainCamera(), partialTicks, useFovSetting);
 	}
 
 
@@ -775,24 +777,23 @@ public class LodRenderer
 	/**
 	 * Determines if the LODs should have a fullRegen or partialRegen
 	 */
-	@SuppressWarnings("unchecked")
 	private void determineIfLodsShouldRegenerate(LodDimension lodDim)
 	{
 
-		short renderDistance = (short) mc.options.renderDistance;
+		short renderDistance = (short) mc.getRenderDistance();
 		//=============//
 		// full regens //
 		//=============//
 		// check if the view distance changed
 		if (ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.graphics.lodChunkRenderDistance.get()
-			    || mc.options.renderDistance != prevRenderDistance
+			    || mc.getRenderDistance() != prevRenderDistance
 			    || prevFogDistance != LodConfig.CLIENT.graphics.fogDistance.get())
 		{
 			DetailDistanceUtil.updateSettings();
 			fullRegen = true;
-			previousPos.changeParameters((byte) 4, mc.player.xChunk, mc.player.zChunk);
+			previousPos.changeParameters((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
 			prevFogDistance = LodConfig.CLIENT.graphics.fogDistance.get();
-			prevRenderDistance = mc.options.renderDistance;
+			prevRenderDistance = mc.getRenderDistance();
 			//should use this when it's ready
 			vanillaRenderedChunks = new boolean[renderDistance*2+2][renderDistance*2+2];
 		}
@@ -811,11 +812,11 @@ public class LodRenderer
 		if (newTime - prevPlayerPosTime > LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.get())
 		{
 			if (previousPos.detailLevel == 0
-				|| mc.player.xChunk != previousPos.posX
-				|| mc.player.zChunk != previousPos.posZ)
+				|| mc.getPlayer().xChunk != previousPos.posX
+				|| mc.getPlayer().zChunk != previousPos.posZ)
 			{
 				fullRegen = true;
-				previousPos.changeParameters((byte) 4, mc.player.xChunk, mc.player.zChunk);
+				previousPos.changeParameters((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
 				//should use this when it's ready
 				vanillaRenderedChunks = new boolean[renderDistance*2+2][renderDistance*2+2];
 			}
@@ -861,13 +862,13 @@ public class LodRenderer
 		//==============//
 		
 		// determine which LODs should not be rendered close to the player
-		HashSet<ChunkPos> chunkPosToSkip = LodUtil.getNearbyLodChunkPosToSkip(lodDim, mc.player.blockPosition());
+		HashSet<ChunkPos> chunkPosToSkip = LodUtil.getNearbyLodChunkPosToSkip(lodDim, mc.getPlayer().blockPosition());
 		int chunkX;
 		int chunkZ;
 		for (ChunkPos pos : chunkPosToSkip)
 		{
-			chunkX = pos.x - mc.player.xChunk + renderDistance + 1;
-			chunkZ = pos.z - mc.player.zChunk + renderDistance + 1;
+			chunkX = pos.x - mc.getPlayer().xChunk + renderDistance + 1;
+			chunkZ = pos.z - mc.getPlayer().zChunk + renderDistance + 1;
 			try
 			{
 				if (!vanillaRenderedChunks[chunkX][chunkZ])
@@ -884,7 +885,7 @@ public class LodRenderer
 		
 		
 		// if the player is high enough, draw all LODs
-		if(chunkPosToSkip.isEmpty() && mc.player.position().y > 256)
+		if(chunkPosToSkip.isEmpty() && mc.getPlayer().position().y > 256)
 		{
 			vanillaRenderedChunks = new boolean[renderDistance*2+2][renderDistance*2+2];
 			vanillaRenderedChunksChanged = true;

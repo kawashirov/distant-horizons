@@ -25,8 +25,8 @@ import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrapper.MinecraftWrapper;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.server.ServerWorld;
@@ -40,7 +40,7 @@ import net.minecraftforge.common.WorldWorkerManager;
  */
 public class LodWorldGenerator
 {
-	public Minecraft mc = Minecraft.getInstance();
+	public MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 
 	/**
 	 * This holds the thread used to generate new LODs off the main thread.
@@ -108,7 +108,7 @@ public class LodWorldGenerator
 				try
 				{
 					// round the player's block position down to the nearest chunk BlockPos
-					ChunkPos playerChunkPos = new ChunkPos(mc.player.blockPosition());
+					ChunkPos playerChunkPos = new ChunkPos(mc.getPlayer().blockPosition());
 					BlockPos playerBlockPosRounded = playerChunkPos.getWorldPosition();
 
 					// used when determining which chunks are closer when queuing distance

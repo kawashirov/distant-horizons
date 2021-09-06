@@ -20,8 +20,7 @@ package com.seibel.lod.handlers;
 import java.lang.reflect.Field;
 
 import com.seibel.lod.enums.FogQuality;
-
-import net.minecraft.client.Minecraft;
+import com.seibel.lod.wrapper.MinecraftWrapper;
 
 /**
  * This object is used to get variables from methods
@@ -33,7 +32,7 @@ import net.minecraft.client.Minecraft;
  */
 public class ReflectionHandler
 {
-	private Minecraft mc = Minecraft.getInstance();
+	private MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	public Field ofFogField = null;
 
 	public ReflectionHandler()
@@ -48,7 +47,7 @@ public class ReflectionHandler
 	private void setupFogField()
 	{
 		// get every variable from the entity renderer
-		Field[] optionFields = mc.options.getClass().getDeclaredFields();
+		Field[] optionFields = mc.getOptions().getClass().getDeclaredFields();
 
 		// try and find the ofFogType variable in gameSettings
 		for (Field field : optionFields)
@@ -84,7 +83,7 @@ public class ReflectionHandler
 
 		try
 		{
-			returnNum = (int) ofFogField.get(mc.options);
+			returnNum = (int) ofFogField.get(mc.getOptions());
 		} catch (IllegalArgumentException | IllegalAccessException e)
 		{
 			e.printStackTrace();

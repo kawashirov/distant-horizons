@@ -38,8 +38,8 @@ import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrapper.MinecraftWrapper;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.client.event.InputEvent;
@@ -68,7 +68,7 @@ public class ClientProxy
 	
 	private boolean configOverrideReminderPrinted = false;
 	
-	Minecraft mc = Minecraft.getInstance();
+	MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	
 	/**
@@ -104,12 +104,12 @@ public class ClientProxy
 	public void renderLods(float partialTicks)
 	{
 		DetailDistanceUtil.updateSettings();
-		if (mc == null || mc.player == null || !lodWorld.getIsWorldLoaded())
+		if (mc == null || mc.getPlayer() == null || !lodWorld.getIsWorldLoaded())
 			return;
 		
 		viewDistanceChangedEvent();
 		
-		LodDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
+		LodDimension lodDim = lodWorld.getLodDimension(mc.getCurrentDimension());
 		if (lodDim == null)
 			return;
 		
@@ -118,8 +118,8 @@ public class ClientProxy
 		//System.out.println("memory needed " + lodDim.getMinMemoryNeeded() + " byte");
 		//System.out.println(lodDim);
 		
-		lodDim.treeCutter((int) mc.player.getX(), (int) mc.player.getZ());
-		lodDim.treeGenerator((int) mc.player.getX(), (int) mc.player.getZ());
+		lodDim.treeCutter((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
+		lodDim.treeGenerator((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
 		
 		
 		// comment out when creating a release
@@ -141,7 +141,7 @@ public class ClientProxy
 		
 		// these can't be set until after the buffers are built (in renderer.drawLODs)
 		// otherwise the buffers may be set to the wrong size, or not changed at all
-		previousChunkRenderDistance = mc.options.renderDistance;
+		previousChunkRenderDistance = mc.getRenderDistance();
 		previousLodRenderDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get();
 	}
 	
@@ -151,7 +151,7 @@ public class ClientProxy
 		// remind the developer(s). that config override is active
 		if (!configOverrideReminderPrinted)
 		{
-			mc.player.sendMessage(new StringTextComponent("Debug settings enabled!"), mc.player.getUUID());
+			mc.getPlayer().sendMessage(new StringTextComponent("Debug settings enabled!"), mc.getPlayer().getUUID());
 			configOverrideReminderPrinted = true;
 		}
 		
@@ -188,10 +188,10 @@ public class ClientProxy
 	@SubscribeEvent
 	public void serverTickEvent(TickEvent.ServerTickEvent event)
 	{
-		if (mc == null || mc.player == null || !lodWorld.getIsWorldLoaded())
+		if (mc == null || mc.getPlayer() == null || !lodWorld.getIsWorldLoaded())
 			return;
 		
-		LodDimension lodDim = lodWorld.getLodDimension(mc.player.level.dimensionType());
+		LodDimension lodDim = lodWorld.getLodDimension(mc.getPlayer().level.dimensionType());
 		if (lodDim == null)
 			return;
 		
@@ -225,7 +225,6 @@ public class ClientProxy
 	public void worldUnloadEvent(WorldEvent.Unload event)
 	{
 		// the player just unloaded a world/dimension
-		
 		if (mc.getConnection().getLevel() == null)
 		{
 			// if this isn't done unfinished tasks may be left in the queue
@@ -280,7 +279,7 @@ public class ClientProxy
 	private void playerMoveEvent(LodDimension lodDim)
 	{
 		// make sure the dimension is centered
-		RegionPos playerRegionPos = new RegionPos(mc.player.blockPosition());
+		RegionPos playerRegionPos = new RegionPos(mc.getPlayer().blockPosition());
 		RegionPos worldRegionOffset = new RegionPos(playerRegionPos.x - lodDim.getCenterX(), playerRegionPos.z - lodDim.getCenterZ());
 		if (worldRegionOffset.x != 0 || worldRegionOffset.z != 0)
 		{
