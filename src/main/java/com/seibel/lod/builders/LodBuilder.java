@@ -20,19 +20,18 @@ package com.seibel.lod.builders;
 import java.awt.Color;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.objects.DataPoint;
-import com.seibel.lod.objects.LodDimension;
-import com.seibel.lod.objects.LodWorld;
-import com.seibel.lod.objects.LevelPos.LevelPos;
+import com.seibel.lod.objects.*;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.wrapper.MinecraftWrapper;
 
+import com.seibel.lod.wrapper.MinecraftWrapper;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import net.minecraft.block.AbstractPlantBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -41,6 +40,7 @@ import net.minecraft.block.GrassBlock;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.material.MaterialColor;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.biome.Biome;
@@ -67,11 +67,11 @@ public class LodBuilder
 	/**
 	 * If no blocks are found in the area in determineBottomPointForArea return this
 	 */
-	public static final short DEFAULT_DEPTH = -1;
+	public static final short DEFAULT_DEPTH = 0;
 	/**
 	 * If no blocks are found in the area in determineHeightPointForArea return this
 	 */
-	public static final short DEFAULT_HEIGHT = -1;
+	public static final short DEFAULT_HEIGHT = 0;
 
 	/**
 	 * How wide LodDimensions should be in regions
@@ -131,7 +131,6 @@ public class LodBuilder
 				generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(generationMode));
 			} catch (IllegalArgumentException | NullPointerException e)
 			{
-				System.out.println("Chunk pos " + chunk.getPos());
 				e.printStackTrace();
 				// if the world changes while LODs are being generated
 				// they will throw errors as they try to access things that no longer
@@ -161,7 +160,6 @@ public class LodBuilder
 	public void generateLodNodeFromChunk(LodDimension lodDim, IChunk chunk, LodBuilderConfig config)
 			throws IllegalArgumentException
 	{
-
 		if (chunk == null)
 			throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
 
@@ -169,17 +167,22 @@ public class LodBuilder
 		int startZ;
 		int endX;
 		int endZ;
-		short[] color;
+		int color;
 		short height;
 		short depth;
-		short[] data;
-		LevelPos levelPos = new LevelPos((byte) 0, 0, 0);
-		levelPos.changeParameters(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
-		levelPos.convert(LodUtil.REGION_DETAIL_LEVEL);
+		long data;
 		try
 		{
-			byte minDetailLevel = lodDim.getRegion(levelPos).getMinDetailLevel();
-			LodDetail detail = DetailDistanceUtil.getLodGenDetail(minDetailLevel);
+			LodDetail detail;
+			LodRegion region = lodDim.getRegion(chunk.getPos().getRegionX(), chunk.getPos().getRegionZ());
+			if (region == null)
+				return;
+			byte minDetailLevel = region.getMinDetailLevel();
+			detail = DetailDistanceUtil.getLodGenDetail(minDetailLevel);
+
+			byte detailLevel = detail.detailLevel;
+			int posX;
+			int posZ;
 			for (int i = 0; i < detail.dataPointLengthCount * detail.dataPointLengthCount; i++)
 			{
 				startX = detail.startX[i];
@@ -199,23 +202,23 @@ public class LodBuilder
 							startZ, endX, endZ);
 					depth = 0;
 				}
-				levelPos.changeParameters((byte) 0,
-						chunk.getPos().x * 16 + startX,
-						chunk.getPos().z * 16 + startZ);
-				levelPos.convert(detail.detailLevel);
+				posX = LevelPosUtil.convert((byte) 0, chunk.getPos().x * 16 + startX, detail.detailLevel);
+				posZ = LevelPosUtil.convert((byte) 0, chunk.getPos().z * 16 + startZ, detail.detailLevel);
 				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
-				data = DataPoint.createDataPoint(height, depth, color[0], color[1], color[2]);
-				lodDim.addData(levelPos,
+				data = DataPoint.createDataPoint(height, depth, ColorUtil.getRed(color), ColorUtil.getGreen(color), ColorUtil.getBlue(color));
+				lodDim.addData(detailLevel,
+						posX,
+						posZ,
 						data,
 						false,
 						isServer);
 			}
-			levelPos.changeParameters(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
-			lodDim.updateData(levelPos);
+			lodDim.updateData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
 		} catch (Exception e)
 		{
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
+
 	}
 
 
@@ -352,8 +355,8 @@ public class LodBuilder
 	 *                                        otherwise only use the block's
 	 *                                        material color
 	 */
-	private short[] generateLodColorForArea(IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX,
-	                                        int endZ)
+	private int generateLodColorForArea(IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX,
+	                                    int endZ)
 	{
 		ChunkSection[] chunkSections = chunk.getSections();
 
@@ -427,8 +430,7 @@ public class LodBuilder
 		red /= numbOfBlocks;
 		green /= numbOfBlocks;
 		blue /= numbOfBlocks;
-
-		return new short[]{(short) red, (short) green, (short) blue};
+		return ColorUtil.rgbToInt(red,green,blue);
 	}
 
 	/**

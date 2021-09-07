@@ -20,20 +20,16 @@ package com.seibel.lod.builders;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.commons.lang3.mutable.MutableBoolean;
+import com.seibel.lod.builders.lodTemplates.Box;
+import com.seibel.lod.objects.*;
 import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.objects.LodDimension;
-import com.seibel.lod.objects.RegionPos;
-import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.LodThreadFactory;
@@ -49,7 +45,7 @@ import net.minecraft.util.math.ChunkPos;
  * This object is used to create NearFarBuffer objects.
  *
  * @author James Seibel
- * @version 9-6-2021
+ * @version 8-24-2021
  */
 public class LodBufferBuilder
 {
@@ -105,15 +101,21 @@ public class LodBufferBuilder
 	 */
 	private ReentrantLock bufferLock = new ReentrantLock();
 
-	private volatile Object[][] setsToRender;
+	private static final int NUMBER_OF_DIRECTION = 4;
+	//in order -x, +x, -z, +z
+	private static final int[][] ADJ_DIRECTION = new int[][]{{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+
+	private volatile Box[][] boxCache;
+	private volatile PosToRenderContainer[][] setsToRender;
 	private volatile RegionPos center;
-	
+
 	/** This is the ChunkPos the player was at the last time the buffers were built.
 	 * IE the center of the buffers last time they were built */
 	private volatile ChunkPos drawableCenterChunkPos = new ChunkPos(0,0);
 	private volatile ChunkPos buildableCenterChunkPos = new ChunkPos(0,0);
-	
-	
+
+
+
 	public LodBufferBuilder()
 	{
 
@@ -165,27 +167,29 @@ public class LodBufferBuilder
 				ArrayList<Callable<Boolean>> nodeToRenderThreads = new ArrayList<>(lodDim.regions.length * lodDim.regions.length);
 
 				startBuffers(fullRegen, lodDim);
-				
-				
+
+				// =====================//
+				//    RENDERING PART    //
+				// =====================//
+
 				RegionPos playerRegionPos = new RegionPos(playerChunkPos);
 				if (center == null)
 					center = playerRegionPos;
 
 				if (setsToRender == null)
-					setsToRender = new Object[lodDim.regions.length][lodDim.regions.length];
+					setsToRender = new PosToRenderContainer[lodDim.regions.length][lodDim.regions.length];
 
 				if (setsToRender.length != lodDim.regions.length)
-					setsToRender = new Object[lodDim.regions.length][lodDim.regions.length];
-				
+					setsToRender = new PosToRenderContainer[lodDim.regions.length][lodDim.regions.length];
+
+				if (boxCache == null)
+					boxCache = new Box[lodDim.regions.length][lodDim.regions.length];
+
+				if (boxCache.length != lodDim.regions.length)
+					boxCache = new Box[lodDim.regions.length][lodDim.regions.length];
+
 				// this will be the center of the VBOs once they have been built
 				buildableCenterChunkPos = playerChunkPos;
-				
-
-				RegionPos worldRegionOffset = new RegionPos(playerRegionPos.x - lodDim.getCenterX(), playerRegionPos.z - lodDim.getCenterZ());
-				if (worldRegionOffset.x != 0 || worldRegionOffset.z != 0)
-				{
-					move(worldRegionOffset, Math.floorDiv(lodDim.getWidth(), 2));
-				}
 
 				for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
 				{
@@ -199,117 +203,104 @@ public class LodBufferBuilder
 
 							// local position in the vbo and bufferBuilder arrays
 							BufferBuilder currentBuffer = buildableBuffers[xRegion][zRegion];
-
+							LodRegion region = lodDim.getRegion(regionPos.x, regionPos.z);
+							if (region == null) continue;
+							byte minDetail = region.getMinDetailLevel();
 							// make sure the buffers weren't
 							// changed while we were running this method
 							if (currentBuffer == null || (currentBuffer != null && !currentBuffer.building()))
 								return;
-
 							//previous setToRender chache
-							if (setsToRender[xRegion][zRegion] == null)
-							{
-								setsToRender[xRegion][zRegion] = new ConcurrentHashMap<LevelPos, MutableBoolean>();
-							}
-							ConcurrentMap<LevelPos, MutableBoolean> nodeToRender = (ConcurrentMap<LevelPos, MutableBoolean>) setsToRender[xRegion][zRegion];
+							final int xR = xRegion;
+							final int zR = zRegion;
 							Callable<Boolean> dataToRenderThread = () ->
 							{
+
+								//previous setToRender chache
+								if (setsToRender[xR][zR] == null)
+								{
+									setsToRender[xR][zR] = new PosToRenderContainer(minDetail, regionPos.x, regionPos.z);
+								}
+
+								if (boxCache[xR][zR] == null)
+								{
+									boxCache[xR][zR] = new Box();
+								}
+								PosToRenderContainer posToRender = (PosToRenderContainer) setsToRender[xR][zR];
+								posToRender.clear(minDetail, regionPos.x, regionPos.z);
+
 								lodDim.getDataToRender(
-										nodeToRender,
+										posToRender,
 										regionPos,
 										playerBlockPosRounded.getX(),
 										playerBlockPosRounded.getZ());
 
+								byte detailLevel;
 								int posX;
 								int posZ;
-								byte detailLevel;
+								int xAdj;
+								int zAdj;
 								int chunkXdist;
 								int chunkZdist;
-								short gameChunkRenderDistance = (short) (renderer.vanillaRenderedChunks.length/2 - 1);
-								for (LevelPos posToRender : nodeToRender.keySet())
+								short gameChunkRenderDistance = (short) (renderer.vanillaRenderedChunks.length / 2 - 1);
+								long dataPoint;
+								long[] adjData;
+								for (int index = 0; index < posToRender.getNumberOfPos(); index++)
 								{
-									if (!nodeToRender.get(posToRender).booleanValue())
+									detailLevel = posToRender.getNthDetailLevel(index);
+									posX = posToRender.getNthPosX(index);
+									posZ = posToRender.getNthPosZ(index);
+									// skip any chunks that Minecraft is going to render
+									chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.x;
+									chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.z;
+									if (gameChunkRenderDistance >= Math.abs(chunkXdist)
+											    && gameChunkRenderDistance >= Math.abs(chunkZdist)
+											    && detailLevel <= LodUtil.CHUNK_DETAIL_LEVEL
+											    && renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1])
 									{
-										nodeToRender.remove(posToRender);
 										continue;
 									}
-									nodeToRender.get(posToRender).setFalse();
 									// skip any chunks that Minecraft is going to render
-									chunkXdist = posToRender.getChunkPosX() - playerChunkPos.x;
-									chunkZdist = posToRender.getChunkPosZ() - playerChunkPos.z;
-									if(gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >=  Math.abs(chunkZdist) && posToRender.detailLevel <= LodUtil.CHUNK_DETAIL_LEVEL)
-									{
-										if (renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance  + 1][chunkZdist + gameChunkRenderDistance + 1])
-										{
-											continue;
-										}
-									}
-									posX = posToRender.posX;
-									posZ = posToRender.posZ;
-									detailLevel = posToRender.detailLevel;
-									// skip any chunks that Minecraft is going to render
-
-
 									try
 									{
-										boolean disableFix = false;
-										if (lodDim.doesDataExist(posToRender.clone()))
+										if (lodDim.doesDataExist(detailLevel, posX, posZ))
 										{
-											short[] lodData = lodDim.getData(posToRender);
-											short[][][] adjData = new short[2][2][];
-											/**TODO The following two for are too complex*/
-											for (int x : new int[]{0, 1})
+											dataPoint = lodDim.getData(detailLevel, posX, posZ);
+											if(DataPoint.getHeight(dataPoint) == LodBuilder.DEFAULT_HEIGHT && DataPoint.getDepth(dataPoint) == LodBuilder.DEFAULT_DEPTH)
+												continue;
+											adjData = new long[NUMBER_OF_DIRECTION];
+											for (int direction = 0; direction < NUMBER_OF_DIRECTION; direction++)
 											{
-												posToRender.changeParameters(detailLevel, posX + x * 2 - 1, posZ);
-												chunkXdist = posToRender.getChunkPosX() - playerChunkPos.x;
-												chunkZdist = posToRender.getChunkPosZ() - playerChunkPos.z;
-												if(gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >=  Math.abs(chunkZdist))
+												xAdj = posX + ADJ_DIRECTION[direction][0];
+												zAdj = posZ + ADJ_DIRECTION[direction][1];
+												chunkXdist = LevelPosUtil.getChunkPos(detailLevel,xAdj) - playerChunkPos.x;
+												chunkZdist = LevelPosUtil.getChunkPos(detailLevel,zAdj) - playerChunkPos.z;
+
+												if (gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >= Math.abs(chunkZdist))
 												{
 													if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
-													&& (nodeToRender.containsKey(posToRender) || disableFix))
+															    && posToRender.contains(detailLevel, xAdj, zAdj))
 													{
-														adjData[0][x] = lodDim.getData(posToRender);
+														adjData[direction]= lodDim.getData(detailLevel, xAdj, zAdj);
 													}
-												}else{
-													if (nodeToRender.containsKey(posToRender) || disableFix)
-													{
-														adjData[0][x] = lodDim.getData(posToRender);
-
-													}
-												}
-											}
-
-											for (int z : new int[]{0, 1})
-											{
-												posToRender.changeParameters(detailLevel, posX, posZ + z * 2 - 1);
-												chunkXdist = posToRender.getChunkPosX() - playerChunkPos.x;
-												chunkZdist = posToRender.getChunkPosZ() - playerChunkPos.z;
-												if(gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >=  Math.abs(chunkZdist))
+												} else
 												{
-													if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance+ 1]
-															    && (nodeToRender.containsKey(posToRender) || disableFix))
+													if (posToRender.contains(detailLevel, xAdj, zAdj))
 													{
-														adjData[1][z] = lodDim.getData(posToRender);
-													}
-												}else{
-													if (nodeToRender.containsKey(posToRender) || disableFix)
-													{
-														adjData[1][z] = lodDim.getData(posToRender);
-
+														adjData[direction] = lodDim.getData(detailLevel, xAdj, zAdj);
 													}
 												}
 											}
-											posToRender.changeParameters(detailLevel, posX, posZ);
-											
-											LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, lodData, adjData,
-													posToRender, renderer.previousDebugMode);
+											LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, dataPoint, adjData,
+													detailLevel, posX, posZ, boxCache[xR][zR],renderer.previousDebugMode);
 										}
 									} catch (ArrayIndexOutOfBoundsException e)
 									{
+										e.printStackTrace();
 										return false;
 									}
 
 								}// for pos to in list to render
-
 								// the thread executed successfully
 								return true;
 							};
@@ -344,7 +335,7 @@ public class LodBufferBuilder
 //				ClientProxy.LOGGER.info("Buffer Build time: " + buildTime + " ms" + '\n' +
 //						                        "Tree cutting time: " + treeTime + " ms" + '\n' +
 //						                        "Rendering time: " + renderingTime + " ms");
-				
+
 				// mark that the buildable buffers as ready to swap
 				switchVbos = true;
 			} catch (Exception e)
@@ -367,108 +358,10 @@ public class LodBufferBuilder
 			}
 
 		});
-		
+
 		mainGenThread.execute(thread);
 
 		return;
-	}
-
-
-	/**
-	 * Move the center of this LodDimension and move all owned
-	 * regions over by the given x and z offset. <br><br>
-	 * <p>
-	 * Synchronized to prevent multiple moves happening on top of each other.
-	 */
-	public void move(RegionPos regionOffset, int width)
-	{
-		int xOffset = regionOffset.x;
-		int zOffset = regionOffset.z;
-
-		// if the x or z offset is equal to or greater than
-		// the total size, just delete the current data
-		// and update the centerX and/or centerZ
-		if (Math.abs(xOffset) >= width || Math.abs(zOffset) >= width)
-		{
-			for (int x = 0; x < width; x++)
-			{
-				for (int z = 0; z < width; z++)
-				{
-					setsToRender[x][z] = null;
-				}
-			}
-
-			// update the new center
-			center.x += xOffset;
-			center.z += zOffset;
-
-			return;
-		}
-
-
-		// X
-		if (xOffset > 0)
-		{
-			// move everything over to the left (as the center moves to the right)
-			for (int x = 0; x < width; x++)
-			{
-				for (int z = 0; z < width; z++)
-				{
-					if (x + xOffset < width)
-						setsToRender[x][z] = setsToRender[x + xOffset][z];
-					else
-						setsToRender[x][z] = null;
-				}
-			}
-		} else
-		{
-			// move everything over to the right (as the center moves to the left)
-			for (int x = width - 1; x >= 0; x--)
-			{
-				for (int z = 0; z < width; z++)
-				{
-					if (x + xOffset >= 0)
-						setsToRender[x][z] = setsToRender[x + xOffset][z];
-					else
-						setsToRender[x][z] = null;
-				}
-			}
-		}
-
-
-		// Z
-		if (zOffset > 0)
-		{
-			// move everything up (as the center moves down)
-			for (int x = 0; x < width; x++)
-			{
-				for (int z = 0; z < width; z++)
-				{
-					if (z + zOffset < width)
-						setsToRender[x][z] = setsToRender[x][z + zOffset];
-					else
-						setsToRender[x][z] = null;
-				}
-			}
-		} else
-		{
-			// move everything down (as the center moves up)
-			for (int x = 0; x < width; x++)
-			{
-				for (int z = width - 1; z >= 0; z--)
-				{
-					if (z + zOffset >= 0)
-						setsToRender[x][z] = setsToRender[x][z + zOffset];
-					else
-						setsToRender[x][z] = null;
-				}
-			}
-		}
-
-
-		// update the new center
-		center.x += xOffset;
-		center.z += zOffset;
 	}
 
 	//===============================//
@@ -574,6 +467,7 @@ public class LodBufferBuilder
 	}
 
 
+
 	/**
 	 * Get the newly created VBOs
 	 */
@@ -586,9 +480,9 @@ public class LodBufferBuilder
 			VertexBuffer[][] tmp = drawableVbos;
 			drawableVbos = buildableVbos;
 			buildableVbos = tmp;
-			
+
 			drawableCenterChunkPos = buildableCenterChunkPos;
-			
+
 			// the vbos have been swapped
 			switchVbos = false;
 			bufferLock.unlock();
@@ -603,7 +497,7 @@ public class LodBufferBuilder
 	{
 		public VertexBuffer[][] vbos;
 		public ChunkPos drawableCenterChunkPos;
-		
+
 		public VertexBuffersAndOffset(VertexBuffer[][] newVbos, ChunkPos newDrawableCenterChunkPos)
 		{
 			vbos = newVbos;

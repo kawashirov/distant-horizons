@@ -19,7 +19,7 @@ public class DetailDistanceUtil
 	private static int base = 2;
 	private static double logBase = Math.log(2);
 
-	private static LodDetail[] lodDetails = {
+	private static LodDetail[] lodGenDetails = {
 			LodDetail.FULL,
 			LodDetail.HALF,
 			LodDetail.QUAD,
@@ -31,6 +31,7 @@ public class DetailDistanceUtil
 			LodDetail.SINGLE,
 			LodDetail.SINGLE,
 			LodDetail.SINGLE};
+
 
 
 	public static void updateSettings(){
@@ -153,10 +154,10 @@ public class DetailDistanceUtil
 	{
 		if (detail < minGenDetail)
 		{
-			return lodDetails[minGenDetail];
+			return lodGenDetails[minGenDetail];
 		} else
 		{
-			return lodDetails[detail];
+			return lodGenDetails[detail];
 		}
 	}
 
@@ -165,13 +166,13 @@ public class DetailDistanceUtil
 	{
 		if (detail < minGenDetail)
 		{
-			return lodDetails[minGenDetail].detailLevel;
+			return lodGenDetails[minGenDetail].detailLevel;
 		} else if (detail == maxDetail)
 		{
 			return LodUtil.REGION_DETAIL_LEVEL;
 		} else
 		{
-			return lodDetails[detail].detailLevel;
+			return lodGenDetails[detail].detailLevel;
 		}
 	}
 

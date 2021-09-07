@@ -1,33 +1,24 @@
 package com.seibel.lod.builders.worldGeneration;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.lang3.mutable.MutableBoolean;
+import com.seibel.lod.objects.LevelPosUtil;
+import com.seibel.lod.objects.PosToGenerateContainer;
 
-import com.seibel.lod.builders.GenerationRequest;
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.objects.LodDimension;
-import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.wrapper.MinecraftWrapper;
 
-import net.minecraft.util.math.BlockPos;
+import com.seibel.lod.wrapper.MinecraftWrapper;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.WorldWorkerManager;
@@ -75,10 +66,6 @@ public class LodWorldGenerator
 	 */
 	public static final LodWorldGenerator INSTANCE = new LodWorldGenerator();
 
-	public volatile ConcurrentMap<LevelPos, MutableBoolean> nodeToGenerate;
-
-	SortedSet<LevelPos> nodeToGenerateListNear;
-	SortedSet<LevelPos> nodeToGenerateListFar;
 
 	private LodWorldGenerator()
 	{
@@ -108,14 +95,9 @@ public class LodWorldGenerator
 				try
 				{
 					// round the player's block position down to the nearest chunk BlockPos
-					ChunkPos playerChunkPos = new ChunkPos(mc.getPlayer().blockPosition());
-					BlockPos playerBlockPosRounded = playerChunkPos.getWorldPosition();
+					int playerPosX = mc.getPlayer().blockPosition().getX();
+					int playerPosZ = mc.getPlayer().blockPosition().getZ();
 
-					// used when determining which chunks are closer when queuing distance
-					// generation
-					int minChunkDist = Integer.MAX_VALUE;
-
-					ArrayList<GenerationRequest> chunksToGen = new ArrayList<>(maxChunkGenRequests);
 					// if we don't have a full number of chunks to generate in chunksToGen
 					// we can top it off from this reserve
 
@@ -123,92 +105,34 @@ public class LodWorldGenerator
 					//=======================================//
 					// create the generation Request objects //
 					//=======================================//
-					List<GenerationRequest> generationRequestList = new ArrayList<>(maxChunkGenRequests);
 
-					if (nodeToGenerate == null)
-						nodeToGenerate = new ConcurrentHashMap<>();
+					ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(lodDim.dimension);
 
-
-					Comparator<LevelPos> posNearComparator = LevelPos.getPosComparator(
-							playerBlockPosRounded.getX(),
-							playerBlockPosRounded.getZ());
-					Comparator<LevelPos> posFarComparator = LevelPos.getPosAndDetailComparator(
-							playerBlockPosRounded.getX(),
-							playerBlockPosRounded.getZ());
-					nodeToGenerateListNear = new TreeSet(posNearComparator);
-					nodeToGenerateListFar = new TreeSet(posFarComparator);
-
-					lodDim.getDataToGenerate(
-							nodeToGenerate,
-							playerBlockPosRounded.getX(),
-							playerBlockPosRounded.getZ());
-
-
+					byte farDetail = (byte) 8;
+					PosToGenerateContainer posToGenerate = lodDim.getDataToGenerate(
+							farDetail,
+							maxChunkGenRequests,
+							0.25,
+							playerPosX,
+							playerPosZ);
+					//System.out.println(posToGenerate);
 					//here we prepare two sorted set
 					//the first contains the near pos to render
 					//the second contain the far pos to render
-					byte farDetail = (byte) 7;
-					for (LevelPos pos : nodeToGenerate.keySet())
+					byte detailLevel;
+					int posX;
+					int posZ;
+					int[] levelPos;
+					for (int index = 0; index < posToGenerate.getNumberOfPos(); index++)
 					{
-						if (!nodeToGenerate.get(pos).booleanValue())
-						{
-							nodeToGenerate.remove(pos);
-						} else
-						{
-							if (pos.detailLevel > farDetail){
-								nodeToGenerateListFar.add(pos);
-							}
-							nodeToGenerateListNear.add(pos);
-							nodeToGenerate.get(pos).setFalse();
-						}
-					}
+						levelPos = posToGenerate.getNthPos(index);
+						if(levelPos[0] == 0)
+							continue;
+						detailLevel = (byte) (levelPos[0] -1);
+						posX = levelPos[1];
+						posZ = levelPos[2];
 
-					int maxDistance;
-					byte circle;
-					LevelPos levelPos;
-					int requesting = maxChunkGenRequests;
-					int requestingFar = maxChunkGenRequests / 4;
-					while (requesting > 0 && !nodeToGenerateListNear.isEmpty())
-					{
-						levelPos = nodeToGenerateListNear.first();
-						//.out.println(levelPos);
-						nodeToGenerate.remove(levelPos);
-						nodeToGenerateListNear.remove(levelPos);
-						nodeToGenerateListFar.remove(levelPos);
-
-						//maxDistance = levelPos.maxDistance(
-						//		playerBlockPosRounded.getX(),
-						//		playerBlockPosRounded.getZ());
-						//circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance);
-						generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(levelPos.detailLevel)));
-						requesting--;
-						if (requestingFar > 0 && !nodeToGenerateListFar.isEmpty())
-						{
-							levelPos = nodeToGenerateListFar.first();
-							nodeToGenerate.remove(levelPos);
-							nodeToGenerateListNear.remove(levelPos);
-							nodeToGenerateListFar.remove(levelPos);
-							if (levelPos.detailLevel >= farDetail)
-							{
-								//maxDistance = levelPos.maxDistance(	playerBlockPosRounded.getX(), playerBlockPosRounded.getZ());
-								//circle = DetailDistanceUtil.getDistanceGenerationInverse(maxDistance);
-								generationRequestList.add(new GenerationRequest(levelPos, DetailDistanceUtil.getDistanceGenerationMode(levelPos.detailLevel)));
-								requestingFar--;
-								requesting--;
-							}
-						}
-					}
-
-
-					//====================================//
-					// get the closet generation requests //
-					//====================================//
-
-					// determine which points in the posListToGenerate
-					// should actually be queued to generate
-					for (GenerationRequest generationRequest : generationRequestList)
-					{
-						ChunkPos chunkPos = generationRequest.getChunkPos();
+						ChunkPos chunkPos = new ChunkPos(LevelPosUtil.getChunkPos(detailLevel,posX), LevelPosUtil.getChunkPos(detailLevel,posZ));
 						if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
 						{
 							// prevent generating the same chunk multiple times
@@ -216,32 +140,16 @@ public class LodWorldGenerator
 							{
 								continue;
 							}
-							chunksToGen.add(generationRequest);
+						}
 
-						} // lod null and can generate more chunks
-					} // positions to generate
-
-
-					//=============================//
-					// start the LodNodeGenWorkers //
-					//=============================//
-
-					// issue #19
-					// TODO add a way for a server side mod to generate chunks requested here
-					ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(lodDim.dimension);
-
-					// start chunk generation
-					for (GenerationRequest generationRequest : generationRequestList)
-					{
 						// don't add null chunkPos (which shouldn't happen anyway)
 						// or add more to the generation queue
-						ChunkPos chunkPos = generationRequest.getChunkPos();
 						if (chunkPos == null || numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
 							continue;
 
 						positionWaitingToBeGenerated.add(chunkPos);
 						numberOfChunksWaitingToGenerate.addAndGet(1);
-						LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, generationRequest.generationMode, renderer, lodBuilder, lodDim, serverWorld);
+						LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos,  DetailDistanceUtil.getDistanceGenerationMode(detailLevel), renderer, lodBuilder, lodDim, serverWorld);
 						WorldWorkerManager.addWorker(genWorker);
 					}
 

@@ -37,11 +37,29 @@ public class LevelPosUtil
 		return new int[]{detailLevel, posX, posZ};
 	}
 
-	public static int[] createLevelPos(byte detailLevel, int posX, int posZ, int distance)
+	public static int convert(byte detailLevel, int pos, byte newDetailLevel)
 	{
-		return new int[]{detailLevel, posX, posZ, distance};
+		int width;
+		if (newDetailLevel >= detailLevel)
+		{
+			width = 1 << (newDetailLevel - detailLevel);
+			return Math.floorDiv(pos, width);
+		} else
+		{
+			width = 1 << (detailLevel - newDetailLevel);
+			return pos * width;
+		}
 	}
 
+	public static int getRegion(byte detailLevel, int pos)
+	{
+		return Math.floorDiv(pos, 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel));
+	}
+
+	public static int getRegionModule(byte detailLevel, int pos)
+	{
+		return Math.floorMod(pos, 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel));
+	}
 
 	public static byte getDetailLevel(int[] levelPos)
 	{
@@ -105,6 +123,11 @@ public class LevelPosUtil
 		return Math.floorDiv(getPosZ(levelPos), width);
 	}
 
+	public static int getChunkPos(byte detailLevel, int pos)
+	{
+		return convert(detailLevel,pos, LodUtil.CHUNK_DETAIL_LEVEL);
+	}
+
 	public static int getChunkPosX(int[] levelPos)
 	{
 		levelPos = convert(levelPos, LodUtil.CHUNK_DETAIL_LEVEL);
@@ -128,6 +151,23 @@ public class LevelPosUtil
 
 		int startPosX = posX * width;
 		int startPosZ = posZ * width;
+		int endPosX = startPosX + width;
+		int endPosZ = startPosZ + width;
+
+		int maxDistance = (int) Math.sqrt(Math.pow(playerPosX - startPosX, 2) + Math.pow(playerPosZ - startPosZ, 2));
+		maxDistance = Math.max(maxDistance, (int) Math.sqrt(Math.pow(playerPosX - startPosX, 2) + Math.pow(playerPosZ - endPosZ, 2)));
+		maxDistance = Math.max(maxDistance, (int) Math.sqrt(Math.pow(playerPosX - endPosX, 2) + Math.pow(playerPosZ - startPosZ, 2)));
+		maxDistance = Math.max(maxDistance, (int) Math.sqrt(Math.pow(playerPosX - endPosX, 2) + Math.pow(playerPosZ - endPosZ, 2)));
+
+		return maxDistance;
+	}
+
+	public static int maxDistance(byte detailLevel, int posX, int posZ, int playerPosX, int playerPosZ, int xRegion, int zRegion)
+	{
+		int width = 1 << detailLevel;
+
+		int startPosX = xRegion * 512 + posX * width;
+		int startPosZ = zRegion * 512 + posZ * width;
 		int endPosX = startPosX + width;
 		int endPosZ = startPosZ + width;
 
@@ -181,40 +221,26 @@ public class LevelPosUtil
 		}
 	}
 
-	public static int compareDistance(int posX, int posZ, int[] first, int[] second)
+	public static int compareDistance(int firstDistance, int secondDistance)
 	{
 		return Integer.compare(
-				minDistance(first, posX, posZ),
-				minDistance(second, posX, posZ));
+				firstDistance,
+				secondDistance);
 	}
 
-	public static int compareDistance(int[] first, int[] second)
-	{
-		return Integer.compare(
-				getDistance(first),
-				getDistance(second));
-	}
 
-	public static int compareLevelAndDistance(int[] first, int[] second)
+	public static int compareLevelAndDistance(byte firstDetail, int firstDistance, byte secondDetail, int secondDistance)
 	{
-		int compareResult = Integer.compare(getDetailLevel(second), getDetailLevel(first));
+		int compareResult = Integer.compare(
+				secondDetail,
+				firstDetail);
+		System.out.println("comparing level "+ firstDetail + " " + secondDetail + " " + compareResult);
 		if (compareResult == 0)
 		{
-			compareResult = Integer.compare(
-					getDistance(first),
-					getDistance(second));
-		}
-		return compareResult;
-	}
-
-	public static int compareLevelAndDistance(int posX, int posZ, int[] first, int[] second)
-	{
-		int compareResult = Integer.compare(getDetailLevel(second), getDetailLevel(first));
-		if (compareResult == 0)
-		{
-			compareResult = Integer.compare(
-					minDistance(first, posX, posZ),
-					minDistance(second, posX, posZ));
+			compareResult = compareDistance(
+					firstDistance,
+					secondDistance);
+			System.out.println("Equal level "+ firstDistance + " " + secondDistance + " " + compareResult);
 		}
 		return compareResult;
 	}
@@ -222,5 +248,9 @@ public class LevelPosUtil
 	public static String toString(int[] levelPos)
 	{
 		return (getDetailLevel(levelPos) + " " + getPosX(levelPos) + " " + getPosZ(levelPos));
+	}
+	public static String toString(byte detailLevel, int posX, int posZ)
+	{
+		return (detailLevel + " " + posX + " " + posZ);
 	}
 }
