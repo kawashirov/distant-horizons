@@ -41,7 +41,7 @@ public class PosToGenerateContainer
 				maxNearSize--;
 			}
 			index = posToGenerate.length - farSize;
-			while (index < posToGenerate.length - 1 && LevelPosUtil.compareLevelAndDistance(detailLevel, distance, (byte) posToGenerate[index + 1][0], posToGenerate[index + 1][3]) <= 0)
+			while (index < posToGenerate.length - 1 && LevelPosUtil.compareLevelAndDistance(detailLevel, distance, (byte) (posToGenerate[index + 1][0] - 1), posToGenerate[index + 1][3]) <= 0)
 			{
 				posToGenerate[index][0] = posToGenerate[index + 1][0];
 				posToGenerate[index][1] = posToGenerate[index + 1][1];
@@ -119,7 +119,7 @@ public class PosToGenerateContainer
 		builder.append('\n');
 		for (int i = 0; i < nearSize; i++)
 		{
-			builder.append(posToGenerate[i][0]);
+			builder.append(posToGenerate[i][0]-1);
 			builder.append(" ");
 			builder.append(posToGenerate[i][1]);
 			builder.append(" ");
@@ -133,7 +133,7 @@ public class PosToGenerateContainer
 		builder.append('\n');
 		for (int i = maxSize - 1; i >= maxSize - farSize; i--)
 		{
-			builder.append(posToGenerate[i][0]);
+			builder.append(posToGenerate[i][0]-1);
 			builder.append(" ");
 			builder.append(posToGenerate[i][1]);
 			builder.append(" ");

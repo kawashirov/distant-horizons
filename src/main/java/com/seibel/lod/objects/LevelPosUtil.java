@@ -234,11 +234,13 @@ public class LevelPosUtil
 		int compareResult = Integer.compare(
 				secondDetail,
 				firstDetail);
+		System.out.println("comparing level "+ firstDetail + " " + secondDetail + " " + compareResult);
 		if (compareResult == 0)
 		{
-			compareResult = Integer.compare(
+			compareResult = compareDistance(
 					firstDistance,
 					secondDistance);
+			System.out.println("Equal level "+ firstDistance + " " + secondDistance + " " + compareResult);
 		}
 		return compareResult;
 	}
