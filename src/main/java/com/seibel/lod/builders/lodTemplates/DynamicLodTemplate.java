@@ -35,7 +35,7 @@ public class DynamicLodTemplate extends AbstractLodTemplate
 {
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, long[] adjData,
-	                           byte detailLevel, int posX, int posZ,DebugMode debugging)
+	                           byte detailLevel, int posX, int posZ, Box box, DebugMode debugging)
 	{
 		System.err.println("DynamicLodTemplate not implemented!");
 	}

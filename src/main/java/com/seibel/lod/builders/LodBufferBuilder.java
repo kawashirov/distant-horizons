@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.seibel.lod.builders.lodTemplates.Box;
 import com.seibel.lod.objects.*;
 import org.lwjgl.opengl.GL11;
 
@@ -104,7 +105,8 @@ public class LodBufferBuilder
 	//in order -x, +x, -z, +z
 	private static final int[][] ADJ_DIRECTION = new int[][]{{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
 
-	private volatile Object[][] setsToRender;
+	private volatile Box[][] boxCache;
+	private volatile PosToRenderContainer[][] setsToRender;
 	private volatile RegionPos center;
 
 	/** This is the ChunkPos the player was at the last time the buffers were built.
@@ -175,10 +177,16 @@ public class LodBufferBuilder
 					center = playerRegionPos;
 
 				if (setsToRender == null)
-					setsToRender = new Object[lodDim.regions.length][lodDim.regions.length];
+					setsToRender = new PosToRenderContainer[lodDim.regions.length][lodDim.regions.length];
 
 				if (setsToRender.length != lodDim.regions.length)
-					setsToRender = new Object[lodDim.regions.length][lodDim.regions.length];
+					setsToRender = new PosToRenderContainer[lodDim.regions.length][lodDim.regions.length];
+
+				if (boxCache == null)
+					boxCache = new Box[lodDim.regions.length][lodDim.regions.length];
+
+				if (boxCache.length != lodDim.regions.length)
+					boxCache = new Box[lodDim.regions.length][lodDim.regions.length];
 
 				// this will be the center of the VBOs once they have been built
 				buildableCenterChunkPos = playerChunkPos;
@@ -212,6 +220,11 @@ public class LodBufferBuilder
 								if (setsToRender[xR][zR] == null)
 								{
 									setsToRender[xR][zR] = new PosToRenderContainer(minDetail, regionPos.x, regionPos.z);
+								}
+
+								if (boxCache[xR][zR] == null)
+								{
+									boxCache[xR][zR] = new Box();
 								}
 								PosToRenderContainer posToRender = (PosToRenderContainer) setsToRender[xR][zR];
 								posToRender.clear(minDetail, regionPos.x, regionPos.z);
@@ -278,7 +291,7 @@ public class LodBufferBuilder
 												}
 											}
 											LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, lodData, adjData,
-													detailLevel, posX, posZ, renderer.previousDebugMode);
+													detailLevel, posX, posZ, boxCache[xR][zR],renderer.previousDebugMode);
 										}
 									} catch (ArrayIndexOutOfBoundsException e)
 									{

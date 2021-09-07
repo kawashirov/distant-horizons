@@ -32,7 +32,7 @@ import net.minecraft.util.math.BlockPos;
 public abstract class AbstractLodTemplate
 {
 	public abstract void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, long[] adjData,
-	                                    byte detailLevel, int posX, int posZ,DebugMode debugging);
+	                                    byte detailLevel, int posX, int posZ, Box box, DebugMode debugging);
 
 	/**
 	 * add the given position and color to the buffer

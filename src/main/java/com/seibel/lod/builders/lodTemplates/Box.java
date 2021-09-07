@@ -33,9 +33,9 @@ public class Box
 	}
 
 	public void move(int xOffset, int yOffset, int zOffset){
-		box[NORTH][X] = xOffset;
-		box[NORTH][Y] = yOffset;
-		box[NORTH][Z] = zOffset;
+		box[OFFSET][X] = xOffset;
+		box[OFFSET][Y] = yOffset;
+		box[OFFSET][Z] = zOffset;
 	}
 
 	public int getMinX(){
