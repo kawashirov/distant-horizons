@@ -21,9 +21,9 @@ import java.awt.Color;
 import java.io.File;
 import java.util.HashSet;
 
+import com.seibel.lod.objects.DataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
-import com.seibel.lod.objects.LevelPos.LevelPos;
 import com.seibel.lod.wrapper.MinecraftWrapper;
 
 import it.unimi.dsi.fastutil.objects.ObjectList;
@@ -324,13 +324,13 @@ public class LodUtil
 			{
 				for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
 				{
-					LevelPos levelPos = new LevelPos(LodUtil.CHUNK_DETAIL_LEVEL, x, z);
-					if (!lodDim.doesDataExist(levelPos.clone()))
+					if (!lodDim.doesDataExist(LodUtil.CHUNK_DETAIL_LEVEL, x, z))
 						continue;
-					
-					short[] data = lodDim.getData(levelPos);
-					
-					short lodAverageHeight = data[0];
+
+					long data = lodDim.getData(LodUtil.CHUNK_DETAIL_LEVEL, x, z);
+
+					short lodAverageHeight = DataPoint.getHeight(data);
+
 					if (playerPos.getY() <= lodAverageHeight)
 					{
 						// don't draw Lod's that are taller than the player

@@ -1,7 +1,5 @@
 package com.seibel.lod.objects;
 
-import org.lwjgl.system.CallbackI;
-
 public class PosToGenerateContainer
 {
 	private int playerPosX;
@@ -27,20 +25,10 @@ public class PosToGenerateContainer
 		posToGenerate = new int[maxDataToGenerate][4];
 	}
 
-	public void addPosToGenerate(int[] levelPos)
-	{
-		addPosToGenerate(LevelPosUtil.getDetailLevel(levelPos), LevelPosUtil.getPosX(levelPos), LevelPosUtil.getPosZ(levelPos));
-	}
-
 	public void addPosToGenerate(byte detailLevel, int posX, int posZ)
 	{
 		int distance = LevelPosUtil.minDistance(detailLevel, posX, posZ, playerPosX, playerPosZ);
 		int index;
-		int[] tempPos = new int[]{
-				detailLevel,
-				posX,
-				posZ,
-				distance};
 		if (detailLevel >= farMinDetail)
 		{//We are introducing a position in the far array
 			if (farSize < maxFarSize)
@@ -53,26 +41,42 @@ public class PosToGenerateContainer
 				maxNearSize--;
 			}
 			index = posToGenerate.length - farSize;
-			while (index < posToGenerate.length - 1 && LevelPosUtil.compareLevelAndDistance(tempPos, posToGenerate[index + 1]) <= 0)
+			while (index < posToGenerate.length - 1 && LevelPosUtil.compareLevelAndDistance(detailLevel, distance, (byte) posToGenerate[index + 1][0], posToGenerate[index + 1][3]) <= 0)
 			{
-				posToGenerate[index] = posToGenerate[index + 1];
+				posToGenerate[index][0] = posToGenerate[index + 1][0];
+				posToGenerate[index][1] = posToGenerate[index + 1][1];
+				posToGenerate[index][2] = posToGenerate[index + 1][2];
+				posToGenerate[index][3] = posToGenerate[index + 1][3];
 				index++;
 			}
 			if (index <= posToGenerate.length - 1)
-				posToGenerate[index] = tempPos;
+			{
+				posToGenerate[index][0] = detailLevel + 1;
+				posToGenerate[index][1] = posX;
+				posToGenerate[index][2] = posZ;
+				posToGenerate[index][3] = distance;
+			}
 		} else
 		{//We are introducing a position in the near array
 			if (nearSize < maxNearSize)
 				nearSize++;
 			index = nearSize - 1;
 
-			while (index > 0 && LevelPosUtil.compareDistance(tempPos, posToGenerate[index - 1]) <= 0)
+			while (index > 0 && LevelPosUtil.compareDistance(distance, posToGenerate[index - 1][3]) <= 0)
 			{
-				posToGenerate[index] = posToGenerate[index - 1];
+				posToGenerate[index][0] = posToGenerate[index - 1][0];
+				posToGenerate[index][1] = posToGenerate[index - 1][1];
+				posToGenerate[index][2] = posToGenerate[index - 1][2];
+				posToGenerate[index][3] = posToGenerate[index - 1][3];
 				index--;
 			}
 			if (index >= 0)
-				posToGenerate[index] = tempPos;
+			{
+				posToGenerate[index][0] = detailLevel + 1;
+				posToGenerate[index][1] = posX;
+				posToGenerate[index][2] = posZ;
+				posToGenerate[index][3] = distance;
+			}
 		}
 	}
 
@@ -84,6 +88,10 @@ public class PosToGenerateContainer
 
 	public int[] getNthPos(int n)
 	{
+		/*if(n < farSize)
+			return posToGenerate[maxSize - n - 1];
+		else
+			return posToGenerate[n - farSize];*/
 		int index;
 		if (n > farSize * 2)
 			index = n - farSize;

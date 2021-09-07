@@ -18,7 +18,6 @@
 package com.seibel.lod.builders.lodTemplates;
 
 import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.objects.LevelPos.LevelPos;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.BlockPos;
@@ -32,8 +31,8 @@ import net.minecraft.util.math.BlockPos;
  */
 public abstract class AbstractLodTemplate
 {
-	public abstract void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, short[] data, short[][][] adjData,
-	                                    LevelPos levelPos, DebugMode debugging);
+	public abstract void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, long[] adjData,
+	                                    byte detailLevel, int posX, int posZ,DebugMode debugging);
 
 	/**
 	 * add the given position and color to the buffer
