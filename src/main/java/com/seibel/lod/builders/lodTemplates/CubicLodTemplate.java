@@ -47,7 +47,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	}
 
 	@Override
-	public void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, long data, long[] adjData,
+	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, long[] adjData,
 	                           byte detailLevel, int posX, int posZ,DebugMode debugging)
 	{
 		AxisAlignedBB bbox;
@@ -60,7 +60,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				width,
 				posX * width,
 				0,
-				posZ * width);
+				posZ * width,
+				bufferCenterBlockPos);
 
 		int color = DataPoint.getColor(data);
 		if (debugging != DebugMode.OFF)
@@ -70,12 +71,12 @@ public class CubicLodTemplate extends AbstractLodTemplate
 
 		if (bbox != null)
 		{
-			addBoundingBoxToBuffer(buffer, bbox, color, playerBlockPos, adjData);
+			addBoundingBoxToBuffer(buffer, bbox, color, bufferCenterBlockPos, adjData);
 		}
 
 	}
 
-	private AxisAlignedBB generateBoundingBox(int height, int depth, int width, double xOffset, double yOffset, double zOffset)
+	private AxisAlignedBB generateBoundingBox(int height, int depth, int width, double xOffset, double yOffset, double zOffset, BlockPos bufferCenterBlockPos)
 	{
 		// don't add an LOD if it is empty
 		if (height == -1 && depth == -1)
@@ -88,7 +89,13 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			height++;
 		}
 
-		return new AxisAlignedBB(0, depth, 0, width, height, width).move(xOffset, yOffset, zOffset);
+		// offset the AABB by it's x/z position in the world since
+		// it uses doubles to specify its location, unlike the model view matrix
+		// which only uses floats
+		double x = -bufferCenterBlockPos.getX();
+		double z = -bufferCenterBlockPos.getZ();
+
+		return new AxisAlignedBB(0, depth, 0, width, height, width).move(xOffset, yOffset, zOffset).move(x, 0, z);
 	}
 
 	private void addBoundingBoxToBuffer(BufferBuilder buffer, AxisAlignedBB bb, int c, BlockPos playerBlockPos, long[] adjData)

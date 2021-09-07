@@ -112,6 +112,8 @@ public class LodBufferBuilder
 	private volatile ChunkPos drawableCenterChunkPos = new ChunkPos(0,0);
 	private volatile ChunkPos buildableCenterChunkPos = new ChunkPos(0,0);
 
+
+
 	public LodBufferBuilder()
 	{
 
@@ -146,8 +148,6 @@ public class LodBufferBuilder
 		ChunkPos playerChunkPos = new ChunkPos(playerBlockPos);
 		BlockPos playerBlockPosRounded = playerChunkPos.getWorldPosition();
 
-		// this will be the center of the VBOs once they have been built
-		buildableCenterChunkPos = playerChunkPos;
 
 		Thread thread = new Thread(() ->
 		{
@@ -180,7 +180,8 @@ public class LodBufferBuilder
 				if (setsToRender.length != lodDim.regions.length)
 					setsToRender = new Object[lodDim.regions.length][lodDim.regions.length];
 
-
+				// this will be the center of the VBOs once they have been built
+				buildableCenterChunkPos = playerChunkPos;
 
 				for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
 				{
@@ -249,7 +250,6 @@ public class LodBufferBuilder
 									// skip any chunks that Minecraft is going to render
 									try
 									{
-										boolean disableFix = false;
 										if (lodDim.doesDataExist(detailLevel, posX, posZ))
 										{
 											lodData = lodDim.getData(detailLevel, posX, posZ);
@@ -263,20 +263,21 @@ public class LodBufferBuilder
 
 												if (gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >= Math.abs(chunkZdist))
 												{
+
 													if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
-															    && (posToRender.contains(detailLevel, xAdj, zAdj) || disableFix))
+															    && posToRender.contains(detailLevel, xAdj, zAdj))
 													{
 														adjData[direction]= lodDim.getData(detailLevel, xAdj, zAdj);
 													}
 												} else
 												{
-													if (posToRender.contains(detailLevel, xAdj, zAdj) || disableFix)
+													if (posToRender.contains(detailLevel, xAdj, zAdj))
 													{
 														adjData[direction] = lodDim.getData(detailLevel, xAdj, zAdj);
 													}
 												}
 											}
-											LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,
+											LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, lodData, adjData,
 													detailLevel, posX, posZ, renderer.previousDebugMode);
 										}
 									} catch (ArrayIndexOutOfBoundsException e)
@@ -450,6 +451,8 @@ public class LodBufferBuilder
 			}
 		}
 	}
+
+
 
 	/**
 	 * Get the newly created VBOs
