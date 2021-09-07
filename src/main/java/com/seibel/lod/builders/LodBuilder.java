@@ -67,11 +67,11 @@ public class LodBuilder
 	/**
 	 * If no blocks are found in the area in determineBottomPointForArea return this
 	 */
-	public static final short DEFAULT_DEPTH = -1;
+	public static final short DEFAULT_DEPTH = 0;
 	/**
 	 * If no blocks are found in the area in determineHeightPointForArea return this
 	 */
-	public static final short DEFAULT_HEIGHT = -1;
+	public static final short DEFAULT_HEIGHT = 0;
 
 	/**
 	 * How wide LodDimensions should be in regions

@@ -243,7 +243,7 @@ public class LodBufferBuilder
 								int chunkXdist;
 								int chunkZdist;
 								short gameChunkRenderDistance = (short) (renderer.vanillaRenderedChunks.length / 2 - 1);
-								long lodData;
+								long dataPoint;
 								long[] adjData;
 								for (int index = 0; index < posToRender.getNumberOfPos(); index++)
 								{
@@ -265,18 +265,19 @@ public class LodBufferBuilder
 									{
 										if (lodDim.doesDataExist(detailLevel, posX, posZ))
 										{
-											lodData = lodDim.getData(detailLevel, posX, posZ);
+											dataPoint = lodDim.getData(detailLevel, posX, posZ);
+											if(DataPoint.getHeight(dataPoint) == LodBuilder.DEFAULT_HEIGHT && DataPoint.getDepth(dataPoint) == LodBuilder.DEFAULT_DEPTH)
+												continue;
 											adjData = new long[NUMBER_OF_DIRECTION];
 											for (int direction = 0; direction < NUMBER_OF_DIRECTION; direction++)
 											{
 												xAdj = posX + ADJ_DIRECTION[direction][0];
 												zAdj = posZ + ADJ_DIRECTION[direction][1];
 												chunkXdist = LevelPosUtil.getChunkPos(detailLevel,xAdj) - playerChunkPos.x;
-												chunkZdist = LevelPosUtil.getChunkPos(detailLevel,xAdj) - playerChunkPos.z;
+												chunkZdist = LevelPosUtil.getChunkPos(detailLevel,zAdj) - playerChunkPos.z;
 
 												if (gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >= Math.abs(chunkZdist))
 												{
-
 													if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
 															    && posToRender.contains(detailLevel, xAdj, zAdj))
 													{
@@ -290,7 +291,7 @@ public class LodBufferBuilder
 													}
 												}
 											}
-											LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, lodData, adjData,
+											LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, dataPoint, adjData,
 													detailLevel, posX, posZ, boxCache[xR][zR],renderer.previousDebugMode);
 										}
 									} catch (ArrayIndexOutOfBoundsException e)

@@ -308,8 +308,8 @@ public class LodRegion
 				childDetailLevel = (byte) (detailLevel - 1);
 				if (doesDataExist(childDetailLevel, childPosX, childPosZ))
 				{
-					if (DataPoint.getHeight(data[childDetailLevel][childPosX][childPosZ]) != LodBuilder.DEFAULT_HEIGHT
-							    && DataPoint.getDepth(data[childDetailLevel][childPosX][childPosZ]) != LodBuilder.DEFAULT_DEPTH)
+					if (!(DataPoint.getHeight(data[childDetailLevel][childPosX][childPosZ]) == LodBuilder.DEFAULT_HEIGHT
+							    && DataPoint.getDepth(data[childDetailLevel][childPosX][childPosZ]) == LodBuilder.DEFAULT_DEPTH))
 					{
 						numberOfChildren++;
 
