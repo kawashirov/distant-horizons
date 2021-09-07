@@ -35,7 +35,7 @@ import net.minecraft.util.math.BlockPos;
  * Builds LODs as rectangular prisms.
  *
  * @author James Seibel
- * @version 8-10-2021
+ * @version 9-6-2021
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {
@@ -47,7 +47,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	}
 	
 	@Override
-	public void addLodToBuffer(BufferBuilder buffer, BlockPos playerBlockPos, short[] data, short[][][] adjData,
+	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, short[] data, short[][][] adjData,
 			LevelPos levelPos, DebugMode debugging)
 	{
 		AxisAlignedBB bbox;
@@ -61,7 +61,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				width,
 				levelPos.posX * width,
 				0,
-				levelPos.posZ * width);
+				levelPos.posZ * width,
+				bufferCenterBlockPos);
 		
 		int color = DataPoint.getColor(data);
 		if (debugging != DebugMode.OFF)
@@ -71,12 +72,12 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		
 		if (bbox != null)
 		{
-			addBoundingBoxToBuffer(buffer, bbox, color, playerBlockPos, adjData);
+			addBoundingBoxToBuffer(buffer, bbox, color, bufferCenterBlockPos, adjData);
 		}
 		
 	}
 	
-	private AxisAlignedBB generateBoundingBox(int height, int depth, int width, double xOffset, double yOffset, double zOffset)
+	private AxisAlignedBB generateBoundingBox(int height, int depth, int width, double xOffset, double yOffset, double zOffset, BlockPos bufferCenterBlockPos)
 	{
 		// don't add an LOD if it is empty
 		if (height == -1 && depth == -1)
@@ -89,7 +90,13 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			height++;
 		}
 		
-		return new AxisAlignedBB(0, depth, 0, width, height, width).move(xOffset, yOffset, zOffset);
+		// offset the AABB by it's x/z position in the world since
+		// it uses doubles to specify its location, unlike the model view matrix
+		// which only uses floats
+		double x = -bufferCenterBlockPos.getX();
+		double z = -bufferCenterBlockPos.getZ();
+		
+		return new AxisAlignedBB(0, depth, 0, width, height, width).move(xOffset, yOffset, zOffset).move(x, 0, z);
 	}
 	
 	private void addBoundingBoxToBuffer(BufferBuilder buffer, AxisAlignedBB bb, int c, BlockPos playerBlockPos, short[][][] adjData)

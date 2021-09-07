@@ -31,6 +31,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.builders.LodBufferBuilder;
+import com.seibel.lod.builders.LodBufferBuilder.VertexBuffersAndOffset;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.enums.FogDistance;
@@ -56,6 +57,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.profiler.IProfiler;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
@@ -68,7 +70,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world.
  *
  * @author James Seibel
- * @version 8-31-2021
+ * @version 9-6-2021
  */
 public class LodRenderer
 {
@@ -120,7 +122,7 @@ public class LodRenderer
 	 */
 	private VertexBuffer[][] vbos;
 	public static final VertexFormat LOD_VERTEX_FORMAT = DefaultVertexFormats.POSITION_COLOR;
-	
+	private ChunkPos vbosCenter = new ChunkPos(0,0);
 	
 	/**
 	 * This is used to determine if the LODs should be regenerated
@@ -227,14 +229,6 @@ public class LodRenderer
 		
 		// TODO move the buffer regeneration logic into its own class (probably called in the client proxy instead)
 		// ...ending here
-		
-		// replace the buffers used to draw and build,
-		// this is only done when the createLodBufferGenerationThread
-		// has finished executing on a parallel thread.
-		if (lodBufferBuilder.newBuffersAvaliable())
-		{
-			swapBuffers();
-		}
 		
 		
 		
@@ -344,6 +338,18 @@ public class LodRenderer
 		// clear the depth buffer so anything drawn is drawn
 		// over the LODs
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+		
+		
+		
+		// replace the buffers used to draw and build,
+		// this is only done when the createLodBufferGenerationThread
+		// has finished executing on a parallel thread.
+		if (lodBufferBuilder.newBuffersAvaliable())
+		{
+			// this has to be called after the VBOs have been drawn
+			// otherwise rubber banding may occur
+			swapBuffers();
+		}
 		
 		
 		// end of internal LOD profiling
@@ -490,10 +496,17 @@ public class LodRenderer
 		// generate the model view matrix
 		MatrixStack matrixStack = new MatrixStack();
 		matrixStack.pushPose();
-		// translate and rotate to the current camera location
+		// rotate to the current camera's direction
 		matrixStack.mulPose(Vector3f.XP.rotationDegrees(renderInfo.getXRot()));
 		matrixStack.mulPose(Vector3f.YP.rotationDegrees(renderInfo.getYRot() + 180));
-		matrixStack.translate(-projectedView.x, -projectedView.y, -projectedView.z);
+		// translate the camera relative to the regions' center
+		// (AxisAlignedBoundingBoxes (LODs) use doubles and thus have a higher
+		// accuracy vs the model view matrix, which only uses floats)
+		BlockPos bufferPos = vbosCenter.getWorldPosition();
+		Vector3d eyePos = mc.getPlayer().getEyePosition(partialTicks);
+		double xDiff = eyePos.x - bufferPos.getX();
+		double zDiff = eyePos.z - bufferPos.getZ();
+		matrixStack.translate(-xDiff, -projectedView.y, -zDiff);
 		
 		return matrixStack.last().pose();
 	}
@@ -638,13 +651,18 @@ public class LodRenderer
 	
 	/**
 	 * Replace the current Vertex Buffers with the newly
-	 * created buffers from the lodBufferBuilder.
+	 * created buffers from the lodBufferBuilder. <br><br>
+	 * 
+	 * For some reason this has to be called after the frame has been rendered,
+	 * otherwise visual stuttering/rubber banding may happen. I'm not sure why...
 	 */
 	private void swapBuffers()
 	{
 		// replace the drawable buffers with
 		// the newly created buffers from the lodBufferBuilder
-		vbos = lodBufferBuilder.getVertexBuffers();
+		VertexBuffersAndOffset result = lodBufferBuilder.getVertexBuffers();
+		vbos = result.vbos;
+		vbosCenter = result.drawableCenterChunkPos;
 	}
 	
 	/**

@@ -49,7 +49,7 @@ import net.minecraft.util.math.ChunkPos;
  * This object is used to create NearFarBuffer objects.
  *
  * @author James Seibel
- * @version 8-24-2021
+ * @version 9-6-2021
  */
 public class LodBufferBuilder
 {
@@ -107,7 +107,13 @@ public class LodBufferBuilder
 
 	private volatile Object[][] setsToRender;
 	private volatile RegionPos center;
-
+	
+	/** This is the ChunkPos the player was at the last time the buffers were built.
+	 * IE the center of the buffers last time they were built */
+	private volatile ChunkPos drawableCenterChunkPos = new ChunkPos(0,0);
+	private volatile ChunkPos buildableCenterChunkPos = new ChunkPos(0,0);
+	
+	
 	public LodBufferBuilder()
 	{
 
@@ -159,11 +165,8 @@ public class LodBufferBuilder
 				ArrayList<Callable<Boolean>> nodeToRenderThreads = new ArrayList<>(lodDim.regions.length * lodDim.regions.length);
 
 				startBuffers(fullRegen, lodDim);
-
-				// =====================//
-				//    RENDERING PART    //
-				// =====================//
-
+				
+				
 				RegionPos playerRegionPos = new RegionPos(playerChunkPos);
 				if (center == null)
 					center = playerRegionPos;
@@ -173,7 +176,10 @@ public class LodBufferBuilder
 
 				if (setsToRender.length != lodDim.regions.length)
 					setsToRender = new Object[lodDim.regions.length][lodDim.regions.length];
-
+				
+				// this will be the center of the VBOs once they have been built
+				buildableCenterChunkPos = playerChunkPos;
+				
 
 				RegionPos worldRegionOffset = new RegionPos(playerRegionPos.x - lodDim.getCenterX(), playerRegionPos.z - lodDim.getCenterZ());
 				if (worldRegionOffset.x != 0 || worldRegionOffset.z != 0)
@@ -293,8 +299,8 @@ public class LodBufferBuilder
 												}
 											}
 											posToRender.changeParameters(detailLevel, posX, posZ);
-
-											LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPos, lodData, adjData,
+											
+											LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, lodData, adjData,
 													posToRender, renderer.previousDebugMode);
 										}
 									} catch (ArrayIndexOutOfBoundsException e)
@@ -338,7 +344,7 @@ public class LodBufferBuilder
 //				ClientProxy.LOGGER.info("Buffer Build time: " + buildTime + " ms" + '\n' +
 //						                        "Tree cutting time: " + treeTime + " ms" + '\n' +
 //						                        "Rendering time: " + renderingTime + " ms");
-
+				
 				// mark that the buildable buffers as ready to swap
 				switchVbos = true;
 			} catch (Exception e)
@@ -361,7 +367,7 @@ public class LodBufferBuilder
 			}
 
 		});
-
+		
 		mainGenThread.execute(thread);
 
 		return;
@@ -571,7 +577,7 @@ public class LodBufferBuilder
 	/**
 	 * Get the newly created VBOs
 	 */
-	public VertexBuffer[][] getVertexBuffers()
+	public VertexBuffersAndOffset getVertexBuffers()
 	{
 		// don't wait for the lock to open
 		// since this is called on the main render thread
@@ -580,13 +586,29 @@ public class LodBufferBuilder
 			VertexBuffer[][] tmp = drawableVbos;
 			drawableVbos = buildableVbos;
 			buildableVbos = tmp;
-
+			
+			drawableCenterChunkPos = buildableCenterChunkPos;
+			
 			// the vbos have been swapped
 			switchVbos = false;
 			bufferLock.unlock();
 		}
 
-		return drawableVbos;
+		return new VertexBuffersAndOffset(drawableVbos, drawableCenterChunkPos);
+	}
+	/**
+	 * A simple container to pass multiple objects back in the getVertexBuffers method.
+	 */
+	public class VertexBuffersAndOffset
+	{
+		public VertexBuffer[][] vbos;
+		public ChunkPos drawableCenterChunkPos;
+		
+		public VertexBuffersAndOffset(VertexBuffer[][] newVbos, ChunkPos newDrawableCenterChunkPos)
+		{
+			vbos = newVbos;
+			drawableCenterChunkPos = newDrawableCenterChunkPos;
+		}
 	}
 
 	/**
