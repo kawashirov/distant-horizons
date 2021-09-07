@@ -133,14 +133,14 @@ public class LodDimensionFileHandler
 		LodRegion region = new LodRegion(LodUtil.REGION_DETAIL_LEVEL,regionPos, generationMode);
 		for (byte tempDetailLevel = LodUtil.REGION_DETAIL_LEVEL; tempDetailLevel >= detailLevel; tempDetailLevel--)
 		{
+			String fileName = getFileNameAndPathForRegion(regionX, regionZ, generationMode, tempDetailLevel);
+
 			try
 			{
-				String fileName = getFileNameAndPathForRegion(regionX, regionZ, generationMode, tempDetailLevel);
-
 				// if the fileName was null that means the folder is inaccessible
 				// for some reason
 				if (fileName == null)
-					throw new IllegalArgumentException("Game folder is not accessible");
+					throw new IllegalArgumentException("Unable to read region [" + regionX + ", " + regionZ + "] file, no fileName.");
 
 
 				File f = new File(fileName);
@@ -209,7 +209,7 @@ public class LodDimensionFileHandler
 			{
 				// the buffered reader encountered a
 				// problem reading the file
-
+				ClientProxy.LOGGER.error("LOD file read error. Unable to read to [" + fileName + "] error [" + e.getMessage() + "]: ");
 				e.printStackTrace();
 			}
 		}
@@ -274,7 +274,7 @@ public class LodDimensionFileHandler
 			// for some reason
 			if (fileName == null)
 			{
-				ClientProxy.LOGGER.warn("Unable to save region [" + x + ", " + z + "] to file.");
+				ClientProxy.LOGGER.warn("Unable to save region [" + x + ", " + z + "] to file, no fileName.");
 				return;
 			}
 
@@ -342,7 +342,7 @@ public class LodDimensionFileHandler
 				Files.move(newFile.toPath(), oldFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
 			} catch (Exception e)
 			{
-				ClientProxy.LOGGER.error("LOD file write error: ");
+				ClientProxy.LOGGER.error("LOD file write error. Unable to write to [" + fileName + "] error [" + e.getMessage() + "]: ");
 				e.printStackTrace();
 			}
 		}
