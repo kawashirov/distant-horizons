@@ -807,7 +807,6 @@ public class LodRenderer
 	@SuppressWarnings("unchecked")
 	private void determineIfLodsShouldRegenerate(LodDimension lodDim)
 	{
-		fullRegen = true;
 		short renderDistance = (short) mc.getRenderDistance();
 		//=============//
 		// full regens //
@@ -832,7 +831,7 @@ public class LodRenderer
 			previousDebugMode = LodConfig.CLIENT.debugging.debugMode.get();
 			fullRegen = true;
 		}
-Bug
+
 
 		long newTime = System.currentTimeMillis();
 
