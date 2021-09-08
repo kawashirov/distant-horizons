@@ -155,7 +155,7 @@ public class LodConfig
 			lodChunkRenderDistance = builder
 					.comment("\n\n"
 							+ " This is the render distance of the mod \n")
-					.defineInRange("lodChunkRenderDistane", 64, 32, 512);
+					.defineInRange("lodChunkRenderDistance", 64, 32, 512);
 			
 			shadingMode = builder
 					.comment("\n\n"
