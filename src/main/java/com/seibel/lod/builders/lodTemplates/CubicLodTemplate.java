@@ -224,7 +224,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				minY = box.getMinY();
 				if (tempMinY > minY)
 				{
-					maxY = Math.min(tempMinY, maxX);
+					maxY = Math.min(tempMinY, maxY);
 					addPosAndColor(buffer, minX, minY, minZ, red, green, blue, alpha);
 					addPosAndColor(buffer, minX, minY, maxZ, red, green, blue, alpha);
 					addPosAndColor(buffer, minX, maxY, maxZ, red, green, blue, alpha);
@@ -270,7 +270,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				minY = box.getMinY();
 				if (tempMinY > minY)
 				{
-					maxY = Math.min(tempMinY, maxX);
+					maxY = Math.min(tempMinY, maxY);
 					addPosAndColor(buffer, maxX, maxY, minZ, red, green, blue, alpha);
 					addPosAndColor(buffer, maxX, maxY, maxZ, red, green, blue, alpha);
 					addPosAndColor(buffer, maxX, minY, maxZ, red, green, blue, alpha);
@@ -316,7 +316,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				minY = box.getMinY();
 				if (tempMinY > minY)
 				{
-					maxY = Math.min(tempMinY, maxX);
+					maxY = Math.min(tempMinY, maxY);
 					addPosAndColor(buffer, maxX, minY, maxZ, red, green, blue, alpha);
 					addPosAndColor(buffer, maxX, maxY, maxZ, red, green, blue, alpha);
 					addPosAndColor(buffer, minX, maxY, maxZ, red, green, blue, alpha);
@@ -362,7 +362,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				minY = box.getMinY();
 				if (tempMinY > minY)
 				{
-					maxY = Math.min(tempMinY, maxX);
+					maxY = Math.min(tempMinY, maxY);
 					addPosAndColor(buffer, minX, minY, minZ, red, green, blue, alpha);
 					addPosAndColor(buffer, minX, maxY, minZ, red, green, blue, alpha);
 					addPosAndColor(buffer, maxX, maxY, minZ, red, green, blue, alpha);
