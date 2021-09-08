@@ -119,7 +119,7 @@ public class ClientProxy
 		
 		
 		// comment out when creating a release
-		applyConfigOverrides();
+		//applyConfigOverrides();
 		
 		
 		// Note to self:
