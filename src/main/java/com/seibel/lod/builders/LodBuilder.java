@@ -20,18 +20,20 @@ package com.seibel.lod.builders;
 import java.awt.Color;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.logging.Level;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.objects.*;
+import com.seibel.lod.objects.DataPoint;
+import com.seibel.lod.objects.LevelPosUtil;
+import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LodRegion;
+import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
-
 import com.seibel.lod.wrapper.MinecraftWrapper;
-import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import net.minecraft.block.AbstractPlantBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -40,7 +42,6 @@ import net.minecraft.block.GrassBlock;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.material.MaterialColor;
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.biome.Biome;
@@ -54,7 +55,7 @@ import net.minecraft.world.gen.Heightmap;
  *
  * @author Leonardo Amato
  * @author James Seibel
- * @version 8-29-2021
+ * @version 9-7-2021
  */
 public class LodBuilder
 {

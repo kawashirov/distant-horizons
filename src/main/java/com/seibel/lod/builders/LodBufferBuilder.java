@@ -25,11 +25,16 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.seibel.lod.builders.lodTemplates.Box;
-import com.seibel.lod.objects.*;
 import org.lwjgl.opengl.GL11;
 
+import com.seibel.lod.builders.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
+import com.seibel.lod.objects.DataPoint;
+import com.seibel.lod.objects.LevelPosUtil;
+import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LodRegion;
+import com.seibel.lod.objects.PosToRenderContainer;
+import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.LodThreadFactory;
@@ -226,7 +231,7 @@ public class LodBufferBuilder
 								{
 									boxCache[xR][zR] = new Box();
 								}
-								PosToRenderContainer posToRender = (PosToRenderContainer) setsToRender[xR][zR];
+								PosToRenderContainer posToRender = setsToRender[xR][zR];
 								posToRender.clear(minDetail, regionPos.x, regionPos.z);
 
 								lodDim.getDataToRender(
