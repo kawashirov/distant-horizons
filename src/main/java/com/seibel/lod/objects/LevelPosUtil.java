@@ -1,9 +1,6 @@
 package com.seibel.lod.objects;
 
 import com.seibel.lod.util.LodUtil;
-import net.minecraft.util.math.ChunkPos;
-
-import java.util.Comparator;
 
 public class LevelPosUtil
 {

@@ -6,19 +6,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.seibel.lod.objects.LevelPosUtil;
-import com.seibel.lod.objects.PosToGenerateContainer;
-
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.objects.LevelPosUtil;
 import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.PosToGenerateContainer;
 import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
-
 import com.seibel.lod.wrapper.MinecraftWrapper;
+
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.WorldWorkerManager;
@@ -149,7 +148,7 @@ public class LodWorldGenerator
 
 						positionWaitingToBeGenerated.add(chunkPos);
 						numberOfChunksWaitingToGenerate.addAndGet(1);
-						LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos,  DetailDistanceUtil.getDistanceGenerationMode(detailLevel), renderer, lodBuilder, lodDim, serverWorld);
+						LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos,  DetailDistanceUtil.getDistanceGenerationMode(detailLevel), lodBuilder, lodDim, serverWorld);
 						WorldWorkerManager.addWorker(genWorker);
 					}
 

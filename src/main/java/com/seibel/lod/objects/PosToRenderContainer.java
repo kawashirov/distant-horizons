@@ -1,7 +1,6 @@
 package com.seibel.lod.objects;
 
 import com.seibel.lod.util.LodUtil;
-import java.util.Arrays;
 
 public class PosToRenderContainer
 {
@@ -95,6 +94,7 @@ public class PosToRenderContainer
 		return posToRender[n];
 	}
 
+	@Override
 	public String toString()
 	{
 

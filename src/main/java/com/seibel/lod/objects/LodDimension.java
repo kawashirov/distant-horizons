@@ -19,13 +19,8 @@ package com.seibel.lod.objects;
 
 import java.io.File;
 import java.io.IOException;
-import java.security.InvalidParameterException;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
-import com.seibel.lod.wrapper.MinecraftWrapper;
-import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
@@ -33,13 +28,12 @@ import com.seibel.lod.handlers.LodDimensionFileHandler;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrapper.MinecraftWrapper;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
-import org.lwjgl.system.CallbackI;
 
 
 /**
@@ -246,8 +240,6 @@ public class LodDimension
 	 */
 	public int getMinMemoryNeeded()
 	{
-		int regionX;
-		int regionZ;
 		int count = 0;
 		LodRegion region;
 

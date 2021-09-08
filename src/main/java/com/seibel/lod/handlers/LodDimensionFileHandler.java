@@ -42,7 +42,7 @@ import com.seibel.lod.util.LodUtil;
  * to file.
  *
  * @author James Seibel
- * @version 8-24-2021
+ * @version 9-7-2021
  */
 public class LodDimensionFileHandler
 {
@@ -65,10 +65,6 @@ public class LodDimensionFileHandler
 	 * .txt
 	 */
 	private static final String FILE_EXTENSION = ".txt";
-	/**
-	 * lod/
-	 */
-	private static final String LOD_FOLDER_NAME = "lod";
 	/**
 	 * detail-#
 	 */

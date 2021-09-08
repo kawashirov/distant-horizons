@@ -7,6 +7,9 @@ import com.seibel.lod.util.LodUtil;
 public class LevelContainer implements Serializable
 {
 
+	/** This is here so that Eclipse doesn't complain */
+	private static final long serialVersionUID = -4930855068717998385L;
+
 	public static final char DATA_DELIMITER = ',';
 
 	public final byte detailLevel;

@@ -32,7 +32,6 @@ import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.proxy.ClientProxy;
-import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 
@@ -69,7 +68,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  *
  * @author James Seibel
- * @version 8-26-2021
+ * @version 9-7-2021
  */
 public class LodNodeGenWorker implements IWorker
 {
@@ -86,16 +85,13 @@ public class LodNodeGenWorker implements IWorker
 
 
 
-	public LodNodeGenWorker(ChunkPos newPos, DistanceGenerationMode newGenerationMode, LodRenderer newLodRenderer,
+	public LodNodeGenWorker(ChunkPos newPos, DistanceGenerationMode newGenerationMode,
 							LodBuilder newLodBuilder,
 							LodDimension newLodDimension, ServerWorld newServerWorld)
 	{
 		// just a few sanity checks
 		if (newPos == null)
 			throw new IllegalArgumentException("LodChunkGenWorker must have a non-null ChunkPos");
-
-		if (newLodRenderer == null)
-			throw new IllegalArgumentException("LodChunkGenWorker must have a non-null LodRenderer");
 
 		if (newLodBuilder == null)
 			throw new IllegalArgumentException("LodChunkGenThread requires a non-null LodChunkBuilder");
@@ -108,7 +104,7 @@ public class LodNodeGenWorker implements IWorker
 
 
 
-		thread = new LodChunkGenThread(newPos, newGenerationMode, newLodRenderer,
+		thread = new LodChunkGenThread(newPos, newGenerationMode,
 				newLodBuilder,
 				newLodDimension, newServerWorld);
 	}
@@ -159,17 +155,15 @@ public class LodNodeGenWorker implements IWorker
 		public final LodDimension lodDim;
 		public final DistanceGenerationMode generationMode;
 		public final LodBuilder lodBuilder;
-		public final LodRenderer lodRenderer;
 
 		private ChunkPos pos;
 
-		public LodChunkGenThread(ChunkPos newPos, DistanceGenerationMode newGenerationMode, LodRenderer newLodRenderer,
+		public LodChunkGenThread(ChunkPos newPos, DistanceGenerationMode newGenerationMode,
 								 LodBuilder newLodBuilder,
 								 LodDimension newLodDimension, ServerWorld newServerWorld)
 		{
 			pos = newPos;
 			generationMode = newGenerationMode;
-			lodRenderer = newLodRenderer;
 			lodBuilder = newLodBuilder;
 			lodDim = newLodDimension;
 			serverWorld = newServerWorld;

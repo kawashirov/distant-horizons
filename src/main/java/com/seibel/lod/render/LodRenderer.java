@@ -796,13 +796,14 @@ public class LodRenderer
 	/**
 	 * Determines if the LODs should have a fullRegen or partialRegen
 	 */
-	@SuppressWarnings("unchecked")
 	private void determineIfLodsShouldRegenerate(LodDimension lodDim)
 	{
 		short renderDistance = (short) mc.getRenderDistance();
+		
 		//=============//
 		// full regens //
 		//=============//
+		
 		// check if the view distance changed
 		if (ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.graphics.lodChunkRenderDistance.get()
 				    ||  mc.getRenderDistance()  != prevRenderDistance
