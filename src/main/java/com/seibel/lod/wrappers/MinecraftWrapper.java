@@ -1,4 +1,4 @@
-package com.seibel.lod.wrapper;
+package com.seibel.lod.wrappers;
 
 import java.io.File;
 

@@ -4,7 +4,7 @@ import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.RegionPos;
-import com.seibel.lod.wrapper.MinecraftWrapper;
+import com.seibel.lod.wrappers.MinecraftWrapper;
 
 public class DetailDistanceUtil
 {

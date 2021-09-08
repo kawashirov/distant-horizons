@@ -24,7 +24,7 @@ import java.util.HashSet;
 import com.seibel.lod.objects.DataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
-import com.seibel.lod.wrapper.MinecraftWrapper;
+import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.multiplayer.ServerData;

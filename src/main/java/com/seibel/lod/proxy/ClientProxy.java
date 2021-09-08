@@ -34,7 +34,7 @@ import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.wrapper.MinecraftWrapper;
+import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.text.StringTextComponent;

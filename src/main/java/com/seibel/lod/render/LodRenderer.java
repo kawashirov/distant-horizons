@@ -45,7 +45,7 @@ import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.wrapper.MinecraftWrapper;
+import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.FogRenderer;

@@ -20,7 +20,7 @@ package com.seibel.lod.render;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.wrapper.MinecraftWrapper;
+import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;

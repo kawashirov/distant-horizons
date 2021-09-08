@@ -21,7 +21,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import com.seibel.lod.enums.FogQuality;
-import com.seibel.lod.wrapper.MinecraftWrapper;
+import com.seibel.lod.wrappers.MinecraftWrapper;
 
 /**
  * This object is used to get variables from methods

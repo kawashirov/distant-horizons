@@ -32,7 +32,7 @@ import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.wrapper.MinecraftWrapper;
+import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.block.AbstractPlantBlock;
 import net.minecraft.block.BlockState;
