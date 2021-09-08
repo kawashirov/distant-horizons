@@ -176,7 +176,7 @@ public class LodDimensionFileHandler
 						// close the reader and delete the file.
 						bufferedReader.close();
 						f.delete();
-						ClientProxy.LOGGER.info("Outdated LOD region file for region: (" + regionX + "," + regionZ + ") version: " + fileVersion +
+						ClientProxy.LOGGER.info("Outdated LOD region file for region: (" + regionX + "," + regionZ + ") found version: " + fileVersion +
 								                        ", version requested: " + LOD_SAVE_FILE_VERSION +
 								                        " File was been deleted.");
 
