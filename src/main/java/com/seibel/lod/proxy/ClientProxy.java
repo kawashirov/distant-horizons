@@ -26,12 +26,8 @@ import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.builders.worldGeneration.LodWorldGenerator;
 import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.enums.DistanceCalculatorType;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.FogDistance;
-import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.objects.RegionPos;
@@ -123,7 +119,7 @@ public class ClientProxy
 		
 		
 		// comment out when creating a release
-		//applyConfigOverrides();
+		applyConfigOverrides();
 		
 		
 		// Note to self:
@@ -161,21 +157,21 @@ public class ClientProxy
 		LodConfig.CLIENT.graphics.maxDrawDetail.set(LodDetail.FULL);
 		LodConfig.CLIENT.worldGenerator.maxGenerationDetail.set(LodDetail.FULL);
 		
-		LodConfig.CLIENT.graphics.fogDistance.set(FogDistance.FAR);
-		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
-		LodConfig.CLIENT.graphics.shadingMode.set(ShadingMode.DARKEN_SIDES);
-		LodConfig.CLIENT.graphics.brightnessMultiplier.set(1.0);
-		LodConfig.CLIENT.graphics.saturationMultiplier.set(1.0);
+//		LodConfig.CLIENT.graphics.fogDistance.set(FogDistance.FAR);
+//		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
+//		LodConfig.CLIENT.graphics.shadingMode.set(ShadingMode.DARKEN_SIDES);
+//		LodConfig.CLIENT.graphics.brightnessMultiplier.set(1.0);
+//		LodConfig.CLIENT.graphics.saturationMultiplier.set(1.0);
 		
-		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
-		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(256);
-		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
-		LodConfig.CLIENT.graphics.lodQuality.set(3);
-		LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.set(false);
+//		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
+//		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(256);
+//		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
+//		LodConfig.CLIENT.graphics.lodQuality.set(3);
+//		LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.set(false);
 		
-		LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
-		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
-		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(50); // 5000
+//		LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
+//		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
+//		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(50); // 5000
 		
 		LodConfig.CLIENT.debugging.enableDebugKeybinding.set(true);
 	}
