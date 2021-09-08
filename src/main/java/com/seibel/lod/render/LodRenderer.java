@@ -23,7 +23,6 @@ import java.nio.FloatBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import com.seibel.lod.objects.LevelPosUtil;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.NVFogDistance;
@@ -39,6 +38,7 @@ import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.handlers.ReflectionHandler;
+import com.seibel.lod.objects.LevelPosUtil;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
 import com.seibel.lod.objects.RegionPos;
@@ -57,8 +57,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.profiler.IProfiler;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
@@ -70,7 +70,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world.
  *
  * @author James Seibel
- * @version 8-31-2021
+ * @version 9-7-2021
  */
 public class LodRenderer
 {
@@ -229,14 +229,6 @@ public class LodRenderer
 
 		// TODO move the buffer regeneration logic into its own class (probably called in the client proxy instead)
 		// ...ending here
-
-		// replace the buffers used to draw and build,
-		// this is only done when the createLodBufferGenerationThread
-		// has finished executing on a parallel thread.
-		if (lodBufferBuilder.newBuffersAvaliable())
-		{
-			swapBuffers();
-		}
 
 
 
