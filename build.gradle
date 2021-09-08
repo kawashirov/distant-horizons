@@ -21,7 +21,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'java' // needed for compileJava
 
-version = 'a1.4'
+version = 'a1.4.1'
 group = 'com.seibel.lod'
 archivesBaseName = 'lod_1.16.5'
 
