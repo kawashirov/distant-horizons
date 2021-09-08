@@ -45,7 +45,7 @@ import net.minecraft.world.server.ServerWorld;
  * This class holds methods and constants that may be used in multiple places.
  * 
  * @author James Seibel
- * @version 8-29-2021
+ * @version 9-7-2021
  */
 public class LodUtil
 {
@@ -100,6 +100,9 @@ public class LodUtil
 	/** If we ever need to use a heightmap for any reason, use this one. */
 	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
 	
+	/** This regex finds any characters that are invalid for use in a windows 
+	 * (and by extension mac and linux) file path */
+	public static final String INVALID_FILE_CHARACTERS_REGEX = "[\\\\\\/:*?\\\"<>|]";
 	
 	
 	
@@ -209,10 +212,7 @@ public class LodUtil
 		}
 		else
 		{
-			ServerData server = mc.getCurrentServer();
-			return server.name + ", IP " + 
-			server.ip + ", GameVersion " + 
-			server.version.getString();
+			return getServerId();
 		}
 	}
 	
@@ -221,7 +221,7 @@ public class LodUtil
 	/**
 	 * If on single player this will return the name of the user's
 	 * world and the dimensional save folder, if in multiplayer 
-	 * it will return the server name, game version, and dimension.<br>
+	 * it will return the server name, ip, game version, and dimension.<br>
 	 * <br>
 	 * This can be used to determine where to save files for a given
 	 * dimension.
@@ -245,14 +245,25 @@ public class LodUtil
 		}
 		else
 		{
-			ServerData server = mc.getCurrentServer();
-			return server.name + ", IP " + 
-			server.ip + ", GameVersion " + 
-			server.version.getString() + File.separatorChar
-			+ "dim_" + world.dimensionType().effectsLocation().getPath() + File.separatorChar;
+			return getServerId() + File.separatorChar + "dim_" + world.dimensionType().effectsLocation().getPath() + File.separatorChar;
 		}
 	}
 	
+	/**
+	 * returns the server name, IP and game version.
+	 */
+	public static String getServerId()
+	{
+		ServerData server = mc.getCurrentServer();
+		
+		String serverName = server.name.replaceAll(INVALID_FILE_CHARACTERS_REGEX, "");
+		String serverIp = server.ip.replaceAll(INVALID_FILE_CHARACTERS_REGEX, "");
+		String serverMcVersion = server.version.getString().replaceAll(INVALID_FILE_CHARACTERS_REGEX, "");
+		
+		String serverId =  serverName + ", IP " + serverIp + ", GameVersion " + serverMcVersion;
+		
+		return serverId; 
+	}
 	
 	
 	/**
