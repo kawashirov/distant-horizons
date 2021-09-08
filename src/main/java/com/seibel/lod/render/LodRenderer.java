@@ -109,7 +109,6 @@ public class LodRenderer
 	private GameRenderer gameRender;
 	private IProfiler profiler;
 	private int farPlaneBlockDistance;
-	private ReflectionHandler reflectionHandler;
 
 
 	/**
@@ -159,7 +158,6 @@ public class LodRenderer
 		mc = MinecraftWrapper.INSTANCE;
 		gameRender = mc.getGameRenderer();
 
-		reflectionHandler = new ReflectionHandler();
 		lodBufferBuilder = newLodNodeBufferBuilder;
 	}
 
@@ -689,7 +687,7 @@ public class LodRenderer
 		NearFarFogSettings fogSettings = new NearFarFogSettings();
 
 
-		FogQuality quality = reflectionHandler.getFogQuality();
+		FogQuality quality = ReflectionHandler.INSTANCE.getFogQuality();
 		FogDrawOverride override = LodConfig.CLIENT.graphics.fogDrawOverride.get();
 
 

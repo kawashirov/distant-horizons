@@ -18,6 +18,7 @@
 package com.seibel.lod.handlers;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.wrapper.MinecraftWrapper;
@@ -28,27 +29,32 @@ import com.seibel.lod.wrapper.MinecraftWrapper;
  * in Optifine.
  *
  * @author James Seibel
- * @version 7-03-2021
+ * @version 9-7-2021
  */
 public class ReflectionHandler
 {
+	public static final ReflectionHandler INSTANCE = new ReflectionHandler();
 	private MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
+	
 	public Field ofFogField = null;
-
-	public ReflectionHandler()
+	public Method vertexBufferUploadMethod = null;
+	
+	
+	
+	private ReflectionHandler()
 	{
 		setupFogField();
 	}
-
-
+	
+	
 	/**
-	 * Similar to setupFovMethod.
+	 * finds the Optifine fog type field
 	 */
 	private void setupFogField()
 	{
 		// get every variable from the entity renderer
 		Field[] optionFields = mc.getOptions().getClass().getDeclaredFields();
-
+		
 		// try and find the ofFogType variable in gameSettings
 		for (Field field : optionFields)
 		{
@@ -58,14 +64,15 @@ public class ReflectionHandler
 				return;
 			}
 		}
-
+		
 		// we didn't find the field,
 		// either optifine isn't installed, or
 		// optifine changed the name of the variable
-		ofFogField = null;
 	}
-
-
+	
+	
+	
+	
 	/**
 	 * Get what type of fog optifine is currently set to render.
 	 */
@@ -78,9 +85,9 @@ public class ReflectionHandler
 			// the setup method wasn't called yet.
 			return FogQuality.FANCY;
 		}
-
+		
 		int returnNum = 0;
-
+		
 		try
 		{
 			returnNum = (int) ofFogField.get(mc.getOptions());
@@ -88,25 +95,24 @@ public class ReflectionHandler
 		{
 			e.printStackTrace();
 		}
-
+		
 		switch (returnNum)
 		{
-			// optifine's "default" option,
-			// it should never be called in this case
-			case 0:
-				return FogQuality.FAST;
-
+		// optifine's "default" option,
+		// it should never be called in this case
+		case 0:
+			return FogQuality.FAST;
+			
 			// normal options
-			case 1:
-				return FogQuality.FAST;
-			case 2:
-				return FogQuality.FANCY;
-			case 3:
-				return FogQuality.OFF;
-
-			default:
-				return FogQuality.FAST;
+		case 1:
+			return FogQuality.FAST;
+		case 2:
+			return FogQuality.FANCY;
+		case 3:
+			return FogQuality.OFF;
+			
+		default:
+			return FogQuality.FAST;
 		}
 	}
-
 }
