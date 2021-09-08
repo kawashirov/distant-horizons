@@ -442,7 +442,9 @@ public class LodBuilder
 		int colorInt = 0;
 
 		// block special cases
-		if (blockState == Blocks.AIR.defaultBlockState() || blockState == Blocks.CAVE_AIR.defaultBlockState())
+		if (blockState == Blocks.AIR.defaultBlockState() 
+				|| blockState == Blocks.CAVE_AIR.defaultBlockState()
+				|| blockState == Blocks.BARRIER.defaultBlockState())
 		{
 			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
 			tmp = tmp.darker();
@@ -561,7 +563,8 @@ public class LodBuilder
 		{
 			if (chunkSections[sectionIndex].getBlockState(x, y, z) != null
 					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.AIR
-					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.CAVE_AIR)
+					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.CAVE_AIR
+					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.BARRIER)
 			{
 				return true;
 			}
