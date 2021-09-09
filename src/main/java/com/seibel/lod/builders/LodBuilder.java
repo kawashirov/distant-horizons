@@ -34,13 +34,7 @@ import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
-import net.minecraft.block.AbstractPlantBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.BushBlock;
-import net.minecraft.block.GrassBlock;
-import net.minecraft.block.IGrowable;
-import net.minecraft.block.LeavesBlock;
+import net.minecraft.block.*;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
@@ -381,11 +375,10 @@ public class LodBuilder
 						{
 							int colorInt = 0;
 							BlockState blockState = null;
-
 							if (chunkSections[i] != null)
 							{
 								blockState = chunkSections[i].getBlockState(x, y, z);
-								colorInt = blockState.materialColor.col;
+								colorInt = blockState.getBlock().defaultMaterialColor().col;
 							}
 
 							if (colorInt == 0 && config.useSolidBlocksInColorGen)
