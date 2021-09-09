@@ -38,7 +38,7 @@ import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.handlers.ReflectionHandler;
-import com.seibel.lod.objects.LevelPosUtil;
+import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
 import com.seibel.lod.objects.RegionPos;

@@ -26,6 +26,7 @@ import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
 import com.seibel.lod.util.DetailDistanceUtil;
+import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
@@ -435,7 +436,7 @@ public class LodDimension
 	 * stored in the LOD. If an LOD already exists at the given
 	 * coordinates it will be overwritten.
 	 */
-	public synchronized Boolean addData(byte detailLevel, int posX, int posZ, long lodDataPoint, boolean dontSave, boolean serverQuality)
+	public Boolean addData(byte detailLevel, int posX, int posZ, long lodDataPoint, boolean dontSave, boolean serverQuality)
 	{
 
 		// don't continue if the region can't be saved

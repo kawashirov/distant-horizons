@@ -23,8 +23,8 @@ import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.objects.DataPoint;
-import com.seibel.lod.objects.LevelPosUtil;
+import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
@@ -200,7 +200,7 @@ public class LodBuilder
 				posX = LevelPosUtil.convert((byte) 0, chunk.getPos().x * 16 + startX, detail.detailLevel);
 				posZ = LevelPosUtil.convert((byte) 0, chunk.getPos().z * 16 + startZ, detail.detailLevel);
 				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
-				data = DataPoint.createDataPoint(height, depth, ColorUtil.getRed(color), ColorUtil.getGreen(color), ColorUtil.getBlue(color));
+				data = DataPointUtil.createDataPoint(height, depth, ColorUtil.getRed(color), ColorUtil.getGreen(color), ColorUtil.getBlue(color));
 				lodDim.addData(detailLevel,
 						posX,
 						posZ,

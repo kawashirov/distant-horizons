@@ -29,8 +29,8 @@ import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.builders.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.objects.DataPoint;
-import com.seibel.lod.objects.LevelPosUtil;
+import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.PosToRenderContainer;
@@ -271,7 +271,7 @@ public class LodBufferBuilder
 										if (lodDim.doesDataExist(detailLevel, posX, posZ))
 										{
 											dataPoint = lodDim.getData(detailLevel, posX, posZ);
-											if(DataPoint.getHeight(dataPoint) == LodBuilder.DEFAULT_HEIGHT && DataPoint.getDepth(dataPoint) == LodBuilder.DEFAULT_DEPTH)
+											if(DataPointUtil.getHeight(dataPoint) == LodBuilder.DEFAULT_HEIGHT && DataPointUtil.getDepth(dataPoint) == LodBuilder.DEFAULT_DEPTH)
 												continue;
 											for (int direction = 0; direction < NUMBER_OF_DIRECTION; direction++)
 											{

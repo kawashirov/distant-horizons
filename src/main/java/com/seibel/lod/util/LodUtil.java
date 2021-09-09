@@ -21,7 +21,6 @@ import java.awt.Color;
 import java.io.File;
 import java.util.HashSet;
 
-import com.seibel.lod.objects.DataPoint;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.wrappers.MinecraftWrapper;
@@ -340,7 +339,7 @@ public class LodUtil
 
 					long data = lodDim.getData(LodUtil.CHUNK_DETAIL_LEVEL, x, z);
 
-					short lodAverageHeight = DataPoint.getHeight(data);
+					short lodAverageHeight = DataPointUtil.getHeight(data);
 
 					if (playerPos.getY() <= lodAverageHeight)
 					{

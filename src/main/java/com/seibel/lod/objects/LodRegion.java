@@ -3,7 +3,9 @@ package com.seibel.lod.objects;
 
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
+import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 
 /**
@@ -32,17 +34,17 @@ public class LodRegion
 	public final int regionPosX;
 	public final int regionPosZ;
 
-	public LodRegion(LevelContainer levelContainer, RegionPos regionPos, DistanceGenerationMode generationMode)
+	public LodRegion(VerticalLevelContainer verticalLevelContainer, RegionPos regionPos, DistanceGenerationMode generationMode)
 	{
 		this.generationMode = generationMode;
 		this.regionPosX = regionPos.x;
 		this.regionPosZ = regionPos.z;
-		this.minDetailLevel = levelContainer.detailLevel;
+		this.minDetailLevel = verticalLevelContainer.detailLevel;
 
 		//Arrays of matrices
 		data = new long[POSSIBLE_LOD][][];
 
-		data[minDetailLevel] = levelContainer.data;
+		data[minDetailLevel] = verticalLevelContainer.data;
 
 		//Initialize all the different matrices
 		for (byte lod = (byte) (minDetailLevel + 1); lod <= LodUtil.REGION_DETAIL_LEVEL; lod++)
@@ -308,16 +310,16 @@ public class LodRegion
 				childDetailLevel = (byte) (detailLevel - 1);
 				if (doesDataExist(childDetailLevel, childPosX, childPosZ))
 				{
-					if (!(DataPoint.getHeight(data[childDetailLevel][childPosX][childPosZ]) == LodBuilder.DEFAULT_HEIGHT
-							    && DataPoint.getDepth(data[childDetailLevel][childPosX][childPosZ]) == LodBuilder.DEFAULT_DEPTH))
+					if (!(DataPointUtil.getHeight(data[childDetailLevel][childPosX][childPosZ]) == LodBuilder.DEFAULT_HEIGHT
+							    && DataPointUtil.getDepth(data[childDetailLevel][childPosX][childPosZ]) == LodBuilder.DEFAULT_DEPTH))
 					{
 						numberOfChildren++;
 
-						tempRed += DataPoint.getRed(data[childDetailLevel][childPosX][childPosZ]);
-						tempGreen += DataPoint.getGreen(data[childDetailLevel][childPosX][childPosZ]);
-						tempBlue += DataPoint.getBlue(data[childDetailLevel][childPosX][childPosZ]);
-						tempHeight += DataPoint.getHeight(data[childDetailLevel][childPosX][childPosZ]);
-						tempDepth += DataPoint.getDepth(data[childDetailLevel][childPosX][childPosZ]);
+						tempRed += DataPointUtil.getRed(data[childDetailLevel][childPosX][childPosZ]);
+						tempGreen += DataPointUtil.getGreen(data[childDetailLevel][childPosX][childPosZ]);
+						tempBlue += DataPointUtil.getBlue(data[childDetailLevel][childPosX][childPosZ]);
+						tempHeight += DataPointUtil.getHeight(data[childDetailLevel][childPosX][childPosZ]);
+						tempDepth += DataPointUtil.getDepth(data[childDetailLevel][childPosX][childPosZ]);
 					} else
 					{
 						// void children have the default height (most likely -1)
@@ -342,7 +344,7 @@ public class LodRegion
 			tempHeight = LodBuilder.DEFAULT_HEIGHT;
 			tempDepth = LodBuilder.DEFAULT_DEPTH;
 		}
-		data[detailLevel][posX][posZ] = DataPoint.createDataPoint(tempHeight, tempDepth, tempRed, tempGreen, tempBlue);
+		data[detailLevel][posX][posZ] = DataPointUtil.createDataPoint(tempHeight, tempDepth, tempRed, tempGreen, tempBlue);
 	}
 
 
@@ -354,7 +356,7 @@ public class LodRegion
 		if(detailLevel < minDetailLevel) return false;
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		return DataPoint.doesItExist(data[detailLevel][posX][posZ]);
+		return DataPointUtil.doesItExist(data[detailLevel][posX][posZ]);
 	}
 
 	/**
@@ -376,26 +378,26 @@ public class LodRegion
 	 * @param detailLevel
 	 * @return
 	 */
-	public LevelContainer getLevel(byte detailLevel)
+	public VerticalLevelContainer getLevel(byte detailLevel)
 	{
 		if (detailLevel < minDetailLevel)
 		{
 			throw new IllegalArgumentException("getLevel asked for a level that does not exist: minimum " + minDetailLevel + " level requested " + detailLevel);
 		}
-		return new LevelContainer(detailLevel, data[detailLevel]);
+		return new VerticalLevelContainer(detailLevel, data[detailLevel]);
 	}
 
 	/**
-	 * @param levelContainer
+	 * @param verticalLevelContainer
 	 */
-	public void addLevel(LevelContainer levelContainer)
+	public void addLevel(VerticalLevelContainer verticalLevelContainer)
 	{
-		if (levelContainer.detailLevel < minDetailLevel - 1)
+		if (verticalLevelContainer.detailLevel < minDetailLevel - 1)
 		{
 			throw new IllegalArgumentException("addLevel requires a level that is at least the minimum level of the region -1 ");
 		}
-		if (levelContainer.detailLevel == minDetailLevel - 1) minDetailLevel = levelContainer.detailLevel;
-		data[levelContainer.detailLevel] = levelContainer.data;
+		if (verticalLevelContainer.detailLevel == minDetailLevel - 1) minDetailLevel = verticalLevelContainer.detailLevel;
+		data[verticalLevelContainer.detailLevel] = verticalLevelContainer.data;
 
 	}
 

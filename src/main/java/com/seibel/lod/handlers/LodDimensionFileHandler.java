@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.objects.LevelContainer;
+import com.seibel.lod.objects.VerticalLevelContainer;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.RegionPos;
@@ -200,7 +200,7 @@ public class LodDimensionFileHandler
 				data = bufferedReader.readLine();
 
 				bufferedReader.close();
-				region.addLevel(new LevelContainer(data));
+				region.addLevel(new VerticalLevelContainer(data));
 			} catch (Exception e)
 			{
 				// the buffered reader encountered a

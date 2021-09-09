@@ -20,7 +20,7 @@ package com.seibel.lod.builders.lodTemplates;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.enums.ShadingMode;
-import com.seibel.lod.objects.DataPoint;
+import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.LodUtil;
 
@@ -53,15 +53,15 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		// add each LOD for the detail level
 		generateBoundingBox(
 				box,
-				DataPoint.getHeight(data),
-				DataPoint.getDepth(data),
+				DataPointUtil.getHeight(data),
+				DataPointUtil.getDepth(data),
 				width,
 				posX * width,
 				0,
 				posZ * width,
 				bufferCenterBlockPos);
 
-		int color = DataPoint.getColor(data);
+		int color = DataPointUtil.getColor(data);
 		if (debugging != DebugMode.OFF)
 		{
 			color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[detailLevel].getRGB();
@@ -211,7 +211,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			}else
 			{
 				maxY = box.getMaxY();
-				tempMaxY = DataPoint.getHeight(data);
+				tempMaxY = DataPointUtil.getHeight(data);
 				if (tempMaxY < maxY)
 				{
 					minY = Math.max(tempMaxY, minY);
@@ -220,7 +220,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 					addPosAndColor(buffer, minX, maxY, maxZ, red, green, blue, alpha);
 					addPosAndColor(buffer, minX, maxY, minZ, red, green, blue, alpha);
 				}
-				tempMinY = DataPoint.getDepth(data);
+				tempMinY = DataPointUtil.getDepth(data);
 				minY = box.getMinY();
 				if (tempMinY > minY)
 				{
@@ -257,7 +257,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			else
 			{
 				maxY = box.getMaxY();
-				tempMaxY = DataPoint.getHeight(data);
+				tempMaxY = DataPointUtil.getHeight(data);
 				if (tempMaxY < maxY)
 				{
 					minY = Math.max(tempMaxY, minY);
@@ -266,7 +266,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 					addPosAndColor(buffer, maxX, minY, maxZ, red, green, blue, alpha);
 					addPosAndColor(buffer, maxX, minY, minZ, red, green, blue, alpha);
 				}
-				tempMinY = DataPoint.getDepth(data);
+				tempMinY = DataPointUtil.getDepth(data);
 				minY = box.getMinY();
 				if (tempMinY > minY)
 				{
@@ -303,7 +303,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			else
 			{
 				maxY = box.getMaxY();
-				tempMaxY = DataPoint.getHeight(data);
+				tempMaxY = DataPointUtil.getHeight(data);
 				if (tempMaxY < maxY)
 				{
 					minY = Math.max(tempMaxY, minY);
@@ -312,7 +312,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 					addPosAndColor(buffer, minX, maxY, maxZ, red, green, blue, alpha);
 					addPosAndColor(buffer, minX, minY, maxZ, red, green, blue, alpha);
 				}
-				tempMinY = DataPoint.getDepth(data);
+				tempMinY = DataPointUtil.getDepth(data);
 				minY = box.getMinY();
 				if (tempMinY > minY)
 				{
@@ -349,7 +349,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			else
 			{
 				maxY = box.getMaxY();
-				tempMaxY = DataPoint.getHeight(data);
+				tempMaxY = DataPointUtil.getHeight(data);
 				if (tempMaxY < maxY)
 				{
 					minY = Math.max(tempMaxY, minY);
@@ -358,7 +358,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 					addPosAndColor(buffer, maxX, maxY, minZ, red, green, blue, alpha);
 					addPosAndColor(buffer, maxX, minY, minZ, red, green, blue, alpha);
 				}
-				tempMinY = DataPoint.getDepth(data);
+				tempMinY = DataPointUtil.getDepth(data);
 				minY = box.getMinY();
 				if (tempMinY > minY)
 				{
