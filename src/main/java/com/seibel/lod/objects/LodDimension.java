@@ -446,7 +446,14 @@ public class LodDimension
 		LodRegion region = getRegion(regionPosX, regionPosZ);
 		if (region == null)
 			return false;
-		boolean nodeAdded = region.addData(detailLevel, posX, posZ, lodDataPoint, serverQuality);
+		;
+		if(!LevelContainer.threadAddDataMap.containsKey(Thread.currentThread().getName()) || (LevelContainer.threadAddDataMap.get(Thread.currentThread().getName()) == null))
+		{
+			LevelContainer.threadAddDataMap.put(Thread.currentThread().getName(), new long[10]);
+		}
+		long[] dataArray = LevelContainer.threadAddDataMap.get(Thread.currentThread().getName());
+		dataArray[0] = lodDataPoint;
+		boolean nodeAdded = region.addData(detailLevel, posX, posZ, dataArray, serverQuality);
 		// only save valid LODs to disk
 		if (!dontSave && fileHandler != null)
 		{
@@ -533,7 +540,7 @@ public class LodDimension
 			return 0;
 		}
 
-		return region.getData(detailLevel, posX, posZ);
+		return region.getData(detailLevel, posX, posZ)[0];
 	}
 
 

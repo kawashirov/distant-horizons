@@ -3,15 +3,19 @@ package com.seibel.lod.objects;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 public interface LevelContainer
 {
 	public static final char VERTICAL_DATA_DELIMITER = '\t';
-	public static final char DATA_DELIMITER = '\n';
+	public static final char DATA_DELIMITER = ',';
+	public static final ConcurrentMap<String,long[]> threadAddDataMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String,long[]> threadGetDataMap = new ConcurrentHashMap();
 
 	/**With this you can add data to the level container
 	 *
 	 * @param data actual data to add in a array of long format.
-	 * @param detailLevel just to check that it's correct
 	 * @param posX x position in the detail level
 	 * @param posZ z position in the detail level
 	 * @return true if correctly added, false otherwise
@@ -20,7 +24,6 @@ public interface LevelContainer
 
 	/**With this you can get data from the level container
 	 *
-	 * @param detailLevel just to check that it's correct
 	 * @param posX x position in the detail level
 	 * @param posZ z position in the detail level
 	 * @return the data in long array format
@@ -28,7 +31,6 @@ public interface LevelContainer
 	public long[] getData(int posX, int posZ);
 
 	/**
-	 * @param detailLevel just to check that it's correct
 	 * @param posX x position in the detail level
 	 * @param posZ z position in the detail level
 	 * @return true only if the data exist
@@ -49,7 +51,6 @@ public interface LevelContainer
 	/**
 	 *
 	 * @param lowerLevelContainer lower level where we extract the data
-	 * @param detailLevel detail level to update
 	 * @param posX x position in the detail level to update
 	 * @param posZ z position in the detail level to update
 	 */

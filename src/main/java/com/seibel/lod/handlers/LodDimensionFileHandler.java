@@ -28,7 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.objects.VerticalLevelContainer;
+import com.seibel.lod.objects.SingleLevelContainer;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.RegionPos;
@@ -200,7 +200,7 @@ public class LodDimensionFileHandler
 				data = bufferedReader.readLine();
 
 				bufferedReader.close();
-				region.addLevel(new VerticalLevelContainer(data));
+				region.addLevel(new SingleLevelContainer(data));
 			} catch (Exception e)
 			{
 				// the buffered reader encountered a
@@ -331,7 +331,7 @@ public class LodDimensionFileHandler
 				fw.write(LOD_FILE_VERSION_PREFIX + " " + LOD_SAVE_FILE_VERSION + "\n");
 
 				// add each LodChunk to the file
-				fw.write(region.getLevel(detailLevel).toString());
+				fw.write(region.getLevel(detailLevel).toDataString());
 				fw.close();
 
 				// overwrite the old file with the new one

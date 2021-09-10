@@ -30,6 +30,8 @@ public class LodRegion
 	private LevelContainer[] dataContainer;
 
 
+	private DistanceGenerationMode generationMode;
+
 	public final int regionPosX;
 	public final int regionPosZ;
 
@@ -41,24 +43,30 @@ public class LodRegion
 		dataContainer = new LevelContainer[POSSIBLE_LOD];
 	}
 
-	public LodRegion(byte minDetailLevel, RegionPos regionPos, boolean twoDimension)
+	public LodRegion(byte minDetailLevel, RegionPos regionPos, DistanceGenerationMode generationMode)
 	{
 		this.minDetailLevel = minDetailLevel;
 		this.regionPosX = regionPos.x;
 		this.regionPosZ = regionPos.z;
-
+		this.generationMode = generationMode;
 		dataContainer = new LevelContainer[POSSIBLE_LOD];
 
 
 		//Initialize all the different matrices
 		for (byte lod = minDetailLevel; lod <= LodUtil.REGION_DETAIL_LEVEL; lod++)
 		{
-			if(twoDimension){
+			dataContainer[lod] = new SingleLevelContainer(lod);
+			/*if(twoDimension){
 				dataContainer[lod] = new SingleLevelContainer(lod);
 			}else{
 				dataContainer[lod] = new VerticalLevelContainer(lod);
-			}
+			}*/
 		}
+	}
+
+	public DistanceGenerationMode getGenerationMode()
+	{
+		return generationMode;
 	}
 
 	/**
@@ -287,6 +295,8 @@ public class LodRegion
 		if(detailLevel < minDetailLevel) return false;
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
+		if(dataContainer == null || dataContainer[detailLevel] == null)
+			return false;
 		return dataContainer[detailLevel].doesItExist(posX, posZ);
 	}
 
@@ -361,12 +371,10 @@ public class LodRegion
 	{
 		if (detailLevel < minDetailLevel)
 		{
-			for (byte tempLod = (byte) (minDetailLevel - 1); tempLod >= minDetailLevel ; tempLod--)
+			for (byte tempLod = (byte) (minDetailLevel - 1); tempLod >= detailLevel ; tempLod--)
 			{
-				int size = (short) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - tempLod);
 				if(dataContainer[tempLod + 1] == null)
 				{
-					/* TODO this can become either Single or Vertical*/
 					dataContainer[tempLod + 1] = new SingleLevelContainer((byte) (tempLod + 1));
 				}
 				dataContainer[tempLod] = dataContainer[tempLod+1].expand();

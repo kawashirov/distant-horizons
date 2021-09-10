@@ -126,7 +126,7 @@ public class LodBuilder
 				generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(generationMode));
 			} catch (IllegalArgumentException | NullPointerException e)
 			{
-				e.printStackTrace();
+				//e.printStackTrace();
 				// if the world changes while LODs are being generated
 				// they will throw errors as they try to access things that no longer
 				// exist.
@@ -200,7 +200,7 @@ public class LodBuilder
 				posX = LevelPosUtil.convert((byte) 0, chunk.getPos().x * 16 + startX, detail.detailLevel);
 				posZ = LevelPosUtil.convert((byte) 0, chunk.getPos().z * 16 + startZ, detail.detailLevel);
 				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
-				data = DataPointUtil.createDataPoint(height, depth, ColorUtil.getRed(color), ColorUtil.getGreen(color), ColorUtil.getBlue(color));
+				data = DataPointUtil.createDataPoint(height, depth, color, 0 , 0);
 				lodDim.addData(detailLevel,
 						posX,
 						posZ,

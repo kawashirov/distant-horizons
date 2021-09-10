@@ -41,16 +41,16 @@ public class DataPointUtil
 		return dataPoint;
 	}
 
-	public static long createDataPoint(int height, int depth, int color)
+	public static long createDataPoint(int height, int depth, int color, int lightValue, int generationMode)
 	{
-		int alpha = (color >> 24) & 0xFF000000;
-		int red = (color >> 16) & 0x00FF0000;
-		int green = (color >> 8) & 0x0000FF00;
-		int blue = color & 0x000000FF;
-		return createDataPoint(height, depth, alpha, red, green, blue);
+		int alpha = ColorUtil.getAlpha(color);
+		int red = ColorUtil.getRed(color);
+		int green = ColorUtil.getGreen(color);
+		int blue = ColorUtil.getBlue(color);
+		return createDataPoint(alpha, red, green, blue, height, depth, lightValue, generationMode);
 	}
 
-	public static long createDataPoint(int height, int depth, int alpha, int red, int green, int blue, int lightValue, int generationMode)
+	public static long createDataPoint(int alpha, int red, int green, int blue, int height, int depth, int lightValue, int generationMode)
 	{
 		long dataPoint = 0;
 		dataPoint += (alpha & ALPHA_MASK) << ALPHA_SHIFT;
@@ -147,4 +147,3 @@ public class DataPointUtil
 		return null;
 	}
 }
-VerticalLevelContainer

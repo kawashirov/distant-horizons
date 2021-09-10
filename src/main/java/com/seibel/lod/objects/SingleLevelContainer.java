@@ -9,23 +9,19 @@ import com.seibel.lod.util.LodUtil;
 public class SingleLevelContainer implements LevelContainer
 {
 	public final byte detailLevel;
+	public final int size;
 
 	public final long[][] data;
 
 	public SingleLevelContainer(byte detailLevel)
 	{
 		this.detailLevel = detailLevel;
-		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
+		size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
 		data = new long[size][size];
 	}
 
-	public SingleLevelContainer(byte detailLevel, long[][] data)
-	{
-		this.detailLevel = detailLevel;
-		this.data = data;
-	}
-
 	public boolean addData(long[] newData, int posX, int posZ){
+
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		data[posX][posZ] = newData[0];
@@ -39,10 +35,18 @@ public class SingleLevelContainer implements LevelContainer
 		return true;
 	}
 	public long[] getData(int posX, int posZ){
+
+		if(!LevelContainer.threadGetDataMap.containsKey(Thread.currentThread().getName()) || (LevelContainer.threadGetDataMap.get(Thread.currentThread().getName()) == null))
+		{
+			LevelContainer.threadGetDataMap.put(Thread.currentThread().getName(), new long[1]);
+		}
+		long[] dataArray = LevelContainer.threadGetDataMap.get(Thread.currentThread().getName());
+
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		//Improve this using a thread map to long[]
-		return new long[]{data[posX][posZ]};
+		dataArray[0] = data[posX][posZ];
+		return dataArray;
 	}
 	private long getSingleData(int posX, int posZ){
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
@@ -67,8 +71,8 @@ public class SingleLevelContainer implements LevelContainer
 
 
 		index = inputString.indexOf(DATA_DELIMITER, 0);
-		this.detailLevel = (byte) Integer.parseInt(inputString.substring(0, index));
-		int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
+		detailLevel = (byte) Integer.parseInt(inputString.substring(0, index));
+		size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
 
 		this.data = new long[size][size];
 		for (int x = 0; x < size; x++)
@@ -163,12 +167,6 @@ public class SingleLevelContainer implements LevelContainer
 
 	public String toDataString()
 	{
-		return toString();
-	}
-
-	@Override
-	public String toString()
-	{
 		StringBuilder stringBuilder = new StringBuilder();
 		int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
 		stringBuilder.append(detailLevel);
@@ -182,6 +180,14 @@ public class SingleLevelContainer implements LevelContainer
 				stringBuilder.append(DATA_DELIMITER);
 			}
 		}
+		return stringBuilder.toString();
+	}
+
+	@Override
+	public String toString()
+	{
+		StringBuilder stringBuilder = new StringBuilder();
+		stringBuilder.append(detailLevel);
 		return stringBuilder.toString();
 	}
 }
