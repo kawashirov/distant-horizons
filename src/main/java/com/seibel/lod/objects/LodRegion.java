@@ -22,55 +22,42 @@ public class LodRegion
 	private byte minDetailLevel;
 	private static final byte POSSIBLE_LOD = 10;
 	//private int numberOfPoints;
-	private DistanceGenerationMode generationMode;
 	//For each of the following field the first slot is for the level of detail
 	//Important: byte have a [-128, 127] range. When converting from or to int a 128 should be added or removed
 	//If there is a bug with color then it's probably caused by this.
 	//in the future other fields like transparency and light level could be added
 
-	private long[][][] data;
+	private LevelContainer[] dataContainer;
 
 
 	public final int regionPosX;
 	public final int regionPosZ;
 
-	public LodRegion(VerticalLevelContainer verticalLevelContainer, RegionPos regionPos, DistanceGenerationMode generationMode)
+	public LodRegion(RegionPos regionPos)
 	{
-		this.generationMode = generationMode;
+		this.minDetailLevel = LodUtil.REGION_DETAIL_LEVEL;
 		this.regionPosX = regionPos.x;
 		this.regionPosZ = regionPos.z;
-		this.minDetailLevel = verticalLevelContainer.detailLevel;
-
-		//Arrays of matrices
-		data = new long[POSSIBLE_LOD][][];
-
-		data[minDetailLevel] = verticalLevelContainer.data;
-
-		//Initialize all the different matrices
-		for (byte lod = (byte) (minDetailLevel + 1); lod <= LodUtil.REGION_DETAIL_LEVEL; lod++)
-		{
-			int size = (short) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - lod);
-			data[lod] = new long[size][size];
-		}
-		updateArea(LodUtil.REGION_DETAIL_LEVEL, regionPosX, regionPosZ);
+		dataContainer = new LevelContainer[POSSIBLE_LOD];
 	}
 
-	public LodRegion(byte minDetailLevel, RegionPos regionPos, DistanceGenerationMode generationMode)
+	public LodRegion(byte minDetailLevel, RegionPos regionPos, boolean twoDimension)
 	{
-		this.generationMode = generationMode;
 		this.minDetailLevel = minDetailLevel;
 		this.regionPosX = regionPos.x;
 		this.regionPosZ = regionPos.z;
 
-		data = new long[POSSIBLE_LOD][][];
+		dataContainer = new LevelContainer[POSSIBLE_LOD];
 
 
 		//Initialize all the different matrices
 		for (byte lod = minDetailLevel; lod <= LodUtil.REGION_DETAIL_LEVEL; lod++)
 		{
-			int size = (short) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - lod);
-			data[lod] = new long[size][size];
-
+			if(twoDimension){
+				dataContainer[lod] = new SingleLevelContainer(lod);
+			}else{
+				dataContainer[lod] = new VerticalLevelContainer(lod);
+			}
 		}
 	}
 
@@ -80,7 +67,7 @@ public class LodRegion
 	 * @param dataPoint
 	 * @return
 	 */
-	public boolean addData(byte detailLevel, int posX, int posZ, long dataPoint, boolean serverQuality)
+	public boolean addData(byte detailLevel, int posX, int posZ, long[] dataPoint, boolean serverQuality)
 	{
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
@@ -91,7 +78,7 @@ public class LodRegion
 			//if (!doesDataExist(detailLevel, posX, posZ)) numberOfPoints++;
 
 			//add the node data
-			this.data[detailLevel][posX][posZ] = dataPoint;
+			this.dataContainer[detailLevel].addData(dataPoint, posX, posZ);
 			return true;
 		} else
 		{
@@ -104,11 +91,11 @@ public class LodRegion
 	 *
 	 * @return the data at the relative pos and level
 	 */
-	public long getData(byte detailLevel, int posX, int posZ)
+	public long[] getData(byte detailLevel, int posX, int posZ)
 	{
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		return data[detailLevel][posX][posZ];
+		return dataContainer[detailLevel].getData(posX, posZ);
 	}
 
 	/**
@@ -288,63 +275,7 @@ public class LodRegion
 	 */
 	private void update(byte detailLevel, int posX, int posZ)
 	{
-		int numberOfChildren = 0;
-		int numberOfVoidChildren = 0;
-
-		int tempRed = 0;
-		int tempGreen = 0;
-		int tempBlue = 0;
-		int tempHeight = 0;
-		int tempDepth = 0;
-		int childPosX;
-		int childPosZ;
-		byte childDetailLevel;
-		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
-		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		for (int x = 0; x <= 1; x++)
-		{
-			for (int z = 0; z <= 1; z++)
-			{
-				childPosX = 2 * posX + x;
-				childPosZ = 2 * posZ + z;
-				childDetailLevel = (byte) (detailLevel - 1);
-				if (doesDataExist(childDetailLevel, childPosX, childPosZ))
-				{
-					if (!(DataPointUtil.getHeight(data[childDetailLevel][childPosX][childPosZ]) == LodBuilder.DEFAULT_HEIGHT
-							    && DataPointUtil.getDepth(data[childDetailLevel][childPosX][childPosZ]) == LodBuilder.DEFAULT_DEPTH))
-					{
-						numberOfChildren++;
-
-						tempRed += DataPointUtil.getRed(data[childDetailLevel][childPosX][childPosZ]);
-						tempGreen += DataPointUtil.getGreen(data[childDetailLevel][childPosX][childPosZ]);
-						tempBlue += DataPointUtil.getBlue(data[childDetailLevel][childPosX][childPosZ]);
-						tempHeight += DataPointUtil.getHeight(data[childDetailLevel][childPosX][childPosZ]);
-						tempDepth += DataPointUtil.getDepth(data[childDetailLevel][childPosX][childPosZ]);
-					} else
-					{
-						// void children have the default height (most likely -1)
-						// and represent a LOD with no blocks in it
-						numberOfVoidChildren++;
-					}
-				}
-			}
-		}
-		if (numberOfChildren > 0)
-		{
-			tempRed = tempRed / numberOfChildren;
-			tempGreen = tempGreen / numberOfChildren;
-			tempBlue = tempBlue / numberOfChildren;
-			tempHeight = tempHeight / numberOfChildren;
-			tempDepth = tempDepth / numberOfChildren;
-		} else if (numberOfVoidChildren > 0)
-		{
-			tempRed = (byte) 0;
-			tempGreen = (byte) 0;
-			tempBlue = (byte) 0;
-			tempHeight = LodBuilder.DEFAULT_HEIGHT;
-			tempDepth = LodBuilder.DEFAULT_DEPTH;
-		}
-		data[detailLevel][posX][posZ] = DataPointUtil.createDataPoint(tempHeight, tempDepth, tempRed, tempGreen, tempBlue);
+		dataContainer[detailLevel].updateData(dataContainer[detailLevel - 1], posX, posZ);
 	}
 
 
@@ -356,15 +287,22 @@ public class LodRegion
 		if(detailLevel < minDetailLevel) return false;
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		return DataPointUtil.doesItExist(data[detailLevel][posX][posZ]);
+		return dataContainer[detailLevel].doesItExist(posX, posZ);
 	}
 
 	/**
 	 * @return
 	 */
-	public DistanceGenerationMode getGenerationMode()
+	public byte getGenerationMode(byte detailLevel, int posX, int posZ)
 	{
-		return generationMode;
+		if(dataContainer[detailLevel].doesItExist(posX,posZ))
+		{
+			//We take the bottom information always
+			return DataPointUtil.getGenerationMode(dataContainer[detailLevel].getData(posX,posZ)[0]);
+		}else
+		{
+			return DistanceGenerationMode.NONE.complexity;
+		}
 	}
 
 	public byte getMinDetailLevel()
@@ -378,26 +316,26 @@ public class LodRegion
 	 * @param detailLevel
 	 * @return
 	 */
-	public VerticalLevelContainer getLevel(byte detailLevel)
+	public LevelContainer getLevel(byte detailLevel)
 	{
 		if (detailLevel < minDetailLevel)
 		{
 			throw new IllegalArgumentException("getLevel asked for a level that does not exist: minimum " + minDetailLevel + " level requested " + detailLevel);
 		}
-		return new VerticalLevelContainer(detailLevel, data[detailLevel]);
+		return dataContainer[detailLevel];
 	}
 
 	/**
-	 * @param verticalLevelContainer
+	 * @param levelContainer
 	 */
-	public void addLevel(VerticalLevelContainer verticalLevelContainer)
+	public void addLevel(LevelContainer levelContainer)
 	{
-		if (verticalLevelContainer.detailLevel < minDetailLevel - 1)
+		if (levelContainer.getDetailLevel() < minDetailLevel - 1)
 		{
 			throw new IllegalArgumentException("addLevel requires a level that is at least the minimum level of the region -1 ");
 		}
-		if (verticalLevelContainer.detailLevel == minDetailLevel - 1) minDetailLevel = verticalLevelContainer.detailLevel;
-		data[verticalLevelContainer.detailLevel] = verticalLevelContainer.data;
+		if (levelContainer.getDetailLevel() == minDetailLevel - 1) minDetailLevel = levelContainer.getDetailLevel();
+		dataContainer[levelContainer.getDetailLevel()] = levelContainer;
 
 	}
 
@@ -410,7 +348,7 @@ public class LodRegion
 		{
 			for (byte tempLod = 0; tempLod < detailLevel; tempLod++)
 			{
-				data[tempLod] = new long[0][0];
+				dataContainer[tempLod] = null;
 			}
 			minDetailLevel = detailLevel;
 		}
@@ -423,10 +361,15 @@ public class LodRegion
 	{
 		if (detailLevel < minDetailLevel)
 		{
-			for (byte tempLod = detailLevel; tempLod < minDetailLevel; tempLod++)
+			for (byte tempLod = (byte) (minDetailLevel - 1); tempLod >= minDetailLevel ; tempLod--)
 			{
 				int size = (short) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - tempLod);
-				data[tempLod] = new long[size][size];
+				if(dataContainer[tempLod + 1] == null)
+				{
+					/* TODO this can become either Single or Vertical*/
+					dataContainer[tempLod + 1] = new SingleLevelContainer((byte) (tempLod + 1));
+				}
+				dataContainer[tempLod] = dataContainer[tempLod+1].expand();
 			}
 			minDetailLevel = detailLevel;
 		}

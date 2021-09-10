@@ -13,13 +13,20 @@ public class VerticalLevelContainer implements LevelContainer
 
 	public final long[][][] data;
 
+	public VerticalLevelContainer(byte detailLevel)
+	{
+		this.detailLevel = detailLevel;
+		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
+		data = new long[size][size][];
+	}
+
 	public VerticalLevelContainer(byte detailLevel, long[][][] data)
 	{
 		this.detailLevel = detailLevel;
 		this.data = data;
 	}
 
-	public boolean putData(long[] data, int posX, int posZ){
+	public boolean addData(long[] data, int posX, int posZ){
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		data[posX][posZ] = data
@@ -55,9 +62,13 @@ public class VerticalLevelContainer implements LevelContainer
 		}
 	}
 
-	public long[] mergeData(long[][] dataArray, long[] newDataPoint, int[] indexes, long[] dataToCombine)
-	{
 
+	public void updateData(LevelContainer lowerLevelContainer, byte detailLevel, int posX, int posZ)
+	{
+		long[][] dataArray;
+		long[] newDataPoint;
+		int[] indexes;
+		long[] dataToCombine;
 		//int maxSize = Math.max(Math.max(Math.max(dataArray[0].length, dataArray[1].length), dataArray[2].length), dataArray[3].length);
 		//DetailDistanceUtil.getMaxVerticalData(detailLevel);
 		//we are re-using these arrays so we must reset them to 0
