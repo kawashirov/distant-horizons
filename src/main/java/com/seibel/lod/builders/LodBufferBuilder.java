@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.builders.lodTemplates.Box;
@@ -61,7 +62,8 @@ public class LodBufferBuilder
 	/**
 	 * This holds the threads used to generate buffers.
 	 */
-	private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfBufferBuilderThreads.get(), new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
+	private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfBufferBuilderThreads.get(), new ThreadFactoryBuilder().setNameFormat("Render-Thread-%d").build());
+	//private ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfBufferBuilderThreads.get(), new LodThreadFactory(this.getClass().getSimpleName() + " - builder"));
 
 	/**
 	 * The buffers that are used to create LODs using far fog
