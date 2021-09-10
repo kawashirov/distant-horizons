@@ -1,42 +1,51 @@
 package com.seibel.lod.objects;
 
-import java.io.Serializable;
-
 import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
-
+/*
 public class VerticalLevelContainer implements LevelContainer
 {
+
 	public final byte detailLevel;
 
-	public final long[][][] data;
+	public final long[][][] dataContainer;
 
 	public VerticalLevelContainer(byte detailLevel)
 	{
 		this.detailLevel = detailLevel;
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
-		data = new long[size][size][];
+		dataContainer = new long[size][size][];
 	}
 
 	public VerticalLevelContainer(byte detailLevel, long[][][] data)
 	{
 		this.detailLevel = detailLevel;
-		this.data = data;
+		this.dataContainer = data;
 	}
 
-	public boolean addData(long[] data, int posX, int posZ){
+	@Override
+	public byte getDetailLevel()
+	{
+		return detailLevel;
+	}
+
+	public boolean addData(long[] newData, int posX, int posZ){
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		data[posX][posZ] = data
+		dataContainer[posX][posZ] = newData;
 		return true;
 	}
 
 	public long[] getData(int posX, int posZ){
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		return data[posX][posZ];
+		return dataContainer[posX][posZ];
+	}
+
+	public boolean doesItExist(int posX, int posZ){
+		long[] data = getData(posX,posZ);
+		return (data != null && DataPointUtil.doesItExist(data[0]));
 	}
 
 	public VerticalLevelContainer(String inputString)
@@ -50,25 +59,49 @@ public class VerticalLevelContainer implements LevelContainer
 		this.detailLevel = (byte) Integer.parseInt(inputString.substring(0, index));
 		int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
 
-		this.data = new long[size][size][1];
+		this.dataContainer = new long[size][size][1];
 		for (int x = 0; x < size; x++)
 		{
 			for (int z = 0; z < size; z++)
 			{
 				lastIndex = index;
 				index = inputString.indexOf(DATA_DELIMITER, lastIndex + 1);
-				data[x][z][0] = Long.parseLong(inputString.substring(lastIndex + 1, index), 16);
+				dataContainer[x][z][0] = Long.parseLong(inputString.substring(lastIndex + 1, index), 16);
 			}
 		}
 	}
 
+	public LevelContainer expand(){
+		return new SingleLevelContainer((byte) (getDetailLevel() - 1));
+	}
 
-	public void updateData(LevelContainer lowerLevelContainer, byte detailLevel, int posX, int posZ)
+	public void updateData(LevelContainer lowerLevelContainer, int posX, int posZ)
 	{
-		long[][] dataArray;
-		long[] newDataPoint;
+		long[][][] updateTemps;
 		int[] indexes;
-		long[] dataToCombine;
+		if(!LevelContainer.threadVerticalUpdateMap.containsKey(Thread.currentThread().getName()) || (LevelContainer.threadVerticalUpdateMap.get(Thread.currentThread().getName()) == null))
+		{
+			//To avoid the creation of multiple
+			updateTemps = new long[4][][];
+			updateTemps[0] = new long[4][16];
+			updateTemps[1] = new long[1][32];
+			updateTemps[2] = new long[1][4];
+			updateTemps[3] = new long[1][4];
+			LevelContainer.threadVerticalUpdateMap.put(Thread.currentThread().getName(), updateTemps);
+		}
+		if(!LevelContainer.threadVerticalIndexesMap.containsKey(Thread.currentThread().getName()) || (LevelContainer.threadVerticalIndexesMap.get(Thread.currentThread().getName()) == null))
+		{
+			//To avoid the creation of multiple
+			indexes = new int[4];
+			LevelContainer.threadVerticalIndexesMap.put(Thread.currentThread().getName(), updateTemps);
+		}
+
+		updateTemps = LevelContainer.threadVerticalIndexesMap.get(Thread.currentThread().getName());
+
+		long[][] dataArray = updateTemps[0];
+		long[] newDataPoint = updateTemps[1][1];
+		long[] indexes = updateTemps[2][1];
+		long[] dataToCombine = updateTemps[3][1];
 		//int maxSize = Math.max(Math.max(Math.max(dataArray[0].length, dataArray[1].length), dataArray[2].length), dataArray[3].length);
 		//DetailDistanceUtil.getMaxVerticalData(detailLevel);
 		//we are re-using these arrays so we must reset them to 0
@@ -97,9 +130,9 @@ public class VerticalLevelContainer implements LevelContainer
 			{
 				if (indexes[arrayIndex] < dataArray[arrayIndex].length)
 				{
-					if (minDepth < getDepth(dataArray[arrayIndex][indexes[arrayIndex]]))
+					if (minDepth < DataPointUtil.getDepth(dataArray[arrayIndex][indexes[arrayIndex]]))
 					{
-						minDepth = getDepth(dataArray[arrayIndex][indexes[arrayIndex]]);
+						minDepth = DataPointUtil.getDepth(dataArray[arrayIndex][indexes[arrayIndex]]);
 						startingArray = arrayIndex;
 					}
 				}
@@ -145,10 +178,10 @@ public class VerticalLevelContainer implements LevelContainer
 			for (int z = 0; z < size; z++)
 			{
 				//Converting the dataToHex
-				stringBuilder.append(Long.toHexString(data[x][z][0]));
+				stringBuilder.append(Long.toHexString(dataContainer[x][z][0]));
 				stringBuilder.append(DATA_DELIMITER);
 			}
 		}
 		return stringBuilder.toString();
 	}
-}
+}*/
