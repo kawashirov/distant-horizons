@@ -59,7 +59,7 @@ public class LodRegion
 			/*if(twoDimension){
 				dataContainer[lod] = new SingleLevelContainer(lod);
 			}else{
-				dataContainer[lod] = new VerticalLevelContainer(lod);
+				dataContainer[lod] = new VerticalLevelContainer.java(lod);
 			}*/
 		}
 	}
@@ -132,11 +132,11 @@ public class LodRegion
 
 		int childSize = 1 << (LodUtil.REGION_DETAIL_LEVEL - childDetailLevel);
 		//we have reached the target detail level
-
-		if (DetailDistanceUtil.getDistanceGenerationInverse(maxDistance) > detailLevel)
+		byte targetDetailLevel = DetailDistanceUtil.getLodGenDetail(DetailDistanceUtil.getDistanceGenerationInverse(maxDistance)).detailLevel;
+		if (targetDetailLevel > detailLevel)
 		{
 			return;
-		} else if (DetailDistanceUtil.getDistanceGenerationInverse(maxDistance) == detailLevel)
+		} else if (targetDetailLevel == detailLevel)
 		{
 			if (!doesDataExist(detailLevel, posX, posZ))
 			{

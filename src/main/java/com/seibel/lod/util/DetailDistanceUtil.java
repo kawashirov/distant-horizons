@@ -160,7 +160,13 @@ public class DetailDistanceUtil
 
 	public static byte getLodDrawDetail(int detail)
 	{
-		return (byte) Math.max(detail, minDrawDetail);
+		if (detail < minGenDetail)
+		{
+			return lodGenDetails[minGenDetail].detailLevel;
+		} else
+		{
+			return lodGenDetails[detail].detailLevel;
+		}
 	}
 
 	public static LodDetail getLodGenDetail(int detail)
