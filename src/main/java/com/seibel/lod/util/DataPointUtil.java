@@ -1,11 +1,14 @@
 package com.seibel.lod.util;
 
+import com.seibel.lod.enums.DistanceGenerationMode;
+
 public class DataPointUtil
 {
 
 	//To be used in the future for negative value
 	//public final static int MIN_DEPTH = -64;
 	//public final static int MIN_HEIGHT = -64;
+	public final static int EMPTY_DATA = 0;
 
 	public final static int ALPHA_SHIFT = 56;
 	public final static int RED_SHIFT = 48;
@@ -32,7 +35,7 @@ public class DataPointUtil
 	public final static long EXISTENCE_MASK = 1;
 
 
-	public static long createDataPoint(int generationMode)
+	public static long createVoidDataPoint(int generationMode)
 	{
 		long dataPoint = 0;
 		dataPoint += (generationMode & GEN_TYPE_MASK) << GEN_TYPE_SHIFT;
@@ -141,6 +144,75 @@ public class DataPointUtil
 		return s.toString();
 	}
 
+	public static long mergeSingleData(long[] dataToMerge)
+	{
+		int numberOfChildren = 0;
+		int numberOfVoidChildren = 0;
+
+		int tempAlpha = 0;
+		int tempRed = 0;
+		int tempGreen = 0;
+		int tempBlue = 0;
+		int tempHeight = 0;
+		int tempDepth = 0;
+		int tempLight = 0;
+		byte tempGenMode = DistanceGenerationMode.SERVER.complexity;
+		long newData = 0;
+		for(long data : dataToMerge)
+		{
+			if (DataPointUtil.doesItExist(data))
+			{
+				if (!(DataPointUtil.isItVoid(data)))
+				{
+					numberOfChildren++;
+
+					tempAlpha += DataPointUtil.getAlpha(data);
+					tempRed += DataPointUtil.getRed(data);
+					tempGreen += DataPointUtil.getGreen(data);
+					tempBlue += DataPointUtil.getBlue(data);
+					tempHeight += DataPointUtil.getHeight(data);
+					tempDepth += DataPointUtil.getDepth(data);
+				} else
+				{
+					// void children have the default height (most likely -1)
+					// and represent a LOD with no blocks in it
+					numberOfVoidChildren++;
+				}
+				tempGenMode = (byte) Math.min(tempGenMode, DataPointUtil.getGenerationMode(data));
+			} else
+			{
+				tempGenMode = (byte) Math.min(tempGenMode, DistanceGenerationMode.NONE.complexity);
+			}
+		}
+		if (numberOfChildren > 0)
+		{
+			//we have at least 1 child
+			tempAlpha = tempAlpha / numberOfChildren;
+			tempRed = tempRed / numberOfChildren;
+			tempGreen = tempGreen / numberOfChildren;
+			tempBlue = tempBlue / numberOfChildren;
+			tempHeight = tempHeight / numberOfChildren;
+			tempDepth = tempDepth / numberOfChildren;
+			tempLight = tempLight / numberOfChildren;
+			return DataPointUtil.createDataPoint(tempAlpha, tempRed, tempGreen, tempBlue, tempHeight, tempDepth, tempLight, tempGenMode);
+		} else if (numberOfVoidChildren > 0)
+		{
+			//all the children are void
+			return DataPointUtil.createVoidDataPoint(tempGenMode);
+		}else
+		{
+			//no child has been initialized
+			return DataPointUtil.EMPTY_DATA;
+		}
+	}
+/*
+	public static int mergeVerticalData(long dataPoint)
+	{
+		int R = (getRed(dataPoint) << 16) & 0x00FF0000;
+		int G = (getGreen(dataPoint) << 8) & 0x0000FF00;
+		int B = getBlue(dataPoint) & 0x000000FF;
+		return 0xFF000000 | R | G | B;
+	}*/
 
 	public static long[] compress(long[] data, byte detailLevel)
 	{

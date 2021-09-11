@@ -3,6 +3,7 @@ package com.seibel.lod.objects;
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 
@@ -88,22 +89,16 @@ public class SingleLevelContainer implements LevelContainer
 
 	public void updateData(LevelContainer lowerLevelContainer, int posX, int posZ)
 	{
-		int numberOfChildren = 0;
-		int numberOfVoidChildren = 0;
+		//We reset the array
+		if(!LevelContainer.threadGetDataMap.containsKey(Thread.currentThread().getName()) || (LevelContainer.threadGetDataMap.get(Thread.currentThread().getName()) == null))
+		{
+			LevelContainer.threadGetDataMap.put(Thread.currentThread().getName(), new long[4]);
+		}
+		long[] dataToMerge = LevelContainer.threadGetDataMap.get(Thread.currentThread().getName());
 
-		int tempAlpha = 0;
-		int tempRed = 0;
-		int tempGreen = 0;
-		int tempBlue = 0;
-		int tempHeight = 0;
-		int tempDepth = 0;
-		int tempLight = 0;
-		byte tempGenMode = DistanceGenerationMode.SERVER.complexity;
 		int childPosX;
 		int childPosZ;
-		long childData;
 		long data = 0;
-		byte childDetailLevel = (byte) (detailLevel - 1);
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		for (int x = 0; x <= 1; x++)
@@ -112,49 +107,11 @@ public class SingleLevelContainer implements LevelContainer
 			{
 				childPosX = 2 * posX + x;
 				childPosZ = 2 * posZ + z;
-				childData = lowerLevelContainer.getData(childPosX, childPosZ)[0];
-
-				if (DataPointUtil.doesItExist(childData))
-				{
-					if (!(DataPointUtil.isItVoid(childData)))
-					{
-						numberOfChildren++;
-
-						tempAlpha += DataPointUtil.getAlpha(childData);
-						tempRed += DataPointUtil.getRed(childData);
-						tempGreen += DataPointUtil.getGreen(childData);
-						tempBlue += DataPointUtil.getBlue(childData);
-						tempHeight += DataPointUtil.getHeight(childData);
-						tempDepth += DataPointUtil.getDepth(childData);
-					} else
-					{
-						// void children have the default height (most likely -1)
-						// and represent a LOD with no blocks in it
-						numberOfVoidChildren++;
-					}
-					tempGenMode = (byte) Math.min(tempGenMode, DataPointUtil.getGenerationMode(childData));
-				}else
-				{
-					tempGenMode = (byte) Math.min(tempGenMode, DistanceGenerationMode.NONE.complexity);
-				}
+				dataToMerge[2*z + x] = lowerLevelContainer.getData(childPosX, childPosZ)[0];
 			}
 		}
-		if (numberOfChildren > 0)
-		{
-			tempAlpha = tempAlpha / numberOfChildren;
-			tempRed = tempRed / numberOfChildren;
-			tempGreen = tempGreen / numberOfChildren;
-			tempBlue = tempBlue / numberOfChildren;
-			tempHeight = tempHeight / numberOfChildren;
-			tempDepth = tempDepth / numberOfChildren;
-			tempLight = tempLight / numberOfChildren;
-			data = DataPointUtil.createDataPoint(tempAlpha, tempRed, tempGreen, tempBlue, tempHeight, tempDepth, tempLight, tempGenMode);
-			addSingleData(data, posX, posZ);
-		} else if (numberOfVoidChildren > 0)
-		{
-			data = DataPointUtil.createDataPoint(tempGenMode);
-			addSingleData(data, posX, posZ);
-		}
+		data = DataPointUtil.mergeSingleData(dataToMerge);
+		addSingleData(data,posX,posZ);
 	}
 
 

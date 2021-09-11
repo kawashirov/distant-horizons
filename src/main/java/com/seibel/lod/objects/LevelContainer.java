@@ -12,6 +12,7 @@ public interface LevelContainer
 	public static final char DATA_DELIMITER = ',';
 	public static final ConcurrentMap<String,long[]> threadAddDataMap = new ConcurrentHashMap();
 	public static final ConcurrentMap<String,long[]> threadGetDataMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String,long[]> threadSingleUpdateMap = new ConcurrentHashMap();
 	public static final ConcurrentMap<String,long[][][]> threadVerticalUpdateMap = new ConcurrentHashMap();
 	public static final ConcurrentMap<String,int[]> threadVerticalIndexesMap = new ConcurrentHashMap();
 	/**With this you can add data to the level container
