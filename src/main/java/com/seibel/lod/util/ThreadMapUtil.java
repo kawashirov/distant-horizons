@@ -9,9 +9,9 @@ public class ThreadMapUtil
 {
 	public static final ConcurrentMap<String,long[]> threadSingleAddDataMap = new ConcurrentHashMap();
 	public static final ConcurrentMap<String,long[]> threadSingleGetDataMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String,long[]> threadSingleUpdateMap = new ConcurrentHashMap();
 	public static final ConcurrentMap<String,long[]> threadVerticalAddDataMap = new ConcurrentHashMap();
 	public static final ConcurrentMap<String,long[]> threadVerticalGetDataMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String,long[]> threadSingleUpdateMap = new ConcurrentHashMap();
 	public static final ConcurrentMap<String,long[][][]> threadVerticalUpdateMap = new ConcurrentHashMap();
 	public static final ConcurrentMap<String,int[]> threadVerticalIndexesMap = new ConcurrentHashMap();
 

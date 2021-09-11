@@ -108,7 +108,7 @@ public class SingleLevelContainer implements LevelContainer
 			{
 				childPosX = 2 * posX + x;
 				childPosZ = 2 * posZ + z;
-				dataToMerge[2*z + x] = lowerLevelContainer.getData(childPosX, childPosZ)[0];
+				dataToMerge[2*x + z] = ((SingleLevelContainer) lowerLevelContainer).getSingleData(childPosX, childPosZ);
 			}
 		}
 		data = DataPointUtil.mergeSingleData(dataToMerge);
