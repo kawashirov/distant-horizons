@@ -263,7 +263,10 @@ public class LodBuilder
 						blockState = chunkSections[sectionIndex].getBlockState(xRel, yRel, zRel);
 
 						height = sectionIndex * CHUNK_DATA_WIDTH + yRel;
-						color = blockState.getBlock().defaultMaterialColor().col;
+						Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, yRel + sectionIndex * chunkSections.length >> 2,
+								zRel >> 2);
+						color = getColorForBlock(xRel, zRel, blockState, biome);
+						//color = blockState.getBlock().defaultMaterialColor().col;
 
 						blockPos.set(xAbs, height, zAbs);
 						light = blockState.getLightBlock(chunk, blockPos);
