@@ -2,10 +2,7 @@ package com.seibel.lod.objects;
 
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.DetailDistanceUtil;
-import com.seibel.lod.util.LevelPosUtil;
-import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.*;
 
 public class SingleLevelContainer implements LevelContainer
 {
@@ -35,20 +32,16 @@ public class SingleLevelContainer implements LevelContainer
 		data[posX][posZ] = newData;
 		return true;
 	}
+
 	public long[] getData(int posX, int posZ){
-
-		if(!LevelContainer.threadGetDataMap.containsKey(Thread.currentThread().getName()) || (LevelContainer.threadGetDataMap.get(Thread.currentThread().getName()) == null))
-		{
-			LevelContainer.threadGetDataMap.put(Thread.currentThread().getName(), new long[1]);
-		}
-		long[] dataArray = LevelContainer.threadGetDataMap.get(Thread.currentThread().getName());
-
+		long[] dataArray = ThreadMapUtil.getSingleGetDataArray();
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		//Improve this using a thread map to long[]
 		dataArray[0] = data[posX][posZ];
 		return dataArray;
 	}
+
 	private long getSingleData(int posX, int posZ){
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
@@ -66,23 +59,35 @@ public class SingleLevelContainer implements LevelContainer
 
 	public SingleLevelContainer(String inputString)
 	{
-
+		int tempIndex;
+		int shift = 0;
 		int index = 0;
-		int lastIndex = 0;
-
-
-		index = inputString.indexOf(DATA_DELIMITER, 0);
-		detailLevel = (byte) Integer.parseInt(inputString.substring(0, index));
+		int digit;
+		char currentChar;
+		long newData;
+		currentChar = inputString.charAt(index);
+		digit = Character.digit(currentChar,16);
+		detailLevel = (byte) digit;
 		size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
-
 		this.data = new long[size][size];
 		for (int x = 0; x < size; x++)
 		{
 			for (int z = 0; z < size; z++)
 			{
-				lastIndex = index;
-				index = inputString.indexOf(DATA_DELIMITER, lastIndex + 1);
-				data[x][z] = Long.parseLong(inputString.substring(lastIndex + 1, index), 16);
+				newData = 0;
+				for(tempIndex = 0; tempIndex < 16; tempIndex++)
+				{
+					currentChar = inputString.charAt(index+tempIndex);
+					if(currentChar == ','){
+						break;
+					}
+					shift = (15-tempIndex)*4;
+					digit = Character.digit(currentChar,16);
+					newData += ((long) (digit & 0xf)) << shift;
+				}
+				newData = newData >>> (shift);
+				data[x][z] = newData;
+				index = index + tempIndex;
 			}
 		}
 	}
@@ -90,11 +95,7 @@ public class SingleLevelContainer implements LevelContainer
 	public void updateData(LevelContainer lowerLevelContainer, int posX, int posZ)
 	{
 		//We reset the array
-		if(!LevelContainer.threadGetDataMap.containsKey(Thread.currentThread().getName()) || (LevelContainer.threadGetDataMap.get(Thread.currentThread().getName()) == null))
-		{
-			LevelContainer.threadGetDataMap.put(Thread.currentThread().getName(), new long[4]);
-		}
-		long[] dataToMerge = LevelContainer.threadGetDataMap.get(Thread.currentThread().getName());
+		long[] dataToMerge = ThreadMapUtil.getSingleUpdateArray();
 
 		int childPosX;
 		int childPosZ;

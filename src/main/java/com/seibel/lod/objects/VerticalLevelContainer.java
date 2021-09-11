@@ -1,9 +1,9 @@
 package com.seibel.lod.objects;
-
+/*
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
-/*
+
 public class VerticalLevelContainer implements LevelContainer
 {
 
@@ -73,6 +73,33 @@ public class VerticalLevelContainer implements LevelContainer
 
 	public LevelContainer expand(){
 		return new SingleLevelContainer((byte) (getDetailLevel() - 1));
+	}
+
+	public void updateData(LevelContainer lowerLevelContainer, int posX, int posZ)
+	{
+		//We reset the array
+		if(!LevelContainer.threadGetDataMap.containsKey(Thread.currentThread().getName()) || (LevelContainer.threadGetDataMap.get(Thread.currentThread().getName()) == null))
+		{
+			LevelContainer.threadGetDataMap.put(Thread.currentThread().getName(), new long[4]);
+		}
+		long[] dataToMerge = LevelContainer.threadGetDataMap.get(Thread.currentThread().getName());
+
+		int childPosX;
+		int childPosZ;
+		long data = 0;
+		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
+		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
+		for (int x = 0; x <= 1; x++)
+		{
+			for (int z = 0; z <= 1; z++)
+			{
+				childPosX = 2 * posX + x;
+				childPosZ = 2 * posZ + z;
+				dataToMerge[2*z + x] = lowerLevelContainer.getData(childPosX, childPosZ)[0];
+			}
+		}
+		data = DataPointUtil.mergeSingleData(dataToMerge);
+		addData(data,posX,posZ);
 	}
 
 	public void updateData(LevelContainer lowerLevelContainer, int posX, int posZ)

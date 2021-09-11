@@ -46,11 +46,12 @@ public class DataPointUtil
 
 	public static long createDataPoint(int height, int depth, int color, int lightValue, int generationMode)
 	{
-		int alpha = ColorUtil.getAlpha(color);
-		int red = ColorUtil.getRed(color);
-		int green = ColorUtil.getGreen(color);
-		int blue = ColorUtil.getBlue(color);
-		return createDataPoint(alpha, red, green, blue, height, depth, lightValue, generationMode);
+		return createDataPoint(
+				ColorUtil.getAlpha(color),
+				ColorUtil.getRed(color),
+				ColorUtil.getGreen(color),
+				ColorUtil.getBlue(color),
+				height, depth, lightValue, generationMode);
 	}
 
 	public static long createDataPoint(int alpha, int red, int green, int blue, int height, int depth, int lightValue, int generationMode)
@@ -62,15 +63,15 @@ public class DataPointUtil
 		dataPoint += (blue & BLUE_MASK) << BLUE_SHIFT;
 		dataPoint += (height & HEIGHT_MASK) << HEIGHT_SHIFT;
 		dataPoint += (depth & DEPTH_MASK) << DEPTH_SHIFT;
-		dataPoint += (depth & LIGHT_MASK) << LIGHT_SHIFT;
-		dataPoint += (depth & GEN_TYPE_MASK) << GEN_TYPE_SHIFT;
+		dataPoint += (lightValue & LIGHT_MASK) << LIGHT_SHIFT;
+		dataPoint += (generationMode & GEN_TYPE_MASK) << GEN_TYPE_SHIFT;
 		dataPoint += EXISTENCE_MASK << EXISTENCE_SHIFT;
 		return dataPoint;
 	}
 
 	public static short getHeight(long dataPoint)
 	{
-		return (short) ((dataPoint >> HEIGHT_SHIFT) & HEIGHT_MASK);
+		return (short) ((dataPoint >>> HEIGHT_SHIFT) & HEIGHT_MASK);
 	}
 
 	public static short getDepth(long dataPoint)
@@ -81,51 +82,48 @@ public class DataPointUtil
 
 	public static short getAlpha(long dataPoint)
 	{
-		return (short) ((dataPoint >> ALPHA_SHIFT) & ALPHA_MASK);
+		return (short) ((dataPoint >>> ALPHA_SHIFT) & ALPHA_MASK);
 	}
 
 	public static short getRed(long dataPoint)
 	{
-		return (short) ((dataPoint >> RED_SHIFT) & RED_MASK);
+		return (short) ((dataPoint >>> RED_SHIFT) & RED_MASK);
 	}
 
 	public static short getGreen(long dataPoint)
 	{
-		return (short) ((dataPoint >> GREEN_SHIFT) & GREEN_MASK);
+		return (short) ((dataPoint >>> GREEN_SHIFT) & GREEN_MASK);
 	}
 
 	public static short getBlue(long dataPoint)
 	{
-		return (short) ((dataPoint >> BLUE_SHIFT) & BLUE_MASK);
+		return (short) ((dataPoint >>> BLUE_SHIFT) & BLUE_MASK);
 	}
 
 	public static byte getLightValue(long dataPoint)
 	{
-		return (byte) ((dataPoint >> LIGHT_SHIFT) & LIGHT_MASK);
+		return (byte) ((dataPoint >>> LIGHT_SHIFT) & LIGHT_MASK);
 	}
 
 	public static byte getGenerationMode(long dataPoint)
 	{
-		return (byte) ((dataPoint >> GEN_TYPE_SHIFT) & GEN_TYPE_MASK);
+		return (byte) ((dataPoint >>> GEN_TYPE_SHIFT) & GEN_TYPE_MASK);
 	}
 
 
 	public static boolean isItVoid(long dataPoint)
 	{
-		return (((dataPoint >> VOID_SHIFT) & VOID_MASK) == 1);
+		return (((dataPoint >>> VOID_SHIFT) & VOID_MASK) == 1);
 	}
 
 	public static boolean doesItExist(long dataPoint)
 	{
-		return (((dataPoint >> EXISTENCE_SHIFT) & EXISTENCE_MASK) == 1);
+		return (((dataPoint >>> EXISTENCE_SHIFT) & EXISTENCE_MASK) == 1);
 	}
 
 	public static int getColor(long dataPoint)
 	{
-		int R = (getRed(dataPoint) << 16) & 0x00FF0000;
-		int G = (getGreen(dataPoint) << 8) & 0x0000FF00;
-		int B = getBlue(dataPoint) & 0x000000FF;
-		return 0xFF000000 | R | G | B;
+		return (int) ((dataPoint >>> COLOR_SHIFT) & COLOR_MASK);
 	}
 
 	public static String toString(long dataPoint)
@@ -157,7 +155,6 @@ public class DataPointUtil
 		int tempDepth = 0;
 		int tempLight = 0;
 		byte tempGenMode = DistanceGenerationMode.SERVER.complexity;
-		long newData = 0;
 		for(long data : dataToMerge)
 		{
 			if (DataPointUtil.doesItExist(data))

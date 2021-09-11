@@ -25,10 +25,7 @@ import java.util.concurrent.Executors;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
-import com.seibel.lod.util.DetailDistanceUtil;
-import com.seibel.lod.util.LevelPosUtil;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.*;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.util.math.ChunkPos;
@@ -446,12 +443,7 @@ public class LodDimension
 		LodRegion region = getRegion(regionPosX, regionPosZ);
 		if (region == null)
 			return false;
-		;
-		if(!LevelContainer.threadAddDataMap.containsKey(Thread.currentThread().getName()) || (LevelContainer.threadAddDataMap.get(Thread.currentThread().getName()) == null))
-		{
-			LevelContainer.threadAddDataMap.put(Thread.currentThread().getName(), new long[10]);
-		}
-		long[] dataArray = LevelContainer.threadAddDataMap.get(Thread.currentThread().getName());
+		long[] dataArray = ThreadMapUtil.getSingleAddDataArray();
 		dataArray[0] = lodDataPoint;
 		boolean nodeAdded = region.addData(detailLevel, posX, posZ, dataArray, serverQuality);
 		// only save valid LODs to disk
