@@ -24,6 +24,7 @@ import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.LodUtil;
 
+import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.Direction;
@@ -60,8 +61,15 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				0,
 				posZ * width,
 				bufferCenterBlockPos);
+		int color;/*
+		if(MinecraftWrapper.INSTANCE.getPlayer().level.isDay())
+		{
+			color = DataPointUtil.getColor(data);
+		}else{
+			color = DataPointUtil.getLightColor(data);
+		}*/
+		color = DataPointUtil.getLightColor(data);
 
-		int color = DataPointUtil.getColor(data);
 		if (debugging != DebugMode.OFF)
 		{
 			color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[detailLevel].getRGB();

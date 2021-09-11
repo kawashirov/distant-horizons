@@ -125,6 +125,13 @@ public class DataPointUtil
 	{
 		return (int) ((dataPoint >>> COLOR_SHIFT) & COLOR_MASK);
 	}
+	public static int getLightColor(long dataPoint)
+	{
+		int red = Math.min(getRed(dataPoint) + getLightValue(dataPoint)*8, 255);
+		int green = Math.min(getGreen(dataPoint) + getLightValue(dataPoint)*8, 255);
+		int blue =  Math.min(getBlue(dataPoint) + getLightValue(dataPoint)*4, 255);
+		return ColorUtil.rgbToInt(red,green,blue);
+	}
 
 	public static String toString(long dataPoint)
 	{

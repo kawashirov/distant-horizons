@@ -23,21 +23,20 @@ import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.LevelPosUtil;
+import com.seibel.lod.util.*;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
-import com.seibel.lod.util.ColorUtil;
-import com.seibel.lod.util.DetailDistanceUtil;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.block.*;
 import net.minecraft.block.material.MaterialColor;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.LightType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
@@ -163,6 +162,7 @@ public class LodBuilder
 		int endX;
 		int endZ;
 		int color;
+		byte light;
 		short height;
 		short depth;
 		long data;
@@ -185,7 +185,9 @@ public class LodBuilder
 				endX = detail.endX[i];
 				endZ = detail.endZ[i];
 
+				/*
 				color = generateLodColorForArea(chunk, config, startX, startZ, endX, endZ);
+				light = generateLodLightForArea(chunk, config, startX, startZ, endX, endZ);
 
 				if (!config.useHeightmap)
 				{
@@ -196,11 +198,12 @@ public class LodBuilder
 					height = determineHeightPoint(chunk.getOrCreateHeightmapUnprimed(LodUtil.DEFAULT_HEIGHTMAP), startX,
 							startZ, endX, endZ);
 					depth = 0;
-				}
+				}*/
 				posX = LevelPosUtil.convert((byte) 0, chunk.getPos().x * 16 + startX, detail.detailLevel);
 				posZ = LevelPosUtil.convert((byte) 0, chunk.getPos().z * 16 + startZ, detail.detailLevel);
+				long[] dataToMerge = createSingleDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
 				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
-				data = DataPointUtil.createDataPoint(height, depth, color, 0 , 0);
+				data = DataPointUtil.mergeSingleData(dataToMerge);
 				lodDim.addData(detailLevel,
 						posX,
 						posZ,
@@ -212,11 +215,99 @@ public class LodBuilder
 		} catch (Exception e)
 		{
 			e.printStackTrace();
+			throw e;
 		}
 
 	}
 
+	private long[] createSingleDataToMerge(LodDetail detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
+	{
+		long[] dataToMerge = ThreadMapUtil.getBuilderArray()[detail.detailLevel];
+		ChunkPos chunkPos = chunk.getPos();
+		BlockState blockState;
+		ChunkSection[] chunkSections = chunk.getSections();
+		ChunkSection section;
+		int size = 1 << detail.detailLevel;
+		int height = 0;
+		int depth = 0;
+		int color = 0;
+		int light = 0;
+		int generation = config.distanceGenerationMode.complexity;
 
+		int xRel;
+		int yRel;
+		int zRel;
+		int xAbs;
+		int zAbs;
+		int sectionIndex;
+		boolean voidData;
+		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
+		int index = 0;
+		if (dataToMerge == null)
+		{
+			dataToMerge = new long[size * size];
+		}
+		for (index = 0; index < size * size; index++)
+		{
+			xRel = Math.floorMod(index, size) + startX;
+			zRel = Math.floorDiv(index, size) + startZ;
+			xAbs = chunkPos.getMinBlockX() + xRel;
+			zAbs = chunkPos.getMinBlockZ() + zRel;
+			voidData = true;
+			for (sectionIndex = chunkSections.length - 1; sectionIndex >= 0; sectionIndex--)
+			{
+				for (yRel = CHUNK_DATA_WIDTH - 1; yRel >= 0; yRel--)
+				{
+					if (isLayerValidLodPoint(chunkSections, sectionIndex, yRel, xRel, zRel))
+					{
+						blockState = chunkSections[sectionIndex].getBlockState(xRel, yRel, zRel);
+
+						height = sectionIndex * CHUNK_DATA_WIDTH + yRel;
+						color = blockState.getBlock().defaultMaterialColor().col;
+
+						blockPos.set(xAbs, height, zAbs);
+						light = blockState.getLightBlock(chunk, blockPos);
+
+						voidData = false;
+						break;
+					}
+				}
+				if (!voidData)
+				{
+					break;
+				}
+			}
+
+			if (voidData)
+			{
+				//no valid block has been found, this column is void
+				dataToMerge[index] = DataPointUtil.createVoidDataPoint(generation);
+				continue;
+			}
+
+			//A valid block has been found. Now we search the deepest one
+
+			voidData = true;
+			for (sectionIndex = 0; sectionIndex < chunkSections.length; sectionIndex++)
+			{
+				for (yRel = 0; yRel < CHUNK_DATA_WIDTH; yRel++)
+				{
+					if (isLayerValidLodPoint(chunkSections, sectionIndex, yRel, xRel, zRel))
+					{
+						depth = sectionIndex * CHUNK_DATA_WIDTH + yRel;
+						voidData = false;
+						break;
+					}
+				}
+				if (!voidData)
+				{
+					break;
+				}
+			}
+			dataToMerge[index] = DataPointUtil.createDataPoint(height, depth, color, light, generation);
+		}
+		return dataToMerge;
+	}
 	// =====================//
 	// constructor helpers //
 	// =====================//
@@ -424,7 +515,67 @@ public class LodBuilder
 		red /= numbOfBlocks;
 		green /= numbOfBlocks;
 		blue /= numbOfBlocks;
-		return ColorUtil.rgbToInt(red,green,blue);
+		return ColorUtil.rgbToInt(red, green, blue);
+	}
+
+	private byte generateLodLightForArea(IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX,
+	                                     int endZ)
+	{
+		ChunkSection[] chunkSections = chunk.getSections();
+
+		int numbOfBlocks = 0;
+		int tempLight;
+		int light = 0;
+		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
+		for (int x = startX; x < endX; x++)
+		{
+			for (int z = startZ; z < endZ; z++)
+			{
+				boolean foundBlock = false;
+
+				// go top down
+				for (int i = chunkSections.length - 1; !foundBlock && i >= 0; i--)
+				{
+					if (!foundBlock && (chunkSections[i] != null || !config.useSolidBlocksInColorGen))
+					{
+						for (int y = CHUNK_SECTION_HEIGHT - 1; !foundBlock && y >= 0; y--)
+						{
+							tempLight = 0;
+							BlockState blockState = null;
+							if (chunkSections[i] != null)
+							{
+								blockPos.set(chunk.getPos().getMinBlockX() + x, y, chunk.getPos().getMinBlockZ() + z);
+								//blockState = chunkSections[i].getBlockState(x, y, z);
+
+								tempLight += MinecraftWrapper.INSTANCE.getPlayer().level.getLightEngine().getLayerListener(LightType.BLOCK).getLightValue(blockPos);
+								//tempLight += MinecraftWrapper.INSTANCE.getPlayer().level.getLightEngine().blockEngine.getLightValue(blockPos);
+								//tempLight += blockState.getLightBlock(chunk, blockPos);
+							}
+
+
+							light += tempLight;
+
+							numbOfBlocks++;
+
+							// we found a valid block, skip to the
+							// next x and z
+							foundBlock = true;
+						}
+					}
+				}
+			}
+		}
+
+		if (numbOfBlocks == 0)
+			numbOfBlocks = 1;
+
+		light /= numbOfBlocks;
+		if (light != 0)
+		{
+			System.out.println((chunk.getPos().getMinBlockX() + startX) + " " + (chunk.getPos().getMinBlockX() + endX) + " " + (chunk.getPos().getMinBlockZ() + startZ) + " " + (chunk.getPos().getMinBlockZ() + endZ));
+			System.out.println(light);
+		}
+		return (byte) light;
 	}
 
 	/**
@@ -435,9 +586,9 @@ public class LodBuilder
 		int colorInt = 0;
 
 		// block special cases
-		if (blockState == Blocks.AIR.defaultBlockState() 
-				|| blockState == Blocks.CAVE_AIR.defaultBlockState()
-				|| blockState == Blocks.BARRIER.defaultBlockState())
+		if (blockState == Blocks.AIR.defaultBlockState()
+				    || blockState == Blocks.CAVE_AIR.defaultBlockState()
+				    || blockState == Blocks.BARRIER.defaultBlockState())
 		{
 			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
 			tmp = tmp.darker();
