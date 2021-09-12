@@ -172,7 +172,6 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			maxY = box.getMaxY();
 			minZ = box.getMinZ();
 			maxZ = box.getMaxZ();
-			setDirection(Direction.UP);
 			addPosAndColor(buffer, minX, maxY, minZ, red, green, blue, alpha);
 			addPosAndColor(buffer, minX, maxY, maxZ, red, green, blue, alpha);
 			addPosAndColor(buffer, maxX, maxY, maxZ, red, green, blue, alpha);
@@ -191,7 +190,6 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			maxY = box.getMaxY();
 			minZ = box.getMinZ();
 			maxZ = box.getMaxZ();
-			setDirection(Direction.DOWN);
 			addPosAndColor(buffer, maxX, minY, minZ, red, green, blue, alpha);
 			addPosAndColor(buffer, maxX, minY, maxZ, red, green, blue, alpha);
 			addPosAndColor(buffer, minX, minY, maxZ, red, green, blue, alpha);
@@ -213,7 +211,6 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			maxY = box.getMaxY();
 			minZ = box.getMinZ();
 			maxZ = box.getMaxZ();
-			setDirection(Direction.WEST);
 			if (data == 0)
 			{
 				addPosAndColor(buffer, minX, minY, minZ, red, green, blue, alpha);
@@ -259,7 +256,6 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			maxY = box.getMaxY();
 			minZ = box.getMinZ();
 			maxZ = box.getMaxZ();
-			setDirection(Direction.EAST);
 			if (data == 0)
 			{
 				addPosAndColor(buffer, maxX, maxY, minZ, red, green, blue, alpha);
@@ -306,7 +302,6 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			minZ = box.getMinZ();
 			maxZ = box.getMaxZ();
 			// north (facing +Z)
-			setDirection(Direction.NORTH);
 			if (data == 0)
 			{
 				addPosAndColor(buffer, maxX, minY, maxZ, red, green, blue, alpha);
@@ -353,7 +348,6 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			minZ = box.getMinZ();
 			maxZ = box.getMaxZ();
 			// south (facing -Z)
-			setDirection(Direction.SOUTH);
 			if (data == 0)
 			{
 				addPosAndColor(buffer, minX, minY, minZ, red, green, blue, alpha);
