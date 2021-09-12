@@ -46,11 +46,6 @@ import com.seibel.lod.util.LodUtil;
  */
 public class LodDimensionFileHandler
 {
-	/**
-	 * This is what separates each piece of data
-	 */
-	public static final char DATA_DELIMITER = ',';
-
 
 	private LodDimension loadedDimension = null;
 	public long regionLastWriteTime[][];
@@ -84,7 +79,7 @@ public class LodDimensionFileHandler
 	 * file handler, older versions (smaller numbers) will be deleted and overwritten,
 	 * newer versions (larger numbers) will be ignored and won't be read.
 	 */
-	public static final int LOD_SAVE_FILE_VERSION = 5;
+	public static final int LOD_SAVE_FILE_VERSION = 6;
 
 	/**
 	 * This is the string written before the file version
