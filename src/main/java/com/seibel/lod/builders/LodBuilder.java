@@ -373,6 +373,11 @@ public class LodBuilder
 
 				colorInt = getColorForBlock(xRel, zRel, blockState, biome);
 			}
+			if (colorInt == 0 && yAbs > 0)
+			{
+				//invisible case
+				colorInt = generateLodColor(chunk, config, xRel, yAbs - 1, zRel);
+			}
 		}
 		return colorInt;
 	}
@@ -381,6 +386,7 @@ public class LodBuilder
 	{
 		int lightBlock;
 
+		//*TODO choose the best one between those options*/
 		//lightBlock = MinecraftWrapper.INSTANCE.getPlayer().level.getLightEngine().getLayerListener(LightType.BLOCK).getLightValue(blockPos);
 		//lightBlock = (byte) MinecraftWrapper.INSTANCE.getPlayer().level.getLightEngine().blockEngine.getLightValue(blockPos);
 		lightBlock = (byte) MinecraftWrapper.INSTANCE.getPlayer().level.getBrightness(LightType.BLOCK, blockPos);
@@ -410,7 +416,20 @@ public class LodBuilder
 		} else if (blockState == Blocks.MYCELIUM.defaultBlockState())
 		{
 			colorInt = LodUtil.MYCELIUM_COLOR_INT;
+		} else if (blockState == Blocks.SOUL_TORCH.defaultBlockState()
+				           || blockState == Blocks.SOUL_WALL_TORCH.defaultBlockState())
+		{
+			colorInt = Blocks.WARPED_PLANKS.defaultMaterialColor().col;
+		} else if (blockState == Blocks.TORCH.defaultBlockState()
+				           || blockState == Blocks.WALL_TORCH.defaultBlockState())
+		{
+			colorInt = Blocks.OAK_PLANKS.defaultMaterialColor().col;
+		} else if (blockState == Blocks.REDSTONE_TORCH.defaultBlockState()
+				           || blockState == Blocks.REDSTONE_WALL_TORCH.defaultBlockState())
+		{
+			colorInt = Blocks.CRIMSON_PLANKS.defaultMaterialColor().col;
 		}
+
 
 		// plant life
 		else if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() == Blocks.VINE)
@@ -436,7 +455,7 @@ public class LodBuilder
 		// everything else
 		else
 		{
-			colorInt = blockState.materialColor.col;
+			colorInt = blockState.getBlock().defaultMaterialColor().col;
 		}
 
 		return colorInt;
