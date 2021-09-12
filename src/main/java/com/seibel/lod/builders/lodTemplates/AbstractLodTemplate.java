@@ -51,7 +51,7 @@ public abstract class AbstractLodTemplate
 	                              double x, double y, double z,
 	                              int red, int green, int blue, int alpha)
 	{
-
+		//buffer.vertex(x, y, z).color(red, green, blue, alpha).normal(direction.getNormal().getX(), direction.getNormal().getY(), direction.getNormal().getZ()).endVertex();
 		buffer.vertex(x, y, z).color(red, green, blue, alpha).normal(direction.getNormal().getX(), direction.getNormal().getY(), direction.getNormal().getZ()).endVertex();
 	}
 

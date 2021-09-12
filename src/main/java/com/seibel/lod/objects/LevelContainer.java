@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentMap;
 public interface LevelContainer
 {
 	public static final char VERTICAL_DATA_DELIMITER = '\t';
-	public static final char DATA_DELIMITER = '\n';
+	public static final char DATA_DELIMITER = ' ';
 	/**With this you can add data to the level container
 	 *
 	 * @param data actual data to add in a array of long format.

@@ -77,13 +77,15 @@ public class SingleLevelContainer implements LevelContainer
 				newData = 0;
 				for(tempIndex = 0; tempIndex < 16; tempIndex++)
 				{
+					if(index+tempIndex >= inputString.length())
+						break;
 					currentChar = inputString.charAt(index+tempIndex);
-					if(currentChar == ','){
+					if(currentChar == DATA_DELIMITER){
 						break;
 					}
 					shift = (15-tempIndex)*4;
 					digit = Character.digit(currentChar,16);
-					newData += ((long) (digit & 0xf)) << shift;
+					newData += ((((long) digit & 0xf)) << shift);
 				}
 				newData = newData >>> (shift);
 				data[x][z] = newData;
