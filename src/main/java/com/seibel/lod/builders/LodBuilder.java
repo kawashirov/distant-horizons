@@ -263,11 +263,12 @@ public class LodBuilder
 				continue;
 			}
 
-			yAbs = height;
-			blockPos.set(xAbs, yAbs, zAbs);
+			yAbs = height - 1;
+			// We search light on above air block
+			blockPos.set(xAbs, yAbs + 1, zAbs);
 
-			color = generateLodColor(chunk, config, xRel, height, zRel);
-			light = getLightBlockValue(chunk, blockPos, xRel, yAbs, zRel);
+			color = generateLodColor(chunk, config, xRel, yAbs, zRel);
+			light = getLightBlockValue(chunk, blockPos);
 			depth = determineBottomPoint(chunk, config, xRel, zRel);
 
 			dataToMerge[index] = DataPointUtil.createDataPoint(height, depth, color, light, generation);
@@ -331,7 +332,7 @@ public class LodBuilder
 				{
 					if (isLayerValidLodPoint(chunkSections, sectionIndex, yRel, xRel, zRel))
 					{
-						height = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel);
+						height = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel + 1);
 						voidData = false;
 						break;
 					}
@@ -376,14 +377,15 @@ public class LodBuilder
 		return colorInt;
 	}
 
-	private byte getLightBlockValue(IChunk chunk, BlockPos.Mutable blockPos, int xRel, int yAbs, int zRel)
+	private int getLightBlockValue(IChunk chunk, BlockPos.Mutable blockPos)
 	{
-		byte lightBlock;
-		BlockState blockState = chunk.getSections()[Math.floorDiv(yAbs, CHUNK_SECTION_HEIGHT)].getBlockState(xRel, Math.floorMod(yAbs, CHUNK_SECTION_HEIGHT), zRel);
+		int lightBlock;
 
 		//lightBlock = MinecraftWrapper.INSTANCE.getPlayer().level.getLightEngine().getLayerListener(LightType.BLOCK).getLightValue(blockPos);
-		//lightBlock = MinecraftWrapper.INSTANCE.getPlayer().level.getLightEngine().blockEngine.getLightValue(blockPos);
-		lightBlock = (byte) blockState.getLightBlock(chunk, blockPos);
+		//lightBlock = (byte) MinecraftWrapper.INSTANCE.getPlayer().level.getLightEngine().blockEngine.getLightValue(blockPos);
+		lightBlock = (byte) MinecraftWrapper.INSTANCE.getPlayer().level.getBrightness(LightType.BLOCK, blockPos);
+		//BlockState blockState = chunk.getBlockState(blockPos);
+		//lightBlock = (byte) blockState.getLightBlock(chunk, blockPos);
 		return lightBlock;
 	}
 

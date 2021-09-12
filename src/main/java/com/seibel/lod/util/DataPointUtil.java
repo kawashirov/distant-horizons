@@ -125,11 +125,13 @@ public class DataPointUtil
 	{
 		return (int) ((dataPoint >>> COLOR_SHIFT) & COLOR_MASK);
 	}
+
 	public static int getLightColor(long dataPoint)
 	{
-		int red = Math.min(getRed(dataPoint) + getLightValue(dataPoint)*8, 255);
-		int green = Math.min(getGreen(dataPoint) + getLightValue(dataPoint)*8, 255);
-		int blue =  Math.min(getBlue(dataPoint) + getLightValue(dataPoint)*4, 255);
+		int lightBlock = getLightValue(dataPoint);
+		int red = Math.min(getRed(dataPoint) + lightBlock*8, 255);
+		int green = Math.min(getGreen(dataPoint) + lightBlock*8, 255);
+		int blue =  Math.min(getBlue(dataPoint) + lightBlock*4, 255);
 		return ColorUtil.rgbToInt(red,green,blue);
 	}
 
@@ -176,6 +178,7 @@ public class DataPointUtil
 					tempBlue += DataPointUtil.getBlue(data);
 					tempHeight += DataPointUtil.getHeight(data);
 					tempDepth += DataPointUtil.getDepth(data);
+					tempLight += DataPointUtil.getLightValue(data);
 				} else
 				{
 					// void children have the default height (most likely -1)
