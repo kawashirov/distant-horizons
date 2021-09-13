@@ -189,19 +189,20 @@ public class LodBuilder
 				posX = LevelPosUtil.convert((byte) 0, chunk.getPos().x * 16 + startX, detail.detailLevel);
 				posZ = LevelPosUtil.convert((byte) 0, chunk.getPos().z * 16 + startZ, detail.detailLevel);
 				long[] data;
-				long[] dataToMerge;
+				long[][] dataToMerge;
 				//data = ThreadMapUtil.getSingleAddDataArray();
-				dataToMerge = createSingleDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-				long[][] dataToMerge2 = new long[dataToMerge.length][];
+				//dataToMerge = createSingleDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
+				/*long[][] dataToMerge2 = new long[dataToMerge.length][];
 				for (int index = 0; index < dataToMerge.length; index++)
 				{
 					dataToMerge2[index] = new long[]{dataToMerge[index]};
-				}
+				}*/
 				//data[0] = DataPointUtil.mergeSingleData(dataToMerge);
 
-				//dataToMerge = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-				data = DataPointUtil.mergeVerticalData(dataToMerge2);
-
+				dataToMerge = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
+				data = DataPointUtil.mergeVerticalData(dataToMerge);
+				if(data.length == 0 || data == null)
+					data = new long[]{DataPointUtil.EMPTY_DATA};
 				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
 				lodDim.addData(detailLevel,
 						posX,
@@ -209,6 +210,7 @@ public class LodBuilder
 						data,
 						false,
 						isServer);
+
 			}
 			lodDim.updateData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
 		} catch (Exception e)

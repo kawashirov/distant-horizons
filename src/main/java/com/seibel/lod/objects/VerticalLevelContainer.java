@@ -42,7 +42,7 @@ public class VerticalLevelContainer implements LevelContainer
 
 	public boolean doesItExist(int posX, int posZ){
 		long[] data = getData(posX,posZ);
-		return DataPointUtil.doesItExist(data[0]);
+		return (data != null && DataPointUtil.doesItExist(data[0]));
 	}
 
 	public VerticalLevelContainer(String inputString)

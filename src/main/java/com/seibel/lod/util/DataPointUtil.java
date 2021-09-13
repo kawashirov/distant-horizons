@@ -105,9 +105,9 @@ public class DataPointUtil
 		return (short) ((dataPoint >>> BLUE_SHIFT) & BLUE_MASK);
 	}
 
-	public static byte getLightValue(long dataPoint)
+	public static int getLightValue(long dataPoint)
 	{
-		return (byte) ((dataPoint >>> LIGHT_SHIFT) & LIGHT_MASK);
+		return (int) ((dataPoint >>> LIGHT_SHIFT) & LIGHT_MASK);
 	}
 
 	public static byte getGenerationMode(long dataPoint)
@@ -128,15 +128,15 @@ public class DataPointUtil
 
 	public static int getColor(long dataPoint)
 	{
-		return (int) ((dataPoint >>> COLOR_SHIFT) & COLOR_MASK);
+		return (int) (dataPoint >>> COLOR_SHIFT);
 	}
 
 	public static int getLightColor(long dataPoint)
 	{
 		int lightBlock = getLightValue(dataPoint);
-		int red = Math.min(getRed(dataPoint) + lightBlock * 8, 255);
-		int green = Math.min(getGreen(dataPoint) + lightBlock * 8, 255);
-		int blue = Math.min(getBlue(dataPoint) + lightBlock * 4, 255);
+		int red = LodUtil.clamp(0, getRed(dataPoint) + lightBlock * 8, 255);
+		int green = LodUtil.clamp(0, getGreen(dataPoint) + lightBlock * 8, 255);
+		int blue = LodUtil.clamp(0, getBlue(dataPoint) + lightBlock * 4, 255);
 		return ColorUtil.rgbToInt(red, green, blue);
 	}
 
@@ -147,11 +147,21 @@ public class DataPointUtil
 		s.append(" ");
 		s.append(getDepth(dataPoint));
 		s.append(" ");
+		s.append(getAlpha(dataPoint));
+		s.append(" ");
 		s.append(getRed(dataPoint));
 		s.append(" ");
 		s.append(getBlue(dataPoint));
 		s.append(" ");
 		s.append(getGreen(dataPoint));
+		s.append(" ");
+		s.append(getLightValue(dataPoint));
+		s.append(" ");
+		s.append(getGenerationMode(dataPoint));
+		s.append(" ");
+		s.append(isItVoid(dataPoint));
+		s.append(" ");
+		s.append(doesItExist(dataPoint));
 		s.append('\n');
 		return s.toString();
 	}
@@ -302,7 +312,7 @@ public class DataPointUtil
 						if ((depth <= getDepth(singleData) && getDepth(singleData) <= height)
 								    || (depth <= getHeight(singleData) && getHeight(singleData) <= height))
 						{
-							singleDataToMerge[dataIndex] = singleData;
+							singleDataToMerge[index] = singleData;
 							break;
 						}
 					}
