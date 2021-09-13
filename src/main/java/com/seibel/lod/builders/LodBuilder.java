@@ -127,7 +127,7 @@ public class LodBuilder
 				generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(generationMode));
 			} catch (IllegalArgumentException | NullPointerException e)
 			{
-				//e.printStackTrace();
+				e.printStackTrace();
 				// if the world changes while LODs are being generated
 				// they will throw errors as they try to access things that no longer
 				// exist.
@@ -192,31 +192,23 @@ public class LodBuilder
 				long[] dataToMerge;
 				//data = ThreadMapUtil.getSingleAddDataArray();
 				dataToMerge = createSingleDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-
-				try
+				long[][] dataToMerge2 = new long[dataToMerge.length][];
+				for (int index = 0; index < dataToMerge.length; index++)
 				{
-					long[][] dataToMerge2 = new long[dataToMerge.length][];
-					for (int index = 0; index < dataToMerge.length; index++)
-					{
-						dataToMerge2[index] = new long[]{dataToMerge[index]};
-					}
-					//data[0] = DataPointUtil.mergeSingleData(dataToMerge);
-
-					//dataToMerge = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-					data = DataPointUtil.mergeVerticalData(dataToMerge2);
-
-					boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
-					lodDim.addData(detailLevel,
-							posX,
-							posZ,
-							data,
-							false,
-							isServer);
-				}catch (Exception e)
-				{
-					e.printStackTrace();
-					throw e;
+					dataToMerge2[index] = new long[]{dataToMerge[index]};
 				}
+				//data[0] = DataPointUtil.mergeSingleData(dataToMerge);
+
+				//dataToMerge = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
+				data = DataPointUtil.mergeVerticalData(dataToMerge2);
+
+				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
+				lodDim.addData(detailLevel,
+						posX,
+						posZ,
+						data,
+						false,
+						isServer);
 			}
 			lodDim.updateData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
 		} catch (Exception e)
@@ -225,8 +217,7 @@ public class LodBuilder
 		}
 
 	}
-
-	/*private long[][] createVerticalDataToMerge(LodDetail detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
+	private long[][] createVerticalDataToMerge(LodDetail detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{
 		long[][] dataToMerge = ThreadMapUtil.getBuilderVerticalArray()[detail.detailLevel];
 		ChunkPos chunkPos = chunk.getPos();
@@ -246,39 +237,114 @@ public class LodBuilder
 
 		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
 		int index = 0;
-		if (dataToMerge == null)
-		{
-			dataToMerge = new long[size * size][256];
-		}
+		dataToMerge = new long[size * size][1024];
 		for (index = 0; index < size * size; index++)
 		{
+
 			xRel = Math.floorMod(index, size) + startX;
 			zRel = Math.floorDiv(index, size) + startZ;
 			xAbs = chunkPos.getMinBlockX() + xRel;
 			zAbs = chunkPos.getMinBlockZ() + zRel;
 
 			//Calculate the height of the lod
-			height = determineHeightPoint(chunk, config, xRel, zRel);
+			yAbs = 255;
+			int count = 0;
+			while(yAbs > 0){
+				height = determineHeightPointFrom(chunk, config, xRel, zRel, yAbs);
 
-			//If the lod is at default, then we set this as void data
-			if (height == DEFAULT_HEIGHT)
-			{
-				dataToMerge[index] = DataPointUtil.createVoidDataPoint(generation);
-				continue;
+				//If the lod is at default, then we set this as void data
+				if (height == DEFAULT_HEIGHT)
+				{
+					dataToMerge[index][0] = DataPointUtil.createVoidDataPoint(generation);
+					break;
+				}
+
+				yAbs = height - 1;
+				// We search light on above air block
+				blockPos.set(xAbs, yAbs + 1, zAbs);
+
+				color = generateLodColor(chunk, config, xRel, yAbs, zRel);
+				light = getLightBlockValue(chunk, blockPos);
+				depth = determineBottomPointFrom(chunk, config, xRel, zRel, yAbs);
+
+				//System.out.println(dataToMerge.length + " " + index +" " + count + " " + yAbs);
+				//System.out.println(dataToMerge.length + " " + dataToMerge[index].length);
+				dataToMerge[index][count] = DataPointUtil.createDataPoint(height, depth, color, light, generation);
+				yAbs = depth - 1;
+				count++;
 			}
-
-			yAbs = height - 1;
-			// We search light on above air block
-			blockPos.set(xAbs, yAbs + 1, zAbs);
-
-			color = generateLodColor(chunk, config, xRel, yAbs, zRel);
-			light = getLightBlockValue(chunk, blockPos);
-			depth = determineBottomPoint(chunk, config, xRel, zRel);
-
-			dataToMerge[index] = DataPointUtil.createDataPoint(height, depth, color, light, generation);
 		}
 		return dataToMerge;
-	}*/
+	}
+
+	/**
+	 * Find the lowest valid point from the bottom.
+	 */
+	private short determineBottomPointFrom(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, int yAbs)
+	{
+		short depth = DEFAULT_DEPTH;
+		if (config.useHeightmap)
+		{
+			depth = 0;
+		} else
+		{
+			boolean voidData = true;
+			ChunkSection[] chunkSections = chunk.getSections();
+			for (int sectionIndex = chunkSections.length - 1; sectionIndex >= 0; sectionIndex--)
+			{
+				for (int yRel = CHUNK_DATA_WIDTH - 1; yRel >= 0; yRel--)
+				{
+					if(sectionIndex * CHUNK_DATA_WIDTH + yRel > yAbs)
+						continue;
+					if (!isLayerValidLodPoint(chunkSections, sectionIndex, yRel, xRel, zRel))
+					{
+						depth = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel + 1);
+						voidData = false;
+						break;
+					}
+				}
+				if (!voidData)
+				{
+					break;
+				}
+			}
+		}
+		return depth;
+	}
+	/**
+	 * Find the highest valid point from the Top
+	 */
+	private short determineHeightPointFrom(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, int yAbs)
+	{
+		short height = DEFAULT_HEIGHT;
+		if (config.useHeightmap)
+		{
+			height = (short) chunk.getOrCreateHeightmapUnprimed(LodUtil.DEFAULT_HEIGHTMAP).getFirstAvailable(xRel, zRel);
+		} else
+		{
+			boolean voidData = true;
+			ChunkSection[] chunkSections = chunk.getSections();
+			for (int sectionIndex = chunkSections.length - 1; sectionIndex >= 0; sectionIndex--)
+			{
+				for (int yRel = CHUNK_DATA_WIDTH - 1; yRel >= 0; yRel--)
+				{
+					if(sectionIndex * CHUNK_DATA_WIDTH + yRel > yAbs)
+						continue;
+					if (isLayerValidLodPoint(chunkSections, sectionIndex, yRel, xRel, zRel))
+					{
+						height = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel + 1);
+						voidData = false;
+						break;
+					}
+				}
+				if (!voidData)
+				{
+					break;
+				}
+			}
+		}
+		return height;
+	}
 
 	private long[] createSingleDataToMerge(LodDetail detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{
