@@ -11,9 +11,10 @@ public class ThreadMapUtil
 	public static final ConcurrentMap<String,long[]> threadSingleGetDataMap = new ConcurrentHashMap();
 	public static final ConcurrentMap<String,long[]> threadSingleUpdateMap = new ConcurrentHashMap();
 	public static final ConcurrentMap<String,long[][]> threadBuilderArrayMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String,long[][][]> threadBuilderVerticalArrayMap = new ConcurrentHashMap();
 	public static final ConcurrentMap<String,long[]> threadVerticalAddDataMap = new ConcurrentHashMap();
 	public static final ConcurrentMap<String,long[]> threadVerticalGetDataMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String,long[][][]> threadVerticalUpdateMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String,long[][]> threadVerticalUpdateMap = new ConcurrentHashMap();
 	public static final ConcurrentMap<String,int[]> threadVerticalIndexesMap = new ConcurrentHashMap();
 
 
@@ -50,6 +51,14 @@ public class ThreadMapUtil
 		return threadBuilderArrayMap.get(Thread.currentThread().getName());
 	}
 
+	public static long[][][] getBuilderVerticalArray(){
+		if(!threadBuilderVerticalArrayMap.containsKey(Thread.currentThread().getName()) || (threadBuilderVerticalArrayMap.get(Thread.currentThread().getName()) == null))
+		{
+			long[][][] array = new long[5][][];
+			threadBuilderVerticalArrayMap.put(Thread.currentThread().getName(), array);
+		}
+		return threadBuilderVerticalArrayMap.get(Thread.currentThread().getName());
+	}
 
 	public static long[] addVerticalDataArray(){
 		if(!threadVerticalAddDataMap.containsKey(Thread.currentThread().getName()) || (threadVerticalAddDataMap.get(Thread.currentThread().getName()) == null))
@@ -67,10 +76,10 @@ public class ThreadMapUtil
 		return threadVerticalGetDataMap.get(Thread.currentThread().getName());
 	}
 
-	public static long[][][] getVerticalUpdateArray(){
+	public static long[][] getVerticalUpdateArray(){
 		if(!threadVerticalUpdateMap.containsKey(Thread.currentThread().getName()) || (threadVerticalUpdateMap.get(Thread.currentThread().getName()) == null))
 		{
-			threadVerticalUpdateMap.put(Thread.currentThread().getName(), new long[4][4][16]);
+			threadVerticalUpdateMap.put(Thread.currentThread().getName(), new long[4][]);
 		}
 		return threadVerticalUpdateMap.get(Thread.currentThread().getName());
 	}

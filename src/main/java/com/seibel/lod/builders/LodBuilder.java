@@ -167,7 +167,6 @@ public class LodBuilder
 		byte light;
 		short height;
 		short depth;
-		long data;
 		try
 		{
 			LodDetail detail;
@@ -187,40 +186,99 @@ public class LodBuilder
 				endX = detail.endX[i];
 				endZ = detail.endZ[i];
 
-				/*
-				color = generateLodColorForArea(chunk, config, startX, startZ, endX, endZ);
-				light = generateLodLightForArea(chunk, config, startX, startZ, endX, endZ);
-
-				if (!config.useHeightmap)
-				{
-					height = determineHeightPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
-					depth = determineBottomPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
-				} else
-				{
-					height = determineHeightPoint(chunk.getOrCreateHeightmapUnprimed(LodUtil.DEFAULT_HEIGHTMAP), startX,
-							startZ, endX, endZ);
-					depth = 0;
-				}*/
 				posX = LevelPosUtil.convert((byte) 0, chunk.getPos().x * 16 + startX, detail.detailLevel);
 				posZ = LevelPosUtil.convert((byte) 0, chunk.getPos().z * 16 + startZ, detail.detailLevel);
-				long[] dataToMerge = createSingleDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
-				data = DataPointUtil.mergeSingleData(dataToMerge);
-				lodDim.addData(detailLevel,
-						posX,
-						posZ,
-						data,
-						false,
-						isServer);
+				long[] data;
+				long[] dataToMerge;
+				//data = ThreadMapUtil.getSingleAddDataArray();
+				dataToMerge = createSingleDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
+
+				try
+				{
+					long[][] dataToMerge2 = new long[dataToMerge.length][];
+					for (int index = 0; index < dataToMerge.length; index++)
+					{
+						dataToMerge2[index] = new long[]{dataToMerge[index]};
+					}
+					//data[0] = DataPointUtil.mergeSingleData(dataToMerge);
+
+					//dataToMerge = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
+					data = DataPointUtil.mergeVerticalData(dataToMerge2);
+
+					boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
+					lodDim.addData(detailLevel,
+							posX,
+							posZ,
+							data,
+							false,
+							isServer);
+				}catch (Exception e)
+				{
+					e.printStackTrace();
+					throw e;
+				}
 			}
 			lodDim.updateData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
 		} catch (Exception e)
 		{
 			e.printStackTrace();
-			throw e;
 		}
 
 	}
+
+	/*private long[][] createVerticalDataToMerge(LodDetail detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
+	{
+		long[][] dataToMerge = ThreadMapUtil.getBuilderVerticalArray()[detail.detailLevel];
+		ChunkPos chunkPos = chunk.getPos();
+
+		int size = 1 << detail.detailLevel;
+		int height = 0;
+		int depth = 0;
+		int color = 0;
+		int light = 0;
+		int generation = config.distanceGenerationMode.complexity;
+
+		int xRel;
+		int zRel;
+		int xAbs;
+		int yAbs;
+		int zAbs;
+
+		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
+		int index = 0;
+		if (dataToMerge == null)
+		{
+			dataToMerge = new long[size * size][256];
+		}
+		for (index = 0; index < size * size; index++)
+		{
+			xRel = Math.floorMod(index, size) + startX;
+			zRel = Math.floorDiv(index, size) + startZ;
+			xAbs = chunkPos.getMinBlockX() + xRel;
+			zAbs = chunkPos.getMinBlockZ() + zRel;
+
+			//Calculate the height of the lod
+			height = determineHeightPoint(chunk, config, xRel, zRel);
+
+			//If the lod is at default, then we set this as void data
+			if (height == DEFAULT_HEIGHT)
+			{
+				dataToMerge[index] = DataPointUtil.createVoidDataPoint(generation);
+				continue;
+			}
+
+			yAbs = height - 1;
+			// We search light on above air block
+			blockPos.set(xAbs, yAbs + 1, zAbs);
+
+			color = generateLodColor(chunk, config, xRel, yAbs, zRel);
+			light = getLightBlockValue(chunk, blockPos);
+			depth = determineBottomPoint(chunk, config, xRel, zRel);
+
+			dataToMerge[index] = DataPointUtil.createDataPoint(height, depth, color, light, generation);
+		}
+		return dataToMerge;
+	}*/
 
 	private long[] createSingleDataToMerge(LodDetail detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{

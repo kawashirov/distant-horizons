@@ -55,7 +55,8 @@ public class LodRegion
 		//Initialize all the different matrices
 		for (byte lod = minDetailLevel; lod <= LodUtil.REGION_DETAIL_LEVEL; lod++)
 		{
-			dataContainer[lod] = new SingleLevelContainer(lod);
+			//dataContainer[lod] = new SingleLevelContainer(lod);
+			dataContainer[lod] = new VerticalLevelContainer(lod);
 			/*if(twoDimension){
 				dataContainer[lod] = new SingleLevelContainer(lod);
 			}else{

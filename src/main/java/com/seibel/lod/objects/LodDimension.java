@@ -433,7 +433,7 @@ public class LodDimension
 	 * stored in the LOD. If an LOD already exists at the given
 	 * coordinates it will be overwritten.
 	 */
-	public Boolean addData(byte detailLevel, int posX, int posZ, long lodDataPoint, boolean dontSave, boolean serverQuality)
+	public Boolean addData(byte detailLevel, int posX, int posZ, long[] dataPoint, boolean dontSave, boolean serverQuality)
 	{
 
 		// don't continue if the region can't be saved
@@ -443,9 +443,7 @@ public class LodDimension
 		LodRegion region = getRegion(regionPosX, regionPosZ);
 		if (region == null)
 			return false;
-		long[] dataArray = ThreadMapUtil.getSingleAddDataArray();
-		dataArray[0] = lodDataPoint;
-		boolean nodeAdded = region.addData(detailLevel, posX, posZ, dataArray, serverQuality);
+		boolean nodeAdded = region.addData(detailLevel, posX, posZ, dataPoint, serverQuality);
 		// only save valid LODs to disk
 		if (!dontSave && fileHandler != null)
 		{
@@ -520,7 +518,7 @@ public class LodDimension
 	 * Returns null if the LodChunk doesn't exist or
 	 * is outside the loaded area.
 	 */
-	public long getData(byte detailLevel, int posX, int posZ)
+	public long[] getData(byte detailLevel, int posX, int posZ)
 	{
 		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
 			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
@@ -529,10 +527,10 @@ public class LodDimension
 
 		if (region == null)
 		{
-			return 0;
+			return new long[]{DataPointUtil.EMPTY_DATA};
 		}
 
-		return region.getData(detailLevel, posX, posZ)[0];
+		return region.getData(detailLevel, posX, posZ);
 	}
 
 

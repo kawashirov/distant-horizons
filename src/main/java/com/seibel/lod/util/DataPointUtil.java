@@ -13,6 +13,7 @@ public class DataPointUtil
 	//public final static int MIN_DEPTH = -64;
 	//public final static int MIN_HEIGHT = -64;
 	public final static int EMPTY_DATA = 0;
+	public final static int WORLD_HEIGHT = 256;
 
 	public final static int ALPHA_SHIFT = 56;
 	public final static int RED_SHIFT = 48;
@@ -218,6 +219,104 @@ public class DataPointUtil
 
 	public static long[] mergeVerticalData(long[][] dataToMerge)
 	{
+		boolean[] projection = new boolean[WORLD_HEIGHT + 1];
+		int size = 0;
+
+		int genMode = DistanceGenerationMode.SERVER.complexity;
+		boolean allEmpty = true;
+		boolean allVoid = true;
+		long singleData;
+
+		int depth = 0;
+		int height = 0;
+		//We collect the indexes of the data, ordered by the depth
+		for (int index = 0; index < dataToMerge.length; index++)
+		{
+			for (int dataIndex = 0; dataIndex < dataToMerge[index].length; dataIndex++)
+			{
+				singleData = dataToMerge[index][dataIndex];
+				if (doesItExist(singleData))
+				{
+					genMode = Math.min(genMode, getGenerationMode(singleData));
+					allEmpty = false;
+					if (!isItVoid(singleData))
+					{
+						allVoid = false;
+						depth = getDepth(singleData);
+						height = getHeight(singleData);
+						for (int y = depth; y <= height; y++)
+						{
+							projection[y] = true;
+						}
+					}
+				}
+			}
+		}
+
+
+		//We check if there is any data that's not empty or void
+		if (allEmpty)
+		{
+			return new long[]{EMPTY_DATA};
+		}
+		if (allVoid)
+		{
+			return new long[]{createVoidDataPoint(genMode)};
+		}
+
+		int count = 0;
+		int i = 0;
+		int[][] heightAndDepth = new int[projection.length][2];
+		while (i < projection.length)
+		{
+			while (i < projection.length && !projection[i])
+			{
+				i++;
+			}
+			depth = i;
+			while (i < projection.length && projection[i])
+			{
+				height = i;
+				i++;
+			}
+			if(!(i < projection.length))
+				break;
+			heightAndDepth[count][0] = depth;
+			heightAndDepth[count][1] = height;
+			count++;
+		}
+		//As standard the vertical lods are ordered from top to bottom
+		long[] dataPoint = new long[count];
+		for (int j = count - 1; j >= 0; j--)
+		{
+			depth = heightAndDepth[j][0];
+			height = heightAndDepth[j][1];
+			long[] singleDataToMerge = new long[dataToMerge.length];
+			for (int index = 0; index < dataToMerge.length; index++)
+			{
+				for (int dataIndex = 0; dataIndex < dataToMerge[index].length; dataIndex++)
+				{
+					singleData = dataToMerge[index][dataIndex];
+					if (doesItExist(singleData) && !isItVoid(singleData))
+					{
+						if ((depth <= getDepth(singleData) && getDepth(singleData) <= height)
+								    || (depth <= getHeight(singleData) && getHeight(singleData) <= height))
+						{
+							singleDataToMerge[dataIndex] = singleData;
+							break;
+						}
+					}
+				}
+			}
+			long data = mergeSingleData(singleDataToMerge);
+			dataPoint[j] = createDataPoint(height, depth, getColor(data), getLightValue(data), getGenerationMode(data));
+		}
+
+		return dataPoint;
+	}
+	/*
+	public static long[] mergeVerticalData(long[][] dataToMerge)
+	{
 		int[][] dataCollector = new int[256][2];
 		long[] singleDataToCollect = new long[256];
 		int size = 0;
@@ -230,7 +329,7 @@ public class DataPointUtil
 		//We collect the indexes of the data, ordered by the depth
 		for (int index = 0; index < dataToMerge.length; index++)
 		{
-			for (int dataIndex = 0; dataIndex < dataToMerge.length; dataIndex++)
+			for (int dataIndex = 0; dataIndex < dataToMerge[index].length; dataIndex++)
 			{
 				singleData = dataToMerge[index][dataIndex];
 				if (doesItExist(singleData))
@@ -246,11 +345,12 @@ public class DataPointUtil
 							dataCollector[j] = dataCollector[j - 1];
 							j = j - 1;
 						}
-						dataCollector[j][0] = dataIndex;
-						dataCollector[j][1] = index;
+						dataCollector[j][0] = index;
+						dataCollector[j][1] = dataIndex;
 						size++;
 					}
 				}
+
 			}
 		}
 
@@ -273,7 +373,7 @@ public class DataPointUtil
 		int index = 0;
 		int dataCount = 0;
 		long[] singleDataToMerge = new long[dataToMerge.length];
-		long[] newData = new long[dataToMerge.length];
+		long[] newData = new long[256];
 		while (index < size)
 		{
 			dataCount++;
@@ -281,17 +381,21 @@ public class DataPointUtil
 			minDepth = getDepth(singleData);
 			maxHeight = getHeight(singleData);
 			index++;
-			while(index < size)
+			while (index < size)
 			{
-				singleData = dataToMerge[dataCollector[index][0]][dataCollector[index][1]];
+				if(dataCollector[index][1] >= dataToMerge[dataCollector[index][0]].length)
+					singleData = EMPTY_DATA;
+				else
+					singleData = dataToMerge[dataCollector[index][0]][dataCollector[index][1]];
 				tempDepth = getDepth(singleData);
 				tempHeight = getHeight(singleData);
-				if(maxHeight >= tempDepth)
+				if (maxHeight >= tempDepth)
 				{
 					singleDataToMerge[dataCollector[index][0]] = singleData;
 					maxHeight = tempHeight;
 					index++;
-				}else{
+				} else
+				{
 					break;
 				}
 			}
@@ -299,7 +403,7 @@ public class DataPointUtil
 			newData[dataCount] = createDataPoint(maxHeight, minDepth, getColor(singleData), getLightValue(singleData), getGenerationMode(singleData));
 		}
 		return Arrays.copyOf(newData, dataCount);
-	}
+	}*/
 
 	public static long[] compress(long[] data, byte detailLevel)
 	{

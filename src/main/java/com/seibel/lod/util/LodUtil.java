@@ -337,7 +337,8 @@ public class LodUtil
 					if (!lodDim.doesDataExist(LodUtil.CHUNK_DETAIL_LEVEL, x, z))
 						continue;
 
-					long data = lodDim.getData(LodUtil.CHUNK_DETAIL_LEVEL, x, z);
+					long[] dataVertical = lodDim.getData(LodUtil.CHUNK_DETAIL_LEVEL, x, z);
+					long data = dataVertical[dataVertical.length - 1];
 
 					short lodAverageHeight = DataPointUtil.getHeight(data);
 
