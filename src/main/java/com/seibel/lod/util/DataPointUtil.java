@@ -1,6 +1,10 @@
 package com.seibel.lod.util;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
+import org.lwjgl.system.CallbackI;
+
+import java.lang.reflect.Array;
+import java.util.Arrays;
 
 public class DataPointUtil
 {
@@ -77,7 +81,7 @@ public class DataPointUtil
 	public static short getDepth(long dataPoint)
 	{
 
-		return (short) ((dataPoint >> DEPTH_SHIFT) & DEPTH_MASK);
+		return (short) ((dataPoint >>> DEPTH_SHIFT) & DEPTH_MASK);
 	}
 
 	public static short getAlpha(long dataPoint)
@@ -129,10 +133,10 @@ public class DataPointUtil
 	public static int getLightColor(long dataPoint)
 	{
 		int lightBlock = getLightValue(dataPoint);
-		int red = Math.min(getRed(dataPoint) + lightBlock*8, 255);
-		int green = Math.min(getGreen(dataPoint) + lightBlock*8, 255);
-		int blue =  Math.min(getBlue(dataPoint) + lightBlock*4, 255);
-		return ColorUtil.rgbToInt(red,green,blue);
+		int red = Math.min(getRed(dataPoint) + lightBlock * 8, 255);
+		int green = Math.min(getGreen(dataPoint) + lightBlock * 8, 255);
+		int blue = Math.min(getBlue(dataPoint) + lightBlock * 4, 255);
+		return ColorUtil.rgbToInt(red, green, blue);
 	}
 
 	public static String toString(long dataPoint)
@@ -164,14 +168,17 @@ public class DataPointUtil
 		int tempDepth = 0;
 		int tempLight = 0;
 		byte tempGenMode = DistanceGenerationMode.SERVER.complexity;
-		for(long data : dataToMerge)
+		boolean allEmpty = true;
+		boolean allVoid = true;
+		for (long data : dataToMerge)
 		{
 			if (DataPointUtil.doesItExist(data))
 			{
+				allEmpty = false;
 				if (!(DataPointUtil.isItVoid(data)))
 				{
 					numberOfChildren++;
-
+					allVoid = false;
 					tempAlpha += DataPointUtil.getAlpha(data);
 					tempRed += DataPointUtil.getRed(data);
 					tempGreen += DataPointUtil.getGreen(data);
@@ -179,11 +186,6 @@ public class DataPointUtil
 					tempHeight += DataPointUtil.getHeight(data);
 					tempDepth += DataPointUtil.getDepth(data);
 					tempLight += DataPointUtil.getLightValue(data);
-				} else
-				{
-					// void children have the default height (most likely -1)
-					// and represent a LOD with no blocks in it
-					numberOfVoidChildren++;
 				}
 				tempGenMode = (byte) Math.min(tempGenMode, DataPointUtil.getGenerationMode(data));
 			} else
@@ -191,7 +193,16 @@ public class DataPointUtil
 				tempGenMode = (byte) Math.min(tempGenMode, DistanceGenerationMode.NONE.complexity);
 			}
 		}
-		if (numberOfChildren > 0)
+
+		if (allEmpty)
+		{
+			//no child has been initialized
+			return DataPointUtil.EMPTY_DATA;
+		} else if (allVoid)
+		{
+			//all the children are void
+			return DataPointUtil.createVoidDataPoint(tempGenMode);
+		} else
 		{
 			//we have at least 1 child
 			tempAlpha = tempAlpha / numberOfChildren;
@@ -202,24 +213,93 @@ public class DataPointUtil
 			tempDepth = tempDepth / numberOfChildren;
 			tempLight = tempLight / numberOfChildren;
 			return DataPointUtil.createDataPoint(tempAlpha, tempRed, tempGreen, tempBlue, tempHeight, tempDepth, tempLight, tempGenMode);
-		} else if (numberOfVoidChildren > 0)
-		{
-			//all the children are void
-			return DataPointUtil.createVoidDataPoint(tempGenMode);
-		}else
-		{
-			//no child has been initialized
-			return DataPointUtil.EMPTY_DATA;
 		}
 	}
-/*
-	public static int mergeVerticalData(long dataPoint)
+
+	public static long[] mergeVerticalData(long[][] dataToMerge)
 	{
-		int R = (getRed(dataPoint) << 16) & 0x00FF0000;
-		int G = (getGreen(dataPoint) << 8) & 0x0000FF00;
-		int B = getBlue(dataPoint) & 0x000000FF;
-		return 0xFF000000 | R | G | B;
-	}*/
+		int[][] dataCollector = new int[256][2];
+		long[] singleDataToCollect = new long[256];
+		int size = 0;
+
+		int tempGenMode = DistanceGenerationMode.SERVER.complexity;
+		boolean allEmpty = true;
+		boolean allVoid = true;
+		long singleData;
+
+		//We collect the indexes of the data, ordered by the depth
+		for (int index = 0; index < dataToMerge.length; index++)
+		{
+			for (int dataIndex = 0; dataIndex < dataToMerge.length; dataIndex++)
+			{
+				singleData = dataToMerge[index][dataIndex];
+				if (doesItExist(singleData))
+				{
+					tempGenMode = Math.min(tempGenMode, getGenerationMode(singleData));
+					allEmpty = false;
+					if (!isItVoid(singleData))
+					{
+						allVoid = false;
+						int j = size;
+						while (j >= 0 && (getDepth(dataToMerge[dataCollector[j][0]][dataCollector[j][1]]) > getDepth(singleData)))
+						{
+							dataCollector[j] = dataCollector[j - 1];
+							j = j - 1;
+						}
+						dataCollector[j][0] = dataIndex;
+						dataCollector[j][1] = index;
+						size++;
+					}
+				}
+			}
+		}
+
+
+		//We check if there is any data that's not empty or void
+		if (allEmpty)
+		{
+			return new long[]{EMPTY_DATA};
+		}
+		if (allVoid)
+		{
+			return new long[]{createVoidDataPoint(tempGenMode)};
+		}
+
+		//We merge together all the data
+		int minDepth;
+		int maxHeight = Integer.MIN_VALUE;
+		int tempDepth;
+		int tempHeight;
+		int index = 0;
+		int dataCount = 0;
+		long[] singleDataToMerge = new long[dataToMerge.length];
+		long[] newData = new long[dataToMerge.length];
+		while (index < size)
+		{
+			dataCount++;
+			singleData = dataToMerge[dataCollector[index][0]][dataCollector[index][1]];
+			minDepth = getDepth(singleData);
+			maxHeight = getHeight(singleData);
+			index++;
+			while(index < size)
+			{
+				singleData = dataToMerge[dataCollector[index][0]][dataCollector[index][1]];
+				tempDepth = getDepth(singleData);
+				tempHeight = getHeight(singleData);
+				if(maxHeight >= tempDepth)
+				{
+					singleDataToMerge[dataCollector[index][0]] = singleData;
+					maxHeight = tempHeight;
+					index++;
+				}else{
+					break;
+				}
+			}
+			singleData = mergeSingleData(singleDataToMerge);
+			newData[dataCount] = createDataPoint(maxHeight, minDepth, getColor(singleData), getLightValue(singleData), getGenerationMode(singleData));
+		}
+		return Arrays.copyOf(newData, dataCount);
+	}
 
 	public static long[] compress(long[] data, byte detailLevel)
 	{
