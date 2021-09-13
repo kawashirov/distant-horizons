@@ -117,8 +117,8 @@ public class LodBuilder
 					playerPosZ = chunk.getPos().getMinBlockZ();
 				} else
 				{
-					playerPosX = (int) world.players().get(0).getX();
-					playerPosZ = (int) world.players().get(0).getZ();
+					playerPosX = (int) MinecraftWrapper.INSTANCE.getPlayer().getX();
+					playerPosZ = (int) MinecraftWrapper.INSTANCE.getPlayer().getZ();
 				}
 				if (lodWorld.getLodDimension(dim) == null)
 				{

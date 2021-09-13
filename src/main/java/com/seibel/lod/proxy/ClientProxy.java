@@ -99,6 +99,8 @@ public class ClientProxy
 	 */
 	public void renderLods(float partialTicks)
 	{
+		GlProxy.getInstance();
+		
 		DetailDistanceUtil.updateSettings();
 		if (mc == null || mc.getPlayer() == null || !lodWorld.getIsWorldLoaded())
 			return;
@@ -119,7 +121,7 @@ public class ClientProxy
 		
 		
 		// comment out when creating a release
-		//applyConfigOverrides();
+		applyConfigOverrides();
 		
 		
 		// Note to self:
@@ -129,6 +131,7 @@ public class ClientProxy
 		IProfiler profiler = mc.getProfiler();
 		profiler.pop(); // get out of "terrain"
 		profiler.push("LOD");
+		
 		renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
 		
 		profiler.pop(); // end LOD
@@ -164,14 +167,14 @@ public class ClientProxy
 //		LodConfig.CLIENT.graphics.saturationMultiplier.set(1.0);
 		
 //		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
-//		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(256);
+		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(256);
 //		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
-//		LodConfig.CLIENT.graphics.lodQuality.set(3);
+		LodConfig.CLIENT.graphics.lodQuality.set(3);
 //		LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.set(false);
 		
-//		LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
-//		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
-//		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(50); // 5000
+		LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
+		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
+		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(5000); // 5000
 		
 		LodConfig.CLIENT.debugging.enableDebugKeybinding.set(true);
 	}

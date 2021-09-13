@@ -25,7 +25,10 @@ import java.util.Iterator;
 
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL15C;
 import org.lwjgl.opengl.NVFogDistance;
+import org.lwjgl.opengl.WGL;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -43,6 +46,8 @@ import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
+import com.seibel.lod.proxy.GlProxy;
+import com.seibel.lod.proxy.GlProxy.GlProxyContext;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
@@ -97,7 +102,8 @@ public class LodRenderer
 	 * Does this computer's GPU support fancy fog?
 	 */
 	private static Boolean fancyFogAvailable = null;
-
+	private static GlProxy glProxy;
+	private GlProxyContext renderContext = null;
 
 	/**
 	 * If true the LODs colors will be replaced with
@@ -191,6 +197,7 @@ public class LodRenderer
 		// only check the GPU capability's once
 		if (fancyFogAvailable == null)
 		{
+			//TODO add this to the GlProxy
 			// see if this GPU can run fancy fog
 			fancyFogAvailable = GL.getCapabilities().GL_NV_fog_distance;
 
@@ -198,6 +205,10 @@ public class LodRenderer
 			{
 				ClientProxy.LOGGER.info("This GPU does not support GL_NV_fog_distance. This means that fancy fog options will not be available.");
 			}
+			
+			// create the GlProxy TODO this should probably be done somewhere else
+			glProxy = GlProxy.getInstance();
+			ClientProxy.LOGGER.error("share lists renderer: " + WGL.wglShareLists(GlProxy.getInstance().minecraftGlContext, GlProxy.getInstance().lodBuilderGlContext));
 		}
 
 
@@ -228,7 +239,21 @@ public class LodRenderer
 
 		// TODO move the buffer regeneration logic into its own class (probably called in the client proxy instead)
 		// ...ending here
+		
+		if (lodBufferBuilder.newBuffersAvaliable())
+		{
+			// this has to be called after the VBOs have been drawn
+			// otherwise rubber banding may occur
+			swapBuffers();
+		}
+		
+		if (renderContext == null)
+		{
+			return;
+		}
 
+		GlProxy.getInstance().setGlContext(renderContext);
+		
 
 
 		//===========================//
@@ -236,7 +261,9 @@ public class LodRenderer
 		//===========================//
 
 		// set the required open GL settings
-
+		
+		GlProxy.getInstance().setGlContext(renderContext);
+		
 		if (LodConfig.CLIENT.debugging.debugMode.get() == DebugMode.SHOW_DETAIL_WIREFRAME)
 			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
 		else
@@ -278,15 +305,14 @@ public class LodRenderer
 		// rendering //
 		//===========//
 		profiler.popPush("LOD draw");
-
+		
 		if (vbos != null)
 		{
 			Entity cameraEntity = mc.getCameraEntity();
 			Vector3d cameraDir = cameraEntity.getLookAngle().normalize();
 			cameraDir = mc.getOptions().getCameraType().isMirrored() ? cameraDir.reverse() : cameraDir;
-
-
-
+			
+			
 			// used to determine what type of fog to render
 			int halfWidth = vbos.length / 2;
 			int quarterWidth = vbos.length / 4;
@@ -309,7 +335,7 @@ public class LodRenderer
 				}
 			}
 		}
-
+		
 
 		//=========//
 		// cleanup //
@@ -338,18 +364,18 @@ public class LodRenderer
 		// clear the depth buffer so anything drawn is drawn
 		// over the LODs
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-
-
+		
+		GlProxy.getInstance().setGlContext(GlProxyContext.MINECRAFT);
 
 		// replace the buffers used to draw and build,
 		// this is only done when the createLodBufferGenerationThread
 		// has finished executing on a parallel thread.
-		if (lodBufferBuilder.newBuffersAvaliable())
-		{
-			// this has to be called after the VBOs have been drawn
-			// otherwise rubber banding may occur
-			swapBuffers();
-		}
+//		if (lodBufferBuilder.newBuffersAvaliable())
+//		{
+//			// this has to be called after the VBOs have been drawn
+//			// otherwise rubber banding may occur
+//			swapBuffers();
+//		}
 
 
 		// end of internal LOD profiling
@@ -365,13 +391,13 @@ public class LodRenderer
 		if (vbo == null)
 			return;
 		
-		vbo.bind();
+		GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.id);
 		// 0L is the starting pointer
 		LOD_VERTEX_FORMAT.setupBufferState(0L);
-
+		
 		vbo.draw(modelViewMatrix, GL11.GL_QUADS);
-
-		VertexBuffer.unbind();
+		
+		GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		LOD_VERTEX_FORMAT.clearBufferState();
 	}
 
@@ -665,6 +691,7 @@ public class LodRenderer
 		VertexBuffersAndOffset result = lodBufferBuilder.getVertexBuffers();
 		vbos = result.vbos;
 		vbosCenter = result.drawableCenterChunkPos;
+		renderContext = result.drawingContext;
 	}
 
 	/**

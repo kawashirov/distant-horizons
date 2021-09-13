@@ -91,7 +91,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		// it uses doubles to specify its location, unlike the model view matrix
 		// which only uses floats
 		double x = -bufferCenterBlockPos.getX();
-		double z = -bufferCenterBlockPos.getZ();;
+		double z = -bufferCenterBlockPos.getZ();
 		box.set(width, height - depth, width);
 		box.move((int) (xOffset + x), (int) (yOffset + depth), (int) (zOffset + z));
 	}
