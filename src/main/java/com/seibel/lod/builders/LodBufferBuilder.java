@@ -17,6 +17,7 @@
  */
 package com.seibel.lod.builders;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -26,20 +27,18 @@ import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.seibel.lod.util.*;
+import net.minecraft.client.renderer.LightTexture;
 import org.lwjgl.opengl.GL11;
 
 import com.seibel.lod.builders.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.PosToRenderContainer;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.render.LodRenderer;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
@@ -142,6 +141,20 @@ public class LodBufferBuilder
 	public void generateLodBuffersAsync(LodRenderer renderer, LodDimension lodDim,
 	                                    BlockPos playerBlockPos, boolean fullRegen)
 	{
+
+
+		for(int i = 0; i<16; i++)
+		{
+			for(int j = 0; j<16; j++)
+			{
+				int lightTint = LightTexture.pack(i,j);
+				//System.out.print(ColorUtil.getRed(lightTint) + " " + ColorUtil.getGreen(lightTint) + " " + ColorUtil.getBlue(lightTint) + " ");
+				System.out.print(Integer.toHexString(lightTint) + " ");
+			}
+			System.out.println();
+		}
+
+
 		// only allow one generation process to happen at a time
 		if (generatingBuffers)
 			return;

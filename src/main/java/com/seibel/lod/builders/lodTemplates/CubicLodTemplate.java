@@ -63,21 +63,11 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				bufferCenterBlockPos);
 		int color;
 		boolean hasSkyLight = MinecraftWrapper.INSTANCE.getPlayer().level.dimensionType().hasSkyLight();
+		boolean hasRoof = MinecraftWrapper.INSTANCE.getPlayer().level.dimensionType().hasSkyLight();
+		int time = (int) (MinecraftWrapper.INSTANCE.getPlayer().level.getDayTime() - 13000);
+		boolean isDay = time < 0;
 		//USE THIS IN THE boolean hasCeiling = MinecraftWrapper.INSTANCE.getPlayer().level.dimensionType().hasCeiling();
-		if (hasSkyLight)
-		{
-			int time = (int) (MinecraftWrapper.INSTANCE.getPlayer().level.getDayTime() - 13000);
-			if (time < 0)
-			{
-				color = DataPointUtil.getColor(data);
-			} else
-			{
-				/*TODO implement a smoother transition for light from day to night */
-				color = DataPointUtil.getLightColor(data,4);
-			}
-		}else{
-			color = DataPointUtil.getLightColor(data,1);
-		}
+		color = DataPointUtil.getLightColor(data, (hasRoof & hasSkyLight), isDay);
 
 		if (debugging != DebugMode.OFF)
 

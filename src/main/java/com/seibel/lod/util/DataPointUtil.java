@@ -1,38 +1,72 @@
 package com.seibel.lod.util;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
+import net.minecraft.client.renderer.LightTexture;
 
 public class DataPointUtil
 {
+	/*
+	|a  |a  |a  |a  |r  |r  |r  |r   |
 
+	|r  |r  |r  |r  |g  |g  |g  |g  |
+
+	|g  |g  |g  |g  |b  |b  |b  |b  |
+
+	|b  |b  |b  |b  |h  |h  |h  |h  |
+
+	|h  |h  |h  |h  |h  |h  |d  |d  |
+
+	|d  |d  |d  |d  |d  |d  |d  |d  |
+
+	|bl |bl |bl |bl |sl |sl |sl |sl |
+
+	|l  |l  |f  |g  |g  |g  |v  |e  |
+
+
+	 */
 	//To be used in the future for negative value
 	//public final static int MIN_DEPTH = -64;
 	//public final static int MIN_HEIGHT = -64;
 	public final static int EMPTY_DATA = 0;
 	public final static int WORLD_HEIGHT = 256;
 
-	public final static int ALPHA_SHIFT = 56;
-	public final static int RED_SHIFT = 48;
-	public final static int GREEN_SHIFT = 40;
-	public final static int BLUE_SHIFT = 32;
-	public final static int COLOR_SHIFT = 32;
-	public final static int HEIGHT_SHIFT = 22;
-	public final static int DEPTH_SHIFT = 12;
-	public final static int LIGHT_SHIFT = 8;
+	public final static int ALPHA_DOWNSIZE_SHIFT = 4;
+
+	public final static int BLUE_COLOR_SHIFT = 0;
+	public final static int GREEN_COLOR_SHIFT = 8;
+	public final static int RED_COLOR_SHIFT = 16;
+	public final static int ALPHA_COLOR_SHIFT = 24;
+
+	public final static int BLUE_SHIFT = 36;
+	public final static int GREEN_SHIFT = BLUE_SHIFT + 8;
+	public final static int RED_SHIFT = BLUE_SHIFT + 16 ;
+	public final static int ALPHA_SHIFT = BLUE_SHIFT + 24;
+
+	public final static int COLOR_SHIFT = 36;
+
+	public final static int HEIGHT_SHIFT = 26;
+	public final static int DEPTH_SHIFT = 16;
+	public final static int BLOCK_LIGHT_SHIFT = 12;
+	public final static int SKY_LIGHT_SHIFT = 8;
+	public final static int LIGHTS_SHIFT = SKY_LIGHT_SHIFT;
 	public final static int VERTICAL_INDEX_SHIFT = 6;
+	public final static int FLAG_SHIFT = 5;
 	public final static int GEN_TYPE_SHIFT = 2;
 	public final static int VOID_SHIFT = 1;
 	public final static int EXISTENCE_SHIFT = 0;
 
-	public final static long ALPHA_MASK = 0b1111_1111;
+	public final static long ALPHA_MASK = 0b1111;
 	public final static long RED_MASK = 0b1111_1111;
 	public final static long GREEN_MASK = 0b1111_1111;
 	public final static long BLUE_MASK = 0b1111_1111;
-	public final static long COLOR_MASK = 0b11111111_11111111_11111111_11111111;
+	public final static long COLOR_MASK = 0b11111111_11111111_11111111;
 	public final static long HEIGHT_MASK = 0b11_1111_1111;
 	public final static long DEPTH_MASK = 0b11_1111_1111;
-	public final static long LIGHT_MASK = 0b1111;
+	public final static long LIGHTS_MASK = 0b1111_1111;
+	public final static long BLOCK_LIGHT_MASK = 0b1111;
+	public final static long SKY_LIGHT_MASK = 0b1111;
 	public final static long VERTICAL_INDEX_MASK = 0b11;
+	public final static long FLAG_MASK = 0b1;
 	public final static long GEN_TYPE_MASK = 0b111;
 	public final static long VOID_MASK = 1;
 	public final static long EXISTENCE_MASK = 1;
@@ -47,26 +81,27 @@ public class DataPointUtil
 		return dataPoint;
 	}
 
-	public static long createDataPoint(int height, int depth, int color, int lightValue, int generationMode)
+	public static long createDataPoint(int height, int depth, int color, int lightSky, int lightBlock, int generationMode)
 	{
 		return createDataPoint(
 				ColorUtil.getAlpha(color),
 				ColorUtil.getRed(color),
 				ColorUtil.getGreen(color),
 				ColorUtil.getBlue(color),
-				height, depth, lightValue, generationMode);
+				height, depth, lightSky, lightBlock, generationMode);
 	}
 
-	public static long createDataPoint(int alpha, int red, int green, int blue, int height, int depth, int lightValue, int generationMode)
+	public static long createDataPoint(int alpha, int red, int green, int blue, int height, int depth, int lightSky, int lightBlock, int generationMode)
 	{
 		long dataPoint = 0;
-		dataPoint += (alpha & ALPHA_MASK) << ALPHA_SHIFT;
+		dataPoint += ((alpha & ALPHA_MASK) >>> ALPHA_DOWNSIZE_SHIFT) << ALPHA_SHIFT;
 		dataPoint += (red & RED_MASK) << RED_SHIFT;
 		dataPoint += (green & GREEN_MASK) << GREEN_SHIFT;
 		dataPoint += (blue & BLUE_MASK) << BLUE_SHIFT;
 		dataPoint += (height & HEIGHT_MASK) << HEIGHT_SHIFT;
 		dataPoint += (depth & DEPTH_MASK) << DEPTH_SHIFT;
-		dataPoint += (lightValue & LIGHT_MASK) << LIGHT_SHIFT;
+		dataPoint += (lightBlock & BLOCK_LIGHT_MASK) << BLOCK_LIGHT_SHIFT;
+		dataPoint += (lightSky & SKY_LIGHT_MASK) << SKY_LIGHT_SHIFT;
 		dataPoint += (generationMode & GEN_TYPE_MASK) << GEN_TYPE_SHIFT;
 		dataPoint += EXISTENCE_MASK << EXISTENCE_SHIFT;
 		return dataPoint;
@@ -85,7 +120,7 @@ public class DataPointUtil
 
 	public static short getAlpha(long dataPoint)
 	{
-		return (short) ((dataPoint >>> ALPHA_SHIFT) & ALPHA_MASK);
+		return (short) (((dataPoint >>> ALPHA_SHIFT) & ALPHA_MASK) << ALPHA_DOWNSIZE_SHIFT);
 	}
 
 	public static short getRed(long dataPoint)
@@ -103,9 +138,14 @@ public class DataPointUtil
 		return (short) ((dataPoint >>> BLUE_SHIFT) & BLUE_MASK);
 	}
 
-	public static int getLightValue(long dataPoint)
+	public static int getLightSky(long dataPoint)
 	{
-		return (int) ((dataPoint >>> LIGHT_SHIFT) & LIGHT_MASK);
+		return (int) ((dataPoint >>> SKY_LIGHT_SHIFT) & SKY_LIGHT_MASK);
+	}
+
+	public static int getLightBlock(long dataPoint)
+	{
+		return (int) ((dataPoint >>> BLOCK_LIGHT_SHIFT) & BLOCK_LIGHT_MASK);
 	}
 
 	public static byte getGenerationMode(long dataPoint)
@@ -126,15 +166,25 @@ public class DataPointUtil
 
 	public static int getColor(long dataPoint)
 	{
+		int color = getBlue(dataPoint) << BLUE_COLOR_SHIFT;
+		color += getRed(dataPoint) << BLUE_COLOR_SHIFT;
 		return (int) (dataPoint >>> COLOR_SHIFT);
 	}
 
-	public static int getLightColor(long dataPoint, int amp)
+	public static int getLightColor(long dataPoint, boolean roof, boolean day)
 	{
-		int lightBlock = getLightValue(dataPoint);
-		int red = LodUtil.clamp(0, getRed(dataPoint) + lightBlock * amp, 255);
-		int green = LodUtil.clamp(0, getGreen(dataPoint) + lightBlock * amp, 255);
-		int blue = LodUtil.clamp(0, getBlue(dataPoint) + lightBlock * amp, 255);
+		int lightBlock = getLightBlock(dataPoint);
+		int lightSky = getLightSky(dataPoint);
+		int lightTint = LightTexture.pack(lightSky,lightBlock);
+
+		int red = (ColorUtil.getRed(lightTint) + getRed(dataPoint))/2;
+		int green = (ColorUtil.getGreen(lightTint) + getGreen(dataPoint))/2;
+		int blue = (ColorUtil.getBlue(lightTint) + getBlue(dataPoint))/2;
+		/*
+		red = LodUtil.clamp(0, getRed(dataPoint)  + red, 255);
+		green = LodUtil.clamp(0, getGreen(dataPoint) + green, 255);
+		blue = LodUtil.clamp(0, getBlue(dataPoint) + blue, 255);*/
+
 		return ColorUtil.rgbToInt(red, green, blue);
 	}
 
@@ -153,7 +203,9 @@ public class DataPointUtil
 		s.append(" ");
 		s.append(getGreen(dataPoint));
 		s.append(" ");
-		s.append(getLightValue(dataPoint));
+		s.append(getLightBlock(dataPoint));
+		s.append(" ");
+		s.append(getLightSky(dataPoint));
 		s.append(" ");
 		s.append(getGenerationMode(dataPoint));
 		s.append(" ");
@@ -175,7 +227,8 @@ public class DataPointUtil
 		int tempBlue = 0;
 		int tempHeight = 0;
 		int tempDepth = 0;
-		int tempLight = 0;
+		int tempLightBlock = 0;
+		int tempLightSky = 0;
 		byte tempGenMode = DistanceGenerationMode.SERVER.complexity;
 		boolean allEmpty = true;
 		boolean allVoid = true;
@@ -194,7 +247,8 @@ public class DataPointUtil
 					tempBlue += DataPointUtil.getBlue(data);
 					tempHeight += DataPointUtil.getHeight(data);
 					tempDepth += DataPointUtil.getDepth(data);
-					tempLight += DataPointUtil.getLightValue(data);
+					tempLightBlock += DataPointUtil.getLightBlock(data);
+					tempLightSky += DataPointUtil.getLightSky(data);
 				}
 				tempGenMode = (byte) Math.min(tempGenMode, DataPointUtil.getGenerationMode(data));
 			} else
@@ -220,8 +274,9 @@ public class DataPointUtil
 			tempBlue = tempBlue / numberOfChildren;
 			tempHeight = tempHeight / numberOfChildren;
 			tempDepth = tempDepth / numberOfChildren;
-			tempLight = tempLight / numberOfChildren;
-			return DataPointUtil.createDataPoint(tempAlpha, tempRed, tempGreen, tempBlue, tempHeight, tempDepth, tempLight, tempGenMode);
+			tempLightBlock = tempLightBlock / numberOfChildren;
+			tempLightSky = tempLightSky / numberOfChildren;
+			return DataPointUtil.createDataPoint(tempAlpha, tempRed, tempGreen, tempBlue, tempHeight, tempDepth, tempLightSky, tempLightBlock, tempGenMode);
 		}
 	}
 
@@ -322,7 +377,7 @@ public class DataPointUtil
 				}
 			}
 			long data = mergeSingleData(singleDataToMerge);
-			dataPoint[j] = createDataPoint(height, depth, getColor(data), getLightValue(data), getGenerationMode(data));
+			dataPoint[j] = createDataPoint(height, depth, getColor(data), getLightSky(data), getLightBlock(data), getGenerationMode(data));
 		}
 
 		return dataPoint;

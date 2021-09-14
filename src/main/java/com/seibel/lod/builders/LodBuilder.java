@@ -36,15 +36,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.DimensionType;
-import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.LightType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
-
-import javax.xml.crypto.Data;
 
 /**
  * This object is in charge of creating Lod related objects. (specifically: Lod
@@ -277,11 +274,11 @@ public class LodBuilder
 				color = generateLodColor(chunk, config, xRel, yAbs, zRel);
 				depth = determineBottomPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
 				blockPos.set(xAbs, yAbs + 1, zAbs);
-				light = getLightBlockValue(chunk, blockPos);
+				light = getLightValue(chunk, blockPos);
 
 				//System.out.println(dataToMerge.length + " " + index +" " + count + " " + yAbs);
 				//System.out.println(dataToMerge.length + " " + dataToMerge[index].length);
-				dataToMerge[index][count] = DataPointUtil.createDataPoint(height, depth, color, light, generation);
+				dataToMerge[index][count] = DataPointUtil.createDataPoint(height, depth, color, (light >> 4) & 0b1111, light & 0b1111, generation);
 				yAbs = depth - 1;
 				count++;
 			}
@@ -409,9 +406,9 @@ public class LodBuilder
 			depth = determineBottomPoint(chunk, config, xRel, zRel, blockPos);
 
 			blockPos.set(xAbs, yAbs + 1, zAbs);
-			light = getLightBlockValue(chunk, blockPos);
+			light = getLightValue(chunk, blockPos);
 
-			dataToMerge[index] = DataPointUtil.createDataPoint(height, depth, color, light, generation);
+			dataToMerge[index] = DataPointUtil.createDataPoint(height, depth, color, (light >> 4) & 0b1111, light & 0b1111, generation);
 		}
 		return dataToMerge;
 	}
@@ -522,17 +519,18 @@ public class LodBuilder
 		return colorInt;
 	}
 
-	private int getLightBlockValue(IChunk chunk, BlockPos.Mutable blockPos)
+	private int getLightValue(IChunk chunk, BlockPos.Mutable blockPos)
 	{
-		int lightBlock;
+		int light;
 
 		//*TODO choose the best one between those options*/
 		//lightBlock = MinecraftWrapper.INSTANCE.getPlayer().level.getLightEngine().getLayerListener(LightType.BLOCK).getLightValue(blockPos);
 		//lightBlock = (byte) MinecraftWrapper.INSTANCE.getPlayer().level.getLightEngine().blockEngine.getLightValue(blockPos);
-		lightBlock = (byte) MinecraftWrapper.INSTANCE.getPlayer().level.getBrightness(LightType.BLOCK, blockPos);
+		light = MinecraftWrapper.INSTANCE.getPlayer().level.getBrightness(LightType.BLOCK, blockPos);
+		light += MinecraftWrapper.INSTANCE.getPlayer().level.getBrightness(LightType.SKY, blockPos) << 4;
 		//BlockState blockState = chunk.getBlockState(blockPos);
 		//lightBlock = (byte) blockState.getLightBlock(chunk, blockPos);
-		return lightBlock;
+		return light;
 	}
 
 	/**

@@ -11,6 +11,7 @@ public class Main
 {
 	public static void main(String[] args)
 	{
+			/*
 		try
 		{
 			long[][] dataToMerge = new long[][]{
@@ -26,6 +27,6 @@ public class Main
 			}
 		}catch (Exception e){
 			e.printStackTrace();
-		}
+		}*/
 	}
 }
