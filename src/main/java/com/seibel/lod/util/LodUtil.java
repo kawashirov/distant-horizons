@@ -334,7 +334,7 @@ public class LodUtil
 			{
 				for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
 				{
-					if (!lodDim.doesDataExist(LodUtil.CHUNK_DETAIL_LEVEL, x, z))
+					/*if (!lodDim.doesDataExist(LodUtil.CHUNK_DETAIL_LEVEL, x, z))
 						continue;
 
 					long[] dataVertical = lodDim.getData(LodUtil.CHUNK_DETAIL_LEVEL, x, z);
@@ -347,7 +347,8 @@ public class LodUtil
 						// don't draw Lod's that are taller than the player
 						// to prevent LODs being drawn on top of the player
 						posToSkip.add(new ChunkPos(x, z));
-					}
+					}*/
+					posToSkip.add(new ChunkPos(x, z));
 				}
 			}
 			
