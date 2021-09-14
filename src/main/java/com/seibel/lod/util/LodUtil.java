@@ -63,7 +63,7 @@ public class LodUtil
 	 * and/or add a method to generate colors based on texture
 	 * issue #64 */
 	public static final int STONE_COLOR_INT = LodUtil.colorToInt(new Color(150, 150, 150));
-	
+	public static final int NETHERRACK_COLOR_INT = LodUtil.colorToInt(new Color(95, 38, 38));
 	/**
 	 * In order of nearest to farthest: <br>
 	 * Red, Orange, Yellow, Green, Cyan, Blue, Magenta, white, gray, black

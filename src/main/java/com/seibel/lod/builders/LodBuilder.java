@@ -546,6 +546,12 @@ public class LodBuilder
 		} else if (blockState == Blocks.STONE.defaultBlockState())
 		{
 			colorInt = LodUtil.STONE_COLOR_INT;
+		} else if (blockState == Blocks.NETHERRACK.defaultBlockState())
+		{
+			colorInt = LodUtil.NETHERRACK_COLOR_INT;
+		} else if (blockState == Blocks.BEDROCK.defaultBlockState())
+		{
+			colorInt = getColorForBiome(x, z, biome);
 		} else if (blockState == Blocks.MYCELIUM.defaultBlockState())
 		{
 			colorInt = LodUtil.MYCELIUM_COLOR_INT;
@@ -605,7 +611,7 @@ public class LodBuilder
 		{
 
 			case NETHER:
-				colorInt = Blocks.BEDROCK.defaultBlockState().materialColor.col;
+				colorInt = LodUtil.NETHERRACK_COLOR_INT;
 				break;
 
 			case THEEND:
@@ -665,17 +671,23 @@ public class LodBuilder
 		BlockState blockState = chunk.getBlockState(blockPos);
 		if (blockState != null)
 		{
-			VoxelShape voxelShape =  blockState.getShape(chunk, blockPos);
-			if(!voxelShape.isEmpty()){
+			if (!blockState.getFluidState().isEmpty())
+			{
+				return true;
+			}
+			VoxelShape voxelShape = blockState.getShape(chunk, blockPos);
+			if (!voxelShape.isEmpty())
+			{
 				AxisAlignedBB bbox = voxelShape.bounds();
 				int xWidth = (int) (bbox.maxX - bbox.minX);
 				int yWidth = (int) (bbox.maxY - bbox.minY);
 				int zWidth = (int) (bbox.maxZ - bbox.minZ);
-				if(xWidth < 0.7 && zWidth < 0.7 && yWidth < 1)
+				if (xWidth < 0.7 && zWidth < 0.7 && yWidth < 1)
 				{
 					return false;
 				}
-			}else{
+			} else
+			{
 				return false;
 			}
 			if (blockState.getBlock() != Blocks.AIR

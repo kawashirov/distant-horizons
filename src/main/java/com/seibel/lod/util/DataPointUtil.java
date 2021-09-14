@@ -36,7 +36,7 @@ public class DataPointUtil
 	public final static long HEIGHT_MASK = 0b11_1111_1111;
 	public final static long DEPTH_MASK = 0b11_1111_1111;
 	public final static long LIGHT_MASK = 0b1111;
-	public final static long VERTICAL_INDEX_SHIFT = 0b11;
+	public final static long VERTICAL_INDEX_MASK = 0b11;
 	public final static long GEN_TYPE_MASK = 0b111;
 	public final static long VOID_MASK = 1;
 	public final static long EXISTENCE_MASK = 1;
