@@ -64,6 +64,9 @@ public class LodUtil
 	 * issue #64 */
 	public static final int STONE_COLOR_INT = LodUtil.colorToInt(new Color(150, 150, 150));
 	public static final int NETHERRACK_COLOR_INT = LodUtil.colorToInt(new Color(95, 38, 38));
+	public static final int WARPED_NYLIUM_COLOR_INT = LodUtil.colorToInt(new Color(34, 94, 85));
+	public static final int CRIMSON_NYLIUM_COLOR_INT = LodUtil.colorToInt(new Color(126, 27, 27));
+
 	/**
 	 * In order of nearest to farthest: <br>
 	 * Red, Orange, Yellow, Green, Cyan, Blue, Magenta, white, gray, black
@@ -334,9 +337,9 @@ public class LodUtil
 			{
 				for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
 				{
-					/*if (!lodDim.doesDataExist(LodUtil.CHUNK_DETAIL_LEVEL, x, z))
+					if (!lodDim.doesDataExist(LodUtil.CHUNK_DETAIL_LEVEL, x, z))
 						continue;
-
+					/*
 					long[] dataVertical = lodDim.getData(LodUtil.CHUNK_DETAIL_LEVEL, x, z);
 					long data = dataVertical[dataVertical.length - 1];
 

@@ -1,7 +1,5 @@
 package com.seibel.lod.util;
 
-import com.seibel.lod.objects.LevelContainer;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -16,6 +14,11 @@ public class ThreadMapUtil
 	public static final ConcurrentMap<String,long[]> threadVerticalGetDataMap = new ConcurrentHashMap();
 	public static final ConcurrentMap<String,long[][]> threadVerticalUpdateMap = new ConcurrentHashMap();
 	public static final ConcurrentMap<String,int[]> threadVerticalIndexesMap = new ConcurrentHashMap();
+
+
+	public static final ConcurrentMap<String,boolean[]> projectionMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String,int[][]> heightAndDepthMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String,long[]> singleDataToMergeMap = new ConcurrentHashMap();
 
 
 	public static long[] getSingleAddDataArray(){
@@ -90,5 +93,31 @@ public class ThreadMapUtil
 			threadVerticalIndexesMap.put(Thread.currentThread().getName(), new int[4]);
 		}
 		return threadVerticalIndexesMap.get(Thread.currentThread().getName());
+	}
+
+
+
+	public static boolean[] getProjection(int size){
+		if(!projectionMap.containsKey(Thread.currentThread().getName()) || (projectionMap.get(Thread.currentThread().getName()) == null) || (projectionMap.get(Thread.currentThread().getName()).length != size))
+		{
+			projectionMap.put(Thread.currentThread().getName(), new boolean[size]);
+		}
+		return projectionMap.get(Thread.currentThread().getName());
+	}
+
+	public static int[][] getHeightAndDepth(int size){
+		if(!heightAndDepthMap.containsKey(Thread.currentThread().getName()) || (heightAndDepthMap.get(Thread.currentThread().getName()) == null) || (heightAndDepthMap.get(Thread.currentThread().getName()).length != size))
+		{
+			heightAndDepthMap.put(Thread.currentThread().getName(), new int[size][2]);
+		}
+		return heightAndDepthMap.get(Thread.currentThread().getName());
+	}
+
+	public static long[] getSingleAddDataToMerge(int size){
+		if(!singleDataToMergeMap.containsKey(Thread.currentThread().getName()) || (singleDataToMergeMap.get(Thread.currentThread().getName()) == null) || (singleDataToMergeMap.get(Thread.currentThread().getName()).length != size))
+		{
+			singleDataToMergeMap.put(Thread.currentThread().getName(), new long[size]);
+		}
+		return singleDataToMergeMap.get(Thread.currentThread().getName());
 	}
 }

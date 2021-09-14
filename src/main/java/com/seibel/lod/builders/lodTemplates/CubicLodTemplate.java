@@ -62,21 +62,31 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				posZ * width,
 				bufferCenterBlockPos);
 		int color;
-		int time = (int) (MinecraftWrapper.INSTANCE.getPlayer().level.getDayTime() - 13000);
-		if(time < 0)
+		boolean hasSkyLight = MinecraftWrapper.INSTANCE.getPlayer().level.dimensionType().hasSkyLight();
+		//USE THIS IN THE boolean hasCeiling = MinecraftWrapper.INSTANCE.getPlayer().level.dimensionType().hasCeiling();
+		if (hasSkyLight)
 		{
-			color = DataPointUtil.getColor(data);
+			int time = (int) (MinecraftWrapper.INSTANCE.getPlayer().level.getDayTime() - 13000);
+			if (time < 0)
+			{
+				color = DataPointUtil.getColor(data);
+			} else
+			{
+				/*TODO implement a smoother transition for light from day to night */
+				color = DataPointUtil.getLightColor(data,4);
+			}
 		}else{
-			/*TODO implement a smoother transition for light from day to night */
-			color = DataPointUtil.getLightColor(data);
+			color = DataPointUtil.getLightColor(data,1);
 		}
 
 		if (debugging != DebugMode.OFF)
+
 		{
 			color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[detailLevel].getRGB();
 		}
 
 		if (box != null)
+
 		{
 			addBoundingBoxToBuffer(buffer, box, color, bufferCenterBlockPos, adjData);
 		}
@@ -100,7 +110,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		// it uses doubles to specify its location, unlike the model view matrix
 		// which only uses floats
 		double x = -bufferCenterBlockPos.getX();
-		double z = -bufferCenterBlockPos.getZ();;
+		double z = -bufferCenterBlockPos.getZ();
 		box.set(width, height - depth, width);
 		box.move((int) (xOffset + x), (int) (yOffset + depth), (int) (zOffset + z));
 	}
@@ -217,7 +227,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				addPosAndColor(buffer, minX, minY, maxZ, red, green, blue, alpha);
 				addPosAndColor(buffer, minX, maxY, maxZ, red, green, blue, alpha);
 				addPosAndColor(buffer, minX, maxY, minZ, red, green, blue, alpha);
-			}else
+			} else
 			{
 				maxY = box.getMaxY();
 				tempMaxY = DataPointUtil.getHeight(data);
@@ -262,8 +272,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				addPosAndColor(buffer, maxX, maxY, maxZ, red, green, blue, alpha);
 				addPosAndColor(buffer, maxX, minY, maxZ, red, green, blue, alpha);
 				addPosAndColor(buffer, maxX, minY, minZ, red, green, blue, alpha);
-			}
-			else
+			} else
 			{
 				maxY = box.getMaxY();
 				tempMaxY = DataPointUtil.getHeight(data);
@@ -308,8 +317,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				addPosAndColor(buffer, maxX, maxY, maxZ, red, green, blue, alpha);
 				addPosAndColor(buffer, minX, maxY, maxZ, red, green, blue, alpha);
 				addPosAndColor(buffer, minX, minY, maxZ, red, green, blue, alpha);
-			}
-			else
+			} else
 			{
 				maxY = box.getMaxY();
 				tempMaxY = DataPointUtil.getHeight(data);
@@ -354,8 +362,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				addPosAndColor(buffer, minX, maxY, minZ, red, green, blue, alpha);
 				addPosAndColor(buffer, maxX, maxY, minZ, red, green, blue, alpha);
 				addPosAndColor(buffer, maxX, minY, minZ, red, green, blue, alpha);
-			}
-			else
+			} else
 			{
 				maxY = box.getMaxY();
 				tempMaxY = DataPointUtil.getHeight(data);

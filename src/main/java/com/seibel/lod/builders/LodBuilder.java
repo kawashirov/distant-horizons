@@ -242,10 +242,17 @@ public class LodBuilder
 
 		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
 		int index = 0;
-		dataToMerge = new long[size * size][1024];
+		if(dataToMerge == null){
+			dataToMerge = new long[size * size][DataPointUtil.WORLD_HEIGHT];
+		}
+		//dataToMerge = new long[size * size][1024];
+
 		for (index = 0; index < size * size; index++)
 		{
-
+			for(int i = 0; i < dataToMerge[index].length; i++)
+			{
+				dataToMerge[index][i] = 0;
+			}
 			xRel = Math.floorMod(index, size) + startX;
 			zRel = Math.floorDiv(index, size) + startZ;
 			xAbs = chunkPos.getMinBlockX() + xRel;
@@ -549,6 +556,12 @@ public class LodBuilder
 		} else if (blockState == Blocks.NETHERRACK.defaultBlockState())
 		{
 			colorInt = LodUtil.NETHERRACK_COLOR_INT;
+		} else if (blockState == Blocks.WARPED_NYLIUM.defaultBlockState())
+		{
+			colorInt = LodUtil.WARPED_NYLIUM_COLOR_INT;
+		} else if (blockState == Blocks.CRIMSON_NYLIUM.defaultBlockState())
+		{
+			colorInt = LodUtil.CRIMSON_NYLIUM_COLOR_INT;
 		} else if (blockState == Blocks.BEDROCK.defaultBlockState())
 		{
 			colorInt = getColorForBiome(x, z, biome);
