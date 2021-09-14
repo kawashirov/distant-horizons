@@ -31,8 +31,10 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.block.*;
 import net.minecraft.block.material.MaterialColor;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.IWorld;
@@ -201,7 +203,7 @@ public class LodBuilder
 
 				dataToMerge = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
 				data = DataPointUtil.mergeVerticalData(dataToMerge);
-				if(data.length == 0 || data == null)
+				if (data.length == 0 || data == null)
 					data = new long[]{DataPointUtil.EMPTY_DATA};
 				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
 				lodDim.addData(detailLevel,
@@ -219,6 +221,7 @@ public class LodBuilder
 		}
 
 	}
+
 	private long[][] createVerticalDataToMerge(LodDetail detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{
 		long[][] dataToMerge = ThreadMapUtil.getBuilderVerticalArray()[detail.detailLevel];
@@ -251,8 +254,9 @@ public class LodBuilder
 			//Calculate the height of the lod
 			yAbs = 255;
 			int count = 0;
-			while(yAbs > 0){
-				height = determineHeightPointFrom(chunk, config, xRel, zRel, yAbs);
+			while (yAbs > 0)
+			{
+				height = determineHeightPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
 
 				//If the lod is at default, then we set this as void data
 				if (height == DEFAULT_HEIGHT)
@@ -263,11 +267,10 @@ public class LodBuilder
 
 				yAbs = height - 1;
 				// We search light on above air block
-				blockPos.set(xAbs, yAbs + 1, zAbs);
-
 				color = generateLodColor(chunk, config, xRel, yAbs, zRel);
+				depth = determineBottomPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
+				blockPos.set(xAbs, yAbs + 1, zAbs);
 				light = getLightBlockValue(chunk, blockPos);
-				depth = determineBottomPointFrom(chunk, config, xRel, zRel, yAbs);
 
 				//System.out.println(dataToMerge.length + " " + index +" " + count + " " + yAbs);
 				//System.out.println(dataToMerge.length + " " + dataToMerge[index].length);
@@ -282,7 +285,7 @@ public class LodBuilder
 	/**
 	 * Find the lowest valid point from the bottom.
 	 */
-	private short determineBottomPointFrom(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, int yAbs)
+	private short determineBottomPointFrom(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, int yAbs, BlockPos.Mutable blockPos)
 	{
 		short depth = DEFAULT_DEPTH;
 		if (config.useHeightmap)
@@ -296,9 +299,10 @@ public class LodBuilder
 			{
 				for (int yRel = CHUNK_DATA_WIDTH - 1; yRel >= 0; yRel--)
 				{
-					if(sectionIndex * CHUNK_DATA_WIDTH + yRel > yAbs)
+					if (sectionIndex * CHUNK_DATA_WIDTH + yRel > yAbs)
 						continue;
-					if (!isLayerValidLodPoint(chunkSections, sectionIndex, yRel, xRel, zRel))
+					blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel, chunk.getPos().getMinBlockZ() + zRel);
+					if (!isLayerValidLodPoint(chunk, blockPos))
 					{
 						depth = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel + 1);
 						voidData = false;
@@ -313,10 +317,11 @@ public class LodBuilder
 		}
 		return depth;
 	}
+
 	/**
 	 * Find the highest valid point from the Top
 	 */
-	private short determineHeightPointFrom(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, int yAbs)
+	private short determineHeightPointFrom(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, int yAbs, BlockPos.Mutable blockPos)
 	{
 		short height = DEFAULT_HEIGHT;
 		if (config.useHeightmap)
@@ -330,9 +335,10 @@ public class LodBuilder
 			{
 				for (int yRel = CHUNK_DATA_WIDTH - 1; yRel >= 0; yRel--)
 				{
-					if(sectionIndex * CHUNK_DATA_WIDTH + yRel > yAbs)
+					if (sectionIndex * CHUNK_DATA_WIDTH + yRel > yAbs)
 						continue;
-					if (isLayerValidLodPoint(chunkSections, sectionIndex, yRel, xRel, zRel))
+					blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel, chunk.getPos().getMinBlockZ() + zRel);
+					if (isLayerValidLodPoint(chunk, blockPos))
 					{
 						height = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel + 1);
 						voidData = false;
@@ -380,7 +386,7 @@ public class LodBuilder
 			zAbs = chunkPos.getMinBlockZ() + zRel;
 
 			//Calculate the height of the lod
-			height = determineHeightPoint(chunk, config, xRel, zRel);
+			height = determineHeightPoint(chunk, config, xRel, zRel, blockPos);
 
 			//If the lod is at default, then we set this as void data
 			if (height == DEFAULT_HEIGHT)
@@ -391,11 +397,12 @@ public class LodBuilder
 
 			yAbs = height - 1;
 			// We search light on above air block
-			blockPos.set(xAbs, yAbs + 1, zAbs);
 
 			color = generateLodColor(chunk, config, xRel, yAbs, zRel);
+			depth = determineBottomPoint(chunk, config, xRel, zRel, blockPos);
+
+			blockPos.set(xAbs, yAbs + 1, zAbs);
 			light = getLightBlockValue(chunk, blockPos);
-			depth = determineBottomPoint(chunk, config, xRel, zRel);
 
 			dataToMerge[index] = DataPointUtil.createDataPoint(height, depth, color, light, generation);
 		}
@@ -408,7 +415,7 @@ public class LodBuilder
 	/**
 	 * Find the lowest valid point from the bottom.
 	 */
-	private short determineBottomPoint(IChunk chunk, LodBuilderConfig config, int xRel, int zRel)
+	private short determineBottomPoint(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, BlockPos.Mutable blockPos)
 	{
 		ChunkSection[] chunkSections = chunk.getSections();
 		short depth = DEFAULT_DEPTH;
@@ -422,7 +429,7 @@ public class LodBuilder
 			{
 				for (int yRel = 0; yRel < CHUNK_DATA_WIDTH; yRel++)
 				{
-					if (isLayerValidLodPoint(chunkSections, sectionIndex, yRel, xRel, zRel))
+					if (isLayerValidLodPoint(chunk, blockPos))
 					{
 						depth = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel);
 						found = true;
@@ -442,7 +449,7 @@ public class LodBuilder
 	/**
 	 * Find the highest valid point from the Top
 	 */
-	private short determineHeightPoint(IChunk chunk, LodBuilderConfig config, int xRel, int zRel)
+	private short determineHeightPoint(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, BlockPos.Mutable blockPos)
 	{
 		short height = DEFAULT_HEIGHT;
 		if (config.useHeightmap)
@@ -456,7 +463,7 @@ public class LodBuilder
 			{
 				for (int yRel = CHUNK_DATA_WIDTH - 1; yRel >= 0; yRel--)
 				{
-					if (isLayerValidLodPoint(chunkSections, sectionIndex, yRel, xRel, zRel))
+					if (isLayerValidLodPoint(chunk, blockPos))
 					{
 						height = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel + 1);
 						voidData = false;
@@ -652,19 +659,28 @@ public class LodBuilder
 	/**
 	 * Is the layer between the given X, Z, and dataIndex values a valid LOD point?
 	 */
-	private boolean isLayerValidLodPoint(ChunkSection[] chunkSections, int sectionIndex, int y, int x, int z)
+	private boolean isLayerValidLodPoint(IChunk chunk, BlockPos.Mutable blockPos)
 	{
-		if (chunkSections[sectionIndex] == null)
+
+		BlockState blockState = chunk.getBlockState(blockPos);
+		if (blockState != null)
 		{
-			// this section doesn't have any blocks,
-			// it is not a valid section
-			return false;
-		} else
-		{
-			if (chunkSections[sectionIndex].getBlockState(x, y, z) != null
-					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.AIR
-					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.CAVE_AIR
-					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.BARRIER)
+			VoxelShape voxelShape =  blockState.getShape(chunk, blockPos);
+			if(!voxelShape.isEmpty()){
+				AxisAlignedBB bbox = voxelShape.bounds();
+				int xWidth = (int) (bbox.maxX - bbox.minX);
+				int yWidth = (int) (bbox.maxY - bbox.minY);
+				int zWidth = (int) (bbox.maxZ - bbox.minZ);
+				if(xWidth < 0.7 && zWidth < 0.7 && yWidth < 1)
+				{
+					return false;
+				}
+			}else{
+				return false;
+			}
+			if (blockState.getBlock() != Blocks.AIR
+					    && blockState.getBlock() != Blocks.CAVE_AIR
+					    && blockState.getBlock() != Blocks.BARRIER)
 			{
 				return true;
 			}
