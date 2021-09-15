@@ -82,9 +82,6 @@ public class LodBufferBuilder
 	 */
 	public volatile VertexBuffer[][] drawableVbos;
 	
-	public GlProxyContext buildingContext = GlProxyContext.ALPHA;
-	public GlProxyContext renderContext = GlProxyContext.BETA;
-	
 	/**
 	 * if this is true the LOD buffers are currently being
 	 * regenerated.
@@ -459,8 +456,11 @@ public class LodBufferBuilder
 	 */
 	private void uploadBuffers(boolean fullRegen, LodDimension lodDim)
 	{
-		GlProxy.getInstance().setGlContext(buildingContext);
-		// used to prevent debug printing multiple times per upload cycle
+		GlProxy glProxy = GlProxy.getInstance();
+		// make sure we are uploading to a different OpenGL context,
+		// to prevent interference (IE stuttering) with the Minecraft context.
+		glProxy.setGlContext(GlProxyContext.LOD_BUILDER);
+		// only print console debugging for vboUpload once per upload cycle
 		boolean bufferMapFail = false;
 		
 		
@@ -481,7 +481,7 @@ public class LodBufferBuilder
 		// make sure all the buffers have been uploaded.
 		// this probably is necessary, but it makes me feel good :)
 		GL11.glFlush();
-		GlProxy.getInstance().setGlContext(GlProxyContext.NONE);
+		glProxy.setGlContext(GlProxyContext.NONE);
 	}
 	
 	/**
@@ -520,7 +520,7 @@ public class LodBufferBuilder
 				
 				// only print to console once per upload cycle
 				if (!bufferMapFail)
-					ClientProxy.LOGGER.debug("LOD buffer upload glMapBuffer failed, using slower glBufferData.");
+					ClientProxy.LOGGER.debug("LOD buffer upload: glMapBuffer failed, used slower glBufferData.");
 				bufferMapFail = true;
 			}
 			
@@ -547,10 +547,6 @@ public class LodBufferBuilder
 			drawableVbos = buildableVbos;
 			buildableVbos = tmpVbo;
 			
-			GlProxyContext tmpContext = renderContext;
-			renderContext = buildingContext;
-			buildingContext = tmpContext;
-			
 			drawableCenterChunkPos = buildableCenterChunkPos;
 			
 			// the vbos have been swapped
@@ -558,7 +554,7 @@ public class LodBufferBuilder
 			bufferLock.unlock();
 		}
 		
-		return new VertexBuffersAndOffset(drawableVbos, drawableCenterChunkPos, renderContext);
+		return new VertexBuffersAndOffset(drawableVbos, drawableCenterChunkPos);
 	}
 	
 	/**
@@ -568,13 +564,11 @@ public class LodBufferBuilder
 	{
 		public VertexBuffer[][] vbos;
 		public ChunkPos drawableCenterChunkPos;
-		public GlProxyContext drawingContext;
 		
-		public VertexBuffersAndOffset(VertexBuffer[][] newVbos, ChunkPos newDrawableCenterChunkPos, GlProxyContext newDrawingContext)
+		public VertexBuffersAndOffset(VertexBuffer[][] newVbos, ChunkPos newDrawableCenterChunkPos)
 		{
 			vbos = newVbos;
 			drawableCenterChunkPos = newDrawableCenterChunkPos;
-			drawingContext = newDrawingContext;
 		}
 	}
 	

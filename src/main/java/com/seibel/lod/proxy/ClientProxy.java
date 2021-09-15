@@ -27,7 +27,6 @@ import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.builders.worldGeneration.LodWorldGenerator;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.objects.RegionPos;
@@ -47,14 +46,16 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 /**
  * This handles all events sent to the client,
- * and is the starting point for most of this program.
+ * and is the starting point for most of the mod.
  *
  * @author James_Seibel
- * @version 8-24-2021
+ * @version 9-14-2021
  */
 public class ClientProxy
 {
 	public static final Logger LOGGER = LogManager.getLogger("LOD");
+	
+	private boolean firstTimeSetupComplete = false;
 	
 	private static LodWorld lodWorld = new LodWorld();
 	private static LodBuilder lodBuilder = new LodBuilder();
@@ -64,7 +65,7 @@ public class ClientProxy
 	
 	private boolean configOverrideReminderPrinted = false;
 	
-	MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
+	private MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	
 	/**
@@ -99,7 +100,13 @@ public class ClientProxy
 	 */
 	public void renderLods(float partialTicks)
 	{
-		GlProxy.getInstance();
+		// only run the first time setup once
+		if (firstTimeSetupComplete)
+		{
+			firstFrameSetup();
+		}
+			
+		
 		
 		DetailDistanceUtil.updateSettings();
 		if (mc == null || mc.getPlayer() == null || !lodWorld.getIsWorldLoaded())
@@ -113,8 +120,6 @@ public class ClientProxy
 		
 		
 		playerMoveEvent(lodDim);
-		//System.out.println("memory needed " + lodDim.getMinMemoryNeeded() + " byte");
-		//System.out.println(lodDim);
 		
 		lodDim.treeCutter((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
 		lodDim.treeGenerator((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
@@ -135,7 +140,7 @@ public class ClientProxy
 		renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
 		
 		profiler.pop(); // end LOD
-		profiler.push("terrain"); // restart "terrain"
+		profiler.push("terrain"); // go back into "terrain"
 		
 		
 		// these can't be set until after the buffers are built (in renderer.drawLODs)
@@ -157,8 +162,8 @@ public class ClientProxy
 		//LodConfig.CLIENT.drawLODs.set(true);
 		//LodConfig.CLIENT.debugMode.set(true);
 		
-		LodConfig.CLIENT.graphics.maxDrawDetail.set(LodDetail.FULL);
-		LodConfig.CLIENT.worldGenerator.maxGenerationDetail.set(LodDetail.FULL);
+//		LodConfig.CLIENT.graphics.maxDrawDetail.set(LodDetail.FULL);
+//		LodConfig.CLIENT.worldGenerator.maxGenerationDetail.set(LodDetail.FULL);
 		
 //		LodConfig.CLIENT.graphics.fogDistance.set(FogDistance.FAR);
 //		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
@@ -167,14 +172,14 @@ public class ClientProxy
 //		LodConfig.CLIENT.graphics.saturationMultiplier.set(1.0);
 		
 //		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
-		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(256);
+//		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(64);
 //		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
-		LodConfig.CLIENT.graphics.lodQuality.set(3);
+//		LodConfig.CLIENT.graphics.lodQuality.set(2);
 //		LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.set(false);
 		
-		LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
-		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
-		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(5000); // 5000
+//		LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
+//		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
+//		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(5000); // 5000
 		
 		LodConfig.CLIENT.debugging.enableDebugKeybinding.set(true);
 	}
@@ -267,10 +272,9 @@ public class ClientProxy
 	}
 	
 	
-	
-	//==================//
-	// frame LOD events //
-	//==================//
+	//============//
+	// LOD events //
+	//============//
 	
 	/**
 	 * Re-centers the given LodDimension if it needs to be.
@@ -313,6 +317,20 @@ public class ClientProxy
 			//LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );
 		}
 		DetailDistanceUtil.updateSettings();
+	}
+	
+
+	/**
+	 * This event is called once during the first frame Minecraft renders in the world.
+	 */
+	public void firstFrameSetup()
+	{
+		// make sure the GlProxy is created before the LodBufferBuilder
+		GlProxy.getInstance();
+		
+		
+		
+		firstTimeSetupComplete = true;
 	}
 	
 	

@@ -7,7 +7,8 @@ import org.lwjgl.opengl.WGL;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 /**
- * A singleton that holds references to different openGL contexts.
+ * A singleton that holds references to different openGL contexts
+ * and GPU capabilities.
  * 
  * <p>
  * Helpful OpenGL resources: <br><br>
@@ -31,8 +32,13 @@ public class GlProxy
 	
 	public long lodBuilderGlContext;
 	public GLCapabilities lodBuilderGlCapabilities;
-	public long lodRenderGlContext;
-	public GLCapabilities lodRenderGlCapabilities;
+	
+	/**
+	 * Does this computer's GPU support fancy fog?
+	 */
+	public final boolean fancyFogAvailable;
+	
+	
 	
 	private GlProxy()
 	{
@@ -42,6 +48,12 @@ public class GlProxy
 			throw new IllegalStateException(GlProxy.class.getSimpleName() + " was created outside the render thread!");
 		
 		
+		
+		
+		//============================//
+		// create the builder context //
+		//============================//
+		
 		minecraftGlContext = WGL.wglGetCurrentContext();
 		minecraftGlCapabilities = GL.getCapabilities();
 		deviceContext = WGL.wglGetCurrentDC();
@@ -50,22 +62,28 @@ public class GlProxy
 		if (!WGL.wglShareLists(minecraftGlContext, lodBuilderGlContext))
 			throw new IllegalStateException("Unable to share lists between Minecraft and builder contexts.");
 		if (!WGL.wglMakeCurrent(deviceContext, lodBuilderGlContext))
-			throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + GlProxyContext.ALPHA.toString() + "] from [" + GlProxyContext.MINECRAFT.toString() + "]");
+			throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + GlProxyContext.LOD_BUILDER.toString() + "] from [" + GlProxyContext.MINECRAFT.toString() + "]");
 		lodBuilderGlCapabilities = GL.createCapabilities();
 		WGL.wglMakeCurrent(deviceContext, 0L);
-			
-		
-		
-		lodRenderGlContext = WGL.wglCreateContext(deviceContext);
-		if (!WGL.wglShareLists(minecraftGlContext, lodRenderGlContext))
-			throw new IllegalStateException("Unable to share lists between builder and render contexts.");
-		if (!WGL.wglMakeCurrent(deviceContext, lodRenderGlContext))
-			throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + GlProxyContext.ALPHA.toString() + "] from [" + GlProxyContext.BETA.toString() + "]");
-		lodRenderGlCapabilities = GL.createCapabilities();
 		
 		
 		// Since this is called on the render thread, make sure the Minecraft context is used in the end
 		WGL.wglMakeCurrent(deviceContext, minecraftGlContext);
+		
+		
+		
+		
+		//==================================//
+		// get any GPU related capabilities //
+		//==================================//
+		
+		// see if this GPU can run fancy fog
+		fancyFogAvailable = GL.getCapabilities().GL_NV_fog_distance;
+
+		if (!fancyFogAvailable)
+		{
+			ClientProxy.LOGGER.info("This GPU does not support GL_NV_fog_distance. This means that the fancy fog option will not be available.");
+		}
 	}
 	
 	
@@ -80,13 +98,9 @@ public class GlProxy
 		GLCapabilities newGlCapabilities = null;
 		switch(context)
 		{
-		case ALPHA:
+		case LOD_BUILDER:
 			contextPointer = lodBuilderGlContext;
 			newGlCapabilities = lodBuilderGlCapabilities;
-			break;
-		case BETA:
-			contextPointer = lodRenderGlContext;
-			newGlCapabilities = lodRenderGlCapabilities;
 			break;
 		case MINECRAFT:
 			contextPointer = minecraftGlContext;
@@ -111,11 +125,7 @@ public class GlProxy
 		long currentContext = WGL.wglGetCurrentContext();
 		if(currentContext == lodBuilderGlContext)
 		{
-			return GlProxyContext.ALPHA;
-		}
-		else if(currentContext == lodRenderGlContext)
-		{
-			return GlProxyContext.BETA;
+			return GlProxyContext.LOD_BUILDER;
 		}
 		else if(currentContext == minecraftGlContext)
 		{
@@ -130,8 +140,7 @@ public class GlProxy
 	public enum GlProxyContext
 	{
 		MINECRAFT,
-		ALPHA,
-		BETA,
+		LOD_BUILDER,
 		
 		/** used to un-bind threads */
 		NONE,

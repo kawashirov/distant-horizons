@@ -23,7 +23,6 @@ import java.nio.FloatBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
@@ -95,13 +94,7 @@ public class LodRenderer
 	 * https://stackoverflow.com/questions/50499238/bytebuffer-allocatedirect-and-xmx
 	 */
 	public static final int MAX_ALOCATEABLE_DIRECT_MEMORY = 64 * 1024 * 1024;
-
-	/**
-	 * Does this computer's GPU support fancy fog?
-	 */
-	private static Boolean fancyFogAvailable = null;
-	private static GlProxy glProxy;
-
+	
 	/**
 	 * If true the LODs colors will be replaced with
 	 * a checkerboard, this can be used for debugging.
@@ -189,25 +182,8 @@ public class LodRenderer
 
 		profiler = newProfiler;
 		profiler.push("LOD setup");
-
-
-		// only check the GPU capability's once
-		if (fancyFogAvailable == null)
-		{
-			//TODO add this to the GlProxy
-			// see if this GPU can run fancy fog
-			fancyFogAvailable = GL.getCapabilities().GL_NV_fog_distance;
-
-			if (!fancyFogAvailable)
-			{
-				ClientProxy.LOGGER.info("This GPU does not support GL_NV_fog_distance. This means that fancy fog options will not be available.");
-			}
-			
-			// create the GlProxy TODO this should probably be done somewhere else
-			glProxy = GlProxy.getInstance();
-		}
-
-
+		
+		
 		// TODO move the buffer regeneration logic into its own class (probably called in the client proxy instead)
 		// starting here...
 		determineIfLodsShouldRegenerate(lodDim);
@@ -241,11 +217,6 @@ public class LodRenderer
 			// this has to be called after the VBOs have been drawn
 			// otherwise rubber banding may occur
 			swapBuffers();
-		}
-		
-		if (renderContext == null)
-		{
-			return;
 		}
 		
 
@@ -738,7 +709,7 @@ public class LodRenderer
 
 
 		// only use fancy fog if the user's GPU can deliver
-		if (!fancyFogAvailable && quality == FogQuality.FANCY)
+		if (!GlProxy.getInstance().fancyFogAvailable && quality == FogQuality.FANCY)
 		{
 			quality = FogQuality.FAST;
 		}
