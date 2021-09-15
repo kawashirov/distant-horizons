@@ -59,6 +59,7 @@ public class LodRegion
 		for (byte lod = minDetailLevel; lod <= LodUtil.REGION_DETAIL_LEVEL; lod++)
 		{
 			switch (lodQualityMode){
+				default:
 				case HEIGHTMAP:
 					dataContainer[lod] = new SingleLevelContainer(lod);
 					break;
@@ -103,6 +104,31 @@ public class LodRegion
 	}
 
 	/**
+	 * This method can be used to insert data into the LodRegion
+	 *
+	 * @param dataPoint
+	 * @return
+	 */
+	public boolean addSingleData(byte detailLevel, int posX, int posZ, long dataPoint, boolean serverQuality)
+	{
+		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
+		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
+		if (!doesDataExist(detailLevel, posX, posZ) || serverQuality)
+		{
+
+			//update the number of node present
+			//if (!doesDataExist(detailLevel, posX, posZ)) numberOfPoints++;
+
+			//add the node data
+			this.dataContainer[detailLevel].addSingleData(dataPoint, posX, posZ);
+			return true;
+		} else
+		{
+			return false;
+		}
+	}
+
+	/**
 	 * This method will return the data in the position relative to the level of detail
 	 *
 	 * @return the data at the relative pos and level
@@ -113,6 +139,19 @@ public class LodRegion
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		return dataContainer[detailLevel].getData(posX, posZ);
 	}
+
+	/**
+	 * This method will return the data in the position relative to the level of detail
+	 *
+	 * @return the data at the relative pos and level
+	 */
+	public long getSingleData(byte detailLevel, int posX, int posZ)
+	{
+		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
+		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
+		return dataContainer[detailLevel].getSingleData(posX, posZ);
+	}
+
 
 	/**
 	 * This method will return all the levelPos that are renderable according to the requisite given in input

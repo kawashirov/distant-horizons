@@ -19,6 +19,15 @@ public interface LevelContainer
 	 */
 	public boolean addData(long[] data, int posX, int posZ);
 
+	/**With this you can add data to the level container
+	 *
+	 * @param data actual data to add in a array of long format.
+	 * @param posX x position in the detail level
+	 * @param posZ z position in the detail level
+	 * @return true if correctly added, false otherwise
+	 */
+	public boolean addSingleData(long data, int posX, int posZ);
+
 	/**With this you can get data from the level container
 	 *
 	 * @param posX x position in the detail level
@@ -26,6 +35,14 @@ public interface LevelContainer
 	 * @return the data in long array format
 	 */
 	public long[] getData(int posX, int posZ);
+
+	/**With this you can get data from the level container
+	 *
+	 * @param posX x position in the detail level
+	 * @param posZ z position in the detail level
+	 * @return the data in long array format
+	 */
+	public long getSingleData(int posX, int posZ);
 
 	/**
 	 * @param posX x position in the detail level

@@ -84,7 +84,7 @@ public class LodUtil
 
 	public static final byte DETAIL_OPTIONS = 10;
 
-	public static final short MAX_VERTICAL_DATA = 256;
+	public static final short MAX_VERTICAL_DATA = 4;
 
 	/** measured in Blocks <br>
 	 * detail level 9 */
@@ -326,41 +326,40 @@ public class LodUtil
      * Get a HashSet of all ChunkPos within the normal render distance
      * that should not be rendered.
      */
-		public static HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodDimension lodDim, BlockPos playerPos)
-		{
-			int chunkRenderDist = mc.getRenderDistance();
-			ChunkPos centerChunk = new ChunkPos(playerPos);
-			
-			// skip chunks that are already going to be rendered by Minecraft
-			HashSet<ChunkPos> posToSkip = getRenderedChunks();
-			
-			// go through each chunk within the normal view distance
-			for (int x = centerChunk.x - chunkRenderDist; x < centerChunk.x + chunkRenderDist; x++)
-			{
-				for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
-				{
-					if (!lodDim.doesDataExist(LodUtil.CHUNK_DETAIL_LEVEL, x, z))
-						continue;
-					/*
-					long[] dataVertical = lodDim.getData(LodUtil.CHUNK_DETAIL_LEVEL, x, z);
-					long data = dataVertical[dataVertical.length - 1];
+	 public static HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodDimension lodDim, BlockPos playerPos)
+	 {
+		 int chunkRenderDist = mc.getRenderDistance();
+		 ChunkPos centerChunk = new ChunkPos(playerPos);
 
-					short lodAverageHeight = DataPointUtil.getHeight(data);
+		 // skip chunks that are already going to be rendered by Minecraft
+		 HashSet<ChunkPos> posToSkip = getRenderedChunks();
 
-					if (playerPos.getY() <= lodAverageHeight)
-					{
-						// don't draw Lod's that are taller than the player
-						// to prevent LODs being drawn on top of the player
-						posToSkip.add(new ChunkPos(x, z));
-					}*/
-					posToSkip.add(new ChunkPos(x, z));
-				}
-			}
-			
-			return posToSkip;
-		}
+		 // go through each chunk within the normal view distance
+		 for (int x = centerChunk.x - chunkRenderDist; x < centerChunk.x + chunkRenderDist; x++)
+		 {
+			 for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
+			 {
+				 if (!lodDim.doesDataExist(LodUtil.CHUNK_DETAIL_LEVEL, x, z))
+					 continue;
 
-    /**
+				 long data = lodDim.getSingleData(LodUtil.CHUNK_DETAIL_LEVEL, x, z);
+
+				 short lodAverageHeight = DataPointUtil.getHeight(data);
+
+				 if (playerPos.getY() <= lodAverageHeight)
+				 {
+					 // don't draw Lod's that are taller than the player
+					 // to prevent LODs being drawn on top of the player
+					 posToSkip.add(new ChunkPos(x, z));
+				 }
+			 }
+		 }
+
+		 return posToSkip;
+	 }
+
+
+	/**
      * This method returns the ChunkPos of all chunks that Minecraft
      * is going to render this frame. <br><br>
      * <p>

@@ -190,32 +190,39 @@ public class LodBuilder
 
 				posX = LevelPosUtil.convert((byte) 0, chunk.getPos().x * 16 + startX, detail.detailLevel);
 				posZ = LevelPosUtil.convert((byte) 0, chunk.getPos().z * 16 + startZ, detail.detailLevel);
-				long[] data = null
-						;
+				long singleData = 0;
+				long[] data = null;
+				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
+
 				switch (lodQualityMode){
+					default:
 					case HEIGHTMAP:
-						data = ThreadMapUtil.getSingleAddDataArray();
 						long[] dataToMergeSingle;
 						dataToMergeSingle = createSingleDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-						data[0] = DataPointUtil.mergeSingleData(dataToMergeSingle);
+						singleData = DataPointUtil.mergeSingleData(dataToMergeSingle);
+						lodDim.addSingleData(detailLevel,
+								posX,
+								posZ,
+								singleData,
+								false,
+								isServer);
 						break;
 					case MULTI_LOD:
 						long[][] dataToMergeVertical;
 						dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
 						data = DataPointUtil.mergeVerticalData(dataToMergeVertical);
+						if (data.length == 0 || data == null)
+							data = new long[]{DataPointUtil.EMPTY_DATA};
+						lodDim.addData(detailLevel,
+								posX,
+								posZ,
+								data,
+								false,
+								isServer);
 						break;
 				}
 
-				if (data.length == 0 || data == null)
-					data = new long[]{DataPointUtil.EMPTY_DATA};
 
-				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
-				lodDim.addData(detailLevel,
-						posX,
-						posZ,
-						data,
-						false,
-						isServer);
 
 			}
 			lodDim.updateData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
@@ -382,6 +389,9 @@ public class LodBuilder
 		int xAbs;
 		int yAbs;
 		int zAbs;
+		int lightBlock;
+		int lightSky;
+
 
 		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
 		int index = 0;
@@ -414,8 +424,9 @@ public class LodBuilder
 
 			blockPos.set(xAbs, yAbs + 1, zAbs);
 			light = getLightValue(chunk, blockPos);
-
-			dataToMerge[index] = DataPointUtil.createDataPoint(height, depth, color, (light >> 4) & 0b1111, light & 0b1111, generation);
+			lightBlock = light & 0b1111;
+			lightSky = (light >> 4) & 0b1111;
+			dataToMerge[index] = DataPointUtil.createDataPoint(height, depth, color, lightSky, lightBlock, generation);
 		}
 		return dataToMerge;
 	}
@@ -440,6 +451,7 @@ public class LodBuilder
 			{
 				for (int yRel = 0; yRel < CHUNK_DATA_WIDTH; yRel++)
 				{
+					blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel, chunk.getPos().getMinBlockZ() + zRel);
 					if (isLayerValidLodPoint(chunk, blockPos))
 					{
 						depth = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel);
@@ -474,6 +486,7 @@ public class LodBuilder
 			{
 				for (int yRel = CHUNK_DATA_WIDTH - 1; yRel >= 0; yRel--)
 				{
+					blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel, chunk.getPos().getMinBlockZ() + zRel);
 					if (isLayerValidLodPoint(chunk, blockPos))
 					{
 						height = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel + 1);
@@ -536,6 +549,7 @@ public class LodBuilder
 		light = MinecraftWrapper.INSTANCE.getPlayer().level.getBrightness(LightType.BLOCK, blockPos);
 		light += MinecraftWrapper.INSTANCE.getPlayer().level.getBrightness(LightType.SKY, blockPos) << 4;
 		//BlockState blockState = chunk.getBlockState(blockPos);
+		//lightBlock = (byte) blockState.getLightBlock(chunk, blockPos);
 		//lightBlock = (byte) blockState.getLightBlock(chunk, blockPos);
 		return light;
 	}
@@ -689,7 +703,7 @@ public class LodBuilder
 		BlockState blockState = chunk.getBlockState(blockPos);
 		if (blockState != null)
 		{
-			if (!blockState.getFluidState().isEmpty())
+			/*if (!blockState.getFluidState().isEmpty())
 			{
 				return true;
 			}
@@ -707,7 +721,7 @@ public class LodBuilder
 			} else
 			{
 				return false;
-			}
+			}*/
 			if (blockState.getBlock() != Blocks.AIR
 					    && blockState.getBlock() != Blocks.CAVE_AIR
 					    && blockState.getBlock() != Blocks.BARRIER)
@@ -718,4 +732,26 @@ public class LodBuilder
 
 		return false;
 	}
+
+	private boolean isLayerValidLodPoint(ChunkSection[] chunkSections, int sectionIndex, int y, int x, int z)
+	{
+		if (chunkSections[sectionIndex] == null)
+		{
+			// this section doesn't have any blocks,
+			// it is not a valid section
+			return false;
+		} else
+		{
+			if (chunkSections[sectionIndex].getBlockState(x, y, z) != null
+					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.AIR
+					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.CAVE_AIR
+					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.BARRIER)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 }

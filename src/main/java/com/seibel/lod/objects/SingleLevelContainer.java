@@ -26,7 +26,7 @@ public class SingleLevelContainer implements LevelContainer
 		return true;
 	}
 
-	private boolean addSingleData(long newData, int posX, int posZ){
+	public boolean addSingleData(long newData, int posX, int posZ){
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		data[posX][posZ] = newData;
@@ -42,7 +42,7 @@ public class SingleLevelContainer implements LevelContainer
 		return dataArray;
 	}
 
-	private long getSingleData(int posX, int posZ){
+	public long getSingleData(int posX, int posZ){
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		//Improve this using a thread map to long[]

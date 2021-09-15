@@ -193,8 +193,16 @@ public class LodDimensionFileHandler
 				data = bufferedReader.readLine();
 
 				bufferedReader.close();
+				switch (region.getLodQualityMode()){
+					default:
+					case HEIGHTMAP:
+						region.addLevel(new SingleLevelContainer(data));
+						break;
+					case MULTI_LOD:
+						region.addLevel(new VerticalLevelContainer(data));
+						break;
+				}
 				//region.addLevel(new SingleLevelContainer(data));
-				region.addLevel(new VerticalLevelContainer(data));
 			} catch (Exception e)
 			{
 				// the buffered reader encountered a

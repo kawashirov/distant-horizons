@@ -467,6 +467,44 @@ public class LodDimension
 		return nodeAdded;
 	}
 
+
+	/**
+	 * Add the given LOD to this dimension at the coordinate
+	 * stored in the LOD. If an LOD already exists at the given
+	 * coordinates it will be overwritten.
+	 */
+	public Boolean addSingleData(byte detailLevel, int posX, int posZ, long dataPoint, boolean dontSave, boolean serverQuality)
+	{
+
+		// don't continue if the region can't be saved
+		int regionPosX = LevelPosUtil.getRegion(detailLevel, posX);
+		int regionPosZ = LevelPosUtil.getRegion(detailLevel, posZ);
+
+		LodRegion region = getRegion(regionPosX, regionPosZ);
+		if (region == null)
+			return false;
+		boolean nodeAdded = region.addSingleData(detailLevel, posX, posZ, dataPoint, serverQuality);
+		// only save valid LODs to disk
+		if (!dontSave && fileHandler != null)
+		{
+			try
+			{
+				// mark the region as dirty so it will be saved to disk
+				int xIndex = (regionPosX - center.x) + halfWidth;
+				int zIndex = (regionPosZ - center.z) + halfWidth;
+				isRegionDirty[xIndex][zIndex] = true;
+				regen[xIndex][zIndex] = true;
+				regenDimension = true;
+			} catch (ArrayIndexOutOfBoundsException e)
+			{
+				e.printStackTrace();
+				// This method was probably called when the dimension was changing size.
+				// Hopefully this shouldn't be an issue.
+			}
+		}
+		return nodeAdded;
+	}
+
 	public void setToRegen(int xRegion, int zRegion)
 	{
 		int xIndex = (xRegion - center.x) + halfWidth;
@@ -535,6 +573,27 @@ public class LodDimension
 		return region.getData(detailLevel, posX, posZ);
 	}
 
+	/**
+	 * Get the data point at the given X and Z coordinates
+	 * in this dimension.
+	 * <br>
+	 * Returns null if the LodChunk doesn't exist or
+	 * is outside the loaded area.
+	 */
+	public long getSingleData(byte detailLevel, int posX, int posZ)
+	{
+		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
+			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
+
+		LodRegion region = getRegion(detailLevel, posX, posZ);
+
+		if (region == null)
+		{
+			return DataPointUtil.EMPTY_DATA;
+		}
+
+		return region.getSingleData(detailLevel, posX, posZ);
+	}
 
 	/**
 	 * Get the data point at the given X and Z coordinates

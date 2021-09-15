@@ -5,48 +5,56 @@ import java.util.concurrent.ConcurrentMap;
 
 public class ThreadMapUtil
 {
-	public static final ConcurrentMap<String,long[]> threadSingleAddDataMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String,long[]> threadSingleGetDataMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String,long[]> threadSingleUpdateMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String,long[][]> threadBuilderArrayMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String,long[][][]> threadBuilderVerticalArrayMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String,long[]> threadVerticalAddDataMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String,long[]> threadVerticalGetDataMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String,long[][]> threadVerticalUpdateMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String,int[]> threadVerticalIndexesMap = new ConcurrentHashMap();
+	private static final int NUMBER_OF_DIRECTION = 4;
+
+	public static final ConcurrentMap<String, long[]> threadSingleAddDataMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String, long[]> threadSingleGetDataMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String, long[]> threadSingleUpdateMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String, long[][]> threadBuilderArrayMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String, long[][][]> threadBuilderVerticalArrayMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String, long[]> threadVerticalAddDataMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String, long[]> threadVerticalGetDataMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String, long[][]> threadVerticalUpdateMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String, int[]> threadVerticalIndexesMap = new ConcurrentHashMap();
 
 
-	public static final ConcurrentMap<String,boolean[]> projectionMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String,int[][]> heightAndDepthMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String,long[]> singleDataToMergeMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String, long[]> threadAdjData = new ConcurrentHashMap();
+
+	public static final ConcurrentMap<String, boolean[]> projectionMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String, int[][]> heightAndDepthMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String, long[]> singleDataToMergeMap = new ConcurrentHashMap();
 
 
-	public static long[] getSingleAddDataArray(){
-		if(!threadSingleAddDataMap.containsKey(Thread.currentThread().getName()) || (threadSingleAddDataMap.get(Thread.currentThread().getName()) == null))
+	public static long[] getSingleAddDataArray()
+	{
+		if (!threadSingleAddDataMap.containsKey(Thread.currentThread().getName()) || (threadSingleAddDataMap.get(Thread.currentThread().getName()) == null))
 		{
 			threadSingleAddDataMap.put(Thread.currentThread().getName(), new long[1]);
 		}
 		return threadSingleAddDataMap.get(Thread.currentThread().getName());
 	}
 
-	public static long[] getSingleGetDataArray(){
-		if(!threadSingleGetDataMap.containsKey(Thread.currentThread().getName()) || (threadSingleGetDataMap.get(Thread.currentThread().getName()) == null))
+	public static long[] getSingleGetDataArray()
+	{
+		if (!threadSingleGetDataMap.containsKey(Thread.currentThread().getName()) || (threadSingleGetDataMap.get(Thread.currentThread().getName()) == null))
 		{
 			threadSingleGetDataMap.put(Thread.currentThread().getName(), new long[1]);
 		}
 		return threadSingleGetDataMap.get(Thread.currentThread().getName());
 	}
 
-	public static long[] getSingleUpdateArray(){
-		if(!threadSingleUpdateMap.containsKey(Thread.currentThread().getName()) || (threadSingleUpdateMap.get(Thread.currentThread().getName()) == null))
+	public static long[] getSingleUpdateArray()
+	{
+		if (!threadSingleUpdateMap.containsKey(Thread.currentThread().getName()) || (threadSingleUpdateMap.get(Thread.currentThread().getName()) == null))
 		{
 			threadSingleUpdateMap.put(Thread.currentThread().getName(), new long[4]);
 		}
 		return threadSingleUpdateMap.get(Thread.currentThread().getName());
 	}
 
-	public static long[][] getBuilderArray(){
-		if(!threadBuilderArrayMap.containsKey(Thread.currentThread().getName()) || (threadBuilderArrayMap.get(Thread.currentThread().getName()) == null))
+	public static long[][] getBuilderArray()
+	{
+		if (!threadBuilderArrayMap.containsKey(Thread.currentThread().getName()) || (threadBuilderArrayMap.get(Thread.currentThread().getName()) == null))
 		{
 			long[][] array = new long[5][];
 			threadBuilderArrayMap.put(Thread.currentThread().getName(), array);
@@ -54,8 +62,9 @@ public class ThreadMapUtil
 		return threadBuilderArrayMap.get(Thread.currentThread().getName());
 	}
 
-	public static long[][][] getBuilderVerticalArray(){
-		if(!threadBuilderVerticalArrayMap.containsKey(Thread.currentThread().getName()) || (threadBuilderVerticalArrayMap.get(Thread.currentThread().getName()) == null))
+	public static long[][][] getBuilderVerticalArray()
+	{
+		if (!threadBuilderVerticalArrayMap.containsKey(Thread.currentThread().getName()) || (threadBuilderVerticalArrayMap.get(Thread.currentThread().getName()) == null))
 		{
 			long[][][] array = new long[5][][];
 			threadBuilderVerticalArrayMap.put(Thread.currentThread().getName(), array);
@@ -63,20 +72,31 @@ public class ThreadMapUtil
 		return threadBuilderVerticalArrayMap.get(Thread.currentThread().getName());
 	}
 
-	public static long[] addVerticalDataArray(){
-		if(!threadVerticalAddDataMap.containsKey(Thread.currentThread().getName()) || (threadVerticalAddDataMap.get(Thread.currentThread().getName()) == null))
+	public static long[] addVerticalDataArray()
+	{
+		if (!threadVerticalAddDataMap.containsKey(Thread.currentThread().getName()) || (threadVerticalAddDataMap.get(Thread.currentThread().getName()) == null))
 		{
 			threadVerticalAddDataMap.put(Thread.currentThread().getName(), new long[16]);
 		}
 		return threadVerticalAddDataMap.get(Thread.currentThread().getName());
 	}
 
-	public static long[] getVerticalGetDataArray(){
-		if(!threadVerticalGetDataMap.containsKey(Thread.currentThread().getName()) || (threadVerticalGetDataMap.get(Thread.currentThread().getName()) == null))
+	public static long[] getVerticalGetDataArray()
+	{
+		if (!threadVerticalGetDataMap.containsKey(Thread.currentThread().getName()) || (threadVerticalGetDataMap.get(Thread.currentThread().getName()) == null))
 		{
 			threadVerticalGetDataMap.put(Thread.currentThread().getName(), new long[16]);
 		}
 		return threadVerticalGetDataMap.get(Thread.currentThread().getName());
+	}
+
+	public static long[] getAdjDataArray()
+	{
+		if(!threadAdjData.containsKey(Thread.currentThread().getName()) || (threadAdjData.get(Thread.currentThread().getName()) == null))
+		{
+			threadAdjData.put(Thread.currentThread().getName(), new long[NUMBER_OF_DIRECTION]);
+		}
+		return threadAdjData.get(Thread.currentThread().getName());
 	}
 
 	public static long[][] getVerticalUpdateArray(){

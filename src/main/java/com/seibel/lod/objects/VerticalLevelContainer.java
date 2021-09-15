@@ -34,10 +34,24 @@ public class VerticalLevelContainer implements LevelContainer
 		return true;
 	}
 
+	public boolean addSingleData(long newData, int posX, int posZ){
+		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
+		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
+		dataContainer[posX][posZ][0] = newData;
+		return true;
+	}
+
 	public long[] getData(int posX, int posZ){
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		return dataContainer[posX][posZ];
+	}
+
+	public long getSingleData(int posX, int posZ){
+		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
+		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
+		//Improve this using a thread map to long[]
+		return dataContainer[posX][posZ][0];
 	}
 
 	public boolean doesItExist(int posX, int posZ){

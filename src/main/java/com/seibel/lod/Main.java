@@ -11,14 +11,13 @@ public class Main
 {
 	public static void main(String[] args)
 	{
-			/*
 		try
 		{
 			long[][] dataToMerge = new long[][]{
-					{DataPointUtil.createDataPoint(10, 5, 0, 0, 0)},
-					{DataPointUtil.createDataPoint(15, 5, 0, 0, 0)},
-					{DataPointUtil.createDataPoint(40, 20, 0, 0, 0)},
-					{DataPointUtil.createDataPoint(1, 0, 0, 0, 0)}};
+					{DataPointUtil.createDataPoint(10, 5, 0, 0, 0, 0)},
+					{DataPointUtil.createDataPoint(15, 5, 0, 0, 0, 0)},
+					{DataPointUtil.createDataPoint(40, 20, 0, 0, 0, 0)},
+					{DataPointUtil.createDataPoint(1, 0, 0, 0, 0, 0)}};
 			long[] data = DataPointUtil.mergeVerticalData(dataToMerge);
 			for (long dataPoint : data)
 			{
@@ -27,6 +26,6 @@ public class Main
 			}
 		}catch (Exception e){
 			e.printStackTrace();
-		}*/
+		}
 	}
 }

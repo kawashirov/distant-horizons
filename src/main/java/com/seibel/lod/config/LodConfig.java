@@ -201,7 +201,7 @@ public class LodConfig
 							                          + " Use 3d lods or 2d lods? \n"
 							                          + " " + LodQualityMode.HEIGHTMAP.toString() + ": enable 2d lods with heightmap \n"
 							                          + " " + LodQualityMode.MULTI_LOD.toString() + ": enable 3d lods with heightmap \n")
-					                 .defineEnum("lodGenerationQuality", LodQualityMode.HEIGHTMAP);
+					                 .defineEnum("lodQualityMode", LodQualityMode.HEIGHTMAP);
 
 			maxGenerationDetail = builder
 					.comment("\n\n"
