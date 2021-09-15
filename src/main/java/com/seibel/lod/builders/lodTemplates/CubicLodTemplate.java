@@ -68,7 +68,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 
 		boolean hasSkyLight = dimensionType.hasSkyLight();
 		boolean hasRoof = dimensionType.hasCeiling();
-		boolean isDay = MinecraftWrapper.INSTANCE.getPlayer().level.isDay();
+		boolean isDay = MinecraftWrapper.INSTANCE.getPlayer().level.getDayTime() < 13000;
 		color = DataPointUtil.getLightColor(data, (hasRoof || hasSkyLight), isDay);
 
 		//color = DataPointUtil.getColor(data);

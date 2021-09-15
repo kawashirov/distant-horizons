@@ -175,8 +175,8 @@ public class DataPointUtil
 	{
 		int lightBlock = getLightBlock(dataPoint);
 		int lightSky = getLightSky(dataPoint);
-		int lightTint = 0;
 
+		/**TODO ALL of this should be dimension dependent and lightMap dependent*/
 		int red;
 		int green;
 		int blue;
@@ -196,11 +196,6 @@ public class DataPointUtil
 				blue = LodUtil.clamp(0, getBlue(dataPoint) + -30 + lightBlock*2,255);
 			}
 		}
-		/*
-		red = LodUtil.clamp(0, getRed(dataPoint)  + red, 255);
-		green = LodUtil.clamp(0, getGreen(dataPoint) + green, 255);
-		blue = LodUtil.clamp(0, getBlue(dataPoint) + blue, 255);*/
-
 		return ColorUtil.rgbToInt(red, green, blue);
 	}
 
