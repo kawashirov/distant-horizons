@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.objects.LevelPosUtil;
+import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.PosToGenerateContainer;
 import com.seibel.lod.render.LodRenderer;

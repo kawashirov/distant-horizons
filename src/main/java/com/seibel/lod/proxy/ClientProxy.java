@@ -101,7 +101,7 @@ public class ClientProxy
 	public void renderLods(float partialTicks)
 	{
 		// only run the first time setup once
-		if (firstTimeSetupComplete)
+		if (!firstTimeSetupComplete)
 		{
 			firstFrameSetup();
 		}

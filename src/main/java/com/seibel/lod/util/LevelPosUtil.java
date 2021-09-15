@@ -1,4 +1,4 @@
-package com.seibel.lod.objects;
+package com.seibel.lod.util;
 
 import com.seibel.lod.util.LodUtil;
 

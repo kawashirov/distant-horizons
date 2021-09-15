@@ -23,27 +23,21 @@ import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.objects.DataPoint;
-import com.seibel.lod.objects.LevelPosUtil;
+import com.seibel.lod.util.*;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
-import com.seibel.lod.util.ColorUtil;
-import com.seibel.lod.util.DetailDistanceUtil;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
-import net.minecraft.block.AbstractPlantBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.BushBlock;
-import net.minecraft.block.GrassBlock;
-import net.minecraft.block.IGrowable;
-import net.minecraft.block.LeavesBlock;
+import net.minecraft.block.*;
 import net.minecraft.block.material.MaterialColor;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.LightType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
@@ -169,9 +163,9 @@ public class LodBuilder
 		int endX;
 		int endZ;
 		int color;
+		byte light;
 		short height;
 		short depth;
-		long data;
 		try
 		{
 			LodDetail detail;
@@ -191,28 +185,31 @@ public class LodBuilder
 				endX = detail.endX[i];
 				endZ = detail.endZ[i];
 
-				color = generateLodColorForArea(chunk, config, startX, startZ, endX, endZ);
-
-				if (!config.useHeightmap)
-				{
-					height = determineHeightPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
-					depth = determineBottomPointForArea(chunk.getSections(), startX, startZ, endX, endZ);
-				} else
-				{
-					height = determineHeightPoint(chunk.getOrCreateHeightmapUnprimed(LodUtil.DEFAULT_HEIGHTMAP), startX,
-							startZ, endX, endZ);
-					depth = 0;
-				}
 				posX = LevelPosUtil.convert((byte) 0, chunk.getPos().x * 16 + startX, detail.detailLevel);
 				posZ = LevelPosUtil.convert((byte) 0, chunk.getPos().z * 16 + startZ, detail.detailLevel);
+				long[] data;
+				long[][] dataToMerge;
+				//data = ThreadMapUtil.getSingleAddDataArray();
+				//dataToMerge = createSingleDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
+				/*long[][] dataToMerge2 = new long[dataToMerge.length][];
+				for (int index = 0; index < dataToMerge.length; index++)
+				{
+					dataToMerge2[index] = new long[]{dataToMerge[index]};
+				}*/
+				//data[0] = DataPointUtil.mergeSingleData(dataToMerge);
+
+				dataToMerge = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
+				data = DataPointUtil.mergeVerticalData(dataToMerge);
+				if (data.length == 0 || data == null)
+					data = new long[]{DataPointUtil.EMPTY_DATA};
 				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
-				data = DataPoint.createDataPoint(height, depth, ColorUtil.getRed(color), ColorUtil.getGreen(color), ColorUtil.getBlue(color));
 				lodDim.addData(detailLevel,
 						posX,
 						posZ,
 						data,
 						false,
 						isServer);
+
 			}
 			lodDim.updateData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
 		} catch (Exception e)
@@ -222,7 +219,199 @@ public class LodBuilder
 
 	}
 
+	private long[][] createVerticalDataToMerge(LodDetail detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
+	{
+		long[][] dataToMerge = ThreadMapUtil.getBuilderVerticalArray()[detail.detailLevel];
+		ChunkPos chunkPos = chunk.getPos();
 
+		int size = 1 << detail.detailLevel;
+		int height = 0;
+		int depth = 0;
+		int color = 0;
+		int light = 0;
+		int generation = config.distanceGenerationMode.complexity;
+
+		int xRel;
+		int zRel;
+		int xAbs;
+		int yAbs;
+		int zAbs;
+
+		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
+		int index = 0;
+		if(dataToMerge == null){
+			dataToMerge = new long[size * size][DataPointUtil.WORLD_HEIGHT];
+		}
+		//dataToMerge = new long[size * size][1024];
+
+		for (index = 0; index < size * size; index++)
+		{
+			for(int i = 0; i < dataToMerge[index].length; i++)
+			{
+				dataToMerge[index][i] = 0;
+			}
+			xRel = Math.floorMod(index, size) + startX;
+			zRel = Math.floorDiv(index, size) + startZ;
+			xAbs = chunkPos.getMinBlockX() + xRel;
+			zAbs = chunkPos.getMinBlockZ() + zRel;
+
+			//Calculate the height of the lod
+			yAbs = 255;
+			int count = 0;
+			while (yAbs > 0)
+			{
+				height = determineHeightPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
+
+				//If the lod is at default, then we set this as void data
+				if (height == DEFAULT_HEIGHT)
+				{
+					dataToMerge[index][0] = DataPointUtil.createVoidDataPoint(generation);
+					break;
+				}
+
+				yAbs = height - 1;
+				// We search light on above air block
+				color = generateLodColor(chunk, config, xRel, yAbs, zRel);
+				depth = determineBottomPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
+				blockPos.set(xAbs, yAbs + 1, zAbs);
+				light = getLightValue(chunk, blockPos);
+
+				//System.out.println(dataToMerge.length + " " + index +" " + count + " " + yAbs);
+				//System.out.println(dataToMerge.length + " " + dataToMerge[index].length);
+				dataToMerge[index][count] = DataPointUtil.createDataPoint(height, depth, color, (light >> 4) & 0b1111, light & 0b1111, generation);
+				yAbs = depth - 1;
+				count++;
+			}
+		}
+		return dataToMerge;
+	}
+
+	/**
+	 * Find the lowest valid point from the bottom.
+	 */
+	private short determineBottomPointFrom(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, int yAbs, BlockPos.Mutable blockPos)
+	{
+		short depth = DEFAULT_DEPTH;
+		if (config.useHeightmap)
+		{
+			depth = 0;
+		} else
+		{
+			boolean voidData = true;
+			ChunkSection[] chunkSections = chunk.getSections();
+			for (int sectionIndex = chunkSections.length - 1; sectionIndex >= 0; sectionIndex--)
+			{
+				for (int yRel = CHUNK_DATA_WIDTH - 1; yRel >= 0; yRel--)
+				{
+					if (sectionIndex * CHUNK_DATA_WIDTH + yRel > yAbs)
+						continue;
+					blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel, chunk.getPos().getMinBlockZ() + zRel);
+					if (!isLayerValidLodPoint(chunk, blockPos))
+					{
+						depth = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel + 1);
+						voidData = false;
+						break;
+					}
+				}
+				if (!voidData)
+				{
+					break;
+				}
+			}
+		}
+		return depth;
+	}
+
+	/**
+	 * Find the highest valid point from the Top
+	 */
+	private short determineHeightPointFrom(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, int yAbs, BlockPos.Mutable blockPos)
+	{
+		short height = DEFAULT_HEIGHT;
+		if (config.useHeightmap)
+		{
+			height = (short) chunk.getOrCreateHeightmapUnprimed(LodUtil.DEFAULT_HEIGHTMAP).getFirstAvailable(xRel, zRel);
+		} else
+		{
+			boolean voidData = true;
+			ChunkSection[] chunkSections = chunk.getSections();
+			for (int sectionIndex = chunkSections.length - 1; sectionIndex >= 0; sectionIndex--)
+			{
+				for (int yRel = CHUNK_DATA_WIDTH - 1; yRel >= 0; yRel--)
+				{
+					if (sectionIndex * CHUNK_DATA_WIDTH + yRel > yAbs)
+						continue;
+					blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel, chunk.getPos().getMinBlockZ() + zRel);
+					if (isLayerValidLodPoint(chunk, blockPos))
+					{
+						height = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel + 1);
+						voidData = false;
+						break;
+					}
+				}
+				if (!voidData)
+				{
+					break;
+				}
+			}
+		}
+		return height;
+	}
+
+	private long[] createSingleDataToMerge(LodDetail detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
+	{
+		long[] dataToMerge = ThreadMapUtil.getBuilderArray()[detail.detailLevel];
+		ChunkPos chunkPos = chunk.getPos();
+
+		int size = 1 << detail.detailLevel;
+		int height = 0;
+		int depth = 0;
+		int color = 0;
+		int light = 0;
+		int generation = config.distanceGenerationMode.complexity;
+
+		int xRel;
+		int zRel;
+		int xAbs;
+		int yAbs;
+		int zAbs;
+
+		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
+		int index = 0;
+		if (dataToMerge == null)
+		{
+			dataToMerge = new long[size * size];
+		}
+		for (index = 0; index < size * size; index++)
+		{
+			xRel = Math.floorMod(index, size) + startX;
+			zRel = Math.floorDiv(index, size) + startZ;
+			xAbs = chunkPos.getMinBlockX() + xRel;
+			zAbs = chunkPos.getMinBlockZ() + zRel;
+
+			//Calculate the height of the lod
+			height = determineHeightPoint(chunk, config, xRel, zRel, blockPos);
+
+			//If the lod is at default, then we set this as void data
+			if (height == DEFAULT_HEIGHT)
+			{
+				dataToMerge[index] = DataPointUtil.createVoidDataPoint(generation);
+				continue;
+			}
+
+			yAbs = height - 1;
+			// We search light on above air block
+
+			color = generateLodColor(chunk, config, xRel, yAbs, zRel);
+			depth = determineBottomPoint(chunk, config, xRel, zRel, blockPos);
+
+			blockPos.set(xAbs, yAbs + 1, zAbs);
+			light = getLightValue(chunk, blockPos);
+
+			dataToMerge[index] = DataPointUtil.createDataPoint(height, depth, color, (light >> 4) & 0b1111, light & 0b1111, generation);
+		}
+		return dataToMerge;
+	}
 	// =====================//
 	// constructor helpers //
 	// =====================//
@@ -230,208 +419,118 @@ public class LodBuilder
 	/**
 	 * Find the lowest valid point from the bottom.
 	 */
-	private short determineBottomPointForArea(ChunkSection[] chunkSections, int startX, int startZ, int endX, int endZ)
+	private short determineBottomPoint(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, BlockPos.Mutable blockPos)
 	{
-		int numberOfBlocksRequired = ((endX - startX) * (endZ - startZ) / 2);
-
-		// search from the bottom up
-		for (int section = 0; section < CHUNK_DATA_WIDTH; section++)
+		ChunkSection[] chunkSections = chunk.getSections();
+		short depth = DEFAULT_DEPTH;
+		if (config.useHeightmap)
 		{
-			for (int y = 0; y < CHUNK_SECTION_HEIGHT; y++)
+			depth = 0;
+		} else
+		{
+			boolean found = false;
+			for (int sectionIndex = 0; sectionIndex < chunkSections.length; sectionIndex++)
 			{
-				int numberOfBlocksFound = 0;
-
-				for (int x = startX; x < endX; x++)
+				for (int yRel = 0; yRel < CHUNK_DATA_WIDTH; yRel++)
 				{
-					for (int z = startZ; z < endZ; z++)
+					if (isLayerValidLodPoint(chunk, blockPos))
 					{
-						if (isLayerValidLodPoint(chunkSections, section, y, x, z))
-						{
-							numberOfBlocksFound++;
-
-							if (numberOfBlocksFound >= numberOfBlocksRequired)
-							{
-								// we found
-								// enough blocks in this
-								// layer to count as an
-								// LOD point
-								return (short) (y + (section * CHUNK_SECTION_HEIGHT));
-							}
-						}
+						depth = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel);
+						found = true;
+						break;
 					}
+				}
+				if (found)
+				{
+					break;
 				}
 			}
 		}
-
-		// we never found a valid LOD point
-		return DEFAULT_DEPTH;
+		return depth;
 	}
 
-
-	/**
-	 * Find the lowest valid point from the bottom.
-	 */
-	@SuppressWarnings("unused")
-	private short determineBottomPoint(Heightmap heightmap)
-	{
-		// the heightmap only shows how high the blocks go, it
-		// doesn't have any info about how low they go
-		return 0;
-	}
 
 	/**
 	 * Find the highest valid point from the Top
 	 */
-	private short determineHeightPointForArea(ChunkSection[] chunkSections, int startX, int startZ, int endX, int endZ)
+	private short determineHeightPoint(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, BlockPos.Mutable blockPos)
 	{
-		int numberOfBlocksRequired = ((endX - startX) * (endZ - startZ) / 2);
-		// search from the top down
-		for (int section = chunkSections.length - 1; section >= 0; section--)
+		short height = DEFAULT_HEIGHT;
+		if (config.useHeightmap)
 		{
-			for (int y = CHUNK_DATA_WIDTH - 1; y >= 0; y--)
+			height = (short) chunk.getOrCreateHeightmapUnprimed(LodUtil.DEFAULT_HEIGHTMAP).getFirstAvailable(xRel, zRel);
+		} else
+		{
+			boolean voidData = true;
+			ChunkSection[] chunkSections = chunk.getSections();
+			for (int sectionIndex = chunkSections.length - 1; sectionIndex >= 0; sectionIndex--)
 			{
-				int numberOfBlocksFound = 0;
-
-				for (int x = startX; x < endX; x++)
+				for (int yRel = CHUNK_DATA_WIDTH - 1; yRel >= 0; yRel--)
 				{
-					for (int z = startZ; z < endZ; z++)
+					if (isLayerValidLodPoint(chunk, blockPos))
 					{
-						if (isLayerValidLodPoint(chunkSections, section, y, x, z))
-						{
-							numberOfBlocksFound++;
-
-							if (numberOfBlocksFound >= numberOfBlocksRequired)
-							{
-								// we found
-								// enough blocks in this
-								// layer to count as an
-								// LOD point
-								return (short) (y + 1 + (section * CHUNK_SECTION_HEIGHT));
-							}
-						}
+						height = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel + 1);
+						voidData = false;
+						break;
 					}
+				}
+				if (!voidData)
+				{
+					break;
 				}
 			}
 		}
-
-		// we never found a valid LOD point
-		return DEFAULT_HEIGHT;
-	}
-
-
-	/**
-	 * Find the highest point from the Top
-	 */
-	private short determineHeightPoint(Heightmap heightmap, int startX, int startZ, int endX, int endZ)
-	{
-		short highest = 0;
-		for (int x = startX; x < endX; x++)
-		{
-			for (int z = startZ; z < endZ; z++)
-			{
-				short newHeight = (short) heightmap.getFirstAvailable(x, z);
-				if (newHeight > highest)
-					highest = newHeight;
-			}
-		}
-
-		return highest;
+		return height;
 	}
 
 	/**
 	 * Generate the color for the given chunk using biome water color, foliage
 	 * color, and grass color.
-	 *
-	 * @param config_useSolidBlocksInColorGen <br>
-	 *                                        If true we look down from the top of
-	 *                                        the <br>
-	 *                                        chunk until we find a non-invisible
-	 *                                        block, and then use <br>
-	 *                                        its color. If false we generate the
-	 *                                        color immediately for <br>
-	 *                                        each x and z.
-	 * @param config_useBiomeColors           <br>
-	 *                                        If true use biome foliage, water, and
-	 *                                        grass colors, <br>
-	 *                                        otherwise only use the block's
-	 *                                        material color
 	 */
-	private int generateLodColorForArea(IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX,
-	                                    int endZ)
+	private int generateLodColor(IChunk chunk, LodBuilderConfig config, int xRel, int yAbs, int zRel)
 	{
 		ChunkSection[] chunkSections = chunk.getSections();
-
-		int numbOfBlocks = 0;
-		int red = 0;
-		int green = 0;
-		int blue = 0;
-
-		for (int x = startX; x < endX; x++)
+		int colorInt = 0;
+		if (config.useBiomeColors)
 		{
-			for (int z = startZ; z < endZ; z++)
+			// I have no idea why I need to bit shift to the right, but
+			// if I don't the biomes don't show up correctly.
+			Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, yAbs >> 2, zRel >> 2);
+			colorInt = getColorForBiome(xRel, zRel, biome);
+		} else
+		{
+			int sectionIndex = Math.floorDiv(yAbs, CHUNK_SECTION_HEIGHT);
+			int yRel = Math.floorMod(yAbs, CHUNK_SECTION_HEIGHT);
+			if (chunkSections[sectionIndex] != null)
 			{
-				boolean foundBlock = false;
+				BlockState blockState = chunkSections[sectionIndex].getBlockState(xRel, yRel, zRel);
 
-				// go top down
-				for (int i = chunkSections.length - 1; !foundBlock && i >= 0; i--)
-				{
-					if (!foundBlock && (chunkSections[i] != null || !config.useSolidBlocksInColorGen))
-					{
-						for (int y = CHUNK_SECTION_HEIGHT - 1; !foundBlock && y >= 0; y--)
-						{
-							int colorInt = 0;
-							BlockState blockState = null;
+				// the bit shift is equivalent to dividing by 4
+				Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, yAbs >> 2, zRel >> 2);
 
-							if (chunkSections[i] != null)
-							{
-								blockState = chunkSections[i].getBlockState(x, y, z);
-								colorInt = blockState.materialColor.col;
-							}
-
-							if (colorInt == 0 && config.useSolidBlocksInColorGen)
-							{
-								// skip air or invisible blocks
-								continue;
-							}
-
-							if (config.useBiomeColors)
-							{
-								// I have no idea why I need to bit shift to the right, but
-								// if I don't the biomes don't show up correctly.
-								Biome biome = chunk.getBiomes().getNoiseBiome(x >> 2, y + 1 * chunkSections.length >> 2,
-										z >> 2);
-								colorInt = getColorForBiome(x, z, biome);
-							} else
-							{
-
-								// the bit shift is equivalent to dividing by 4
-								Biome biome = chunk.getBiomes().getNoiseBiome(x >> 2, y + i * chunkSections.length >> 2,
-										z >> 2);
-								colorInt = getColorForBlock(x, z, blockState, biome);
-							}
-
-							red += ColorUtil.getRed(colorInt);
-							green += ColorUtil.getGreen(colorInt);
-							blue += ColorUtil.getBlue(colorInt);
-
-							numbOfBlocks++;
-
-							// we found a valid block, skip to the
-							// next x and z
-							foundBlock = true;
-						}
-					}
-				}
+				colorInt = getColorForBlock(xRel, zRel, blockState, biome);
+			}
+			if (colorInt == 0 && yAbs > 0)
+			{
+				//invisible case
+				colorInt = generateLodColor(chunk, config, xRel, yAbs - 1, zRel);
 			}
 		}
+		return colorInt;
+	}
 
-		if (numbOfBlocks == 0)
-			numbOfBlocks = 1;
+	private int getLightValue(IChunk chunk, BlockPos.Mutable blockPos)
+	{
+		int light;
 
-		red /= numbOfBlocks;
-		green /= numbOfBlocks;
-		blue /= numbOfBlocks;
-		return ColorUtil.rgbToInt(red,green,blue);
+		//*TODO choose the best one between those options*/
+		//lightBlock = MinecraftWrapper.INSTANCE.getPlayer().level.getLightEngine().getLayerListener(LightType.BLOCK).getLightValue(blockPos);
+		//lightBlock = (byte) MinecraftWrapper.INSTANCE.getPlayer().level.getLightEngine().blockEngine.getLightValue(blockPos);
+		light = MinecraftWrapper.INSTANCE.getPlayer().level.getBrightness(LightType.BLOCK, blockPos);
+		light += MinecraftWrapper.INSTANCE.getPlayer().level.getBrightness(LightType.SKY, blockPos) << 4;
+		//BlockState blockState = chunk.getBlockState(blockPos);
+		//lightBlock = (byte) blockState.getLightBlock(chunk, blockPos);
+		return light;
 	}
 
 	/**
@@ -442,9 +541,9 @@ public class LodBuilder
 		int colorInt = 0;
 
 		// block special cases
-		if (blockState == Blocks.AIR.defaultBlockState() 
-				|| blockState == Blocks.CAVE_AIR.defaultBlockState()
-				|| blockState == Blocks.BARRIER.defaultBlockState())
+		if (blockState == Blocks.AIR.defaultBlockState()
+				    || blockState == Blocks.CAVE_AIR.defaultBlockState()
+				    || blockState == Blocks.BARRIER.defaultBlockState())
 		{
 			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
 			tmp = tmp.darker();
@@ -452,10 +551,35 @@ public class LodBuilder
 		} else if (blockState == Blocks.STONE.defaultBlockState())
 		{
 			colorInt = LodUtil.STONE_COLOR_INT;
+		} else if (blockState == Blocks.NETHERRACK.defaultBlockState())
+		{
+			colorInt = LodUtil.NETHERRACK_COLOR_INT;
+		} else if (blockState == Blocks.WARPED_NYLIUM.defaultBlockState())
+		{
+			colorInt = LodUtil.WARPED_NYLIUM_COLOR_INT;
+		} else if (blockState == Blocks.CRIMSON_NYLIUM.defaultBlockState())
+		{
+			colorInt = LodUtil.CRIMSON_NYLIUM_COLOR_INT;
+		} else if (blockState == Blocks.BEDROCK.defaultBlockState())
+		{
+			colorInt = getColorForBiome(x, z, biome);
 		} else if (blockState == Blocks.MYCELIUM.defaultBlockState())
 		{
 			colorInt = LodUtil.MYCELIUM_COLOR_INT;
+		} else if (blockState == Blocks.SOUL_TORCH.defaultBlockState()
+				           || blockState == Blocks.SOUL_WALL_TORCH.defaultBlockState())
+		{
+			colorInt = Blocks.WARPED_PLANKS.defaultMaterialColor().col;
+		} else if (blockState == Blocks.TORCH.defaultBlockState()
+				           || blockState == Blocks.WALL_TORCH.defaultBlockState())
+		{
+			colorInt = Blocks.OAK_PLANKS.defaultMaterialColor().col;
+		} else if (blockState == Blocks.REDSTONE_TORCH.defaultBlockState()
+				           || blockState == Blocks.REDSTONE_WALL_TORCH.defaultBlockState())
+		{
+			colorInt = Blocks.CRIMSON_PLANKS.defaultMaterialColor().col;
 		}
+
 
 		// plant life
 		else if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() == Blocks.VINE)
@@ -481,7 +605,7 @@ public class LodBuilder
 		// everything else
 		else
 		{
-			colorInt = blockState.materialColor.col;
+			colorInt = blockState.getBlock().defaultMaterialColor().col;
 		}
 
 		return colorInt;
@@ -498,7 +622,7 @@ public class LodBuilder
 		{
 
 			case NETHER:
-				colorInt = Blocks.BEDROCK.defaultBlockState().materialColor.col;
+				colorInt = LodUtil.NETHERRACK_COLOR_INT;
 				break;
 
 			case THEEND:
@@ -552,19 +676,34 @@ public class LodBuilder
 	/**
 	 * Is the layer between the given X, Z, and dataIndex values a valid LOD point?
 	 */
-	private boolean isLayerValidLodPoint(ChunkSection[] chunkSections, int sectionIndex, int y, int x, int z)
+	private boolean isLayerValidLodPoint(IChunk chunk, BlockPos.Mutable blockPos)
 	{
-		if (chunkSections[sectionIndex] == null)
+
+		BlockState blockState = chunk.getBlockState(blockPos);
+		if (blockState != null)
 		{
-			// this section doesn't have any blocks,
-			// it is not a valid section
-			return false;
-		} else
-		{
-			if (chunkSections[sectionIndex].getBlockState(x, y, z) != null
-					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.AIR
-					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.CAVE_AIR
-					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.BARRIER)
+			if (!blockState.getFluidState().isEmpty())
+			{
+				return true;
+			}
+			VoxelShape voxelShape = blockState.getShape(chunk, blockPos);
+			if (!voxelShape.isEmpty())
+			{
+				AxisAlignedBB bbox = voxelShape.bounds();
+				int xWidth = (int) (bbox.maxX - bbox.minX);
+				int yWidth = (int) (bbox.maxY - bbox.minY);
+				int zWidth = (int) (bbox.maxZ - bbox.minZ);
+				if (xWidth < 0.7 && zWidth < 0.7 && yWidth < 1)
+				{
+					return false;
+				}
+			} else
+			{
+				return false;
+			}
+			if (blockState.getBlock() != Blocks.AIR
+					    && blockState.getBlock() != Blocks.CAVE_AIR
+					    && blockState.getBlock() != Blocks.BARRIER)
 			{
 				return true;
 			}

@@ -1,5 +1,7 @@
 package com.seibel.lod.objects;
 
+import com.seibel.lod.util.LevelPosUtil;
+
 public class PosToGenerateContainer
 {
 	private int playerPosX;

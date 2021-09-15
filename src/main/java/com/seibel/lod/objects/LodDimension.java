@@ -25,9 +25,7 @@ import java.util.concurrent.Executors;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
-import com.seibel.lod.util.DetailDistanceUtil;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.*;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.util.math.ChunkPos;
@@ -435,7 +433,7 @@ public class LodDimension
 	 * stored in the LOD. If an LOD already exists at the given
 	 * coordinates it will be overwritten.
 	 */
-	public synchronized Boolean addData(byte detailLevel, int posX, int posZ, long lodDataPoint, boolean dontSave, boolean serverQuality)
+	public Boolean addData(byte detailLevel, int posX, int posZ, long[] dataPoint, boolean dontSave, boolean serverQuality)
 	{
 
 		// don't continue if the region can't be saved
@@ -445,7 +443,7 @@ public class LodDimension
 		LodRegion region = getRegion(regionPosX, regionPosZ);
 		if (region == null)
 			return false;
-		boolean nodeAdded = region.addData(detailLevel, posX, posZ, lodDataPoint, serverQuality);
+		boolean nodeAdded = region.addData(detailLevel, posX, posZ, dataPoint, serverQuality);
 		// only save valid LODs to disk
 		if (!dontSave && fileHandler != null)
 		{
@@ -520,7 +518,7 @@ public class LodDimension
 	 * Returns null if the LodChunk doesn't exist or
 	 * is outside the loaded area.
 	 */
-	public long getData(byte detailLevel, int posX, int posZ)
+	public long[] getData(byte detailLevel, int posX, int posZ)
 	{
 		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
 			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
@@ -529,7 +527,7 @@ public class LodDimension
 
 		if (region == null)
 		{
-			return 0;
+			return new long[]{DataPointUtil.EMPTY_DATA};
 		}
 
 		return region.getData(detailLevel, posX, posZ);

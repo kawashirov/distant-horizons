@@ -24,8 +24,10 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.function.Supplier;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.builders.LodBuilderConfig;
 import com.seibel.lod.config.LodConfig;
@@ -72,7 +74,8 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  */
 public class LodNodeGenWorker implements IWorker
 {
-	public static ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
+	public static ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
+	//public static ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
 
 	private boolean threadStarted = false;
 	private LodChunkGenThread thread;
@@ -126,7 +129,7 @@ public class LodNodeGenWorker implements IWorker
 				// Every other method can
 				// be done asynchronously
 				Thread newThread = new Thread(thread);
-				newThread.setPriority(3);
+				newThread.setPriority(5);
 				genThreads.execute(newThread);
 			}
 

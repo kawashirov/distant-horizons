@@ -28,10 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.objects.LevelContainer;
-import com.seibel.lod.objects.LodDimension;
-import com.seibel.lod.objects.LodRegion;
-import com.seibel.lod.objects.RegionPos;
+import com.seibel.lod.objects.*;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
@@ -46,11 +43,6 @@ import com.seibel.lod.util.LodUtil;
  */
 public class LodDimensionFileHandler
 {
-	/**
-	 * This is what separates each piece of data
-	 */
-	public static final char DATA_DELIMITER = ',';
-
 
 	private LodDimension loadedDimension = null;
 	public long regionLastWriteTime[][];
@@ -84,7 +76,7 @@ public class LodDimensionFileHandler
 	 * file handler, older versions (smaller numbers) will be deleted and overwritten,
 	 * newer versions (larger numbers) will be ignored and won't be read.
 	 */
-	public static final int LOD_SAVE_FILE_VERSION = 5;
+	public static final int LOD_SAVE_FILE_VERSION = 6;
 
 	/**
 	 * This is the string written before the file version
@@ -200,7 +192,8 @@ public class LodDimensionFileHandler
 				data = bufferedReader.readLine();
 
 				bufferedReader.close();
-				region.addLevel(new LevelContainer(data));
+				//region.addLevel(new SingleLevelContainer(data));
+				region.addLevel(new VerticalLevelContainer(data));
 			} catch (Exception e)
 			{
 				// the buffered reader encountered a
@@ -331,7 +324,7 @@ public class LodDimensionFileHandler
 				fw.write(LOD_FILE_VERSION_PREFIX + " " + LOD_SAVE_FILE_VERSION + "\n");
 
 				// add each LodChunk to the file
-				fw.write(region.getLevel(detailLevel).toString());
+				fw.write(region.getLevel(detailLevel).toDataString());
 				fw.close();
 
 				// overwrite the old file with the new one

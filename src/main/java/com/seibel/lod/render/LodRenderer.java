@@ -39,7 +39,7 @@ import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.handlers.ReflectionHandler;
-import com.seibel.lod.objects.LevelPosUtil;
+import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
 import com.seibel.lod.objects.RegionPos;
@@ -551,7 +551,7 @@ public class LodRenderer
 						// it is possible to see the near clip plane, but
 						// you have to be flying quickly in spectator mode through ungenerated
 						// terrain, so I don't think it is much of an issue.
-						mc.getRenderDistance(),
+						mc.getRenderDistance()/2,
 						farPlaneBlockDistance * LodUtil.CHUNK_WIDTH * 2);
 
 		// add the screen space distortions

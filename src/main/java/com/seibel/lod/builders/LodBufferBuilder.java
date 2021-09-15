@@ -32,8 +32,6 @@ import org.lwjgl.opengl.GL15C;
 
 import com.seibel.lod.builders.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.objects.DataPoint;
-import com.seibel.lod.objects.LevelPosUtil;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.PosToRenderContainer;
@@ -42,10 +40,13 @@ import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.proxy.GlProxy;
 import com.seibel.lod.proxy.GlProxy.GlProxyContext;
 import com.seibel.lod.render.LodRenderer;
+import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -117,8 +118,10 @@ public class LodBufferBuilder
 	private volatile PosToRenderContainer[][] setsToRender;
 	private volatile RegionPos center;
 	
-	/** This is the ChunkPos the player was at the last time the buffers were built.
-	 * IE the center of the buffers last time they were built */
+	/**
+	 * This is the ChunkPos the player was at the last time the buffers were built.
+	 * IE the center of the buffers last time they were built
+	 */
 	private volatile ChunkPos drawableCenterChunkPos = new ChunkPos(0, 0);
 	private volatile ChunkPos buildableCenterChunkPos = new ChunkPos(0, 0);
 	
@@ -142,6 +145,20 @@ public class LodBufferBuilder
 	public void generateLodBuffersAsync(LodRenderer renderer, LodDimension lodDim,
 			BlockPos playerBlockPos, boolean fullRegen)
 	{
+
+
+		for(int i = 0; i<16; i++)
+		{
+			for(int j = 0; j<16; j++)
+			{
+				int lightTint = LightTexture.pack(i,j);
+				//System.out.print(ColorUtil.getRed(lightTint) + " " + ColorUtil.getGreen(lightTint) + " " + ColorUtil.getBlue(lightTint) + " ");
+				System.out.print(Integer.toHexString(lightTint) + " ");
+			}
+			System.out.println();
+		}
+
+
 		// only allow one generation process to happen at a time
 		if (generatingBuffers)
 			return;
@@ -246,8 +263,9 @@ public class LodBufferBuilder
 								int chunkXdist;
 								int chunkZdist;
 								short gameChunkRenderDistance = (short) (renderer.vanillaRenderedChunks.length / 2 - 1);
-								long dataPoint;
-								long[] adjData;
+								//long dataPoint;
+								long[] adjData = new long[NUMBER_OF_DIRECTION];
+
 								for (int index = 0; index < posToRender.getNumberOfPos(); index++)
 								{
 									detailLevel = posToRender.getNthDetailLevel(index);
@@ -266,12 +284,13 @@ public class LodBufferBuilder
 									// skip any chunks that Minecraft is going to render
 									try
 									{
-										if (lodDim.doesDataExist(detailLevel, posX, posZ))
+										//dataPoint = lodDim.getData(detailLevel, posX, posZ)[0];
+										for(long dataPoint : lodDim.getData(detailLevel, posX, posZ))
 										{
-											dataPoint = lodDim.getData(detailLevel, posX, posZ);
-											if (DataPoint.getHeight(dataPoint) == LodBuilder.DEFAULT_HEIGHT && DataPoint.getDepth(dataPoint) == LodBuilder.DEFAULT_DEPTH)
-												continue;
-											adjData = new long[NUMBER_OF_DIRECTION];
+
+											if (!DataPointUtil.isItVoid(dataPoint) && DataPointUtil.doesItExist(dataPoint))
+										{
+												/*
 											for (int direction = 0; direction < NUMBER_OF_DIRECTION; direction++)
 											{
 												xAdj = posX + ADJ_DIRECTION[direction][0];
@@ -284,22 +303,27 @@ public class LodBufferBuilder
 													if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
 															&& posToRender.contains(detailLevel, xAdj, zAdj))
 													{
-														adjData[direction] = lodDim.getData(detailLevel, xAdj, zAdj);
+															adjData[direction] = lodDim.getData(detailLevel, xAdj, zAdj)[0];
+														} else
+														{
+															adjData[direction] = 0;
 													}
-												}
-												else
+													} else
 												{
 													if (posToRender.contains(detailLevel, xAdj, zAdj))
 													{
-														adjData[direction] = lodDim.getData(detailLevel, xAdj, zAdj);
+															adjData[direction] = lodDim.getData(detailLevel, xAdj, zAdj)[0];
+														} else
+														{
+															adjData[direction] = 0;
 													}
 												}
-											}
+												}*/
 											LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, dataPoint, adjData,
 													detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode);
 										}
-									}
-									catch (ArrayIndexOutOfBoundsException e)
+										}
+									} catch (ArrayIndexOutOfBoundsException e)
 									{
 										e.printStackTrace();
 										return false;

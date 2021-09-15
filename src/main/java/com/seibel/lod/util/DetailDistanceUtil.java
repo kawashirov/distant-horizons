@@ -19,6 +19,19 @@ public class DetailDistanceUtil
 	private static int base = 2;
 	private static double logBase = Math.log(2);
 
+	private static int[] maxVerticalData = {
+			8,
+			4,
+			4,
+			2,
+			2,
+			1,
+			1,
+			1,
+			1,
+			1,
+			1,};
+
 	private static LodDetail[] lodGenDetails = {
 			LodDetail.FULL,
 			LodDetail.HALF,
@@ -147,7 +160,13 @@ public class DetailDistanceUtil
 
 	public static byte getLodDrawDetail(int detail)
 	{
-		return (byte) Math.max(detail, minDrawDetail);
+		if (detail < minGenDetail)
+		{
+			return lodGenDetails[minGenDetail].detailLevel;
+		} else
+		{
+			return lodGenDetails[detail].detailLevel;
+		}
 	}
 
 	public static LodDetail getLodGenDetail(int detail)
@@ -176,6 +195,10 @@ public class DetailDistanceUtil
 		}
 	}
 
+	public static int getMaxVerticalData(int detail)
+	{
+		return maxVerticalData[LodUtil.clamp(minGenDetail, detail, LodUtil.REGION_DETAIL_LEVEL)];
+	}
 
 	public static boolean regionInView(int playerPosX, int playerPosY, int playerPosZ, int xRot, int yRot, int fov, RegionPos regionPos)
 	{

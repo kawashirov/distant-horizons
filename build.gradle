@@ -31,7 +31,7 @@ compileJava {
     // release 8 is needed because otherwise FloatBuffer.flip() will crash
     // on some machines
     // example thread: https://github.com/eclipse/jetty.project/issues/3244
-    options.compilerArgs.addAll(['--release', '8', '-Xlint:unchecked', '-Xlint:deprecation']) 
+    options.compilerArgs.addAll(['-Xlint:unchecked', '-Xlint:deprecation'])
 }
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))

@@ -1,67 +1,61 @@
 package com.seibel.lod.objects;
 
-import java.io.Serializable;
-
+import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 
-public class LevelContainer implements Serializable
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+public interface LevelContainer
 {
+	public static final char VERTICAL_DATA_DELIMITER = '\t';
+	public static final char DATA_DELIMITER = ' ';
+	/**With this you can add data to the level container
+	 *
+	 * @param data actual data to add in a array of long format.
+	 * @param posX x position in the detail level
+	 * @param posZ z position in the detail level
+	 * @return true if correctly added, false otherwise
+	 */
+	public boolean addData(long[] data, int posX, int posZ);
 
-	/** This is here so that Eclipse doesn't complain */
-	private static final long serialVersionUID = -4930855068717998385L;
+	/**With this you can get data from the level container
+	 *
+	 * @param posX x position in the detail level
+	 * @param posZ z position in the detail level
+	 * @return the data in long array format
+	 */
+	public long[] getData(int posX, int posZ);
 
-	public static final char DATA_DELIMITER = ',';
+	/**
+	 * @param posX x position in the detail level
+	 * @param posZ z position in the detail level
+	 * @return true only if the data exist
+	 */
+	public boolean doesItExist(int posX, int posZ);
 
-	public final byte detailLevel;
+	/**
+	 * @return return the deatilLevel of this level container
+	 */
+	public byte getDetailLevel();
 
-	public final long[][] data;
+	/**This return a level container with detail level lower than the current level.
+	 * The new level container may use information of this level.
+	 * @return the new level container
+	 */
+	public LevelContainer expand();
 
-	public LevelContainer(byte detailLevel, long[][] data)
-	{
-		this.detailLevel = detailLevel;
-		this.data = data;
-	}
+	/**
+	 *
+	 * @param lowerLevelContainer lower level where we extract the data
+	 * @param posX x position in the detail level to update
+	 * @param posZ z position in the detail level to update
+	 */
+	public void updateData(LevelContainer lowerLevelContainer, int posX, int posZ);
 
-	public LevelContainer(String inputString)
-	{
-
-		int index = 0;
-		int lastIndex = 0;
-
-
-		index = inputString.indexOf(DATA_DELIMITER, 0);
-		this.detailLevel = (byte) Integer.parseInt(inputString.substring(0, index));
-		int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
-
-		this.data = new long[size][size];
-		for (int x = 0; x < size; x++)
-		{
-			for (int z = 0; z < size; z++)
-			{
-				lastIndex = index;
-				index = inputString.indexOf(DATA_DELIMITER, lastIndex + 1);
-				data[x][z] = Long.parseLong(inputString.substring(lastIndex + 1, index), 16);
-			}
-		}
-
-	}
-
-	@Override
-	public String toString()
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
-		stringBuilder.append(detailLevel);
-		stringBuilder.append(DATA_DELIMITER);
-		for (int x = 0; x < size; x++)
-		{
-			for (int z = 0; z < size; z++)
-			{
-				//Converting the dataToHex
-				stringBuilder.append(Long.toHexString(data[x][z]));
-				stringBuilder.append(DATA_DELIMITER);
-			}
-		}
-		return stringBuilder.toString();
-	}
+	/**
+	 * This will give the data to save in the file
+	 * @return data as a String
+	 */
+	public String toDataString();
 }

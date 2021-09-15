@@ -20,6 +20,7 @@ package com.seibel.lod.builders.lodTemplates;
 import com.seibel.lod.enums.DebugMode;
 
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
 /**
@@ -31,6 +32,8 @@ import net.minecraft.util.math.BlockPos;
  */
 public abstract class AbstractLodTemplate
 {
+
+
 	public abstract void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, long[] adjData,
 	                                    byte detailLevel, int posX, int posZ, Box box, DebugMode debugging);
 
@@ -41,6 +44,7 @@ public abstract class AbstractLodTemplate
 	                              double x, double y, double z,
 	                              int red, int green, int blue, int alpha)
 	{
+
 		buffer.vertex(x, y, z).color(red, green, blue, alpha).endVertex();
 	}
 
