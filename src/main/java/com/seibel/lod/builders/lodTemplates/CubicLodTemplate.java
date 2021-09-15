@@ -20,6 +20,7 @@ package com.seibel.lod.builders.lodTemplates;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.enums.ShadingMode;
+import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.LodUtil;
@@ -27,8 +28,10 @@ import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.DimensionType;
 
 /**
  * Builds LODs as rectangular prisms.
@@ -47,7 +50,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, long[] adjData,
-	                           byte detailLevel, int posX, int posZ, Box box, DebugMode debugging)
+	                           byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, DimensionType dimensionType)
 	{
 		int width = 1 << detailLevel;
 
@@ -61,14 +64,15 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				0,
 				posZ * width,
 				bufferCenterBlockPos);
-		int color;/*
-		boolean hasSkyLight = MinecraftWrapper.INSTANCE.getPlayer().level.dimensionType().hasSkyLight();
-		boolean hasRoof = MinecraftWrapper.INSTANCE.getPlayer().level.dimensionType().hasSkyLight();
-		int time = (int) (MinecraftWrapper.INSTANCE.getPlayer().level.getDayTime() - 13000);
-		boolean isDay = time < 0;*/
-		//USE THIS IN THE boolean hasCeiling = MinecraftWrapper.INSTANCE.getPlayer().level.dimensionType().hasCeiling();
-		//color = DataPointUtil.getLightColor(data, (hasRoof & hasSkyLight), isDay);
-		color = DataPointUtil.getColor(data);
+		int color;
+
+		boolean hasSkyLight = dimensionType.hasSkyLight();
+		boolean hasRoof = dimensionType.hasCeiling();
+		boolean isDay = MinecraftWrapper.INSTANCE.getPlayer().level.isDay();
+		color = DataPointUtil.getLightColor(data, (hasRoof || hasSkyLight), isDay);
+
+		//color = DataPointUtil.getColor(data);
+
 
 		if (debugging != DebugMode.OFF)
 

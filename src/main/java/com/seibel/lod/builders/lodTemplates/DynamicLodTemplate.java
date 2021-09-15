@@ -21,6 +21,7 @@ import com.seibel.lod.enums.DebugMode;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.DimensionType;
 
 /**
  * TODO DynamicLodTemplate
@@ -35,7 +36,7 @@ public class DynamicLodTemplate extends AbstractLodTemplate
 {
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, long[] adjData,
-	                           byte detailLevel, int posX, int posZ, Box box, DebugMode debugging)
+	                           byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, DimensionType dimensionType)
 	{
 		System.err.println("DynamicLodTemplate not implemented!");
 	}

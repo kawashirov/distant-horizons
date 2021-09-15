@@ -142,19 +142,6 @@ public class LodBufferBuilder
 	                                    BlockPos playerBlockPos, boolean fullRegen)
 	{
 
-/*
-		for(int i = 0; i<16; i++)
-		{
-			for(int j = 0; j<16; j++)
-			{
-				int lightTint = LightTexture.pack(i,j);
-				//System.out.print(ColorUtil.getRed(lightTint) + " " + ColorUtil.getGreen(lightTint) + " " + ColorUtil.getBlue(lightTint) + " ");
-				System.out.print(Integer.toHexString(lightTint) + " ");
-			}
-			System.out.println();
-		}*/
-
-
 		// only allow one generation process to happen at a time
 		if (generatingBuffers)
 			return;
@@ -318,7 +305,7 @@ public class LodBufferBuilder
 													}
 												}
 												LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, dataPoint, adjData,
-														detailLevel, posX, posZ, boxCache[xR][zR],renderer.previousDebugMode);
+														detailLevel, posX, posZ, boxCache[xR][zR],renderer.previousDebugMode, lodDim.dimension);
 											}
 
 										} else if (region.getLodQualityMode() == LodQualityMode.MULTI_LOD)
@@ -329,7 +316,7 @@ public class LodBufferBuilder
 												if (!DataPointUtil.isItVoid(dataPoint) && DataPointUtil.doesItExist(dataPoint))
 												{
 													LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, dataPoint, adjData,
-															detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode);
+															detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode,  lodDim.dimension);
 												}
 											}
 										}

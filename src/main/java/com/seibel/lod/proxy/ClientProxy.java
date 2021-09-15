@@ -100,53 +100,57 @@ public class ClientProxy
 	 */
 	public void renderLods(float partialTicks)
 	{
-		// only run the first time setup once
-		if (!firstTimeSetupComplete)
+		try
 		{
-			firstFrameSetup();
+			// only run the first time setup once
+			if (!firstTimeSetupComplete)
+			{
+				firstFrameSetup();
+			}
+
+
+			DetailDistanceUtil.updateSettings();
+			if (mc == null || mc.getPlayer() == null || !lodWorld.getIsWorldLoaded())
+				return;
+
+			viewDistanceChangedEvent();
+
+			LodDimension lodDim = lodWorld.getLodDimension(mc.getCurrentDimension());
+			if (lodDim == null)
+				return;
+
+
+			playerMoveEvent(lodDim);
+
+			lodDim.treeCutter((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
+			lodDim.treeGenerator((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
+
+
+			// comment out when creating a release
+			applyConfigOverrides();
+
+
+			// Note to self:
+			// if "unspecified" shows up in the pie chart, it is
+			// possibly because the amount of time between sections
+			// is too small for the profiler to measure
+			IProfiler profiler = mc.getProfiler();
+			profiler.pop(); // get out of "terrain"
+			profiler.push("LOD");
+
+			renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
+
+			profiler.pop(); // end LOD
+			profiler.push("terrain"); // go back into "terrain"
+
+
+			// these can't be set until after the buffers are built (in renderer.drawLODs)
+			// otherwise the buffers may be set to the wrong size, or not changed at all
+			previousChunkRenderDistance = mc.getRenderDistance();
+			previousLodRenderDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get();
+		}catch (Exception e){
+
 		}
-			
-		
-		
-		DetailDistanceUtil.updateSettings();
-		if (mc == null || mc.getPlayer() == null || !lodWorld.getIsWorldLoaded())
-			return;
-		
-		viewDistanceChangedEvent();
-		
-		LodDimension lodDim = lodWorld.getLodDimension(mc.getCurrentDimension());
-		if (lodDim == null)
-			return;
-		
-		
-		playerMoveEvent(lodDim);
-		
-		lodDim.treeCutter((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
-		lodDim.treeGenerator((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
-		
-		
-		// comment out when creating a release
-		applyConfigOverrides();
-		
-		
-		// Note to self:
-		// if "unspecified" shows up in the pie chart, it is
-		// possibly because the amount of time between sections
-		// is too small for the profiler to measure
-		IProfiler profiler = mc.getProfiler();
-		profiler.pop(); // get out of "terrain"
-		profiler.push("LOD");
-		
-		renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
-		
-		profiler.pop(); // end LOD
-		profiler.push("terrain"); // go back into "terrain"
-		
-		
-		// these can't be set until after the buffers are built (in renderer.drawLODs)
-		// otherwise the buffers may be set to the wrong size, or not changed at all
-		previousChunkRenderDistance = mc.getRenderDistance();
-		previousLodRenderDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get();
 	}
 	
 	

@@ -194,7 +194,8 @@ public class LodBuilder
 				long[] data = null;
 				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
 
-				switch (lodQualityMode){
+				switch (lodQualityMode)
+				{
 					default:
 					case HEIGHTMAP:
 						long[] dataToMergeSingle;
@@ -221,7 +222,6 @@ public class LodBuilder
 								isServer);
 						break;
 				}
-
 
 
 			}
@@ -253,14 +253,15 @@ public class LodBuilder
 
 		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
 		int index = 0;
-		if(dataToMerge == null){
+		if (dataToMerge == null)
+		{
 			dataToMerge = new long[size * size][DataPointUtil.WORLD_HEIGHT];
 		}
 		//dataToMerge = new long[size * size][1024];
 
 		for (index = 0; index < size * size; index++)
 		{
-			for(int i = 0; i < dataToMerge[index].length; i++)
+			for (int i = 0; i < dataToMerge[index].length; i++)
 			{
 				dataToMerge[index][i] = 0;
 			}
@@ -546,6 +547,10 @@ public class LodBuilder
 		//*TODO choose the best one between those options*/
 		//lightBlock = MinecraftWrapper.INSTANCE.getPlayer().level.getLightEngine().getLayerListener(LightType.BLOCK).getLightValue(blockPos);
 		//lightBlock = (byte) MinecraftWrapper.INSTANCE.getPlayer().level.getLightEngine().blockEngine.getLightValue(blockPos);
+		if (MinecraftWrapper.INSTANCE.getPlayer() == null)
+			return 0;
+		if (MinecraftWrapper.INSTANCE.getPlayer().level == null)
+			return 0;
 		light = MinecraftWrapper.INSTANCE.getPlayer().level.getBrightness(LightType.BLOCK, blockPos);
 		light += MinecraftWrapper.INSTANCE.getPlayer().level.getBrightness(LightType.SKY, blockPos) << 4;
 		//BlockState blockState = chunk.getBlockState(blockPos);
@@ -581,6 +586,18 @@ public class LodBuilder
 		} else if (blockState == Blocks.CRIMSON_NYLIUM.defaultBlockState())
 		{
 			colorInt = LodUtil.CRIMSON_NYLIUM_COLOR_INT;
+		} else if (blockState == Blocks.WEEPING_VINES.defaultBlockState()
+						   || blockState == Blocks.WEEPING_VINES_PLANT.defaultBlockState()
+				           || blockState == Blocks.CRIMSON_FUNGUS.defaultBlockState()
+				           || blockState == Blocks.CRIMSON_ROOTS.defaultBlockState())
+		{
+			colorInt = Blocks.NETHER_WART_BLOCK.defaultMaterialColor().col;
+		} else if (blockState == Blocks.TWISTING_VINES.defaultBlockState()
+				           || blockState == Blocks.TWISTING_VINES_PLANT.defaultBlockState()
+				           || blockState == Blocks.CRIMSON_FUNGUS.defaultBlockState()
+				           || blockState == Blocks.CRIMSON_ROOTS.defaultBlockState())
+		{
+			colorInt = Blocks.WARPED_WART_BLOCK.defaultMaterialColor().col;
 		} else if (blockState == Blocks.BEDROCK.defaultBlockState())
 		{
 			colorInt = getColorForBiome(x, z, biome);
@@ -703,6 +720,8 @@ public class LodBuilder
 		BlockState blockState = chunk.getBlockState(blockPos);
 		if (blockState != null)
 		{
+			//blockState.isCollisionShapeFullBlock(chunk, blockPos);
+
 			/*if (!blockState.getFluidState().isEmpty())
 			{
 				return true;

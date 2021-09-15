@@ -175,11 +175,27 @@ public class DataPointUtil
 	{
 		int lightBlock = getLightBlock(dataPoint);
 		int lightSky = getLightSky(dataPoint);
-		int lightTint = LightTexture.pack(lightSky,lightBlock);
+		int lightTint = 0;
 
-		int red = (ColorUtil.getRed(lightTint) + getRed(dataPoint))/2;
-		int green = (ColorUtil.getGreen(lightTint) + getGreen(dataPoint))/2;
-		int blue = (ColorUtil.getBlue(lightTint) + getBlue(dataPoint))/2;
+		int red;
+		int green;
+		int blue;
+		if(roof)
+		{
+			red = LodUtil.clamp(0, getRed(dataPoint) + -30 + lightBlock*4,255);
+			green = LodUtil.clamp(0, getGreen(dataPoint) + -30 + lightBlock*4,255);
+			blue = LodUtil.clamp(0, getBlue(dataPoint) + -30 + lightBlock*2,255);
+		}else{
+			if(day){
+				red = LodUtil.clamp(0, getRed(dataPoint) + -30 + LodUtil.clamp(0, lightBlock + lightSky,15)*4,255);
+				green = LodUtil.clamp(0, getGreen(dataPoint) + -30 + LodUtil.clamp(0, lightBlock + lightSky,15)*4,255);
+				blue = LodUtil.clamp(0, getBlue(dataPoint) + -30 + LodUtil.clamp(0, lightBlock/2 + lightSky,15)*4,255);
+			}else{
+				red = LodUtil.clamp(0, getRed(dataPoint) + -60 + lightBlock*6,255);
+				green = LodUtil.clamp(0, getGreen(dataPoint) + -60 + lightBlock*6,255);
+				blue = LodUtil.clamp(0, getBlue(dataPoint) + -30 + lightBlock*2,255);
+			}
+		}
 		/*
 		red = LodUtil.clamp(0, getRed(dataPoint)  + red, 255);
 		green = LodUtil.clamp(0, getGreen(dataPoint) + green, 255);

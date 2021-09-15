@@ -67,4 +67,16 @@ public class ColorUtil
 				LodUtil.clamp(0.0f, hsv[1] * saturationMultiplier, 1.0f),
 				LodUtil.clamp(0.0f, hsv[2] * brightnessMultiplier, 1.0f)).getRGB();
 	}
+
+	/**
+	 * Edit the given color as a HSV (Hue Saturation Value) color.
+	 */
+	public static int changeBrightness(int color, float brightness)
+	{
+		float[] hsv = Color.RGBtoHSB(getRed(color), getGreen(color), getBlue(color), null);
+		return Color.getHSBColor(
+				hsv[0], // hue
+				hsv[1],
+				brightness).getRGB();
+	}
 }

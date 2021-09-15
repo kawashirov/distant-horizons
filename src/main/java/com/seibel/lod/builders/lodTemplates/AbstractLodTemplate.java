@@ -22,6 +22,7 @@ import com.seibel.lod.enums.DebugMode;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.DimensionType;
 
 /**
  * This is the abstract class used to create different
@@ -35,7 +36,7 @@ public abstract class AbstractLodTemplate
 
 
 	public abstract void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, long[] adjData,
-	                                    byte detailLevel, int posX, int posZ, Box box, DebugMode debugging);
+	                                    byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, DimensionType dimensionType);
 
 	/**
 	 * add the given position and color to the buffer
