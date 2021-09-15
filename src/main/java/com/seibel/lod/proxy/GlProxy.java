@@ -1,24 +1,24 @@
 package com.seibel.lod.proxy;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Future;
-
-import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.WGL;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.seibel.lod.builders.LodBufferBuilder;
 
 /**
  * A singleton that holds references to different openGL contexts.
  * 
+ * <p>
+ * Helpful OpenGL resources: <br><br>
+ * 
+ * https://www.seas.upenn.edu/~pcozzi/OpenGLInsights/OpenGLInsights-AsynchronousBufferTransfers.pdf <br>
+ * https://learnopengl.com/Advanced-OpenGL/Advanced-Data <br>
+ * https://gamedev.stackexchange.com/questions/91995/edit-vbo-data-or-create-a-new-one <br><br>
+ * 
+ * 
  * @author James Seibel
- * @version 9-9-2021
+ * @version 9-14-2021
  */
 public class GlProxy
 {
@@ -36,57 +36,35 @@ public class GlProxy
 	
 	private GlProxy()
 	{
-		GLFWErrorCallback errorfun = GLFWErrorCallback.createPrint();
-		GLFW.glfwSetErrorCallback(errorfun);
-		
-		
 		// getting Minecraft's context has to be done on the render thread,
 		// where the GL context is
 		if (!RenderSystem.isOnRenderThread())
 			throw new IllegalStateException(GlProxy.class.getSimpleName() + " was created outside the render thread!");
 		
+		
 		minecraftGlContext = WGL.wglGetCurrentContext();
 		minecraftGlCapabilities = GL.getCapabilities();
 		deviceContext = WGL.wglGetCurrentDC();
 		
-		
-		Callable<Void> callable = () ->
-		{
-			lodBuilderGlContext = WGL.wglCreateContext(deviceContext);
-//			if (!WGL.wglShareLists(minecraftGlContext, lodBuilderGlContext))
-//				throw new IllegalStateException("Unable to share lists between Minecraft and builder contexts.");
-			if (!WGL.wglMakeCurrent(deviceContext, lodBuilderGlContext))
-				throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + GlProxyContext.BUILDER.toString() + "] from [" + GlProxyContext.MINECRAFT.toString() + "]");
-			lodBuilderGlCapabilities = GL.createCapabilities();
-			WGL.wglMakeCurrent(deviceContext, 0L);
+		lodBuilderGlContext = WGL.wglCreateContext(deviceContext);
+		if (!WGL.wglShareLists(minecraftGlContext, lodBuilderGlContext))
+			throw new IllegalStateException("Unable to share lists between Minecraft and builder contexts.");
+		if (!WGL.wglMakeCurrent(deviceContext, lodBuilderGlContext))
+			throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + GlProxyContext.ALPHA.toString() + "] from [" + GlProxyContext.MINECRAFT.toString() + "]");
+		lodBuilderGlCapabilities = GL.createCapabilities();
+		WGL.wglMakeCurrent(deviceContext, 0L);
 			
-			return null;
-		};
-		
-		ArrayList<Callable<Void>> list = new ArrayList<Callable<Void>>();
-		list.add(callable);
-		try
-		{
-			List<Future<Void>> futuresBuffer = LodBufferBuilder.mainGenThread.invokeAll(list);
-			
-			for (Future<Void> future : futuresBuffer)
-				if (!future.isDone())
-					ClientProxy.LOGGER.error("GLProxy failed to setup.");
-		}
-		catch (InterruptedException e)
-		{
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 		
 		
 		lodRenderGlContext = WGL.wglCreateContext(deviceContext);
-//		if (!WGL.wglShareLists(lodBuilderGlContext, lodRenderGlContext))
-//			throw new IllegalStateException("Unable to share lists between builder and render contexts.");
+		if (!WGL.wglShareLists(minecraftGlContext, lodRenderGlContext))
+			throw new IllegalStateException("Unable to share lists between builder and render contexts.");
 		if (!WGL.wglMakeCurrent(deviceContext, lodRenderGlContext))
-			throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + GlProxyContext.BUILDER.toString() + "] from [" + GlProxyContext.RENDER.toString() + "]");
+			throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + GlProxyContext.ALPHA.toString() + "] from [" + GlProxyContext.BETA.toString() + "]");
 		lodRenderGlCapabilities = GL.createCapabilities();
+		
+		
+		// Since this is called on the render thread, make sure the Minecraft context is used in the end
 		WGL.wglMakeCurrent(deviceContext, minecraftGlContext);
 	}
 	
@@ -102,11 +80,11 @@ public class GlProxy
 		GLCapabilities newGlCapabilities = null;
 		switch(context)
 		{
-		case BUILDER:
+		case ALPHA:
 			contextPointer = lodBuilderGlContext;
 			newGlCapabilities = lodBuilderGlCapabilities;
 			break;
-		case RENDER:
+		case BETA:
 			contextPointer = lodRenderGlContext;
 			newGlCapabilities = lodRenderGlCapabilities;
 			break;
@@ -133,11 +111,11 @@ public class GlProxy
 		long currentContext = WGL.wglGetCurrentContext();
 		if(currentContext == lodBuilderGlContext)
 		{
-			return GlProxyContext.BUILDER;
+			return GlProxyContext.ALPHA;
 		}
 		else if(currentContext == lodRenderGlContext)
 		{
-			return GlProxyContext.RENDER;
+			return GlProxyContext.BETA;
 		}
 		else if(currentContext == minecraftGlContext)
 		{
@@ -152,8 +130,8 @@ public class GlProxy
 	public enum GlProxyContext
 	{
 		MINECRAFT,
-		BUILDER,
-		RENDER,
+		ALPHA,
+		BETA,
 		
 		/** used to un-bind threads */
 		NONE,

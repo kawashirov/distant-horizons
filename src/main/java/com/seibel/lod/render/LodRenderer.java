@@ -28,7 +28,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
 import org.lwjgl.opengl.NVFogDistance;
-import org.lwjgl.opengl.WGL;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -47,7 +46,6 @@ import com.seibel.lod.objects.NearFarFogSettings;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.proxy.GlProxy;
-import com.seibel.lod.proxy.GlProxy.GlProxyContext;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
@@ -75,7 +73,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world.
  *
  * @author James Seibel
- * @version 9-7-2021
+ * @version 9-14-2021
  */
 public class LodRenderer
 {
@@ -103,7 +101,6 @@ public class LodRenderer
 	 */
 	private static Boolean fancyFogAvailable = null;
 	private static GlProxy glProxy;
-	private GlProxyContext renderContext = null;
 
 	/**
 	 * If true the LODs colors will be replaced with
@@ -208,7 +205,6 @@ public class LodRenderer
 			
 			// create the GlProxy TODO this should probably be done somewhere else
 			glProxy = GlProxy.getInstance();
-			ClientProxy.LOGGER.error("share lists renderer: " + WGL.wglShareLists(GlProxy.getInstance().minecraftGlContext, GlProxy.getInstance().lodBuilderGlContext));
 		}
 
 
@@ -251,8 +247,6 @@ public class LodRenderer
 		{
 			return;
 		}
-
-		GlProxy.getInstance().setGlContext(renderContext);
 		
 
 
@@ -261,8 +255,6 @@ public class LodRenderer
 		//===========================//
 
 		// set the required open GL settings
-		
-		GlProxy.getInstance().setGlContext(renderContext);
 		
 		if (LodConfig.CLIENT.debugging.debugMode.get() == DebugMode.SHOW_DETAIL_WIREFRAME)
 			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
@@ -365,8 +357,6 @@ public class LodRenderer
 		// over the LODs
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		
-		GlProxy.getInstance().setGlContext(GlProxyContext.MINECRAFT);
-
 		// replace the buffers used to draw and build,
 		// this is only done when the createLodBufferGenerationThread
 		// has finished executing on a parallel thread.
@@ -691,7 +681,6 @@ public class LodRenderer
 		VertexBuffersAndOffset result = lodBufferBuilder.getVertexBuffers();
 		vbos = result.vbos;
 		vbosCenter = result.drawableCenterChunkPos;
-		renderContext = result.drawingContext;
 	}
 
 	/**
