@@ -3,6 +3,7 @@ package com.seibel.lod.objects;
 
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.LodQualityMode;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
@@ -31,6 +32,7 @@ public class LodRegion
 
 
 	private DistanceGenerationMode generationMode;
+	private LodQualityMode lodQualityMode;
 
 	public final int regionPosX;
 	public final int regionPosZ;
@@ -43,11 +45,12 @@ public class LodRegion
 		dataContainer = new LevelContainer[POSSIBLE_LOD];
 	}
 
-	public LodRegion(byte minDetailLevel, RegionPos regionPos, DistanceGenerationMode generationMode)
+	public LodRegion(byte minDetailLevel, RegionPos regionPos, DistanceGenerationMode generationMode, LodQualityMode lodQualityMode)
 	{
 		this.minDetailLevel = minDetailLevel;
 		this.regionPosX = regionPos.x;
 		this.regionPosZ = regionPos.z;
+		this.lodQualityMode = lodQualityMode;
 		this.generationMode = generationMode;
 		dataContainer = new LevelContainer[POSSIBLE_LOD];
 
@@ -55,16 +58,20 @@ public class LodRegion
 		//Initialize all the different matrices
 		for (byte lod = minDetailLevel; lod <= LodUtil.REGION_DETAIL_LEVEL; lod++)
 		{
-			//dataContainer[lod] = new SingleLevelContainer(lod);
-			dataContainer[lod] = new VerticalLevelContainer(lod);
-			/*if(twoDimension){
-				dataContainer[lod] = new SingleLevelContainer(lod);
-			}else{
-				dataContainer[lod] = new VerticalLevelContainer.java(lod);
-			}*/
+			switch (lodQualityMode){
+				case HEIGHTMAP:
+					dataContainer[lod] = new SingleLevelContainer(lod);
+					break;
+				case MULTI_LOD:
+					dataContainer[lod] = new VerticalLevelContainer(lod);
+					break;
+			}
 		}
 	}
-
+	public LodQualityMode getLodQualityMode()
+	{
+		return lodQualityMode;
+	}
 	public DistanceGenerationMode getGenerationMode()
 	{
 		return generationMode;

@@ -83,7 +83,9 @@ public class LodUtil
 
 
 	public static final byte DETAIL_OPTIONS = 10;
-	
+
+	public static final short MAX_VERTICAL_DATA = 256;
+
 	/** measured in Blocks <br>
 	 * detail level 9 */
 	public static final short REGION_WIDTH = 512;

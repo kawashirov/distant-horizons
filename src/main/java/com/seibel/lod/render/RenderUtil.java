@@ -93,7 +93,7 @@ public class RenderUtil
 	{
 		// calculate the max amount of buffer memory needed (in bytes)
 		return LodUtil.REGION_WIDTH_IN_CHUNKS * LodUtil.REGION_WIDTH_IN_CHUNKS * 6 * // TODO this really needs to be more accurate
-				LodConfig.CLIENT.graphics.lodTemplate.get().getBufferMemoryForSingleLod();
+				LodConfig.CLIENT.graphics.lodTemplate.get().getBufferMemoryForSingleLod() * LodUtil.MAX_VERTICAL_DATA;
 	}
 	
 	/**

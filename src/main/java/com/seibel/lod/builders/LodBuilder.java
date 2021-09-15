@@ -21,8 +21,10 @@ import java.awt.Color;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
+import com.seibel.lod.enums.LodQualityMode;
 import com.seibel.lod.util.*;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
@@ -175,6 +177,7 @@ public class LodBuilder
 			byte minDetailLevel = region.getMinDetailLevel();
 			detail = DetailDistanceUtil.getLodGenDetail(minDetailLevel);
 
+			LodQualityMode lodQualityMode = LodConfig.CLIENT.worldGenerator.lodQualityMode.get();
 			byte detailLevel = detail.detailLevel;
 			int posX;
 			int posZ;
@@ -187,21 +190,25 @@ public class LodBuilder
 
 				posX = LevelPosUtil.convert((byte) 0, chunk.getPos().x * 16 + startX, detail.detailLevel);
 				posZ = LevelPosUtil.convert((byte) 0, chunk.getPos().z * 16 + startZ, detail.detailLevel);
-				long[] data;
-				long[][] dataToMerge;
-				//data = ThreadMapUtil.getSingleAddDataArray();
-				//dataToMerge = createSingleDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-				/*long[][] dataToMerge2 = new long[dataToMerge.length][];
-				for (int index = 0; index < dataToMerge.length; index++)
-				{
-					dataToMerge2[index] = new long[]{dataToMerge[index]};
-				}*/
-				//data[0] = DataPointUtil.mergeSingleData(dataToMerge);
+				long[] data = null
+						;
+				switch (lodQualityMode){
+					case HEIGHTMAP:
+						data = ThreadMapUtil.getSingleAddDataArray();
+						long[] dataToMergeSingle;
+						dataToMergeSingle = createSingleDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
+						data[0] = DataPointUtil.mergeSingleData(dataToMergeSingle);
+						break;
+					case MULTI_LOD:
+						long[][] dataToMergeVertical;
+						dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
+						data = DataPointUtil.mergeVerticalData(dataToMergeVertical);
+						break;
+				}
 
-				dataToMerge = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-				data = DataPointUtil.mergeVerticalData(dataToMerge);
 				if (data.length == 0 || data == null)
 					data = new long[]{DataPointUtil.EMPTY_DATA};
+
 				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
 				lodDim.addData(detailLevel,
 						posX,

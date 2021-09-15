@@ -20,20 +20,13 @@ package com.seibel.lod.config;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import com.seibel.lod.enums.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.seibel.lod.ModInfo;
-import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.enums.DistanceCalculatorType;
-import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.FogDistance;
-import com.seibel.lod.enums.FogDrawOverride;
-import com.seibel.lod.enums.LodDetail;
-import com.seibel.lod.enums.LodTemplate;
-import com.seibel.lod.enums.ShadingMode;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -192,6 +185,7 @@ public class LodConfig
 	
 	public static class WorldGenerator
 	{
+		public ForgeConfigSpec.EnumValue<LodQualityMode> lodQualityMode;
 		public ForgeConfigSpec.EnumValue<LodDetail> maxGenerationDetail;
 		public ForgeConfigSpec.EnumValue<DistanceGenerationMode> distanceGenerationMode;
 		public ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
@@ -201,7 +195,14 @@ public class LodConfig
 		WorldGenerator(ForgeConfigSpec.Builder builder)
 		{
 			builder.comment("These settings control how LODs outside your normal view range are generated.").push(this.getClass().getSimpleName());
-			
+
+			lodQualityMode = builder
+					                 .comment("\n\n"
+							                          + " Use 3d lods or 2d lods? \n"
+							                          + " " + LodQualityMode.HEIGHTMAP.toString() + ": enable 2d lods with heightmap \n"
+							                          + " " + LodQualityMode.MULTI_LOD.toString() + ": enable 3d lods with heightmap \n")
+					                 .defineEnum("lodGenerationQuality", LodQualityMode.HEIGHTMAP);
+
 			maxGenerationDetail = builder
 					.comment("\n\n"
 							+ " What is the maximum detail level that LODs should be generated at? \n"
