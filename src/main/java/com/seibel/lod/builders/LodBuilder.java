@@ -35,12 +35,9 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.block.*;
 import net.minecraft.block.material.MaterialColor;
-import net.minecraft.client.renderer.model.ModelManager;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.LightType;
@@ -65,7 +62,7 @@ public class LodBuilder
 	public static final int CHUNK_DATA_WIDTH = LodUtil.CHUNK_WIDTH;
 	public static final int CHUNK_SECTION_HEIGHT = CHUNK_DATA_WIDTH;
 	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
-	public static final ConcurrentMap<Block,Integer> colorMap= new ConcurrentHashMap<>();
+	public static final ConcurrentMap<Block, Integer> colorMap = new ConcurrentHashMap<>();
 
 	/**
 	 * If no blocks are found in the area in determineBottomPointForArea return this
@@ -292,7 +289,7 @@ public class LodBuilder
 
 				yAbs = height - 1;
 				// We search light on above air block
-				color = generateLodColor(chunk, config, xRel, yAbs, zRel,blockPos );
+				color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
 				depth = determineBottomPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
 				blockPos.set(xAbs, yAbs + 1, zAbs);
 				light = getLightValue(chunk, blockPos);
@@ -530,14 +527,11 @@ public class LodBuilder
 			int yRel = Math.floorMod(yAbs, CHUNK_SECTION_HEIGHT);
 			if (chunkSections[sectionIndex] != null)
 			{
-				BlockState blockState = chunkSections[sectionIndex].getBlockState(xRel, yRel, zRel);
-
 				// the bit shift is equivalent to dividing by 4
-				Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, yAbs >> 2, zRel >> 2);
 
 				blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel, chunk.getPos().getMinBlockZ() + zRel);
 				//colorInt = getColorTextureForBlock(blockState, blockPos);
-				colorInt = getColorForBlock(xRel, zRel, blockState, biome, blockPos);
+				colorInt = getColorForBlock(chunk, blockPos);
 			}
 			if (colorInt == 0 && yAbs > 0)
 			{
@@ -569,7 +563,7 @@ public class LodBuilder
 
 	private int getColorTextureForBlock(BlockState blockState, BlockPos blockPos)
 	{
-		if(colorMap.containsKey(blockState.getBlock()))
+		if (colorMap.containsKey(blockState.getBlock()))
 			return colorMap.get(blockState.getBlock());
 		World world = MinecraftWrapper.INSTANCE.getPlayer().level;
 		TextureAtlasSprite texture = MinecraftWrapper.INSTANCE.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
@@ -577,33 +571,37 @@ public class LodBuilder
 		int alpha = 0;
 		int red = 0;
 		int green = 0;
-		int blue = 0;;
+		int blue = 0;
+		;
 		int color = 0;
-		System.out.println(blockState.getBlock().toString() + " " + texture.getFrameCount() +  " " + texture.getHeight() +  " " + texture.getWidth());
-		for(int k = 0 ; k < texture.getFrameCount(); k++)
+		for (int k = 0; k < texture.getFrameCount(); k++)
 		{
 			for (int i = 0; i < texture.getHeight(); i++)
 			{
 				for (int j = 0; j < texture.getWidth(); j++)
 				{
-					color = texture.getPixelRGBA(k, i, j);
-					if (!texture.isTransparent(k, i, j))
+					if (texture.isTransparent(k, i, j))
 					{
-						count++;
-						alpha += ColorUtil.getAlpha(color);
-						red += ColorUtil.getBlue(color);
-						green += ColorUtil.getGreen(color);
-						blue += ColorUtil.getRed(color);
-
+						if (blockState.getBlock() instanceof LeavesBlock)
+							color = 0;
+						else
+							continue;
+					} else
+					{
+						color = texture.getPixelRGBA(k, i, j);
 					}
+					count++;
+					alpha += ColorUtil.getAlpha(color);
+					red += ColorUtil.getBlue(color);
+					green += ColorUtil.getGreen(color);
+					blue += ColorUtil.getRed(color);
 				}
 			}
 		}
-		if(count == 0)
+		if (count == 0)
 		{
 			color = 0;
-		}
-		else
+		} else
 		{
 			alpha /= count;
 			red /= count;
@@ -614,12 +612,27 @@ public class LodBuilder
 		colorMap.put(blockState.getBlock(), color);
 		return color;
 	}
+
 	/**
 	 * Returns a color int for the given block.
 	 */
-	private int getColorForBlock(int x, int z, BlockState blockState, Biome biome, BlockPos blockPos)
+	private int getColorForBlock(IChunk chunk, BlockPos blockPos)
 	{
+
+		int xRel = blockPos.getX() - chunk.getPos().getMinBlockX();
+		int zRel = blockPos.getZ() - chunk.getPos().getMinBlockZ();
+		int x = blockPos.getX();
+		int y = blockPos.getY();
+		int z = blockPos.getZ();
+		Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, y >> 2, zRel >> 2);
+		int brightness;
+		int red = 0;
+		int green = 0;
+		int blue = 0;
+
+		BlockState blockState = chunk.getBlockState(blockPos);
 		int colorInt = 0;
+
 
 		// block special cases
 		if (blockState == Blocks.AIR.defaultBlockState()
@@ -629,7 +642,7 @@ public class LodBuilder
 			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
 			tmp = tmp.darker();
 			colorInt = LodUtil.colorToInt(tmp);
-		}else if (blockState == Blocks.NETHERRACK.defaultBlockState())
+		} else if (blockState == Blocks.NETHERRACK.defaultBlockState())
 		{
 			colorInt = LodUtil.NETHERRACK_COLOR_INT;
 		} else if (blockState == Blocks.WARPED_NYLIUM.defaultBlockState())
@@ -639,7 +652,7 @@ public class LodBuilder
 		{
 			colorInt = LodUtil.CRIMSON_NYLIUM_COLOR_INT;
 		} else if (blockState == Blocks.WEEPING_VINES.defaultBlockState()
-						   || blockState == Blocks.WEEPING_VINES_PLANT.defaultBlockState()
+				           || blockState == Blocks.WEEPING_VINES_PLANT.defaultBlockState()
 				           || blockState == Blocks.CRIMSON_FUNGUS.defaultBlockState()
 				           || blockState == Blocks.CRIMSON_ROOTS.defaultBlockState())
 		{
@@ -656,27 +669,26 @@ public class LodBuilder
 		// plant life
 		else if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() == Blocks.VINE)
 		{
-			int brightness = getColorTextureForBlock(blockState,blockPos);
-			colorInt = ColorUtil.changeBrightnessValue(biome.getFoliageColor(),brightness);
+			brightness = getColorTextureForBlock(blockState, blockPos);
+			colorInt = ColorUtil.changeBrightnessValue(biome.getFoliageColor(), brightness);
 		} else if ((blockState.getBlock() instanceof GrassBlock || blockState.getBlock() instanceof AbstractPlantBlock
 				            || blockState.getBlock() instanceof BushBlock || blockState.getBlock() instanceof IGrowable)
 				           && !(blockState.getBlock() == Blocks.BROWN_MUSHROOM || blockState.getBlock() == Blocks.RED_MUSHROOM))
 		{
-			int brightness = getColorTextureForBlock(blockState,blockPos);
-			colorInt = ColorUtil.changeBrightnessValue(biome.getGrassColor(x, z),brightness);
+			brightness = getColorTextureForBlock(blockState, blockPos);
+			colorInt = ColorUtil.changeBrightnessValue(biome.getGrassColor(x, z), brightness);
 		}
-
 		// water
 		else if (blockState.getBlock() == Blocks.WATER)
 		{
-			int brightness = getColorTextureForBlock(blockState,blockPos);
-			colorInt = ColorUtil.changeBrightnessValue(biome.getWaterColor(),brightness);
+			brightness = getColorTextureForBlock(blockState, blockPos);
+			colorInt = ColorUtil.changeBrightnessValue(biome.getWaterColor(), brightness);
 		}
 
 		// everything else
 		else
 		{
-			colorInt = getColorTextureForBlock(blockState,blockPos);
+			colorInt = getColorTextureForBlock(blockState, blockPos);
 			//colorInt = blockState.materialColor.col;
 			//colorInt = blockState.getBlock().defaultMaterialColor().col;
 		}
