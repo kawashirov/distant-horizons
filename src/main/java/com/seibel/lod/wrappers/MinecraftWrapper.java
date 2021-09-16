@@ -12,6 +12,7 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.model.ModelManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.server.integrated.IntegratedServer;
@@ -78,7 +79,12 @@ public class MinecraftWrapper
 	{
 		return mc.options;
 	}
-	
+
+	public ModelManager getModelManager()
+	{
+		return mc.getModelManager();
+	}
+
 	/** Measured in chunks */
 	public int getRenderDistance()
 	{
