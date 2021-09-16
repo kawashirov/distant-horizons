@@ -39,13 +39,13 @@ import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.handlers.ReflectionHandler;
-import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.proxy.GlProxy;
 import com.seibel.lod.util.DetailDistanceUtil;
+import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
@@ -214,8 +214,6 @@ public class LodRenderer
 		
 		if (lodBufferBuilder.newBuffersAvaliable())
 		{
-			// this has to be called after the VBOs have been drawn
-			// otherwise rubber banding may occur
 			swapBuffers();
 		}
 		
@@ -329,16 +327,6 @@ public class LodRenderer
 		// over the LODs
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 		
-		// replace the buffers used to draw and build,
-		// this is only done when the createLodBufferGenerationThread
-		// has finished executing on a parallel thread.
-//		if (lodBufferBuilder.newBuffersAvaliable())
-//		{
-//			// this has to be called after the VBOs have been drawn
-//			// otherwise rubber banding may occur
-//			swapBuffers();
-//		}
-
 
 		// end of internal LOD profiling
 		profiler.pop();
