@@ -267,6 +267,7 @@ public class LodRenderer
 		//===========//
 		// rendering //
 		//===========//
+		
 		profiler.popPush("LOD draw");
 		
 		if (vbos != null)

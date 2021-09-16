@@ -166,8 +166,11 @@ public class ClientProxy
 		//LodConfig.CLIENT.drawLODs.set(true);
 		//LodConfig.CLIENT.debugMode.set(true);
 		
+		
 //		LodConfig.CLIENT.graphics.maxDrawDetail.set(LodDetail.FULL);
 //		LodConfig.CLIENT.worldGenerator.maxGenerationDetail.set(LodDetail.FULL);
+		// requires a world restart?
+//		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(LodQualityMode.HEIGHTMAP);
 		
 //		LodConfig.CLIENT.graphics.fogDistance.set(FogDistance.FAR);
 //		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);

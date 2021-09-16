@@ -26,14 +26,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.seibel.lod.enums.LodQualityMode;
-import com.seibel.lod.util.*;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
 
 import com.seibel.lod.builders.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
+import com.seibel.lod.enums.LodQualityMode;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.PosToRenderContainer;
@@ -42,9 +41,12 @@ import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.proxy.GlProxy;
 import com.seibel.lod.proxy.GlProxy.GlProxyContext;
 import com.seibel.lod.render.LodRenderer;
+import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.LevelPosUtil;
+import com.seibel.lod.util.LodThreadFactory;
+import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -53,7 +55,7 @@ import net.minecraft.util.math.ChunkPos;
  * This object is used to create NearFarBuffer objects.
  *
  * @author James Seibel
- * @version 9-14-2021
+ * @version 9-15-2021
  */
 public class LodBufferBuilder
 {
@@ -370,6 +372,9 @@ public class LodBufferBuilder
 				e.printStackTrace();
 			} finally
 			{
+				// make sure the context is disabled
+				GlProxy.getInstance().setGlContext(GlProxyContext.NONE);
+				
 				// regardless of if we successfully created the buffers
 				// we are done generating.
 				generatingBuffers = false;
@@ -512,43 +517,27 @@ public class LodBufferBuilder
 		// this shouldn't happen, but just to be safe
 		if (vbo.id != -1)
 		{
-			vbo.vertexCount = uploadBuffer.remaining() / vbo.format.getVertexSize();
-
-
+			// this is how many points will be rendered
+			vbo.vertexCount = (uploadBuffer.remaining() / vbo.format.getVertexSize());
+			
+			
 			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.id);
-
-
-			// make sure enough space is allocated to fit the builderBuffer
-			GL15C.glBufferData(GL15.GL_ARRAY_BUFFER, uploadBuffer.capacity(), GL15C.GL_DYNAMIC_DRAW);
-			// try to get a pointer to the VBO's byteBuffer in GPU memory
-			ByteBuffer vboBuffer = GL15C.glMapBuffer(GL15.GL_ARRAY_BUFFER, GL15.GL_WRITE_ONLY);
-
-			// upload the builderBuffer to the GPU
-			if (vboBuffer != null)
-			{
-				// This is the best way to upload lots of data, since writes directly to GPU
-				// memory, and doesn't pause OpenGL.
-				vboBuffer.put(uploadBuffer);
-			} else
-			{
-				// Sometimes the vboBuffer is null (I think it may be due to buffer sizes
-				// changing or a setup process that didn't complete), so in that case 
-				// we have to use this method which is slower and pauses OpenGL, 
-				// but always succeeds.
-				GL15C.glBufferData(GL15.GL_ARRAY_BUFFER, uploadBuffer, GL15C.GL_DYNAMIC_DRAW);
-
-				// only print to console once per upload cycle
-				if (!bufferMapFail)
-					ClientProxy.LOGGER.debug("LOD buffer upload: glMapBuffer failed, used slower glBufferData.");
-				bufferMapFail = true;
-			}
-
-
+			
+			
+			// subData only works if the memory is allocated beforehand.
+			GL15C.glBufferData(GL15.GL_ARRAY_BUFFER, uploadBuffer.remaining(), GL15C.GL_DYNAMIC_DRAW);
+			
+			// interestingly bufferSubData renders faster than glMapBuffer
+			// even though OpenGLInsights-AsynchronousBufferTransfers says glMapBuffer
+			// is faster for transferring data. They must put the data in different memory
+			// or something.
+			GL15C.glBufferSubData(GL15.GL_ARRAY_BUFFER, 0, uploadBuffer);
+				
+				
 			GL15C.glUnmapBuffer(GL15.GL_ARRAY_BUFFER);
 			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		}
-
-
+		
 		// just used to improve debug printing
 		return bufferMapFail;
 	}

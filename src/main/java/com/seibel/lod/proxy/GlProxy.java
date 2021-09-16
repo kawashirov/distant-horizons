@@ -19,7 +19,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
  * 
  * 
  * @author James Seibel
- * @version 9-14-2021
+ * @version 9-15-2021
  */
 public class GlProxy
 {
@@ -90,13 +90,18 @@ public class GlProxy
 	/**
 	 * A simple wrapper function to make switching contexts easier
 	 */
-	public void setGlContext(GlProxyContext context)
+	public void setGlContext(GlProxyContext newContext)
 	{
 		GlProxyContext currentContext = getGlContext();
 		
+		// we don't have to change the context, we're already there.
+		if (currentContext == newContext)
+			return;
+		
+		
 		long contextPointer = 0L;
 		GLCapabilities newGlCapabilities = null;
-		switch(context)
+		switch(newContext)
 		{
 		case LOD_BUILDER:
 			contextPointer = lodBuilderGlContext;
@@ -116,10 +121,11 @@ public class GlProxy
 		}
 		
 		if (!WGL.wglMakeCurrent(deviceContext, contextPointer))
-			throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + context.toString() + "] from [" + currentContext.toString() + "]");
+			throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + newContext.toString() + "] from [" + currentContext.toString() + "]");
 		
 		GL.setCapabilities(newGlCapabilities);
 	}
+	
 	public GlProxyContext getGlContext()
 	{
 		long currentContext = WGL.wglGetCurrentContext();
@@ -136,6 +142,7 @@ public class GlProxy
 			return GlProxyContext.NONE;
 		}
 	}
+	
 	/** Minecraft, Alpha, Beta, None */
 	public enum GlProxyContext
 	{
