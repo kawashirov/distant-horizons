@@ -577,8 +577,8 @@ public class LodRenderer
 		sunBrightness = playerHasNightVision ? 1.0f : sunBrightness;
 		float gamma = (float) mc.getOptions().gamma - 0.0f;
 		float dayEffect = (sunBrightness - 0.2f) * 1.25f;
-		float lightStrength = (gamma * 0.35f + 0.18f) * (1.0f - dayEffect) + dayEffect - 0.20f; //gamma * 0.2980392157f + 0.1647058824f
-		float blueLightStrength = (gamma * 0.48f + 0.32f) * (1.0f - dayEffect) + dayEffect - 0.20f; //gamma * 0.4235294118f + 0.2784313725f
+		float lightStrength = (gamma * 0.34f - 0.01f) * (1.0f - dayEffect) + dayEffect - 0.20f; //gamma * 0.2980392157f + 0.1647058824f
+		float blueLightStrength = (gamma * 0.44f + 0.12f) * (1.0f - dayEffect) + dayEffect - 0.20f; //gamma * 0.4235294118f + 0.2784313725f
 
 		float lightAmbient[] = {lightStrength, lightStrength, blueLightStrength, 1.0f};
 

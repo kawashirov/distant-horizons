@@ -677,7 +677,7 @@ public class LodBuilder
 		{
 			brightness = getColorTextureForBlock(blockState, blockPos);
 			//colorInt = ColorUtil.changeBrightnessValue(biome.getGrassColor(x, z), brightness);
-			colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getGrassColor(x, z),1f,0.75f);
+			colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getGrassColor(x, z),1f,0.65f);
 		}
 		// water
 		else if (blockState.getBlock() == Blocks.WATER)
