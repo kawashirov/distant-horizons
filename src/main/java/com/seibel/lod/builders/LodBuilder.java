@@ -579,20 +579,22 @@ public class LodBuilder
 		int green = 0;
 		int blue = 0;;
 		int color = 0;
-		for(int i = 0 ; i < texture.getHeight(); i++)
+		for(int k = 0 ; k < texture.getFrameCount(); k++)
 		{
-			for(int j = 0 ; j < texture.getWidth(); j++)
+			for (int i = 0; i < texture.getHeight(); i++)
 			{
-				color = texture.getPixelRGBA(0,i,j);
-				//if(color != 0)
-				if(!texture.isTransparent(0,i,j))
+				for (int j = 0; j < texture.getWidth(); j++)
 				{
-					count++;
-					alpha += ColorUtil.getAlpha(color);
-					red += ColorUtil.getBlue(color);
-					green += ColorUtil.getGreen(color);
-					blue += ColorUtil.getRed(color);
+					color = texture.getPixelRGBA(k, i, j);
+					if (!texture.isTransparent(k, i, j))
+					{
+						count++;
+						alpha += ColorUtil.getAlpha(color);
+						red += ColorUtil.getBlue(color);
+						green += ColorUtil.getGreen(color);
+						blue += ColorUtil.getRed(color);
 
+					}
 				}
 			}
 		}
@@ -695,8 +697,9 @@ public class LodBuilder
 		// everything else
 		else
 		{
-			//colorInt = getColorTextureForBlock(blockState,blockPos);
-			colorInt = blockState.getBlock().defaultMaterialColor().col;
+			colorInt = getColorTextureForBlock(blockState,blockPos);
+			//colorInt = blockState.materialColor.col;
+			//colorInt = blockState.getBlock().defaultMaterialColor().col;
 		}
 
 		return colorInt;
