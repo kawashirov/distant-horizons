@@ -676,13 +676,15 @@ public class LodBuilder
 				           && !(blockState.getBlock() == Blocks.BROWN_MUSHROOM || blockState.getBlock() == Blocks.RED_MUSHROOM))
 		{
 			brightness = getColorTextureForBlock(blockState, blockPos);
-			colorInt = ColorUtil.changeBrightnessValue(biome.getGrassColor(x, z), brightness);
+			//colorInt = ColorUtil.changeBrightnessValue(biome.getGrassColor(x, z), brightness);
+			colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getGrassColor(x, z),1f,0.75f);
 		}
 		// water
 		else if (blockState.getBlock() == Blocks.WATER)
 		{
 			brightness = getColorTextureForBlock(blockState, blockPos);
-			colorInt = ColorUtil.changeBrightnessValue(biome.getWaterColor(), brightness);
+			//colorInt = ColorUtil.changeBrightnessValue(biome.getWaterColor(), brightness);
+			colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getWaterColor(),1f,0.75f);
 		}
 
 		// everything else
