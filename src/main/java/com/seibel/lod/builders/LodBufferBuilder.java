@@ -224,6 +224,13 @@ public class LodBufferBuilder
 							Callable<Boolean> dataToRenderThread = () ->
 							{
 
+								Map<Direction, long[]> adjData = new HashMap<>();
+								if(LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP){
+									adjData.put(Direction.WEST, new long[1]);
+									adjData.put(Direction.EAST, new long[1]);
+									adjData.put(Direction.SOUTH, new long[1]);
+									adjData.put(Direction.NORTH, new long[1]);
+								}
 								//previous setToRender chache
 								if (setsToRender[xR][zR] == null)
 								{
@@ -252,7 +259,6 @@ public class LodBufferBuilder
 								int chunkZdist;
 								short gameChunkRenderDistance = (short) (renderer.vanillaRenderedChunks.length / 2 - 1);
 								//long dataPoint;
-								Map<Direction, long[]> adjData = new HashMap<>();
 
 								for (int index = 0; index < posToRender.getNumberOfPos(); index++)
 								{
@@ -273,11 +279,12 @@ public class LodBufferBuilder
 									try
 									{
 
-										for (int direction = 0; direction < NUMBER_OF_DIRECTION; direction++)
+										for (Direction direction : Box.ADJ_DIRECTIONS)
 										{
 
-											xAdj = posX + ADJ_VECTOR[direction][0];
-											zAdj = posZ + ADJ_VECTOR[direction][1];
+
+											xAdj = posX + direction.getNormal().getX();
+											zAdj = posZ + direction.getNormal().getZ();
 											chunkXdist = LevelPosUtil.getChunkPos(detailLevel,xAdj) - playerChunkPos.x;
 											chunkZdist = LevelPosUtil.getChunkPos(detailLevel,zAdj) - playerChunkPos.z;
 
@@ -286,17 +293,39 @@ public class LodBufferBuilder
 												if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
 														    && posToRender.contains(detailLevel, xAdj, zAdj))
 												{
-													adjData.put(Box.ADJ_DIRECTIONS[direction], lodDim.getData(detailLevel, xAdj, zAdj));
+													if(LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP){
+														adjData.get(direction)[0] = lodDim.getSingleData(detailLevel, xAdj, zAdj);
+													}else
+													{
+														adjData.put(direction, lodDim.getData(detailLevel, xAdj, zAdj));
+													}
+
 												}else{
-													adjData.put(Box.ADJ_DIRECTIONS[direction], null);
+													if(LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP){
+														adjData.get(direction)[0] = DataPointUtil.createVoidDataPoint(0);
+													}else
+													{
+														adjData.put(direction, null);
+													}
 												}
 											} else
 											{
 												if (posToRender.contains(detailLevel, xAdj, zAdj))
 												{
-													adjData.put(Box.ADJ_DIRECTIONS[direction], lodDim.getData(detailLevel, xAdj, zAdj));
+													if(LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP){
+														adjData.get(direction)[0] = lodDim.getSingleData(detailLevel, xAdj, zAdj);
+													}else
+													{
+														adjData.put(direction, lodDim.getData(detailLevel, xAdj, zAdj));
+													}
 												}else{
-													adjData.put(Box.ADJ_DIRECTIONS[direction], null);
+
+													if(LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP){
+														adjData.get(direction)[0] = DataPointUtil.createVoidDataPoint(0);
+													}else
+													{
+														adjData.put(direction, null);
+													}
 												}
 											}
 										}

@@ -1,6 +1,7 @@
 package com.seibel.lod.builders.lodTemplates;
 
 import com.seibel.lod.config.LodConfig;
+import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DataPointUtil;
@@ -32,10 +33,10 @@ public class Box
 			Direction.SOUTH};
 
 	public static final Direction[] ADJ_DIRECTIONS = new Direction[]{
-			Direction.WEST,
 			Direction.EAST,
-			Direction.NORTH,
-			Direction.SOUTH};
+			Direction.WEST,
+			Direction.SOUTH,
+			Direction.NORTH};
 
 	public static final Map<Direction, int[][]> DIRECTION_VERTEX_MAP = new HashMap()
 	{{
@@ -118,7 +119,7 @@ public class Box
 
 	public int getColor(Direction direction)
 	{
-		if (LodConfig.CLIENT.graphics.shadingMode.get() == ShadingMode.DARKEN_SIDES)
+		if (LodConfig.CLIENT.debugging.debugMode.get() != DebugMode.SHOW_DETAIL)
 		{
 			return colorMap.get(direction)[0];
 		} else
@@ -151,6 +152,11 @@ public class Box
 			boolean toFinish = false;
 			for (i = 0; i < dataPoint.length; i++)
 			{
+
+				if (DataPointUtil.isItVoid(dataPoint[i]))
+				{
+					continue;
+				}
 				height = DataPointUtil.getHeight(dataPoint[i]);
 				depth = DataPointUtil.getDepth(dataPoint[i]);
 
