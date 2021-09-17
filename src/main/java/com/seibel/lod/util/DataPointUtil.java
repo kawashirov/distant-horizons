@@ -283,7 +283,81 @@ public class DataPointUtil
 
 	public static long[] mergeVerticalData(long[][] dataToMerge)
 	{
-		boolean[] projection = ThreadMapUtil.getProjection(WORLD_HEIGHT + 1);
+		//new code
+		short[] projection = ThreadMapUtil.getProjectionShort((WORLD_HEIGHT + 1 ) >>> 4);
+		int[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth(WORLD_HEIGHT + 1);
+		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(dataToMerge.length);
+		int genMode = DistanceGenerationMode.SERVER.complexity;
+		boolean allEmpty = true;
+		boolean allVoid = true;
+		long singleData;
+
+		for(int k=0; k < projection.length; k++)
+			projection[k] = 0;
+		int depth = 0;
+		int height = 0;
+		//We collect the indexes of the data, ordered by the depth
+		for (int index = 0; index < dataToMerge.length; index++)
+		{
+			for (int dataIndex = 0; dataIndex < dataToMerge[index].length; dataIndex++)
+			{
+				singleData = dataToMerge[index][dataIndex];
+				if (doesItExist(singleData))
+				{
+					genMode = Math.min(genMode, getGenerationMode(singleData));
+					allEmpty = false;
+					if (!isItVoid(singleData))
+					{
+						allVoid = false;
+						depth = getDepth(singleData);
+						height = getHeight(singleData);
+						for (int y = depth; y <= height; y++)
+							projection[y >>> 4] |= 1L << (y & 0xf);
+					}
+				}
+			}
+		}
+
+
+		//We check if there is any data that's not empty or void
+		if (allEmpty)
+			return new long[]{EMPTY_DATA};
+		if (allVoid)
+			return new long[]{createVoidDataPoint(genMode)};
+
+		int count = 0;
+		int i = 0;
+		int ii = 0;
+		while (i < projection.length)
+		{
+			while (i < projection.length && projection[i] != 0)	i++;
+			if (i == projection.length)
+				break; //we reached end of WORLD_HEIGHT and it's nothing more here
+			while (((projection[i] >>> ii) & 1) == 0) ii++;
+			depth = i * 16 + ii;
+
+			while (ii<15 && ((projection[i] >>> ii) & 1) == 1) ii++;
+			if (ii==15) //if end is outside of this int
+			{
+				ii = 0;
+				i++;
+				while (i < projection.length && ~(projection[i]) != 0)	i++; //check for big solid blocks
+				if (i == projection.length) //solid to WORLD_HEIGHT
+				{
+					heightAndDepth[count][0] = depth;
+					heightAndDepth[count][1] = WORLD_HEIGHT;
+					break;
+				}
+				while (((projection[i] >>> ii) & 1) == 1) ii++;
+			}
+			height = i * 16 + ii;
+
+			heightAndDepth[count][0] = depth;
+			heightAndDepth[count][1] = height;
+			count++;
+		}
+		//old code
+		/*boolean[] projection = ThreadMapUtil.getProjection(WORLD_HEIGHT + 1);
 		int[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth(WORLD_HEIGHT + 1);
 		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(dataToMerge.length);
 		int genMode = DistanceGenerationMode.SERVER.complexity;
@@ -319,7 +393,6 @@ public class DataPointUtil
 			}
 		}
 
-
 		//We check if there is any data that's not empty or void
 		if (allEmpty)
 		{
@@ -349,7 +422,9 @@ public class DataPointUtil
 			heightAndDepth[count][0] = depth;
 			heightAndDepth[count][1] = height;
 			count++;
-		}
+		}*/
+		//end of changes
+
 		//As standard the vertical lods are ordered from top to bottom
 		long[] dataPoint = new long[count];
 		for (int j = count - 1; j >= 0; j--)
