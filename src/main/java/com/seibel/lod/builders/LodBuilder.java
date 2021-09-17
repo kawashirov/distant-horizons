@@ -18,6 +18,8 @@
 package com.seibel.lod.builders;
 
 import java.awt.Color;
+import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -35,7 +37,9 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.block.*;
 import net.minecraft.block.material.MaterialColor;
+import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -45,9 +49,14 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeColors;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
+import net.minecraftforge.client.extensions.IForgeBakedModel;
+import net.minecraftforge.client.model.data.ModelDataMap;
+
+import javax.swing.*;
 
 /**
  * This object is in charge of creating Lod related objects. (specifically: Lod
@@ -66,6 +75,8 @@ public class LodBuilder
 	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
 	public static final ConcurrentMap<Block, Integer> colorMap = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<Block, VoxelShape> shapeMap = new ConcurrentHashMap<>();
+
+	public static final ModelDataMap dataMap = new ModelDataMap.Builder().build() ;
 
 	/**
 	 * If no blocks are found in the area in determineBottomPointForArea return this
@@ -547,35 +558,57 @@ public class LodBuilder
 
 	private int getLightValue(IChunk chunk, BlockPos.Mutable blockPos)
 	{
-		int light;
-
-		//*TODO choose the best one between those options*/
-		//lightBlock = MinecraftWrapper.INSTANCE.getPlayer().level.getLightEngine().getLayerListener(LightType.BLOCK).getLightValue(blockPos);
-		//lightBlock = (byte) MinecraftWrapper.INSTANCE.getPlayer().level.getLightEngine().blockEngine.getLightValue(blockPos);
+		int skyLight;
+		int blockLight;
 		if (MinecraftWrapper.INSTANCE.getPlayer() == null)
 			return 0;
 		if (MinecraftWrapper.INSTANCE.getPlayer().level == null)
 			return 0;
-		light = MinecraftWrapper.INSTANCE.getPlayer().level.getBrightness(LightType.BLOCK, blockPos);
-		light += MinecraftWrapper.INSTANCE.getPlayer().level.getBrightness(LightType.SKY, blockPos) << 4;
-		//BlockState blockState = chunk.getBlockState(blockPos);
-		//lightBlock = (byte) blockState.getLightBlock(chunk, blockPos);
-		//lightBlock = (byte) blockState.getLightBlock(chunk, blockPos);
-		return light;
+
+		IWorld world = MinecraftWrapper.INSTANCE.getPlayer().level;
+
+		blockLight = world.getBrightness(LightType.BLOCK, blockPos);
+		skyLight = world.getBrightness(LightType.SKY, blockPos);
+
+		blockPos.set(blockPos.getX(), blockPos.getY() - 1, blockPos.getZ());
+		BlockState blockState = chunk.getBlockState(blockPos);
+
+		blockLight = LodUtil.clamp(0, blockLight + blockState.getLightValue(chunk, blockPos), 15);
+
+		return blockLight + (skyLight << 4);
 	}
 
-	private int getColorTextureForBlock(BlockState blockState, BlockPos blockPos)
+	private int getColorTextureForBlock(BlockState blockState, BlockPos blockPos, boolean topTextureRequired)
 	{
 		if (colorMap.containsKey(blockState.getBlock()))
 			return colorMap.get(blockState.getBlock());
-		World world = MinecraftWrapper.INSTANCE.getPlayer().level;
-		TextureAtlasSprite texture = MinecraftWrapper.INSTANCE.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
+
+
+		World world = MinecraftWrapper.INSTANCE.getWorld();
+		TextureAtlasSprite texture;
+		if(topTextureRequired)
+		{
+			List<BakedQuad> quad = ((IForgeBakedModel) MinecraftWrapper.INSTANCE.getModelManager().getBlockModelShaper().getBlockModel(blockState)).getQuads(blockState, Direction.UP, new Random(0), dataMap);
+			if (!quad.isEmpty())
+			{
+				texture = quad.get(0).getSprite();
+			}
+			else
+			{
+				texture = MinecraftWrapper.INSTANCE.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
+			}
+		}
+		else
+		{
+			texture = MinecraftWrapper.INSTANCE.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
+		}
+
+
 		int count = 0;
 		int alpha = 0;
 		int red = 0;
 		int green = 0;
 		int blue = 0;
-		;
 		int color = 0;
 		for (int k = 0; k < texture.getFrameCount(); k++)
 		{
@@ -672,30 +705,28 @@ public class LodBuilder
 		// plant life
 		else if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() == Blocks.VINE)
 		{
-			brightness = getColorTextureForBlock(blockState, blockPos);
+			brightness = getColorTextureForBlock(blockState, blockPos, false);
 			colorInt = ColorUtil.changeBrightnessValue(biome.getFoliageColor(), brightness);
 		} else if ((blockState.getBlock() instanceof GrassBlock || blockState.getBlock() instanceof AbstractPlantBlock
 				            || blockState.getBlock() instanceof BushBlock || blockState.getBlock() instanceof IGrowable)
 				           && !(blockState.getBlock() == Blocks.BROWN_MUSHROOM || blockState.getBlock() == Blocks.RED_MUSHROOM))
 		{
-			brightness = getColorTextureForBlock(blockState, blockPos);
-			//colorInt = ColorUtil.changeBrightnessValue(biome.getGrassColor(x, z), brightness);
+			/*brightness = getColorTextureForBlock(blockState, blockPos, true);
+			colorInt = ColorUtil.changeBrightnessValue(biome.getGrassColor(x, z), brightness);*/
 			colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getGrassColor(x, z), 1f, 0.65f);
 		}
 		// water
 		else if (blockState.getBlock() == Blocks.WATER)
 		{
-			brightness = getColorTextureForBlock(blockState, blockPos);
-			//colorInt = ColorUtil.changeBrightnessValue(biome.getWaterColor(), brightness);
+			/*brightness = getColorTextureForBlock(blockState, blockPos, true);
+			colorInt = ColorUtil.changeBrightnessValue(biome.getWaterColor(), brightness);*/
 			colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getWaterColor(), 1f, 0.75f);
 		}
 
 		// everything else
 		else
 		{
-			colorInt = getColorTextureForBlock(blockState, blockPos);
-			//colorInt = blockState.materialColor.col;
-			//colorInt = blockState.getBlock().defaultMaterialColor().col;
+			colorInt = getColorTextureForBlock(blockState, blockPos, false);
 		}
 
 		return colorInt;
@@ -776,7 +807,7 @@ public class LodBuilder
 		{
 			//blockState.isCollisionShapeFullBlock(chunk, blockPos);
 
-			if(avoidSmallBlock || onlyUseFullBlock)
+			if (avoidSmallBlock || onlyUseFullBlock)
 			{
 				if (!blockState.getFluidState().isEmpty())
 				{
@@ -803,7 +834,7 @@ public class LodBuilder
 					{
 						return false;
 					}
-					if (xWidth < 0.7 && zWidth < 0.7 && yWidth < 1  && avoidSmallBlock)
+					if (xWidth < 0.7 && zWidth < 0.7 && yWidth < 1 && avoidSmallBlock)
 					{
 						return false;
 					}

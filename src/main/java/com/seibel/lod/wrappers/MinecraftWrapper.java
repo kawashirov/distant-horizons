@@ -21,6 +21,9 @@ import net.minecraft.profiler.IProfiler;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.Direction;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.IWorld;
+import net.minecraft.world.World;
+import org.lwjgl.system.CallbackI;
 
 /**
  * A singleton that wraps the Minecraft class
@@ -170,6 +173,11 @@ public class MinecraftWrapper
 	public ModelManager getModelManager()
 	{
 		return mc.getModelManager();
+	}
+
+	public World getWorld()
+	{
+		return  mc.level;
 	}
 
 	/** Measured in chunks */
