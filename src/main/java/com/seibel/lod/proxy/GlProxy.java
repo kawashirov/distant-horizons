@@ -32,6 +32,9 @@ public class GlProxy
 	
 	public long lodBuilderGlContext;
 	public GLCapabilities lodBuilderGlCapabilities;
+	/** This is just used for debugging, hopefuly it can be removed once 
+	 * the context switching is more stable. */
+	public Thread lodBuilderOwnerThread = null;
 	
 	/**
 	 * Does this computer's GPU support fancy fog?
@@ -89,6 +92,10 @@ public class GlProxy
 	
 	/**
 	 * A simple wrapper function to make switching contexts easier
+	 * 
+	 * @throws IllegalStateException if unable to change to newContext. <br>
+	 * 								 This expection should never be thrown if 
+	 * 								 switching to GlProxyContext.NONE
 	 */
 	public void setGlContext(GlProxyContext newContext)
 	{
@@ -121,11 +128,17 @@ public class GlProxy
 		}
 		
 		if (!WGL.wglMakeCurrent(deviceContext, contextPointer))
-			throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + newContext.toString() + "] from [" + currentContext.toString() + "]");
+			throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + newContext.toString() + "] from [" + currentContext.toString() + "] lod builder owner thread: " + (lodBuilderOwnerThread != null ? lodBuilderOwnerThread.getName() : "null"));
+		
+		if (newContext == GlProxyContext.LOD_BUILDER)
+			lodBuilderOwnerThread = Thread.currentThread();
 		
 		GL.setCapabilities(newGlCapabilities);
 	}
 	
+	/**
+	 * Returns this thread's OpenGL context.
+	 */
 	public GlProxyContext getGlContext()
 	{
 		long currentContext = WGL.wglGetCurrentContext();
