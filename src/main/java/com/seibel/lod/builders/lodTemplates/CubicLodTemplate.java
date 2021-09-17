@@ -116,7 +116,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 					addPosAndColor(buffer,
 							box.getX(direction, vertexIndex),
 							box.getY(direction, vertexIndex, adjIndex),
-							box.getX(direction, vertexIndex),
+							box.getZ(direction, vertexIndex),
 							box.getColor(direction));
 				}
 				adjIndex++;

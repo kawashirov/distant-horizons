@@ -25,7 +25,11 @@ public class Box
 
 	public static final Direction[] DIRECTIONS = new Direction[]{
 			Direction.UP,
-			Direction.DOWN};
+			Direction.DOWN,
+			Direction.WEST,
+			Direction.EAST,
+			Direction.NORTH,
+			Direction.SOUTH};
 
 	public static final Direction[] ADJ_DIRECTIONS = new Direction[]{
 			Direction.WEST,
@@ -38,33 +42,33 @@ public class Box
 		put(Direction.UP, new int[][]{
 				{0, 1, 0},
 				{0, 1, 1},
-				{1, 1, 0},
-				{1, 1, 1}});
+				{1, 1, 1},
+				{1, 1, 0}});
 		put(Direction.DOWN, new int[][]{
-				{0, 0, 0},
-				{0, 0, 1},
-				{1, 0, 0},
-				{1, 0, 1}});
-		put(Direction.EAST, new int[][]{
 				{1, 0, 0},
 				{1, 0, 1},
+				{0, 0, 1},
+				{0, 0, 0}});
+		put(Direction.EAST, new int[][]{
 				{1, 1, 0},
-				{1, 1, 1}});
+				{1, 1, 1},
+				{1, 0, 1},
+				{1, 0, 0}});
 		put(Direction.WEST, new int[][]{
 				{0, 0, 0},
 				{0, 0, 1},
-				{0, 1, 0},
-				{0, 1, 1}});
-		put(Direction.SOUTH, new int[][]{
-				{0, 0, 1},
-				{1, 0, 1},
 				{0, 1, 1},
-				{1, 1, 1}});
+				{0, 1, 0}});
+		put(Direction.SOUTH, new int[][]{
+				{1, 0, 1},
+				{1, 1, 1},
+				{0, 1, 1},
+				{0, 0, 1}});
 		put(Direction.NORTH, new int[][]{
 				{0, 0, 0},
-				{1, 0, 0},
 				{0, 1, 0},
-				{1, 1, 0}});
+				{1, 1, 0},
+				{1, 0, 0}});
 	}};
 
 	public static final Map<Direction, int[][]> DIRECTION_NORMAL_MAP = new HashMap()
@@ -153,7 +157,7 @@ public class Box
 				if (depth > getMaxY())
 				{//the adj data is higher than the current data
 					//we continue since there could be some other data that intersect the current
-					System.out.println("case 1 " + height + " " + depth);
+					//System.out.println("case 1 " + height + " " + depth);
 					continue;
 				} else if (height < getMinY())
 				{//the adj data is lower than the current data
@@ -161,12 +165,12 @@ public class Box
 
 					if (firstFace)
 					{
-						System.out.println("case 2-1 " + height + " " + depth);
+						//System.out.println("case 2-1 " + height + " " + depth);
 						adjHeightAndDepth.get(direction)[0][0] = getMaxY();
 						adjHeightAndDepth.get(direction)[0][1] = getMinY();
 					} else
 					{
-						System.out.println("case 2-2 " + height + " " + depth);
+						//System.out.println("case 2-2 " + height + " " + depth);
 						adjHeightAndDepth.get(direction)[faceToDraw][1] = getMinY();
 					}
 					faceToDraw++;
@@ -175,7 +179,7 @@ public class Box
 				} else if (depth <= getMinY() && height >= getMaxY())
 				{//the adj data contains the current
 					//we do not draw the face
-					System.out.println("case 3");
+					//System.out.println("case 3");
 					adjHeightAndDepth.get(direction)[0][0] = VOID_FACE;
 					adjHeightAndDepth.get(direction)[0][1] = VOID_FACE;
 					break;
@@ -185,12 +189,12 @@ public class Box
 					//if there was other face we finish the last one and break
 					if (firstFace)
 					{
-						System.out.println("case 4-1 " + height + " " + depth);
+						//System.out.println("case 4-1 " + height + " " + depth);
 						adjHeightAndDepth.get(direction)[0][0] = getMaxY();
 						adjHeightAndDepth.get(direction)[0][1] = height;
 					} else
 					{
-						System.out.println("case 4-2 " + height + " " + depth);
+						//System.out.println("case 4-2 " + height + " " + depth);
 						adjHeightAndDepth.get(direction)[faceToDraw][1] = height;
 					}
 					firstFace = false;
@@ -200,7 +204,7 @@ public class Box
 				} else if (depth > getMinY() && height >= getMaxY())
 				{//the adj data intersect the higher part of the current data
 					//we start the creation of a new face
-					System.out.println("case 5 " + height + " " + depth);
+					//System.out.println("case 5 " + height + " " + depth);
 					adjHeightAndDepth.get(direction)[faceToDraw][0] = depth;
 					firstFace = false;
 					toFinish = true;
@@ -209,11 +213,11 @@ public class Box
 				{//the adj data is contained in the current data
 					if (firstFace)
 					{
-						System.out.println("case 6-1 " + height + " " + depth);;
+						//System.out.println("case 6-1 " + height + " " + depth);;
 						adjHeightAndDepth.get(direction)[0][0] = getMaxY();
 					} else
 					{
-						System.out.println("case 6-2 " + height + " " + depth);
+						//System.out.println("case 6-2 " + height + " " + depth);
 					}
 					adjHeightAndDepth.get(direction)[faceToDraw][1] = height;
 					faceToDraw++;

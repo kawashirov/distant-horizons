@@ -29,11 +29,12 @@ public class Main
 			box.move(0, depth, 0);
 			box.setAdjData(adjData);
 
-			for(Direction direction : Box.ADJ_DIRECTIONS)
+			for(Direction direction : Box.DIRECTIONS)
 			{
 				int adjIndex = 0;
 				while (box.shouldContinue(direction, adjIndex))
 				{
+					System.out.println(direction.toString());
 					for (int i = 0; i < 4; i++)
 					{
 						System.out.println(box.getX(direction, i) + " " + box.getY(direction, i, adjIndex) + " " + box.getZ(direction, i));
