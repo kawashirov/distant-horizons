@@ -269,6 +269,7 @@ public class LodBuilder
 		int xAbs;
 		int yAbs;
 		int zAbs;
+		boolean hasCeiling = MinecraftWrapper.INSTANCE.getWorld().dimensionType().hasCeiling();
 
 		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
 		int index = 0;
@@ -306,19 +307,30 @@ public class LodBuilder
 
 				yAbs = height - 1;
 				// We search light on above air block
-				color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
 				depth = determineBottomPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
+				if(hasCeiling && topBlock)
+				{
+					yAbs = depth;
+					color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
+					blockPos.set(xAbs, yAbs - 1, zAbs);
+					light = getLightValue(chunk, blockPos, true);
+				}
+				else
+				{
+					color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
+					blockPos.set(xAbs, yAbs + 1, zAbs);
+					light = getLightValue(chunk, blockPos, false);
+				}
 				blockPos.set(xAbs, yAbs + 1, zAbs);
-				light = getLightValue(chunk, blockPos);
+				light = getLightValue(chunk, blockPos, hasCeiling && topBlock);
 				lightBlock = light & 0b1111;
-				if(topBlock)
+				if(!hasCeiling && topBlock)
 					lightSky = 15; //default max light
 				else
 					lightSky = (light >> 4) & 0b1111;
+
 				topBlock = false;
 
-				//System.out.println(dataToMerge.length + " " + index +" " + count + " " + yAbs);
-				//System.out.println(dataToMerge.length + " " + dataToMerge[index].length);
 				dataToMerge[index][count] = DataPointUtil.createDataPoint(height, depth, color, lightSky, lightBlock, generation);
 				yAbs = depth - 1;
 				count++;
@@ -450,7 +462,7 @@ public class LodBuilder
 			depth = determineBottomPoint(chunk, config, xRel, zRel, blockPos);
 
 			blockPos.set(xAbs, yAbs + 1, zAbs);
-			light = getLightValue(chunk, blockPos);
+			light = getLightValue(chunk, blockPos, false);
 			lightBlock = light & 0b1111;
 			//lightSky = (light >> 4) & 0b1111;
 			lightSky = 15; //default max light
@@ -566,7 +578,7 @@ public class LodBuilder
 		return colorInt;
 	}
 
-	private int getLightValue(IChunk chunk, BlockPos.Mutable blockPos)
+	private int getLightValue(IChunk chunk, BlockPos.Mutable blockPos, boolean ceilingTopBlock)
 	{
 		int skyLight;
 		int blockLight;
@@ -580,7 +592,11 @@ public class LodBuilder
 		blockLight = world.getBrightness(LightType.BLOCK, blockPos);
 		skyLight = world.getBrightness(LightType.SKY, blockPos);
 
-		blockPos.set(blockPos.getX(), blockPos.getY() - 1, blockPos.getZ());
+		if(ceilingTopBlock)
+			blockPos.set(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ());
+		else
+			blockPos.set(blockPos.getX(), blockPos.getY() - 1, blockPos.getZ());
+
 		BlockState blockState = chunk.getBlockState(blockPos);
 
 		blockLight = LodUtil.clamp(0, blockLight + blockState.getLightValue(chunk, blockPos), 15);
