@@ -706,7 +706,8 @@ public class LodBuilder
 		} else if (blockState.getBlock().equals(Blocks.TWISTING_VINES)
 				           || blockState.equals(Blocks.TWISTING_VINES_PLANT)
 				           || blockState == Blocks.WARPED_ROOTS.defaultBlockState()
-				           || blockState == Blocks.WARPED_FUNGUS.defaultBlockState())
+				           || blockState == Blocks.WARPED_FUNGUS.defaultBlockState()
+				           || blockState == Blocks.NETHER_SPROUTS.defaultBlockState())
 		{
 			colorInt = Blocks.WARPED_NYLIUM.defaultMaterialColor().col;
 		}

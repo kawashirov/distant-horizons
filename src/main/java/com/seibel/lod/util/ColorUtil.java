@@ -94,6 +94,21 @@ public class ColorUtil
 	}
 	public static int multiplyRGBcolors(int color1, int color2)
 	{
-		return (((getAlpha(color1) * getAlpha(color2)) << 16) & 0xFF000000) | (((getRed(color1) * getRed(color2)) << 8) & 0xFF0000) | ((getGreen(color1) * getGreen(color2)) & 0xFF00) | (((getBlue(color1) * getBlue(color2)) >> 8) & 0xFF);
+		/**TODO FIX the alpha*/
+		return 0xFF000000 | (((getRed(color1) * getRed(color2)) << 8) & 0xFF0000) | ((getGreen(color1) * getGreen(color2)) & 0xFF00) | (((getBlue(color1) * getBlue(color2)) >> 8) & 0xFF);
+	}
+
+
+	public static String toString(int color)
+	{
+		StringBuilder s = new StringBuilder();
+		s.append(Integer.toHexString(getAlpha(color)));
+		s.append(" ");
+		s.append(Integer.toHexString(getRed(color)));
+		s.append(" ");
+		s.append(Integer.toHexString(getGreen(color)));
+		s.append(" ");
+		s.append(Integer.toHexString(getBlue(color)));
+		return s.toString();
 	}
 }

@@ -20,6 +20,7 @@ package com.seibel.lod.builders.lodTemplates;
 import com.seibel.lod.enums.DebugMode;
 
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
 
@@ -34,7 +35,7 @@ public class TriangularLodTemplate extends AbstractLodTemplate
 {
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, long[] adjData,
-	                           byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, DimensionType dimensionType)
+	                           byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap)
 	{
 		System.err.println("DynamicLodTemplate not implemented!");
 	}

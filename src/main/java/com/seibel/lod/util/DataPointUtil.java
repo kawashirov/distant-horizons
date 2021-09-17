@@ -176,12 +176,10 @@ public class DataPointUtil
 		return (int) (dataPoint >>> COLOR_SHIFT);
 	}
 
-	public static int getLightColor(long dataPoint, boolean roof, boolean day)
+	public static int getLightColor(long dataPoint, NativeImage lightMap)
 	{
 		int lightBlock = getLightBlock(dataPoint);
 		int lightSky = getLightSky(dataPoint);
-
-		NativeImage lightMap = MinecraftWrapper.INSTANCE.getCurrentLightMap();
 		/**TODO ALL of this should be dimension dependent and lightMap dependent*/
 		int color = lightMap.getPixelRGBA(lightBlock, lightSky);
 		int red = ColorUtil.getBlue(color);

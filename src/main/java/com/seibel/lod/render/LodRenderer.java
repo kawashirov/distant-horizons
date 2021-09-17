@@ -23,6 +23,7 @@ import java.nio.FloatBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import net.minecraft.client.renderer.texture.NativeImage;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
@@ -123,6 +124,9 @@ public class LodRenderer
 	 * This is used to determine if the LODs should be regenerated
 	 */
 	private int[] previousPos = new int[]{0,0,0};
+	public NativeImage lightMap = null;
+	private long prevDayTime = 0;
+	private double prevBrightness = 0;
 	private int prevRenderDistance = 0;
 	private long prevPlayerPosTime = 0;
 	private long prevVanillaChunkTime = 0;
@@ -852,6 +856,15 @@ public class LodRenderer
 				lodDim.regenDimension = false;
 			}
 			prevChunkTime = newTime;
+		}
+
+		// check if there is any newly generated terrain to show
+		if (mc.getWorld().getDayTime() - prevDayTime > 1000 || mc.getOptions().gamma != prevBrightness || lightMap == null)
+		{
+			fullRegen = true;
+			lightMap = mc.getCurrentLightMap();
+			prevBrightness = mc.getOptions().gamma;
+			prevDayTime = mc.getWorld().getDayTime();
 		}
 
 

@@ -29,9 +29,12 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
+
+import java.lang.annotation.Native;
 
 /**
  * Builds LODs as rectangular prisms.
@@ -50,7 +53,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, long[] adjData,
-	                           byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, DimensionType dimensionType)
+	                           byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap)
 	{
 		int width = 1 << detailLevel;
 
@@ -65,11 +68,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				posZ * width,
 				bufferCenterBlockPos);
 		int color;
-
-		boolean hasSkyLight = dimensionType.hasSkyLight();
-		boolean hasRoof = dimensionType.hasCeiling();
-		boolean isDay = MinecraftWrapper.INSTANCE.getPlayer().level.getDayTime() < 13000;
-		color = DataPointUtil.getLightColor(data, (hasRoof || hasSkyLight), isDay);
+		color = DataPointUtil.getLightColor(data,lightMap);
 
 		//color = DataPointUtil.getColor(data);
 
