@@ -15,6 +15,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.texture.NativeImage;
+import net.minecraft.client.renderer.model.ModelManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.server.integrated.IntegratedServer;
@@ -45,9 +46,9 @@ public class MinecraftWrapper
 	
 	
 	
-	//=======================//
-	// non-minecraft methods //
-	//=======================//
+	//================//
+	// helper methods //
+	//================//
 	
 	/**
 	 * This should be called at the beginning of every frame to
@@ -165,7 +166,12 @@ public class MinecraftWrapper
 	{
 		return mc.options;
 	}
-	
+
+	public ModelManager getModelManager()
+	{
+		return mc.getModelManager();
+	}
+
 	/** Measured in chunks */
 	public int getRenderDistance()
 	{

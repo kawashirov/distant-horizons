@@ -1,8 +1,7 @@
 package com.seibel.lod.objects;
 
-import com.seibel.lod.builders.LodBuilder;
-import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.util.*;
+import java.util.Arrays;
 
 public class SingleLevelContainer implements LevelContainer
 {
@@ -57,17 +56,13 @@ public class SingleLevelContainer implements LevelContainer
 		return new SingleLevelContainer((byte) (getDetailLevel() - 1));
 	}
 
-	public SingleLevelContainer(String inputString)
+	public SingleLevelContainer(byte inputData[])
 	{
 		int tempIndex;
-		int shift = 0;
 		int index = 0;
-		int digit;
-		char currentChar;
 		long newData;
-		currentChar = inputString.charAt(index);
-		digit = Character.digit(currentChar,16);
-		detailLevel = (byte) digit;
+		detailLevel = inputData[index];
+		index++;
 		size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
 		this.data = new long[size][size];
 		for (int x = 0; x < size; x++)
@@ -75,21 +70,17 @@ public class SingleLevelContainer implements LevelContainer
 			for (int z = 0; z < size; z++)
 			{
 				newData = 0;
-				for(tempIndex = 0; tempIndex < 16; tempIndex++)
-				{
-					if(index+tempIndex >= inputString.length())
-						break;
-					currentChar = inputString.charAt(index+tempIndex);
-					if(currentChar == DATA_DELIMITER){
-						break;
-					}
-					shift = (15-tempIndex)*4;
-					digit = Character.digit(currentChar,16);
-					newData += ((((long) digit & 0xf)) << shift);
-				}
-				newData = newData >>> (shift);
+				if(inputData[index] == 0)
+					index++;
+				else if(index + 7 >= inputData.length)
+				break;
+			else {
+				for (tempIndex = 0; tempIndex < 8; tempIndex++)
+					newData += (((long) inputData[index + tempIndex]) & 0xff) << (8 * tempIndex);
+				index = index + 8;
+			}
 				data[x][z] = newData;
-				index = index + tempIndex;
+
 			}
 		}
 	}
@@ -125,22 +116,28 @@ public class SingleLevelContainer implements LevelContainer
 		return DataPointUtil.doesItExist(getSingleData(posX, posZ));
 	}
 
-	public String toDataString()
+	public byte[] toDataString()
 	{
-		StringBuilder stringBuilder = new StringBuilder();
-		int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
-		stringBuilder.append(detailLevel);
-		stringBuilder.append(DATA_DELIMITER);
+		int index = 0;
+		int tempIndex;
+		byte[] tempData = new byte[1 + (size * size * 8)];
+		tempData[index] = detailLevel;
+		index++;
 		for (int x = 0; x < size; x++)
 		{
 			for (int z = 0; z < size; z++)
 			{
-				//Converting the dataToHex
-				stringBuilder.append(Long.toHexString(data[x][z]));
-				stringBuilder.append(DATA_DELIMITER);
+				if(data[x][z] == 0){
+					tempData[index] = 0;
+					index++;
+				} else {
+				for (tempIndex = 0; tempIndex < 8; tempIndex++)
+					tempData[index + tempIndex] = (byte) (data[x][z] >>> (8 * tempIndex));
+				index += 8;
+			}
 			}
 		}
-		return stringBuilder.toString();
+		return Arrays.copyOfRange(tempData, 0, index);
 	}
 
 	@Override

@@ -18,6 +18,8 @@
 package com.seibel.lod.builders;
 
 import java.awt.Color;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -33,13 +35,13 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.block.*;
 import net.minecraft.block.material.MaterialColor;
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.LightType;
+import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
@@ -60,6 +62,7 @@ public class LodBuilder
 	public static final int CHUNK_DATA_WIDTH = LodUtil.CHUNK_WIDTH;
 	public static final int CHUNK_SECTION_HEIGHT = CHUNK_DATA_WIDTH;
 	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
+	public static final ConcurrentMap<Block, Integer> colorMap = new ConcurrentHashMap<>();
 
 	/**
 	 * If no blocks are found in the area in determineBottomPointForArea return this
@@ -286,7 +289,7 @@ public class LodBuilder
 
 				yAbs = height - 1;
 				// We search light on above air block
-				color = generateLodColor(chunk, config, xRel, yAbs, zRel);
+				color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
 				depth = determineBottomPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
 				blockPos.set(xAbs, yAbs + 1, zAbs);
 				light = getLightValue(chunk, blockPos);
@@ -420,7 +423,7 @@ public class LodBuilder
 			yAbs = height - 1;
 			// We search light on above air block
 
-			color = generateLodColor(chunk, config, xRel, yAbs, zRel);
+			color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
 			depth = determineBottomPoint(chunk, config, xRel, zRel, blockPos);
 
 			blockPos.set(xAbs, yAbs + 1, zAbs);
@@ -508,7 +511,7 @@ public class LodBuilder
 	 * Generate the color for the given chunk using biome water color, foliage
 	 * color, and grass color.
 	 */
-	private int generateLodColor(IChunk chunk, LodBuilderConfig config, int xRel, int yAbs, int zRel)
+	private int generateLodColor(IChunk chunk, LodBuilderConfig config, int xRel, int yAbs, int zRel, BlockPos.Mutable blockPos)
 	{
 		ChunkSection[] chunkSections = chunk.getSections();
 		int colorInt = 0;
@@ -524,17 +527,16 @@ public class LodBuilder
 			int yRel = Math.floorMod(yAbs, CHUNK_SECTION_HEIGHT);
 			if (chunkSections[sectionIndex] != null)
 			{
-				BlockState blockState = chunkSections[sectionIndex].getBlockState(xRel, yRel, zRel);
-
 				// the bit shift is equivalent to dividing by 4
-				Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, yAbs >> 2, zRel >> 2);
 
-				colorInt = getColorForBlock(xRel, zRel, blockState, biome);
+				blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel, chunk.getPos().getMinBlockZ() + zRel);
+				//colorInt = getColorTextureForBlock(blockState, blockPos);
+				colorInt = getColorForBlock(chunk, blockPos);
 			}
 			if (colorInt == 0 && yAbs > 0)
 			{
 				//invisible case
-				colorInt = generateLodColor(chunk, config, xRel, yAbs - 1, zRel);
+				colorInt = generateLodColor(chunk, config, xRel, yAbs - 1, zRel, blockPos);
 			}
 		}
 		return colorInt;
@@ -559,12 +561,78 @@ public class LodBuilder
 		return light;
 	}
 
+	private int getColorTextureForBlock(BlockState blockState, BlockPos blockPos)
+	{
+		if (colorMap.containsKey(blockState.getBlock()))
+			return colorMap.get(blockState.getBlock());
+		World world = MinecraftWrapper.INSTANCE.getPlayer().level;
+		TextureAtlasSprite texture = MinecraftWrapper.INSTANCE.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
+		int count = 0;
+		int alpha = 0;
+		int red = 0;
+		int green = 0;
+		int blue = 0;
+		;
+		int color = 0;
+		for (int k = 0; k < texture.getFrameCount(); k++)
+		{
+			for (int i = 0; i < texture.getHeight(); i++)
+			{
+				for (int j = 0; j < texture.getWidth(); j++)
+				{
+					if (texture.isTransparent(k, i, j))
+					{
+						if (blockState.getBlock() instanceof LeavesBlock)
+							color = 0;
+						else
+							continue;
+					} else
+					{
+						color = texture.getPixelRGBA(k, i, j);
+					}
+					count++;
+					alpha += ColorUtil.getAlpha(color);
+					red += ColorUtil.getBlue(color);
+					green += ColorUtil.getGreen(color);
+					blue += ColorUtil.getRed(color);
+				}
+			}
+		}
+		if (count == 0)
+		{
+			color = 0;
+		} else
+		{
+			alpha /= count;
+			red /= count;
+			green /= count;
+			blue /= count;
+			color = ColorUtil.rgbToInt(alpha, red, green, blue);
+		}
+		colorMap.put(blockState.getBlock(), color);
+		return color;
+	}
+
 	/**
 	 * Returns a color int for the given block.
 	 */
-	private int getColorForBlock(int x, int z, BlockState blockState, Biome biome)
+	private int getColorForBlock(IChunk chunk, BlockPos blockPos)
 	{
+
+		int xRel = blockPos.getX() - chunk.getPos().getMinBlockX();
+		int zRel = blockPos.getZ() - chunk.getPos().getMinBlockZ();
+		int x = blockPos.getX();
+		int y = blockPos.getY();
+		int z = blockPos.getZ();
+		Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, y >> 2, zRel >> 2);
+		int brightness;
+		int red = 0;
+		int green = 0;
+		int blue = 0;
+
+		BlockState blockState = chunk.getBlockState(blockPos);
 		int colorInt = 0;
+
 
 		// block special cases
 		if (blockState == Blocks.AIR.defaultBlockState()
@@ -574,9 +642,6 @@ public class LodBuilder
 			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
 			tmp = tmp.darker();
 			colorInt = LodUtil.colorToInt(tmp);
-		} else if (blockState == Blocks.STONE.defaultBlockState())
-		{
-			colorInt = LodUtil.STONE_COLOR_INT;
 		} else if (blockState == Blocks.NETHERRACK.defaultBlockState())
 		{
 			colorInt = LodUtil.NETHERRACK_COLOR_INT;
@@ -587,63 +652,47 @@ public class LodBuilder
 		{
 			colorInt = LodUtil.CRIMSON_NYLIUM_COLOR_INT;
 		} else if (blockState == Blocks.WEEPING_VINES.defaultBlockState()
-						   || blockState == Blocks.WEEPING_VINES_PLANT.defaultBlockState()
+				           || blockState == Blocks.WEEPING_VINES_PLANT.defaultBlockState()
 				           || blockState == Blocks.CRIMSON_FUNGUS.defaultBlockState()
 				           || blockState == Blocks.CRIMSON_ROOTS.defaultBlockState())
 		{
 			colorInt = Blocks.NETHER_WART_BLOCK.defaultMaterialColor().col;
-		} else if (blockState == Blocks.TWISTING_VINES.defaultBlockState()
-				           || blockState == Blocks.TWISTING_VINES_PLANT.defaultBlockState()
-				           || blockState == Blocks.CRIMSON_FUNGUS.defaultBlockState()
-				           || blockState == Blocks.CRIMSON_ROOTS.defaultBlockState())
+		} else if (blockState.getBlock().equals(Blocks.TWISTING_VINES)
+				           || blockState.equals(Blocks.TWISTING_VINES_PLANT)
+				           || blockState == Blocks.WARPED_ROOTS.defaultBlockState()
+				           || blockState == Blocks.WARPED_FUNGUS.defaultBlockState())
 		{
-			colorInt = Blocks.WARPED_WART_BLOCK.defaultMaterialColor().col;
-		} else if (blockState == Blocks.BEDROCK.defaultBlockState())
-		{
-			colorInt = getColorForBiome(x, z, biome);
-		} else if (blockState == Blocks.MYCELIUM.defaultBlockState())
-		{
-			colorInt = LodUtil.MYCELIUM_COLOR_INT;
-		} else if (blockState == Blocks.SOUL_TORCH.defaultBlockState()
-				           || blockState == Blocks.SOUL_WALL_TORCH.defaultBlockState())
-		{
-			colorInt = Blocks.WARPED_PLANKS.defaultMaterialColor().col;
-		} else if (blockState == Blocks.TORCH.defaultBlockState()
-				           || blockState == Blocks.WALL_TORCH.defaultBlockState())
-		{
-			colorInt = Blocks.OAK_PLANKS.defaultMaterialColor().col;
-		} else if (blockState == Blocks.REDSTONE_TORCH.defaultBlockState()
-				           || blockState == Blocks.REDSTONE_WALL_TORCH.defaultBlockState())
-		{
-			colorInt = Blocks.CRIMSON_PLANKS.defaultMaterialColor().col;
+			colorInt = Blocks.WARPED_NYLIUM.defaultMaterialColor().col;
 		}
 
 
 		// plant life
 		else if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() == Blocks.VINE)
 		{
-			Color leafColor = LodUtil.intToColor(biome.getFoliageColor()).darker();
-			leafColor = leafColor.darker();
-			colorInt = LodUtil.colorToInt(leafColor);
+			brightness = getColorTextureForBlock(blockState, blockPos);
+			colorInt = ColorUtil.changeBrightnessValue(biome.getFoliageColor(), brightness);
 		} else if ((blockState.getBlock() instanceof GrassBlock || blockState.getBlock() instanceof AbstractPlantBlock
 				            || blockState.getBlock() instanceof BushBlock || blockState.getBlock() instanceof IGrowable)
 				           && !(blockState.getBlock() == Blocks.BROWN_MUSHROOM || blockState.getBlock() == Blocks.RED_MUSHROOM))
 		{
-			Color plantColor = LodUtil.intToColor(biome.getGrassColor(x, z));
-			plantColor = plantColor.darker();
-			colorInt = LodUtil.colorToInt(plantColor);
+			brightness = getColorTextureForBlock(blockState, blockPos);
+			//colorInt = ColorUtil.changeBrightnessValue(biome.getGrassColor(x, z), brightness);
+			colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getGrassColor(x, z),1f,0.65f);
 		}
-
 		// water
 		else if (blockState.getBlock() == Blocks.WATER)
 		{
-			colorInt = biome.getWaterColor();
+			brightness = getColorTextureForBlock(blockState, blockPos);
+			//colorInt = ColorUtil.changeBrightnessValue(biome.getWaterColor(), brightness);
+			colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getWaterColor(),1f,0.75f);
 		}
 
 		// everything else
 		else
 		{
-			colorInt = blockState.getBlock().defaultMaterialColor().col;
+			colorInt = getColorTextureForBlock(blockState, blockPos);
+			//colorInt = blockState.materialColor.col;
+			//colorInt = blockState.getBlock().defaultMaterialColor().col;
 		}
 
 		return colorInt;
@@ -751,26 +800,4 @@ public class LodBuilder
 
 		return false;
 	}
-
-	private boolean isLayerValidLodPoint(ChunkSection[] chunkSections, int sectionIndex, int y, int x, int z)
-	{
-		if (chunkSections[sectionIndex] == null)
-		{
-			// this section doesn't have any blocks,
-			// it is not a valid section
-			return false;
-		} else
-		{
-			if (chunkSections[sectionIndex].getBlockState(x, y, z) != null
-					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.AIR
-					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.CAVE_AIR
-					    && chunkSections[sectionIndex].getBlockState(x, y, z).getBlock() != Blocks.BARRIER)
-			{
-				return true;
-			}
-		}
-
-		return false;
-	}
-
 }

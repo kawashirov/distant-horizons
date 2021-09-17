@@ -1,11 +1,5 @@
 package com.seibel.lod.objects;
 
-import com.seibel.lod.util.LevelPosUtil;
-import com.seibel.lod.util.LodUtil;
-
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 public interface LevelContainer
 {
 	public static final char VERTICAL_DATA_DELIMITER = '\t';
@@ -74,5 +68,5 @@ public interface LevelContainer
 	 * This will give the data to save in the file
 	 * @return data as a String
 	 */
-	public String toDataString();
+	public byte[] toDataString();
 }

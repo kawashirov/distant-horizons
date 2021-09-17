@@ -114,9 +114,10 @@ public class VerticalLevelContainer implements LevelContainer
 		addData(data,posX,posZ);
 	}
 
-	public String toDataString()
+	public byte[] toDataString()
 	{
-		return toString();
+		byte[] temp = {};
+		return temp;
 	}
 
 	@Override

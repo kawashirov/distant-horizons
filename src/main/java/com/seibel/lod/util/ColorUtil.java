@@ -79,4 +79,17 @@ public class ColorUtil
 				hsv[1],
 				brightness).getRGB();
 	}
+
+	/**
+	 * Edit the given color as a HSV (Hue Saturation Value) color.
+	 */
+	public static int changeBrightnessValue(int color, int brightnessColor)
+	{
+		float[] hsv = Color.RGBtoHSB(getRed(color), getGreen(color), getBlue(color), null);
+		float brightness = Color.RGBtoHSB(getRed(brightnessColor), getGreen(brightnessColor), getBlue(brightnessColor), null)[2];
+		return Color.getHSBColor(
+				hsv[0], // hue
+				hsv[1],
+				brightness).getRGB();
+	}
 }
