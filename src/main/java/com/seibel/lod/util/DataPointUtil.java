@@ -1,7 +1,12 @@
 package com.seibel.lod.util;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.texture.NativeImage;
+
+import javax.xml.crypto.Data;
+import java.lang.annotation.Native;
 
 public class DataPointUtil
 {
@@ -176,27 +181,14 @@ public class DataPointUtil
 		int lightBlock = getLightBlock(dataPoint);
 		int lightSky = getLightSky(dataPoint);
 
+		NativeImage lightMap = MinecraftWrapper.INSTANCE.getCurrentLightMap();
 		/**TODO ALL of this should be dimension dependent and lightMap dependent*/
-		int red;
-		int green;
-		int blue;
-		if(roof)
-		{
-			red = LodUtil.clamp(0, getRed(dataPoint) + -30 + lightBlock*4,255);
-			green = LodUtil.clamp(0, getGreen(dataPoint) + -30 + lightBlock*4,255);
-			blue = LodUtil.clamp(0, getBlue(dataPoint) + -30 + lightBlock*2,255);
-		}else{
-			if(day){
-				red = LodUtil.clamp(0, getRed(dataPoint) + -30 + LodUtil.clamp(0, lightBlock + lightSky,15)*4,255);
-				green = LodUtil.clamp(0, getGreen(dataPoint) + -30 + LodUtil.clamp(0, lightBlock + lightSky,15)*4,255);
-				blue = LodUtil.clamp(0, getBlue(dataPoint) + -30 + LodUtil.clamp(0, lightBlock/2 + lightSky,15)*4,255);
-			}else{
-				red = LodUtil.clamp(0, getRed(dataPoint) + -60 + lightBlock*6,255);
-				green = LodUtil.clamp(0, getGreen(dataPoint) + -60 + lightBlock*6,255);
-				blue = LodUtil.clamp(0, getBlue(dataPoint) + -30 + lightBlock*2,255);
-			}
-		}
-		return ColorUtil.rgbToInt(red, green, blue);
+		int color = lightMap.getPixelRGBA(lightBlock, lightSky);
+		int red = ColorUtil.getBlue(color);
+		int green = ColorUtil.getGreen(color);
+		int blue = ColorUtil.getRed(color);
+
+		return ColorUtil.multiplyRGBcolors(getColor(dataPoint), ColorUtil.rgbToInt(red, green, blue));
 	}
 
 	public static String toString(long dataPoint)

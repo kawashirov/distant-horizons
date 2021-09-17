@@ -260,6 +260,8 @@ public class LodBuilder
 		int depth = 0;
 		int color = 0;
 		int light = 0;
+		int lightSky = 0;
+		int lightBlock = 0;
 		int generation = config.distanceGenerationMode.complexity;
 
 		int xRel;
@@ -290,6 +292,7 @@ public class LodBuilder
 			//Calculate the height of the lod
 			yAbs = 255;
 			int count = 0;
+			boolean topBlock = true;
 			while (yAbs > 0)
 			{
 				height = determineHeightPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
@@ -307,10 +310,16 @@ public class LodBuilder
 				depth = determineBottomPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
 				blockPos.set(xAbs, yAbs + 1, zAbs);
 				light = getLightValue(chunk, blockPos);
+				lightBlock = light & 0b1111;
+				if(topBlock)
+					lightSky = 15; //default max light
+				else
+					lightSky = (light >> 4) & 0b1111;
+				topBlock = false;
 
 				//System.out.println(dataToMerge.length + " " + index +" " + count + " " + yAbs);
 				//System.out.println(dataToMerge.length + " " + dataToMerge[index].length);
-				dataToMerge[index][count] = DataPointUtil.createDataPoint(height, depth, color, (light >> 4) & 0b1111, light & 0b1111, generation);
+				dataToMerge[index][count] = DataPointUtil.createDataPoint(height, depth, color, lightSky, lightBlock, generation);
 				yAbs = depth - 1;
 				count++;
 			}
@@ -443,7 +452,8 @@ public class LodBuilder
 			blockPos.set(xAbs, yAbs + 1, zAbs);
 			light = getLightValue(chunk, blockPos);
 			lightBlock = light & 0b1111;
-			lightSky = (light >> 4) & 0b1111;
+			//lightSky = (light >> 4) & 0b1111;
+			lightSky = 15; //default max light
 			dataToMerge[index] = DataPointUtil.createDataPoint(height, depth, color, lightSky, lightBlock, generation);
 		}
 		return dataToMerge;

@@ -250,7 +250,7 @@ public class LodRenderer
 		farPlaneBlockDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
 
 		setupProjectionMatrix(partialTicks);
-		setupLighting(lodDim, partialTicks);
+		//setupLighting(lodDim, partialTicks);
 
 		NearFarFogSettings fogSettings = determineFogSettings();
 
