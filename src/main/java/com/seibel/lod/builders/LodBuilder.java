@@ -36,8 +36,10 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.block.*;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.LightType;
@@ -63,6 +65,7 @@ public class LodBuilder
 	public static final int CHUNK_SECTION_HEIGHT = CHUNK_DATA_WIDTH;
 	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
 	public static final ConcurrentMap<Block, Integer> colorMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<Block, VoxelShape> shapeMap = new ConcurrentHashMap<>();
 
 	/**
 	 * If no blocks are found in the area in determineBottomPointForArea return this
@@ -677,14 +680,14 @@ public class LodBuilder
 		{
 			brightness = getColorTextureForBlock(blockState, blockPos);
 			//colorInt = ColorUtil.changeBrightnessValue(biome.getGrassColor(x, z), brightness);
-			colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getGrassColor(x, z),1f,0.65f);
+			colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getGrassColor(x, z), 1f, 0.65f);
 		}
 		// water
 		else if (blockState.getBlock() == Blocks.WATER)
 		{
 			brightness = getColorTextureForBlock(blockState, blockPos);
 			//colorInt = ColorUtil.changeBrightnessValue(biome.getWaterColor(), brightness);
-			colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getWaterColor(),1f,0.75f);
+			colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getWaterColor(), 1f, 0.75f);
 		}
 
 		// everything else
@@ -767,29 +770,49 @@ public class LodBuilder
 	{
 
 		BlockState blockState = chunk.getBlockState(blockPos);
+		boolean onlyUseFullBlock = false;
+		boolean avoidSmallBlock = false;
 		if (blockState != null)
 		{
 			//blockState.isCollisionShapeFullBlock(chunk, blockPos);
 
-			/*if (!blockState.getFluidState().isEmpty())
+			if(avoidSmallBlock || onlyUseFullBlock)
 			{
-				return true;
-			}
-			VoxelShape voxelShape = blockState.getShape(chunk, blockPos);
-			if (!voxelShape.isEmpty())
-			{
-				AxisAlignedBB bbox = voxelShape.bounds();
-				int xWidth = (int) (bbox.maxX - bbox.minX);
-				int yWidth = (int) (bbox.maxY - bbox.minY);
-				int zWidth = (int) (bbox.maxZ - bbox.minZ);
-				if (xWidth < 0.7 && zWidth < 0.7 && yWidth < 1)
+				if (!blockState.getFluidState().isEmpty())
+				{
+					return true;
+				}
+
+				VoxelShape voxelShape;
+				if (shapeMap.containsKey(blockState.getBlock()))
+				{
+					voxelShape = shapeMap.get(blockState.getBlock());
+
+				} else
+				{
+					voxelShape = blockState.getShape(chunk, blockPos);
+					shapeMap.put(blockState.getBlock(), voxelShape);
+				}
+				if (!voxelShape.isEmpty())
+				{
+					AxisAlignedBB bbox = voxelShape.bounds();
+					int xWidth = (int) (bbox.maxX - bbox.minX);
+					int yWidth = (int) (bbox.maxY - bbox.minY);
+					int zWidth = (int) (bbox.maxZ - bbox.minZ);
+					if (xWidth < 1 && zWidth < 1 && yWidth < 1 && onlyUseFullBlock)
+					{
+						return false;
+					}
+					if (xWidth < 0.7 && zWidth < 0.7 && yWidth < 1  && avoidSmallBlock)
+					{
+						return false;
+					}
+				} else
 				{
 					return false;
 				}
-			} else
-			{
-				return false;
-			}*/
+			}
+
 			if (blockState.getBlock() != Blocks.AIR
 					    && blockState.getBlock() != Blocks.CAVE_AIR
 					    && blockState.getBlock() != Blocks.BARRIER)
