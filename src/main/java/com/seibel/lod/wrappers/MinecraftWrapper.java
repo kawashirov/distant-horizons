@@ -1,5 +1,6 @@
 package com.seibel.lod.wrappers;
 
+import java.awt.Color;
 import java.io.File;
 
 import com.seibel.lod.util.LodUtil;
@@ -11,7 +12,9 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.entity.Entity;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.server.integrated.IntegratedServer;
@@ -23,7 +26,7 @@ import net.minecraft.world.DimensionType;
  * to allow for easier movement between Minecraft versions.
  * 
  * @author James Seibel
- * @version 9-6-2021
+ * @version 9-16-2021
  */
 public class MinecraftWrapper
 {
@@ -31,9 +34,32 @@ public class MinecraftWrapper
 	
 	private Minecraft mc = Minecraft.getInstance();
 	
+	/** The lightmap for the current:
+	 * Time, dimension, brightness setting, etc. */
+	private NativeImage lightMap = null;
+	
 	private MinecraftWrapper()
 	{
 		
+	}
+	
+	
+	
+	//=======================//
+	// non-minecraft methods //
+	//=======================//
+	
+	/**
+	 * This should be called at the beginning of every frame to
+	 * clear any Minecraft data that becomes out of date after a frame. <br> <br>
+	 * 
+	 * Lightmaps and other time sensitive objects fall in this category. <br> <br>
+	 * 
+	 * This doesn't effect OpenGL objects in any way.
+	 */
+	public void clearFrameObjectCache()
+	{
+		lightMap = null;
 	}
 	
 	
@@ -60,6 +86,67 @@ public class MinecraftWrapper
 	public String getCurrentDimensionId()
 	{
 		return LodUtil.getDimensionIDFromWorld(mc.level);
+	}
+	
+	/** 
+	 * This texture changes every frame
+	 */
+	public NativeImage getCurrentLightMap()
+	{
+		// get the current lightMap if the cache is empty
+		if (lightMap == null)
+		{
+			LightTexture tex = mc.gameRenderer.lightTexture();
+			NativeImage lightPixels = tex.lightPixels;
+			lightMap = lightPixels;
+		}
+		
+//		// hotswap this to true, then back to false to write a file
+//		// (and not write a file every frame)
+//		if (false)
+//		{
+//			try
+//			{
+//				// obviously change the filepath to somewhere on your PC
+//				lightPixels.writeToFile(new File("C:\\Users\\James Seibel\\Desktop\\image.png"));
+//			}
+//			catch(Exception e)
+//			{
+//				e.printStackTrace();
+//			}
+//		}
+		
+		return lightMap;
+	}
+	
+	/**
+	 * Returns the color int at the given pixel coordinates
+	 * from the current lightmap.
+	 * 
+	 * @param u x location in texture space
+	 * @param v z location in texture space
+	 */
+	public int getColorIntFromLightMap(int u, int v)
+	{
+		if (lightMap == null)
+		{
+			// make sure the lightMap is up to date
+			getCurrentLightMap();
+		}
+		
+		return lightMap.getPixelRGBA(u, v);
+	}
+	
+	/**
+	 * Returns the Color at the given pixel coordinates
+	 * from the current lightmap.
+	 * 
+	 * @param u x location in texture space
+	 * @param v z location in texture space
+	 */
+	public Color getColorFromLightMap(int u, int v)
+	{
+		return LodUtil.intToColor(lightMap.getPixelRGBA(u, v));
 	}
 	
 	

@@ -49,7 +49,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of the mod.
  *
  * @author James_Seibel
- * @version 9-14-2021
+ * @version 9-16-2021
  */
 public class ClientProxy
 {
@@ -100,6 +100,9 @@ public class ClientProxy
 	 */
 	public void renderLods(float partialTicks)
 	{
+		// clear any out of date objects
+		mc.clearFrameObjectCache();
+		
 		try
 		{
 			// only run the first time setup once
