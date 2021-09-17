@@ -254,6 +254,12 @@ public class ClientProxy
 			// breaking when changing worlds.
 			renderer.destroyBuffers();
 			recalculateWidths = true;
+			
+			
+			// make sure the nulled objects are freed.
+			// (this prevents a out of memory error when
+			// changing worlds)
+			System.gc();
 		}
 	}
 	
