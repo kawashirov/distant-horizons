@@ -618,9 +618,9 @@ public class LodBuilder
 				{
 					if (texture.isTransparent(k, i, j))
 					{
-						if (blockState.getBlock() instanceof LeavesBlock)
+						/*if (blockState.getBlock() instanceof LeavesBlock)
 							color = 0;
-						else
+						else*/
 							continue;
 					} else
 					{
@@ -706,21 +706,24 @@ public class LodBuilder
 		else if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() == Blocks.VINE)
 		{
 			brightness = getColorTextureForBlock(blockState, blockPos, false);
-			colorInt = ColorUtil.changeBrightnessValue(biome.getFoliageColor(), brightness);
+			//colorInt = ColorUtil.changeBrightnessValue(biome.getFoliageColor(), brightness);
+			colorInt = ColorUtil.multiplyRGBcolors(biome.getFoliageColor(), brightness);
 		} else if ((blockState.getBlock() instanceof GrassBlock || blockState.getBlock() instanceof AbstractPlantBlock
 				            || blockState.getBlock() instanceof BushBlock || blockState.getBlock() instanceof IGrowable)
 				           && !(blockState.getBlock() == Blocks.BROWN_MUSHROOM || blockState.getBlock() == Blocks.RED_MUSHROOM))
 		{
-			/*brightness = getColorTextureForBlock(blockState, blockPos, true);
-			colorInt = ColorUtil.changeBrightnessValue(biome.getGrassColor(x, z), brightness);*/
-			colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getGrassColor(x, z), 1f, 0.65f);
+			brightness = ColorUtil.applySaturationAndBrightnessMultipliers(getColorTextureForBlock(blockState, blockPos, true),1f, 1.2f);
+			//colorInt = ColorUtil.changeBrightnessValue(biome.getGrassColor(x, z), brightness);
+			//colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getGrassColor(x, z), 1f, 0.65f);
+			colorInt = ColorUtil.multiplyRGBcolors(biome.getGrassColor(x, z), brightness);
 		}
 		// water
 		else if (blockState.getBlock() == Blocks.WATER)
 		{
-			/*brightness = getColorTextureForBlock(blockState, blockPos, true);
-			colorInt = ColorUtil.changeBrightnessValue(biome.getWaterColor(), brightness);*/
-			colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getWaterColor(), 1f, 0.75f);
+			brightness = getColorTextureForBlock(blockState, blockPos, true);
+			//colorInt = ColorUtil.changeBrightnessValue(biome.getWaterColor(), brightness);
+			//colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getWaterColor(), 1f, 0.75f);
+			colorInt = ColorUtil.multiplyRGBcolors(biome.getWaterColor(), brightness);
 		}
 
 		// everything else

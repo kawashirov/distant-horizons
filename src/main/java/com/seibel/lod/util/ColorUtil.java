@@ -92,4 +92,8 @@ public class ColorUtil
 				hsv[1],
 				brightness).getRGB();
 	}
+	public static int multiplyRGBcolors(int color1, int color2)
+	{
+		return (((getAlpha(color1) * getAlpha(color2)) << 16) & 0xFF000000) | (((getRed(color1) * getRed(color2)) << 8) & 0xFF0000) | ((getGreen(color1) * getGreen(color2)) & 0xFF00) | (((getBlue(color1) * getBlue(color2)) >> 8) & 0xFF);
+	}
 }
