@@ -49,14 +49,11 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeColors;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.client.extensions.IForgeBakedModel;
 import net.minecraftforge.client.model.data.ModelDataMap;
-
-import javax.swing.*;
 
 /**
  * This object is in charge of creating Lod related objects. (specifically: Lod
@@ -228,7 +225,7 @@ public class LodBuilder
 					case MULTI_LOD:
 						long[][] dataToMergeVertical;
 						dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-						data = DataPointUtil.mergeVerticalData(dataToMergeVertical);
+						data = DataPointUtil.mergeMultiData(dataToMergeVertical);
 						if (data.length == 0 || data == null)
 							data = new long[]{DataPointUtil.EMPTY_DATA};
 						lodDim.addData(detailLevel,

@@ -19,13 +19,16 @@ package com.seibel.lod.builders;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
+import net.minecraft.util.Direction;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
@@ -112,7 +115,7 @@ public class LodBufferBuilder
 
 	private static final int NUMBER_OF_DIRECTION = 4;
 	//in order -x, +x, -z, +z
-	private static final int[][] ADJ_DIRECTION = new int[][]{{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
+	private static final int[][] ADJ_VECTOR = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
 	private volatile Box[][] boxCache;
 	private volatile PosToRenderContainer[][] setsToRender;
@@ -249,7 +252,7 @@ public class LodBufferBuilder
 								int chunkZdist;
 								short gameChunkRenderDistance = (short) (renderer.vanillaRenderedChunks.length / 2 - 1);
 								//long dataPoint;
-								long[] adjData = new long[NUMBER_OF_DIRECTION];
+								Map<Direction, long[]> adjData = new HashMap<>();
 
 								for (int index = 0; index < posToRender.getNumberOfPos(); index++)
 								{
@@ -270,49 +273,46 @@ public class LodBufferBuilder
 									try
 									{
 
+										for (int direction = 0; direction < NUMBER_OF_DIRECTION; direction++)
+										{
+
+											xAdj = posX + ADJ_VECTOR[direction][0];
+											zAdj = posZ + ADJ_VECTOR[direction][1];
+											chunkXdist = LevelPosUtil.getChunkPos(detailLevel,xAdj) - playerChunkPos.x;
+											chunkZdist = LevelPosUtil.getChunkPos(detailLevel,zAdj) - playerChunkPos.z;
+
+											if (gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >= Math.abs(chunkZdist))
+											{
+												if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
+														    && posToRender.contains(detailLevel, xAdj, zAdj))
+												{
+													adjData.put(Box.ADJ_DIRECTIONS[direction], lodDim.getData(detailLevel, xAdj, zAdj));
+												}else{
+													adjData.put(Box.ADJ_DIRECTIONS[direction], null);
+												}
+											} else
+											{
+												if (posToRender.contains(detailLevel, xAdj, zAdj))
+												{
+													adjData.put(Box.ADJ_DIRECTIONS[direction], lodDim.getData(detailLevel, xAdj, zAdj));
+												}else{
+													adjData.put(Box.ADJ_DIRECTIONS[direction], null);
+												}
+											}
+										}
+
 										if (region.getLodQualityMode() == LodQualityMode.HEIGHTMAP)
 										{
 											//dataPoint = lodDim.getData(detailLevel, posX, posZ)[0];
 											long dataPoint = lodDim.getSingleData(detailLevel, posX, posZ);
 											if (!DataPointUtil.isItVoid(dataPoint) && DataPointUtil.doesItExist(dataPoint))
 											{
-												dataPoint = lodDim.getSingleData(detailLevel, posX, posZ);
-												if(DataPointUtil.getHeight(dataPoint) == LodBuilder.DEFAULT_HEIGHT && DataPointUtil.getDepth(dataPoint) == LodBuilder.DEFAULT_DEPTH)
-													continue;
-												for (int direction = 0; direction < NUMBER_OF_DIRECTION; direction++)
-												{
-
-													xAdj = posX + ADJ_DIRECTION[direction][0];
-													zAdj = posZ + ADJ_DIRECTION[direction][1];
-													chunkXdist = LevelPosUtil.getChunkPos(detailLevel,xAdj) - playerChunkPos.x;
-													chunkZdist = LevelPosUtil.getChunkPos(detailLevel,zAdj) - playerChunkPos.z;
-
-													if (gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >= Math.abs(chunkZdist))
-													{
-														if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
-																    && posToRender.contains(detailLevel, xAdj, zAdj))
-														{
-															adjData[direction]= lodDim.getSingleData(detailLevel, xAdj, zAdj);
-														}else{
-															adjData[direction]= 0;
-														}
-													} else
-													{
-														if (posToRender.contains(detailLevel, xAdj, zAdj))
-														{
-															adjData[direction] = lodDim.getSingleData(detailLevel, xAdj, zAdj);
-														}else{
-															adjData[direction]= 0;
-														}
-													}
-												}
 												LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, dataPoint, adjData,
 														detailLevel, posX, posZ, boxCache[xR][zR],renderer.previousDebugMode, renderer.lightMap);
 											}
 
 										} else if (region.getLodQualityMode() == LodQualityMode.MULTI_LOD)
 										{
-											//dataPoint = lodDim.getData(detailLevel, posX, posZ)[0];
 											for (long dataPoint : lodDim.getData(detailLevel, posX, posZ))
 											{
 												if (!DataPointUtil.isItVoid(dataPoint) && DataPointUtil.doesItExist(dataPoint))
@@ -385,7 +385,7 @@ public class LodBufferBuilder
 				// upload the new buffers
 				uploadBuffers(fullRegen, lodDim);
 				bufferLock.unlock();
-				
+
 				// make sure the context is disabled
 				GlProxy.getInstance().setGlContext(GlProxyContext.NONE);
 			}
@@ -491,8 +491,8 @@ public class LodBufferBuilder
 			glProxy.setGlContext(GlProxyContext.LOD_BUILDER);
 			// only print console debugging for vboUpload once per upload cycle
 			boolean bufferMapFail = false;
-		
-		
+
+
 			for (int x = 0; x < buildableVbos.length; x++)
 			{
 				for (int z = 0; z < buildableVbos.length; z++)
@@ -505,8 +505,8 @@ public class LodBufferBuilder
 					}
 				}
 			}
-		
-		
+
+
 			// make sure all the buffers have been uploaded.
 			// this probably is necessary, but it makes me feel good :)
 			GL11.glFlush();
@@ -529,25 +529,25 @@ public class LodBufferBuilder
 		{
 			// this is how many points will be rendered
 			vbo.vertexCount = (uploadBuffer.remaining() / vbo.format.getVertexSize());
-			
-			
+
+
 			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.id);
-			
-			
+
+
 			// subData only works if the memory is allocated beforehand.
 			GL15C.glBufferData(GL15.GL_ARRAY_BUFFER, uploadBuffer.remaining(), GL15C.GL_DYNAMIC_DRAW);
-			
+
 			// interestingly bufferSubData renders faster than glMapBuffer
 			// even though OpenGLInsights-AsynchronousBufferTransfers says glMapBuffer
 			// is faster for transferring data. They must put the data in different memory
 			// or something.
 			GL15C.glBufferSubData(GL15.GL_ARRAY_BUFFER, 0, uploadBuffer);
-				
-				
+
+
 			GL15C.glUnmapBuffer(GL15.GL_ARRAY_BUFFER);
 			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		}
-		
+
 		// just used to improve debug printing
 		return bufferMapFail;
 	}

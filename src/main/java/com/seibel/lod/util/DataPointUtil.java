@@ -281,7 +281,7 @@ public class DataPointUtil
 		}
 	}
 
-	public static long[] mergeVerticalData(long[][] dataToMerge)
+	public static long[] mergeMultiData(long[][] dataToMerge)
 	{
 		boolean[] projection = ThreadMapUtil.getProjection(WORLD_HEIGHT + 1);
 		int[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth(WORLD_HEIGHT + 1);
