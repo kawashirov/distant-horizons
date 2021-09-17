@@ -55,7 +55,7 @@ import net.minecraft.util.math.ChunkPos;
  * This object is used to create NearFarBuffer objects.
  *
  * @author James Seibel
- * @version 9-15-2021
+ * @version 9-16-2021
  */
 public class LodBufferBuilder
 {
@@ -366,15 +366,14 @@ public class LodBufferBuilder
 
 				// mark that the buildable buffers as ready to swap
 				switchVbos = true;
-			} catch (Exception e)
+			}
+			catch (Exception e)
 			{
 				ClientProxy.LOGGER.warn("\"LodNodeBufferBuilder.generateLodBuffersAsync\" ran into trouble: ");
 				e.printStackTrace();
-			} finally
+			}
+			finally
 			{
-				// make sure the context is disabled
-				GlProxy.getInstance().setGlContext(GlProxyContext.NONE);
-				
 				// regardless of if we successfully created the buffers
 				// we are done generating.
 				generatingBuffers = false;
@@ -386,6 +385,9 @@ public class LodBufferBuilder
 				// upload the new buffers
 				uploadBuffers(fullRegen, lodDim);
 				bufferLock.unlock();
+				
+				// make sure the context is disabled
+				GlProxy.getInstance().setGlContext(GlProxyContext.NONE);
 			}
 
 		});
@@ -481,32 +483,40 @@ public class LodBufferBuilder
 	 */
 	private void uploadBuffers(boolean fullRegen, LodDimension lodDim)
 	{
-		GlProxy glProxy = GlProxy.getInstance();
-		// make sure we are uploading to a different OpenGL context,
-		// to prevent interference (IE stuttering) with the Minecraft context.
-		glProxy.setGlContext(GlProxyContext.LOD_BUILDER);
-		// only print console debugging for vboUpload once per upload cycle
-		boolean bufferMapFail = false;
-
-
-		for (int x = 0; x < buildableVbos.length; x++)
+		try
 		{
-			for (int z = 0; z < buildableVbos.length; z++)
+			GlProxy glProxy = GlProxy.getInstance();
+			// make sure we are uploading to a different OpenGL context,
+			// to prevent interference (IE stuttering) with the Minecraft context.
+			glProxy.setGlContext(GlProxyContext.LOD_BUILDER);
+			// only print console debugging for vboUpload once per upload cycle
+			boolean bufferMapFail = false;
+		
+		
+			for (int x = 0; x < buildableVbos.length; x++)
 			{
-				if (fullRegen || lodDim.regen[x][z])
+				for (int z = 0; z < buildableVbos.length; z++)
 				{
-					ByteBuffer builderBuffer = buildableBuffers[x][z].popNextBuffer().getSecond();
-					bufferMapFail = vboUpload(buildableVbos[x][z], builderBuffer, bufferMapFail);
-					lodDim.regen[x][z] = false;
+					if (fullRegen || lodDim.regen[x][z])
+					{
+						ByteBuffer builderBuffer = buildableBuffers[x][z].popNextBuffer().getSecond();
+						bufferMapFail = vboUpload(buildableVbos[x][z], builderBuffer, bufferMapFail);
+						lodDim.regen[x][z] = false;
+					}
 				}
 			}
+		
+		
+			// make sure all the buffers have been uploaded.
+			// this probably is necessary, but it makes me feel good :)
+			GL11.glFlush();
+			glProxy.setGlContext(GlProxyContext.NONE);
 		}
-
-
-		// make sure all the buffers have been uploaded.
-		// this probably is necessary, but it makes me feel good :)
-		GL11.glFlush();
-		glProxy.setGlContext(GlProxyContext.NONE);
+		catch(IllegalStateException e)
+		{
+			ClientProxy.LOGGER.error(LodBufferBuilder.class.getSimpleName() + " - UploadBuffers failed: " + e.getMessage());
+			e.printStackTrace();
+		}
 	}
 
 	/**
