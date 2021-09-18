@@ -307,7 +307,7 @@ public class LodBufferBuilder
 													}
 												}
 												LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, dataPoint, adjData,
-														detailLevel, posX, posZ, boxCache[xR][zR],renderer.previousDebugMode, lodDim.dimension);
+														detailLevel, posX, posZ, boxCache[xR][zR],renderer.previousDebugMode, renderer.lightMap);
 											}
 
 										} else if (region.getLodQualityMode() == LodQualityMode.MULTI_LOD)
@@ -318,7 +318,7 @@ public class LodBufferBuilder
 												if (!DataPointUtil.isItVoid(dataPoint) && DataPointUtil.doesItExist(dataPoint))
 												{
 													LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, dataPoint, adjData,
-															detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode,  lodDim.dimension);
+															detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode,  renderer.lightMap);
 												}
 											}
 										}

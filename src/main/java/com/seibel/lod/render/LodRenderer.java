@@ -52,6 +52,7 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -122,6 +123,12 @@ public class LodRenderer
 	 * This is used to determine if the LODs should be regenerated
 	 */
 	private int[] previousPos = new int[]{0,0,0};
+	
+	public NativeImage lightMap = null;
+	
+	// these variables are used to determine if the buffers should be rebuilt
+	private long prevDayTime = 0;
+	private double prevBrightness = 0;
 	private int prevRenderDistance = 0;
 	private long prevPlayerPosTime = 0;
 	private long prevVanillaChunkTime = 0;
@@ -253,7 +260,8 @@ public class LodRenderer
 		farPlaneBlockDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
 
 		setupProjectionMatrix(mcProjectionMatrix, partialTicks);
-		setupLighting(lodDim, partialTicks);
+		// commented out until we can add shaders to handle lighting
+		//setupLighting(lodDim, partialTicks);
 
 		NearFarFogSettings fogSettings = determineFogSettings();
 
@@ -834,6 +842,15 @@ public class LodRenderer
 				lodDim.regenDimension = false;
 			}
 			prevChunkTime = newTime;
+		}
+
+		// check if the lighting has changed
+		if (mc.getWorld().getDayTime() - prevDayTime > 1000 || mc.getOptions().gamma != prevBrightness || lightMap == null)
+		{
+			fullRegen = true;
+			lightMap = mc.getCurrentLightMap();
+			prevBrightness = mc.getOptions().gamma;
+			prevDayTime = mc.getWorld().getDayTime();
 		}
 
 
