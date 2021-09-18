@@ -28,7 +28,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
-import net.minecraft.util.Direction;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
@@ -51,6 +50,7 @@ import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 
@@ -113,9 +113,9 @@ public class LodBufferBuilder
 	 */
 	private ReentrantLock bufferLock = new ReentrantLock();
 
-	private static final int NUMBER_OF_DIRECTION = 4;
+//	private static final int NUMBER_OF_DIRECTION = 4;
 	//in order -x, +x, -z, +z
-	private static final int[][] ADJ_VECTOR = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+//	private static final int[][] ADJ_VECTOR = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
 
 	private volatile Box[][] boxCache;
 	private volatile PosToRenderContainer[][] setsToRender;
@@ -412,9 +412,6 @@ public class LodBufferBuilder
 				// upload the new buffers
 				uploadBuffers(fullRegen, lodDim);
 				bufferLock.unlock();
-
-				// make sure the context is disabled
-				GlProxy.getInstance().setGlContext(GlProxyContext.NONE);
 			}
 
 		});
@@ -510,9 +507,10 @@ public class LodBufferBuilder
 	 */
 	private void uploadBuffers(boolean fullRegen, LodDimension lodDim)
 	{
+		GlProxy glProxy = GlProxy.getInstance();
+		
 		try
 		{
-			GlProxy glProxy = GlProxy.getInstance();
 			// make sure we are uploading to a different OpenGL context,
 			// to prevent interference (IE stuttering) with the Minecraft context.
 			glProxy.setGlContext(GlProxyContext.LOD_BUILDER);
@@ -537,11 +535,16 @@ public class LodBufferBuilder
 			// make sure all the buffers have been uploaded.
 			// this probably is necessary, but it makes me feel good :)
 			GL11.glFlush();
-			glProxy.setGlContext(GlProxyContext.NONE);
-		} catch (IllegalStateException e)
+		}
+		catch (IllegalStateException e)
 		{
 			ClientProxy.LOGGER.error(LodBufferBuilder.class.getSimpleName() + " - UploadBuffers failed: " + e.getMessage());
 			e.printStackTrace();
+		}
+		finally
+		{
+			// make sure the context is disabled
+			glProxy.setGlContext(GlProxyContext.NONE);
 		}
 	}
 
