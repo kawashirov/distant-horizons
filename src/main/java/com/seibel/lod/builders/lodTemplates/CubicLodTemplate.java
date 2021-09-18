@@ -51,6 +51,13 @@ public class CubicLodTemplate extends AbstractLodTemplate
 
 		int color = DataPointUtil.getLightColor(data,lightMap);
 		// add each LOD for the detail level
+
+		if (debugging != DebugMode.OFF)
+
+		{
+			color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[detailLevel].getRGB();
+		}
+
 		generateBoundingBox(
 				box,
 				DataPointUtil.getHeight(data),
@@ -62,15 +69,6 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				bufferCenterBlockPos,
 				adjData,
 				color);
-
-		//color = DataPointUtil.getColor(data);
-
-
-		if (debugging != DebugMode.OFF)
-
-		{
-			color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[detailLevel].getRGB();
-		}
 
 		if (box != null)
 
@@ -98,10 +96,11 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		// which only uses floats
 		double x = -bufferCenterBlockPos.getX();
 		double z = -bufferCenterBlockPos.getZ();
-		box.setAdjData(adjData);
+		box.reset();
 		box.setColor(color);
 		box.set(width, height - depth, width);
 		box.move((int) (xOffset + x), (int) (yOffset + depth), (int) (zOffset + z));
+		box.setAdjData(adjData);
 	}
 
 	private void addBoundingBoxToBuffer(BufferBuilder buffer, Box box)

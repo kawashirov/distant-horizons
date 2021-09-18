@@ -15,10 +15,10 @@ public class Main
 		{
 			Map<Direction, long[]> adjData = new HashMap()
 			{{
-				put(Direction.EAST, new long[]{DataPointUtil.createDataPoint(70, 50, 0, 0, 0, 0), DataPointUtil.createDataPoint(45, 30, 0, 0, 0, 0), DataPointUtil.createDataPoint(28, 25, 0, 0, 0, 0)});
-				put(Direction.WEST, new long[]{DataPointUtil.createDataPoint(70, 10, 0, 0, 0, 0)});
-				put(Direction.NORTH, new long[]{DataPointUtil.createDataPoint(50, 0, 0, 0, 0, 0)});
-				put(Direction.SOUTH, new long[]{DataPointUtil.createDataPoint(50, 30, 0, 0, 0, 0)});
+				put(Direction.EAST, new long[]{DataPointUtil.createDataPoint(40, 20, 0, 0, 0, 0)});
+				put(Direction.WEST,  new long[]{DataPointUtil.createDataPoint(40, 20, 0, 0, 0, 0)});
+				put(Direction.NORTH,  new long[]{DataPointUtil.createDataPoint(40, 20, 0, 0, 0, 0)});
+				put(Direction.SOUTH,  new long[]{DataPointUtil.createDataPoint(40, 20, 0, 0, 0, 0)});
 			}};
 
 			Box box = new Box();

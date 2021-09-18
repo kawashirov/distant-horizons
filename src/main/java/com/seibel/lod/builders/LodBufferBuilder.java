@@ -223,9 +223,9 @@ public class LodBufferBuilder
 							final int zR = zRegion;
 							Callable<Boolean> dataToRenderThread = () ->
 							{
-
 								Map<Direction, long[]> adjData = new HashMap<>();
-								if(LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP){
+								if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP)
+								{
 									adjData.put(Direction.WEST, new long[1]);
 									adjData.put(Direction.EAST, new long[1]);
 									adjData.put(Direction.SOUTH, new long[1]);
@@ -259,7 +259,6 @@ public class LodBufferBuilder
 								int chunkZdist;
 								short gameChunkRenderDistance = (short) (renderer.vanillaRenderedChunks.length / 2 - 1);
 								//long dataPoint;
-
 								for (int index = 0; index < posToRender.getNumberOfPos(); index++)
 								{
 									detailLevel = posToRender.getNthDetailLevel(index);
@@ -278,32 +277,32 @@ public class LodBufferBuilder
 									// skip any chunks that Minecraft is going to render
 									try
 									{
-
 										for (Direction direction : Box.ADJ_DIRECTIONS)
 										{
-
-
 											xAdj = posX + direction.getNormal().getX();
 											zAdj = posZ + direction.getNormal().getZ();
-											chunkXdist = LevelPosUtil.getChunkPos(detailLevel,xAdj) - playerChunkPos.x;
-											chunkZdist = LevelPosUtil.getChunkPos(detailLevel,zAdj) - playerChunkPos.z;
+											chunkXdist = LevelPosUtil.getChunkPos(detailLevel, xAdj) - playerChunkPos.x;
+											chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.z;
 
 											if (gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >= Math.abs(chunkZdist))
 											{
 												if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
 														    && posToRender.contains(detailLevel, xAdj, zAdj))
 												{
-													if(LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP){
+													if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP)
+													{
 														adjData.get(direction)[0] = lodDim.getSingleData(detailLevel, xAdj, zAdj);
-													}else
+													} else
 													{
 														adjData.put(direction, lodDim.getData(detailLevel, xAdj, zAdj));
 													}
 
-												}else{
-													if(LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP){
+												} else
+												{
+													if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP)
+													{
 														adjData.get(direction)[0] = DataPointUtil.createVoidDataPoint(0);
-													}else
+													} else
 													{
 														adjData.put(direction, null);
 													}
@@ -312,24 +311,26 @@ public class LodBufferBuilder
 											{
 												if (posToRender.contains(detailLevel, xAdj, zAdj))
 												{
-													if(LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP){
+													if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP)
+													{
 														adjData.get(direction)[0] = lodDim.getSingleData(detailLevel, xAdj, zAdj);
-													}else
+													} else
 													{
 														adjData.put(direction, lodDim.getData(detailLevel, xAdj, zAdj));
 													}
-												}else{
+												} else
+												{
 
-													if(LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP){
+													if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP)
+													{
 														adjData.get(direction)[0] = DataPointUtil.createVoidDataPoint(0);
-													}else
+													} else
 													{
 														adjData.put(direction, null);
 													}
 												}
 											}
 										}
-
 										if (region.getLodQualityMode() == LodQualityMode.HEIGHTMAP)
 										{
 											//dataPoint = lodDim.getData(detailLevel, posX, posZ)[0];
@@ -337,7 +338,7 @@ public class LodBufferBuilder
 											if (!DataPointUtil.isItVoid(dataPoint) && DataPointUtil.doesItExist(dataPoint))
 											{
 												LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, dataPoint, adjData,
-														detailLevel, posX, posZ, boxCache[xR][zR],renderer.previousDebugMode, renderer.lightMap);
+														detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode, renderer.lightMap);
 											}
 
 										} else if (region.getLodQualityMode() == LodQualityMode.MULTI_LOD)
@@ -347,7 +348,7 @@ public class LodBufferBuilder
 												if (!DataPointUtil.isItVoid(dataPoint) && DataPointUtil.doesItExist(dataPoint))
 												{
 													LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, dataPoint, adjData,
-															detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode,  renderer.lightMap);
+															detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode, renderer.lightMap);
 												}
 											}
 										}
@@ -395,13 +396,11 @@ public class LodBufferBuilder
 
 				// mark that the buildable buffers as ready to swap
 				switchVbos = true;
-			}
-			catch (Exception e)
+			} catch (Exception e)
 			{
 				ClientProxy.LOGGER.warn("\"LodNodeBufferBuilder.generateLodBuffersAsync\" ran into trouble: ");
 				e.printStackTrace();
-			}
-			finally
+			} finally
 			{
 				// regardless of if we successfully created the buffers
 				// we are done generating.
@@ -540,8 +539,7 @@ public class LodBufferBuilder
 			// this probably is necessary, but it makes me feel good :)
 			GL11.glFlush();
 			glProxy.setGlContext(GlProxyContext.NONE);
-		}
-		catch(IllegalStateException e)
+		} catch (IllegalStateException e)
 		{
 			ClientProxy.LOGGER.error(LodBufferBuilder.class.getSimpleName() + " - UploadBuffers failed: " + e.getMessage());
 			e.printStackTrace();

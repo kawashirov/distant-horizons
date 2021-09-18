@@ -84,15 +84,8 @@ public class Box
 
 	public int[][] box;
 	public Map<Direction, int[]> colorMap;
-	public Map<Direction, long[]> adjData;
 	public int color;
-	public Map<Direction, int[][]> adjHeightAndDepth = new HashMap()
-	{{
-		put(Direction.EAST, new int[256][2]);
-		put(Direction.WEST, new int[256][2]);
-		put(Direction.SOUTH, new int[256][2]);
-		put(Direction.NORTH, new int[256][2]);
-	}};
+	public Map<Direction, int[][]> adjHeightAndDepth;
 
 	public Box()
 	{
@@ -105,6 +98,13 @@ public class Box
 			put(Direction.WEST, new int[1]);
 			put(Direction.SOUTH, new int[1]);
 			put(Direction.NORTH, new int[1]);
+		}};
+		adjHeightAndDepth = new HashMap()
+		{{
+			put(Direction.EAST, new int[256][2]);
+			put(Direction.WEST, new int[256][2]);
+			put(Direction.SOUTH, new int[256][2]);
+			put(Direction.NORTH, new int[256][2]);
 		}};
 	}
 
@@ -128,15 +128,33 @@ public class Box
 		}
 	}
 
+	public void reset()
+	{
+		for(int i = 0; i < box.length; i++){
+			for(int j = 0; j < box[i].length; j++){
+				box[i][j] = 0;
+			}
+		}
+		for(Direction direction : DIRECTIONS)
+		{
+			colorMap.get(direction)[0] = 0;
+		}
+
+		for(Direction direction : ADJ_DIRECTIONS)
+		{
+			for(int i = 0; i < adjHeightAndDepth.get(direction).length; i++)
+			{
+				adjHeightAndDepth.get(direction)[i][0] = VOID_FACE;
+				adjHeightAndDepth.get(direction)[i][1] = VOID_FACE;
+			}
+		}
+	}
 	public void setAdjData(Map<Direction, long[]> adjData)
 	{
 		int height;
 		int depth;
-		this.adjData = adjData;
-
 		for (Direction direction : ADJ_DIRECTIONS)
 		{
-			boolean noMatch = true;
 			long[] dataPoint = adjData.get(direction);
 			if (dataPoint == null)
 			{
@@ -152,13 +170,13 @@ public class Box
 			boolean toFinish = false;
 			for (i = 0; i < dataPoint.length; i++)
 			{
-
-				if (DataPointUtil.isItVoid(dataPoint[i]))
+				long singleDataPoint = dataPoint[i];
+				if (DataPointUtil.isItVoid(singleDataPoint))
 				{
 					continue;
 				}
-				height = DataPointUtil.getHeight(dataPoint[i]);
-				depth = DataPointUtil.getDepth(dataPoint[i]);
+				height = DataPointUtil.getHeight(singleDataPoint);
+				depth = DataPointUtil.getDepth(singleDataPoint);
 
 				if (depth > getMaxY())
 				{//the adj data is higher than the current data
@@ -233,7 +251,7 @@ public class Box
 					continue;
 				}
 			}
-			if(toFinish)
+			if (toFinish)
 			{
 				adjHeightAndDepth.get(direction)[faceToDraw][1] = getMinY();
 				faceToDraw++;
@@ -269,6 +287,11 @@ public class Box
 	public int getX(Direction direction, int vertexIndex)
 	{
 		return box[OFFSET][X] + box[WIDTH][X] * DIRECTION_VERTEX_MAP.get(direction)[vertexIndex][X];
+	}
+
+	public int getY(Direction direction, int vertexIndex)
+	{
+		return box[OFFSET][Y] + box[WIDTH][Y] * DIRECTION_VERTEX_MAP.get(direction)[vertexIndex][Y];
 	}
 
 	public int getY(Direction direction, int vertexIndex, int adjIndex)
