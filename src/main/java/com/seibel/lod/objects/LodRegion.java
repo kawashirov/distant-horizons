@@ -1,7 +1,6 @@
 package com.seibel.lod.objects;
 
 
-import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodQualityMode;
 import com.seibel.lod.util.DataPointUtil;
@@ -15,8 +14,9 @@ import com.seibel.lod.util.LodUtil;
  * if an array contain coordinate the order is the following
  * 0 for x, 1 for z in 2D
  * 0 for x, 1 for y, 2 for z in 3D
+ * 
+ * 
  */
-
 public class LodRegion
 {
 	//x coord,

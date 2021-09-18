@@ -1,18 +1,16 @@
 package com.seibel.lod.builders.lodTemplates;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import org.lwjgl.system.CallbackI;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
+import net.minecraft.util.Direction;
+import net.minecraft.util.math.vector.Vector3d;
 
 public class Box
 {
@@ -43,7 +41,8 @@ public class Box
 			Direction.SOUTH,
 			Direction.NORTH};
 
-	public static final Map<Direction, int[][]> DIRECTION_VERTEX_MAP = new HashMap()
+	@SuppressWarnings("serial")
+	public static final Map<Direction, int[][]> DIRECTION_VERTEX_MAP = new HashMap<Direction, int[][]>()
 	{{
 		put(Direction.UP, new int[][]{
 				{0, 1, 0},
@@ -76,7 +75,10 @@ public class Box
 				{1, 1, 0},
 				{1, 0, 0}});
 	}};
-	public static final Map<Direction, int[]> FACE_DIRECTION = new HashMap()
+	
+	
+	@SuppressWarnings("serial")
+	public static final Map<Direction, int[]> FACE_DIRECTION = new HashMap<Direction, int[]>()
 	{{
 		put(Direction.UP, new int[]{Y, MAX});
 		put(Direction.DOWN, new int[]{Y, MIN});
@@ -86,7 +88,8 @@ public class Box
 		put(Direction.NORTH, new int[]{Z, MIN});
 	}};
 
-	public static final Map<Direction, int[][]> DIRECTION_NORMAL_MAP = new HashMap()
+	@SuppressWarnings("serial")
+	public static final Map<Direction, int[]> DIRECTION_NORMAL_MAP = new HashMap<Direction, int[]>()
 	{{
 		put(Direction.UP, new int[]{0, 1, 0});
 		put(Direction.DOWN, new int[]{0, -1, 0});
@@ -102,11 +105,12 @@ public class Box
 	public Map<Direction, int[][]> adjHeightAndDepth;
 	public Map<Direction, boolean[]> culling;
 
+	@SuppressWarnings("serial")
 	public Box()
 	{
 		box = new int[2][3];
 		//order = new long[32];
-		colorMap = new HashMap()
+		colorMap = new HashMap<Direction, int[]>()
 		{{
 			put(Direction.UP, new int[1]);
 			put(Direction.DOWN, new int[1]);
@@ -115,14 +119,14 @@ public class Box
 			put(Direction.SOUTH, new int[1]);
 			put(Direction.NORTH, new int[1]);
 		}};
-		adjHeightAndDepth = new HashMap()
+		adjHeightAndDepth = new HashMap<Direction, int[][]>()
 		{{
 			put(Direction.EAST, new int[32][2]);
 			put(Direction.WEST, new int[32][2]);
 			put(Direction.SOUTH, new int[32][2]);
 			put(Direction.NORTH, new int[32][2]);
 		}};
-		culling = new HashMap()
+		culling = new HashMap<Direction, boolean[]>()
 		{{
 			put(Direction.UP, new boolean[1]);
 			put(Direction.DOWN, new boolean[1]);

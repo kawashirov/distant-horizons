@@ -544,7 +544,7 @@ public class LodRenderer
 	/**
 	 * setup the lighting to be used for the LODs
 	 */
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({ "deprecation", "unused" })
 	private void setupLighting(LodDimension lodDimension, float partialTicks)
 	{
 		// Determine if the player has night vision

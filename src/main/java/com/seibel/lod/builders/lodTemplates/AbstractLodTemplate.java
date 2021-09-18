@@ -17,17 +17,15 @@
  */
 package com.seibel.lod.builders.lodTemplates;
 
-import com.seibel.lod.enums.DebugMode;
+import java.util.Map;
 
+import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.util.ColorUtil;
+
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.DimensionType;
-
-import java.awt.*;
-import java.util.Map;
 
 /**
  * This is the abstract class used to create different

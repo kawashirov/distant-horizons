@@ -198,10 +198,6 @@ public class LodBuilder
 		int startZ;
 		int endX;
 		int endZ;
-		int color;
-		byte light;
-		short height;
-		short depth;
 		try
 		{
 			LodDetail detail;
@@ -705,9 +701,6 @@ public class LodBuilder
 		int z = blockPos.getZ();
 		Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, y >> 2, zRel >> 2);
 		int brightness;
-		int red = 0;
-		int green = 0;
-		int blue = 0;
 
 		BlockState blockState = chunk.getBlockState(blockPos);
 		int colorInt = 0;

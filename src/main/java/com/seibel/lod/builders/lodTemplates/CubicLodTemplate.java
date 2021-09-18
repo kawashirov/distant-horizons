@@ -17,6 +17,8 @@
  */
 package com.seibel.lod.builders.lodTemplates;
 
+import java.util.Map;
+
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.LodUtil;
@@ -26,8 +28,6 @@ import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.Map;
-
 /**
  * Builds LODs as rectangular prisms.
  *
@@ -36,8 +36,7 @@ import java.util.Map;
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {
-	private final int CULL_OFFSET = 16;
-
+	
 	public CubicLodTemplate()
 	{
 

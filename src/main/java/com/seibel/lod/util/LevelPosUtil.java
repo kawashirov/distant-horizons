@@ -1,7 +1,5 @@
 package com.seibel.lod.util;
 
-import com.seibel.lod.util.LodUtil;
-
 public class LevelPosUtil
 {
 	public static int[] convert(int[] levelPos, byte newDetailLevel)

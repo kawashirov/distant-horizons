@@ -1,11 +1,12 @@
 package com.seibel.lod;
 
-import com.seibel.lod.builders.lodTemplates.Box;
-import com.seibel.lod.util.DataPointUtil;
-import net.minecraft.util.Direction;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import com.seibel.lod.builders.lodTemplates.Box;
+import com.seibel.lod.util.DataPointUtil;
+
+import net.minecraft.util.Direction;
 
 public class Main
 {
@@ -13,7 +14,8 @@ public class Main
 	{
 		try
 		{
-			Map<Direction, long[]> adjData = new HashMap()
+			@SuppressWarnings("serial")
+			Map<Direction, long[]> adjData = new HashMap<Direction, long[]>()
 			{{
 				put(Direction.EAST, new long[]{DataPointUtil.createDataPoint(60, 30, 0, 0, 0, 0), DataPointUtil.createDataPoint(25, 10, 0, 0, 0, 0)});
 				put(Direction.WEST,  new long[]{DataPointUtil.createDataPoint(60, 10, 0, 0, 0, 0)});
