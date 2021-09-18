@@ -257,8 +257,12 @@ public class LodBufferBuilder
 								int zAdj;
 								int chunkXdist;
 								int chunkZdist;
-								short gameChunkRenderDistance = (short) (renderer.vanillaRenderedChunks.length / 2 - 1);
-								//long dataPoint;
+								
+								// keep a local version so we don't have to worry about indexOutOfBounds Exceptions
+								// if it changes in the LodRenderer while we are working here
+								boolean[][] vanillaRenderedChunks = renderer.vanillaRenderedChunks; 
+								short gameChunkRenderDistance = (short) (vanillaRenderedChunks.length / 2 - 1);
+								
 								for (int index = 0; index < posToRender.getNumberOfPos(); index++)
 								{
 									detailLevel = posToRender.getNthDetailLevel(index);
@@ -270,7 +274,7 @@ public class LodBufferBuilder
 									if (gameChunkRenderDistance >= Math.abs(chunkXdist)
 											    && gameChunkRenderDistance >= Math.abs(chunkZdist)
 											    && detailLevel <= LodUtil.CHUNK_DETAIL_LEVEL
-											    && renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1])
+											    && vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1])
 									{
 										continue;
 									}
@@ -285,7 +289,7 @@ public class LodBufferBuilder
 											chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.z;
 											if (gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >= Math.abs(chunkZdist))
 											{
-												if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
+												if (!vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
 														    && posToRender.contains(detailLevel, xAdj, zAdj))
 												{
 													if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP)
