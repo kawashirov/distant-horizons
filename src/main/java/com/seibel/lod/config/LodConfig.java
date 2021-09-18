@@ -20,13 +20,21 @@ package com.seibel.lod.config;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import com.seibel.lod.enums.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.seibel.lod.ModInfo;
+import com.seibel.lod.enums.DebugMode;
+import com.seibel.lod.enums.DistanceCalculatorType;
+import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.FogDistance;
+import com.seibel.lod.enums.FogDrawOverride;
+import com.seibel.lod.enums.LodDetail;
+import com.seibel.lod.enums.LodQualityMode;
+import com.seibel.lod.enums.LodTemplate;
+import com.seibel.lod.enums.ShadingMode;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -37,7 +45,7 @@ import net.minecraftforge.fml.config.ModConfig;
  * This handles any configuration the user has access to.
  *
  * @author James Seibel
- * @version 9-1-2021
+ * @version 9-17-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -86,6 +94,8 @@ public class LodConfig
 		public ForgeConfigSpec.IntValue lodQuality;
 		
 		public ForgeConfigSpec.IntValue lodChunkRenderDistance;
+		
+		public ForgeConfigSpec.BooleanValue disableDirectionalCulling;
 		
 		public ForgeConfigSpec.DoubleValue brightnessMultiplier;
 		public ForgeConfigSpec.DoubleValue saturationMultiplier;
@@ -149,6 +159,18 @@ public class LodConfig
 					.comment("\n\n"
 							+ " This is the render distance of the mod \n")
 					.defineInRange("lodChunkRenderDistance", 64, 32, 512);
+			
+			disableDirectionalCulling = builder
+					.comment("\n\n"
+							+ " If false LODs that are behind the player's camera \n"
+							+ " aren't drawn, increasing performance. \n\n"
+							+ ""
+							+ " If true all LODs are drawn, even those behind \n"
+							+ " the player's camera, decreasing performance. \n\n"
+							+ ""
+							+ " Disable this if you see LODs disapearing. \n"
+							+ " (This may happen if you are using a camera mod) \n")
+					.define("disableDirectionalCulling", false);
 			
 			shadingMode = builder
 					.comment("\n\n"

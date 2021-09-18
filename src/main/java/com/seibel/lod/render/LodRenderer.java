@@ -285,6 +285,7 @@ public class LodRenderer
 			Vector3d cameraDir = cameraEntity.getLookAngle().normalize();
 			cameraDir = mc.getOptions().getCameraType().isMirrored() ? cameraDir.reverse() : cameraDir;
 			
+			boolean cullingDisabled = LodConfig.CLIENT.graphics.disableDirectionalCulling.get();
 			
 			// used to determine what type of fog to render
 			int halfWidth = vbos.length / 2;
@@ -295,7 +296,7 @@ public class LodRenderer
 				for (int j = 0; j < vbos.length; j++)
 				{
 					RegionPos vboPos = new RegionPos(i + lodDim.getCenterX() - lodDim.getWidth() / 2, j + lodDim.getCenterZ() - lodDim.getWidth() / 2);
-					if (RenderUtil.isRegionInViewFrustum(cameraEntity.blockPosition(), cameraDir, vboPos.blockPos()))
+					if (cullingDisabled || RenderUtil.isRegionInViewFrustum(cameraEntity.blockPosition(), cameraDir, vboPos.blockPos()))
 					{
 						if ((i > halfWidth - quarterWidth && i < halfWidth + quarterWidth) && (j > halfWidth - quarterWidth && j < halfWidth + quarterWidth))
 							setupFog(fogSettings.near.distance, fogSettings.near.quality);
