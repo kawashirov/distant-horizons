@@ -25,10 +25,9 @@ import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
-import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.WorldRenderer.LocalRenderInformationContainer;
+import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -375,12 +374,12 @@ public class LodUtil
 		
 		// go through every RenderInfo to get the compiled chunks
 		WorldRenderer renderer = mc.getLevelRenderer();
-		ObjectList<LocalRenderInformationContainer> chunks = renderer.renderChunks;
-		for (WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer : chunks)
+		for (WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer : renderer.renderChunks)
 		{
-			if (!worldrenderer$localrenderinformationcontainer.chunk.getCompiledChunk().hasNoRenderableLayers())
+			CompiledChunk compiledChunk = worldrenderer$localrenderinformationcontainer.chunk.getCompiledChunk();
+			if (!compiledChunk.hasNoRenderableLayers())
 			{
-				// add the ChunkPos for every empty compiled chunk
+				// add the ChunkPos for every rendered chunk
 				BlockPos bpos = worldrenderer$localrenderinformationcontainer.chunk.getOrigin();
 				
 				loadedPos.add(new ChunkPos(bpos));

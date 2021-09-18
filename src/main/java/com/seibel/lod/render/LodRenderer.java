@@ -72,7 +72,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world.
  *
  * @author James Seibel
- * @version 9-17-2021
+ * @version 9-18-2021
  */
 public class LodRenderer
 {
@@ -769,7 +769,7 @@ public class LodRenderer
 	 */
 	private void determineIfLodsShouldRegenerate(LodDimension lodDim)
 	{
-		short renderDistance = (short) mc.getRenderDistance();
+		short chunkRenderDistance = (short) mc.getRenderDistance();
 		
 		//=============//
 		// full regens //
@@ -786,7 +786,7 @@ public class LodRenderer
 			prevFogDistance = LodConfig.CLIENT.graphics.fogDistance.get();
 			prevRenderDistance = mc.getRenderDistance();
 			//should use this when it's ready
-			vanillaRenderedChunks = new boolean[renderDistance*2+2][renderDistance*2+2];
+			vanillaRenderedChunks = new boolean[chunkRenderDistance*2+2][chunkRenderDistance*2+2];
 		}
 
 		// did the user change the debug setting?
@@ -809,7 +809,7 @@ public class LodRenderer
 				fullRegen = true;
 				previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
 				//should use this when it's ready
-				vanillaRenderedChunks = new boolean[renderDistance*2+2][renderDistance*2+2];
+				vanillaRenderedChunks = new boolean[chunkRenderDistance*2+2][chunkRenderDistance*2+2];
 			}
 			prevPlayerPosTime = newTime;
 		}
@@ -863,23 +863,18 @@ public class LodRenderer
 
 		// determine which LODs should not be rendered close to the player
 		HashSet<ChunkPos> chunkPosToSkip = LodUtil.getNearbyLodChunkPosToSkip(lodDim, mc.getPlayer().blockPosition());
-		int chunkX;
-		int chunkZ;
+		int xIndex;
+		int zIndex;
 		for (ChunkPos pos : chunkPosToSkip)
 		{
-			chunkX = pos.x - mc.getPlayer().xChunk + renderDistance + 1;
-			chunkZ = pos.z - mc.getPlayer().zChunk + renderDistance + 1;
-			try
+			xIndex = (pos.x - mc.getPlayer().xChunk) + chunkRenderDistance + 1;
+			zIndex = (pos.z - mc.getPlayer().zChunk) + chunkRenderDistance + 1;
+			
+			if (!vanillaRenderedChunks[xIndex][zIndex])
 			{
-				if (!vanillaRenderedChunks[chunkX][chunkZ])
-				{
-					vanillaRenderedChunks[chunkX][chunkZ] = true;
-					vanillaRenderedChunksChanged = true;
-					lodDim.setToRegen(pos.getRegionX(), pos.getRegionZ());
-				}
-			}catch (Exception e){
-				System.out.println(vanillaRenderedChunks.length);
-				e.printStackTrace();
+				vanillaRenderedChunks[xIndex][zIndex] = true;
+				vanillaRenderedChunksChanged = true;
+				lodDim.setToRegen(pos.getRegionX(), pos.getRegionZ());
 			}
 		}
 
@@ -887,7 +882,7 @@ public class LodRenderer
 		// if the player is high enough, draw all LODs
 		if(chunkPosToSkip.isEmpty() && mc.getPlayer().position().y > 256)
 		{
-			vanillaRenderedChunks = new boolean[renderDistance*2+2][renderDistance*2+2];
+			vanillaRenderedChunks = new boolean[chunkRenderDistance*2+2][chunkRenderDistance*2+2];
 			vanillaRenderedChunksChanged = true;
 		}
 	}
