@@ -714,6 +714,7 @@ public class LodBuilder
 
 
 		// block special cases
+		// TODO: this needs to be replaced by a config file of some sort
 		if (blockState == Blocks.AIR.defaultBlockState()
 				    || blockState == Blocks.CAVE_AIR.defaultBlockState()
 				    || blockState == Blocks.BARRIER.defaultBlockState())
@@ -737,7 +738,7 @@ public class LodBuilder
 		{
 			colorInt = Blocks.NETHER_WART_BLOCK.defaultMaterialColor().col;
 		} else if (blockState.getBlock().equals(Blocks.TWISTING_VINES)
-				           || blockState.equals(Blocks.TWISTING_VINES_PLANT)
+				           || blockState.equals(Blocks.TWISTING_VINES_PLANT.defaultBlockState())
 				           || blockState == Blocks.WARPED_ROOTS.defaultBlockState()
 				           || blockState == Blocks.WARPED_FUNGUS.defaultBlockState()
 				           || blockState == Blocks.NETHER_SPROUTS.defaultBlockState())

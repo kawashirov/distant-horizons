@@ -172,7 +172,7 @@ public class LodBufferBuilder
 
 				long startTime = System.currentTimeMillis();
 
-				ArrayList<Callable<Boolean>> nodeToRenderThreads = new ArrayList<>(lodDim.regions.length * lodDim.regions.length);
+				ArrayList<Callable<Boolean>> nodeToRenderThreads = new ArrayList<>(lodDim.getWidth() * lodDim.getWidth());
 
 				startBuffers(fullRegen, lodDim);
 
@@ -185,25 +185,25 @@ public class LodBufferBuilder
 					center = playerRegionPos;
 
 				if (setsToRender == null)
-					setsToRender = new PosToRenderContainer[lodDim.regions.length][lodDim.regions.length];
+					setsToRender = new PosToRenderContainer[lodDim.getWidth()][lodDim.getWidth()];
 
-				if (setsToRender.length != lodDim.regions.length)
-					setsToRender = new PosToRenderContainer[lodDim.regions.length][lodDim.regions.length];
+				if (setsToRender.length != lodDim.getWidth())
+					setsToRender = new PosToRenderContainer[lodDim.getWidth()][lodDim.getWidth()];
 
 				if (boxCache == null)
-					boxCache = new Box[lodDim.regions.length][lodDim.regions.length];
+					boxCache = new Box[lodDim.getWidth()][lodDim.getWidth()];
 
-				if (boxCache.length != lodDim.regions.length)
-					boxCache = new Box[lodDim.regions.length][lodDim.regions.length];
+				if (boxCache.length != lodDim.getWidth())
+					boxCache = new Box[lodDim.getWidth()][lodDim.getWidth()];
 
 				// this will be the center of the VBOs once they have been built
 				buildableCenterChunkPos = playerChunkPos;
 
-				for (int xRegion = 0; xRegion < lodDim.regions.length; xRegion++)
+				for (int xRegion = 0; xRegion < lodDim.getWidth(); xRegion++)
 				{
-					for (int zRegion = 0; zRegion < lodDim.regions.length; zRegion++)
+					for (int zRegion = 0; zRegion < lodDim.getWidth(); zRegion++)
 					{
-						if (lodDim.regen[xRegion][zRegion] || fullRegen)
+						if (lodDim.getRegenByArrayIndex(xRegion, zRegion) || fullRegen)
 						{
 							RegionPos regionPos = new RegionPos(
 									xRegion + lodDim.getCenterX() - Math.floorDiv(lodDim.getWidth(), 2),
@@ -483,7 +483,7 @@ public class LodBufferBuilder
 		{
 			for (int z = 0; z < buildableBuffers.length; z++)
 			{
-				if (fullRegen || lodDim.regen[x][z])
+				if (fullRegen || lodDim.getRegenByArrayIndex(x, z))
 				{
 					buildableBuffers[x][z].begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
 				}
@@ -498,7 +498,7 @@ public class LodBufferBuilder
 	{
 		for (int x = 0; x < buildableBuffers.length; x++)
 			for (int z = 0; z < buildableBuffers.length; z++)
-				if (buildableBuffers[x][z] != null && buildableBuffers[x][z].building() && (fullRegen || lodDim.regen[x][z]))
+				if (buildableBuffers[x][z] != null && buildableBuffers[x][z].building() && (fullRegen || lodDim.getRegenByArrayIndex(x, z)))
 					buildableBuffers[x][z].end();
 	}
 
@@ -520,11 +520,11 @@ public class LodBufferBuilder
 			{
 				for (int z = 0; z < buildableVbos.length; z++)
 				{
-					if (fullRegen || lodDim.regen[x][z])
+					if (fullRegen || lodDim.getRegenByArrayIndex(x, z))
 					{
 						ByteBuffer builderBuffer = buildableBuffers[x][z].popNextBuffer().getSecond();
 						vboUpload(buildableVbos[x][z], builderBuffer);
-						lodDim.regen[x][z] = false;
+						lodDim.setRegenByArrayIndex(x, z, false);
 					}
 				}
 			}

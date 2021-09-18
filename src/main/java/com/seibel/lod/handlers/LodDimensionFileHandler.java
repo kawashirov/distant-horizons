@@ -17,7 +17,14 @@
  */
 package com.seibel.lod.handlers;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.ExecutorService;
@@ -25,7 +32,10 @@ import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodQualityMode;
-import com.seibel.lod.objects.*;
+import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LodRegion;
+import com.seibel.lod.objects.RegionPos;
+import com.seibel.lod.objects.SingleLevelContainer;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
@@ -212,10 +222,10 @@ public class LodDimensionFileHandler
 			{
 				for (int j = 0; j < loadedDimension.getWidth(); j++)
 				{
-					if (loadedDimension.isRegionDirty[i][j] && loadedDimension.regions[i][j] != null)
+					if (loadedDimension.getRegenByArrayIndex(i,j) && loadedDimension.getRegionByArrayIndex(i,j) != null)
 					{
-						saveRegionToFile(loadedDimension.regions[i][j]);
-						loadedDimension.isRegionDirty[i][j] = false;
+						saveRegionToFile(loadedDimension.getRegionByArrayIndex(i,j));
+						loadedDimension.setRegenByArrayIndex(i, j,false);
 					}
 				}
 			}
