@@ -3,6 +3,7 @@ package com.seibel.lod.objects;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodQualityMode;
+import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
@@ -82,7 +83,7 @@ public class LodRegion
 	 * This method can be used to insert data into the LodRegion
 	 *
 	 * @param dataPoint
-	 * @return
+	 * @return if the data was added successfully
 	 */
 	public boolean addData(byte detailLevel, int posX, int posZ, long[] dataPoint, boolean serverQuality)
 	{
@@ -90,14 +91,25 @@ public class LodRegion
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		if (!doesDataExist(detailLevel, posX, posZ) || serverQuality)
 		{
-
-			//update the number of node present
+			//update the number of nodes present
 			//if (!doesDataExist(detailLevel, posX, posZ)) numberOfPoints++;
 
-			//add the node data
-			this.dataContainer[detailLevel].addData(dataPoint, posX, posZ);
-			return true;
-		} else
+			try
+			{
+				//add the node data
+				this.dataContainer[detailLevel].addData(dataPoint, posX, posZ);
+				return true;
+			}
+			catch (NullPointerException e)
+			{
+				String detailMessage = "pos: [" + posX + "," + posZ + "] dataPoint: [" + dataPoint + "] serverQuality: [" + serverQuality + "] dataContainer";
+				detailMessage += this.dataContainer != null ? ": [NULL]" : " at detailLevel: [" + dataContainer[detailLevel] + "]"; 
+				
+				ClientProxy.LOGGER.error("addSingleData: " + e.getMessage() + "\t" + detailMessage);
+				return false;
+			}
+		}
+		else
 		{
 			return false;
 		}
@@ -107,7 +119,7 @@ public class LodRegion
 	 * This method can be used to insert data into the LodRegion
 	 *
 	 * @param dataPoint
-	 * @return
+	 * @return if the data was added successfully
 	 */
 	public boolean addSingleData(byte detailLevel, int posX, int posZ, long dataPoint, boolean serverQuality)
 	{
@@ -115,14 +127,25 @@ public class LodRegion
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		if (!doesDataExist(detailLevel, posX, posZ) || serverQuality)
 		{
-
-			//update the number of node present
+			//update the number of nodes present
 			//if (!doesDataExist(detailLevel, posX, posZ)) numberOfPoints++;
-
-			//add the node data
-			this.dataContainer[detailLevel].addSingleData(dataPoint, posX, posZ);
-			return true;
-		} else
+			
+			try
+			{
+				//add the node data
+				this.dataContainer[detailLevel].addSingleData(dataPoint, posX, posZ);
+				return true;
+			}
+			catch (NullPointerException e)
+			{
+				String detailMessage = "pos: [" + posX + "," + posZ + "] dataPoint: [" + dataPoint + "] serverQuality: [" + serverQuality + "] dataContainer";
+				detailMessage += this.dataContainer != null ? ": [NULL]" : " at detailLevel: [" + dataContainer[detailLevel] + "]"; 
+				
+				ClientProxy.LOGGER.error("addSingleData: " + e.getMessage() + "\t" + detailMessage);
+				return false;
+			}
+		}
+		else
 		{
 			return false;
 		}
