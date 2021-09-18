@@ -108,8 +108,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	{
 		for(Direction direction : Box.DIRECTIONS)
 		{
-			if(box.isCulled(direction))
-				continue;
+			//if(box.isCulled(direction))
+			//	continue;
 			int adjIndex = 0;
 			while(box.shouldContinue(direction, adjIndex))
 			{
