@@ -2,11 +2,12 @@ package com.seibel.lod.builders.lodTemplates;
 
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
+import org.lwjgl.system.CallbackI;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,6 +22,8 @@ public class Box
 	public static final int Y = 1;
 	public static final int Z = 2;
 
+	public static final int MIN = 0;
+	public static final int MAX = 1;
 
 	public static final int VOID_FACE = 0;
 
@@ -71,6 +74,15 @@ public class Box
 				{1, 1, 0},
 				{1, 0, 0}});
 	}};
+	public static final Map<Direction, int[]> FACE_DIRECTION = new HashMap()
+	{{
+		put(Direction.UP, new int[]{Y, MAX});
+		put(Direction.DOWN, new int[]{Y, MIN});
+		put(Direction.EAST, new int[]{X, MAX});
+		put(Direction.WEST, new int[]{X, MIN});
+		put(Direction.SOUTH, new int[]{Z, MAX});
+		put(Direction.NORTH, new int[]{Z, MIN});
+	}};
 
 	public static final Map<Direction, int[][]> DIRECTION_NORMAL_MAP = new HashMap()
 	{{
@@ -86,10 +98,14 @@ public class Box
 	public Map<Direction, int[]> colorMap;
 	public int color;
 	public Map<Direction, int[][]> adjHeightAndDepth;
+	public Map<Direction, boolean[]> culling;
+	public long[] order;
+
 
 	public Box()
 	{
 		box = new int[2][3];
+		order = new long[32];
 		colorMap = new HashMap()
 		{{
 			put(Direction.UP, new int[1]);
@@ -101,10 +117,19 @@ public class Box
 		}};
 		adjHeightAndDepth = new HashMap()
 		{{
-			put(Direction.EAST, new int[256][2]);
-			put(Direction.WEST, new int[256][2]);
-			put(Direction.SOUTH, new int[256][2]);
-			put(Direction.NORTH, new int[256][2]);
+			put(Direction.EAST, new int[32][2]);
+			put(Direction.WEST, new int[32][2]);
+			put(Direction.SOUTH, new int[32][2]);
+			put(Direction.NORTH, new int[32][2]);
+		}};
+		culling = new HashMap()
+		{{
+			put(Direction.UP, new boolean[1]);
+			put(Direction.DOWN, new boolean[1]);
+			put(Direction.EAST, new boolean[1]);
+			put(Direction.WEST, new boolean[1]);
+			put(Direction.SOUTH, new boolean[1]);
+			put(Direction.NORTH, new boolean[1]);
 		}};
 	}
 
@@ -130,118 +155,155 @@ public class Box
 
 	public void reset()
 	{
-		for(int i = 0; i < box.length; i++){
-			for(int j = 0; j < box[i].length; j++){
+		for (int i = 0; i < box.length; i++)
+		{
+			for (int j = 0; j < box[i].length; j++)
+			{
 				box[i][j] = 0;
 			}
 		}
-		for(Direction direction : DIRECTIONS)
+
+		for (int i = 0; i < order.length; i++)
+		{
+			order[i] = 0;
+		}
+
+		for (Direction direction : DIRECTIONS)
 		{
 			colorMap.get(direction)[0] = 0;
 		}
 
-		for(Direction direction : ADJ_DIRECTIONS)
+		for (Direction direction : ADJ_DIRECTIONS)
 		{
-			for(int i = 0; i < adjHeightAndDepth.get(direction).length; i++)
+			if(isCulled(direction)){
+				continue;
+			}
+			for (int i = 0; i < adjHeightAndDepth.get(direction).length; i++)
 			{
 				adjHeightAndDepth.get(direction)[i][0] = VOID_FACE;
 				adjHeightAndDepth.get(direction)[i][1] = VOID_FACE;
 			}
 		}
 	}
+
+	public void setUpCulling(BlockPos playerPos, int cullingDistance)
+	{
+		for (Direction direction : DIRECTIONS)
+		{
+			if(direction == Direction.UP || direction == Direction.DOWN)
+				culling.get(direction)[0] = false;
+			else if(direction == Direction.EAST || direction == Direction.SOUTH)
+				culling.get(direction)[0] = playerPos.get(direction.getAxis()) < getFacePos(direction) + 32;
+			else
+				culling.get(direction)[0] = playerPos.get(direction.getAxis()) > getFacePos(direction) - 32;
+			culling.get(direction)[0] = false;
+		}
+	}
+
+	public boolean isCulled(Direction direction)
+	{
+		return culling.get(direction)[0];
+	}
+
 	public void setAdjData(Map<Direction, long[]> adjData)
 	{
 		int height;
 		int depth;
+		int minY = getMinY();
+		int maxY = getMaxY();
 		for (Direction direction : ADJ_DIRECTIONS)
 		{
+			if(isCulled(direction)){
+				continue;
+			}
+
+			//Reset the ordered array
+
 			long[] dataPoint = adjData.get(direction);
-			if (dataPoint == null)
+			if (dataPoint == null || DataPointUtil.isItVoid(dataPoint[0]))
 			{
-				adjHeightAndDepth.get(direction)[0][0] = getMaxY();
-				adjHeightAndDepth.get(direction)[0][1] = getMinY();
+				adjHeightAndDepth.get(direction)[0][0] = maxY;
+				adjHeightAndDepth.get(direction)[0][1] = minY;
 				adjHeightAndDepth.get(direction)[1][0] = VOID_FACE;
 				adjHeightAndDepth.get(direction)[1][1] = VOID_FACE;
 				continue;
 			}
+
+			//We order the adj list
+			/**TODO remove this if the order is maintained naturally*/
+			order[0] = 0;
+			for (int i = 0; i < dataPoint.length; i++)
+			{
+				int j = i - 1;
+				while (j >= 0 && DataPointUtil.getHeight(order[j]) > DataPointUtil.getHeight(dataPoint[i])) {
+					order[j + 1] = order[j];
+					j = j - 1;
+				}
+				order[j + 1] = dataPoint[i];
+			}
+
 			int i;
 			int faceToDraw = 0;
 			boolean firstFace = true;
 			boolean toFinish = false;
-			for (i = 0; i < dataPoint.length; i++)
+			for (i = dataPoint.length - 1; i >= 0; i--)
 			{
-				long singleDataPoint = dataPoint[i];
-				if (DataPointUtil.isItVoid(singleDataPoint))
-				{
-					continue;
-				}
+				long singleDataPoint = order[i];
 				height = DataPointUtil.getHeight(singleDataPoint);
 				depth = DataPointUtil.getDepth(singleDataPoint);
 
-				if (depth > getMaxY())
+				if (depth > maxY)
 				{//the adj data is higher than the current data
 					//we continue since there could be some other data that intersect the current
-					//System.out.println("case 1 " + height + " " + depth);
 					continue;
-				} else if (height < getMinY())
+				} else if (height < minY)
 				{//the adj data is lower than the current data
 					//we break since all the other data will be lower
 
 					if (firstFace)
 					{
-						//System.out.println("case 2-1 " + height + " " + depth);
 						adjHeightAndDepth.get(direction)[0][0] = getMaxY();
 						adjHeightAndDepth.get(direction)[0][1] = getMinY();
 					} else
 					{
-						//System.out.println("case 2-2 " + height + " " + depth);
 						adjHeightAndDepth.get(direction)[faceToDraw][1] = getMinY();
 					}
 					faceToDraw++;
 					toFinish = false;
 					break;
-				} else if (depth <= getMinY() && height >= getMaxY())
+				} else if (depth <= minY && height >= maxY)
 				{//the adj data contains the current
 					//we do not draw the face
-					//System.out.println("case 3");
 					adjHeightAndDepth.get(direction)[0][0] = VOID_FACE;
 					adjHeightAndDepth.get(direction)[0][1] = VOID_FACE;
 					break;
-				} else if (depth <= getMinY() && height < getMaxY())
+				} else if (depth <= minY && height < maxY)
 				{//the adj data intersect the lower part of the current data
 					//if this is the only face we use the maxY and break
 					//if there was other face we finish the last one and break
 					if (firstFace)
 					{
-						//System.out.println("case 4-1 " + height + " " + depth);
 						adjHeightAndDepth.get(direction)[0][0] = getMaxY();
 						adjHeightAndDepth.get(direction)[0][1] = height;
 					} else
 					{
-						//System.out.println("case 4-2 " + height + " " + depth);
 						adjHeightAndDepth.get(direction)[faceToDraw][1] = height;
 					}
-					firstFace = false;
 					toFinish = false;
 					faceToDraw++;
 					break;
-				} else if (depth > getMinY() && height >= getMaxY())
+				} else if (depth > minY && height >= maxY)
 				{//the adj data intersect the higher part of the current data
 					//we start the creation of a new face
-					//System.out.println("case 5 " + height + " " + depth);
 					adjHeightAndDepth.get(direction)[faceToDraw][0] = depth;
 					firstFace = false;
 					toFinish = true;
 					continue;
-				} else if (depth > getMinY() && height < getMaxY())
+				} else if (depth > minY && height < maxY)
 				{//the adj data is contained in the current data
 					if (firstFace)
 					{
-						//System.out.println("case 6-1 " + height + " " + depth);;
 						adjHeightAndDepth.get(direction)[0][0] = getMaxY();
-					} else
-					{
-						//System.out.println("case 6-2 " + height + " " + depth);
 					}
 					adjHeightAndDepth.get(direction)[faceToDraw][1] = height;
 					faceToDraw++;
@@ -253,7 +315,7 @@ public class Box
 			}
 			if (toFinish)
 			{
-				adjHeightAndDepth.get(direction)[faceToDraw][1] = getMinY();
+				adjHeightAndDepth.get(direction)[faceToDraw][1] = minY;
 				faceToDraw++;
 			}
 			adjHeightAndDepth.get(direction)[faceToDraw][0] = VOID_FACE;
@@ -263,10 +325,6 @@ public class Box
 
 	public void set(int xWidth, int yWidth, int zWidth)
 	{
-		box[OFFSET][X] = 0;
-		box[OFFSET][Y] = 0;
-		box[OFFSET][Z] = 0;
-
 		box[WIDTH][X] = xWidth;
 		box[WIDTH][Y] = yWidth;
 		box[WIDTH][Z] = zWidth;
@@ -277,6 +335,13 @@ public class Box
 		box[OFFSET][X] = xOffset;
 		box[OFFSET][Y] = yOffset;
 		box[OFFSET][Z] = zOffset;
+	}
+
+
+
+	public int getFacePos(Direction direction)
+	{
+		return box[OFFSET][FACE_DIRECTION.get(direction)[0]] + box[WIDTH][FACE_DIRECTION.get(direction)[0]] * FACE_DIRECTION.get(direction)[1];
 	}
 
 	public int getCoord(Direction direction, int axis, int vertexIndex)
@@ -312,6 +377,9 @@ public class Box
 
 	public boolean shouldContinue(Direction direction, int adjIndex)
 	{
+		if(isCulled(direction)){
+			return false;
+		}
 		if (direction == Direction.UP || direction == Direction.DOWN)
 		{
 			if (adjIndex == 0)

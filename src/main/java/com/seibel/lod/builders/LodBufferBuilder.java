@@ -283,7 +283,6 @@ public class LodBufferBuilder
 											zAdj = posZ + direction.getNormal().getZ();
 											chunkXdist = LevelPosUtil.getChunkPos(detailLevel, xAdj) - playerChunkPos.x;
 											chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.z;
-
 											if (gameChunkRenderDistance >= Math.abs(chunkXdist) && gameChunkRenderDistance >= Math.abs(chunkZdist))
 											{
 												if (!renderer.vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]

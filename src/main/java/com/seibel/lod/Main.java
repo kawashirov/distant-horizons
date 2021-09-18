@@ -15,8 +15,8 @@ public class Main
 		{
 			Map<Direction, long[]> adjData = new HashMap()
 			{{
-				put(Direction.EAST, new long[]{DataPointUtil.createDataPoint(40, 20, 0, 0, 0, 0)});
-				put(Direction.WEST,  new long[]{DataPointUtil.createDataPoint(40, 20, 0, 0, 0, 0)});
+				put(Direction.EAST, new long[]{DataPointUtil.createDataPoint(60, 30, 0, 0, 0, 0), DataPointUtil.createDataPoint(25, 10, 0, 0, 0, 0)});
+				put(Direction.WEST,  new long[]{DataPointUtil.createDataPoint(60, 10, 0, 0, 0, 0)});
 				put(Direction.NORTH,  new long[]{DataPointUtil.createDataPoint(40, 20, 0, 0, 0, 0)});
 				put(Direction.SOUTH,  new long[]{DataPointUtil.createDataPoint(40, 20, 0, 0, 0, 0)});
 			}};

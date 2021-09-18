@@ -49,7 +49,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	{
 		int width = 1 << detailLevel;
 
-		int color = DataPointUtil.getLightColor(data,lightMap);
+		int color = DataPointUtil.getLightColor(data, lightMap);
 		// add each LOD for the detail level
 
 		if (debugging != DebugMode.OFF)
@@ -78,7 +78,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 
 	}
 
-	private void generateBoundingBox(Box box, int height, int depth, int width, double xOffset, double yOffset, double zOffset, BlockPos bufferCenterBlockPos,  Map<Direction, long[]> adjData, int color)
+	private void generateBoundingBox(Box box, int height, int depth, int width, double xOffset, double yOffset, double zOffset, BlockPos bufferCenterBlockPos, Map<Direction, long[]> adjData, int color)
 	{
 		// don't add an LOD if it is empty
 		if (height == -1 && depth == -1)
@@ -99,13 +99,13 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		box.reset();
 		box.setColor(color);
 		box.set(width, height - depth, width);
-		box.move((int) (xOffset + x), (int) (yOffset + depth), (int) (zOffset + z));
+		box.move((int) (xOffset + x), (int) (depth + yOffset), (int) (zOffset + z));
+		box.setUpCulling(bufferCenterBlockPos, 32);
 		box.setAdjData(adjData);
 	}
 
 	private void addBoundingBoxToBuffer(BufferBuilder buffer, Box box)
 	{
-
 		for(Direction direction : Box.DIRECTIONS)
 		{
 			int adjIndex = 0;
