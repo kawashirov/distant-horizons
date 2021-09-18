@@ -846,12 +846,12 @@ public class LodRenderer
 		}
 
 		// check if the lighting has changed
-		if (mc.getWorld().getDayTime() - prevDayTime > 1000 || mc.getOptions().gamma != prevBrightness || lightMap == null)
+		if (mc.getClientWorld().getDayTime() - prevDayTime > 1000 || mc.getOptions().gamma != prevBrightness || lightMap == null)
 		{
 			fullRegen = true;
 			lightMap = mc.getCurrentLightMap();
 			prevBrightness = mc.getOptions().gamma;
-			prevDayTime = mc.getWorld().getDayTime();
+			prevDayTime = mc.getClientWorld().getDayTime();
 		}
 
 

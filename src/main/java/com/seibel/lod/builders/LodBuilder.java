@@ -29,13 +29,26 @@ import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.enums.LodQualityMode;
-import com.seibel.lod.util.*;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
+import com.seibel.lod.util.ColorUtil;
+import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.DetailDistanceUtil;
+import com.seibel.lod.util.LevelPosUtil;
+import com.seibel.lod.util.LodThreadFactory;
+import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
-import net.minecraft.block.*;
+import net.minecraft.block.AbstractPlantBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.BushBlock;
+import net.minecraft.block.GrassBlock;
+import net.minecraft.block.IGrowable;
+import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -61,10 +74,12 @@ import net.minecraftforge.client.model.data.ModelDataMap;
  *
  * @author Leonardo Amato
  * @author James Seibel
- * @version 9-7-2021
+ * @version 9-18-2021
  */
 public class LodBuilder
 {
+	private static MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
+
 	private ExecutorService lodGenThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
 
 	public static final int CHUNK_DATA_WIDTH = LodUtil.CHUNK_WIDTH;
@@ -115,20 +130,25 @@ public class LodBuilder
 		{
 			try
 			{
+				// we need a loaded client world in order to
+				// get the textures for blocks
+				if (mc.getClientWorld() == null)
+					return;
+				
 				DimensionType dim = world.dimensionType();
 
 				LodDimension lodDim;
 
 				int playerPosX;
 				int playerPosZ;
-				if (MinecraftWrapper.INSTANCE.getPlayer() == null)
+				if (mc.getPlayer() == null)
 				{
 					playerPosX = chunk.getPos().getMinBlockX();
 					playerPosZ = chunk.getPos().getMinBlockZ();
 				} else
 				{
-					playerPosX = (int) MinecraftWrapper.INSTANCE.getPlayer().getX();
-					playerPosZ = (int) MinecraftWrapper.INSTANCE.getPlayer().getZ();
+					playerPosX = (int) mc.getPlayer().getX();
+					playerPosZ = (int) mc.getPlayer().getZ();
 				}
 				if (lodWorld.getLodDimension(dim) == null)
 				{
@@ -266,7 +286,7 @@ public class LodBuilder
 		int xAbs;
 		int yAbs;
 		int zAbs;
-		boolean hasCeiling = MinecraftWrapper.INSTANCE.getWorld().dimensionType().hasCeiling();
+		boolean hasCeiling = mc.getClientWorld().dimensionType().hasCeiling();
 
 		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
 		int index = 0;
@@ -579,12 +599,12 @@ public class LodBuilder
 	{
 		int skyLight;
 		int blockLight;
-		if (MinecraftWrapper.INSTANCE.getPlayer() == null)
+		if (mc.getPlayer() == null)
 			return 0;
-		if (MinecraftWrapper.INSTANCE.getPlayer().level == null)
+		if (mc.getPlayer().level == null)
 			return 0;
 
-		IWorld world = MinecraftWrapper.INSTANCE.getPlayer().level;
+		IWorld world = mc.getPlayer().level;
 
 		blockLight = world.getBrightness(LightType.BLOCK, blockPos);
 		skyLight = world.getBrightness(LightType.SKY, blockPos);
@@ -607,23 +627,23 @@ public class LodBuilder
 			return colorMap.get(blockState.getBlock());
 
 
-		World world = MinecraftWrapper.INSTANCE.getWorld();
+		World world = mc.getClientWorld();
 		TextureAtlasSprite texture;
 		if(topTextureRequired)
 		{
-			List<BakedQuad> quad = ((IForgeBakedModel) MinecraftWrapper.INSTANCE.getModelManager().getBlockModelShaper().getBlockModel(blockState)).getQuads(blockState, Direction.UP, new Random(0), dataMap);
+			List<BakedQuad> quad = ((IForgeBakedModel) mc.getModelManager().getBlockModelShaper().getBlockModel(blockState)).getQuads(blockState, Direction.UP, new Random(0), dataMap);
 			if (!quad.isEmpty())
 			{
 				texture = quad.get(0).getSprite();
 			}
 			else
 			{
-				texture = MinecraftWrapper.INSTANCE.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
+				texture = mc.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
 			}
 		}
 		else
 		{
-			texture = MinecraftWrapper.INSTANCE.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
+			texture = mc.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
 		}
 
 

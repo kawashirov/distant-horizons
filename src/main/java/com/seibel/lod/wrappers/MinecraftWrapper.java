@@ -14,16 +14,14 @@ import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.model.ModelManager;
+import net.minecraft.client.renderer.texture.NativeImage;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.Direction;
 import net.minecraft.world.DimensionType;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import org.lwjgl.system.CallbackI;
 
 /**
  * A singleton that wraps the Minecraft class
@@ -174,8 +172,8 @@ public class MinecraftWrapper
 	{
 		return mc.getModelManager();
 	}
-
-	public World getWorld()
+	
+	public ClientWorld getClientWorld()
 	{
 		return  mc.level;
 	}

@@ -138,7 +138,7 @@ public class Box
 		this.color = color;
 		for (Direction direction : DIRECTIONS)
 		{
-			colorMap.get(direction)[0] = ColorUtil.applyShade(color, MinecraftWrapper.INSTANCE.getWorld().getShade(direction, true));
+			colorMap.get(direction)[0] = ColorUtil.applyShade(color, MinecraftWrapper.INSTANCE.getClientWorld().getShade(direction, true));
 		}
 	}
 
