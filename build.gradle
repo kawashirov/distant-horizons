@@ -10,7 +10,7 @@ buildscript {
 		maven { url 'https://jitpack.io' }
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
 		classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
     }
 }
@@ -19,20 +19,12 @@ apply plugin: 'org.spongepowered.mixin'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
-apply plugin: 'java' // needed for compileJava
 
 version = 'a1.4.1'
 group = 'com.seibel.lod'
 archivesBaseName = 'lod_1.16.5'
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
-
-compileJava {
-    // release 8 is needed because otherwise FloatBuffer.flip() will crash
-    // on some machines
-    // example thread: https://github.com/eclipse/jetty.project/issues/3244
-    options.compilerArgs.addAll(['-Xlint:unchecked', '-Xlint:deprecation'])
-}
+java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
