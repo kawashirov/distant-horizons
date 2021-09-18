@@ -7,10 +7,12 @@ import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 import org.lwjgl.system.CallbackI;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Vector;
 
 public class Box
 {
@@ -99,13 +101,11 @@ public class Box
 	public int color;
 	public Map<Direction, int[][]> adjHeightAndDepth;
 	public Map<Direction, boolean[]> culling;
-	public long[] order;
-
 
 	public Box()
 	{
 		box = new int[2][3];
-		order = new long[32];
+		//order = new long[32];
 		colorMap = new HashMap()
 		{{
 			put(Direction.UP, new int[1]);
@@ -163,11 +163,6 @@ public class Box
 			}
 		}
 
-		for (int i = 0; i < order.length; i++)
-		{
-			order[i] = 0;
-		}
-
 		for (Direction direction : DIRECTIONS)
 		{
 			colorMap.get(direction)[0] = 0;
@@ -186,17 +181,23 @@ public class Box
 		}
 	}
 
-	public void setUpCulling(BlockPos playerPos, int cullingDistance)
+	public void setUpCulling(int cullingDistance)
 	{
+		Vector3d playerPos = MinecraftWrapper.INSTANCE.getPlayer().position();
 		for (Direction direction : DIRECTIONS)
 		{
-			if(direction == Direction.UP || direction == Direction.DOWN)
-				culling.get(direction)[0] = false;
-			else if(direction == Direction.EAST || direction == Direction.SOUTH)
-				culling.get(direction)[0] = playerPos.get(direction.getAxis()) < getFacePos(direction) + 32;
-			else
-				culling.get(direction)[0] = playerPos.get(direction.getAxis()) > getFacePos(direction) - 32;
-			culling.get(direction)[0] = false;
+			if(direction == Direction.DOWN)
+				culling.get(direction)[0] = playerPos.get(direction.getAxis()) > getFacePos(direction) + cullingDistance;
+			else if(direction == Direction.UP)
+				culling.get(direction)[0] = playerPos.get(direction.getAxis()) < getFacePos(direction) - cullingDistance;
+			else if(direction == Direction.WEST)
+				culling.get(direction)[0] = -playerPos.get(direction.getAxis()) > getFacePos(direction) + cullingDistance;
+			else if(direction == Direction.NORTH)
+				culling.get(direction)[0] = -playerPos.get(direction.getAxis()) > getFacePos(direction) + cullingDistance;
+			else if(direction == Direction.EAST)
+				culling.get(direction)[0] = -playerPos.get(direction.getAxis()) < getFacePos(direction) - cullingDistance;
+			else if(direction == Direction.SOUTH)
+				culling.get(direction)[0] = -playerPos.get(direction.getAxis()) < getFacePos(direction) - cullingDistance;
 		}
 	}
 
@@ -213,11 +214,9 @@ public class Box
 		int maxY = getMaxY();
 		for (Direction direction : ADJ_DIRECTIONS)
 		{
-			if(isCulled(direction)){
-				continue;
-			}
-
-			//Reset the ordered array
+			//if(isCulled(direction)){
+			//	continue;
+			//}
 
 			long[] dataPoint = adjData.get(direction);
 			if (dataPoint == null || DataPointUtil.isItVoid(dataPoint[0]))
@@ -231,6 +230,7 @@ public class Box
 
 			//We order the adj list
 			/**TODO remove this if the order is maintained naturally*/
+			/*
 			order[0] = 0;
 			for (int i = 0; i < dataPoint.length; i++)
 			{
@@ -240,7 +240,7 @@ public class Box
 					j = j - 1;
 				}
 				order[j + 1] = dataPoint[i];
-			}
+			}*/
 
 			int i;
 			int faceToDraw = 0;
@@ -248,7 +248,7 @@ public class Box
 			boolean toFinish = false;
 			for (i = dataPoint.length - 1; i >= 0; i--)
 			{
-				long singleDataPoint = order[i];
+				long singleDataPoint = dataPoint[i];
 				height = DataPointUtil.getHeight(singleDataPoint);
 				depth = DataPointUtil.getDepth(singleDataPoint);
 
@@ -377,9 +377,6 @@ public class Box
 
 	public boolean shouldContinue(Direction direction, int adjIndex)
 	{
-		if(isCulled(direction)){
-			return false;
-		}
 		if (direction == Direction.UP || direction == Direction.DOWN)
 		{
 			if (adjIndex == 0)
