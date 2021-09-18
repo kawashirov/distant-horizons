@@ -162,7 +162,7 @@ public class DetailDistanceUtil
 	{
 		if (detail < minDrawDetail)
 		{
-			return lodGenDetails[minGenDetail].detailLevel;
+			return lodGenDetails[minDrawDetail].detailLevel;
 		} else
 		{
 			return lodGenDetails[detail].detailLevel;
