@@ -514,10 +514,8 @@ public class LodBufferBuilder
 			// make sure we are uploading to a different OpenGL context,
 			// to prevent interference (IE stuttering) with the Minecraft context.
 			glProxy.setGlContext(GlProxyContext.LOD_BUILDER);
-			// only print console debugging for vboUpload once per upload cycle
-			boolean bufferMapFail = false;
-
-
+			
+			
 			for (int x = 0; x < buildableVbos.length; x++)
 			{
 				for (int z = 0; z < buildableVbos.length; z++)
@@ -525,13 +523,13 @@ public class LodBufferBuilder
 					if (fullRegen || lodDim.regen[x][z])
 					{
 						ByteBuffer builderBuffer = buildableBuffers[x][z].popNextBuffer().getSecond();
-						bufferMapFail = vboUpload(buildableVbos[x][z], builderBuffer, bufferMapFail);
+						vboUpload(buildableVbos[x][z], builderBuffer);
 						lodDim.regen[x][z] = false;
 					}
 				}
 			}
-
-
+			
+			
 			// make sure all the buffers have been uploaded.
 			// this probably is necessary, but it makes me feel good :)
 			GL11.glFlush();
@@ -543,6 +541,12 @@ public class LodBufferBuilder
 		}
 		finally
 		{
+			// make sure no buffer is bound
+			if (glProxy.getGlContext() == GlProxyContext.LOD_BUILDER)
+			{
+				GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+			}
+			
 			// make sure the context is disabled
 			glProxy.setGlContext(GlProxyContext.NONE);
 		}
@@ -551,7 +555,7 @@ public class LodBufferBuilder
 	/**
 	 * Uploads the uploadBuffer into the VBO in GPU memory.
 	 */
-	private boolean vboUpload(VertexBuffer vbo, ByteBuffer uploadBuffer, boolean bufferMapFail)
+	private void vboUpload(VertexBuffer vbo, ByteBuffer uploadBuffer)
 	{
 		// this shouldn't happen, but just to be safe
 		if (vbo.id != -1)
@@ -571,14 +575,10 @@ public class LodBufferBuilder
 			// is faster for transferring data. They must put the data in different memory
 			// or something.
 			GL15C.glBufferSubData(GL15.GL_ARRAY_BUFFER, 0, uploadBuffer);
-
-
-			GL15C.glUnmapBuffer(GL15.GL_ARRAY_BUFFER);
+			
+			
 			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		}
-
-		// just used to improve debug printing
-		return bufferMapFail;
 	}
 
 	/**
