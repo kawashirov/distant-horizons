@@ -128,7 +128,7 @@ public class GlProxy
 		}
 		
 		if (!WGL.wglMakeCurrent(deviceContext, contextPointer))
-			throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + newContext.toString() + "] from [" + currentContext.toString() + "] lod builder owner thread: " + (lodBuilderOwnerThread != null ? lodBuilderOwnerThread.getName() : "null"));
+			throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + newContext.toString() + "] from [" + currentContext.toString() + "] on thread: [" + Thread.currentThread().getName() + "] lod builder owner thread: " + (lodBuilderOwnerThread != null ? lodBuilderOwnerThread.getName() : "null"));
 		
 		if (newContext == GlProxyContext.LOD_BUILDER)
 			lodBuilderOwnerThread = Thread.currentThread();
