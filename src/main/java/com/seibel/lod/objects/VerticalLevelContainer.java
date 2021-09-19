@@ -151,7 +151,7 @@ public class VerticalLevelContainer implements LevelContainer
 		byte[] tempData = new byte[2 + (size * size * maxVerticalData * 8)];
 		tempData[index] = detailLevel;
 		index++;
-		tempData[index] = maxVerticalData;
+		tempData[index] = (byte) maxVerticalData;
 		index++;
 		int x, y, z = 0;
 		for (x = 0; x < size; x++)
