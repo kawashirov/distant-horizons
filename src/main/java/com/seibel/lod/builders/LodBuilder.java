@@ -241,13 +241,13 @@ public class LodBuilder
 					case MULTI_LOD:
 						long[] dataToMergeVertical;
 						dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-						data = DataPointUtil.mergeMultiData(dataToMergeVertical, detailLevel);
+						data = DataPointUtil.mergeMultiData(dataToMergeVertical, DataPointUtil.WORLD_HEIGHT, DetailDistanceUtil.getMaxVerticalData(detailLevel));
 						if (data.length == 0 || data == null)
 							data = new long[]{DataPointUtil.EMPTY_DATA};
 						//lodDim.clear(detailLevel, posX, posZ);
 						for (int verticalIndex = 0; (verticalIndex < data.length) && (verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ)); verticalIndex++)
 						{
-							lodDim.addData(detailLevel,
+							boolean test = lodDim.addData(detailLevel,
 									posX,
 									posZ,
 									verticalIndex,
@@ -258,7 +258,6 @@ public class LodBuilder
 									posX,
 									posZ,
 									verticalIndex);
-							System.out.println(DataPointUtil.toString(dataTest));
 						}
 
 						break;
@@ -267,6 +266,10 @@ public class LodBuilder
 
 			}
 			lodDim.updateData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
+			long dataTest = lodDim.getData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z, 0);
+			long dataTest2 = lodDim.getData(LodUtil.REGION_DETAIL_LEVEL, chunk.getPos().getRegionX(), chunk.getPos().getRegionZ(), 0);
+			/*System.out.println(LodUtil.CHUNK_DETAIL_LEVEL + " " + chunk.getPos().x + " " + chunk.getPos().z + " " + 0 + " " +DataPointUtil.toString(dataTest));
+			System.out.println(LodUtil.REGION_DETAIL_LEVEL + " " + chunk.getPos().getRegionX() + " " + chunk.getPos().getRegionZ() + " " + 0 + " " +DataPointUtil.toString(dataTest2));*/
 		} catch (Exception e)
 		{
 			e.printStackTrace();

@@ -32,10 +32,8 @@ public class VerticalLevelContainer implements LevelContainer
 
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		int index = 0;
-		for(int i = 0; i < maxVerticalData; i++){
-			index = posX*size*maxVerticalData + posZ*maxVerticalData + i;
-			dataContainer[index] = DataPointUtil.EMPTY_DATA;
+		for(int verticalIndex = 0; verticalIndex < maxVerticalData; verticalIndex++){
+			dataContainer[posX*size*maxVerticalData + posZ*maxVerticalData + verticalIndex] = DataPointUtil.EMPTY_DATA;
 		}
 	}
 
@@ -133,7 +131,7 @@ public class VerticalLevelContainer implements LevelContainer
 					dataToMerge[(z*2+x)*maxVerticalData + verticalIndex] = lowerLevelContainer.getData(childPosX, childPosZ, verticalIndex);
 			}
 		}
-		data = DataPointUtil.mergeMultiData(dataToMerge, lowerLevelContainer.getDetailLevel());
+		data = DataPointUtil.mergeMultiData(dataToMerge, lowerLevelContainer.getMaxVerticalData(), getMaxVerticalData());
 
 		for(int verticalIndex = 0; (verticalIndex < data.length) && (verticalIndex < maxVerticalData); verticalIndex++)
 		{
