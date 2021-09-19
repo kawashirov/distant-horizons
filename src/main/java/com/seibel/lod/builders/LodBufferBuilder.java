@@ -212,37 +212,38 @@ public class LodBufferBuilder
 							// local position in the vbo and bufferBuilder arrays
 							BufferBuilder currentBuffer = buildableBuffers[xRegion][zRegion];
 							LodRegion region = lodDim.getRegion(regionPos.x, regionPos.z);
+							
 							if (region == null)
 								continue;
-							byte minDetail = region.getMinDetailLevel();
+							
 							// make sure the buffers weren't
 							// changed while we were running this method
 							if (currentBuffer == null || (currentBuffer != null && !currentBuffer.building()))
 								return;
-							//previous setToRender chache
+							
+							byte minDetail = region.getMinDetailLevel();
+							
+							
 							final int xR = xRegion;
 							final int zR = zRegion;
 							Callable<Boolean> dataToRenderThread = () ->
 							{
 								Map<Direction, long[]> adjData = new HashMap<>();
-								int maxVerticalData;
-								if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP)
+								
+								// determine how many LODs we can stack vertically
+								int maxVerticalData = 1;
+								if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.MULTI_LOD)
 								{
-									maxVerticalData = 1;
-								}
-								else
-								{
-									maxVerticalData = DetailDistanceUtil.getMaxVerticalData(0);
+									maxVerticalData = DetailDistanceUtil.getMaxVerticalData(LodUtil.BLOCK_DETAIL_LEVEL);
 								}
 								
+								// create adjData's arrays
 								for (Direction direction : Box.ADJ_DIRECTIONS)
 								{
-									if (adjData.containsKey(direction) && LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.MULTI_LOD)
-									{
-										adjData.put(direction, new long[DetailDistanceUtil.getMaxVerticalData(0)]);
-									}
+									adjData.put(direction, new long[maxVerticalData]);
 								}
-								//previous setToRender chache
+								
+								//previous setToRender cache
 								if (setsToRender[xR][zR] == null)
 								{
 									setsToRender[xR][zR] = new PosToRenderContainer(minDetail, regionPos.x, regionPos.z);
@@ -279,9 +280,11 @@ public class LodBufferBuilder
 									detailLevel = posToRender.getNthDetailLevel(index);
 									posX = posToRender.getNthPosX(index);
 									posZ = posToRender.getNthPosZ(index);
+									
 									// skip any chunks that Minecraft is going to render
 									chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.x;
 									chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.z;
+									
 									if (gameChunkRenderDistance >= Math.abs(chunkXdist)
 											&& gameChunkRenderDistance >= Math.abs(chunkZdist)
 											&& detailLevel <= LodUtil.CHUNK_DETAIL_LEVEL
@@ -289,6 +292,7 @@ public class LodBufferBuilder
 									{
 										continue;
 									}
+									
 									// skip any chunks that Minecraft is going to render
 									try
 									{
@@ -309,11 +313,9 @@ public class LodBufferBuilder
 													}
 													else
 													{
-														adjData.put(direction, new long[DetailDistanceUtil.getMaxVerticalData(lodDim.getMaxVerticalData(detailLevel, posX, posZ))]);
 														for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
 															adjData.get(direction)[verticalIndex] = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
 													}
-													
 												}
 												else
 												{
@@ -333,18 +335,10 @@ public class LodBufferBuilder
 												{
 													if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP)
 													{
-														try
-														{
-															adjData.get(direction)[0] = lodDim.getSingleData(detailLevel, xAdj, zAdj);
-														}
-														catch (NullPointerException e)
-														{
-															e.printStackTrace();
-														}
+														adjData.get(direction)[0] = lodDim.getSingleData(detailLevel, xAdj, zAdj);
 													}
 													else
 													{
-														adjData.put(direction, new long[DetailDistanceUtil.getMaxVerticalData(lodDim.getMaxVerticalData(detailLevel, posX, posZ))]);
 														for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
 															adjData.get(direction)[verticalIndex] = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
 													}
