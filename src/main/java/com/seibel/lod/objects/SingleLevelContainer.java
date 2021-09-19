@@ -1,6 +1,8 @@
 package com.seibel.lod.objects;
 
 import com.seibel.lod.util.*;
+
+import javax.xml.crypto.Data;
 import java.util.Arrays;
 
 public class SingleLevelContainer implements LevelContainer
@@ -8,51 +10,61 @@ public class SingleLevelContainer implements LevelContainer
 	public final byte detailLevel;
 	public final int size;
 
-	public final long[][] data;
+	public final long[][] dataContainer;
 
 	public SingleLevelContainer(byte detailLevel)
 	{
 		this.detailLevel = detailLevel;
 		size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
-		data = new long[size][size];
+		dataContainer = new long[size][size];
 	}
 
-	public boolean addData(long[] newData, int posX, int posZ){
-
+	public void clear(int posX, int posZ)
+	{
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		data[posX][posZ] = newData[0];
+		dataContainer[posX][posZ] = DataPointUtil.EMPTY_DATA;
+	}
+
+	public boolean addData(long data, int posX, int posZ, int index)
+	{
+		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
+		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
+		dataContainer[posX][posZ] = data;
 		return true;
 	}
 
-	public boolean addSingleData(long newData, int posX, int posZ){
+	public boolean addSingleData(long newData, int posX, int posZ)
+	{
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		data[posX][posZ] = newData;
+		dataContainer[posX][posZ] = newData;
 		return true;
 	}
 
-	public long[] getData(int posX, int posZ){
-		long[] dataArray = ThreadMapUtil.getSingleGetDataArray();
+	public long getData(int posX, int posZ, int index)
+	{
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		//Improve this using a thread map to long[]
-		dataArray[0] = data[posX][posZ];
-		return dataArray;
+		return dataContainer[posX][posZ];
 	}
 
-	public long getSingleData(int posX, int posZ){
+	public long getSingleData(int posX, int posZ)
+	{
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		//Improve this using a thread map to long[]
-		return data[posX][posZ];
+		return dataContainer[posX][posZ];
 	}
 
-	public byte getDetailLevel(){
+	public byte getDetailLevel()
+	{
 		return detailLevel;
 	}
 
-	public LevelContainer expand(){
+	public LevelContainer expand()
+	{
 		return new SingleLevelContainer((byte) (getDetailLevel() - 1));
 	}
 
@@ -64,22 +76,23 @@ public class SingleLevelContainer implements LevelContainer
 		detailLevel = inputData[index];
 		index++;
 		size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
-		this.data = new long[size][size];
+		this.dataContainer = new long[size][size];
 		for (int x = 0; x < size; x++)
 		{
 			for (int z = 0; z < size; z++)
 			{
 				newData = 0;
-				if(inputData[index] == 0)
+				if (inputData[index] == 0)
 					index++;
-				else if(index + 7 >= inputData.length)
-				break;
-			else {
-				for (tempIndex = 0; tempIndex < 8; tempIndex++)
-					newData += (((long) inputData[index + tempIndex]) & 0xff) << (8 * tempIndex);
-				index = index + 8;
-			}
-				data[x][z] = newData;
+				else if (index + 7 >= inputData.length)
+					break;
+				else
+				{
+					for (tempIndex = 0; tempIndex < 8; tempIndex++)
+						newData += (((long) inputData[index + tempIndex]) & 0xff) << (8 * tempIndex);
+					index = index + 8;
+				}
+				dataContainer[x][z] = newData;
 
 			}
 		}
@@ -101,15 +114,19 @@ public class SingleLevelContainer implements LevelContainer
 			{
 				childPosX = 2 * posX + x;
 				childPosZ = 2 * posZ + z;
-				dataToMerge[2*x + z] = ((SingleLevelContainer) lowerLevelContainer).getSingleData(childPosX, childPosZ);
+				dataToMerge[2 * x + z] = ((SingleLevelContainer) lowerLevelContainer).getSingleData(childPosX, childPosZ);
 			}
 		}
 		data = DataPointUtil.mergeSingleData(dataToMerge);
-		addSingleData(data,posX,posZ);
+		addSingleData(data, posX, posZ);
 	}
 
+	public int getMaxVerticalData(){
+		return 1;
+	}
 
-	public boolean doesItExist(int posX, int posZ){
+	public boolean doesItExist(int posX, int posZ)
+	{
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		//Improve this using a thread map to long[]
@@ -127,14 +144,16 @@ public class SingleLevelContainer implements LevelContainer
 		{
 			for (int z = 0; z < size; z++)
 			{
-				if(data[x][z] == 0){
+				if (dataContainer[x][z] == 0)
+				{
 					tempData[index] = 0;
 					index++;
-				} else {
-				for (tempIndex = 0; tempIndex < 8; tempIndex++)
-					tempData[index + tempIndex] = (byte) (data[x][z] >>> (8 * tempIndex));
-				index += 8;
-			}
+				} else
+				{
+					for (tempIndex = 0; tempIndex < 8; tempIndex++)
+						tempData[index + tempIndex] = (byte) (dataContainer[x][z] >>> (8 * tempIndex));
+					index += 8;
+				}
 			}
 		}
 		return Arrays.copyOfRange(tempData, 0, index);

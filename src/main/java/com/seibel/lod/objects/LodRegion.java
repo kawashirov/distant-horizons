@@ -79,13 +79,17 @@ public class LodRegion
 		return generationMode;
 	}
 
+	public int getMaxVerticalData(byte detailLevel)
+	{
+		return dataContainer[detailLevel].getMaxVerticalData();
+	}
+
 	/**
 	 * This method can be used to insert data into the LodRegion
 	 *
-	 * @param dataPoint
 	 * @return if the data was added successfully
 	 */
-	public boolean addData(byte detailLevel, int posX, int posZ, long[] dataPoint, boolean serverQuality)
+	public boolean addData(byte detailLevel, int posX, int posZ, int verticalIndex, long data, boolean serverQuality)
 	{
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
@@ -97,12 +101,12 @@ public class LodRegion
 			try
 			{
 				//add the node data
-				this.dataContainer[detailLevel].addData(dataPoint, posX, posZ);
+				this.dataContainer[detailLevel].addData(data, posX, posZ, verticalIndex);
 				return true;
 			}
 			catch (NullPointerException e)
 			{
-				String detailMessage = "pos: [" + posX + "," + posZ + "] dataPoint: [" + dataPoint + "] serverQuality: [" + serverQuality + "] dataContainer";
+				String detailMessage = "pos: [" + posX + "," + posZ + "] dataPoint: [" + data + "] serverQuality: [" + serverQuality + "] dataContainer";
 				detailMessage += this.dataContainer != null ? ": [NULL]" : " at detailLevel: [" + dataContainer[detailLevel] + "]"; 
 				
 				ClientProxy.LOGGER.error("addSingleData: " + e.getMessage() + "\t" + detailMessage);
@@ -156,11 +160,9 @@ public class LodRegion
 	 *
 	 * @return the data at the relative pos and level
 	 */
-	public long[] getData(byte detailLevel, int posX, int posZ)
+	public long getData(byte detailLevel, int posX, int posZ, int verticalIndex)
 	{
-		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
-		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		return dataContainer[detailLevel].getData(posX, posZ);
+		return dataContainer[detailLevel].getData(posX, posZ,verticalIndex);
 	}
 
 	/**
@@ -170,12 +172,13 @@ public class LodRegion
 	 */
 	public long getSingleData(byte detailLevel, int posX, int posZ)
 	{
-		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
-		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		return dataContainer[detailLevel].getSingleData(posX, posZ);
 	}
 
-
+	public void clear(byte detailLevel, int posX, int posZ)
+	{
+		dataContainer[detailLevel].clear(posX, posZ);
+	}
 	/**
 	 * This method will return all the levelPos that are renderable according to the requisite given in input
 	 *
@@ -378,7 +381,7 @@ public class LodRegion
 		if(dataContainer[detailLevel].doesItExist(posX,posZ))
 		{
 			//We take the bottom information always
-			return DataPointUtil.getGenerationMode(dataContainer[detailLevel].getData(posX,posZ)[0]);
+			return DataPointUtil.getGenerationMode(dataContainer[detailLevel].getSingleData(posX,posZ));
 		}else
 		{
 			return DistanceGenerationMode.NONE.complexity;

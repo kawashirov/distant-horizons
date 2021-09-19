@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.seibel.lod.util.*;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
@@ -43,10 +44,6 @@ import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.proxy.GlProxy;
 import com.seibel.lod.proxy.GlProxy.GlProxyContext;
 import com.seibel.lod.render.LodRenderer;
-import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.LevelPosUtil;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
@@ -224,12 +221,21 @@ public class LodBufferBuilder
 							Callable<Boolean> dataToRenderThread = () ->
 							{
 								Map<Direction, long[]> adjData = new HashMap<>();
+								int maxVerticalData;
 								if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP)
 								{
-									adjData.put(Direction.WEST, new long[1]);
-									adjData.put(Direction.EAST, new long[1]);
-									adjData.put(Direction.SOUTH, new long[1]);
-									adjData.put(Direction.NORTH, new long[1]);
+									maxVerticalData = 1;
+								} else
+								{
+									maxVerticalData = DetailDistanceUtil.getMaxVerticalData(0);
+								}
+
+								for (Direction direction : Box.ADJ_DIRECTIONS)
+								{
+									if (adjData.containsKey(direction) && LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.MULTI_LOD)
+									{
+										adjData.put(direction, new long[DetailDistanceUtil.getMaxVerticalData(0)]);
+									}
 								}
 								//previous setToRender chache
 								if (setsToRender[xR][zR] == null)
@@ -257,12 +263,12 @@ public class LodBufferBuilder
 								int zAdj;
 								int chunkXdist;
 								int chunkZdist;
-								
+
 								// keep a local version so we don't have to worry about indexOutOfBounds Exceptions
 								// if it changes in the LodRenderer while we are working here
-								boolean[][] vanillaRenderedChunks = renderer.vanillaRenderedChunks; 
+								boolean[][] vanillaRenderedChunks = renderer.vanillaRenderedChunks;
 								short gameChunkRenderDistance = (short) (vanillaRenderedChunks.length / 2 - 1);
-								
+
 								for (int index = 0; index < posToRender.getNumberOfPos(); index++)
 								{
 									detailLevel = posToRender.getNthDetailLevel(index);
@@ -297,7 +303,9 @@ public class LodBufferBuilder
 														adjData.get(direction)[0] = lodDim.getSingleData(detailLevel, xAdj, zAdj);
 													} else
 													{
-														adjData.put(direction, lodDim.getData(detailLevel, xAdj, zAdj));
+														adjData.put(direction, new long[DetailDistanceUtil.getMaxVerticalData(lodDim.getMaxVerticalData(detailLevel,posX,posZ))]);
+														for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
+															adjData.get(direction)[verticalIndex] = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
 													}
 
 												} else
@@ -319,7 +327,9 @@ public class LodBufferBuilder
 														adjData.get(direction)[0] = lodDim.getSingleData(detailLevel, xAdj, zAdj);
 													} else
 													{
-														adjData.put(direction, lodDim.getData(detailLevel, xAdj, zAdj));
+														adjData.put(direction, new long[DetailDistanceUtil.getMaxVerticalData(lodDim.getMaxVerticalData(detailLevel,posX,posZ))]);
+														for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
+															adjData.get(direction)[verticalIndex] = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
 													}
 												} else
 												{
@@ -346,13 +356,14 @@ public class LodBufferBuilder
 
 										} else if (region.getLodQualityMode() == LodQualityMode.MULTI_LOD)
 										{
-											for (long dataPoint : lodDim.getData(detailLevel, posX, posZ))
+											long data;
+											for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ); verticalIndex++)
 											{
-												if (!DataPointUtil.isItVoid(dataPoint) && DataPointUtil.doesItExist(dataPoint))
-												{
-													LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, dataPoint, adjData,
-															detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode, renderer.lightMap);
-												}
+												data = lodDim.getData(detailLevel, posX, posZ, verticalIndex);
+												if (DataPointUtil.isItVoid(data) || DataPointUtil.doesItExist(data))
+													break;
+												LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, data, adjData,
+														detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode, renderer.lightMap);
 											}
 										}
 
@@ -512,14 +523,14 @@ public class LodBufferBuilder
 	private void uploadBuffers(boolean fullRegen, LodDimension lodDim)
 	{
 		GlProxy glProxy = GlProxy.getInstance();
-		
+
 		try
 		{
 			// make sure we are uploading to a different OpenGL context,
 			// to prevent interference (IE stuttering) with the Minecraft context.
 			glProxy.setGlContext(GlProxyContext.LOD_BUILDER);
-			
-			
+
+
 			for (int x = 0; x < buildableVbos.length; x++)
 			{
 				for (int z = 0; z < buildableVbos.length; z++)
@@ -532,25 +543,23 @@ public class LodBufferBuilder
 					}
 				}
 			}
-			
-			
+
+
 			// make sure all the buffers have been uploaded.
 			// this probably is necessary, but it makes me feel good :)
 			GL11.glFlush();
-		}
-		catch (IllegalStateException e)
+		} catch (IllegalStateException e)
 		{
 			ClientProxy.LOGGER.error(LodBufferBuilder.class.getSimpleName() + " - UploadBuffers failed: " + e.getMessage());
 			e.printStackTrace();
-		}
-		finally
+		} finally
 		{
 			// make sure no buffer is bound
 			if (glProxy.getGlContext() == GlProxyContext.LOD_BUILDER)
 			{
 				GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 			}
-			
+
 			// make sure the context is disabled
 			glProxy.setGlContext(GlProxyContext.NONE);
 		}
@@ -579,8 +588,8 @@ public class LodBufferBuilder
 			// is faster for transferring data. They must put the data in different memory
 			// or something.
 			GL15C.glBufferSubData(GL15.GL_ARRAY_BUFFER, 0, uploadBuffer);
-			
-			
+
+
 			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		}
 	}

@@ -1,9 +1,6 @@
 package com.seibel.lod.objects;
 
-import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.LevelPosUtil;
-import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.util.ThreadMapUtil;
+import com.seibel.lod.util.*;
 
 import java.security.InvalidParameterException;
 import java.util.Arrays;
@@ -15,13 +12,14 @@ public class VerticalLevelContainer implements LevelContainer
 	public final int size;
 	public final int maxVerticalData;
 
-	public final long[][][] dataContainer;
+	public final long[] dataContainer;
 
 	public VerticalLevelContainer(byte detailLevel)
 	{
 		this.detailLevel = detailLevel;
 		size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
-		dataContainer = new long[size][size][1];
+		maxVerticalData = DetailDistanceUtil.getMaxVerticalData(detailLevel);
+		dataContainer = new long[size * size * DetailDistanceUtil.getMaxVerticalData(detailLevel)];
 	}
 
 	@Override
@@ -30,38 +28,51 @@ public class VerticalLevelContainer implements LevelContainer
 		return detailLevel;
 	}
 
-	public boolean addData(long[] newData, int posX, int posZ){
+	public void clear(int posX, int posZ){
+
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		dataContainer[posX][posZ] = newData;
+		int index = 0;
+		for(int i = 0; i < maxVerticalData; i++){
+			index = posX*size*maxVerticalData + posZ*maxVerticalData + i;
+			dataContainer[index] = DataPointUtil.EMPTY_DATA;
+		}
+	}
+
+	public boolean addData(long data, int posX, int posZ, int verticalIndex){
+
+		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
+		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
+		dataContainer[posX*size*maxVerticalData + posZ*maxVerticalData + verticalIndex] = data;
 		return true;
 	}
 
-	public boolean addSingleData(long newData, int posX, int posZ){
-		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
-		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		dataContainer[posX][posZ][0] = newData;
-		return true;
+	public boolean addSingleData(long data, int posX, int posZ){
+		return addData(data, posX, posZ, 0);
 	}
 
-	public long[] getData(int posX, int posZ){
+	public long getData(int posX, int posZ, int verticalIndex){
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		return dataContainer[posX][posZ];
+		return dataContainer[posX*size*maxVerticalData + posZ*maxVerticalData + verticalIndex];
 	}
 
 	public long getSingleData(int posX, int posZ){
-		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
-		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		//Improve this using a thread map to long[]
-		return dataContainer[posX][posZ][0];
+		return getData(posX,posZ,0);
+	}
+
+	public int getMaxVerticalData(){
+		return maxVerticalData;
+	}
+
+	public int getSize(){
+		return size;
 	}
 
 	public boolean doesItExist(int posX, int posZ){
-		long[] data = getData(posX,posZ);
-		if(data == null)
-			return false;
-		return DataPointUtil.doesItExist(data[0]);
+		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
+		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
+		return DataPointUtil.doesItExist(getSingleData(posX,posZ));
 	}
 
 	public VerticalLevelContainer(byte inputData[])
@@ -104,7 +115,8 @@ public class VerticalLevelContainer implements LevelContainer
 	public void updateData(LevelContainer lowerLevelContainer, int posX, int posZ)
 	{
 		//We reset the array
-		long[][] dataToMerge = ThreadMapUtil.getVerticalUpdateArray();
+		//long[] dataToMerge = ThreadMapUtil.getVerticalUpdateArray(maxVerticalData);
+		long[] dataToMerge = new long[4*lowerLevelContainer.getMaxVerticalData()];
 
 		int childPosX;
 		int childPosZ;
@@ -117,11 +129,19 @@ public class VerticalLevelContainer implements LevelContainer
 			{
 				childPosX = 2 * posX + x;
 				childPosZ = 2 * posZ + z;
-				dataToMerge[2*z + x] = lowerLevelContainer.getData(childPosX, childPosZ);
+				for(int verticalIndex = 0; verticalIndex < maxVerticalData; verticalIndex++)
+					dataToMerge[(z*2+x)*maxVerticalData + verticalIndex] = lowerLevelContainer.getData(childPosX, childPosZ, verticalIndex);
 			}
 		}
-		data = DataPointUtil.mergeMultiData(dataToMerge);
-		addData(data,posX,posZ);
+		data = DataPointUtil.mergeMultiData(dataToMerge, lowerLevelContainer.getDetailLevel());
+
+		for(int verticalIndex = 0; (verticalIndex < data.length) && (verticalIndex < maxVerticalData); verticalIndex++)
+		{
+			addData(data[verticalIndex],
+					posX,
+					posZ,
+					verticalIndex);
+		}
 	}
 
 	public byte[] toDataString()

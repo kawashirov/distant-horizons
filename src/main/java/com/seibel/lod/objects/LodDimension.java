@@ -444,23 +444,23 @@ public class LodDimension
 			cutAndGenThreads.execute(thread);
 		}
 	}
-	
+
 	/**
 	 * Add the given LOD to this dimension at the coordinate
 	 * stored in the LOD. If an LOD already exists at the given
 	 * coordinates it will be overwritten.
 	 */
-	public Boolean addData(byte detailLevel, int posX, int posZ, long[] dataPoint, boolean dontSave, boolean serverQuality)
+	public Boolean addData(byte detailLevel, int posX, int posZ, int verticalIndex, long data, boolean dontSave, boolean serverQuality)
 	{
-		
+
 		// don't continue if the region can't be saved
 		int regionPosX = LevelPosUtil.getRegion(detailLevel, posX);
 		int regionPosZ = LevelPosUtil.getRegion(detailLevel, posZ);
-		
+
 		LodRegion region = getRegion(regionPosX, regionPosZ);
 		if (region == null)
 			return false;
-		boolean nodeAdded = region.addData(detailLevel, posX, posZ, dataPoint, serverQuality);
+		boolean nodeAdded = region.addData(detailLevel, posX, posZ, verticalIndex, data, serverQuality);
 		// only save valid LODs to disk
 		if (!dontSave && fileHandler != null)
 		{
@@ -565,7 +565,22 @@ public class LodDimension
 		if (region != null)
 			region.getDataToRender(posToRender, playerPosX, playerPosZ);
 	}
-	
+
+	public int getMaxVerticalData(byte detailLevel, int posX, int posZ)
+	{
+		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
+			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
+
+		LodRegion region = getRegion(detailLevel, posX, posZ);
+
+		if (region == null)
+		{
+			return 0;
+		}
+
+		return region.getMaxVerticalData(detailLevel);
+	}
+
 	/**
 	 * Get the data point at the given X and Z coordinates
 	 * in this dimension.
@@ -573,7 +588,7 @@ public class LodDimension
 	 * Returns null if the LodChunk doesn't exist or
 	 * is outside the loaded area.
 	 */
-	public long[] getData(byte detailLevel, int posX, int posZ)
+	public long getData(byte detailLevel, int posX, int posZ, int verticalIndex)
 	{
 		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
 			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
@@ -582,12 +597,13 @@ public class LodDimension
 		
 		if (region == null)
 		{
-			return new long[]{DataPointUtil.EMPTY_DATA};
+			return DataPointUtil.EMPTY_DATA;
 		}
 		
-		return region.getData(detailLevel, posX, posZ);
+		return region.getData(detailLevel, posX, posZ, verticalIndex);
 	}
-	
+
+
 	/**
 	 * Get the data point at the given X and Z coordinates
 	 * in this dimension.
@@ -609,7 +625,21 @@ public class LodDimension
 		
 		return region.getSingleData(detailLevel, posX, posZ);
 	}
-	
+
+	public void clear(byte detailLevel, int posX, int posZ)
+	{
+		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
+			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
+
+		LodRegion region = getRegion(detailLevel, posX, posZ);
+
+		if (region == null)
+		{
+			return;
+		}
+
+		region.clear(detailLevel, posX, posZ);
+	}
 	
 	public boolean getRegenByArrayIndex(int xIndex, int zIndex)
 	{
@@ -761,4 +791,5 @@ public class LodDimension
 		}
 		return stringBuilder.toString();
 	}
+
 }

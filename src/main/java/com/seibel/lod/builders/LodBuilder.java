@@ -88,7 +88,7 @@ public class LodBuilder
 	public static final ConcurrentMap<Block, Integer> colorMap = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<Block, VoxelShape> shapeMap = new ConcurrentHashMap<>();
 
-	public static final ModelDataMap dataMap = new ModelDataMap.Builder().build() ;
+	public static final ModelDataMap dataMap = new ModelDataMap.Builder().build();
 
 	/**
 	 * If no blocks are found in the area in determineBottomPointForArea return this
@@ -134,7 +134,7 @@ public class LodBuilder
 				// get the textures for blocks
 				if (mc.getClientWorld() == null)
 					return;
-				
+
 				DimensionType dim = world.dimensionType();
 
 				LodDimension lodDim;
@@ -239,17 +239,28 @@ public class LodBuilder
 								isServer);
 						break;
 					case MULTI_LOD:
-						long[][] dataToMergeVertical;
+						long[] dataToMergeVertical;
 						dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-						data = DataPointUtil.mergeMultiData(dataToMergeVertical);
+						data = DataPointUtil.mergeMultiData(dataToMergeVertical, detailLevel);
 						if (data.length == 0 || data == null)
 							data = new long[]{DataPointUtil.EMPTY_DATA};
-						lodDim.addData(detailLevel,
-								posX,
-								posZ,
-								data,
-								false,
-								isServer);
+						//lodDim.clear(detailLevel, posX, posZ);
+						for (int verticalIndex = 0; (verticalIndex < data.length) && (verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ)); verticalIndex++)
+						{
+							lodDim.addData(detailLevel,
+									posX,
+									posZ,
+									verticalIndex,
+									data[verticalIndex],
+									false,
+									isServer);
+							long dataTest = lodDim.getData(detailLevel,
+									posX,
+									posZ,
+									verticalIndex);
+							System.out.println(DataPointUtil.toString(dataTest));
+						}
+
 						break;
 				}
 
@@ -263,11 +274,12 @@ public class LodBuilder
 
 	}
 
-	private long[][] createVerticalDataToMerge(LodDetail detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
+	private long[] createVerticalDataToMerge(LodDetail detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{
-		long[][] dataToMerge = ThreadMapUtil.getBuilderVerticalArray()[detail.detailLevel];
-		ChunkPos chunkPos = chunk.getPos();
+		long[] dataToMerge = ThreadMapUtil.getBuilderVerticalArray()[detail.detailLevel];
+		int verticalData = DataPointUtil.WORLD_HEIGHT;
 
+		ChunkPos chunkPos = chunk.getPos();
 		int size = 1 << detail.detailLevel;
 		int height = 0;
 		int depth = 0;
@@ -286,17 +298,18 @@ public class LodBuilder
 
 		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
 		int index = 0;
+
 		if (dataToMerge == null)
 		{
-			dataToMerge = new long[size * size][DataPointUtil.WORLD_HEIGHT];
+			dataToMerge = new long[size * size * DataPointUtil.WORLD_HEIGHT];
 		}
 		//dataToMerge = new long[size * size][1024];
 
 		for (index = 0; index < size * size; index++)
 		{
-			for (int i = 0; i < dataToMerge[index].length; i++)
+			for (int verticalIndex = 0; verticalIndex < verticalData; verticalIndex++)
 			{
-				dataToMerge[index][i] = 0;
+				dataToMerge[index * verticalData + verticalIndex] = DataPointUtil.EMPTY_DATA;
 			}
 			xRel = Math.floorMod(index, size) + startX;
 			zRel = Math.floorDiv(index, size) + startZ;
@@ -314,21 +327,20 @@ public class LodBuilder
 				//If the lod is at default, then we set this as void data
 				if (height == DEFAULT_HEIGHT)
 				{
-					dataToMerge[index][0] = DataPointUtil.createVoidDataPoint(generation);
+					dataToMerge[index * verticalData + 0] = DataPointUtil.createVoidDataPoint(generation);
 					break;
 				}
 
 				yAbs = height - 1;
 				// We search light on above air block
 				depth = determineBottomPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
-				if(hasCeiling && topBlock)
+				if (hasCeiling && topBlock)
 				{
 					yAbs = depth;
 					color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
 					blockPos.set(xAbs, yAbs - 1, zAbs);
 					light = getLightValue(chunk, blockPos, true);
-				}
-				else
+				} else
 				{
 					color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
 					blockPos.set(xAbs, yAbs + 1, zAbs);
@@ -337,14 +349,14 @@ public class LodBuilder
 				blockPos.set(xAbs, yAbs + 1, zAbs);
 				light = getLightValue(chunk, blockPos, hasCeiling && topBlock);
 				lightBlock = light & 0b1111;
-				if(!hasCeiling && topBlock)
+				if (!hasCeiling && topBlock)
 					lightSky = 15; //default max light
 				else
 					lightSky = (light >> 4) & 0b1111;
 
 				topBlock = false;
 
-				dataToMerge[index][count] = DataPointUtil.createDataPoint(height, depth, color, lightSky, lightBlock, generation);
+				dataToMerge[index * verticalData + count] = DataPointUtil.createDataPoint(height, depth, color, lightSky, lightBlock, generation);
 				yAbs = depth - 1;
 				count++;
 			}
@@ -605,7 +617,7 @@ public class LodBuilder
 		blockLight = world.getBrightness(LightType.BLOCK, blockPos);
 		skyLight = world.getBrightness(LightType.SKY, blockPos);
 
-		if(ceilingTopBlock)
+		if (ceilingTopBlock)
 			blockPos.set(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ());
 		else
 			blockPos.set(blockPos.getX(), blockPos.getY() - 1, blockPos.getZ());
@@ -625,19 +637,17 @@ public class LodBuilder
 
 		World world = mc.getClientWorld();
 		TextureAtlasSprite texture;
-		if(topTextureRequired)
+		if (topTextureRequired)
 		{
 			List<BakedQuad> quad = ((IForgeBakedModel) mc.getModelManager().getBlockModelShaper().getBlockModel(blockState)).getQuads(blockState, Direction.UP, new Random(0), dataMap);
 			if (!quad.isEmpty())
 			{
 				texture = quad.get(0).getSprite();
-			}
-			else
+			} else
 			{
 				texture = mc.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
 			}
-		}
-		else
+		} else
 		{
 			texture = mc.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
 		}
@@ -660,7 +670,7 @@ public class LodBuilder
 						/*if (blockState.getBlock() instanceof LeavesBlock)
 							color = 0;
 						else*/
-							continue;
+						continue;
 					} else
 					{
 						color = texture.getPixelRGBA(k, i, j);

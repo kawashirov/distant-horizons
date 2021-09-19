@@ -4,6 +4,9 @@ import com.seibel.lod.enums.DistanceGenerationMode;
 
 import net.minecraft.client.renderer.texture.NativeImage;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 public class DataPointUtil
 {
 	/*
@@ -281,7 +284,7 @@ public class DataPointUtil
 		int size = dataToMerge.length / inputVerticalData;
 		short[] projection = ThreadMapUtil.getProjectionShort((WORLD_HEIGHT + 1) / 16);
 		short[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth(inputVerticalData);
-		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(dataToMerge.length);
+		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(size);
 		int genMode = DistanceGenerationMode.SERVER.complexity;
 		boolean allEmpty = true;
 		boolean allVoid = true;
@@ -383,7 +386,7 @@ public class DataPointUtil
 		{
 			depth = heightAndDepth[j][0];
 			height = heightAndDepth[j][1];
-			for(int k = 0; k < dataToMerge.length; k++){
+			for(int k = 0; k < size; k++){
 				singleDataToMerge[k] = 0;
 			}
 			for (int index = 0; index < size; index++)
