@@ -110,7 +110,7 @@ public class VerticalLevelContainer implements LevelContainer
 				dataToMerge[2*z + x] = lowerLevelContainer.getData(childPosX, childPosZ);
 			}
 		}
-		data = DataPointUtil.mergeVerticalData(dataToMerge);
+		data = DataPointUtil.mergeMultiData(dataToMerge);
 		addData(data,posX,posZ);
 	}
 

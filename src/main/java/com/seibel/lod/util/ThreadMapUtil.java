@@ -7,23 +7,23 @@ public class ThreadMapUtil
 {
 	private static final int NUMBER_OF_DIRECTION = 4;
 
-	public static final ConcurrentMap<String, long[]> threadSingleAddDataMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String, long[]> threadSingleGetDataMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String, long[]> threadSingleUpdateMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String, long[][]> threadBuilderArrayMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String, long[][][]> threadBuilderVerticalArrayMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String, long[]> threadVerticalAddDataMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String, long[]> threadVerticalGetDataMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String, long[][]> threadVerticalUpdateMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String, int[]> threadVerticalIndexesMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String, long[]> threadSingleAddDataMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<String, long[]> threadSingleGetDataMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<String, long[]> threadSingleUpdateMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<String, long[][]> threadBuilderArrayMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<String, long[][][]> threadBuilderVerticalArrayMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<String, long[]> threadVerticalAddDataMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<String, long[]> threadVerticalGetDataMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<String, long[][]> threadVerticalUpdateMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<String, int[]> threadVerticalIndexesMap = new ConcurrentHashMap<>();
 
 
-	public static final ConcurrentMap<String, long[]> threadAdjData = new ConcurrentHashMap();
+	public static final ConcurrentMap<String, long[]> threadAdjData = new ConcurrentHashMap<>();
 
-	public static final ConcurrentMap<String, boolean[]> projectionMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String, short[]> projectionShortMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String, int[][]> heightAndDepthMap = new ConcurrentHashMap();
-	public static final ConcurrentMap<String, long[]> singleDataToMergeMap = new ConcurrentHashMap();
+	public static final ConcurrentMap<String, boolean[]> projectionMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<String, short[]> projectionShortMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<String, int[][]> heightAndDepthMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<String, long[]> singleDataToMergeMap = new ConcurrentHashMap<>();
 
 
 	public static long[] getSingleAddDataArray()

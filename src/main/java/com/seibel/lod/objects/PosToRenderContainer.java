@@ -1,8 +1,14 @@
 package com.seibel.lod.objects;
 
+import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 
+/**
+ * 
+ * @author Leonardo Amato
+ * @version 9-18-2021
+ */
 public class PosToRenderContainer
 {
 	public byte minDetail;
@@ -26,6 +32,18 @@ public class PosToRenderContainer
 
 	public void addPosToRender(byte detailLevel, int posX, int posZ)
 	{
+		// When rapidly changing dimensions the bufferBuidler can cause this,
+		// James isn't sure why, but this will prevent an exception at
+		// the very least (while stilling logging the problem). 
+		if (numberOfPosToRender >= posToRender.length)
+		{
+			// This is might be due to dimensions having a different width
+			// when first loading in
+			ClientProxy.LOGGER.error("Unable to addPosToRender. numberOfPosToRender [" + numberOfPosToRender +"] detailLevel [" + detailLevel + "] Pos [" + posX + "," + posZ + "]");
+			numberOfPosToRender++; // incrementing so we can see how many pos over the limit we would go
+			return;
+		}
+		
 		//if(numberOfPosToRender >= posToRender.length)
 		//	posToRender = Arrays.copyOf(posToRender, posToRender.length*2);
 		posToRender[numberOfPosToRender][0] = detailLevel;

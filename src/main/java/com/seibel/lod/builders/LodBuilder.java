@@ -29,13 +29,26 @@ import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.enums.LodQualityMode;
-import com.seibel.lod.util.*;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
+import com.seibel.lod.util.ColorUtil;
+import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.DetailDistanceUtil;
+import com.seibel.lod.util.LevelPosUtil;
+import com.seibel.lod.util.LodThreadFactory;
+import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
-import net.minecraft.block.*;
+import net.minecraft.block.AbstractPlantBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.BushBlock;
+import net.minecraft.block.GrassBlock;
+import net.minecraft.block.IGrowable;
+import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -49,14 +62,11 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeColors;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.client.extensions.IForgeBakedModel;
 import net.minecraftforge.client.model.data.ModelDataMap;
-
-import javax.swing.*;
 
 /**
  * This object is in charge of creating Lod related objects. (specifically: Lod
@@ -64,10 +74,12 @@ import javax.swing.*;
  *
  * @author Leonardo Amato
  * @author James Seibel
- * @version 9-7-2021
+ * @version 9-18-2021
  */
 public class LodBuilder
 {
+	private static MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
+
 	private ExecutorService lodGenThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
 
 	public static final int CHUNK_DATA_WIDTH = LodUtil.CHUNK_WIDTH;
@@ -118,20 +130,25 @@ public class LodBuilder
 		{
 			try
 			{
+				// we need a loaded client world in order to
+				// get the textures for blocks
+				if (mc.getClientWorld() == null)
+					return;
+				
 				DimensionType dim = world.dimensionType();
 
 				LodDimension lodDim;
 
 				int playerPosX;
 				int playerPosZ;
-				if (MinecraftWrapper.INSTANCE.getPlayer() == null)
+				if (mc.getPlayer() == null)
 				{
 					playerPosX = chunk.getPos().getMinBlockX();
 					playerPosZ = chunk.getPos().getMinBlockZ();
 				} else
 				{
-					playerPosX = (int) MinecraftWrapper.INSTANCE.getPlayer().getX();
-					playerPosZ = (int) MinecraftWrapper.INSTANCE.getPlayer().getZ();
+					playerPosX = (int) mc.getPlayer().getX();
+					playerPosZ = (int) mc.getPlayer().getZ();
 				}
 				if (lodWorld.getLodDimension(dim) == null)
 				{
@@ -181,10 +198,6 @@ public class LodBuilder
 		int startZ;
 		int endX;
 		int endZ;
-		int color;
-		byte light;
-		short height;
-		short depth;
 		try
 		{
 			LodDetail detail;
@@ -228,7 +241,7 @@ public class LodBuilder
 					case MULTI_LOD:
 						long[][] dataToMergeVertical;
 						dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-						data = DataPointUtil.mergeVerticalData(dataToMergeVertical);
+						data = DataPointUtil.mergeMultiData(dataToMergeVertical);
 						if (data.length == 0 || data == null)
 							data = new long[]{DataPointUtil.EMPTY_DATA};
 						lodDim.addData(detailLevel,
@@ -269,7 +282,7 @@ public class LodBuilder
 		int xAbs;
 		int yAbs;
 		int zAbs;
-		boolean hasCeiling = MinecraftWrapper.INSTANCE.getWorld().dimensionType().hasCeiling();
+		boolean hasCeiling = mc.getClientWorld().dimensionType().hasCeiling();
 
 		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
 		int index = 0;
@@ -582,12 +595,12 @@ public class LodBuilder
 	{
 		int skyLight;
 		int blockLight;
-		if (MinecraftWrapper.INSTANCE.getPlayer() == null)
+		if (mc.getPlayer() == null)
 			return 0;
-		if (MinecraftWrapper.INSTANCE.getPlayer().level == null)
+		if (mc.getPlayer().level == null)
 			return 0;
 
-		IWorld world = MinecraftWrapper.INSTANCE.getPlayer().level;
+		IWorld world = mc.getPlayer().level;
 
 		blockLight = world.getBrightness(LightType.BLOCK, blockPos);
 		skyLight = world.getBrightness(LightType.SKY, blockPos);
@@ -610,23 +623,23 @@ public class LodBuilder
 			return colorMap.get(blockState.getBlock());
 
 
-		World world = MinecraftWrapper.INSTANCE.getWorld();
+		World world = mc.getClientWorld();
 		TextureAtlasSprite texture;
 		if(topTextureRequired)
 		{
-			List<BakedQuad> quad = ((IForgeBakedModel) MinecraftWrapper.INSTANCE.getModelManager().getBlockModelShaper().getBlockModel(blockState)).getQuads(blockState, Direction.UP, new Random(0), dataMap);
+			List<BakedQuad> quad = ((IForgeBakedModel) mc.getModelManager().getBlockModelShaper().getBlockModel(blockState)).getQuads(blockState, Direction.UP, new Random(0), dataMap);
 			if (!quad.isEmpty())
 			{
 				texture = quad.get(0).getSprite();
 			}
 			else
 			{
-				texture = MinecraftWrapper.INSTANCE.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
+				texture = mc.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
 			}
 		}
 		else
 		{
-			texture = MinecraftWrapper.INSTANCE.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
+			texture = mc.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
 		}
 
 
@@ -688,15 +701,13 @@ public class LodBuilder
 		int z = blockPos.getZ();
 		Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, y >> 2, zRel >> 2);
 		int brightness;
-		int red = 0;
-		int green = 0;
-		int blue = 0;
 
 		BlockState blockState = chunk.getBlockState(blockPos);
 		int colorInt = 0;
 
 
 		// block special cases
+		// TODO: this needs to be replaced by a config file of some sort
 		if (blockState == Blocks.AIR.defaultBlockState()
 				    || blockState == Blocks.CAVE_AIR.defaultBlockState()
 				    || blockState == Blocks.BARRIER.defaultBlockState())
@@ -720,7 +731,7 @@ public class LodBuilder
 		{
 			colorInt = Blocks.NETHER_WART_BLOCK.defaultMaterialColor().col;
 		} else if (blockState.getBlock().equals(Blocks.TWISTING_VINES)
-				           || blockState.equals(Blocks.TWISTING_VINES_PLANT)
+				           || blockState.equals(Blocks.TWISTING_VINES_PLANT.defaultBlockState())
 				           || blockState == Blocks.WARPED_ROOTS.defaultBlockState()
 				           || blockState == Blocks.WARPED_FUNGUS.defaultBlockState()
 				           || blockState == Blocks.NETHER_SPROUTS.defaultBlockState())

@@ -1,12 +1,8 @@
 package com.seibel.lod.util;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.wrappers.MinecraftWrapper;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.texture.NativeImage;
 
-import javax.xml.crypto.Data;
-import java.lang.annotation.Native;
+import net.minecraft.client.renderer.texture.NativeImage;
 
 public class DataPointUtil
 {
@@ -171,8 +167,8 @@ public class DataPointUtil
 
 	public static int getColor(long dataPoint)
 	{
-		int color = getBlue(dataPoint) << BLUE_COLOR_SHIFT;
-		color += getRed(dataPoint) << BLUE_COLOR_SHIFT;
+		//int color = getBlue(dataPoint) << BLUE_COLOR_SHIFT;
+		//color += getRed(dataPoint) << BLUE_COLOR_SHIFT;
 		return (int) (dataPoint >>> COLOR_SHIFT);
 	}
 
@@ -220,7 +216,6 @@ public class DataPointUtil
 	public static long mergeSingleData(long[] dataToMerge)
 	{
 		int numberOfChildren = 0;
-		int numberOfVoidChildren = 0;
 
 		int tempAlpha = 0;
 		int tempRed = 0;
@@ -281,7 +276,7 @@ public class DataPointUtil
 		}
 	}
 
-	public static long[] mergeVerticalData(long[][] dataToMerge)
+	public static long[] mergeMultiData(long[][] dataToMerge)
 	{
 		//new code
 		short[] projection = ThreadMapUtil.getProjectionShort((WORLD_HEIGHT + 1 ) >>> 4);

@@ -17,24 +17,16 @@
  */
 package com.seibel.lod.builders.lodTemplates;
 
-import com.seibel.lod.config.LodConfig;
+import java.util.Map;
+
 import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.enums.ShadingMode;
-import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.LodUtil;
 
-import com.seibel.lod.wrappers.MinecraftWrapper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.DimensionType;
-
-import java.lang.annotation.Native;
 
 /**
  * Builds LODs as rectangular prisms.
@@ -44,20 +36,27 @@ import java.lang.annotation.Native;
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {
-	private final int CULL_OFFSET = 16;
-
+	
 	public CubicLodTemplate()
 	{
 
 	}
 
 	@Override
-	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, long[] adjData,
+	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
 	                           byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap)
 	{
 		int width = 1 << detailLevel;
 
+		int color = DataPointUtil.getLightColor(data, lightMap);
 		// add each LOD for the detail level
+
+		if (debugging != DebugMode.OFF)
+
+		{
+			color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[detailLevel].getRGB();
+		}
+
 		generateBoundingBox(
 				box,
 				DataPointUtil.getHeight(data),
@@ -66,28 +65,19 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				posX * width,
 				0,
 				posZ * width,
-				bufferCenterBlockPos);
-		int color;
-		color = DataPointUtil.getLightColor(data,lightMap);
-
-		//color = DataPointUtil.getColor(data);
-
-
-		if (debugging != DebugMode.OFF)
-
-		{
-			color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[detailLevel].getRGB();
-		}
+				bufferCenterBlockPos,
+				adjData,
+				color);
 
 		if (box != null)
 
 		{
-			addBoundingBoxToBuffer(buffer, box, color, bufferCenterBlockPos, adjData);
+			addBoundingBoxToBuffer(buffer, box);
 		}
 
 	}
 
-	private void generateBoundingBox(Box box, int height, int depth, int width, double xOffset, double yOffset, double zOffset, BlockPos bufferCenterBlockPos)
+	private void generateBoundingBox(Box box, int height, int depth, int width, double xOffset, double yOffset, double zOffset, BlockPos bufferCenterBlockPos, Map<Direction, long[]> adjData, int color)
 	{
 		// don't add an LOD if it is empty
 		if (height == -1 && depth == -1)
@@ -105,285 +95,34 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		// which only uses floats
 		double x = -bufferCenterBlockPos.getX();
 		double z = -bufferCenterBlockPos.getZ();
+		box.reset();
+		box.setColor(color);
 		box.set(width, height - depth, width);
-		box.move((int) (xOffset + x), (int) (yOffset + depth), (int) (zOffset + z));
+		box.move((int) (xOffset + x), (int) (depth + yOffset), (int) (zOffset + z));
+		box.setUpCulling(32);
+		box.setAdjData(adjData);
 	}
 
-	private void addBoundingBoxToBuffer(BufferBuilder buffer, Box box, int c, BlockPos playerBlockPos, long[] adjData)
+	private void addBoundingBoxToBuffer(BufferBuilder buffer, Box box)
 	{
-		int topColor = c;
-		int bottomColor = c;
-		int northColor = c;
-		int southColor = c;
-		int westColor = c;
-		int eastColor = c;
-
-		// darken the bottom and side colors if requested
-		if (LodConfig.CLIENT.graphics.shadingMode.get() == ShadingMode.DARKEN_SIDES)
+		for(Direction direction : Box.DIRECTIONS)
 		{
-			// the side colors are different because
-			// when using fast lighting in Minecraft the north/south
-			// and east/west sides are different in a similar way
-			/**TODO OPTIMIZE THIS STEP*/
-			Minecraft mc = Minecraft.getInstance();
-			topColor = ColorUtil.applyShade(c, mc.level.getShade(Direction.UP, true));
-			bottomColor = ColorUtil.applyShade(c, mc.level.getShade(Direction.DOWN, true));
-			northColor = ColorUtil.applyShade(c, mc.level.getShade(Direction.NORTH, true));
-			southColor = ColorUtil.applyShade(c, mc.level.getShade(Direction.SOUTH, true));
-			westColor = ColorUtil.applyShade(c, mc.level.getShade(Direction.WEST, true));
-			eastColor = ColorUtil.applyShade(c, mc.level.getShade(Direction.EAST, true));
-		}
-
-		// apply the user specified saturation and brightness
-		float saturationMultiplier = LodConfig.CLIENT.graphics.saturationMultiplier.get().floatValue();
-		float brightnessMultiplier = LodConfig.CLIENT.graphics.brightnessMultiplier.get().floatValue();
-
-		if (saturationMultiplier != 1 || brightnessMultiplier != 1)
-		{
-			topColor = ColorUtil.applySaturationAndBrightnessMultipliers(topColor, saturationMultiplier, brightnessMultiplier);
-			bottomColor = ColorUtil.applySaturationAndBrightnessMultipliers(bottomColor, saturationMultiplier, brightnessMultiplier);
-			northColor = ColorUtil.applySaturationAndBrightnessMultipliers(northColor, saturationMultiplier, brightnessMultiplier);
-			southColor = ColorUtil.applySaturationAndBrightnessMultipliers(southColor, saturationMultiplier, brightnessMultiplier);
-			westColor = ColorUtil.applySaturationAndBrightnessMultipliers(westColor, saturationMultiplier, brightnessMultiplier);
-			eastColor = ColorUtil.applySaturationAndBrightnessMultipliers(eastColor, saturationMultiplier, brightnessMultiplier);
-		}
-		int minX;
-		int maxX;
-		int minY;
-		int maxY;
-		int minZ;
-		int maxZ;
-		long data;
-		int tempMinY;
-		int tempMaxY;
-
-		int red;
-		int green;
-		int blue;
-		int alpha;
-		boolean disableCulling = true;
-		/**TODO make all of this more automatic if possible*/
-		if (playerBlockPos.getY() > box.getMaxY() - CULL_OFFSET || disableCulling)
-		{
-			red = ColorUtil.getRed(topColor);
-			green = ColorUtil.getGreen(topColor);
-			blue = ColorUtil.getBlue(topColor);
-			alpha = ColorUtil.getAlpha(topColor);
-			// top (facing up)
-			minX = box.getMinX();
-			maxX = box.getMaxX();
-			minY = box.getMinY();
-			maxY = box.getMaxY();
-			minZ = box.getMinZ();
-			maxZ = box.getMaxZ();
-			addPosAndColor(buffer, minX, maxY, minZ, red, green, blue, alpha);
-			addPosAndColor(buffer, minX, maxY, maxZ, red, green, blue, alpha);
-			addPosAndColor(buffer, maxX, maxY, maxZ, red, green, blue, alpha);
-			addPosAndColor(buffer, maxX, maxY, minZ, red, green, blue, alpha);
-		}
-		if (playerBlockPos.getY() < box.getMinY() + CULL_OFFSET || disableCulling)
-		{
-			red = ColorUtil.getRed(bottomColor);
-			green = ColorUtil.getGreen(bottomColor);
-			blue = ColorUtil.getBlue(bottomColor);
-			alpha = ColorUtil.getAlpha(bottomColor);
-			// bottom (facing down)
-			minX = box.getMinX();
-			maxX = box.getMaxX();
-			minY = box.getMinY();
-			maxY = box.getMaxY();
-			minZ = box.getMinZ();
-			maxZ = box.getMaxZ();
-			addPosAndColor(buffer, maxX, minY, minZ, red, green, blue, alpha);
-			addPosAndColor(buffer, maxX, minY, maxZ, red, green, blue, alpha);
-			addPosAndColor(buffer, minX, minY, maxZ, red, green, blue, alpha);
-			addPosAndColor(buffer, minX, minY, minZ, red, green, blue, alpha);
-		}
-
-		if (playerBlockPos.getX() < box.getMaxX() + CULL_OFFSET || disableCulling)
-		{
-			red = ColorUtil.getRed(westColor);
-			green = ColorUtil.getGreen(westColor);
-			blue = ColorUtil.getBlue(westColor);
-			alpha = ColorUtil.getAlpha(westColor);
-			// west (facing -X)
-			data = adjData[0];
-
-			minX = box.getMinX();
-			maxX = box.getMaxX();
-			minY = box.getMinY();
-			maxY = box.getMaxY();
-			minZ = box.getMinZ();
-			maxZ = box.getMaxZ();
-			if (data == 0)
+			//if(box.isCulled(direction))
+			//	continue;
+			int adjIndex = 0;
+			while(box.shouldContinue(direction, adjIndex))
 			{
-				addPosAndColor(buffer, minX, minY, minZ, red, green, blue, alpha);
-				addPosAndColor(buffer, minX, minY, maxZ, red, green, blue, alpha);
-				addPosAndColor(buffer, minX, maxY, maxZ, red, green, blue, alpha);
-				addPosAndColor(buffer, minX, maxY, minZ, red, green, blue, alpha);
-			}else
-			{
-				maxY = box.getMaxY();
-				tempMaxY = DataPointUtil.getHeight(data);
-				if (tempMaxY < maxY)
+				for (int vertexIndex = 0; vertexIndex < 4; vertexIndex++)
 				{
-					minY = Math.max(tempMaxY, minY);
-					addPosAndColor(buffer, minX, minY, minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, minX, minY, maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, minX, maxY, maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, minX, maxY, minZ, red, green, blue, alpha);
+					addPosAndColor(buffer,
+							box.getX(direction, vertexIndex),
+							box.getY(direction, vertexIndex, adjIndex),
+							box.getZ(direction, vertexIndex),
+							box.getColor(direction));
 				}
-				tempMinY = DataPointUtil.getDepth(data);
-				minY = box.getMinY();
-				if (tempMinY > minY)
-				{
-					maxY = Math.min(tempMinY, maxY);
-					addPosAndColor(buffer, minX, minY, minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, minX, minY, maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, minX, maxY, maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, minX, maxY, minZ, red, green, blue, alpha);
-				}
+				adjIndex++;
 			}
 		}
-
-		if (playerBlockPos.getX() > box.getMinX() - CULL_OFFSET || disableCulling)
-		{
-			red = ColorUtil.getRed(eastColor);
-			green = ColorUtil.getGreen(eastColor);
-			blue = ColorUtil.getBlue(eastColor);
-			alpha = ColorUtil.getAlpha(eastColor);
-			// east (facing +X)
-			data = adjData[1];
-			minX = box.getMinX();
-			maxX = box.getMaxX();
-			minY = box.getMinY();
-			maxY = box.getMaxY();
-			minZ = box.getMinZ();
-			maxZ = box.getMaxZ();
-			if (data == 0)
-			{
-				addPosAndColor(buffer, maxX, maxY, minZ, red, green, blue, alpha);
-				addPosAndColor(buffer, maxX, maxY, maxZ, red, green, blue, alpha);
-				addPosAndColor(buffer, maxX, minY, maxZ, red, green, blue, alpha);
-				addPosAndColor(buffer, maxX, minY, minZ, red, green, blue, alpha);
-			}
-			else
-			{
-				maxY = box.getMaxY();
-				tempMaxY = DataPointUtil.getHeight(data);
-				if (tempMaxY < maxY)
-				{
-					minY = Math.max(tempMaxY, minY);
-					addPosAndColor(buffer, maxX, maxY, minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, maxX, maxY, maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, maxX, minY, maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, maxX, minY, minZ, red, green, blue, alpha);
-				}
-				tempMinY = DataPointUtil.getDepth(data);
-				minY = box.getMinY();
-				if (tempMinY > minY)
-				{
-					maxY = Math.min(tempMinY, maxY);
-					addPosAndColor(buffer, maxX, maxY, minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, maxX, maxY, maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, maxX, minY, maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, maxX, minY, minZ, red, green, blue, alpha);
-				}
-			}
-		}
-
-		if (playerBlockPos.getZ() > box.getMinZ() - CULL_OFFSET || disableCulling)
-		{
-			red = ColorUtil.getRed(northColor);
-			green = ColorUtil.getGreen(northColor);
-			blue = ColorUtil.getBlue(northColor);
-			alpha = ColorUtil.getAlpha(northColor);
-			data = adjData[3];
-			minX = box.getMinX();
-			maxX = box.getMaxX();
-			minY = box.getMinY();
-			maxY = box.getMaxY();
-			minZ = box.getMinZ();
-			maxZ = box.getMaxZ();
-			// north (facing +Z)
-			if (data == 0)
-			{
-				addPosAndColor(buffer, maxX, minY, maxZ, red, green, blue, alpha);
-				addPosAndColor(buffer, maxX, maxY, maxZ, red, green, blue, alpha);
-				addPosAndColor(buffer, minX, maxY, maxZ, red, green, blue, alpha);
-				addPosAndColor(buffer, minX, minY, maxZ, red, green, blue, alpha);
-			}
-			else
-			{
-				maxY = box.getMaxY();
-				tempMaxY = DataPointUtil.getHeight(data);
-				if (tempMaxY < maxY)
-				{
-					minY = Math.max(tempMaxY, minY);
-					addPosAndColor(buffer, maxX, minY, maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, maxX, maxY, maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, minX, maxY, maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, minX, minY, maxZ, red, green, blue, alpha);
-				}
-				tempMinY = DataPointUtil.getDepth(data);
-				minY = box.getMinY();
-				if (tempMinY > minY)
-				{
-					maxY = Math.min(tempMinY, maxY);
-					addPosAndColor(buffer, maxX, minY, maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, maxX, maxY, maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, minX, maxY, maxZ, red, green, blue, alpha);
-					addPosAndColor(buffer, minX, minY, maxZ, red, green, blue, alpha);
-				}
-			}
-		}
-
-		if (playerBlockPos.getZ() < box.getMaxZ() + CULL_OFFSET || disableCulling)
-		{
-			red = ColorUtil.getRed(southColor);
-			green = ColorUtil.getGreen(southColor);
-			blue = ColorUtil.getBlue(southColor);
-			alpha = ColorUtil.getAlpha(southColor);
-			data = adjData[2];
-			minX = box.getMinX();
-			maxX = box.getMaxX();
-			minY = box.getMinY();
-			maxY = box.getMaxY();
-			minZ = box.getMinZ();
-			maxZ = box.getMaxZ();
-			// south (facing -Z)
-			if (data == 0)
-			{
-				addPosAndColor(buffer, minX, minY, minZ, red, green, blue, alpha);
-				addPosAndColor(buffer, minX, maxY, minZ, red, green, blue, alpha);
-				addPosAndColor(buffer, maxX, maxY, minZ, red, green, blue, alpha);
-				addPosAndColor(buffer, maxX, minY, minZ, red, green, blue, alpha);
-			}
-			else
-			{
-				maxY = box.getMaxY();
-				tempMaxY = DataPointUtil.getHeight(data);
-				if (tempMaxY < maxY)
-				{
-					minY = Math.max(tempMaxY, minY);
-					addPosAndColor(buffer, minX, minY, minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, minX, maxY, minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, maxX, maxY, minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, maxX, minY, minZ, red, green, blue, alpha);
-				}
-				tempMinY = DataPointUtil.getDepth(data);
-				minY = box.getMinY();
-				if (tempMinY > minY)
-				{
-					maxY = Math.min(tempMinY, maxY);
-					addPosAndColor(buffer, minX, minY, minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, minX, maxY, minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, maxX, maxY, minZ, red, green, blue, alpha);
-					addPosAndColor(buffer, maxX, minY, minZ, red, green, blue, alpha);
-				}
-			}
-		}
-
 	}
 
 	@Override

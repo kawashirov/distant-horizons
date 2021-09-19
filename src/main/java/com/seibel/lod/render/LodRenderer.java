@@ -23,7 +23,6 @@ import java.nio.FloatBuffer;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import net.minecraft.client.renderer.texture.NativeImage;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
@@ -53,6 +52,7 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.client.renderer.vertex.VertexFormat;
@@ -62,7 +62,6 @@ import net.minecraft.potion.Effects;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
@@ -73,7 +72,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world.
  *
  * @author James Seibel
- * @version 9-14-2021
+ * @version 9-18-2021
  */
 public class LodRenderer
 {
@@ -124,7 +123,10 @@ public class LodRenderer
 	 * This is used to determine if the LODs should be regenerated
 	 */
 	private int[] previousPos = new int[]{0,0,0};
+	
 	public NativeImage lightMap = null;
+	
+	// these variables are used to determine if the buffers should be rebuilt
 	private long prevDayTime = 0;
 	private double prevBrightness = 0;
 	private int prevRenderDistance = 0;
@@ -245,15 +247,20 @@ public class LodRenderer
 
 		// get the default projection matrix so we can
 		// reset it after drawing the LODs
-		float[] defaultProjMatrix = new float[16];
-		GL11.glGetFloatv(GL11.GL_PROJECTION_MATRIX, defaultProjMatrix);
-
+		float[] mcProjMatrixRaw = new float[16];
+		GL11.glGetFloatv(GL11.GL_PROJECTION_MATRIX, mcProjMatrixRaw);
+		Matrix4f mcProjectionMatrix = new Matrix4f(mcProjMatrixRaw);
+		// OpenGl outputs their matricies in col,row form instead of row,col
+		// (or maybe vice versa I have no idea :P)
+		mcProjectionMatrix.transpose();
+		
 		Matrix4f modelViewMatrix = generateModelViewMatrix(partialTicks);
 
 		// required for setupFog and setupProjectionMatrix
 		farPlaneBlockDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
 
-		setupProjectionMatrix(partialTicks);
+		setupProjectionMatrix(mcProjectionMatrix, partialTicks);
+		// commented out until we can add shaders to handle lighting
 		//setupLighting(lodDim, partialTicks);
 
 		NearFarFogSettings fogSettings = determineFogSettings();
@@ -278,6 +285,7 @@ public class LodRenderer
 			Vector3d cameraDir = cameraEntity.getLookAngle().normalize();
 			cameraDir = mc.getOptions().getCameraType().isMirrored() ? cameraDir.reverse() : cameraDir;
 			
+			boolean cullingDisabled = LodConfig.CLIENT.graphics.disableDirectionalCulling.get();
 			
 			// used to determine what type of fog to render
 			int halfWidth = vbos.length / 2;
@@ -288,7 +296,7 @@ public class LodRenderer
 				for (int j = 0; j < vbos.length; j++)
 				{
 					RegionPos vboPos = new RegionPos(i + lodDim.getCenterX() - lodDim.getWidth() / 2, j + lodDim.getCenterZ() - lodDim.getWidth() / 2);
-					if (RenderUtil.isRegionInViewFrustum(cameraEntity.blockPosition(), cameraDir, vboPos.blockPos()))
+					if (cullingDisabled || RenderUtil.isRegionInViewFrustum(cameraEntity.blockPosition(), cameraDir, vboPos.blockPos()))
 					{
 						if ((i > halfWidth - quarterWidth && i < halfWidth + quarterWidth) && (j > halfWidth - quarterWidth && j < halfWidth + quarterWidth))
 							setupFog(fogSettings.near.distance, fogSettings.near.quality);
@@ -323,10 +331,8 @@ public class LodRenderer
 
 		// reset the projection matrix so anything drawn after
 		// the LODs will use the correct projection matrix
-		Matrix4f mvm = new Matrix4f(defaultProjMatrix);
-		mvm.transpose();
-		gameRender.resetProjectionMatrix(mvm);
-
+		gameRender.resetProjectionMatrix(mcProjectionMatrix);
+		
 		// clear the depth buffer so anything drawn is drawn
 		// over the LODs
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
@@ -495,69 +501,50 @@ public class LodRenderer
 
 	/**
 	 * create a new projection matrix and send it over to the GPU
-	 * <br><br>
-	 * A lot of this code is copied from renderLevel (line 567)
-	 * in the GameRender class. The code copied is anything with
-	 * a matrixStack and is responsible for making sure the LOD
-	 * objects distort correctly relative to the rest of the world.
-	 * Distortions are caused by: standing in a nether portal,
-	 * nausea potion effect, walking bobbing.
-	 *
+	 * 
+	 * @param currentProjectionMatrix this is Minecraft's current projection matrix
 	 * @param partialTicks how many ticks into the frame we are
 	 */
-	private void setupProjectionMatrix(float partialTicks)
+	private void setupProjectionMatrix(Matrix4f currentProjectionMatrix, float partialTicks)
 	{
-		// Note: if the LOD objects don't distort correctly
-		// compared to regular minecraft terrain, make sure
-		// all the transformations in renderWorld are here too
-
-		MatrixStack matrixStack = new MatrixStack();
-		matrixStack.pushPose();
-
-		gameRender.bobHurt(matrixStack, partialTicks);
-		if (this.mc.getOptions().bobView)
-		{
-			gameRender.bobView(matrixStack, partialTicks);
-		}
-
-		// potion and nausea effects
-		float f = MathHelper.lerp(partialTicks, this.mc.getPlayer().oPortalTime, this.mc.getPlayer().portalTime) * this.mc.getOptions().screenEffectScale * this.mc.getOptions().screenEffectScale;
-		if (f > 0.0F)
-		{
-			int i = this.mc.getPlayer().hasEffect(Effects.CONFUSION) ? 7 : 20;
-			float f1 = 5.0F / (f * f + 5.0F) - f * 0.04F;
-			f1 = f1 * f1;
-			Vector3f vector3f = new Vector3f(0.0F, MathHelper.SQRT_OF_TWO / 2.0F, MathHelper.SQRT_OF_TWO / 2.0F);
-			matrixStack.mulPose(vector3f.rotationDegrees((gameRender.tick + partialTicks) * i));
-			matrixStack.scale(1.0F / f1, 1.0F, 1.0F);
-			float f2 = -(gameRender.tick + partialTicks) * i;
-			matrixStack.mulPose(vector3f.rotationDegrees(f2));
-		}
-
-
-		// this projection matrix allows us to see past the normal
-		// world render distance
-		Matrix4f projectionMatrix =
-				Matrix4f.perspective(
-						getFov(partialTicks, true),
-						(float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight(),
-						// it is possible to see the near clip plane, but
-						// you have to be flying quickly in spectator mode through ungenerated
-						// terrain, so I don't think it is much of an issue.
-						mc.getRenderDistance()/2,
-						farPlaneBlockDistance * LodUtil.CHUNK_WIDTH * 2);
-
-		// add the screen space distortions
-		projectionMatrix.multiply(matrixStack.last().pose());
-		gameRender.resetProjectionMatrix(projectionMatrix);
-		return;
+		// create the new projection matrix
+		Matrix4f lodPoj =
+			Matrix4f.perspective(
+					getFov(partialTicks, true),
+					(float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight(),
+					mc.getRenderDistance()/2,
+					farPlaneBlockDistance * LodUtil.CHUNK_WIDTH * 2 / 4);
+		
+		// get Minecraft's un-edited projection matrix
+		// (this is before it is zoomed, distorted, etc.)
+		Matrix4f defaultMcProj = mc.getGameRenderer().getProjectionMatrix(mc.getGameRenderer().getMainCamera(), partialTicks, true);
+		// true here means use "use fov setting" (probably)
+		
+		
+		// this logic strips away the defaultMcProj matrix so we 
+		// can get the distortionMatrix, which represents all
+		// transformations, zooming, distortions, etc. done
+		// to Minecraft's Projection matrix
+		Matrix4f defaultMcProjInv = defaultMcProj.copy();
+		defaultMcProjInv.invert();
+		
+		Matrix4f distortionMatrix = defaultMcProjInv.copy();
+		distortionMatrix.multiply(currentProjectionMatrix);
+		
+		
+		// edit the lod projection to match Minecraft's
+		// (so the LODs line up with the real world)
+		lodPoj.multiply(distortionMatrix);
+		
+		// send the projection over to the GPU
+		gameRender.resetProjectionMatrix(lodPoj);
 	}
 
 
 	/**
 	 * setup the lighting to be used for the LODs
 	 */
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings({ "deprecation", "unused" })
 	private void setupLighting(LodDimension lodDimension, float partialTicks)
 	{
 		// Determine if the player has night vision
@@ -782,7 +769,7 @@ public class LodRenderer
 	 */
 	private void determineIfLodsShouldRegenerate(LodDimension lodDim)
 	{
-		short renderDistance = (short) mc.getRenderDistance();
+		short chunkRenderDistance = (short) mc.getRenderDistance();
 		
 		//=============//
 		// full regens //
@@ -799,7 +786,7 @@ public class LodRenderer
 			prevFogDistance = LodConfig.CLIENT.graphics.fogDistance.get();
 			prevRenderDistance = mc.getRenderDistance();
 			//should use this when it's ready
-			vanillaRenderedChunks = new boolean[renderDistance*2+2][renderDistance*2+2];
+			vanillaRenderedChunks = new boolean[chunkRenderDistance*2+2][chunkRenderDistance*2+2];
 		}
 
 		// did the user change the debug setting?
@@ -822,7 +809,7 @@ public class LodRenderer
 				fullRegen = true;
 				previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
 				//should use this when it's ready
-				vanillaRenderedChunks = new boolean[renderDistance*2+2][renderDistance*2+2];
+				vanillaRenderedChunks = new boolean[chunkRenderDistance*2+2][chunkRenderDistance*2+2];
 			}
 			prevPlayerPosTime = newTime;
 		}
@@ -858,13 +845,13 @@ public class LodRenderer
 			prevChunkTime = newTime;
 		}
 
-		// check if there is any newly generated terrain to show
-		if (mc.getWorld().getDayTime() - prevDayTime > 1000 || mc.getOptions().gamma != prevBrightness || lightMap == null)
+		// check if the lighting has changed
+		if (mc.getClientWorld().getDayTime() - prevDayTime > 1000 || mc.getOptions().gamma != prevBrightness || lightMap == null)
 		{
 			fullRegen = true;
 			lightMap = mc.getCurrentLightMap();
 			prevBrightness = mc.getOptions().gamma;
-			prevDayTime = mc.getWorld().getDayTime();
+			prevDayTime = mc.getClientWorld().getDayTime();
 		}
 
 
@@ -876,23 +863,18 @@ public class LodRenderer
 
 		// determine which LODs should not be rendered close to the player
 		HashSet<ChunkPos> chunkPosToSkip = LodUtil.getNearbyLodChunkPosToSkip(lodDim, mc.getPlayer().blockPosition());
-		int chunkX;
-		int chunkZ;
+		int xIndex;
+		int zIndex;
 		for (ChunkPos pos : chunkPosToSkip)
 		{
-			chunkX = pos.x - mc.getPlayer().xChunk + renderDistance + 1;
-			chunkZ = pos.z - mc.getPlayer().zChunk + renderDistance + 1;
-			try
+			xIndex = (pos.x - mc.getPlayer().xChunk) + chunkRenderDistance + 1;
+			zIndex = (pos.z - mc.getPlayer().zChunk) + chunkRenderDistance + 1;
+			
+			if (!vanillaRenderedChunks[xIndex][zIndex])
 			{
-				if (!vanillaRenderedChunks[chunkX][chunkZ])
-				{
-					vanillaRenderedChunks[chunkX][chunkZ] = true;
-					vanillaRenderedChunksChanged = true;
-					lodDim.setToRegen(pos.getRegionX(), pos.getRegionZ());
-				}
-			}catch (Exception e){
-				System.out.println(vanillaRenderedChunks.length);
-				e.printStackTrace();
+				vanillaRenderedChunks[xIndex][zIndex] = true;
+				vanillaRenderedChunksChanged = true;
+				lodDim.setToRegen(pos.getRegionX(), pos.getRegionZ());
 			}
 		}
 
@@ -900,7 +882,7 @@ public class LodRenderer
 		// if the player is high enough, draw all LODs
 		if(chunkPosToSkip.isEmpty() && mc.getPlayer().position().y > 256)
 		{
-			vanillaRenderedChunks = new boolean[renderDistance*2+2][renderDistance*2+2];
+			vanillaRenderedChunks = new boolean[chunkRenderDistance*2+2][chunkRenderDistance*2+2];
 			vanillaRenderedChunksChanged = true;
 		}
 	}

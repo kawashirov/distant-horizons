@@ -17,13 +17,15 @@
  */
 package com.seibel.lod.builders.lodTemplates;
 
+import java.util.Map;
+
 import com.seibel.lod.enums.DebugMode;
+import com.seibel.lod.util.ColorUtil;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.DimensionType;
 
 /**
  * This is the abstract class used to create different
@@ -36,7 +38,7 @@ public abstract class AbstractLodTemplate
 {
 
 
-	public abstract void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, long[] adjData,
+	public abstract void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
 	                                    byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap);
 
 	/**
@@ -44,10 +46,10 @@ public abstract class AbstractLodTemplate
 	 */
 	protected void addPosAndColor(BufferBuilder buffer,
 	                              double x, double y, double z,
-	                              int red, int green, int blue, int alpha)
+	                              int color)
 	{
 
-		buffer.vertex(x, y, z).color(red, green, blue, alpha).endVertex();
+		buffer.vertex(x, y, z).color(ColorUtil.getRed(color), ColorUtil.getGreen(color), ColorUtil.getBlue(color), ColorUtil.getAlpha(color)).endVertex();
 	}
 
 	/**

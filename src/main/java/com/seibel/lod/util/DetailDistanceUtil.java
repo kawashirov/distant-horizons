@@ -160,9 +160,9 @@ public class DetailDistanceUtil
 
 	public static byte getLodDrawDetail(int detail)
 	{
-		if (detail < minGenDetail)
+		if (detail < minDrawDetail)
 		{
-			return lodGenDetails[minGenDetail].detailLevel;
+			return lodGenDetails[minDrawDetail].detailLevel;
 		} else
 		{
 			return lodGenDetails[detail].detailLevel;
