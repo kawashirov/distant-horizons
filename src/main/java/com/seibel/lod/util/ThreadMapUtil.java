@@ -22,7 +22,7 @@ public class ThreadMapUtil
 
 	public static final ConcurrentMap<String, boolean[]> projectionMap = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<String, short[]> projectionShortMap = new ConcurrentHashMap<>();
-	public static final ConcurrentMap<String, int[][]> heightAndDepthMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<String, short[][]> heightAndDepthMap = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<String, long[]> singleDataToMergeMap = new ConcurrentHashMap<>();
 
 
@@ -134,10 +134,10 @@ public class ThreadMapUtil
 		return projectionShortMap.get(Thread.currentThread().getName());
 	}
 
-	public static int[][] getHeightAndDepth(int size){
+	public static short[][] getHeightAndDepth(int size){
 		if(!heightAndDepthMap.containsKey(Thread.currentThread().getName()) || (heightAndDepthMap.get(Thread.currentThread().getName()) == null) || (heightAndDepthMap.get(Thread.currentThread().getName()).length != size))
 		{
-			heightAndDepthMap.put(Thread.currentThread().getName(), new int[size][2]);
+			heightAndDepthMap.put(Thread.currentThread().getName(), new short[size][2]);
 		}
 		return heightAndDepthMap.get(Thread.currentThread().getName());
 	}

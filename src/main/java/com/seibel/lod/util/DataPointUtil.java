@@ -279,8 +279,8 @@ public class DataPointUtil
 	public static long[] mergeMultiData(long[][] dataToMerge)
 	{
 		//new code
-		short[] projection = ThreadMapUtil.getProjectionShort((WORLD_HEIGHT + 1 ) >>> 4);
-		int[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth(WORLD_HEIGHT + 1);
+		short[] projection = ThreadMapUtil.getProjectionShort((WORLD_HEIGHT + 1) / 16);
+		short[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth((WORLD_HEIGHT / 2) + 1);
 		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(dataToMerge.length);
 		int genMode = DistanceGenerationMode.SERVER.complexity;
 		boolean allEmpty = true;
@@ -289,8 +289,8 @@ public class DataPointUtil
 
 		for(int k=0; k < projection.length; k++)
 			projection[k] = 0;
-		int depth = 0;
-		int height = 0;
+		short depth = 0;
+		short height = 0;
 		//We collect the indexes of the data, ordered by the depth
 		for (int index = 0; index < dataToMerge.length; index++)
 		{
@@ -307,7 +307,7 @@ public class DataPointUtil
 						depth = getDepth(singleData);
 						height = getHeight(singleData);
 						for (int y = depth; y <= height; y++)
-							projection[y >>> 4] |= 1L << (y & 0xf);
+							projection[y / 16] |= 1 << (y & 0xf);
 					}
 				}
 			}
@@ -325,18 +325,23 @@ public class DataPointUtil
 		int ii = 0;
 		while (i < projection.length)
 		{
-			while (i < projection.length && projection[i] != 0)	i++;
-			if (i == projection.length)
-				break; //we reached end of WORLD_HEIGHT and it's nothing more here
-			while (((projection[i] >>> ii) & 1) == 0) ii++;
-			depth = i * 16 + ii;
-
-			while (ii<15 && ((projection[i] >>> ii) & 1) == 1) ii++;
-			if (ii==15) //if end is outside of this int
+			if (ii >= 15)
 			{
 				ii = 0;
 				i++;
-				while (i < projection.length && ~(projection[i]) != 0)	i++; //check for big solid blocks
+			}
+			while (i < projection.length && projection[i] == 0)	i++;
+			if (i == projection.length)
+				break; //we reached end of WORLD_HEIGHT and it's nothing more here
+			while (((projection[i] >>> ii) & 1) == 0) ii++;
+			depth = (short)( i * 16 + ii);
+
+			while (ii<15 && ((projection[i] >>> ii) & 1) == 1) ii++;
+			if (ii>=15) //if end is outside of this int
+			{
+				ii = 0;
+				i++;
+				while (i < projection.length && ~(projection[i]) == 0)	i++; //check for big solid blocks
 				if (i == projection.length) //solid to WORLD_HEIGHT
 				{
 					heightAndDepth[count][0] = depth;
@@ -345,7 +350,7 @@ public class DataPointUtil
 				}
 				while (((projection[i] >>> ii) & 1) == 1) ii++;
 			}
-			height = i * 16 + ii;
+			height = (short)(i * 16 + ii);
 
 			heightAndDepth[count][0] = depth;
 			heightAndDepth[count][1] = height;
@@ -353,7 +358,7 @@ public class DataPointUtil
 		}
 		//old code
 		/*boolean[] projection = ThreadMapUtil.getProjection(WORLD_HEIGHT + 1);
-		int[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth(WORLD_HEIGHT + 1);
+		short[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth((WORLD_HEIGHT / 2) + 1);
 		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(dataToMerge.length);
 		int genMode = DistanceGenerationMode.SERVER.complexity;
 		boolean allEmpty = true;
@@ -362,8 +367,8 @@ public class DataPointUtil
 
 		for(int k=0; k < projection.length; k++)
 			projection[k] = false;
-		int depth = 0;
-		int height = 0;
+		short depth = 0;
+		short height = 0;
 		//We collect the indexes of the data, ordered by the depth
 		for (int index = 0; index < dataToMerge.length; index++)
 		{
@@ -406,10 +411,10 @@ public class DataPointUtil
 			{
 				i++;
 			}
-			depth = i;
+			depth = (short) i;
 			while (i < projection.length && projection[i])
 			{
-				height = i;
+				height = (short) i;
 				i++;
 			}
 			if(!(i < projection.length))
