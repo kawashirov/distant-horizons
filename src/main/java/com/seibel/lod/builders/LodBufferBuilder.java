@@ -225,14 +225,18 @@ public class LodBufferBuilder
 								if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.HEIGHTMAP)
 								{
 									maxVerticalData = 1;
-								}else{
+								} else
+								{
 									maxVerticalData = DetailDistanceUtil.getMaxVerticalData(0);
 								}
 
-								adjData.put(Direction.WEST, new long[maxVerticalData]);
-								adjData.put(Direction.EAST, new long[maxVerticalData]);
-								adjData.put(Direction.SOUTH, new long[maxVerticalData]);
-								adjData.put(Direction.NORTH, new long[maxVerticalData]);
+								for (Direction direction : Box.ADJ_DIRECTIONS)
+								{
+									if (adjData.containsKey(direction) && LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.MULTI_LOD)
+									{
+										adjData.put(direction, new long[DetailDistanceUtil.getMaxVerticalData(0)]);
+									}
+								}
 								//previous setToRender chache
 								if (setsToRender[xR][zR] == null)
 								{
@@ -285,7 +289,6 @@ public class LodBufferBuilder
 									{
 										for (Direction direction : Box.ADJ_DIRECTIONS)
 										{
-
 											xAdj = posX + direction.getNormal().getX();
 											zAdj = posZ + direction.getNormal().getZ();
 											chunkXdist = LevelPosUtil.getChunkPos(detailLevel, xAdj) - playerChunkPos.x;
@@ -300,8 +303,8 @@ public class LodBufferBuilder
 														adjData.get(direction)[0] = lodDim.getSingleData(detailLevel, xAdj, zAdj);
 													} else
 													{
-														for(int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
-															adjData.get(direction)[verticalIndex] = lodDim.getData(detailLevel, xAdj, zAdj,verticalIndex);
+														for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
+															adjData.get(direction)[verticalIndex] = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
 													}
 
 												} else
@@ -323,8 +326,8 @@ public class LodBufferBuilder
 														adjData.get(direction)[0] = lodDim.getSingleData(detailLevel, xAdj, zAdj);
 													} else
 													{
-														for(int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
-															adjData.get(direction)[verticalIndex] = lodDim.getData(detailLevel, xAdj, zAdj,verticalIndex);
+														for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
+															adjData.get(direction)[verticalIndex] = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
 													}
 												} else
 												{
@@ -351,13 +354,14 @@ public class LodBufferBuilder
 
 										} else if (region.getLodQualityMode() == LodQualityMode.MULTI_LOD)
 										{
-											int verticalIndex = 0;
-											long data = lodDim.getData(detailLevel, posX, posZ, verticalIndex);
-											while(!(DataPointUtil.isItVoid(data) || DataPointUtil.doesItExist(data)))
+											long data;
+											for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ); verticalIndex++)
 											{
+												data = lodDim.getData(detailLevel, posX, posZ, verticalIndex);
+												if (DataPointUtil.isItVoid(data) || DataPointUtil.doesItExist(data))
+													break;
 												LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, data, adjData,
 														detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode, renderer.lightMap);
-												verticalIndex++;
 											}
 										}
 
