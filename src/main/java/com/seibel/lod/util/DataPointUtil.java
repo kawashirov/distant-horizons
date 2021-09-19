@@ -278,7 +278,6 @@ public class DataPointUtil
 
 	public static long[] mergeMultiData(long[][] dataToMerge)
 	{
-		//new code
 		short[] projection = ThreadMapUtil.getProjectionShort((WORLD_HEIGHT + 1) / 16);
 		short[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth((WORLD_HEIGHT / 2) + 1);
 		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(dataToMerge.length);
@@ -313,7 +312,6 @@ public class DataPointUtil
 				}
 			}
 		}
-
 
 		//We check if there is any data that's not empty or void
 		if (allEmpty)
@@ -357,74 +355,6 @@ public class DataPointUtil
 			heightAndDepth[count][1] =  height;
 			count++;
 		}
-		//old code
-		/*boolean[] projection = ThreadMapUtil.getProjection(WORLD_HEIGHT + 1);
-		short[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth((WORLD_HEIGHT / 2) + 1);
-		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(dataToMerge.length);
-		int genMode = DistanceGenerationMode.SERVER.complexity;
-		boolean allEmpty = true;
-		boolean allVoid = true;
-		long singleData;
-
-		for(int k=0; k < projection.length; k++)
-			projection[k] = false;
-		short depth = 0;
-		short height = 0;
-		//We collect the indexes of the data, ordered by the depth
-		for (int index = 0; index < dataToMerge.length; index++)
-		{
-			for (int dataIndex = 0; dataIndex < dataToMerge[index].length; dataIndex++)
-			{
-				singleData = dataToMerge[index][dataIndex];
-				if (doesItExist(singleData))
-				{
-					genMode = Math.min(genMode, getGenerationMode(singleData));
-					allEmpty = false;
-					if (!isItVoid(singleData))
-					{
-						allVoid = false;
-						depth = getDepth(singleData);
-						height = getHeight(singleData);
-						for (int y = depth; y <= height; y++)
-						{
-							projection[y] = true;
-						}
-					}
-				}
-			}
-		}
-
-		//We check if there is any data that's not empty or void
-		if (allEmpty)
-		{
-			return new long[]{EMPTY_DATA};
-		}
-		if (allVoid)
-		{
-			return new long[]{createVoidDataPoint(genMode)};
-		}
-
-		int count = 0;
-		int i = 0;
-		while (i < projection.length)
-		{
-			while (i < projection.length && !projection[i])
-			{
-				i++;
-			}
-			depth = (short) i;
-			while (i < projection.length && projection[i])
-			{
-				height = (short) i;
-				i++;
-			}
-			if(!(i < projection.length))
-				break;
-			heightAndDepth[count][0] = depth;
-			heightAndDepth[count][1] = height;
-			count++;
-		}*/
-		//end of changes
 
 		//As standard the vertical lods are ordered from top to bottom
 		long[] dataPoint = new long[count];
