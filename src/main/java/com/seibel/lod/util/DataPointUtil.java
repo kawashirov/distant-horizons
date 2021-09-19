@@ -4,6 +4,9 @@ import com.seibel.lod.enums.DistanceGenerationMode;
 
 import net.minecraft.client.renderer.texture.NativeImage;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 public class DataPointUtil
 {
 	/*
@@ -276,11 +279,13 @@ public class DataPointUtil
 		}
 	}
 
-	public static long[] mergeMultiData(long[][] dataToMerge)
+	public static long[] mergeMultiData(long[] dataToMerge, byte detailLevel)
 	{
+		int verticalData = DetailDistanceUtil.getMaxVerticalData(detailLevel);
+		int size = dataToMerge.length/verticalData;
 		short[] projection = ThreadMapUtil.getProjectionShort((WORLD_HEIGHT + 1) / 16);
 		short[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth((WORLD_HEIGHT / 2) + 1);
-		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(dataToMerge.length);
+		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(size);
 		int genMode = DistanceGenerationMode.SERVER.complexity;
 		boolean allEmpty = true;
 		boolean allVoid = true;
@@ -292,11 +297,11 @@ public class DataPointUtil
 		short depth = 0;
 		short height = 0;
 		//We collect the indexes of the data, ordered by the depth
-		for (int index = 0; index < dataToMerge.length; index++)
+		for (int index = 0; index < size; index++)
 		{
-			for (int dataIndex = 0; dataIndex < dataToMerge[index].length; dataIndex++)
+			for (int verticalIndex = 0; verticalIndex < verticalData; verticalIndex++)
 			{
-				singleData = dataToMerge[index][dataIndex];
+				singleData = dataToMerge[index * verticalData + verticalIndex];
 				if (doesItExist(singleData))
 				{
 					genMode = Math.min(genMode, getGenerationMode(singleData));
@@ -362,14 +367,14 @@ public class DataPointUtil
 		{
 			depth = heightAndDepth[j][0];
 			height = heightAndDepth[j][1];
-			for(int k = 0; k < dataToMerge.length; k++){
+			for(int k = 0; k < size; k++){
 				singleDataToMerge[k] = 0;
 			}
-			for (int index = 0; index < dataToMerge.length; index++)
+			for (int index = 0; index < size; index++)
 			{
-				for (int dataIndex = 0; dataIndex < dataToMerge[index].length; dataIndex++)
+				for (int verticalIndex = 0; verticalIndex < verticalData; verticalIndex++)
 				{
-					singleData = dataToMerge[index][dataIndex];
+					singleData = dataToMerge[index * verticalData + verticalIndex];
 					if (doesItExist(singleData) && !isItVoid(singleData))
 					{
 						if ((depth <= getDepth(singleData) && getDepth(singleData) <= height)
@@ -386,8 +391,8 @@ public class DataPointUtil
 			long data = mergeSingleData(singleDataToMerge);
 			dataPoint[j] = createDataPoint(height, depth, getColor(data), getLightSky(data), getLightBlock(data), getGenerationMode(data));
 		}
-
-		return dataPoint;
+		verticalData = DetailDistanceUtil.getMaxVerticalData(detailLevel+1);
+		return Arrays.copyOf(dataPoint, verticalData);
 	}
 
 	public static long[] compress(long[] data, byte detailLevel)

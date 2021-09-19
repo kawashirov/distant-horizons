@@ -239,17 +239,22 @@ public class LodBuilder
 								isServer);
 						break;
 					case MULTI_LOD:
-						long[][] dataToMergeVertical;
+						long[] dataToMergeVertical;
 						dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-						data = DataPointUtil.mergeMultiData(dataToMergeVertical);
+						data = DataPointUtil.mergeMultiData(dataToMergeVertical, detailLevel);
 						if (data.length == 0 || data == null)
 							data = new long[]{DataPointUtil.EMPTY_DATA};
-						lodDim.addData(detailLevel,
-								posX,
-								posZ,
-								data,
-								false,
-								isServer);
+						lodDim.clear(detailLevel, posX, posZ);
+						for(int verticalIndex = 0; (verticalIndex < data.length) && (verticalIndex < lodDim.getMaxVerticalData(detailLevel,posX,posZ)); verticalIndex++)
+						{
+							lodDim.addData(detailLevel,
+									posX,
+									posZ,
+									verticalIndex,
+									data[verticalIndex],
+									false,
+									isServer);
+						}
 						break;
 				}
 
@@ -263,11 +268,12 @@ public class LodBuilder
 
 	}
 
-	private long[][] createVerticalDataToMerge(LodDetail detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
+	private long[] createVerticalDataToMerge(LodDetail detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{
-		long[][] dataToMerge = ThreadMapUtil.getBuilderVerticalArray()[detail.detailLevel];
-		ChunkPos chunkPos = chunk.getPos();
+		long[] dataToMerge = ThreadMapUtil.getBuilderVerticalArray()[detail.detailLevel];
+		int verticalData = DataPointUtil.WORLD_HEIGHT;
 
+		ChunkPos chunkPos = chunk.getPos();
 		int size = 1 << detail.detailLevel;
 		int height = 0;
 		int depth = 0;
@@ -286,17 +292,18 @@ public class LodBuilder
 
 		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
 		int index = 0;
+
 		if (dataToMerge == null)
 		{
-			dataToMerge = new long[size * size][DataPointUtil.WORLD_HEIGHT];
+			dataToMerge = new long[size * size * DataPointUtil.WORLD_HEIGHT];
 		}
 		//dataToMerge = new long[size * size][1024];
 
 		for (index = 0; index < size * size; index++)
 		{
-			for (int i = 0; i < dataToMerge[index].length; i++)
+			for (int verticalIndex = 0; verticalIndex < verticalData; verticalIndex++)
 			{
-				dataToMerge[index][i] = 0;
+				dataToMerge[index * verticalData + verticalIndex] = DataPointUtil.EMPTY_DATA;
 			}
 			xRel = Math.floorMod(index, size) + startX;
 			zRel = Math.floorDiv(index, size) + startZ;
@@ -314,7 +321,7 @@ public class LodBuilder
 				//If the lod is at default, then we set this as void data
 				if (height == DEFAULT_HEIGHT)
 				{
-					dataToMerge[index][0] = DataPointUtil.createVoidDataPoint(generation);
+					dataToMerge[index*verticalData + 0] = DataPointUtil.createVoidDataPoint(generation);
 					break;
 				}
 
@@ -344,7 +351,7 @@ public class LodBuilder
 
 				topBlock = false;
 
-				dataToMerge[index][count] = DataPointUtil.createDataPoint(height, depth, color, lightSky, lightBlock, generation);
+				dataToMerge[index * verticalData + count] = DataPointUtil.createDataPoint(height, depth, color, lightSky, lightBlock, generation);
 				yAbs = depth - 1;
 				count++;
 			}

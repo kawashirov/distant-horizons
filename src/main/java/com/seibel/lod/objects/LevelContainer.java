@@ -4,14 +4,16 @@ public interface LevelContainer
 {
 	public static final char VERTICAL_DATA_DELIMITER = '\t';
 	public static final char DATA_DELIMITER = ' ';
+
 	/**With this you can add data to the level container
 	 *
 	 * @param data actual data to add in a array of long format.
 	 * @param posX x position in the detail level
 	 * @param posZ z position in the detail level
+	 * @param index z position in the detail level
 	 * @return true if correctly added, false otherwise
 	 */
-	public boolean addData(long[] data, int posX, int posZ);
+	public boolean addData(long data, int posX, int posZ, int index);
 
 	/**With this you can add data to the level container
 	 *
@@ -28,7 +30,7 @@ public interface LevelContainer
 	 * @param posZ z position in the detail level
 	 * @return the data in long array format
 	 */
-	public long[] getData(int posX, int posZ);
+	public long getData(int posX, int posZ, int index);
 
 	/**With this you can get data from the level container
 	 *
@@ -49,6 +51,11 @@ public interface LevelContainer
 	 * @return return the deatilLevel of this level container
 	 */
 	public byte getDetailLevel();
+
+
+	public int getMaxVerticalData();
+
+	public void clear(int posX, int posZ);
 
 	/**This return a level container with detail level lower than the current level.
 	 * The new level container may use information of this level.
