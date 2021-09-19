@@ -750,7 +750,7 @@ public class LodBuilder
 				            || blockState.getBlock() instanceof BushBlock || blockState.getBlock() instanceof IGrowable)
 				           && !(blockState.getBlock() == Blocks.BROWN_MUSHROOM || blockState.getBlock() == Blocks.RED_MUSHROOM))
 		{
-			brightness = ColorUtil.applySaturationAndBrightnessMultipliers(getColorTextureForBlock(blockState, blockPos, true),1f, 1.2f);
+			brightness = getColorTextureForBlock(blockState, blockPos, true);
 			//colorInt = ColorUtil.changeBrightnessValue(biome.getGrassColor(x, z), brightness);
 			//colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getGrassColor(x, z), 1f, 0.65f);
 			colorInt = ColorUtil.multiplyRGBcolors(biome.getGrassColor(x, z), brightness);
