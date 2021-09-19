@@ -286,6 +286,7 @@ public class DataPointUtil
 		boolean allEmpty = true;
 		boolean allVoid = true;
 		long singleData;
+		int test = 0;
 
 		for(int k=0; k < projection.length; k++)
 			projection[k] = 0;
@@ -325,15 +326,10 @@ public class DataPointUtil
 		int ii = 0;
 		while (i < projection.length)
 		{
-			if (ii >= 15)
-			{
-				ii = 0;
-				i++;
-			}
 			while (i < projection.length && projection[i] == 0)	i++;
 			if (i == projection.length)
 				break; //we reached end of WORLD_HEIGHT and it's nothing more here
-			while (((projection[i] >>> ii) & 1) == 0) ii++;
+			while ((((projection[i] >>> ii) & 1) == 0)) ii++;
 			depth = (short)( i * 16 + ii);
 
 			while (ii<15 && ((projection[i] >>> ii) & 1) == 1) ii++;
@@ -348,12 +344,19 @@ public class DataPointUtil
 					heightAndDepth[count][1] = WORLD_HEIGHT;
 					break;
 				}
-				while (((projection[i] >>> ii) & 1) == 1) ii++;
+				while ((((projection[i] >>> ii) & 1) == 1)) ii++;
 			}
 			height = (short)(i * 16 + ii);
-
+			if (height < depth) {
+				test++;
+			}
+			if (ii >= 15)
+			{
+				ii = 0;
+				i++;
+			}
 			heightAndDepth[count][0] = depth;
-			heightAndDepth[count][1] = height;
+			heightAndDepth[count][1] =  (short)(height - 1);
 			count++;
 		}
 		//old code
