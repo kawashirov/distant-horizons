@@ -330,7 +330,7 @@ public class DataPointUtil
 			if (i == projection.length)
 				break; //we reached end of WORLD_HEIGHT and it's nothing more here
 			while (ii < 15 && ((projection[i] >>> ii) & 1) == 0) ii++;
-			if (ii >= 15 && ((projection[i] >>> ii) & 1) == 1) //there is nothing more in this chunk
+			if (ii >= 15 && ((projection[i] >>> ii) & 1) == 0) //there is nothing more in this chunk
 			{
 				ii = 0;
 				i++;
@@ -339,7 +339,7 @@ public class DataPointUtil
 			depth = (short)( i * 16 + ii);
 
 			while (ii < 15 && ((projection[i] >>> ii) & 1) == 1) ii++;
-			if (ii >= 15 && ((projection[i] >>> ii) & 1) == 0) //if end is not in this chunk
+			if (ii >= 15 && ((projection[i] >>> ii) & 1) == 1) //if end is not in this chunk
 			{
 				ii = 0;
 				i++;
