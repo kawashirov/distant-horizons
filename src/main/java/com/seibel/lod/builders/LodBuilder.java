@@ -88,7 +88,7 @@ public class LodBuilder
 	public static final ConcurrentMap<Block, Integer> colorMap = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<Block, VoxelShape> shapeMap = new ConcurrentHashMap<>();
 
-	public static final ModelDataMap dataMap = new ModelDataMap.Builder().build() ;
+	public static final ModelDataMap dataMap = new ModelDataMap.Builder().build();
 
 	/**
 	 * If no blocks are found in the area in determineBottomPointForArea return this
@@ -134,7 +134,7 @@ public class LodBuilder
 				// get the textures for blocks
 				if (mc.getClientWorld() == null)
 					return;
-				
+
 				DimensionType dim = world.dimensionType();
 
 				LodDimension lodDim;
@@ -245,7 +245,7 @@ public class LodBuilder
 						if (data.length == 0 || data == null)
 							data = new long[]{DataPointUtil.EMPTY_DATA};
 						lodDim.clear(detailLevel, posX, posZ);
-						for(int verticalIndex = 0; (verticalIndex < data.length) && (verticalIndex < lodDim.getMaxVerticalData(detailLevel,posX,posZ)); verticalIndex++)
+						for (int verticalIndex = 0; (verticalIndex < data.length) && (verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ)); verticalIndex++)
 						{
 							lodDim.addData(detailLevel,
 									posX,
@@ -254,7 +254,13 @@ public class LodBuilder
 									data[verticalIndex],
 									false,
 									isServer);
+							long dataTest = lodDim.getData(detailLevel,
+									posX,
+									posZ,
+									verticalIndex);
+							System.out.println(DataPointUtil.toString(dataTest));
 						}
+
 						break;
 				}
 
@@ -321,21 +327,20 @@ public class LodBuilder
 				//If the lod is at default, then we set this as void data
 				if (height == DEFAULT_HEIGHT)
 				{
-					dataToMerge[index*verticalData + 0] = DataPointUtil.createVoidDataPoint(generation);
+					dataToMerge[index * verticalData + 0] = DataPointUtil.createVoidDataPoint(generation);
 					break;
 				}
 
 				yAbs = height - 1;
 				// We search light on above air block
 				depth = determineBottomPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
-				if(hasCeiling && topBlock)
+				if (hasCeiling && topBlock)
 				{
 					yAbs = depth;
 					color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
 					blockPos.set(xAbs, yAbs - 1, zAbs);
 					light = getLightValue(chunk, blockPos, true);
-				}
-				else
+				} else
 				{
 					color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
 					blockPos.set(xAbs, yAbs + 1, zAbs);
@@ -344,7 +349,7 @@ public class LodBuilder
 				blockPos.set(xAbs, yAbs + 1, zAbs);
 				light = getLightValue(chunk, blockPos, hasCeiling && topBlock);
 				lightBlock = light & 0b1111;
-				if(!hasCeiling && topBlock)
+				if (!hasCeiling && topBlock)
 					lightSky = 15; //default max light
 				else
 					lightSky = (light >> 4) & 0b1111;
@@ -612,7 +617,7 @@ public class LodBuilder
 		blockLight = world.getBrightness(LightType.BLOCK, blockPos);
 		skyLight = world.getBrightness(LightType.SKY, blockPos);
 
-		if(ceilingTopBlock)
+		if (ceilingTopBlock)
 			blockPos.set(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ());
 		else
 			blockPos.set(blockPos.getX(), blockPos.getY() - 1, blockPos.getZ());
@@ -632,19 +637,17 @@ public class LodBuilder
 
 		World world = mc.getClientWorld();
 		TextureAtlasSprite texture;
-		if(topTextureRequired)
+		if (topTextureRequired)
 		{
 			List<BakedQuad> quad = ((IForgeBakedModel) mc.getModelManager().getBlockModelShaper().getBlockModel(blockState)).getQuads(blockState, Direction.UP, new Random(0), dataMap);
 			if (!quad.isEmpty())
 			{
 				texture = quad.get(0).getSprite();
-			}
-			else
+			} else
 			{
 				texture = mc.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
 			}
-		}
-		else
+		} else
 		{
 			texture = mc.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
 		}
@@ -667,7 +670,7 @@ public class LodBuilder
 						/*if (blockState.getBlock() instanceof LeavesBlock)
 							color = 0;
 						else*/
-							continue;
+						continue;
 					} else
 					{
 						color = texture.getPixelRGBA(k, i, j);

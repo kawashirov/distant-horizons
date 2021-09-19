@@ -69,6 +69,8 @@ public class VerticalLevelContainer implements LevelContainer
 	}
 
 	public boolean doesItExist(int posX, int posZ){
+		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
+		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		return DataPointUtil.doesItExist(getSingleData(posX,posZ));
 	}
 

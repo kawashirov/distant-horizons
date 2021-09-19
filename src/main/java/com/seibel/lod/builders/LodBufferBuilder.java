@@ -303,6 +303,7 @@ public class LodBufferBuilder
 														adjData.get(direction)[0] = lodDim.getSingleData(detailLevel, xAdj, zAdj);
 													} else
 													{
+														adjData.replace(direction, new long[DetailDistanceUtil.getMaxVerticalData(lodDim.getMaxVerticalData(detailLevel,posX,posZ))]);
 														for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
 															adjData.get(direction)[verticalIndex] = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
 													}
@@ -326,6 +327,7 @@ public class LodBufferBuilder
 														adjData.get(direction)[0] = lodDim.getSingleData(detailLevel, xAdj, zAdj);
 													} else
 													{
+														adjData.replace(direction, new long[DetailDistanceUtil.getMaxVerticalData(lodDim.getMaxVerticalData(detailLevel,posX,posZ))]);
 														for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
 															adjData.get(direction)[verticalIndex] = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
 													}
