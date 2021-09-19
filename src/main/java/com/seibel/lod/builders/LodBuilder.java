@@ -244,7 +244,7 @@ public class LodBuilder
 						data = DataPointUtil.mergeMultiData(dataToMergeVertical, detailLevel);
 						if (data.length == 0 || data == null)
 							data = new long[]{DataPointUtil.EMPTY_DATA};
-						lodDim.clear(detailLevel, posX, posZ);
+						//lodDim.clear(detailLevel, posX, posZ);
 						for (int verticalIndex = 0; (verticalIndex < data.length) && (verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ)); verticalIndex++)
 						{
 							lodDim.addData(detailLevel,
