@@ -279,29 +279,29 @@ public class DataPointUtil
 		}
 	}
 
-	public static long[] mergeMultiData(long[] dataToMerge, byte detailLevel)
+	public static long[] mergeMultiData(long[] dataToMerge, int inputVerticalData,int maxVerticalData)
 	{
-		int verticalData = DetailDistanceUtil.getMaxVerticalData(detailLevel);
-		int size = dataToMerge.length/verticalData;
+		int size = dataToMerge.length / inputVerticalData;
 		short[] projection = ThreadMapUtil.getProjectionShort((WORLD_HEIGHT + 1) / 16);
-		short[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth((WORLD_HEIGHT / 2) + 1);
+		short[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth(inputVerticalData);
 		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(size);
 		int genMode = DistanceGenerationMode.SERVER.complexity;
 		boolean allEmpty = true;
 		boolean allVoid = true;
 		long singleData;
-		int test = 0;
 
-		for(int k=0; k < projection.length; k++)
+
+		for(int k=0; k < projection.length; k++) //probably can remove
 			projection[k] = 0;
 		short depth = 0;
 		short height = 0;
+
 		//We collect the indexes of the data, ordered by the depth
 		for (int index = 0; index < size; index++)
 		{
-			for (int verticalIndex = 0; verticalIndex < verticalData; verticalIndex++)
+			for (int dataIndex = 0; dataIndex < inputVerticalData; dataIndex++)
 			{
-				singleData = dataToMerge[index * verticalData + verticalIndex];
+				singleData = dataToMerge[index * inputVerticalData + dataIndex];
 				if (doesItExist(singleData))
 				{
 					genMode = Math.min(genMode, getGenerationMode(singleData));
@@ -324,6 +324,7 @@ public class DataPointUtil
 		if (allVoid)
 			return new long[]{createVoidDataPoint(genMode)};
 
+		//We extract the merged data
 		int count = 0;
 		int i = 0;
 		int ii = 0;
@@ -357,13 +358,31 @@ public class DataPointUtil
 			}
 			height = (short)(i * 16 + ii - 1);
 			heightAndDepth[count][0] = depth;
-			heightAndDepth[count][1] =  height;
+			heightAndDepth[count][1] = height;
 			count++;
+		}
+
+		//we limit the vertical portion to maxVerticalData
+		int j = 0;
+		while (count > maxVerticalData)
+		{
+			ii = WORLD_HEIGHT;
+			for (i = 0; i < count - 1; i++)
+			{
+				if (heightAndDepth[i][1] - heightAndDepth[i + 1][0] < ii)
+				{
+					ii = heightAndDepth[i][1] - heightAndDepth[i + 1][0];
+					j = i;
+				}
+			}
+			heightAndDepth[j][1] = heightAndDepth[j + 1][1];
+			System.arraycopy(heightAndDepth,j + 1, heightAndDepth, j,count - j - 1);
+			count--;
 		}
 
 		//As standard the vertical lods are ordered from top to bottom
 		long[] dataPoint = new long[count];
-		for (int j = count - 1; j >= 0; j--)
+		for (j = count - 1; j >= 0; j--)
 		{
 			depth = heightAndDepth[j][0];
 			height = heightAndDepth[j][1];
@@ -372,9 +391,9 @@ public class DataPointUtil
 			}
 			for (int index = 0; index < size; index++)
 			{
-				for (int verticalIndex = 0; verticalIndex < verticalData; verticalIndex++)
+				for (int dataIndex = 0; dataIndex < inputVerticalData; dataIndex++)
 				{
-					singleData = dataToMerge[index * verticalData + verticalIndex];
+					singleData = dataToMerge[index * inputVerticalData + dataIndex];
 					if (doesItExist(singleData) && !isItVoid(singleData))
 					{
 						if ((depth <= getDepth(singleData) && getDepth(singleData) <= height)
@@ -391,8 +410,7 @@ public class DataPointUtil
 			long data = mergeSingleData(singleDataToMerge);
 			dataPoint[j] = createDataPoint(height, depth, getColor(data), getLightSky(data), getLightBlock(data), getGenerationMode(data));
 		}
-		verticalData = DetailDistanceUtil.getMaxVerticalData(detailLevel+1);
-		return Arrays.copyOf(dataPoint, verticalData);
+		return dataPoint;
 	}
 
 	public static long[] compress(long[] data, byte detailLevel)

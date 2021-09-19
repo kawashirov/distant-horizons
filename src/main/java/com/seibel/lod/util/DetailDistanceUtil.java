@@ -32,6 +32,19 @@ public class DetailDistanceUtil
 			1,
 			1,};
 
+	/*private static int[] maxVerticalData = {
+			8,
+			8,
+			8,
+			8,
+			8,
+			8,
+			8,
+			8,
+			8,
+			8,
+			8};*/
+
 	private static LodDetail[] lodGenDetails = {
 			LodDetail.FULL,
 			LodDetail.HALF,

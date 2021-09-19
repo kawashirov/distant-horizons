@@ -3,6 +3,7 @@ package com.seibel.lod.objects;
 import com.seibel.lod.util.*;
 
 import java.security.InvalidParameterException;
+import java.util.Arrays;
 
 public class VerticalLevelContainer implements LevelContainer
 {
@@ -31,10 +32,8 @@ public class VerticalLevelContainer implements LevelContainer
 
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		int index = 0;
-		for(int i = 0; i < maxVerticalData; i++){
-			index = posX*size*maxVerticalData + posZ*maxVerticalData + i;
-			dataContainer[index] = DataPointUtil.EMPTY_DATA;
+		for(int verticalIndex = 0; verticalIndex < maxVerticalData; verticalIndex++){
+			dataContainer[posX*size*maxVerticalData + posZ*maxVerticalData + verticalIndex] = DataPointUtil.EMPTY_DATA;
 		}
 	}
 
@@ -74,30 +73,37 @@ public class VerticalLevelContainer implements LevelContainer
 		return DataPointUtil.doesItExist(getSingleData(posX,posZ));
 	}
 
-	public VerticalLevelContainer(String inputString)
+	public VerticalLevelContainer(byte inputData[])
 	{
-
-		throw new InvalidParameterException("loading not yet implemented");
-
-/*
+		int tempIndex;
 		int index = 0;
-		int lastIndex = 0;
-
-
-		index = inputString.indexOf(DATA_DELIMITER, 0);
-		this.detailLevel = (byte) Integer.parseInt(inputString.substring(0, index));
-		int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
-
-		this.dataContainer = new long[size][size][1];
-		for (int x = 0; x < size; x++)
+		long newData;
+		detailLevel = inputData[index];
+		index++;
+		maxVerticalData = inputData[index];
+		index++;
+		size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
+		this.dataContainer = new long[size * size * maxVerticalData];
+		int x, y, z = 0;
+		for (x = 0; x < size; x++)
 		{
-			for (int z = 0; z < size; z++)
+			for (z = 0; z < size; z++)
 			{
-				lastIndex = index;
-				index = inputString.indexOf(DATA_DELIMITER, lastIndex + 1);
-				dataContainer[x][z][0] = Long.parseLong(inputString.substring(lastIndex + 1, index), 16);
+				for (y = 0; y < maxVerticalData; y++) {
+					newData = 0;
+					if (inputData[index] == 0)
+						index++;
+					else if (index + 7 >= inputData.length)
+						break;
+					else {
+						for (tempIndex = 0; tempIndex < 8; tempIndex++)
+							newData += (((long) inputData[index + tempIndex]) & 0xff) << (8 * tempIndex);
+						index = index + 8;
+					}
+					dataContainer[(x * size + z) * maxVerticalData + y] = newData;
+				}
 			}
-		}*/
+		}
 	}
 
 	public LevelContainer expand(){
@@ -125,7 +131,7 @@ public class VerticalLevelContainer implements LevelContainer
 					dataToMerge[(z*2+x)*maxVerticalData + verticalIndex] = lowerLevelContainer.getData(childPosX, childPosZ, verticalIndex);
 			}
 		}
-		data = DataPointUtil.mergeMultiData(dataToMerge, lowerLevelContainer.getDetailLevel());
+		data = DataPointUtil.mergeMultiData(dataToMerge, lowerLevelContainer.getMaxVerticalData(), getMaxVerticalData());
 
 		for(int verticalIndex = 0; (verticalIndex < data.length) && (verticalIndex < maxVerticalData); verticalIndex++)
 		{
@@ -138,8 +144,37 @@ public class VerticalLevelContainer implements LevelContainer
 
 	public byte[] toDataString()
 	{
-		byte[] temp = {};
-		return temp;
+		int index = 0;
+		int tempIndex;
+		byte[] tempData = new byte[2 + (size * size * maxVerticalData * 8)];
+		tempData[index] = detailLevel;
+		index++;
+		tempData[index] = (byte) maxVerticalData;
+		index++;
+		int x, y, z = 0;
+		for (x = 0; x < size; x++)
+		{
+			for (z = 0; z < size; z++)
+			{
+				for (y = 0; y < maxVerticalData; y++)
+				{
+					if (dataContainer[(x * size + z) * maxVerticalData + y] == 0)
+					{
+						tempData[index] = 0;
+						index++;
+					} else if (dataContainer[(x * size + z) * maxVerticalData + y] == 3)
+					{
+						tempData[index] = 3;
+						index++;
+					} else {
+						for (tempIndex = 0; tempIndex < 8; tempIndex++)
+							tempData[index + tempIndex] = (byte) (dataContainer[(x * size + z) * maxVerticalData + y] >>> (8 * tempIndex));
+						index += 8;
+					}
+				}
+			}
+		}
+		return Arrays.copyOfRange(tempData, 0, index);
 	}
 
 	@Override
