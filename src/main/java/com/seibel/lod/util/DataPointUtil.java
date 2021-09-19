@@ -329,11 +329,17 @@ public class DataPointUtil
 			while (i < projection.length && projection[i] == 0)	i++;
 			if (i == projection.length)
 				break; //we reached end of WORLD_HEIGHT and it's nothing more here
-			while ((((projection[i] >>> ii) & 1) == 0)) ii++;
+			while (ii < 15 && ((projection[i] >>> ii) & 1) == 0) ii++;
+			if (ii >= 15 && ((projection[i] >>> ii) & 1) == 1) //there is nothing more in this chunk
+			{
+				ii = 0;
+				i++;
+				continue;
+			}
 			depth = (short)( i * 16 + ii);
 
-			while (ii<15 && ((projection[i] >>> ii) & 1) == 1) ii++;
-			if (ii>=15) //if end is outside of this int
+			while (ii < 15 && ((projection[i] >>> ii) & 1) == 1) ii++;
+			if (ii >= 15 && ((projection[i] >>> ii) & 1) == 0) //if end is not in this chunk
 			{
 				ii = 0;
 				i++;
@@ -341,22 +347,14 @@ public class DataPointUtil
 				if (i == projection.length) //solid to WORLD_HEIGHT
 				{
 					heightAndDepth[count][0] = depth;
-					heightAndDepth[count][1] = WORLD_HEIGHT;
+					heightAndDepth[count][1] = WORLD_HEIGHT - 1;
 					break;
 				}
 				while ((((projection[i] >>> ii) & 1) == 1)) ii++;
 			}
-			height = (short)(i * 16 + ii);
-			if (height < depth) {
-				test++;
-			}
-			if (ii >= 15)
-			{
-				ii = 0;
-				i++;
-			}
+			height = (short)(i * 16 + ii - 1);
 			heightAndDepth[count][0] = depth;
-			heightAndDepth[count][1] =  (short)(height - 1);
+			heightAndDepth[count][1] =  height;
 			count++;
 		}
 		//old code
