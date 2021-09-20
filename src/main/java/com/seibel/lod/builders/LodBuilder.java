@@ -882,14 +882,10 @@ public class LodBuilder
 				}
 			}
 
-			if (blockState.getBlock() != Blocks.AIR
-					    && blockState.getBlock() != Blocks.CAVE_AIR
-					    && blockState.getBlock() != Blocks.BARRIER)
-			{
-				return true;
-			}
+			return blockState.getBlock() != Blocks.AIR
+					&& blockState.getBlock() != Blocks.CAVE_AIR
+					&& blockState.getBlock() != Blocks.BARRIER;
 		}
-
 		return false;
 	}
 }
