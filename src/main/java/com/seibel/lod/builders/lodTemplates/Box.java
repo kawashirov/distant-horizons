@@ -1,5 +1,6 @@
 package com.seibel.lod.builders.lodTemplates;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -164,10 +165,7 @@ public class Box
 	{
 		for (int i = 0; i < box.length; i++)
 		{
-			for (int j = 0; j < box[i].length; j++)
-			{
-				box[i][j] = 0;
-			}
+			Arrays.fill(box[i], 0);
 		}
 
 		for (Direction direction : DIRECTIONS)
@@ -175,8 +173,7 @@ public class Box
 			colorMap.get(direction)[0] = 0;
 		}
 
-		for(int i = 0; i < order.length; i++)
-			order[i] = DataPointUtil.EMPTY_DATA;
+		Arrays.fill(order, DataPointUtil.EMPTY_DATA);
 		for (Direction direction : ADJ_DIRECTIONS)
 		{
 			if(isCulled(direction)){
@@ -274,66 +271,64 @@ public class Box
 				height = DataPointUtil.getHeight(singleAdjDataPoint);
 				depth = DataPointUtil.getDepth(singleAdjDataPoint);
 
-				if (depth > maxY)
-				{//the adj data is higher than the current data
-					//we continue since there could be some other data that intersect the current
-					continue;
-				} else if (height < minY)
-				{//the adj data is lower than the current data
-					//we break since all the other data will be lower
+				if (depth <= maxY) {
+					if (height < minY)
+					{//the adj data is lower than the current data
+						//we break since all the other data will be lower
 
-					if (firstFace)
-					{
-						adjHeightAndDepth.get(direction)[0][0] = getMaxY();
-						adjHeightAndDepth.get(direction)[0][1] = getMinY();
-					} else
-					{
-						adjHeightAndDepth.get(direction)[faceToDraw][1] = getMinY();
-					}
-					faceToDraw++;
-					toFinish = false;
-					break;
-				} else if (depth <= minY && height >= maxY)
-				{//the adj data contains the current
-					//we do not draw the face
-					adjHeightAndDepth.get(direction)[0][0] = VOID_FACE;
-					adjHeightAndDepth.get(direction)[0][1] = VOID_FACE;
-					break;
-				} else if (depth <= minY && height < maxY)
-				{//the adj data intersect the lower part of the current data
-					//if this is the only face we use the maxY and break
-					//if there was other face we finish the last one and break
-					if (firstFace)
-					{
-						adjHeightAndDepth.get(direction)[0][0] = getMaxY();
-						adjHeightAndDepth.get(direction)[0][1] = height;
-					} else
-					{
+						if (firstFace)
+						{
+							adjHeightAndDepth.get(direction)[0][0] = getMaxY();
+							adjHeightAndDepth.get(direction)[0][1] = getMinY();
+						} else
+						{
+							adjHeightAndDepth.get(direction)[faceToDraw][1] = getMinY();
+						}
+						faceToDraw++;
+						toFinish = false;
+						break;
+					} else if (depth <= minY && height >= maxY)
+					{//the adj data contains the current
+						//we do not draw the face
+						adjHeightAndDepth.get(direction)[0][0] = VOID_FACE;
+						adjHeightAndDepth.get(direction)[0][1] = VOID_FACE;
+						break;
+					} else if (depth <= minY)//&& height < maxY
+					{//the adj data intersect the lower part of the current data
+						//if this is the only face we use the maxY and break
+						//if there was other face we finish the last one and break
+						if (firstFace)
+						{
+							adjHeightAndDepth.get(direction)[0][0] = getMaxY();
+							adjHeightAndDepth.get(direction)[0][1] = height;
+						} else
+						{
+							adjHeightAndDepth.get(direction)[faceToDraw][1] = height;
+						}
+						toFinish = false;
+						faceToDraw++;
+						break;
+					} else if (height >= maxY)//depth > minY &&
+					{//the adj data intersect the higher part of the current data
+						//we start the creation of a new face
+						adjHeightAndDepth.get(direction)[faceToDraw][0] = depth;
+						firstFace = false;
+						toFinish = true;
+					} else {//if (depth > minY && height < maxY)
+						//the adj data is contained in the current data
+						if (firstFace)
+						{
+							adjHeightAndDepth.get(direction)[0][0] = getMaxY();
+						}
 						adjHeightAndDepth.get(direction)[faceToDraw][1] = height;
+						faceToDraw++;
+						adjHeightAndDepth.get(direction)[faceToDraw][0] = depth;
+						firstFace = false;
+						toFinish = true;
 					}
-					toFinish = false;
-					faceToDraw++;
-					break;
-				} else if (depth > minY && height >= maxY)
-				{//the adj data intersect the higher part of the current data
-					//we start the creation of a new face
-					adjHeightAndDepth.get(direction)[faceToDraw][0] = depth;
-					firstFace = false;
-					toFinish = true;
-					continue;
-				} else if (depth > minY && height < maxY)
-				{//the adj data is contained in the current data
-					if (firstFace)
-					{
-						adjHeightAndDepth.get(direction)[0][0] = getMaxY();
-					}
-					adjHeightAndDepth.get(direction)[faceToDraw][1] = height;
-					faceToDraw++;
-					adjHeightAndDepth.get(direction)[faceToDraw][0] = depth;
-					firstFace = false;
-					toFinish = true;
-					continue;
-				}
+				} //else {//the adj data is higher than the current data
+					//we continue since there could be some other data that intersect the current
+				//}
 			}
 			if (toFinish)
 			{
@@ -401,10 +396,7 @@ public class Box
 	{
 		if (direction == Direction.UP || direction == Direction.DOWN)
 		{
-			if (adjIndex == 0)
-				return true;
-			else
-				return false;
+			return adjIndex == 0;
 		}
 		return !(adjHeightAndDepth.get(direction)[adjIndex][0] == VOID_FACE && adjHeightAndDepth.get(direction)[adjIndex][1] == VOID_FACE);
 

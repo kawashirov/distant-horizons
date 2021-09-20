@@ -286,16 +286,16 @@ public class LodDimensionFileHandler
 						ex.printStackTrace();
 					}
 					// check if this file can be written to by the file handler
-					if (fileVersion <= LOD_SAVE_FILE_VERSION)
-					{
-						// we are good to continue and overwrite the old file
-					} else // if(fileVersion > LOD_SAVE_FILE_VERSION)
-					{
+					if (fileVersion > LOD_SAVE_FILE_VERSION) {
 						// the file we are reading is a newer version,
 						// don't write anything, we don't want to accidently
 						// delete anything the user may want.
 						return;
-					}
+					}  // if(fileVersion > LOD_SAVE_FILE_VERSION)
+					//else {
+						// we are good to continue and overwrite the old file
+					//}
+
 				}
 
 				// the old file is good, now create a new save file

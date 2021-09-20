@@ -318,7 +318,7 @@ public class LodBuilder
 				//If the lod is at default, then we set this as void data
 				if (height == DEFAULT_HEIGHT)
 				{
-					dataToMerge[index * verticalData + 0] = DataPointUtil.createVoidDataPoint(generation);
+					dataToMerge[index * verticalData] = DataPointUtil.createVoidDataPoint(generation);
 					break;
 				}
 
@@ -417,9 +417,7 @@ public class LodBuilder
 					}
 				}
 				if (!voidData)
-				{
 					break;
-				}
 			}
 		}
 		return height;
@@ -884,14 +882,10 @@ public class LodBuilder
 				}
 			}
 
-			if (blockState.getBlock() != Blocks.AIR
-					    && blockState.getBlock() != Blocks.CAVE_AIR
-					    && blockState.getBlock() != Blocks.BARRIER)
-			{
-				return true;
-			}
+			return blockState.getBlock() != Blocks.AIR
+					&& blockState.getBlock() != Blocks.CAVE_AIR
+					&& blockState.getBlock() != Blocks.BARRIER;
 		}
-
 		return false;
 	}
 }

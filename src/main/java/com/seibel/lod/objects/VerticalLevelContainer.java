@@ -152,7 +152,7 @@ public class VerticalLevelContainer implements LevelContainer
 	{
 		int index = 0;
 		int tempIndex;
-		byte[] tempData = new byte[2 + (size * size * maxVerticalData * 8)];
+		byte[] tempData = ThreadMapUtil.getSaveContainer(2 + (size * size * maxVerticalData * 8));
 		tempData[index] = detailLevel;
 		index++;
 		tempData[index] = (byte) maxVerticalData;
