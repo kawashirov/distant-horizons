@@ -68,7 +68,7 @@ public class SingleLevelContainer implements LevelContainer
 		return new SingleLevelContainer((byte) (getDetailLevel() - 1));
 	}
 
-	public SingleLevelContainer(byte inputData[])
+	public SingleLevelContainer(byte[] inputData)
 	{
 		int tempIndex;
 		int index = 0;
@@ -105,7 +105,7 @@ public class SingleLevelContainer implements LevelContainer
 
 		int childPosX;
 		int childPosZ;
-		long data = 0;
+		long data;
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		for (int x = 0; x <= 1; x++)

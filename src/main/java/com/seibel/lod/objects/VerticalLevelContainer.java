@@ -73,7 +73,7 @@ public class VerticalLevelContainer implements LevelContainer
 		return DataPointUtil.doesItExist(getSingleData(posX,posZ));
 	}
 
-	public VerticalLevelContainer(byte inputData[])
+	public VerticalLevelContainer(byte[] inputData)
 	{
 		int tempIndex;
 		int index = 0;
@@ -84,7 +84,7 @@ public class VerticalLevelContainer implements LevelContainer
 		index++;
 		size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
 		this.dataContainer = new long[size * size * maxVerticalData];
-		int x, y, z = 0;
+		int x, y, z;
 		for (x = 0; x < size; x++)
 		{
 			for (z = 0; z < size; z++)
@@ -157,7 +157,7 @@ public class VerticalLevelContainer implements LevelContainer
 		index++;
 		tempData[index] = (byte) maxVerticalData;
 		index++;
-		int x, y, z = 0;
+		int x, y, z;
 		for (x = 0; x < size; x++)
 		{
 			for (z = 0; z < size; z++)
