@@ -367,9 +367,9 @@ public class DataPointUtil
 			ii = WORLD_HEIGHT;
 			for (i = 0; i < count - 1; i++)
 			{
-				if (heightAndDepth[i][1] - heightAndDepth[i + 1][0] < ii)
+				if (heightAndDepth[i + 1][0] - heightAndDepth[i][1] < ii)
 				{
-					ii = heightAndDepth[i][1] - heightAndDepth[i + 1][0];
+					ii = heightAndDepth[i + 1][0] - heightAndDepth[i][1];
 					j = i;
 				}
 			}
