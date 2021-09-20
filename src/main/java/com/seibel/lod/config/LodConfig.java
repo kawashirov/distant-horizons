@@ -116,37 +116,37 @@ public class LodConfig
 					.comment("\n\n"
 							+ " At what distance should Fog be drawn on the LODs? \n"
 							+ " If the fog cuts off ubruptly or you are using Optifine's \"fast\" fog option \n"
-							+ " set this to " + FogDistance.NEAR.toString() + " or " + FogDistance.FAR.toString() + ". \n")
+							+ " set this to " + FogDistance.NEAR + " or " + FogDistance.FAR + ". \n")
 					.defineEnum("fogDistance", FogDistance.NEAR_AND_FAR);
 			
 			fogDrawOverride = builder
 					.comment("\n\n"
 							+ " When should fog be drawn? \n"
-							+ " " + FogDrawOverride.USE_OPTIFINE_FOG_SETTING.toString() + ": Use whatever Fog setting Optifine is using. If Optifine isn't installed this defaults to " + FogDrawOverride.ALWAYS_DRAW_FOG_FANCY.toString() + ". \n"
-							+ " " + FogDrawOverride.NEVER_DRAW_FOG.toString() + ": Never draw fog on the LODs \n"
-							+ " " + FogDrawOverride.ALWAYS_DRAW_FOG_FAST.toString() + ": Always draw fast fog on the LODs \n"
-							+ " " + FogDrawOverride.ALWAYS_DRAW_FOG_FANCY.toString() + ": Always draw fancy fog on the LODs (if your graphics card supports it) \n")
+							+ " " + FogDrawOverride.USE_OPTIFINE_FOG_SETTING + ": Use whatever Fog setting Optifine is using. If Optifine isn't installed this defaults to " + FogDrawOverride.ALWAYS_DRAW_FOG_FANCY + ". \n"
+							+ " " + FogDrawOverride.NEVER_DRAW_FOG + ": Never draw fog on the LODs \n"
+							+ " " + FogDrawOverride.ALWAYS_DRAW_FOG_FAST + ": Always draw fast fog on the LODs \n"
+							+ " " + FogDrawOverride.ALWAYS_DRAW_FOG_FANCY + ": Always draw fancy fog on the LODs (if your graphics card supports it) \n")
 					.defineEnum("fogDrawOverride", FogDrawOverride.USE_OPTIFINE_FOG_SETTING);
 			
 			lodTemplate = builder
 					.comment("\n\n"
 							+ " How should the LODs be drawn? \n"
-							+ " NOTE: Currently only " + LodTemplate.CUBIC.toString() + " is implemented! \n"
+							+ " NOTE: Currently only " + LodTemplate.CUBIC + " is implemented! \n"
 							+ " \n"
-							+ " " + LodTemplate.CUBIC.toString() + ": LOD Chunks are drawn as rectangular prisms (boxes). \n"
-							+ " " + LodTemplate.TRIANGULAR.toString() + ": LOD Chunks smoothly transition between other. \n"
-							+ " " + LodTemplate.DYNAMIC.toString() + ": LOD Chunks smoothly transition between other, \n"
+							+ " " + LodTemplate.CUBIC + ": LOD Chunks are drawn as rectangular prisms (boxes). \n"
+							+ " " + LodTemplate.TRIANGULAR + ": LOD Chunks smoothly transition between other. \n"
+							+ " " + LodTemplate.DYNAMIC + ": LOD Chunks smoothly transition between other, \n"
 							+ " " + "         unless a neighboring chunk is at a significantly different height. \n")
 					.defineEnum("lodTemplate", LodTemplate.CUBIC);
 			
 			maxDrawDetail = builder
 					.comment("\n\n"
 							+ " What is the maximum detail level that LODs should be drawn at? \n"
-							+ " " + LodResolution.CHUNK.toString() + ": render 1 LOD for each Chunk. \n"
-							+ " " + LodResolution.HALF_CHUNK.toString() + ": render 4 LODs for each Chunk. \n"
-							+ " " + LodResolution.FOUR_BLOCKS.toString() + ": render 16 LODs for each Chunk. \n"
-							+ " " + LodResolution.TWO_BLOCKS.toString() + ": render 64 LODs for each Chunk. \n"
-							+ " " + LodResolution.BLOCK.toString() + ": render 256 LODs for each Chunk. \n")
+							+ " " + LodResolution.CHUNK + ": render 1 LOD for each Chunk. \n"
+							+ " " + LodResolution.HALF_CHUNK + ": render 4 LODs for each Chunk. \n"
+							+ " " + LodResolution.FOUR_BLOCKS + ": render 16 LODs for each Chunk. \n"
+							+ " " + LodResolution.TWO_BLOCKS + ": render 64 LODs for each Chunk. \n"
+							+ " " + LodResolution.BLOCK + ": render 256 LODs for each Chunk. \n")
 					.defineEnum("lodDrawQuality", LodResolution.BLOCK);
 			
 			lodQuality = builder
@@ -176,11 +176,11 @@ public class LodConfig
 					.comment("\n\n"
 							+ " What kind of shading should the LODs have? \n"
 							+ " \n"
-							+ " " + ShadingMode.NONE.toString() + " \n"
+							+ " " + ShadingMode.NONE + " \n"
 							+ " " + "LODs will have the same lighting on every side. \n"
 							+ " " + "Can make large similarly colored areas hard to differentiate. \n"
 							+ "\n"
-							+ " " + ShadingMode.DARKEN_SIDES.toString() + " \n"
+							+ " " + ShadingMode.DARKEN_SIDES + " \n"
 							+ " " + "LODs will have darker sides and bottoms to simulate Minecraft's flat lighting.")
 					.defineEnum("lightingMode", ShadingMode.DARKEN_SIDES);
 			
@@ -221,18 +221,18 @@ public class LodConfig
 			lodQualityMode = builder
 					                 .comment("\n\n"
 							                          + " Use 3d lods or 2d lods? \n"
-							                          + " " + LodQualityMode.HEIGHTMAP.toString() + ": enable 2d lods with heightmap \n"
-							                          + " " + LodQualityMode.MULTI_LOD.toString() + ": enable 3d lods with heightmap \n")
+							                          + " " + LodQualityMode.HEIGHTMAP + ": enable 2d lods with heightmap \n"
+							                          + " " + LodQualityMode.MULTI_LOD + ": enable 3d lods with heightmap \n")
 					                 .defineEnum("lodQualityMode", LodQualityMode.HEIGHTMAP);
 
 			maxGenerationDetail = builder
 					.comment("\n\n"
 							+ " What is the maximum detail level that LODs should be generated at? \n"
-							+ " " + LodResolution.CHUNK.toString() + ": render 1 LOD for each Chunk. \n"
-							+ " " + LodResolution.HALF_CHUNK.toString() + ": render 4 LODs for each Chunk. \n"
-							+ " " + LodResolution.FOUR_BLOCKS.toString() + ": render 16 LODs for each Chunk. \n"
-							+ " " + LodResolution.TWO_BLOCKS.toString() + ": render 64 LODs for each Chunk. \n"
-							+ " " + LodResolution.BLOCK.toString() + ": render 256 LODs for each Chunk. \n")
+							+ " " + LodResolution.CHUNK + ": render 1 LOD for each Chunk. \n"
+							+ " " + LodResolution.HALF_CHUNK + ": render 4 LODs for each Chunk. \n"
+							+ " " + LodResolution.FOUR_BLOCKS + ": render 16 LODs for each Chunk. \n"
+							+ " " + LodResolution.TWO_BLOCKS + ": render 64 LODs for each Chunk. \n"
+							+ " " + LodResolution.BLOCK + ": render 256 LODs for each Chunk. \n")
 					.defineEnum("lodGenerationQuality", LodResolution.TWO_BLOCKS);
 			
 			lodDistanceCalculatorType = builder
@@ -255,10 +255,10 @@ public class LodConfig
 							+ "       different generation options. Your mileage may vary. \n"
 							+ "\n"
 
-							+ " " + DistanceGenerationMode.NONE.toString() + " \n"
+							+ " " + DistanceGenerationMode.NONE + " \n"
 							+ " Don't run the distance generator. \n"
 							
-							+ " " + DistanceGenerationMode.BIOME_ONLY.toString() + " \n"
+							+ " " + DistanceGenerationMode.BIOME_ONLY + " \n"
 							+ " Only generate the biomes and use biome \n"
 							+ " grass/foliage color, water color, or snow color \n"
 							+ " to generate the color. \n"
@@ -266,7 +266,7 @@ public class LodConfig
 							+ " Multithreaded - Fastest (2-5 ms) \n"
 							
 							+ "\n"
-							+ " " + DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT.toString() + " \n"
+							+ " " + DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT + " \n"
 							+ " Same as BIOME_ONLY, except instead \n"
 							+ " of always using sea level as the LOD height \n"
 							+ " different biome types (mountain, ocean, forest, etc.) \n"
@@ -274,20 +274,20 @@ public class LodConfig
 							+ " Multithreaded - Fastest (2-5 ms) \n"
 							
 							+ "\n"
-							+ " " + DistanceGenerationMode.SURFACE.toString() + " \n"
+							+ " " + DistanceGenerationMode.SURFACE + " \n"
 							+ " Generate the world surface, \n"
 							+ " this does NOT include caves, trees, \n"
 							+ " or structures. \n"
 							+ " Multithreaded - Faster (10-20 ms) \n"
 							
 							+ "\n"
-							+ " " + DistanceGenerationMode.FEATURES.toString() + " \n"
+							+ " " + DistanceGenerationMode.FEATURES + " \n"
 							+ " Generate everything except structures. \n"
 							+ " WARNING: This may cause world generation bugs or instability! \n"
 							+ " Multithreaded - Fast (15-20 ms) \n"
 							
 							+ "\n"
-							+ " " + DistanceGenerationMode.SERVER.toString() + " \n"
+							+ " " + DistanceGenerationMode.SERVER + " \n"
 							+ " Ask the server to generate/load each chunk. \n"
 							+ " This is the most compatible, but causes server/simulation lag. \n"
 							+ " This will also show player made structures if you \n"
@@ -297,7 +297,7 @@ public class LodConfig
 			
 			allowUnstableFeatureGeneration = builder
 					.comment("\n\n"
-							+ " When using the " + DistanceGenerationMode.FEATURES.toString() + " generation mode \n"
+							+ " When using the " + DistanceGenerationMode.FEATURES + " generation mode \n"
 							+ " some features may not be thread safe, which could \n"
 							+ " cause instability and crashes. \n"
 							+ " By default (false) those features are skipped, \n"
@@ -366,9 +366,9 @@ public class LodConfig
 			
 			debugMode = builder
 					.comment("\n\n"
-							+ " " + DebugMode.OFF.toString() + ": LODs will draw with their normal colors. \n"
-							+ " " + DebugMode.SHOW_DETAIL.toString() + ": LOD colors will be based on their detail. \n"
-							+ " " + DebugMode.SHOW_DETAIL_WIREFRAME.toString() + ": LOD colors will be based on their detail, drawn with wireframe. \n")
+							+ " " + DebugMode.OFF + ": LODs will draw with their normal colors. \n"
+							+ " " + DebugMode.SHOW_DETAIL + ": LOD colors will be based on their detail. \n"
+							+ " " + DebugMode.SHOW_DETAIL_WIREFRAME + ": LOD colors will be based on their detail, drawn with wireframe. \n")
 					.defineEnum("debugMode", DebugMode.OFF);
 			
 			enableDebugKeybinding = builder
