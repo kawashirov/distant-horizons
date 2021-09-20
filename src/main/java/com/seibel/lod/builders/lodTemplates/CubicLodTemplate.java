@@ -99,7 +99,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		box.setColor(color);
 		box.set(width, height - depth, width);
 		box.move((int) (xOffset + x), (int) (depth + yOffset), (int) (zOffset + z));
-		box.setUpCulling(32);
+		box.setUpCulling(32, bufferCenterBlockPos);
 		box.setAdjData(adjData);
 	}
 

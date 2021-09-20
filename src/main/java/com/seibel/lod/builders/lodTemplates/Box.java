@@ -11,9 +11,8 @@ import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.BlockPos;
 
-import javax.xml.crypto.Data;
 
 public class Box
 {
@@ -191,9 +190,8 @@ public class Box
 		}
 	}
 
-	public void setUpCulling(int cullingDistance)
+	public void setUpCulling(int cullingDistance, BlockPos playerPos)
 	{
-		Vector3d playerPos = MinecraftWrapper.INSTANCE.getPlayer().position();
 		for (Direction direction : DIRECTIONS)
 		{
 			if(direction == Direction.DOWN)
@@ -224,9 +222,9 @@ public class Box
 		int maxY = getMaxY();
 		for (Direction direction : ADJ_DIRECTIONS)
 		{
-			//if(isCulled(direction)){
-			//	continue;
-			//}
+			/*if(isCulled(direction)){
+				continue;
+			}*/
 
 			long[] dataPoint = adjData.get(direction);
 			if (dataPoint == null || DataPointUtil.isItVoid(dataPoint[0]))
@@ -262,13 +260,17 @@ public class Box
 			int faceToDraw = 0;
 			boolean firstFace = true;
 			boolean toFinish = false;
-			/*for (i = dataPoint.length - 1; i >= 0; i--)
-			{
-				long singleDataPoint = dataPoint[i];*/
 			long singleAdjDataPoint;
+			/*for (i = 0; i < dataPoint.length; i++)
+			{
+				singleAdjDataPoint = dataPoint[i];*/
 			for (i = 0; i < count; i++)
 			{
 				singleAdjDataPoint = order[i];
+				if(DataPointUtil.isItVoid(singleAdjDataPoint) || !DataPointUtil.doesItExist(singleAdjDataPoint))
+				{
+					break;
+				}
 				height = DataPointUtil.getHeight(singleAdjDataPoint);
 				depth = DataPointUtil.getDepth(singleAdjDataPoint);
 
