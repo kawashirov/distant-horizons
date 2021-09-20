@@ -224,9 +224,9 @@ public class LodNodeGenWorker implements IWorker
 //					System.out.println(endTime - startTime);
 
 				}// if in range
-				else{
+				//else{
 
-				}
+				//}
 			}
 			catch (Exception e)
 			{
@@ -584,16 +584,11 @@ public class LodNodeGenWorker implements IWorker
 		private BlockClusterFeatureConfig cloneBlockClusterFeatureConfig(BlockClusterFeatureConfig config)
 		{
 			WeightedBlockStateProvider provider = new WeightedBlockStateProvider();
-			for(Entry<BlockState> state : ((WeightedBlockStateProvider) config.stateProvider).weightedList.entries)
-				provider.weightedList.entries.add(state);
+			provider.weightedList.entries.addAll(((WeightedBlockStateProvider) config.stateProvider).weightedList.entries);
 
-			HashSet<Block> whitelist = new HashSet<>();
-			for(Block block : config.whitelist)
-				whitelist.add(block);
+			HashSet<Block> whitelist = new HashSet<>(config.whitelist);
 
-			HashSet<BlockState> blacklist = new HashSet<>();
-			for(BlockState state : config.blacklist)
-				blacklist.add(state);
+			HashSet<BlockState> blacklist = new HashSet<>(config.blacklist);
 
 
 			BlockClusterFeatureConfig.Builder builder = new BlockClusterFeatureConfig.Builder(provider, config.blockPlacer);

@@ -390,8 +390,6 @@ public class LodBufferBuilder
 		});
 
 		mainGenThread.execute(thread);
-
-		return;
 	}
 
 	//===============================//
