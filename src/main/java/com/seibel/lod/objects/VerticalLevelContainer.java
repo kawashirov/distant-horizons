@@ -93,9 +93,15 @@ public class VerticalLevelContainer implements LevelContainer
 					newData = 0;
 					if (inputData[index] == 0)
 						index++;
+					if (inputData[index] == 3)
+					{
+						newData = 3;
+						index++;
+					}
 					else if (index + 7 >= inputData.length)
 						break;
-					else {
+					else
+					{
 						for (tempIndex = 0; tempIndex < 8; tempIndex++)
 							newData += (((long) inputData[index + tempIndex]) & 0xff) << (8 * tempIndex);
 						index = index + 8;
@@ -158,17 +164,18 @@ public class VerticalLevelContainer implements LevelContainer
 			{
 				for (y = 0; y < maxVerticalData; y++)
 				{
-					if (dataContainer[(x * size + z) * maxVerticalData + y] == 0)
+					int i = (x * size + z) * maxVerticalData + y;
+					if (dataContainer[i] == 0)
 					{
 						tempData[index] = 0;
 						index++;
-					} else if (dataContainer[(x * size + z) * maxVerticalData + y] == 3)
+					} else if (dataContainer[i] == 3)
 					{
 						tempData[index] = 3;
 						index++;
 					} else {
 						for (tempIndex = 0; tempIndex < 8; tempIndex++)
-							tempData[index + tempIndex] = (byte) (dataContainer[(x * size + z) * maxVerticalData + y] >>> (8 * tempIndex));
+							tempData[index + tempIndex] = (byte) (dataContainer[i] >>> (8 * tempIndex));
 						index += 8;
 					}
 				}
