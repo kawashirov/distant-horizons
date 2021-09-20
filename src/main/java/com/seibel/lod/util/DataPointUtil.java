@@ -224,8 +224,8 @@ public class DataPointUtil
 		int tempRed = 0;
 		int tempGreen = 0;
 		int tempBlue = 0;
-		int tempHeight = 0;
-		int tempDepth = 0;
+		int tempHeight = Integer.MIN_VALUE;
+		int tempDepth = Integer.MAX_VALUE;
 		int tempLightBlock = 0;
 		int tempLightSky = 0;
 		byte tempGenMode = DistanceGenerationMode.SERVER.complexity;
@@ -244,8 +244,8 @@ public class DataPointUtil
 					tempRed += DataPointUtil.getRed(data);
 					tempGreen += DataPointUtil.getGreen(data);
 					tempBlue += DataPointUtil.getBlue(data);
-					tempHeight += DataPointUtil.getHeight(data);
-					tempDepth += DataPointUtil.getDepth(data);
+					tempHeight = Math.max(tempHeight, DataPointUtil.getHeight(data));
+					tempDepth =  Math.min(tempDepth, DataPointUtil.getDepth(data));
 					tempLightBlock += DataPointUtil.getLightBlock(data);
 					tempLightSky += DataPointUtil.getLightSky(data);
 				}
