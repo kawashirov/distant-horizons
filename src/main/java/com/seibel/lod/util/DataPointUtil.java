@@ -375,8 +375,8 @@ public class DataPointUtil
 			}
 			heightAndDepth[j][1] = heightAndDepth[j + 1][1];
 			for (i = j + 1; i < count - 1; i++){
+				heightAndDepth[i][0] = heightAndDepth[i + 1][0];
 				heightAndDepth[i][1] = heightAndDepth[i + 1][1];
-				heightAndDepth[i][2] = heightAndDepth[i + 1][2];
 			}
 			//System.arraycopy(heightAndDepth,j + 1, heightAndDepth, j,count - j - 1);
 			count--;
