@@ -294,47 +294,44 @@ public class LodBufferBuilder
 									}
 
 									// skip any chunks that Minecraft is going to render
-									try
+									for (Direction direction : Box.ADJ_DIRECTIONS)
 									{
-										for (Direction direction : Box.ADJ_DIRECTIONS)
-										{
-											xAdj = posX + direction.getNormal().getX();
-											zAdj = posZ + direction.getNormal().getZ();
-											chunkXdist = LevelPosUtil.getChunkPos(detailLevel, xAdj) - playerChunkPos.x;
-											chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.z;
-											boolean performFaceCulling = false;
-											if (performFaceCulling
-														&& posToRender.contains(detailLevel, xAdj, zAdj)
-													    && (gameChunkRenderDistance < Math.abs(chunkXdist)
+										xAdj = posX + direction.getNormal().getX();
+										zAdj = posZ + direction.getNormal().getZ();
+										chunkXdist = LevelPosUtil.getChunkPos(detailLevel, xAdj) - playerChunkPos.x;
+										chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.z;
+										boolean performFaceCulling = true;
+										if (performFaceCulling
+												    && posToRender.contains(detailLevel, xAdj, zAdj)
+													    /*&& (gameChunkRenderDistance < Math.abs(chunkXdist)
 															        || gameChunkRenderDistance < Math.abs(chunkZdist)
-															        || !vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]))
-											{
-												if (!adjData.containsKey(direction) || adjData.get(direction)==null)
-													adjData.put(direction, new long[maxVerticalData]);
-												for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
-													adjData.get(direction)[verticalIndex] = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
-											} else
-											{
-												adjData.put(direction, null);
-											}
-										}
-
-										long data;
-										for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ); verticalIndex++)
+															        || !vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1])*/)
 										{
-											data = lodDim.getData(detailLevel, posX, posZ, verticalIndex);
-											if (DataPointUtil.isItVoid(data) || !DataPointUtil.doesItExist(data))
-												break;
-											LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, data, adjData,
-													detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode, renderer.lightMap);
+											if (!adjData.containsKey(direction) || adjData.get(direction) == null)
+												adjData.put(direction, new long[maxVerticalData]);
+											for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
+											{
+												long data = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
+												if(!DataPointUtil.isItVoid(data) && DataPointUtil.doesItExist(data))
+													System.out.println(DataPointUtil.toString(data));
+												adjData.get(direction)[verticalIndex] = data;
+											}
+										} else
+										{
+											adjData.put(direction, null);
 										}
-
-
-									} catch (ArrayIndexOutOfBoundsException e)
-									{
-										e.printStackTrace();
-										return false;
 									}
+
+									long data;
+									for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ); verticalIndex++)
+									{
+										data = lodDim.getData(detailLevel, posX, posZ, verticalIndex);
+										if (DataPointUtil.isItVoid(data) || !DataPointUtil.doesItExist(data))
+											break;
+										LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, data, adjData,
+												detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode, renderer.lightMap);
+									}
+
 
 								} // for pos to in list to render
 								// the thread executed successfully

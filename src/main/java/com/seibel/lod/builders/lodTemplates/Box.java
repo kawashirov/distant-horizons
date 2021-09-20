@@ -7,10 +7,13 @@ import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.vector.Vector3d;
+
+import javax.xml.crypto.Data;
 
 public class Box
 {
@@ -100,6 +103,7 @@ public class Box
 	}};
 
 	public int[][] box;
+	public long[] order;
 	public Map<Direction, int[]> colorMap;
 	public int color;
 	public Map<Direction, int[][]> adjHeightAndDepth;
@@ -109,7 +113,7 @@ public class Box
 	public Box()
 	{
 		box = new int[2][3];
-		//order = new long[32];
+		order = new long[DetailDistanceUtil.getMaxVerticalData(0)];
 		colorMap = new HashMap<Direction, int[]>()
 		{{
 			put(Direction.UP, new int[1]);
@@ -172,6 +176,8 @@ public class Box
 			colorMap.get(direction)[0] = 0;
 		}
 
+		for(int i = 0; i < order.length; i++)
+			order[i] = DataPointUtil.EMPTY_DATA;
 		for (Direction direction : ADJ_DIRECTIONS)
 		{
 			if(isCulled(direction)){
@@ -234,27 +240,37 @@ public class Box
 
 			//We order the adj list
 			/**TODO remove this if the order is maintained naturally*/
-			/*
 			order[0] = 0;
+			int count = 0;
 			for (int i = 0; i < dataPoint.length; i++)
 			{
 				int j = i - 1;
-				while (j >= 0 && DataPointUtil.getHeight(order[j]) > DataPointUtil.getHeight(dataPoint[i])) {
+				if(DataPointUtil.isItVoid(dataPoint[i]) || !DataPointUtil.doesItExist(dataPoint[i]))
+				{
+					continue;
+				}
+				while (j >= 0 && DataPointUtil.getHeight(order[j]) < DataPointUtil.getHeight(dataPoint[i]))
+				{
 					order[j + 1] = order[j];
 					j = j - 1;
 				}
 				order[j + 1] = dataPoint[i];
-			}*/
+				count++;
+			}
 
 			int i;
 			int faceToDraw = 0;
 			boolean firstFace = true;
 			boolean toFinish = false;
-			for (i = dataPoint.length - 1; i >= 0; i--)
+			/*for (i = dataPoint.length - 1; i >= 0; i--)
 			{
-				long singleDataPoint = dataPoint[i];
-				height = DataPointUtil.getHeight(singleDataPoint);
-				depth = DataPointUtil.getDepth(singleDataPoint);
+				long singleDataPoint = dataPoint[i];*/
+			long singleAdjDataPoint;
+			for (i = 0; i < count; i++)
+			{
+				singleAdjDataPoint = order[i];
+				height = DataPointUtil.getHeight(singleAdjDataPoint);
+				depth = DataPointUtil.getDepth(singleAdjDataPoint);
 
 				if (depth > maxY)
 				{//the adj data is higher than the current data
