@@ -303,17 +303,15 @@ public class LodBufferBuilder
 										boolean performFaceCulling = true;
 										if (performFaceCulling
 												    && posToRender.contains(detailLevel, xAdj, zAdj)
-													    /*&& (gameChunkRenderDistance < Math.abs(chunkXdist)
+													    && (gameChunkRenderDistance < Math.abs(chunkXdist)
 															        || gameChunkRenderDistance < Math.abs(chunkZdist)
-															        || !vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1])*/)
+															        || !vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]))
 										{
 											if (!adjData.containsKey(direction) || adjData.get(direction) == null)
 												adjData.put(direction, new long[maxVerticalData]);
 											for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
 											{
 												long data = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
-												if(!DataPointUtil.isItVoid(data) && DataPointUtil.doesItExist(data))
-													System.out.println(DataPointUtil.toString(data));
 												adjData.get(direction)[verticalIndex] = data;
 											}
 										} else
