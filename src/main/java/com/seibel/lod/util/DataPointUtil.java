@@ -282,7 +282,7 @@ public class DataPointUtil
 	public static long[] mergeMultiData(long[] dataToMerge, int inputVerticalData,int maxVerticalData)
 	{
 		int size = dataToMerge.length / inputVerticalData;
-		short[] projection = ThreadMapUtil.getProjectionShort((WORLD_HEIGHT + 1) / 16);
+		short[] projection = ThreadMapUtil.getProjectionShort((WORLD_HEIGHT) / 16  + 1);
 		short[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth(inputVerticalData);
 		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(size);
 		int genMode = DistanceGenerationMode.SERVER.complexity;
