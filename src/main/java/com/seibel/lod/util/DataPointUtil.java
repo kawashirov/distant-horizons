@@ -283,7 +283,7 @@ public class DataPointUtil
 	{
 		int size = dataToMerge.length / inputVerticalData;
 		short[] projection = ThreadMapUtil.getProjectionShort((WORLD_HEIGHT) / 16  + 1);
-		short[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth(inputVerticalData + 1);
+		short[] heightAndDepth = ThreadMapUtil.getHeightAndDepth(inputVerticalData * 2);
 		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(size);
 		int genMode = DistanceGenerationMode.SERVER.complexity;
 		boolean allEmpty = true;
@@ -348,15 +348,15 @@ public class DataPointUtil
 				while (i < projection.length && ~(projection[i]) == 0)	i++; //check for big solid blocks
 				if (i == projection.length) //solid to WORLD_HEIGHT
 				{
-					heightAndDepth[count][0] = depth;
-					heightAndDepth[count][1] = WORLD_HEIGHT - 1;
+					heightAndDepth[count * 2] = depth;
+					heightAndDepth[count * 2 + 1] = WORLD_HEIGHT - 1;
 					break;
 				}
 				while ((((projection[i] >>> ii) & 1) == 1)) ii++;
 			}
 			height = (short)(i * 16 + ii - 1);
-			heightAndDepth[count][0] = depth;
-			heightAndDepth[count][1] = height;
+			heightAndDepth[count * 2] = depth;
+			heightAndDepth[count * 2 + 1] = height;
 			count++;
 		}
 
@@ -367,16 +367,16 @@ public class DataPointUtil
 			ii = WORLD_HEIGHT;
 			for (i = 0; i < count - 1; i++)
 			{
-				if (heightAndDepth[i + 1][0] - heightAndDepth[i][1] < ii)
+				if (heightAndDepth[(i + 1) * 2] - heightAndDepth[i * 2 + 1] < ii)
 				{
-					ii = heightAndDepth[i + 1][0] - heightAndDepth[i][1];
+					ii = heightAndDepth[(i + 1) * 2] - heightAndDepth[i * 2 + 1];
 					j = i;
 				}
 			}
-			heightAndDepth[j][1] = heightAndDepth[j + 1][1];
+			heightAndDepth[j * 2 + 1] = heightAndDepth[(j + 1) * 2 + 1];
 			for (i = j + 1; i < count - 1; i++){
-				heightAndDepth[i][0] = heightAndDepth[i + 1][0];
-				heightAndDepth[i][1] = heightAndDepth[i + 1][1];
+				heightAndDepth[i * 2] = heightAndDepth[(i + 1) * 2];
+				heightAndDepth[i * 2 + 1] = heightAndDepth[(i + 1) * 2 + 1];
 			}
 			//System.arraycopy(heightAndDepth,j + 1, heightAndDepth, j,count - j - 1);
 			count--;
