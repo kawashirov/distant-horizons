@@ -137,7 +137,7 @@ public class SingleLevelContainer implements LevelContainer
 	{
 		int index = 0;
 		int tempIndex;
-		byte[] tempData = new byte[1 + (size * size * 8)];
+		byte[] tempData = ThreadMapUtil.getSaveContainer(1 + (size * size * 8));
 		tempData[index] = detailLevel;
 		index++;
 		for (int x = 0; x < size; x++)
