@@ -98,7 +98,7 @@ public class DataPointUtil
 	public static long createDataPoint(int alpha, int red, int green, int blue, int height, int depth, int lightSky, int lightBlock, int generationMode)
 	{
 		long dataPoint = 0;
-		dataPoint += ((alpha & ALPHA_MASK) >>> ALPHA_DOWNSIZE_SHIFT) << ALPHA_SHIFT;
+		dataPoint += ((alpha >>> ALPHA_DOWNSIZE_SHIFT) & ALPHA_MASK ) << ALPHA_SHIFT;
 		dataPoint += (red & RED_MASK) << RED_SHIFT;
 		dataPoint += (green & GREEN_MASK) << GREEN_SHIFT;
 		dataPoint += (blue & BLUE_MASK) << BLUE_SHIFT;
@@ -290,11 +290,9 @@ public class DataPointUtil
 		boolean allVoid = true;
 		long singleData;
 
-
-		for(int k=0; k < projection.length; k++) //probably can remove
-			projection[k] = 0;
-		short depth = 0;
-		short height = 0;
+		Arrays.fill(projection, (short) 0); //probably can remove
+		short depth;
+		short height;
 
 		//We collect the indexes of the data, ordered by the depth
 		for (int index = 0; index < size; index++)
