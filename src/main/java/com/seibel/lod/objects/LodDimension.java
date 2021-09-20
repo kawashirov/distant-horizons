@@ -64,11 +64,11 @@ public class LodDimension
 	// these three variables are private to force use of the getWidth() method
 	// which is a safer way to get the width then directly asking the arrays
 	/** stores all the regions in this dimension */
-	private volatile LodRegion regions[][];
+	private volatile LodRegion[][] regions;
 	/** stores if the region at the given x and z index needs to be saved to disk */
-	private volatile boolean isRegionDirty[][];
+	private volatile boolean[][] isRegionDirty;
 	/** stores if the region at the given x and z index needs to be regenerated */
-	private volatile boolean regionNeedsRegen[][];
+	private volatile boolean[][] regionNeedsRegen;
 	
 	/**
 	 * if true that means there are regions in this dimension
@@ -93,7 +93,7 @@ public class LodDimension
 		lastGenChunk = null;
 		dimension = newDimension;
 		width = newWidth;
-		halfWidth = (int) Math.floor(width / 2);
+		halfWidth = width / 2;
 		MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 		if (newDimension != null && lodWorld != null)
 		{
