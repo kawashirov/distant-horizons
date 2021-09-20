@@ -386,8 +386,8 @@ public class DataPointUtil
 		long[] dataPoint = new long[count];
 		for (j = count - 1; j >= 0; j--)
 		{
-			depth = heightAndDepth[j][0];
-			height = heightAndDepth[j][1];
+			depth = heightAndDepth[j * 2];
+			height = heightAndDepth[j * 2 + 1];
 			for(int k = 0; k < size; k++){
 				singleDataToMerge[k] = 0;
 			}
