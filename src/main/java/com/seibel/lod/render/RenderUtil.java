@@ -19,6 +19,8 @@ package com.seibel.lod.render;
 
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.LodTemplate;
+import com.seibel.lod.objects.LodRegion;
+import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
@@ -89,24 +91,23 @@ public class RenderUtil
 	 * it is possible (albeit unlikely) to have a buffer indexOutOfBounds exception
 	 * which is caused by the buffer not being big enough.
 	 */
-	public static int getBufferMemoryForRegion()
+	public static int getBufferMemoryForRegion(LodRegion region)
 	{
 		// calculate the max amount of buffer memory needed (in bytes)
-		return LodUtil.REGION_WIDTH_IN_CHUNKS * LodUtil.REGION_WIDTH_IN_CHUNKS * 6 * // TODO this really needs to be more accurate
-				LodConfig.CLIENT.graphics.lodTemplate.get().getBufferMemoryForSingleLod() * LodUtil.MAX_VERTICAL_DATA;
+		return region.getMinMemoryNeeded(LodConfig.CLIENT.graphics.lodTemplate.get());
 	}
 	
 	/**
 	 * Returns the maxViewDistanceMultiplier for the given LodTemplate
 	 * at the given LodDetail level.
 	 */
-	public static int getMaxRadiusMultiplierWithAvaliableMemory(LodTemplate lodTemplate, int detailLevel)
+	/*public static int getMaxRadiusMultiplierWithAvaliableMemory(LodTemplate lodTemplate, int detailLevel)
 	{
 		int maxNumberOfLods = LodRenderer.MAX_ALOCATEABLE_DIRECT_MEMORY / lodTemplate.getBufferMemoryForSingleLod();
 		int numbLodsWide = (int) Math.sqrt(maxNumberOfLods);
 		
 		return numbLodsWide / (2 * mc.getRenderDistance());
-	}
+	}*/
 	
 	
 	/**

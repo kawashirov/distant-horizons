@@ -58,6 +58,7 @@ public class ClientProxy
 	public static final Logger LOGGER = LogManager.getLogger("LOD");
 	
 	private boolean firstTimeSetupComplete = false;
+	public static boolean drawLods = true;
 	
 	private static LodWorld lodWorld = new LodWorld();
 	private static LodBuilder lodBuilder = new LodBuilder();
@@ -144,7 +145,7 @@ public class ClientProxy
 			profiler.pop(); // get out of "terrain"
 			profiler.push("LOD");
 
-			if(LodConfig.CLIENT.graphics.drawLODs.get())
+			if(drawLods)
 			{
 				renderer.drawLODs(lodDim, mcMatrixStack, partialTicks, mc.getProfiler());
 			}
@@ -297,7 +298,7 @@ public class ClientProxy
 		if(LodConfig.CLIENT.debugging.enableDebugKeybinding.get()
 				   && event.getKey() == GLFW.GLFW_KEY_F6 && event.getAction() == GLFW.GLFW_PRESS)
 		{
-			LodConfig.CLIENT.graphics.drawLODs.set(!LodConfig.CLIENT.graphics.drawLODs.get());
+			drawLods = !drawLods;
 		}
 	}
 	
@@ -340,7 +341,7 @@ public class ClientProxy
 			// update the dimensions to fit the new width
 			lodWorld.resizeDimensionRegionWidth(newWidth);
 			lodBuilder.defaultDimensionWidthInRegions = newWidth;
-			renderer.setupBuffers(newWidth);
+			renderer.setupBuffers(newWidth, lodWorld.getLodDimension(mc.getClientWorld().dimensionType()));
 			
 			recalculateWidths = false;
 			//LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );

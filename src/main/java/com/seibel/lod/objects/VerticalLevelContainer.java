@@ -205,4 +205,12 @@ public class VerticalLevelContainer implements LevelContainer
 		 */
 		return " ";
 	}
+
+	public int getMaxNumberOfLods(){
+		return size*size*getMaxVerticalData();
+	}
+
+	public int getMaxMemoryUse(){
+		return getMaxNumberOfLods() * 2; //2 byte
+	}
 }

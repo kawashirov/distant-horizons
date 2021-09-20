@@ -28,6 +28,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.seibel.lod.render.RenderUtil;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
@@ -402,12 +403,12 @@ public class LodBufferBuilder
 	 * <p>
 	 * May have to wait for the bufferLock to open.
 	 */
-	public void setupBuffers(int numbRegionsWide, int bufferMaxCapacity)
+	public void setupBuffers(int numbRegionsWide, LodDimension lodDimension)
 	{
 		bufferLock.lock();
 
 		previousRegionWidth = numbRegionsWide;
-		previousBufferSize = bufferMaxCapacity;
+		int bufferMaxCapacity;
 
 		buildableBuffers = new BufferBuilder[numbRegionsWide][numbRegionsWide];
 
@@ -418,6 +419,7 @@ public class LodBufferBuilder
 		{
 			for (int z = 0; z < numbRegionsWide; z++)
 			{
+				bufferMaxCapacity = lodDimension.getMemoryRequired(x,z);
 				buildableBuffers[x][z] = new BufferBuilder(bufferMaxCapacity);
 
 				buildableVbos[x][z] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
@@ -542,6 +544,43 @@ public class LodBufferBuilder
 
 			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		}
+		/*
+		// this shouldn't happen, but just to be safe
+		if (vbo.id != -1)
+		{
+			vbo.vertexCount = uploadBuffer.remaining() / vbo.format.getVertexSize();
+
+
+			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.id);
+
+
+			// make sure enough space is allocated to fit the builderBuffer
+			GL15C.glBufferData(GL15.GL_ARRAY_BUFFER, uploadBuffer.capacity(), GL15C.GL_DYNAMIC_DRAW);
+			// try to get a pointer to the VBO's byteBuffer in GPU memory
+			ByteBuffer vboBuffer = GL15C.glMapBuffer(GL15.GL_ARRAY_BUFFER, GL15.GL_WRITE_ONLY);
+
+			// upload the builderBuffer to the GPU
+			if (vboBuffer != null)
+			{
+				// This is the best way to upload lots of data, since writes directly to GPU
+				// memory, and doesn't pause OpenGL.
+				vboBuffer.put(uploadBuffer);
+			}
+			else
+			{
+				// Sometimes the vboBuffer is null (I think it may be due to buffer sizes
+				// changing or a setup process that didn't complete), so in that case
+				// we have to use this method which is slower and pauses OpenGL,
+				// but always succeeds.
+				GL15C.glBufferData(GL15.GL_ARRAY_BUFFER, uploadBuffer, GL15C.GL_DYNAMIC_DRAW);
+
+			}
+
+
+			GL15C.glUnmapBuffer(GL15.GL_ARRAY_BUFFER);
+			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+		}*/
+
 	}
 
 	/**

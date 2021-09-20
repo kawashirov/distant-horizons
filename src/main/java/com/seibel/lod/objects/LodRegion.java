@@ -2,6 +2,7 @@ package com.seibel.lod.objects;
 
 
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.DataPointUtil;
@@ -466,8 +467,9 @@ public class LodRegion
 
 	/**
 	 * return needed memory in byte
+	 * @param template
 	 */
-	public int getMinMemoryNeeded()
+	public int getMinMemoryNeeded(LodTemplate template)
 	{
 		int count = 0;
 		for (byte tempLod = LodUtil.REGION_DETAIL_LEVEL; tempLod > minDetailLevel; tempLod--)
@@ -475,7 +477,7 @@ public class LodRegion
 			//i'm doing a upper limit of the minimum
 			//Color should be just 3 byte but i'm gonna calculate as 12 byte
 			//Height and depth should be just 4 byte but i'm gonna calculate as 8 byte
-			count += Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - tempLod) * (8 + 3 + 2 + 2 + 1);
+			count += dataContainer[tempLod].getMaxMemoryUse() * template.getBufferMemoryForSingleLod(dataContainer[tempLod].getMaxVerticalData());
 			//count += Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - tempLod) * (24 + 8 + 8 + 8 + 8);
 		}
 		return count;
@@ -485,5 +487,12 @@ public class LodRegion
 	public String toString()
 	{
 		return getLevel(LodUtil.REGION_DETAIL_LEVEL).toString();
+	}
+
+	public int getNumberOfLods(){
+		int count = 0;
+		for(LevelContainer container : dataContainer)
+			count += container.getMaxNumberOfLods();
+		return count;
 	}
 }

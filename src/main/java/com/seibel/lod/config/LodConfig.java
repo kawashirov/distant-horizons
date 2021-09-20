@@ -71,8 +71,6 @@ public class LodConfig
 
 	public static class Graphics
 	{
-		public ForgeConfigSpec.BooleanValue drawLODs;
-
 		public ForgeConfigSpec.EnumValue<FogDistance> fogDistance;
 		public ForgeConfigSpec.EnumValue<FogDrawOverride> fogDrawOverride;
 
@@ -92,13 +90,6 @@ public class LodConfig
 		Graphics(ForgeConfigSpec.Builder builder)
 		{
 			builder.comment("These settings control how the LODs look.").push(this.getClass().getSimpleName());
-
-			drawLODs = builder
-					           .comment("\n\n"
-							                    + " If false LODs will not be drawn, \n"
-							                    + " however they will still be generated \n"
-							                    + " and saved to file for later use. \n")
-					           .define("drawLODs", true);
 
 			fogDistance = builder
 					              .comment("\n\n"

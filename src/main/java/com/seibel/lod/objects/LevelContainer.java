@@ -76,4 +76,17 @@ public interface LevelContainer
 	 * @return data as a String
 	 */
 	public byte[] toDataString();
+
+
+	/**
+	 * This will give the data to save in the file
+	 * @return data as a String
+	 */
+	public int getMaxNumberOfLods();
+
+	/**
+	 * This will give the data to save in the file
+	 * @return data as a String
+	 */
+	public int getMaxMemoryUse();
 }

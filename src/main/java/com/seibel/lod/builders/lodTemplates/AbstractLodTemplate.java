@@ -56,5 +56,5 @@ public abstract class AbstractLodTemplate
 	 * Returns in bytes how much buffer memory is required
 	 * for one LOD object
 	 */
-	public abstract int getBufferMemoryForSingleNode();
+	public abstract int getBufferMemoryForSingleNode(int maxVerticalData);
 }

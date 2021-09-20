@@ -166,4 +166,13 @@ public class SingleLevelContainer implements LevelContainer
 		stringBuilder.append(detailLevel);
 		return stringBuilder.toString();
 	}
+
+
+	public int getMaxNumberOfLods(){
+		return size*size*getMaxVerticalData();
+	}
+
+	public int getMaxMemoryUse(){
+		return getMaxNumberOfLods() * 2; //2 byte
+	}
 }

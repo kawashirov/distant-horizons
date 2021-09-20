@@ -44,7 +44,7 @@ public class TriangularLodTemplate extends AbstractLodTemplate
 	}
 
 	@Override
-	public int getBufferMemoryForSingleNode()
+	public int getBufferMemoryForSingleNode(int maxVerticalData)
 	{
 		return 0;
 	}

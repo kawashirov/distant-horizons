@@ -589,21 +589,21 @@ public class LodRenderer
 	/**
 	 * Create all buffers that will be used.
 	 */
-	public void setupBuffers(int numbRegionsWide)
+	public void setupBuffers(int numbRegionsWide, LodDimension lodDim)
 	{
 		// calculate the max amount of memory needed (in bytes)
-		int bufferMemory = RenderUtil.getBufferMemoryForRegion();
+		/*int bufferMemory = RenderUtil.getBufferMemoryForRegion(lodDim);*/
 
 		// if the required memory is greater than the
 		// MAX_ALOCATEABLE_DIRECT_MEMORY lower the lodChunkRadiusMultiplier
 		// to fit.
-		if (bufferMemory > MAX_ALOCATEABLE_DIRECT_MEMORY)
+		/*if (bufferMemory > MAX_ALOCATEABLE_DIRECT_MEMORY)
 		{
 			ClientProxy.LOGGER.warn("setupBuffers tried to allocate too much memory for the BufferBuilders."
 					                        + " It tried to allocate \"" + bufferMemory + "\" bytes, when \"" + MAX_ALOCATEABLE_DIRECT_MEMORY + "\" is the max.");
-		}
+		}*/
 
-		lodBufferBuilder.setupBuffers(numbRegionsWide, bufferMemory);
+		lodBufferBuilder.setupBuffers(numbRegionsWide, lodDim);
 	}
 
 

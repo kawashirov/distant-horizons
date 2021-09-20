@@ -54,8 +54,8 @@ public enum LodTemplate
 	}
 	
 	
-	public int getBufferMemoryForSingleLod()
+	public int getBufferMemoryForSingleLod(int maxVerticalData)
 	{
-		return template.getBufferMemoryForSingleNode();
+		return template.getBufferMemoryForSingleNode(maxVerticalData);
 	}
 }
