@@ -220,16 +220,15 @@ public class LodBuilder
 
 				posX = LevelPosUtil.convert((byte) 0, chunk.getPos().x * 16 + startX, detail.detailLevel);
 				posZ = LevelPosUtil.convert((byte) 0, chunk.getPos().z * 16 + startZ, detail.detailLevel);
-				long singleData = 0;
-				long[] data = null;
+				long[] data;
 				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
 
 				switch (lodQualityMode)
 				{
 					default:
 					case HEIGHTMAP:
-						long[] dataToMergeSingle;
-						dataToMergeSingle = createSingleDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
+						long singleData;
+						long[] dataToMergeSingle = createSingleDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
 						singleData = DataPointUtil.mergeSingleData(dataToMergeSingle);
 						lodDim.addSingleData(detailLevel,
 								posX,
@@ -239,25 +238,21 @@ public class LodBuilder
 								isServer);
 						break;
 					case MULTI_LOD:
-						long[] dataToMergeVertical;
-						dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
+						long[] dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
 						data = DataPointUtil.mergeMultiData(dataToMergeVertical, DataPointUtil.WORLD_HEIGHT, DetailDistanceUtil.getMaxVerticalData(detailLevel));
-						if (data.length == 0 || data == null)
-							data = new long[]{DataPointUtil.EMPTY_DATA};
-						//lodDim.clear(detailLevel, posX, posZ);
-						for (int verticalIndex = 0; (verticalIndex < data.length) && (verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ)); verticalIndex++)
+						lodDim.clear(detailLevel, posX, posZ);
+						if (data.length != 0 || data != null)
 						{
-							boolean test = lodDim.addData(detailLevel,
-									posX,
-									posZ,
-									verticalIndex,
-									data[verticalIndex],
-									false,
-									isServer);
-							long dataTest = lodDim.getData(detailLevel,
-									posX,
-									posZ,
-									verticalIndex);
+							for (int verticalIndex = 0; (verticalIndex < data.length) && (verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ)); verticalIndex++)
+							{
+								lodDim.addData(detailLevel,
+										posX,
+										posZ,
+										verticalIndex,
+										data[verticalIndex],
+										false,
+										isServer);
+							}
 						}
 
 						break;
@@ -266,10 +261,6 @@ public class LodBuilder
 
 			}
 			lodDim.updateData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
-			long dataTest = lodDim.getData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z, 0);
-			long dataTest2 = lodDim.getData(LodUtil.REGION_DETAIL_LEVEL, chunk.getPos().getRegionX(), chunk.getPos().getRegionZ(), 0);
-			/*System.out.println(LodUtil.CHUNK_DETAIL_LEVEL + " " + chunk.getPos().x + " " + chunk.getPos().z + " " + 0 + " " +DataPointUtil.toString(dataTest));
-			System.out.println(LodUtil.REGION_DETAIL_LEVEL + " " + chunk.getPos().getRegionX() + " " + chunk.getPos().getRegionZ() + " " + 0 + " " +DataPointUtil.toString(dataTest2));*/
 		} catch (Exception e)
 		{
 			e.printStackTrace();
@@ -284,12 +275,12 @@ public class LodBuilder
 
 		ChunkPos chunkPos = chunk.getPos();
 		int size = 1 << detail.detailLevel;
-		int height = 0;
-		int depth = 0;
-		int color = 0;
-		int light = 0;
-		int lightSky = 0;
-		int lightBlock = 0;
+		int height;
+		int depth;
+		int color;
+		int light;
+		int lightSky;
+		int lightBlock;
 		int generation = config.distanceGenerationMode.complexity;
 
 		int xRel;
@@ -306,7 +297,6 @@ public class LodBuilder
 		{
 			dataToMerge = new long[size * size * DataPointUtil.WORLD_HEIGHT];
 		}
-		//dataToMerge = new long[size * size][1024];
 
 		for (index = 0; index < size * size; index++)
 		{
@@ -349,8 +339,6 @@ public class LodBuilder
 					blockPos.set(xAbs, yAbs + 1, zAbs);
 					light = getLightValue(chunk, blockPos, false);
 				}
-				blockPos.set(xAbs, yAbs + 1, zAbs);
-				light = getLightValue(chunk, blockPos, hasCeiling && topBlock);
 				lightBlock = light & 0b1111;
 				if (!hasCeiling && topBlock)
 					lightSky = 15; //default max light
