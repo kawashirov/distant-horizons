@@ -205,7 +205,7 @@ public class LodRegion
 
 		int childSize = 1 << (LodUtil.REGION_DETAIL_LEVEL - childDetailLevel);
 		//we have reached the target detail level
-		byte targetDetailLevel = DetailDistanceUtil.getLodGenDetail(DetailDistanceUtil.getDistanceGenerationInverse(maxDistance)).detailLevel;
+		byte targetDetailLevel = DetailDistanceUtil.getLodGenDetail(DetailDistanceUtil.getGenerationDetailFromDistance(maxDistance)).detailLevel;
 		if (targetDetailLevel > detailLevel)
 		{
 			return;
@@ -283,7 +283,7 @@ public class LodRegion
 		//This is important to avoid any kind of hole in the rendering
 		int maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
 
-		byte supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDistanceRenderingInverse(maxDistance));
+		byte supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
 		if (supposedLevel > detailLevel)
 			return;
 		else if (supposedLevel == detailLevel)

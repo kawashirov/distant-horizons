@@ -3,8 +3,6 @@ package com.seibel.lod.util;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodResolution;
-import com.seibel.lod.objects.RegionPos;
-import com.seibel.lod.wrappers.MinecraftWrapper;
 
 public class DetailDistanceUtil
 {
@@ -32,18 +30,6 @@ public class DetailDistanceUtil
 			1,
 			1,};
 
-	/*private static int[] maxVerticalData = {
-			8,
-			8,
-			8,
-			8,
-			8,
-			8,
-			8,
-			8,
-			8,
-			8,
-			8};*/
 
 	private static LodResolution[] lodGenDetails = {
 			LodResolution.BLOCK,
@@ -66,7 +52,7 @@ public class DetailDistanceUtil
 		maxDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 16 * 2;
 	}
 
-	public static int getDistanceRendering(int detail)
+	public static int baseDistanceFunction(int detail)
 	{
 		int initial;
 		int distance = 0;
@@ -88,7 +74,7 @@ public class DetailDistanceUtil
 		return distance;
 	}
 
-	public static byte baseInverse(int distance, int minDetail)
+	public static byte baseInverseFunction(int distance, int minDetail)
 	{
 		int initial;
 		byte detail = 0;
@@ -110,46 +96,25 @@ public class DetailDistanceUtil
 		return (byte) Math.min(detail, LodUtil.REGION_DETAIL_LEVEL);
 	}
 
-	public static byte getDistanceRenderingInverse(int distance)
+	public static byte getDrawDetailFromDistance(int distance)
 	{
-		return baseInverse(distance, minDrawDetail);
+		return baseInverseFunction(distance, minDrawDetail);
 	}
 
-	public static byte getDistanceGenerationInverse(int distance)
+	public static byte getGenerationDetailFromDistance(int distance)
 	{
-		return baseInverse((int) (distance * genMultiplier), minGenDetail);
+		return baseInverseFunction((int) (distance * genMultiplier), minGenDetail);
 	}
 
-	public static byte getDistanceTreeCutInverse(int distance)
+	public static byte getTreeCutDetailFromDistance(int distance)
 	{
-		return baseInverse((int) (distance * treeCutMultiplier), minGenDetail);
+		return baseInverseFunction((int) (distance * treeCutMultiplier), minGenDetail);
 	}
 
 
-	public static byte getDistanceTreeGenInverse(int distance)
+	public static byte getTreeGenDetailFromDistance(int distance)
 	{
-		return baseInverse((int) (distance * treeGenMultiplier), minGenDetail);
-	}
-
-	public static int getDistanceGeneration(int detail)
-	{
-		if (detail == maxDetail)
-			return maxDistance;
-		return (int) (getDistanceRendering(detail) * genMultiplier);
-	}
-
-	public static int getDistanceTreeCut(int detail)
-	{
-		if (detail == maxDetail)
-			return maxDistance;
-		return (int) (getDistanceRendering(detail) * treeCutMultiplier);
-	}
-
-	public static int getDistanceTreeGen(int detail)
-	{
-		if (detail == maxDetail)
-			return maxDistance;
-		return (int) (getDistanceRendering(detail) * treeGenMultiplier);
+		return baseInverseFunction((int) (distance * treeGenMultiplier), minGenDetail);
 	}
 
 	public static DistanceGenerationMode getDistanceGenerationMode(int detail)
@@ -197,15 +162,6 @@ public class DetailDistanceUtil
 	public static int getMaxVerticalData(int detail)
 	{
 		return maxVerticalData[LodUtil.clamp(minGenDetail, detail, LodUtil.REGION_DETAIL_LEVEL)];
-	}
-
-	public static boolean regionInView(int playerPosX, int playerPosY, int playerPosZ, int xRot, int yRot, int fov, RegionPos regionPos)
-	{
-
-		//System.out.println(Math.floorMod((int) mc.player.xRot,360) + " " + Math.floorMod((int) mc.player.yRot,360) + " " + mc.options.fov);
-		//System.out.println(mc.player.xRotO + " " + mc.player.yRotO);
-		//mc.options.fov;
-		return false;
 	}
 
 }

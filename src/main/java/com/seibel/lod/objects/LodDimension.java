@@ -366,7 +366,7 @@ public class LodDimension
 						if (regions[x][z] != null)
 						{
 							minDistance = LevelPosUtil.minDistance(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ, playerPosX, playerPosZ);
-							detail = DetailDistanceUtil.getDistanceTreeCutInverse(minDistance);
+							detail = DetailDistanceUtil.getTreeCutDetailFromDistance(minDistance);
 							levelToCut = DetailDistanceUtil.getCutLodDetail(detail);
 							if (regions[x][z].getMinDetailLevel() > levelToCut)
 							{
@@ -415,7 +415,7 @@ public class LodDimension
 						//We require that the region we are checking is loaded with at least this level
 						
 						minDistance = LevelPosUtil.minDistance(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ, playerPosX, playerPosZ);
-						detail = DetailDistanceUtil.getDistanceTreeGenInverse(minDistance);
+						detail = DetailDistanceUtil.getTreeGenDetailFromDistance(minDistance);
 						levelToGen = DetailDistanceUtil.getLodGenDetail(detail).detailLevel;
 						if (region == null || region.getGenerationMode() != generationMode)
 						{
