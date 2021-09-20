@@ -36,7 +36,7 @@ import net.minecraft.util.math.BlockPos;
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {
-	
+
 	public CubicLodTemplate()
 	{
 
@@ -105,12 +105,12 @@ public class CubicLodTemplate extends AbstractLodTemplate
 
 	private void addBoundingBoxToBuffer(BufferBuilder buffer, Box box)
 	{
-		for(Direction direction : Box.DIRECTIONS)
+		for (Direction direction : Box.DIRECTIONS)
 		{
 			//if(box.isCulled(direction))
 			//	continue;
 			int adjIndex = 0;
-			while(box.shouldContinue(direction, adjIndex))
+			while (box.shouldContinue(direction, adjIndex))
 			{
 				for (int vertexIndex = 0; vertexIndex < 4; vertexIndex++)
 				{

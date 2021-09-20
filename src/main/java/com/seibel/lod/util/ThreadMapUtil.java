@@ -72,47 +72,17 @@ public class ThreadMapUtil
 		return threadBuilderVerticalArrayMap.get(Thread.currentThread().getName());
 	}
 
-	public static long[] addVerticalDataArray()
+	public static long[] verticalDataArray(int count)
 	{
 		if (!threadVerticalAddDataMap.containsKey(Thread.currentThread().getName()) || (threadVerticalAddDataMap.get(Thread.currentThread().getName()) == null))
 		{
-			threadVerticalAddDataMap.put(Thread.currentThread().getName(), new long[16]);
+			threadVerticalAddDataMap.put(Thread.currentThread().getName(), new long[count]);
+		}
+		for(int i = 0; i < count ; i++)
+		{
+			threadVerticalAddDataMap.get(Thread.currentThread().getName())[i] = DataPointUtil.EMPTY_DATA;
 		}
 		return threadVerticalAddDataMap.get(Thread.currentThread().getName());
-	}
-
-	public static long[] getVerticalGetDataArray()
-	{
-		if (!threadVerticalGetDataMap.containsKey(Thread.currentThread().getName()) || (threadVerticalGetDataMap.get(Thread.currentThread().getName()) == null))
-		{
-			threadVerticalGetDataMap.put(Thread.currentThread().getName(), new long[16]);
-		}
-		return threadVerticalGetDataMap.get(Thread.currentThread().getName());
-	}
-
-	public static long[] getAdjDataArray()
-	{
-		if(!threadAdjData.containsKey(Thread.currentThread().getName()) || (threadAdjData.get(Thread.currentThread().getName()) == null))
-		{
-			threadAdjData.put(Thread.currentThread().getName(), new long[NUMBER_OF_DIRECTION]);
-		}
-		return threadAdjData.get(Thread.currentThread().getName());
-	}
-
-	public static long[][] getVerticalUpdateArray(){
-		if(!threadVerticalUpdateMap.containsKey(Thread.currentThread().getName()) || (threadVerticalUpdateMap.get(Thread.currentThread().getName()) == null))
-		{
-			threadVerticalUpdateMap.put(Thread.currentThread().getName(), new long[4][]);
-		}
-		return threadVerticalUpdateMap.get(Thread.currentThread().getName());
-	}
-
-	public static int[] getVerticalIndexesArray(){
-		if(!threadVerticalIndexesMap.containsKey(Thread.currentThread().getName()) || (threadVerticalIndexesMap.get(Thread.currentThread().getName()) == null))
-		{
-			threadVerticalIndexesMap.put(Thread.currentThread().getName(), new int[4]);
-		}
-		return threadVerticalIndexesMap.get(Thread.currentThread().getName());
 	}
 
 	public static short[] getProjectionShort(int size){

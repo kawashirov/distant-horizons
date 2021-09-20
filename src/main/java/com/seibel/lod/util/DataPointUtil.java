@@ -289,6 +289,7 @@ public class DataPointUtil
 		boolean allEmpty = true;
 		boolean allVoid = true;
 		long singleData;
+		long[] dataPoint = ThreadMapUtil.verticalDataArray(DetailDistanceUtil.getMaxVerticalData(LodUtil.BLOCK_DETAIL_LEVEL));
 
 		Arrays.fill(projection, (short) 0); //probably can remove
 		short depth;
@@ -318,9 +319,15 @@ public class DataPointUtil
 
 		//We check if there is any data that's not empty or void
 		if (allEmpty)
-			return new long[]{EMPTY_DATA};
+		{
+			dataPoint[0] = EMPTY_DATA;
+			return dataPoint;
+		}
 		if (allVoid)
-			return new long[]{createVoidDataPoint(genMode)};
+		{
+			dataPoint[0] = createVoidDataPoint(genMode);
+			return dataPoint;
+		}
 
 		//We extract the merged data
 		int count = 0;
@@ -383,7 +390,6 @@ public class DataPointUtil
 		}
 
 		//As standard the vertical lods are ordered from top to bottom
-		long[] dataPoint = new long[count];
 		for (j = count - 1; j >= 0; j--)
 		{
 			depth = heightAndDepth[j * 2];
