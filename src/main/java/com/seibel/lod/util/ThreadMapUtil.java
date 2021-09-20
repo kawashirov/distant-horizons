@@ -78,7 +78,7 @@ public class ThreadMapUtil
 		{
 			threadVerticalAddDataMap.put(Thread.currentThread().getName(), new long[count]);
 		}
-		for(int i = 0; i < count ; i++)
+		for(int i = 0; i < threadVerticalAddDataMap.get(Thread.currentThread().getName()).length ; i++)
 		{
 			threadVerticalAddDataMap.get(Thread.currentThread().getName())[i] = DataPointUtil.EMPTY_DATA;
 		}

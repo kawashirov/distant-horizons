@@ -2,7 +2,7 @@ package com.seibel.lod.util;
 
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.LodDetail;
+import com.seibel.lod.enums.LodResolution;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
@@ -45,18 +45,18 @@ public class DetailDistanceUtil
 			8,
 			8};*/
 
-	private static LodDetail[] lodGenDetails = {
-			LodDetail.FULL,
-			LodDetail.HALF,
-			LodDetail.QUAD,
-			LodDetail.DOUBLE,
-			LodDetail.SINGLE,
-			LodDetail.SINGLE,
-			LodDetail.SINGLE,
-			LodDetail.SINGLE,
-			LodDetail.SINGLE,
-			LodDetail.SINGLE,
-			LodDetail.SINGLE};
+	private static LodResolution[] lodGenDetails = {
+			LodResolution.BLOCK,
+			LodResolution.TWO_BLOCKS,
+			LodResolution.FOUR_BLOCKS,
+			LodResolution.HALF_CHUNK,
+			LodResolution.CHUNK,
+			LodResolution.CHUNK,
+			LodResolution.CHUNK,
+			LodResolution.CHUNK,
+			LodResolution.CHUNK,
+			LodResolution.CHUNK,
+			LodResolution.CHUNK};
 
 
 
@@ -84,17 +84,6 @@ public class DetailDistanceUtil
 			case QUADRATIC:
 				initial = LodConfig.CLIENT.graphics.lodQuality.get() * 128;
 				return (int) (Math.pow(base, detail) * initial);
-			case RENDER_DEPENDANT:
-				int realRenderDistance = MinecraftWrapper.INSTANCE.getRenderDistance() * 16;
-				int border = 64;
-				byte detailAtBorder = (byte) 4;
-				if (detail > detailAtBorder)
-				{
-					return (detail * (border - realRenderDistance) / detailAtBorder + realRenderDistance);
-				} else
-				{
-					return ((maxDetail - detail) * (maxDistance - border) / (maxDetail - detailAtBorder) + border);
-				}
 		}
 		return distance;
 	}
@@ -116,9 +105,6 @@ public class DetailDistanceUtil
 			case QUADRATIC:
 				initial = LodConfig.CLIENT.graphics.lodQuality.get() * 128;
 				detail = (byte) (Math.log(Math.floorDiv(distance, initial))/logBase);
-				break;
-			case RENDER_DEPENDANT:
-				detail = (byte) 9;
 				break;
 		}
 		return (byte) Math.min(detail, LodUtil.REGION_DETAIL_LEVEL);
@@ -182,7 +168,7 @@ public class DetailDistanceUtil
 		}
 	}
 
-	public static LodDetail getLodGenDetail(int detail)
+	public static LodResolution getLodGenDetail(int detail)
 	{
 		if (detail < minGenDetail)
 		{

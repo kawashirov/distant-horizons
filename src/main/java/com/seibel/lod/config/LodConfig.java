@@ -31,7 +31,7 @@ import com.seibel.lod.enums.DistanceCalculatorType;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
-import com.seibel.lod.enums.LodDetail;
+import com.seibel.lod.enums.LodResolution;
 import com.seibel.lod.enums.LodQualityMode;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.enums.ShadingMode;
@@ -87,7 +87,7 @@ public class LodConfig
 		
 		public ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
 		
-		public ForgeConfigSpec.EnumValue<LodDetail> maxDrawDetail;
+		public ForgeConfigSpec.EnumValue<LodResolution> maxDrawDetail;
 		
 		public ForgeConfigSpec.EnumValue<ShadingMode> shadingMode;
 		
@@ -142,12 +142,12 @@ public class LodConfig
 			maxDrawDetail = builder
 					.comment("\n\n"
 							+ " What is the maximum detail level that LODs should be drawn at? \n"
-							+ " " + LodDetail.SINGLE.toString() + ": render 1 LOD for each Chunk. \n"
-							+ " " + LodDetail.DOUBLE.toString() + ": render 4 LODs for each Chunk. \n"
-							+ " " + LodDetail.QUAD.toString() + ": render 16 LODs for each Chunk. \n"
-							+ " " + LodDetail.HALF.toString() + ": render 64 LODs for each Chunk. \n"
-							+ " " + LodDetail.FULL.toString() + ": render 256 LODs for each Chunk. \n")
-					.defineEnum("lodDrawQuality", LodDetail.FULL);
+							+ " " + LodResolution.CHUNK.toString() + ": render 1 LOD for each Chunk. \n"
+							+ " " + LodResolution.HALF_CHUNK.toString() + ": render 4 LODs for each Chunk. \n"
+							+ " " + LodResolution.FOUR_BLOCKS.toString() + ": render 16 LODs for each Chunk. \n"
+							+ " " + LodResolution.TWO_BLOCKS.toString() + ": render 64 LODs for each Chunk. \n"
+							+ " " + LodResolution.BLOCK.toString() + ": render 256 LODs for each Chunk. \n")
+					.defineEnum("lodDrawQuality", LodResolution.BLOCK);
 			
 			lodQuality = builder
 					.comment("\n\n"
@@ -208,7 +208,7 @@ public class LodConfig
 	public static class WorldGenerator
 	{
 		public ForgeConfigSpec.EnumValue<LodQualityMode> lodQualityMode;
-		public ForgeConfigSpec.EnumValue<LodDetail> maxGenerationDetail;
+		public ForgeConfigSpec.EnumValue<LodResolution> maxGenerationDetail;
 		public ForgeConfigSpec.EnumValue<DistanceGenerationMode> distanceGenerationMode;
 		public ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
 		public ForgeConfigSpec.EnumValue<DistanceCalculatorType> lodDistanceCalculatorType;
@@ -228,12 +228,12 @@ public class LodConfig
 			maxGenerationDetail = builder
 					.comment("\n\n"
 							+ " What is the maximum detail level that LODs should be generated at? \n"
-							+ " " + LodDetail.SINGLE.toString() + ": render 1 LOD for each Chunk. \n"
-							+ " " + LodDetail.DOUBLE.toString() + ": render 4 LODs for each Chunk. \n"
-							+ " " + LodDetail.QUAD.toString() + ": render 16 LODs for each Chunk. \n"
-							+ " " + LodDetail.HALF.toString() + ": render 64 LODs for each Chunk. \n"
-							+ " " + LodDetail.FULL.toString() + ": render 256 LODs for each Chunk. \n")
-					.defineEnum("lodGenerationQuality", LodDetail.HALF);
+							+ " " + LodResolution.CHUNK.toString() + ": render 1 LOD for each Chunk. \n"
+							+ " " + LodResolution.HALF_CHUNK.toString() + ": render 4 LODs for each Chunk. \n"
+							+ " " + LodResolution.FOUR_BLOCKS.toString() + ": render 16 LODs for each Chunk. \n"
+							+ " " + LodResolution.TWO_BLOCKS.toString() + ": render 64 LODs for each Chunk. \n"
+							+ " " + LodResolution.BLOCK.toString() + ": render 256 LODs for each Chunk. \n")
+					.defineEnum("lodGenerationQuality", LodResolution.TWO_BLOCKS);
 			
 			lodDistanceCalculatorType = builder
 					.comment("\n\n"
@@ -243,11 +243,6 @@ public class LodConfig
 							
 							+ "\n"
 							+ " " + DistanceCalculatorType.QUADRATIC + " \n"
-							+ " with LINEAR calculator the quality of block decrease \n"
-							+ " quadratically to the distance of the player \n"
-							
-							+ "\n"
-							+ " " + DistanceCalculatorType.RENDER_DEPENDANT + " \n"
 							+ " with LINEAR calculator the quality of block decrease \n"
 							+ " quadratically to the distance of the player \n")
 					.defineEnum("lodDistanceComputation", DistanceCalculatorType.LINEAR);

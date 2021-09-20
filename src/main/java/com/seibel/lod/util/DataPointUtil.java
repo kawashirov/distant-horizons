@@ -289,7 +289,7 @@ public class DataPointUtil
 		boolean allEmpty = true;
 		boolean allVoid = true;
 		long singleData;
-		long[] dataPoint = ThreadMapUtil.verticalDataArray(DetailDistanceUtil.getMaxVerticalData(LodUtil.BLOCK_DETAIL_LEVEL));
+		long[] dataPoint = ThreadMapUtil.verticalDataArray(WORLD_HEIGHT+1);
 
 		Arrays.fill(projection, (short) 0); //probably can remove
 		short depth;

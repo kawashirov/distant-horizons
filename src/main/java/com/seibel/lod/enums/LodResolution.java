@@ -28,24 +28,23 @@ import com.seibel.lod.util.LodUtil;
  * @author James Seibel
  * @version 8-11-2021
  */
-public enum LodDetail
+public enum LodResolution
 {
 	/** render 1 LOD for each chunk */
-	SINGLE(1, 4),
+	CHUNK(1, 4),
 	
 	/** render 4 LODs for each chunk */
-	DOUBLE(2, 3),
+	HALF_CHUNK(2, 3),
 	
 	/** render 16 LODs for each chunk */
-	QUAD(4, 2),
+	FOUR_BLOCKS(4, 2),
 	
 	/** render 64 LODs for each chunk */
-	HALF(8, 1),
+	TWO_BLOCKS(8, 1),
 	
 	/** render 256 LODs for each chunk */
-	FULL(16, 0);
-	
-	
+	BLOCK(16, 0);
+
 	/** How many DataPoints should 
 	 * be drawn per side per LodChunk */
 	public final int dataPointLengthCount;
@@ -69,12 +68,12 @@ public enum LodDetail
 	 * 2nd dimension: An array of all LodDetails that are less than or <br>
 	 *                equal to that detailLevel
 	 */
-	private static LodDetail[][] lowerDetailArrays;
+	private static LodResolution[][] lowerDetailArrays;
 	
 	
 	
 	
-	private LodDetail(int newLengthCount, int newDetailLevel)
+	private LodResolution(int newLengthCount, int newDetailLevel)
 	{
 		detailLevel = (byte) newDetailLevel;
 		dataPointLengthCount = newLengthCount;
@@ -113,20 +112,20 @@ public enum LodDetail
 	 * Returns an array of all LodDetails that have a detail level
 	 * that is less than or equal to the given LodDetail
 	 */
-	public static LodDetail[] getSelfAndLowerDetails(LodDetail detail)
+	public static LodResolution[] getSelfAndLowerDetails(LodResolution detail)
 	{
 		if (lowerDetailArrays == null)
 		{
 			// run first time setup
-			lowerDetailArrays = new LodDetail[LodDetail.values().length][];
+			lowerDetailArrays = new LodResolution[LodResolution.values().length][];
 			
 			// go through each LodDetail
-			for(LodDetail currentDetail : LodDetail.values())
+			for(LodResolution currentDetail : LodResolution.values())
 			{
-				ArrayList<LodDetail> lowerDetails = new ArrayList<>();
+				ArrayList<LodResolution> lowerDetails = new ArrayList<>();
 				
 				// find the details lower than currentDetail
-				for(LodDetail compareDetail : LodDetail.values())
+				for(LodResolution compareDetail : LodResolution.values())
 				{
 					if (currentDetail.detailLevel <= compareDetail.detailLevel)
 					{
@@ -138,7 +137,7 @@ public enum LodDetail
 				Collections.sort(lowerDetails);
 				Collections.reverse(lowerDetails);
 				
-				lowerDetailArrays[currentDetail.detailLevel] = lowerDetails.toArray(new LodDetail[lowerDetails.size()]); 
+				lowerDetailArrays[currentDetail.detailLevel] = lowerDetails.toArray(new LodResolution[lowerDetails.size()]);
 			}
 		}
 		
@@ -146,9 +145,9 @@ public enum LodDetail
 	}
 	
 	/** Returns what detail level should be used at a given distance and maxDistance. */
-	public static LodDetail getDetailForDistance(LodDetail maxDetailLevel, int distance, int maxDistance)
+	public static LodResolution getDetailForDistance(LodResolution maxDetailLevel, int distance, int maxDistance)
 	{
-		LodDetail[] lowerDetails = getSelfAndLowerDetails(maxDetailLevel);
+		LodResolution[] lowerDetails = getSelfAndLowerDetails(maxDetailLevel);
 		int distaneBetweenDetails = maxDistance / lowerDetails.length;
 		int index = LodUtil.clamp(0, distance / distaneBetweenDetails, lowerDetails.length - 1);
 		

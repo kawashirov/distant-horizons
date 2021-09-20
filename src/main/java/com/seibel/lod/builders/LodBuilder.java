@@ -27,7 +27,7 @@ import java.util.concurrent.Executors;
 
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.LodDetail;
+import com.seibel.lod.enums.LodResolution;
 import com.seibel.lod.enums.LodQualityMode;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
@@ -198,7 +198,7 @@ public class LodBuilder
 		int endZ;
 		try
 		{
-			LodDetail detail;
+			LodResolution detail;
 			LodRegion region = lodDim.getRegion(chunk.getPos().getRegionX(), chunk.getPos().getRegionZ());
 			if (region == null)
 				return;
@@ -266,7 +266,7 @@ public class LodBuilder
 
 	}
 
-	private long[] createVerticalDataToMerge(LodDetail detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
+	private long[] createVerticalDataToMerge(LodResolution detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{
 		long[] dataToMerge = ThreadMapUtil.getBuilderVerticalArray()[detail.detailLevel];
 		int verticalData = DataPointUtil.WORLD_HEIGHT;
@@ -423,7 +423,7 @@ public class LodBuilder
 		return height;
 	}
 
-	private long[] createSingleDataToMerge(LodDetail detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
+	private long[] createSingleDataToMerge(LodResolution detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{
 		long[] dataToMerge = ThreadMapUtil.getBuilderArray()[detail.detailLevel];
 		ChunkPos chunkPos = chunk.getPos();

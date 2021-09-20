@@ -28,7 +28,7 @@ import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.builders.worldGeneration.LodWorldGenerator;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.LodDetail;
+import com.seibel.lod.enums.LodResolution;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.objects.RegionPos;
@@ -175,8 +175,8 @@ public class ClientProxy
 		//LodConfig.CLIENT.debugMode.set(true);
 		
 		
-		LodConfig.CLIENT.graphics.maxDrawDetail.set(LodDetail.FULL);
-		LodConfig.CLIENT.worldGenerator.maxGenerationDetail.set(LodDetail.FULL);
+		LodConfig.CLIENT.graphics.maxDrawDetail.set(LodResolution.BLOCK);
+		LodConfig.CLIENT.worldGenerator.maxGenerationDetail.set(LodResolution.BLOCK);
 		// requires a world restart?
 //		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(LodQualityMode.HEIGHTMAP);
 		
