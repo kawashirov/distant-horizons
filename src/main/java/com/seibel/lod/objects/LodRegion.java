@@ -2,7 +2,7 @@ package com.seibel.lod.objects;
 
 
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.LodQualityMode;
+import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
@@ -33,7 +33,7 @@ public class LodRegion
 
 
 	private DistanceGenerationMode generationMode;
-	private LodQualityMode lodQualityMode;
+	private VerticalQuality verticalQuality;
 
 	public final int regionPosX;
 	public final int regionPosZ;
@@ -46,12 +46,12 @@ public class LodRegion
 		dataContainer = new LevelContainer[POSSIBLE_LOD];
 	}
 
-	public LodRegion(byte minDetailLevel, RegionPos regionPos, DistanceGenerationMode generationMode, LodQualityMode lodQualityMode)
+	public LodRegion(byte minDetailLevel, RegionPos regionPos, DistanceGenerationMode generationMode, VerticalQuality verticalQuality)
 	{
 		this.minDetailLevel = minDetailLevel;
 		this.regionPosX = regionPos.x;
 		this.regionPosZ = regionPos.z;
-		this.lodQualityMode = lodQualityMode;
+		this.verticalQuality = verticalQuality;
 		this.generationMode = generationMode;
 		dataContainer = new LevelContainer[POSSIBLE_LOD];
 
@@ -59,7 +59,7 @@ public class LodRegion
 		//Initialize all the different matrices
 		for (byte lod = minDetailLevel; lod <= LodUtil.REGION_DETAIL_LEVEL; lod++)
 		{
-			switch (lodQualityMode){
+			switch (verticalQuality){
 				default:
 				case HEIGHTMAP:
 					dataContainer[lod] = new SingleLevelContainer(lod);
@@ -70,9 +70,9 @@ public class LodRegion
 			}
 		}
 	}
-	public LodQualityMode getLodQualityMode()
+	public VerticalQuality getLodQualityMode()
 	{
-		return lodQualityMode;
+		return verticalQuality;
 	}
 	public DistanceGenerationMode getGenerationMode()
 	{

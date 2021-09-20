@@ -34,7 +34,7 @@ import org.lwjgl.opengl.GL15C;
 
 import com.seibel.lod.builders.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.enums.LodQualityMode;
+import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.PosToRenderContainer;
@@ -232,7 +232,7 @@ public class LodBufferBuilder
 
 								// determine how many LODs we can stack vertically
 								int maxVerticalData = 1;
-								if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == LodQualityMode.MULTI_LOD)
+								if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == VerticalQuality.MULTI_LOD)
 								{
 									maxVerticalData = DetailDistanceUtil.getMaxVerticalData(LodUtil.BLOCK_DETAIL_LEVEL);
 								}

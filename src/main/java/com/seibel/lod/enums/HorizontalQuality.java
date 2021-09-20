@@ -26,11 +26,21 @@ package com.seibel.lod.enums;
  * @author James Seibel
  * @version 7-03-2021
  */
-public enum LodQualityMode
+public enum HorizontalQuality
 {
 	/** Lods are 2D with heightMap */
-	HEIGHTMAP,
+	LOW(64),
 
 	/** Lods expand in three dimension */
-	MULTI_LOD;
+	MEDIUM(128),
+
+	/** Lods expand in three dimension */
+	HIGH(256);
+
+	public int distanceUnit;
+
+	HorizontalQuality(int distanceUnit)
+	{
+		this.distanceUnit = distanceUnit;
+	}
 }

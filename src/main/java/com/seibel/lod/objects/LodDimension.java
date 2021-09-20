@@ -24,7 +24,7 @@ import java.util.concurrent.Executors;
 
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.LodQualityMode;
+import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
@@ -389,7 +389,7 @@ public class LodDimension
 	{
 		DistanceGenerationMode generationMode = LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get();
 		ChunkPos newPlayerChunk = new ChunkPos(LevelPosUtil.getChunkPos((byte) 0, playerPosX), LevelPosUtil.getChunkPos((byte) 0, playerPosZ));
-		LodQualityMode lodQualityMode = LodConfig.CLIENT.worldGenerator.lodQualityMode.get();
+		VerticalQuality verticalQuality = LodConfig.CLIENT.worldGenerator.lodQualityMode.get();
 		
 		if (lastGenChunk == null)
 			lastGenChunk = new ChunkPos(newPlayerChunk.x + 1, newPlayerChunk.z - 1);
@@ -422,12 +422,12 @@ public class LodDimension
 							//First case, region has to be initialized
 							
 							//We check if there is a file at the target level
-							regions[x][z] = getRegionFromFile(regionPos, levelToGen, generationMode, lodQualityMode);
+							regions[x][z] = getRegionFromFile(regionPos, levelToGen, generationMode, verticalQuality);
 							
 							//if there is no file we initialize the region
 							if (regions[x][z] == null)
 							{
-								regions[x][z] = new LodRegion(levelToGen, regionPos, generationMode, lodQualityMode);
+								regions[x][z] = new LodRegion(levelToGen, regionPos, generationMode, verticalQuality);
 							}
 							regionNeedsRegen[x][z] = true;
 							regenDimension = true;
@@ -692,10 +692,10 @@ public class LodDimension
 	 * Get the region at the given X and Z coordinates from the
 	 * RegionFileHandler.
 	 */
-	public LodRegion getRegionFromFile(RegionPos regionPos, byte detailLevel, DistanceGenerationMode generationMode, LodQualityMode lodQualityMode)
+	public LodRegion getRegionFromFile(RegionPos regionPos, byte detailLevel, DistanceGenerationMode generationMode, VerticalQuality verticalQuality)
 	{
 		if (fileHandler != null)
-			return fileHandler.loadRegionFromFile(detailLevel, regionPos, generationMode, lodQualityMode);
+			return fileHandler.loadRegionFromFile(detailLevel, regionPos, generationMode, verticalQuality);
 		else
 			return null;
 	}

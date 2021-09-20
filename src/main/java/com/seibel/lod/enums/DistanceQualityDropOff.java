@@ -4,7 +4,7 @@ package com.seibel.lod.enums;
  * @author Leonardo Amato
  * @version 22-08-2021
  */
-public enum DistanceCalculatorType
+public enum DistanceQualityDropOff
 {
 	/**
 	 * different Lod detail render and generate linearly to the distance

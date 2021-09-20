@@ -27,8 +27,8 @@ import java.util.concurrent.Executors;
 
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.LodResolution;
-import com.seibel.lod.enums.LodQualityMode;
+import com.seibel.lod.enums.HorizontalResolution;
+import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
@@ -198,14 +198,14 @@ public class LodBuilder
 		int endZ;
 		try
 		{
-			LodResolution detail;
+			HorizontalResolution detail;
 			LodRegion region = lodDim.getRegion(chunk.getPos().getRegionX(), chunk.getPos().getRegionZ());
 			if (region == null)
 				return;
 			byte minDetailLevel = region.getMinDetailLevel();
 			detail = DetailDistanceUtil.getLodGenDetail(minDetailLevel);
 
-			LodQualityMode lodQualityMode = LodConfig.CLIENT.worldGenerator.lodQualityMode.get();
+			VerticalQuality verticalQuality = LodConfig.CLIENT.worldGenerator.lodQualityMode.get();
 			byte detailLevel = detail.detailLevel;
 			int posX;
 			int posZ;
@@ -221,7 +221,7 @@ public class LodBuilder
 				long[] data;
 				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
 
-				switch (lodQualityMode)
+				switch (verticalQuality)
 				{
 					default:
 					case HEIGHTMAP:
@@ -266,7 +266,7 @@ public class LodBuilder
 
 	}
 
-	private long[] createVerticalDataToMerge(LodResolution detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
+	private long[] createVerticalDataToMerge(HorizontalResolution detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{
 		long[] dataToMerge = ThreadMapUtil.getBuilderVerticalArray()[detail.detailLevel];
 		int verticalData = DataPointUtil.WORLD_HEIGHT;
@@ -423,7 +423,7 @@ public class LodBuilder
 		return height;
 	}
 
-	private long[] createSingleDataToMerge(LodResolution detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
+	private long[] createSingleDataToMerge(HorizontalResolution detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{
 		long[] dataToMerge = ThreadMapUtil.getBuilderArray()[detail.detailLevel];
 		ChunkPos chunkPos = chunk.getPos();

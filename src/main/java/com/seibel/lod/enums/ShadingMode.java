@@ -14,5 +14,5 @@ public enum ShadingMode
 	
 	/** LODs will have darker sides and bottoms to simulate top down lighting.
 	Fastest */
-	DARKEN_SIDES;
+	GAME_SHADING;
 }

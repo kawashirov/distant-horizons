@@ -28,7 +28,7 @@ import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.builders.worldGeneration.LodWorldGenerator;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.LodResolution;
+import com.seibel.lod.enums.HorizontalResolution;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.objects.RegionPos;
@@ -144,7 +144,10 @@ public class ClientProxy
 			profiler.pop(); // get out of "terrain"
 			profiler.push("LOD");
 
-			renderer.drawLODs(lodDim, mcMatrixStack, partialTicks, mc.getProfiler());
+			if(LodConfig.CLIENT.graphics.drawLODs.get())
+			{
+				renderer.drawLODs(lodDim, mcMatrixStack, partialTicks, mc.getProfiler());
+			}
 
 			profiler.pop(); // end LOD
 			profiler.push("terrain"); // go back into "terrain"
@@ -175,8 +178,8 @@ public class ClientProxy
 		//LodConfig.CLIENT.debugMode.set(true);
 		
 		
-		LodConfig.CLIENT.graphics.maxDrawDetail.set(LodResolution.BLOCK);
-		LodConfig.CLIENT.worldGenerator.maxGenerationDetail.set(LodResolution.BLOCK);
+		LodConfig.CLIENT.graphics.drawResolution.set(HorizontalResolution.BLOCK);
+		LodConfig.CLIENT.worldGenerator.generationResolution.set(HorizontalResolution.BLOCK);
 		// requires a world restart?
 //		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(LodQualityMode.HEIGHTMAP);
 		
@@ -290,8 +293,13 @@ public class ClientProxy
 		{
 			LodConfig.CLIENT.debugging.debugMode.set(LodConfig.CLIENT.debugging.debugMode.get().getNext());
 		}
+
+		if(LodConfig.CLIENT.debugging.enableDebugKeybinding.get()
+				   && event.getKey() == GLFW.GLFW_KEY_F6 && event.getAction() == GLFW.GLFW_PRESS)
+		{
+			LodConfig.CLIENT.graphics.drawLODs.set(!LodConfig.CLIENT.graphics.drawLODs.get());
+		}
 	}
-	
 	
 	//============//
 	// LOD events //
