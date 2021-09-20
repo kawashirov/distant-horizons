@@ -271,8 +271,6 @@ public class DataPointUtil
 			tempRed = tempRed / numberOfChildren;
 			tempGreen = tempGreen / numberOfChildren;
 			tempBlue = tempBlue / numberOfChildren;
-			tempHeight = tempHeight / numberOfChildren;
-			tempDepth = tempDepth / numberOfChildren;
 			tempLightBlock = tempLightBlock / numberOfChildren;
 			tempLightSky = tempLightSky / numberOfChildren;
 			return DataPointUtil.createDataPoint(tempAlpha, tempRed, tempGreen, tempBlue, tempHeight, tempDepth, tempLightSky, tempLightBlock, tempGenMode);
