@@ -546,8 +546,7 @@ public class LodRenderer
 	/**
 	 * setup the lighting to be used for the LODs
 	 */
-	@SuppressWarnings( "unused" )
-	private void setupLighting(LodDimension lodDimension, float partialTicks)
+	/*private void setupLighting(LodDimension lodDimension, float partialTicks)
 	{
 		// Determine if the player has night vision
 		boolean playerHasNightVision = false;
@@ -565,7 +564,6 @@ public class LodRenderer
 			}
 		}
 
-
 		float sunBrightness = lodDimension.dimension.hasSkyLight() ? mc.getSkyDarken(partialTicks) : 0.2f;
 		sunBrightness = playerHasNightVision ? 1.0f : sunBrightness;
 		float gamma = (float) mc.getOptions().gamma - 0.0f;
@@ -573,7 +571,7 @@ public class LodRenderer
 		float lightStrength = (gamma * 0.34f - 0.01f) * (1.0f - dayEffect) + dayEffect - 0.20f; //gamma * 0.2980392157f + 0.1647058824f
 		float blueLightStrength = (gamma * 0.44f + 0.12f) * (1.0f - dayEffect) + dayEffect - 0.20f; //gamma * 0.4235294118f + 0.2784313725f
 
-		float lightAmbient[] = {lightStrength, lightStrength, blueLightStrength, 1.0f};
+		float[] lightAmbient = {lightStrength, lightStrength, blueLightStrength, 1.0f};
 
 
 		// can be used for debugging
@@ -586,7 +584,7 @@ public class LodRenderer
 		GL11.glEnable(LOD_GL_LIGHT_NUMBER); // Enable the above lighting
 
 		RenderSystem.enableLighting();
-	}
+	}*/
 
 	/**
 	 * Create all buffers that will be used.
@@ -666,10 +664,7 @@ public class LodRenderer
 		FogDrawOverride override = LodConfig.CLIENT.graphics.fogDrawOverride.get();
 
 
-		if (quality == FogQuality.OFF)
-			fogSettings.vanillaIsRenderingFog = false;
-		else
-			fogSettings.vanillaIsRenderingFog = true;
+		fogSettings.vanillaIsRenderingFog = quality != FogQuality.OFF;
 
 
 		// use any fog overrides the user may have set

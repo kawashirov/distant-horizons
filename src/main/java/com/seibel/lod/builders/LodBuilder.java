@@ -169,8 +169,6 @@ public class LodBuilder
 			}
 		});
 		lodGenThreadPool.execute(thread);
-
-		return;
 	}
 
 	/**
@@ -291,7 +289,7 @@ public class LodBuilder
 		boolean hasCeiling = mc.getClientWorld().dimensionType().hasCeiling();
 
 		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
-		int index = 0;
+		int index;
 
 		if (dataToMerge == null)
 		{
@@ -649,7 +647,7 @@ public class LodBuilder
 		int red = 0;
 		int green = 0;
 		int blue = 0;
-		int color = 0;
+		int color;
 		for (int k = 0; k < texture.getFrameCount(); k++)
 		{
 			for (int i = 0; i < texture.getHeight(); i++)
@@ -779,7 +777,7 @@ public class LodBuilder
 	 */
 	private int getColorForBiome(int x, int z, Biome biome)
 	{
-		int colorInt = 0;
+		int colorInt;
 
 		switch (biome.getBiomeCategory())
 		{

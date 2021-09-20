@@ -141,7 +141,7 @@ public class LodDimensionFileHandler
 					// return anything
 					continue;
 				}
-				byte data[] = {0};
+				byte[] data = {0};
 				long dataSize = f.length();
 				dataSize -= 1;
 				if (dataSize > 0) {
@@ -300,7 +300,7 @@ public class LodDimensionFileHandler
 
 				// the old file is good, now create a new save file
 				File newFile = new File(fileName + TMP_FILE_EXTENSION);
-				try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(newFile));) {
+				try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(newFile))) {
 
 					// add the version of this file
 					outputStream.write(LOD_SAVE_FILE_VERSION);
