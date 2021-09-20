@@ -21,12 +21,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.builders.LodBuilder;
 import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.builders.worldGeneration.LodWorldGenerator;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.LodDetail;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.objects.RegionPos;
@@ -49,7 +51,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of the mod.
  *
  * @author James_Seibel
- * @version 9-16-2021
+ * @version 9-19-2021
  */
 public class ClientProxy
 {
@@ -97,8 +99,9 @@ public class ClientProxy
 	/**
 	 * Do any setup that is required to draw LODs
 	 * and then tell the LodRenderer to draw.
+	 * @param mcMatrixStack 
 	 */
-	public void renderLods(float partialTicks)
+	public void renderLods(MatrixStack mcMatrixStack, float partialTicks)
 	{
 		// clear any out of date objects
 		mc.clearFrameObjectCache();
@@ -141,7 +144,7 @@ public class ClientProxy
 			profiler.pop(); // get out of "terrain"
 			profiler.push("LOD");
 
-			renderer.drawLODs(lodDim, partialTicks, mc.getProfiler());
+			renderer.drawLODs(lodDim, mcMatrixStack, partialTicks, mc.getProfiler());
 
 			profiler.pop(); // end LOD
 			profiler.push("terrain"); // go back into "terrain"
@@ -151,8 +154,10 @@ public class ClientProxy
 			// otherwise the buffers may be set to the wrong size, or not changed at all
 			previousChunkRenderDistance = mc.getRenderDistance();
 			previousLodRenderDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get();
-		}catch (Exception e){
-
+		}
+		catch (Exception e)
+		{
+			LOGGER.error(e.getMessage());
 		}
 	}
 	
@@ -170,8 +175,8 @@ public class ClientProxy
 		//LodConfig.CLIENT.debugMode.set(true);
 		
 		
-//		LodConfig.CLIENT.graphics.maxDrawDetail.set(LodDetail.FULL);
-//		LodConfig.CLIENT.worldGenerator.maxGenerationDetail.set(LodDetail.FULL);
+		LodConfig.CLIENT.graphics.maxDrawDetail.set(LodDetail.FULL);
+		LodConfig.CLIENT.worldGenerator.maxGenerationDetail.set(LodDetail.FULL);
 		// requires a world restart?
 //		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(LodQualityMode.HEIGHTMAP);
 		

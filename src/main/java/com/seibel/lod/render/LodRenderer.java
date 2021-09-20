@@ -56,7 +56,6 @@ import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.entity.Entity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.profiler.IProfiler;
@@ -64,7 +63,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
 
 
 /**
@@ -72,7 +70,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * This is where LODs are draw to the world.
  *
  * @author James Seibel
- * @version 9-18-2021
+ * @version 9-19-2021
  */
 public class LodRenderer
 {
@@ -169,10 +167,10 @@ public class LodRenderer
 	 * the async process of generating the Buffers that hold those LODs.
 	 *
 	 * @param lodDim       The dimension to draw, if null doesn't replace the current dimension.
+	 * @param mcMatrixStack This matrix stack should come straight from MC's renderChunkLayer (or future equivalent) method
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
-	@SuppressWarnings("deprecation")
-	public void drawLODs(LodDimension lodDim, float partialTicks, IProfiler newProfiler)
+	public void drawLODs(LodDimension lodDim, MatrixStack mcMatrixStack, float partialTicks, IProfiler newProfiler)
 	{
 		if (lodDim == null)
 		{
@@ -254,7 +252,7 @@ public class LodRenderer
 		// (or maybe vice versa I have no idea :P)
 		mcProjectionMatrix.transpose();
 		
-		Matrix4f modelViewMatrix = generateModelViewMatrix(partialTicks);
+		Matrix4f modelViewMatrix = offsetTheModelViewMatrix(mcMatrixStack, partialTicks);
 
 		// required for setupFog and setupProjectionMatrix
 		farPlaneBlockDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
@@ -281,9 +279,8 @@ public class LodRenderer
 		
 		if (vbos != null)
 		{
-			Entity cameraEntity = mc.getCameraEntity();
-			Vector3d cameraDir = cameraEntity.getLookAngle().normalize();
-			cameraDir = mc.getOptions().getCameraType().isMirrored() ? cameraDir.reverse() : cameraDir;
+			ActiveRenderInfo renderInfo = mc.getGameRenderer().getMainCamera();
+			Vector3d cameraDir = new Vector3d(renderInfo.getLookVector());
 			
 			boolean cullingDisabled = LodConfig.CLIENT.graphics.disableDirectionalCulling.get();
 			
@@ -296,7 +293,7 @@ public class LodRenderer
 				for (int j = 0; j < vbos.length; j++)
 				{
 					RegionPos vboPos = new RegionPos(i + lodDim.getCenterX() - lodDim.getWidth() / 2, j + lodDim.getCenterZ() - lodDim.getWidth() / 2);
-					if (cullingDisabled || RenderUtil.isRegionInViewFrustum(cameraEntity.blockPosition(), cameraDir, vboPos.blockPos()))
+					if (cullingDisabled || RenderUtil.isRegionInViewFrustum(renderInfo.getBlockPosition(), cameraDir, vboPos.blockPos()))
 					{
 						if ((i > halfWidth - quarterWidth && i < halfWidth + quarterWidth) && (j > halfWidth - quarterWidth && j < halfWidth + quarterWidth))
 							setupFog(fogSettings.near.distance, fogSettings.near.quality);
@@ -448,7 +445,6 @@ public class LodRenderer
 	/**
 	 * Revert any changes that were made to the fog.
 	 */
-	@SuppressWarnings("deprecation")
 	private void cleanupFog(NearFarFogSettings fogSettings,
 	                        float defaultFogStartDist, float defaultFogEndDist,
 	                        int defaultFogMode, int defaultFogDistance)
@@ -470,22 +466,22 @@ public class LodRenderer
 
 
 	/**
-	 * Create the model view matrix to move the LODs
-	 * from object space into world space.
+	 * Translate the camera relative to the LodDimension's center,
+	 * this is done since all LOD buffers are created in world space
+	 * instead of object space.
+	 * (since AxisAlignedBoundingBoxes (LODs) use doubles and thus have a higher
+	 * accuracy vs the model view matrix, which only uses floats)
 	 */
-	private Matrix4f generateModelViewMatrix(float partialTicks)
+	private Matrix4f offsetTheModelViewMatrix(MatrixStack mcMatrixStack, float partialTicks)
 	{
+		// duplicate the last matrix
+		mcMatrixStack.pushPose();
+		
+		
 		// get all relevant camera info
 		ActiveRenderInfo renderInfo = mc.getGameRenderer().getMainCamera();
 		Vector3d projectedView = renderInfo.getPosition();
-
-
-		// generate the model view matrix
-		MatrixStack matrixStack = new MatrixStack();
-		matrixStack.pushPose();
-		// rotate to the current camera's direction
-		matrixStack.mulPose(Vector3f.XP.rotationDegrees(renderInfo.getXRot()));
-		matrixStack.mulPose(Vector3f.YP.rotationDegrees(renderInfo.getYRot() + 180));
+		
 		// translate the camera relative to the regions' center
 		// (AxisAlignedBoundingBoxes (LODs) use doubles and thus have a higher
 		// accuracy vs the model view matrix, which only uses floats)
@@ -493,9 +489,15 @@ public class LodRenderer
 		Vector3d eyePos = mc.getPlayer().getEyePosition(partialTicks);
 		double xDiff = eyePos.x - bufferPos.getX();
 		double zDiff = eyePos.z - bufferPos.getZ();
-		matrixStack.translate(-xDiff, -projectedView.y, -zDiff);
-
-		return matrixStack.last().pose();
+		mcMatrixStack.translate(-xDiff, -projectedView.y, -zDiff);
+		
+		
+		// get the modified model view matrix
+		Matrix4f lodModelViewMatrix = mcMatrixStack.last().pose(); 
+		// remove the lod ModelViewMatrix
+		mcMatrixStack.popPose();
+		
+		return lodModelViewMatrix;
 	}
 
 
@@ -544,7 +546,7 @@ public class LodRenderer
 	/**
 	 * setup the lighting to be used for the LODs
 	 */
-	@SuppressWarnings({ "deprecation", "unused" })
+	@SuppressWarnings( "unused" )
 	private void setupLighting(LodDimension lodDimension, float partialTicks)
 	{
 		// Determine if the player has night vision

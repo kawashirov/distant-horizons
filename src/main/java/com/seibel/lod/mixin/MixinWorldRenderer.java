@@ -32,11 +32,12 @@ import net.minecraft.client.renderer.WorldRenderer;
 /**
  * This class is used to mix in my rendering code
  * before Minecraft starts rendering blocks.
- * If this wasn't done the LODs would render on top
+ * If this wasn't done and we used Forge's 
+ * render last event, the LODs would render on top
  * of the normal terrain.
  * 
  * @author James Seibel
- * @version 05-29-2021
+ * @version 9-19-2021
  */
 @Mixin(WorldRenderer.class)
 public class MixinWorldRenderer
@@ -57,6 +58,6 @@ public class MixinWorldRenderer
 		// only render if LODs are enabled and
 		// only render before solid blocks
 		if (LodConfig.CLIENT.graphics.drawLODs.get() && renderType.equals(RenderType.solid()))
-			LodMain.client_proxy.renderLods(previousPartialTicks);
+			LodMain.client_proxy.renderLods(matrixStackIn, previousPartialTicks);
 	}
 }
