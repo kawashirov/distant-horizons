@@ -283,7 +283,7 @@ public class DataPointUtil
 	{
 		int size = dataToMerge.length / inputVerticalData;
 		short[] projection = ThreadMapUtil.getProjectionShort((WORLD_HEIGHT) / 16  + 1);
-		short[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth(inputVerticalData);
+		short[][] heightAndDepth = ThreadMapUtil.getHeightAndDepth(inputVerticalData + 1);
 		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(size);
 		int genMode = DistanceGenerationMode.SERVER.complexity;
 		boolean allEmpty = true;
