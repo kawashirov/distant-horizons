@@ -502,23 +502,74 @@ public class LodDimension
 	 *
 	 * @return list of quadTrees
 	 */
-	public PosToGenerateContainer getDataToGenerate(byte farDetail, int maxDataToGenerate, double farRatio, int playerPosX, int playerPosZ)
+	public PosToGenerateContainer getDataToGenerate(int maxDataToGenerate, int playerPosX, int playerPosZ)
 	{
-		PosToGenerateContainer posToGenerate = new PosToGenerateContainer(farDetail, maxDataToGenerate, (int) (maxDataToGenerate * farRatio), playerPosX, playerPosZ);
-		int n = regions.length;
-		int xIndex;
-		int zIndex;
-		LodRegion region;
-		for (int xRegion = 0; xRegion < n; xRegion++)
+		PosToGenerateContainer posToGenerate;
+		boolean circularGeneration = true;
+		if (circularGeneration)
 		{
-			for (int zRegion = 0; zRegion < n; zRegion++)
-			{
-				xIndex = (xRegion + center.x) - halfWidth;
-				zIndex = (zRegion + center.z) - halfWidth;
-				region = getRegion(xIndex, zIndex);
-				if (region != null)
-					region.getDataToGenerate(posToGenerate, playerPosX, playerPosZ);
+			posToGenerate = new PosToGenerateContainer((byte) 10, maxDataToGenerate, 0, playerPosX, playerPosZ);
 
+			int numbChunksWide = width * 32;
+			int playerChunkPosX = Math.floorDiv(playerPosX, LodUtil.CHUNK_WIDTH);
+			int playerChunkPosZ = Math.floorDiv(playerPosZ, LodUtil.CHUNK_WIDTH);
+			int xChunkToCheck;
+			int zChunkToCheck;
+			byte detailLevel;
+			int posX;
+			int posZ;
+			int distance;
+			int x,z,dx,dz;
+			long data;
+			x = z = dx =0;
+			dz = -1;
+			int width = numbChunksWide;
+			int t = width;
+			int maxI = t*t;
+			for(int i =0; i < maxI; i++){
+				if(maxDataToGenerate < 0){
+					break;
+				}
+				if ((-width/2 <= x) && (x <= width/2) && (-width/2 <= z) && (z <= width/2)){
+					xChunkToCheck = x * LodUtil.CHUNK_WIDTH + playerChunkPosX;
+					zChunkToCheck = z * LodUtil.CHUNK_WIDTH + playerChunkPosZ;
+					distance = LevelPosUtil.maxDistance(LodUtil.CHUNK_DETAIL_LEVEL,x,z,0,0);
+					detailLevel = DetailDistanceUtil.getGenerationDetailFromDistance(distance);
+					posX = LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL,xChunkToCheck, detailLevel);
+					posZ = LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL,zChunkToCheck, detailLevel);
+					data = getSingleData(detailLevel,posX,posZ);
+					if(!DataPointUtil.doesItExist(data))
+					{
+						posToGenerate.addPosToGenerate(detailLevel,posX,posZ);
+						maxDataToGenerate--;
+					}
+				}
+				if( (x == z) || ((x < 0) && (x == -z)) || ((x > 0) && (x == 1-z))){
+					t = dx;
+					dx = -dz;
+					dz = t;
+				}
+				x += dx;
+				z += dz;
+			}
+		} else
+		{
+			posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, (int) (maxDataToGenerate * 0.25f), playerPosX, playerPosZ);
+			int n = regions.length;
+			int xIndex;
+			int zIndex;
+			LodRegion region;
+			for (int xRegion = 0; xRegion < n; xRegion++)
+			{
+				for (int zRegion = 0; zRegion < n; zRegion++)
+				{
+					xIndex = (xRegion + center.x) - halfWidth;
+					zIndex = (zRegion + center.z) - halfWidth;
+					region = getRegion(xIndex, zIndex);
+					if (region != null)
+						region.getDataToGenerate(posToGenerate, playerPosX, playerPosZ);
+
+				}
 			}
 		}
 		return posToGenerate;

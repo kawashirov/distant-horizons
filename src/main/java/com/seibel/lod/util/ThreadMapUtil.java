@@ -86,13 +86,13 @@ public class ThreadMapUtil
 		return saveContainer.get(Thread.currentThread().getName());
 	}
 
-	public static long[] getVerticalUpdateArray(byte detailLevel,int size){
-		if(!verticalUpdate.containsKey(Thread.currentThread().getName()) || (verticalUpdate.get(Thread.currentThread().getName()) == null) || (verticalUpdate.get(Thread.currentThread().getName())[detailLevel].length != size))
+	public static long[] getVerticalUpdateArray(byte detailLevel){
+		if(!verticalUpdate.containsKey(Thread.currentThread().getName()) || (verticalUpdate.get(Thread.currentThread().getName()) == null) || (verticalUpdate.get(Thread.currentThread().getName())[detailLevel].length != 4*DetailDistanceUtil.getMaxVerticalData(detailLevel)))
 		{
 			long[][] array = new long[10][];
 			for(int i = 0; i < array.length; i++)
 			{
-				array[i] = new long[4 * size];
+				array[i] = new long[4 * DetailDistanceUtil.getMaxVerticalData(detailLevel)];
 			}
 			verticalUpdate.put(Thread.currentThread().getName(), array);
 		}

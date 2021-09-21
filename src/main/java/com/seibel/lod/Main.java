@@ -12,6 +12,7 @@ public class Main
 {
 	public static void main(String[] args)
 	{
+		/*
 		try
 		{
 			@SuppressWarnings("serial")
@@ -49,5 +50,6 @@ public class Main
 		{
 			e.printStackTrace();
 		}
+		*/
 	}
 }

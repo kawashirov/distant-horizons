@@ -107,11 +107,8 @@ public class LodWorldGenerator
 
 					ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(lodDim.dimension);
 
-					byte farDetail = (byte) 8;
 					PosToGenerateContainer posToGenerate = lodDim.getDataToGenerate(
-							farDetail,
 							maxChunkGenRequests,
-							0.25,
 							playerPosX,
 							playerPosZ);
 					//System.out.println(posToGenerate);
@@ -121,15 +118,13 @@ public class LodWorldGenerator
 					byte detailLevel;
 					int posX;
 					int posZ;
-					int[] levelPos;
 					for (int index = 0; index < posToGenerate.getNumberOfPos(); index++)
 					{
-						levelPos = posToGenerate.getNthPos(index);
-						if(levelPos[0] == 0)
+						if(posToGenerate.getNthDetail(index) == 0)
 							continue;
-						detailLevel = (byte) (levelPos[0] -1);
-						posX = levelPos[1];
-						posZ = levelPos[2];
+						detailLevel = (byte) (posToGenerate.getNthDetail(index) - 1);
+						posX = posToGenerate.getNthPosX(index);
+						posZ = posToGenerate.getNthPosZ(index);
 
 						ChunkPos chunkPos = new ChunkPos(LevelPosUtil.getChunkPos(detailLevel,posX), LevelPosUtil.getChunkPos(detailLevel,posZ));
 						if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)

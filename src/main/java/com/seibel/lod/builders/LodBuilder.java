@@ -264,6 +264,7 @@ public class LodBuilder
 		} catch (Exception e)
 		{
 			e.printStackTrace();
+			throw e;
 		}
 
 	}
