@@ -84,6 +84,9 @@ public class SingleLevelContainer implements LevelContainer
 				newData = 0;
 				if (inputData[index] == 0)
 					index++;
+				else if (inputData[index] == 3)
+					newData = 3;
+					index++;
 				else if (index + 7 >= inputData.length)
 					break;
 				else
@@ -147,6 +150,10 @@ public class SingleLevelContainer implements LevelContainer
 				if (dataContainer[x][z] == 0)
 				{
 					tempData[index] = 0;
+					index++;
+				} else if (dataContainer[x][z] == 3)
+				{
+					tempData[index] = 3;
 					index++;
 				} else
 				{
