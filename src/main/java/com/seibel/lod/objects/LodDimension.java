@@ -458,7 +458,7 @@ public class LodDimension
 	 * stored in the LOD. If an LOD already exists at the given
 	 * coordinates it will be overwritten.
 	 */
-	public Boolean addData(byte detailLevel, int posX, int posZ, int verticalIndex, long data, boolean dontSave, boolean serverQuality)
+	public Boolean addData(byte detailLevel, int posX, int posZ, int verticalIndex, long data, boolean dontSave)
 	{
 
 		// don't continue if the region can't be saved
@@ -468,45 +468,7 @@ public class LodDimension
 		LodRegion region = getRegion(regionPosX, regionPosZ);
 		if (region == null)
 			return false;
-		boolean nodeAdded = region.addData(detailLevel, posX, posZ, verticalIndex, data, serverQuality);
-		// only save valid LODs to disk
-		if (!dontSave && fileHandler != null)
-		{
-			try
-			{
-				// mark the region as dirty so it will be saved to disk
-				int xIndex = (regionPosX - center.x) + halfWidth;
-				int zIndex = (regionPosZ - center.z) + halfWidth;
-				isRegionDirty[xIndex][zIndex] = true;
-				regionNeedsRegen[xIndex][zIndex] = true;
-				regenDimension = true;
-			} catch (ArrayIndexOutOfBoundsException e)
-			{
-				e.printStackTrace();
-				// This method was probably called when the dimension was changing size.
-				// Hopefully this shouldn't be an issue.
-			}
-		}
-		return nodeAdded;
-	}
-
-
-	/**
-	 * Add the given LOD to this dimension at the coordinate
-	 * stored in the LOD. If an LOD already exists at the given
-	 * coordinates it will be overwritten.
-	 */
-	public Boolean addSingleData(byte detailLevel, int posX, int posZ, long dataPoint, boolean dontSave, boolean serverQuality)
-	{
-
-		// don't continue if the region can't be saved
-		int regionPosX = LevelPosUtil.getRegion(detailLevel, posX);
-		int regionPosZ = LevelPosUtil.getRegion(detailLevel, posZ);
-
-		LodRegion region = getRegion(regionPosX, regionPosZ);
-		if (region == null)
-			return false;
-		boolean nodeAdded = region.addSingleData(detailLevel, posX, posZ, dataPoint, serverQuality);
+		boolean nodeAdded = region.addData(detailLevel, posX, posZ, verticalIndex, data);
 		// only save valid LODs to disk
 		if (!dontSave && fileHandler != null)
 		{

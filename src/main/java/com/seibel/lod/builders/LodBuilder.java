@@ -219,8 +219,6 @@ public class LodBuilder
 				posX = LevelPosUtil.convert((byte) 0, chunk.getPos().x * 16 + startX, detail.detailLevel);
 				posZ = LevelPosUtil.convert((byte) 0, chunk.getPos().z * 16 + startZ, detail.detailLevel);
 				long[] data;
-				boolean isServer = config.distanceGenerationMode == DistanceGenerationMode.SERVER;
-
 				switch (verticalQuality)
 				{
 					default:
@@ -228,35 +226,41 @@ public class LodBuilder
 						long singleData;
 						long[] dataToMergeSingle = createSingleDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
 						singleData = DataPointUtil.mergeSingleData(dataToMergeSingle);
-						lodDim.addSingleData(detailLevel,
+						lodDim.addData(detailLevel,
 								posX,
 								posZ,
+								0,
 								singleData,
-								false,
-								isServer);
+								false);
 						break;
 					case MULTI_LOD:
 						long[] dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
+						/*for(long dat : dataToMergeVertical){
+							if(!DataPointUtil.doesItExist(dat) || DataPointUtil.isItVoid(dat))
+								continue;
+							System.out.println(DataPointUtil.toString(dat));
+						}*/
 						data = DataPointUtil.mergeMultiData(dataToMergeVertical, DataPointUtil.WORLD_HEIGHT, DetailDistanceUtil.getMaxVerticalData(detailLevel));
-						lodDim.clear(detailLevel, posX, posZ);
+
+
+						//lodDim.clear(detailLevel, posX, posZ);
 						if (data.length != 0 || data != null)
 						{
-							for (int verticalIndex = 0; (verticalIndex < data.length) && (verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ)); verticalIndex++)
+							for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ); verticalIndex++)
 							{
+
+								if (!DataPointUtil.doesItExist(data[verticalIndex]))
+									break;
 								lodDim.addData(detailLevel,
 										posX,
 										posZ,
 										verticalIndex,
 										data[verticalIndex],
-										false,
-										isServer);
+										false);
 							}
 						}
-
 						break;
 				}
-
-
 			}
 			lodDim.updateData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
 		} catch (Exception e)
@@ -287,14 +291,10 @@ public class LodBuilder
 		int yAbs;
 		int zAbs;
 		boolean hasCeiling = mc.getClientWorld().dimensionType().hasCeiling();
+		boolean hasSkyLight = mc.getClientWorld().dimensionType().hasSkyLight();
 
 		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
 		int index;
-
-		if (dataToMerge == null)
-		{
-			dataToMerge = new long[size * size * DataPointUtil.WORLD_HEIGHT];
-		}
 
 		for (index = 0; index < size * size; index++)
 		{
@@ -308,13 +308,12 @@ public class LodBuilder
 			zAbs = chunkPos.getMinBlockZ() + zRel;
 
 			//Calculate the height of the lod
-			yAbs = 255;
+			yAbs = 1024;
 			int count = 0;
 			boolean topBlock = true;
 			while (yAbs > 0)
 			{
 				height = determineHeightPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
-
 				//If the lod is at default, then we set this as void data
 				if (height == DEFAULT_HEIGHT)
 				{
@@ -339,13 +338,22 @@ public class LodBuilder
 				}
 				lightBlock = light & 0b1111;
 				if (!hasCeiling && topBlock)
-					lightSky = 15; //default max light
-				else
+				{
+					if (hasSkyLight)
+					{
+						lightSky = 15; //default max light
+					} else
+					{
+						lightSky = 0;
+					}
+				} else
+				{
 					lightSky = (light >> 4) & 0b1111;
-
-				topBlock = false;
+				}
 
 				dataToMerge[index * verticalData + count] = DataPointUtil.createDataPoint(height, depth, color, lightSky, lightBlock, generation);
+
+				topBlock = false;
 				yAbs = depth - 1;
 				count++;
 			}
@@ -883,8 +891,8 @@ public class LodBuilder
 			}
 
 			return blockState.getBlock() != Blocks.AIR
-					&& blockState.getBlock() != Blocks.CAVE_AIR
-					&& blockState.getBlock() != Blocks.BARRIER;
+					       && blockState.getBlock() != Blocks.CAVE_AIR
+					       && blockState.getBlock() != Blocks.BARRIER;
 		}
 		return false;
 	}

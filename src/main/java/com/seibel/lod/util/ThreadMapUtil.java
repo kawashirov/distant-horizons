@@ -38,6 +38,11 @@ public class ThreadMapUtil
 		if (!threadBuilderVerticalArrayMap.containsKey(Thread.currentThread().getName()) || (threadBuilderVerticalArrayMap.get(Thread.currentThread().getName()) == null))
 		{
 			long[][] array = new long[5][];
+			for(int i = 0; i < array.length; i++)
+			{
+				int size = 1 << i;
+				array[i] = new long[size * size * DataPointUtil.WORLD_HEIGHT];
+			}
 			threadBuilderVerticalArrayMap.put(Thread.currentThread().getName(), array);
 		}
 		return threadBuilderVerticalArrayMap.get(Thread.currentThread().getName());

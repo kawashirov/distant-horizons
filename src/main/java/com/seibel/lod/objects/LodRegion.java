@@ -16,8 +16,6 @@ import com.seibel.lod.util.LodUtil;
  * if an array contain coordinate the order is the following
  * 0 for x, 1 for z in 2D
  * 0 for x, 1 for y, 2 for z in 3D
- * 
- * 
  */
 public class LodRegion
 {
@@ -60,7 +58,8 @@ public class LodRegion
 		//Initialize all the different matrices
 		for (byte lod = minDetailLevel; lod <= LodUtil.REGION_DETAIL_LEVEL; lod++)
 		{
-			switch (verticalQuality){
+			switch (verticalQuality)
+			{
 				default:
 				case HEIGHTMAP:
 					dataContainer[lod] = new SingleLevelContainer(lod);
@@ -71,10 +70,12 @@ public class LodRegion
 			}
 		}
 	}
+
 	public VerticalQuality getLodQualityMode()
 	{
 		return verticalQuality;
 	}
+
 	public DistanceGenerationMode getGenerationMode()
 	{
 		return generationMode;
@@ -90,70 +91,15 @@ public class LodRegion
 	 *
 	 * @return if the data was added successfully
 	 */
-	public boolean addData(byte detailLevel, int posX, int posZ, int verticalIndex, long data, boolean serverQuality)
+	public boolean addData(byte detailLevel, int posX, int posZ, int verticalIndex, long data)
 	{
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		if (!doesDataExist(detailLevel, posX, posZ) || serverQuality)
-		{
-			//update the number of nodes present
-			//if (!doesDataExist(detailLevel, posX, posZ)) numberOfPoints++;
-
-			try
-			{
-				//add the node data
-				this.dataContainer[detailLevel].addData(data, posX, posZ, verticalIndex);
-				return true;
-			}
-			catch (NullPointerException e)
-			{
-				String detailMessage = "pos: [" + posX + "," + posZ + "] dataPoint: [" + data + "] serverQuality: [" + serverQuality + "] dataContainer";
-				detailMessage += this.dataContainer != null ? ": [NULL]" : " at detailLevel: [" + dataContainer[detailLevel] + "]"; 
-				
-				ClientProxy.LOGGER.error("addSingleData: " + e.getMessage() + "\t" + detailMessage);
-				return false;
-			}
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	/**
-	 * This method can be used to insert data into the LodRegion
-	 *
-	 * @param dataPoint
-	 * @return if the data was added successfully
-	 */
-	public boolean addSingleData(byte detailLevel, int posX, int posZ, long dataPoint, boolean serverQuality)
-	{
-		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
-		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		if (!doesDataExist(detailLevel, posX, posZ) || serverQuality)
-		{
-			//update the number of nodes present
-			//if (!doesDataExist(detailLevel, posX, posZ)) numberOfPoints++;
-			
-			try
-			{
-				//add the node data
-				this.dataContainer[detailLevel].addSingleData(dataPoint, posX, posZ);
-				return true;
-			}
-			catch (NullPointerException e)
-			{
-				String detailMessage = "pos: [" + posX + "," + posZ + "] dataPoint: [" + dataPoint + "] serverQuality: [" + serverQuality + "] dataContainer";
-				detailMessage += this.dataContainer != null ? ": [NULL]" : " at detailLevel: [" + dataContainer[detailLevel] + "]"; 
-				
-				ClientProxy.LOGGER.error("addSingleData: " + e.getMessage() + "\t" + detailMessage);
-				return false;
-			}
-		}
-		else
-		{
-			return false;
-		}
+		//update the number of nodes present
+		//if (!doesDataExist(detailLevel, posX, posZ)) numberOfPoints++;
+		//add the node data
+		this.dataContainer[detailLevel].addData(data, posX, posZ, verticalIndex);
+		return true;
 	}
 
 	/**
@@ -163,7 +109,7 @@ public class LodRegion
 	 */
 	public long getData(byte detailLevel, int posX, int posZ, int verticalIndex)
 	{
-		return dataContainer[detailLevel].getData(posX, posZ,verticalIndex);
+		return dataContainer[detailLevel].getData(posX, posZ, verticalIndex);
 	}
 
 	/**
@@ -180,6 +126,7 @@ public class LodRegion
 	{
 		dataContainer[detailLevel].clear(posX, posZ);
 	}
+
 	/**
 	 * This method will return all the levelPos that are renderable according to the requisite given in input
 	 *
@@ -326,6 +273,7 @@ public class LodRegion
 	}
 
 	/**
+	 *
 	 */
 	public void updateArea(byte detailLevel, int posX, int posZ)
 	{
@@ -354,6 +302,7 @@ public class LodRegion
 	}
 
 	/**
+	 *
 	 */
 	private void update(byte detailLevel, int posX, int posZ)
 	{
@@ -366,10 +315,10 @@ public class LodRegion
 	 */
 	public boolean doesDataExist(byte detailLevel, int posX, int posZ)
 	{
-		if(detailLevel < minDetailLevel) return false;
+		if (detailLevel < minDetailLevel) return false;
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		if(dataContainer == null || dataContainer[detailLevel] == null)
+		if (dataContainer == null || dataContainer[detailLevel] == null)
 			return false;
 		return dataContainer[detailLevel].doesItExist(posX, posZ);
 	}
@@ -379,11 +328,11 @@ public class LodRegion
 	 */
 	public byte getGenerationMode(byte detailLevel, int posX, int posZ)
 	{
-		if(dataContainer[detailLevel].doesItExist(posX,posZ))
+		if (dataContainer[detailLevel].doesItExist(posX, posZ))
 		{
 			//We take the bottom information always
-			return DataPointUtil.getGenerationMode(dataContainer[detailLevel].getSingleData(posX,posZ));
-		}else
+			return DataPointUtil.getGenerationMode(dataContainer[detailLevel].getSingleData(posX, posZ));
+		} else
 		{
 			return DistanceGenerationMode.NONE.complexity;
 		}
@@ -445,13 +394,13 @@ public class LodRegion
 	{
 		if (detailLevel < minDetailLevel)
 		{
-			for (byte tempLod = (byte) (minDetailLevel - 1); tempLod >= detailLevel ; tempLod--)
+			for (byte tempLod = (byte) (minDetailLevel - 1); tempLod >= detailLevel; tempLod--)
 			{
-				if(dataContainer[tempLod + 1] == null)
+				if (dataContainer[tempLod + 1] == null)
 				{
 					dataContainer[tempLod + 1] = new SingleLevelContainer((byte) (tempLod + 1));
 				}
-				dataContainer[tempLod] = dataContainer[tempLod+1].expand();
+				dataContainer[tempLod] = dataContainer[tempLod + 1].expand();
 			}
 			minDetailLevel = detailLevel;
 		}
@@ -467,6 +416,7 @@ public class LodRegion
 
 	/**
 	 * return needed memory in byte
+	 *
 	 * @param template
 	 */
 	public int getMinMemoryNeeded(LodTemplate template)
@@ -489,9 +439,10 @@ public class LodRegion
 		return getLevel(LodUtil.REGION_DETAIL_LEVEL).toString();
 	}
 
-	public int getNumberOfLods(){
+	public int getNumberOfLods()
+	{
 		int count = 0;
-		for(LevelContainer container : dataContainer)
+		for (LevelContainer container : dataContainer)
 			count += container.getMaxNumberOfLods();
 		return count;
 	}
