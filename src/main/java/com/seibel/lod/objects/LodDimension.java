@@ -506,71 +506,94 @@ public class LodDimension
 	public PosToGenerateContainer getDataToGenerate(int maxDataToGenerate, int playerPosX, int playerPosZ)
 	{
 		PosToGenerateContainer posToGenerate;
-		boolean circularGeneration = true;
-		if (circularGeneration)
+		LodRegion region;
+		int x, z, dx, dz, t;
+		x = 0;
+		z = 0;
+		dx = 0;
+		dz = -1;
+		switch (LodConfig.CLIENT.worldGenerator.generationPriority.get())
 		{
-			posToGenerate = new PosToGenerateContainer((byte) 10, maxDataToGenerate, 0, playerPosX, playerPosZ);
-
-			int numbChunksWide = width * 32;
-			int playerChunkPosX = Math.floorDiv(playerPosX, LodUtil.CHUNK_WIDTH);
-			int playerChunkPosZ = Math.floorDiv(playerPosZ, LodUtil.CHUNK_WIDTH);
-			int xChunkToCheck;
-			int zChunkToCheck;
-			byte detailLevel;
-			int posX;
-			int posZ;
-			int distance;
-			int x,z,dx,dz;
-			long data;
-			x = z = dx =0;
-			dz = -1;
-			int t = numbChunksWide;
-			int maxI = t*t;
-			for(int i =0; i < maxI; i++){
-				if(maxDataToGenerate < 0){
-					break;
-				}
-				if ((-numbChunksWide/2 <= x) && (x <= numbChunksWide/2) && (-numbChunksWide/2 <= z) && (z <= numbChunksWide/2)){
-					xChunkToCheck = x + playerChunkPosX;
-					zChunkToCheck = z + playerChunkPosZ;
-					distance = LevelPosUtil.maxDistance(LodUtil.CHUNK_DETAIL_LEVEL,x,z,0,0);
-					detailLevel = DetailDistanceUtil.getGenerationDetailFromDistance(distance);
-					posX = LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL,xChunkToCheck, detailLevel);
-					posZ = LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL,zChunkToCheck, detailLevel);
-					data = getSingleData(detailLevel,posX,posZ);
-					if(!DataPointUtil.doesItExist(data))
-					{
-						posToGenerate.addPosToGenerate(detailLevel,posX,posZ);
-						maxDataToGenerate--;
-					}
-				}
-				if( (x == z) || ((x < 0) && (x == -z)) || ((x > 0) && (x == 1-z))){
-					t = dx;
-					dx = -dz;
-					dz = t;
-				}
-				x += dx;
-				z += dz;
-			}
-		} else
-		{
-			posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, (int) (maxDataToGenerate * 0.25f), playerPosX, playerPosZ);
-			int n = regions.length;
-			int xIndex;
-			int zIndex;
-			LodRegion region;
-			for (int xRegion = 0; xRegion < n; xRegion++)
-			{
-				for (int zRegion = 0; zRegion < n; zRegion++)
+			default:
+			case NORMAL:
+				posToGenerate = new PosToGenerateContainer((byte) 10, maxDataToGenerate, 0, playerPosX, playerPosZ);
+				int playerChunkX = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerPosX);
+				int playerChunkZ = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerPosZ);
+				int xChunkToCheck;
+				int zChunkToCheck;
+				byte detailLevel;
+				int posX;
+				int posZ;
+				long data;
+				int numbChunksWide = (width) * 32;
+				//int circleLimit = Integer.MAX_VALUE;
+				for (int i = 0; i < numbChunksWide * numbChunksWide; i++)
 				{
-					xIndex = (xRegion + center.x) - halfWidth;
-					zIndex = (zRegion + center.z) - halfWidth;
-					region = getRegion(xIndex, zIndex);
+					// use this for square generation
+					if (maxDataToGenerate <= 0)
+					{
+						break;
+					}
+
+					// use this for circular generation
+					/*if (circleLimit < Math.abs(x) && circleLimit < Math.abs(z))
+						break;
+					if (maxDataToGenerate == 0)
+					{
+						circleLimit = (int) (Math.abs(x) * 1.6f);
+					}*/
+
+
+					xChunkToCheck = x + playerChunkX;
+					zChunkToCheck = z + playerChunkZ;
+					//distance = LevelPosUtil.maxDistance(LodUtil.CHUNK_DETAIL_LEVEL, xChunkToCheck, zChunkToCheck, playerChunkX, playerChunkZ);
+					region = getRegion(LodUtil.CHUNK_DETAIL_LEVEL, xChunkToCheck, zChunkToCheck);
+					if(region == null)
+						continue;
+					detailLevel = region.getMinDetailLevel();
+
+					posX = LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, xChunkToCheck, detailLevel);
+					posZ = LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, zChunkToCheck, detailLevel);
+					data = getSingleData(detailLevel, posX, posZ);
+					if (DataPointUtil.getGenerationMode(data) < LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get().complexity)
+					{
+						posToGenerate.addPosToGenerate(detailLevel, posX, posZ);
+						if (maxDataToGenerate >= 0)
+							maxDataToGenerate--;
+					}
+					if ((x == z) || ((x < 0) && (x == -z)) || ((x > 0) && (x == 1 - z)))
+					{
+						t = dx;
+						dx = -dz;
+						dz = t;
+					}
+					x += dx;
+					z += dz;
+				}
+				break;
+			case FAR:
+				posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, (int) (maxDataToGenerate * 0.25f), playerPosX, playerPosZ);
+				int n = regions.length;
+				int xRegion;
+				int zRegion;
+
+				for (int i = 0; i < width * width; i++)
+				{
+					xRegion = x + center.x;
+					zRegion = z + center.z;
+					region = getRegion(xRegion, zRegion);
 					if (region != null)
 						region.getDataToGenerate(posToGenerate, playerPosX, playerPosZ);
-
+					if ((x == z) || ((x < 0) && (x == -z)) || ((x > 0) && (x == 1 - z)))
+					{
+						t = dx;
+						dx = -dz;
+						dz = t;
+					}
+					x += dx;
+					z += dz;
 				}
-			}
+				break;
 		}
 		return posToGenerate;
 	}
@@ -580,7 +603,8 @@ public class LodDimension
 	 *
 	 * @return list of nodes
 	 */
-	public void getDataToRender(PosToRenderContainer posToRender, RegionPos regionPos, int playerPosX, int playerPosZ)
+	public void getDataToRender(PosToRenderContainer posToRender, RegionPos regionPos, int playerPosX,
+	                            int playerPosZ)
 	{
 		LodRegion region = getRegion(regionPos.x, regionPos.z);
 		if (region != null)
@@ -713,7 +737,8 @@ public class LodDimension
 	 * Get the region at the given X and Z coordinates from the
 	 * RegionFileHandler.
 	 */
-	public LodRegion getRegionFromFile(RegionPos regionPos, byte detailLevel, DistanceGenerationMode generationMode, VerticalQuality verticalQuality)
+	public LodRegion getRegionFromFile(RegionPos regionPos, byte detailLevel, DistanceGenerationMode
+			                                                                          generationMode, VerticalQuality verticalQuality)
 	{
 		if (fileHandler != null)
 			return fileHandler.loadRegionFromFile(detailLevel, regionPos, generationMode, verticalQuality);

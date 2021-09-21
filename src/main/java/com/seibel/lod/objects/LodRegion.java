@@ -251,7 +251,7 @@ public class LodRegion
 				{
 					if (doesDataExist(childDetailLevel, childPosX + x, childPosZ + z))
 					{
-						if (!requireCorrectDetailLevel)
+						if (!requireCorrectDetailLevel && detailLevel > supposedLevel + 1)
 						{
 							childrenCount++;
 						} else
@@ -264,7 +264,7 @@ public class LodRegion
 
 			//If all the four children exist we go deeper
 
-			if(!requireCorrectDetailLevel)
+			if(!requireCorrectDetailLevel && detailLevel > supposedLevel + 1)
 			{
 				if (childrenCount == 4)
 				{

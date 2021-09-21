@@ -231,7 +231,7 @@ public class LevelPosUtil
 				firstDetail);
 		if (compareResult == 0)
 		{
-			compareResult = compareDistance(
+			compareResult = Integer.compare(
 					firstDistance,
 					secondDistance);
 		}

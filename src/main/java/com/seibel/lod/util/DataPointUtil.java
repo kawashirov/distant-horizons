@@ -279,7 +279,7 @@ public class DataPointUtil
 	public static long[] mergeMultiData(long[] dataToMerge, int inputVerticalData, int maxVerticalData)
 	{
 		int size = dataToMerge.length / inputVerticalData;
-		short[] projection = ThreadMapUtil.getProjectionShort((WORLD_HEIGHT) / 16 + 1);
+		short[] projection = ThreadMapUtil.getProjectionShort((WORLD_HEIGHT) / 16 + 2);
 		short[] heightAndDepth = ThreadMapUtil.getHeightAndDepth((WORLD_HEIGHT + 1) * 2);
 		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(size);
 		long[] dataPoint = ThreadMapUtil.verticalDataArray(WORLD_HEIGHT + 1);

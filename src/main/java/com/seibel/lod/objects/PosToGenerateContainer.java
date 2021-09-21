@@ -12,7 +12,7 @@ public class PosToGenerateContainer
 	private int maxFarSize;
 	private int nearSize;
 	private int farSize;
-	private int[] posToGenerate;
+	private int[][] posToGenerate;
 
 	public PosToGenerateContainer(byte farMinDetail, int maxDataToGenerate, int maxFarDataToGenerate, int playerPosX, int playerPosZ)
 	{
@@ -24,7 +24,7 @@ public class PosToGenerateContainer
 		maxSize = maxDataToGenerate;
 		nearSize = 0;
 		farSize = 0;
-		posToGenerate = new int[maxDataToGenerate*4];
+		posToGenerate = new int[maxDataToGenerate][4];
 	}
 
 	public void addPosToGenerate(byte detailLevel, int posX, int posZ)
@@ -43,20 +43,20 @@ public class PosToGenerateContainer
 				maxNearSize--;
 			}
 			index = posToGenerate.length - farSize;
-			while (index < posToGenerate.length - 1 && LevelPosUtil.compareLevelAndDistance(detailLevel, distance, (byte) (posToGenerate[(index + 1)*4 + 0] - 1), posToGenerate[(index + 1)*4 + 3]) <= 0)
+			while (index < posToGenerate.length - 1 && LevelPosUtil.compareLevelAndDistance(detailLevel, distance, (byte) (posToGenerate[index + 1][0] - 1), posToGenerate[index + 1][3]) <= 0)
 			{
-				posToGenerate[index*4 + 0] = posToGenerate[(index + 1)*4 + 0];
-				posToGenerate[index*4 + 1] = posToGenerate[(index + 1)*4 + 1];
-				posToGenerate[index*4 + 2] = posToGenerate[(index + 1)*4 + 2];
-				posToGenerate[index*4 + 3] = posToGenerate[(index + 1)*4 + 3];
+				posToGenerate[index][0] = posToGenerate[index + 1][0];
+				posToGenerate[index][1] = posToGenerate[index + 1][1];
+				posToGenerate[index][2] = posToGenerate[index + 1][2];
+				posToGenerate[index][3] = posToGenerate[index + 1][3];
 				index++;
 			}
 			if (index <= posToGenerate.length - 1)
 			{
-				posToGenerate[index*4 + 0] = detailLevel + 1;
-				posToGenerate[index*4 + 1] = posX;
-				posToGenerate[index*4 + 2] = posZ;
-				posToGenerate[index*4 + 3] = distance;
+				posToGenerate[index][0] = detailLevel + 1;
+				posToGenerate[index][1] = posX;
+				posToGenerate[index][2] = posZ;
+				posToGenerate[index][3] = distance;
 			}
 		} else
 		{//We are introducing a position in the near array
@@ -64,28 +64,27 @@ public class PosToGenerateContainer
 				nearSize++;
 			index = nearSize - 1;
 
-			while (index > 0 && LevelPosUtil.compareDistance(distance, posToGenerate[(index - 1)*4 + 3]) <= 0)
+			while (index > 0 && LevelPosUtil.compareDistance(distance, posToGenerate[index - 1][3]) <= 0)
 			{
-				posToGenerate[index*4 + 0] = posToGenerate[(index - 1)*4 + 0];
-				posToGenerate[index*4 + 1] = posToGenerate[(index - 1)*4 + 1];
-				posToGenerate[index*4 + 2] = posToGenerate[(index - 1)*4 + 2];
-				posToGenerate[index*4 + 3] = posToGenerate[(index - 1)*4 + 3];
+				posToGenerate[index][0] = posToGenerate[index - 1][0];
+				posToGenerate[index][1] = posToGenerate[index - 1][1];
+				posToGenerate[index][2] = posToGenerate[index - 1][2];
+				posToGenerate[index][3] = posToGenerate[index - 1][3];
 				index--;
 			}
 			if (index >= 0)
 			{
-				posToGenerate[index*4 + 0] = detailLevel + 1;
-				posToGenerate[index*4 + 1] = posX;
-				posToGenerate[index*4 + 2] = posZ;
-				posToGenerate[index*4 + 3] = distance;
+				posToGenerate[index][0] = detailLevel + 1;
+				posToGenerate[index][1] = posX;
+				posToGenerate[index][2] = posZ;
+				posToGenerate[index][3] = distance;
 			}
 		}
 	}
 
-
 	public int getNumberOfPos()
 	{
-		return farSize + nearSize;
+		return nearSize+farSize;
 	}
 
 	public int getNthDetail(int n)
@@ -97,8 +96,9 @@ public class PosToGenerateContainer
 			index = n / 2;
 		else
 			index = posToGenerate.length - n / 2 - 1;
-		return posToGenerate[index*4 + 0];
+		return posToGenerate[index][0];
 	}
+
 	public int getNthPosX(int n)
 	{
 		int index;
@@ -108,7 +108,7 @@ public class PosToGenerateContainer
 			index = n / 2;
 		else
 			index = posToGenerate.length - n / 2 - 1;
-		return posToGenerate[index*4 + 1];
+		return posToGenerate[index][1];
 	}
 	public int getNthPosZ(int n)
 	{
@@ -119,7 +119,7 @@ public class PosToGenerateContainer
 			index = n / 2;
 		else
 			index = posToGenerate.length - n / 2 - 1;
-		return posToGenerate[index*4 + 2];
+		return posToGenerate[index][2];
 	}
 	public int getNthGeneration(int n)
 	{
@@ -130,7 +130,7 @@ public class PosToGenerateContainer
 			index = n / 2;
 		else
 			index = posToGenerate.length - n / 2 - 1;
-		return posToGenerate[index*4 + 3];
+		return posToGenerate[index][3];
 	}
 
 	public String toString()
@@ -150,13 +150,13 @@ public class PosToGenerateContainer
 		builder.append('\n');
 		for (int i = 0; i < nearSize; i++)
 		{
-			builder.append(posToGenerate[i*4 +0]-1);
+			builder.append(posToGenerate[i][0]-1);
 			builder.append(" ");
-			builder.append(posToGenerate[i*4 +1]);
+			builder.append(posToGenerate[i][1]);
 			builder.append(" ");
-			builder.append(posToGenerate[i*4 +2]);
+			builder.append(posToGenerate[i][2]);
 			builder.append(" ");
-			builder.append(posToGenerate[i*4 +3]);
+			builder.append(posToGenerate[i][3]);
 			builder.append('\n');
 		}
 		builder.append('\n');
@@ -164,13 +164,13 @@ public class PosToGenerateContainer
 		builder.append('\n');
 		for (int i = maxSize - 1; i >= maxSize - farSize; i--)
 		{
-			builder.append(posToGenerate[i*4 +0]-1);
+			builder.append(posToGenerate[i][0]-1);
 			builder.append(" ");
-			builder.append(posToGenerate[i*4 +1]);
+			builder.append(posToGenerate[i][1]);
 			builder.append(" ");
-			builder.append(posToGenerate[i*4 +2]);
+			builder.append(posToGenerate[i][2]);
 			builder.append(" ");
-			builder.append(posToGenerate[i*4 +3]);
+			builder.append(posToGenerate[i][3]);
 			builder.append('\n');
 		}
 		builder.append('\n');
