@@ -77,37 +77,52 @@ public class VerticalLevelContainer implements LevelContainer
 	{
 		int tempIndex;
 		int index = 0;
+		int counter = -1;
 		long newData;
+		byte last = 0;
 		detailLevel = inputData[index];
 		index++;
 		maxVerticalData = inputData[index];
 		index++;
 		size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
-		this.dataContainer = new long[size * size * maxVerticalData];
-		int x, y, z;
-		for (x = 0; x < size; x++)
+		int x = size * size * maxVerticalData;
+		this.dataContainer = new long[x];
+		for ( int i = 0; i < x; i++)
 		{
-			for (z = 0; z < size; z++)
+			newData = 0;
+			if (counter > -1)
 			{
-				for (y = 0; y < maxVerticalData; y++) {
-					newData = 0;
-					if (inputData[index] == 0)
-						index++;
-					if (inputData[index] == 3)
-					{
-						newData = 3;
-						index++;
+				dataContainer[i] = last;
+				if (last == 3)
+				{ //skip rest of void chunk
+					for (tempIndex = 1; tempIndex < maxVerticalData; tempIndex++) {
+						dataContainer[i + tempIndex] = 0;
 					}
-					else if (index + 7 >= inputData.length)
-						break;
-					else
-					{
-						for (tempIndex = 0; tempIndex < 8; tempIndex++)
-							newData += (((long) inputData[index + tempIndex]) & 0xff) << (8 * tempIndex);
-						index = index + 8;
-					}
-					dataContainer[(x * size + z) * maxVerticalData + y] = newData;
+					i += maxVerticalData - 1;
 				}
+				counter--;
+			} else if ((inputData[index] & 0x3) == 0 || (inputData[index] & 0x3) == 3)
+			{
+				last = (byte)(inputData[index] & 0x3);
+				//recover counter
+				counter = (inputData[index] & 0x7c) >>> 2;
+				tempIndex = 0;
+				while ((inputData[index] & 0x80) == 0x80)
+				{ //overflow bit is on
+					index++;
+					counter += (inputData[index] & 0x7f) << (5 + 7 * tempIndex);
+					tempIndex++;
+				}
+				index++;
+				//since loop expects from us to put some data in, we just make it rerun it with new counter;
+				i--;
+			} else if (index + 7 >= inputData.length)
+				break;
+			else {
+				for (tempIndex = 0; tempIndex < 8; tempIndex++)
+					newData += (((long) inputData[index + tempIndex]) & 0xff) << (8 * tempIndex);
+				index = index + 8;
+				dataContainer[i] = newData;
 			}
 		}
 	}
@@ -151,34 +166,43 @@ public class VerticalLevelContainer implements LevelContainer
 	public byte[] toDataString()
 	{
 		int index = 0;
+		int counter = -1;
+		byte last = -1;
+		int x = size * size * maxVerticalData;
 		int tempIndex;
-		byte[] tempData = ThreadMapUtil.getSaveContainer(2 + (size * size * maxVerticalData * 8));
+		byte[] tempData = ThreadMapUtil.getSaveContainer(2 + (x * 8));
 		tempData[index] = detailLevel;
 		index++;
 		tempData[index] = (byte) maxVerticalData;
 		index++;
-		int x, y, z;
-		for (x = 0; x < size; x++)
+
+		for (int i = 0; i < x; i++)
 		{
-			for (z = 0; z < size; z++)
+			if (dataContainer[i] == 0 || dataContainer[i] == 3)
 			{
-				for (y = 0; y < maxVerticalData; y++)
+				last = (byte) dataContainer[i];
+				if (dataContainer[i] == 3) //skip rest of void chunk
+					i += maxVerticalData - 1;
+				counter++;
+			} else {
+				for (tempIndex = 0; tempIndex < 8; tempIndex++)
+					tempData[index + tempIndex] = (byte) (dataContainer[i] >>> (8 * tempIndex));
+				index += 8;
+			}
+			if (last != -1 && ( i == x - 1 || last != dataContainer[i + 1]))
+			{ //save compressed data if next is different or if we reached onf of the data
+				tempData[index] = (byte)(0x7f & ((counter << 2) + last)); //save 5 bits of counter and compressed block
+				tempIndex = 0;
+				while ((counter >>> (5 + 7 * tempIndex)) != 0) //there is more of that counter
 				{
-					int i = (x * size + z) * maxVerticalData + y;
-					if (dataContainer[i] == 0)
-					{
-						tempData[index] = 0;
-						index++;
-					} else if (dataContainer[i] == 3)
-					{
-						tempData[index] = 3;
-						index++;
-					} else {
-						for (tempIndex = 0; tempIndex < 8; tempIndex++)
-							tempData[index + tempIndex] = (byte) (dataContainer[i] >>> (8 * tempIndex));
-						index += 8;
-					}
+					tempData[index] = (byte)(tempData[index] | 0x80); //set overflow bit to true
+					index++; // after setting overflow bit w can actually index++
+					tempData[index] = (byte)(0x7f & (counter >>> (5 + 7 * tempIndex))); // save 7 bits of counter
+					tempIndex++;
 				}
+				index++;
+				last = -1;
+				counter = -1;
 			}
 		}
 		return Arrays.copyOfRange(tempData, 0, index);
