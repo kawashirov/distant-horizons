@@ -174,6 +174,7 @@ public class LodConfig
 		public ForgeConfigSpec.EnumValue<VerticalQuality> lodQualityMode;
 		public ForgeConfigSpec.EnumValue<HorizontalResolution> generationResolution;
 		public ForgeConfigSpec.EnumValue<DistanceGenerationMode> distanceGenerationMode;
+		public ForgeConfigSpec.EnumValue<GenerationPriority> generationPriority;
 		public ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
 		public ForgeConfigSpec.EnumValue<DistanceQualityDropOff> lodDistanceCalculatorType;
 
@@ -210,6 +211,18 @@ public class LodConfig
 							                                     + " with LINEAR calculator the quality of block decrease \n"
 							                                     + " quadratically to the distance of the player \n")
 					                            .defineEnum("lodDistanceComputation", DistanceQualityDropOff.LINEAR);
+
+			generationPriority = builder
+					                            .comment("\n\n"
+							                                     + " " + GenerationPriority.FAR + " \n"
+							                                     + " the fake chunk are generated from smallest to biggest\n"
+							                                     + " with a small priority for far regions \n"
+
+							                                     + "\n"
+							                                     + " " + GenerationPriority.NORMAL + " \n"
+							                                     + " the fake chunk are generated around the player \n"
+							                                     + " in spiral similar to vanilla minecraft \n")
+					                            .defineEnum("Generation priority", GenerationPriority.NORMAL);
 
 			distanceGenerationMode = builder
 					                         .comment("\n\n"

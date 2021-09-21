@@ -215,15 +215,15 @@ public class LodRegion
 	/**
 	 * @return
 	 */
-	public void getDataToRender(PosToRenderContainer posToRender, int playerPosX, int playerPosZ)
+	public void getDataToRender(PosToRenderContainer posToRender, int playerPosX, int playerPosZ, boolean requireCorrectDetailLevel)
 	{
-		getDataToRender(posToRender, LodUtil.REGION_DETAIL_LEVEL, 0, 0, playerPosX, playerPosZ);
+		getDataToRender(posToRender, LodUtil.REGION_DETAIL_LEVEL, 0, 0, playerPosX, playerPosZ, requireCorrectDetailLevel);
 	}
 
 	/**
 	 * @return
 	 */
-	private void getDataToRender(PosToRenderContainer posToRender, byte detailLevel, int posX, int posZ, int playerPosX, int playerPosZ)
+	private void getDataToRender(PosToRenderContainer posToRender, byte detailLevel, int posX, int posZ, int playerPosX, int playerPosZ, boolean requireCorrectDetailLevel)
 	{
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
 
@@ -249,25 +249,38 @@ public class LodRegion
 			{
 				for (int z = 0; z <= 1; z++)
 				{
-					if (doesDataExist(childDetailLevel, childPosX + x, childPosZ + z)) childrenCount++;
+					if (doesDataExist(childDetailLevel, childPosX + x, childPosZ + z))
+					{
+						if (!requireCorrectDetailLevel)
+						{
+							childrenCount++;
+						} else
+						{
+							getDataToRender(posToRender, childDetailLevel, childPosX + x, childPosZ + z, playerPosX, playerPosZ, requireCorrectDetailLevel);
+						}
+					}
 				}
 			}
 
 			//If all the four children exist we go deeper
-			if (childrenCount == 4)
+
+			if(!requireCorrectDetailLevel)
 			{
-				for (int x = 0; x <= 1; x++)
+				if (childrenCount == 4)
 				{
-					for (int z = 0; z <= 1; z++)
+					for (int x = 0; x <= 1; x++)
 					{
-						getDataToRender(posToRender, childDetailLevel, childPosX + x, childPosZ + z, playerPosX, playerPosZ);
+						for (int z = 0; z <= 1; z++)
+						{
+							getDataToRender(posToRender, childDetailLevel, childPosX + x, childPosZ + z, playerPosX, playerPosZ, requireCorrectDetailLevel);
+						}
 					}
+				} else
+				{
+					posToRender.addPosToRender(detailLevel,
+							posX + regionPosX * size,
+							posZ + regionPosZ * size);
 				}
-			} else
-			{
-				posToRender.addPosToRender(detailLevel,
-						posX + regionPosX * size,
-						posZ + regionPosZ * size);
 			}
 		}
 	}

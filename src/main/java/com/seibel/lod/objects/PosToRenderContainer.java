@@ -20,7 +20,7 @@ public class PosToRenderContainer
 	private int numberOfPosToRender;
 	private int[] posToRender;
 	/*TODO this population matrix could be converted to boolean to improve memory use*/
-	private byte[] population;
+	private byte[][] population;
 
 	public PosToRenderContainer(byte minDetail, int regionPosX, int regionPosZ)
 	{
@@ -30,7 +30,7 @@ public class PosToRenderContainer
 		this.regionPosZ = regionPosZ;
 		this.size = 1 << (LodUtil.REGION_DETAIL_LEVEL - minDetail);
 		posToRender = new int[size*size*3];
-		population = new byte[size*size];
+		population = new byte[size][size];
 	}
 
 	public void addPosToRender(byte detailLevel, int posX, int posZ)
@@ -53,16 +53,16 @@ public class PosToRenderContainer
 		posToRender[numberOfPosToRender*3 + 1] = posX;
 		posToRender[numberOfPosToRender*3 + 2] = posZ;
 		numberOfPosToRender++;
-		population[LevelPosUtil.getRegionModule(minDetail, LevelPosUtil.convert(detailLevel,posX,minDetail))*size +
-				LevelPosUtil.getRegionModule(minDetail, LevelPosUtil.convert(detailLevel,posZ,minDetail))] = (byte) (detailLevel + 1);
+		population[LevelPosUtil.getRegionModule(minDetail, LevelPosUtil.convert(detailLevel,posX,minDetail))]
+				[LevelPosUtil.getRegionModule(minDetail, LevelPosUtil.convert(detailLevel,posZ,minDetail))] = (byte) (detailLevel + 1);
 	}
 
 	public boolean contains(byte detailLevel, int posX, int posZ)
 	{
 		if(LevelPosUtil.getRegion(detailLevel, posX) == regionPosX && LevelPosUtil.getRegion(detailLevel, posZ) == regionPosZ)
 		{
-			return (population[LevelPosUtil.getRegionModule(minDetail, LevelPosUtil.convert(detailLevel,posX,minDetail)) * size +
-					        LevelPosUtil.getRegionModule(minDetail, LevelPosUtil.convert(detailLevel,posZ,minDetail))] == (detailLevel + 1));
+			return (population[LevelPosUtil.getRegionModule(minDetail, LevelPosUtil.convert(detailLevel,posX,minDetail))]
+					        [LevelPosUtil.getRegionModule(minDetail, LevelPosUtil.convert(detailLevel,posZ,minDetail))] == (detailLevel + 1));
 		}else
 		{
 			return false;
@@ -75,12 +75,13 @@ public class PosToRenderContainer
 		if(this.minDetail == minDetail)
 		{
 			Arrays.fill(posToRender, 0);
-			Arrays.fill(population, (byte) 0);
+			for(int i = 0; i< population.length; i++)
+				Arrays.fill(population[i], (byte) 0);
 		}else{
 			this.minDetail = minDetail;
 			int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - minDetail);
 			posToRender = new int[size*size*3];
-			population = new byte[size*size];
+			population = new byte[size][size];
 		}
 	}
 

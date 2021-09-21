@@ -24,6 +24,7 @@ import java.util.concurrent.Executors;
 
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.GenerationPriority;
 import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
 import com.seibel.lod.util.DataPointUtil;
@@ -523,16 +524,15 @@ public class LodDimension
 			long data;
 			x = z = dx =0;
 			dz = -1;
-			int width = numbChunksWide;
-			int t = width;
+			int t = numbChunksWide;
 			int maxI = t*t;
 			for(int i =0; i < maxI; i++){
 				if(maxDataToGenerate < 0){
 					break;
 				}
-				if ((-width/2 <= x) && (x <= width/2) && (-width/2 <= z) && (z <= width/2)){
-					xChunkToCheck = x * LodUtil.CHUNK_WIDTH + playerChunkPosX;
-					zChunkToCheck = z * LodUtil.CHUNK_WIDTH + playerChunkPosZ;
+				if ((-numbChunksWide/2 <= x) && (x <= numbChunksWide/2) && (-numbChunksWide/2 <= z) && (z <= numbChunksWide/2)){
+					xChunkToCheck = x + playerChunkPosX;
+					zChunkToCheck = z + playerChunkPosZ;
 					distance = LevelPosUtil.maxDistance(LodUtil.CHUNK_DETAIL_LEVEL,x,z,0,0);
 					detailLevel = DetailDistanceUtil.getGenerationDetailFromDistance(distance);
 					posX = LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL,xChunkToCheck, detailLevel);
@@ -584,7 +584,7 @@ public class LodDimension
 	{
 		LodRegion region = getRegion(regionPos.x, regionPos.z);
 		if (region != null)
-			region.getDataToRender(posToRender, playerPosX, playerPosZ);
+			region.getDataToRender(posToRender, playerPosX, playerPosZ, LodConfig.CLIENT.worldGenerator.generationPriority.get() == GenerationPriority.NORMAL);
 	}
 
 	public int getMaxVerticalData(byte detailLevel, int posX, int posZ)
