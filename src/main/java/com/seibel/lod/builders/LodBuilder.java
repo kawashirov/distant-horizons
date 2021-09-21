@@ -18,6 +18,7 @@
 package com.seibel.lod.builders;
 
 import java.awt.Color;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -270,6 +271,7 @@ public class LodBuilder
 	private long[] createVerticalDataToMerge(HorizontalResolution detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{
 		long[] dataToMerge = ThreadMapUtil.getBuilderVerticalArray()[detail.detailLevel];
+		Arrays.fill(dataToMerge, DataPointUtil.EMPTY_DATA);
 		int verticalData = DataPointUtil.WORLD_HEIGHT;
 
 		ChunkPos chunkPos = chunk.getPos();
@@ -295,17 +297,13 @@ public class LodBuilder
 
 		for (index = 0; index < size * size; index++)
 		{
-			for (int verticalIndex = 0; verticalIndex < verticalData; verticalIndex++)
-			{
-				dataToMerge[index * verticalData + verticalIndex] = DataPointUtil.EMPTY_DATA;
-			}
 			xRel = Math.floorMod(index, size) + startX;
 			zRel = Math.floorDiv(index, size) + startZ;
 			xAbs = chunkPos.getMinBlockX() + xRel;
 			zAbs = chunkPos.getMinBlockZ() + zRel;
 
 			//Calculate the height of the lod
-			yAbs = 1024;
+			yAbs = DataPointUtil.WORLD_HEIGHT+2;
 			int count = 0;
 			boolean topBlock = true;
 			while (yAbs > 0)

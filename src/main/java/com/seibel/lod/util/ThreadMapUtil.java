@@ -13,6 +13,7 @@ public class ThreadMapUtil
 	public static final ConcurrentMap<String, short[]> projectionShortMap = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<String, short[]> heightAndDepthMap = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<String, long[]> singleDataToMergeMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<String, long[][]> verticalUpdate = new ConcurrentHashMap<>();
 
 	public static long[] getSingleUpdateArray()
 	{
@@ -83,6 +84,19 @@ public class ThreadMapUtil
 			saveContainer.put(Thread.currentThread().getName(), new byte[size]);
 		}
 		return saveContainer.get(Thread.currentThread().getName());
+	}
+
+	public static long[] getVerticalUpdateArray(byte detailLevel,int size){
+		if(!verticalUpdate.containsKey(Thread.currentThread().getName()) || (verticalUpdate.get(Thread.currentThread().getName()) == null) || (verticalUpdate.get(Thread.currentThread().getName())[detailLevel].length != size))
+		{
+			long[][] array = new long[10][];
+			for(int i = 0; i < array.length; i++)
+			{
+				array[i] = new long[4 * size];
+			}
+			verticalUpdate.put(Thread.currentThread().getName(), array);
+		}
+		return verticalUpdate.get(Thread.currentThread().getName())[detailLevel];
 	}
 
 	public static long[] getSingleAddDataToMerge(int size){

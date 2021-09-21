@@ -134,9 +134,8 @@ public class VerticalLevelContainer implements LevelContainer
 	public void updateData(LevelContainer lowerLevelContainer, int posX, int posZ)
 	{
 		//We reset the array
-		//long[] dataToMerge = ThreadMapUtil.getVerticalUpdateArray(maxVerticalData);
-		long[] dataToMerge = new long[4*lowerLevelContainer.getMaxVerticalData()];
-
+		long[] dataToMerge = ThreadMapUtil.getVerticalUpdateArray(detailLevel, lowerLevelContainer.getMaxVerticalData());
+		Arrays.fill(dataToMerge, DataPointUtil.EMPTY_DATA);
 		int childPosX;
 		int childPosZ;
 		long[] data;
