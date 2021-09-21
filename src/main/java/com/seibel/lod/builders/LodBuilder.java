@@ -68,6 +68,8 @@ import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.client.extensions.IForgeBakedModel;
 import net.minecraftforge.client.model.data.ModelDataMap;
 
+import javax.xml.crypto.Data;
+
 /**
  * This object is in charge of creating Lod related objects. (specifically: Lod
  * World, Dimension, and Region objects)
@@ -235,11 +237,6 @@ public class LodBuilder
 						break;
 					case MULTI_LOD:
 						long[] dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-						/*for(long dat : dataToMergeVertical){
-							if(!DataPointUtil.doesItExist(dat) || DataPointUtil.isItVoid(dat))
-								continue;
-							System.out.println(DataPointUtil.toString(dat));
-						}*/
 						data = DataPointUtil.mergeMultiData(dataToMergeVertical, DataPointUtil.WORLD_HEIGHT, DetailDistanceUtil.getMaxVerticalData(detailLevel));
 
 
@@ -317,7 +314,8 @@ public class LodBuilder
 				//If the lod is at default, then we set this as void data
 				if (height == DEFAULT_HEIGHT)
 				{
-					dataToMerge[index * verticalData] = DataPointUtil.createVoidDataPoint(generation);
+					if(topBlock)
+						dataToMerge[index * verticalData] = DataPointUtil.createVoidDataPoint(generation);
 					break;
 				}
 
@@ -352,7 +350,6 @@ public class LodBuilder
 				}
 
 				dataToMerge[index * verticalData + count] = DataPointUtil.createDataPoint(height, depth, color, lightSky, lightBlock, generation);
-
 				topBlock = false;
 				yAbs = depth - 1;
 				count++;
