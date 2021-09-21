@@ -716,52 +716,42 @@ public class LodBuilder
 			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
 			tmp = tmp.darker();
 			colorInt = LodUtil.colorToInt(tmp);
-		} else if (blockState == Blocks.NETHERRACK.defaultBlockState())
-		{
-			colorInt = LodUtil.NETHERRACK_COLOR_INT;
-		} else if (blockState == Blocks.WARPED_NYLIUM.defaultBlockState())
-		{
-			colorInt = LodUtil.WARPED_NYLIUM_COLOR_INT;
-		} else if (blockState == Blocks.CRIMSON_NYLIUM.defaultBlockState())
-		{
-			colorInt = LodUtil.CRIMSON_NYLIUM_COLOR_INT;
-		} else if (blockState == Blocks.WEEPING_VINES.defaultBlockState()
-				           || blockState == Blocks.WEEPING_VINES_PLANT.defaultBlockState()
-				           || blockState == Blocks.CRIMSON_FUNGUS.defaultBlockState()
-				           || blockState == Blocks.CRIMSON_ROOTS.defaultBlockState())
+		}
+		/*else if (blockState == Blocks.WEEPING_VINES.defaultBlockState()
+				|| blockState == Blocks.WEEPING_VINES_PLANT.defaultBlockState()
+				|| blockState == Blocks.CRIMSON_FUNGUS.defaultBlockState()
+				|| blockState == Blocks.CRIMSON_ROOTS.defaultBlockState())
 		{
 			colorInt = Blocks.NETHER_WART_BLOCK.defaultMaterialColor().col;
 		} else if (blockState.getBlock().equals(Blocks.TWISTING_VINES)
-				           || blockState.equals(Blocks.TWISTING_VINES_PLANT.defaultBlockState())
-				           || blockState == Blocks.WARPED_ROOTS.defaultBlockState()
-				           || blockState == Blocks.WARPED_FUNGUS.defaultBlockState()
-				           || blockState == Blocks.NETHER_SPROUTS.defaultBlockState())
+				|| blockState.equals(Blocks.TWISTING_VINES_PLANT.defaultBlockState())
+				|| blockState == Blocks.WARPED_ROOTS.defaultBlockState()
+				|| blockState == Blocks.WARPED_FUNGUS.defaultBlockState()
+				|| blockState == Blocks.NETHER_SPROUTS.defaultBlockState())
 		{
 			colorInt = Blocks.WARPED_NYLIUM.defaultMaterialColor().col;
+		}*/
+		else if (blockState.getBlock() == Blocks.GRASS_PATH || blockState.getBlock() == Blocks.MYCELIUM
+				|| blockState.getBlock() == Blocks.PODZOL || blockState.getBlock() == Blocks.CRIMSON_NYLIUM
+				|| blockState.getBlock() == Blocks.WARPED_NYLIUM)
+		{
+			colorInt = getColorTextureForBlock(blockState, blockPos, true);
 		}
-
-
 		// plant life
-		else if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() == Blocks.VINE)
+		else if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() == Blocks.VINE || blockState.getBlock() == Blocks.SUGAR_CANE)
 		{
 			brightness = getColorTextureForBlock(blockState, blockPos, false);
-			//colorInt = ColorUtil.changeBrightnessValue(biome.getFoliageColor(), brightness);
 			colorInt = ColorUtil.multiplyRGBcolors(biome.getFoliageColor(), brightness);
-		} else if ((blockState.getBlock() instanceof GrassBlock || blockState.getBlock() instanceof AbstractPlantBlock
-				            || blockState.getBlock() instanceof BushBlock || blockState.getBlock() instanceof IGrowable)
-				           && !(blockState.getBlock() == Blocks.BROWN_MUSHROOM || blockState.getBlock() == Blocks.RED_MUSHROOM))
+		}
+		else if (blockState.getBlock() instanceof GrassBlock || blockState.getBlock() instanceof BushBlock) //( AbstractPlantBlock IGrowable )&& !(blockState.getBlock() == Blocks.BROWN_MUSHROOM || blockState.getBlock() == Blocks.RED_MUSHROOM)
 		{
 			brightness = getColorTextureForBlock(blockState, blockPos, true);
-			//colorInt = ColorUtil.changeBrightnessValue(biome.getGrassColor(x, z), brightness);
-			//colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getGrassColor(x, z), 1f, 0.65f);
 			colorInt = ColorUtil.multiplyRGBcolors(biome.getGrassColor(x, z), brightness);
 		}
 		// water
 		else if (blockState.getBlock() == Blocks.WATER)
 		{
 			brightness = getColorTextureForBlock(blockState, blockPos, true);
-			//colorInt = ColorUtil.changeBrightnessValue(biome.getWaterColor(), brightness);
-			//colorInt = ColorUtil.applySaturationAndBrightnessMultipliers(biome.getWaterColor(), 1f, 0.75f);
 			colorInt = ColorUtil.multiplyRGBcolors(biome.getWaterColor(), brightness);
 		}
 
