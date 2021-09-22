@@ -23,7 +23,7 @@ package com.seibel.lod.enums;
  */
 public enum GenerationPriority
 {
-	NORMAL,
+	NEAR_FIRST,
 
-	FAR;
+	FAR_FIRST;
 }

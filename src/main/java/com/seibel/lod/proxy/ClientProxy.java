@@ -168,21 +168,20 @@ public class ClientProxy
 	
 	private void applyConfigOverrides()
 	{
-		// remind the developer(s). that config override is active
+		// remind the developer(s) that the config override is active
 		if (!configOverrideReminderPrinted)
 		{
 			mc.getPlayer().sendMessage(new StringTextComponent("Debug settings enabled!"), mc.getPlayer().getUUID());
 			configOverrideReminderPrinted = true;
 		}
 		
-		//LodConfig.CLIENT.drawLODs.set(true);
 		//LodConfig.CLIENT.debugMode.set(true);
 		
 		
 		LodConfig.CLIENT.graphics.drawResolution.set(HorizontalResolution.BLOCK);
 		LodConfig.CLIENT.worldGenerator.generationResolution.set(HorizontalResolution.BLOCK);
 		// requires a world restart?
-//		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(LodQualityMode.HEIGHTMAP);
+//		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(VerticalQuality.MULTI_LOD);
 		
 //		LodConfig.CLIENT.graphics.fogDistance.set(FogDistance.FAR);
 //		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
@@ -193,14 +192,13 @@ public class ClientProxy
 //		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 //		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(64);
 //		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
-//		LodConfig.CLIENT.graphics.lodQuality.set(2);
 //		LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.set(false);
 		
 //		LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
 //		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
 //		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(5000); // 5000
 		
-		LodConfig.CLIENT.debugging.enableDebugKeybinding.set(true);
+		LodConfig.CLIENT.debugging.enableDebugKeybindings.set(true);
 	}
 	
 	
@@ -289,13 +287,13 @@ public class ClientProxy
 	@SubscribeEvent
 	public void onKeyInput(InputEvent.KeyInputEvent event) 
 	{
-		if(LodConfig.CLIENT.debugging.enableDebugKeybinding.get()
+		if(LodConfig.CLIENT.debugging.enableDebugKeybindings.get()
 			&& event.getKey() == GLFW.GLFW_KEY_F4 && event.getAction() == GLFW.GLFW_PRESS)
 		{
 			LodConfig.CLIENT.debugging.debugMode.set(LodConfig.CLIENT.debugging.debugMode.get().getNext());
 		}
 
-		if(LodConfig.CLIENT.debugging.enableDebugKeybinding.get()
+		if(LodConfig.CLIENT.debugging.enableDebugKeybindings.get()
 				   && event.getKey() == GLFW.GLFW_KEY_F6 && event.getAction() == GLFW.GLFW_PRESS)
 		{
 			drawLods = !drawLods;

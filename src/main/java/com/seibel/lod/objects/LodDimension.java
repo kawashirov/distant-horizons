@@ -515,7 +515,7 @@ public class LodDimension
 		switch (LodConfig.CLIENT.worldGenerator.generationPriority.get())
 		{
 			default:
-			case NORMAL:
+			case NEAR_FIRST:
 				posToGenerate = new PosToGenerateContainer((byte) 10, maxDataToGenerate, 0, playerPosX, playerPosZ);
 				int playerChunkX = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerPosX);
 				int playerChunkZ = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerPosZ);
@@ -571,7 +571,7 @@ public class LodDimension
 					z += dz;
 				}
 				break;
-			case FAR:
+			case FAR_FIRST:
 				posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, (int) (maxDataToGenerate * 0.25f), playerPosX, playerPosZ);
 				int n = regions.length;
 				int xRegion;
@@ -608,7 +608,7 @@ public class LodDimension
 	{
 		LodRegion region = getRegion(regionPos.x, regionPos.z);
 		if (region != null)
-			region.getDataToRender(posToRender, playerPosX, playerPosZ, LodConfig.CLIENT.worldGenerator.generationPriority.get() == GenerationPriority.NORMAL);
+			region.getDataToRender(posToRender, playerPosX, playerPosZ, LodConfig.CLIENT.worldGenerator.generationPriority.get() == GenerationPriority.NEAR_FIRST);
 	}
 
 	public int getMaxVerticalData(byte detailLevel, int posX, int posZ)

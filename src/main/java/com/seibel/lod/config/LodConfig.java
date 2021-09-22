@@ -47,7 +47,7 @@ import net.minecraftforge.fml.config.ModConfig;
  * This handles any configuration the user has access to.
  *
  * @author James Seibel
- * @version 9-17-2021
+ * @version 9-21-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -138,15 +138,15 @@ public class LodConfig
 			
 			horizontalQuality = builder
 					.comment("\n\n"
-							+ " This indicate the unit for the \n"
-							+ " " + HorizontalQuality.LOW + ": Base distance 4 chunks. \n"
-							+ " " + HorizontalQuality.MEDIUM + ": Base distance 8 chunks. \n"
-							+ " " + HorizontalQuality.HIGH + ": Base distance 16 chunks. \n")
+							+ " This indicate quickly LODs drop off in quality. \n"
+							+ " " + HorizontalQuality.LOW + ": quality drops every 4 chunks. \n"
+							+ " " + HorizontalQuality.MEDIUM + ": quality drops every 8 chunks. \n"
+							+ " " + HorizontalQuality.HIGH + ": quality drops every 16 chunks. \n")
 					.defineEnum("lodDrawQuality", HorizontalQuality.LOW);
 			
 			lodChunkRenderDistance = builder
 					.comment("\n\n"
-							+ " This is the render distance of the mod \n")
+							+ " The mod's render distance, measured in chunks. \n")
 					.defineInRange("lodChunkRenderDistance", 64, 32, 1024);
 			
 			disableDirectionalCulling = builder
@@ -193,8 +193,8 @@ public class LodConfig
 			lodQualityMode = builder
 					.comment("\n\n"
 							+ " Use 3d lods or 2d lods? \n"
-							+ " " + VerticalQuality.HEIGHTMAP + ": enable 2d lods with heightmap \n"
-							+ " " + VerticalQuality.MULTI_LOD + ": enable 3d lods with heightmap \n")
+							+ " " + VerticalQuality.HEIGHTMAP + ": LODs are solid from the lowest world point to the highest. Not good for floating islands or caves. Faster \n"
+							+ " " + VerticalQuality.MULTI_LOD + ": LODs have gaps between vertical blocks. Good for floating islands and caves. Slower \n")
 					.defineEnum("lodQualityMode", VerticalQuality.HEIGHTMAP);
 			
 			generationResolution = builder
@@ -215,26 +215,27 @@ public class LodConfig
 							
 							+ "\n"
 							+ " " + DistanceQualityDropOff.QUADRATIC + " \n"
-							+ " with LINEAR calculator the quality of block decrease \n"
+							+ " with QUADRATIC calculator the quality of block decrease \n"
 							+ " quadratically to the distance of the player \n")
 					.defineEnum("lodDistanceComputation", DistanceQualityDropOff.LINEAR);
 			
 			generationPriority = builder
 					.comment("\n\n"
-							+ " " + GenerationPriority.FAR + " \n"
-							+ " the fake chunk are generated from smallest to biggest\n"
-							+ " with a small priority for far regions \n"
+							+ " " + GenerationPriority.FAR_FIRST + " \n"
+							+ " LODs are generated from low to high detail\n"
+							+ " with a small priority for far regions. \n"
+							+ " This fills in the world fastest. \n"
 							
 							+ "\n"
-							+ " " + GenerationPriority.NORMAL + " \n"
-							+ " the fake chunk are generated around the player \n"
-							+ " in spiral similar to vanilla minecraft \n")
-					.defineEnum("Generation priority", GenerationPriority.NORMAL);
+							+ " " + GenerationPriority.NEAR_FIRST + " \n"
+							+ " LODs are generated around the player \n"
+							+ " in a spiral, similar to vanilla minecraft. \n")
+					.defineEnum("Generation priority", GenerationPriority.NEAR_FIRST);
 			
 			distanceGenerationMode = builder
 					.comment("\n\n"
 							+ " Note: The times listed here are the amount of time it took \n"
-							+ "       the developer's PC to generate 1 chunk, \n"
+							+ "       one of the developer's PC to generate 1 chunk, \n"
 							+ "       and are included so you can compare the \n"
 							+ "       different generation options. Your mileage may vary. \n"
 							+ "\n"
@@ -243,9 +244,8 @@ public class LodConfig
 							+ " Don't run the distance generator. \n"
 							
 							+ " " + DistanceGenerationMode.BIOME_ONLY + " \n"
-							+ " Only generate the biomes and use biome \n"
-							+ " grass/foliage color, water color, or snow color \n"
-							+ " to generate the color. \n"
+							+ " Only generate the biomes and use the biome's \n"
+							+ " grass color, water color, or snow color. \n"
 							+ " Doesn't generate height, everything is shown at sea level. \n"
 							+ " Multithreaded - Fastest (2-5 ms) \n"
 							
@@ -274,8 +274,8 @@ public class LodConfig
 							+ " " + DistanceGenerationMode.SERVER + " \n"
 							+ " Ask the server to generate/load each chunk. \n"
 							+ " This is the most compatible, but causes server/simulation lag. \n"
-							+ " This will also show player made structures if you \n"
-							+ " are adding the mod to a pre-existing world. \n"
+							+ " This will show player made structures, which can \n"
+							+ " be useful if you are adding the mod to a pre-existing world. \n"
 							+ " Singlethreaded - Slow (15-50 ms, with spikes up to 200 ms) \n")
 					.defineEnum("distanceGenerationMode", DistanceGenerationMode.SURFACE);
 			
@@ -319,7 +319,7 @@ public class LodConfig
 							+ " this number. If you want to increase LOD generation speed, \n"
 							+ " increase this number. \n"
 							+ " \n"
-							+ " The maximum value is the number of processors on your CPU. \n"
+							+ " The maximum value is the number of logical processors on your CPU. \n"
 							+ " Requires a restart to take effect. \n")
 					.defineInRange("numberOfWorldGenerationThreads", Runtime.getRuntime().availableProcessors() / 2, 1, Runtime.getRuntime().availableProcessors());
 			
@@ -330,7 +330,7 @@ public class LodConfig
 							+ " If you experience high CPU useage when NOT generating distant \n"
 							+ " LODs, lower this number. \n"
 							+ " \n"
-							+ " The maximum value is the number of processors on your CPU. \n"
+							+ " The maximum value is the number of logical processors on your CPU. \n"
 							+ " Requires a restart to take effect. \n")
 					.defineInRange("numberOfBufferBuilderThreads", Runtime.getRuntime().availableProcessors(), 1, Runtime.getRuntime().availableProcessors());
 			
@@ -341,22 +341,23 @@ public class LodConfig
 	public static class Debugging
 	{
 		public ForgeConfigSpec.EnumValue<DebugMode> debugMode;
-		public ForgeConfigSpec.BooleanValue enableDebugKeybinding;
+		public ForgeConfigSpec.BooleanValue enableDebugKeybindings;
 		
 		Debugging(ForgeConfigSpec.Builder builder)
 		{
-			builder.comment("These settings can be used by to look for bugs, or see how certain parts of the mod are working.").push(this.getClass().getSimpleName());
+			builder.comment("These settings can be used to look for bugs, or see how certain aspects of the mod work.").push(this.getClass().getSimpleName());
 			
 			debugMode = builder
 					.comment("\n\n"
 							+ " " + DebugMode.OFF + ": LODs will draw with their normal colors. \n"
-							+ " " + DebugMode.SHOW_DETAIL + ": LOD colors will be based on their detail. \n"
-							+ " " + DebugMode.SHOW_DETAIL_WIREFRAME + ": LOD colors will be based on their detail, drawn with wireframe. \n")
+							+ " " + DebugMode.SHOW_DETAIL + ": LOD colors will be based on their detail level. \n"
+							+ " " + DebugMode.SHOW_DETAIL_WIREFRAME + ": LOD colors will be based on their detail level, drawn as a wireframe. \n")
 					.defineEnum("debugMode", DebugMode.OFF);
 			
-			enableDebugKeybinding = builder
+			enableDebugKeybindings = builder
 					.comment("\n\n"
-							+ " If true the F4 key can be used to cycle through the different debug modes. \n")
+							+ " If true the F4 key can be used to cycle through the different debug modes. \n"
+							+ " and the F6 key can be used to enable and disable LOD rendering.")
 					.define("enableDebugKeybinding", false);
 			
 			builder.pop();
