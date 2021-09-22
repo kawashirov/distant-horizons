@@ -28,7 +28,11 @@ import com.seibel.lod.enums.GenerationPriority;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
-import com.seibel.lod.util.*;
+import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.DetailDistanceUtil;
+import com.seibel.lod.util.LevelPosUtil;
+import com.seibel.lod.util.LodThreadFactory;
+import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.util.math.ChunkPos;
@@ -47,9 +51,9 @@ import net.minecraft.world.server.ServerWorld;
  */
 public class LodDimension
 {
-
+	
 	public final DimensionType dimension;
-
+	
 	/**
 	 * measured in regions
 	 */
@@ -58,14 +62,14 @@ public class LodDimension
 	 * measured in regions
 	 */
 	private volatile int halfWidth;
-
+	
 	// these three variables are private to force use of the getWidth() method
 	// which is a safer way to get the width then directly asking the arrays
 	/**
 	 * stores all the regions in this dimension
 	 */
 	public volatile LodRegion[][] regions;
-
+	
 	/**
 	 * stores if the region at the given x and z index needs to be saved to disk
 	 */
@@ -78,19 +82,19 @@ public class LodDimension
 	 * stores if the buffer size at the given x and z index needs to be changed
 	 */
 	private volatile boolean[][] setupBuffer;
-
+	
 	/**
 	 * if true that means there are regions in this dimension
 	 * that need to have their buffers rebuilt.
 	 */
 	public volatile boolean regenDimension = false;
-
+	
 	private volatile RegionPos center;
 	private volatile ChunkPos lastGenChunk;
 	private volatile ChunkPos lastCutChunk;
 	private LodDimensionFileHandler fileHandler;
 	private ExecutorService cutAndGenThreads = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " - cutAndGen"));
-
+	
 	/**
 	 * Creates the dimension centered at (0,0)
 	 *
@@ -108,14 +112,14 @@ public class LodDimension
 		{
 			try
 			{
-
+				
 				File saveDir;
 				if (mc.hasSingleplayerServer())
 				{
 					// local world
-
+					
 					ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(newDimension);
-
+					
 					// provider needs a separate variable to prevent
 					// the compiler from complaining
 					ServerChunkProvider provider = serverWorld.getChunkSource();
@@ -123,11 +127,11 @@ public class LodDimension
 				} else
 				{
 					// connected to server
-
+					
 					saveDir = new File(mc.getGameDirectory().getCanonicalFile().getPath() +
-							                   File.separatorChar + "lod server data" + File.separatorChar + mc.getCurrentDimensionId());
+							File.separatorChar + "lod server data" + File.separatorChar + mc.getCurrentDimensionId());
 				}
-
+				
 				fileHandler = new LodDimensionFileHandler(saveDir, this);
 			} catch (IOException e)
 			{
@@ -135,24 +139,24 @@ public class LodDimension
 				// we won't be able to read or write any files
 			}
 		}
-
-
+		
+		
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];
 		regionNeedsRegen = new boolean[width][width];
 		setupBuffer = new boolean[width][width];
-
+		
 		//treeGenerator((int) mc.player.getX(),(int) mc.player.getZ());
-
+		
 		// populate isRegionDirty
 		for (int i = 0; i < width; i++)
 			for (int j = 0; j < width; j++)
 				isRegionDirty[i][j] = false;
-
+		
 		center = new RegionPos(0, 0);
 	}
-
-
+	
+	
 	/**
 	 * Move the center of this LodDimension and move all owned
 	 * regions over by the given x and z offset. <br><br>
@@ -163,7 +167,7 @@ public class LodDimension
 	{
 		int xOffset = regionOffset.x;
 		int zOffset = regionOffset.z;
-
+		
 		// if the x or z offset is equal to or greater than
 		// the total size, just delete the current data
 		// and update the centerX and/or centerZ
@@ -176,15 +180,15 @@ public class LodDimension
 					regions[x][z] = null;
 				}
 			}
-
+			
 			// update the new center
 			center.x += xOffset;
 			center.z += zOffset;
-
+			
 			return;
 		}
-
-
+		
+		
 		// X
 		if (xOffset > 0)
 		{
@@ -215,8 +219,8 @@ public class LodDimension
 				}
 			}
 		}
-
-
+		
+		
 		// Z
 		if (zOffset > 0)
 		{
@@ -245,14 +249,14 @@ public class LodDimension
 				}
 			}
 		}
-
-
+		
+		
 		// update the new center
 		center.x += xOffset;
 		center.z += zOffset;
 	}
-
-
+	
+	
 	/**
 	 * return needed memory in bytes
 	 */
@@ -260,7 +264,7 @@ public class LodDimension
 	{
 		int count = 0;
 		LodRegion region;
-
+		
 		for (int x = 0; x < regions.length; x++)
 		{
 			for (int z = 0; z < regions.length; z++)
@@ -274,8 +278,8 @@ public class LodDimension
 		}
 		return count;
 	}
-
-
+	
+	
 	/**
 	 * Gets the region at the given X and Z
 	 * <br>
@@ -288,19 +292,19 @@ public class LodDimension
 		int zRegion = LevelPosUtil.getRegion(detailLevel, posZ);
 		int xIndex = (xRegion - center.x) + halfWidth;
 		int zIndex = (zRegion - center.z) + halfWidth;
-
+		
 		if (!regionIsInRange(xRegion, zRegion))
 			return null;
-			//throw new ArrayIndexOutOfBoundsException("Region for level pos " + LevelPosUtil.toString(detailLevel, posX, posZ) + " out of range");
+		//throw new ArrayIndexOutOfBoundsException("Region for level pos " + LevelPosUtil.toString(detailLevel, posX, posZ) + " out of range");
 		else if (regions[xIndex][zIndex] == null)
 			return null;
-			//throw new InvalidParameterException("Region for level pos " + LevelPosUtil.toString(detailLevel, posX, posZ) + " not currently initialized");
+		//throw new InvalidParameterException("Region for level pos " + LevelPosUtil.toString(detailLevel, posX, posZ) + " not currently initialized");
 		else if (regions[xIndex][zIndex].getMinDetailLevel() > detailLevel)
 			return null;
 		//throw new InvalidParameterException("Region for level pos " + LevelPosUtil.toString(detailLevel, posX, posZ) + " currently only reach level " + regions[xIndex][zIndex].getMinDetailLevel());
 		return regions[xIndex][zIndex];
 	}
-
+	
 	/**
 	 * Gets the region at the given X and Z
 	 * <br>
@@ -311,16 +315,16 @@ public class LodDimension
 	{
 		int xIndex = (regionPosX - center.x) + halfWidth;
 		int zIndex = (regionPosZ - center.z) + halfWidth;
-
+		
 		if (!regionIsInRange(regionPosX, regionPosZ))
 			return null;
-			//throw new ArrayIndexOutOfBoundsException("Region " + regionPosX + " " + regionPosZ + " out of range");
+		//throw new ArrayIndexOutOfBoundsException("Region " + regionPosX + " " + regionPosZ + " out of range");
 		else if (regions[xIndex][zIndex] == null)
 			return null;
 		//throw new InvalidParameterException("Region " + regionPosX + " " + regionPosZ + " not currently initialized");
 		return regions[xIndex][zIndex];
 	}
-
+	
 	/**
 	 * Useful when needing to iterate over every region.
 	 */
@@ -328,7 +332,7 @@ public class LodDimension
 	{
 		return regions[xIndex][zIndex];
 	}
-
+	
 	/**
 	 * Overwrite the LodRegion at the location of newRegion with newRegion.
 	 *
@@ -338,15 +342,15 @@ public class LodDimension
 	{
 		int xIndex = (newRegion.regionPosX - center.x) + halfWidth;
 		int zIndex = (newRegion.regionPosZ - center.z) + halfWidth;
-
+		
 		if (!regionIsInRange(newRegion.regionPosX, newRegion.regionPosZ))
 			// out of range
 			throw new ArrayIndexOutOfBoundsException("Region " + newRegion.regionPosX + ", " + newRegion.regionPosZ + " out of range");
-
+		
 		regions[xIndex][zIndex] = newRegion;
 	}
-
-
+	
+	
 	/**
 	 *
 	 */
@@ -365,7 +369,7 @@ public class LodDimension
 				int minDistance;
 				byte detail;
 				byte levelToCut;
-
+				
 				for (int x = 0; x < regions.length; x++)
 				{
 					for (int z = 0; z < regions.length; z++)
@@ -386,15 +390,15 @@ public class LodDimension
 								setupBuffer[x][z] = true;
 							}
 						}
-
+						
 					}// region z
 				}// region z
-
+				
 			});
 			cutAndGenThreads.execute(thread);
 		}
 	}
-
+	
 	/**
 	 *
 	 */
@@ -403,7 +407,7 @@ public class LodDimension
 		DistanceGenerationMode generationMode = LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get();
 		ChunkPos newPlayerChunk = new ChunkPos(LevelPosUtil.getChunkPos((byte) 0, playerPosX), LevelPosUtil.getChunkPos((byte) 0, playerPosZ));
 		VerticalQuality verticalQuality = LodConfig.CLIENT.worldGenerator.lodQualityMode.get();
-
+		
 		if (lastGenChunk == null)
 			lastGenChunk = new ChunkPos(newPlayerChunk.x + 1, newPlayerChunk.z - 1);
 		if (newPlayerChunk.x != lastGenChunk.x || newPlayerChunk.z != lastGenChunk.z)
@@ -426,17 +430,17 @@ public class LodDimension
 						final RegionPos regionPos = new RegionPos(regionX, regionZ);
 						region = regions[x][z];
 						//We require that the region we are checking is loaded with at least this level
-
+						
 						minDistance = LevelPosUtil.minDistance(LodUtil.REGION_DETAIL_LEVEL, regionX, regionZ, playerPosX, playerPosZ);
 						detail = DetailDistanceUtil.getTreeGenDetailFromDistance(minDistance);
 						levelToGen = DetailDistanceUtil.getLodGenDetail(detail).detailLevel;
 						if (region == null || region.getGenerationMode() != generationMode)
 						{
 							//First case, region has to be initialized
-
+							
 							//We check if there is a file at the target level
 							regions[x][z] = getRegionFromFile(regionPos, levelToGen, generationMode, verticalQuality);
-
+							
 							//if there is no file we initialize the region
 							if (regions[x][z] == null)
 							{
@@ -445,7 +449,7 @@ public class LodDimension
 							regionNeedsRegen[x][z] = true;
 							regenDimension = true;
 							setupBuffer[x][z] = true;
-
+							
 						} else if (region.getMinDetailLevel() > levelToGen)
 						{
 							//Second case, region has been initialized but at a higher level
@@ -459,7 +463,7 @@ public class LodDimension
 			cutAndGenThreads.execute(thread);
 		}
 	}
-
+	
 	/**
 	 * Add the given LOD to this dimension at the coordinate
 	 * stored in the LOD. If an LOD already exists at the given
@@ -467,11 +471,11 @@ public class LodDimension
 	 */
 	public Boolean addData(byte detailLevel, int posX, int posZ, int verticalIndex, long data, boolean dontSave)
 	{
-
+		
 		// don't continue if the region can't be saved
 		int regionPosX = LevelPosUtil.getRegion(detailLevel, posX);
 		int regionPosZ = LevelPosUtil.getRegion(detailLevel, posZ);
-
+		
 		LodRegion region = getRegion(regionPosX, regionPosZ);
 		if (region == null)
 			return false;
@@ -496,14 +500,14 @@ public class LodDimension
 		}
 		return nodeAdded;
 	}
-
+	
 	public void setToRegen(int xRegion, int zRegion)
 	{
 		int xIndex = (xRegion - center.x) + halfWidth;
 		int zIndex = (zRegion - center.z) + halfWidth;
 		regionNeedsRegen[xIndex][zIndex] = true;
 	}
-
+	
 	/**
 	 * method to get all the quadtree level that have to be generated based on the position of the player
 	 *
@@ -520,104 +524,104 @@ public class LodDimension
 		dz = -1;
 		switch (LodConfig.CLIENT.worldGenerator.generationPriority.get())
 		{
-			default:
-			case NEAR_FIRST:
-				posToGenerate = new PosToGenerateContainer((byte) 10, maxDataToGenerate, 0, playerPosX, playerPosZ);
-				int playerChunkX = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerPosX);
-				int playerChunkZ = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerPosZ);
-				int xChunkToCheck;
-				int zChunkToCheck;
-				byte detailLevel;
-				int posX;
-				int posZ;
-				long data;
-				int numbChunksWide = (width) * 32 * 2;
-				for (int i = 0; i < numbChunksWide * numbChunksWide; i++)
+		default:
+		case NEAR_FIRST:
+			posToGenerate = new PosToGenerateContainer((byte) 10, maxDataToGenerate, 0, playerPosX, playerPosZ);
+			int playerChunkX = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerPosX);
+			int playerChunkZ = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerPosZ);
+			int xChunkToCheck;
+			int zChunkToCheck;
+			byte detailLevel;
+			int posX;
+			int posZ;
+			long data;
+			int numbChunksWide = (width) * 32 * 2;
+			for (int i = 0; i < numbChunksWide * numbChunksWide; i++)
+			{
+				
+				
+				xChunkToCheck = x + playerChunkX;
+				zChunkToCheck = z + playerChunkZ;
+				//distance = LevelPosUtil.maxDistance(LodUtil.CHUNK_DETAIL_LEVEL, xChunkToCheck, zChunkToCheck, playerChunkX, playerChunkZ);
+				region = getRegion(LodUtil.CHUNK_DETAIL_LEVEL, xChunkToCheck, zChunkToCheck);
+				if(region == null)
+					continue;
+				detailLevel = region.getMinDetailLevel();
+				
+				posX = LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, xChunkToCheck, detailLevel);
+				posZ = LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, zChunkToCheck, detailLevel);
+				data = getSingleData(detailLevel, posX, posZ);
+				if (DataPointUtil.getGenerationMode(data) < LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get().complexity)
 				{
-
-
-					xChunkToCheck = x + playerChunkX;
-					zChunkToCheck = z + playerChunkZ;
-					//distance = LevelPosUtil.maxDistance(LodUtil.CHUNK_DETAIL_LEVEL, xChunkToCheck, zChunkToCheck, playerChunkX, playerChunkZ);
-					region = getRegion(LodUtil.CHUNK_DETAIL_LEVEL, xChunkToCheck, zChunkToCheck);
-					if(region == null)
-						continue;
-					detailLevel = region.getMinDetailLevel();
-
-					posX = LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, xChunkToCheck, detailLevel);
-					posZ = LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, zChunkToCheck, detailLevel);
-					data = getSingleData(detailLevel, posX, posZ);
-					if (DataPointUtil.getGenerationMode(data) < LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get().complexity)
-					{
-						posToGenerate.addPosToGenerate(detailLevel, posX, posZ);
-						//if (maxDataToGenerate >= 0)
-						//	maxDataToGenerate--;
-					}
-					if ((x == z) || ((x < 0) && (x == -z)) || ((x > 0) && (x == 1 - z)))
-					{
-						t = dx;
-						dx = -dz;
-						dz = t;
-					}
-					x += dx;
-					z += dz;
+					posToGenerate.addPosToGenerate(detailLevel, posX, posZ);
+					//if (maxDataToGenerate >= 0)
+					//	maxDataToGenerate--;
 				}
-				break;
-			case FAR_FIRST:
-				posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, (int) (maxDataToGenerate * 0.25f), playerPosX, playerPosZ);
-				int n = regions.length;
-				int xRegion;
-				int zRegion;
-
-				for (int i = 0; i < width * width; i++)
+				if ((x == z) || ((x < 0) && (x == -z)) || ((x > 0) && (x == 1 - z)))
 				{
-					xRegion = x + center.x;
-					zRegion = z + center.z;
-					region = getRegion(xRegion, zRegion);
-					if (region != null)
-						region.getDataToGenerate(posToGenerate, playerPosX, playerPosZ);
-					if ((x == z) || ((x < 0) && (x == -z)) || ((x > 0) && (x == 1 - z)))
-					{
-						t = dx;
-						dx = -dz;
-						dz = t;
-					}
-					x += dx;
-					z += dz;
+					t = dx;
+					dx = -dz;
+					dz = t;
 				}
-				break;
+				x += dx;
+				z += dz;
+			}
+			break;
+		case FAR_FIRST:
+			posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, (int) (maxDataToGenerate * 0.25f), playerPosX, playerPosZ);
+			int n = regions.length;
+			int xRegion;
+			int zRegion;
+			
+			for (int i = 0; i < width * width; i++)
+			{
+				xRegion = x + center.x;
+				zRegion = z + center.z;
+				region = getRegion(xRegion, zRegion);
+				if (region != null)
+					region.getDataToGenerate(posToGenerate, playerPosX, playerPosZ);
+				if ((x == z) || ((x < 0) && (x == -z)) || ((x > 0) && (x == 1 - z)))
+				{
+					t = dx;
+					dx = -dz;
+					dz = t;
+				}
+				x += dx;
+				z += dz;
+			}
+			break;
 		}
 		return posToGenerate;
 	}
-
+	
 	/**
 	 * method to get all the nodes that have to be rendered based on the position of the player
 	 *
 	 * @return list of nodes
 	 */
 	public void getDataToRender(PosToRenderContainer posToRender, RegionPos regionPos, int playerPosX,
-	                            int playerPosZ)
+			int playerPosZ)
 	{
 		LodRegion region = getRegion(regionPos.x, regionPos.z);
 		if (region != null)
 			region.getDataToRender(posToRender, playerPosX, playerPosZ, LodConfig.CLIENT.worldGenerator.generationPriority.get() == GenerationPriority.NEAR_FIRST);
 	}
-
+	
 	public int getMaxVerticalData(byte detailLevel, int posX, int posZ)
 	{
 		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
 			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
-
+		
 		LodRegion region = getRegion(detailLevel, posX, posZ);
-
+		
 		if (region == null)
 		{
 			return 0;
 		}
-
+		
 		return region.getMaxVerticalData(detailLevel);
 	}
-
+	
 	/**
 	 * Get the data point at the given X and Z coordinates
 	 * in this dimension.
@@ -629,18 +633,18 @@ public class LodDimension
 	{
 		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
 			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
-
+		
 		LodRegion region = getRegion(detailLevel, posX, posZ);
-
+		
 		if (region == null)
 		{
 			return DataPointUtil.EMPTY_DATA;
 		}
-
+		
 		return region.getData(detailLevel, posX, posZ, verticalIndex);
 	}
-
-
+	
+	
 	/**
 	 * Get the data point at the given X and Z coordinates
 	 * in this dimension.
@@ -652,32 +656,32 @@ public class LodDimension
 	{
 		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
 			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
-
+		
 		LodRegion region = getRegion(detailLevel, posX, posZ);
-
+		
 		if (region == null)
 		{
 			return DataPointUtil.EMPTY_DATA;
 		}
-
+		
 		return region.getSingleData(detailLevel, posX, posZ);
 	}
-
+	
 	public void clear(byte detailLevel, int posX, int posZ)
 	{
 		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
 			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
-
+		
 		LodRegion region = getRegion(detailLevel, posX, posZ);
-
+		
 		if (region == null)
 		{
 			return;
 		}
-
+		
 		region.clear(detailLevel, posX, posZ);
 	}
-
+	
 	public boolean isRegionToRegen(int xIndex, int zIndex)
 	{
 		return regionNeedsRegen[xIndex][zIndex];
@@ -686,12 +690,12 @@ public class LodDimension
 	{
 		return setupBuffer[xIndex][zIndex];
 	}
-
+	
 	public void setRegenByArrayIndex(int xIndex, int zIndex, boolean newRegen)
 	{
 		regionNeedsRegen[xIndex][zIndex] = newRegen;
 	}
-
+	
 	/**
 	 * Get the data point at the given X and Z coordinates
 	 * in this dimension.
@@ -703,45 +707,45 @@ public class LodDimension
 	{
 		if (detailLevel > LodUtil.REGION_DETAIL_LEVEL)
 			throw new IllegalArgumentException("getLodFromCoordinates given a level of \"" + detailLevel + "\" when \"" + LodUtil.REGION_DETAIL_LEVEL + "\" is the max.");
-
+		
 		LodRegion region = getRegion(detailLevel, posX, posZ);
-
-
+		
+		
 		if (region == null)
 		{
 			return;
 		}
 		region.updateArea(detailLevel, posX, posZ);
 	}
-
+	
 	/**
 	 * return true if and only if the node at that position exist
 	 */
 	public boolean doesDataExist(byte detailLevel, int posX, int posZ)
 	{
 		LodRegion region = getRegion(detailLevel, posX, posZ);
-
+		
 		if (region == null)
 		{
 			return false;
 		}
-
+		
 		return region.doesDataExist(detailLevel, posX, posZ);
 	}
-
+	
 	/**
 	 * Get the region at the given X and Z coordinates from the
 	 * RegionFileHandler.
 	 */
 	public LodRegion getRegionFromFile(RegionPos regionPos, byte detailLevel, DistanceGenerationMode
-			                                                                          generationMode, VerticalQuality verticalQuality)
+			generationMode, VerticalQuality verticalQuality)
 	{
 		if (fileHandler != null)
 			return fileHandler.loadRegionFromFile(detailLevel, regionPos, generationMode, verticalQuality);
 		else
 			return null;
 	}
-
+	
 	/**
 	 * Save all dirty regions in this LodDimension to file.
 	 */
@@ -749,8 +753,8 @@ public class LodDimension
 	{
 		fileHandler.saveDirtyRegionsToFileAsync();
 	}
-
-
+	
+	
 	/**
 	 * Returns whether the region at the given X and Z coordinates
 	 * is within the loaded range.
@@ -759,21 +763,21 @@ public class LodDimension
 	{
 		int xIndex = (regionX - center.x) + halfWidth;
 		int zIndex = (regionZ - center.z) + halfWidth;
-
+		
 		return xIndex >= 0 && xIndex < width && zIndex >= 0 && zIndex < width;
 	}
-
-
+	
+	
 	public int getCenterX()
 	{
 		return center.x;
 	}
-
+	
 	public int getCenterZ()
 	{
 		return center.z;
 	}
-
+	
 	/**
 	 * returns the width of the dimension in regions
 	 */
@@ -790,30 +794,30 @@ public class LodDimension
 			return width;
 		}
 	}
-
-
+	
+	
 	public void setRegionWidth(int newWidth)
 	{
 		width = newWidth;
 		halfWidth = Math.floorDiv(width, 2);
-
+		
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];
 		regionNeedsRegen = new boolean[width][width];
 		setupBuffer = new boolean[width][width];
-
+		
 		// populate isRegionDirty
 		for (int i = 0; i < width; i++)
 			for (int j = 0; j < width; j++)
 				isRegionDirty[i][j] = false;
 	}
-
-
+	
+	
 	@Override
 	public String toString()
 	{
 		LodRegion region;
-
+		
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("Dimension : \n");
 		for (int x = 0; x < regions.length; x++)
@@ -825,7 +829,7 @@ public class LodDimension
 				{
 					stringBuilder.append("n");
 					stringBuilder.append("\t");
-
+					
 				} else
 				{
 					stringBuilder.append(region.getMinDetailLevel());
@@ -836,11 +840,11 @@ public class LodDimension
 		}
 		return stringBuilder.toString();
 	}
-
+	
 	public int getMemoryRequired(int x, int z, LodTemplate template)
 	{
 		/*return regions[x][z].getMinMemoryNeeded(template);*/
-
+		
 		int minDistance = LevelPosUtil.minDistance(LodUtil.REGION_DETAIL_LEVEL, x, z, halfWidth, halfWidth);
 		int detail = DetailDistanceUtil.getTreeCutDetailFromDistance(minDistance);
 		int levelToGen = DetailDistanceUtil.getCutLodDetail(detail);
