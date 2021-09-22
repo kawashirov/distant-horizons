@@ -35,10 +35,10 @@ public class DataPointUtil
 
 	public final static int ALPHA_DOWNSIZE_SHIFT = 4;
 
-	public final static int BLUE_COLOR_SHIFT = 0;
-	public final static int GREEN_COLOR_SHIFT = 8;
-	public final static int RED_COLOR_SHIFT = 16;
-	public final static int ALPHA_COLOR_SHIFT = 24;
+	//public final static int BLUE_COLOR_SHIFT = 0;
+	//public final static int GREEN_COLOR_SHIFT = 8;
+	//public final static int RED_COLOR_SHIFT = 16;
+	//public final static int ALPHA_COLOR_SHIFT = 24;
 
 	public final static int BLUE_SHIFT = 36;
 	public final static int GREEN_SHIFT = BLUE_SHIFT + 8;
@@ -51,9 +51,9 @@ public class DataPointUtil
 	public final static int DEPTH_SHIFT = 16;
 	public final static int BLOCK_LIGHT_SHIFT = 12;
 	public final static int SKY_LIGHT_SHIFT = 8;
-	public final static int LIGHTS_SHIFT = SKY_LIGHT_SHIFT;
-	public final static int VERTICAL_INDEX_SHIFT = 6;
-	public final static int FLAG_SHIFT = 5;
+	//public final static int LIGHTS_SHIFT = SKY_LIGHT_SHIFT;
+	//public final static int VERTICAL_INDEX_SHIFT = 6;
+	//public final static int FLAG_SHIFT = 5;
 	public final static int GEN_TYPE_SHIFT = 2;
 	public final static int VOID_SHIFT = 1;
 	public final static int EXISTENCE_SHIFT = 0;
@@ -62,14 +62,14 @@ public class DataPointUtil
 	public final static long RED_MASK = 0b1111_1111;
 	public final static long GREEN_MASK = 0b1111_1111;
 	public final static long BLUE_MASK = 0b1111_1111;
-	public final static long COLOR_MASK = 0b11111111_11111111_11111111;
+	//public final static long COLOR_MASK = 0b11111111_11111111_11111111;
 	public final static long HEIGHT_MASK = 0b11_1111_1111;
 	public final static long DEPTH_MASK = 0b11_1111_1111;
-	public final static long LIGHTS_MASK = 0b1111_1111;
+	//public final static long LIGHTS_MASK = 0b1111_1111;
 	public final static long BLOCK_LIGHT_MASK = 0b1111;
 	public final static long SKY_LIGHT_MASK = 0b1111;
-	public final static long VERTICAL_INDEX_MASK = 0b11;
-	public final static long FLAG_MASK = 0b1;
+	//public final static long VERTICAL_INDEX_MASK = 0b11;
+	//public final static long FLAG_MASK = 0b1;
 	public final static long GEN_TYPE_MASK = 0b111;
 	public final static long VOID_MASK = 1;
 	public final static long EXISTENCE_MASK = 1;

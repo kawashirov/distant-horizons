@@ -2,7 +2,6 @@ package com.seibel.lod.objects;
 
 import com.seibel.lod.util.*;
 
-import java.security.InvalidParameterException;
 import java.util.Arrays;
 
 public class VerticalLevelContainer implements LevelContainer
