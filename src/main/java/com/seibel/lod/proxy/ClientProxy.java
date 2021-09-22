@@ -374,7 +374,6 @@ public class ClientProxy
 
 	public static void reset()
 	{
-		lodBufferBuilder = new LodBufferBuilder();
 		renderer = new LodRenderer(lodBufferBuilder);
 		LodNodeGenWorker.resetGenerator();
 		ThreadMapUtil.clearMaps();

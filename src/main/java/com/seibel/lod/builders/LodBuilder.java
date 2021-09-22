@@ -41,15 +41,11 @@ import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.BushBlock;
-import net.minecraft.block.GrassBlock;
-import net.minecraft.block.LeavesBlock;
+import net.minecraft.block.*;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -80,10 +76,12 @@ public class LodBuilder
 
 	private ExecutorService lodGenThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
 
+	public static final Direction[] directions = new Direction[]{Direction.UP, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.DOWN};
 	public static final int CHUNK_DATA_WIDTH = LodUtil.CHUNK_WIDTH;
 	public static final int CHUNK_SECTION_HEIGHT = CHUNK_DATA_WIDTH;
 	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
 	public static final ConcurrentMap<Block, Integer> colorMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<Block, Boolean> toTint = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<Block, VoxelShape> shapeMap = new ConcurrentHashMap<>();
 
 	public static final ModelDataMap dataMap = new ModelDataMap.Builder().build();
@@ -271,8 +269,8 @@ public class LodBuilder
 
 		long[] dataToMerge = ThreadMapUtil.getBuilderVerticalArray()[detail.detailLevel];
 
-		if (dataToMerge == null || dataToMerge.length != size*size*DataPointUtil.worldHeight + 1)
-			dataToMerge = new long[size*size*DataPointUtil.worldHeight + 1];
+		if (dataToMerge == null || dataToMerge.length != size * size * DataPointUtil.worldHeight + 1)
+			dataToMerge = new long[size * size * DataPointUtil.worldHeight + 1];
 
 		for (int i = 0; i < dataToMerge.length; i++)
 			dataToMerge[i] = DataPointUtil.EMPTY_DATA;
@@ -307,7 +305,7 @@ public class LodBuilder
 			zAbs = chunkPos.getMinBlockZ() + zRel;
 
 			//Calculate the height of the lod
-			yAbs = DataPointUtil.worldHeight +2;
+			yAbs = DataPointUtil.worldHeight + 2;
 			int count = 0;
 			boolean topBlock = true;
 			while (yAbs > 0)
@@ -316,7 +314,7 @@ public class LodBuilder
 				//If the lod is at default, then we set this as void data
 				if (height == DEFAULT_HEIGHT)
 				{
-					if(topBlock)
+					if (topBlock)
 						dataToMerge[index * verticalData] = DataPointUtil.createVoidDataPoint(generation);
 					break;
 				}
@@ -625,22 +623,31 @@ public class LodBuilder
 
 	private int getColorTextureForBlock(BlockState blockState, BlockPos blockPos, boolean topTextureRequired)
 	{
-		if (colorMap.containsKey(blockState.getBlock()))
-			return colorMap.get(blockState.getBlock());
+		Block block = blockState.getBlock();
+		if (colorMap.containsKey(block) && toTint.containsKey(block))
+			return colorMap.get(block);
 
 
 		World world = mc.getClientWorld();
 		TextureAtlasSprite texture;
-		if (topTextureRequired)
+		List<BakedQuad> quad = null;
+		for (Direction direction : directions)
 		{
-			List<BakedQuad> quad = ((IForgeBakedModel) mc.getModelManager().getBlockModelShaper().getBlockModel(blockState)).getQuads(blockState, Direction.UP, new Random(0), dataMap);
+			quad = mc.getModelManager().getBlockModelShaper().getBlockModel(blockState).getQuads(blockState, direction, new Random(0), dataMap);
 			if (!quad.isEmpty())
 			{
-				texture = quad.get(0).getSprite();
-			} else
-			{
-				texture = mc.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
+				break;
 			}
+		}
+		if (!quad.isEmpty())
+		{
+			toTint.put(block, quad.get(0).isTinted());
+		} else
+			toTint.put(blockState.getBlock(), false);
+
+		if (topTextureRequired && !quad.isEmpty())
+		{
+			texture = quad.get(0).getSprite();
 		} else
 		{
 			texture = mc.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
@@ -660,15 +667,10 @@ public class LodBuilder
 				for (int j = 0; j < texture.getWidth(); j++)
 				{
 					if (texture.isTransparent(k, i, j))
-					{
-						/*if (blockState.getBlock() instanceof LeavesBlock)
-							color = 0;
-						else*/
 						continue;
-					} else
-					{
-						color = texture.getPixelRGBA(k, i, j);
-					}
+					color = texture.getPixelRGBA(k, i, j);
+					if (block instanceof FlowerBlock && ColorUtil.getGreen(color) > (ColorUtil.getBlue(color) + 30) && ColorUtil.getGreen(color) > (ColorUtil.getRed(color) + 30))
+						continue;
 					count++;
 					alpha += ColorUtil.getAlpha(color);
 					red += ColorUtil.getBlue(color);
@@ -688,8 +690,37 @@ public class LodBuilder
 			blue /= count;
 			color = ColorUtil.rgbToInt(alpha, red, green, blue);
 		}
-		colorMap.put(blockState.getBlock(), color);
+		if ((couldHaveGrassTint(block) || couldHaveLeavesTint(block) || couldHaveWaterTint(block)) && (red == green && green == blue))
+		{
+			toTint.replace(block, true);
+		}
+		colorMap.put(block, color);
+
+		if(block instanceof TallGrassBlock)
+			System.out.println("rgb " + red + " " + green +" " + blue);
 		return color;
+	}
+
+	private boolean couldHaveGrassTint(Block block)
+	{
+		return block instanceof GrassBlock
+				       || block instanceof BushBlock
+				       || block instanceof IGrowable
+				       || block instanceof AbstractPlantBlock
+				       || block instanceof AbstractTopPlantBlock
+				       || block instanceof TallGrassBlock;
+	}
+
+	private boolean couldHaveLeavesTint(Block block)
+	{
+		return block instanceof LeavesBlock
+				       || block == Blocks.VINE
+				       || block == Blocks.SUGAR_CANE;
+	}
+
+	private boolean couldHaveWaterTint(Block block)
+	{
+		return block == Blocks.WATER;
 	}
 
 	/**
@@ -697,14 +728,13 @@ public class LodBuilder
 	 */
 	private int getColorForBlock(IChunk chunk, BlockPos blockPos)
 	{
-
 		int xRel = blockPos.getX() - chunk.getPos().getMinBlockX();
 		int zRel = blockPos.getZ() - chunk.getPos().getMinBlockZ();
 		int x = blockPos.getX();
 		int y = blockPos.getY();
 		int z = blockPos.getZ();
 		Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, y >> 2, zRel >> 2);
-		int brightness;
+		int blockColor;
 
 		BlockState blockState = chunk.getBlockState(blockPos);
 		int colorInt = 0;
@@ -720,50 +750,29 @@ public class LodBuilder
 			tmp = tmp.darker();
 			colorInt = LodUtil.colorToInt(tmp);
 		}
-		/*else if (blockState == Blocks.WEEPING_VINES.defaultBlockState()
-				|| blockState == Blocks.WEEPING_VINES_PLANT.defaultBlockState()
-				|| blockState == Blocks.CRIMSON_FUNGUS.defaultBlockState()
-				|| blockState == Blocks.CRIMSON_ROOTS.defaultBlockState())
-		{
-			colorInt = Blocks.NETHER_WART_BLOCK.defaultMaterialColor().col;
-		} else if (blockState.getBlock().equals(Blocks.TWISTING_VINES)
-				|| blockState.equals(Blocks.TWISTING_VINES_PLANT.defaultBlockState())
-				|| blockState == Blocks.WARPED_ROOTS.defaultBlockState()
-				|| blockState == Blocks.WARPED_FUNGUS.defaultBlockState()
-				|| blockState == Blocks.NETHER_SPROUTS.defaultBlockState())
-		{
-			colorInt = Blocks.WARPED_NYLIUM.defaultMaterialColor().col;
-		}*/
-		else if (blockState.getBlock() == Blocks.GRASS_PATH || blockState.getBlock() == Blocks.MYCELIUM
-				|| blockState.getBlock() == Blocks.PODZOL || blockState.getBlock() == Blocks.CRIMSON_NYLIUM
-				|| blockState.getBlock() == Blocks.WARPED_NYLIUM)
-		{
-			colorInt = getColorTextureForBlock(blockState, blockPos, true);
-		}
-		// plant life
-		else if (blockState.getBlock() instanceof LeavesBlock || blockState.getBlock() == Blocks.VINE || blockState.getBlock() == Blocks.SUGAR_CANE)
-		{
-			brightness = getColorTextureForBlock(blockState, blockPos, false);
-			colorInt = ColorUtil.multiplyRGBcolors(biome.getFoliageColor(), brightness);
-		}
-		else if (blockState.getBlock() instanceof GrassBlock || blockState.getBlock() instanceof BushBlock) //( AbstractPlantBlock IGrowable )&& !(blockState.getBlock() == Blocks.BROWN_MUSHROOM || blockState.getBlock() == Blocks.RED_MUSHROOM)
-		{
-			brightness = getColorTextureForBlock(blockState, blockPos, true);
-			colorInt = ColorUtil.multiplyRGBcolors(biome.getGrassColor(x, z), brightness);
-		}
-		// water
-		else if (blockState.getBlock() == Blocks.WATER)
-		{
-			brightness = getColorTextureForBlock(blockState, blockPos, true);
-			colorInt = ColorUtil.multiplyRGBcolors(biome.getWaterColor(), brightness);
-		}
 
-		// everything else
-		else
+		blockColor = getColorTextureForBlock(blockState, blockPos, true);
+		if (toTint.get(blockState.getBlock()).booleanValue())
 		{
-			colorInt = getColorTextureForBlock(blockState, blockPos, false);
+			// leaves
+			if (couldHaveLeavesTint(blockState.getBlock()))
+			{
+				colorInt = ColorUtil.multiplyRGBcolors(biome.getFoliageColor(), blockColor);
+			}
+			// grass and green plants
+			else if (couldHaveGrassTint(blockState.getBlock()))
+			{
+				colorInt = ColorUtil.multiplyRGBcolors(biome.getGrassColor(x, z), blockColor);
+			}
+			// water
+			else if (couldHaveWaterTint(blockState.getBlock()))
+			{
+				colorInt = ColorUtil.multiplyRGBcolors(biome.getWaterColor(), blockColor);
+			}
+		} else
+		{
+			colorInt = blockColor;
 		}
-
 		return colorInt;
 	}
 
