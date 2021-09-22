@@ -659,6 +659,7 @@ public class LodBuilder
 		int red = 0;
 		int green = 0;
 		int blue = 0;
+		int numberOfGreyPixel = 0;
 		int color;
 		for (int k = 0; k < texture.getFrameCount(); k++)
 		{
@@ -669,6 +670,10 @@ public class LodBuilder
 					if (texture.isTransparent(k, i, j))
 						continue;
 					color = texture.getPixelRGBA(k, i, j);
+					if(Math.max(Math.max(ColorUtil.getBlue(color),ColorUtil.getGreen(color)),ColorUtil.getRed(color)) < 4 + Math.min(Math.min(ColorUtil.getBlue(color),ColorUtil.getGreen(color)),ColorUtil.getRed(color)))
+					{
+						numberOfGreyPixel++;
+					}
 					if (block instanceof FlowerBlock && ColorUtil.getGreen(color) > (ColorUtil.getBlue(color) + 30) && ColorUtil.getGreen(color) > (ColorUtil.getRed(color) + 30))
 						continue;
 					count++;
@@ -690,14 +695,14 @@ public class LodBuilder
 			blue /= count;
 			color = ColorUtil.rgbToInt(alpha, red, green, blue);
 		}
-		if ((couldHaveGrassTint(block) || couldHaveLeavesTint(block) || couldHaveWaterTint(block)) && (red == green && green == blue))
+		if (blockState.getBlock().equals(Blocks.TALL_GRASS))
+			System.out.println(ColorUtil.toString(color) + " " + numberOfGreyPixel + " " + count);
+		if (block instanceof TallGrassBlock || (couldHaveGrassTint(block) || couldHaveLeavesTint(block) || couldHaveWaterTint(block)) && (float) (numberOfGreyPixel/count) > 0.75f)
 		{
 			toTint.replace(block, true);
 		}
 		colorMap.put(block, color);
 
-		if(block instanceof TallGrassBlock)
-			System.out.println("rgb " + red + " " + green +" " + blue);
 		return color;
 	}
 
