@@ -17,12 +17,9 @@
  */
 package com.seibel.lod.render;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.FloatBuffer;
 import java.util.HashSet;
-import java.util.Iterator;
 
+import com.seibel.lod.enums.*;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
@@ -34,10 +31,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.builders.LodBufferBuilder.VertexBuffersAndOffset;
 import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.enums.FogDistance;
-import com.seibel.lod.enums.FogDrawOverride;
-import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
@@ -56,8 +49,6 @@ import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -796,19 +787,22 @@ public class LodRenderer
 
 		long newTime = System.currentTimeMillis();
 
-		// check if the player has moved
-		if (newTime - prevPlayerPosTime > LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.get())
+		if(LodConfig.CLIENT.graphics.detailDropOff.get() == DetailDropOff.BY_BLOCK)
 		{
-			if (LevelPosUtil.getDetailLevel(previousPos) == 0
-					    || mc.getPlayer().xChunk != LevelPosUtil.getPosX(previousPos)
-					    || mc.getPlayer().zChunk != LevelPosUtil.getPosZ(previousPos))
+			// check if the player has moved
+			if (newTime - prevPlayerPosTime > LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.get())
 			{
-				fullRegen = true;
-				previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
-				//should use this when it's ready
-				vanillaRenderedChunks = new boolean[chunkRenderDistance*2+2][chunkRenderDistance*2+2];
+				if (LevelPosUtil.getDetailLevel(previousPos) == 0
+						    || mc.getPlayer().xChunk != LevelPosUtil.getPosX(previousPos)
+						    || mc.getPlayer().zChunk != LevelPosUtil.getPosZ(previousPos))
+				{
+					fullRegen = true;
+					previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
+					//should use this when it's ready
+					vanillaRenderedChunks = new boolean[chunkRenderDistance * 2 + 2][chunkRenderDistance * 2 + 2];
+				}
+				prevPlayerPosTime = newTime;
 			}
-			prevPlayerPosTime = newTime;
 		}
 
 

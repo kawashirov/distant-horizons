@@ -1,10 +1,10 @@
 package com.seibel.lod.objects;
 
 
+import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.enums.VerticalQuality;
-import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
@@ -229,9 +229,31 @@ public class LodRegion
 
 		//here i calculate the the LevelPos is in range
 		//This is important to avoid any kind of hole in the rendering
-		int maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
+		byte supposedLevel;
+		int maxDistance;
+		switch (LodConfig.CLIENT.graphics.detailDropOff.get())
+		{
+			default:
+			case BY_BLOCK:
+				maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
+				supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
+				break;
+			case BY_REGION_FANCY:
+				supposedLevel = minDetailLevel;
+				break;
+			case BY_REGION_FAST:
+				int playerRegionX = LevelPosUtil.getRegion(LodUtil.BLOCK_DETAIL_LEVEL,playerPosX);
+				int playerRegionZ = LevelPosUtil.getRegion(LodUtil.BLOCK_DETAIL_LEVEL,playerPosZ);
+				if(playerRegionX == regionPosX && playerRegionZ == regionPosZ)
+					supposedLevel = minDetailLevel;
+				else
+				{
+					maxDistance = LevelPosUtil.maxDistance(LodUtil.REGION_DETAIL_LEVEL, regionPosX, regionPosZ, playerRegionX*512 + 256, playerRegionZ*512 + 256);
+					supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
+				}
+				break;
+		}
 
-		byte supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
 		if (supposedLevel > detailLevel)
 			return;
 		else if (supposedLevel == detailLevel)

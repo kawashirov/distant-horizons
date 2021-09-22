@@ -20,23 +20,13 @@ package com.seibel.lod.config;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import com.seibel.lod.enums.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.seibel.lod.ModInfo;
-import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.DistanceQualityDropOff;
-import com.seibel.lod.enums.FogDistance;
-import com.seibel.lod.enums.FogDrawOverride;
-import com.seibel.lod.enums.GenerationPriority;
-import com.seibel.lod.enums.HorizontalQuality;
-import com.seibel.lod.enums.HorizontalResolution;
-import com.seibel.lod.enums.LodTemplate;
-import com.seibel.lod.enums.ShadingMode;
-import com.seibel.lod.enums.VerticalQuality;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -90,10 +80,13 @@ public class LodConfig
 		public ForgeConfigSpec.EnumValue<ShadingMode> shadingMode;
 		
 		public ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
+
+		public ForgeConfigSpec.EnumValue<DetailDropOff> detailDropOff;
 		
 		public ForgeConfigSpec.IntValue lodChunkRenderDistance;
 		
 		public ForgeConfigSpec.BooleanValue disableDirectionalCulling;
+
 		
 		Graphics(ForgeConfigSpec.Builder builder)
 		{
@@ -125,7 +118,15 @@ public class LodConfig
 							+ " " + LodTemplate.DYNAMIC + ": LOD Chunks smoothly transition between other, \n"
 							+ " " + "         unless a neighboring chunk is at a significantly different height. \n")
 					.defineEnum("lodTemplate", LodTemplate.CUBIC);
-			
+
+			detailDropOff = builder
+					              .comment("\n\n"
+							                       + " how the detail should go dropoff? \n"
+							                       + DetailDropOff.BY_BLOCK + "  in chunks circles around the player (best quality option, may cause stuttering)\n"
+							                       + DetailDropOff.BY_REGION_FANCY + "  in regions circles around the player (quality option)\n"
+							                       + DetailDropOff.BY_REGION_FAST + "  in regions circles around the player (performance option)\n")
+					              .defineEnum("detailDropOff", DetailDropOff.BY_REGION_FAST);
+
 			drawResolution = builder
 					.comment("\n\n"
 							+ " What is the maximum detail level that LODs should be drawn at? \n"
