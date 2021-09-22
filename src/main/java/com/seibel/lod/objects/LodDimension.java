@@ -534,8 +534,6 @@ public class LodDimension
 				int numbChunksWide = (width) * 32 * 2;
 				for (int i = 0; i < numbChunksWide * numbChunksWide; i++)
 				{
-
-
 					xChunkToCheck = x + playerChunkX;
 					zChunkToCheck = z + playerChunkZ;
 					//distance = LevelPosUtil.maxDistance(LodUtil.CHUNK_DETAIL_LEVEL, xChunkToCheck, zChunkToCheck, playerChunkX, playerChunkZ);
@@ -564,7 +562,7 @@ public class LodDimension
 				}
 				break;
 			case FAR_FIRST:
-				posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, (int) (maxDataToGenerate * 0.25f), playerPosX, playerPosZ);
+				posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, (int) (maxDataToGenerate * 0.25), playerPosX, playerPosZ);
 				int n = regions.length;
 				int xRegion;
 				int zRegion;
@@ -843,7 +841,7 @@ public class LodDimension
 
 		int minDistance = LevelPosUtil.minDistance(LodUtil.REGION_DETAIL_LEVEL, x, z, halfWidth, halfWidth);
 		int detail = DetailDistanceUtil.getTreeCutDetailFromDistance(minDistance);
-		int levelToGen = DetailDistanceUtil.getCutLodDetail(detail);
+		int levelToGen = DetailDistanceUtil.getCutLodDetail(detail)+1;
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelToGen);
 		int maxVerticalData = DetailDistanceUtil.getMaxVerticalData(levelToGen);
 		int numberOfLods = size * size * maxVerticalData;

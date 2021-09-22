@@ -322,32 +322,21 @@ public class LodBuilder
 				yAbs = height - 1;
 				// We search light on above air block
 				depth = determineBottomPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
+				blockPos.set(xAbs, yAbs, zAbs);
+				light = getLightValue(chunk, blockPos, hasCeiling, hasSkyLight, topBlock);
 				if (hasCeiling && topBlock)
 				{
 					yAbs = depth;
 					color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
 					blockPos.set(xAbs, yAbs - 1, zAbs);
-					light = getLightValue(chunk, blockPos, true);
 				} else
 				{
 					color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
 					blockPos.set(xAbs, yAbs + 1, zAbs);
-					light = getLightValue(chunk, blockPos, false);
 				}
 				lightBlock = light & 0b1111;
-				if (!hasCeiling && topBlock)
-				{
-					if (hasSkyLight)
-					{
-						lightSky = 15; //default max light
-					} else
-					{
-						lightSky = 0;
-					}
-				} else
-				{
-					lightSky = (light >> 4) & 0b1111;
-				}
+				lightSky = (light >> 4) & 0b1111;
+
 
 				dataToMerge[index * verticalData + count] = DataPointUtil.createDataPoint(height, depth, color, lightSky, lightBlock, generation);
 				topBlock = false;
@@ -448,6 +437,8 @@ public class LodBuilder
 		int lightBlock;
 		int lightSky;
 
+		boolean hasCeiling = mc.getClientWorld().dimensionType().hasCeiling();
+		boolean hasSkyLight = mc.getClientWorld().dimensionType().hasSkyLight();
 
 		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
 		int index = 0;
@@ -479,7 +470,7 @@ public class LodBuilder
 			depth = determineBottomPoint(chunk, config, xRel, zRel, blockPos);
 
 			blockPos.set(xAbs, yAbs + 1, zAbs);
-			light = getLightValue(chunk, blockPos, false);
+			light = getLightValue(chunk, blockPos, hasCeiling, hasSkyLight, true);
 			lightBlock = light & 0b1111;
 			//lightSky = (light >> 4) & 0b1111;
 			lightSky = 15; //default max light
@@ -595,31 +586,53 @@ public class LodBuilder
 		return colorInt;
 	}
 
-	private int getLightValue(IChunk chunk, BlockPos.Mutable blockPos, boolean ceilingTopBlock)
+	private int getLightValue(IChunk chunk, BlockPos.Mutable blockPos, boolean hasCeiling, boolean hasSkyLight, boolean topBlock)
 	{
 		int skyLight;
-		int blockLight;
-		if (mc.getPlayer() == null)
-			return 0;
-		if (mc.getPlayer().level == null)
+		int blockLight = 0;
+		if (mc.getClientWorld() == null)
 			return 0;
 
-		IWorld world = mc.getPlayer().level;
+		IWorld world = mc.getClientWorld();
 
-		blockLight = world.getBrightness(LightType.BLOCK, blockPos);
-		skyLight = world.getBrightness(LightType.SKY, blockPos);
+		int blockBrightness = world.getBrightness(LightType.BLOCK, blockPos);
 
-		if (ceilingTopBlock)
-			blockPos.set(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ());
-		else
+		if (hasCeiling && topBlock)
 			blockPos.set(blockPos.getX(), blockPos.getY() - 1, blockPos.getZ());
+		else
+			blockPos.set(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ());
 
+
+		if (!hasSkyLight && hasCeiling)
+		{
+			skyLight = 0;
+		}
+		else if(topBlock)
+		{
+			skyLight = 15; //default max light
+		} else
+		{
+			if (chunk.isLightCorrect() && false)
+			{
+				skyLight = world.getBrightness(LightType.SKY, blockPos);
+			} else
+			{
+				if (blockPos.getY() >= mc.getClientWorld().getSeaLevel()-5)
+				{
+					skyLight = 10;
+				} else
+				{
+					skyLight = 0;
+				}
+			}
+		}
 		BlockState blockState = chunk.getBlockState(blockPos);
-
-		blockLight = LodUtil.clamp(0, blockLight + blockState.getLightValue(chunk, blockPos), 15);
+		blockLight = blockState.getLightValue(chunk, blockPos);
+		blockLight = LodUtil.clamp(0, blockLight + blockBrightness, 15);
 
 		return blockLight + (skyLight << 4);
 	}
+
 
 	private int getColorTextureForBlock(BlockState blockState, BlockPos blockPos, boolean topTextureRequired)
 	{
@@ -661,6 +674,7 @@ public class LodBuilder
 		int blue = 0;
 		int numberOfGreyPixel = 0;
 		int color;
+		int colorMultiplier;
 		for (int k = 0; k < texture.getFrameCount(); k++)
 		{
 			for (int i = 0; i < texture.getHeight(); i++)
@@ -670,17 +684,20 @@ public class LodBuilder
 					if (texture.isTransparent(k, i, j))
 						continue;
 					color = texture.getPixelRGBA(k, i, j);
-					if(Math.max(Math.max(ColorUtil.getBlue(color),ColorUtil.getGreen(color)),ColorUtil.getRed(color)) < 4 + Math.min(Math.min(ColorUtil.getBlue(color),ColorUtil.getGreen(color)),ColorUtil.getRed(color)))
+					if (Math.max(Math.max(ColorUtil.getBlue(color), ColorUtil.getGreen(color)), ColorUtil.getRed(color)) < 4 + Math.min(Math.min(ColorUtil.getBlue(color), ColorUtil.getGreen(color)), ColorUtil.getRed(color)))
 					{
 						numberOfGreyPixel++;
 					}
-					if (block instanceof FlowerBlock && ColorUtil.getGreen(color) > (ColorUtil.getBlue(color) + 30) && ColorUtil.getGreen(color) > (ColorUtil.getRed(color) + 30))
-						continue;
-					count++;
-					alpha += ColorUtil.getAlpha(color);
-					red += ColorUtil.getBlue(color);
-					green += ColorUtil.getGreen(color);
-					blue += ColorUtil.getRed(color);
+					if (block instanceof FlowerBlock && (!(ColorUtil.getGreen(color) > (ColorUtil.getBlue(color) + 30)) || !(ColorUtil.getGreen(color) > (ColorUtil.getRed(color) + 30))))
+						colorMultiplier = 5;
+					else
+						colorMultiplier = 1;
+					count = colorMultiplier + count;
+					alpha += ColorUtil.getAlpha(color) * colorMultiplier;
+					;
+					red += ColorUtil.getBlue(color) * colorMultiplier;
+					green += ColorUtil.getGreen(color) * colorMultiplier;
+					blue += ColorUtil.getRed(color) * colorMultiplier;
 				}
 			}
 		}
@@ -697,7 +714,7 @@ public class LodBuilder
 		}
 		if (blockState.getBlock().equals(Blocks.TALL_GRASS))
 			System.out.println(ColorUtil.toString(color) + " " + numberOfGreyPixel + " " + count);
-		if (block instanceof TallGrassBlock || (couldHaveGrassTint(block) || couldHaveLeavesTint(block) || couldHaveWaterTint(block)) && (float) (numberOfGreyPixel/count) > 0.75f)
+		if (block instanceof TallGrassBlock || (couldHaveGrassTint(block) || couldHaveLeavesTint(block) || couldHaveWaterTint(block)) && (float) (numberOfGreyPixel / count) > 0.75f)
 		{
 			toTint.replace(block, true);
 		}

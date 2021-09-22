@@ -43,7 +43,8 @@ public class PosToGenerateContainer
 				maxNearSize--;
 			}
 			index = posToGenerate.length - farSize;
-			while (index < posToGenerate.length - 1 && LevelPosUtil.compareLevelAndDistance(detailLevel, distance, (byte) (posToGenerate[index + 1][0] - 1), posToGenerate[index + 1][3]) <= 0)
+			while (index < posToGenerate.length - 1 && LevelPosUtil.compareDistance(distance, posToGenerate[index + 1][3]) <= 0)
+			//while (index < posToGenerate.length - 1 && LevelPosUtil.compareLevelAndDistance(detailLevel, distance, (byte) (posToGenerate[index + 1][0] - 1), posToGenerate[index + 1][3]) <= 0)
 			{
 				posToGenerate[index][0] = posToGenerate[index + 1][0];
 				posToGenerate[index][1] = posToGenerate[index + 1][1];
@@ -87,50 +88,43 @@ public class PosToGenerateContainer
 		return nearSize+farSize;
 	}
 
-	public int getNthDetail(int n)
+	public int getNumberOfNearPos()
 	{
-		int index;
-		if (n > farSize * 2)
-			index = n - farSize;
-		else if (n % 2 == 0)
-			index = n / 2;
-		else
-			index = posToGenerate.length - n / 2 - 1;
-		return posToGenerate[index][0];
+		return nearSize;
 	}
 
-	public int getNthPosX(int n)
+	public int getNumberOfFarPos()
 	{
-		int index;
-		if (n > farSize * 2)
-			index = n - farSize;
-		else if (n % 2 == 0)
-			index = n / 2;
-		else
-			index = posToGenerate.length - n / 2 - 1;
-		return posToGenerate[index][1];
+		return farSize;
 	}
-	public int getNthPosZ(int n)
+
+	public int getNthDetail(int n, boolean near)
 	{
-		int index;
-		if (n > farSize * 2)
-			index = n - farSize;
-		else if (n % 2 == 0)
-			index = n / 2;
+		if (near)
+			return posToGenerate[n][0];
 		else
-			index = posToGenerate.length - n / 2 - 1;
-		return posToGenerate[index][2];
+			return posToGenerate[maxSize-1-n][0];
 	}
-	public int getNthGeneration(int n)
+	public int getNthPosX(int n, boolean near)
 	{
-		int index;
-		if (n > farSize * 2)
-			index = n - farSize;
-		else if (n % 2 == 0)
-			index = n / 2;
+		if (near)
+			return posToGenerate[n][1];
 		else
-			index = posToGenerate.length - n / 2 - 1;
-		return posToGenerate[index][3];
+			return posToGenerate[maxSize-1-n][1];
+	}
+	public int getNthPosZ(int n, boolean near)
+	{
+		if (near)
+			return posToGenerate[n][2];
+		else
+			return posToGenerate[maxSize-1-n][2];
+	}
+	public int getNthGeneration(int n, boolean near)
+	{
+		if (near)
+			return posToGenerate[n][3];
+		else
+			return posToGenerate[maxSize-1-n][3];
 	}
 
 	public String toString()

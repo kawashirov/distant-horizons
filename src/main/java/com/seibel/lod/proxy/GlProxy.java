@@ -168,8 +168,14 @@ public class GlProxy
 	
 	public static GlProxy getInstance()
 	{
-		if (instance == null)
-			instance = new GlProxy();
+		try
+		{
+			if (instance == null)
+				instance = new GlProxy();
+		}catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 		
 		return instance;
 	}
