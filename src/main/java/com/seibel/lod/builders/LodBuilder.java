@@ -242,7 +242,7 @@ public class LodBuilder
 
 
 						//lodDim.clear(detailLevel, posX, posZ);
-						if (data.length != 0 || data != null)
+						if (data != null && data.length != 0)
 						{
 							for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ); verticalIndex++)
 							{
