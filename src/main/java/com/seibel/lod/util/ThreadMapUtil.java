@@ -19,7 +19,7 @@ public class ThreadMapUtil
 	{
 		if (!threadSingleUpdateMap.containsKey(Thread.currentThread().getName()) || (threadSingleUpdateMap.get(Thread.currentThread().getName()) == null))
 		{
-			threadSingleUpdateMap.put(Thread.currentThread().getName(), new long[4]);
+			threadSingleUpdateMap.put(Thread.currentThread().getName(), new long[0]);
 		}
 		return threadSingleUpdateMap.get(Thread.currentThread().getName());
 	}
@@ -39,71 +39,70 @@ public class ThreadMapUtil
 		if (!threadBuilderVerticalArrayMap.containsKey(Thread.currentThread().getName()) || (threadBuilderVerticalArrayMap.get(Thread.currentThread().getName()) == null))
 		{
 			long[][] array = new long[5][];
-			for(int i = 0; i < array.length; i++)
-			{
-				int size = 1 << i;
-				array[i] = new long[size * size * DataPointUtil.WORLD_HEIGHT];
-			}
 			threadBuilderVerticalArrayMap.put(Thread.currentThread().getName(), array);
 		}
 		return threadBuilderVerticalArrayMap.get(Thread.currentThread().getName());
 	}
 
-	public static long[] verticalDataArray(int count)
+	public static long[] verticalDataArray()
 	{
 		if (!threadVerticalAddDataMap.containsKey(Thread.currentThread().getName()) || (threadVerticalAddDataMap.get(Thread.currentThread().getName()) == null))
 		{
-			threadVerticalAddDataMap.put(Thread.currentThread().getName(), new long[count]);
-		}
-		for(int i = 0; i < threadVerticalAddDataMap.get(Thread.currentThread().getName()).length ; i++)
-		{
-			threadVerticalAddDataMap.get(Thread.currentThread().getName())[i] = DataPointUtil.EMPTY_DATA;
+			threadVerticalAddDataMap.put(Thread.currentThread().getName(), new long[0]);
 		}
 		return threadVerticalAddDataMap.get(Thread.currentThread().getName());
 	}
 
-	public static short[] getProjectionShort(int size){
-		if(!projectionShortMap.containsKey(Thread.currentThread().getName()) || (projectionShortMap.get(Thread.currentThread().getName()) == null) || (projectionShortMap.get(Thread.currentThread().getName()).length != size))
+	public static short[] getProjectionShort(){
+		if(!projectionShortMap.containsKey(Thread.currentThread().getName()) || (projectionShortMap.get(Thread.currentThread().getName()) == null))
 		{
-			projectionShortMap.put(Thread.currentThread().getName(), new short[size]);
+			projectionShortMap.put(Thread.currentThread().getName(), new short[0]);
 		}
 		return projectionShortMap.get(Thread.currentThread().getName());
 	}
 
-	public static short[] getHeightAndDepth(int size){
-		if(!heightAndDepthMap.containsKey(Thread.currentThread().getName()) || (heightAndDepthMap.get(Thread.currentThread().getName()) == null) || (heightAndDepthMap.get(Thread.currentThread().getName()).length != size))
+	public static short[] getHeightAndDepth(){
+		if(!heightAndDepthMap.containsKey(Thread.currentThread().getName()) || (heightAndDepthMap.get(Thread.currentThread().getName()) == null))
 		{
-			heightAndDepthMap.put(Thread.currentThread().getName(), new short[size]);
+			heightAndDepthMap.put(Thread.currentThread().getName(), new short[0]);
 		}
 		return heightAndDepthMap.get(Thread.currentThread().getName());
 	}
 
-	public static byte[] getSaveContainer(int size){
-		if(!saveContainer.containsKey(Thread.currentThread().getName()) || (saveContainer.get(Thread.currentThread().getName()) == null) || (saveContainer.get(Thread.currentThread().getName()).length != size))
+	public static byte[] getSaveContainer(){
+		if(!saveContainer.containsKey(Thread.currentThread().getName()) || (saveContainer.get(Thread.currentThread().getName()) == null))
 		{
-			saveContainer.put(Thread.currentThread().getName(), new byte[size]);
+			saveContainer.put(Thread.currentThread().getName(), new byte[0]);
 		}
 		return saveContainer.get(Thread.currentThread().getName());
 	}
 
-	public static long[] getVerticalUpdateArray(byte detailLevel){
-		if(!verticalUpdate.containsKey(Thread.currentThread().getName()) || (verticalUpdate.get(Thread.currentThread().getName()) == null) || (verticalUpdate.get(Thread.currentThread().getName())[detailLevel].length != 4*DetailDistanceUtil.getMaxVerticalData(detailLevel)))
+	public static long[][] getVerticalUpdateArray(){
+		if(!verticalUpdate.containsKey(Thread.currentThread().getName()) || (verticalUpdate.get(Thread.currentThread().getName()) == null))
 		{
 			long[][] array = new long[10][];
-			for(int i = 0; i < array.length; i++)
-			{
-				array[i] = new long[4 * DetailDistanceUtil.getMaxVerticalData(detailLevel)];
-			}
 			verticalUpdate.put(Thread.currentThread().getName(), array);
 		}
-		return verticalUpdate.get(Thread.currentThread().getName())[detailLevel];
+		return verticalUpdate.get(Thread.currentThread().getName());
 	}
 
-	public static long[] getSingleAddDataToMerge(int size){
-		if(!singleDataToMergeMap.containsKey(Thread.currentThread().getName()) || (singleDataToMergeMap.get(Thread.currentThread().getName()) == null) || (singleDataToMergeMap.get(Thread.currentThread().getName()).length != size))
+	public static long[] getSingleAddDataToMerge(){
+		if(!singleDataToMergeMap.containsKey(Thread.currentThread().getName()) || (singleDataToMergeMap.get(Thread.currentThread().getName()) == null))
 		{
-			singleDataToMergeMap.put(Thread.currentThread().getName(), new long[size]);
+			singleDataToMergeMap.put(Thread.currentThread().getName(), new long[0]);
 		}
 		return singleDataToMergeMap.get(Thread.currentThread().getName());
+	}
+
+	public static void clearMaps(){
+		threadSingleUpdateMap.clear();
+		threadBuilderArrayMap.clear();
+		threadBuilderVerticalArrayMap.clear();
+		threadVerticalAddDataMap.clear();
+		saveContainer.clear();
+		projectionShortMap.clear();
+		heightAndDepthMap.clear();
+		singleDataToMergeMap.clear();
+		verticalUpdate.clear();
 	}
 }

@@ -133,9 +133,13 @@ public class VerticalLevelContainer implements LevelContainer
 	public void updateData(LevelContainer lowerLevelContainer, int posX, int posZ)
 	{
 		//We reset the array
-		int lowerMaxVerticalData = lowerLevelContainer.getMaxVerticalData();
-		long[] dataToMerge = ThreadMapUtil.getVerticalUpdateArray(detailLevel);
-		Arrays.fill(dataToMerge, DataPointUtil.EMPTY_DATA);
+		long[] dataToMerge = ThreadMapUtil.getVerticalUpdateArray()[detailLevel];
+
+		if(dataToMerge == null || dataToMerge.length != 4*lowerLevelContainer.getMaxVerticalData())
+			dataToMerge = new long[4 * lowerLevelContainer.getMaxVerticalData()];
+		else
+			Arrays.fill(dataToMerge, DataPointUtil.EMPTY_DATA);
+
 		int lowerMaxVertical = dataToMerge.length/4;
 		int childPosX;
 		int childPosZ;
@@ -170,7 +174,12 @@ public class VerticalLevelContainer implements LevelContainer
 		byte last = -1;
 		int x = size * size * maxVerticalData;
 		int tempIndex;
-		byte[] tempData = ThreadMapUtil.getSaveContainer(2 + (x * 8));
+		byte[] tempData = ThreadMapUtil.getSaveContainer();
+		if(tempData == null || tempData.length != (2 + (x * 8)))
+			tempData = new byte[2 + (x * 8)];
+		else
+			Arrays.fill(tempData, (byte) 0);
+
 		tempData[index] = detailLevel;
 		index++;
 		tempData[index] = (byte) maxVerticalData;

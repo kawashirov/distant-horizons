@@ -111,6 +111,10 @@ public class LodNodeGenWorker implements IWorker
 				newLodDimension, newServerWorld);
 	}
 
+	public static void resetGenerator(){
+		ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
+	}
+
 	@Override
 	public boolean doWork()
 	{

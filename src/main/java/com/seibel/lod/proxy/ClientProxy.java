@@ -17,6 +17,9 @@
  */
 package com.seibel.lod.proxy;
 
+import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.ThreadMapUtil;
+import net.minecraft.world.DimensionType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -85,7 +88,7 @@ public class ClientProxy
 	 * to the LOD view distance
 	 */
 	private boolean recalculateWidths = false;
-	
+	private DimensionType currentDimension = null;
 	
 	public ClientProxy()
 	{
@@ -112,9 +115,15 @@ public class ClientProxy
 			// only run the first time setup once
 			if (!firstTimeSetupComplete)
 			{
+				ThreadMapUtil.clearMaps();
 				firstFrameSetup();
 			}
 
+			if(mc.getCurrentDimension() != currentDimension)
+			{
+				currentDimension = mc.getCurrentDimension();
+				reset();
+			}
 
 			DetailDistanceUtil.updateSettings();
 			if (mc == null || mc.getPlayer() == null || !lodWorld.getIsWorldLoaded())
@@ -235,6 +244,7 @@ public class ClientProxy
 	@SubscribeEvent
 	public void worldLoadEvent(WorldEvent.Load event)
 	{
+		DataPointUtil.worldHeight = event.getWorld().getHeight();
 		// the player just loaded a new world/dimension
 		lodWorld.selectWorld(LodUtil.getWorldID(event.getWorld()));
 		// make sure the correct LODs are being rendered
@@ -360,8 +370,15 @@ public class ClientProxy
 		
 		firstTimeSetupComplete = true;
 	}
-	
-	
+
+
+	public static void reset()
+	{
+		lodBufferBuilder = new LodBufferBuilder();
+		renderer = new LodRenderer(lodBufferBuilder);
+		LodNodeGenWorker.resetGenerator();
+		ThreadMapUtil.clearMaps();
+	}
 	
 	//================//
 	// public getters //

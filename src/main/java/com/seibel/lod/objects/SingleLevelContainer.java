@@ -88,8 +88,7 @@ public class SingleLevelContainer implements LevelContainer
 				{
 					newData = 3;
 					index++;
-				}
-				else if (index + 7 >= inputData.length)
+				} else if (index + 7 >= inputData.length)
 					break;
 				else
 				{
@@ -126,7 +125,8 @@ public class SingleLevelContainer implements LevelContainer
 		addSingleData(data, posX, posZ);
 	}
 
-	public int getMaxVerticalData(){
+	public int getMaxVerticalData()
+	{
 		return 1;
 	}
 
@@ -142,7 +142,11 @@ public class SingleLevelContainer implements LevelContainer
 	{
 		int index = 0;
 		int tempIndex;
-		byte[] tempData = ThreadMapUtil.getSaveContainer(1 + (size * size * 8));
+		byte[] tempData = ThreadMapUtil.getSaveContainer();
+		if (tempData == null || tempData.length != (1 + (size * size * 8)))
+			tempData = new byte[1 + (size * size * 8)];
+		else
+			Arrays.fill(tempData, (byte) 0);
 		tempData[index] = detailLevel;
 		index++;
 		for (int x = 0; x < size; x++)
@@ -177,11 +181,13 @@ public class SingleLevelContainer implements LevelContainer
 	}
 
 
-	public int getMaxNumberOfLods(){
-		return size*size*getMaxVerticalData();
+	public int getMaxNumberOfLods()
+	{
+		return size * size * getMaxVerticalData();
 	}
 
-	public int getMaxMemoryUse(){
+	public int getMaxMemoryUse()
+	{
 		return getMaxNumberOfLods() * 2; //2 byte
 	}
 }

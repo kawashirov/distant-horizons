@@ -28,11 +28,7 @@ import com.seibel.lod.enums.GenerationPriority;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
-import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.DetailDistanceUtil;
-import com.seibel.lod.util.LevelPosUtil;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.*;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.util.math.ChunkPos;
@@ -535,23 +531,9 @@ public class LodDimension
 				int posX;
 				int posZ;
 				long data;
-				int numbChunksWide = (width) * 32;
-				//int circleLimit = Integer.MAX_VALUE;
+				int numbChunksWide = (width) * 32 * 2;
 				for (int i = 0; i < numbChunksWide * numbChunksWide; i++)
 				{
-					// use this for square generation
-					if (maxDataToGenerate <= 0)
-					{
-						break;
-					}
-
-					// use this for circular generation
-					/*if (circleLimit < Math.abs(x) && circleLimit < Math.abs(z))
-						break;
-					if (maxDataToGenerate == 0)
-					{
-						circleLimit = (int) (Math.abs(x) * 1.6f);
-					}*/
 
 
 					xChunkToCheck = x + playerChunkX;
@@ -568,8 +550,8 @@ public class LodDimension
 					if (DataPointUtil.getGenerationMode(data) < LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get().complexity)
 					{
 						posToGenerate.addPosToGenerate(detailLevel, posX, posZ);
-						if (maxDataToGenerate >= 0)
-							maxDataToGenerate--;
+						//if (maxDataToGenerate >= 0)
+						//	maxDataToGenerate--;
 					}
 					if ((x == z) || ((x < 0) && (x == -z)) || ((x > 0) && (x == 1 - z)))
 					{

@@ -18,7 +18,6 @@
 package com.seibel.lod.builders;
 
 import java.awt.Color;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,13 +41,11 @@ import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
-import net.minecraft.block.AbstractPlantBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.BushBlock;
 import net.minecraft.block.GrassBlock;
-import net.minecraft.block.IGrowable;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.renderer.model.BakedQuad;
@@ -68,8 +65,6 @@ import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.client.extensions.IForgeBakedModel;
 import net.minecraftforge.client.model.data.ModelDataMap;
-
-import javax.xml.crypto.Data;
 
 /**
  * This object is in charge of creating Lod related objects. (specifically: Lod
@@ -156,6 +151,7 @@ public class LodBuilder
 				if (lodWorld.getLodDimension(dim) == null)
 				{
 					lodDim = new LodDimension(dim, lodWorld, defaultDimensionWidthInRegions);
+					ThreadMapUtil.clearMaps();
 					lodWorld.addLodDimension(lodDim);
 					lodDim.treeGenerator(playerPosX, playerPosZ);
 				} else
@@ -238,7 +234,7 @@ public class LodBuilder
 						break;
 					case MULTI_LOD:
 						long[] dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-						data = DataPointUtil.mergeMultiData(dataToMergeVertical, DataPointUtil.WORLD_HEIGHT, DetailDistanceUtil.getMaxVerticalData(detailLevel));
+						data = DataPointUtil.mergeMultiData(dataToMergeVertical, DataPointUtil.worldHeight, DetailDistanceUtil.getMaxVerticalData(detailLevel));
 
 
 						//lodDim.clear(detailLevel, posX, posZ);
@@ -271,12 +267,19 @@ public class LodBuilder
 
 	private long[] createVerticalDataToMerge(HorizontalResolution detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{
+		int size = 1 << detail.detailLevel;
+
 		long[] dataToMerge = ThreadMapUtil.getBuilderVerticalArray()[detail.detailLevel];
-		Arrays.fill(dataToMerge, DataPointUtil.EMPTY_DATA);
-		int verticalData = DataPointUtil.WORLD_HEIGHT;
+
+		if (dataToMerge == null || dataToMerge.length != size*size*DataPointUtil.worldHeight + 1)
+			dataToMerge = new long[size*size*DataPointUtil.worldHeight + 1];
+
+		for (int i = 0; i < dataToMerge.length; i++)
+			dataToMerge[i] = DataPointUtil.EMPTY_DATA;
+
+		int verticalData = DataPointUtil.worldHeight;
 
 		ChunkPos chunkPos = chunk.getPos();
-		int size = 1 << detail.detailLevel;
 		int height;
 		int depth;
 		int color;
@@ -304,7 +307,7 @@ public class LodBuilder
 			zAbs = chunkPos.getMinBlockZ() + zRel;
 
 			//Calculate the height of the lod
-			yAbs = DataPointUtil.WORLD_HEIGHT+2;
+			yAbs = DataPointUtil.worldHeight +2;
 			int count = 0;
 			boolean topBlock = true;
 			while (yAbs > 0)

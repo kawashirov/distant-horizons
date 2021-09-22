@@ -31,7 +31,7 @@ public class DataPointUtil
 	//public final static int MIN_DEPTH = -64;
 	//public final static int MIN_HEIGHT = -64;
 	public final static int EMPTY_DATA = 0;
-	public final static int WORLD_HEIGHT = 256;
+	public static int worldHeight = 256;
 
 	public final static int ALPHA_DOWNSIZE_SHIFT = 4;
 
@@ -279,14 +279,32 @@ public class DataPointUtil
 	public static long[] mergeMultiData(long[] dataToMerge, int inputVerticalData, int maxVerticalData)
 	{
 		int size = dataToMerge.length / inputVerticalData;
-		short[] projection = ThreadMapUtil.getProjectionShort((WORLD_HEIGHT) / 16 + 2);
-		short[] heightAndDepth = ThreadMapUtil.getHeightAndDepth((WORLD_HEIGHT + 1) * 2);
-		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(size);
-		long[] dataPoint = ThreadMapUtil.verticalDataArray(WORLD_HEIGHT + 1);
-		Arrays.fill(projection, (short) 0);
-		Arrays.fill(heightAndDepth, (short) 0);
-		Arrays.fill(singleDataToMerge, EMPTY_DATA);
-		Arrays.fill(dataPoint, EMPTY_DATA);
+
+		//We initialise the arrays that are going to be used
+		short[] projection = ThreadMapUtil.getProjectionShort();
+		short[] heightAndDepth = ThreadMapUtil.getHeightAndDepth();
+		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge();
+		long[] dataPoint = ThreadMapUtil.verticalDataArray();
+
+		if (projection == null || projection.length != (worldHeight) / 16 + 1)
+			projection = new short[(worldHeight) / 16 + 1];
+		else
+			Arrays.fill(projection, (short) 0);
+
+		if (heightAndDepth == null || heightAndDepth.length != (worldHeight + 1) * 2)
+			heightAndDepth = new short[(worldHeight + 1) * 2];
+		else
+			Arrays.fill(heightAndDepth, (short) 0);
+
+		if (singleDataToMerge == null || singleDataToMerge.length != size)
+			singleDataToMerge = new long[size];
+		else
+			Arrays.fill(singleDataToMerge, EMPTY_DATA);
+
+		if (dataPoint == null || dataPoint.length != worldHeight + 1)
+			dataPoint = new long[worldHeight + 1];
+		else
+			Arrays.fill(dataPoint, EMPTY_DATA);
 
 		int genMode = DistanceGenerationMode.SERVER.complexity;
 		boolean allEmpty = true;
@@ -355,7 +373,7 @@ public class DataPointUtil
 				if (i == projection.length) //solid to WORLD_HEIGHT
 				{
 					heightAndDepth[count * 2] = depth;
-					heightAndDepth[count * 2 + 1] = WORLD_HEIGHT - 1;
+					heightAndDepth[count * 2 + 1] = (short) (worldHeight - 1);
 					break;
 				}
 				while ((((projection[i] >>> ii) & 1) == 1)) ii++;
@@ -370,7 +388,7 @@ public class DataPointUtil
 		int j = 0;
 		while (count > maxVerticalData)
 		{
-			ii = WORLD_HEIGHT;
+			ii = worldHeight;
 			for (i = 0; i < count - 1; i++)
 			{
 				if (heightAndDepth[(i + 1) * 2] - heightAndDepth[i * 2 + 1] < ii)

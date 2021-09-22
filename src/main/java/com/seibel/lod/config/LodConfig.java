@@ -125,7 +125,7 @@ public class LodConfig
 							                       + DetailDropOff.BY_BLOCK + "  in chunks circles around the player (best quality option, may cause stuttering)\n"
 							                       + DetailDropOff.BY_REGION_FANCY + "  in regions circles around the player (quality option)\n"
 							                       + DetailDropOff.BY_REGION_FAST + "  in regions circles around the player (performance option)\n")
-					              .defineEnum("detailDropOff", DetailDropOff.BY_REGION_FAST);
+					              .defineEnum("detailDropOff", DetailDropOff.BY_BLOCK);
 
 			drawResolution = builder
 					.comment("\n\n"
