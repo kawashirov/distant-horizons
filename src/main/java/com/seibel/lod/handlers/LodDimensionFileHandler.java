@@ -219,7 +219,7 @@ public class LodDimensionFileHandler
 			{
 				for (int j = 0; j < loadedDimension.getWidth(); j++)
 				{
-					if (loadedDimension.getRegenByArrayIndex(i,j) && loadedDimension.getRegionByArrayIndex(i,j) != null)
+					if (loadedDimension.isRegionToRegen(i,j) && loadedDimension.getRegionByArrayIndex(i,j) != null)
 					{
 						saveRegionToFile(loadedDimension.getRegionByArrayIndex(i,j));
 						loadedDimension.setRegenByArrayIndex(i, j,false);

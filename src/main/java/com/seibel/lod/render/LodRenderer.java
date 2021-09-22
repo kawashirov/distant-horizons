@@ -589,7 +589,7 @@ public class LodRenderer
 	/**
 	 * Create all buffers that will be used.
 	 */
-	public void setupBuffers(int numbRegionsWide, LodDimension lodDim)
+	public void setupBuffers(LodDimension lodDim)
 	{
 		// calculate the max amount of memory needed (in bytes)
 		/*int bufferMemory = RenderUtil.getBufferMemoryForRegion(lodDim);*/
@@ -603,7 +603,7 @@ public class LodRenderer
 					                        + " It tried to allocate \"" + bufferMemory + "\" bytes, when \"" + MAX_ALOCATEABLE_DIRECT_MEMORY + "\" is the max.");
 		}*/
 
-		lodBufferBuilder.setupBuffers(numbRegionsWide, lodDim);
+		lodBufferBuilder.setupBuffers(lodDim);
 	}
 
 

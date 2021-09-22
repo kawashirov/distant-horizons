@@ -28,7 +28,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.seibel.lod.render.RenderUtil;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
@@ -129,7 +128,7 @@ public class LodBufferBuilder
 	 */
 	private volatile ChunkPos drawableCenterChunkPos = new ChunkPos(0, 0);
 	private volatile ChunkPos buildableCenterChunkPos = new ChunkPos(0, 0);
-
+	private volatile boolean firstSetup = true;
 	public LodBufferBuilder()
 	{
 
@@ -175,6 +174,7 @@ public class LodBufferBuilder
 
 				ArrayList<Callable<Boolean>> nodeToRenderThreads = new ArrayList<>(lodDim.getWidth() * lodDim.getWidth());
 
+				//setupBuffers(lodDim);
 				startBuffers(fullRegen, lodDim);
 
 				// =====================//
@@ -204,7 +204,7 @@ public class LodBufferBuilder
 				{
 					for (int zRegion = 0; zRegion < lodDim.getWidth(); zRegion++)
 					{
-						if (lodDim.getRegenByArrayIndex(xRegion, zRegion) || fullRegen)
+						if (lodDim.isRegionToRegen(xRegion, zRegion) || fullRegen)
 						{
 							RegionPos regionPos = new RegionPos(
 									xRegion + lodDim.getCenterX() - Math.floorDiv(lodDim.getWidth(), 2),
@@ -219,7 +219,7 @@ public class LodBufferBuilder
 
 							// make sure the buffers weren't
 							// changed while we were running this method
-							if (currentBuffer == null || (currentBuffer != null && !currentBuffer.building()))
+							if (currentBuffer == null || !currentBuffer.building())
 								return;
 
 							byte minDetail = region.getMinDetailLevel();
@@ -403,27 +403,33 @@ public class LodBufferBuilder
 	 * <p>
 	 * May have to wait for the bufferLock to open.
 	 */
-	public void setupBuffers(int numbRegionsWide, LodDimension lodDimension)
+	public void setupBuffers(LodDimension lodDimension)
 	{
 		bufferLock.lock();
-
-		previousRegionWidth = numbRegionsWide;
+		int numbRegionsWide = lodDimension.getWidth();
 		int bufferMaxCapacity;
 
-		buildableBuffers = new BufferBuilder[numbRegionsWide][numbRegionsWide];
+		//if(previousRegionWidth != numbRegionsWide || firstSetup)
+		//{
+			firstSetup = false;
+			previousRegionWidth = numbRegionsWide;
+			buildableBuffers = new BufferBuilder[numbRegionsWide][numbRegionsWide];
 
-		buildableVbos = new VertexBuffer[numbRegionsWide][numbRegionsWide];
-		drawableVbos = new VertexBuffer[numbRegionsWide][numbRegionsWide];
-
+			buildableVbos = new VertexBuffer[numbRegionsWide][numbRegionsWide];
+			drawableVbos = new VertexBuffer[numbRegionsWide][numbRegionsWide];
+		//}
 		for (int x = 0; x < numbRegionsWide; x++)
 		{
 			for (int z = 0; z < numbRegionsWide; z++)
 			{
-				bufferMaxCapacity = lodDimension.getMemoryRequired(x,z);
-				buildableBuffers[x][z] = new BufferBuilder(bufferMaxCapacity);
+				//if(lodDimension.isBufferToSetup(x,z))
+				//{
+					bufferMaxCapacity = lodDimension.getMemoryRequired(x, z, LodConfig.CLIENT.graphics.lodTemplate.get());
+					buildableBuffers[x][z] = new BufferBuilder(bufferMaxCapacity);
 
-				buildableVbos[x][z] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
-				drawableVbos[x][z] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
+					buildableVbos[x][z] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
+					drawableVbos[x][z] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
+				//}
 			}
 		}
 
@@ -455,7 +461,7 @@ public class LodBufferBuilder
 		{
 			for (int z = 0; z < buildableBuffers.length; z++)
 			{
-				if (fullRegen || lodDim.getRegenByArrayIndex(x, z))
+				if (fullRegen || lodDim.isRegionToRegen(x, z))
 				{
 					buildableBuffers[x][z].begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
 				}
@@ -470,7 +476,7 @@ public class LodBufferBuilder
 	{
 		for (int x = 0; x < buildableBuffers.length; x++)
 			for (int z = 0; z < buildableBuffers.length; z++)
-				if (buildableBuffers[x][z] != null && buildableBuffers[x][z].building() && (fullRegen || lodDim.getRegenByArrayIndex(x, z)))
+				if (buildableBuffers[x][z] != null && buildableBuffers[x][z].building() && (fullRegen || lodDim.isRegionToRegen(x, z)))
 					buildableBuffers[x][z].end();
 	}
 
@@ -491,7 +497,7 @@ public class LodBufferBuilder
 			{
 				for (int z = 0; z < buildableVbos.length; z++)
 				{
-					if (fullRegen || lodDim.getRegenByArrayIndex(x, z))
+					if (fullRegen || lodDim.isRegionToRegen(x, z))
 					{
 						ByteBuffer builderBuffer = buildableBuffers[x][z].popNextBuffer().getSecond();
 						vboUpload(buildableVbos[x][z], builderBuffer);

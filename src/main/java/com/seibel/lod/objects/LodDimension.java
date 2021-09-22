@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.GenerationPriority;
+import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
 import com.seibel.lod.util.DataPointUtil;
@@ -68,6 +69,7 @@ public class LodDimension
 	 * stores all the regions in this dimension
 	 */
 	public volatile LodRegion[][] regions;
+
 	/**
 	 * stores if the region at the given x and z index needs to be saved to disk
 	 */
@@ -76,6 +78,10 @@ public class LodDimension
 	 * stores if the region at the given x and z index needs to be regenerated
 	 */
 	private volatile boolean[][] regionNeedsRegen;
+	/**
+	 * stores if the buffer size at the given x and z index needs to be changed
+	 */
+	private volatile boolean[][] setupBuffer;
 
 	/**
 	 * if true that means there are regions in this dimension
@@ -138,6 +144,7 @@ public class LodDimension
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];
 		regionNeedsRegen = new boolean[width][width];
+		setupBuffer = new boolean[width][width];
 
 		//treeGenerator((int) mc.player.getX(),(int) mc.player.getZ());
 
@@ -380,6 +387,7 @@ public class LodDimension
 							if (regions[x][z].getMinDetailLevel() > levelToCut)
 							{
 								regions[x][z].cutTree(levelToCut);
+								setupBuffer[x][z] = true;
 							}
 						}
 
@@ -440,12 +448,14 @@ public class LodDimension
 							}
 							regionNeedsRegen[x][z] = true;
 							regenDimension = true;
+							setupBuffer[x][z] = true;
 
 						} else if (region.getMinDetailLevel() > levelToGen)
 						{
 							//Second case, region has been initialized but at a higher level
 							//We expand the region by introducing the missing layer
 							region.expand(levelToGen);
+							setupBuffer[x][z] = true;
 						}
 					}
 				}
@@ -686,9 +696,13 @@ public class LodDimension
 		region.clear(detailLevel, posX, posZ);
 	}
 
-	public boolean getRegenByArrayIndex(int xIndex, int zIndex)
+	public boolean isRegionToRegen(int xIndex, int zIndex)
 	{
 		return regionNeedsRegen[xIndex][zIndex];
+	}
+	public boolean isBufferToSetup(int xIndex, int zIndex)
+	{
+		return setupBuffer[xIndex][zIndex];
 	}
 
 	public void setRegenByArrayIndex(int xIndex, int zIndex, boolean newRegen)
@@ -804,6 +818,7 @@ public class LodDimension
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];
 		regionNeedsRegen = new boolean[width][width];
+		setupBuffer = new boolean[width][width];
 
 		// populate isRegionDirty
 		for (int i = 0; i < width; i++)
@@ -840,11 +855,13 @@ public class LodDimension
 		return stringBuilder.toString();
 	}
 
-	public int getMemoryRequired(int x, int z)
+	public int getMemoryRequired(int x, int z, LodTemplate template)
 	{
+		/*return regions[x][z].getMinMemoryNeeded(template);*/
+
 		int minDistance = LevelPosUtil.minDistance(LodUtil.REGION_DETAIL_LEVEL, x, z, halfWidth, halfWidth);
-		int detail = DetailDistanceUtil.getGenerationDetailFromDistance(minDistance);
-		int levelToGen = DetailDistanceUtil.getLodGenDetail(detail).detailLevel;
+		int detail = DetailDistanceUtil.getTreeCutDetailFromDistance(minDistance);
+		int levelToGen = DetailDistanceUtil.getCutLodDetail(detail);
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelToGen);
 		int maxVerticalData = DetailDistanceUtil.getMaxVerticalData(levelToGen);
 		int numberOfLods = size * size * maxVerticalData;
