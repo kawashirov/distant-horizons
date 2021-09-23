@@ -2,7 +2,6 @@ package com.seibel.lod.objects;
 
 
 import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.enums.DetailDropOff;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.enums.VerticalQuality;
@@ -56,7 +55,7 @@ public class LodRegion
 		dataContainer = new LevelContainer[POSSIBLE_LOD];
 
 
-		//Initialize all the different matrices
+		// Initialize all the different matrices
 		for (byte lod = minDetailLevel; lod <= LodUtil.REGION_DETAIL_LEVEL; lod++)
 		{
 			switch (verticalQuality)
@@ -96,10 +95,18 @@ public class LodRegion
 	{
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		//update the number of nodes present
-		//if (!doesDataExist(detailLevel, posX, posZ)) numberOfPoints++;
-		//add the node data
+		
+		// For some reason the dataContainer can contain null entries
+		if (this.dataContainer[detailLevel] == null)
+		{
+			if (verticalQuality == VerticalQuality.HEIGHTMAP)
+				this.dataContainer[detailLevel] = new SingleLevelContainer(detailLevel);
+			else
+				this.dataContainer[detailLevel] = new VerticalLevelContainer(detailLevel);
+		}
+		
 		this.dataContainer[detailLevel].addData(data, posX, posZ, verticalIndex);
+		
 		return true;
 	}
 
