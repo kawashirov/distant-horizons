@@ -322,15 +322,17 @@ public class LodBuilder
 				yAbs = height - 1;
 				// We search light on above air block
 				depth = determineBottomPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
-				blockPos.set(xAbs, yAbs, zAbs);
-				light = getLightValue(chunk, blockPos, hasCeiling, hasSkyLight, topBlock);
 				if (hasCeiling && topBlock)
 				{
 					yAbs = depth;
+					blockPos.set(xAbs, yAbs, zAbs);
+					light = getLightValue(chunk, blockPos, hasCeiling, hasSkyLight, topBlock);
 					color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
 					blockPos.set(xAbs, yAbs - 1, zAbs);
 				} else
 				{
+					blockPos.set(xAbs, yAbs, zAbs);
+					light = getLightValue(chunk, blockPos, hasCeiling, hasSkyLight, topBlock);
 					color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
 					blockPos.set(xAbs, yAbs + 1, zAbs);
 				}
@@ -595,7 +597,8 @@ public class LodBuilder
 
 		IWorld world = mc.getClientWorld();
 
-		int blockBrightness = world.getBrightness(LightType.BLOCK, blockPos);
+		//int blockBrightness = world.getBrightness(LightType.BLOCK, blockPos);
+		int blockBrightness = chunk.getLightEmission(blockPos);
 
 		if (hasCeiling && topBlock)
 			blockPos.set(blockPos.getX(), blockPos.getY() - 1, blockPos.getZ());
@@ -626,8 +629,7 @@ public class LodBuilder
 				}
 			}
 		}
-		BlockState blockState = chunk.getBlockState(blockPos);
-		blockLight = blockState.getLightValue(chunk, blockPos);
+		blockLight = world.getBrightness(LightType.BLOCK, blockPos);
 		blockLight = LodUtil.clamp(0, blockLight + blockBrightness, 15);
 
 		return blockLight + (skyLight << 4);

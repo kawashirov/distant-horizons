@@ -854,6 +854,16 @@ public class LodDimension
 	{
 		/*return regions[x][z].getMinMemoryNeeded(template);*/
 
+		/*TODO add memory use calculated with the following cases
+		switch (LodConfig.CLIENT.graphics.detailDropOff.get())
+		{
+			default:
+			case BY_BLOCK:
+				break;
+			case BY_REGION_FANCY:
+				break;
+			case BY_REGION_FAST:
+		}*/
 		int minDistance = LevelPosUtil.minDistance(LodUtil.REGION_DETAIL_LEVEL, x, z, halfWidth, halfWidth);
 		int detail = DetailDistanceUtil.getTreeCutDetailFromDistance(minDistance);
 		int levelToGen = DetailDistanceUtil.getLodDrawDetail(detail);

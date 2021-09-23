@@ -95,7 +95,7 @@ public class LodRegion
 	{
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		
+
 		// For some reason the dataContainer can contain null entries
 		if (this.dataContainer[detailLevel] == null)
 		{
@@ -104,9 +104,9 @@ public class LodRegion
 			else
 				this.dataContainer[detailLevel] = new VerticalLevelContainer(detailLevel);
 		}
-		
+
 		this.dataContainer[detailLevel].addData(data, posX, posZ, verticalIndex);
-		
+
 		return true;
 	}
 
@@ -240,14 +240,16 @@ public class LodRegion
 		byte supposedLevel;
 		int maxDistance;
 		boolean stopNow = false;
+		int minDistance;
+		int childLevel;
 		switch (LodConfig.CLIENT.graphics.detailDropOff.get())
 		{
 			default:
 			case BY_BLOCK:
 				maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
 				supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
-				int minDistance = LevelPosUtil.minDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
-				int childLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(minDistance));
+				minDistance = LevelPosUtil.minDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
+				childLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(minDistance));
 				stopNow = detailLevel == childLevel - 1;
 
 				break;
@@ -255,28 +257,32 @@ public class LodRegion
 				supposedLevel = minDetailLevel;
 				break;
 			case BY_REGION_FAST:
-				int playerRegionX = LevelPosUtil.getRegion(LodUtil.BLOCK_DETAIL_LEVEL,playerPosX);
-				int playerRegionZ = LevelPosUtil.getRegion(LodUtil.BLOCK_DETAIL_LEVEL,playerPosZ);
-				if(playerRegionX == regionPosX && playerRegionZ == regionPosZ)
-					supposedLevel = minDetailLevel;
-				else
+				int playerRegionX = LevelPosUtil.getRegion(LodUtil.BLOCK_DETAIL_LEVEL, playerPosX);
+				int playerRegionZ = LevelPosUtil.getRegion(LodUtil.BLOCK_DETAIL_LEVEL, playerPosZ);
+				if (playerRegionX == regionPosX && playerRegionZ == regionPosZ)
 				{
-					maxDistance = LevelPosUtil.maxDistance(LodUtil.REGION_DETAIL_LEVEL, regionPosX, regionPosZ, playerRegionX*512 + 256, playerRegionZ*512 + 256);
+					maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
+					supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
+					minDistance = LevelPosUtil.minDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
+					childLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(minDistance));
+					stopNow = detailLevel == childLevel - 1;
+				} else
+				{
+					maxDistance = LevelPosUtil.maxDistance(LodUtil.REGION_DETAIL_LEVEL, regionPosX, regionPosZ, playerRegionX * 512 + 256, playerRegionZ * 512 + 256);
 					supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
 				}
 				break;
 		}
 
-		if(stopNow){
+		if (stopNow)
+		{
 			posToRender.addPosToRender(detailLevel,
 					posX + regionPosX * size,
 					posZ + regionPosZ * size);
-		}
-		else if (supposedLevel > detailLevel)
+		} else if (supposedLevel > detailLevel)
 		{
 			return;
-		}
-		else if (supposedLevel == detailLevel)
+		} else if (supposedLevel == detailLevel)
 		{
 			posToRender.addPosToRender(detailLevel,
 					posX + regionPosX * size,
@@ -306,7 +312,7 @@ public class LodRegion
 
 			//If all the four children exist we go deeper
 
-			if(!requireCorrectDetailLevel)
+			if (!requireCorrectDetailLevel)
 			{
 				if (childrenCount == 4)
 				{

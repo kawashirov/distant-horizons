@@ -235,7 +235,7 @@ public class LodBufferBuilder
 								int maxVerticalData = 1;
 								if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == VerticalQuality.MULTI_LOD)
 								{
-									maxVerticalData = DetailDistanceUtil.getMaxVerticalData(LodUtil.BLOCK_DETAIL_LEVEL);
+									maxVerticalData = 256;
 								}
 								
 								// create adjData's arrays
