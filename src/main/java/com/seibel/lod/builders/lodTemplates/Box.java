@@ -113,7 +113,7 @@ public class Box
 	public Box()
 	{
 		box = new int[2][3];
-		order = new long[DetailDistanceUtil.getMaxVerticalData(0)];
+		//order = new long[DetailDistanceUtil.getMaxVerticalData(0)];
 		colorMap = new HashMap<Direction, int[]>()
 		{{
 			put(Direction.UP, new int[1]);
@@ -173,7 +173,7 @@ public class Box
 			colorMap.get(direction)[0] = 0;
 		}
 
-		Arrays.fill(order, DataPointUtil.EMPTY_DATA);
+		//Arrays.fill(order, DataPointUtil.EMPTY_DATA);
 		for (Direction direction : ADJ_DIRECTIONS)
 		{
 			if(isCulled(direction)){
@@ -235,7 +235,7 @@ public class Box
 
 			//We order the adj list
 			/**TODO remove this if the order is maintained naturally*/
-			order[0] = 0;
+			/*order[0] = 0;
 			int count = 0;
 			for (int i = 0; i < dataPoint.length; i++)
 			{
@@ -251,19 +251,21 @@ public class Box
 				}
 				order[j + 1] = dataPoint[i];
 				count++;
-			}
+			}*/
 
 			int i;
 			int faceToDraw = 0;
 			boolean firstFace = true;
 			boolean toFinish = false;
+			boolean allAbove = true;
 			long singleAdjDataPoint;
-			/*for (i = 0; i < dataPoint.length; i++)
+			for (i = 0; i < dataPoint.length; i++)
 			{
-				singleAdjDataPoint = dataPoint[i];*/
-			for (i = 0; i < count; i++)
+				singleAdjDataPoint = dataPoint[i];
+			/*for (i = 0; i < count; i++)
 			{
-				singleAdjDataPoint = order[i];
+				singleAdjDataPoint = order[i];*/
+
 				if(DataPointUtil.isItVoid(singleAdjDataPoint) || !DataPointUtil.doesItExist(singleAdjDataPoint))
 				{
 					break;
@@ -272,6 +274,7 @@ public class Box
 				depth = DataPointUtil.getDepth(singleAdjDataPoint);
 
 				if (depth <= maxY) {
+					allAbove = false;
 					if (height < minY)
 					{//the adj data is lower than the current data
 						//we break since all the other data will be lower
@@ -326,11 +329,17 @@ public class Box
 						firstFace = false;
 						toFinish = true;
 					}
-				} //else {//the adj data is higher than the current data
+				}
+				//else {//the adj data is higher than the current data
 					//we continue since there could be some other data that intersect the current
 				//}
 			}
-			if (toFinish)
+			if(allAbove){
+				adjHeightAndDepth.get(direction)[0][0] = getMaxY();
+				adjHeightAndDepth.get(direction)[0][1] = getMinY();
+				faceToDraw++;
+			}
+			else if (toFinish)
 			{
 				adjHeightAndDepth.get(direction)[faceToDraw][1] = minY;
 				faceToDraw++;
