@@ -19,7 +19,6 @@ package com.seibel.lod.render;
 
 import java.util.HashSet;
 
-import com.seibel.lod.enums.*;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
@@ -31,6 +30,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.builders.LodBufferBuilder;
 import com.seibel.lod.builders.LodBufferBuilder.VertexBuffersAndOffset;
 import com.seibel.lod.config.LodConfig;
+import com.seibel.lod.enums.DebugMode;
+import com.seibel.lod.enums.DetailDropOff;
+import com.seibel.lod.enums.FogDistance;
+import com.seibel.lod.enums.FogDrawOverride;
+import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
@@ -61,7 +65,7 @@ import net.minecraft.util.math.vector.Vector3d;
  * This is where LODs are draw to the world.
  *
  * @author James Seibel
- * @version 9-19-2021
+ * @version 9-23-2021
  */
 public class LodRenderer
 {
@@ -582,18 +586,6 @@ public class LodRenderer
 	 */
 	public void setupBuffers(LodDimension lodDim)
 	{
-		// calculate the max amount of memory needed (in bytes)
-		/*int bufferMemory = RenderUtil.getBufferMemoryForRegion(lodDim);*/
-
-		// if the required memory is greater than the
-		// MAX_ALOCATEABLE_DIRECT_MEMORY lower the lodChunkRadiusMultiplier
-		// to fit.
-		/*if (bufferMemory > MAX_ALOCATEABLE_DIRECT_MEMORY)
-		{
-			ClientProxy.LOGGER.warn("setupBuffers tried to allocate too much memory for the BufferBuilders."
-					                        + " It tried to allocate \"" + bufferMemory + "\" bytes, when \"" + MAX_ALOCATEABLE_DIRECT_MEMORY + "\" is the max.");
-		}*/
-
 		lodBufferBuilder.setupBuffers(lodDim);
 	}
 
@@ -759,6 +751,11 @@ public class LodRenderer
 	{
 		short chunkRenderDistance = (short) mc.getRenderDistance();
 		
+		int vanillaRenderedChunksWidth = chunkRenderDistance*2+2;
+		vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
+		
+		
+		
 		//=============//
 		// full regens //
 		//=============//
@@ -773,8 +770,6 @@ public class LodRenderer
 			previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
 			prevFogDistance = LodConfig.CLIENT.graphics.fogDistance.get();
 			prevRenderDistance = mc.getRenderDistance();
-			//should use this when it's ready
-			vanillaRenderedChunks = new boolean[chunkRenderDistance*2+2][chunkRenderDistance*2+2];
 		}
 
 		// did the user change the debug setting?
@@ -798,8 +793,6 @@ public class LodRenderer
 				{
 					fullRegen = true;
 					previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
-					//should use this when it's ready
-					vanillaRenderedChunks = new boolean[chunkRenderDistance * 2 + 2][chunkRenderDistance * 2 + 2];
 				}
 				prevPlayerPosTime = newTime;
 			}
@@ -858,22 +851,29 @@ public class LodRenderer
 		int zIndex;
 		for (ChunkPos pos : chunkPosToSkip)
 		{
-			xIndex = (pos.x - mc.getPlayer().xChunk) + chunkRenderDistance + 1;
-			zIndex = (pos.z - mc.getPlayer().zChunk) + chunkRenderDistance + 1;
+			xIndex = (pos.x - mc.getPlayer().xChunk) + (chunkRenderDistance + 1);
+			zIndex = (pos.z - mc.getPlayer().zChunk) + (chunkRenderDistance + 1);
 			
-			if (!vanillaRenderedChunks[xIndex][zIndex])
+			// sometimes we are given chunks that are outside the render distance,
+			// This prevents index out of bounds exceptions
+			if (xIndex >= 0 && zIndex >= 0
+				&& xIndex < vanillaRenderedChunks.length 
+				&& zIndex < vanillaRenderedChunks.length)
 			{
-				vanillaRenderedChunks[xIndex][zIndex] = true;
-				vanillaRenderedChunksChanged = true;
-				lodDim.setToRegen(pos.getRegionX(), pos.getRegionZ());
+				if (!vanillaRenderedChunks[xIndex][zIndex])
+				{
+					vanillaRenderedChunks[xIndex][zIndex] = true;
+					vanillaRenderedChunksChanged = true;
+					lodDim.setToRegen(pos.getRegionX(), pos.getRegionZ());
+				}
 			}
 		}
-
-
+		
+		
 		// if the player is high enough, draw all LODs
 		if(chunkPosToSkip.isEmpty() && mc.getPlayer().position().y > 256)
 		{
-			vanillaRenderedChunks = new boolean[chunkRenderDistance*2+2][chunkRenderDistance*2+2];
+			vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
 			vanillaRenderedChunksChanged = true;
 		}
 	}
