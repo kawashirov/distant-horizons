@@ -59,7 +59,7 @@ import net.minecraft.util.math.ChunkPos;
  * This object is used to create NearFarBuffer objects.
  *
  * @author James Seibel
- * @version 9-16-2021
+ * @version 9-22-2021
  */
 public class LodBufferBuilder
 {
@@ -505,10 +505,6 @@ public class LodBufferBuilder
 					}
 				}
 			}
-			
-			// make sure all the buffers have been uploaded.
-			// this probably is necessary, but it makes me feel good :)
-			GL11.glFlush();
 		}
 		catch (IllegalStateException e)
 		{
