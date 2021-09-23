@@ -118,33 +118,67 @@ public class LodWorldGenerator
 					byte detailLevel;
 					int posX;
 					int posZ;
+					boolean nearOrFar = true;
+					boolean stopSwitch = false;
+					int near = 0;
+					int far = 0;
+
 					for (int index = 0; index < posToGenerate.getNumberOfPos(); index++)
 					{
-						if(posToGenerate.getNthDetail(index) == 0)
-							continue;
-						detailLevel = (byte) (posToGenerate.getNthDetail(index) - 1);
-						posX = posToGenerate.getNthPosX(index);
-						posZ = posToGenerate.getNthPosZ(index);
-
-						ChunkPos chunkPos = new ChunkPos(LevelPosUtil.getChunkPos(detailLevel,posX), LevelPosUtil.getChunkPos(detailLevel,posZ));
-						if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
+						if (posToGenerate.getNthDetail(near, true) != 0 && near < posToGenerate.getNumberOfNearPos())
 						{
-							// prevent generating the same chunk multiple times
-							if (positionWaitingToBeGenerated.contains(chunkPos))
+							detailLevel = (byte) (posToGenerate.getNthDetail(near, true) - 1);
+							posX = posToGenerate.getNthPosX(near, true);
+							posZ = posToGenerate.getNthPosZ(near, true);
+							near++;
+							ChunkPos chunkPos = new ChunkPos(LevelPosUtil.getChunkPos(detailLevel, posX), LevelPosUtil.getChunkPos(detailLevel, posZ));
+							if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
 							{
-								continue;
+								// prevent generating the same chunk multiple times
+								if (positionWaitingToBeGenerated.contains(chunkPos))
+								{
+									continue;
+								}
 							}
+
+							// don't add null chunkPos (which shouldn't happen anyway)
+							// or add more to the generation queue
+							if (chunkPos == null || numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
+								continue;
+
+							positionWaitingToBeGenerated.add(chunkPos);
+							numberOfChunksWaitingToGenerate.addAndGet(1);
+							LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, DetailDistanceUtil.getDistanceGenerationMode(detailLevel), lodBuilder, lodDim, serverWorld);
+							WorldWorkerManager.addWorker(genWorker);
 						}
 
-						// don't add null chunkPos (which shouldn't happen anyway)
-						// or add more to the generation queue
-						if (chunkPos == null || numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
-							continue;
 
-						positionWaitingToBeGenerated.add(chunkPos);
-						numberOfChunksWaitingToGenerate.addAndGet(1);
-						LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos,  DetailDistanceUtil.getDistanceGenerationMode(detailLevel), lodBuilder, lodDim, serverWorld);
-						WorldWorkerManager.addWorker(genWorker);
+						if (posToGenerate.getNthDetail(far, false) != 0 && far < posToGenerate.getNumberOfFarPos())
+						{
+							detailLevel = (byte) (posToGenerate.getNthDetail(far, false) - 1);
+							posX = posToGenerate.getNthPosX(far, false);
+							posZ = posToGenerate.getNthPosZ(far, false);
+							far++;
+							ChunkPos chunkPos = new ChunkPos(LevelPosUtil.getChunkPos(detailLevel, posX), LevelPosUtil.getChunkPos(detailLevel, posZ));
+							if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
+							{
+								// prevent generating the same chunk multiple times
+								if (positionWaitingToBeGenerated.contains(chunkPos))
+								{
+									continue;
+								}
+							}
+
+							// don't add null chunkPos (which shouldn't happen anyway)
+							// or add more to the generation queue
+							if (chunkPos == null || numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
+								continue;
+
+							positionWaitingToBeGenerated.add(chunkPos);
+							numberOfChunksWaitingToGenerate.addAndGet(1);
+							LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, DetailDistanceUtil.getDistanceGenerationMode(detailLevel), lodBuilder, lodDim, serverWorld);
+							WorldWorkerManager.addWorker(genWorker);
+						}
 					}
 
 				} catch (Exception e)

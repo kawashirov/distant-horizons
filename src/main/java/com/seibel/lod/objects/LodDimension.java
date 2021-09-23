@@ -28,11 +28,7 @@ import com.seibel.lod.enums.GenerationPriority;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
-import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.DetailDistanceUtil;
-import com.seibel.lod.util.LevelPosUtil;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.*;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.util.math.ChunkPos;
@@ -535,10 +531,19 @@ public class LodDimension
 			int posX;
 			int posZ;
 			long data;
-			int numbChunksWide = (width) * 32 * 2;
+				int numbChunksWide = (width) * 32 ;
+				int circleLimit = Integer.MAX_VALUE;
 			for (int i = 0; i < numbChunksWide * numbChunksWide; i++)
 			{
+					// use this for square generation
 				
+					// use this for circular generation
+					if (circleLimit < Math.abs(x) && circleLimit < Math.abs(z))
+						break;
+					if (maxDataToGenerate == 0)
+					{
+						circleLimit = (int) (Math.abs(x) * 1.41f);
+					}
 				
 				xChunkToCheck = x + playerChunkX;
 				zChunkToCheck = z + playerChunkZ;
@@ -554,8 +559,8 @@ public class LodDimension
 				if (DataPointUtil.getGenerationMode(data) < LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get().complexity)
 				{
 					posToGenerate.addPosToGenerate(detailLevel, posX, posZ);
-					//if (maxDataToGenerate >= 0)
-					//	maxDataToGenerate--;
+						if (maxDataToGenerate >= 0)
+							maxDataToGenerate--;
 				}
 				if ((x == z) || ((x < 0) && (x == -z)) || ((x > 0) && (x == 1 - z)))
 				{
@@ -568,7 +573,7 @@ public class LodDimension
 			}
 			break;
 		case FAR_FIRST:
-			posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, (int) (maxDataToGenerate * 0.25f), playerPosX, playerPosZ);
+			posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, (int) (maxDataToGenerate * 0.25), playerPosX, playerPosZ);
 			int n = regions.length;
 			int xRegion;
 			int zRegion;
@@ -847,7 +852,7 @@ public class LodDimension
 		
 		int minDistance = LevelPosUtil.minDistance(LodUtil.REGION_DETAIL_LEVEL, x, z, halfWidth, halfWidth);
 		int detail = DetailDistanceUtil.getTreeCutDetailFromDistance(minDistance);
-		int levelToGen = DetailDistanceUtil.getCutLodDetail(detail);
+		int levelToGen = DetailDistanceUtil.getCutLodDetail(detail)+1;
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelToGen);
 		int maxVerticalData = DetailDistanceUtil.getMaxVerticalData(levelToGen);
 		int numberOfLods = size * size * maxVerticalData;
