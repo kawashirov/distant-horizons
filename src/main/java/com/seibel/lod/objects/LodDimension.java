@@ -856,11 +856,12 @@ public class LodDimension
 
 		int minDistance = LevelPosUtil.minDistance(LodUtil.REGION_DETAIL_LEVEL, x, z, halfWidth, halfWidth);
 		int detail = DetailDistanceUtil.getTreeCutDetailFromDistance(minDistance);
-		int levelToGen = DetailDistanceUtil.getCutLodDetail(detail)+1;
+		int levelToGen = DetailDistanceUtil.getLodDrawDetail(detail);
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelToGen);
-		int maxVerticalData = DetailDistanceUtil.getMaxVerticalData(levelToGen);
+		int maxVerticalData = DetailDistanceUtil.getMaxVerticalData(detail);
 		int numberOfLods = size * size * maxVerticalData;
-		int memoryUse = numberOfLods * LodConfig.CLIENT.graphics.lodTemplate.get().getBufferMemoryForSingleLod(maxVerticalData);
+		int memoryUse = numberOfLods * template.getBufferMemoryForSingleLod(maxVerticalData);
+		System.out.println(detail + " " + memoryUse + " " + numberOfLods + " " + template.getBufferMemoryForSingleLod(maxVerticalData));
 		return memoryUse;
 	}
 }

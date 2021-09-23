@@ -18,7 +18,7 @@ public class DetailDistanceUtil
 	private static double logBase = Math.log(2);
 
 	private static int[] maxVerticalData = {
-			8,
+			4,
 			4,
 			4,
 			2,
@@ -28,7 +28,7 @@ public class DetailDistanceUtil
 			1,
 			1,
 			1,
-			1,};
+			1};
 
 
 	private static HorizontalResolution[] lodGenDetails = {
@@ -121,10 +121,16 @@ public class DetailDistanceUtil
 	{
 		if (detail < minDrawDetail)
 		{
-			return lodGenDetails[minDrawDetail].detailLevel;
+			if(LodConfig.CLIENT.graphics.alwaysDrawAtMaxQuality.get())
+				return getLodGenDetail(minDrawDetail).detailLevel;
+			else
+				return (byte) minDrawDetail;
 		} else
 		{
-			return lodGenDetails[detail].detailLevel;
+			if(LodConfig.CLIENT.graphics.alwaysDrawAtMaxQuality.get())
+				return getLodGenDetail(detail).detailLevel;
+			else
+				return (byte) detail;
 		}
 	}
 

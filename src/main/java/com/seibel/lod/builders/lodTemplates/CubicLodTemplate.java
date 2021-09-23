@@ -129,7 +129,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	public int getBufferMemoryForSingleNode(int maxVerticalData)
 	{
 		// (sidesOnACube * pointsInASquare * (positionPoints + colorPoints)))
-		return (2 * 4 * (3 + 4)) + (4 * 4 * (maxVerticalData + 1) * (3 + 4));
+		return 2 * 4 * (3 + 4) + 4 * 4 * Math.max((maxVerticalData+1)/2,1) * (3 + 4);
 	}
 
 }
