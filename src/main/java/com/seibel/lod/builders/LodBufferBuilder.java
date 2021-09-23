@@ -509,11 +509,13 @@ public class LodBufferBuilder
 			// make sure all the buffers have been uploaded.
 			// this probably is necessary, but it makes me feel good :)
 			GL11.glFlush();
-		} catch (IllegalStateException e)
+		}
+		catch (IllegalStateException e)
 		{
 			ClientProxy.LOGGER.error(LodBufferBuilder.class.getSimpleName() + " - UploadBuffers failed: " + e.getMessage());
 			e.printStackTrace();
-		} finally
+		}
+		finally
 		{
 			// make sure no buffer is bound
 			if (glProxy.getGlContext() == GlProxyContext.LOD_BUILDER)
@@ -532,7 +534,7 @@ public class LodBufferBuilder
 	private void vboUpload(VertexBuffer vbo, ByteBuffer uploadBuffer)
 	{
 		// this shouldn't happen, but just to be safe
-		if (vbo.id != -1)
+		if (vbo.id != -1 && GlProxy.getInstance().getGlContext() == GlProxyContext.LOD_BUILDER)
 		{
 			// this is how many points will be rendered
 			vbo.vertexCount = (uploadBuffer.remaining() / vbo.format.getVertexSize());
@@ -550,43 +552,6 @@ public class LodBufferBuilder
 
 			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		}
-		/*
-		// this shouldn't happen, but just to be safe
-		if (vbo.id != -1)
-		{
-			vbo.vertexCount = uploadBuffer.remaining() / vbo.format.getVertexSize();
-
-
-			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.id);
-
-
-			// make sure enough space is allocated to fit the builderBuffer
-			GL15C.glBufferData(GL15.GL_ARRAY_BUFFER, uploadBuffer.capacity(), GL15C.GL_DYNAMIC_DRAW);
-			// try to get a pointer to the VBO's byteBuffer in GPU memory
-			ByteBuffer vboBuffer = GL15C.glMapBuffer(GL15.GL_ARRAY_BUFFER, GL15.GL_WRITE_ONLY);
-
-			// upload the builderBuffer to the GPU
-			if (vboBuffer != null)
-			{
-				// This is the best way to upload lots of data, since writes directly to GPU
-				// memory, and doesn't pause OpenGL.
-				vboBuffer.put(uploadBuffer);
-			}
-			else
-			{
-				// Sometimes the vboBuffer is null (I think it may be due to buffer sizes
-				// changing or a setup process that didn't complete), so in that case
-				// we have to use this method which is slower and pauses OpenGL,
-				// but always succeeds.
-				GL15C.glBufferData(GL15.GL_ARRAY_BUFFER, uploadBuffer, GL15C.GL_DYNAMIC_DRAW);
-
-			}
-
-
-			GL15C.glUnmapBuffer(GL15.GL_ARRAY_BUFFER);
-			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-		}*/
-
 	}
 
 	/**
