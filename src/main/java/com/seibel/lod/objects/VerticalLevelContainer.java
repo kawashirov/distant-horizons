@@ -175,6 +175,7 @@ public class VerticalLevelContainer implements LevelContainer
 		int x = size * size * maxVerticalData;
 		int tempIndex;
 		byte[] tempData = ThreadMapUtil.getSaveContainer();
+		long current;
 		if(tempData == null || tempData.length != (2 + (x * 8)))
 			tempData = new byte[2 + (x * 8)];
 		else
@@ -187,20 +188,23 @@ public class VerticalLevelContainer implements LevelContainer
 
 		for (int i = 0; i < x; i++)
 		{
-			if (dataContainer[i] == 0 || dataContainer[i] == 3)
+			current = dataContainer[i];
+			if ((current & 0b11) == 0 || (current & 0b11) == 3)
 			{
-				last = (byte) dataContainer[i];
-				if (dataContainer[i] == 3) //skip rest of void chunk
+				current &= 0b11; //clean any garbage data after those two bits
+				last = (byte) current;
+				if (current == 3) //skip rest of void chunk
 					i += maxVerticalData - 1;
 				counter++;
 			} else {
 				for (tempIndex = 0; tempIndex < 8; tempIndex++)
-					tempData[index + tempIndex] = (byte) (dataContainer[i] >>> (8 * tempIndex));
+					tempData[index + tempIndex] = (byte) (current >>> (8 * tempIndex));
 				index += 8;
 			}
-			if (last != -1 && ( i == x - 1 || last != dataContainer[i + 1]))
+			if (last != -1 && ( i == x - 1 || last != ((dataContainer[i + 1]) & 0b11)))
 			{ //save compressed data if next is different or if we reached onf of the data
 				tempData[index] = (byte)(0x7f & ((counter << 2) + last)); //save 5 bits of counter and compressed block
+
 				tempIndex = 0;
 				while ((counter >>> (5 + 7 * tempIndex)) != 0) //there is more of that counter
 				{
