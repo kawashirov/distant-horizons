@@ -12,19 +12,22 @@ public class PosToGenerateContainer
 	private int maxFarSize;
 	private int nearSize;
 	private int farSize;
-	private int[][] posToGenerate;
+	private int[][] nearPosToGenerate;
+	private int[][] farPosToGenerate;
+
 
 	public PosToGenerateContainer(byte farMinDetail, int maxDataToGenerate, int maxFarDataToGenerate, int playerPosX, int playerPosZ)
 	{
 		this.playerPosX = playerPosX;
 		this.playerPosZ = playerPosZ;
 		this.farMinDetail = farMinDetail;
-		maxNearSize = maxDataToGenerate;
+		maxNearSize = maxDataToGenerate-maxFarDataToGenerate;
 		maxFarSize = maxFarDataToGenerate;
 		maxSize = maxDataToGenerate;
 		nearSize = 0;
 		farSize = 0;
-		posToGenerate = new int[maxDataToGenerate][4];
+		nearPosToGenerate = new int[maxDataToGenerate][4];
+		farPosToGenerate = new int[maxDataToGenerate][4];
 	}
 
 	public void addPosToGenerate(byte detailLevel, int posX, int posZ)
@@ -33,52 +36,45 @@ public class PosToGenerateContainer
 		int index;
 		if (detailLevel >= farMinDetail)
 		{//We are introducing a position in the far array
-			if (farSize < maxFarSize)
-			{
+
+			if(farSize < farPosToGenerate.length)
 				farSize++;
-				if (nearSize == maxNearSize)
-				{
-					nearSize--;
-				}
-				maxNearSize--;
-			}
-			index = posToGenerate.length - farSize;
-			while (index < posToGenerate.length - 1 && LevelPosUtil.compareDistance(distance, posToGenerate[index + 1][3]) <= 0)
-			//while (index < posToGenerate.length - 1 && LevelPosUtil.compareLevelAndDistance(detailLevel, distance, (byte) (posToGenerate[index + 1][0] - 1), posToGenerate[index + 1][3]) <= 0)
+			index = farSize;
+			//while (index > 0 && LevelPosUtil.compareDistance(distance, farPosToGenerate[index - 1][3]) <= 0)
+			while (index > 0 && LevelPosUtil.compareDistance(distance, farPosToGenerate[index - 1][3]) <= 0)
 			{
-				posToGenerate[index][0] = posToGenerate[index + 1][0];
-				posToGenerate[index][1] = posToGenerate[index + 1][1];
-				posToGenerate[index][2] = posToGenerate[index + 1][2];
-				posToGenerate[index][3] = posToGenerate[index + 1][3];
-				index++;
+				farPosToGenerate[index][0] = farPosToGenerate[index - 1][0];
+				farPosToGenerate[index][1] = farPosToGenerate[index - 1][1];
+				farPosToGenerate[index][2] = farPosToGenerate[index - 1][2];
+				farPosToGenerate[index][3] = farPosToGenerate[index - 1][3];
+				index--;
 			}
-			if (index <= posToGenerate.length - 1)
+			if (index != farSize-1 || farSize != farPosToGenerate.length)
 			{
-				posToGenerate[index][0] = detailLevel + 1;
-				posToGenerate[index][1] = posX;
-				posToGenerate[index][2] = posZ;
-				posToGenerate[index][3] = distance;
+				farPosToGenerate[index][0] = detailLevel + 1;
+				farPosToGenerate[index][1] = posX;
+				farPosToGenerate[index][2] = posZ;
+				farPosToGenerate[index][3] = distance;
 			}
 		} else
 		{//We are introducing a position in the near array
-			if (nearSize < maxNearSize)
+			if(nearSize < nearPosToGenerate.length)
 				nearSize++;
-			index = nearSize - 1;
-
-			while (index > 0 && LevelPosUtil.compareDistance(distance, posToGenerate[index - 1][3]) <= 0)
+			index = nearSize-1;
+			while (index > 0 && LevelPosUtil.compareDistance(distance, nearPosToGenerate[index - 1][3]) <= 0)
 			{
-				posToGenerate[index][0] = posToGenerate[index - 1][0];
-				posToGenerate[index][1] = posToGenerate[index - 1][1];
-				posToGenerate[index][2] = posToGenerate[index - 1][2];
-				posToGenerate[index][3] = posToGenerate[index - 1][3];
+				nearPosToGenerate[index][0] = nearPosToGenerate[index - 1][0];
+				nearPosToGenerate[index][1] = nearPosToGenerate[index - 1][1];
+				nearPosToGenerate[index][2] = nearPosToGenerate[index - 1][2];
+				nearPosToGenerate[index][3] = nearPosToGenerate[index - 1][3];
 				index--;
 			}
-			if (index >= 0)
+			if (index != nearSize-1 || nearSize != nearPosToGenerate.length)
 			{
-				posToGenerate[index][0] = detailLevel + 1;
-				posToGenerate[index][1] = posX;
-				posToGenerate[index][2] = posZ;
-				posToGenerate[index][3] = distance;
+				nearPosToGenerate[index][0] = detailLevel + 1;
+				nearPosToGenerate[index][1] = posX;
+				nearPosToGenerate[index][2] = posZ;
+				nearPosToGenerate[index][3] = distance;
 			}
 		}
 	}
@@ -101,34 +97,34 @@ public class PosToGenerateContainer
 	public int getNthDetail(int n, boolean near)
 	{
 		if (near)
-			return posToGenerate[n][0];
+			return nearPosToGenerate[n][0];
 		else
-			return posToGenerate[maxSize-1-n][0];
+			return farPosToGenerate[n][0];
 	}
 	public int getNthPosX(int n, boolean near)
 	{
 		if (near)
-			return posToGenerate[n][1];
+			return nearPosToGenerate[n][1];
 		else
-			return posToGenerate[maxSize-1-n][1];
+			return farPosToGenerate[n][1];
 	}
 	public int getNthPosZ(int n, boolean near)
 	{
 		if (near)
-			return posToGenerate[n][2];
+			return nearPosToGenerate[n][2];
 		else
-			return posToGenerate[maxSize-1-n][2];
+			return farPosToGenerate[n][2];
 	}
 	public int getNthGeneration(int n, boolean near)
 	{
 		if (near)
-			return posToGenerate[n][3];
+			return nearPosToGenerate[n][3];
 		else
-			return posToGenerate[maxSize-1-n][3];
+			return farPosToGenerate[n][3];
 	}
 
 	public String toString()
-	{
+	{/*
 		StringBuilder builder = new StringBuilder();
 		builder.append("Number of pos to generate ");
 		builder.append(farSize + nearSize);
@@ -168,6 +164,7 @@ public class PosToGenerateContainer
 			builder.append('\n');
 		}
 		builder.append('\n');
-		return builder.toString();
+		return builder.toString();*/
+		return " ";
 	}
 }

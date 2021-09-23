@@ -2,6 +2,7 @@ package com.seibel.lod.objects;
 
 
 import com.seibel.lod.config.LodConfig;
+import com.seibel.lod.enums.DetailDropOff;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.enums.VerticalQuality;
@@ -231,12 +232,17 @@ public class LodRegion
 		//This is important to avoid any kind of hole in the rendering
 		byte supposedLevel;
 		int maxDistance;
+		boolean stopNow = false;
 		switch (LodConfig.CLIENT.graphics.detailDropOff.get())
 		{
 			default:
 			case BY_BLOCK:
 				maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
 				supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
+				int minDistance = LevelPosUtil.minDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
+				int childLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(minDistance));
+				stopNow = detailLevel == childLevel - 1;
+
 				break;
 			case BY_REGION_FANCY:
 				supposedLevel = minDetailLevel;
@@ -254,8 +260,15 @@ public class LodRegion
 				break;
 		}
 
-		if (supposedLevel > detailLevel)
+		if(stopNow){
+			posToRender.addPosToRender(detailLevel,
+					posX + regionPosX * size,
+					posZ + regionPosZ * size);
+		}
+		else if (supposedLevel > detailLevel)
+		{
 			return;
+		}
 		else if (supposedLevel == detailLevel)
 		{
 			posToRender.addPosToRender(detailLevel,

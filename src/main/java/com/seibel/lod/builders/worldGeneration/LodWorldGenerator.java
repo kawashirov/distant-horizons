@@ -125,7 +125,7 @@ public class LodWorldGenerator
 
 					for (int index = 0; index < posToGenerate.getNumberOfPos(); index++)
 					{
-						if (posToGenerate.getNthDetail(near, true) != 0 && far < posToGenerate.getNumberOfNearPos())
+						if (posToGenerate.getNthDetail(near, true) != 0 && near < posToGenerate.getNumberOfNearPos())
 						{
 							detailLevel = (byte) (posToGenerate.getNthDetail(near, true) - 1);
 							posX = posToGenerate.getNthPosX(near, true);
