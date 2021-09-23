@@ -19,7 +19,7 @@ public class ThreadMapUtil
 	{
 		if (!threadSingleUpdateMap.containsKey(Thread.currentThread().getName()) || (threadSingleUpdateMap.get(Thread.currentThread().getName()) == null))
 		{
-			threadSingleUpdateMap.put(Thread.currentThread().getName(), new long[0]);
+			threadSingleUpdateMap.put(Thread.currentThread().getName(), new long[4]);
 		}
 		return threadSingleUpdateMap.get(Thread.currentThread().getName());
 	}
