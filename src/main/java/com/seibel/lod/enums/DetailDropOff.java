@@ -24,5 +24,5 @@ public enum DetailDropOff
 {
 	BY_REGION_FAST,
 	BY_REGION_FANCY,
-	BY_BLOCK,
+	BY_CHUNK,
 }

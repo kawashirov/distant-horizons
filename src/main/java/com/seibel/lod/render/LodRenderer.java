@@ -782,7 +782,7 @@ public class LodRenderer
 
 		long newTime = System.currentTimeMillis();
 
-		if(LodConfig.CLIENT.graphics.detailDropOff.get() == DetailDropOff.BY_BLOCK)
+		if(LodConfig.CLIENT.graphics.detailDropOff.get() == DetailDropOff.BY_CHUNK)
 		{
 			// check if the player has moved
 			if (newTime - prevPlayerPosTime > LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.get())

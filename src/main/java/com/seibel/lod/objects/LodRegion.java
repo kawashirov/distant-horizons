@@ -245,7 +245,7 @@ public class LodRegion
 		switch (LodConfig.CLIENT.graphics.detailDropOff.get())
 		{
 			default:
-			case BY_BLOCK:
+			case BY_CHUNK:
 				maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
 				supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
 				minDistance = LevelPosUtil.minDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);

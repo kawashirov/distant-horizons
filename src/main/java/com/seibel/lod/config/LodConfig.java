@@ -48,7 +48,7 @@ import net.minecraftforge.fml.config.ModConfig;
  * This handles any configuration the user has access to.
  *
  * @author James Seibel
- * @version 9-21-2021
+ * @version 9-24-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -134,11 +134,11 @@ public class LodConfig
 			
 			detailDropOff = builder
 					.comment("\n\n"
-							+ " how the detail should go dropoff? \n"
-							+ DetailDropOff.BY_BLOCK + "  in chunks circles around the player (best quality option, may cause stuttering)\n"
-							+ DetailDropOff.BY_REGION_FANCY + "  in regions circles around the player (quality option)\n"
-							+ DetailDropOff.BY_REGION_FAST + "  in regions circles around the player (performance option)\n")
-					.defineEnum("detailDropOff", DetailDropOff.BY_BLOCK);
+							+ " How smooth should the detail transition for LODs be? \n"
+							+ DetailDropOff.BY_CHUNK + ": quality is determined per-chunk (best quality option, may cause stuttering when moving)\n"
+							+ DetailDropOff.BY_REGION_FANCY + ": quality is determiend per-region (quality option)\n"
+							+ DetailDropOff.BY_REGION_FAST + ": quality is determiend per-region (performance option)\n")
+					.defineEnum("detailDropOff", DetailDropOff.BY_CHUNK);
 			
 			drawResolution = builder
 					.comment("\n\n"
@@ -152,11 +152,11 @@ public class LodConfig
 			
 			horizontalQuality = builder
 					.comment("\n\n"
-							+ " This indicate quickly LODs drop off in quality. \n"
+							+ " This indicates how quickly LODs drop off in quality. \n"
 							+ " " + HorizontalQuality.LOW + ": quality drops every 4 chunks. \n"
 							+ " " + HorizontalQuality.MEDIUM + ": quality drops every 8 chunks. \n"
 							+ " " + HorizontalQuality.HIGH + ": quality drops every 16 chunks. \n")
-					.defineEnum("lodDrawQuality", HorizontalQuality.LOW);
+					.defineEnum("lodDrawQuality", HorizontalQuality.MEDIUM);
 			
 			lodChunkRenderDistance = builder
 					.comment("\n\n"
@@ -189,8 +189,13 @@ public class LodConfig
 			
 			alwaysDrawAtMaxQuality = builder
 					.comment("\n\n"
-							+ " !!!this could cause a \"memory\" full crash on render "
-							+ " distance higher than 128!!! \n")
+							+ " Disable LOD quality falloff, "
+							+ " all LODs will be drawn at the highest "
+							+ " available detail level. "
+							+ " "
+							+ " WARNING "
+							+ " This could cause a Out Of Memory crash on render "
+							+ " distances higher than 128 \n")
 					.define("alwaysDrawAtMaxQuality", false);
 			
 			builder.pop();
@@ -260,43 +265,43 @@ public class LodConfig
 							+ "       different generation options. Your mileage may vary. \n"
 							+ "\n"
 							
-							                                  + " " + DistanceGenerationMode.NONE + " \n"
-							                                  + " Don't run the distance generator. \n"
-							                                  
-							                                  + " " + DistanceGenerationMode.BIOME_ONLY + " \n"
-							                                  + " Only generate the biomes and use the biome's \n"
-							                                  + " grass color, water color, or snow color. \n"
-							                                  + " Doesn't generate height, everything is shown at sea level. \n"
-							                                  + " Multithreaded - Fastest (2-5 ms) \n"
-							                                  
-							                                  + "\n"
-							                                  + " " + DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT + " \n"
-							                                  + " Same as BIOME_ONLY, except instead \n"
-							                                  + " of always using sea level as the LOD height \n"
-							                                  + " different biome types (mountain, ocean, forest, etc.) \n"
-							                                  + " use predetermined heights to simulate having height data. \n"
-							                                  + " Multithreaded - Fastest (2-5 ms) \n"
-							                                  
-							                                  + "\n"
-							                                  + " " + DistanceGenerationMode.SURFACE + " \n"
-							                                  + " Generate the world surface, \n"
-							                                  + " this does NOT include caves, trees, \n"
-							                                  + " or structures. \n"
-							                                  + " Multithreaded - Faster (10-20 ms) \n"
-							                                  
-							                                  + "\n"
-							                                  + " " + DistanceGenerationMode.FEATURES + " \n"
-							                                  + " Generate everything except structures. \n"
-							                                  + " WARNING: This may cause world generation bugs or instability! \n"
-							                                  + " Multithreaded - Fast (15-20 ms) \n"
-							                                  
-							                                  + "\n"
-							                                  + " " + DistanceGenerationMode.SERVER + " \n"
-							                                  + " Ask the server to generate/load each chunk. \n"
-							                                  + " This is the most compatible, but causes server/simulation lag. \n"
-							                                  + " This will show player made structures, which can \n"
-							                                  + " be useful if you are adding the mod to a pre-existing world. \n"
-							                                  + " Singlethreaded - Slow (15-50 ms, with spikes up to 200 ms) \n")
+							+ " " + DistanceGenerationMode.NONE + " \n"
+							+ " Don't run the distance generator. \n"
+							
+							+ " " + DistanceGenerationMode.BIOME_ONLY + " \n"
+							+ " Only generate the biomes and use the biome's \n"
+							+ " grass color, water color, or snow color. \n"
+							+ " Doesn't generate height, everything is shown at sea level. \n"
+							+ " Multithreaded - Fastest (2-5 ms) \n"
+							
+							+ "\n"
+							+ " " + DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT + " \n"
+							+ " Same as BIOME_ONLY, except instead \n"
+							+ " of always using sea level as the LOD height \n"
+							+ " different biome types (mountain, ocean, forest, etc.) \n"
+							+ " use predetermined heights to simulate having height data. \n"
+							+ " Multithreaded - Fastest (2-5 ms) \n"
+							
+							+ "\n"
+							+ " " + DistanceGenerationMode.SURFACE + " \n"
+							+ " Generate the world surface, \n"
+							+ " this does NOT include caves, trees, \n"
+							+ " or structures. \n"
+							+ " Multithreaded - Faster (10-20 ms) \n"
+							
+							+ "\n"
+							+ " " + DistanceGenerationMode.FEATURES + " \n"
+							+ " Generate everything except structures. \n"
+							+ " WARNING: This may cause world generation bugs or instability! \n"
+							+ " Multithreaded - Fast (15-20 ms) \n"
+							
+							+ "\n"
+							+ " " + DistanceGenerationMode.SERVER + " \n"
+							+ " Ask the server to generate/load each chunk. \n"
+							+ " This is the most compatible, but causes server/simulation lag. \n"
+							+ " This will show player made structures, which can \n"
+							+ " be useful if you are adding the mod to a pre-existing world. \n"
+							+ " Singlethreaded - Slow (15-50 ms, with spikes up to 200 ms) \n")
 					.defineEnum("distanceGenerationMode", DistanceGenerationMode.SURFACE);
 			
 			allowUnstableFeatureGeneration = builder
