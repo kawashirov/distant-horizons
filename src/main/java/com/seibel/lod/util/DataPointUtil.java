@@ -1,10 +1,10 @@
 package com.seibel.lod.util;
 
+import java.util.Arrays;
+
 import com.seibel.lod.enums.DistanceGenerationMode;
 
 import net.minecraft.client.renderer.texture.NativeImage;
-
-import java.util.Arrays;
 
 public class DataPointUtil
 {
@@ -178,7 +178,6 @@ public class DataPointUtil
 	{
 		int lightBlock = getLightBlock(dataPoint);
 		int lightSky = getLightSky(dataPoint);
-		/**TODO ALL of this should be dimension dependent and lightMap dependent*/
 		int color = lightMap.getPixelRGBA(lightBlock, lightSky);
 		int red = ColorUtil.getBlue(color);
 		int green = ColorUtil.getGreen(color);

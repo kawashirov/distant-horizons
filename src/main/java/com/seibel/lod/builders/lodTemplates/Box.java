@@ -104,7 +104,7 @@ public class Box
 	public int[][] box;
 	public long[] order;
 	public Map<Direction, int[]> colorMap;
-	public int color;
+	public int debugColor;
 	public Map<Direction, int[][]> adjHeightAndDepth;
 	public Map<Direction, boolean[]> culling;
 	
@@ -142,7 +142,7 @@ public class Box
 	
 	public void setColor(int color)
 	{
-		this.color = color;
+		this.debugColor = color;
 		for (Direction direction : DIRECTIONS)
 		{
 			colorMap.get(direction)[0] = ColorUtil.applyShade(color, MinecraftWrapper.INSTANCE.getClientWorld().getShade(direction, true));
@@ -154,9 +154,10 @@ public class Box
 		if (LodConfig.CLIENT.debugging.debugMode.get() != DebugMode.SHOW_DETAIL)
 		{
 			return colorMap.get(direction)[0];
-		} else
+		}
+		else
 		{
-			return color;
+			return ColorUtil.applyShade(debugColor, MinecraftWrapper.INSTANCE.getClientWorld().getShade(direction, true));
 		}
 	}
 	
@@ -400,7 +401,11 @@ public class Box
 		return box[OFFSET][Z] + box[WIDTH][Z] * DIRECTION_VERTEX_MAP.get(direction)[vertexIndex][Z];
 	}
 	
-	public boolean shouldContinue(Direction direction, int adjIndex)
+	/**
+	 * returns true if the given direction should be rendered.
+	 * TODO what does adjIndex represent?
+	 */
+	public boolean shouldRenderFace(Direction direction, int adjIndex)
 	{
 		if (direction == Direction.UP || direction == Direction.DOWN)
 		{

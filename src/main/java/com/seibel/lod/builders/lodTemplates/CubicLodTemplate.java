@@ -103,10 +103,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	{
 		for (Direction direction : Box.DIRECTIONS)
 		{
-			//if(box.isCulled(direction))
-			//	continue;
 			int adjIndex = 0;
-			while (box.shouldContinue(direction, adjIndex))
+			while (box.shouldRenderFace(direction, adjIndex))
 			{
 				for (int vertexIndex = 0; vertexIndex < 4; vertexIndex++)
 				{
@@ -124,7 +122,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	@Override
 	public int getBufferMemoryForSingleNode(int maxVerticalData)
 	{
-		// (sidesOnACube * pointsInASquare * (positionPoints + colorPoints)))
+		// TODO, someone please comment what these magic numbers mean
 		return 2 * 4 * (3 + 4) + 4 * 4 * Math.max((maxVerticalData+1)/2,1) * (3 + 4);
 	}
 	
