@@ -17,9 +17,6 @@
  */
 package com.seibel.lod.proxy;
 
-import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.ThreadMapUtil;
-import net.minecraft.world.DimensionType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -36,12 +33,15 @@ import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.render.LodRenderer;
+import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.DimensionType;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.BlockEvent;
@@ -54,7 +54,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of the mod.
  *
  * @author James_Seibel
- * @version 9-19-2021
+ * @version 9-23-2021
  */
 public class ClientProxy
 {
@@ -118,34 +118,32 @@ public class ClientProxy
 				ThreadMapUtil.clearMaps();
 				firstFrameSetup();
 			}
-
+			
 			if(mc.getCurrentDimension() != currentDimension)
 			{
 				currentDimension = mc.getCurrentDimension();
 				reset();
 			}
-
+			
 			DetailDistanceUtil.updateSettings();
 			if (mc == null || mc.getPlayer() == null || !lodWorld.getIsWorldLoaded())
 				return;
-
-			viewDistanceChangedEvent();
-
+			
 			LodDimension lodDim = lodWorld.getLodDimension(mc.getCurrentDimension());
 			if (lodDim == null)
 				return;
-
-
+			
+			viewDistanceChangedEvent();
 			playerMoveEvent(lodDim);
-
+			
 			lodDim.treeCutter((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
 			lodDim.treeGenerator((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
-
-
+			
+			
 			// comment out when creating a release
 			applyConfigOverrides();
-
-
+			
+			
 			// Note to self:
 			// if "unspecified" shows up in the pie chart, it is
 			// possibly because the amount of time between sections
@@ -153,16 +151,16 @@ public class ClientProxy
 			IProfiler profiler = mc.getProfiler();
 			profiler.pop(); // get out of "terrain"
 			profiler.push("LOD");
-
+			
 			if(drawLods)
 			{
 				renderer.drawLODs(lodDim, mcMatrixStack, partialTicks, mc.getProfiler());
 			}
-
+			
 			profiler.pop(); // end LOD
 			profiler.push("terrain"); // go back into "terrain"
-
-
+			
+			
 			// these can't be set until after the buffers are built (in renderer.drawLODs)
 			// otherwise the buffers may be set to the wrong size, or not changed at all
 			previousChunkRenderDistance = mc.getRenderDistance();
@@ -170,7 +168,8 @@ public class ClientProxy
 		}
 		catch (Exception e)
 		{
-			LOGGER.error(e.getMessage());
+			LOGGER.error("client proxy: " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 	
@@ -190,22 +189,22 @@ public class ClientProxy
 		LodConfig.CLIENT.graphics.drawResolution.set(HorizontalResolution.BLOCK);
 		LodConfig.CLIENT.worldGenerator.generationResolution.set(HorizontalResolution.BLOCK);
 		// requires a world restart?
-//		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(VerticalQuality.MULTI_LOD);
+		//		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(VerticalQuality.MULTI_LOD);
 		
-//		LodConfig.CLIENT.graphics.fogDistance.set(FogDistance.FAR);
-//		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
-//		LodConfig.CLIENT.graphics.shadingMode.set(ShadingMode.DARKEN_SIDES);
-//		LodConfig.CLIENT.graphics.brightnessMultiplier.set(1.0);
-//		LodConfig.CLIENT.graphics.saturationMultiplier.set(1.0);
+		//		LodConfig.CLIENT.graphics.fogDistance.set(FogDistance.FAR);
+		//		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
+		//		LodConfig.CLIENT.graphics.shadingMode.set(ShadingMode.DARKEN_SIDES);
+		//		LodConfig.CLIENT.graphics.brightnessMultiplier.set(1.0);
+		//		LodConfig.CLIENT.graphics.saturationMultiplier.set(1.0);
 		
-//		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
-//		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(64);
-//		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
-//		LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.set(false);
+		//		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
+		//		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(64);
+		//		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
+		//		LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.set(false);
 		
-//		LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
-//		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
-//		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(5000); // 5000
+		//		LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
+		//		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
+		//		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(5000); // 5000
 		
 		LodConfig.CLIENT.debugging.enableDebugKeybindings.set(true);
 	}
@@ -298,13 +297,13 @@ public class ClientProxy
 	public void onKeyInput(InputEvent.KeyInputEvent event) 
 	{
 		if(LodConfig.CLIENT.debugging.enableDebugKeybindings.get()
-			&& event.getKey() == GLFW.GLFW_KEY_F4 && event.getAction() == GLFW.GLFW_PRESS)
+				&& event.getKey() == GLFW.GLFW_KEY_F4 && event.getAction() == GLFW.GLFW_PRESS)
 		{
 			LodConfig.CLIENT.debugging.debugMode.set(LodConfig.CLIENT.debugging.debugMode.get().getNext());
 		}
-
+		
 		if(LodConfig.CLIENT.debugging.enableDebugKeybindings.get()
-				   && event.getKey() == GLFW.GLFW_KEY_F6 && event.getAction() == GLFW.GLFW_PRESS)
+				&& event.getKey() == GLFW.GLFW_KEY_F6 && event.getAction() == GLFW.GLFW_PRESS)
 		{
 			drawLods = !drawLods;
 		}
@@ -357,7 +356,7 @@ public class ClientProxy
 		DetailDistanceUtil.updateSettings();
 	}
 	
-
+	
 	/**
 	 * This event is called once during the first frame Minecraft renders in the world.
 	 */
@@ -370,8 +369,8 @@ public class ClientProxy
 		
 		firstTimeSetupComplete = true;
 	}
-
-
+	
+	
 	public static void reset()
 	{
 		renderer = new LodRenderer(lodBufferBuilder);
