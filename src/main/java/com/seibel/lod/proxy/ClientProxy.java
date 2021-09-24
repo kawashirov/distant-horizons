@@ -107,7 +107,7 @@ public class ClientProxy
 	public void renderLods(MatrixStack mcMatrixStack, float partialTicks)
 	{
 		// comment out when creating a release
-//		applyConfigOverrides();
+		applyConfigOverrides();
 		
 		// clear any out of date objects
 		mc.clearFrameObjectCache();
@@ -177,34 +177,37 @@ public class ClientProxy
 		// remind the developer(s) that the config override is active
 		if (!configOverrideReminderPrinted)
 		{
-			mc.getPlayer().sendMessage(new StringTextComponent("Debug settings enabled!"), mc.getPlayer().getUUID());
+			//mc.getPlayer().sendMessage(new StringTextComponent("Debug settings enabled!"), mc.getPlayer().getUUID());
+			
+			// this was changed just for the buggy pre-release, since the code was already here
+			mc.getPlayer().sendMessage(new StringTextComponent("Warning: LOD mod 1.5 buggy pre-release"), mc.getPlayer().getUUID());
+			mc.getPlayer().sendMessage(new StringTextComponent("Hic sunt dracones"), mc.getPlayer().getUUID()); // Here be dragons
 			configOverrideReminderPrinted = true;
 		}
-		
-		//LodConfig.CLIENT.debugMode.set(true);
 		
 		
 //		LodConfig.CLIENT.graphics.drawResolution.set(HorizontalResolution.BLOCK);
 //		LodConfig.CLIENT.worldGenerator.generationResolution.set(HorizontalResolution.BLOCK);
 		// requires a world restart?
-		//		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(VerticalQuality.MULTI_LOD);
+//		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(VerticalQuality.MULTI_LOD);
 		
-		//		LodConfig.CLIENT.graphics.fogDistance.set(FogDistance.FAR);
-		//		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
-		//		LodConfig.CLIENT.graphics.shadingMode.set(ShadingMode.DARKEN_SIDES);
-		//		LodConfig.CLIENT.graphics.brightnessMultiplier.set(1.0);
-		//		LodConfig.CLIENT.graphics.saturationMultiplier.set(1.0);
+//		LodConfig.CLIENT.graphics.fogDistance.set(FogDistance.FAR);
+//		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
+//		LodConfig.CLIENT.graphics.shadingMode.set(ShadingMode.DARKEN_SIDES);
+//		LodConfig.CLIENT.graphics.brightnessMultiplier.set(1.0);
+//		LodConfig.CLIENT.graphics.saturationMultiplier.set(1.0);
+
+//		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
+//		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(64);
+//		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
+//		LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.set(false);
+
+//		LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
+//		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
+//		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(5000); // 5000
 		
-		//		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
-		//		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(64);
-		//		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
-		//		LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.set(false);
-		
-		//		LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
-		//		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
-		//		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(5000); // 5000
-		
-		LodConfig.CLIENT.debugging.enableDebugKeybindings.set(true);
+//		LodConfig.CLIENT.debugging.enableDebugKeybindings.set(true);
+//		LodConfig.CLIENT.debugging.debugMode.set(DebugMode.SHOW_DETAIL);
 	}
 	
 	
