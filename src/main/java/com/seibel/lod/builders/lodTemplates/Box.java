@@ -8,7 +8,6 @@ import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.util.Direction;
@@ -17,19 +16,19 @@ import net.minecraft.util.math.BlockPos;
 
 public class Box
 {
-
+	
 	public static final int OFFSET = 0;
 	public static final int WIDTH = 1;
-
+	
 	public static final int X = 0;
 	public static final int Y = 1;
 	public static final int Z = 2;
-
+	
 	public static final int MIN = 0;
 	public static final int MAX = 1;
-
+	
 	public static final int VOID_FACE = 0;
-
+	
 	public static final Direction[] DIRECTIONS = new Direction[]{
 			Direction.UP,
 			Direction.DOWN,
@@ -37,46 +36,46 @@ public class Box
 			Direction.EAST,
 			Direction.NORTH,
 			Direction.SOUTH};
-
+	
 	public static final Direction[] ADJ_DIRECTIONS = new Direction[]{
 			Direction.EAST,
 			Direction.WEST,
 			Direction.SOUTH,
 			Direction.NORTH};
-
+	
 	@SuppressWarnings("serial")
 	public static final Map<Direction, int[][]> DIRECTION_VERTEX_MAP = new HashMap<Direction, int[][]>()
 	{{
 		put(Direction.UP, new int[][]{
-				{0, 1, 0},
-				{0, 1, 1},
-				{1, 1, 1},
-				{1, 1, 0}});
+			{0, 1, 0},
+			{0, 1, 1},
+			{1, 1, 1},
+			{1, 1, 0}});
 		put(Direction.DOWN, new int[][]{
-				{1, 0, 0},
-				{1, 0, 1},
-				{0, 0, 1},
-				{0, 0, 0}});
+			{1, 0, 0},
+			{1, 0, 1},
+			{0, 0, 1},
+			{0, 0, 0}});
 		put(Direction.EAST, new int[][]{
-				{1, 1, 0},
-				{1, 1, 1},
-				{1, 0, 1},
-				{1, 0, 0}});
+			{1, 1, 0},
+			{1, 1, 1},
+			{1, 0, 1},
+			{1, 0, 0}});
 		put(Direction.WEST, new int[][]{
-				{0, 0, 0},
-				{0, 0, 1},
-				{0, 1, 1},
-				{0, 1, 0}});
+			{0, 0, 0},
+			{0, 0, 1},
+			{0, 1, 1},
+			{0, 1, 0}});
 		put(Direction.SOUTH, new int[][]{
-				{1, 0, 1},
-				{1, 1, 1},
-				{0, 1, 1},
-				{0, 0, 1}});
+			{1, 0, 1},
+			{1, 1, 1},
+			{0, 1, 1},
+			{0, 0, 1}});
 		put(Direction.NORTH, new int[][]{
-				{0, 0, 0},
-				{0, 1, 0},
-				{1, 1, 0},
-				{1, 0, 0}});
+			{0, 0, 0},
+			{0, 1, 0},
+			{1, 1, 0},
+			{1, 0, 0}});
 	}};
 	
 	
@@ -90,7 +89,7 @@ public class Box
 		put(Direction.SOUTH, new int[]{Z, MAX});
 		put(Direction.NORTH, new int[]{Z, MIN});
 	}};
-
+	
 	@SuppressWarnings("serial")
 	public static final Map<Direction, int[]> DIRECTION_NORMAL_MAP = new HashMap<Direction, int[]>()
 	{{
@@ -101,14 +100,14 @@ public class Box
 		put(Direction.SOUTH, new int[]{0, 0, 1});
 		put(Direction.NORTH, new int[]{0, 0, -1});
 	}};
-
+	
 	public int[][] box;
 	public long[] order;
 	public Map<Direction, int[]> colorMap;
 	public int color;
 	public Map<Direction, int[][]> adjHeightAndDepth;
 	public Map<Direction, boolean[]> culling;
-
+	
 	@SuppressWarnings("serial")
 	public Box()
 	{
@@ -140,7 +139,7 @@ public class Box
 			put(Direction.NORTH, new boolean[1]);
 		}};
 	}
-
+	
 	public void setColor(int color)
 	{
 		this.color = color;
@@ -149,7 +148,7 @@ public class Box
 			colorMap.get(direction)[0] = ColorUtil.applyShade(color, MinecraftWrapper.INSTANCE.getClientWorld().getShade(direction, true));
 		}
 	}
-
+	
 	public int getColor(Direction direction)
 	{
 		if (LodConfig.CLIENT.debugging.debugMode.get() != DebugMode.SHOW_DETAIL)
@@ -160,19 +159,19 @@ public class Box
 			return color;
 		}
 	}
-
+	
 	public void reset()
 	{
 		for (int i = 0; i < box.length; i++)
 		{
 			Arrays.fill(box[i], 0);
 		}
-
+		
 		for (Direction direction : DIRECTIONS)
 		{
 			colorMap.get(direction)[0] = 0;
 		}
-
+		
 		//Arrays.fill(order, DataPointUtil.EMPTY_DATA);
 		for (Direction direction : ADJ_DIRECTIONS)
 		{
@@ -186,31 +185,31 @@ public class Box
 			}
 		}
 	}
-
+	
 	public void setUpCulling(int cullingDistance, BlockPos playerPos)
 	{
 		for (Direction direction : DIRECTIONS)
 		{
 			if(direction == Direction.DOWN)
 				culling.get(direction)[0] = playerPos.get(direction.getAxis()) > getFacePos(direction) + cullingDistance;
-			else if(direction == Direction.UP)
-				culling.get(direction)[0] = playerPos.get(direction.getAxis()) < getFacePos(direction) - cullingDistance;
-			else if(direction == Direction.WEST)
-				culling.get(direction)[0] = -playerPos.get(direction.getAxis()) > getFacePos(direction) + cullingDistance;
-			else if(direction == Direction.NORTH)
-				culling.get(direction)[0] = -playerPos.get(direction.getAxis()) > getFacePos(direction) + cullingDistance;
-			else if(direction == Direction.EAST)
-				culling.get(direction)[0] = -playerPos.get(direction.getAxis()) < getFacePos(direction) - cullingDistance;
-			else if(direction == Direction.SOUTH)
-				culling.get(direction)[0] = -playerPos.get(direction.getAxis()) < getFacePos(direction) - cullingDistance;
+				else if(direction == Direction.UP)
+					culling.get(direction)[0] = playerPos.get(direction.getAxis()) < getFacePos(direction) - cullingDistance;
+				else if(direction == Direction.WEST)
+					culling.get(direction)[0] = -playerPos.get(direction.getAxis()) > getFacePos(direction) + cullingDistance;
+					else if(direction == Direction.NORTH)
+						culling.get(direction)[0] = -playerPos.get(direction.getAxis()) > getFacePos(direction) + cullingDistance;
+						else if(direction == Direction.EAST)
+							culling.get(direction)[0] = -playerPos.get(direction.getAxis()) < getFacePos(direction) - cullingDistance;
+						else if(direction == Direction.SOUTH)
+							culling.get(direction)[0] = -playerPos.get(direction.getAxis()) < getFacePos(direction) - cullingDistance;
 		}
 	}
-
+	
 	public boolean isCulled(Direction direction)
 	{
 		return culling.get(direction)[0];
 	}
-
+	
 	public void setAdjData(Map<Direction, long[]> adjData)
 	{
 		int height;
@@ -222,7 +221,7 @@ public class Box
 			/*if(isCulled(direction)){
 				continue;
 			}*/
-
+			
 			long[] dataPoint = adjData.get(direction);
 			if (dataPoint == null || DataPointUtil.isItVoid(dataPoint[0]))
 			{
@@ -232,7 +231,7 @@ public class Box
 				adjHeightAndDepth.get(direction)[1][1] = VOID_FACE;
 				continue;
 			}
-
+			
 			//We order the adj list
 			/**TODO remove this if the order is maintained naturally*/
 			/*order[0] = 0;
@@ -252,7 +251,7 @@ public class Box
 				order[j + 1] = dataPoint[i];
 				count++;
 			}*/
-
+			
 			int i;
 			int faceToDraw = 0;
 			boolean firstFace = true;
@@ -262,23 +261,23 @@ public class Box
 			for (i = 0; i < dataPoint.length; i++)
 			{
 				singleAdjDataPoint = dataPoint[i];
-			/*for (i = 0; i < count; i++)
+				/*for (i = 0; i < count; i++)
 			{
 				singleAdjDataPoint = order[i];*/
-
+				
 				if(DataPointUtil.isItVoid(singleAdjDataPoint) || !DataPointUtil.doesItExist(singleAdjDataPoint))
 				{
 					break;
 				}
 				height = DataPointUtil.getHeight(singleAdjDataPoint);
 				depth = DataPointUtil.getDepth(singleAdjDataPoint);
-
+				
 				if (depth <= maxY) {
 					allAbove = false;
 					if (height < minY)
 					{//the adj data is lower than the current data
 						//we break since all the other data will be lower
-
+						
 						if (firstFace)
 						{
 							adjHeightAndDepth.get(direction)[0][0] = getMaxY();
@@ -331,7 +330,7 @@ public class Box
 					}
 				}
 				//else {//the adj data is higher than the current data
-					//we continue since there could be some other data that intersect the current
+				//we continue since there could be some other data that intersect the current
 				//}
 			}
 			if(allAbove){
@@ -348,43 +347,43 @@ public class Box
 			adjHeightAndDepth.get(direction)[faceToDraw][1] = VOID_FACE;
 		}
 	}
-
+	
 	public void set(int xWidth, int yWidth, int zWidth)
 	{
 		box[WIDTH][X] = xWidth;
 		box[WIDTH][Y] = yWidth;
 		box[WIDTH][Z] = zWidth;
 	}
-
+	
 	public void move(int xOffset, int yOffset, int zOffset)
 	{
 		box[OFFSET][X] = xOffset;
 		box[OFFSET][Y] = yOffset;
 		box[OFFSET][Z] = zOffset;
 	}
-
-
-
+	
+	
+	
 	public int getFacePos(Direction direction)
 	{
 		return box[OFFSET][FACE_DIRECTION.get(direction)[0]] + box[WIDTH][FACE_DIRECTION.get(direction)[0]] * FACE_DIRECTION.get(direction)[1];
 	}
-
+	
 	public int getCoord(Direction direction, int axis, int vertexIndex)
 	{
 		return box[OFFSET][axis] + box[WIDTH][axis] * DIRECTION_VERTEX_MAP.get(direction)[vertexIndex][axis];
 	}
-
+	
 	public int getX(Direction direction, int vertexIndex)
 	{
 		return box[OFFSET][X] + box[WIDTH][X] * DIRECTION_VERTEX_MAP.get(direction)[vertexIndex][X];
 	}
-
+	
 	public int getY(Direction direction, int vertexIndex)
 	{
 		return box[OFFSET][Y] + box[WIDTH][Y] * DIRECTION_VERTEX_MAP.get(direction)[vertexIndex][Y];
 	}
-
+	
 	public int getY(Direction direction, int vertexIndex, int adjIndex)
 	{
 		if (direction == Direction.DOWN || direction == Direction.UP)
@@ -395,12 +394,12 @@ public class Box
 			return adjHeightAndDepth.get(direction)[adjIndex][1 - DIRECTION_VERTEX_MAP.get(direction)[vertexIndex][Y]];
 		}
 	}
-
+	
 	public int getZ(Direction direction, int vertexIndex)
 	{
 		return box[OFFSET][Z] + box[WIDTH][Z] * DIRECTION_VERTEX_MAP.get(direction)[vertexIndex][Z];
 	}
-
+	
 	public boolean shouldContinue(Direction direction, int adjIndex)
 	{
 		if (direction == Direction.UP || direction == Direction.DOWN)
@@ -408,37 +407,37 @@ public class Box
 			return adjIndex == 0;
 		}
 		return !(adjHeightAndDepth.get(direction)[adjIndex][0] == VOID_FACE && adjHeightAndDepth.get(direction)[adjIndex][1] == VOID_FACE);
-
+		
 	}
-
+	
 	public int getMinX()
 	{
 		return box[OFFSET][X];
 	}
-
+	
 	public int getMaxX()
 	{
 		return box[OFFSET][X] + box[WIDTH][X];
 	}
-
+	
 	public int getMinY()
 	{
 		return box[OFFSET][Y];
 	}
-
+	
 	public int getMaxY()
 	{
 		return box[OFFSET][Y] + box[WIDTH][Y];
 	}
-
+	
 	public int getMinZ()
 	{
 		return box[OFFSET][Z];
 	}
-
+	
 	public int getMaxZ()
 	{
 		return box[OFFSET][Z] + box[WIDTH][Z];
 	}
-
+	
 }
