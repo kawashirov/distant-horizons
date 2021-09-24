@@ -28,7 +28,6 @@ import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.builders.worldGeneration.LodWorldGenerator;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.HorizontalResolution;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.objects.RegionPos;
@@ -107,6 +106,9 @@ public class ClientProxy
 	 */
 	public void renderLods(MatrixStack mcMatrixStack, float partialTicks)
 	{
+		// comment out when creating a release
+//		applyConfigOverrides();
+		
 		// clear any out of date objects
 		mc.clearFrameObjectCache();
 		
@@ -138,10 +140,6 @@ public class ClientProxy
 			
 			lodDim.treeCutter((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
 			lodDim.treeGenerator((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
-			
-			
-			// comment out when creating a release
-			applyConfigOverrides();
 			
 			
 			// Note to self:
@@ -186,8 +184,8 @@ public class ClientProxy
 		//LodConfig.CLIENT.debugMode.set(true);
 		
 		
-		LodConfig.CLIENT.graphics.drawResolution.set(HorizontalResolution.BLOCK);
-		LodConfig.CLIENT.worldGenerator.generationResolution.set(HorizontalResolution.BLOCK);
+//		LodConfig.CLIENT.graphics.drawResolution.set(HorizontalResolution.BLOCK);
+//		LodConfig.CLIENT.worldGenerator.generationResolution.set(HorizontalResolution.BLOCK);
 		// requires a world restart?
 		//		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(VerticalQuality.MULTI_LOD);
 		
