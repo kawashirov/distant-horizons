@@ -36,7 +36,6 @@ import com.seibel.lod.enums.GenerationPriority;
 import com.seibel.lod.enums.HorizontalQuality;
 import com.seibel.lod.enums.HorizontalResolution;
 import com.seibel.lod.enums.LodTemplate;
-import com.seibel.lod.enums.ShadingMode;
 import com.seibel.lod.enums.VerticalQuality;
 
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -88,7 +87,7 @@ public class LodConfig
 		
 		public ForgeConfigSpec.EnumValue<HorizontalResolution> drawResolution;
 		
-		public ForgeConfigSpec.EnumValue<ShadingMode> shadingMode;
+//		public ForgeConfigSpec.EnumValue<ShadingMode> shadingMode;
 		
 		public ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
 		
@@ -175,17 +174,17 @@ public class LodConfig
 							+ " (This may happen if you are using a camera mod) \n")
 					.define("disableDirectionalCulling", false);
 			
-			shadingMode = builder
-					.comment("\n\n"
-							+ " What kind of shading should the LODs have? \n"
-							+ " \n"
-							+ " " + ShadingMode.NONE + " \n"
-							+ " " + "LODs will have the same lighting on every side. \n"
-							+ " " + "Can make large similarly colored areas hard to differentiate. \n"
-							+ "\n"
-							+ " " + ShadingMode.GAME_SHADING + " \n"
-							+ " " + "LODs will have darker sides and bottoms to simulate Minecraft's flat lighting.")
-					.defineEnum("lightingMode", ShadingMode.GAME_SHADING);
+//			shadingMode = builder
+//					.comment("\n\n"
+//							+ " What kind of shading should the LODs have? \n"
+//							+ " \n"
+//							+ " " + ShadingMode.NONE + " \n"
+//							+ " " + "LODs will have the same lighting on every side. \n"
+//							+ " " + "Can make large similarly colored areas hard to differentiate. \n"
+//							+ "\n"
+//							+ " " + ShadingMode.GAME_SHADING + " \n"
+//							+ " " + "LODs will have darker sides and bottoms to simulate Minecraft's flat lighting.")
+//					.defineEnum("lightingMode", ShadingMode.GAME_SHADING);
 			
 			alwaysDrawAtMaxQuality = builder
 					.comment("\n\n"
