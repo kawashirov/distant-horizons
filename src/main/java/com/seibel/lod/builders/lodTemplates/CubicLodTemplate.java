@@ -36,27 +36,24 @@ import net.minecraft.util.math.BlockPos;
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {
-
+	
 	public CubicLodTemplate()
 	{
-
+		
 	}
-
+	
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
-	                           byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap)
+			byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap)
 	{
 		int width = 1 << detailLevel;
-
+		
 		int color = DataPointUtil.getLightColor(data, lightMap);
-		// add each LOD for the detail level
-
 		if (debugging != DebugMode.OFF)
-
 		{
 			color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[detailLevel].getRGB();
 		}
-
+		
 		generateBoundingBox(
 				box,
 				DataPointUtil.getHeight(data),
@@ -68,28 +65,27 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				bufferCenterBlockPos,
 				adjData,
 				color);
-
+		
 		if (box != null)
-
 		{
 			addBoundingBoxToBuffer(buffer, box);
 		}
-
+		
 	}
-
+	
 	private void generateBoundingBox(Box box, int height, int depth, int width, double xOffset, double yOffset, double zOffset, BlockPos bufferCenterBlockPos, Map<Direction, long[]> adjData, int color)
 	{
 		// don't add an LOD if it is empty
 		if (height == -1 && depth == -1)
 			return;
-
+		
 		if (depth == height)
 		{
 			// if the top and bottom points are at the same height
 			// render this LOD as 1 block thick
 			height++;
 		}
-
+		
 		// offset the AABB by it's x/z position in the world since
 		// it uses doubles to specify its location, unlike the model view matrix
 		// which only uses floats
@@ -102,7 +98,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		box.setUpCulling(32, bufferCenterBlockPos);
 		box.setAdjData(adjData);
 	}
-
+	
 	private void addBoundingBoxToBuffer(BufferBuilder buffer, Box box)
 	{
 		for (Direction direction : Box.DIRECTIONS)
@@ -124,12 +120,12 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			}
 		}
 	}
-
+	
 	@Override
 	public int getBufferMemoryForSingleNode(int maxVerticalData)
 	{
 		// (sidesOnACube * pointsInASquare * (positionPoints + colorPoints)))
 		return 2 * 4 * (3 + 4) + 4 * 4 * Math.max((maxVerticalData+1)/2,1) * (3 + 4);
 	}
-
+	
 }
