@@ -113,10 +113,6 @@ public class LodBufferBuilder
 	 */
 	private ReentrantLock bufferLock = new ReentrantLock();
 	
-	//	private static final int NUMBER_OF_DIRECTION = 4;
-	//in order -x, +x, -z, +z
-	//	private static final int[][] ADJ_VECTOR = new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
-	
 	private volatile Box[][] boxCache;
 	private volatile PosToRenderContainer[][] setsToRender;
 	private volatile RegionPos center;
@@ -167,18 +163,12 @@ public class LodBufferBuilder
 			
 			try
 			{
-				long treeStart = System.currentTimeMillis();
-				long treeEnd = System.currentTimeMillis();
-				
 				long startTime = System.currentTimeMillis();
 				
 				ArrayList<Callable<Boolean>> nodeToRenderThreads = new ArrayList<>(lodDim.getWidth() * lodDim.getWidth());
 				
 				startBuffers(fullRegen, lodDim);
 				
-				// =====================//
-				//    RENDERING PART    //
-				// =====================//
 				
 				RegionPos playerRegionPos = new RegionPos(playerChunkPos);
 				if (center == null)
@@ -198,6 +188,12 @@ public class LodBufferBuilder
 				
 				// this will be the center of the VBOs once they have been built
 				buildableCenterChunkPos = playerChunkPos;
+				
+				
+				
+				//================================//
+				// create the nodeToRenderThreads //
+				//================================//
 				
 				for (int xRegion = 0; xRegion < lodDim.getWidth(); xRegion++)
 				{
@@ -233,26 +229,19 @@ public class LodBufferBuilder
 								// determine how many LODs we can stack vertically
 								int maxVerticalData = 1;
 								if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == VerticalQuality.MULTI_LOD)
-								{
 									maxVerticalData = 256;
-								}
 								
 								// create adjData's arrays
 								for (Direction direction : Box.ADJ_DIRECTIONS)
-								{
 									adjData.put(direction, new long[maxVerticalData]);
-								}
 								
 								//previous setToRender cache
 								if (setsToRender[xR][zR] == null)
-								{
 									setsToRender[xR][zR] = new PosToRenderContainer(minDetail, regionPos.x, regionPos.z);
-								}
 								
 								if (boxCache[xR][zR] == null)
-								{
 									boxCache[xR][zR] = new Box();
-								}
+								
 								PosToRenderContainer posToRender = setsToRender[xR][zR];
 								posToRender.clear(minDetail, regionPos.x, regionPos.z);
 								
@@ -301,6 +290,7 @@ public class LodBufferBuilder
 										chunkXdist = LevelPosUtil.getChunkPos(detailLevel, xAdj) - playerChunkPos.x;
 										chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.z;
 										boolean performFaceCulling = true;
+										
 										if (performFaceCulling
 												&& posToRender.contains(detailLevel, xAdj, zAdj)
 												&& (gameChunkRenderDistance < Math.abs(chunkXdist)
@@ -314,7 +304,8 @@ public class LodBufferBuilder
 												long data = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
 												adjData.get(direction)[verticalIndex] = data;
 											}
-										} else
+										}
+										else
 										{
 											adjData.put(direction, null);
 										}
@@ -333,14 +324,17 @@ public class LodBufferBuilder
 									
 									
 								} // for pos to in list to render
-								// the thread executed successfully
+									// the thread executed successfully
 								return true;
 							};
 							nodeToRenderThreads.add(dataToRenderThread);
 						}
 					} // region z
 				} // region z
-				long renderStart = System.currentTimeMillis();
+				
+				
+				
+				long executeStart = System.currentTimeMillis();
 				// wait for all threads to finish
 				List<Future<Boolean>> futuresBuffer = bufferBuilderThreads.invokeAll(nodeToRenderThreads);
 				for (Future<Boolean> future : futuresBuffer)
@@ -353,27 +347,27 @@ public class LodBufferBuilder
 						return;
 					}
 				}
-				long renderEnd = System.currentTimeMillis();
+				long executeEnd = System.currentTimeMillis();
+				
 				
 				long endTime = System.currentTimeMillis();
 				@SuppressWarnings("unused")
 				long buildTime = endTime - startTime;
 				@SuppressWarnings("unused")
-				long treeTime = treeEnd - treeStart;
-				@SuppressWarnings("unused")
-				long renderingTime = renderEnd - renderStart;
-				
-				//				ClientProxy.LOGGER.info("Buffer Build time: " + buildTime + " ms" + '\n' +
-				//						                        "Tree cutting time: " + treeTime + " ms" + '\n' +
-				//						                        "Rendering time: " + renderingTime + " ms");
+				long executeTime = executeEnd - executeStart;
+		
+//				ClientProxy.LOGGER.info("Thread Build time: " + buildTime + " ms" + '\n' +
+//						                        "thread execute time: " + executeTime + " ms");
 				
 				// mark that the buildable buffers as ready to swap
 				switchVbos = true;
-			} catch (Exception e)
+			}
+			catch (Exception e)
 			{
 				ClientProxy.LOGGER.warn("\"LodNodeBufferBuilder.generateLodBuffersAsync\" ran into trouble: ");
 				e.printStackTrace();
-			} finally
+			}
+			finally
 			{
 				// regardless of if we successfully created the buffers
 				// we are done generating.
@@ -409,26 +403,21 @@ public class LodBufferBuilder
 		int numbRegionsWide = lodDimension.getWidth();
 		int bufferMaxCapacity;
 		
-		//if(previousRegionWidth != numbRegionsWide || firstSetup)
-		//{
 		previousRegionWidth = numbRegionsWide;
 		buildableBuffers = new BufferBuilder[numbRegionsWide][numbRegionsWide];
 		
 		buildableVbos = new VertexBuffer[numbRegionsWide][numbRegionsWide];
 		drawableVbos = new VertexBuffer[numbRegionsWide][numbRegionsWide];
-		//}
+		
 		for (int x = 0; x < numbRegionsWide; x++)
 		{
 			for (int z = 0; z < numbRegionsWide; z++)
 			{
-				//if(lodDimension.isBufferToSetup(x,z))
-				//{
 				bufferMaxCapacity = lodDimension.getMemoryRequired(x, z, LodConfig.CLIENT.graphics.lodTemplate.get());
 				buildableBuffers[x][z] = new BufferBuilder(bufferMaxCapacity);
 				
 				buildableVbos[x][z] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
 				drawableVbos[x][z] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
-				//}
 			}
 		}
 		
@@ -517,12 +506,6 @@ public class LodBufferBuilder
 		}
 		finally
 		{
-			// make sure no buffer is bound
-			if (glProxy.getGlContext() == GlProxyContext.LOD_BUILDER)
-			{
-				GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-			}
-			
 			// make sure the context is disabled
 			glProxy.setGlContext(GlProxyContext.NONE);
 		}
