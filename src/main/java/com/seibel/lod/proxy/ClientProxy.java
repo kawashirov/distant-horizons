@@ -232,9 +232,6 @@ public class ClientProxy
 	@SubscribeEvent
 	public void worldLoadEvent(WorldEvent.Load event)
 	{
-		// TODO why are we re-creating the lodRenderer when the dimension changes?
-		renderer = new LodRenderer(lodBufferBuilder);
-		
 		DataPointUtil.worldHeight = event.getWorld().getHeight();
 		
 		// the player just loaded a new world/dimension
@@ -269,6 +266,7 @@ public class ClientProxy
 			// breaking when changing worlds.
 			renderer.destroyBuffers();
 			recalculateWidths = true;
+			renderer = new LodRenderer(lodBufferBuilder);
 			
 			
 			// make sure the nulled objects are freed.
