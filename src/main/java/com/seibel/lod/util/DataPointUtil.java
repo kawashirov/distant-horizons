@@ -157,7 +157,7 @@ public class DataPointUtil
 	}
 
 
-	public static boolean isItVoid(long dataPoint)
+	public static boolean isVoid(long dataPoint)
 	{
 		return (((dataPoint >>> VOID_SHIFT) & VOID_MASK) == 1);
 	}
@@ -207,7 +207,7 @@ public class DataPointUtil
 		s.append(" ");
 		s.append(getGenerationMode(dataPoint));
 		s.append(" ");
-		s.append(isItVoid(dataPoint));
+		s.append(isVoid(dataPoint));
 		s.append(" ");
 		s.append(doesItExist(dataPoint));
 		s.append('\n');
@@ -234,7 +234,7 @@ public class DataPointUtil
 			if (DataPointUtil.doesItExist(data))
 			{
 				allEmpty = false;
-				if (!(DataPointUtil.isItVoid(data)))
+				if (!(DataPointUtil.isVoid(data)))
 				{
 					numberOfChildren++;
 					allVoid = false;
@@ -324,7 +324,7 @@ public class DataPointUtil
 				{
 					genMode = Math.min(genMode, getGenerationMode(singleData));
 					allEmpty = false;
-					if (!isItVoid(singleData))
+					if (!isVoid(singleData))
 					{
 						allVoid = false;
 						depth = getDepth(singleData);
@@ -421,7 +421,7 @@ public class DataPointUtil
 				for (int dataIndex = 0; dataIndex < inputVerticalData; dataIndex++)
 				{
 					singleData = dataToMerge[index * inputVerticalData + dataIndex];
-					if (doesItExist(singleData) && !isItVoid(singleData))
+					if (doesItExist(singleData) && !isVoid(singleData))
 					{
 						if ((depth <= getDepth(singleData) && getDepth(singleData) <= height)
 								    || (depth <= getHeight(singleData) && getHeight(singleData) <= height))

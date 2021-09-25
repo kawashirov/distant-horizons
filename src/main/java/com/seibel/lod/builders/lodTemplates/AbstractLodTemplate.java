@@ -36,22 +36,23 @@ import net.minecraft.util.math.BlockPos;
  */
 public abstract class AbstractLodTemplate
 {
-
-
+	
+	/**
+	 * Uploads the given LOD to the buffer.
+	 */
 	public abstract void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
-	                                    byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap);
-
+			byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap);
+	
 	/**
 	 * add the given position and color to the buffer
 	 */
 	protected void addPosAndColor(BufferBuilder buffer,
-	                              double x, double y, double z,
-	                              int color)
+			double x, double y, double z,
+			int color)
 	{
-
 		buffer.vertex(x, y, z).color(ColorUtil.getRed(color), ColorUtil.getGreen(color), ColorUtil.getBlue(color), ColorUtil.getAlpha(color)).endVertex();
 	}
-
+	
 	/**
 	 * Returns in bytes how much buffer memory is required
 	 * for one LOD object

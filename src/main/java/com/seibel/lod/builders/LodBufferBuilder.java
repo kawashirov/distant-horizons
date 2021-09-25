@@ -325,7 +325,7 @@ public class LodBufferBuilder
 									for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ); verticalIndex++)
 									{
 										data = lodDim.getData(detailLevel, posX, posZ, verticalIndex);
-										if (DataPointUtil.isItVoid(data) || !DataPointUtil.doesItExist(data))
+										if (DataPointUtil.isVoid(data) || !DataPointUtil.doesItExist(data))
 											break;
 										LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, data, adjData,
 												detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode, renderer.lightMap);
