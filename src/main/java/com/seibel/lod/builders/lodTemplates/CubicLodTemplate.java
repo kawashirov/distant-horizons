@@ -32,7 +32,7 @@ import net.minecraft.util.math.BlockPos;
  * Builds LODs as rectangular prisms.
  *
  * @author James Seibel
- * @version 8-10-2021
+ * @version 9-25-2021
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {
@@ -46,34 +46,38 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
 			byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap)
 	{
-		int width = 1 << detailLevel;
+		if (box == null)
+			return;
 		
-		int color = DataPointUtil.getLightColor(data, lightMap);
+		// equivalent to 2^detailLevel
+		int blockWidth = 1 << detailLevel;
+		
+		int color;
 		if (debugging != DebugMode.OFF)
-		{
 			color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[detailLevel].getRGB();
-		}
+		else
+			color = DataPointUtil.getLightColor(data, lightMap);
+		
 		
 		generateBoundingBox(
 				box,
 				DataPointUtil.getHeight(data),
 				DataPointUtil.getDepth(data),
-				width,
-				posX * width,
-				0,
-				posZ * width,
+				blockWidth,
+				posX * blockWidth, 0, posZ * blockWidth, // x, y, z offset
 				bufferCenterBlockPos,
 				adjData,
 				color);
 		
-		if (box != null)
-		{
-			addBoundingBoxToBuffer(buffer, box);
-		}
-		
+		addBoundingBoxToBuffer(buffer, box);
 	}
 	
-	private void generateBoundingBox(Box box, int height, int depth, int width, double xOffset, double yOffset, double zOffset, BlockPos bufferCenterBlockPos, Map<Direction, long[]> adjData, int color)
+	private void generateBoundingBox(Box box, 
+			int height, int depth, int width, 
+			double xOffset, double yOffset, double zOffset, 
+			BlockPos bufferCenterBlockPos, 
+			Map<Direction, long[]> adjData, 
+			int color)
 	{
 		// don't add an LOD if it is empty
 		if (height == -1 && depth == -1)
@@ -103,6 +107,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	{
 		for (Direction direction : Box.DIRECTIONS)
 		{
+			// TODO what does adjacentIndex mean?
 			int adjIndex = 0;
 			while (box.shouldRenderFace(direction, adjIndex))
 			{
@@ -122,7 +127,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	@Override
 	public int getBufferMemoryForSingleNode(int maxVerticalData)
 	{
-		// TODO, someone please comment what these magic numbers mean
+		// TODO, what do these magic numbers mean
 		return 2 * 4 * (3 + 4) + 4 * 4 * Math.max((maxVerticalData+1)/2,1) * (3 + 4);
 	}
 	
