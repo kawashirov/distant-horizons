@@ -40,7 +40,6 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.DimensionType;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.BlockEvent;
@@ -87,7 +86,6 @@ public class ClientProxy
 	 * to the LOD view distance
 	 */
 	private boolean recalculateWidths = false;
-	private DimensionType currentDimension = null;
 	
 	public ClientProxy()
 	{
@@ -117,14 +115,7 @@ public class ClientProxy
 			// only run the first time setup once
 			if (!firstTimeSetupComplete)
 			{
-				ThreadMapUtil.clearMaps();
 				firstFrameSetup();
-			}
-			
-			if(mc.getCurrentDimension() != currentDimension)
-			{
-				currentDimension = mc.getCurrentDimension();
-				reset();
 			}
 			
 			DetailDistanceUtil.updateSettings();
@@ -177,11 +168,7 @@ public class ClientProxy
 		// remind the developer(s) that the config override is active
 		if (!configOverrideReminderPrinted)
 		{
-			//mc.getPlayer().sendMessage(new StringTextComponent("Debug settings enabled!"), mc.getPlayer().getUUID());
-			
-			// this was changed just for the buggy pre-release, since the code was already here
-			mc.getPlayer().sendMessage(new StringTextComponent("Warning: LOD mod 1.5 buggy pre-release"), mc.getPlayer().getUUID());
-			mc.getPlayer().sendMessage(new StringTextComponent("Hic sunt dracones"), mc.getPlayer().getUUID()); // Here be dragons
+			mc.getPlayer().sendMessage(new StringTextComponent("Debug settings enabled!"), mc.getPlayer().getUUID());
 			configOverrideReminderPrinted = true;
 		}
 		
@@ -241,12 +228,18 @@ public class ClientProxy
 			lodWorld.saveAllDimensions();
 	}
 	
+	/** This is also called when a new dimension loads */
 	@SubscribeEvent
 	public void worldLoadEvent(WorldEvent.Load event)
 	{
+		// TODO why are we re-creating the lodRenderer when the dimension changes?
+		renderer = new LodRenderer(lodBufferBuilder);
+		
 		DataPointUtil.worldHeight = event.getWorld().getHeight();
+		
 		// the player just loaded a new world/dimension
 		lodWorld.selectWorld(LodUtil.getWorldID(event.getWorld()));
+		
 		// make sure the correct LODs are being rendered
 		// (if this isn't done the previous world's LODs may be drawn)
 		renderer.regenerateLODsNextFrame();
@@ -256,8 +249,13 @@ public class ClientProxy
 	public void worldUnloadEvent(WorldEvent.Unload event)
 	{
 		// the player just unloaded a world/dimension
+		ThreadMapUtil.clearMaps();
+		
+		
 		if (mc.getConnection().getLevel() == null)
 		{
+			// the player just left the server
+			
 			// if this isn't done unfinished tasks may be left in the queue
 			// preventing new LodChunks form being generated
 			LodNodeGenWorker.restartExecuterService();
@@ -274,7 +272,7 @@ public class ClientProxy
 			
 			
 			// make sure the nulled objects are freed.
-			// (this prevents a out of memory error when
+			// (this prevents an out of memory error when
 			// changing worlds)
 			System.gc();
 		}
@@ -366,17 +364,10 @@ public class ClientProxy
 		// make sure the GlProxy is created before the LodBufferBuilder
 		GlProxy.getInstance();
 		
-		
+		// TODO shouldn't these already be empty?
+		ThreadMapUtil.clearMaps();
 		
 		firstTimeSetupComplete = true;
-	}
-	
-	
-	public static void reset()
-	{
-		renderer = new LodRenderer(lodBufferBuilder);
-		LodNodeGenWorker.resetGenerator();
-		ThreadMapUtil.clearMaps();
 	}
 	
 	//================//
