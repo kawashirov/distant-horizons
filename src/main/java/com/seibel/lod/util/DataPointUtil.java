@@ -32,21 +32,21 @@ public class DataPointUtil
 	//public final static int MIN_HEIGHT = -64;
 	public final static int EMPTY_DATA = 0;
 	public static int worldHeight = 256;
-
+	
 	public final static int ALPHA_DOWNSIZE_SHIFT = 4;
-
+	
 	//public final static int BLUE_COLOR_SHIFT = 0;
 	//public final static int GREEN_COLOR_SHIFT = 8;
 	//public final static int RED_COLOR_SHIFT = 16;
 	//public final static int ALPHA_COLOR_SHIFT = 24;
-
+	
 	public final static int BLUE_SHIFT = 36;
 	public final static int GREEN_SHIFT = BLUE_SHIFT + 8;
 	public final static int RED_SHIFT = BLUE_SHIFT + 16;
 	public final static int ALPHA_SHIFT = BLUE_SHIFT + 24;
-
+	
 	public final static int COLOR_SHIFT = 36;
-
+	
 	public final static int HEIGHT_SHIFT = 26;
 	public final static int DEPTH_SHIFT = 16;
 	public final static int BLOCK_LIGHT_SHIFT = 12;
@@ -57,7 +57,7 @@ public class DataPointUtil
 	public final static int GEN_TYPE_SHIFT = 2;
 	public final static int VOID_SHIFT = 1;
 	public final static int EXISTENCE_SHIFT = 0;
-
+	
 	public final static long ALPHA_MASK = 0b1111;
 	public final static long RED_MASK = 0b1111_1111;
 	public final static long GREEN_MASK = 0b1111_1111;
@@ -73,8 +73,8 @@ public class DataPointUtil
 	public final static long GEN_TYPE_MASK = 0b111;
 	public final static long VOID_MASK = 1;
 	public final static long EXISTENCE_MASK = 1;
-
-
+	
+	
 	public static long createVoidDataPoint(int generationMode)
 	{
 		long dataPoint = 0;
@@ -83,7 +83,7 @@ public class DataPointUtil
 		dataPoint += EXISTENCE_MASK << EXISTENCE_SHIFT;
 		return dataPoint;
 	}
-
+	
 	public static long createDataPoint(int height, int depth, int color, int lightSky, int lightBlock, int generationMode)
 	{
 		return createDataPoint(
@@ -93,7 +93,7 @@ public class DataPointUtil
 				ColorUtil.getBlue(color),
 				height, depth, lightSky, lightBlock, generationMode);
 	}
-
+	
 	public static long createDataPoint(int alpha, int red, int green, int blue, int height, int depth, int lightSky, int lightBlock, int generationMode)
 	{
 		long dataPoint = 0;
@@ -109,71 +109,71 @@ public class DataPointUtil
 		dataPoint += EXISTENCE_MASK << EXISTENCE_SHIFT;
 		return dataPoint;
 	}
-
+	
 	public static short getHeight(long dataPoint)
 	{
 		return (short) ((dataPoint >>> HEIGHT_SHIFT) & HEIGHT_MASK);
 	}
-
+	
 	public static short getDepth(long dataPoint)
 	{
-
+		
 		return (short) ((dataPoint >>> DEPTH_SHIFT) & DEPTH_MASK);
 	}
-
+	
 	public static short getAlpha(long dataPoint)
 	{
 		return (short) (((dataPoint >>> ALPHA_SHIFT) & ALPHA_MASK) << ALPHA_DOWNSIZE_SHIFT);
 	}
-
+	
 	public static short getRed(long dataPoint)
 	{
 		return (short) ((dataPoint >>> RED_SHIFT) & RED_MASK);
 	}
-
+	
 	public static short getGreen(long dataPoint)
 	{
 		return (short) ((dataPoint >>> GREEN_SHIFT) & GREEN_MASK);
 	}
-
+	
 	public static short getBlue(long dataPoint)
 	{
 		return (short) ((dataPoint >>> BLUE_SHIFT) & BLUE_MASK);
 	}
-
+	
 	public static int getLightSky(long dataPoint)
 	{
 		return (int) ((dataPoint >>> SKY_LIGHT_SHIFT) & SKY_LIGHT_MASK);
 	}
-
+	
 	public static int getLightBlock(long dataPoint)
 	{
 		return (int) ((dataPoint >>> BLOCK_LIGHT_SHIFT) & BLOCK_LIGHT_MASK);
 	}
-
+	
 	public static byte getGenerationMode(long dataPoint)
 	{
 		return (byte) ((dataPoint >>> GEN_TYPE_SHIFT) & GEN_TYPE_MASK);
 	}
-
-
+	
+	
 	public static boolean isVoid(long dataPoint)
 	{
 		return (((dataPoint >>> VOID_SHIFT) & VOID_MASK) == 1);
 	}
-
+	
 	public static boolean doesItExist(long dataPoint)
 	{
 		return (((dataPoint >>> EXISTENCE_SHIFT) & EXISTENCE_MASK) == 1);
 	}
-
+	
 	public static int getColor(long dataPoint)
 	{
 		//int color = getBlue(dataPoint) << BLUE_COLOR_SHIFT;
 		//color += getRed(dataPoint) << BLUE_COLOR_SHIFT;
 		return (int) (dataPoint >>> COLOR_SHIFT);
 	}
-
+	
 	public static int getLightColor(long dataPoint, NativeImage lightMap)
 	{
 		int lightBlock = getLightBlock(dataPoint);
@@ -182,10 +182,10 @@ public class DataPointUtil
 		int red = ColorUtil.getBlue(color);
 		int green = ColorUtil.getGreen(color);
 		int blue = ColorUtil.getRed(color);
-
+		
 		return ColorUtil.multiplyRGBcolors(getColor(dataPoint), ColorUtil.rgbToInt(red, green, blue));
 	}
-
+	
 	public static String toString(long dataPoint)
 	{
 		StringBuilder s = new StringBuilder();
@@ -213,11 +213,11 @@ public class DataPointUtil
 		s.append('\n');
 		return s.toString();
 	}
-
+	
 	public static long mergeSingleData(long[] dataToMerge)
 	{
 		int numberOfChildren = 0;
-
+		
 		int tempAlpha = 0;
 		int tempRed = 0;
 		int tempGreen = 0;
@@ -253,7 +253,7 @@ public class DataPointUtil
 				tempGenMode = (byte) Math.min(tempGenMode, DistanceGenerationMode.NONE.complexity);
 			}
 		}
-
+		
 		if (allEmpty)
 		{
 			//no child has been initialized
@@ -274,46 +274,46 @@ public class DataPointUtil
 			return DataPointUtil.createDataPoint(tempAlpha, tempRed, tempGreen, tempBlue, tempHeight, tempDepth, tempLightSky, tempLightBlock, tempGenMode);
 		}
 	}
-
+	
 	public static long[] mergeMultiData(long[] dataToMerge, int inputVerticalData, int maxVerticalData)
 	{
 		int size = dataToMerge.length / inputVerticalData;
-
+		
 		//We initialise the arrays that are going to be used
 		short[] projection = ThreadMapUtil.getProjectionShort();
 		short[] heightAndDepth = ThreadMapUtil.getHeightAndDepth();
 		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge();
 		long[] dataPoint = ThreadMapUtil.verticalDataArray();
-
+		
 		if (projection == null || projection.length != (worldHeight) / 16 + 1)
 			projection = new short[(worldHeight) / 16 + 1];
 		else
 			Arrays.fill(projection, (short) 0);
-
+		
 		if (heightAndDepth == null || heightAndDepth.length != (worldHeight + 1) * 2)
 			heightAndDepth = new short[(worldHeight + 1) * 2];
 		else
 			Arrays.fill(heightAndDepth, (short) 0);
-
+		
 		if (singleDataToMerge == null || singleDataToMerge.length != size)
 			singleDataToMerge = new long[size];
 		else
 			Arrays.fill(singleDataToMerge, EMPTY_DATA);
-
+		
 		if (dataPoint == null || dataPoint.length != worldHeight + 1)
 			dataPoint = new long[worldHeight + 1];
 		else
 			Arrays.fill(dataPoint, EMPTY_DATA);
-
+		
 		int genMode = DistanceGenerationMode.SERVER.complexity;
 		boolean allEmpty = true;
 		boolean allVoid = true;
 		long singleData;
-
-
+		
+		
 		short depth;
 		short height;
-
+		
 		//We collect the indexes of the data, ordered by the depth
 		for (int index = 0; index < size; index++)
 		{
@@ -362,7 +362,7 @@ public class DataPointUtil
 				continue;
 			}
 			depth = (short) (i * 16 + ii);
-
+			
 			while (ii < 15 && ((projection[i] >>> ii) & 1) == 1) ii++;
 			if (ii >= 15 && ((projection[i] >>> ii) & 1) == 1) //if end is not in this chunk
 			{
@@ -382,7 +382,7 @@ public class DataPointUtil
 			heightAndDepth[count * 2 + 1] = height;
 			count++;
 		}
-
+		
 		//we limit the vertical portion to maxVerticalData
 		int j = 0;
 		while (count > maxVerticalData)
@@ -424,7 +424,7 @@ public class DataPointUtil
 					if (doesItExist(singleData) && !isVoid(singleData))
 					{
 						if ((depth <= getDepth(singleData) && getDepth(singleData) <= height)
-								    || (depth <= getHeight(singleData) && getHeight(singleData) <= height))
+								|| (depth <= getHeight(singleData) && getHeight(singleData) <= height))
 						{
 							if (getHeight(singleData) > getHeight(singleDataToMerge[index]))
 							{
@@ -435,12 +435,12 @@ public class DataPointUtil
 				}
 			}
 			long data = mergeSingleData(singleDataToMerge);
-
+			
 			dataPoint[count - j - 1] = createDataPoint(height, depth, getColor(data), getLightSky(data), getLightBlock(data), getGenerationMode(data));
 		}
 		return dataPoint;
 	}
-
+	
 	public static long[] compress(long[] data, byte detailLevel)
 	{
 		return null;
