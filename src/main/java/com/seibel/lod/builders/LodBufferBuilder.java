@@ -44,7 +44,6 @@ import com.seibel.lod.proxy.GlProxy;
 import com.seibel.lod.proxy.GlProxy.GlProxyContext;
 import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
@@ -59,7 +58,7 @@ import net.minecraft.util.math.ChunkPos;
  * This object is used to create NearFarBuffer objects.
  *
  * @author James Seibel
- * @version 9-22-2021
+ * @version 9-25-2021
  */
 public class LodBufferBuilder
 {
@@ -128,7 +127,8 @@ public class LodBufferBuilder
 	 */
 	private volatile ChunkPos drawableCenterChunkPos = new ChunkPos(0, 0);
 	private volatile ChunkPos buildableCenterChunkPos = new ChunkPos(0, 0);
-	private volatile boolean firstSetup = true;
+	
+	
 	public LodBufferBuilder()
 	{
 		
@@ -174,7 +174,6 @@ public class LodBufferBuilder
 				
 				ArrayList<Callable<Boolean>> nodeToRenderThreads = new ArrayList<>(lodDim.getWidth() * lodDim.getWidth());
 				
-				//setupBuffers(lodDim);
 				startBuffers(fullRegen, lodDim);
 				
 				// =====================//
@@ -327,6 +326,7 @@ public class LodBufferBuilder
 										data = lodDim.getData(detailLevel, posX, posZ, verticalIndex);
 										if (DataPointUtil.isVoid(data) || !DataPointUtil.doesItExist(data))
 											break;
+										
 										LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffer, playerBlockPosRounded, data, adjData,
 												detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode, renderer.lightMap);
 									}
@@ -411,7 +411,6 @@ public class LodBufferBuilder
 		
 		//if(previousRegionWidth != numbRegionsWide || firstSetup)
 		//{
-		firstSetup = false;
 		previousRegionWidth = numbRegionsWide;
 		buildableBuffers = new BufferBuilder[numbRegionsWide][numbRegionsWide];
 		
@@ -463,6 +462,11 @@ public class LodBufferBuilder
 			{
 				if (fullRegen || lodDim.isRegionToRegen(x, z))
 				{
+					// for some reason BufferBuilder.vertexCounts
+					// isn't reset unless this is called, which can cause
+					// a false indexOutOfBoundsException
+					buildableBuffers[x][z].discard();
+					
 					buildableBuffers[x][z].begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
 				}
 			}
