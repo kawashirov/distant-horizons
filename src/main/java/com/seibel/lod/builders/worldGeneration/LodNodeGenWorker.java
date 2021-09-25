@@ -73,7 +73,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
 public class LodNodeGenWorker implements IWorker
 {
 	public static ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
-
+	
 	private boolean threadStarted = false;
 	private LodChunkGenThread thread;
 	
@@ -82,33 +82,33 @@ public class LodNodeGenWorker implements IWorker
 	 * add it to this list, this is to hopefully remove any
 	 * features that could cause issues down the line. */
 	private static ConcurrentHashMap<Integer, ConfiguredFeature<?, ?>> configuredFeaturesToAvoid = new ConcurrentHashMap<>();
-
-
-
+	
+	
+	
 	public LodNodeGenWorker(ChunkPos newPos, DistanceGenerationMode newGenerationMode,
-							LodBuilder newLodBuilder,
-							LodDimension newLodDimension, ServerWorld newServerWorld)
+			LodBuilder newLodBuilder,
+			LodDimension newLodDimension, ServerWorld newServerWorld)
 	{
 		// just a few sanity checks
 		if (newPos == null)
 			throw new IllegalArgumentException("LodChunkGenWorker must have a non-null ChunkPos");
-
+		
 		if (newLodBuilder == null)
 			throw new IllegalArgumentException("LodChunkGenThread requires a non-null LodChunkBuilder");
-
+		
 		if (newLodDimension == null)
 			throw new IllegalArgumentException("LodChunkGenThread requires a non-null LodDimension");
-
+		
 		if (newServerWorld == null)
 			throw new IllegalArgumentException("LodChunkGenThread requires a non-null ServerWorld");
-
-
-
+		
+		
+		
 		thread = new LodChunkGenThread(newPos, newGenerationMode,
 				newLodBuilder,
 				newLodDimension, newServerWorld);
 	}
-
+	
 	@Override
 	public boolean doWork()
 	{
@@ -129,38 +129,38 @@ public class LodNodeGenWorker implements IWorker
 				newThread.setPriority(5);
 				genThreads.execute(newThread);
 			}
-
+			
 			threadStarted = true;
-
+			
 			// useful for debugging
 //        	ClientProxy.LOGGER.info(thread.lodDim.getNumberOfLods());
 //        	ClientProxy.LOGGER.info(genThreads.toString());
 		}
-
+		
 		return false;
 	}
-
+	
 	@Override
 	public boolean hasWork()
 	{
 		return !threadStarted;
 	}
-
-
-
-
+	
+	
+	
+	
 	private class LodChunkGenThread implements Runnable
 	{
 		public final ServerWorld serverWorld;
 		public final LodDimension lodDim;
 		public final DistanceGenerationMode generationMode;
 		public final LodBuilder lodBuilder;
-
+		
 		private ChunkPos pos;
-
+		
 		public LodChunkGenThread(ChunkPos newPos, DistanceGenerationMode newGenerationMode,
-								 LodBuilder newLodBuilder,
-								 LodDimension newLodDimension, ServerWorld newServerWorld)
+				LodBuilder newLodBuilder,
+				LodDimension newLodDimension, ServerWorld newServerWorld)
 		{
 			pos = newPos;
 			generationMode = newGenerationMode;
@@ -168,7 +168,7 @@ public class LodNodeGenWorker implements IWorker
 			lodDim = newLodDimension;
 			serverWorld = newServerWorld;
 		}
-
+		
 		@Override
 		public void run()
 		{
@@ -176,59 +176,57 @@ public class LodNodeGenWorker implements IWorker
 			{
 				// only generate LodChunks if they can
 				// be added to the current LodDimension
-
+				
 				/**TODO i must disable this if, i will find a way to replace it*/
 				if (lodDim.regionIsInRange(pos.x / LodUtil.REGION_WIDTH_IN_CHUNKS, pos.z / LodUtil.REGION_WIDTH_IN_CHUNKS))
 				{
 //					long startTime = System.currentTimeMillis();
-
+					
 					switch(generationMode)
 					{
-						case NONE:
-							// don't generate
-							break;
-						case BIOME_ONLY:
-						case BIOME_ONLY_SIMULATE_HEIGHT:
-							// fastest
-							generateUsingBiomesOnly();
-							break;
-						case SURFACE:
-							// faster
-							generateUsingSurface();
-							break;
-						case FEATURES:
-							// fast
-							generateUsingFeatures();
-							break;
-						case SERVER:
-							// very slow
-							generateWithServer();
-							break;
+					case NONE:
+						// don't generate
+						break;
+					case BIOME_ONLY:
+					case BIOME_ONLY_SIMULATE_HEIGHT:
+						// fastest
+						generateUsingBiomesOnly();
+						break;
+					case SURFACE:
+						// faster
+						generateUsingSurface();
+						break;
+					case FEATURES:
+						// fast
+						generateUsingFeatures();
+						break;
+					case SERVER:
+						// very slow
+						generateWithServer();
+						break;
 					}
-
+					
 					//lodRenderer.regenerateLODsNextFrame();
-
+					
 /*
 					boolean dataExistence = lodDim.doesDataExist(new LevelPos((byte) 3, pos.x, pos.z));
 					if (dataExistence)
 						ClientProxy.LOGGER.info(pos.x + " " + pos.z + " Success!");
 					else
 						ClientProxy.LOGGER.info(pos.x + " " + pos.z);
-*/
+ */
 					// shows the pool size, active threads, queued tasks and completed tasks
 //					ClientProxy.LOGGER.info(genThreads.toString());
-
+					
 //					long endTime = System.currentTimeMillis();
 //					System.out.println(endTime - startTime);
-
+					
 				}// if in range
-				//else{
-
-				//}
 			}
 			catch (Exception e)
 			{
-				//e.printStackTrace();
+				ClientProxy.LOGGER.error(LodChunkGenThread.class.getSimpleName() + ": ran into an error: " + e.getMessage());
+				e.printStackTrace();
 			}
 			finally
 			{
@@ -236,13 +234,13 @@ public class LodNodeGenWorker implements IWorker
 				LodWorldGenerator.INSTANCE.numberOfChunksWaitingToGenerate.addAndGet(-1);
 				
 				// this position is no longer being generated
-				LodWorldGenerator.INSTANCE.positionWaitingToBeGenerated.remove(pos);
+				LodWorldGenerator.INSTANCE.positionsWaitingToBeGenerated.remove(pos);
 			}
-
+			
 		}// run
-
-
-
+		
+		
+		
 		/**
 		 * takes about 2-5 ms
 		 */
@@ -251,26 +249,26 @@ public class LodNodeGenWorker implements IWorker
 			List<IChunk> chunkList = new LinkedList<>();
 			ChunkPrimer chunk = new ChunkPrimer(pos, UpgradeData.EMPTY);
 			chunkList.add(chunk);
-
+			
 			ServerChunkProvider chunkSource = serverWorld.getChunkSource();
 			ChunkGenerator chunkGen = chunkSource.generator;
-
+			
 			// generate the terrain (this is thread safe)
 			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			// override the chunk status so we can run the next generator stage
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
 			chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
-
-
-
-
+			
+			
+			
+			
 			// generate fake height data for this LOD
 			int seaLevel = serverWorld.getSeaLevel();
-
+			
 			boolean simulateHeight = generationMode == DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
 			boolean inTheEnd = false;
-
+			
 			// add fake heightmap data so our LODs aren't at height 0
 			Heightmap heightmap = new Heightmap(chunk, LodUtil.DEFAULT_HEIGHTMAP);
 			for(int x = 0; x < LodUtil.CHUNK_WIDTH && !inTheEnd; x++)
@@ -283,35 +281,35 @@ public class LodNodeGenWorker implements IWorker
 						// they are just to simulate height data where there isn't any
 						switch(chunk.getBiomes().getNoiseBiome(x >> 2, seaLevel >> 2, z >> 2).getBiomeCategory())
 						{
-							case NETHER:
-								heightmap.setHeight(x, z, serverWorld.getHeight() / 2);
-								break;
-
-							case EXTREME_HILLS:
-								heightmap.setHeight(x, z, seaLevel + 30);
-								break;
-							case MESA:
-								heightmap.setHeight(x, z, seaLevel + 20);
-								break;
-							case JUNGLE:
-								heightmap.setHeight(x, z, seaLevel + 20);
-								break;
-							case BEACH:
-								heightmap.setHeight(x, z, seaLevel + 5);
-								break;
-							case NONE:
-								heightmap.setHeight(x, z, 0);
-								break;
-
-							case OCEAN:
-							case RIVER:
-								heightmap.setHeight(x, z, seaLevel);
-								break;
-
-							case THEEND:
-								inTheEnd = true;
-								break;
-
+						case NETHER:
+							heightmap.setHeight(x, z, serverWorld.getHeight() / 2);
+							break;
+							
+						case EXTREME_HILLS:
+							heightmap.setHeight(x, z, seaLevel + 30);
+							break;
+						case MESA:
+							heightmap.setHeight(x, z, seaLevel + 20);
+							break;
+						case JUNGLE:
+							heightmap.setHeight(x, z, seaLevel + 20);
+							break;
+						case BEACH:
+							heightmap.setHeight(x, z, seaLevel + 5);
+							break;
+						case NONE:
+							heightmap.setHeight(x, z, 0);
+							break;
+							
+						case OCEAN:
+						case RIVER:
+							heightmap.setHeight(x, z, seaLevel);
+							break;
+							
+						case THEEND:
+							inTheEnd = true;
+							break;
+							
 							// DESERT
 							// FOREST
 							// ICY
@@ -320,9 +318,9 @@ public class LodNodeGenWorker implements IWorker
 							// SWAMP
 							// TAIGA
 							// PLAINS
-							default:
-								heightmap.setHeight(x, z, seaLevel + 10);
-								break;
+						default:
+							heightmap.setHeight(x, z, seaLevel + 10);
+							break;
 						}// heightmap switch
 					}
 					else
@@ -333,10 +331,10 @@ public class LodNodeGenWorker implements IWorker
 					}
 				}// z
 			}// x
-
+			
 			chunk.setHeightmap(LodUtil.DEFAULT_HEIGHTMAP, heightmap.getRawData());
-
-
+			
+			
 			if (!inTheEnd)
 			{
 				lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(true, true, false));
@@ -348,14 +346,14 @@ public class LodNodeGenWorker implements IWorker
 				// generates the same and it looks really bad.
 				lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(true, true, false));
 			}
-
-
+			
+			
 //			long startTime = System.currentTimeMillis();
 //			long endTime = System.currentTimeMillis();
 //			System.out.println(endTime - startTime);
 		}
-
-
+		
+		
 		/**
 		 * takes about 10 - 20 ms
 		 */
@@ -365,11 +363,11 @@ public class LodNodeGenWorker implements IWorker
 			ChunkPrimer chunk = new ChunkPrimer(pos, UpgradeData.EMPTY);
 			chunkList.add(chunk);
 			LodServerWorld lodServerWorld = new LodServerWorld(serverWorld, chunk);
-
+			
 			ServerChunkProvider chunkSource = serverWorld.getChunkSource();
 			ChunkGenerator chunkGen = chunkSource.generator;
-
-
+			
+			
 			// generate the terrain (this is thread safe)
 			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			// override the chunk status so we can run the next generator stage
@@ -377,19 +375,19 @@ public class LodNodeGenWorker implements IWorker
 			chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
 			ChunkStatus.NOISE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			ChunkStatus.SURFACE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
-
+			
 			// this feature has been proven to be thread safe
 			// so we will add it
 			IceAndSnowFeature snowFeature = new IceAndSnowFeature(NoFeatureConfig.CODEC);
 			snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
-
+			
 			lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(DistanceGenerationMode.SURFACE));
-
+			
 			/**TODO if we want to use Biome utils and terrain utils for overworld
 			 * lodBuilder.generateLodNodeFromChunk(lodDim, pos ,detailLevel, serverWorld.getSeed());*/
 		}
-
-
+		
+		
 		/**
 		 * takes about 15 - 20 ms
 		 *
@@ -402,11 +400,11 @@ public class LodNodeGenWorker implements IWorker
 			ChunkPrimer chunk = new ChunkPrimer(pos, UpgradeData.EMPTY);
 			chunkList.add(chunk);
 			LodServerWorld lodServerWorld = new LodServerWorld(serverWorld, chunk);
-
+			
 			ServerChunkProvider chunkSource = serverWorld.getChunkSource();
 			ChunkGenerator chunkGen = chunkSource.generator;
-
-
+			
+			
 			// generate the terrain (this is thread safe)
 			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			// override the chunk status so we can run the next generator stage
@@ -414,8 +412,8 @@ public class LodNodeGenWorker implements IWorker
 			chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
 			ChunkStatus.NOISE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			ChunkStatus.SURFACE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
-
-
+			
+			
 			// get all the biomes in the chunk
 			HashSet<Biome> biomes = new HashSet<>();
 			for (int x = 0; x < LodUtil.CHUNK_WIDTH; x++)
@@ -423,7 +421,7 @@ public class LodNodeGenWorker implements IWorker
 				for (int z = 0; z < LodUtil.CHUNK_WIDTH; z++)
 				{
 					Biome biome = chunk.getBiomes().getNoiseBiome(x >> 2, serverWorld.getSeaLevel() >> 2, z >> 2);
-
+					
 					// Issue #35
 					// For some reason Jungle biomes cause incredible lag
 					// the features here must be interacting with each other
@@ -438,26 +436,26 @@ public class LodNodeGenWorker implements IWorker
 					}
 				}
 			}
-
+			
 			boolean allowUnstableFeatures = LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.get();
-
+			
 			// generate all the features related to this chunk.
 			// this may or may not be thread safe
 			for (Biome biome : biomes)
 			{
 				List<List<Supplier<ConfiguredFeature<?, ?>>>> featuresForState = biome.generationSettings.features();
-
+				
 				for(int featureStateToGenerate = 0; featureStateToGenerate < featuresForState.size(); featureStateToGenerate++)
 				{
 					for(Supplier<ConfiguredFeature<?, ?>> featureSupplier : featuresForState.get(featureStateToGenerate))
 					{
 						ConfiguredFeature<?, ?> configuredFeature = featureSupplier.get();
-
+						
 						if (!allowUnstableFeatures &&
 								configuredFeaturesToAvoid.containsKey(configuredFeature.hashCode()))
 							continue;
-
-
+						
+						
 						try
 						{
 							configuredFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition());
@@ -468,7 +466,7 @@ public class LodNodeGenWorker implements IWorker
 							// except pray that it doesn't effect the normal world generation
 							// in any harmful way.
 							// Update: this can cause crashes and high CPU usage.
-
+							
 							// Issue #35
 							// I tried cloning the config for each feature, but that
 							// path was blocked since I can't clone lambda methods.
@@ -477,7 +475,7 @@ public class LodNodeGenWorker implements IWorker
 							// ( https://github.com/kostaskougios/cloning
 							//   and
 							//   https://github.com/EsotericSoftware/kryo )
-
+							
 							if (!allowUnstableFeatures)
 								configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
@@ -487,7 +485,7 @@ public class LodNodeGenWorker implements IWorker
 							// This will happen when the LodServerWorld
 							// isn't able to return something that a feature
 							// generator needs
-
+							
 							if (!allowUnstableFeatures)
 								configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
@@ -495,13 +493,9 @@ public class LodNodeGenWorker implements IWorker
 						catch(Exception e)
 						{
 							// I'm not sure what happened, print to the log
-
-							System.out.println();
-							System.out.println();
+							
 							e.printStackTrace();
-							System.out.println();
-							System.out.println();
-
+							
 							if (!allowUnstableFeatures)
 								configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
@@ -509,13 +503,12 @@ public class LodNodeGenWorker implements IWorker
 					}
 				}
 			}
-
+			
 			// generate a Lod like normal
-
 			lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(DistanceGenerationMode.FEATURES));
 		}
-
-
+		
+		
 		/**
 		 * on pre generated chunks 0 - 1 ms
 		 * on un generated chunks 0 - 50 ms
@@ -529,31 +522,31 @@ public class LodNodeGenWorker implements IWorker
 		{
 			lodBuilder.generateLodNodeAsync(serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES), ClientProxy.getLodWorld(), serverWorld);
 		}
-
-
-
-
-
-
+		
+		
+		
+		
+		
+		
 		//================//
 		// Unused methods //
 		//================//
-
+		
 		// Sadly I wasn't able to get these to work,
 		// they are here for documentation purposes
-
+		
 		@SuppressWarnings({ "rawtypes", "unchecked", "unused" })
 		private DecoratedFeatureConfig cloneDecoratedFeatureConfig(DecoratedFeatureConfig config)
 		{
 			IPlacementConfig placementConfig = null;
-
+			
 			Class oldConfigClass = config.decorator.config().getClass();
-
+			
 			if (oldConfigClass == FeatureSpreadConfig.class)
 			{
 				FeatureSpreadConfig oldPlacementConfig = (FeatureSpreadConfig) config.decorator.config();
 				FeatureSpread oldSpread = oldPlacementConfig.count();
-
+				
 				placementConfig = new FeatureSpreadConfig(oldSpread);
 			}
 			else if(oldConfigClass == DecoratedPlacementConfig.class)
@@ -571,24 +564,24 @@ public class LodNodeGenWorker implements IWorker
 //				ClientProxy.LOGGER.debug("unkown decorated placement config: \"" + config.decorator.config().getClass() + "\"");
 				return config;
 			}
-
-
+			
+			
 			ConfiguredPlacement<?> newPlacement = new ConfiguredPlacement(config.decorator.decorator, placementConfig);
 			return new DecoratedFeatureConfig(config.feature, newPlacement);
 		}
-
-
+		
+		
 		@SuppressWarnings("unused")
 		private BlockClusterFeatureConfig cloneBlockClusterFeatureConfig(BlockClusterFeatureConfig config)
 		{
 			WeightedBlockStateProvider provider = new WeightedBlockStateProvider();
 			provider.weightedList.entries.addAll(((WeightedBlockStateProvider) config.stateProvider).weightedList.entries);
-
+			
 			HashSet<Block> whitelist = new HashSet<>(config.whitelist);
-
+			
 			HashSet<BlockState> blacklist = new HashSet<>(config.blacklist);
-
-
+			
+			
 			BlockClusterFeatureConfig.Builder builder = new BlockClusterFeatureConfig.Builder(provider, config.blockPlacer);
 			builder.whitelist(whitelist);
 			builder.blacklist(blacklist);
@@ -599,14 +592,14 @@ public class LodNodeGenWorker implements IWorker
 			if(config.needWater) { builder.needWater(); }
 			if(config.project) { builder.noProjection(); }
 			builder.tries(config.tries);
-
-
+			
+			
 			return builder.build();
 		}
-
+		
 	}
-
-
+	
+	
 	/**
 	 * Stops the current genThreads if they are running
 	 * and then recreates the Executer service. <br><br>
@@ -624,14 +617,14 @@ public class LodNodeGenWorker implements IWorker
 		}
 		genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
 	}
-
-
-
-
-
-    /*
-     * performance/generation tests related to
-     * serverWorld.getChunk(x, z, ChunkStatus. *** )
+	
+	
+	
+	
+	
+	/*
+	 * performance/generation tests related to
+	 * serverWorld.getChunk(x, z, ChunkStatus. *** )
 
      true/false is whether they generated blocks or not
      the time is how long it took to generate
@@ -654,5 +647,5 @@ public class LodNodeGenWorker implements IWorker
      (and any other object that is needed to make biomes distinct)
 
      Otherwise if snow/trees aren't necessary SURFACE is the next fastest (although not by much)
-     */
+	 */
 }
