@@ -193,7 +193,7 @@ public class ClientProxy
 //		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
 //		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(5000); // 5000
 		
-//		LodConfig.CLIENT.debugging.enableDebugKeybindings.set(true);
+		LodConfig.CLIENT.debugging.enableDebugKeybindings.set(true);
 //		LodConfig.CLIENT.debugging.debugMode.set(DebugMode.SHOW_DETAIL);
 	}
 	

@@ -30,7 +30,7 @@ public class ThreadMapUtil
 	public static long[] getFreshSingleUpdateArray(int arrayLength)
 	{
 		long[] array = getSingleUpdateArray();
-		clearOrCreateArray(array, arrayLength);
+		array = clearOrCreateArray(array, arrayLength);
 		return array;
 	}
 	public static long[] getSingleUpdateArray()
@@ -47,7 +47,7 @@ public class ThreadMapUtil
 	public static long[] getFreshBuilderArray(int arrayLength, int detailLevel)
 	{
 		long[] array = getBuilderArray(detailLevel);
-		clearOrCreateArray(array, arrayLength);
+		array = clearOrCreateArray(array, arrayLength);
 		return array;
 	}
 	public static long[] getBuilderArray(int detailLevel)
@@ -65,7 +65,7 @@ public class ThreadMapUtil
 	public static long[] getFreshBuilderVerticalArray(int arrayLength, int detailLevel)
 	{
 		long[] array = getBuilderVerticalArray(detailLevel);
-		clearOrCreateArray(array, arrayLength);
+		array = clearOrCreateArray(array, arrayLength);
 		return array;
 	}
 	public static long[] getBuilderVerticalArray(int detailLevel)
@@ -83,7 +83,7 @@ public class ThreadMapUtil
 	public static long[] getFreshVerticalDataArray(int arrayLength)
 	{
 		long[] array = getVerticalDataArray();
-		clearOrCreateArray(array, arrayLength);
+		array = clearOrCreateArray(array, arrayLength);
 		return array;
 	}
 	public static long[] getVerticalDataArray()
@@ -101,7 +101,7 @@ public class ThreadMapUtil
 	public static short[] getFreshProjectionArray(int arrayLength)
 	{
 		short[] array = getProjectionArray();
-		clearOrCreateArray(array, arrayLength);
+		array = clearOrCreateArray(array, arrayLength);
 		return array;
 	}
 	public static short[] getProjectionArray()
@@ -118,7 +118,7 @@ public class ThreadMapUtil
 	public static short[] getFreshHeightAndDepth(int arrayLength)
 	{
 		short[] array = getHeightAndDepth();
-		clearOrCreateArray(array, arrayLength);
+		array = clearOrCreateArray(array, arrayLength);
 		return array;
 	}
 	public static short[] getHeightAndDepth()
@@ -135,7 +135,7 @@ public class ThreadMapUtil
 	public static byte[] getFreshSaveContainer(int arrayLength)
 	{
 		byte[] array = getSaveContainer();
-		clearOrCreateArray(array, arrayLength);
+		array = clearOrCreateArray(array, arrayLength);
 		return array;
 	}
 	public static byte[] getSaveContainer()
@@ -151,7 +151,7 @@ public class ThreadMapUtil
 	public static long[] getFreshVerticalUpdateArray(int arrayLength, int detailLevel)
 	{
 		long[] array = ThreadMapUtil.getVerticalUpdateArray(detailLevel);
-		clearOrCreateArray(array, arrayLength);
+		array = clearOrCreateArray(array, arrayLength);
 		return array;
 	}
 	public static long[] getVerticalUpdateArray(int detailLevel)
@@ -169,7 +169,7 @@ public class ThreadMapUtil
 	public static long[] getFreshSingleAddDataToMerge(int arrayLength)
 	{
 		long[] array = getSingleAddDataToMerge();
-		clearOrCreateArray(array, arrayLength);
+		array = clearOrCreateArray(array, arrayLength);
 		return array;
 	}
 	public static long[] getSingleAddDataToMerge()
@@ -201,41 +201,51 @@ public class ThreadMapUtil
 	
 	
 	
-	/** fills the array with 0's */
-	private static void clearOrCreateArray(long[] array, int arrayLength)
+	/** returns an array filled with 0's */
+	private static long[] clearOrCreateArray(long[] array, int arrayLength)
 	{
 		if (array == null || array.length != arrayLength)
+		{
 			array = new long[arrayLength];
+		}
 		else
 			Arrays.fill(array, 0);
+		
+		return array;
 	}
 	
-	/** fills the array with 0's */
+	/** returns an array filled with 0's */
 	@SuppressWarnings("unused")
-	private static void clearOrCreateArray(int[] array, int arrayLength)
+	private static int[] clearOrCreateArray(int[] array, int arrayLength)
 	{
 		if (array == null || array.length != arrayLength)
 			array = new int[arrayLength];
 		else
 			Arrays.fill(array, 0);
+		
+		return array;
 	}
 	
-	/** fills the array with 0's */
-	private static void clearOrCreateArray(short[] array, int arrayLength)
+	/** returns an array filled with 0's */
+	private static short[] clearOrCreateArray(short[] array, int arrayLength)
 	{
 		if (array == null || array.length != arrayLength)
 			array = new short[arrayLength];
 		else
 			Arrays.fill(array, (short) 0);
+		
+		return array;
 	}
 
-	/** fills the array with 0's */
-	private static void clearOrCreateArray(byte[] array, int arrayLength)
+	/** returns an array filled with 0's */
+	private static byte[] clearOrCreateArray(byte[] array, int arrayLength)
 	{
 		if (array == null || array.length != arrayLength)
 			array = new byte[arrayLength];
 		else
 			Arrays.fill(array, (byte) 0);
+		
+		return array;
 	}
 	
 }
