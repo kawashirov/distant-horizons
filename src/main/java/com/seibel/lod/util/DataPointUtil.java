@@ -1,7 +1,5 @@
 package com.seibel.lod.util;
 
-import java.util.Arrays;
-
 import com.seibel.lod.enums.DistanceGenerationMode;
 
 import net.minecraft.client.renderer.texture.NativeImage;
@@ -279,31 +277,12 @@ public class DataPointUtil
 	{
 		int size = dataToMerge.length / inputVerticalData;
 		
-		//We initialise the arrays that are going to be used
-		short[] projection = ThreadMapUtil.getProjectionShort();
-		short[] heightAndDepth = ThreadMapUtil.getHeightAndDepth();
-		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge();
-		long[] dataPoint = ThreadMapUtil.verticalDataArray();
+		// We initialize the arrays that are going to be used
+		short[] projection = ThreadMapUtil.getFreshProjectionArray((worldHeight) / 16 + 1);
+		short[] heightAndDepth = ThreadMapUtil.getFreshHeightAndDepth((worldHeight + 1) * 2);
+		long[] singleDataToMerge = ThreadMapUtil.getFreshSingleAddDataToMerge(size);
+		long[] dataPoint = ThreadMapUtil.getFreshVerticalDataArray(worldHeight + 1);
 		
-		if (projection == null || projection.length != (worldHeight) / 16 + 1)
-			projection = new short[(worldHeight) / 16 + 1];
-		else
-			Arrays.fill(projection, (short) 0);
-		
-		if (heightAndDepth == null || heightAndDepth.length != (worldHeight + 1) * 2)
-			heightAndDepth = new short[(worldHeight + 1) * 2];
-		else
-			Arrays.fill(heightAndDepth, (short) 0);
-		
-		if (singleDataToMerge == null || singleDataToMerge.length != size)
-			singleDataToMerge = new long[size];
-		else
-			Arrays.fill(singleDataToMerge, EMPTY_DATA);
-		
-		if (dataPoint == null || dataPoint.length != worldHeight + 1)
-			dataPoint = new long[worldHeight + 1];
-		else
-			Arrays.fill(dataPoint, EMPTY_DATA);
 		
 		int genMode = DistanceGenerationMode.SERVER.complexity;
 		boolean allEmpty = true;

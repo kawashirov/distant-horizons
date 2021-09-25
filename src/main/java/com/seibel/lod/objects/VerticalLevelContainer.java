@@ -1,8 +1,12 @@
 package com.seibel.lod.objects;
 
-import com.seibel.lod.util.*;
-
 import java.util.Arrays;
+
+import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.DetailDistanceUtil;
+import com.seibel.lod.util.LevelPosUtil;
+import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.ThreadMapUtil;
 
 public class VerticalLevelContainer implements LevelContainer
 {
@@ -27,6 +31,7 @@ public class VerticalLevelContainer implements LevelContainer
 		return detailLevel;
 	}
 
+	@Override
 	public void clear(int posX, int posZ){
 
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
@@ -36,6 +41,7 @@ public class VerticalLevelContainer implements LevelContainer
 		}
 	}
 
+	@Override
 	public boolean addData(long data, int posX, int posZ, int verticalIndex){
 
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
@@ -44,20 +50,24 @@ public class VerticalLevelContainer implements LevelContainer
 		return true;
 	}
 
+	@Override
 	public boolean addSingleData(long data, int posX, int posZ){
 		return addData(data, posX, posZ, 0);
 	}
 
+	@Override
 	public long getData(int posX, int posZ, int verticalIndex){
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		return dataContainer[posX*size*maxVerticalData + posZ*maxVerticalData + verticalIndex];
 	}
 
+	@Override
 	public long getSingleData(int posX, int posZ){
 		return getData(posX,posZ,0);
 	}
 
+	@Override
 	public int getMaxVerticalData(){
 		return maxVerticalData;
 	}
@@ -66,6 +76,7 @@ public class VerticalLevelContainer implements LevelContainer
 		return size;
 	}
 
+	@Override
 	public boolean doesItExist(int posX, int posZ){
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
@@ -126,19 +137,16 @@ public class VerticalLevelContainer implements LevelContainer
 		}
 	}
 
+	@Override
 	public LevelContainer expand(){
 		return new VerticalLevelContainer((byte) (getDetailLevel() - 1));
 	}
 
+	@Override
 	public void updateData(LevelContainer lowerLevelContainer, int posX, int posZ)
 	{
 		//We reset the array
-		long[] dataToMerge = ThreadMapUtil.getVerticalUpdateArray()[detailLevel];
-
-		if(dataToMerge == null || dataToMerge.length != 4*lowerLevelContainer.getMaxVerticalData())
-			dataToMerge = new long[4 * lowerLevelContainer.getMaxVerticalData()];
-		else
-			Arrays.fill(dataToMerge, DataPointUtil.EMPTY_DATA);
+		long[] dataToMerge = ThreadMapUtil.getFreshVerticalUpdateArray(4 * lowerLevelContainer.getMaxVerticalData(), detailLevel);
 
 		int lowerMaxVertical = dataToMerge.length/4;
 		int childPosX;
@@ -157,7 +165,7 @@ public class VerticalLevelContainer implements LevelContainer
 			}
 		}
 		data = DataPointUtil.mergeMultiData(dataToMerge, lowerMaxVertical, getMaxVerticalData());
-
+		
 		for(int verticalIndex = 0; (verticalIndex < data.length) && (verticalIndex < maxVerticalData); verticalIndex++)
 		{
 			addData(data[verticalIndex],
@@ -167,6 +175,7 @@ public class VerticalLevelContainer implements LevelContainer
 		}
 	}
 
+	@Override
 	public byte[] toDataString()
 	{
 		int index = 0;
@@ -174,12 +183,9 @@ public class VerticalLevelContainer implements LevelContainer
 		byte last = -1;
 		int x = size * size * maxVerticalData;
 		int tempIndex;
-		byte[] tempData = ThreadMapUtil.getSaveContainer();
 		long current;
-		if(tempData == null || tempData.length != (2 + (x * 8)))
-			tempData = new byte[2 + (x * 8)];
-		else
-			Arrays.fill(tempData, (byte) 0);
+		
+		byte[] tempData = ThreadMapUtil.getFreshSaveContainer(2 + (x * 8));
 
 		tempData[index] = detailLevel;
 		index++;
@@ -243,10 +249,12 @@ public class VerticalLevelContainer implements LevelContainer
 		return " ";
 	}
 
+	@Override
 	public int getMaxNumberOfLods(){
 		return size*size*getMaxVerticalData();
 	}
 
+	@Override
 	public int getMaxMemoryUse(){
 		return getMaxNumberOfLods() * 2; //2 byte
 	}

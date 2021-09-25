@@ -275,13 +275,8 @@ public class LodBuilder
 	{
 		int size = 1 << detail.detailLevel;
 		
-		long[] dataToMerge = ThreadMapUtil.getBuilderVerticalArray()[detail.detailLevel];
+		long[] dataToMerge = ThreadMapUtil.getFreshBuilderVerticalArray(size * size * DataPointUtil.worldHeight + 1, detail.detailLevel);
 		
-		if (dataToMerge == null || dataToMerge.length != size * size * DataPointUtil.worldHeight + 1)
-			dataToMerge = new long[size * size * DataPointUtil.worldHeight + 1];
-		
-		for (int i = 0; i < dataToMerge.length; i++)
-			dataToMerge[i] = DataPointUtil.EMPTY_DATA;
 		
 		int verticalData = DataPointUtil.worldHeight;
 		
@@ -429,7 +424,7 @@ public class LodBuilder
 	
 	private long[] createSingleDataToMerge(HorizontalResolution detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{
-		long[] dataToMerge = ThreadMapUtil.getBuilderArray()[detail.detailLevel];
+		long[] dataToMerge = ThreadMapUtil.getBuilderArray(detail.detailLevel);
 		ChunkPos chunkPos = chunk.getPos();
 		
 		int size = 1 << detail.detailLevel;

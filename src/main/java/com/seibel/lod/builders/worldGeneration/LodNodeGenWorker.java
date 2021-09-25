@@ -38,7 +38,6 @@ import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.util.WeightedList.Entry;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.palette.UpgradeData;
 import net.minecraft.util.registry.Registry;
@@ -74,7 +73,6 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
 public class LodNodeGenWorker implements IWorker
 {
 	public static ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
-	//public static ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
 
 	private boolean threadStarted = false;
 	private LodChunkGenThread thread;
@@ -109,10 +107,6 @@ public class LodNodeGenWorker implements IWorker
 		thread = new LodChunkGenThread(newPos, newGenerationMode,
 				newLodBuilder,
 				newLodDimension, newServerWorld);
-	}
-
-	public static void resetGenerator(){
-		ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
 	}
 
 	@Override
