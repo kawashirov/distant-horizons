@@ -1,18 +1,16 @@
 package com.seibel.lod.enums;
 
 /**
+ * 
+ * 
  * @author Leonardo Amato
- * @version 22-08-2021
+ * @version 8-22-2021
  */
 public enum DistanceQualityDropOff
 {
-	/**
-	 * different Lod detail render and generate linearly to the distance
-	 */
+	/** detail drops off linearly to the distance */
 	LINEAR,
-
-	/**
-	 * different Lod detail render and generate quadratically to the distance
-	 */
+	
+	/** detail drops off quadratically to the distance */
 	QUADRATIC,
 }

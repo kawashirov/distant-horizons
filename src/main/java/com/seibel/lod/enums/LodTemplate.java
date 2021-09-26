@@ -30,18 +30,16 @@ import com.seibel.lod.builders.lodTemplates.TriangularLodTemplate;
  */
 public enum LodTemplate
 {
-	// used for position
-
-	/** Chunks are rendered as
+	/** LODs are rendered as
 	 * rectangular prisms. */
 	CUBIC(new CubicLodTemplate()),
 	
-	/** Chunks smoothly transition between
+	/** LODs smoothly transition between
 	 * each other. */
 	TRIANGULAR(new TriangularLodTemplate()),
 	
-	/** Chunks smoothly transition between
-	 * each other, unless a neighboring chunk
+	/** LODs smoothly transition between
+	 * each other, unless a neighboring LOD
 	 * is at a significantly different height. */
 	DYNAMIC(new DynamicLodTemplate());
 	

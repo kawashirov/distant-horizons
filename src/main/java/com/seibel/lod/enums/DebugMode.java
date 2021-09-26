@@ -25,6 +25,7 @@ package com.seibel.lod.enums;
  */
 public enum DebugMode
 {
+	/** LODs are rendered normally */
 	OFF,
 	
 	/** LOD colors are based on their detail */

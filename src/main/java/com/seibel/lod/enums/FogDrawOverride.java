@@ -24,7 +24,7 @@ package com.seibel.lod.enums;
  * ALWAYS_DRAW_FOG_FANCY <br>
  * 
  * @author James Seibel
- * @version 7-03-2021
+ * @version 7-3-2021
  */
 public enum FogDrawOverride
 {

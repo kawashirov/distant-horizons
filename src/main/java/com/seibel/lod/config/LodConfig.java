@@ -33,7 +33,6 @@ import com.seibel.lod.enums.DistanceQualityDropOff;
 import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.GenerationPriority;
-import com.seibel.lod.enums.HorizontalQuality;
 import com.seibel.lod.enums.HorizontalResolution;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.enums.VerticalQuality;
@@ -89,7 +88,7 @@ public class LodConfig
 		
 //		public ForgeConfigSpec.EnumValue<ShadingMode> shadingMode;
 		
-		public ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
+//		public ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
 		
 		public ForgeConfigSpec.EnumValue<DetailDropOff> detailDropOff;
 		
@@ -135,13 +134,13 @@ public class LodConfig
 					.comment("\n\n"
 							+ " How smooth should the detail transition for LODs be? \n"
 							+ DetailDropOff.BY_CHUNK + ": quality is determined per-chunk (best quality option, may cause stuttering when moving)\n"
-							+ DetailDropOff.BY_REGION_FANCY + ": quality is determiend per-region (quality option)\n"
-							+ DetailDropOff.BY_REGION_FAST + ": quality is determiend per-region (performance option)\n")
+							+ DetailDropOff.BY_REGION_FANCY + ": quality is determined per-region (quality option)\n"
+							+ DetailDropOff.BY_REGION_FAST + ": quality is determined per-region (performance option)\n")
 					.defineEnum("detailDropOff", DetailDropOff.BY_CHUNK);
 			
 			drawResolution = builder
 					.comment("\n\n"
-							+ " What is the maximum detail level that LODs should be drawn at? \n"
+							+ " What is the maximum detail LODs should be drawn at? \n"
 							+ " " + HorizontalResolution.CHUNK + ": render 1 LOD for each Chunk. \n"
 							+ " " + HorizontalResolution.HALF_CHUNK + ": render 4 LODs for each Chunk. \n"
 							+ " " + HorizontalResolution.FOUR_BLOCKS + ": render 16 LODs for each Chunk. \n"
@@ -149,13 +148,13 @@ public class LodConfig
 							+ " " + HorizontalResolution.BLOCK + ": render 256 LODs for each Chunk. \n")
 					.defineEnum("Draw resolution", HorizontalResolution.BLOCK);
 			
-			horizontalQuality = builder
-					.comment("\n\n"
-							+ " This indicates how quickly LODs drop off in quality. \n"
-							+ " " + HorizontalQuality.LOW + ": quality drops every 4 chunks. \n"
-							+ " " + HorizontalQuality.MEDIUM + ": quality drops every 8 chunks. \n"
-							+ " " + HorizontalQuality.HIGH + ": quality drops every 16 chunks. \n")
-					.defineEnum("lodDrawQuality", HorizontalQuality.MEDIUM);
+//			horizontalQuality = builder
+//					.comment("\n\n"
+//							+ " This indicates how quickly LODs drop off in quality. \n"
+//							+ " " + HorizontalQuality.LOW + ": quality drops every 4 chunks. \n"
+//							+ " " + HorizontalQuality.MEDIUM + ": quality drops every 8 chunks. \n"
+//							+ " " + HorizontalQuality.HIGH + ": quality drops every 16 chunks. \n")
+//					.defineEnum("lodDrawQuality", HorizontalQuality.MEDIUM);
 			
 			lodChunkRenderDistance = builder
 					.comment("\n\n"

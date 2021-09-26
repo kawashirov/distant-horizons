@@ -18,27 +18,28 @@
 package com.seibel.lod.enums;
 
 /**
- * USE_OPTIFINE_FOG_SETTING, <br>
- * NEVER_DRAW_FOG, <br>
- * ALWAYS_DRAW_FOG_FAST, <br>
- * ALWAYS_DRAW_FOG_FANCY <br>
- *
- * @author James Seibel
- * @version 7-03-2021
+ * Low <br>
+ * Medium <br>
+ * High <br>
+ * <br>
+ * TODO what will the represent when it is hooked up?
+ * 
+ * @author Leonardo Amato
+ * @version 9-25-2021
  */
 public enum HorizontalQuality
 {
 	/** Lods are 2D with heightMap */
 	LOW(64),
-
+	
 	/** Lods expand in three dimension */
 	MEDIUM(128),
-
+	
 	/** Lods expand in three dimension */
 	HIGH(256);
-
+	
 	public int distanceUnit;
-
+	
 	HorizontalQuality(int distanceUnit)
 	{
 		this.distanceUnit = distanceUnit;

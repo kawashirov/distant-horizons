@@ -18,12 +18,18 @@
 package com.seibel.lod.enums;
 
 /**
- * @author James Seibel
+ * Near_First <br>
+ * Far_First <br>
+ * <br>
+ * Determines which LODs should have priority when generating
+ * outside the normal view distance.
+ * 
  * @author Leonardo Amato
+ * @version 9-25-2021
  */
 public enum GenerationPriority
 {
 	NEAR_FIRST,
-
+	
 	FAR_FIRST;
 }

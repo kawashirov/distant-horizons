@@ -23,10 +23,15 @@ import java.util.Collections;
 import com.seibel.lod.util.LodUtil;
 
 /**
- * single, double, quad, half, full
+ * chunk <Br>
+ * half_chunk <Br>
+ * four_blocks <br>
+ * two_blocks <Br>
+ * block <br>
  * 
  * @author James Seibel
- * @version 8-11-2021
+ * @author Leonardo Amato
+ * @version 9-25-2021
  */
 public enum HorizontalResolution
 {
@@ -48,8 +53,10 @@ public enum HorizontalResolution
 	/** How many DataPoints should 
 	 * be drawn per side per LodChunk */
 	public final int dataPointLengthCount;
+	
 	/** How wide each LOD DataPoint is */
 	public final int dataPointWidth;
+	
 	/** This is the same as detailLevel in LodQuadTreeNode, 
 	 * lowest is 0 highest is 9 */
 	public final byte detailLevel;

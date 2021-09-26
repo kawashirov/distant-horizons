@@ -18,19 +18,17 @@
 package com.seibel.lod.enums;
 
 /**
- * USE_OPTIFINE_FOG_SETTING, <br>
- * NEVER_DRAW_FOG, <br>
- * ALWAYS_DRAW_FOG_FAST, <br>
- * ALWAYS_DRAW_FOG_FANCY <br>
- *
- * @author James Seibel
+ * heightmap <br>
+ * multi_lod <br>
+ * 
+ * @author Leonardo Amato
  * @version 7-03-2021
  */
 public enum VerticalQuality
 {
-	/** Lods are 2D with heightMap */
+	/** Lods only have height and depth data */
 	HEIGHTMAP,
 
-	/** Lods expand in three dimension */
+	/** Lods expand in three dimensions */
 	MULTI_LOD;
 }
