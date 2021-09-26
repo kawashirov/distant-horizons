@@ -32,7 +32,11 @@ import java.util.concurrent.Executors;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.VerticalQuality;
-import com.seibel.lod.objects.*;
+import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LodRegion;
+import com.seibel.lod.objects.RegionPos;
+import com.seibel.lod.objects.SingleLevelContainer;
+import com.seibel.lod.objects.VerticalLevelContainer;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
@@ -41,18 +45,19 @@ import com.seibel.lod.util.LodUtil;
  * This object handles creating LodRegions
  * from files and saving LodRegion objects
  * to file.
- *
+ * 
  * @author James Seibel
- * @version 9-7-2021
+ * @author Cola
+ * @version 9-25-2021
  */
 public class LodDimensionFileHandler
 {
-
+	
 	private LodDimension loadedDimension = null;
 	public long regionLastWriteTime[][];
-
+	
 	private File dimensionDataSaveFolder;
-
+	
 	/**
 	 * lod
 	 */
@@ -65,7 +70,7 @@ public class LodDimensionFileHandler
 	 * detail-#
 	 */
 	private static final String DETAIL_FOLDER_NAME_PREFIX = "detail-";
-
+	
 	/**
 	 * .tmp <br>
 	 * Added to the end of the file path when saving to prevent
@@ -74,28 +79,28 @@ public class LodDimensionFileHandler
 	 * FILE_EXTENSION.
 	 */
 	private static final String TMP_FILE_EXTENSION = ".tmp";
-
+	
 	/**
 	 * This is the file version currently accepted by this
 	 * file handler, older versions (smaller numbers) will be deleted and overwritten,
 	 * newer versions (larger numbers) will be ignored and won't be read.
 	 */
 	public static final int LOD_SAVE_FILE_VERSION = 6;
-
+	
 	/**
 	 * Allow saving asynchronously, but never try to save multiple regions
 	 * at a time
 	 */
 	private ExecutorService fileWritingThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
-
-
+	
+	
 	public LodDimensionFileHandler(File newSaveFolder, LodDimension newLoadedDimension)
 	{
 		if (newSaveFolder == null)
 			throw new IllegalArgumentException("LodDimensionFileHandler requires a valid File location to read and write to.");
-
+		
 		dimensionDataSaveFolder = newSaveFolder;
-
+		
 		loadedDimension = newLoadedDimension;
 		// these two variable are used in sync with the LodDimension
 		regionLastWriteTime = new long[loadedDimension.getWidth()][loadedDimension.getWidth()];
@@ -103,12 +108,12 @@ public class LodDimensionFileHandler
 			for (int j = 0; j < loadedDimension.getWidth(); j++)
 				regionLastWriteTime[i][j] = -1;
 	}
-
-
+	
+	
 	//================//
 	// read from file //
 	//================//
-
+	
 	/**
 	 * Return the LodRegion region at the given coordinates.
 	 * (null if the file doesn't exist)
@@ -121,17 +126,17 @@ public class LodDimensionFileHandler
 		for (byte tempDetailLevel = LodUtil.REGION_DETAIL_LEVEL; tempDetailLevel >= detailLevel; tempDetailLevel--)
 		{
 			String fileName = getFileNameAndPathForRegion(regionX, regionZ, generationMode, tempDetailLevel, verticalQuality);
-
+			
 			try
 			{
 				// if the fileName was null that means the folder is inaccessible
 				// for some reason
 				if (fileName == null)
 					throw new IllegalArgumentException("Unable to read region [" + regionX + ", " + regionZ + "] file, no fileName.");
-
-
+				
+				
 				File f = new File(fileName);
-
+				
 				if (!f.exists())
 				{
 					// there wasn't a file, don't
@@ -154,7 +159,7 @@ public class LodDimensionFileHandler
 							ClientProxy.LOGGER.info("Outdated LOD region file for region: (" + regionX + "," + regionZ + ") version found: " + fileVersion +
 									", version requested: " + LOD_SAVE_FILE_VERSION +
 									" File was been deleted.");
-
+							
 							break;
 						} else if (fileVersion > LOD_SAVE_FILE_VERSION) {
 							// the file we are reading is a newer version,
@@ -164,7 +169,7 @@ public class LodDimensionFileHandler
 							ClientProxy.LOGGER.info("Newer LOD region file for region: (" + regionX + "," + regionZ + ") version found: " + fileVersion +
 									", version requested: " + LOD_SAVE_FILE_VERSION +
 									" this region will not be written to in order to protect the newer file.");
-
+							
 							break;
 						}
 						// this file is a readable version, begin reading the file
@@ -176,13 +181,13 @@ public class LodDimensionFileHandler
 					}
 				}
 				switch (region.getLodQualityMode()){
-					default:
-					case HEIGHTMAP:
-						region.addLevel(new SingleLevelContainer(data));
-						break;
-					case MULTI_LOD:
-						region.addLevel(new VerticalLevelContainer(data));
-						break;
+				default:
+				case HEIGHTMAP:
+					region.addLevel(new SingleLevelContainer(data));
+					break;
+				case MULTI_LOD:
+					region.addLevel(new VerticalLevelContainer(data));
+					break;
 				}
 				//region.addLevel(new SingleLevelContainer(data));
 			} catch (Exception e)
@@ -197,12 +202,12 @@ public class LodDimensionFileHandler
 			region.expand(detailLevel);
 		return region;
 	}
-
-
+	
+	
 	//==============//
 	// Save to File //
 	//==============//
-
+	
 	/**
 	 * Save all dirty regions in this LodDimension to file.
 	 */
@@ -210,7 +215,7 @@ public class LodDimensionFileHandler
 	{
 		fileWritingThreadPool.execute(saveDirtyRegionsThread);
 	}
-
+	
 	private Thread saveDirtyRegionsThread = new Thread(() ->
 	{
 		try
@@ -231,7 +236,7 @@ public class LodDimensionFileHandler
 			e.printStackTrace();
 		}
 	});
-
+	
 	/**
 	 * Save a specific region to disk.<br>
 	 * Note: <br>
@@ -249,7 +254,7 @@ public class LodDimensionFileHandler
 		{
 			String fileName = getFileNameAndPathForRegion(x, z, region.getGenerationMode(), detailLevel, region.getLodQualityMode());
 			File oldFile = new File(fileName);
-
+			
 			// if the fileName was null that means the folder is inaccessible
 			// for some reason
 			if (fileName == null)
@@ -257,8 +262,8 @@ public class LodDimensionFileHandler
 				ClientProxy.LOGGER.warn("Unable to save region [" + x + ", " + z + "] to file, no fileName.");
 				return;
 			}
-
-
+			
+			
 			try
 			{
 				// make sure the file and folder exists
@@ -290,22 +295,22 @@ public class LodDimensionFileHandler
 						return;
 					}  // if(fileVersion > LOD_SAVE_FILE_VERSION)
 					//else {
-						// we are good to continue and overwrite the old file
+					// we are good to continue and overwrite the old file
 					//}
-
+					
 				}
-
+				
 				// the old file is good, now create a new save file
 				File newFile = new File(fileName + TMP_FILE_EXTENSION);
 				try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(newFile))) {
-
+					
 					// add the version of this file
 					outputStream.write(LOD_SAVE_FILE_VERSION);
-
+					
 					// add each LodChunk to the file
 					outputStream.write(region.getLevel(detailLevel).toDataString());
 					outputStream.close();
-
+					
 					// overwrite the old file with the new one
 					Files.move(newFile.toPath(), oldFile.toPath(), StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
 				}catch (IOException ex) {
@@ -318,13 +323,13 @@ public class LodDimensionFileHandler
 			}
 		}
 	}
-
-
+	
+	
 	//================//
 	// helper methods //
 	//================//
-
-
+	
+	
 	/**
 	 * Return the name of the file that should contain the
 	 * region at the given x and z. <br>
@@ -343,7 +348,7 @@ public class LodDimensionFileHandler
 			// or
 			// ".\Super Flat\data"
 			return dimensionDataSaveFolder.getCanonicalPath() + File.separatorChar +
-					       verticalQuality + File.separatorChar +
+					verticalQuality + File.separatorChar +
 					generationMode.toString() + File.separatorChar +
 					DETAIL_FOLDER_NAME_PREFIX + detailLevel + File.separatorChar +
 					FILE_NAME_PREFIX + "." + regionX + "." + regionZ + FILE_EXTENSION;
@@ -354,5 +359,5 @@ public class LodDimensionFileHandler
 			return null;
 		}
 	}
-
+	
 }
