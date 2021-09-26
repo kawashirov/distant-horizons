@@ -21,6 +21,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import com.seibel.lod.enums.FogQuality;
+import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 /**
@@ -29,7 +30,7 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
  * in Optifine.
  *
  * @author James Seibel
- * @version 9-7-2021
+ * @version 9-25-2021
  */
 public class ReflectionHandler
 {
@@ -68,6 +69,7 @@ public class ReflectionHandler
 		// we didn't find the field,
 		// either optifine isn't installed, or
 		// optifine changed the name of the variable
+		ClientProxy.LOGGER.info(ReflectionHandler.class.getSimpleName() + ": unable to find the Optifine fog field. If Optifine isn't installed this can be ignored.");
 	}
 	
 	
@@ -91,17 +93,20 @@ public class ReflectionHandler
 		try
 		{
 			returnNum = (int) ofFogField.get(mc.getOptions());
-		} catch (IllegalArgumentException | IllegalAccessException e)
+		}
+		catch (IllegalArgumentException | IllegalAccessException e)
 		{
 			e.printStackTrace();
 		}
 		
 		switch (returnNum)
 		{
-		// optifine's "default" option,
-		// it should never be called in this case
+		default:
 		case 0:
+			// optifine's "default" option,
+			// it should never be called in this case
 			return FogQuality.FAST;
+			
 			
 			// normal options
 		case 1:
@@ -110,9 +115,6 @@ public class ReflectionHandler
 			return FogQuality.FANCY;
 		case 3:
 			return FogQuality.OFF;
-			
-		default:
-			return FogQuality.FAST;
 		}
 	}
 }
