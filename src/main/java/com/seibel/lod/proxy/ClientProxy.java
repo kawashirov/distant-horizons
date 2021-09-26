@@ -52,14 +52,17 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * and is the starting point for most of the mod.
  *
  * @author James_Seibel
- * @version 9-23-2021
+ * @version 9-26-2021
  */
 public class ClientProxy
 {
 	public static final Logger LOGGER = LogManager.getLogger("LOD");
 	
+	/** 
+	 * there is some setup that should only happen once,
+	 * once this is true that setup has completed
+	 */
 	private boolean firstTimeSetupComplete = false;
-	public static boolean drawLods = true;
 	
 	private static LodWorld lodWorld = new LodWorld();
 	private static LodBuilder lodBuilder = new LodBuilder();
@@ -72,13 +75,9 @@ public class ClientProxy
 	private MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	
-	/**
-	 * This is used to determine if the LODs should be regenerated
-	 */
+	/** This is used to determine if the LODs should be regenerated */
 	public static int previousChunkRenderDistance = 0;
-	/**
-	 * This is used to determine if the LODs should be regenerated
-	 */
+	/** This is used to determine if the LODs should be regenerated */
 	public static int previousLodRenderDistance = 0;
 	
 	/**
@@ -100,6 +99,7 @@ public class ClientProxy
 	/**
 	 * Do any setup that is required to draw LODs
 	 * and then tell the LodRenderer to draw.
+	 * 
 	 * @param mcMatrixStack 
 	 */
 	public void renderLods(MatrixStack mcMatrixStack, float partialTicks)
@@ -114,11 +114,9 @@ public class ClientProxy
 		{
 			// only run the first time setup once
 			if (!firstTimeSetupComplete)
-			{
 				firstFrameSetup();
-			}
 			
-			DetailDistanceUtil.updateSettings();
+			
 			if (mc == null || mc.getPlayer() == null || !lodWorld.getIsWorldLoaded())
 				return;
 			
@@ -126,6 +124,7 @@ public class ClientProxy
 			if (lodDim == null)
 				return;
 			
+			DetailDistanceUtil.updateSettings();
 			viewDistanceChangedEvent();
 			playerMoveEvent(lodDim);
 			
@@ -141,10 +140,7 @@ public class ClientProxy
 			profiler.pop(); // get out of "terrain"
 			profiler.push("LOD");
 			
-			if(drawLods)
-			{
-				renderer.drawLODs(lodDim, mcMatrixStack, partialTicks, mc.getProfiler());
-			}
+			renderer.drawLODs(lodDim, mcMatrixStack, partialTicks, mc.getProfiler());		
 			
 			profiler.pop(); // end LOD
 			profiler.push("terrain"); // go back into "terrain"
@@ -302,7 +298,7 @@ public class ClientProxy
 		if(LodConfig.CLIENT.debugging.enableDebugKeybindings.get()
 				&& event.getKey() == GLFW.GLFW_KEY_F6 && event.getAction() == GLFW.GLFW_PRESS)
 		{
-			drawLods = !drawLods;
+			LodConfig.CLIENT.graphics.drawLods.set(!LodConfig.CLIENT.graphics.drawLods.get());
 		}
 	}
 	

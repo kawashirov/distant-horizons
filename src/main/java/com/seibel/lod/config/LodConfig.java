@@ -33,6 +33,7 @@ import com.seibel.lod.enums.DistanceQualityDropOff;
 import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.GenerationPriority;
+import com.seibel.lod.enums.HorizontalQuality;
 import com.seibel.lod.enums.HorizontalResolution;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.enums.VerticalQuality;
@@ -46,7 +47,7 @@ import net.minecraftforge.fml.config.ModConfig;
  * This handles any configuration the user has access to.
  *
  * @author James Seibel
- * @version 9-24-2021
+ * @version 9-26-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -79,6 +80,8 @@ public class LodConfig
 	
 	public static class Graphics
 	{
+		public ForgeConfigSpec.BooleanValue drawLods;
+		
 		public ForgeConfigSpec.EnumValue<FogDistance> fogDistance;
 		public ForgeConfigSpec.EnumValue<FogDrawOverride> fogDrawOverride;
 		
@@ -88,7 +91,7 @@ public class LodConfig
 		
 //		public ForgeConfigSpec.EnumValue<ShadingMode> shadingMode;
 		
-//		public ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
+		public ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
 		
 		public ForgeConfigSpec.EnumValue<DetailDropOff> detailDropOff;
 		
@@ -102,6 +105,13 @@ public class LodConfig
 		Graphics(ForgeConfigSpec.Builder builder)
 		{
 			builder.comment("These settings control how the LODs look.").push(this.getClass().getSimpleName());
+			
+			drawLods = builder
+					.comment("\n\n"
+							+ " If true, the mod is enabled and LODs will be drawn. \n"
+							+ " If false, the mod will still generate LODs, \n"
+							+ " but they won't be rendered. \n")
+					.define("drawLODs", true);
 			
 			fogDistance = builder
 					.comment("\n\n"
@@ -148,13 +158,13 @@ public class LodConfig
 							+ " " + HorizontalResolution.BLOCK + ": render 256 LODs for each Chunk. \n")
 					.defineEnum("Draw resolution", HorizontalResolution.BLOCK);
 			
-//			horizontalQuality = builder
-//					.comment("\n\n"
-//							+ " This indicates how quickly LODs drop off in quality. \n"
-//							+ " " + HorizontalQuality.LOW + ": quality drops every 4 chunks. \n"
-//							+ " " + HorizontalQuality.MEDIUM + ": quality drops every 8 chunks. \n"
-//							+ " " + HorizontalQuality.HIGH + ": quality drops every 16 chunks. \n")
-//					.defineEnum("lodDrawQuality", HorizontalQuality.MEDIUM);
+			horizontalQuality = builder
+					.comment("\n\n"
+							+ " This indicates how quickly LODs drop off in quality. \n"
+							+ " " + HorizontalQuality.LOW + ": quality drops every 4 chunks. \n"
+							+ " " + HorizontalQuality.MEDIUM + ": quality drops every 8 chunks. \n"
+							+ " " + HorizontalQuality.HIGH + ": quality drops every 16 chunks. \n")
+					.defineEnum("lodDrawQuality", HorizontalQuality.MEDIUM);
 			
 			lodChunkRenderDistance = builder
 					.comment("\n\n"
