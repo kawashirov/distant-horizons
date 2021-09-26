@@ -30,21 +30,13 @@ import com.seibel.lod.enums.DistanceGenerationMode;
  */
 public class LodBuilderConfig
 {
-	/**
-	 * default false
-	 */
+	/** default: false */
 	public boolean useHeightmap;
-	/**
-	 * default false
-	 */
+	/** default: false */
 	public boolean useBiomeColors;
-	/**
-	 * default true
-	 */
+	/** default: true */
 	public boolean useSolidBlocksInColorGen;
-	/**
-	 * default server
-	 */
+	/** default: server */
 	public DistanceGenerationMode distanceGenerationMode;
 
 	/**
@@ -89,13 +81,7 @@ public class LodBuilderConfig
 		useHeightmap = newUseHeightmap;
 		useBiomeColors = newUseBiomeColors;
 		useSolidBlocksInColorGen = newUseSolidBlocksInBiomeColor;
-		if (newUseHeightmap)
-		{
-			distanceGenerationMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
-		} else
-		{
-			distanceGenerationMode = DistanceGenerationMode.BIOME_ONLY;
-		}
+		distanceGenerationMode = newUseHeightmap? DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT : DistanceGenerationMode.BIOME_ONLY;
 	}
 
 	/**
