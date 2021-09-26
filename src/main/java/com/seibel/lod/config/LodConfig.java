@@ -237,10 +237,10 @@ public class LodConfig
 							+ " with LINEAR calculator the quality of block decrease \n"
 							+ " linearly to the distance of the player \n"
 							
-							                                     + "\n"
-							                                     + " " + DistanceQualityDropOff.QUADRATIC + " \n"
-							                                     + " with QUADRATIC calculator the quality of block decrease \n"
-							                                     + " quadratically to the distance of the player \n")
+							+ "\n"
+							+ " " + DistanceQualityDropOff.QUADRATIC + " \n"
+							+ " with QUADRATIC calculator the quality of block decrease \n"
+							+ " quadratically to the distance of the player \n")
 					.defineEnum("lodDistanceComputation", DistanceQualityDropOff.LINEAR);
 			
 			generationPriority = builder
@@ -250,10 +250,10 @@ public class LodConfig
 							+ " with a small priority for far regions. \n"
 							+ " This fills in the world fastest. \n"
 							
-							                              + "\n"
-							                              + " " + GenerationPriority.NEAR_FIRST + " \n"
-							                              + " LODs are generated around the player \n"
-							                              + " in a spiral, similar to vanilla minecraft. \n")
+							+ "\n"
+							+ " " + GenerationPriority.NEAR_FIRST + " \n"
+							+ " LODs are generated around the player \n"
+							+ " in a spiral, similar to vanilla minecraft. \n")
 					.defineEnum("Generation priority", GenerationPriority.NEAR_FIRST);
 			
 			distanceGenerationMode = builder
