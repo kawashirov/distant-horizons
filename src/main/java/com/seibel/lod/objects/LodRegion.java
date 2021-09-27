@@ -449,6 +449,7 @@ public class LodRegion
 	}
 
 	/**
+	 * TODO what does this do?
 	 * @param detailLevel
 	 */
 	public void expand(byte detailLevel)

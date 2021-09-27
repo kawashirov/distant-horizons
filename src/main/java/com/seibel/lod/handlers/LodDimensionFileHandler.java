@@ -238,10 +238,10 @@ public class LodDimensionFileHandler
 			{
 				for (int j = 0; j < lodDimension.getWidth(); j++)
 				{
-					if (lodDimension.isRegionToRegen(i,j) && lodDimension.getRegionByArrayIndex(i,j) != null)
+					if (lodDimension.doesRegionNeedBufferRegen(i,j) && lodDimension.getRegionByArrayIndex(i,j) != null)
 					{
 						saveRegionToFile(lodDimension.getRegionByArrayIndex(i,j));
-						lodDimension.setRegenByArrayIndex(i, j,false);
+						lodDimension.setRegenRegionBufferByArrayIndex(i, j,false);
 					}
 				}
 			}

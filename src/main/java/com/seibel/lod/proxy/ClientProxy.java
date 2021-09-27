@@ -128,8 +128,8 @@ public class ClientProxy
 			viewDistanceChangedEvent();
 			playerMoveEvent(lodDim);
 			
-			lodDim.treeCutter((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
-			lodDim.treeGenerator((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
+			lodDim.cutRegionNodesAsync((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
+			lodDim.expandOrLoadRegionsAsync((int) mc.getPlayer().getX(), (int) mc.getPlayer().getZ());
 			
 			
 			// Note to self:
@@ -313,7 +313,7 @@ public class ClientProxy
 	{
 		// make sure the dimension is centered
 		RegionPos playerRegionPos = new RegionPos(mc.getPlayer().blockPosition());
-		RegionPos worldRegionOffset = new RegionPos(playerRegionPos.x - lodDim.getCenterX(), playerRegionPos.z - lodDim.getCenterZ());
+		RegionPos worldRegionOffset = new RegionPos(playerRegionPos.x - lodDim.getCenterRegionPosX(), playerRegionPos.z - lodDim.getCenterRegionPosZ());
 		if (worldRegionOffset.x != 0 || worldRegionOffset.z != 0)
 		{
 			lodWorld.saveAllDimensions();

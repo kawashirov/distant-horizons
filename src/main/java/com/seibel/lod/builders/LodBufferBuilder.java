@@ -199,11 +199,11 @@ public class LodBufferBuilder
 				{
 					for (int zRegion = 0; zRegion < lodDim.getWidth(); zRegion++)
 					{
-						if (lodDim.isRegionToRegen(xRegion, zRegion) || fullRegen)
+						if (lodDim.doesRegionNeedBufferRegen(xRegion, zRegion) || fullRegen)
 						{
 							RegionPos regionPos = new RegionPos(
-									xRegion + lodDim.getCenterX() - Math.floorDiv(lodDim.getWidth(), 2),
-									zRegion + lodDim.getCenterZ() - Math.floorDiv(lodDim.getWidth(), 2));
+									xRegion + lodDim.getCenterRegionPosX() - Math.floorDiv(lodDim.getWidth(), 2),
+									zRegion + lodDim.getCenterRegionPosZ() - Math.floorDiv(lodDim.getWidth(), 2));
 							
 							// local position in the vbo and bufferBuilder arrays
 							BufferBuilder currentBuffer = buildableBuffers[xRegion][zRegion];
@@ -449,7 +449,7 @@ public class LodBufferBuilder
 		{
 			for (int z = 0; z < buildableBuffers.length; z++)
 			{
-				if (fullRegen || lodDim.isRegionToRegen(x, z))
+				if (fullRegen || lodDim.doesRegionNeedBufferRegen(x, z))
 				{
 					// for some reason BufferBuilder.vertexCounts
 					// isn't reset unless this is called, which can cause
@@ -469,7 +469,7 @@ public class LodBufferBuilder
 	{
 		for (int x = 0; x < buildableBuffers.length; x++)
 			for (int z = 0; z < buildableBuffers.length; z++)
-				if (buildableBuffers[x][z] != null && buildableBuffers[x][z].building() && (fullRegen || lodDim.isRegionToRegen(x, z)))
+				if (buildableBuffers[x][z] != null && buildableBuffers[x][z].building() && (fullRegen || lodDim.doesRegionNeedBufferRegen(x, z)))
 					buildableBuffers[x][z].end();
 	}
 	
@@ -490,11 +490,11 @@ public class LodBufferBuilder
 			{
 				for (int z = 0; z < buildableVbos.length; z++)
 				{
-					if (fullRegen || lodDim.isRegionToRegen(x, z))
+					if (fullRegen || lodDim.doesRegionNeedBufferRegen(x, z))
 					{
 						ByteBuffer builderBuffer = buildableBuffers[x][z].popNextBuffer().getSecond();
 						vboUpload(buildableVbos[x][z], builderBuffer);
-						lodDim.setRegenByArrayIndex(x, z, false);
+						lodDim.setRegenRegionBufferByArrayIndex(x, z, false);
 					}
 				}
 			}

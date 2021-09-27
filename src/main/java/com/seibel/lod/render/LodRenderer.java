@@ -287,7 +287,7 @@ public class LodRenderer
 			{
 				for (int j = 0; j < vbos.length; j++)
 				{
-					RegionPos vboPos = new RegionPos(i + lodDim.getCenterX() - lodDim.getWidth() / 2, j + lodDim.getCenterZ() - lodDim.getWidth() / 2);
+					RegionPos vboPos = new RegionPos(i + lodDim.getCenterRegionPosX() - lodDim.getWidth() / 2, j + lodDim.getCenterRegionPosZ() - lodDim.getWidth() / 2);
 					if (cullingDisabled || RenderUtil.isRegionInViewFrustum(renderInfo.getBlockPosition(), cameraDir, vboPos.blockPos()))
 					{
 						if ((i > halfWidth - quarterWidth && i < halfWidth + quarterWidth) && (j > halfWidth - quarterWidth && j < halfWidth + quarterWidth))
@@ -821,10 +821,10 @@ public class LodRenderer
 		// check if there is any newly generated terrain to show
 		if (newTime - prevChunkTime > LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.get())
 		{
-			if (lodDim.regenDimension)
+			if (lodDim.regenDimensionBuffers)
 			{
 				partialRegen = true;
-				lodDim.regenDimension = false;
+				lodDim.regenDimensionBuffers = false;
 			}
 			prevChunkTime = newTime;
 		}
@@ -864,7 +864,7 @@ public class LodRenderer
 				{
 					vanillaRenderedChunks[xIndex][zIndex] = true;
 					vanillaRenderedChunksChanged = true;
-					lodDim.setToRegen(pos.getRegionX(), pos.getRegionZ());
+					lodDim.markRegionBufferToRegen(pos.getRegionX(), pos.getRegionZ());
 				}
 			}
 		}
