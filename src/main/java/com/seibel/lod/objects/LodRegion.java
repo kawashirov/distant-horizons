@@ -24,18 +24,26 @@ import com.seibel.lod.util.LodUtil;
  */
 public class LodRegion
 {
+	/** TODO what does this represent, and should it be defined here? */
+	private static final byte POSSIBLE_LOD = 10;
+	
+	
 	/** Holds the lowest (least detailed) detail level in this region
 	 * TODO is that correct? */
 	private byte minDetailLevel;
-	private static final byte POSSIBLE_LOD = 10;
 	
+	/** This holds all data for this region */
 	private LevelContainer[] dataContainer;
 	
-	
+	/** the generation mode for this region
+	 * TODO will this ever change through a region's life? */
 	private DistanceGenerationMode generationMode;
+	/** the vertical quality of this region */
 	private VerticalQuality verticalQuality;
 	
+	/** this region's x RegionPos */
 	public final int regionPosX;
+	/** this region's z RegionPos */
 	public final int regionPosZ;
 	
 	
@@ -76,21 +84,6 @@ public class LodRegion
 	}
 	
 	
-	
-	public VerticalQuality getLodQualityMode()
-	{
-		return verticalQuality;
-	}
-	
-	public DistanceGenerationMode getGenerationMode()
-	{
-		return generationMode;
-	}
-	
-	public int getMaxVerticalData(byte detailLevel)
-	{
-		return dataContainer[detailLevel].getMaxVerticalData();
-	}
 	
 	/**
 	 * Inserts the data point into the region.
@@ -552,6 +545,22 @@ public class LodRegion
 		
 		return count;
 	}
+	
+	public VerticalQuality getVerticalQuality()
+	{
+		return verticalQuality;
+	}
+	
+	public DistanceGenerationMode getGenerationMode()
+	{
+		return generationMode;
+	}
+	
+	public int getMaxVerticalData(byte detailLevel)
+	{
+		return dataContainer[detailLevel].getMaxVerticalData();
+	}
+	
 	
 	@Override
 	public String toString()

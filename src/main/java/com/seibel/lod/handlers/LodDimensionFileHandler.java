@@ -184,7 +184,7 @@ public class LodDimensionFileHandler
 						
 						
 						// add the data to our region
-						switch (region.getLodQualityMode())
+						switch (region.getVerticalQuality())
 						{
 						default:
 						case HEIGHTMAP:
@@ -264,7 +264,7 @@ public class LodDimensionFileHandler
 	{
 		for (byte detailLevel = region.getMinDetailLevel(); detailLevel <= LodUtil.REGION_DETAIL_LEVEL; detailLevel++)
 		{
-			String fileName = getFileNameAndPathForRegion(region.regionPosX, region.regionPosZ, region.getGenerationMode(), detailLevel, region.getLodQualityMode());
+			String fileName = getFileNameAndPathForRegion(region.regionPosX, region.regionPosZ, region.getGenerationMode(), detailLevel, region.getVerticalQuality());
 			File oldFile = new File(fileName);
 			
 			// if the fileName was null that means the folder is inaccessible
