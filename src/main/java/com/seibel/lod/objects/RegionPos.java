@@ -32,11 +32,11 @@ public class RegionPos
 {
 	public int x;
 	public int z;
-
-
+	
+	
 	/**
-	 * Default Constructor <br>
-	 * <p>
+	 * Default Constructor <br><br>
+	 * 
 	 * Sets x and z to 0
 	 */
 	public RegionPos()
@@ -44,41 +44,43 @@ public class RegionPos
 		x = 0;
 		z = 0;
 	}
-
+	
+	/** simple constructor that sets x and z to new x and z. */
 	public RegionPos(int newX, int newZ)
 	{
 		x = newX;
 		z = newZ;
 	}
-
+	
+	/** Converts from a BlockPos to a RegionPos */
 	public RegionPos(BlockPos pos)
 	{
 		this(new ChunkPos(pos));
 	}
-
+	
+	/** Converts from a ChunkPos to a RegionPos */
 	public RegionPos(ChunkPos pos)
 	{
 		x = Math.floorDiv(pos.x, LodUtil.REGION_WIDTH_IN_CHUNKS);
 		z = Math.floorDiv(pos.z, LodUtil.REGION_WIDTH_IN_CHUNKS);
 	}
-
-	/**
-	 * Returns the ChunkPos at the center of this region
-	 */
+	
+	/** Returns the ChunkPos at the center of this region */
 	public ChunkPos chunkPos()
 	{
-		return new ChunkPos((x * LodUtil.REGION_WIDTH_IN_CHUNKS) + LodUtil.REGION_WIDTH_IN_CHUNKS / 2, (z * LodUtil.REGION_WIDTH_IN_CHUNKS) + LodUtil.REGION_WIDTH_IN_CHUNKS / 2);
+		return new ChunkPos(
+				(x * LodUtil.REGION_WIDTH_IN_CHUNKS) + LodUtil.REGION_WIDTH_IN_CHUNKS / 2, 
+				(z * LodUtil.REGION_WIDTH_IN_CHUNKS) + LodUtil.REGION_WIDTH_IN_CHUNKS / 2);
 	}
-
-	/**
-	 * Returns the BlockPos at the center of this region
-	 */
+	
+	/** Returns the BlockPos at the center of this region */
 	public BlockPos blockPos()
 	{
-		return chunkPos().getWorldPosition().offset(LodUtil.CHUNK_WIDTH / 2, 0, LodUtil.CHUNK_WIDTH / 2);
+		return chunkPos().getWorldPosition()
+				.offset(LodUtil.CHUNK_WIDTH / 2, 0, LodUtil.CHUNK_WIDTH / 2);
 	}
-
-
+	
+	
 	@Override
 	public String toString()
 	{
