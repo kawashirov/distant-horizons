@@ -47,7 +47,7 @@ import net.minecraft.world.server.ServerWorld;
  *
  * @author Leonardo Amato
  * @author James Seibel
- * @version 9-26-2021
+ * @version 9-27-2021
  */
 public class LodDimension
 {
@@ -275,7 +275,9 @@ public class LodDimension
 		
 		if (!regionIsInRange(xRegion, zRegion))
 			return null;
-		//throw new ArrayIndexOutOfBoundsException("Region for level pos " + LevelPosUtil.toString(detailLevel, posX, posZ) + " out of range");
+			// throw new ArrayIndexOutOfBoundsException("Region for level pos " + LevelPosUtil.toString(detailLevel, posX, posZ) + " out of range");
+		else if (regions[xIndex][zIndex] == null)
+			return null;
 		else if (regions[xIndex][zIndex].getMinDetailLevel() > detailLevel)
 			return null;
 		//throw new InvalidParameterException("Region for level pos " + LevelPosUtil.toString(detailLevel, posX, posZ) + " currently only reach level " + regions[xIndex][zIndex].getMinDetailLevel());
@@ -851,7 +853,8 @@ public class LodDimension
 					stringBuilder.append("n");
 					stringBuilder.append("\t");
 					
-				} else
+				}
+				else
 				{
 					stringBuilder.append(region.getMinDetailLevel());
 					stringBuilder.append("\t");
@@ -862,6 +865,7 @@ public class LodDimension
 		return stringBuilder.toString();
 	}
 	
+	/** Returns the minimum memory required by the dimension in Bytes */
 	public int getMemoryRequired(int x, int z, LodTemplate template)
 	{
 		/*return regions[x][z].getMinMemoryNeeded(template);*/
@@ -876,14 +880,17 @@ public class LodDimension
 				break;
 			case BY_REGION_FAST:
 		}*/
+		
 		int minDistance = LevelPosUtil.minDistance(LodUtil.REGION_DETAIL_LEVEL, x, z, halfWidth, halfWidth);
 		int detail = DetailDistanceUtil.getTreeCutDetailFromDistance(minDistance);
 		int levelToGen = DetailDistanceUtil.getLodDrawDetail(detail);
+		
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelToGen);
 		int maxVerticalData = DetailDistanceUtil.getMaxVerticalData(detail);
+		
 		int numberOfLods = size * size * maxVerticalData;
 		int memoryUse = numberOfLods * template.getBufferMemoryForSingleLod(maxVerticalData);
-		System.out.println(detail + " " + memoryUse + " " + numberOfLods + " " + template.getBufferMemoryForSingleLod(maxVerticalData));
+		
 		return memoryUse;
 	}
 }
