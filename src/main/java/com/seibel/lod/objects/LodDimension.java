@@ -526,7 +526,7 @@ public class LodDimension
 		{
 		default:
 		case NEAR_FIRST:
-			posToGenerate = new PosToGenerateContainer((byte) 10, maxDataToGenerate, 0, playerBlockPosX, playerBlockPosZ);
+			posToGenerate = new PosToGenerateContainer((byte) 10, maxDataToGenerate, playerBlockPosX, playerBlockPosZ);
 			
 			int playerChunkX = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerBlockPosX);
 			int playerChunkZ = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerBlockPosZ);
@@ -587,7 +587,7 @@ public class LodDimension
 			
 			
 		case FAR_FIRST:
-			posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, (int) (maxDataToGenerate * 0.25), playerBlockPosX, playerBlockPosZ);
+			posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, playerBlockPosX, playerBlockPosZ);
 			
 			int xRegion;
 			int zRegion;

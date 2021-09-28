@@ -2,45 +2,55 @@ package com.seibel.lod.objects;
 
 import com.seibel.lod.util.LevelPosUtil;
 
+/**
+ * Holds the levelPos that need to be generated.
+ * TODO is that correct?
+ * 
+ * @author Leonardo Amato
+ * @version 9-27-2021
+ */
 public class PosToGenerateContainer
 {
 	private int playerPosX;
 	private int playerPosZ;
 	private byte farMinDetail;
-	private int maxSize;
-	private int maxNearSize;
-	private int maxFarSize;
 	private int nearSize;
 	private int farSize;
+	
+	// TODO what is the format of these two arrays? [detailLevel][4-children]?
 	private int[][] nearPosToGenerate;
 	private int[][] farPosToGenerate;
-
-
-	public PosToGenerateContainer(byte farMinDetail, int maxDataToGenerate, int maxFarDataToGenerate, int playerPosX, int playerPosZ)
+	
+	
+	
+	
+	public PosToGenerateContainer(byte farMinDetail, int maxDataToGenerate, int playerPosX, int playerPosZ)
 	{
 		this.playerPosX = playerPosX;
 		this.playerPosZ = playerPosZ;
 		this.farMinDetail = farMinDetail;
-		maxNearSize = maxDataToGenerate-maxFarDataToGenerate;
-		maxFarSize = maxFarDataToGenerate;
-		maxSize = maxDataToGenerate;
 		nearSize = 0;
 		farSize = 0;
 		nearPosToGenerate = new int[maxDataToGenerate][4];
 		farPosToGenerate = new int[maxDataToGenerate][4];
 	}
-
+	
+	
+	
+	// TODO what is going on in this method?
 	public void addPosToGenerate(byte detailLevel, int posX, int posZ)
 	{
 		int distance = LevelPosUtil.minDistance(detailLevel, posX, posZ, playerPosX, playerPosZ);
 		int index;
+		
 		if (detailLevel >= farMinDetail)
-		{//We are introducing a position in the far array
-
+		{
+			// We are introducing a position in the far array
+			
 			if(farSize < farPosToGenerate.length)
 				farSize++;
+			
 			index = farSize;
-			//while (index > 0 && LevelPosUtil.compareDistance(distance, farPosToGenerate[index - 1][3]) <= 0)
 			while (index > 0 && LevelPosUtil.compareDistance(distance, farPosToGenerate[index - 1][3]) <= 0)
 			{
 				farPosToGenerate[index][0] = farPosToGenerate[index - 1][0];
@@ -49,6 +59,8 @@ public class PosToGenerateContainer
 				farPosToGenerate[index][3] = farPosToGenerate[index - 1][3];
 				index--;
 			}
+			
+			
 			if (index != farSize-1 || farSize != farPosToGenerate.length)
 			{
 				farPosToGenerate[index][0] = detailLevel + 1;
@@ -56,10 +68,14 @@ public class PosToGenerateContainer
 				farPosToGenerate[index][2] = posZ;
 				farPosToGenerate[index][3] = distance;
 			}
-		} else
-		{//We are introducing a position in the near array
+		}
+		else
+		{
+			//We are introducing a position in the near array
+			
 			if(nearSize < nearPosToGenerate.length)
 				nearSize++;
+			
 			index = nearSize-1;
 			while (index > 0 && LevelPosUtil.compareDistance(distance, nearPosToGenerate[index - 1][3]) <= 0)
 			{
@@ -69,6 +85,8 @@ public class PosToGenerateContainer
 				nearPosToGenerate[index][3] = nearPosToGenerate[index - 1][3];
 				index--;
 			}
+			
+			
 			if (index != nearSize-1 || nearSize != nearPosToGenerate.length)
 			{
 				nearPosToGenerate[index][0] = detailLevel + 1;
@@ -78,22 +96,25 @@ public class PosToGenerateContainer
 			}
 		}
 	}
-
+	
+	
+	
 	public int getNumberOfPos()
 	{
 		return nearSize+farSize;
 	}
-
+	
 	public int getNumberOfNearPos()
 	{
 		return nearSize;
 	}
-
+	
 	public int getNumberOfFarPos()
 	{
 		return farSize;
 	}
-
+	
+	// TODO what does getNth mean? could the name be more descriptive or is it just a index?
 	public int getNthDetail(int n, boolean near)
 	{
 		if (near)
@@ -122,9 +143,14 @@ public class PosToGenerateContainer
 		else
 			return farPosToGenerate[n][3];
 	}
-
+	
+	@Override
 	public String toString()
-	{/*
+	{
+		// TOOD is this commented code still useful?
+		// if so why have it commented out?
+		
+		/*
 		StringBuilder builder = new StringBuilder();
 		builder.append("Number of pos to generate ");
 		builder.append(farSize + nearSize);
@@ -164,7 +190,9 @@ public class PosToGenerateContainer
 			builder.append('\n');
 		}
 		builder.append('\n');
-		return builder.toString();*/
+		return builder.toString();
+		*/
+		
 		return " ";
 	}
 }
