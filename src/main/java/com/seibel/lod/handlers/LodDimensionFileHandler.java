@@ -188,10 +188,10 @@ public class LodDimensionFileHandler
 						{
 						default:
 						case HEIGHTMAP:
-							region.addLevel(new SingleLevelContainer(data));
+							region.addLevelContainer(new SingleLevelContainer(data));
 							break;
 						case VOXEL:
-							region.addLevel(new VerticalLevelContainer(data));
+							region.addLevelContainer(new VerticalLevelContainer(data));
 							break;
 						}
 					}
@@ -212,7 +212,7 @@ public class LodDimensionFileHandler
 		}// for each detail level
 		
 		if (region.getMinDetailLevel() >= detailLevel)
-			region.expand(detailLevel);
+			region.growTree(detailLevel);
 		
 		return region;
 	}

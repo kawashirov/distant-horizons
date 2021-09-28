@@ -43,8 +43,12 @@ import net.minecraft.world.server.ServerWorld;
 
 /**
  * This object holds all loaded LOD regions
- * for a given dimension.
- *
+ * for a given dimension. <Br><Br>
+ * 
+ * <strong>Coordinate Standard: </strong><br>
+ * Coordinate called posX or posZ are relative LevelPos coordinates <br>
+ * unless stated otherwise. <br>
+ * 
  * @author Leonardo Amato
  * @author James Seibel
  * @version 9-27-2021
@@ -442,7 +446,7 @@ public class LodDimension
 							// Second case, the region exists at a higher detail level.
 							
 							// Expand the region by introducing the missing layer
-							region.expand(levelToGen);
+							region.growTree(levelToGen);
 							recreateRegionBuffer[x][z] = true;
 						}
 					}
@@ -506,7 +510,7 @@ public class LodDimension
 	/**
 	 * Returns every position that need to be generated based on the position of the player
 	 */
-	public PosToGenerateContainer getDataToGenerate(int maxDataToGenerate, int playerPosX, int playerPosZ)
+	public PosToGenerateContainer getDataToGenerate(int maxDataToGenerate, int playerBlockPosX, int playerBlockPosZ)
 	{
 		PosToGenerateContainer posToGenerate;
 		LodRegion region;
@@ -522,10 +526,10 @@ public class LodDimension
 		{
 		default:
 		case NEAR_FIRST:
-			posToGenerate = new PosToGenerateContainer((byte) 10, maxDataToGenerate, 0, playerPosX, playerPosZ);
+			posToGenerate = new PosToGenerateContainer((byte) 10, maxDataToGenerate, 0, playerBlockPosX, playerBlockPosZ);
 			
-			int playerChunkX = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerPosX);
-			int playerChunkZ = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerPosZ);
+			int playerChunkX = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerBlockPosX);
+			int playerChunkZ = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerBlockPosZ);
 			
 			int xChunkToCheck;
 			int zChunkToCheck;
@@ -583,7 +587,7 @@ public class LodDimension
 			
 			
 		case FAR_FIRST:
-			posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, (int) (maxDataToGenerate * 0.25), playerPosX, playerPosZ);
+			posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, (int) (maxDataToGenerate * 0.25), playerBlockPosX, playerBlockPosZ);
 			
 			int xRegion;
 			int zRegion;
@@ -595,7 +599,7 @@ public class LodDimension
 				
 				region = getRegion(xRegion, zRegion);
 				if (region != null)
-					region.getDataToGenerate(posToGenerate, playerPosX, playerPosZ);
+					region.getDataToGenerate(posToGenerate, playerBlockPosX, playerBlockPosZ);
 				
 				
 				if ((x == z) || ((x < 0) && (x == -z)) || ((x > 0) && (x == 1 - z)))

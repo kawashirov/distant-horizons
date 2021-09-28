@@ -11,17 +11,21 @@ import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 
 /**
- * STANDARD TO FOLLOW
- * every coordinate called posX or posZ is a relative coordinate and not and absolute coordinate
- * if an array contain coordinate the order is the following
- * 0 for x, 1 for z in 2D
- * 0 for x, 1 for y, 2 for z in 3D
+ * This object holds all loaded LevelContainers
+ * for a given region. <Br><Br>
+ * 
+ * <strong>Coordinate Standard: </strong><br>
+ * Coordinate called posX or posZ are relative LevelPos coordinates <br>
+ * unless stated otherwise. <br>
+ * 
  * 
  * @author Leonardo Amato
  * @version 9-27-2021
  */
 public class LodRegion
 {
+	/** Holds the lowest (least detailed) detail level in this region
+	 * TODO is that correct? */
 	private byte minDetailLevel;
 	private static final byte POSSIBLE_LOD = 10;
 	
@@ -33,6 +37,9 @@ public class LodRegion
 	
 	public final int regionPosX;
 	public final int regionPosZ;
+	
+	
+	
 	
 	public LodRegion(RegionPos regionPos)
 	{
@@ -68,6 +75,8 @@ public class LodRegion
 		}
 	}
 	
+	
+	
 	public VerticalQuality getLodQualityMode()
 	{
 		return verticalQuality;
@@ -84,16 +93,18 @@ public class LodRegion
 	}
 	
 	/**
-	 * This method can be used to insert data into the LodRegion
-	 *
-	 * @return if the data was added successfully
+	 * Inserts the data point into the region.
+	 * 
+	 * TODO this will always return true unless it has 
+	 * @return true if the data was added successfully
 	 */
 	public boolean addData(byte detailLevel, int posX, int posZ, int verticalIndex, long data)
 	{
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		
-		// For some reason the dataContainer can contain null entries
+		// The dataContainer could have null entries if the
+		// detailLevel changes.
 		if (this.dataContainer[detailLevel] == null)
 		{
 			if (verticalQuality == VerticalQuality.HEIGHTMAP)
@@ -108,9 +119,10 @@ public class LodRegion
 	}
 	
 	/**
-	 * This method will return the data in the position relative to the level of detail
+	 * Get the dataPoint at the given relative position.
 	 *
-	 * @return the data at the relative pos and level
+	 * @return the data at the relative pos and detail level,
+	 *         0 if the data doesn't exist.
 	 */
 	public long getData(byte detailLevel, int posX, int posZ, int verticalIndex)
 	{
@@ -118,99 +130,110 @@ public class LodRegion
 	}
 	
 	/**
-	 * This method will return the data in the position relative to the level of detail
+	 * Get the dataPoint at the given relative position.
 	 *
-	 * @return the data at the relative pos and level
+	 * @return the data at the relative pos and detail level,
+	 *         0 if the data doesn't exist.
 	 */
 	public long getSingleData(byte detailLevel, int posX, int posZ)
 	{
 		return dataContainer[detailLevel].getSingleData(posX, posZ);
 	}
 	
+	/** Clears the datapoint at the given relative position */
 	public void clear(byte detailLevel, int posX, int posZ)
 	{
 		dataContainer[detailLevel].clear(posX, posZ);
 	}
 	
 	/**
-	 * This method will return all the levelPos that are renderable according to the requisite given in input
-	 *
-	 * @return
+	 * This method will fill the posToGenerate array with all levelPos that 
+	 * are render-able.
+	 * 
+	 * TODO why don't we return the posToGenerate, it would make this easier to understand
 	 */
-	public void getDataToGenerate(PosToGenerateContainer posToGenerate, int playerPosX, int playerPosZ)
+	public void getDataToGenerate(PosToGenerateContainer posToGenerate, 
+			int playerBlockPosX, int playerBlockPosZ)
 	{
-		getDataToGenerate(posToGenerate, LodUtil.REGION_DETAIL_LEVEL, 0, 0, playerPosX, playerPosZ);
+		getDataToGenerate(posToGenerate, LodUtil.REGION_DETAIL_LEVEL, 0, 0, playerBlockPosX, playerBlockPosZ);
 		
 	}
 	
-	private void getDataToGenerate(PosToGenerateContainer posToGenerate, byte detailLevel, int posX, int posZ, int playerPosX, int playerPosZ)
+	/**
+	 * A recursive method that fills the posToGenerate array with all levelPos that 
+	 * need to be generated.
+	 * 
+	 * TODO why don't we return the posToGenerate, it would make this easier to understand
+	 */
+	private void getDataToGenerate(PosToGenerateContainer posToGenerate, byte detailLevel, 
+			int childOffsetPosX, int childOffsetPosZ, int playerPosX, int playerPosZ)
 	{
+		// equivalent to 2^(...)
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
 		
-		//here i calculate the the LevelPos is in range
-		//This is important to avoid any kind of hole in the generation
-		//nt minDistance = LevelPosUtil.minDistance(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size, playerPosX, playerPosZ);
-		int maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
+		// calculate what LevelPos are in range to generate
+		int maxDistance = LevelPosUtil.maxDistance(detailLevel, childOffsetPosX, childOffsetPosZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
 		
+		// determine this child's levelPos
 		byte childDetailLevel = (byte) (detailLevel - 1);
-		int childPosX = posX * 2;
-		int childPosZ = posZ * 2;
+		int childPosX = childOffsetPosX * 2;
+		int childPosZ = childOffsetPosZ * 2;
 		
 		int childSize = 1 << (LodUtil.REGION_DETAIL_LEVEL - childDetailLevel);
-		//we have reached the target detail level
+		
 		byte targetDetailLevel = DetailDistanceUtil.getLodGenDetail(DetailDistanceUtil.getGenerationDetailFromDistance(maxDistance)).detailLevel;
 		if (targetDetailLevel > detailLevel)
 		{
+			// we have gone beyond the target Detail level
+			// we can stop generating
 			return;
-		} else if (targetDetailLevel == detailLevel)
+		}
+		else if (targetDetailLevel == detailLevel)
 		{
-			if (!doesDataExist(detailLevel, posX, posZ))
-			{
-				posToGenerate.addPosToGenerate(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size);
-			}
-		} else
+			if (!doesDataExist(detailLevel, childOffsetPosX, childOffsetPosZ))
+				posToGenerate.addPosToGenerate(detailLevel, childOffsetPosX + regionPosX * size, childOffsetPosZ + regionPosZ * size);
+		}
+		else
 		{
-			//we want max a request per chunk. So for lod smaller than chunk we explore only the top rigth child
+			// we want at max one request per chunk (since the world generator creates chunks).
+			// So for lod smaller than a chunk, only recurse down
+			// the top right child
+			
 			if (detailLevel > LodUtil.CHUNK_DETAIL_LEVEL)
 			{
-				int num = 0;
-				//We take all the children that are not generated to at least the generation level taken in input
+				int ungeneratedChildren = 0;
+				
+				// make sure all children are generated to this detailLevel
 				for (int x = 0; x <= 1; x++)
 				{
 					for (int z = 0; z <= 1; z++)
 					{
-						
 						if (!doesDataExist(childDetailLevel, childPosX + x, childPosZ + z))
 						{
-							num++;
+							ungeneratedChildren++;
 							posToGenerate.addPosToGenerate(childDetailLevel, childPosX + x + regionPosX * childSize, childPosZ + z + regionPosZ * childSize);
 						}
 					}
 				}
 				
-				//only if all the children are correctly generated we go deeper
-				if (num == 0)
-				{
+				// only if all the children are correctly generated 
+				// should we go deeper
+				if (ungeneratedChildren == 0)
 					for (int x = 0; x <= 1; x++)
-					{
 						for (int z = 0; z <= 1; z++)
-						{
 							getDataToGenerate(posToGenerate, childDetailLevel, childPosX + x, childPosZ + z, playerPosX, playerPosZ);
-						}
-					}
-				}
-			} else
-				//now we keep exploring the top right child
+			}
+			else
 			{
+				// The detail Level is smaller than a chunk.
+				// Only recurse down the top right child.
+				
 				if (DetailDistanceUtil.getLodGenDetail(childDetailLevel).detailLevel <= (childDetailLevel))
 				{
 					if (!doesDataExist(childDetailLevel, childPosX, childPosZ))
-					{
 						posToGenerate.addPosToGenerate(childDetailLevel, childPosX + regionPosX * childSize, childPosZ + regionPosZ * childSize);
-					} else
-					{
+					else
 						getDataToGenerate(posToGenerate, childDetailLevel, childPosX, childPosZ, playerPosX, playerPosZ);
-					}
 				}
 			}
 		}
@@ -218,78 +241,99 @@ public class LodRegion
 	
 	
 	/**
-	 * @return
+	 * This method will fill the posToRender array with all levelPos that 
+	 * are render-able.
+	 * 
+	 * TODO why don't we return the posToRender, it would make this easier to understand
 	 */
-	public void getDataToRender(PosToRenderContainer posToRender, int playerPosX, int playerPosZ, boolean requireCorrectDetailLevel)
+	public void getDataToRender(PosToRenderContainer posToRender, 
+			int playerPosX, int playerPosZ, boolean requireCorrectDetailLevel)
 	{
 		getDataToRender(posToRender, LodUtil.REGION_DETAIL_LEVEL, 0, 0, playerPosX, playerPosZ, requireCorrectDetailLevel);
 	}
 	
 	/**
-	 * @return
+	 * This method will fill the posToRender array with all levelPos that 
+	 * are render-able.
+	 * 
+	 * TODO why don't we return the posToRender, it would make this easier to understand
+	 * TODO this needs some more comments, James was only able to figure out part of it
 	 */
-	private void getDataToRender(PosToRenderContainer posToRender, byte detailLevel, int posX, int posZ, int playerPosX, int playerPosZ, boolean requireCorrectDetailLevel)
+	private void getDataToRender(PosToRenderContainer posToRender, 
+			byte detailLevel, int posX, int posZ, 
+			int playerPosX, int playerPosZ, boolean requireCorrectDetailLevel)
 	{
+		// equivalent to 2^(...)
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
 		
-		//here i calculate the the LevelPos is in range
-		//This is important to avoid any kind of hole in the rendering
-		byte supposedLevel;
+		byte desiredLevel;
 		int maxDistance;
 		boolean stopNow = false;
 		int minDistance;
 		int childLevel;
+		
+		
+		// calculate the LevelPos that are in range
 		switch (LodConfig.CLIENT.graphics.detailDropOff.get())
 		{
 		default:
 		case BY_CHUNK:
 			maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
-			supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
+			desiredLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
 			minDistance = LevelPosUtil.minDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
 			childLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(minDistance));
 			stopNow = detailLevel == childLevel - 1;
+			break;
 			
-			break;
 		case BY_REGION_FANCY:
-			supposedLevel = minDetailLevel;
+			desiredLevel = minDetailLevel;
 			break;
+			
 		case BY_REGION_FAST:
 			int playerRegionX = LevelPosUtil.getRegion(LodUtil.BLOCK_DETAIL_LEVEL, playerPosX);
 			int playerRegionZ = LevelPosUtil.getRegion(LodUtil.BLOCK_DETAIL_LEVEL, playerPosZ);
 			if (playerRegionX == regionPosX && playerRegionZ == regionPosZ)
 			{
 				maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
-				supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
+				desiredLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
 				minDistance = LevelPosUtil.minDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
 				childLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(minDistance));
 				stopNow = detailLevel == childLevel - 1;
-			} else
+			}
+			else
 			{
 				maxDistance = LevelPosUtil.maxDistance(LodUtil.REGION_DETAIL_LEVEL, regionPosX, regionPosZ, playerRegionX * 512 + 256, playerRegionZ * 512 + 256);
-				supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
+				desiredLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
 			}
 			break;
 		}
+		
 		
 		if (stopNow)
 		{
 			posToRender.addPosToRender(detailLevel,
 					posX + regionPosX * size,
 					posZ + regionPosZ * size);
-		} else if (supposedLevel > detailLevel)
+		}
+		else if (desiredLevel > detailLevel)
 		{
+			// we have gone beyond the target Detail level
+			// we can stop generating
 			return;
-		} else if (supposedLevel == detailLevel)
+		}
+		else if (desiredLevel == detailLevel)
 		{
 			posToRender.addPosToRender(detailLevel,
 					posX + regionPosX * size,
 					posZ + regionPosZ * size);
-		} else //case where (detailLevel > supposedLevel)
+		}
+		else //case where (detailLevel > desiredLevel)
 		{
 			int childPosX = posX * 2;
 			int childPosZ = posZ * 2;
 			byte childDetailLevel = (byte) (detailLevel - 1);
 			int childrenCount = 0;
+			
 			for (int x = 0; x <= 1; x++)
 			{
 				for (int z = 0; z <= 1; z++)
@@ -297,30 +341,24 @@ public class LodRegion
 					if (doesDataExist(childDetailLevel, childPosX + x, childPosZ + z))
 					{
 						if (!requireCorrectDetailLevel)
-						{
 							childrenCount++;
-						} else
-						{
+						else
 							getDataToRender(posToRender, childDetailLevel, childPosX + x, childPosZ + z, playerPosX, playerPosZ, requireCorrectDetailLevel);
-						}
 					}
 				}
 			}
 			
-			//If all the four children exist we go deeper
 			
 			if (!requireCorrectDetailLevel)
 			{
+				// If all the four children exist go deeper
 				if (childrenCount == 4)
 				{
 					for (int x = 0; x <= 1; x++)
-					{
 						for (int z = 0; z <= 1; z++)
-						{
 							getDataToRender(posToRender, childDetailLevel, childPosX + x, childPosZ + z, playerPosX, playerPosZ, requireCorrectDetailLevel);
-						}
-					}
-				} else
+				}
+				else
 				{
 					posToRender.addPosToRender(detailLevel,
 							posX + regionPosX * size,
@@ -330,27 +368,31 @@ public class LodRegion
 		}
 	}
 	
+	
 	/**
-	 *
+	 * Updates all children.
+	 * 
+	 * TODO could this be renamed mergeArea?
 	 */
 	public void updateArea(byte detailLevel, int posX, int posZ)
 	{
 		int width;
 		int startX;
 		int startZ;
-		for (byte bottom = (byte) (minDetailLevel + 1); bottom <= detailLevel; bottom++)
+		
+		// TODO what are each of these loops updating?
+		for (byte down = (byte) (minDetailLevel + 1); down <= detailLevel; down++)
 		{
-			startX = LevelPosUtil.convert(detailLevel, posX, bottom);
-			startZ = LevelPosUtil.convert(detailLevel, posZ, bottom);
-			width = 1 << (detailLevel - bottom);
+			startX = LevelPosUtil.convert(detailLevel, posX, down);
+			startZ = LevelPosUtil.convert(detailLevel, posZ, down);
+			width = 1 << (detailLevel - down);
+			
 			for (int x = 0; x < width; x++)
-			{
 				for (int z = 0; z < width; z++)
-				{
-					update(bottom, startX + x, startZ + z);
-				}
-			}
+					update(down, startX + x, startZ + z);
 		}
+		
+		
 		for (byte up = (byte) (detailLevel + 1); up <= LodUtil.REGION_DETAIL_LEVEL; up++)
 		{
 			update(up,
@@ -360,7 +402,9 @@ public class LodRegion
 	}
 	
 	/**
-	 *
+	 * Update the child at the given relative Pos
+	 * 
+	 * TODO could this be renamed mergeChildData?
 	 */
 	private void update(byte detailLevel, int posX, int posZ)
 	{
@@ -369,126 +413,143 @@ public class LodRegion
 	
 	
 	/**
-	 * @return
+	 * Returns if data exists at the given relative Pos.
 	 */
 	public boolean doesDataExist(byte detailLevel, int posX, int posZ)
 	{
-		if (detailLevel < minDetailLevel) return false;
+		if (detailLevel < minDetailLevel)
+			return false;
+		
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
+		
 		if (dataContainer == null || dataContainer[detailLevel] == null)
 			return false;
+		
 		return dataContainer[detailLevel].doesItExist(posX, posZ);
 	}
 	
 	/**
-	 * @return
+	 * Gets the generation mode for the data point at the given relative pos.
 	 */
 	public byte getGenerationMode(byte detailLevel, int posX, int posZ)
 	{
 		if (dataContainer[detailLevel].doesItExist(posX, posZ))
-		{
-			//We take the bottom information always
+			// We take the bottom information always
+			// TODO what does that mean? bottom of what?
 			return DataPointUtil.getGenerationMode(dataContainer[detailLevel].getSingleData(posX, posZ));
-		} else
-		{
+		else
 			return DistanceGenerationMode.NONE.complexity;
-		}
 	}
 	
+	/** Returns the lowest detail level in this region
+	 * TODO is that right? */
 	public byte getMinDetailLevel()
 	{
 		return minDetailLevel;
 	}
 	
 	/**
-	 * This will be used to save a level
-	 *
-	 * @param detailLevel
-	 * @return
+	 * Returns the LevelContainer for the detailLevel
+	 * 
+	 * @throws IllegalArgumentException if the detailLevel is less than minDetailLevel
 	 */
 	public LevelContainer getLevel(byte detailLevel)
 	{
 		if (detailLevel < minDetailLevel)
-		{
-			throw new IllegalArgumentException("getLevel asked for a level that does not exist: minimum " + minDetailLevel + " level requested " + detailLevel);
-		}
+			throw new IllegalArgumentException("getLevel asked for a detail level that does not exist: minimum: [" + minDetailLevel + "] level requested: [" + detailLevel + "]");
+		
 		return dataContainer[detailLevel];
 	}
 	
 	/**
-	 * @param levelContainer
+	 * Add the levelContainer to this Region, updating the minDetailLevel
+	 * if necessary.
+	 * 
+	 * @throws IllegalArgumentException if the LevelContainer's detailLevel
+	 * 									is 2 or more detail levels lower than the
+	 * 									minDetailLevel of this region.
 	 */
-	public void addLevel(LevelContainer levelContainer)
+	public void addLevelContainer(LevelContainer levelContainer)
 	{
 		if (levelContainer.getDetailLevel() < minDetailLevel - 1)
 		{
-			throw new IllegalArgumentException("addLevel requires a level that is at least the minimum level of the region -1 ");
+			throw new IllegalArgumentException(
+					"the LevelContainer's detailLevel was "
+							+ "[" + levelContainer.getDetailLevel() + "] but this region "
+							+ "only allows adding LevelContainers with a "
+							+ "detail level of [" + (minDetailLevel - 1) + "]");
 		}
-		if (levelContainer.getDetailLevel() == minDetailLevel - 1) minDetailLevel = levelContainer.getDetailLevel();
-		dataContainer[levelContainer.getDetailLevel()] = levelContainer;
 		
+		if (levelContainer.getDetailLevel() == minDetailLevel - 1) 
+			minDetailLevel = levelContainer.getDetailLevel();
+		
+		dataContainer[levelContainer.getDetailLevel()] = levelContainer;
 	}
 	
+	// TODO James thinks cutTree and growTree (which he renamed to match cutTree)
+	// should have more descriptive names, to make sure the "Tree" portion isn't
+	// confused with Minecraft trees (the plant).
+	
 	/**
-	 * @param detailLevel
+	 * Removes any dataContainers that are higher than
+	 * the given detailLevel
 	 */
 	public void cutTree(byte detailLevel)
 	{
-		if (minDetailLevel < detailLevel)
+		if (detailLevel > minDetailLevel)
 		{
-			for (byte tempLod = 0; tempLod < detailLevel; tempLod++)
-			{
-				dataContainer[tempLod] = null;
-			}
+			for (byte detailLevelIndex = 0; detailLevelIndex < detailLevel; detailLevelIndex++)
+				dataContainer[detailLevelIndex] = null;
+			
 			minDetailLevel = detailLevel;
 		}
 	}
 	
 	/**
-	 * TODO what does this do?
-	 * @param detailLevel
+	 * Make this region more detailed to the detailLevel given.
+	 * TODO is that correct?
 	 */
-	public void expand(byte detailLevel)
+	public void growTree(byte detailLevel)
 	{
 		if (detailLevel < minDetailLevel)
 		{
-			for (byte tempLod = (byte) (minDetailLevel - 1); tempLod >= detailLevel; tempLod--)
+			for (byte detailLevelIndex = (byte) (minDetailLevel - 1); detailLevelIndex >= detailLevel; detailLevelIndex--)
 			{
-				if (dataContainer[tempLod + 1] == null)
-				{
-					dataContainer[tempLod + 1] = new SingleLevelContainer((byte) (tempLod + 1));
-				}
-				dataContainer[tempLod] = dataContainer[tempLod + 1].expand();
+				if (dataContainer[detailLevelIndex + 1] == null)
+					dataContainer[detailLevelIndex + 1] = new SingleLevelContainer((byte) (detailLevelIndex + 1));
+				
+				dataContainer[detailLevelIndex] = dataContainer[detailLevelIndex + 1].expand();
 			}
 			minDetailLevel = detailLevel;
 		}
 	}
 	
-	/**
-	 * return RegionPos of this lod region
-	 */
+	/** return RegionPos of this lod region */
 	public RegionPos getRegionPos()
 	{
 		return new RegionPos(regionPosX, regionPosZ);
 	}
 	
-	/**
-	 * return needed memory in byte
-	 *
-	 * @param template
-	 */
+	/** Returns the minimum memory needed in bytes */
 	public int getMinMemoryNeeded(LodTemplate template)
 	{
-		int count = 0;
-		for (byte tempLod = LodUtil.REGION_DETAIL_LEVEL; tempLod > minDetailLevel; tempLod--)
+		int memory = 0;
+		for (byte detailLevelIndex = LodUtil.REGION_DETAIL_LEVEL; detailLevelIndex > minDetailLevel; detailLevelIndex--)
 		{
-			//i'm doing a upper limit of the minimum
-			//Color should be just 3 byte but i'm gonna calculate as 12 byte
-			//Height and depth should be just 4 byte but i'm gonna calculate as 8 byte
-			count += dataContainer[tempLod].getMaxMemoryUse() * template.getBufferMemoryForSingleLod(dataContainer[tempLod].getMaxVerticalData());
-			//count += Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - tempLod) * (24 + 8 + 8 + 8 + 8);
+			// TODO why are we multiplying the dataContainer's memory by the template's memory?
+			memory += dataContainer[detailLevelIndex].getMaxMemoryUse() * template.getBufferMemoryForSingleLod(dataContainer[detailLevelIndex].getMaxVerticalData());
 		}
+		return memory;
+	}
+	
+	/** Returns how many LODs are in this region */
+	public int getNumberOfLods()
+	{
+		int count = 0;
+		for (LevelContainer container : dataContainer)
+			count += container.getMaxNumberOfLods();
+		
 		return count;
 	}
 	
@@ -496,13 +557,5 @@ public class LodRegion
 	public String toString()
 	{
 		return getLevel(LodUtil.REGION_DETAIL_LEVEL).toString();
-	}
-	
-	public int getNumberOfLods()
-	{
-		int count = 0;
-		for (LevelContainer container : dataContainer)
-			count += container.getMaxNumberOfLods();
-		return count;
 	}
 }

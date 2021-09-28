@@ -111,6 +111,7 @@ public class SingleLevelContainer implements LevelContainer
 		}
 	}
 	
+	/** TODO could this be renamed mergeData? */
 	@Override
 	public void updateData(LevelContainer lowerLevelContainer, int posX, int posZ)
 	{
