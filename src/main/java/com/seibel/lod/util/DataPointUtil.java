@@ -22,9 +22,14 @@ public class DataPointUtil
 	|bl |bl |bl |bl |sl |sl |sl |sl |
 
 	|l  |l  |f  |g  |g  |g  |v  |e  |
-
-
+	
+	
 	 */
+	
+	// Reminder: bytes have range of [-128, 127].
+	// When converting to or from a int a 128 should be added or removed.
+	// If there is a bug with color then it's probably caused by this.
+	
 	//To be used in the future for negative value
 	//public final static int MIN_DEPTH = -64;
 	//public final static int MIN_HEIGHT = -64;

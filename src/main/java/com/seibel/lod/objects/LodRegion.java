@@ -16,27 +16,24 @@ import com.seibel.lod.util.LodUtil;
  * if an array contain coordinate the order is the following
  * 0 for x, 1 for z in 2D
  * 0 for x, 1 for y, 2 for z in 3D
+ * 
+ * @author Leonardo Amato
+ * @version 9-27-2021
  */
 public class LodRegion
 {
-	//x coord,
 	private byte minDetailLevel;
 	private static final byte POSSIBLE_LOD = 10;
-	//private int numberOfPoints;
-	//For each of the following field the first slot is for the level of detail
-	//Important: byte have a [-128, 127] range. When converting from or to int a 128 should be added or removed
-	//If there is a bug with color then it's probably caused by this.
-	//in the future other fields like transparency and light level could be added
-
+	
 	private LevelContainer[] dataContainer;
-
-
+	
+	
 	private DistanceGenerationMode generationMode;
 	private VerticalQuality verticalQuality;
-
+	
 	public final int regionPosX;
 	public final int regionPosZ;
-
+	
 	public LodRegion(RegionPos regionPos)
 	{
 		this.minDetailLevel = LodUtil.REGION_DETAIL_LEVEL;
@@ -44,7 +41,7 @@ public class LodRegion
 		this.regionPosZ = regionPos.z;
 		dataContainer = new LevelContainer[POSSIBLE_LOD];
 	}
-
+	
 	public LodRegion(byte minDetailLevel, RegionPos regionPos, DistanceGenerationMode generationMode, VerticalQuality verticalQuality)
 	{
 		this.minDetailLevel = minDetailLevel;
@@ -53,39 +50,39 @@ public class LodRegion
 		this.verticalQuality = verticalQuality;
 		this.generationMode = generationMode;
 		dataContainer = new LevelContainer[POSSIBLE_LOD];
-
-
+		
+		
 		// Initialize all the different matrices
 		for (byte lod = minDetailLevel; lod <= LodUtil.REGION_DETAIL_LEVEL; lod++)
 		{
 			switch (verticalQuality)
 			{
-				default:
-				case HEIGHTMAP:
-					dataContainer[lod] = new SingleLevelContainer(lod);
-					break;
-				case VOXEL:
-					dataContainer[lod] = new VerticalLevelContainer(lod);
-					break;
+			default:
+			case HEIGHTMAP:
+				dataContainer[lod] = new SingleLevelContainer(lod);
+				break;
+			case VOXEL:
+				dataContainer[lod] = new VerticalLevelContainer(lod);
+				break;
 			}
 		}
 	}
-
+	
 	public VerticalQuality getLodQualityMode()
 	{
 		return verticalQuality;
 	}
-
+	
 	public DistanceGenerationMode getGenerationMode()
 	{
 		return generationMode;
 	}
-
+	
 	public int getMaxVerticalData(byte detailLevel)
 	{
 		return dataContainer[detailLevel].getMaxVerticalData();
 	}
-
+	
 	/**
 	 * This method can be used to insert data into the LodRegion
 	 *
@@ -95,7 +92,7 @@ public class LodRegion
 	{
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-
+		
 		// For some reason the dataContainer can contain null entries
 		if (this.dataContainer[detailLevel] == null)
 		{
@@ -104,12 +101,12 @@ public class LodRegion
 			else
 				this.dataContainer[detailLevel] = new VerticalLevelContainer(detailLevel);
 		}
-
+		
 		this.dataContainer[detailLevel].addData(data, posX, posZ, verticalIndex);
-
+		
 		return true;
 	}
-
+	
 	/**
 	 * This method will return the data in the position relative to the level of detail
 	 *
@@ -119,7 +116,7 @@ public class LodRegion
 	{
 		return dataContainer[detailLevel].getData(posX, posZ, verticalIndex);
 	}
-
+	
 	/**
 	 * This method will return the data in the position relative to the level of detail
 	 *
@@ -129,12 +126,12 @@ public class LodRegion
 	{
 		return dataContainer[detailLevel].getSingleData(posX, posZ);
 	}
-
+	
 	public void clear(byte detailLevel, int posX, int posZ)
 	{
 		dataContainer[detailLevel].clear(posX, posZ);
 	}
-
+	
 	/**
 	 * This method will return all the levelPos that are renderable according to the requisite given in input
 	 *
@@ -143,22 +140,22 @@ public class LodRegion
 	public void getDataToGenerate(PosToGenerateContainer posToGenerate, int playerPosX, int playerPosZ)
 	{
 		getDataToGenerate(posToGenerate, LodUtil.REGION_DETAIL_LEVEL, 0, 0, playerPosX, playerPosZ);
-
+		
 	}
-
+	
 	private void getDataToGenerate(PosToGenerateContainer posToGenerate, byte detailLevel, int posX, int posZ, int playerPosX, int playerPosZ)
 	{
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
-
+		
 		//here i calculate the the LevelPos is in range
 		//This is important to avoid any kind of hole in the generation
 		//nt minDistance = LevelPosUtil.minDistance(detailLevel, posX + regionPosX * size, posZ + regionPosZ * size, playerPosX, playerPosZ);
 		int maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
-
+		
 		byte childDetailLevel = (byte) (detailLevel - 1);
 		int childPosX = posX * 2;
 		int childPosZ = posZ * 2;
-
+		
 		int childSize = 1 << (LodUtil.REGION_DETAIL_LEVEL - childDetailLevel);
 		//we have reached the target detail level
 		byte targetDetailLevel = DetailDistanceUtil.getLodGenDetail(DetailDistanceUtil.getGenerationDetailFromDistance(maxDistance)).detailLevel;
@@ -182,7 +179,7 @@ public class LodRegion
 				{
 					for (int z = 0; z <= 1; z++)
 					{
-
+						
 						if (!doesDataExist(childDetailLevel, childPosX + x, childPosZ + z))
 						{
 							num++;
@@ -190,7 +187,7 @@ public class LodRegion
 						}
 					}
 				}
-
+				
 				//only if all the children are correctly generated we go deeper
 				if (num == 0)
 				{
@@ -203,7 +200,7 @@ public class LodRegion
 					}
 				}
 			} else
-			//now we keep exploring the top right child
+				//now we keep exploring the top right child
 			{
 				if (DetailDistanceUtil.getLodGenDetail(childDetailLevel).detailLevel <= (childDetailLevel))
 				{
@@ -218,8 +215,8 @@ public class LodRegion
 			}
 		}
 	}
-
-
+	
+	
 	/**
 	 * @return
 	 */
@@ -227,14 +224,14 @@ public class LodRegion
 	{
 		getDataToRender(posToRender, LodUtil.REGION_DETAIL_LEVEL, 0, 0, playerPosX, playerPosZ, requireCorrectDetailLevel);
 	}
-
+	
 	/**
 	 * @return
 	 */
 	private void getDataToRender(PosToRenderContainer posToRender, byte detailLevel, int posX, int posZ, int playerPosX, int playerPosZ, boolean requireCorrectDetailLevel)
 	{
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
-
+		
 		//here i calculate the the LevelPos is in range
 		//This is important to avoid any kind of hole in the rendering
 		byte supposedLevel;
@@ -244,36 +241,36 @@ public class LodRegion
 		int childLevel;
 		switch (LodConfig.CLIENT.graphics.detailDropOff.get())
 		{
-			default:
-			case BY_CHUNK:
+		default:
+		case BY_CHUNK:
+			maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
+			supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
+			minDistance = LevelPosUtil.minDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
+			childLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(minDistance));
+			stopNow = detailLevel == childLevel - 1;
+			
+			break;
+		case BY_REGION_FANCY:
+			supposedLevel = minDetailLevel;
+			break;
+		case BY_REGION_FAST:
+			int playerRegionX = LevelPosUtil.getRegion(LodUtil.BLOCK_DETAIL_LEVEL, playerPosX);
+			int playerRegionZ = LevelPosUtil.getRegion(LodUtil.BLOCK_DETAIL_LEVEL, playerPosZ);
+			if (playerRegionX == regionPosX && playerRegionZ == regionPosZ)
+			{
 				maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
 				supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
 				minDistance = LevelPosUtil.minDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
 				childLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(minDistance));
 				stopNow = detailLevel == childLevel - 1;
-
-				break;
-			case BY_REGION_FANCY:
-				supposedLevel = minDetailLevel;
-				break;
-			case BY_REGION_FAST:
-				int playerRegionX = LevelPosUtil.getRegion(LodUtil.BLOCK_DETAIL_LEVEL, playerPosX);
-				int playerRegionZ = LevelPosUtil.getRegion(LodUtil.BLOCK_DETAIL_LEVEL, playerPosZ);
-				if (playerRegionX == regionPosX && playerRegionZ == regionPosZ)
-				{
-					maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
-					supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
-					minDistance = LevelPosUtil.minDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
-					childLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(minDistance));
-					stopNow = detailLevel == childLevel - 1;
-				} else
-				{
-					maxDistance = LevelPosUtil.maxDistance(LodUtil.REGION_DETAIL_LEVEL, regionPosX, regionPosZ, playerRegionX * 512 + 256, playerRegionZ * 512 + 256);
-					supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
-				}
-				break;
+			} else
+			{
+				maxDistance = LevelPosUtil.maxDistance(LodUtil.REGION_DETAIL_LEVEL, regionPosX, regionPosZ, playerRegionX * 512 + 256, playerRegionZ * 512 + 256);
+				supposedLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
+			}
+			break;
 		}
-
+		
 		if (stopNow)
 		{
 			posToRender.addPosToRender(detailLevel,
@@ -309,9 +306,9 @@ public class LodRegion
 					}
 				}
 			}
-
+			
 			//If all the four children exist we go deeper
-
+			
 			if (!requireCorrectDetailLevel)
 			{
 				if (childrenCount == 4)
@@ -332,7 +329,7 @@ public class LodRegion
 			}
 		}
 	}
-
+	
 	/**
 	 *
 	 */
@@ -361,7 +358,7 @@ public class LodRegion
 					LevelPosUtil.convert(detailLevel, posZ, up));
 		}
 	}
-
+	
 	/**
 	 *
 	 */
@@ -369,8 +366,8 @@ public class LodRegion
 	{
 		dataContainer[detailLevel].updateData(dataContainer[detailLevel - 1], posX, posZ);
 	}
-
-
+	
+	
 	/**
 	 * @return
 	 */
@@ -383,7 +380,7 @@ public class LodRegion
 			return false;
 		return dataContainer[detailLevel].doesItExist(posX, posZ);
 	}
-
+	
 	/**
 	 * @return
 	 */
@@ -398,12 +395,12 @@ public class LodRegion
 			return DistanceGenerationMode.NONE.complexity;
 		}
 	}
-
+	
 	public byte getMinDetailLevel()
 	{
 		return minDetailLevel;
 	}
-
+	
 	/**
 	 * This will be used to save a level
 	 *
@@ -418,7 +415,7 @@ public class LodRegion
 		}
 		return dataContainer[detailLevel];
 	}
-
+	
 	/**
 	 * @param levelContainer
 	 */
@@ -430,9 +427,9 @@ public class LodRegion
 		}
 		if (levelContainer.getDetailLevel() == minDetailLevel - 1) minDetailLevel = levelContainer.getDetailLevel();
 		dataContainer[levelContainer.getDetailLevel()] = levelContainer;
-
+		
 	}
-
+	
 	/**
 	 * @param detailLevel
 	 */
@@ -447,7 +444,7 @@ public class LodRegion
 			minDetailLevel = detailLevel;
 		}
 	}
-
+	
 	/**
 	 * TODO what does this do?
 	 * @param detailLevel
@@ -467,7 +464,7 @@ public class LodRegion
 			minDetailLevel = detailLevel;
 		}
 	}
-
+	
 	/**
 	 * return RegionPos of this lod region
 	 */
@@ -475,7 +472,7 @@ public class LodRegion
 	{
 		return new RegionPos(regionPosX, regionPosZ);
 	}
-
+	
 	/**
 	 * return needed memory in byte
 	 *
@@ -494,13 +491,13 @@ public class LodRegion
 		}
 		return count;
 	}
-
+	
 	@Override
 	public String toString()
 	{
 		return getLevel(LodUtil.REGION_DETAIL_LEVEL).toString();
 	}
-
+	
 	public int getNumberOfLods()
 	{
 		int count = 0;
