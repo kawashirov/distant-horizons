@@ -246,7 +246,7 @@ public class LodBuilder
 						false);
 				break;
 				
-			case MULTI_LOD:
+			case VOXEL:
 				long[] dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
 				data = DataPointUtil.mergeMultiData(dataToMergeVertical, DataPointUtil.worldHeight, DetailDistanceUtil.getMaxVerticalData(detailLevel));
 				

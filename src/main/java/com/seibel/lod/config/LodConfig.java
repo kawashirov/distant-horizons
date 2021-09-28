@@ -226,8 +226,9 @@ public class LodConfig
 			lodQualityMode = builder
 					.comment("\n\n"
 							+ " Use 3d lods or 2d lods? \n"
-							+ " " + VerticalQuality.HEIGHTMAP + ": LODs are solid from the lowest world point to the highest. Not good for floating islands or caves. Faster \n"
-							+ " " + VerticalQuality.MULTI_LOD + ": LODs have gaps between vertical blocks. Good for floating islands and caves. Slower \n")
+							+ " " + VerticalQuality.HEIGHTMAP + ": LODs are solid from the lowest point to the highest. Creates pillars for floating islands. Faster \n"
+							+ " " + VerticalQuality.VOXEL + ": LODs have gaps between vertical blocks. Good for floating islands and caves. Slower \n"
+							+ " " + "(Yes we know voxels are generally cubes, but voxel sounds better than rectangular_prism) \n")
 					.defineEnum("lodQualityMode", VerticalQuality.HEIGHTMAP);
 			
 			generationResolution = builder

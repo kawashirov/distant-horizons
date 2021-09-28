@@ -190,7 +190,7 @@ public class LodDimensionFileHandler
 						case HEIGHTMAP:
 							region.addLevel(new SingleLevelContainer(data));
 							break;
-						case MULTI_LOD:
+						case VOXEL:
 							region.addLevel(new VerticalLevelContainer(data));
 							break;
 						}

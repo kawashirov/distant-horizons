@@ -228,7 +228,7 @@ public class LodBufferBuilder
 								
 								// determine how many LODs we can stack vertically
 								int maxVerticalData = 1;
-								if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == VerticalQuality.MULTI_LOD)
+								if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == VerticalQuality.VOXEL)
 									maxVerticalData = 256;
 								
 								// create adjData's arrays

@@ -22,7 +22,7 @@ package com.seibel.lod.enums;
  * multi_lod <br>
  * 
  * @author Leonardo Amato
- * @version 7-03-2021
+ * @version 9-27-2021
  */
 public enum VerticalQuality
 {
@@ -30,5 +30,5 @@ public enum VerticalQuality
 	HEIGHTMAP,
 
 	/** Lods expand in three dimensions */
-	MULTI_LOD;
+	VOXEL;
 }

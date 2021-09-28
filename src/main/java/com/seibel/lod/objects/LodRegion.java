@@ -64,7 +64,7 @@ public class LodRegion
 				case HEIGHTMAP:
 					dataContainer[lod] = new SingleLevelContainer(lod);
 					break;
-				case MULTI_LOD:
+				case VOXEL:
 					dataContainer[lod] = new VerticalLevelContainer(lod);
 					break;
 			}
