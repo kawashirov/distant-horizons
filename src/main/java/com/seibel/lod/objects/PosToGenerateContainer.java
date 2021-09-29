@@ -2,6 +2,8 @@ package com.seibel.lod.objects;
 
 import com.seibel.lod.util.LevelPosUtil;
 
+import javax.swing.*;
+
 /**
  * Holds the levelPos that need to be generated.
  * TODO is that correct?
@@ -49,8 +51,8 @@ public class PosToGenerateContainer
 			
 			if(farSize < farPosToGenerate.length)
 				farSize++;
-			
-			index = farSize;
+
+			index = farSize - 1;
 			while (index > 0 && LevelPosUtil.compareDistance(distance, farPosToGenerate[index - 1][3]) <= 0)
 			{
 				farPosToGenerate[index][0] = farPosToGenerate[index - 1][0];

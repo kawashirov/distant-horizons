@@ -36,10 +36,10 @@ public enum HorizontalQuality
 	LOW(1.5f),
 
 	/** Lods expand in three dimension */
-	MEDIUM(2f),
+	MEDIUM(2.0f),
 
 	/** Lods expand in three dimension */
-	HIGH(Math.E);
+	HIGH(2.2f);
 
 	public double quadraticBase;
 
