@@ -3,6 +3,7 @@ package com.seibel.lod.util;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.HorizontalResolution;
+import com.seibel.lod.enums.VerticalQuality;
 
 public class DetailDistanceUtil
 {
@@ -14,8 +15,6 @@ public class DetailDistanceUtil
 	private static int maxDetail = LodUtil.REGION_DETAIL_LEVEL + 1;
 	private static int minDistance = 0;
 	private static int maxDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 16 * 2;
-	private static int base = 2;
-	private static double logBase = Math.log(2);
 
 	private static int[] maxVerticalData = {
 			4,
@@ -49,46 +48,50 @@ public class DetailDistanceUtil
 	public static void updateSettings(){
 		minGenDetail = LodConfig.CLIENT.worldGenerator.generationResolution.get().detailLevel;
 		minDrawDetail = Math.max(LodConfig.CLIENT.graphics.drawResolution.get().detailLevel,LodConfig.CLIENT.worldGenerator.generationResolution.get().detailLevel);
-		maxDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 16 * 2;
+		maxDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 16 * 8;
 	}
 
 	public static int baseDistanceFunction(int detail)
 	{
-		int distanceUnit = LodConfig.CLIENT.graphics.horizontalQuality.get().distanceUnit;
 		if (detail <= minGenDetail)
 			return minDistance;
-		if (detail == maxDetail)
+		if (detail >= maxDetail)
 			return maxDistance;
-		if (detail == maxDetail + 1)
-			return maxDistance;
-		switch (LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.get())
-		{
+
+		int distanceUnit = LodConfig.CLIENT.worldGenerator.horizontalScale.get().distanceUnit;
+		switch (LodConfig.CLIENT.worldGenerator.horizontalQuality.get()){
+
 			case LINEAR:;
 				return (detail * distanceUnit);
 			default:
-			case QUADRATIC:
+				double base = LodConfig.CLIENT.worldGenerator.horizontalQuality.get().quadraticBase;
 				return (int) (Math.pow(base, detail) * distanceUnit);
 		}
 	}
 
+	public static int getDrawDistanceFromDetail(int detail)
+	{
+		return baseDistanceFunction(detail);
+	}
+
 	public static byte baseInverseFunction(int distance, int minDetail)
 	{
-		int distanceUnit = LodConfig.CLIENT.graphics.horizontalQuality.get().distanceUnit;
-		byte detail = 0;
+
+		int detail = 0;
 		if (distance == 0)
-			detail = (byte) minDetail;
-		if (distance > maxDistance)
-			detail = (byte) (maxDetail-1);
-		switch (LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.get())
-		{
+			return (byte) minDetail;
+		int distanceUnit = LodConfig.CLIENT.worldGenerator.horizontalScale.get().distanceUnit;
+		switch (LodConfig.CLIENT.worldGenerator.horizontalQuality.get()){
 			case LINEAR:
 				detail = (byte) Math.floorDiv(distance, distanceUnit);
 				break;
-			case QUADRATIC:
+			default:
+				double base = LodConfig.CLIENT.worldGenerator.horizontalQuality.get().quadraticBase;
+				double logBase = Math.log(base);
 				detail = (byte) (Math.log(Math.floorDiv(distance, distanceUnit))/logBase);
 				break;
 		}
-		return (byte) Math.min(detail, LodUtil.REGION_DETAIL_LEVEL);
+		return (byte) LodUtil.clamp(minDetail, detail, maxDetail-1);
 	}
 
 	public static byte getDrawDetailFromDistance(int distance)
@@ -162,6 +165,8 @@ public class DetailDistanceUtil
 
 	public static int getMaxVerticalData(int detail)
 	{
+		if(LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == VerticalQuality.HEIGHTMAP)
+			return 1;
 		return maxVerticalData[LodUtil.clamp(minGenDetail, detail, LodUtil.REGION_DETAIL_LEVEL)];
 	}
 

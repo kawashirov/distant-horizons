@@ -21,7 +21,10 @@ import java.awt.Color;
 import java.io.File;
 import java.util.HashSet;
 
+import com.seibel.lod.config.LodConfig;
+import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.objects.LodDimension;
+import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
@@ -318,7 +321,73 @@ public class LodUtil
 	{
 		return Math.min(max, Math.max(value, min));
 	}
-	
+
+	/**
+	 * This methods return the number of lods that are going to be rendered in a region in the worst case
+	 * @param regionPosX x region position to check
+ 	 * @param regionPosZ z region position to check
+	 * @return number of lods in the region
+	 */
+	public static int regionRenderingMemoryUse(int regionPosX, int regionPosZ, LodTemplate template)
+	{
+		int xRegionSign = (int) Math.signum(regionPosX);
+		int zRegionSign = (int) Math.signum(regionPosZ);
+
+		//we first find the center of the circle which is one of the following X position in the center region
+		/*
+		X - X - X
+		|       |
+		X   X   X
+		|       |
+		X - X - X
+		 */
+		int circleCenterX = 256 + 256*xRegionSign;
+		int circleCenterZ = 256 + 256*zRegionSign;
+
+
+		int innerRadius;
+		int outerRadius;
+		int size;
+		int count;
+		int minDistance;
+		int maxDistance;
+		int memoryUse = 0;
+		int number = 0;
+		for(byte detailLevel = BLOCK_DETAIL_LEVEL; detailLevel <= REGION_DETAIL_LEVEL; detailLevel++)
+		{
+			//We find now the inner and outer detail of this area
+			innerRadius = DetailDistanceUtil.getDrawDistanceFromDetail(detailLevel);
+			outerRadius = DetailDistanceUtil.getDrawDistanceFromDetail(detailLevel + 1);
+
+			//we skip if the region does not intersect the two circles.
+			minDistance = LevelPosUtil.minDistance(REGION_DETAIL_LEVEL, regionPosX, regionPosZ, circleCenterX, circleCenterZ);
+			maxDistance = LevelPosUtil.maxDistance(REGION_DETAIL_LEVEL, regionPosX, regionPosZ, circleCenterX, circleCenterZ);
+			if (innerRadius > maxDistance || minDistance > outerRadius)
+				continue;
+
+			//we proceed to count all the position in the region that fall between these two circle
+			size = 1 << (REGION_DETAIL_LEVEL - detailLevel);
+			count = 0;
+			for (int x = 0; x < size; x++)
+			{
+				for (int z = 0; z < size; z++)
+				{
+					minDistance = LevelPosUtil.minDistance(detailLevel, x, z, circleCenterX, circleCenterZ, regionPosX, regionPosZ);
+					if (innerRadius < minDistance && minDistance < outerRadius)
+						count++;
+				}
+			}
+
+			//we multiply the data with the max vertical data of this detail level
+			int maxVerticalData = DetailDistanceUtil.getMaxVerticalData(detailLevel);
+
+			number += count;
+			count *= maxVerticalData;
+			memoryUse += template.getBufferMemoryForSingleLod(maxVerticalData) * count;
+		}
+		System.out.println(number);
+		return memoryUse;
+	}
 	
 	
 	 /**

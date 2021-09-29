@@ -1,5 +1,7 @@
 package com.seibel.lod.util;
 
+import com.seibel.lod.config.LodConfig;
+
 public class LevelPosUtil
 {
 	public static int[] convert(int[] levelPos, byte newDetailLevel)
@@ -143,19 +145,10 @@ public class LevelPosUtil
 
 	public static int maxDistance(byte detailLevel, int posX, int posZ, int playerPosX, int playerPosZ, int xRegion, int zRegion)
 	{
-		int width = 1 << detailLevel;
-
-		int startPosX = xRegion * 512 + posX * width;
-		int startPosZ = zRegion * 512 + posZ * width;
-		int endPosX = startPosX + width;
-		int endPosZ = startPosZ + width;
-
-		int maxDistance = (int) Math.sqrt(Math.pow(playerPosX - startPosX, 2) + Math.pow(playerPosZ - startPosZ, 2));
-		maxDistance = Math.max(maxDistance, (int) Math.sqrt(Math.pow(playerPosX - startPosX, 2) + Math.pow(playerPosZ - endPosZ, 2)));
-		maxDistance = Math.max(maxDistance, (int) Math.sqrt(Math.pow(playerPosX - endPosX, 2) + Math.pow(playerPosZ - startPosZ, 2)));
-		maxDistance = Math.max(maxDistance, (int) Math.sqrt(Math.pow(playerPosX - endPosX, 2) + Math.pow(playerPosZ - endPosZ, 2)));
-
-		return maxDistance;
+		int width = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
+		int newPosX = xRegion * width + posX;
+		int newPosZ = zRegion * width + posZ;
+		return maxDistance(detailLevel, newPosX, newPosZ, playerPosX, playerPosZ);
 	}
 
 
@@ -197,38 +190,10 @@ public class LevelPosUtil
 
 	public static int minDistance(byte detailLevel, int posX, int posZ, int playerPosX, int playerPosZ, int xRegion, int zRegion)
 	{
-		int width = 1 << detailLevel;
-
-		int startPosX = xRegion * 512 + posX * width;
-		int startPosZ = zRegion * 512 + posZ * width;
-		int endPosX = startPosX + width;
-		int endPosZ = startPosZ + width;
-
-		boolean inXArea = playerPosX >= startPosX && playerPosX <= endPosX;
-		boolean inZArea = playerPosZ >= startPosZ && playerPosZ <= endPosZ;
-		if (inXArea && inZArea)
-		{
-			return 0;
-		} else if (inXArea)
-		{
-			return Math.min(
-					Math.abs(playerPosZ - startPosZ),
-					Math.abs(playerPosZ - endPosZ)
-			);
-		} else if (inZArea)
-		{
-			return Math.min(
-					Math.abs(playerPosX - startPosX),
-					Math.abs(playerPosX - endPosX)
-			);
-		} else
-		{
-			int minDistance = (int) Math.sqrt(Math.pow(playerPosX - startPosX, 2) + Math.pow(playerPosZ - startPosZ, 2));
-			minDistance = Math.min(minDistance, (int) Math.sqrt(Math.pow(playerPosX - startPosX, 2) + Math.pow(playerPosZ - endPosZ, 2)));
-			minDistance = Math.min(minDistance, (int) Math.sqrt(Math.pow(playerPosX - endPosX, 2) + Math.pow(playerPosZ - startPosZ, 2)));
-			minDistance = Math.min(minDistance, (int) Math.sqrt(Math.pow(playerPosX - endPosX, 2) + Math.pow(playerPosZ - endPosZ, 2)));
-			return minDistance;
-		}
+		int width = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
+		int newPosX = xRegion * width + posX;
+		int newPosZ = zRegion * width + posZ;
+		return minDistance(detailLevel, newPosX, newPosZ, playerPosX, playerPosZ);
 	}
 
 	public static int compareDistance(int firstDistance, int secondDistance)

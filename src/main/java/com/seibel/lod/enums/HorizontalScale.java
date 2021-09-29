@@ -18,18 +18,30 @@
 package com.seibel.lod.enums;
 
 /**
- * By_Region_Fast, <br>
- * By_Region_Fancy, <br>
- * By_Chunk
+ * Low <br>
+ * Medium <br>
+ * High <br>
+ * <br>
+ * this is a quality scale for the detail drop-off
  * 
  * @author Leonardo Amato
  * @version 9-25-2021
  */
-public enum DetailDropOff
+public enum HorizontalScale
 {
-	/** quality is determined per-region, using the lowest quality that would be used in BY_CHUNK */
-	FAST,
-
-	/** quality is determined per-block (best quality option, may cause stuttering when moving) */
-	FANCY,
+	/** Lods are 2D with heightMap */
+	LOW(64),
+	
+	/** Lods expand in three dimension */
+	MEDIUM(128),
+	
+	/** Lods expand in three dimension */
+	HIGH(256);
+	
+	public int distanceUnit;
+	
+	HorizontalScale(int distanceUnit)
+	{
+		this.distanceUnit = distanceUnit;
+	}
 }

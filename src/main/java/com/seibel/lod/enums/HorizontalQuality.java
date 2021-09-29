@@ -22,26 +22,29 @@ package com.seibel.lod.enums;
  * Medium <br>
  * High <br>
  * <br>
- * TODO what will the represent when it is hooked up?
+ * this indicate the base of the quadratic function we use for the quality drop off
  * 
  * @author Leonardo Amato
- * @version 9-25-2021
+ * @version 9-29-2021
  */
 public enum HorizontalQuality
 {
 	/** Lods are 2D with heightMap */
-	LOW(64),
-	
+	LINEAR(1.0f),
+
+	/** Lods are 2D with heightMap */
+	LOW(1.5f),
+
 	/** Lods expand in three dimension */
-	MEDIUM(128),
-	
+	MEDIUM(2f),
+
 	/** Lods expand in three dimension */
-	HIGH(256);
-	
-	public int distanceUnit;
-	
-	HorizontalQuality(int distanceUnit)
+	HIGH(Math.E);
+
+	public double quadraticBase;
+
+	HorizontalQuality(double distanceUnit)
 	{
-		this.distanceUnit = distanceUnit;
+		this.quadraticBase = distanceUnit;
 	}
 }

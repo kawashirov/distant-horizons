@@ -20,23 +20,13 @@ package com.seibel.lod.config;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import com.seibel.lod.enums.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.seibel.lod.ModInfo;
-import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.enums.DetailDropOff;
-import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.DistanceQualityDropOff;
-import com.seibel.lod.enums.FogDistance;
-import com.seibel.lod.enums.FogDrawOverride;
-import com.seibel.lod.enums.GenerationPriority;
-import com.seibel.lod.enums.HorizontalQuality;
-import com.seibel.lod.enums.HorizontalResolution;
-import com.seibel.lod.enums.LodTemplate;
-import com.seibel.lod.enums.VerticalQuality;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -90,8 +80,7 @@ public class LodConfig
 		public ForgeConfigSpec.EnumValue<HorizontalResolution> drawResolution;
 		
 //		public ForgeConfigSpec.EnumValue<ShadingMode> shadingMode;
-		
-		public ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
+
 		
 		public ForgeConfigSpec.EnumValue<DetailDropOff> detailDropOff;
 		
@@ -143,10 +132,9 @@ public class LodConfig
 			detailDropOff = builder
 					.comment("\n\n"
 							+ " How smooth should the detail transition for LODs be? \n"
-							+ DetailDropOff.BY_CHUNK + ": quality is determined per-chunk (best quality option, may cause stuttering when moving)\n"
-							+ DetailDropOff.BY_REGION_FANCY + ": quality is determined per-region (quality option)\n"
-							+ DetailDropOff.BY_REGION_FAST + ": quality is determined per-region (performance option)\n")
-					.defineEnum("detailDropOff", DetailDropOff.BY_CHUNK);
+							+ DetailDropOff.FANCY + ": quality is determined per-block (best quality option, may cause stuttering when moving)\n"
+							+ DetailDropOff.FAST + ": quality is determined per-region (performance option)\n")
+					.defineEnum("detailDropOff", DetailDropOff.FANCY);
 			
 			drawResolution = builder
 					.comment("\n\n"
@@ -157,14 +145,7 @@ public class LodConfig
 							+ " " + HorizontalResolution.TWO_BLOCKS + ": render 64 LODs for each Chunk. \n"
 							+ " " + HorizontalResolution.BLOCK + ": render 256 LODs for each Chunk. \n")
 					.defineEnum("Draw resolution", HorizontalResolution.BLOCK);
-			
-			horizontalQuality = builder
-					.comment("\n\n"
-							+ " This indicates how quickly LODs drop off in quality. \n"
-							+ " " + HorizontalQuality.LOW + ": quality drops every 4 chunks. \n"
-							+ " " + HorizontalQuality.MEDIUM + ": quality drops every 8 chunks. \n"
-							+ " " + HorizontalQuality.HIGH + ": quality drops every 16 chunks. \n")
-					.defineEnum("lodDrawQuality", HorizontalQuality.MEDIUM);
+
 			
 			lodChunkRenderDistance = builder
 					.comment("\n\n"
@@ -217,7 +198,8 @@ public class LodConfig
 		public ForgeConfigSpec.EnumValue<DistanceGenerationMode> distanceGenerationMode;
 		public ForgeConfigSpec.EnumValue<GenerationPriority> generationPriority;
 		public ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
-		public ForgeConfigSpec.EnumValue<DistanceQualityDropOff> lodDistanceCalculatorType;
+		public ForgeConfigSpec.EnumValue<HorizontalScale> horizontalScale;
+		public ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
 		
 		WorldGenerator(ForgeConfigSpec.Builder builder)
 		{
@@ -240,19 +222,23 @@ public class LodConfig
 							+ " " + HorizontalResolution.TWO_BLOCKS + ": render 64 LODs for each Chunk. \n"
 							+ " " + HorizontalResolution.BLOCK + ": render 256 LODs for each Chunk. \n")
 					.defineEnum("Generation Resolution", HorizontalResolution.BLOCK);
-			
-			lodDistanceCalculatorType = builder
-					.comment("\n\n"
-							+ " " + DistanceQualityDropOff.LINEAR + " \n"
-							+ " with LINEAR calculator the quality of block decrease \n"
-							+ " linearly to the distance of the player \n"
-							
-							+ "\n"
-							+ " " + DistanceQualityDropOff.QUADRATIC + " \n"
-							+ " with QUADRATIC calculator the quality of block decrease \n"
-							+ " quadratically to the distance of the player \n")
-					.defineEnum("lodDistanceComputation", DistanceQualityDropOff.LINEAR);
-			
+
+			horizontalScale = builder
+					                    .comment("\n\n"
+							                             + " This indicates how quickly LODs drop off in quality. \n"
+							                             + " " + HorizontalScale.LOW + ": quality drops every " + HorizontalScale.LOW.distanceUnit/16 + " chunks. \n"
+							                             + " " + HorizontalScale.MEDIUM + ": quality drops every " + HorizontalScale.MEDIUM.distanceUnit/16 + " chunks. \n"
+							                             + " " + HorizontalScale.HIGH + ": quality drops every " + HorizontalScale.HIGH.distanceUnit/16 + " chunks. \n")
+					                    .defineEnum("horizontal scale", HorizontalScale.MEDIUM);
+
+			horizontalQuality = builder
+					                    .comment("\n\n"
+							                             + " This indicates the exponential base of the quadratic drop-off \n"
+							                             + " " + HorizontalQuality.LINEAR + ": base " + HorizontalQuality.LINEAR.quadraticBase + ". \n"
+							                             + " " + HorizontalQuality.LOW + ": base " + HorizontalQuality.LOW.quadraticBase + ". \n"
+							                             + " " + HorizontalQuality.MEDIUM + ": base " + HorizontalQuality.MEDIUM.quadraticBase + ". \n"
+							                             + " " + HorizontalQuality.HIGH + ": base " + HorizontalQuality.HIGH.quadraticBase + ". \n")
+					                    .defineEnum("horizontal quality", HorizontalQuality.MEDIUM);
 			generationPriority = builder
 					.comment("\n\n"
 							+ " " + GenerationPriority.FAR_FIRST + " \n"
