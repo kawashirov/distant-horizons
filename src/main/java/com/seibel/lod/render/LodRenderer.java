@@ -65,7 +65,7 @@ import net.minecraft.util.math.vector.Vector3d;
  * This is where LODs are draw to the world.
  *
  * @author James Seibel
- * @version 9-23-2021
+ * @version 9-28-2021
  */
 public class LodRenderer
 {
@@ -483,6 +483,25 @@ public class LodRenderer
 	}
 
 
+	/** James added this to test if Vivecraft is not using
+	 * the MC FOV setting or if the problem is deeper */
+	public enum FovTest
+	{
+		LOD_USE_FOV(true, false),
+		MC_USE_FOV(false, true),
+		NEITHER(false, false),
+		BOTH(true, true);
+		
+		boolean lodProjUseFov;
+		boolean defaultMcProjUseFov;
+		
+		private FovTest(boolean newLodProjUseFov, boolean newDefaultMcProjUseFov)
+		{
+			lodProjUseFov = newLodProjUseFov;
+			defaultMcProjUseFov = newDefaultMcProjUseFov;
+		}
+	}
+	
 	/**
 	 * create a new projection matrix and send it over to the GPU
 	 * 
@@ -494,14 +513,14 @@ public class LodRenderer
 		// create the new projection matrix
 		Matrix4f lodPoj =
 			Matrix4f.perspective(
-					getFov(partialTicks, true),
+					getFov(partialTicks, LodConfig.CLIENT.graphics.useFovSetting.get().lodProjUseFov),
 					(float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight(),
 					mc.getRenderDistance()/2,
 					farPlaneBlockDistance * LodUtil.CHUNK_WIDTH * 2 / 4);
 		
 		// get Minecraft's un-edited projection matrix
 		// (this is before it is zoomed, distorted, etc.)
-		Matrix4f defaultMcProj = mc.getGameRenderer().getProjectionMatrix(mc.getGameRenderer().getMainCamera(), partialTicks, true);
+		Matrix4f defaultMcProj = mc.getGameRenderer().getProjectionMatrix(mc.getGameRenderer().getMainCamera(), partialTicks, LodConfig.CLIENT.graphics.useFovSetting.get().defaultMcProjUseFov);
 		// true here means use "use fov setting" (probably)
 		
 		

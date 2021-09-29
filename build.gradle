@@ -19,7 +19,7 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = 'a1.5.0-pre'
+version = 'a1.5.1-pre'
 group = 'com.seibel.lod'
 archivesBaseName = 'lod_1.16.5'
 

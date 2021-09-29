@@ -164,10 +164,12 @@ public class ClientProxy
 		// remind the developer(s) that the config override is active
 		if (!configOverrideReminderPrinted)
 		{
-			mc.getPlayer().sendMessage(new StringTextComponent("Debug settings enabled!"), mc.getPlayer().getUUID());
+			//mc.getPlayer().sendMessage(new StringTextComponent("Debug settings enabled!"), mc.getPlayer().getUUID());
+			
+			mc.getPlayer().sendMessage(new StringTextComponent("LOD experimental build 1.5.1"), mc.getPlayer().getUUID());
+			mc.getPlayer().sendMessage(new StringTextComponent("Here be dragons!"), mc.getPlayer().getUUID());
 			configOverrideReminderPrinted = true;
 		}
-		
 		
 //		LodConfig.CLIENT.graphics.drawResolution.set(HorizontalResolution.BLOCK);
 //		LodConfig.CLIENT.worldGenerator.generationResolution.set(HorizontalResolution.BLOCK);
@@ -179,12 +181,12 @@ public class ClientProxy
 //		LodConfig.CLIENT.graphics.shadingMode.set(ShadingMode.DARKEN_SIDES);
 //		LodConfig.CLIENT.graphics.brightnessMultiplier.set(1.0);
 //		LodConfig.CLIENT.graphics.saturationMultiplier.set(1.0);
-
+		
 //		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 //		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(64);
 //		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
 //		LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.set(false);
-
+		
 //		LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
 //		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
 //		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(5000); // 5000

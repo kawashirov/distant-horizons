@@ -37,6 +37,7 @@ import com.seibel.lod.enums.HorizontalResolution;
 import com.seibel.lod.enums.HorizontalScale;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.enums.VerticalQuality;
+import com.seibel.lod.render.LodRenderer.FovTest;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -100,6 +101,8 @@ public class LodConfig
 		
 		public ForgeConfigSpec.BooleanValue alwaysDrawAtMaxQuality;
 		
+		public ForgeConfigSpec.EnumValue<FovTest> useFovSetting;
+		
 		
 		Graphics(ForgeConfigSpec.Builder builder)
 		{
@@ -161,6 +164,12 @@ public class LodConfig
 					.comment("\n\n"
 							+ " The mod's render distance, measured in chunks. \n")
 					.defineInRange("lodChunkRenderDistance", 64, 32, 1024);
+			
+			useFovSetting = builder
+					.comment("\n\n"
+							+ " Experimental text value. \n"
+							+ " " + FovTest.BOTH + ": is the normal value \n")
+					.defineEnum("useFovSetting", FovTest.BOTH);
 			
 			disableDirectionalCulling = builder
 					.comment("\n\n"
