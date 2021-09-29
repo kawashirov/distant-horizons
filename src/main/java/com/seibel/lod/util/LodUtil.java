@@ -21,10 +21,8 @@ import java.awt.Color;
 import java.io.File;
 import java.util.HashSet;
 
-import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.objects.LodDimension;
-import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
@@ -109,6 +107,21 @@ public class LodUtil
 	/** This regex finds any characters that are invalid for use in a windows 
 	 * (and by extension mac and linux) file path */
 	public static final String INVALID_FILE_CHARACTERS_REGEX = "[\\\\\\/:*?\\\"<>|]";
+	
+	/**
+	 * 64 MB by default is the maximum amount of memory that
+	 * can be directly allocated. <br><br>
+	 * <p>
+	 * I know there are commands to change that amount
+	 * (specifically "-XX:MaxDirectMemorySize"), but
+	 * I have no idea how to access that amount. <br>
+	 * So I guess this will be the hard limit for now. <br><br>
+	 * <p>
+	 * https://stackoverflow.com/questions/50499238/bytebuffer-allocatedirect-and-xmx
+	 */
+	public static final int MAX_ALOCATEABLE_DIRECT_MEMORY = 64 * 1024 * 1024;
+	
+	
 	
 	
 	

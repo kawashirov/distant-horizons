@@ -74,19 +74,6 @@ public class LodRenderer
 	 * it should be something different than what is used by Minecraft
 	 */
 	private static final int LOD_GL_LIGHT_NUMBER = GL11.GL_LIGHT2;
-
-	/**
-	 * 64 MB by default is the maximum amount of memory that
-	 * can be directly allocated. <br><br>
-	 * <p>
-	 * I know there are commands to change that amount
-	 * (specifically "-XX:MaxDirectMemorySize"), but
-	 * I have no idea how to access that amount. <br>
-	 * So I guess this will be the hard limit for now. <br><br>
-	 * <p>
-	 * https://stackoverflow.com/questions/50499238/bytebuffer-allocatedirect-and-xmx
-	 */
-	public static final int MAX_ALOCATEABLE_DIRECT_MEMORY = 64 * 1024 * 1024;
 	
 	/**
 	 * If true the LODs colors will be replaced with
