@@ -17,10 +17,10 @@
  */
 package com.seibel.lod.enums;
 
-import com.seibel.lod.builders.lodTemplates.AbstractLodTemplate;
-import com.seibel.lod.builders.lodTemplates.CubicLodTemplate;
-import com.seibel.lod.builders.lodTemplates.DynamicLodTemplate;
-import com.seibel.lod.builders.lodTemplates.TriangularLodTemplate;
+import com.seibel.lod.builders.bufferBuilding.lodTemplates.AbstractLodTemplate;
+import com.seibel.lod.builders.bufferBuilding.lodTemplates.CubicLodTemplate;
+import com.seibel.lod.builders.bufferBuilding.lodTemplates.DynamicLodTemplate;
+import com.seibel.lod.builders.bufferBuilding.lodTemplates.TriangularLodTemplate;
 
 /**
  * Cubic, Triangular, Dynamic

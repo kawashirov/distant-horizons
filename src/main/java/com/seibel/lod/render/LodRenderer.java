@@ -27,8 +27,8 @@ import org.lwjgl.opengl.NVFogDistance;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.seibel.lod.builders.LodBufferBuilder;
-import com.seibel.lod.builders.LodBufferBuilder.VertexBuffersAndOffset;
+import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder;
+import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder.VertexBuffersAndOffset;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.enums.DetailDropOff;
@@ -95,7 +95,7 @@ public class LodRenderer
 	/**
 	 * Each VertexBuffer represents 1 region
 	 */
-	private VertexBuffer[][] vbos;
+	private VertexBuffer[][][] vbos;
 	public static final VertexFormat LOD_VERTEX_FORMAT = DefaultVertexFormats.POSITION_COLOR;
 	private ChunkPos vbosCenter = new ChunkPos(0,0);
 
@@ -270,20 +270,23 @@ public class LodRenderer
 			int halfWidth = vbos.length / 2;
 			int quarterWidth = vbos.length / 4;
 
-			for (int i = 0; i < vbos.length; i++)
+			for (int x = 0; x < vbos.length; x++)
 			{
-				for (int j = 0; j < vbos.length; j++)
+				for (int z = 0; z < vbos.length; z++)
 				{
-					RegionPos vboPos = new RegionPos(i + lodDim.getCenterRegionPosX() - lodDim.getWidth() / 2, j + lodDim.getCenterRegionPosZ() - lodDim.getWidth() / 2);
+					RegionPos vboPos = new RegionPos(x + lodDim.getCenterRegionPosX() - lodDim.getWidth() / 2, z + lodDim.getCenterRegionPosZ() - lodDim.getWidth() / 2);
 					if (cullingDisabled || RenderUtil.isRegionInViewFrustum(renderInfo.getBlockPosition(), cameraDir, vboPos.blockPos()))
 					{
-						if ((i > halfWidth - quarterWidth && i < halfWidth + quarterWidth) && (j > halfWidth - quarterWidth && j < halfWidth + quarterWidth))
+						if ((x > halfWidth - quarterWidth && x < halfWidth + quarterWidth) && (z > halfWidth - quarterWidth && z < halfWidth + quarterWidth))
 							setupFog(fogSettings.near.distance, fogSettings.near.quality);
 						else
 							setupFog(fogSettings.far.distance, fogSettings.far.quality);
 
 
-						sendLodsToGpuAndDraw(vbos[i][j], modelViewMatrix);
+						for(int i = 0; i < lodBufferBuilder.bufferSize[x][z]; i++)
+						{
+							sendLodsToGpuAndDraw(vbos[x][z][i], modelViewMatrix);
+						}
 					}
 				}
 			}

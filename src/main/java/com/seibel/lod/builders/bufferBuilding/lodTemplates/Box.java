@@ -1,4 +1,4 @@
-package com.seibel.lod.builders.lodTemplates;
+package com.seibel.lod.builders.bufferBuilding.lodTemplates;
 
 import java.util.Arrays;
 import java.util.HashMap;

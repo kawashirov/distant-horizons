@@ -341,7 +341,7 @@ public class LodUtil
  	 * @param regionPosZ z region position to check
 	 * @return number of lods in the region
 	 */
-	public static int regionRenderingMemoryUse(int regionPosX, int regionPosZ, LodTemplate template)
+	public static long regionRenderingMemoryUse(int regionPosX, int regionPosZ, LodTemplate template)
 	{
 		int xRegionSign = (int) Math.signum(regionPosX);
 		int zRegionSign = (int) Math.signum(regionPosZ);
@@ -364,7 +364,7 @@ public class LodUtil
 		int count;
 		int minDistance;
 		int maxDistance;
-		int memoryUse = 0;
+		long memoryUse = 0;
 		int number = 0;
 		for(byte detailLevel = BLOCK_DETAIL_LEVEL; detailLevel <= REGION_DETAIL_LEVEL; detailLevel++)
 		{
@@ -398,7 +398,6 @@ public class LodUtil
 			count *= maxVerticalData;
 			memoryUse += template.getBufferMemoryForSingleLod(maxVerticalData) * count;
 		}
-		System.out.println(number);
 		return memoryUse;
 	}
 	

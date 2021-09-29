@@ -15,12 +15,12 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.builders.lodTemplates;
+package com.seibel.lod.builders.bufferBuilding.lodTemplates;
 
 import java.util.Map;
 
 import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.util.ColorUtil;
+import com.seibel.lod.proxy.ClientProxy;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.NativeImage;
@@ -28,34 +28,24 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
 /**
- * This is the abstract class used to create different
- * BufferBuilders.
+ * TODO #21 TriangularLodTemplate
+ * Builds each LOD chunk as a singular rectangular prism.
  *
  * @author James Seibel
- * @version 8-8-2021
+ * @version 06-16-2021
  */
-public abstract class AbstractLodTemplate
+public class TriangularLodTemplate extends AbstractLodTemplate
 {
-	
-	/**
-	 * Uploads the given LOD to the buffer.
-	 */
-	public abstract void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
-			byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap);
-	
-	/**
-	 * add the given position and color to the buffer
-	 */
-	protected void addPosAndColor(BufferBuilder buffer,
-			double x, double y, double z,
-			int color)
+	@Override
+	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
+	                           byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap)
 	{
-		buffer.vertex(x, y, z).color(ColorUtil.getRed(color), ColorUtil.getGreen(color), ColorUtil.getBlue(color), ColorUtil.getAlpha(color)).endVertex();
+		ClientProxy.LOGGER.error(DynamicLodTemplate.class.getSimpleName() + " is not implemented!");
 	}
-	
-	/**
-	 * Returns in bytes how much buffer memory is required
-	 * for one LOD object
-	 */
-	public abstract int getBufferMemoryForSingleNode(int maxVerticalData);
+
+	@Override
+	public int getBufferMemoryForSingleNode(int maxVerticalData)
+	{
+		return 0;
+	}
 }

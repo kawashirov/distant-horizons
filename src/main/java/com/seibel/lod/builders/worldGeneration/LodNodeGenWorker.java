@@ -27,8 +27,8 @@ import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.seibel.lod.builders.LodBuilder;
-import com.seibel.lod.builders.LodBuilderConfig;
+import com.seibel.lod.builders.lodBuilding.LodBuilder;
+import com.seibel.lod.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.objects.LodDimension;
