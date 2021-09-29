@@ -19,6 +19,8 @@ package com.seibel.lod.render;
 
 import java.util.HashSet;
 
+import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
+import net.minecraft.util.Direction;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
@@ -58,6 +60,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
+import org.lwjgl.system.CallbackI;
 
 
 /**
@@ -74,7 +77,7 @@ public class LodRenderer
 	 * it should be something different than what is used by Minecraft
 	 */
 	private static final int LOD_GL_LIGHT_NUMBER = GL11.GL_LIGHT2;
-	
+
 	/**
 	 * If true the LODs colors will be replaced with
 	 * a checkerboard, this can be used for debugging.
@@ -97,15 +100,16 @@ public class LodRenderer
 	 */
 	private VertexBuffer[][][] vbos;
 	public static final VertexFormat LOD_VERTEX_FORMAT = DefaultVertexFormats.POSITION_COLOR;
-	private ChunkPos vbosCenter = new ChunkPos(0,0);
+	private ChunkPos vbosCenter = new ChunkPos(0, 0);
+
 
 	/**
 	 * This is used to determine if the LODs should be regenerated
 	 */
-	private int[] previousPos = new int[]{0,0,0};
-	
+	private int[] previousPos = new int[]{0, 0, 0};
+
 	public NativeImage lightMap = null;
-	
+
 	// these variables are used to determine if the buffers should be rebuilt
 	private long prevDayTime = 0;
 	private double prevBrightness = 0;
@@ -148,9 +152,9 @@ public class LodRenderer
 	 * Besides drawing the LODs this method also starts
 	 * the async process of generating the Buffers that hold those LODs.
 	 *
-	 * @param lodDim       The dimension to draw, if null doesn't replace the current dimension.
+	 * @param lodDim        The dimension to draw, if null doesn't replace the current dimension.
 	 * @param mcMatrixStack This matrix stack should come straight from MC's renderChunkLayer (or future equivalent) method
-	 * @param partialTicks how far into the current tick this method was called.
+	 * @param partialTicks  how far into the current tick this method was called.
 	 */
 	public void drawLODs(LodDimension lodDim, MatrixStack mcMatrixStack, float partialTicks, IProfiler newProfiler)
 	{
@@ -168,8 +172,8 @@ public class LodRenderer
 
 		profiler = newProfiler;
 		profiler.push("LOD setup");
-		
-		
+
+
 		// TODO move the buffer regeneration logic into its own class (probably called in the client proxy instead)
 		// starting here...
 		determineIfLodsShouldRegenerate(lodDim);
@@ -197,12 +201,11 @@ public class LodRenderer
 
 		// TODO move the buffer regeneration logic into its own class (probably called in the client proxy instead)
 		// ...ending here
-		
+
 		if (lodBufferBuilder.newBuffersAvaliable())
 		{
 			swapBuffers();
 		}
-		
 
 
 		//===========================//
@@ -210,7 +213,7 @@ public class LodRenderer
 		//===========================//
 
 		// set the required open GL settings
-		
+
 		if (LodConfig.CLIENT.debugging.debugMode.get() == DebugMode.SHOW_DETAIL_WIREFRAME)
 			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
 		else
@@ -233,7 +236,7 @@ public class LodRenderer
 		// OpenGl outputs their matricies in col,row form instead of row,col
 		// (or maybe vice versa I have no idea :P)
 		mcProjectionMatrix.transpose();
-		
+
 		Matrix4f modelViewMatrix = offsetTheModelViewMatrix(mcMatrixStack, partialTicks);
 
 		// required for setupFog and setupProjectionMatrix
@@ -256,16 +259,16 @@ public class LodRenderer
 		//===========//
 		// rendering //
 		//===========//
-		
+
 		profiler.popPush("LOD draw");
-		
+
 		if (vbos != null)
 		{
 			ActiveRenderInfo renderInfo = mc.getGameRenderer().getMainCamera();
 			Vector3d cameraDir = new Vector3d(renderInfo.getLookVector());
-			
+
 			boolean cullingDisabled = LodConfig.CLIENT.graphics.disableDirectionalCulling.get();
-			
+
 			// used to determine what type of fog to render
 			int halfWidth = vbos.length / 2;
 			int quarterWidth = vbos.length / 4;
@@ -283,7 +286,7 @@ public class LodRenderer
 							setupFog(fogSettings.far.distance, fogSettings.far.quality);
 
 
-						for(int i = 0; i < lodBufferBuilder.bufferSize[x][z]; i++)
+						for (int i = 0; i < lodBufferBuilder.bufferSize[x][z]; i++)
 						{
 							sendLodsToGpuAndDraw(vbos[x][z][i], modelViewMatrix);
 						}
@@ -291,7 +294,7 @@ public class LodRenderer
 				}
 			}
 		}
-		
+
 
 		//=========//
 		// cleanup //
@@ -314,11 +317,11 @@ public class LodRenderer
 		// reset the projection matrix so anything drawn after
 		// the LODs will use the correct projection matrix
 		gameRender.resetProjectionMatrix(mcProjectionMatrix);
-		
+
 		// clear the depth buffer so anything drawn is drawn
 		// over the LODs
 		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
-		
+
 
 		// end of internal LOD profiling
 		profiler.pop();
@@ -332,13 +335,13 @@ public class LodRenderer
 	{
 		if (vbo == null)
 			return;
-		
+
 		GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.id);
 		// 0L is the starting pointer
 		LOD_VERTEX_FORMAT.setupBufferState(0L);
-		
+
 		vbo.draw(modelViewMatrix, GL11.GL_QUADS);
-		
+
 		GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		LOD_VERTEX_FORMAT.clearBufferState();
 	}
@@ -369,8 +372,7 @@ public class LodRenderer
 		{
 			// fancy fog (fragment distance based fog)
 			glFogDistanceMode = NVFogDistance.GL_EYE_RADIAL_NV;
-		}
-		else
+		} else
 		{
 			// fast fog (frustum distance based fog)
 			glFogDistanceMode = NVFogDistance.GL_EYE_PLANE_ABSOLUTE_NV;
@@ -388,16 +390,16 @@ public class LodRenderer
 			if (fogQuality == FogQuality.FANCY)
 			{
 				// for more realistic fog when using FAR
-				if(LodConfig.CLIENT.graphics.fogDistance.get() == FogDistance.NEAR_AND_FAR)
+				if (LodConfig.CLIENT.graphics.fogDistance.get() == FogDistance.NEAR_AND_FAR)
 				{
 					RenderSystem.fogStart(farPlaneBlockDistance * 0.9f);
 					RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
-				}else{
+				} else
+				{
 					RenderSystem.fogStart(farPlaneBlockDistance * 0.1f);
 					RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
 				}
-			}
-			else if (fogQuality == FogQuality.FAST)
+			} else if (fogQuality == FogQuality.FAST)
 			{
 				// for the far fog of the normal chunks
 				// to start right where the LODs' end use:
@@ -405,15 +407,13 @@ public class LodRenderer
 				RenderSystem.fogStart(farPlaneBlockDistance * 1.5f);
 				RenderSystem.fogEnd(farPlaneBlockDistance * 2.0f);
 			}
-		}
-		else if (fogDistance == FogDistance.NEAR)
+		} else if (fogDistance == FogDistance.NEAR)
 		{
 			if (fogQuality == FogQuality.FANCY)
 			{
 				RenderSystem.fogEnd(mc.getRenderDistance() * 16 * 1.41f);
 				RenderSystem.fogStart(mc.getRenderDistance() * 16 * 1.6f);
-			}
-			else if (fogQuality == FogQuality.FAST)
+			} else if (fogQuality == FogQuality.FAST)
 			{
 				RenderSystem.fogEnd(mc.getRenderDistance() * 16 * 1.0f);
 				RenderSystem.fogStart(mc.getRenderDistance() * 16 * 1.5f);
@@ -461,12 +461,12 @@ public class LodRenderer
 	{
 		// duplicate the last matrix
 		mcMatrixStack.pushPose();
-		
-		
+
+
 		// get all relevant camera info
 		ActiveRenderInfo renderInfo = mc.getGameRenderer().getMainCamera();
 		Vector3d projectedView = renderInfo.getPosition();
-		
+
 		// translate the camera relative to the regions' center
 		// (AxisAlignedBoundingBoxes (LODs) use doubles and thus have a higher
 		// accuracy vs the model view matrix, which only uses floats)
@@ -475,73 +475,75 @@ public class LodRenderer
 		double xDiff = eyePos.x - bufferPos.getX();
 		double zDiff = eyePos.z - bufferPos.getZ();
 		mcMatrixStack.translate(-xDiff, -projectedView.y, -zDiff);
-		
-		
+
+
 		// get the modified model view matrix
-		Matrix4f lodModelViewMatrix = mcMatrixStack.last().pose(); 
+		Matrix4f lodModelViewMatrix = mcMatrixStack.last().pose();
 		// remove the lod ModelViewMatrix
 		mcMatrixStack.popPose();
-		
+
 		return lodModelViewMatrix;
 	}
 
 
-	/** James added this to test if Vivecraft is not using
-	 * the MC FOV setting or if the problem is deeper */
+	/**
+	 * James added this to test if Vivecraft is not using
+	 * the MC FOV setting or if the problem is deeper
+	 */
 	public enum FovTest
 	{
 		LOD_USE_FOV(true, false),
 		MC_USE_FOV(false, true),
 		NEITHER(false, false),
 		BOTH(true, true);
-		
+
 		boolean lodProjUseFov;
 		boolean defaultMcProjUseFov;
-		
+
 		private FovTest(boolean newLodProjUseFov, boolean newDefaultMcProjUseFov)
 		{
 			lodProjUseFov = newLodProjUseFov;
 			defaultMcProjUseFov = newDefaultMcProjUseFov;
 		}
 	}
-	
+
 	/**
 	 * create a new projection matrix and send it over to the GPU
-	 * 
+	 *
 	 * @param currentProjectionMatrix this is Minecraft's current projection matrix
-	 * @param partialTicks how many ticks into the frame we are
+	 * @param partialTicks            how many ticks into the frame we are
 	 */
 	private void setupProjectionMatrix(Matrix4f currentProjectionMatrix, float partialTicks)
 	{
 		// create the new projection matrix
 		Matrix4f lodPoj =
-			Matrix4f.perspective(
-					getFov(partialTicks, LodConfig.CLIENT.graphics.useFovSetting.get().lodProjUseFov),
-					(float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight(),
-					mc.getRenderDistance()/2,
-					farPlaneBlockDistance * LodUtil.CHUNK_WIDTH * 2 / 4);
-		
+				Matrix4f.perspective(
+						getFov(partialTicks, LodConfig.CLIENT.graphics.useFovSetting.get().lodProjUseFov),
+						(float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight(),
+						mc.getRenderDistance() / 2,
+						farPlaneBlockDistance * LodUtil.CHUNK_WIDTH * 2 / 4);
+
 		// get Minecraft's un-edited projection matrix
 		// (this is before it is zoomed, distorted, etc.)
 		Matrix4f defaultMcProj = mc.getGameRenderer().getProjectionMatrix(mc.getGameRenderer().getMainCamera(), partialTicks, LodConfig.CLIENT.graphics.useFovSetting.get().defaultMcProjUseFov);
 		// true here means use "use fov setting" (probably)
-		
-		
+
+
 		// this logic strips away the defaultMcProj matrix so we 
 		// can get the distortionMatrix, which represents all
 		// transformations, zooming, distortions, etc. done
 		// to Minecraft's Projection matrix
 		Matrix4f defaultMcProjInv = defaultMcProj.copy();
 		defaultMcProjInv.invert();
-		
+
 		Matrix4f distortionMatrix = defaultMcProjInv.copy();
 		distortionMatrix.multiply(currentProjectionMatrix);
-		
-		
+
+
 		// edit the lod projection to match Minecraft's
 		// (so the LODs line up with the real world)
 		lodPoj.multiply(distortionMatrix);
-		
+
 		// send the projection over to the GPU
 		gameRender.resetProjectionMatrix(lodPoj);
 	}
@@ -616,7 +618,7 @@ public class LodRenderer
 	/**
 	 * Replace the current Vertex Buffers with the newly
 	 * created buffers from the lodBufferBuilder. <br><br>
-	 *
+	 * <p>
 	 * For some reason this has to be called after the frame has been rendered,
 	 * otherwise visual stuttering/rubber banding may happen. I'm not sure why...
 	 */
@@ -758,27 +760,27 @@ public class LodRenderer
 	 */
 	private void determineIfLodsShouldRegenerate(LodDimension lodDim)
 	{
+
+
 		short chunkRenderDistance = (short) mc.getRenderDistance();
-		
-		int vanillaRenderedChunksWidth = chunkRenderDistance*2+2;
-		vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
-		
-		
-		
+		int vanillaRenderedChunksWidth = chunkRenderDistance * 2 + 2;
+
 		//=============//
 		// full regens //
 		//=============//
-		
+
 		// check if the view distance changed
 		if (ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.graphics.lodChunkRenderDistance.get()
-				    ||  mc.getRenderDistance()  != prevRenderDistance
+				    || chunkRenderDistance != prevRenderDistance
 				    || prevFogDistance != LodConfig.CLIENT.graphics.fogDistance.get())
 		{
+
+			vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
 			DetailDistanceUtil.updateSettings();
 			fullRegen = true;
 			previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
 			prevFogDistance = LodConfig.CLIENT.graphics.fogDistance.get();
-			prevRenderDistance = mc.getRenderDistance();
+			prevRenderDistance = chunkRenderDistance;
 		}
 
 		// did the user change the debug setting?
@@ -791,7 +793,7 @@ public class LodRenderer
 
 		long newTime = System.currentTimeMillis();
 
-		if(LodConfig.CLIENT.graphics.detailDropOff.get() == DetailDropOff.FANCY)
+		if (LodConfig.CLIENT.graphics.detailDropOff.get() == DetailDropOff.FANCY)
 		{
 			// check if the player has moved
 			if (newTime - prevPlayerPosTime > LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.get())
@@ -800,13 +802,13 @@ public class LodRenderer
 						    || mc.getPlayer().xChunk != LevelPosUtil.getPosX(previousPos)
 						    || mc.getPlayer().zChunk != LevelPosUtil.getPosZ(previousPos))
 				{
+					vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
 					fullRegen = true;
 					previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
 				}
 				prevPlayerPosTime = newTime;
 			}
 		}
-
 
 
 		//================//
@@ -848,8 +850,6 @@ public class LodRenderer
 		}
 
 
-
-
 		//==============//
 		// LOD skipping //
 		//==============//
@@ -862,11 +862,11 @@ public class LodRenderer
 		{
 			xIndex = (pos.x - mc.getPlayer().xChunk) + (chunkRenderDistance + 1);
 			zIndex = (pos.z - mc.getPlayer().zChunk) + (chunkRenderDistance + 1);
-			
+
 			// sometimes we are given chunks that are outside the render distance,
 			// This prevents index out of bounds exceptions
 			if (xIndex >= 0 && zIndex >= 0
-				&& xIndex < vanillaRenderedChunks.length 
+				&& xIndex < vanillaRenderedChunks.length
 				&& zIndex < vanillaRenderedChunks.length)
 			{
 				if (!vanillaRenderedChunks[xIndex][zIndex])
@@ -877,8 +877,8 @@ public class LodRenderer
 				}
 			}
 		}
-		
-		
+
+
 		// if the player is high enough, draw all LODs
 		if(chunkPosToSkip.isEmpty() && mc.getPlayer().position().y > 256)
 		{

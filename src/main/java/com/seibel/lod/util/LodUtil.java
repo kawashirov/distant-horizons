@@ -21,6 +21,7 @@ import java.awt.Color;
 import java.io.File;
 import java.util.HashSet;
 
+import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
@@ -30,6 +31,7 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
 import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
@@ -42,26 +44,32 @@ import net.minecraft.world.server.ServerWorld;
 
 /**
  * This class holds methods and constants that may be used in multiple places.
- * 
+ *
  * @author James Seibel
  * @version 9-7-2021
  */
 public class LodUtil
 {
 	private static MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
-	
-	
-	/** alpha used when drawing chunks in debug mode */
+
+
+	/**
+	 * alpha used when drawing chunks in debug mode
+	 */
 	public static final int DEBUG_ALPHA = 255; // 0 - 255
 	public static final Color COLOR_DEBUG_BLACK = new Color(0, 0, 0, DEBUG_ALPHA);
 	public static final Color COLOR_DEBUG_WHITE = new Color(255, 255, 255, DEBUG_ALPHA);
-	public static final Color COLOR_INVISIBLE = new Color(0,0,0,0);
-	
-	/** a gray-purple color */
+	public static final Color COLOR_INVISIBLE = new Color(0, 0, 0, 0);
+
+	/**
+	 * a gray-purple color
+	 */
 	public static final int MYCELIUM_COLOR_INT = LodUtil.colorToInt(Color.decode("#6E6166"));
-	/** TODO, add a better way to override material colors
+	/**
+	 * TODO, add a better way to override material colors
 	 * and/or add a method to generate colors based on texture
-	 * issue #64 */
+	 * issue #64
+	 */
 	public static final int STONE_COLOR_INT = LodUtil.colorToInt(new Color(150, 150, 150));
 	public static final int NETHERRACK_COLOR_INT = LodUtil.colorToInt(new Color(95, 38, 38));
 	public static final int WARPED_NYLIUM_COLOR_INT = LodUtil.colorToInt(new Color(34, 94, 85));
@@ -71,14 +79,20 @@ public class LodUtil
 	 * In order of nearest to farthest: <br>
 	 * Red, Orange, Yellow, Green, Cyan, Blue, Magenta, white, gray, black
 	 */
-	public static final Color DEBUG_DETAIL_LEVEL_COLORS[] = new Color[] { Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA, Color.WHITE, Color.GRAY, Color.BLACK };
-	
-	
-	/** 512 blocks wide */
+	public static final Color DEBUG_DETAIL_LEVEL_COLORS[] = new Color[]{Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA, Color.WHITE, Color.GRAY, Color.BLACK};
+
+
+	/**
+	 * 512 blocks wide
+	 */
 	public static final byte REGION_DETAIL_LEVEL = 9;
-	/** 16 blocks wide */
+	/**
+	 * 16 blocks wide
+	 */
 	public static final byte CHUNK_DETAIL_LEVEL = 4;
-	/** 1 block wide */
+	/**
+	 * 1 block wide
+	 */
 	public static final byte BLOCK_DETAIL_LEVEL = 0;
 
 
@@ -86,28 +100,40 @@ public class LodUtil
 
 	public static final short MAX_VERTICAL_DATA = 4;
 
-	/** measured in Blocks <br>
-	 * detail level 9 */
+	/**
+	 * measured in Blocks <br>
+	 * detail level 9
+	 */
 	public static final short REGION_WIDTH = 512;
-	/** measured in Blocks <br>
-	 * detail level 4 */
+	/**
+	 * measured in Blocks <br>
+	 * detail level 4
+	 */
 	public static final short CHUNK_WIDTH = 16;
-	/** measured in Blocks <br> 
-	 * detail level 0 */
+	/**
+	 * measured in Blocks <br>
+	 * detail level 0
+	 */
 	public static final short BLOCK_WIDTH = 1;
-	
-	
-	/** number of chunks wide */
+
+
+	/**
+	 * number of chunks wide
+	 */
 	public static final int REGION_WIDTH_IN_CHUNKS = 32;
-	
-	
-	/** If we ever need to use a heightmap for any reason, use this one. */
+
+
+	/**
+	 * If we ever need to use a heightmap for any reason, use this one.
+	 */
 	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
-	
-	/** This regex finds any characters that are invalid for use in a windows 
-	 * (and by extension mac and linux) file path */
+
+	/**
+	 * This regex finds any characters that are invalid for use in a windows
+	 * (and by extension mac and linux) file path
+	 */
 	public static final String INVALID_FILE_CHARACTERS_REGEX = "[\\\\\\/:*?\\\"<>|]";
-	
+
 	/**
 	 * 64 MB by default is the maximum amount of memory that
 	 * can be directly allocated. <br><br>
@@ -120,33 +146,29 @@ public class LodUtil
 	 * https://stackoverflow.com/questions/50499238/bytebuffer-allocatedirect-and-xmx
 	 */
 	public static final int MAX_ALOCATEABLE_DIRECT_MEMORY = 64 * 1024 * 1024;
-	
-	
-	
-	
-	
-	
+
+
 	/**
 	 * Gets the first valid ServerWorld.
-	 * 
+	 *
 	 * @return null if there are no ServerWorlds
 	 */
 	public static ServerWorld getFirstValidServerWorld()
 	{
 		if (mc.hasSingleplayerServer())
 			return null;
-		
+
 		Iterable<ServerWorld> worlds = mc.getSingleplayerServer().getAllLevels();
-		
+
 		for (ServerWorld world : worlds)
 			return world;
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Gets the ServerWorld for the relevant dimension.
-	 * 
+	 *
 	 * @return null if there is no ServerWorld for the given dimension
 	 */
 	public static ServerWorld getServerWorldFromDimension(DimensionType dimension)
@@ -154,42 +176,43 @@ public class LodUtil
 		IntegratedServer server = mc.getSingleplayerServer();
 		if (server == null)
 			return null;
-		
+
 		Iterable<ServerWorld> worlds = server.getAllLevels();
 		ServerWorld returnWorld = null;
-		
+
 		for (ServerWorld world : worlds)
 		{
-			if(world.dimensionType() == dimension)
+			if (world.dimensionType() == dimension)
 			{
 				returnWorld = world;
 				break;
 			}
 		}
-		
+
 		return returnWorld;
 	}
-	
+
 	/**
-	 * Convert a 2D absolute position into a quad tree relative position. 
+	 * Convert a 2D absolute position into a quad tree relative position.
 	 */
 	public static RegionPos convertGenericPosToRegionPos(int x, int z, int detailLevel)
 	{
 		int relativePosX = Math.floorDiv(x, (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel));
 		int relativePosZ = Math.floorDiv(z, (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel));
-		
+
 		return new RegionPos(relativePosX, relativePosZ);
 	}
-	
+
 	/**
 	 * Convert a 2D absolute position into a quad tree relative position.
 	 */
 	public static int convertLevelPos(int pos, int currectDetailLevel, int targetDetailLevel)
 	{
 		int newPos = Math.floorDiv(pos, (int) Math.pow(2, targetDetailLevel - currectDetailLevel));
-		
+
 		return newPos;
 	}
+
 	/**
 	 * Return whether the given chunk
 	 * has any data in it.
@@ -197,20 +220,19 @@ public class LodUtil
 	public static boolean chunkHasBlockData(IChunk chunk)
 	{
 		ChunkSection[] blockStorage = chunk.getSections();
-		
-		for(ChunkSection section : blockStorage)
+
+		for (ChunkSection section : blockStorage)
 		{
-			if(section != null && !section.isEmpty())
+			if (section != null && !section.isEmpty())
 			{
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
-	
-	
+
+
 	/**
 	 * If on single player this will return the name of the user's
 	 * world, if in multiplayer it will return the server name, IP,
@@ -218,28 +240,26 @@ public class LodUtil
 	 */
 	public static String getWorldID(IWorld world)
 	{
-		if(mc.hasSingleplayerServer())
+		if (mc.hasSingleplayerServer())
 		{
 			// chop off the dimension ID as it is not needed/wanted
 			String dimId = getDimensionIDFromWorld(world);
-			
+
 			// get the world name
 			int saveIndex = dimId.indexOf("saves") + 1 + "saves".length();
 			int slashIndex = dimId.indexOf(File.separatorChar, saveIndex);
 			dimId = dimId.substring(saveIndex, slashIndex);
 			return dimId;
-		}
-		else
+		} else
 		{
 			return getServerId();
 		}
 	}
-	
-	
-	
+
+
 	/**
 	 * If on single player this will return the name of the user's
-	 * world and the dimensional save folder, if in multiplayer 
+	 * world and the dimensional save folder, if in multiplayer
 	 * it will return the server name, ip, game version, and dimension.<br>
 	 * <br>
 	 * This can be used to determine where to save files for a given
@@ -247,58 +267,57 @@ public class LodUtil
 	 */
 	public static String getDimensionIDFromWorld(IWorld world)
 	{
-		if(mc.hasSingleplayerServer())
+		if (mc.hasSingleplayerServer())
 		{
 			// this will return the world save location
 			// and the dimension folder
-			
+
 			ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(world.dimensionType());
-			if(serverWorld == null)
+			if (serverWorld == null)
 				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerWorld for the dimension " + world.dimensionType().effectsLocation().getPath());
-			
+
 			ServerChunkProvider provider = serverWorld.getChunkSource();
-			if(provider == null)
+			if (provider == null)
 				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerChunkProvider for the dimension " + world.dimensionType().effectsLocation().getPath());
-			
+
 			return provider.dataStorage.dataFolder.toString();
-		}
-		else
+		} else
 		{
 			return getServerId() + File.separatorChar + "dim_" + world.dimensionType().effectsLocation().getPath() + File.separatorChar;
 		}
 	}
-	
+
 	/**
 	 * returns the server name, IP and game version.
 	 */
 	public static String getServerId()
 	{
 		ServerData server = mc.getCurrentServer();
-		
+
 		String serverName = server.name.replaceAll(INVALID_FILE_CHARACTERS_REGEX, "");
 		String serverIp = server.ip.replaceAll(INVALID_FILE_CHARACTERS_REGEX, "");
 		String serverMcVersion = server.version.getString().replaceAll(INVALID_FILE_CHARACTERS_REGEX, "");
-		
-		String serverId =  serverName + ", IP " + serverIp + ", GameVersion " + serverMcVersion;
-		
-		return serverId; 
+
+		String serverId = serverName + ", IP " + serverIp + ", GameVersion " + serverMcVersion;
+
+		return serverId;
 	}
-	
-	
+
+
 	/**
 	 * Convert a BlockColors int into a Color object.
 	 */
 	public static Color intToColor(int num)
 	{
 		int filter = 0b11111111;
-		
-		int red = (num >> 16 ) & filter;
-		int green = (num >> 8 ) & filter;
+
+		int red = (num >> 16) & filter;
+		int green = (num >> 8) & filter;
 		int blue = num & filter;
-		
+
 		return new Color(red, green, blue);
 	}
-	
+
 	/**
 	 * Convert a Color into a BlockColors object.
 	 */
@@ -306,8 +325,8 @@ public class LodUtil
 	{
 		return color.getRGB();
 	}
-	
-	
+
+
 	/**
 	 * Clamps the given value between the min and max values.
 	 * May behave strangely if min > max.
@@ -316,7 +335,7 @@ public class LodUtil
 	{
 		return Math.min(max, Math.max(value, min));
 	}
-	
+
 	/**
 	 * Clamps the given value between the min and max values.
 	 * May behave strangely if min > max.
@@ -325,7 +344,7 @@ public class LodUtil
 	{
 		return Math.min(max, Math.max(value, min));
 	}
-	
+
 	/**
 	 * Clamps the given value between the min and max values.
 	 * May behave strangely if min > max.
@@ -337,8 +356,9 @@ public class LodUtil
 
 	/**
 	 * This methods return the number of lods that are going to be rendered in a region in the worst case
+	 *
 	 * @param regionPosX x region position to check
- 	 * @param regionPosZ z region position to check
+	 * @param regionPosZ z region position to check
 	 * @return number of lods in the region
 	 */
 	public static long regionRenderingMemoryUse(int regionPosX, int regionPosZ, LodTemplate template)
@@ -354,8 +374,8 @@ public class LodUtil
 		|       |
 		X - X - X
 		 */
-		int circleCenterX = 256 + 256*xRegionSign;
-		int circleCenterZ = 256 + 256*zRegionSign;
+		int circleCenterX = 256 + 256 * xRegionSign;
+		int circleCenterZ = 256 + 256 * zRegionSign;
 
 
 		int innerRadius;
@@ -366,7 +386,7 @@ public class LodUtil
 		int maxDistance;
 		long memoryUse = 0;
 		int number = 0;
-		for(byte detailLevel = BLOCK_DETAIL_LEVEL; detailLevel <= REGION_DETAIL_LEVEL; detailLevel++)
+		for (byte detailLevel = BLOCK_DETAIL_LEVEL; detailLevel <= REGION_DETAIL_LEVEL; detailLevel++)
 		{
 			//We find now the inner and outer detail of this area
 			innerRadius = DetailDistanceUtil.getDrawDistanceFromDetail(detailLevel);
@@ -400,59 +420,59 @@ public class LodUtil
 		}
 		return memoryUse;
 	}
-	
-	
-	 /**
-     * Get a HashSet of all ChunkPos within the normal render distance
-     * that should not be rendered.
-     */
-	 public static HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodDimension lodDim, BlockPos playerPos)
-	 {
-		 int chunkRenderDist = mc.getRenderDistance();
-		 ChunkPos centerChunk = new ChunkPos(playerPos);
-
-		 // skip chunks that are already going to be rendered by Minecraft
-		 HashSet<ChunkPos> posToSkip = getRenderedChunks();
-
-		 // go through each chunk within the normal view distance
-		 for (int x = centerChunk.x - chunkRenderDist; x < centerChunk.x + chunkRenderDist; x++)
-		 {
-			 for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
-			 {
-				 if (!lodDim.doesDataExist(LodUtil.CHUNK_DETAIL_LEVEL, x, z))
-					 continue;
-
-				 long data = lodDim.getSingleData(LodUtil.CHUNK_DETAIL_LEVEL, x, z);
-
-				 short lodAverageHeight = DataPointUtil.getHeight(data);
-
-				 if (playerPos.getY() <= lodAverageHeight)
-				 {
-					 // don't draw Lod's that are taller than the player
-					 // to prevent LODs being drawn on top of the player
-					 posToSkip.add(new ChunkPos(x, z));
-				 }
-			 }
-		 }
-
-		 return posToSkip;
-	 }
 
 
 	/**
-     * This method returns the ChunkPos of all chunks that Minecraft
-     * is going to render this frame. <br><br>
-     * <p>
-     * Note: This isn't perfect. It will return some chunks that are outside
-     * the clipping plane. (For example, if you are high above the ground some chunks
-     * will be incorrectly added, even though they are outside render range).
-     */
+	 * Get a HashSet of all ChunkPos within the normal render distance
+	 * that should not be rendered.
+	 */
+	public static HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodDimension lodDim, BlockPos playerPos)
+	{
+		int chunkRenderDist = mc.getRenderDistance();
+		ChunkPos centerChunk = new ChunkPos(playerPos);
+
+		// skip chunks that are already going to be rendered by Minecraft
+		HashSet<ChunkPos> posToSkip = getRenderedChunks();
+
+		// go through each chunk within the normal view distance
+		for (int x = centerChunk.x - chunkRenderDist; x < centerChunk.x + chunkRenderDist; x++)
+		{
+			for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
+			{
+				if (!lodDim.doesDataExist(LodUtil.CHUNK_DETAIL_LEVEL, x, z))
+					continue;
+
+				long data = lodDim.getSingleData(LodUtil.CHUNK_DETAIL_LEVEL, x, z);
+
+				short lodAverageHeight = DataPointUtil.getHeight(data);
+
+				if (playerPos.getY() <= lodAverageHeight)
+				{
+					// don't draw Lod's that are taller than the player
+					// to prevent LODs being drawn on top of the player
+					posToSkip.add(new ChunkPos(x, z));
+				}
+			}
+		}
+
+		return posToSkip;
+	}
+
+
+	/**
+	 * This method returns the ChunkPos of all chunks that Minecraft
+	 * is going to render this frame. <br><br>
+	 * <p>
+	 * Note: This isn't perfect. It will return some chunks that are outside
+	 * the clipping plane. (For example, if you are high above the ground some chunks
+	 * will be incorrectly added, even though they are outside render range).
+	 */
 	public static HashSet<ChunkPos> getRenderedChunks()
 	{
 		HashSet<ChunkPos> loadedPos = new HashSet<>();
-		
+
 		// Wow those are some long names!
-		
+
 		// go through every RenderInfo to get the compiled chunks
 		WorldRenderer renderer = mc.getLevelRenderer();
 		for (WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer : renderer.renderChunks)
@@ -462,14 +482,42 @@ public class LodUtil
 			{
 				// add the ChunkPos for every rendered chunk
 				BlockPos bpos = worldrenderer$localrenderinformationcontainer.chunk.getOrigin();
-				
+
 				loadedPos.add(new ChunkPos(bpos));
 			}
 		}
-		
-		
+
+
 		return loadedPos;
 	}
-	
-	
+
+	/**
+	 *
+	 */
+	public static boolean isBorderChunk(boolean[][] vanillaRenderedChunks, int x, int z)
+	{
+		if (x < 0 || z < 0 || x >= vanillaRenderedChunks.length || z >= vanillaRenderedChunks[0].length)
+			return false;
+		int tempX;
+		int tempZ;
+		for (Direction direction : Box.ADJ_DIRECTIONS)
+		{
+			tempX = x + direction.getNormal().getX();
+			tempZ = z + direction.getNormal().getZ();
+			if (!(tempX < 0 || tempZ < 0 || tempX >= vanillaRenderedChunks.length || tempZ >= vanillaRenderedChunks[0].length))
+			{
+				if (!vanillaRenderedChunks[tempX][tempZ])
+				{
+					return true;
+				}
+			}else
+			{
+				if (vanillaRenderedChunks[x][z])
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }

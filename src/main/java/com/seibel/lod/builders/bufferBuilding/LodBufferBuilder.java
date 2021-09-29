@@ -295,10 +295,12 @@ public class LodBufferBuilder
 									chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.x;
 									chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.z;
 
+									boolean isItBorderPos = LodUtil.isBorderChunk(vanillaRenderedChunks,chunkXdist + gameChunkRenderDistance + 1,chunkZdist + gameChunkRenderDistance + 1);
 									if (gameChunkRenderDistance >= Math.abs(chunkXdist)
 											    && gameChunkRenderDistance >= Math.abs(chunkZdist)
 											    && detailLevel <= LodUtil.CHUNK_DETAIL_LEVEL
-											    && vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1])
+											    && vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
+											    && !isItBorderPos)
 									{
 										continue;
 									}
@@ -316,7 +318,8 @@ public class LodBufferBuilder
 												    && posToRender.contains(detailLevel, xAdj, zAdj)
 												    && (gameChunkRenderDistance < Math.abs(chunkXdist)
 														        || gameChunkRenderDistance < Math.abs(chunkZdist)
-														        || !vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]))
+														        || !(vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
+																           && !LodUtil.isBorderChunk(vanillaRenderedChunks,chunkXdist + gameChunkRenderDistance + 1,chunkZdist + gameChunkRenderDistance + 1))))
 										{
 											if (!adjData.containsKey(direction) || adjData.get(direction) == null)
 												adjData.put(direction, new long[maxVerticalData]);
@@ -442,7 +445,7 @@ public class LodBufferBuilder
 					drawableVbos[x][z] = new VertexBuffer[1];
 				} else
 				{
-					numberOfBuffers = (int) Math.ceil(memoryRequired / BUFFER_MAX_CAPACITY)+1;
+					numberOfBuffers = (int) Math.ceil(memoryRequired / BUFFER_MAX_CAPACITY) + 1;
 					System.out.println(numberOfBuffers);
 					memoryRequired = BUFFER_MAX_CAPACITY;
 					bufferSize[x][z] = numberOfBuffers;
