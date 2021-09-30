@@ -283,10 +283,10 @@ public class DataPointUtil
 		int size = dataToMerge.length / inputVerticalData;
 		
 		// We initialize the arrays that are going to be used
-		short[] projection = ThreadMapUtil.getFreshProjectionArray((worldHeight) / 16 + 1);
-		short[] heightAndDepth = ThreadMapUtil.getFreshHeightAndDepth((worldHeight + 1) * 2);
-		long[] singleDataToMerge = ThreadMapUtil.getFreshSingleAddDataToMerge(size);
-		long[] dataPoint = ThreadMapUtil.getFreshVerticalDataArray(worldHeight + 1);
+		short[] projection = ThreadMapUtil.getProjectionArray((worldHeight) / 16 + 1);
+		short[] heightAndDepth = ThreadMapUtil.getHeightAndDepth((worldHeight + 1) * 2);
+		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(size);
+		long[] dataPoint = ThreadMapUtil.getVerticalDataArray(worldHeight + 1);
 		
 		
 		int genMode = DistanceGenerationMode.SERVER.complexity;

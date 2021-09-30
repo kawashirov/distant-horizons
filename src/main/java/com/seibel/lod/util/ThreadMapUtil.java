@@ -26,13 +26,7 @@ public class ThreadMapUtil
 	
 	
 	
-	/** returns the array filled with 0's */
-	public static long[] getFreshSingleUpdateArray(int arrayLength)
-	{
-		long[] array = getSingleUpdateArray();
-		array = clearOrCreateArray(array, arrayLength);
-		return array;
-	}
+	/** returns the array NOT cleared every time */
 	public static long[] getSingleUpdateArray()
 	{
 		if (!threadSingleUpdateMap.containsKey(Thread.currentThread().getName()) || (threadSingleUpdateMap.get(Thread.currentThread().getName()) == null))
@@ -43,13 +37,7 @@ public class ThreadMapUtil
 	}
 	
 	
-	/** returns the array filled with 0's */
-	public static long[] getFreshBuilderArray(int arrayLength, int detailLevel)
-	{
-		long[] array = getBuilderArray(detailLevel);
-		array = clearOrCreateArray(array, arrayLength);
-		return array;
-	}
+	/** returns the array NOT cleared every time */
 	public static long[] getBuilderArray(int detailLevel)
 	{
 		if (!threadBuilderArrayMap.containsKey(Thread.currentThread().getName()) || (threadBuilderArrayMap.get(Thread.currentThread().getName()) == null))
@@ -68,35 +56,34 @@ public class ThreadMapUtil
 	
 	
 	/** returns the array filled with 0's */
-	public static long[] getFreshBuilderVerticalArray(int arrayLength, int detailLevel)
-	{
-		long[] array = getBuilderVerticalArray(detailLevel);
-		array = clearOrCreateArray(array, arrayLength);
-		return array;
-	}
 	public static long[] getBuilderVerticalArray(int detailLevel)
 	{
 		if (!threadBuilderVerticalArrayMap.containsKey(Thread.currentThread().getName()) || (threadBuilderVerticalArrayMap.get(Thread.currentThread().getName()) == null))
 		{
 			long[][] array = new long[5][];
+			int size = 1;
+			for (int i = 0; i < 5; i++)
+			{
+				array[i] = new long[size * size * DataPointUtil.worldHeight + 1];
+				size = size << 1;
+			}
 			threadBuilderVerticalArrayMap.put(Thread.currentThread().getName(), array);
 		}
+		Arrays.fill(threadBuilderVerticalArrayMap.get(Thread.currentThread().getName())[detailLevel], 0);
 		return threadBuilderVerticalArrayMap.get(Thread.currentThread().getName())[detailLevel];
 	}
 	
 	
 	/** returns the array filled with 0's */
-	public static long[] getFreshVerticalDataArray(int arrayLength)
-	{
-		long[] array = getVerticalDataArray();
-		array = clearOrCreateArray(array, arrayLength);
-		return array;
-	}
-	public static long[] getVerticalDataArray()
+	public static long[] getVerticalDataArray(int arrayLength)
 	{
 		if (!threadVerticalAddDataMap.containsKey(Thread.currentThread().getName()) || (threadVerticalAddDataMap.get(Thread.currentThread().getName()) == null))
 		{
-			threadVerticalAddDataMap.put(Thread.currentThread().getName(), new long[0]);
+			threadVerticalAddDataMap.put(Thread.currentThread().getName(), new long[arrayLength]);
+		}
+		else
+		{
+			Arrays.fill(threadVerticalAddDataMap.get(Thread.currentThread().getName()), 0);
 		}
 		return threadVerticalAddDataMap.get(Thread.currentThread().getName());
 	}
@@ -104,85 +91,81 @@ public class ThreadMapUtil
 	
 	
 	/** returns the array filled with 0's */
-	public static short[] getFreshProjectionArray(int arrayLength)
-	{
-		short[] array = getProjectionArray();
-		array = clearOrCreateArray(array, arrayLength);
-		return array;
-	}
-	public static short[] getProjectionArray()
+	public static short[] getProjectionArray(int arrayLength)
 	{
 		if (!projectionArrayMap.containsKey(Thread.currentThread().getName()) || (projectionArrayMap.get(Thread.currentThread().getName()) == null))
 		{
-			projectionArrayMap.put(Thread.currentThread().getName(), new short[0]);
+			projectionArrayMap.put(Thread.currentThread().getName(), new short[arrayLength]);
+		}
+		else
+		{
+			Arrays.fill(projectionArrayMap.get(Thread.currentThread().getName()), (short) 0);
 		}
 		return projectionArrayMap.get(Thread.currentThread().getName());
 	}
 	
 	
-	/** returns the array filled with 0's */
-	public static short[] getFreshHeightAndDepth(int arrayLength)
-	{
-		short[] array = getHeightAndDepth();
-		array = clearOrCreateArray(array, arrayLength);
-		return array;
-	}
-	public static short[] getHeightAndDepth()
+	/** returns the array NOT cleared every time */
+	public static short[] getHeightAndDepth(int arrayLength)
 	{
 		if (!heightAndDepthMap.containsKey(Thread.currentThread().getName()) || (heightAndDepthMap.get(Thread.currentThread().getName()) == null))
 		{
-			heightAndDepthMap.put(Thread.currentThread().getName(), new short[0]);
+			heightAndDepthMap.put(Thread.currentThread().getName(), new short[arrayLength]);
 		}
 		return heightAndDepthMap.get(Thread.currentThread().getName());
 	}
 	
 	
 	/** returns the array filled with 0's */
-	public static byte[] getFreshSaveContainer(int arrayLength)
-	{
-		byte[] array = getSaveContainer();
-		array = clearOrCreateArray(array, arrayLength);
-		return array;
-	}
-	public static byte[] getSaveContainer()
+	public static byte[] getSaveContainer(int arrayLength)
 	{
 		if (!saveContainer.containsKey(Thread.currentThread().getName()) || (saveContainer.get(Thread.currentThread().getName()) == null))
 		{
-			saveContainer.put(Thread.currentThread().getName(), new byte[0]);
+			saveContainer.put(Thread.currentThread().getName(), new byte[arrayLength]);
+		}
+		else if (saveContainer.get(Thread.currentThread().getName()).length != arrayLength)
+		{
+			saveContainer.replace(Thread.currentThread().getName(), new byte[arrayLength]);
+		}
+		else
+		{
+			Arrays.fill(saveContainer.get(Thread.currentThread().getName()), (byte) 0);
 		}
 		return saveContainer.get(Thread.currentThread().getName());
 	}
 	
 	/** returns the array filled with 0's */
-	public static long[] getFreshVerticalUpdateArray(int arrayLength, int detailLevel)
-	{
-		long[] array = ThreadMapUtil.getVerticalUpdateArray(detailLevel);
-		array = clearOrCreateArray(array, arrayLength);
-		return array;
-	}
 	public static long[] getVerticalUpdateArray(int detailLevel)
 	{
 		if (!verticalUpdate.containsKey(Thread.currentThread().getName()) || (verticalUpdate.get(Thread.currentThread().getName()) == null))
 		{
 			long[][] array = new long[10][];
+			for (int i = 1; i < 10; i++)
+				array[i] = new long[DetailDistanceUtil.getMaxVerticalData(i - 1) * 4];
 			verticalUpdate.put(Thread.currentThread().getName(), array);
+		}
+		else
+		{
+			Arrays.fill(verticalUpdate.get(Thread.currentThread().getName())[detailLevel], 0);
 		}
 		return verticalUpdate.get(Thread.currentThread().getName())[detailLevel];
 	}
 	
 	
 	/** returns the array filled with 0's */
-	public static long[] getFreshSingleAddDataToMerge(int arrayLength)
-	{
-		long[] array = getSingleAddDataToMerge();
-		array = clearOrCreateArray(array, arrayLength);
-		return array;
-	}
-	public static long[] getSingleAddDataToMerge()
+	public static long[] getSingleAddDataToMerge(int arrayLength)
 	{
 		if (!singleDataToMergeMap.containsKey(Thread.currentThread().getName()) || (singleDataToMergeMap.get(Thread.currentThread().getName()) == null))
 		{
-			singleDataToMergeMap.put(Thread.currentThread().getName(), new long[0]);
+			singleDataToMergeMap.put(Thread.currentThread().getName(), new long[arrayLength]);
+		}
+		else if (singleDataToMergeMap.get(Thread.currentThread().getName()).length != arrayLength)
+		{
+			singleDataToMergeMap.replace(Thread.currentThread().getName(), new long[arrayLength]);
+		}
+		else
+		{
+			Arrays.fill(singleDataToMergeMap.get(Thread.currentThread().getName()), 0);
 		}
 		return singleDataToMergeMap.get(Thread.currentThread().getName());
 	}
@@ -203,55 +186,4 @@ public class ThreadMapUtil
 		singleDataToMergeMap.clear();
 		verticalUpdate.clear();
 	}
-	
-	
-	
-	
-	/** returns an array filled with 0's */
-	private static long[] clearOrCreateArray(long[] array, int arrayLength)
-	{
-		if (array == null || array.length != arrayLength)
-		{
-			array = new long[arrayLength];
-		}
-		else
-			Arrays.fill(array, 0);
-		
-		return array;
-	}
-	
-	/** returns an array filled with 0's */
-	@SuppressWarnings("unused")
-	private static int[] clearOrCreateArray(int[] array, int arrayLength)
-	{
-		if (array == null || array.length != arrayLength)
-			array = new int[arrayLength];
-		else
-			Arrays.fill(array, 0);
-		
-		return array;
-	}
-	
-	/** returns an array filled with 0's */
-	private static short[] clearOrCreateArray(short[] array, int arrayLength)
-	{
-		if (array == null || array.length != arrayLength)
-			array = new short[arrayLength];
-		else
-			Arrays.fill(array, (short) 0);
-		
-		return array;
-	}
-
-	/** returns an array filled with 0's */
-	private static byte[] clearOrCreateArray(byte[] array, int arrayLength)
-	{
-		if (array == null || array.length != arrayLength)
-			array = new byte[arrayLength];
-		else
-			Arrays.fill(array, (byte) 0);
-		
-		return array;
-	}
-	
 }

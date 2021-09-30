@@ -281,7 +281,7 @@ public class LodBuilder
 		// equivalent to 2^detailLevel
 		int size = 1 << detail.detailLevel;
 		
-		long[] dataToMerge = ThreadMapUtil.getFreshBuilderVerticalArray(size * size * DataPointUtil.worldHeight + 1, detail.detailLevel);
+		long[] dataToMerge = ThreadMapUtil.getBuilderVerticalArray(detail.detailLevel);
 		
 		
 		int verticalData = DataPointUtil.worldHeight;
