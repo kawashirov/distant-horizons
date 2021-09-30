@@ -846,7 +846,7 @@ public class LodBuilder
 			else if (useWaterTint(blockState.getBlock()))
 			{
 				// water
-				colorInt = ColorUtil.multiplyRGBcolors(biome.getWaterColor(), blockColor);
+				colorInt = ColorUtil.multiplyRGBcolors((biome.getWaterColor() | 0xFF000000), blockColor);
 			}
 		}
 		else

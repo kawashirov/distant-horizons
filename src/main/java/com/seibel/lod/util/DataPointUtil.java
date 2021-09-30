@@ -65,7 +65,7 @@ public class DataPointUtil
 	public final static long RED_MASK = 0b1111_1111;
 	public final static long GREEN_MASK = 0b1111_1111;
 	public final static long BLUE_MASK = 0b1111_1111;
-	//public final static long COLOR_MASK = 0b11111111_11111111_11111111;
+	public final static long COLOR_MASK = 0b11111111_11111111_11111111;
 	public final static long HEIGHT_MASK = 0b11_1111_1111;
 	public final static long DEPTH_MASK = 0b11_1111_1111;
 	//public final static long LIGHTS_MASK = 0b1111_1111;
@@ -100,7 +100,7 @@ public class DataPointUtil
 	public static long createDataPoint(int alpha, int red, int green, int blue, int height, int depth, int lightSky, int lightBlock, int generationMode)
 	{
 		long dataPoint = 0;
-		dataPoint += ((alpha >>> ALPHA_DOWNSIZE_SHIFT) & ALPHA_MASK) << ALPHA_SHIFT;
+		dataPoint += (long) (alpha >>> ALPHA_DOWNSIZE_SHIFT) << ALPHA_SHIFT;
 		dataPoint += (red & RED_MASK) << RED_SHIFT;
 		dataPoint += (green & GREEN_MASK) << GREEN_SHIFT;
 		dataPoint += (blue & BLUE_MASK) << BLUE_SHIFT;
@@ -174,7 +174,7 @@ public class DataPointUtil
 	{
 		//int color = getBlue(dataPoint) << BLUE_COLOR_SHIFT;
 		//color += getRed(dataPoint) << BLUE_COLOR_SHIFT;
-		return (int) (dataPoint >>> COLOR_SHIFT);
+		return (int) (((dataPoint >>> COLOR_SHIFT) & COLOR_MASK) | (((dataPoint >>> (ALPHA_SHIFT - ALPHA_DOWNSIZE_SHIFT)) | 0b1111) << 24));
 	}
 	
 	public static int getLightColor(long dataPoint, NativeImage lightMap)
