@@ -44,7 +44,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
-			byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap)
+			byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap, boolean[] adjShadeDisabled)
 	{
 		if (box == null)
 			return;
@@ -67,7 +67,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				posX * blockWidth, 0, posZ * blockWidth, // x, y, z offset
 				bufferCenterBlockPos,
 				adjData,
-				color);
+				color,
+				adjShadeDisabled);
 		
 		addBoundingBoxToBuffer(buffer, box);
 	}
@@ -77,7 +78,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			double xOffset, double yOffset, double zOffset, 
 			BlockPos bufferCenterBlockPos, 
 			Map<Direction, long[]> adjData, 
-			int color)
+			int color,
+			boolean[] adjShadeDisabled)
 	{
 		// don't add an LOD if it is empty
 		if (height == -1 && depth == -1)
@@ -96,7 +98,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		double x = -bufferCenterBlockPos.getX();
 		double z = -bufferCenterBlockPos.getZ();
 		box.reset();
-		box.setColor(color);
+		box.setColor(color, adjShadeDisabled);
 		box.setWidth(width, height - depth, width);
 		box.setOffset((int) (xOffset + x), (int) (depth + yOffset), (int) (zOffset + z));
 		box.setUpCulling(32, bufferCenterBlockPos);

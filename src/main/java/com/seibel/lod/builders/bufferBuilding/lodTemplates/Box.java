@@ -12,7 +12,6 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import org.lwjgl.system.CallbackI;
 
 /**
  * Similar to Minecraft's AxisAlignedBoundingBox.
@@ -99,6 +98,7 @@ public class Box
 		put(Direction.NORTH, new int[]{Z, MIN});
 	}};
 
+
 	@SuppressWarnings("serial")
 	public static final Map<Direction, int[]> DIRECTION_NORMAL_MAP = new HashMap<Direction, int[]>()
 	{{
@@ -110,13 +110,30 @@ public class Box
 		put(Direction.NORTH, new int[]{0, 0, -1});
 	}};
 
+	public static final Map<Direction, Integer> DIRECTION_INDEX = new HashMap<Direction, Integer>()
+	{{
+		put(Direction.UP, 0);
+		put(Direction.DOWN, 1);
+		put(Direction.EAST, 2);
+		put(Direction.WEST, 3);
+		put(Direction.SOUTH, 4);
+		put(Direction.NORTH, 5);
+	}};
+
+	public static final Map<Direction, Integer> ADJ_DIRECTION_INDEX = new HashMap<Direction, Integer>()
+	{{
+		put(Direction.EAST, 0);
+		put(Direction.WEST, 1);
+		put(Direction.SOUTH, 2);
+		put(Direction.NORTH, 3);
+	}};
 	/** holds the box's x, y, z offset */
 	public int[] boxOffset;
 	/** holds the box's x, y, z width */
 	public int[] boxWidth;
 
 	/** Holds each direction's color */
-	public Map<Direction, Integer> colorMap;
+	public int[] colorMap;
 	/** The original color (before shading) of this box */
 	public int color;
 	/**  */
@@ -134,15 +151,7 @@ public class Box
 		boxOffset = new int[3];
 		boxWidth = new int[3];
 
-		colorMap = new HashMap<Direction, Integer>()
-		{{
-			put(Direction.UP, 0);
-			put(Direction.DOWN, 0);
-			put(Direction.EAST, 0);
-			put(Direction.WEST, 0);
-			put(Direction.SOUTH, 0);
-			put(Direction.NORTH, 0);
-		}};
+		colorMap = new int[6];
 
 		// TODO what does the 32 represent?
 		adjHeight = new HashMap<Direction, int[]>()
@@ -173,12 +182,15 @@ public class Box
 
 
 
-	public void setColor(int color)
+	public void setColor(int color, boolean[] adjShadeDisabled)
 	{
 		this.color = color;
 		for (Direction direction : DIRECTIONS)
 		{
-			colorMap.put(direction, ColorUtil.applyShade(color, MinecraftWrapper.INSTANCE.getClientWorld().getShade(direction, true)));
+			if (!adjShadeDisabled[DIRECTION_INDEX.get(direction)])
+				colorMap[DIRECTION_INDEX.get(direction)] = ColorUtil.applyShade(color, MinecraftWrapper.INSTANCE.getClientWorld().getShade(direction, true));
+			else
+				colorMap[DIRECTION_INDEX.get(direction)] = color;
 		}
 	}
 
@@ -186,7 +198,7 @@ public class Box
 	{
 		if (LodConfig.CLIENT.debugging.debugMode.get() != DebugMode.SHOW_DETAIL)
 		{
-			return colorMap.get(direction);
+			return colorMap[DIRECTION_INDEX.get(direction)];
 		}
 		else
 		{
@@ -200,11 +212,7 @@ public class Box
 	{
 		Arrays.fill(boxWidth, 0);
 		Arrays.fill(boxOffset, 0);
-
-		for (Direction direction : DIRECTIONS)
-		{
-			colorMap.put(direction, 0);
-		}
+		Arrays.fill(colorMap, 0);
 
 		for (Direction direction : ADJ_DIRECTIONS)
 		{

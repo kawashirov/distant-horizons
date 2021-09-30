@@ -18,10 +18,7 @@
 package com.seibel.lod.builders.bufferBuilding;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -245,6 +242,7 @@ public class LodBufferBuilder
 							Callable<Boolean> dataToRenderThread = () ->
 							{
 								Map<Direction, long[]> adjData = new HashMap<>();
+								boolean[] adjShadeDisabled = new boolean[Box.DIRECTIONS.length];
 
 								// determine how many LODs we can stack vertically
 								int maxVerticalData = 1;
@@ -279,6 +277,7 @@ public class LodBufferBuilder
 								int chunkXdist;
 								int chunkZdist;
 								int bufferIndex;
+								boolean disableShading;
 								// keep a local version so we don't have to worry about indexOutOfBounds Exceptions
 								// if it changes in the LodRenderer while we are working here
 								boolean[][] vanillaRenderedChunks = renderer.vanillaRenderedChunks;
@@ -295,7 +294,7 @@ public class LodBufferBuilder
 									chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.x;
 									chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.z;
 
-									boolean isItBorderPos = LodUtil.isBorderChunk(vanillaRenderedChunks,chunkXdist + gameChunkRenderDistance + 1,chunkZdist + gameChunkRenderDistance + 1);
+									boolean isItBorderPos = LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1);
 									if (gameChunkRenderDistance >= Math.abs(chunkXdist)
 											    && gameChunkRenderDistance >= Math.abs(chunkZdist)
 											    && detailLevel <= LodUtil.CHUNK_DETAIL_LEVEL
@@ -304,7 +303,7 @@ public class LodBufferBuilder
 									{
 										continue;
 									}
-
+									Arrays.fill(adjShadeDisabled, false);
 									// skip any chunks that Minecraft is going to render
 									for (Direction direction : Box.ADJ_DIRECTIONS)
 									{
@@ -312,14 +311,11 @@ public class LodBufferBuilder
 										zAdj = posZ + direction.getNormal().getZ();
 										chunkXdist = LevelPosUtil.getChunkPos(detailLevel, xAdj) - playerChunkPos.x;
 										chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.z;
-										boolean performFaceCulling = true;
-
-										if (performFaceCulling
-												    && posToRender.contains(detailLevel, xAdj, zAdj)
+										if (posToRender.contains(detailLevel, xAdj, zAdj)
 												    && (gameChunkRenderDistance < Math.abs(chunkXdist)
 														        || gameChunkRenderDistance < Math.abs(chunkZdist)
 														        || !(vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
-																           && !LodUtil.isBorderChunk(vanillaRenderedChunks,chunkXdist + gameChunkRenderDistance + 1,chunkZdist + gameChunkRenderDistance + 1))))
+																             && !LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1))))
 										{
 											if (!adjData.containsKey(direction) || adjData.get(direction) == null)
 												adjData.put(direction, new long[maxVerticalData]);
@@ -330,6 +326,12 @@ public class LodBufferBuilder
 											}
 										} else
 										{
+											if (gameChunkRenderDistance >= Math.abs(chunkXdist)
+													    && gameChunkRenderDistance >= Math.abs(chunkZdist)
+													    && !LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1)
+													    && vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
+													    && !DataPointUtil.isVoid(lodDim.getSingleData(detailLevel, xAdj, zAdj)))
+												adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = true;
 											adjData.put(direction, null);
 										}
 									}
@@ -342,7 +344,7 @@ public class LodBufferBuilder
 											break;
 
 										LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffers[bufferIndex], playerBlockPosRounded, data, adjData,
-												detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode, renderer.lightMap);
+												detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode, renderer.lightMap, adjShadeDisabled);
 									}
 
 

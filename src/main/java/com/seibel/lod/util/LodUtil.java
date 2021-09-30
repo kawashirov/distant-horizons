@@ -492,7 +492,11 @@ public class LodUtil
 	}
 
 	/**
-	 *
+	 * This method find if a given chunk is a border chunk of the renderable ones
+	 * @param vanillaRenderedChunks matrix of the vanilla rendered chunks
+	 * @param x relative (to the matrix) x chunk to check
+	 * @param z relative (to the matrix) z chunk to check
+	 * @return true if and only if the chunk is a the border of the rendereble chunks
 	 */
 	public static boolean isBorderChunk(boolean[][] vanillaRenderedChunks, int x, int z)
 	{
