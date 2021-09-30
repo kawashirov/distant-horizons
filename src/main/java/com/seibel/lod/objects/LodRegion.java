@@ -24,14 +24,13 @@ import com.seibel.lod.util.LodUtil;
 public class LodRegion
 {
 	/**
-	 * TODO what does this represent, and should it be defined here?
+	 * Number of detail level supported by a region
 	 */
 	private static final byte POSSIBLE_LOD = 10;
 
 
 	/**
 	 * Holds the lowest (least detailed) detail level in this region
-	 * TODO is that correct?
 	 */
 	private byte minDetailLevel;
 
@@ -42,7 +41,6 @@ public class LodRegion
 
 	/**
 	 * the generation mode for this region
-	 * TODO will this ever change through a region's life?
 	 */
 	private DistanceGenerationMode generationMode;
 	/**

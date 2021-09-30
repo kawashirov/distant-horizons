@@ -12,6 +12,8 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3i;
 
 /**
  * Similar to Minecraft's AxisAlignedBoundingBox.
@@ -50,7 +52,9 @@ public class Box
 			Direction.SOUTH,
 			Direction.NORTH};
 
-	/** TODO what does this represent? I don't understand the name */
+	/**
+	 * All the faces and vertex of a cube. This is used to extract the vertex of the column
+	 */
 	@SuppressWarnings("serial")
 	public static final Map<Direction, int[][]> DIRECTION_VERTEX_MAP = new HashMap<Direction, int[][]>()
 	{{
@@ -87,6 +91,10 @@ public class Box
 	}};
 
 
+	/**
+	 * This indicate which position is invariable in the DIRECTION_VERTEX_MAP.
+	 * Is used to extract the vertex
+	 */
 	@SuppressWarnings("serial")
 	public static final Map<Direction, int[]> FACE_DIRECTION = new HashMap<Direction, int[]>()
 	{{
@@ -99,17 +107,23 @@ public class Box
 	}};
 
 
-	@SuppressWarnings("serial")
-	public static final Map<Direction, int[]> DIRECTION_NORMAL_MAP = new HashMap<Direction, int[]>()
+	/**
+	 * This is a map from Direction to the relative normal vector
+	 * we are using this since i'm not sure if the getNormal create new object at every call
+	 */
+	public static final Map<Direction, Vector3i> DIRECTION_NORMAL_MAP = new HashMap<Direction, Vector3i>()
 	{{
-		put(Direction.UP, new int[]{0, 1, 0});
-		put(Direction.DOWN, new int[]{0, -1, 0});
-		put(Direction.EAST, new int[]{1, 0, 0});
-		put(Direction.WEST, new int[]{-1, 0, 0});
-		put(Direction.SOUTH, new int[]{0, 0, 1});
-		put(Direction.NORTH, new int[]{0, 0, -1});
+		put(Direction.UP, Direction.UP.getNormal());
+		put(Direction.DOWN, Direction.DOWN.getNormal());
+		put(Direction.EAST, Direction.EAST.getNormal());
+		put(Direction.WEST, Direction.WEST.getNormal());
+		put(Direction.SOUTH, Direction.SOUTH.getNormal());
+		put(Direction.NORTH, Direction.NORTH.getNormal());
 	}};
 
+	/**
+	 * We use this index for all array that are going to
+	 */
 	public static final Map<Direction, Integer> DIRECTION_INDEX = new HashMap<Direction, Integer>()
 	{{
 		put(Direction.UP, 0);
@@ -141,7 +155,7 @@ public class Box
 	public Map<Direction, int[]> adjDepth;
 
 	/** Holds if the given direction should be culled or not */
-	public Map<Direction, Boolean> culling;
+	public boolean[] culling;
 
 
 	/** creates a empty box */
@@ -169,19 +183,15 @@ public class Box
 			put(Direction.NORTH, new int[32]);
 		}};
 
-		culling = new HashMap<Direction, Boolean>()
-		{{
-			put(Direction.UP, false);
-			put(Direction.DOWN, false);
-			put(Direction.EAST, false);
-			put(Direction.WEST, false);
-			put(Direction.SOUTH, false);
-			put(Direction.NORTH, false);
-		}};
+		culling = new boolean[6];
 	}
 
 
-
+	/**
+	 * Set the color of the columns
+	 * @param color color to add
+	 * @param adjShadeDisabled this array indicate which face does not need shading
+	 */
 	public void setColor(int color, boolean[] adjShadeDisabled)
 	{
 		this.color = color;
@@ -194,6 +204,10 @@ public class Box
 		}
 	}
 
+	/**
+	 * @param direction of the face of which we want to get the color
+	 * @return color of the face
+	 */
 	public int getColor(Direction direction)
 	{
 		if (LodConfig.CLIENT.debugging.debugMode.get() != DebugMode.SHOW_DETAIL)
@@ -237,20 +251,29 @@ public class Box
 		{
 			if (direction == Direction.DOWN || direction == Direction.WEST  || direction == Direction.NORTH)
 			{
-				culling.put(direction, playerPos.get(direction.getAxis()) > getFacePos(direction) + cullingDistance);
+				culling[DIRECTION_INDEX.get(direction)] = playerPos.get(direction.getAxis()) > getFacePos(direction) + cullingDistance;
 			}
 			else if (direction == Direction.UP || direction == Direction.EAST || direction == Direction.SOUTH)
 			{
-				culling.put(direction, playerPos.get(direction.getAxis()) < getFacePos(direction) - cullingDistance);
+				culling[DIRECTION_INDEX.get(direction)] = playerPos.get(direction.getAxis()) < getFacePos(direction) - cullingDistance;
 			}
 		}
 	}
 
+	/**
+	 * @param direction direction that we want to check if it's culled
+	 * @return true if and only if the face of the direction is culled
+	 */
 	public boolean isCulled(Direction direction)
 	{
-		return culling.get(direction);
+		return culling[DIRECTION_INDEX.get(direction)];
 	}
 
+
+	/**
+	 * This method create all the shared face culling based on the adjacent data
+	 * @param adjData data adjacent to the column we are going to render
+	 */
 	public void setAdjData(Map<Direction, long[]> adjData)
 	{
 		int height;
@@ -361,11 +384,6 @@ public class Box
 						toFinish = true;
 					}
 				}
-				//else
-				//{
-				//	// the adj data is higher than the current data
-				//	// we continue since there could be some other data that intersect the current
-				//}
 			}
 
 			if(allAbove)
@@ -385,6 +403,12 @@ public class Box
 		}
 	}
 
+	/**
+	 * We use this method to set the various width of the column
+	 * @param xWidth
+	 * @param yWidth
+	 * @param zWidth
+	 */
 	public void setWidth(int xWidth, int yWidth, int zWidth)
 	{
 		boxWidth[X] = xWidth;
@@ -392,6 +416,12 @@ public class Box
 		boxWidth[Z] = zWidth;
 	}
 
+	/**
+	 * We use this method to set the various offset of the column
+	 * @param xOffset
+	 * @param yOffset
+	 * @param zOffset
+	 */
 	public void setOffset(int xOffset, int yOffset, int zOffset)
 	{
 		boxOffset[X] = xOffset;
@@ -399,18 +429,16 @@ public class Box
 		boxOffset[Z] = zOffset;
 	}
 
-
-	// TODO what does this mean?
+	/**
+	 * This method return the position of a face in the axis of the face
+	 * This is usefull for the face culling
+	 * @param direction that we want to check
+	 * @return position in the axis of the face
+	 */
 	public int getFacePos(Direction direction)
 	{
 		return boxOffset[FACE_DIRECTION.get(direction)[0]] + boxWidth[FACE_DIRECTION.get(direction)[0]] * FACE_DIRECTION.get(direction)[1];
 	}
-
-	// TODO is this still needed?
-//	public int getCoord(Direction direction, int axis, int vertexIndex)
-//	{
-//		return box[OFFSET][axis] + boxWidth[axis] * DIRECTION_VERTEX_MAP.get(direction)[vertexIndex][axis];
-//	}
 
 	/**
 	 * returns true if the given direction should be rendered.
@@ -425,21 +453,35 @@ public class Box
 	}
 
 
-
-
-	// TODO what does vertexIndex mean, is it 0-3 and represent
-	// the 4 vertices in the quad we send to the bufferBuilder?
-
+	/**
+	 *
+	 * @param direction direction of the face we want to render
+	 * @param vertexIndex index of the vertex of the face (0-1-2-3)
+	 * @return position x of the relative vertex
+	 */
 	public int getX(Direction direction, int vertexIndex)
 	{
 		return boxOffset[X] + boxWidth[X] * DIRECTION_VERTEX_MAP.get(direction)[vertexIndex][X];
 	}
 
+	/**
+	 *
+	 * @param direction direction of the face we want to render
+	 * @param vertexIndex index of the vertex of the face (0-1-2-3)
+	 * @return position y of the relative vertex
+	 */
 	public int getY(Direction direction, int vertexIndex)
 	{
 		return boxOffset[Y] + boxWidth[Y] * DIRECTION_VERTEX_MAP.get(direction)[vertexIndex][Y];
 	}
 
+	/**
+	 *
+	 * @param direction direction of the face we want to render
+	 * @param vertexIndex index of the vertex of the face (0-1-2-3)
+	 * @param adjIndex, index of the n-th culled face of this direction
+	 * @return position x of the relative vertex
+	 */
 	public int getY(Direction direction, int vertexIndex, int adjIndex)
 	{
 		if (direction == Direction.DOWN || direction == Direction.UP)
@@ -461,6 +503,12 @@ public class Box
 		}
 	}
 
+	/**
+	 *
+	 * @param direction direction of the face we want to render
+	 * @param vertexIndex index of the vertex of the face (0-1-2-3)
+	 * @return position z of the relative vertex
+	 */
 	public int getZ(Direction direction, int vertexIndex)
 	{
 		return boxOffset[Z] + boxWidth[Z] * DIRECTION_VERTEX_MAP.get(direction)[vertexIndex][Z];

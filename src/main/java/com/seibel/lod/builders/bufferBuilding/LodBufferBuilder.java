@@ -239,6 +239,8 @@ public class LodBufferBuilder
 
 							final int xR = xRegion;
 							final int zR = zRegion;
+
+							//we create the Callable to use for the buffer builder creation
 							Callable<Boolean> dataToRenderThread = () ->
 							{
 								Map<Direction, long[]> adjData = new HashMap<>();
@@ -284,6 +286,8 @@ public class LodBufferBuilder
 								short gameChunkRenderDistance = (short) (vanillaRenderedChunks.length / 2 - 1);
 								boolean smallRenderDistance = gameChunkRenderDistance <= 4;
 
+
+
 								for (int index = 0; index < posToRender.getNumberOfPos(); index++)
 								{
 									bufferIndex = Math.floorMod(index, currentBuffers.length);
@@ -308,8 +312,8 @@ public class LodBufferBuilder
 									// skip any chunks that Minecraft is going to render
 									for (Direction direction : Box.ADJ_DIRECTIONS)
 									{
-										xAdj = posX + direction.getNormal().getX();
-										zAdj = posZ + direction.getNormal().getZ();
+										xAdj = posX + Box.DIRECTION_NORMAL_MAP.get(direction).getX();
+										zAdj = posZ + Box.DIRECTION_NORMAL_MAP.get(direction).getZ();
 										chunkXdist = LevelPosUtil.getChunkPos(detailLevel, xAdj) - playerChunkPos.x;
 										chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.z;
 										if (posToRender.contains(detailLevel, xAdj, zAdj)
@@ -353,7 +357,11 @@ public class LodBufferBuilder
 								// the thread executed successfully
 								return true;
 							};
+
+
 							nodeToRenderThreads.add(dataToRenderThread);
+
+
 						}
 					} // region z
 				} // region z

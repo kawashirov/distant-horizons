@@ -506,8 +506,8 @@ public class LodUtil
 		int tempZ;
 		for (Direction direction : Box.ADJ_DIRECTIONS)
 		{
-			tempX = x + direction.getNormal().getX();
-			tempZ = z + direction.getNormal().getZ();
+			tempX = x + Box.DIRECTION_NORMAL_MAP.get(direction).getX();
+			tempZ = z + Box.DIRECTION_NORMAL_MAP.get(direction).getZ();
 			if (!(tempX < 0 || tempZ < 0 || tempX >= vanillaRenderedChunks.length || tempZ >= vanillaRenderedChunks[0].length))
 			{
 				if (!vanillaRenderedChunks[tempX][tempZ])
