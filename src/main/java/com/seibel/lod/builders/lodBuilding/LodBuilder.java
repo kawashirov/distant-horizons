@@ -831,17 +831,17 @@ public class LodBuilder
 			if (useLeafTint(blockState.getBlock()))
 			{
 				// leaves
-				colorInt = ColorUtil.multiplyRGBcolors(biome.getFoliageColor(), blockColor);
+				colorInt = ColorUtil.multiplyRGBcolors(biome.getFoliageColor() | 0xFF000000, blockColor);
 			}
 			else if (useGrassTint(blockState.getBlock()))
 			{
 				// grass and green plants
-				colorInt = ColorUtil.multiplyRGBcolors(biome.getGrassColor(x, z), blockColor);
+				colorInt = ColorUtil.multiplyRGBcolors(biome.getGrassColor(x, z) | 0xFF000000, blockColor);
 			}
 			else if (useWaterTint(blockState.getBlock()))
 			{
 				// water
-				colorInt = ColorUtil.multiplyRGBcolors((biome.getWaterColor() | 0xFF000000), blockColor);
+				colorInt = ColorUtil.multiplyRGBcolors(biome.getWaterColor() | 0xFF000000, blockColor);
 			}
 		}
 		else
