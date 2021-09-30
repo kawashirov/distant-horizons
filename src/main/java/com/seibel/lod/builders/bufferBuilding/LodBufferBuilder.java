@@ -25,13 +25,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.seibel.lod.util.*;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
 
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.PosToRenderContainer;
@@ -40,10 +41,6 @@ import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.proxy.GlProxy;
 import com.seibel.lod.proxy.GlProxy.GlProxyContext;
 import com.seibel.lod.render.LodRenderer;
-import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.LevelPosUtil;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
@@ -66,7 +63,7 @@ public class LodBufferBuilder
 	/**
 	 * This holds the threads used to generate buffers.
 	 */
-	public static ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfBufferBuilderThreads.get(), new LodThreadFactory(LodBufferBuilder.class.getSimpleName() + " - builder"));
+	public static ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfBufferBuilderThreads.get(), new ThreadFactoryBuilder().setNameFormat("Buffer-Builder-%d").build());
 
 	/**
 	 * This boolean matrix indicate the buffer builder in that position has to be regenerated
@@ -243,24 +240,27 @@ public class LodBufferBuilder
 							//we create the Callable to use for the buffer builder creation
 							Callable<Boolean> dataToRenderThread = () ->
 							{
-								Map<Direction, long[]> adjData = new HashMap<>();
-								boolean[] adjShadeDisabled = new boolean[Box.DIRECTIONS.length];
+								//Variable initialization
+								byte detailLevel;
+								int posX;
+								int posZ;
+								int xAdj;
+								int zAdj;
+								int chunkXdist;
+								int chunkZdist;
+								int bufferIndex;
+								Box box = ThreadMapUtil.getBox();
+								boolean[] adjShadeDisabled = ThreadMapUtil.getAdjShadeDisabledArray();
 
 								// determine how many LODs we can stack vertically
-								int maxVerticalData = 1;
-								if (LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == VerticalQuality.VOXEL)
-									maxVerticalData = 256;
+								int maxVerticalData = DetailDistanceUtil.getMaxVerticalData((byte) 0);
 
-								// create adjData's arrays
-								for (Direction direction : Box.ADJ_DIRECTIONS)
-									adjData.put(direction, new long[maxVerticalData]);
+								//we get or create the map that will contain the adj data
+								Map<Direction, long[]> adjData = ThreadMapUtil.getAdjDataArray(maxVerticalData);
 
 								//previous setToRender cache
 								if (setsToRender[xR][zR] == null)
 									setsToRender[xR][zR] = new PosToRenderContainer(minDetail, regionPos.x, regionPos.z);
-
-								if (boxCache[xR][zR] == null)
-									boxCache[xR][zR] = new Box();
 
 								PosToRenderContainer posToRender = setsToRender[xR][zR];
 								posToRender.clear(minDetail, regionPos.x, regionPos.z);
@@ -271,15 +271,10 @@ public class LodBufferBuilder
 										playerBlockPosRounded.getX(),
 										playerBlockPosRounded.getZ());
 
-								byte detailLevel;
-								int posX;
-								int posZ;
-								int xAdj;
-								int zAdj;
-								int chunkXdist;
-								int chunkZdist;
-								int bufferIndex;
-								boolean disableShading;
+
+
+
+
 								// keep a local version so we don't have to worry about indexOutOfBounds Exceptions
 								// if it changes in the LodRenderer while we are working here
 								boolean[][] vanillaRenderedChunks = renderer.vanillaRenderedChunks;
@@ -322,8 +317,6 @@ public class LodBufferBuilder
 														        || !(vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
 																             && (!LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1) || smallRenderDistance))))
 										{
-											if (!adjData.containsKey(direction) || adjData.get(direction) == null)
-												adjData.put(direction, new long[maxVerticalData]);
 											for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
 											{
 												long data = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
@@ -337,7 +330,7 @@ public class LodBufferBuilder
 													    && vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
 													    && !DataPointUtil.isVoid(lodDim.getSingleData(detailLevel, xAdj, zAdj)))
 												adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = true;
-											adjData.put(direction, null);
+											adjData.get(direction)[0] = DataPointUtil.EMPTY_DATA;
 										}
 									}
 
@@ -349,7 +342,7 @@ public class LodBufferBuilder
 											break;
 
 										LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffers[bufferIndex], playerBlockPosRounded, data, adjData,
-												detailLevel, posX, posZ, boxCache[xR][zR], renderer.previousDebugMode, renderer.lightMap, adjShadeDisabled);
+												detailLevel, posX, posZ, box, renderer.previousDebugMode, renderer.lightMap, adjShadeDisabled);
 									}
 
 
