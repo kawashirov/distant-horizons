@@ -282,6 +282,7 @@ public class LodBufferBuilder
 								// if it changes in the LodRenderer while we are working here
 								boolean[][] vanillaRenderedChunks = renderer.vanillaRenderedChunks;
 								short gameChunkRenderDistance = (short) (vanillaRenderedChunks.length / 2 - 1);
+								boolean smallRenderDistance = gameChunkRenderDistance <= 4;
 
 								for (int index = 0; index < posToRender.getNumberOfPos(); index++)
 								{
@@ -299,7 +300,7 @@ public class LodBufferBuilder
 											    && gameChunkRenderDistance >= Math.abs(chunkZdist)
 											    && detailLevel <= LodUtil.CHUNK_DETAIL_LEVEL
 											    && vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
-											    && !isItBorderPos)
+											    && (!isItBorderPos || smallRenderDistance))
 									{
 										continue;
 									}
@@ -315,7 +316,7 @@ public class LodBufferBuilder
 												    && (gameChunkRenderDistance < Math.abs(chunkXdist)
 														        || gameChunkRenderDistance < Math.abs(chunkZdist)
 														        || !(vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
-																             && !LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1))))
+																             && (!LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1) || smallRenderDistance))))
 										{
 											if (!adjData.containsKey(direction) || adjData.get(direction) == null)
 												adjData.put(direction, new long[maxVerticalData]);
@@ -328,7 +329,7 @@ public class LodBufferBuilder
 										{
 											if (gameChunkRenderDistance >= Math.abs(chunkXdist)
 													    && gameChunkRenderDistance >= Math.abs(chunkZdist)
-													    && !LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1)
+													    && (!LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1) || smallRenderDistance)
 													    && vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
 													    && !DataPointUtil.isVoid(lodDim.getSingleData(detailLevel, xAdj, zAdj)))
 												adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = true;
