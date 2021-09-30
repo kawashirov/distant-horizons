@@ -231,6 +231,7 @@ public class ClientProxy
 	public void worldLoadEvent(WorldEvent.Load event)
 	{
 		DataPointUtil.worldHeight = event.getWorld().getHeight();
+		ThreadMapUtil.clearMaps();
 		
 		// the player just loaded a new world/dimension
 		lodWorld.selectWorld(LodUtil.getWorldID(event.getWorld()));
@@ -254,6 +255,7 @@ public class ClientProxy
 			// if this isn't done unfinished tasks may be left in the queue
 			// preventing new LodChunks form being generated
 			LodNodeGenWorker.restartExecuterService();
+			ThreadMapUtil.clearMaps();
 			
 			LodWorldGenerator.INSTANCE.numberOfChunksWaitingToGenerate.set(0);
 			// the player has disconnected from a server
