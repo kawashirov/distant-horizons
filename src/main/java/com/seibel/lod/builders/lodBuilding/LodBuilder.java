@@ -103,7 +103,7 @@ public class LodBuilder
 	public static final short DEFAULT_MAX_LIGHT = 15;
 	
 	/** TODO is this needed / used? */
-	public static final boolean onlyUseFullBlock = false;
+	public static final boolean avoidNonFullBlock = false;
 	/** TODO is this needed / used? */
 	public static final boolean avoidSmallBlock = false;
 	
@@ -282,7 +282,6 @@ public class LodBuilder
 		int size = 1 << detail.detailLevel;
 		
 		long[] dataToMerge = ThreadMapUtil.getBuilderVerticalArray(detail.detailLevel);
-		
 		
 		int verticalData = DataPointUtil.worldHeight;
 		
@@ -913,61 +912,75 @@ public class LodBuilder
 		
 		return colorInt;
 	}
-	
-	/** Is the block at the given blockPos a valid LOD point? */
+
+	public static final ConcurrentMap<Block, Boolean> notFullBlock = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<Block, Boolean> smallBlock = new ConcurrentHashMap<>();
+	/**
+	 * Is the block at the given blockPos a valid LOD point?
+	 */
 	private boolean isLayerValidLodPoint(IChunk chunk, BlockPos.Mutable blockPos)
 	{
 		BlockState blockState = chunk.getBlockState(blockPos);
-		
-		
+
+
 		if (blockState != null)
 		{
 			// TODO this code is dead since avoidSmallBlock and onlyUseFullBlock
 			// are set to false and are never changed.
 			// should this code be changed?
-			if (avoidSmallBlock || onlyUseFullBlock)
+			if (avoidSmallBlock || avoidNonFullBlock)
 			{
-				if (!blockState.getFluidState().isEmpty())
-					return true;
-				
-				
-				VoxelShape voxelShape;
-				if (shapeMap.containsKey(blockState.getBlock()))
+				if (!smallBlock.containsKey(blockState.getBlock())
+						    || smallBlock.get(blockState.getBlock()) == null
+						    || !notFullBlock.containsKey(blockState.getBlock())
+						    || notFullBlock.get(blockState.getBlock()) == null
+				)
 				{
-					voxelShape = shapeMap.get(blockState.getBlock());
-					
-				}
-				else
-				{
-					voxelShape = blockState.getShape(chunk, blockPos);
-					shapeMap.put(blockState.getBlock(), voxelShape);
-				}
-				if (!voxelShape.isEmpty())
-				{
-					AxisAlignedBB bbox = voxelShape.bounds();
-					int xWidth = (int) (bbox.maxX - bbox.minX);
-					int yWidth = (int) (bbox.maxY - bbox.minY);
-					int zWidth = (int) (bbox.maxZ - bbox.minZ);
-					if (xWidth < 1 && zWidth < 1 && yWidth < 1 && onlyUseFullBlock)
+					VoxelShape voxelShape = blockState.getShape(chunk, blockPos);
+					if (!blockState.getFluidState().isEmpty())
 					{
-						return false;
+						notFullBlock.put(blockState.getBlock(), false);
+						smallBlock.put(blockState.getBlock(), false);
 					}
-					if (xWidth < 0.7 && zWidth < 0.7 && yWidth < 1 && avoidSmallBlock)
+
+					if (!voxelShape.isEmpty())
 					{
-						return false;
+						AxisAlignedBB bbox = voxelShape.bounds();
+						int xWidth = (int) (bbox.maxX - bbox.minX);
+						int yWidth = (int) (bbox.maxY - bbox.minY);
+						int zWidth = (int) (bbox.maxZ - bbox.minZ);
+						if (xWidth < 1 && zWidth < 1 && yWidth < 1)
+							notFullBlock.put(blockState.getBlock(), true);
+						else
+							notFullBlock.put(blockState.getBlock(), false);
+
+						if (xWidth < 0.7 && zWidth < 0.7 && yWidth < 0.7)
+							smallBlock.put(blockState.getBlock(), true);
+						else
+							smallBlock.put(blockState.getBlock(), false);
+					} else
+					{
+						notFullBlock.put(blockState.getBlock(), false);
+						smallBlock.put(blockState.getBlock(), false);
 					}
 				}
-				else
+
+				if (notFullBlock.get(blockState.getBlock()) && avoidNonFullBlock)
+				{
+					return false;
+				}
+				if (smallBlock.get(blockState.getBlock()) && avoidSmallBlock)
 				{
 					return false;
 				}
 			}
-			
+
+
 			return blockState.getBlock() != Blocks.AIR
-					&& blockState.getBlock() != Blocks.CAVE_AIR
-					&& blockState.getBlock() != Blocks.BARRIER;
+					       && blockState.getBlock() != Blocks.CAVE_AIR
+					       && blockState.getBlock() != Blocks.BARRIER;
 		}
-		
+
 		return false;
 	}
 }
