@@ -55,6 +55,12 @@ public class ThreadMapUtil
 		if (!threadBuilderArrayMap.containsKey(Thread.currentThread().getName()) || (threadBuilderArrayMap.get(Thread.currentThread().getName()) == null))
 		{
 			long[][] array = new long[5][];
+			int size = 1;
+			for (int i = 0; i < 5; i++)
+			{
+				array[i] = new long[size * size];
+				size = size << 1;
+			}
 			threadBuilderArrayMap.put(Thread.currentThread().getName(), array);
 		}
 		return threadBuilderArrayMap.get(Thread.currentThread().getName())[detailLevel];

@@ -461,12 +461,7 @@ public class LodBuilder
 		boolean hasSkyLight = mc.getClientWorld().dimensionType().hasSkyLight();
 		
 		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
-		int index = 0;
-		if (dataToMerge == null)
-		{
-			dataToMerge = new long[size * size];
-		}
-		
+		int index;
 		for (index = 0; index < size * size; index++)
 		{
 			xRel = Math.floorMod(index, size) + startX;
