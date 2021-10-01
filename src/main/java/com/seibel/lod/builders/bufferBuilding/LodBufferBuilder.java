@@ -549,10 +549,17 @@ public class LodBufferBuilder
 		
 		try
 		{
-			// make sure we are uploading to a different OpenGL context,
+			// make sure we are uploading to the builder context,
 			// to prevent interference (IE stuttering) with the Minecraft context.
-			glProxy.setGlContext(GlProxyContext.LOD_BUILDER);
+			// But only set the context once, we don't need to set it multiple times.
+			if (glProxy.getGlContext() != GlProxyContext.LOD_BUILDER)
+			{
+				glProxy.setGlContext(GlProxyContext.LOD_BUILDER);
+				ClientProxy.LOGGER.info(Thread.currentThread().getName() + ": setting OpenGL context to: [" + GlProxyContext.LOD_BUILDER + "]");
+			}
 			
+			
+			// actually upload the buffers
 			for (int x = 0; x < buildableVbos.length; x++)
 			{
 				for (int z = 0; z < buildableVbos.length; z++)
@@ -573,11 +580,6 @@ public class LodBufferBuilder
 		{
 			ClientProxy.LOGGER.error(LodBufferBuilder.class.getSimpleName() + " - UploadBuffers failed: " + e.getMessage());
 			e.printStackTrace();
-		}
-		finally
-		{
-			// make sure the context is disabled
-			glProxy.setGlContext(GlProxyContext.NONE);
 		}
 	}
 	
