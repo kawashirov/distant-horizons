@@ -1,10 +1,18 @@
 package com.seibel.lod.proxy;
 
+import org.apache.commons.lang3.SystemUtils;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.opengl.CGL;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
+import org.lwjgl.opengl.GLX;
+import org.lwjgl.opengl.GLX14;
 import org.lwjgl.opengl.WGL;
+import org.lwjgl.system.linux.X11;
+import org.lwjgl.system.linux.XVisualInfo;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.seibel.lod.enums.GlProxyContext;
 
 /**
  * A singleton that holds references to different openGL contexts
@@ -19,26 +27,41 @@ import com.mojang.blaze3d.systems.RenderSystem;
  * 
  * 
  * @author James Seibel
- * @version 9-15-2021
+ * @version 10-1-2021
  */
 public class GlProxy
 {
 	private static GlProxy instance = null;
 	
-	public final long deviceContext;
 	
-	public long minecraftGlContext;
-	public GLCapabilities minecraftGlCapabilities;
+	// windows context variables
+	private long windowsDeviceContext;
 	
-	public long lodBuilderGlContext;
-	public GLCapabilities lodBuilderGlCapabilities;
+	// mac context variables
+	private long macPixelFormat;
+	
+	// linux context variables
+	long linuxDisplayID;
+	
+	long linuxMcDrawable;
+	long linuxMcReadDrawable;
+	
+	long linuxLodBuilderDrawable;
+	long linuxLodBuilderReadDrawable;
+	
+	
+	
+	public final long minecraftGlContext;
+	public final GLCapabilities minecraftGlCapabilities;
+	
+	public final long lodBuilderGlContext;
+	public final GLCapabilities lodBuilderGlCapabilities;
+	
 	/** This is just used for debugging, hopefuly it can be removed once 
 	 * the context switching is more stable. */
 	public Thread lodBuilderOwnerThread = null;
 	
-	/**
-	 * Does this computer's GPU support fancy fog?
-	 */
+	/** Does this computer's GPU support fancy fog? */
 	public final boolean fancyFogAvailable;
 	
 	
@@ -57,22 +80,81 @@ public class GlProxy
 		// create the builder context //
 		//============================//
 		
-		minecraftGlContext = WGL.wglGetCurrentContext();
-		minecraftGlCapabilities = GL.getCapabilities();
-		deviceContext = WGL.wglGetCurrentDC();
 		
-		lodBuilderGlContext = WGL.wglCreateContext(deviceContext);
-		if (!WGL.wglShareLists(minecraftGlContext, lodBuilderGlContext))
-			throw new IllegalStateException("Unable to share lists between Minecraft and builder contexts.");
-		if (!WGL.wglMakeCurrent(deviceContext, lodBuilderGlContext))
-			throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + GlProxyContext.LOD_BUILDER.toString() + "] from [" + GlProxyContext.MINECRAFT.toString() + "]");
-		lodBuilderGlCapabilities = GL.createCapabilities();
-		WGL.wglMakeCurrent(deviceContext, 0L);
+		minecraftGlCapabilities = GL.getCapabilities();
+		
+		// run OS specific context creation code
+		if (SystemUtils.IS_OS_WINDOWS)
+		{
+			ClientProxy.LOGGER.info(GlProxy.class.getSimpleName() + " Running Windows setup.");
+			
+			// get Minecraft variables
+			minecraftGlContext = WGL.wglGetCurrentContext();
+			windowsDeviceContext = WGL.wglGetCurrentDC();
+			
+			// setup the lodBuilder variables
+			lodBuilderGlContext = WGL.wglCreateContext(windowsDeviceContext);
+			if (!WGL.wglShareLists(minecraftGlContext, lodBuilderGlContext))
+				throw new IllegalStateException("Unable to share lists between Minecraft and builder contexts.");
+			if (!WGL.wglMakeCurrent(windowsDeviceContext, lodBuilderGlContext))
+				throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + GlProxyContext.LOD_BUILDER.toString() + "] from [" + GlProxyContext.MINECRAFT.toString() + "]");
+			lodBuilderGlCapabilities = GL.createCapabilities();
+		}
+		else if (SystemUtils.IS_OS_MAC)
+		{
+			ClientProxy.LOGGER.info(GlProxy.class.getSimpleName() + " Running Mac setup.");
+			
+			// get Minecraft variables
+			minecraftGlContext = CGL.CGLGetCurrentContext();
+			macPixelFormat = CGL.CGLGetPixelFormat(minecraftGlContext);
+			
+			// setup the lodBuilder variables
+			lodBuilderGlContext = CGL.CGLCreateContext(macPixelFormat, minecraftGlContext, null);
+			lodBuilderGlCapabilities = GL.createCapabilities();
+		}
+		else
+		{
+			// if we can't determine the OS, default to linux
+			if (SystemUtils.IS_OS_LINUX)
+				ClientProxy.LOGGER.info(GlProxy.class.getSimpleName() + " Running Linux setup.");
+			else
+				ClientProxy.LOGGER.info(GlProxy.class.getSimpleName() + " Unkown OS: [" + SystemUtils.OS_NAME + "] Running Linux setup.");
+			
+			
+			// get Minecraft variables //
+			
+			minecraftGlContext = GLX14.glXGetCurrentContext();
+			linuxDisplayID = GLX14.glXGetCurrentDisplay();
+			
+			
+			// setup the lodBuilder variables //
+			
+			linuxMcDrawable = GLX14.glXGetCurrentDrawable();
+			linuxMcReadDrawable = GLX14.glXGetCurrentReadDrawable();
+			
+			// single buffered example config
+//			int attributeList[] = {	GLX.GLX_RGBA,
+//					GLX.GLX_RED_SIZE, 1,
+//					GLX.GLX_GREEN_SIZE, 1,
+//					GLX.GLX_BLUE_SIZE, 1,
+//					GLX.GLX_DEPTH_SIZE, 12,
+//					X11.None };
+			
+			// use the defaults for all config options
+			int attributeList[] = { X11.None };
+			
+			PointerBuffer config = GLX14.glXChooseFBConfig(linuxDisplayID, 0, attributeList);
+			XVisualInfo visualInfo = GLX14.glXGetVisualFromFBConfig(linuxDisplayID, config.address());
+			lodBuilderGlContext = GLX14.glXCreateContext(linuxDisplayID, visualInfo, minecraftGlContext, false);
+			lodBuilderGlCapabilities = GL.createCapabilities();
+			
+			linuxLodBuilderDrawable = GLX14.glXGetCurrentDrawable();
+			linuxLodBuilderReadDrawable = GLX14.glXGetCurrentReadDrawable();
+		}
 		
 		
 		// Since this is called on the render thread, make sure the Minecraft context is used in the end
-		WGL.wglMakeCurrent(deviceContext, minecraftGlContext);
-		
+		setGlContext(GlProxyContext.MINECRAFT);
 		
 		
 		
@@ -90,11 +172,14 @@ public class GlProxy
 	}
 	
 	
+	
+	
 	/**
-	 * A simple wrapper function to make switching contexts easier
+	 * A wrapper function to make switching contexts easier. <br>
+	 * Does nothing if the calling thread is already using newContext.
 	 * 
 	 * @throws IllegalStateException if unable to change to newContext. <br>
-	 * 								 This expection should never be thrown if 
+	 * 								 This exception should never be thrown if 
 	 * 								 switching to GlProxyContext.NONE
 	 */
 	public void setGlContext(GlProxyContext newContext)
@@ -107,70 +192,101 @@ public class GlProxy
 		
 		
 		long contextPointer = 0L;
+		long linuxDrawable = 0L; 
+		long linuxReadDrawable = 0L;
 		GLCapabilities newGlCapabilities = null;
+		
+		// get the pointer(s) for this context
 		switch(newContext)
 		{
 		case LOD_BUILDER:
+			linuxDrawable = linuxLodBuilderDrawable;
+			linuxReadDrawable = linuxLodBuilderReadDrawable;
+			
 			contextPointer = lodBuilderGlContext;
 			newGlCapabilities = lodBuilderGlCapabilities;
 			break;
+		
 		case MINECRAFT:
+			linuxDrawable = linuxMcDrawable;
+			linuxReadDrawable = linuxMcReadDrawable;
+			
 			contextPointer = minecraftGlContext;
 			newGlCapabilities = minecraftGlCapabilities;
 			break;
+		
+		default: // default should never happen, it is just here to make the compiler happy
 		case NONE:
-			contextPointer = 0L; // equivalent to null
+			// 0L is equivalent to null
+			linuxDrawable = 0L;
+			linuxReadDrawable = 0L;
+			
+			contextPointer = 0L;
 			newGlCapabilities = null;
 			break;
-			
-		default:
-			// should never happen, here to make the compiler happy
 		}
 		
-		if (!WGL.wglMakeCurrent(deviceContext, contextPointer))
-			throw new IllegalStateException("Unable to change OpenGL contexts! tried to change to [" + newContext.toString() + "] from [" + currentContext.toString() + "] on thread: [" + Thread.currentThread().getName() + "] lod builder owner thread: " + (lodBuilderOwnerThread != null ? lodBuilderOwnerThread.getName() : "null"));
 		
-		if (newContext == GlProxyContext.LOD_BUILDER)
+		String contextSwitchError = "Unable to change OpenGL contexts! tried to change to [" + newContext.toString() + "] from [" + currentContext.toString() + "] on thread: [" + Thread.currentThread().getName() + "] lod builder owner thread: " + (lodBuilderOwnerThread != null ? lodBuilderOwnerThread.getName() : "null");
+		
+		// run the OS specific context switching code
+		if (SystemUtils.IS_OS_WINDOWS)
 		{
-			lodBuilderOwnerThread = Thread.currentThread();
+			if (!WGL.wglMakeCurrent(windowsDeviceContext, contextPointer))
+				throw new IllegalStateException(contextSwitchError);	
 		}
-		else if (newContext == GlProxyContext.NONE && currentContext == GlProxyContext.LOD_BUILDER)
+		else if (SystemUtils.IS_OS_MAC)
 		{
-			lodBuilderOwnerThread = null;
+			if (CGL.CGLSetCurrentContext(contextPointer) != CGL.kCGLNoError)
+				throw new IllegalStateException(contextSwitchError);
+		}
+		else //if (SystemUtils.IS_OS_LINUX)
+		{
+			// default to linux
+			if (!GLX14.glXMakeContextCurrent(linuxDisplayID, linuxDrawable, linuxReadDrawable, contextPointer))
+				throw new IllegalStateException(contextSwitchError);
 		}
 		
 		GL.setCapabilities(newGlCapabilities);
+		
+		
+		
+		// used for debugging
+		if (newContext == GlProxyContext.LOD_BUILDER)
+			lodBuilderOwnerThread = Thread.currentThread();
+		else if (newContext == GlProxyContext.NONE && currentContext == GlProxyContext.LOD_BUILDER)
+			lodBuilderOwnerThread = null;
 	}
 	
-	/**
-	 * Returns this thread's OpenGL context.
-	 */
+	
+	
+	
+	
+	/** Returns this thread's OpenGL context. */
 	public GlProxyContext getGlContext()
 	{
-		long currentContext = WGL.wglGetCurrentContext();
+		long currentContext;
+		
+		if (SystemUtils.IS_OS_WINDOWS)
+			currentContext = WGL.wglGetCurrentContext();
+		else if (SystemUtils.IS_OS_MAC)
+			currentContext = CGL.CGLGetCurrentContext();
+		else //if (SystemUtils.IS_OS_LINUX) // default to Linux
+			currentContext = GLX.glXGetCurrentContext();
+		
+		
 		if(currentContext == lodBuilderGlContext)
-		{
 			return GlProxyContext.LOD_BUILDER;
-		}
 		else if(currentContext == minecraftGlContext)
-		{
 			return GlProxyContext.MINECRAFT;
-		}
-		else 
-		{
+		else if (currentContext == 0L)
 			return GlProxyContext.NONE;
-		}
+		else
+			// hopefully this shouldn't happen, but
+			// at least now we will be notified if it does happen
+			throw new IllegalStateException(Thread.currentThread().getName() + " has a unkown OpenGl context: [" + currentContext + "]. Minecraft context [" + minecraftGlContext + "], LodBuilder context [" + lodBuilderGlContext + "], no context [0].");
 	}
 	
-	/** Minecraft, Alpha, Beta, None */
-	public enum GlProxyContext
-	{
-		MINECRAFT,
-		LOD_BUILDER,
-		
-		/** used to un-bind threads */
-		NONE,
-	}
 	
 	public static GlProxy getInstance()
 	{
@@ -185,4 +301,13 @@ public class GlProxy
 		
 		return instance;
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

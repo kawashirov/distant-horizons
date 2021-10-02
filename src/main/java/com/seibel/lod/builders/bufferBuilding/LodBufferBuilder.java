@@ -35,13 +35,13 @@ import org.lwjgl.opengl.GL15C;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
+import com.seibel.lod.enums.GlProxyContext;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.PosToRenderContainer;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.proxy.GlProxy;
-import com.seibel.lod.proxy.GlProxy.GlProxyContext;
 import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
@@ -555,7 +555,7 @@ public class LodBufferBuilder
 			if (glProxy.getGlContext() != GlProxyContext.LOD_BUILDER)
 			{
 				glProxy.setGlContext(GlProxyContext.LOD_BUILDER);
-				ClientProxy.LOGGER.info(Thread.currentThread().getName() + ": setting OpenGL context to: [" + GlProxyContext.LOD_BUILDER + "]");
+				ClientProxy.LOGGER.debug(Thread.currentThread().getName() + ": setting OpenGL context to: [" + GlProxyContext.LOD_BUILDER + "]");
 			}
 			
 			
