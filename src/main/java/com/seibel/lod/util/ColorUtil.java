@@ -94,7 +94,7 @@ public class ColorUtil
 	}
 	public static int multiplyRGBcolors(int color1, int color2)
 	{
-		return (((getAlpha(color1) * getAlpha(color2)) << 16) & 0xFF000000) | (((getRed(color1) * getRed(color2)) << 8) & 0xFF0000) | ((getGreen(color1) * getGreen(color2)) & 0xFF00) | (((getBlue(color1) * getBlue(color2)) >> 8) & 0xFF);
+		return ((getAlpha(color1) * getAlpha(color2) / 255) << 24) | ((getRed(color1) * getRed(color2) / 255) << 16) | ((getGreen(color1) * getGreen(color2) / 255) << 8) | (getBlue(color1) * getBlue(color2) / 255);
 	}
 
 
