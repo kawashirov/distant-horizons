@@ -53,6 +53,9 @@ public class LodUtil
 	private static MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	
+	/** The maximum number of LODs that can be rendered vertically */
+	public static final int MAX_NUMBER_OF_VERTICAL_LODS = 32;
+	
 	/**
 	 * alpha used when drawing chunks in debug mode
 	 */
@@ -61,19 +64,6 @@ public class LodUtil
 	public static final Color COLOR_DEBUG_WHITE = new Color(255, 255, 255, DEBUG_ALPHA);
 	public static final Color COLOR_INVISIBLE = new Color(0, 0, 0, 0);
 	
-	/**
-	 * a gray-purple color
-	 */
-	public static final int MYCELIUM_COLOR_INT = LodUtil.colorToInt(Color.decode("#6E6166"));
-	/**
-	 * TODO, add a better way to override material colors
-	 * and/or add a method to generate colors based on texture
-	 * issue #64
-	 */
-	public static final int STONE_COLOR_INT = LodUtil.colorToInt(new Color(150, 150, 150));
-	public static final int NETHERRACK_COLOR_INT = LodUtil.colorToInt(new Color(95, 38, 38));
-	public static final int WARPED_NYLIUM_COLOR_INT = LodUtil.colorToInt(new Color(34, 94, 85));
-	public static final int CRIMSON_NYLIUM_COLOR_INT = LodUtil.colorToInt(new Color(126, 27, 27));
 	
 	/**
 	 * In order of nearest to farthest: <br>

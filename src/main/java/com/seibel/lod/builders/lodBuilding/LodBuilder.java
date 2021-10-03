@@ -862,7 +862,7 @@ public class LodBuilder
 		{
 		
 		case NETHER:
-			colorInt = LodUtil.NETHERRACK_COLOR_INT;
+			colorInt = Blocks.NETHERRACK.defaultBlockState().materialColor.col;
 			break;
 		
 		case THEEND:

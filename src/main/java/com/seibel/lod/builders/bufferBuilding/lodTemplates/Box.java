@@ -8,6 +8,7 @@ import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.util.Direction;
@@ -166,20 +167,19 @@ public class Box
 		
 		colorMap = new int[6];
 		
-		// TODO what does the 32 represent?
 		adjHeight = new HashMap<Direction, int[]>()
 		{{
-			put(Direction.EAST, new int[32]);
-			put(Direction.WEST, new int[32]);
-			put(Direction.SOUTH, new int[32]);
-			put(Direction.NORTH, new int[32]);
+			put(Direction.EAST, new int[LodUtil.MAX_NUMBER_OF_VERTICAL_LODS]);
+			put(Direction.WEST, new int[LodUtil.MAX_NUMBER_OF_VERTICAL_LODS]);
+			put(Direction.SOUTH, new int[LodUtil.MAX_NUMBER_OF_VERTICAL_LODS]);
+			put(Direction.NORTH, new int[LodUtil.MAX_NUMBER_OF_VERTICAL_LODS]);
 		}};
 		adjDepth = new HashMap<Direction, int[]>()
 		{{
-			put(Direction.EAST, new int[32]);
-			put(Direction.WEST, new int[32]);
-			put(Direction.SOUTH, new int[32]);
-			put(Direction.NORTH, new int[32]);
+			put(Direction.EAST, new int[LodUtil.MAX_NUMBER_OF_VERTICAL_LODS]);
+			put(Direction.WEST, new int[LodUtil.MAX_NUMBER_OF_VERTICAL_LODS]);
+			put(Direction.SOUTH, new int[LodUtil.MAX_NUMBER_OF_VERTICAL_LODS]);
+			put(Direction.NORTH, new int[LodUtil.MAX_NUMBER_OF_VERTICAL_LODS]);
 		}};
 		
 		culling = new boolean[6];
