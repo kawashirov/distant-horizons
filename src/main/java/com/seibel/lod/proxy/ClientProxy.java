@@ -174,7 +174,7 @@ public class ClientProxy
 //		LodConfig.CLIENT.graphics.drawResolution.set(HorizontalResolution.BLOCK);
 //		LodConfig.CLIENT.worldGenerator.generationResolution.set(HorizontalResolution.BLOCK);
 		// requires a world restart?
-//		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(VerticalQuality.MULTI_LOD);
+//		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(VerticalQuality.VOXEL);
 		
 //		LodConfig.CLIENT.graphics.fogDistance.set(FogDistance.FAR);
 //		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
