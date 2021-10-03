@@ -50,7 +50,8 @@ public abstract class AbstractLodTemplate
 			double x, double y, double z,
 			int color)
 	{
-		buffer.vertex(x, y, z).color(ColorUtil.getRed(color), ColorUtil.getGreen(color), ColorUtil.getBlue(color), ColorUtil.getAlpha(color)).endVertex();
+		// TODO re-add transparency by replacing the 255 with "ColorUtil.getAlpha(color)"
+		buffer.vertex(x, y, z).color(ColorUtil.getRed(color), ColorUtil.getGreen(color), ColorUtil.getBlue(color), 255).endVertex();
 	}
 	
 	/**
