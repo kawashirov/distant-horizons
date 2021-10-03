@@ -172,8 +172,6 @@ public class DataPointUtil
 	
 	public static int getColor(long dataPoint)
 	{
-		//int color = getBlue(dataPoint) << BLUE_COLOR_SHIFT;
-		//color += getRed(dataPoint) << BLUE_COLOR_SHIFT;
 		return (int) (((dataPoint >>> COLOR_SHIFT) & COLOR_MASK) | (((dataPoint >>> (ALPHA_SHIFT - ALPHA_DOWNSIZE_SHIFT)) | 0b1111) << 24));
 	}
 	
