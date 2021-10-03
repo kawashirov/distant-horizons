@@ -19,8 +19,6 @@ package com.seibel.lod.render;
 
 import java.util.HashSet;
 
-import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
-import net.minecraft.util.Direction;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
@@ -60,7 +58,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
-import org.lwjgl.system.CallbackI;
 
 
 /**
@@ -68,7 +65,7 @@ import org.lwjgl.system.CallbackI;
  * This is where LODs are draw to the world.
  *
  * @author James Seibel
- * @version 9-28-2021
+ * @version 10-2-2021
  */
 public class LodRenderer
 {
@@ -223,7 +220,11 @@ public class LodRenderer
 		GL11.glEnable(GL11.GL_CULL_FACE);
 		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
 		GL11.glEnable(GL11.GL_DEPTH_TEST);
-
+		
+		// enable transparent rendering
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glEnable( GL11.GL_BLEND );
+		
 		// disable the lights Minecraft uses
 		GL11.glDisable(GL11.GL_LIGHT0);
 		GL11.glDisable(GL11.GL_LIGHT1);
@@ -305,6 +306,7 @@ public class LodRenderer
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(LOD_GL_LIGHT_NUMBER);
+		GL11.glDisable( GL11.GL_BLEND );
 		// re-enable the lights Minecraft uses
 		GL11.glEnable(GL11.GL_LIGHT0);
 		GL11.glEnable(GL11.GL_LIGHT1);
