@@ -378,8 +378,7 @@ public class LodBufferBuilder
 					if (!future.get())
 					{
 						ClientProxy.LOGGER.warn("LodBufferBuilder ran into trouble and had to start over.");
-						closeBuffers(fullRegen, lodDim);
-						return;
+						break;
 					}
 				}
 				long executeEnd = System.currentTimeMillis();
@@ -404,16 +403,24 @@ public class LodBufferBuilder
 			}
 			finally
 			{
-				// regardless of if we successfully created the buffers
-				// we are done generating.
-				generatingBuffers = false;
-				
 				// clean up any potentially open resources
 				if (buildableBuffers != null)
 					closeBuffers(fullRegen, lodDim);
 				
-				// upload the new buffers
-				uploadBuffers(fullRegen, lodDim);
+				try
+				{
+					// upload the new buffers
+					uploadBuffers(fullRegen, lodDim);
+				}
+				catch (Exception e)
+				{
+					ClientProxy.LOGGER.warn("\"LodNodeBufferBuilder.generateLodBuffersAsync\" was unable to upload the buffers to the GPU: " + e.getMessage());
+					e.printStackTrace();
+				}
+				
+				// regardless of whether we were able to successfully create
+				// the buffers, we are done generating.
+				generatingBuffers = false;
 				bufferLock.unlock();
 			}
 			
