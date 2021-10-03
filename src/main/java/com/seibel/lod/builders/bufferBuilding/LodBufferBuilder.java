@@ -60,7 +60,7 @@ import net.minecraft.util.math.ChunkPos;
  * This object is used to create NearFarBuffer objects.
  *
  * @author James Seibel
- * @version 9-25-2021
+ * @version 10-2-2021
  */
 public class LodBufferBuilder
 {
@@ -550,14 +550,8 @@ public class LodBufferBuilder
 		try
 		{
 			// make sure we are uploading to the builder context,
-			// to prevent interference (IE stuttering) with the Minecraft context.
-			// But only set the context once, we don't need to set it multiple times.
-			if (glProxy.getGlContext() != GlProxyContext.LOD_BUILDER)
-			{
-				glProxy.setGlContext(GlProxyContext.LOD_BUILDER);
-				ClientProxy.LOGGER.debug(Thread.currentThread().getName() + ": setting OpenGL context to: [" + GlProxyContext.LOD_BUILDER + "]");
-			}
-			
+			// this helps prevent interference (IE stuttering) with the Minecraft context.
+			glProxy.setGlContext(GlProxyContext.LOD_BUILDER);
 			
 			// actually upload the buffers
 			for (int x = 0; x < buildableVbos.length; x++)
@@ -580,6 +574,13 @@ public class LodBufferBuilder
 		{
 			ClientProxy.LOGGER.error(LodBufferBuilder.class.getSimpleName() + " - UploadBuffers failed: " + e.getMessage());
 			e.printStackTrace();
+		}
+		finally
+		{
+			// close the context so it can be re-used later.
+			// I'm guessing we can't just leave it because the executer service
+			// does something that invalidates the OpenGL context
+			glProxy.setGlContext(GlProxyContext.NONE);
 		}
 	}
 	

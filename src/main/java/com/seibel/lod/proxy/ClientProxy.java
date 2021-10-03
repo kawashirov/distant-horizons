@@ -258,7 +258,6 @@ public class ClientProxy
 			ThreadMapUtil.clearMaps();
 			
 			LodWorldGenerator.INSTANCE.numberOfChunksWaitingToGenerate.set(0);
-			// the player has disconnected from a server
 			lodWorld.deselectWorld();
 			
 			
@@ -359,7 +358,7 @@ public class ClientProxy
 	 */
 	public void firstFrameSetup()
 	{
-		// make sure the GlProxy is created before the LodBufferBuilder
+		// make sure the GlProxy is created before the LodBufferBuilder needs it
 		GlProxy.getInstance();
 		
 		// TODO shouldn't these already be empty?
