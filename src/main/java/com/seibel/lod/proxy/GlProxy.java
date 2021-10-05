@@ -100,10 +100,6 @@ public class GlProxy
 	/**
 	 * A wrapper function to make switching contexts easier. <br>
 	 * Does nothing if the calling thread is already using newContext.
-	 * 
-	 * @throws IllegalStateException if unable to change to newContext. <br>
-	 * 								 This exception should never be thrown if 
-	 * 								 switching to GlProxyContext.NONE
 	 */
 	public void setGlContext(GlProxyContext newContext)
 	{

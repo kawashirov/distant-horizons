@@ -31,6 +31,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
+import org.lwjgl.opengl.GL45;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
@@ -60,7 +61,7 @@ import net.minecraft.util.math.ChunkPos;
  * This object is used to create NearFarBuffer objects.
  *
  * @author James Seibel
- * @version 10-2-2021
+ * @version 10-4-2021
  */
 public class LodBufferBuilder
 {
@@ -469,7 +470,6 @@ public class LodBufferBuilder
 				else
 				{
 					numberOfBuffers = (int) Math.ceil(memoryRequired / BUFFER_MAX_CAPACITY) + 1;
-					System.out.println(numberOfBuffers);
 					memoryRequired = BUFFER_MAX_CAPACITY;
 					bufferSize[x][z] = numberOfBuffers;
 					buildableBuffers[x][z] = new BufferBuilder[numberOfBuffers];
@@ -480,8 +480,25 @@ public class LodBufferBuilder
 				for (int i = 0; i < bufferSize[x][z]; i++)
 				{
 					buildableBuffers[x][z][i] = new BufferBuilder((int) memoryRequired);
+					
 					buildableVbos[x][z][i] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
 					drawableVbos[x][z][i] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
+					
+					
+//					// buffer storage
+//					GL15.glDeleteBuffers(buildableVbos[x][z][i].id);
+//					GL15.glDeleteBuffers(drawableVbos[x][z][i].id);
+//					
+//					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buildableVbos[x][z][i].id);
+//					// no matter the size the buffer are created at sometimes they will still fail
+//					// to map later on, James isn't sure why that is
+//					GL45.glBufferStorage(GL15.GL_ARRAY_BUFFER, BUFFER_MAX_CAPACITY / 2, GL45.GL_MAP_WRITE_BIT | GL45.GL_MAP_PERSISTENT_BIT | GL45.GL_MAP_COHERENT_BIT);
+//					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+//					
+//					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, drawableVbos[x][z][i].id);
+//					GL45.glBufferStorage(GL15.GL_ARRAY_BUFFER, BUFFER_MAX_CAPACITY / 2, GL45.GL_MAP_WRITE_BIT | GL45.GL_MAP_PERSISTENT_BIT | GL45.GL_MAP_COHERENT_BIT);
+//					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+//					// buffer storage end
 				}
 			}
 		}
@@ -547,6 +564,7 @@ public class LodBufferBuilder
 				}
 	}
 	
+	
 	/**
 	 * Upload all buildableBuffers to the GPU.
 	 */
@@ -577,7 +595,7 @@ public class LodBufferBuilder
 				}
 			}
 		}
-		catch (IllegalStateException e)
+		catch (Exception e) // TODO this try/catch may not be needed anymore, James needs to check
 		{
 			ClientProxy.LOGGER.error(LodBufferBuilder.class.getSimpleName() + " - UploadBuffers failed: " + e.getMessage());
 			e.printStackTrace();
@@ -602,18 +620,115 @@ public class LodBufferBuilder
 			// this is how many points will be rendered
 			vbo.vertexCount = (uploadBuffer.remaining() / vbo.format.getVertexSize());
 			
-			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.id);
 			
-			// subData only works if the memory is allocated beforehand.
-			GL15C.glBufferData(GL15.GL_ARRAY_BUFFER, uploadBuffer.remaining(), GL15C.GL_DYNAMIC_DRAW);
 			
-			// interestingly bufferSubData renders faster than glMapBuffer
-			// even though OpenGLInsights-AsynchronousBufferTransfers says glMapBuffer
-			// is faster for transferring data. They must put the data in different memory
-			// or something.
-			GL15C.glBufferSubData(GL15.GL_ARRAY_BUFFER, 0, uploadBuffer);
+//			// buffer mapping // 
+//			// no stutter 50% GPU useage
+//			// stores everything in system memory instead of GPU memory
+//			// making rendering much slower
+//			
+//			GL45.glBindBuffer(GL45.GL_ARRAY_BUFFER, vbo.id);
+//			
+//			ByteBuffer vboBuffer = null;
+//			try
+//			{
+//				vboBuffer = GL45.glMapBufferRange(GL45.GL_ARRAY_BUFFER, 0, uploadBuffer.capacity(), GL45.GL_MAP_WRITE_BIT | GL45.GL_MAP_UNSYNCHRONIZED_BIT);
+//				if (vboBuffer == null)
+//				{
+//					GL45.glBufferData(GL45.GL_ARRAY_BUFFER, uploadBuffer.capacity() * 4, GL45.GL_STREAM_DRAW);
+//					GL45.glBufferSubData(GL45.GL_ARRAY_BUFFER, 0, uploadBuffer);
+//					
+//					ClientProxy.LOGGER.info("null");
+//				}
+//				else
+//				{
+//					vboBuffer.put(uploadBuffer);
+////					ClientProxy.LOGGER.info("not null");
+//				}
+//			}
+//			catch(Exception e)
+//			{
+//				ClientProxy.LOGGER.info(e.getClass().getSimpleName());
+////				e.printStackTrace();
+//			}
+//			finally
+//			{
+//				GL15.glUnmapBuffer(GL15.GL_ARRAY_BUFFER);
+//				GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);	
+//			}
 			
-			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+			
+			
+			
+			
+//			// bufferstorage //
+//			// to test: uncomment the bufferstorage lines in setupBuffers as well
+//			// then reboot the game
+//			
+//			// moderate stutter 50% gpu
+//			// stores everything in system memory instead of GPU memory
+//			// making rendering much slower
+//			
+//			GL45.glBindBuffer(GL45.GL_ARRAY_BUFFER, vbo.id);
+//			
+//			try
+//			{
+//				ByteBuffer vboBuffer = GL45.glMapBufferRange(GL45.GL_ARRAY_BUFFER, 0, uploadBuffer.capacity(), GL45.GL_MAP_WRITE_BIT | GL45.GL_MAP_UNSYNCHRONIZED_BIT);
+//				if (vboBuffer == null)
+//				{
+//					ClientProxy.LOGGER.info("mapping fail");
+//				}
+//				else
+//				{
+//					vboBuffer.put(uploadBuffer);
+//				}
+//			}
+//			catch(Exception e)
+//			{
+//				ClientProxy.LOGGER.info(e.getClass().getSimpleName());
+//				//e.printStackTrace();
+//			}
+//			finally
+//			{
+//				GL45.glUnmapBuffer(GL45.GL_ARRAY_BUFFER);
+//				GL45.glBindBuffer(GL45.GL_ARRAY_BUFFER, 0);
+//			}
+			
+
+			
+			
+			
+			// hybrid subData/bufferData //
+			// less stutter 12% GPU usage
+			
+			GL45.glBindBuffer(GL45.GL_ARRAY_BUFFER, vbo.id);
+			
+			long size = GL45.glGetBufferParameteri64(GL45.GL_ARRAY_BUFFER, GL45.GL_BUFFER_SIZE);
+			if (size < uploadBuffer.capacity() * 4)
+			{
+				GL45.glBufferData(GL45.GL_ARRAY_BUFFER, uploadBuffer.capacity() * 5, GL45.GL_STREAM_DRAW);
+				ClientProxy.LOGGER.info("expand buffer: " + size + " -> " + (uploadBuffer.capacity() * 4));
+			}
+			GL45.glBufferSubData(GL45.GL_ARRAY_BUFFER, 0, uploadBuffer);
+			
+			GL15.glUnmapBuffer(GL15.GL_ARRAY_BUFFER);
+			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);	
+			
+			
+			
+//			// old method - bufferData
+//			// bad stuttering 12% GPU usage
+//			
+//			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.id);
+//			// subData only works if the memory is allocated beforehand.
+//			GL15C.glBufferData(GL15.GL_ARRAY_BUFFER, uploadBuffer.remaining(), GL15C.GL_DYNAMIC_DRAW);
+//			
+//			// interestingly bufferSubData renders faster than glMapBuffer
+//			// even though OpenGLInsights-AsynchronousBufferTransfers says glMapBuffer
+//			// is faster for transferring data. They must put the data in different memory
+//			// or something.
+//			GL15C.glBufferSubData(GL15.GL_ARRAY_BUFFER, 0, uploadBuffer);
+//			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		}
 	}
 	
@@ -629,6 +744,7 @@ public class LodBufferBuilder
 			VertexBuffer[][][] tmpVbo = drawableVbos;
 			drawableVbos = buildableVbos;
 			buildableVbos = tmpVbo;
+			
 			
 			drawableCenterChunkPos = buildableCenterChunkPos;
 			
