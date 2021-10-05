@@ -174,7 +174,13 @@ public class DataPointUtil
 	{
 		return (int) (((dataPoint >>> COLOR_SHIFT) & COLOR_MASK) | (((dataPoint >>> (ALPHA_SHIFT - ALPHA_DOWNSIZE_SHIFT)) | 0b1111) << 24));
 	}
-	
+
+	/**
+	 * This method apply the lightmap to the color to use
+	 * @param dataPoint
+	 * @param lightMap
+	 * @return
+	 */
 	public static int getLightColor(long dataPoint, NativeImage lightMap)
 	{
 		int lightBlock = getLightBlock(dataPoint);
@@ -186,7 +192,12 @@ public class DataPointUtil
 		
 		return ColorUtil.multiplyRGBcolors(getColor(dataPoint), ColorUtil.rgbToInt(red, green, blue));
 	}
-	
+
+	/**
+	 * This is used to convert a dataPoint to string (usefull for the print function)
+	 * @param dataPoint
+	 * @return
+	 */
 	public static String toString(long dataPoint)
 	{
 		StringBuilder s = new StringBuilder();
@@ -214,7 +225,12 @@ public class DataPointUtil
 		s.append('\n');
 		return s.toString();
 	}
-	
+
+	/**
+	 * This method merge column of single data together
+	 * @param dataToMerge
+	 * @return
+	 */
 	public static long mergeSingleData(long[] dataToMerge)
 	{
 		int numberOfChildren = 0;
@@ -275,7 +291,14 @@ public class DataPointUtil
 			return DataPointUtil.createDataPoint(tempAlpha, tempRed, tempGreen, tempBlue, tempHeight, tempDepth, tempLightSky, tempLightBlock, tempGenMode);
 		}
 	}
-	
+
+	/**
+	 * This method merge column of multiple data together
+	 * @param dataToMerge
+	 * @param inputVerticalData vertical size of an input data
+	 * @param maxVerticalData max vertical size of the merged data
+	 * @return
+	 */
 	public static long[] mergeMultiData(long[] dataToMerge, int inputVerticalData, int maxVerticalData)
 	{
 		int size = dataToMerge.length / inputVerticalData;
@@ -421,10 +444,5 @@ public class DataPointUtil
 			dataPoint[count - j - 1] = createDataPoint(height, depth, getColor(data), getLightSky(data), getLightBlock(data), getGenerationMode(data));
 		}
 		return dataPoint;
-	}
-	
-	public static long[] compress(long[] data, byte detailLevel)
-	{
-		return null;
 	}
 }

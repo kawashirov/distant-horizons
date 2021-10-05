@@ -101,9 +101,9 @@ public class LodNodeGenWorker implements IWorker
 		
 		if (newServerWorld == null)
 			throw new IllegalArgumentException("LodChunkGenThread requires a non-null ServerWorld");
-		
-		
-		
+
+
+
 		thread = new LodChunkGenThread(newPos, newGenerationMode,
 				newLodBuilder,
 				newLodDimension, newServerWorld);
@@ -615,7 +615,7 @@ public class LodNodeGenWorker implements IWorker
 		{
 			genThreads.shutdownNow();
 		}
-		genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
+		genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
 	}
 	
 	

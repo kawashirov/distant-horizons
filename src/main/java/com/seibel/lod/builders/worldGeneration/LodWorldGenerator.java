@@ -126,13 +126,11 @@ public class LodWorldGenerator
 							nearIndex++;
 							
 							ChunkPos chunkPos = new ChunkPos(LevelPosUtil.getChunkPos(detailLevel, posX), LevelPosUtil.getChunkPos(detailLevel, posZ));
-							if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
-							{
-								// prevent generating the same chunk multiple times
-								if (positionsWaitingToBeGenerated.contains(chunkPos))
-									continue;
-							}
-							
+
+							// prevent generating the same chunk multiple times
+							if (positionsWaitingToBeGenerated.contains(chunkPos))
+								continue;
+
 							// don't add more to the generation queue then allowed
 							if (numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
 								break;
@@ -153,17 +151,16 @@ public class LodWorldGenerator
 							farIndex++;
 							
 							ChunkPos chunkPos = new ChunkPos(LevelPosUtil.getChunkPos(detailLevel, posX), LevelPosUtil.getChunkPos(detailLevel, posZ));
-							if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
-							{
-								// prevent generating the same chunk multiple times
-								if (positionsWaitingToBeGenerated.contains(chunkPos))
-									continue;
-							}
-							
+
 							// don't add more to the generation queue then allowed
 							if (numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
-								break;
-							
+								continue;
+								//break;
+
+							// prevent generating the same chunk multiple times
+							if (positionsWaitingToBeGenerated.contains(chunkPos))
+								continue;
+
 							positionsWaitingToBeGenerated.add(chunkPos);
 							numberOfChunksWaitingToGenerate.addAndGet(1);
 							LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, DetailDistanceUtil.getDistanceGenerationMode(detailLevel), lodBuilder, lodDim, serverWorld);
