@@ -186,8 +186,5 @@ public class PosToGenerateContainer
 			builder.append('\n');
 		}
 		return builder.toString();
-
-		
-		return " ";
 	}
 }
