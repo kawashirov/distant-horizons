@@ -152,48 +152,41 @@ public class PosToGenerateContainer
 		// TOOD is this commented code still useful?
 		// if so why have it commented out?
 		
-		/*
+
 		StringBuilder builder = new StringBuilder();
-		builder.append("Number of pos to generate ");
-		builder.append(farSize + nearSize);
 		builder.append('\n');
-		builder.append("Number of near pos to generate ");
-		builder.append(nearSize);
-		builder.append('\n');
-		builder.append("Number of far pos to generate ");
-		builder.append(farSize);
 		builder.append('\n');
 		builder.append('\n');
 		builder.append("near pos to generate");
 		builder.append('\n');
-		for (int i = 0; i < nearSize; i++)
+		for (int i = 0; i < nearPosToGenerate.length; i++)
 		{
-			builder.append(posToGenerate[i][0]-1);
+			builder.append(nearPosToGenerate[i][0]-1);
 			builder.append(" ");
-			builder.append(posToGenerate[i][1]);
+			builder.append(nearPosToGenerate[i][1]);
 			builder.append(" ");
-			builder.append(posToGenerate[i][2]);
+			builder.append(nearPosToGenerate[i][2]);
 			builder.append(" ");
-			builder.append(posToGenerate[i][3]);
+			builder.append(nearPosToGenerate[i][3]);
 			builder.append('\n');
 		}
 		builder.append('\n');
+
 		builder.append("far pos to generate");
 		builder.append('\n');
-		for (int i = maxSize - 1; i >= maxSize - farSize; i--)
+		for (int i = 0; i < farPosToGenerate.length; i++)
 		{
-			builder.append(posToGenerate[i][0]-1);
+			builder.append(farPosToGenerate[i][0]-1);
 			builder.append(" ");
-			builder.append(posToGenerate[i][1]);
+			builder.append(farPosToGenerate[i][1]);
 			builder.append(" ");
-			builder.append(posToGenerate[i][2]);
+			builder.append(farPosToGenerate[i][2]);
 			builder.append(" ");
-			builder.append(posToGenerate[i][3]);
+			builder.append(farPosToGenerate[i][3]);
 			builder.append('\n');
 		}
-		builder.append('\n');
 		return builder.toString();
-		*/
+
 		
 		return " ";
 	}
