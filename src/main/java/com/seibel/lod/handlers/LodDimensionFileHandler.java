@@ -239,10 +239,10 @@ public class LodDimensionFileHandler
 				for (int j = 0; j < lodDimension.getWidth(); j++)
 				{
 					// TODO shouldn't this use lodDimension.isRegionDirty?
-					if (lodDimension.doesRegionNeedBufferRegen(i,j) && lodDimension.getRegionByArrayIndex(i,j) != null)
+					if (lodDimension.GetIsRegionDirty(i,j) && lodDimension.getRegionByArrayIndex(i,j) != null)
 					{
 						saveRegionToFile(lodDimension.getRegionByArrayIndex(i,j));
-						lodDimension.setRegenRegionBufferByArrayIndex(i, j,false);
+						lodDimension.SetIsRegionDirty(i, j, false);
 					}
 				}
 			}
@@ -275,7 +275,7 @@ public class LodDimensionFileHandler
 				ClientProxy.LOGGER.warn("Unable to save region [" + region.regionPosX + ", " + region.regionPosZ + "] to file, file is inaccessible.");
 				return;
 			}
-			
+			ClientProxy.LOGGER.info("saving region [" + region.regionPosX + ", " + region.regionPosZ + "] to file.");
 			
 			try
 			{

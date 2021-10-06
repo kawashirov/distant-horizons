@@ -906,4 +906,14 @@ public class LodDimension
 		return memoryUse;
 		//return memoryUse;
 	}
+
+	public boolean GetIsRegionDirty(int i , int j)
+	{
+		return isRegionDirty[i][j];
+	}
+
+	public void SetIsRegionDirty(int i, int j, boolean val)
+	{
+		isRegionDirty[i][j] = val;
+	}
 }
