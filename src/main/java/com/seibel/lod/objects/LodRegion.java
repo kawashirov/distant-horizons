@@ -156,10 +156,10 @@ public class LodRegion
 	 * <p>
 	 * TODO why don't we return the posToGenerate, it would make this easier to understand
 	 */
-	public void getDataToGenerate(PosToGenerateContainer posToGenerate,
-	                              int playerBlockPosX, int playerBlockPosZ)
+	public void getPosToGenerate(PosToGenerateContainer posToGenerate,
+	                             int playerBlockPosX, int playerBlockPosZ)
 	{
-		getDataToGenerate(posToGenerate, LodUtil.REGION_DETAIL_LEVEL, 0, 0, playerBlockPosX, playerBlockPosZ);
+		getPosToGenerate(posToGenerate, LodUtil.REGION_DETAIL_LEVEL, 0, 0, playerBlockPosX, playerBlockPosZ);
 
 	}
 
@@ -169,8 +169,8 @@ public class LodRegion
 	 * <p>
 	 * TODO why don't we return the posToGenerate, it would make this easier to understand
 	 */
-	private void getDataToGenerate(PosToGenerateContainer posToGenerate, byte detailLevel,
-	                               int childOffsetPosX, int childOffsetPosZ, int playerPosX, int playerPosZ)
+	private void getPosToGenerate(PosToGenerateContainer posToGenerate, byte detailLevel,
+	                              int childOffsetPosX, int childOffsetPosZ, int playerPosX, int playerPosZ)
 	{
 		// equivalent to 2^(...)
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
@@ -223,7 +223,7 @@ public class LodRegion
 				if (ungeneratedChildren == 0)
 					for (int x = 0; x <= 1; x++)
 						for (int z = 0; z <= 1; z++)
-							getDataToGenerate(posToGenerate, childDetailLevel, childPosX + x, childPosZ + z, playerPosX, playerPosZ);
+							getPosToGenerate(posToGenerate, childDetailLevel, childPosX + x, childPosZ + z, playerPosX, playerPosZ);
 			} else
 			{
 				// The detail Level is smaller than a chunk.
@@ -234,7 +234,7 @@ public class LodRegion
 					if (!doesDataExist(childDetailLevel, childPosX, childPosZ))
 						posToGenerate.addPosToGenerate(childDetailLevel, childPosX + regionPosX * childSize, childPosZ + regionPosZ * childSize);
 					else
-						getDataToGenerate(posToGenerate, childDetailLevel, childPosX, childPosZ, playerPosX, playerPosZ);
+						getPosToGenerate(posToGenerate, childDetailLevel, childPosX, childPosZ, playerPosX, playerPosZ);
 				}
 			}
 		}
@@ -247,10 +247,10 @@ public class LodRegion
 	 * <p>
 	 * TODO why don't we return the posToRender, it would make this easier to understand
 	 */
-	public void getDataToRender(PosToRenderContainer posToRender,
-	                            int playerPosX, int playerPosZ, boolean requireCorrectDetailLevel)
+	public void getPosToRender(PosToRenderContainer posToRender,
+	                           int playerPosX, int playerPosZ, boolean requireCorrectDetailLevel)
 	{
-		getDataToRender(posToRender, LodUtil.REGION_DETAIL_LEVEL, 0, 0, playerPosX, playerPosZ, requireCorrectDetailLevel);
+		getPosToRender(posToRender, LodUtil.REGION_DETAIL_LEVEL, 0, 0, playerPosX, playerPosZ, requireCorrectDetailLevel);
 	}
 
 	/**
@@ -260,9 +260,9 @@ public class LodRegion
 	 * TODO why don't we return the posToRender, it would make this easier to understand
 	 * TODO this needs some more comments, James was only able to figure out part of it
 	 */
-	private void getDataToRender(PosToRenderContainer posToRender,
-	                             byte detailLevel, int posX, int posZ,
-	                             int playerPosX, int playerPosZ, boolean requireCorrectDetailLevel)
+	private void getPosToRender(PosToRenderContainer posToRender,
+	                            byte detailLevel, int posX, int posZ,
+	                            int playerPosX, int playerPosZ, boolean requireCorrectDetailLevel)
 	{
 		// equivalent to 2^(...)
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
@@ -302,9 +302,9 @@ public class LodRegion
 
 		if (stopNow)
 		{
-			posToRender.addPosToRender(detailLevel,
-					posX + regionPosX * size,
-					posZ + regionPosZ * size);
+				posToRender.addPosToRender(detailLevel,
+						posX + regionPosX * size,
+						posZ + regionPosZ * size);
 		} else if (desiredLevel > detailLevel)
 		{
 			// we have gone beyond the target Detail level
@@ -312,9 +312,9 @@ public class LodRegion
 			return;
 		} else if (desiredLevel == detailLevel)
 		{
-			posToRender.addPosToRender(detailLevel,
-					posX + regionPosX * size,
-					posZ + regionPosZ * size);
+				posToRender.addPosToRender(detailLevel,
+						posX + regionPosX * size,
+						posZ + regionPosZ * size);
 		} else //case where (detailLevel > desiredLevel)
 		{
 			int childPosX = posX * 2;
@@ -331,7 +331,7 @@ public class LodRegion
 						if (!requireCorrectDetailLevel)
 							childrenCount++;
 						else
-							getDataToRender(posToRender, childDetailLevel, childPosX + x, childPosZ + z, playerPosX, playerPosZ, requireCorrectDetailLevel);
+							getPosToRender(posToRender, childDetailLevel, childPosX + x, childPosZ + z, playerPosX, playerPosZ, requireCorrectDetailLevel);
 					}
 				}
 			}
@@ -344,12 +344,12 @@ public class LodRegion
 				{
 					for (int x = 0; x <= 1; x++)
 						for (int z = 0; z <= 1; z++)
-							getDataToRender(posToRender, childDetailLevel, childPosX + x, childPosZ + z, playerPosX, playerPosZ, requireCorrectDetailLevel);
+							getPosToRender(posToRender, childDetailLevel, childPosX + x, childPosZ + z, playerPosX, playerPosZ, requireCorrectDetailLevel);
 				} else
 				{
-					posToRender.addPosToRender(detailLevel,
-							posX + regionPosX * size,
-							posZ + regionPosZ * size);
+						posToRender.addPosToRender(detailLevel,
+								posX + regionPosX * size,
+								posZ + regionPosZ * size);
 				}
 			}
 		}

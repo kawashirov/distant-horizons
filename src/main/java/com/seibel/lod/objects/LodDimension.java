@@ -510,7 +510,7 @@ public class LodDimension
 	/**
 	 * Returns every position that need to be generated based on the position of the player
 	 */
-	public PosToGenerateContainer getDataToGenerate(int maxDataToGenerate, int playerBlockPosX, int playerBlockPosZ)
+	public PosToGenerateContainer getPosToGenerate(int maxDataToGenerate, int playerBlockPosX, int playerBlockPosZ)
 	{
 		PosToGenerateContainer posToGenerate;
 		LodRegion region;
@@ -599,7 +599,7 @@ public class LodDimension
 				
 				region = getRegion(xRegion, zRegion);
 				if (region != null)
-					region.getDataToGenerate(posToGenerate, playerBlockPosX, playerBlockPosZ);
+					region.getPosToGenerate(posToGenerate, playerBlockPosX, playerBlockPosZ);
 				
 				
 				if ((x == z) || ((x < 0) && (x == -z)) || ((x > 0) && (x == 1 - z)))
@@ -621,12 +621,12 @@ public class LodDimension
 	 * 
 	 * TODO why isn't posToRender returned? it would make it a bit more clear what is happening
 	 */
-	public void getDataToRender(PosToRenderContainer posToRender, RegionPos regionPos, int playerPosX,
-			int playerPosZ)
+	public void getPosToRender(PosToRenderContainer posToRender, RegionPos regionPos, int playerPosX,
+	                           int playerPosZ)
 	{
 		LodRegion region = getRegion(regionPos.x, regionPos.z);
 		if (region != null)
-			region.getDataToRender(posToRender, playerPosX, playerPosZ, LodConfig.CLIENT.worldGenerator.generationPriority.get() == GenerationPriority.NEAR_FIRST);
+			region.getPosToRender(posToRender, playerPosX, playerPosZ, LodConfig.CLIENT.worldGenerator.generationPriority.get() == GenerationPriority.NEAR_FIRST);
 	}
 	
 	/**

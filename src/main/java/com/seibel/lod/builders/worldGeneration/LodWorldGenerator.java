@@ -100,23 +100,23 @@ public class LodWorldGenerator
 					
 					ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(lodDim.dimension);
 					
-					PosToGenerateContainer posToGenerate = lodDim.getDataToGenerate(
+					PosToGenerateContainer posToGenerate = lodDim.getPosToGenerate(
 							maxChunkGenRequests,
 							playerPosX,
 							playerPosZ);
-					
-					
+
+
 					byte detailLevel;
 					int posX;
 					int posZ;
 					int nearIndex = 0;
 					int farIndex = 0;
-					
+
 					for (int i = 0; i < posToGenerate.getNumberOfPos(); i++)
 					{
 						// I wish there was a way to compress this code, but I'm not aware of 
 						// a easy way to do so.
-						
+
 						// add the near positions
 						if (posToGenerate.getNthDetail(nearIndex, true) != 0 && nearIndex < posToGenerate.getNumberOfNearPos())
 						{
@@ -140,8 +140,8 @@ public class LodWorldGenerator
 							LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, DetailDistanceUtil.getDistanceGenerationMode(detailLevel), lodBuilder, lodDim, serverWorld);
 							WorldWorkerManager.addWorker(genWorker);
 						}
-						
-						
+
+
 						// add the far positions
 						if (posToGenerate.getNthDetail(farIndex, false) != 0 && farIndex < posToGenerate.getNumberOfFarPos())
 						{

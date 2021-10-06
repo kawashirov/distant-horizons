@@ -4,6 +4,8 @@ import com.seibel.lod.enums.DistanceGenerationMode;
 
 import net.minecraft.client.renderer.texture.NativeImage;
 
+import javax.xml.crypto.Data;
+
 public class DataPointUtil
 {
 	/*
@@ -428,6 +430,7 @@ public class DataPointUtil
 					singleData = dataToMerge[index * inputVerticalData + dataIndex];
 					if (doesItExist(singleData) && !isVoid(singleData))
 					{
+
 						if ((depth <= getDepth(singleData) && getDepth(singleData) <= height)
 								|| (depth <= getHeight(singleData) && getHeight(singleData) <= height))
 						{
@@ -437,6 +440,10 @@ public class DataPointUtil
 							}
 						}
 					}
+				}
+				if(!doesItExist(singleDataToMerge[index])){
+					singleData = dataToMerge[index * inputVerticalData];
+					singleDataToMerge[index] = createVoidDataPoint(getGenerationMode(singleData));
 				}
 			}
 			long data = mergeSingleData(singleDataToMerge);

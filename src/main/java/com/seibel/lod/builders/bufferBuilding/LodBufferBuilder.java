@@ -274,7 +274,7 @@ public class LodBufferBuilder
 								PosToRenderContainer posToRender = setsToRender[xR][zR];
 								posToRender.clear(minDetail, regionPos.x, regionPos.z);
 								
-								lodDim.getDataToRender(
+								lodDim.getPosToRender(
 										posToRender,
 										regionPos,
 										playerBlockPosRounded.getX(),
