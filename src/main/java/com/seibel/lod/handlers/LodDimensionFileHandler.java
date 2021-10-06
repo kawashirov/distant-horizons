@@ -275,7 +275,7 @@ public class LodDimensionFileHandler
 				ClientProxy.LOGGER.warn("Unable to save region [" + region.regionPosX + ", " + region.regionPosZ + "] to file, file is inaccessible.");
 				return;
 			}
-			ClientProxy.LOGGER.info("saving region [" + region.regionPosX + ", " + region.regionPosZ + "] to file.");
+			//ClientProxy.LOGGER.info("saving region [" + region.regionPosX + ", " + region.regionPosZ + "] to file.");
 			
 			try
 			{
