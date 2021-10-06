@@ -238,7 +238,6 @@ public class LodDimensionFileHandler
 			{
 				for (int j = 0; j < lodDimension.getWidth(); j++)
 				{
-					// TODO shouldn't this use lodDimension.isRegionDirty?
 					if (lodDimension.GetIsRegionDirty(i,j) && lodDimension.getRegionByArrayIndex(i,j) != null)
 					{
 						saveRegionToFile(lodDimension.getRegionByArrayIndex(i,j));
