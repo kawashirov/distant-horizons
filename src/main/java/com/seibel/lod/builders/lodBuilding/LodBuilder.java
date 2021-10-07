@@ -191,7 +191,7 @@ public class LodBuilder
 		
 		
 		// determine how many LODs to generate vertically
-		VerticalQuality verticalQuality = LodConfig.CLIENT.worldGenerator.lodQualityMode.get();
+		VerticalQuality verticalQuality = LodConfig.CLIENT.worldGenerator.verticalQuality.get();
 		byte detailLevel = detail.detailLevel;
 		
 		
@@ -210,43 +210,25 @@ public class LodBuilder
 			
 			
 			long[] data;
-			switch (verticalQuality)
-			{
-			default:
-			case HEIGHTMAP:
-				long singleData;
-				long[] dataToMergeSingle = createSingleDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-				singleData = DataPointUtil.mergeSingleData(dataToMergeSingle);
-				lodDim.addData(detailLevel,
-						posX,
-						posZ,
-						0,
-						singleData,
-						false);
-				break;
+			long[] dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
+			data = DataPointUtil.mergeMultiData(dataToMergeVertical, DataPointUtil.worldHeight, DetailDistanceUtil.getMaxVerticalData(detailLevel));
 			
-			case VOXEL:
-				long[] dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-				data = DataPointUtil.mergeMultiData(dataToMergeVertical, DataPointUtil.worldHeight, DetailDistanceUtil.getMaxVerticalData(detailLevel));
-				
-				
-				//lodDim.clear(detailLevel, posX, posZ);
-				if (data != null && data.length != 0)
+			
+			//lodDim.clear(detailLevel, posX, posZ);
+			if (data != null && data.length != 0)
+			{
+				for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ); verticalIndex++)
 				{
-					for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ); verticalIndex++)
-					{
-						
-						if (!DataPointUtil.doesItExist(data[verticalIndex]))
-							break;
-						lodDim.addData(detailLevel,
-								posX,
-								posZ,
-								verticalIndex,
-								data[verticalIndex],
-								false);
-					}
+					
+					if (!DataPointUtil.doesItExist(data[verticalIndex]))
+						break;
+					lodDim.addData(detailLevel,
+							posX,
+							posZ,
+							verticalIndex,
+							data[verticalIndex],
+							false);
 				}
-				break;
 			}
 		}
 		lodDim.updateData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
@@ -742,19 +724,19 @@ public class LodBuilder
 	private boolean useGrassTint(Block block)
 	{
 		return block instanceof GrassBlock
-				|| block instanceof BushBlock
-				|| block instanceof IGrowable
-				|| block instanceof AbstractPlantBlock
-				|| block instanceof AbstractTopPlantBlock
-				|| block instanceof TallGrassBlock;
+					   || block instanceof BushBlock
+					   || block instanceof IGrowable
+					   || block instanceof AbstractPlantBlock
+					   || block instanceof AbstractTopPlantBlock
+					   || block instanceof TallGrassBlock;
 	}
 	
 	/** determine if the given block should use the biome's foliage color */
 	private boolean useLeafTint(Block block)
 	{
 		return block instanceof LeavesBlock
-				|| block == Blocks.VINE
-				|| block == Blocks.SUGAR_CANE;
+					   || block == Blocks.VINE
+					   || block == Blocks.SUGAR_CANE;
 	}
 	
 	/** determine if the given block should use the biome's water color */
@@ -783,8 +765,8 @@ public class LodBuilder
 		// block special cases
 		// TODO: this needs to be replaced by a config file of some sort
 		if (blockState == Blocks.AIR.defaultBlockState()
-				|| blockState == Blocks.CAVE_AIR.defaultBlockState()
-				|| blockState == Blocks.BARRIER.defaultBlockState())
+					|| blockState == Blocks.CAVE_AIR.defaultBlockState()
+					|| blockState == Blocks.BARRIER.defaultBlockState())
 		{
 			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
 			tmp = tmp.darker();
@@ -891,9 +873,9 @@ public class LodBuilder
 			if (avoidSmallBlock || avoidNonFullBlock)
 			{
 				if (!smallBlock.containsKey(blockState.getBlock())
-						|| smallBlock.get(blockState.getBlock()) == null
-						|| !notFullBlock.containsKey(blockState.getBlock())
-						|| notFullBlock.get(blockState.getBlock()) == null
+							|| smallBlock.get(blockState.getBlock()) == null
+							|| !notFullBlock.containsKey(blockState.getBlock())
+							|| notFullBlock.get(blockState.getBlock()) == null
 				)
 				{
 					VoxelShape voxelShape = blockState.getShape(chunk, blockPos);
@@ -934,8 +916,8 @@ public class LodBuilder
 			
 			
 			return blockState.getBlock() != Blocks.AIR
-					&& blockState.getBlock() != Blocks.CAVE_AIR
-					&& blockState.getBlock() != Blocks.BARRIER;
+						   && blockState.getBlock() != Blocks.CAVE_AIR
+						   && blockState.getBlock() != Blocks.BARRIER;
 		}
 		
 		return false;

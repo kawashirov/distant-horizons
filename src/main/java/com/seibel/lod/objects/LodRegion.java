@@ -79,16 +79,7 @@ public class LodRegion
 		// Initialize all the different matrices
 		for (byte lod = minDetailLevel; lod <= LodUtil.REGION_DETAIL_LEVEL; lod++)
 		{
-			switch (verticalQuality)
-			{
-				default:
-				case HEIGHTMAP:
-					dataContainer[lod] = new SingleLevelContainer(lod);
-					break;
-				case VOXEL:
-					dataContainer[lod] = new VerticalLevelContainer(lod);
-					break;
-			}
+			dataContainer[lod] = new VerticalLevelContainer(lod);
 		}
 	}
 
@@ -109,10 +100,7 @@ public class LodRegion
 		// detailLevel changes.
 		if (this.dataContainer[detailLevel] == null)
 		{
-			if (verticalQuality == VerticalQuality.HEIGHTMAP)
-				this.dataContainer[detailLevel] = new SingleLevelContainer(detailLevel);
-			else
-				this.dataContainer[detailLevel] = new VerticalLevelContainer(detailLevel);
+			this.dataContainer[detailLevel] = new VerticalLevelContainer(detailLevel);
 		}
 
 		this.dataContainer[detailLevel].addData(data, posX, posZ, verticalIndex);

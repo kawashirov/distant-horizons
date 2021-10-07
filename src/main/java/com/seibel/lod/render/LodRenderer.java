@@ -798,7 +798,7 @@ public class LodRenderer
 		if (LodConfig.CLIENT.graphics.detailDropOff.get() == DetailDropOff.FANCY)
 		{
 			// check if the player has moved
-			if (newTime - prevPlayerPosTime > LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.get())
+			if (newTime - prevPlayerPosTime > LodConfig.CLIENT.buffers.rebuildTimes.get().playerMoveTimeout)
 			{
 				if (LevelPosUtil.getDetailLevel(previousPos) == 0
 						    || mc.getPlayer().xChunk != LevelPosUtil.getPosX(previousPos)
@@ -819,7 +819,7 @@ public class LodRenderer
 
 
 		// check if the vanilla rendered chunks changed
-		if (newTime - prevVanillaChunkTime > LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.get())
+		if (newTime - prevVanillaChunkTime > LodConfig.CLIENT.buffers.rebuildTimes.get().renderdChunkTimeout)
 		{
 			if (vanillaRenderedChunksChanged)
 			{
@@ -832,7 +832,7 @@ public class LodRenderer
 
 
 		// check if there is any newly generated terrain to show
-		if (newTime - prevChunkTime > LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.get())
+		if (newTime - prevChunkTime > LodConfig.CLIENT.buffers.rebuildTimes.get().chunkChangeTimeout)
 		{
 			if (lodDim.regenDimensionBuffers)
 			{

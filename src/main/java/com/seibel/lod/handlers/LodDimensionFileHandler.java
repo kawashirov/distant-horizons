@@ -174,16 +174,7 @@ public class LodDimensionFileHandler
 						
 						
 						// add the data to our region
-						switch (region.getVerticalQuality())
-						{
-						default:
-						case HEIGHTMAP:
-							region.addLevelContainer(new SingleLevelContainer(data));
-							break;
-						case VOXEL:
-							region.addLevelContainer(new VerticalLevelContainer(data));
-							break;
-						}
+						region.addLevelContainer(new VerticalLevelContainer(data));
 					}
 					catch (IOException ioEx)
 					{
