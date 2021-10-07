@@ -293,6 +293,31 @@ public class DataPointUtil
 			return DataPointUtil.createDataPoint(tempAlpha, tempRed, tempGreen, tempBlue, tempHeight, tempDepth, tempLightSky, tempLightBlock, tempGenMode);
 		}
 	}
+	
+	public static void shrinkArray(short[] array, int packetSize, int start, int length, int arraySize)
+	{
+		start *= packetSize;
+		length *= packetSize;
+		arraySize *= packetSize;
+		for (int i = 0; i < arraySize - start; i++)
+		{
+			array[start + i] = array[start + length + i];
+			//remove comment to not leave garbage at the end
+			//array[start + packetSize + i] = 0;
+		}
+	}
+	
+	public static void extendArray(short[] array, int packetSize, int start, int length, int arraySize)
+	{
+		start *= packetSize;
+		length *= packetSize;
+		arraySize *= packetSize;
+		for (int i = arraySize - start - 1; i >= 0; i--)
+		{
+			array[start + length + i] = array[start + i];
+			array[start + i] = 0;
+		}
+	}
 
 	/**
 	 * This method merge column of multiple data together
@@ -306,7 +331,6 @@ public class DataPointUtil
 		int size = dataToMerge.length / inputVerticalData;
 		
 		// We initialize the arrays that are going to be used
-		short[] projection = ThreadMapUtil.getProjectionArray((worldHeight) / 16 + 1);
 		short[] heightAndDepth = ThreadMapUtil.getHeightAndDepth((worldHeight + 1) * 2);
 		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(size);
 		long[] dataPoint = ThreadMapUtil.getVerticalDataArray(worldHeight + 1);
@@ -320,28 +344,119 @@ public class DataPointUtil
 		
 		short depth;
 		short height;
-		
+		int count = 0;
+		int i;
+		int ii;
 		//We collect the indexes of the data, ordered by the depth
-		for (int index = 0; index < size; index++)
+		for (int index = 0; index < dataToMerge.length; index++)
 		{
-			for (int dataIndex = 0; dataIndex < inputVerticalData; dataIndex++)
+			singleData = dataToMerge[index];
+			if (doesItExist(singleData))
 			{
-				singleData = dataToMerge[index * inputVerticalData + dataIndex];
-				if (doesItExist(singleData))
+				genMode = Math.min(genMode, getGenerationMode(singleData));
+				allEmpty = false;
+				if (!isVoid(singleData))
 				{
-					genMode = Math.min(genMode, getGenerationMode(singleData));
-					allEmpty = false;
-					if (!isVoid(singleData))
+					allVoid = false;
+					depth = getDepth(singleData);
+					height = getHeight(singleData);
+					
+					int botPos = -1;
+					int topPos = -1;
+					//values fall in between and possibly require extension of array
+					boolean botExtend = false;
+					boolean topExtend = false;
+					for (i = 0; i < count; i++)
 					{
-						allVoid = false;
-						depth = getDepth(singleData);
-						height = getHeight(singleData);
-						for (int y = depth; y <= height; y++)
-							projection[y / 16] |= 1 << (y & 0xf);
+						if (depth >= heightAndDepth[i * 2] && depth <= heightAndDepth[i * 2 + 1])
+						{
+							botPos = i;
+							break;
+						}
+						else if (((i + 1 < count && depth < heightAndDepth[(i + 1) * 2]) || i + 1 == count) && depth > heightAndDepth[i * 2 + 1])
+						{
+							botPos = i;
+							botExtend = true;
+							break;
+						}
+					}
+					for (i = 0; i < count; i++)
+					{
+						if (height >= heightAndDepth[i * 2] && height <= heightAndDepth[i * 2 + 1])
+						{
+							topPos = i;
+							break;
+						}
+						else if (((i + 1 < count && height < heightAndDepth[(i + 1) * 2]) || i + 1 == count) && height > heightAndDepth[i * 2 + 1])
+						{
+							topPos = i;
+							topExtend = true;
+							break;
+						}
+					}
+					if (botPos == -1)
+					{
+						if (topPos == -1)
+						{
+							//whole block falls below
+							extendArray(heightAndDepth, 2, 0, 1, count);
+							heightAndDepth[0] = depth;
+							heightAndDepth[1] = height;
+							count++;
+						}
+						else if (!topExtend)
+						{
+							//only bottom falls below extending it there, while top is inside existing
+							shrinkArray(heightAndDepth, 2, 0, topPos, count);
+							heightAndDepth[0] = depth;
+							count -= topPos;
+						}
+						else
+						{
+							//top falls between some blocks, extending those as well
+							shrinkArray(heightAndDepth, 2, 0, topPos, count);
+							heightAndDepth[0] = depth;
+							heightAndDepth[1] = height;
+							count -= topPos;
+						}
+					}
+					else if (!botExtend)
+					{
+						if (!topExtend)
+							//both top and bottom are within some exiting blocks, possibly merging them
+							heightAndDepth[botPos * 2 + 1] = heightAndDepth[topPos * 2 + 1];
+						else
+							//top falls between some blocks, extending it there
+							heightAndDepth[botPos * 2 + 1] = height;
+						shrinkArray(heightAndDepth, 2, botPos + 1, topPos - botPos, count);
+						count -= topPos - botPos;
+					}
+					else
+					{
+						if (!topExtend)
+						{
+							//only top is within some exiting block, extending it
+							botPos++; //to make it easier
+							heightAndDepth[botPos * 2] = depth;
+							heightAndDepth[botPos * 2 + 1] = heightAndDepth[topPos * 2 + 1];
+							shrinkArray(heightAndDepth, 2, botPos + 1, topPos - botPos, count);
+							count -= topPos - botPos;
+						}
+						else
+						{
+							//both top and bottom are outside existing blocks
+							shrinkArray(heightAndDepth, 2, botPos + 1, topPos - botPos, count);
+							count -= topPos - botPos;
+							extendArray(heightAndDepth, 2, botPos + 1, 1, count);
+							count++;
+							heightAndDepth[botPos * 2 + 2] = depth;
+							heightAndDepth[botPos * 2 + 3] = height;
+						}
 					}
 				}
 			}
 		}
+		
 		//We check if there is any data that's not empty or void
 		if (allEmpty)
 		{
@@ -352,44 +467,6 @@ public class DataPointUtil
 			dataPoint[0] = createVoidDataPoint(genMode);
 			return dataPoint;
 		}
-		//We extract the merged data
-		int count = 0;
-		int i = 0;
-		int ii = 0;
-		while (i < projection.length)
-		{
-			while (i < projection.length && projection[i] == 0) i++;
-			if (i == projection.length)
-				break; //we reached end of WORLD_HEIGHT and it's nothing more here
-			while (ii < 15 && ((projection[i] >>> ii) & 1) == 0) ii++;
-			if (ii >= 15 && ((projection[i] >>> ii) & 1) == 0) //there is nothing more in this chunk
-			{
-				ii = 0;
-				i++;
-				continue;
-			}
-			depth = (short) (i * 16 + ii);
-			
-			while (ii < 15 && ((projection[i] >>> ii) & 1) == 1) ii++;
-			if (ii >= 15 && ((projection[i] >>> ii) & 1) == 1) //if end is not in this chunk
-			{
-				ii = 0;
-				i++;
-				while (i < projection.length && ~(projection[i]) == 0) i++; //check for big solid blocks
-				if (i == projection.length) //solid to WORLD_HEIGHT
-				{
-					heightAndDepth[count * 2] = depth;
-					heightAndDepth[count * 2 + 1] = (short) (worldHeight - 1);
-					break;
-				}
-				while ((((projection[i] >>> ii) & 1) == 1)) ii++;
-			}
-			height = (short) (i * 16 + ii - 1);
-			heightAndDepth[count * 2] = depth;
-			heightAndDepth[count * 2 + 1] = height;
-			count++;
-		}
-		
 		//we limit the vertical portion to maxVerticalData
 		int j = 0;
 		while (count > maxVerticalData)
