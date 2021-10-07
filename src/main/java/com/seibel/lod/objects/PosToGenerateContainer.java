@@ -161,6 +161,8 @@ public class PosToGenerateContainer
 		builder.append('\n');
 		for (int i = 0; i < nearPosToGenerate.length; i++)
 		{
+			if(nearPosToGenerate[i][0] == 0)
+				break;
 			builder.append(nearPosToGenerate[i][0]-1);
 			builder.append(" ");
 			builder.append(nearPosToGenerate[i][1]);
@@ -176,6 +178,8 @@ public class PosToGenerateContainer
 		builder.append('\n');
 		for (int i = 0; i < farPosToGenerate.length; i++)
 		{
+			if(farPosToGenerate[i][0] == 0)
+				break;
 			builder.append(farPosToGenerate[i][0]-1);
 			builder.append(" ");
 			builder.append(farPosToGenerate[i][1]);
