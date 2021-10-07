@@ -531,7 +531,7 @@ public class LodNodeGenWorker implements IWorker
 		@SuppressWarnings({ "rawtypes", "unchecked", "unused" })
 		private DecoratedFeatureConfig cloneDecoratedFeatureConfig(DecoratedFeatureConfig config)
 		{
-			IPlacementConfig placementConfig = null;
+			IPlacementConfig placementConfig;
 			
 			Class oldConfigClass = config.decorator.config().getClass();
 			

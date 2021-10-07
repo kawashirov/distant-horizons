@@ -729,7 +729,7 @@ public class LodBuilder
 		}
 		
 		// determine if this block should use the biome color tint
-		if (block instanceof TallGrassBlock || (useGrassTint(block) || useLeafTint(block) || useWaterTint(block)) && numberOfGreyPixel / count > 0.75f)
+		if (block instanceof TallGrassBlock || (useGrassTint(block) || useLeafTint(block) || useWaterTint(block)) && (float) numberOfGreyPixel / count > 0.75f)
 			toTint.replace(block, true);
 		
 		// add the newly generated block color to the map for later use
@@ -792,7 +792,7 @@ public class LodBuilder
 		}
 		
 		blockColor = getColorTextureForBlock(blockState, blockPos, true);
-		if (toTint.get(blockState.getBlock()).booleanValue())
+		if (toTint.get(blockState.getBlock()))
 		{
 			if (useLeafTint(blockState.getBlock()))
 				// leaves

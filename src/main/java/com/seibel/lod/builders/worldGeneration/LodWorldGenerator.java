@@ -33,7 +33,7 @@ public class LodWorldGenerator
 	public MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	/** This holds the thread used to generate new LODs off the main thread. */
-	private ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " world generator"));
+	private final ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " world generator"));
 	
 	/** we only want to queue up one generator thread at a time */
 	private boolean generatorThreadRunning = false;
