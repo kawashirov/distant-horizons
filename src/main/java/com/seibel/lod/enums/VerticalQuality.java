@@ -22,7 +22,7 @@ package com.seibel.lod.enums;
  * multi_lod <br>
  * 
  * @author Leonardo Amato
- * @version 9-27-2021
+ * @version 10-07-2021
  */
 public enum VerticalQuality
 {

@@ -13,7 +13,7 @@ public class DetailDistanceUtil
 	private static int minDrawDetail = Math.max(LodConfig.CLIENT.graphics.drawResolution.get().detailLevel,LodConfig.CLIENT.worldGenerator.generationResolution.get().detailLevel);
 	private static int maxDetail = LodUtil.REGION_DETAIL_LEVEL + 1;
 	private static int minDistance = 0;
-	private static int maxDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 16 * 2;
+	private static int maxDistance = Integer.MAX_VALUE;
 
 	
 	private static HorizontalResolution[] lodGenDetails = {
@@ -34,7 +34,7 @@ public class DetailDistanceUtil
 	public static void updateSettings(){
 		minGenDetail = LodConfig.CLIENT.worldGenerator.generationResolution.get().detailLevel;
 		minDrawDetail = Math.max(LodConfig.CLIENT.graphics.drawResolution.get().detailLevel,LodConfig.CLIENT.worldGenerator.generationResolution.get().detailLevel);
-		maxDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 16 * 8;
+		//maxDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 16 * 8;
 	}
 
 	public static int baseDistanceFunction(int detail)
