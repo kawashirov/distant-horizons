@@ -15,14 +15,15 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.handlers;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+package com.seibel.lod.handlers;
 
 import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.wrappers.MinecraftWrapper;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 
 /**
  * This object is used to get variables from methods
@@ -35,7 +36,7 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 public class ReflectionHandler
 {
 	public static final ReflectionHandler INSTANCE = new ReflectionHandler();
-	private MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
+	private final MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	public Field ofFogField = null;
 	public Method vertexBufferUploadMethod = null;
@@ -106,9 +107,9 @@ public class ReflectionHandler
 			// optifine's "default" option,
 			// it should never be called in this case
 			return FogQuality.FAST;
-			
-			
-			// normal options
+		
+		
+		// normal options
 		case 1:
 			return FogQuality.FAST;
 		case 2:

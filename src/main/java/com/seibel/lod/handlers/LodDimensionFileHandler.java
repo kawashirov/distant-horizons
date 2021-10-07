@@ -74,7 +74,7 @@ public class LodDimensionFileHandler
 	 * Allow saving asynchronously, but never try to save multiple regions
 	 * at a time
 	 */
-	private ExecutorService fileWritingThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
+	private final ExecutorService fileWritingThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
 	
 	
 	
