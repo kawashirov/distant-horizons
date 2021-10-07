@@ -15,23 +15,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.builders.bufferBuilding;
-
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL15C;
-import org.lwjgl.opengl.GL45;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
@@ -44,18 +29,27 @@ import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.proxy.GlProxy;
 import com.seibel.lod.render.LodRenderer;
-import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.DetailDistanceUtil;
-import com.seibel.lod.util.LevelPosUtil;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.util.ThreadMapUtil;
-
+import com.seibel.lod.util.*;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL15C;
+import org.lwjgl.opengl.GL45;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This object is used to create NearFarBuffer objects.
@@ -135,7 +129,7 @@ public class LodBufferBuilder
 	/**
 	 * this is used to prevent multiple threads creating, destroying, or using the buffers at the same time
 	 */
-	private ReentrantLock bufferLock = new ReentrantLock();
+	private final ReentrantLock bufferLock = new ReentrantLock();
 	
 	private volatile Box[][] boxCache;
 	private volatile PosToRenderContainer[][] setsToRender;
@@ -322,9 +316,9 @@ public class LodBufferBuilder
 										chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.z;
 										if (posToRender.contains(detailLevel, xAdj, zAdj)
 												&& (gameChunkRenderDistance < Math.abs(chunkXdist)
-														|| gameChunkRenderDistance < Math.abs(chunkZdist)
-														|| !(vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
-																&& (!LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1) || smallRenderDistance))))
+												|| gameChunkRenderDistance < Math.abs(chunkZdist)
+												|| !(vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
+												&& (!LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1) || smallRenderDistance))))
 										{
 											for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
 											{
@@ -357,7 +351,7 @@ public class LodBufferBuilder
 									
 									
 								} // for pos to in list to render
-									// the thread executed successfully
+								// the thread executed successfully
 								return true;
 							};
 							
@@ -390,7 +384,7 @@ public class LodBufferBuilder
 				long buildTime = endTime - startTime;
 				@SuppressWarnings("unused")
 				long executeTime = executeEnd - executeStart;
-		
+
 //				ClientProxy.LOGGER.info("Thread Build time: " + buildTime + " ms" + '\n' +
 //						                        "thread execute time: " + executeTime + " ms");
 				
@@ -469,7 +463,7 @@ public class LodBufferBuilder
 				}
 				else
 				{
-					numberOfBuffers = (int) Math.ceil(memoryRequired / BUFFER_MAX_CAPACITY) + 1;
+					numberOfBuffers = (int) memoryRequired / BUFFER_MAX_CAPACITY + 1;
 					memoryRequired = BUFFER_MAX_CAPACITY;
 					bufferSize[x][z] = numberOfBuffers;
 					buildableBuffers[x][z] = new BufferBuilder[numberOfBuffers];
@@ -483,8 +477,8 @@ public class LodBufferBuilder
 					
 					buildableVbos[x][z][i] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
 					drawableVbos[x][z][i] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
-					
-					
+
+
 //					// buffer storage
 //					GL15.glDeleteBuffers(buildableVbos[x][z][i].id);
 //					GL15.glDeleteBuffers(drawableVbos[x][z][i].id);
@@ -619,9 +613,9 @@ public class LodBufferBuilder
 		{
 			// this is how many points will be rendered
 			vbo.vertexCount = (uploadBuffer.remaining() / vbo.format.getVertexSize());
-			
-			
-			
+
+
+
 //			// buffer mapping // 
 //			// no stutter 50% GPU useage
 //			// stores everything in system memory instead of GPU memory
@@ -656,11 +650,11 @@ public class LodBufferBuilder
 //				GL15.glUnmapBuffer(GL15.GL_ARRAY_BUFFER);
 //				GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);	
 //			}
-			
-			
-			
-			
-			
+
+
+
+
+
 //			// bufferstorage //
 //			// to test: uncomment the bufferstorage lines in setupBuffers as well
 //			// then reboot the game
@@ -694,7 +688,7 @@ public class LodBufferBuilder
 //				GL45.glBindBuffer(GL45.GL_ARRAY_BUFFER, 0);
 //			}
 			
-
+			
 			
 			
 			
@@ -704,18 +698,18 @@ public class LodBufferBuilder
 			GL45.glBindBuffer(GL45.GL_ARRAY_BUFFER, vbo.id);
 			
 			long size = GL45.glGetBufferParameteri64(GL45.GL_ARRAY_BUFFER, GL45.GL_BUFFER_SIZE);
-			if (size < uploadBuffer.capacity() * 4)
+			if (size < uploadBuffer.capacity() * 4L)
 			{
-				GL45.glBufferData(GL45.GL_ARRAY_BUFFER, uploadBuffer.capacity() * 5, GL45.GL_STREAM_DRAW);
+				GL45.glBufferData(GL45.GL_ARRAY_BUFFER, uploadBuffer.capacity() * 5L, GL45.GL_STREAM_DRAW);
 				ClientProxy.LOGGER.info("expand buffer: " + size + " -> " + (uploadBuffer.capacity() * 4));
 			}
 			GL45.glBufferSubData(GL45.GL_ARRAY_BUFFER, 0, uploadBuffer);
 			
 			GL15.glUnmapBuffer(GL15.GL_ARRAY_BUFFER);
-			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);	
-			
-			
-			
+			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+
+
+
 //			// old method - bufferData
 //			// bad stuttering 12% GPU usage
 //			
@@ -759,7 +753,7 @@ public class LodBufferBuilder
 	/**
 	 * A simple container to pass multiple objects back in the getVertexBuffers method.
 	 */
-	public class VertexBuffersAndOffset
+	public static class VertexBuffersAndOffset
 	{
 		public VertexBuffer[][][] vbos;
 		public ChunkPos drawableCenterChunkPos;

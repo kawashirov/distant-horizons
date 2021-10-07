@@ -15,37 +15,27 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.handlers;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.VerticalQuality;
+import com.seibel.lod.objects.*;
+import com.seibel.lod.proxy.ClientProxy;
+import com.seibel.lod.util.LodThreadFactory;
+import com.seibel.lod.util.LodUtil;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.VerticalQuality;
-import com.seibel.lod.objects.LodDimension;
-import com.seibel.lod.objects.LodRegion;
-import com.seibel.lod.objects.RegionPos;
-import com.seibel.lod.objects.SingleLevelContainer;
-import com.seibel.lod.objects.VerticalLevelContainer;
-import com.seibel.lod.proxy.ClientProxy;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
-
 /**
  * This object handles creating LodRegions
  * from files and saving LodRegion objects
  * to file.
- * 
+ *
  * @author James Seibel
  * @author Cola
  * @version 9-25-2021
@@ -230,7 +220,7 @@ public class LodDimensionFileHandler
 		fileWritingThreadPool.execute(saveDirtyRegionsThread);
 	}
 	
-	private Thread saveDirtyRegionsThread = new Thread(() ->
+	private final Thread saveDirtyRegionsThread = new Thread(() ->
 	{
 		try
 		{
@@ -238,9 +228,9 @@ public class LodDimensionFileHandler
 			{
 				for (int j = 0; j < lodDimension.getWidth(); j++)
 				{
-					if (lodDimension.GetIsRegionDirty(i,j) && lodDimension.getRegionByArrayIndex(i,j) != null)
+					if (lodDimension.GetIsRegionDirty(i, j) && lodDimension.getRegionByArrayIndex(i, j) != null)
 					{
-						saveRegionToFile(lodDimension.getRegionByArrayIndex(i,j));
+						saveRegionToFile(lodDimension.getRegionByArrayIndex(i, j));
 						lodDimension.SetIsRegionDirty(i, j, false);
 					}
 				}
@@ -311,7 +301,7 @@ public class LodDimensionFileHandler
 						// don't write anything, we don't want to accidently
 						// delete anything the user may want.
 						return;
-					}  
+					}
 					
 					// if we got this far then we are good
 					// to overwrite the old file

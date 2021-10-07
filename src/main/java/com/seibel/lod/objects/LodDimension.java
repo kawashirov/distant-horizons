@@ -15,12 +15,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.objects;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+package com.seibel.lod.objects;
 
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
@@ -28,27 +24,27 @@ import com.seibel.lod.enums.GenerationPriority;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
-import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.DetailDistanceUtil;
-import com.seibel.lod.util.LevelPosUtil;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.*;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 
 /**
  * This object holds all loaded LOD regions
  * for a given dimension. <Br><Br>
- * 
+ *
  * <strong>Coordinate Standard: </strong><br>
  * Coordinate called posX or posZ are relative LevelPos coordinates <br>
  * unless stated otherwise. <br>
- * 
+ *
  * @author Leonardo Amato
  * @author James Seibel
  * @version 9-27-2021
@@ -82,13 +78,13 @@ public class LodDimension
 	
 	private LodDimensionFileHandler fileHandler;
 	
-	private volatile RegionPos center;
+	private final RegionPos center;
 	
 	/** prevents the cutAndExpandThread from expanding at the same location multiple times */
 	private volatile ChunkPos lastExpandedChunk;
 	/** prevents the cutAndExpandThread from cutting at the same location multiple times */
 	private volatile ChunkPos lastCutChunk;
-	private ExecutorService cutAndExpandThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " - Cut and Expand"));
+	private final ExecutorService cutAndExpandThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " - Cut and Expand"));
 	
 	/**
 	 * Creates the dimension centered at (0,0)
@@ -584,8 +580,8 @@ public class LodDimension
 				z += dz;
 			}
 			break;
-			
-			
+		
+		
 		case FAR_FIRST:
 			posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, playerBlockPosX, playerBlockPosZ);
 			
@@ -618,11 +614,11 @@ public class LodDimension
 	
 	/**
 	 * Returns every node that should be rendered based on the position of the player.
-	 * 
+	 *
 	 * TODO why isn't posToRender returned? it would make it a bit more clear what is happening
 	 */
 	public void getPosToRender(PosToRenderContainer posToRender, RegionPos regionPos, int playerPosX,
-	                           int playerPosZ)
+			int playerPosZ)
 	{
 		LodRegion region = getRegion(regionPos.x, regionPos.z);
 		if (region != null)
@@ -709,7 +705,7 @@ public class LodDimension
 	/**
 	 * TODO we aren't currently using this, is there a reason for that?
 	 * is this significantly different than regenRegionBuffer?
-	 * 
+	 *
 	 * Returns if the buffer at the given array index needs
 	 * to have its buffer resized.
 	 */
@@ -762,7 +758,7 @@ public class LodDimension
 	 * Loads the region at the given RegionPos from file,
 	 * if a file exists for that region.
 	 */
-	public LodRegion getRegionFromFile(RegionPos regionPos, byte detailLevel, 
+	public LodRegion getRegionFromFile(RegionPos regionPos, byte detailLevel,
 			DistanceGenerationMode generationMode, VerticalQuality verticalQuality)
 	{
 		if (fileHandler != null)
@@ -901,17 +897,17 @@ public class LodDimension
 		int levelToGen = DetailDistanceUtil.getLodDrawDetail(detail);
 		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelToGen);
 		int maxVerticalData = DetailDistanceUtil.getMaxVerticalData(detail);
-		long memoryUse = LodUtil.regionRenderingMemoryUse(x,z,template);
+		long memoryUse = LodUtil.regionRenderingMemoryUse(x, z, template);
 		//System.out.println(detail + " " + memoryUse + " " + template.getBufferMemoryForSingleLod(maxVerticalData));
 		return memoryUse;
 		//return memoryUse;
 	}
-
-	public boolean GetIsRegionDirty(int i , int j)
+	
+	public boolean GetIsRegionDirty(int i, int j)
 	{
 		return isRegionDirty[i][j];
 	}
-
+	
 	public void SetIsRegionDirty(int i, int j, boolean val)
 	{
 		isRegionDirty[i][j] = val;

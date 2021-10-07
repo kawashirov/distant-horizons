@@ -1,19 +1,18 @@
 package com.seibel.lod.builders.bufferBuilding.lodTemplates;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3i;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Similar to Minecraft's AxisAlignedBoundingBox.
@@ -37,57 +36,56 @@ public class Box
 	public static final int VOID_FACE = 0;
 	
 	/** The six cardinal directions */
-	public static final Direction[] DIRECTIONS = new Direction[]{
+	public static final Direction[] DIRECTIONS = new Direction[] {
 			Direction.UP,
 			Direction.DOWN,
 			Direction.WEST,
 			Direction.EAST,
 			Direction.NORTH,
-			Direction.SOUTH};
+			Direction.SOUTH };
 	
 	/** North, South, East, West */
-	public static final Direction[] ADJ_DIRECTIONS = new Direction[]{
+	public static final Direction[] ADJ_DIRECTIONS = new Direction[] {
 			Direction.EAST,
 			Direction.WEST,
 			Direction.SOUTH,
-			Direction.NORTH};
+			Direction.NORTH };
 	
 	/**
 	 * All the faces and vertices of a cube. This is used to extract the vertex from the column
 	 */
-	@SuppressWarnings("serial")
 	public static final Map<Direction, int[][]> DIRECTION_VERTEX_MAP = new HashMap<Direction, int[][]>()
 	{{
-		put(Direction.UP, new int[][]{
-			{0, 1, 0},
-			{0, 1, 1},
-			{1, 1, 1},
-			{1, 1, 0}});
-		put(Direction.DOWN, new int[][]{
-			{1, 0, 0},
-			{1, 0, 1},
-			{0, 0, 1},
-			{0, 0, 0}});
-		put(Direction.EAST, new int[][]{
-			{1, 1, 0},
-			{1, 1, 1},
-			{1, 0, 1},
-			{1, 0, 0}});
-		put(Direction.WEST, new int[][]{
-			{0, 0, 0},
-			{0, 0, 1},
-			{0, 1, 1},
-			{0, 1, 0}});
-		put(Direction.SOUTH, new int[][]{
-			{1, 0, 1},
-			{1, 1, 1},
-			{0, 1, 1},
-			{0, 0, 1}});
-		put(Direction.NORTH, new int[][]{
-			{0, 0, 0},
-			{0, 1, 0},
-			{1, 1, 0},
-			{1, 0, 0}});
+		put(Direction.UP, new int[][] {
+				{ 0, 1, 0 },
+				{ 0, 1, 1 },
+				{ 1, 1, 1 },
+				{ 1, 1, 0 } });
+		put(Direction.DOWN, new int[][] {
+				{ 1, 0, 0 },
+				{ 1, 0, 1 },
+				{ 0, 0, 1 },
+				{ 0, 0, 0 } });
+		put(Direction.EAST, new int[][] {
+				{ 1, 1, 0 },
+				{ 1, 1, 1 },
+				{ 1, 0, 1 },
+				{ 1, 0, 0 } });
+		put(Direction.WEST, new int[][] {
+				{ 0, 0, 0 },
+				{ 0, 0, 1 },
+				{ 0, 1, 1 },
+				{ 0, 1, 0 } });
+		put(Direction.SOUTH, new int[][] {
+				{ 1, 0, 1 },
+				{ 1, 1, 1 },
+				{ 0, 1, 1 },
+				{ 0, 0, 1 } });
+		put(Direction.NORTH, new int[][] {
+				{ 0, 0, 0 },
+				{ 0, 1, 0 },
+				{ 1, 1, 0 },
+				{ 1, 0, 0 } });
 	}};
 	
 	
@@ -95,15 +93,14 @@ public class Box
 	 * This indicate which position is invariable in the DIRECTION_VERTEX_MAP.
 	 * Is used to extract the vertex
 	 */
-	@SuppressWarnings("serial")
 	public static final Map<Direction, int[]> FACE_DIRECTION = new HashMap<Direction, int[]>()
 	{{
-		put(Direction.UP, new int[]{Y, MAX});
-		put(Direction.DOWN, new int[]{Y, MIN});
-		put(Direction.EAST, new int[]{X, MAX});
-		put(Direction.WEST, new int[]{X, MIN});
-		put(Direction.SOUTH, new int[]{Z, MAX});
-		put(Direction.NORTH, new int[]{Z, MIN});
+		put(Direction.UP, new int[] { Y, MAX });
+		put(Direction.DOWN, new int[] { Y, MIN });
+		put(Direction.EAST, new int[] { X, MAX });
+		put(Direction.WEST, new int[] { X, MIN });
+		put(Direction.SOUTH, new int[] { Z, MAX });
+		put(Direction.NORTH, new int[] { Z, MIN });
 	}};
 	
 	
@@ -159,7 +156,6 @@ public class Box
 	
 	
 	/** creates a empty box */
-	@SuppressWarnings("serial")
 	public Box()
 	{
 		boxOffset = new int[3];
@@ -248,7 +244,7 @@ public class Box
 		playerPos = MinecraftWrapper.INSTANCE.getPlayer().blockPosition();
 		for (Direction direction : DIRECTIONS)
 		{
-			if (direction == Direction.DOWN || direction == Direction.WEST  || direction == Direction.NORTH)
+			if (direction == Direction.DOWN || direction == Direction.WEST || direction == Direction.NORTH)
 			{
 				culling[DIRECTION_INDEX.get(direction)] = playerPos.get(direction.getAxis()) > getFacePos(direction) + cullingDistance;
 			}
@@ -304,7 +300,7 @@ public class Box
 			{
 				singleAdjDataPoint = dataPoint[i];
 				
-				if(DataPointUtil.isVoid(singleAdjDataPoint) || !DataPointUtil.doesItExist(singleAdjDataPoint))
+				if (DataPointUtil.isVoid(singleAdjDataPoint) || !DataPointUtil.doesItExist(singleAdjDataPoint))
 					break;
 				
 				height = DataPointUtil.getHeight(singleAdjDataPoint);
@@ -385,7 +381,7 @@ public class Box
 				}
 			}
 			
-			if(allAbove)
+			if (allAbove)
 			{
 				adjHeight.get(direction)[0] = getMaxY();
 				adjDepth.get(direction)[0] = getMinY();

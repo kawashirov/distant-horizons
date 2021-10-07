@@ -13,7 +13,7 @@ import java.util.concurrent.ConcurrentMap;
  * Holds data used by specific threads so 
  * the data doesn't have to be recreated every
  * time it is needed.
- * 
+ *
  * @author Leonardo Amato
  * @version 9-25-2021
  */
@@ -28,72 +28,74 @@ public class ThreadMapUtil
 	public static final ConcurrentMap<String, short[]> heightAndDepthMap = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<String, long[]> singleDataToMergeMap = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<String, long[][]> verticalUpdate = new ConcurrentHashMap<>();
-
-
+	
+	
 	//________________________//
 	// used in BufferBuilder  //
 	//________________________//
-
+	
 	public static final ConcurrentMap<String, boolean[]> adjShadeDisabled = new ConcurrentHashMap<>();
-	public static final ConcurrentMap<String, Map<Direction ,long[]>> adjDataMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<String, Map<Direction, long[]>> adjDataMap = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<String, Box> boxMap = new ConcurrentHashMap<>();
-
+	
 	/** returns the array NOT cleared every time
 	 * @return*/
 	public static boolean[] getAdjShadeDisabledArray()
 	{
 		if (!adjShadeDisabled.containsKey(Thread.currentThread().getName())
-				    || (adjShadeDisabled.get(Thread.currentThread().getName()) == null))
+				|| (adjShadeDisabled.get(Thread.currentThread().getName()) == null))
 		{
 			adjShadeDisabled.put(Thread.currentThread().getName(), new boolean[Box.DIRECTIONS.length]);
 		}
 		Arrays.fill(adjShadeDisabled.get(Thread.currentThread().getName()), false);
 		return adjShadeDisabled.get(Thread.currentThread().getName());
 	}
-
+	
 	/** returns the array NOT cleared every time */
-	public static Map<Direction ,long[]> getAdjDataArray(int verticalData)
+	public static Map<Direction, long[]> getAdjDataArray(int verticalData)
 	{
 		if (!adjDataMap.containsKey(Thread.currentThread().getName())
-				    || (adjDataMap.get(Thread.currentThread().getName()) == null)
-				    || (adjDataMap.get(Thread.currentThread().getName()).get(Direction.UP) == null)
-				    || (adjDataMap.get(Thread.currentThread().getName()).get(Direction.UP).length != verticalData))
+				|| (adjDataMap.get(Thread.currentThread().getName()) == null)
+				|| (adjDataMap.get(Thread.currentThread().getName()).get(Direction.UP) == null)
+				|| (adjDataMap.get(Thread.currentThread().getName()).get(Direction.UP).length != verticalData))
 		{
 			adjDataMap.put(Thread.currentThread().getName(), new HashMap());
 			for (Direction direction : Box.ADJ_DIRECTIONS)
 				adjDataMap.get(Thread.currentThread().getName()).put(direction, new long[verticalData]);
-		}else{
-
+		}
+		else
+		{
+			
 			for (Direction direction : Box.ADJ_DIRECTIONS)
-				Arrays.fill(adjDataMap.get(Thread.currentThread().getName()).get(direction),DataPointUtil.EMPTY_DATA);
+				Arrays.fill(adjDataMap.get(Thread.currentThread().getName()).get(direction), DataPointUtil.EMPTY_DATA);
 		}
 		return adjDataMap.get(Thread.currentThread().getName());
 	}
-
+	
 	public static Box getBox()
 	{
 		if (!boxMap.containsKey(Thread.currentThread().getName())
-				    || (boxMap.get(Thread.currentThread().getName()) == null))
+				|| (boxMap.get(Thread.currentThread().getName()) == null))
 		{
 			boxMap.put(Thread.currentThread().getName(), new Box());
 		}
 		boxMap.get(Thread.currentThread().getName()).reset();
 		return boxMap.get(Thread.currentThread().getName());
 	}
-
+	
 	//________________________//
 	// used in DataPointUtil  //
 	// mergeVerticalData      //
 	//________________________//
-
-
+	
+	
 	//________________________//
 	// used in DataPointUtil  //
 	// mergeSingleData        //
 	//________________________//
-
-
-
+	
+	
+	
 	/** returns the array NOT cleared every time */
 	public static long[] getSingleUpdateArray()
 	{

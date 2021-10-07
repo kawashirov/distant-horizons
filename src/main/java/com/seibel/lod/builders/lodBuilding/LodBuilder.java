@@ -15,15 +15,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.builders.lodBuilding;
 
-import java.awt.Color;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+package com.seibel.lod.builders.lodBuilding;
 
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
@@ -32,26 +25,9 @@ import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
-import com.seibel.lod.util.ColorUtil;
-import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.DetailDistanceUtil;
-import com.seibel.lod.util.LevelPosUtil;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.util.ThreadMapUtil;
+import com.seibel.lod.util.*;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
-import net.minecraft.block.AbstractPlantBlock;
-import net.minecraft.block.AbstractTopPlantBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.BushBlock;
-import net.minecraft.block.FlowerBlock;
-import net.minecraft.block.GrassBlock;
-import net.minecraft.block.IGrowable;
-import net.minecraft.block.LeavesBlock;
-import net.minecraft.block.TallGrassBlock;
+import net.minecraft.block.*;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -71,6 +47,14 @@ import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.client.model.data.ModelDataMap;
 
+import java.awt.*;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * This object is in charge of creating Lod related objects. (specifically: Lod
  * World, Dimension, and Region objects)
@@ -81,9 +65,9 @@ import net.minecraftforge.client.model.data.ModelDataMap;
  */
 public class LodBuilder
 {
-	private static MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
+	private static final MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
-	private ExecutorService lodGenThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
+	private final ExecutorService lodGenThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
 	
 	public static final Direction[] directions = new Direction[] { Direction.UP, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.DOWN };
 	public static final int CHUNK_DATA_WIDTH = LodUtil.CHUNK_WIDTH;
@@ -115,18 +99,13 @@ public class LodBuilder
 	
 	public LodBuilder()
 	{
-		
+	
 	}
-	
-	
-	
-	
 	
 	public void generateLodNodeAsync(IChunk chunk, LodWorld lodWorld, IWorld world)
 	{
 		generateLodNodeAsync(chunk, lodWorld, world, DistanceGenerationMode.SERVER);
 	}
-	
 	
 	public void generateLodNodeAsync(IChunk chunk, LodWorld lodWorld, IWorld world, DistanceGenerationMode generationMode)
 	{
@@ -245,7 +224,7 @@ public class LodBuilder
 						singleData,
 						false);
 				break;
-				
+			
 			case VOXEL:
 				long[] dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
 				data = DataPointUtil.mergeMultiData(dataToMergeVertical, DataPointUtil.worldHeight, DetailDistanceUtil.getMaxVerticalData(detailLevel));
@@ -366,35 +345,35 @@ public class LodBuilder
 	private short determineBottomPointFrom(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, int yAbs, BlockPos.Mutable blockPos)
 	{
 		short depth = DEFAULT_DEPTH;
-		if (config.useHeightmap)
+		/*if (config.useHeightmap)
 		{
 			// when using the generated heightmap there is no data about the lowest point
-			depth = 0;
+			depth = 0; //DEFAULT_DEPTH == 0
 		}
 		else
+		{*/
+		boolean voidData = true;
+		ChunkSection[] chunkSections = chunk.getSections();
+		for (int sectionIndex = chunkSections.length - 1; sectionIndex >= 0; sectionIndex--)
 		{
-			boolean voidData = true;
-			ChunkSection[] chunkSections = chunk.getSections();
-			for (int sectionIndex = chunkSections.length - 1; sectionIndex >= 0; sectionIndex--)
+			for (int yRel = CHUNK_DATA_WIDTH - 1; yRel >= 0; yRel--)
 			{
-				for (int yRel = CHUNK_DATA_WIDTH - 1; yRel >= 0; yRel--)
-				{
-					if (sectionIndex * CHUNK_DATA_WIDTH + yRel > yAbs)
-						continue;
-					
-					blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel, chunk.getPos().getMinBlockZ() + zRel);
-					if (!isLayerValidLodPoint(chunk, blockPos))
-					{
-						depth = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel + 1);
-						voidData = false;
-						break;
-					}
-				}
+				if (sectionIndex * CHUNK_DATA_WIDTH + yRel > yAbs)
+					continue;
 				
-				if (!voidData)
+				blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel, chunk.getPos().getMinBlockZ() + zRel);
+				if (!isLayerValidLodPoint(chunk, blockPos))
+				{
+					depth = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel + 1);
+					voidData = false;
 					break;
+				}
 			}
+			
+			if (!voidData)
+				break;
 		}
+		//}
 		return depth;
 	}
 	
@@ -405,9 +384,7 @@ public class LodBuilder
 	{
 		short height = DEFAULT_HEIGHT;
 		if (config.useHeightmap)
-		{
 			height = (short) chunk.getOrCreateHeightmapUnprimed(LodUtil.DEFAULT_HEIGHTMAP).getFirstAvailable(xRel, zRel);
-		}
 		else
 		{
 			boolean voidData = true;
@@ -509,30 +486,30 @@ public class LodBuilder
 	{
 		ChunkSection[] chunkSections = chunk.getSections();
 		short depth = DEFAULT_DEPTH;
-		if (config.useHeightmap)
+		/*if (config.useHeightmap)
 		{
-			depth = 0;
+			depth = 0; //DEFAULT_DEPTH == 0
 		}
 		else
+		{*/
+		boolean found = false;
+		for (int sectionIndex = 0; sectionIndex < chunkSections.length; sectionIndex++)
 		{
-			boolean found = false;
-			for (int sectionIndex = 0; sectionIndex < chunkSections.length; sectionIndex++)
+			for (int yRel = 0; yRel < CHUNK_DATA_WIDTH; yRel++)
 			{
-				for (int yRel = 0; yRel < CHUNK_DATA_WIDTH; yRel++)
+				blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel, chunk.getPos().getMinBlockZ() + zRel);
+				if (isLayerValidLodPoint(chunk, blockPos))
 				{
-					blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel, chunk.getPos().getMinBlockZ() + zRel);
-					if (isLayerValidLodPoint(chunk, blockPos))
-					{
-						depth = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel);
-						found = true;
-						break;
-					}
-				}
-				
-				if (found)
+					depth = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel);
+					found = true;
 					break;
+				}
 			}
+			
+			if (found)
+				break;
 		}
+		//}
 		return depth;
 	}
 	
@@ -544,9 +521,7 @@ public class LodBuilder
 	{
 		short height = DEFAULT_HEIGHT;
 		if (config.useHeightmap)
-		{
 			height = (short) chunk.getOrCreateHeightmapUnprimed(LodUtil.DEFAULT_HEIGHTMAP).getFirstAvailable(xRel, zRel);
-		}
 		else
 		{
 			boolean voidData = true;
@@ -610,7 +585,7 @@ public class LodBuilder
 	private int getLightValue(IChunk chunk, BlockPos.Mutable blockPos, boolean hasCeiling, boolean hasSkyLight, boolean topBlock)
 	{
 		int skyLight;
-		int blockLight = 0;
+		int blockLight;
 		
 		if (mc.getClientWorld() == null)
 			return 0;
@@ -627,19 +602,13 @@ public class LodBuilder
 		
 		
 		if (!hasSkyLight && hasCeiling)
-		{
 			skyLight = 0;
-		}
 		else if (topBlock)
-		{
 			skyLight = DEFAULT_MAX_LIGHT;
-		}
 		else
 		{
 			if (chunk.isLightCorrect())
-			{
 				skyLight = world.getBrightness(LightType.SKY, blockPos);
-			}
 			else
 			{
 				// we don't know what the light here is,
@@ -747,10 +716,8 @@ public class LodBuilder
 		
 		
 		if (count == 0)
-		{
 			// this block is entirely transparent
 			color = 0;
-		}
 		else
 		{
 			// determine the average color
@@ -828,25 +795,17 @@ public class LodBuilder
 		if (toTint.get(blockState.getBlock()).booleanValue())
 		{
 			if (useLeafTint(blockState.getBlock()))
-			{
 				// leaves
 				colorInt = ColorUtil.multiplyRGBcolors(biome.getFoliageColor() | 0xFF000000, blockColor);
-			}
 			else if (useGrassTint(blockState.getBlock()))
-			{
 				// grass and green plants
 				colorInt = ColorUtil.multiplyRGBcolors(biome.getGrassColor(x, z) | 0xFF000000, blockColor);
-			}
 			else if (useWaterTint(blockState.getBlock()))
-			{
 				// water
 				colorInt = ColorUtil.multiplyRGBcolors(biome.getWaterColor() | 0xFF000000, blockColor);
-			}
 		}
 		else
-		{
 			colorInt = blockColor;
-		}
 		
 		return colorInt;
 	}
@@ -907,22 +866,23 @@ public class LodBuilder
 			tmp = tmp.darker();
 			colorInt = LodUtil.colorToInt(tmp);
 			break;
-		
+			
 		}
 		
 		return colorInt;
 	}
-
+	
 	public static final ConcurrentMap<Block, Boolean> notFullBlock = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<Block, Boolean> smallBlock = new ConcurrentHashMap<>();
+	
 	/**
 	 * Is the block at the given blockPos a valid LOD point?
 	 */
 	private boolean isLayerValidLodPoint(IChunk chunk, BlockPos.Mutable blockPos)
 	{
 		BlockState blockState = chunk.getBlockState(blockPos);
-
-
+		
+		
 		if (blockState != null)
 		{
 			// TODO this code is dead since avoidSmallBlock and onlyUseFullBlock
@@ -931,9 +891,9 @@ public class LodBuilder
 			if (avoidSmallBlock || avoidNonFullBlock)
 			{
 				if (!smallBlock.containsKey(blockState.getBlock())
-						    || smallBlock.get(blockState.getBlock()) == null
-						    || !notFullBlock.containsKey(blockState.getBlock())
-						    || notFullBlock.get(blockState.getBlock()) == null
+						|| smallBlock.get(blockState.getBlock()) == null
+						|| !notFullBlock.containsKey(blockState.getBlock())
+						|| notFullBlock.get(blockState.getBlock()) == null
 				)
 				{
 					VoxelShape voxelShape = blockState.getShape(chunk, blockPos);
@@ -942,7 +902,7 @@ public class LodBuilder
 						notFullBlock.put(blockState.getBlock(), false);
 						smallBlock.put(blockState.getBlock(), false);
 					}
-
+					
 					if (!voxelShape.isEmpty())
 					{
 						AxisAlignedBB bbox = voxelShape.bounds();
@@ -953,34 +913,31 @@ public class LodBuilder
 							notFullBlock.put(blockState.getBlock(), true);
 						else
 							notFullBlock.put(blockState.getBlock(), false);
-
+						
 						if (xWidth < 0.7 && zWidth < 0.7 && yWidth < 0.7)
 							smallBlock.put(blockState.getBlock(), true);
 						else
 							smallBlock.put(blockState.getBlock(), false);
-					} else
+					}
+					else
 					{
 						notFullBlock.put(blockState.getBlock(), false);
 						smallBlock.put(blockState.getBlock(), false);
 					}
 				}
-
+				
 				if (notFullBlock.get(blockState.getBlock()) && avoidNonFullBlock)
-				{
 					return false;
-				}
 				if (smallBlock.get(blockState.getBlock()) && avoidSmallBlock)
-				{
 					return false;
-				}
 			}
-
-
+			
+			
 			return blockState.getBlock() != Blocks.AIR
-					       && blockState.getBlock() != Blocks.CAVE_AIR
-					       && blockState.getBlock() != Blocks.BARRIER;
+					&& blockState.getBlock() != Blocks.CAVE_AIR
+					&& blockState.getBlock() != Blocks.BARRIER;
 		}
-
+		
 		return false;
 	}
 }
