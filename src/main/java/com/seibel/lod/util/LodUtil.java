@@ -30,6 +30,8 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
+import net.minecraft.client.renderer.vertex.VertexFormat;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
@@ -46,7 +48,7 @@ import net.minecraft.world.server.ServerWorld;
  * This class holds methods and constants that may be used in multiple places.
  *
  * @author James Seibel
- * @version 10-2-2021
+ * @version 10-7-2021
  */
 public class LodUtil
 {
@@ -136,6 +138,12 @@ public class LodUtil
 	 * https://stackoverflow.com/questions/50499238/bytebuffer-allocatedirect-and-xmx
 	 */
 	public static final int MAX_ALOCATEABLE_DIRECT_MEMORY = 64 * 1024 * 1024;
+	
+
+	public static final VertexFormat LOD_VERTEX_FORMAT = DefaultVertexFormats.POSITION_COLOR;
+	
+	
+	
 	
 	
 	/**

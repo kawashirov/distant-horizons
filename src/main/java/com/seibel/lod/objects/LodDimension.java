@@ -870,7 +870,7 @@ public class LodDimension
 	}
 	
 	/** Returns the minimum memory required by the dimension in Bytes */
-	public long getMemoryRequired(int x, int z, LodTemplate template)
+	public long getRegionRequiredMemory(int x, int z, LodTemplate template)
 	{
 		/*return regions[x][z].getMinMemoryNeeded(template);*/
 		
@@ -884,18 +884,7 @@ public class LodDimension
 				break;
 			case BY_REGION_FAST:
 		}*/
-		/*return regions[x][z].getMinMemoryNeeded(template);*/
-
-		/*TODO add memory use calculated with the following cases
-		switch (LodConfig.CLIENT.graphics.detailDropOff.get())
-		{
-			default:
-			case BY_BLOCK:
-				break;
-			case BY_REGION_FANCY:
-				break;
-			case BY_REGION_FAST:
-		}*/
+		
 		int minDistance = LevelPosUtil.minDistance(LodUtil.REGION_DETAIL_LEVEL, x, z, halfWidth, halfWidth);
 		int detail = DetailDistanceUtil.getTreeCutDetailFromDistance(minDistance);
 		int levelToGen = DetailDistanceUtil.getLodDrawDetail(detail);
@@ -904,6 +893,5 @@ public class LodDimension
 		long memoryUse = LodUtil.regionRenderingMemoryUse(x,z,template);
 		//System.out.println(detail + " " + memoryUse + " " + template.getBufferMemoryForSingleLod(maxVerticalData));
 		return memoryUse;
-		//return memoryUse;
 	}
 }

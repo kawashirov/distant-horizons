@@ -430,7 +430,7 @@ public class LodRegion
 	}
 
 	/**
-	 * Returns the lowest detail level in this region
+	 * Returns the lowest (least detailed) detail level in this region
 	 * TODO is that right?
 	 */
 	public byte getMinDetailLevel()

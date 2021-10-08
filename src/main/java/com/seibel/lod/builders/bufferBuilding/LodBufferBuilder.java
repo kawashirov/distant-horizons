@@ -61,53 +61,35 @@ import net.minecraft.util.math.ChunkPos;
  * This object is used to create NearFarBuffer objects.
  *
  * @author James Seibel
- * @version 10-4-2021
+ * @version 10-7-2021
  */
 public class LodBufferBuilder
 {
-	/**
-	 * This holds the thread used to generate new LODs off the main thread.
-	 */
+	/** The thread used to generate new LODs off the main thread. */
 	public static ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(LodBufferBuilder.class.getSimpleName() + " - main"));
-	/**
-	 * This holds the threads used to generate buffers.
-	 */
+	/** The threads used to generate buffers. */
 	public static ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfBufferBuilderThreads.get(), new ThreadFactoryBuilder().setNameFormat("Buffer-Builder-%d").build());
 	
-	/**
-	 * This boolean matrix indicate the buffer builder in that position has to be regenerated
-	 */
+	/** This boolean matrix indicate the buffer builder in that position has to be regenerated */
 	public volatile boolean[][] regenPos;
 	
-	/**
-	 * This boolean indicate that all buffer need to be regenerated
-	 */
+	/** This boolean indicates that ever buffer need to be regenerated */
 	public volatile boolean fullRegeneration = false;
 	
-	/**
-	 * max capacity of buffers
-	 */
-	//public volatile int BUFFER_MAX_CAPACITY = 1 << (26);
-	public volatile int BUFFER_MAX_CAPACITY = (int) (64 * Math.pow(10, 6));
+	/** the capacity of each buffer in bytes */
+	public volatile int[][] bufferCount;
 	
-	/**
-	 * buffer builder for the vertex
-	 */
-	public volatile int[][] bufferSize;
-	
-	/**
-	 * buffer builder for the vertex
-	 */
+	/** Used when building the vbos */
 	public volatile BufferBuilder[][][] buildableBuffers;
 	
-	/**
-	 * Used when building new VBOs
-	 */
-	public volatile VertexBuffer[][][] buildableVbos;
+	/** The OpenGL IDs of the storage buffers used by the buildableVbos */
+	public int[][] buildableStorageBufferIds;
+	/** The OpenGL IDs of the storage buffers used by the drawableVbos */
+	public int[][] drawableStorageBufferIds;
 	
-	/**
-	 * VBOs that are sent over to the LodNodeRenderer
-	 */
+	/** Used when building new VBOs */
+	public volatile VertexBuffer[][][] buildableVbos;
+	/** VBOs that are sent over to the LodNodeRenderer */
 	public volatile VertexBuffer[][][] drawableVbos;
 	
 	/**
@@ -122,19 +104,13 @@ public class LodBufferBuilder
 	 */
 	private boolean switchVbos = false;
 	
-	/**
-	 * Size of the buffer builders in bytes last time we created them
-	 */
+	/** Size of the buffer builders in bytes last time we created them */
 	public int previousBufferSize = 0;
 	
-	/**
-	 * Width of the dimension in regions last time we created the buffers
-	 */
+	/** Width of the dimension in regions last time we created the buffers */
 	public int previousRegionWidth = 0;
 	
-	/**
-	 * this is used to prevent multiple threads creating, destroying, or using the buffers at the same time
-	 */
+	/** this is used to prevent multiple threads creating, destroying, or using the buffers at the same time */
 	private ReentrantLock bufferLock = new ReentrantLock();
 	
 	private volatile Box[][] boxCache;
@@ -147,6 +123,10 @@ public class LodBufferBuilder
 	 */
 	private volatile ChunkPos drawableCenterChunkPos = new ChunkPos(0, 0);
 	private volatile ChunkPos buildableCenterChunkPos = new ChunkPos(0, 0);
+	
+	
+	
+	
 	
 	
 	public LodBufferBuilder()
@@ -448,57 +428,71 @@ public class LodBufferBuilder
 		int numberOfBuffers;
 		
 		previousRegionWidth = numbRegionsWide;
-		bufferSize = new int[numbRegionsWide][numbRegionsWide];
+		bufferCount = new int[numbRegionsWide][numbRegionsWide];
 		buildableBuffers = new BufferBuilder[numbRegionsWide][numbRegionsWide][];
 		
 		buildableVbos = new VertexBuffer[numbRegionsWide][numbRegionsWide][];
 		drawableVbos = new VertexBuffer[numbRegionsWide][numbRegionsWide][];
 		
+		buildableStorageBufferIds = new int[numbRegionsWide][numbRegionsWide];
+		drawableStorageBufferIds = new int[numbRegionsWide][numbRegionsWide];
+		
+		
 		for (int x = 0; x < numbRegionsWide; x++)
 		{
 			for (int z = 0; z < numbRegionsWide; z++)
 			{
-				memoryRequired = lodDimension.getMemoryRequired(x, z, LodConfig.CLIENT.graphics.lodTemplate.get());
-				//if the memory required is less than the max buffer capacity we divide the memory across multiple buffers
-				if (BUFFER_MAX_CAPACITY > memoryRequired)
+				memoryRequired = lodDimension.getRegionRequiredMemory(x, z, LodConfig.CLIENT.graphics.lodTemplate.get());
+				
+				// if the memory required is greater than the max buffer capacity divide the memory across multiple buffers
+				if (memoryRequired < LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY)
 				{
-					bufferSize[x][z] = 1;
+					bufferCount[x][z] = 1;
 					buildableBuffers[x][z] = new BufferBuilder[1];
 					buildableVbos[x][z] = new VertexBuffer[1];
 					drawableVbos[x][z] = new VertexBuffer[1];
 				}
 				else
 				{
-					numberOfBuffers = (int) Math.ceil(memoryRequired / BUFFER_MAX_CAPACITY) + 1;
-					memoryRequired = BUFFER_MAX_CAPACITY;
-					bufferSize[x][z] = numberOfBuffers;
+					numberOfBuffers = (int) Math.ceil(memoryRequired / LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY) + 1;
+					memoryRequired = LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY;
+					bufferCount[x][z] = numberOfBuffers;
 					buildableBuffers[x][z] = new BufferBuilder[numberOfBuffers];
 					buildableVbos[x][z] = new VertexBuffer[numberOfBuffers];
 					drawableVbos[x][z] = new VertexBuffer[numberOfBuffers];
 				}
 				
-				for (int i = 0; i < bufferSize[x][z]; i++)
+				
+				for (int i = 0; i < bufferCount[x][z]; i++)
 				{
 					buildableBuffers[x][z][i] = new BufferBuilder((int) memoryRequired);
 					
-					buildableVbos[x][z][i] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
-					drawableVbos[x][z][i] = new VertexBuffer(LodRenderer.LOD_VERTEX_FORMAT);
+					buildableVbos[x][z][i] = new VertexBuffer(LodUtil.LOD_VERTEX_FORMAT);
+					drawableVbos[x][z][i] = new VertexBuffer(LodUtil.LOD_VERTEX_FORMAT);
+					
+					// create the initial mapped buffers (system memory)
+					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buildableVbos[x][z][i].id);
+					GL15.glBufferData(GL15.GL_ARRAY_BUFFER, memoryRequired, GL45.GL_DYNAMIC_DRAW);
+					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+					
+					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, drawableVbos[x][z][i].id);
+					GL15.glBufferData(GL15.GL_ARRAY_BUFFER, memoryRequired, GL45.GL_DYNAMIC_DRAW);
+					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 					
 					
-//					// buffer storage
-//					GL15.glDeleteBuffers(buildableVbos[x][z][i].id);
-//					GL15.glDeleteBuffers(drawableVbos[x][z][i].id);
-//					
-//					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buildableVbos[x][z][i].id);
-//					// no matter the size the buffer are created at sometimes they will still fail
-//					// to map later on, James isn't sure why that is
-//					GL45.glBufferStorage(GL15.GL_ARRAY_BUFFER, BUFFER_MAX_CAPACITY / 2, GL45.GL_MAP_WRITE_BIT | GL45.GL_MAP_PERSISTENT_BIT | GL45.GL_MAP_COHERENT_BIT);
-//					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-//					
-//					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, drawableVbos[x][z][i].id);
-//					GL45.glBufferStorage(GL15.GL_ARRAY_BUFFER, BUFFER_MAX_CAPACITY / 2, GL45.GL_MAP_WRITE_BIT | GL45.GL_MAP_PERSISTENT_BIT | GL45.GL_MAP_COHERENT_BIT);
-//					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-//					// buffer storage end
+					
+					// create the buffer storage (GPU memory)
+					
+					buildableStorageBufferIds[x][z] = GL45.glGenBuffers();
+					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buildableStorageBufferIds[x][z]);
+					// TODO get a better max size, BufferStorage's can't be resized after they are created
+					GL45.glBufferStorage(GL15.GL_ARRAY_BUFFER, LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY, 0); // the 0 flag means to create the storage in the GPU's memory
+					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+					
+					drawableStorageBufferIds[x][z] = GL45.glGenBuffers();
+					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, drawableStorageBufferIds[x][z]);
+					GL45.glBufferStorage(GL15.GL_ARRAY_BUFFER, LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY, 0);
+					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 				}
 			}
 		}
@@ -522,9 +516,7 @@ public class LodBufferBuilder
 		bufferLock.unlock();
 	}
 	
-	/**
-	 * Calls begin on each of the buildable BufferBuilders.
-	 */
+	/** Calls begin on each of the buildable BufferBuilders. */
 	private void startBuffers(boolean fullRegen, LodDimension lodDim)
 	{
 		for (int x = 0; x < buildableBuffers.length; x++)
@@ -541,16 +533,14 @@ public class LodBufferBuilder
 					{
 						buildableBuffers[x][z][i].discard();
 						
-						buildableBuffers[x][z][i].begin(GL11.GL_QUADS, LodRenderer.LOD_VERTEX_FORMAT);
+						buildableBuffers[x][z][i].begin(GL11.GL_QUADS, LodUtil.LOD_VERTEX_FORMAT);
 					}
 				}
 			}
 		}
 	}
 	
-	/**
-	 * Calls end on each of the buildable BufferBuilders.
-	 */
+	/** Calls end on each of the buildable BufferBuilders. */
 	private void closeBuffers(boolean fullRegen, LodDimension lodDim)
 	{
 		for (int x = 0; x < buildableBuffers.length; x++)
@@ -565,9 +555,7 @@ public class LodBufferBuilder
 	}
 	
 	
-	/**
-	 * Upload all buildableBuffers to the GPU.
-	 */
+	/** Upload all buildableBuffers to the GPU. */
 	private void uploadBuffers(boolean fullRegen, LodDimension lodDim)
 	{
 		GlProxy glProxy = GlProxy.getInstance();
@@ -588,15 +576,16 @@ public class LodBufferBuilder
 						for (int i = 0; i < buildableBuffers[x][z].length; i++)
 						{
 							ByteBuffer builderBuffer = buildableBuffers[x][z][i].popNextBuffer().getSecond();
-							vboUpload(buildableVbos[x][z][i], builderBuffer);
+							vboUpload(buildableVbos[x][z][i], buildableStorageBufferIds[x][z], builderBuffer);
 							lodDim.setRegenRegionBufferByArrayIndex(x, z, false);
 						}
 					}
 				}
 			}
 		}
-		catch (Exception e) // TODO this try/catch may not be needed anymore, James needs to check
+		catch (Exception e)
 		{
+			// this doesn't appear to be necessary anymore, but just in case.
 			ClientProxy.LOGGER.error(LodBufferBuilder.class.getSimpleName() + " - UploadBuffers failed: " + e.getMessage());
 			e.printStackTrace();
 		}
@@ -604,15 +593,13 @@ public class LodBufferBuilder
 		{
 			// close the context so it can be re-used later.
 			// I'm guessing we can't just leave it because the executer service
-			// does something that invalidates the OpenGL context
+			// does something that invalidates the OpenGL context.
 			glProxy.setGlContext(GlProxyContext.NONE);
 		}
 	}
 	
-	/**
-	 * Uploads the uploadBuffer into the VBO in GPU memory.
-	 */
-	private void vboUpload(VertexBuffer vbo, ByteBuffer uploadBuffer)
+	/** Uploads the uploadBuffer into the VBO and then into GPU memory. */
+	private void vboUpload(VertexBuffer vbo, int storageBufferId, ByteBuffer uploadBuffer)
 	{
 		// this shouldn't happen, but just to be safe
 		if (vbo.id != -1 && GlProxy.getInstance().getGlContext() == GlProxyContext.LOD_BUILDER)
@@ -621,129 +608,59 @@ public class LodBufferBuilder
 			vbo.vertexCount = (uploadBuffer.remaining() / vbo.format.getVertexSize());
 			
 			
-			
-//			// buffer mapping // 
-//			// no stutter 50% GPU useage
-//			// stores everything in system memory instead of GPU memory
-//			// making rendering much slower
-//			
-//			GL45.glBindBuffer(GL45.GL_ARRAY_BUFFER, vbo.id);
-//			
-//			ByteBuffer vboBuffer = null;
-//			try
-//			{
-//				vboBuffer = GL45.glMapBufferRange(GL45.GL_ARRAY_BUFFER, 0, uploadBuffer.capacity(), GL45.GL_MAP_WRITE_BIT | GL45.GL_MAP_UNSYNCHRONIZED_BIT);
-//				if (vboBuffer == null)
-//				{
-//					GL45.glBufferData(GL45.GL_ARRAY_BUFFER, uploadBuffer.capacity() * 4, GL45.GL_STREAM_DRAW);
-//					GL45.glBufferSubData(GL45.GL_ARRAY_BUFFER, 0, uploadBuffer);
-//					
-//					ClientProxy.LOGGER.info("null");
-//				}
-//				else
-//				{
-//					vboBuffer.put(uploadBuffer);
-////					ClientProxy.LOGGER.info("not null");
-//				}
-//			}
-//			catch(Exception e)
-//			{
-//				ClientProxy.LOGGER.info(e.getClass().getSimpleName());
-////				e.printStackTrace();
-//			}
-//			finally
-//			{
-//				GL15.glUnmapBuffer(GL15.GL_ARRAY_BUFFER);
-//				GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);	
-//			}
-			
-			
-			
-			
-			
-//			// bufferstorage //
-//			// to test: uncomment the bufferstorage lines in setupBuffers as well
-//			// then reboot the game
-//			
-//			// moderate stutter 50% gpu
-//			// stores everything in system memory instead of GPU memory
-//			// making rendering much slower
-//			
-//			GL45.glBindBuffer(GL45.GL_ARRAY_BUFFER, vbo.id);
-//			
-//			try
-//			{
-//				ByteBuffer vboBuffer = GL45.glMapBufferRange(GL45.GL_ARRAY_BUFFER, 0, uploadBuffer.capacity(), GL45.GL_MAP_WRITE_BIT | GL45.GL_MAP_UNSYNCHRONIZED_BIT);
-//				if (vboBuffer == null)
-//				{
-//					ClientProxy.LOGGER.info("mapping fail");
-//				}
-//				else
-//				{
-//					vboBuffer.put(uploadBuffer);
-//				}
-//			}
-//			catch(Exception e)
-//			{
-//				ClientProxy.LOGGER.info(e.getClass().getSimpleName());
-//				//e.printStackTrace();
-//			}
-//			finally
-//			{
-//				GL45.glUnmapBuffer(GL45.GL_ARRAY_BUFFER);
-//				GL45.glBindBuffer(GL45.GL_ARRAY_BUFFER, 0);
-//			}
-			
-
-			
-			
-			
-			// hybrid subData/bufferData //
-			// less stutter 12% GPU usage
-			
 			GL45.glBindBuffer(GL45.GL_ARRAY_BUFFER, vbo.id);
-			
-			long size = GL45.glGetBufferParameteri64(GL45.GL_ARRAY_BUFFER, GL45.GL_BUFFER_SIZE);
-			if (size < uploadBuffer.capacity() * 4)
+			try
 			{
-				GL45.glBufferData(GL45.GL_ARRAY_BUFFER, uploadBuffer.capacity() * 5, GL45.GL_STREAM_DRAW);
-				ClientProxy.LOGGER.info("expand buffer: " + size + " -> " + (uploadBuffer.capacity() * 4));
+				// get a pointer to the buffer in system memory
+				ByteBuffer vboBuffer = GL45.glMapBufferRange(GL45.GL_ARRAY_BUFFER, 0, uploadBuffer.capacity(), GL45.GL_MAP_WRITE_BIT | GL45.GL_MAP_UNSYNCHRONIZED_BIT);
+				if (vboBuffer == null)
+				{
+					// the buffer in system memory isn't big enough, 
+					// expand it so next time hopefully it will be big enough.
+					// This does cause lag/stuttering so it should be avoided!
+					GL45.glBufferData(GL45.GL_ARRAY_BUFFER, uploadBuffer.capacity() * 4, GL45.GL_STREAM_DRAW);
+					GL45.glBufferSubData(GL45.GL_ARRAY_BUFFER, 0, uploadBuffer);
+					
+					ClientProxy.LOGGER.info("null");
+				}
+				else
+				{
+					// upload the buffer into system memory...
+					vboBuffer.put(uploadBuffer);
+					GL15.glUnmapBuffer(GL15.GL_ARRAY_BUFFER);
+					
+					// ...then upload into GPU memory
+					// (uploading into GPU memory can only be done through )
+					GL45.glCopyNamedBufferSubData(vbo.id, storageBufferId, 0, 0, uploadBuffer.capacity());
+				}
 			}
-			GL45.glBufferSubData(GL45.GL_ARRAY_BUFFER, 0, uploadBuffer);
+			catch(Exception e)
+			{
+				ClientProxy.LOGGER.info(e.getClass().getSimpleName());
+//				e.printStackTrace();
+			}
+			finally
+			{
+				GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);	
+			}
 			
-			GL15.glUnmapBuffer(GL15.GL_ARRAY_BUFFER);
-			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);	
-			
-			
-			
-//			// old method - bufferData
-//			// bad stuttering 12% GPU usage
-//			
-//			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.id);
-//			// subData only works if the memory is allocated beforehand.
-//			GL15C.glBufferData(GL15.GL_ARRAY_BUFFER, uploadBuffer.remaining(), GL15C.GL_DYNAMIC_DRAW);
-//			
-//			// interestingly bufferSubData renders faster than glMapBuffer
-//			// even though OpenGLInsights-AsynchronousBufferTransfers says glMapBuffer
-//			// is faster for transferring data. They must put the data in different memory
-//			// or something.
-//			GL15C.glBufferSubData(GL15.GL_ARRAY_BUFFER, 0, uploadBuffer);
-//			GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		}
 	}
 	
-	/**
-	 * Get the newly created VBOs
-	 */
+	/** Get the newly created VBOs */
 	public VertexBuffersAndOffset getVertexBuffers()
 	{
-		// don't wait for the lock to open
+		// don't wait for the lock to open,
 		// since this is called on the main render thread
 		if (bufferLock.tryLock())
 		{
 			VertexBuffer[][][] tmpVbo = drawableVbos;
 			drawableVbos = buildableVbos;
 			buildableVbos = tmpVbo;
+			
+			int[][] tmpStorage = drawableStorageBufferIds;
+			drawableStorageBufferIds = buildableStorageBufferIds;
+			buildableStorageBufferIds = tmpStorage;
 			
 			
 			drawableCenterChunkPos = buildableCenterChunkPos;
@@ -753,20 +670,20 @@ public class LodBufferBuilder
 			bufferLock.unlock();
 		}
 		
-		return new VertexBuffersAndOffset(drawableVbos, drawableCenterChunkPos);
+		return new VertexBuffersAndOffset(drawableVbos, drawableStorageBufferIds, drawableCenterChunkPos);
 	}
 	
-	/**
-	 * A simple container to pass multiple objects back in the getVertexBuffers method.
-	 */
+	/** A simple container to pass multiple objects back in the getVertexBuffers method. */
 	public class VertexBuffersAndOffset
 	{
 		public VertexBuffer[][][] vbos;
+		public int[][] storageBufferIds;
 		public ChunkPos drawableCenterChunkPos;
 		
-		public VertexBuffersAndOffset(VertexBuffer[][][] newVbos, ChunkPos newDrawableCenterChunkPos)
+		public VertexBuffersAndOffset(VertexBuffer[][][] newVbos, int[][] newStorageBufferIds, ChunkPos newDrawableCenterChunkPos)
 		{
 			vbos = newVbos;
+			storageBufferIds = newStorageBufferIds;
 			drawableCenterChunkPos = newDrawableCenterChunkPos;
 		}
 	}
@@ -779,20 +696,5 @@ public class LodBufferBuilder
 	public boolean newBuffersAvaliable()
 	{
 		return switchVbos;
-	}
-	
-	
-	/**
-	 *
-	 */
-	public void setPartialRegen()
-	{
-	}
-	
-	/**
-	 *
-	 */
-	public void setFullRegen()
-	{
 	}
 }
