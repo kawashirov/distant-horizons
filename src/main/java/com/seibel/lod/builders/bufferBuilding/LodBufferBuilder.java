@@ -576,7 +576,7 @@ public class LodBufferBuilder
 						for (int i = 0; i < buildableBuffers[x][z].length; i++)
 						{
 							ByteBuffer builderBuffer = buildableBuffers[x][z][i].popNextBuffer().getSecond();
-							vboUpload(buildableVbos[x][z][i], buildableStorageBufferIds[x][z], builderBuffer);
+							vboUpload(buildableVbos[x][z][i], buildableStorageBufferIds[x][z], builderBuffer, x,z);
 							lodDim.setRegenRegionBufferByArrayIndex(x, z, false);
 						}
 					}
@@ -599,7 +599,10 @@ public class LodBufferBuilder
 	}
 	
 	/** Uploads the uploadBuffer into the VBO and then into GPU memory. */
-	private void vboUpload(VertexBuffer vbo, int storageBufferId, ByteBuffer uploadBuffer)
+	private void vboUpload(VertexBuffer vbo, int storageBufferId, ByteBuffer uploadBuffer,
+			int xVboIndex, int zVboIndex) 
+			// x/zVboIndex are just used for the debugging console logging
+			// and should be removed when the logger is removed.
 	{
 		// this shouldn't happen, but just to be safe
 		if (vbo.id != -1 && GlProxy.getInstance().getGlContext() == GlProxyContext.LOD_BUILDER)
@@ -615,13 +618,20 @@ public class LodBufferBuilder
 				ByteBuffer vboBuffer = GL45.glMapBufferRange(GL45.GL_ARRAY_BUFFER, 0, uploadBuffer.capacity(), GL45.GL_MAP_WRITE_BIT | GL45.GL_MAP_UNSYNCHRONIZED_BIT);
 				if (vboBuffer == null)
 				{
-					// the buffer in system memory isn't big enough, 
-					// expand it so next time hopefully it will be big enough.
-					// This does cause lag/stuttering so it should be avoided!
-					GL45.glBufferData(GL45.GL_ARRAY_BUFFER, uploadBuffer.capacity() * 4, GL45.GL_STREAM_DRAW);
-					GL45.glBufferSubData(GL45.GL_ARRAY_BUFFER, 0, uploadBuffer);
+					int previousCapacity = uploadBuffer.capacity();
 					
-					ClientProxy.LOGGER.info("null");
+					// only change the system buffer if the uploadBuffer actually
+					// has something in it
+					if (previousCapacity != 0)
+					{
+						// the buffer in system memory isn't big enough, 
+						// expand it so next time hopefully it will be big enough.
+						// This does cause lag/stuttering so it should be avoided!
+						GL45.glBufferData(GL45.GL_ARRAY_BUFFER, uploadBuffer.capacity() * 4, GL45.GL_DYNAMIC_DRAW);
+						GL45.glBufferSubData(GL45.GL_ARRAY_BUFFER, 0, uploadBuffer);
+						
+						ClientProxy.LOGGER.info("vbo (" + xVboIndex + "," + zVboIndex + ") expanded: " + previousCapacity + " -> " + (previousCapacity * 4));
+					}
 				}
 				else
 				{
@@ -636,8 +646,8 @@ public class LodBufferBuilder
 			}
 			catch(Exception e)
 			{
-				ClientProxy.LOGGER.info(e.getClass().getSimpleName());
-//				e.printStackTrace();
+				ClientProxy.LOGGER.error("vboUpload failed: " + e.getClass().getSimpleName());
+				e.printStackTrace();
 			}
 			finally
 			{
