@@ -18,23 +18,27 @@
 
 package com.seibel.lod.objects;
 
-import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.GenerationPriority;
-import com.seibel.lod.enums.LodTemplate;
-import com.seibel.lod.enums.VerticalQuality;
-import com.seibel.lod.handlers.LodDimensionFileHandler;
-import com.seibel.lod.util.*;
-import com.seibel.lod.wrappers.MinecraftWrapper;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.server.ServerChunkProvider;
-import net.minecraft.world.server.ServerWorld;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import com.seibel.lod.config.LodConfig;
+import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.GenerationPriority;
+import com.seibel.lod.enums.VerticalQuality;
+import com.seibel.lod.handlers.LodDimensionFileHandler;
+import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.DetailDistanceUtil;
+import com.seibel.lod.util.LevelPosUtil;
+import com.seibel.lod.util.LodThreadFactory;
+import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrappers.MinecraftWrapper;
+
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
 
 
 /**
@@ -863,32 +867,6 @@ public class LodDimension
 			stringBuilder.append("\n");
 		}
 		return stringBuilder.toString();
-	}
-	
-	/** Returns the minimum memory required by the dimension in Bytes */
-	public long getRegionRequiredMemory(int x, int z, LodTemplate template)
-	{
-		/*return regions[x][z].getMinMemoryNeeded(template);*/
-		
-		/*TODO add memory use calculated with the following cases
-		switch (LodConfig.CLIENT.graphics.detailDropOff.get())
-		{
-			default:
-			case BY_BLOCK:
-				break;
-			case BY_REGION_FANCY:
-				break;
-			case BY_REGION_FAST:
-		}*/
-		
-		int minDistance = LevelPosUtil.minDistance(LodUtil.REGION_DETAIL_LEVEL, x, z, halfWidth, halfWidth);
-		int detail = DetailDistanceUtil.getTreeCutDetailFromDistance(minDistance);
-		int levelToGen = DetailDistanceUtil.getLodDrawDetail(detail);
-		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - levelToGen);
-		int maxVerticalData = DetailDistanceUtil.getMaxVerticalData(detail);
-		long memoryUse = LodUtil.regionRenderingMemoryUse(x, z, template);
-		//System.out.println(detail + " " + memoryUse + " " + template.getBufferMemoryForSingleLod(maxVerticalData));
-		return memoryUse;
 	}
 	
 	public boolean GetIsRegionDirty(int i, int j)

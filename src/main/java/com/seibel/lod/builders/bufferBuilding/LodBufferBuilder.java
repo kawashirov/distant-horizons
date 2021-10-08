@@ -424,7 +424,7 @@ public class LodBufferBuilder
 	{
 		bufferLock.lock();
 		int numbRegionsWide = lodDimension.getWidth();
-		long memoryRequired;
+		long regionMemoryRequired;
 		int numberOfBuffers;
 		
 		previousRegionWidth = numbRegionsWide;
@@ -442,10 +442,10 @@ public class LodBufferBuilder
 		{
 			for (int z = 0; z < numbRegionsWide; z++)
 			{
-				memoryRequired = lodDimension.getRegionRequiredMemory(x, z, LodConfig.CLIENT.graphics.lodTemplate.get());
+				regionMemoryRequired = LodUtil.calculateMaximumRegionGpuMemoryUse(x, z, LodConfig.CLIENT.graphics.lodTemplate.get());
 				
 				// if the memory required is greater than the max buffer capacity divide the memory across multiple buffers
-				if (memoryRequired < LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY)
+				if (regionMemoryRequired < LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY)
 				{
 					bufferSize[x][z] = 1;
 					buildableBuffers[x][z] = new BufferBuilder[1];
@@ -454,8 +454,8 @@ public class LodBufferBuilder
 				}
 				else
 				{
-					numberOfBuffers = (int) Math.ceil(memoryRequired / LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY) + 1;
-					memoryRequired = LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY;
+					numberOfBuffers = (int) Math.ceil(regionMemoryRequired / LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY) + 1;
+					regionMemoryRequired = LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY;
 					bufferSize[x][z] = numberOfBuffers;
 					buildableBuffers[x][z] = new BufferBuilder[numberOfBuffers];
 					buildableVbos[x][z] = new VertexBuffer[numberOfBuffers];
@@ -465,18 +465,18 @@ public class LodBufferBuilder
 				
 				for (int i = 0; i < bufferSize[x][z]; i++)
 				{
-					buildableBuffers[x][z][i] = new BufferBuilder((int) memoryRequired);
+					buildableBuffers[x][z][i] = new BufferBuilder((int) regionMemoryRequired);
 					
 					buildableVbos[x][z][i] = new VertexBuffer(LodUtil.LOD_VERTEX_FORMAT);
 					drawableVbos[x][z][i] = new VertexBuffer(LodUtil.LOD_VERTEX_FORMAT);
 					
 					// create the initial mapped buffers (system memory)
 					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buildableVbos[x][z][i].id);
-					GL15.glBufferData(GL15.GL_ARRAY_BUFFER, memoryRequired, GL45.GL_DYNAMIC_DRAW);
+					GL15.glBufferData(GL15.GL_ARRAY_BUFFER, regionMemoryRequired, GL45.GL_DYNAMIC_DRAW);
 					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 					
 					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, drawableVbos[x][z][i].id);
-					GL15.glBufferData(GL15.GL_ARRAY_BUFFER, memoryRequired, GL45.GL_DYNAMIC_DRAW);
+					GL15.glBufferData(GL15.GL_ARRAY_BUFFER, regionMemoryRequired, GL45.GL_DYNAMIC_DRAW);
 					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 					
 					

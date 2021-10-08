@@ -353,13 +353,14 @@ public class LodUtil
 	}
 	
 	/**
-	 * This methods return the number of lods that are going to be rendered in a region in the worst case
+	 * Returns the GPU memory needed if all LODs in
+	 * a the given region are rendered.
 	 *
 	 * @param regionPosX x region position to check
 	 * @param regionPosZ z region position to check
 	 * @return number of lods in the region
 	 */
-	public static long regionRenderingMemoryUse(int regionPosX, int regionPosZ, LodTemplate template)
+	public static long calculateMaximumRegionGpuMemoryUse(int regionPosX, int regionPosZ, LodTemplate template)
 	{
 		int xRegionSign = (int) Math.signum(regionPosX);
 		int zRegionSign = (int) Math.signum(regionPosZ);
@@ -414,6 +415,7 @@ public class LodUtil
 			count *= maxVerticalData;
 			memoryUse += template.getBufferMemoryForSingleLod(maxVerticalData) * count;
 		}
+		
 		return memoryUse;
 	}
 	
