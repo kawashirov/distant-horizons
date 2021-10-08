@@ -3,7 +3,6 @@ package com.seibel.lod.util;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.HorizontalResolution;
-import com.seibel.lod.enums.VerticalQuality;
 
 public class DetailDistanceUtil
 {
@@ -167,9 +166,7 @@ public class DetailDistanceUtil
 	
 	public static int getMaxVerticalData(int detail)
 	{
-		if(LodConfig.CLIENT.worldGenerator.lodQualityMode.get() == VerticalQuality.HEIGHTMAP)
-			return 1;
-		return maxVerticalData[LodUtil.clamp(minGenDetail, detail, LodUtil.REGION_DETAIL_LEVEL)];
+		return LodConfig.CLIENT.worldGenerator.verticalQuality.get().maxVerticalData[LodUtil.clamp(minGenDetail, detail, LodUtil.REGION_DETAIL_LEVEL)];
 	}
 	
 }

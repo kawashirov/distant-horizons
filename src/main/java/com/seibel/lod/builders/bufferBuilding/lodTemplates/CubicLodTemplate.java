@@ -15,18 +15,18 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.builders.bufferBuilding.lodTemplates;
 
-import java.util.Map;
+package com.seibel.lod.builders.bufferBuilding.lodTemplates;
 
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.LodUtil;
-
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+
+import java.util.Map;
 
 /**
  * Builds LODs as rectangular prisms.
@@ -39,7 +39,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	
 	public CubicLodTemplate()
 	{
-		
+	
 	}
 	
 	@Override
@@ -73,11 +73,11 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		addBoundingBoxToBuffer(buffer, box);
 	}
 	
-	private void generateBoundingBox(Box box, 
-			int height, int depth, int width, 
-			double xOffset, double yOffset, double zOffset, 
-			BlockPos bufferCenterBlockPos, 
-			Map<Direction, long[]> adjData, 
+	private void generateBoundingBox(Box box,
+			int height, int depth, int width,
+			double xOffset, double yOffset, double zOffset,
+			BlockPos bufferCenterBlockPos,
+			Map<Direction, long[]> adjData,
 			int color,
 			boolean[] adjShadeDisabled)
 	{
@@ -130,7 +130,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	public int getBufferMemoryForSingleNode(int maxVerticalData)
 	{
 		// TODO, what do these magic numbers mean
-		return 2 * 4 * (3 + 4) + 4 * 4 * Math.max((maxVerticalData+1)/2,1) * (3 + 4);
+		return 2 * 4 * (3 + 4) + 4 * 4 * Math.max((maxVerticalData + 1) / 2, 1) * (3 + 4);
 	}
 	
 }

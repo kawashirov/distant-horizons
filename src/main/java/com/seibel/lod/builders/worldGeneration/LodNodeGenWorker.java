@@ -15,16 +15,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.builders.worldGeneration;
 
-import java.util.ConcurrentModificationException;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.function.Supplier;
+package com.seibel.lod.builders.worldGeneration;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.seibel.lod.builders.lodBuilding.LodBuilder;
@@ -33,9 +25,7 @@ import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.proxy.ClientProxy;
-import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.ChunkPos;
@@ -48,13 +38,7 @@ import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.gen.blockstateprovider.WeightedBlockStateProvider;
-import net.minecraft.world.gen.feature.BlockClusterFeatureConfig;
-import net.minecraft.world.gen.feature.ConfiguredFeature;
-import net.minecraft.world.gen.feature.DecoratedFeatureConfig;
-import net.minecraft.world.gen.feature.FeatureSpread;
-import net.minecraft.world.gen.feature.FeatureSpreadConfig;
-import net.minecraft.world.gen.feature.IceAndSnowFeature;
-import net.minecraft.world.gen.feature.NoFeatureConfig;
+import net.minecraft.world.gen.feature.*;
 import net.minecraft.world.gen.placement.ConfiguredPlacement;
 import net.minecraft.world.gen.placement.DecoratedPlacementConfig;
 import net.minecraft.world.gen.placement.IPlacementConfig;
@@ -63,6 +47,15 @@ import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.ServerWorldLightManager;
 import net.minecraftforge.common.WorldWorkerManager.IWorker;
+
+import java.util.ConcurrentModificationException;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 /**
  * This is used to generate a LodChunk at a given ChunkPos.
@@ -75,13 +68,13 @@ public class LodNodeGenWorker implements IWorker
 	public static ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
 	
 	private boolean threadStarted = false;
-	private LodChunkGenThread thread;
+	private final LodChunkGenThread thread;
 	
 	
 	/** If a configured feature fails for whatever reason,
 	 * add it to this list, this is to hopefully remove any
 	 * features that could cause issues down the line. */
-	private static ConcurrentHashMap<Integer, ConfiguredFeature<?, ?>> configuredFeaturesToAvoid = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<Integer, ConfiguredFeature<?, ?>> configuredFeaturesToAvoid = new ConcurrentHashMap<>();
 	
 	
 	
@@ -149,14 +142,14 @@ public class LodNodeGenWorker implements IWorker
 	
 	
 	
-	private class LodChunkGenThread implements Runnable
+	private static class LodChunkGenThread implements Runnable
 	{
 		public final ServerWorld serverWorld;
 		public final LodDimension lodDim;
 		public final DistanceGenerationMode generationMode;
 		public final LodBuilder lodBuilder;
 		
-		private ChunkPos pos;
+		private final ChunkPos pos;
 		
 		public LodChunkGenThread(ChunkPos newPos, DistanceGenerationMode newGenerationMode,
 				LodBuilder newLodBuilder,
@@ -177,12 +170,12 @@ public class LodNodeGenWorker implements IWorker
 				// only generate LodChunks if they can
 				// be added to the current LodDimension
 				
-				/**TODO i must disable this if, i will find a way to replace it*/
+				/* TODO i must disable this if, i will find a way to replace it */
 				if (lodDim.regionIsInRange(pos.x / LodUtil.REGION_WIDTH_IN_CHUNKS, pos.z / LodUtil.REGION_WIDTH_IN_CHUNKS))
 				{
 //					long startTime = System.currentTimeMillis();
 					
-					switch(generationMode)
+					switch (generationMode)
 					{
 					case NONE:
 						// don't generate
@@ -217,7 +210,7 @@ public class LodNodeGenWorker implements IWorker
  */
 					// shows the pool size, active threads, queued tasks and completed tasks
 //					ClientProxy.LOGGER.info(genThreads.toString());
-					
+
 //					long endTime = System.currentTimeMillis();
 //					System.out.println(endTime - startTime);
 					
@@ -271,20 +264,20 @@ public class LodNodeGenWorker implements IWorker
 			
 			// add fake heightmap data so our LODs aren't at height 0
 			Heightmap heightmap = new Heightmap(chunk, LodUtil.DEFAULT_HEIGHTMAP);
-			for(int x = 0; x < LodUtil.CHUNK_WIDTH && !inTheEnd; x++)
+			for (int x = 0; x < LodUtil.CHUNK_WIDTH && !inTheEnd; x++)
 			{
-				for(int z = 0; z < LodUtil.CHUNK_WIDTH && !inTheEnd; z++)
+				for (int z = 0; z < LodUtil.CHUNK_WIDTH && !inTheEnd; z++)
 				{
 					if (simulateHeight)
 					{
 						// these heights are of course aren't super accurate,
 						// they are just to simulate height data where there isn't any
-						switch(chunk.getBiomes().getNoiseBiome(x >> 2, seaLevel >> 2, z >> 2).getBiomeCategory())
+						switch (chunk.getBiomes().getNoiseBiome(x >> 2, seaLevel >> 2, z >> 2).getBiomeCategory())
 						{
 						case NETHER:
 							heightmap.setHeight(x, z, serverWorld.getHeight() / 2);
 							break;
-							
+						
 						case EXTREME_HILLS:
 							heightmap.setHeight(x, z, seaLevel + 30);
 							break;
@@ -300,24 +293,24 @@ public class LodNodeGenWorker implements IWorker
 						case NONE:
 							heightmap.setHeight(x, z, 0);
 							break;
-							
+						
 						case OCEAN:
 						case RIVER:
 							heightmap.setHeight(x, z, seaLevel);
 							break;
-							
+						
 						case THEEND:
 							inTheEnd = true;
 							break;
-							
-							// DESERT
-							// FOREST
-							// ICY
-							// MUSHROOM
-							// SAVANNA
-							// SWAMP
-							// TAIGA
-							// PLAINS
+						
+						// DESERT
+						// FOREST
+						// ICY
+						// MUSHROOM
+						// SAVANNA
+						// SWAMP
+						// TAIGA
+						// PLAINS
 						default:
 							heightmap.setHeight(x, z, seaLevel + 10);
 							break;
@@ -346,8 +339,8 @@ public class LodNodeGenWorker implements IWorker
 				// generates the same and it looks really bad.
 				lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(true, true, false));
 			}
-			
-			
+
+
 //			long startTime = System.currentTimeMillis();
 //			long endTime = System.currentTimeMillis();
 //			System.out.println(endTime - startTime);
@@ -445,9 +438,9 @@ public class LodNodeGenWorker implements IWorker
 			{
 				List<List<Supplier<ConfiguredFeature<?, ?>>>> featuresForState = biome.generationSettings.features();
 				
-				for(int featureStateToGenerate = 0; featureStateToGenerate < featuresForState.size(); featureStateToGenerate++)
+				for (int featureStateToGenerate = 0; featureStateToGenerate < featuresForState.size(); featureStateToGenerate++)
 				{
-					for(Supplier<ConfiguredFeature<?, ?>> featureSupplier : featuresForState.get(featureStateToGenerate))
+					for (Supplier<ConfiguredFeature<?, ?>> featureSupplier : featuresForState.get(featureStateToGenerate))
 					{
 						ConfiguredFeature<?, ?> configuredFeature = featureSupplier.get();
 						
@@ -460,7 +453,7 @@ public class LodNodeGenWorker implements IWorker
 						{
 							configuredFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition());
 						}
-						catch(ConcurrentModificationException e)
+						catch (ConcurrentModificationException e)
 						{
 							// This will happen. I'm not sure what to do about it
 							// except pray that it doesn't effect the normal world generation
@@ -480,7 +473,7 @@ public class LodNodeGenWorker implements IWorker
 								configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
 						}
-						catch(UnsupportedOperationException e)
+						catch (UnsupportedOperationException e)
 						{
 							// This will happen when the LodServerWorld
 							// isn't able to return something that a feature
@@ -490,7 +483,7 @@ public class LodNodeGenWorker implements IWorker
 								configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
 						}
-						catch(Exception e)
+						catch (Exception e)
 						{
 							// I'm not sure what happened, print to the log
 							
@@ -538,7 +531,7 @@ public class LodNodeGenWorker implements IWorker
 		@SuppressWarnings({ "rawtypes", "unchecked", "unused" })
 		private DecoratedFeatureConfig cloneDecoratedFeatureConfig(DecoratedFeatureConfig config)
 		{
-			IPlacementConfig placementConfig = null;
+			IPlacementConfig placementConfig;
 			
 			Class oldConfigClass = config.decorator.config().getClass();
 			
@@ -549,12 +542,12 @@ public class LodNodeGenWorker implements IWorker
 				
 				placementConfig = new FeatureSpreadConfig(oldSpread);
 			}
-			else if(oldConfigClass == DecoratedPlacementConfig.class)
+			else if (oldConfigClass == DecoratedPlacementConfig.class)
 			{
 				DecoratedPlacementConfig oldPlacementConfig = (DecoratedPlacementConfig) config.decorator.config();
 				placementConfig = new DecoratedPlacementConfig(oldPlacementConfig.inner(), oldPlacementConfig.outer());
 			}
-			else if(oldConfigClass == NoiseDependant.class)
+			else if (oldConfigClass == NoiseDependant.class)
 			{
 				NoiseDependant oldPlacementConfig = (NoiseDependant) config.decorator.config();
 				placementConfig = new NoiseDependant(oldPlacementConfig.noiseLevel, oldPlacementConfig.belowNoise, oldPlacementConfig.aboveNoise);
@@ -588,9 +581,18 @@ public class LodNodeGenWorker implements IWorker
 			builder.xspread(config.xspread);
 			builder.yspread(config.yspread);
 			builder.zspread(config.zspread);
-			if(config.canReplace) { builder.canReplace(); }
-			if(config.needWater) { builder.needWater(); }
-			if(config.project) { builder.noProjection(); }
+			if (config.canReplace)
+			{
+				builder.canReplace();
+			}
+			if (config.needWater)
+			{
+				builder.needWater();
+			}
+			if (config.project)
+			{
+				builder.noProjection();
+			}
 			builder.tries(config.tries);
 			
 			
@@ -615,7 +617,7 @@ public class LodNodeGenWorker implements IWorker
 		{
 			genThreads.shutdownNow();
 		}
-		genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new LodThreadFactory(LodNodeGenWorker.class.getSimpleName()));
+		genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get(), new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
 	}
 	
 	

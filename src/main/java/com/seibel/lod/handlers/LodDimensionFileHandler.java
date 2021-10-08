@@ -15,37 +15,27 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.handlers;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.VerticalQuality;
+import com.seibel.lod.objects.*;
+import com.seibel.lod.proxy.ClientProxy;
+import com.seibel.lod.util.LodThreadFactory;
+import com.seibel.lod.util.LodUtil;
+
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.VerticalQuality;
-import com.seibel.lod.objects.LodDimension;
-import com.seibel.lod.objects.LodRegion;
-import com.seibel.lod.objects.RegionPos;
-import com.seibel.lod.objects.SingleLevelContainer;
-import com.seibel.lod.objects.VerticalLevelContainer;
-import com.seibel.lod.proxy.ClientProxy;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
-
 /**
  * This object handles creating LodRegions
  * from files and saving LodRegion objects
  * to file.
- * 
+ *
  * @author James Seibel
  * @author Cola
  * @version 9-25-2021
@@ -84,7 +74,7 @@ public class LodDimensionFileHandler
 	 * Allow saving asynchronously, but never try to save multiple regions
 	 * at a time
 	 */
-	private ExecutorService fileWritingThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
+	private final ExecutorService fileWritingThreadPool = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName()));
 	
 	
 	
@@ -184,16 +174,7 @@ public class LodDimensionFileHandler
 						
 						
 						// add the data to our region
-						switch (region.getVerticalQuality())
-						{
-						default:
-						case HEIGHTMAP:
-							region.addLevelContainer(new SingleLevelContainer(data));
-							break;
-						case VOXEL:
-							region.addLevelContainer(new VerticalLevelContainer(data));
-							break;
-						}
+						region.addLevelContainer(new VerticalLevelContainer(data));
 					}
 					catch (IOException ioEx)
 					{
@@ -230,7 +211,7 @@ public class LodDimensionFileHandler
 		fileWritingThreadPool.execute(saveDirtyRegionsThread);
 	}
 	
-	private Thread saveDirtyRegionsThread = new Thread(() ->
+	private final Thread saveDirtyRegionsThread = new Thread(() ->
 	{
 		try
 		{
@@ -238,11 +219,10 @@ public class LodDimensionFileHandler
 			{
 				for (int j = 0; j < lodDimension.getWidth(); j++)
 				{
-					// TODO shouldn't this use lodDimension.isRegionDirty?
-					if (lodDimension.doesRegionNeedBufferRegen(i,j) && lodDimension.getRegionByArrayIndex(i,j) != null)
+					if (lodDimension.GetIsRegionDirty(i, j) && lodDimension.getRegionByArrayIndex(i, j) != null)
 					{
-						saveRegionToFile(lodDimension.getRegionByArrayIndex(i,j));
-						lodDimension.setRegenRegionBufferByArrayIndex(i, j,false);
+						saveRegionToFile(lodDimension.getRegionByArrayIndex(i, j));
+						lodDimension.SetIsRegionDirty(i, j, false);
 					}
 				}
 			}
@@ -275,7 +255,7 @@ public class LodDimensionFileHandler
 				ClientProxy.LOGGER.warn("Unable to save region [" + region.regionPosX + ", " + region.regionPosZ + "] to file, file is inaccessible.");
 				return;
 			}
-			
+			//ClientProxy.LOGGER.info("saving region [" + region.regionPosX + ", " + region.regionPosZ + "] to file.");
 			
 			try
 			{
@@ -312,7 +292,7 @@ public class LodDimensionFileHandler
 						// don't write anything, we don't want to accidently
 						// delete anything the user may want.
 						return;
-					}  
+					}
 					
 					// if we got this far then we are good
 					// to overwrite the old file

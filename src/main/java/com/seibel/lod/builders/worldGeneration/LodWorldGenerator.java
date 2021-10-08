@@ -33,7 +33,7 @@ public class LodWorldGenerator
 	public MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	/** This holds the thread used to generate new LODs off the main thread. */
-	private ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " world generator"));
+	private final ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " world generator"));
 	
 	/** we only want to queue up one generator thread at a time */
 	private boolean generatorThreadRunning = false;
@@ -100,23 +100,23 @@ public class LodWorldGenerator
 					
 					ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(lodDim.dimension);
 					
-					PosToGenerateContainer posToGenerate = lodDim.getDataToGenerate(
+					PosToGenerateContainer posToGenerate = lodDim.getPosToGenerate(
 							maxChunkGenRequests,
 							playerPosX,
 							playerPosZ);
-					
-					
+
+
 					byte detailLevel;
 					int posX;
 					int posZ;
 					int nearIndex = 0;
 					int farIndex = 0;
-					
+
 					for (int i = 0; i < posToGenerate.getNumberOfPos(); i++)
 					{
 						// I wish there was a way to compress this code, but I'm not aware of 
 						// a easy way to do so.
-						
+
 						// add the near positions
 						if (posToGenerate.getNthDetail(nearIndex, true) != 0 && nearIndex < posToGenerate.getNumberOfNearPos())
 						{
@@ -126,13 +126,11 @@ public class LodWorldGenerator
 							nearIndex++;
 							
 							ChunkPos chunkPos = new ChunkPos(LevelPosUtil.getChunkPos(detailLevel, posX), LevelPosUtil.getChunkPos(detailLevel, posZ));
-							if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
-							{
-								// prevent generating the same chunk multiple times
-								if (positionsWaitingToBeGenerated.contains(chunkPos))
-									continue;
-							}
-							
+
+							// prevent generating the same chunk multiple times
+							if (positionsWaitingToBeGenerated.contains(chunkPos))
+								continue;
+
 							// don't add more to the generation queue then allowed
 							if (numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
 								break;
@@ -142,8 +140,8 @@ public class LodWorldGenerator
 							LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, DetailDistanceUtil.getDistanceGenerationMode(detailLevel), lodBuilder, lodDim, serverWorld);
 							WorldWorkerManager.addWorker(genWorker);
 						}
-						
-						
+
+
 						// add the far positions
 						if (posToGenerate.getNthDetail(farIndex, false) != 0 && farIndex < posToGenerate.getNumberOfFarPos())
 						{
@@ -153,17 +151,16 @@ public class LodWorldGenerator
 							farIndex++;
 							
 							ChunkPos chunkPos = new ChunkPos(LevelPosUtil.getChunkPos(detailLevel, posX), LevelPosUtil.getChunkPos(detailLevel, posZ));
-							if (numberOfChunksWaitingToGenerate.get() < maxChunkGenRequests)
-							{
-								// prevent generating the same chunk multiple times
-								if (positionsWaitingToBeGenerated.contains(chunkPos))
-									continue;
-							}
-							
+
 							// don't add more to the generation queue then allowed
 							if (numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
-								break;
-							
+								continue;
+								//break;
+
+							// prevent generating the same chunk multiple times
+							if (positionsWaitingToBeGenerated.contains(chunkPos))
+								continue;
+
 							positionsWaitingToBeGenerated.add(chunkPos);
 							numberOfChunksWaitingToGenerate.addAndGet(1);
 							LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, DetailDistanceUtil.getDistanceGenerationMode(detailLevel), lodBuilder, lodDim, serverWorld);

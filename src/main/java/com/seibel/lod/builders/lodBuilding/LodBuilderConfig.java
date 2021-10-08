@@ -15,6 +15,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.builders.lodBuilding;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
@@ -38,7 +39,7 @@ public class LodBuilderConfig
 	public boolean useSolidBlocksInColorGen;
 	/** default: server */
 	public DistanceGenerationMode distanceGenerationMode;
-
+	
 	/**
 	 * default settings for a normal chunk <br>
 	 * useHeightmap = false <br>
@@ -53,7 +54,7 @@ public class LodBuilderConfig
 		useSolidBlocksInColorGen = true;
 		distanceGenerationMode = DistanceGenerationMode.SERVER;
 	}
-
+	
 	/**
 	 * @param newUseHeightmap               default = false
 	 * @param newUseBiomeColors             default = false
@@ -61,14 +62,14 @@ public class LodBuilderConfig
 	 * @param newDistanceGenerationMode     default = Server
 	 */
 	public LodBuilderConfig(boolean newUseHeightmap, boolean newUseBiomeColors,
-	                        boolean newUseSolidBlocksInBiomeColor, DistanceGenerationMode newDistanceGenerationMode)
+			boolean newUseSolidBlocksInBiomeColor, DistanceGenerationMode newDistanceGenerationMode)
 	{
 		useHeightmap = newUseHeightmap;
 		useBiomeColors = newUseBiomeColors;
 		useSolidBlocksInColorGen = newUseSolidBlocksInBiomeColor;
 		distanceGenerationMode = newDistanceGenerationMode;
 	}
-
+	
 	/**
 	 * @param newUseHeightmap               default = false
 	 * @param newUseBiomeColors             default = false
@@ -81,9 +82,9 @@ public class LodBuilderConfig
 		useHeightmap = newUseHeightmap;
 		useBiomeColors = newUseBiomeColors;
 		useSolidBlocksInColorGen = newUseSolidBlocksInBiomeColor;
-		distanceGenerationMode = newUseHeightmap? DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT : DistanceGenerationMode.BIOME_ONLY;
+		distanceGenerationMode = newUseHeightmap ? DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT : DistanceGenerationMode.BIOME_ONLY;
 	}
-
+	
 	/**
 	 * @param newUseHeightmap               default = false
 	 * @param newUseBiomeColors             default = false

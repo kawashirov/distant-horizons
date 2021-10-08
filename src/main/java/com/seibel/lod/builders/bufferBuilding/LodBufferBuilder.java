@@ -77,7 +77,7 @@ public class LodBufferBuilder
 	public volatile boolean fullRegeneration = false;
 	
 	/** the capacity of each buffer in bytes */
-	public volatile int[][] bufferCount;
+	public volatile int[][] bufferSize;
 	
 	/** Used when building the vbos */
 	public volatile BufferBuilder[][][] buildableBuffers;
@@ -254,7 +254,7 @@ public class LodBufferBuilder
 								PosToRenderContainer posToRender = setsToRender[xR][zR];
 								posToRender.clear(minDetail, regionPos.x, regionPos.z);
 								
-								lodDim.getDataToRender(
+								lodDim.getPosToRender(
 										posToRender,
 										regionPos,
 										playerBlockPosRounded.getX(),
@@ -428,7 +428,7 @@ public class LodBufferBuilder
 		int numberOfBuffers;
 		
 		previousRegionWidth = numbRegionsWide;
-		bufferCount = new int[numbRegionsWide][numbRegionsWide];
+		bufferSize = new int[numbRegionsWide][numbRegionsWide];
 		buildableBuffers = new BufferBuilder[numbRegionsWide][numbRegionsWide][];
 		
 		buildableVbos = new VertexBuffer[numbRegionsWide][numbRegionsWide][];
@@ -447,7 +447,7 @@ public class LodBufferBuilder
 				// if the memory required is greater than the max buffer capacity divide the memory across multiple buffers
 				if (memoryRequired < LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY)
 				{
-					bufferCount[x][z] = 1;
+					bufferSize[x][z] = 1;
 					buildableBuffers[x][z] = new BufferBuilder[1];
 					buildableVbos[x][z] = new VertexBuffer[1];
 					drawableVbos[x][z] = new VertexBuffer[1];
@@ -456,14 +456,14 @@ public class LodBufferBuilder
 				{
 					numberOfBuffers = (int) Math.ceil(memoryRequired / LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY) + 1;
 					memoryRequired = LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY;
-					bufferCount[x][z] = numberOfBuffers;
+					bufferSize[x][z] = numberOfBuffers;
 					buildableBuffers[x][z] = new BufferBuilder[numberOfBuffers];
 					buildableVbos[x][z] = new VertexBuffer[numberOfBuffers];
 					drawableVbos[x][z] = new VertexBuffer[numberOfBuffers];
 				}
 				
 				
-				for (int i = 0; i < bufferCount[x][z]; i++)
+				for (int i = 0; i < bufferSize[x][z]; i++)
 				{
 					buildableBuffers[x][z][i] = new BufferBuilder((int) memoryRequired);
 					

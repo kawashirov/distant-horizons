@@ -17,62 +17,33 @@
  */
 package com.seibel.lod.enums;
 
+import net.minecraftforge.common.ForgeConfigSpec;
+
 /**
- * heightmap <br>
- * multi_lod <br>
- * 
+ * Near_First <br>
+ * Far_First <br>
+ * <br>
+ * Determines how fast the buffers need to be regenerated
+ *
  * @author Leonardo Amato
- * @version 10-07-2021
+ * @version 9-25-2021
  */
-public enum VerticalQuality
+public enum BufferRebuildTimes
 {
-	LOW(
-			new int[]{2,
-					2,
-					2,
-					2,
-					1,
-					1,
-					1,
-					1,
-					1,
-					1,
-					1}
-	),
-	
-	MEDIUM(
-			new int[]{4,
-					4,
-					2,
-					2,
-					2,
-					1,
-					1,
-					1,
-					1,
-					1,
-					1}
-	),
-	
-	HIGH(
-			new int[]{
-					8,
-					8,
-					4,
-					4,
-					2,
-					2,
-					2,
-					1,
-					1,
-					1,
-					1}
-	);
-	
-	public final int[] maxVerticalData;
-	
-	VerticalQuality(int[] maxVerticalData)
+	FREQUENT(1000, 500, 2500),
+
+	NORMAL(2000, 1000, 5000),
+
+	RARE(5000, 2000, 10000);
+
+	public int playerMoveTimeout;
+	public int renderdChunkTimeout;
+	public int chunkChangeTimeout;
+
+	BufferRebuildTimes(int playerMoveTimeout, int renderdChunkTimeout, int chunkChangeTimeout)
 	{
-		this.maxVerticalData = maxVerticalData;
+		this.playerMoveTimeout = playerMoveTimeout;
+		this.renderdChunkTimeout = renderdChunkTimeout;
+		this.chunkChangeTimeout = chunkChangeTimeout;
 	}
 }

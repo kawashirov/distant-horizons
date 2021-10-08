@@ -15,17 +15,17 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.builders.bufferBuilding.lodTemplates;
 
-import java.util.Map;
+package com.seibel.lod.builders.bufferBuilding.lodTemplates;
 
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.util.ColorUtil;
-
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+
+import java.util.Map;
 
 /**
  * This is the abstract class used to create different

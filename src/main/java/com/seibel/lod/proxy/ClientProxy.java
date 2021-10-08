@@ -231,7 +231,8 @@ public class ClientProxy
 	public void worldLoadEvent(WorldEvent.Load event)
 	{
 		DataPointUtil.worldHeight = event.getWorld().getHeight();
-		ThreadMapUtil.clearMaps();
+		//LodNodeGenWorker.restartExecuterService();
+		//ThreadMapUtil.clearMaps();
 		
 		// the player just loaded a new world/dimension
 		lodWorld.selectWorld(LodUtil.getWorldID(event.getWorld()));
@@ -254,8 +255,8 @@ public class ClientProxy
 			
 			// if this isn't done unfinished tasks may be left in the queue
 			// preventing new LodChunks form being generated
-			LodNodeGenWorker.restartExecuterService();
-			ThreadMapUtil.clearMaps();
+			//LodNodeGenWorker.restartExecuterService();
+			//ThreadMapUtil.clearMaps();
 			
 			LodWorldGenerator.INSTANCE.numberOfChunksWaitingToGenerate.set(0);
 			lodWorld.deselectWorld();
@@ -332,7 +333,12 @@ public class ClientProxy
 	private void viewDistanceChangedEvent()
 	{
 		// calculate how wide the dimension(s) should be in regions
-		int chunksWide = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 2 + 1;
+		int chunksWide;
+		if(mc.getClientWorld().dimensionType().hasCeiling())
+			chunksWide = Math.max(LodConfig.CLIENT.graphics.lodChunkRenderDistance.get(),64) * 2 + 1;
+		else
+			chunksWide = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 2 + 1;
+			
 		int newWidth = (int) Math.ceil(chunksWide / (float) LodUtil.REGION_WIDTH_IN_CHUNKS);
 		newWidth = (newWidth % 2 == 0) ? (newWidth += 1) : (newWidth += 2); // make sure we have a odd number of regions
 		
@@ -365,6 +371,16 @@ public class ClientProxy
 		ThreadMapUtil.clearMaps();
 		
 		firstTimeSetupComplete = true;
+	}
+
+	/**
+	 * this method reset some of the static data everytime we change world
+	 **/
+	private void resetMod()
+	{
+		ThreadMapUtil.clearMaps();
+		LodNodeGenWorker.restartExecuterService();
+
 	}
 	
 	//================//
