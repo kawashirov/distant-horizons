@@ -34,6 +34,7 @@ import org.lwjgl.opengl.GL15C;
 import org.lwjgl.opengl.GL45;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.GlProxyContext;
@@ -501,7 +502,8 @@ public class LodBufferBuilder
 	}
 	
 	/**
-	 * sets the buffers and Vbos to null, forcing them to be recreated. <br><br>
+	 * Sets the buffers and Vbos to null, forcing them to be recreated <br>
+	 * and destroys any bound OpenGL objects. <br><br>
 	 * <p>
 	 * May have to wait for the bufferLock to open.
 	 */
@@ -509,9 +511,79 @@ public class LodBufferBuilder
 	{
 		bufferLock.lock();
 		
-		buildableBuffers = null;
+		
+		// destroy the buffer storages if they aren't already
+		if (buildableStorageBufferIds != null)
+		{
+			for (int i = 0; i < buildableStorageBufferIds.length; i++)
+			{
+				for (int j = 0; j < buildableStorageBufferIds.length; j++)
+				{
+					int buildableId = buildableStorageBufferIds[i][j];
+					int drawableId = drawableStorageBufferIds[i][j];
+					
+					// Send this over to the render thread, if this is being
+					// called we aren't worried about stuttering anyway.
+					// This way we don't have to worry about what context this
+					// was called from (if any).
+					RenderSystem.recordRenderCall(() -> {
+			            GL45.glDeleteBuffers(buildableId);
+			            GL45.glDeleteBuffers(drawableId);
+			         });
+				}
+			}
+		}
+		
+		buildableStorageBufferIds = null;
+		drawableStorageBufferIds = null;
+		
+		
+		
+		
+		// destroy the VBOs if they aren't already
+		if (buildableVbos != null)
+		{
+			for (int i = 0; i < buildableVbos.length; i++)
+			{
+				for (int j = 0; j < buildableVbos.length; j++)
+				{
+					for (int k = 0; k < buildableVbos[i][j].length; k++)
+					{
+						int buildableId; 
+						int drawableId;
+						
+						// variables passed into a lambda expression
+						// need to be effectively final, so we have
+						// to use a else statement here
+						if (buildableVbos[i][j][k] != null)
+							buildableId = buildableVbos[i][j][k].id;
+						else
+							buildableId = 0;
+						
+						if (drawableVbos[i][j][k] != null)
+							drawableId = drawableVbos[i][j][k].id;
+						else
+							drawableId = 0;
+							
+							
+						RenderSystem.recordRenderCall(() -> {
+							if (buildableId != 0)
+								GL45.glDeleteBuffers(buildableId);
+							if (drawableId != 0)
+								GL45.glDeleteBuffers(drawableId);
+				         });
+					}
+				}
+			}
+		}
+		
 		buildableVbos = null;
 		drawableVbos = null;
+		
+		
+		// these don't contain any OpenGL objects, so
+		// they don't require any special clean-up
+		buildableBuffers = null;
 		
 		bufferLock.unlock();
 	}
