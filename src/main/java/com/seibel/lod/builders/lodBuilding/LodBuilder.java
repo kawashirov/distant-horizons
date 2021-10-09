@@ -616,7 +616,7 @@ public class LodBuilder
 				// we don't know what the light here is,
 				// lets just take a guess
 				if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
-					skyLight = 10;
+					skyLight = 13;
 				else
 					skyLight = 0;
 			}
