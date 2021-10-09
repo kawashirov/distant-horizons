@@ -347,113 +347,119 @@ public class DataPointUtil
 		int count = 0;
 		int i;
 		int ii;
+		int dataIndex;
 		//We collect the indexes of the data, ordered by the depth
-		for (int index = 0; index < dataToMerge.length; index++)
+		for (int index = 0; index < size; index++)
 		{
-			singleData = dataToMerge[index];
-			if (doesItExist(singleData))
+			for (dataIndex = 0; dataIndex < inputVerticalData; dataIndex++)
 			{
-				genMode = Math.min(genMode, getGenerationMode(singleData));
-				allEmpty = false;
-				if (!isVoid(singleData))
+				singleData = dataToMerge[index * inputVerticalData + dataIndex];
+				if (doesItExist(singleData))
 				{
-					allVoid = false;
-					depth = getDepth(singleData);
-					height = getHeight(singleData);
-					
-					int botPos = -1;
-					int topPos = -1;
-					//values fall in between and possibly require extension of array
-					boolean botExtend = false;
-					boolean topExtend = false;
-					for (i = 0; i < count; i++)
+					genMode = Math.min(genMode, getGenerationMode(singleData));
+					allEmpty = false;
+					if (!isVoid(singleData))
 					{
-						if (depth >= heightAndDepth[i * 2] && depth <= heightAndDepth[i * 2 + 1])
+						allVoid = false;
+						depth = getDepth(singleData);
+						height = getHeight(singleData);
+						
+						int botPos = -1;
+						int topPos = -1;
+						//values fall in between and possibly require extension of array
+						boolean botExtend = false;
+						boolean topExtend = false;
+						for (i = 0; i < count; i++)
 						{
-							botPos = i;
-							break;
+							if (depth >= heightAndDepth[i * 2] && depth <= heightAndDepth[i * 2 + 1])
+							{
+								botPos = i;
+								break;
+							}
+							else if (((i + 1 < count && depth < heightAndDepth[(i + 1) * 2]) || i + 1 == count) && depth > heightAndDepth[i * 2 + 1])
+							{
+								botPos = i;
+								botExtend = true;
+								break;
+							}
 						}
-						else if (((i + 1 < count && depth < heightAndDepth[(i + 1) * 2]) || i + 1 == count) && depth > heightAndDepth[i * 2 + 1])
+						for (i = 0; i < count; i++)
 						{
-							botPos = i;
-							botExtend = true;
-							break;
+							if (height >= heightAndDepth[i * 2] && height <= heightAndDepth[i * 2 + 1])
+							{
+								topPos = i;
+								break;
+							}
+							else if (((i + 1 < count && height < heightAndDepth[(i + 1) * 2]) || i + 1 == count) && height > heightAndDepth[i * 2 + 1])
+							{
+								topPos = i;
+								topExtend = true;
+								break;
+							}
 						}
-					}
-					for (i = 0; i < count; i++)
-					{
-						if (height >= heightAndDepth[i * 2] && height <= heightAndDepth[i * 2 + 1])
+						if (botPos == -1)
 						{
-							topPos = i;
-							break;
+							if (topPos == -1)
+							{
+								//whole block falls below
+								extendArray(heightAndDepth, 2, 0, 1, count);
+								heightAndDepth[0] = depth;
+								heightAndDepth[1] = height;
+								count++;
+							}
+							else if (!topExtend)
+							{
+								//only bottom falls below extending it there, while top is inside existing
+								shrinkArray(heightAndDepth, 2, 0, topPos, count);
+								heightAndDepth[0] = depth;
+								count -= topPos;
+							}
+							else
+							{
+								//top falls between some blocks, extending those as well
+								shrinkArray(heightAndDepth, 2, 0, topPos, count);
+								heightAndDepth[0] = depth;
+								heightAndDepth[1] = height;
+								count -= topPos;
+							}
 						}
-						else if (((i + 1 < count && height < heightAndDepth[(i + 1) * 2]) || i + 1 == count) && height > heightAndDepth[i * 2 + 1])
+						else if (!botExtend)
 						{
-							topPos = i;
-							topExtend = true;
-							break;
-						}
-					}
-					if (botPos == -1)
-					{
-						if (topPos == -1)
-						{
-							//whole block falls below
-							extendArray(heightAndDepth, 2, 0, 1, count);
-							heightAndDepth[0] = depth;
-							heightAndDepth[1] = height;
-							count++;
-						}
-						else if (!topExtend)
-						{
-							//only bottom falls below extending it there, while top is inside existing
-							shrinkArray(heightAndDepth, 2, 0, topPos, count);
-							heightAndDepth[0] = depth;
-							count -= topPos;
-						}
-						else
-						{
-							//top falls between some blocks, extending those as well
-							shrinkArray(heightAndDepth, 2, 0, topPos, count);
-							heightAndDepth[0] = depth;
-							heightAndDepth[1] = height;
-							count -= topPos;
-						}
-					}
-					else if (!botExtend)
-					{
-						if (!topExtend)
-							//both top and bottom are within some exiting blocks, possibly merging them
-							heightAndDepth[botPos * 2 + 1] = heightAndDepth[topPos * 2 + 1];
-						else
-							//top falls between some blocks, extending it there
-							heightAndDepth[botPos * 2 + 1] = height;
-						shrinkArray(heightAndDepth, 2, botPos + 1, topPos - botPos, count);
-						count -= topPos - botPos;
-					}
-					else
-					{
-						if (!topExtend)
-						{
-							//only top is within some exiting block, extending it
-							botPos++; //to make it easier
-							heightAndDepth[botPos * 2] = depth;
-							heightAndDepth[botPos * 2 + 1] = heightAndDepth[topPos * 2 + 1];
+							if (!topExtend)
+								//both top and bottom are within some exiting blocks, possibly merging them
+								heightAndDepth[botPos * 2 + 1] = heightAndDepth[topPos * 2 + 1];
+							else
+								//top falls between some blocks, extending it there
+								heightAndDepth[botPos * 2 + 1] = height;
 							shrinkArray(heightAndDepth, 2, botPos + 1, topPos - botPos, count);
 							count -= topPos - botPos;
 						}
 						else
 						{
-							//both top and bottom are outside existing blocks
-							shrinkArray(heightAndDepth, 2, botPos + 1, topPos - botPos, count);
-							count -= topPos - botPos;
-							extendArray(heightAndDepth, 2, botPos + 1, 1, count);
-							count++;
-							heightAndDepth[botPos * 2 + 2] = depth;
-							heightAndDepth[botPos * 2 + 3] = height;
+							if (!topExtend)
+							{
+								//only top is within some exiting block, extending it
+								botPos++; //to make it easier
+								heightAndDepth[botPos * 2] = depth;
+								heightAndDepth[botPos * 2 + 1] = heightAndDepth[topPos * 2 + 1];
+								shrinkArray(heightAndDepth, 2, botPos + 1, topPos - botPos, count);
+								count -= topPos - botPos;
+							}
+							else
+							{
+								//both top and bottom are outside existing blocks
+								shrinkArray(heightAndDepth, 2, botPos + 1, topPos - botPos, count);
+								count -= topPos - botPos;
+								extendArray(heightAndDepth, 2, botPos + 1, 1, count);
+								count++;
+								heightAndDepth[botPos * 2 + 2] = depth;
+								heightAndDepth[botPos * 2 + 3] = height;
+							}
 						}
 					}
 				}
+				else
+					break;
 			}
 		}
 		
@@ -502,7 +508,7 @@ public class DataPointUtil
 			}
 			for (int index = 0; index < size; index++)
 			{
-				for (int dataIndex = 0; dataIndex < inputVerticalData; dataIndex++)
+				for (dataIndex = 0; dataIndex < inputVerticalData; dataIndex++)
 				{
 					singleData = dataToMerge[index * inputVerticalData + dataIndex];
 					if (doesItExist(singleData) && !isVoid(singleData))
