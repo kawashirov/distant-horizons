@@ -333,8 +333,7 @@ public class DataPointUtil
 		
 		// We initialize the arrays that are going to be used
 		short[] heightAndDepth = ThreadMapUtil.getHeightAndDepth((worldHeight + 1) * 2);
-		long[] singleDataToMerge = ThreadMapUtil.getSingleAddDataToMerge(size);
-		long[] dataPoint = ThreadMapUtil.getVerticalDataArray(worldHeight + 1);
+		long[] dataPoint = ThreadMapUtil.getVerticalDataArray(DetailDistanceUtil.getMaxVerticalData(0));
 		
 		
 		int genMode = DistanceGenerationMode.SERVER.complexity;
@@ -505,7 +504,19 @@ public class DataPointUtil
 			
 			if ((depth == 0 && height == 0) || j >= heightAndDepth.length / 2)
 				break;
-			Arrays.fill(singleDataToMerge, 0);
+				
+			int numberOfChildren = 0;
+			int tempAlpha = 0;
+			int tempRed = 0;
+			int tempGreen = 0;
+			int tempBlue = 0;
+			int tempLightBlock = 0;
+			int tempLightSky = 0;
+			byte tempGenMode = DistanceGenerationMode.SERVER.complexity;
+			allEmpty = true;
+			allVoid = true;
+			long data = 0;
+			
 			for (int index = 0; index < size; index++)
 			{
 				for (dataIndex = 0; dataIndex < inputVerticalData; dataIndex++)
@@ -517,21 +528,55 @@ public class DataPointUtil
 						if ((depth <= getDepth(singleData) && getDepth(singleData) <= height)
 								|| (depth <= getHeight(singleData) && getHeight(singleData) <= height))
 						{
-							if (getHeight(singleData) > getHeight(singleDataToMerge[index]))
-								singleDataToMerge[index] = singleData;
+							if (getHeight(singleData) > getHeight(data))
+								data = singleData;
 						}
 					}
 					else
 						break;
 				}
-				if(!doesItExist(singleDataToMerge[index])){
+				if(!doesItExist(data)){
 					singleData = dataToMerge[index * inputVerticalData];
-					singleDataToMerge[index] = createVoidDataPoint(getGenerationMode(singleData));
+					data = createVoidDataPoint(getGenerationMode(singleData));
 				}
+				
+				if (doesItExist(data))
+				{
+					allEmpty = false;
+					if (!isVoid(data))
+					{
+						numberOfChildren++;
+						allVoid = false;
+						tempAlpha += getAlpha(data);
+						tempRed += getRed(data);
+						tempGreen += getGreen(data);
+						tempBlue += getBlue(data);
+						tempLightBlock += getLightBlock(data);
+						tempLightSky += getLightSky(data);
+					}
+					tempGenMode = (byte) Math.min(tempGenMode, getGenerationMode(data));
+				}
+				else
+					tempGenMode = (byte) Math.min(tempGenMode, DistanceGenerationMode.NONE.complexity);
 			}
-			long data = mergeSingleData(singleDataToMerge);
 			
-			dataPoint[j] = createDataPoint(height, depth, getColor(data), getLightSky(data), getLightBlock(data), getGenerationMode(data));
+			if (allEmpty)
+				//no child has been initialized
+				dataPoint[j] = EMPTY_DATA;
+			else if (allVoid)
+				//all the children are void
+				dataPoint[j] = createVoidDataPoint(tempGenMode);
+			else
+			{
+				//we have at least 1 child
+				tempAlpha = tempAlpha / numberOfChildren;
+				tempRed = tempRed / numberOfChildren;
+				tempGreen = tempGreen / numberOfChildren;
+				tempBlue = tempBlue / numberOfChildren;
+				tempLightBlock = tempLightBlock / numberOfChildren;
+				tempLightSky = tempLightSky / numberOfChildren;
+				dataPoint[j] = createDataPoint(tempAlpha, tempRed, tempGreen, tempBlue, height, depth, tempLightSky, tempLightBlock, tempGenMode);
+			}
 		}
 		return dataPoint;
 	}
