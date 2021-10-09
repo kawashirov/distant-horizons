@@ -63,7 +63,7 @@ import net.minecraft.util.math.vector.Vector3d;
  * This is where LODs are draw to the world.
  *
  * @author James Seibel
- * @version 10-7-2021
+ * @version 10-9-2021
  */
 public class LodRenderer
 {
@@ -95,7 +95,7 @@ public class LodRenderer
 	 * These have to be separate because we can't override the
 	 * buffers in the VBOs (and we don't want too)
 	 */
-	private int[][] storageBufferIds;
+	private int[][][] storageBufferIds;
 	
 	private ChunkPos vbosCenter = new ChunkPos(0, 0);
 	
@@ -291,9 +291,9 @@ public class LodRenderer
 							setupFog(fogSettings.far.distance, fogSettings.far.quality);
 						
 						
-						for (int i = 0; i < lodBufferBuilder.bufferSize[x][z]; i++)
+						for (int i = 0; i < lodBufferBuilder.numberOfBuffersPerRegion[x][z]; i++)
 						{
-							sendLodsToGpuAndDraw(vbos[x][z][i], storageBufferIds[x][z], modelViewMatrix);
+							drawBuffer(vbos[x][z][i], storageBufferIds[x][z][i], modelViewMatrix);
 						}
 					}
 				}
@@ -334,10 +334,8 @@ public class LodRenderer
 	}
 	
 	
-	/**
-	 * This is where the actual drawing happens.
-	 */
-	private void sendLodsToGpuAndDraw(VertexBuffer vbo, int bufferStorageId, Matrix4f modelViewMatrix)
+	/** This is where the actual drawing happens. */
+	private void drawBuffer(VertexBuffer vbo, int bufferStorageId, Matrix4f modelViewMatrix)
 	{
 		if (vbo == null)
 			return;
@@ -351,6 +349,8 @@ public class LodRenderer
 		GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		LodUtil.LOD_VERTEX_FORMAT.clearBufferState();
 	}
+	
+	
 	
 	
 	//=================//
@@ -556,9 +556,7 @@ public class LodRenderer
 	}
 	
 	
-	/**
-	 * setup the lighting to be used for the LODs
-	 */
+	/** setup the lighting to be used for the LODs */
 	/*private void setupLighting(LodDimension lodDimension, float partialTicks)
 	{
 		// Determine if the player has night vision
@@ -599,9 +597,7 @@ public class LodRenderer
 		RenderSystem.enableLighting();
 	}*/
 	
-	/**
-	 * Create all buffers that will be used.
-	 */
+	/** Create all buffers that will be used. */
 	public void setupBuffers(LodDimension lodDim)
 	{
 		lodBufferBuilder.setupBuffers(lodDim);

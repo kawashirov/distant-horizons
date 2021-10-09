@@ -18,6 +18,14 @@
 
 package com.seibel.lod.builders.lodBuilding;
 
+import java.awt.Color;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.HorizontalResolution;
@@ -25,9 +33,26 @@ import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
-import com.seibel.lod.util.*;
+import com.seibel.lod.util.ColorUtil;
+import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.DetailDistanceUtil;
+import com.seibel.lod.util.LevelPosUtil;
+import com.seibel.lod.util.LodThreadFactory;
+import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-import net.minecraft.block.*;
+
+import net.minecraft.block.AbstractPlantBlock;
+import net.minecraft.block.AbstractTopPlantBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.BushBlock;
+import net.minecraft.block.FlowerBlock;
+import net.minecraft.block.GrassBlock;
+import net.minecraft.block.IGrowable;
+import net.minecraft.block.LeavesBlock;
+import net.minecraft.block.TallGrassBlock;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -47,21 +72,13 @@ import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.client.model.data.ModelDataMap;
 
-import java.awt.*;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 /**
  * This object is in charge of creating Lod related objects. (specifically: Lod
  * World, Dimension, and Region objects)
  *
  * @author Leonardo Amato
  * @author James Seibel
- * @version 9-25-2021
+ * @version 10-9-2021
  */
 public class LodBuilder
 {
@@ -91,8 +108,11 @@ public class LodBuilder
 	/** TODO is this needed / used? */
 	public static final boolean avoidSmallBlock = false;
 	
-	/** How wide LodDimensions should be in regions */
-	public int defaultDimensionWidthInRegions = 5;
+	/**
+	 * How wide LodDimensions should be in regions <br>
+	 * Is automatically set before the first frame in ClientProxy. 
+	 */
+	public int defaultDimensionWidthInRegions = 0;
 	
 	
 	

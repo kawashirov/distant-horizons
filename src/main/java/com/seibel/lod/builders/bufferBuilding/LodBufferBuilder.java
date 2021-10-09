@@ -84,22 +84,27 @@ public class LodBufferBuilder
 	/** This boolean indicates that ever buffer need to be regenerated */
 	public volatile boolean fullRegeneration = false;
 	
-	/** the capacity of each buffer in bytes */
-	public volatile int[][] bufferSize;
+	/**
+	 * How many buffers there are for the given region. <Br>
+	 * This is done because some regions may require more memory than
+	 * can be directly allocated, so we split the regions into smaller sections. <Br>
+	 * This keeps track of those sections. 
+	 */
+	public volatile int[][] numberOfBuffersPerRegion;
 	
-	/** Used when building the vbos */
+	/** Stores the vertices when building the VBOs */
 	public volatile BufferBuilder[][][] buildableBuffers;
 	
 	/** The OpenGL IDs of the storage buffers used by the buildableVbos */
-	public int[][] buildableStorageBufferIds;
+	public int[][][] buildableStorageBufferIds;
 	/** The OpenGL IDs of the storage buffers used by the drawableVbos */
-	public int[][] drawableStorageBufferIds;
+	public int[][][] drawableStorageBufferIds;
 	
 	/** used to debug how the buildableStorageBuffers are growing */
-	public int[][] bufferPreviousCapacity;
+	public int[][][] bufferPreviousCapacity;
 	/** 
 	 * This is toggled when the buffers are swapped so we only
-	 * display content related to one set of buffers
+	 * display the expansion log for one set of buffers
 	 */
 	public boolean printExpansionLog = true;
 	
@@ -444,16 +449,16 @@ public class LodBufferBuilder
 		int numberOfBuffers;
 		
 		previousRegionWidth = numbRegionsWide;
-		bufferSize = new int[numbRegionsWide][numbRegionsWide];
+		numberOfBuffersPerRegion = new int[numbRegionsWide][numbRegionsWide];
 		buildableBuffers = new BufferBuilder[numbRegionsWide][numbRegionsWide][];
 		
 		buildableVbos = new VertexBuffer[numbRegionsWide][numbRegionsWide][];
 		drawableVbos = new VertexBuffer[numbRegionsWide][numbRegionsWide][];
 		
-		buildableStorageBufferIds = new int[numbRegionsWide][numbRegionsWide];
-		drawableStorageBufferIds = new int[numbRegionsWide][numbRegionsWide];
+		buildableStorageBufferIds = new int[numbRegionsWide][numbRegionsWide][];
+		drawableStorageBufferIds = new int[numbRegionsWide][numbRegionsWide][];
 		
-		bufferPreviousCapacity = new int[numbRegionsWide][numbRegionsWide];
+		bufferPreviousCapacity = new int[numbRegionsWide][numbRegionsWide][];
 		
 		for (int x = 0; x < numbRegionsWide; x++)
 		{
@@ -461,29 +466,41 @@ public class LodBufferBuilder
 			{
 				regionMemoryRequired = LodUtil.calculateMaximumRegionGpuMemoryUse(x, z, LodConfig.CLIENT.graphics.lodTemplate.get());
 				
-				// if the memory required is greater than the max buffer capacity divide the memory across multiple buffers
+				// if the memory required is greater than the max buffer 
+				// capacity, divide the memory across multiple buffers
 				if (regionMemoryRequired > LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY)
 				{
 					numberOfBuffers = (int) Math.ceil(regionMemoryRequired / LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY) + 1;
-					regionMemoryRequired = LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY; // TODO should this be determined with regionMemoryRequired?
-					bufferSize[x][z] = numberOfBuffers;
+					
+					// TODO shouldn't this be determined with regionMemoryRequired?
+					// always allocating the max memory is a bit expensive isn't it?
+					regionMemoryRequired = LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY;
+					numberOfBuffersPerRegion[x][z] = numberOfBuffers;
 					buildableBuffers[x][z] = new BufferBuilder[numberOfBuffers];
 					buildableVbos[x][z] = new VertexBuffer[numberOfBuffers];
 					drawableVbos[x][z] = new VertexBuffer[numberOfBuffers];
+					
+					buildableStorageBufferIds[x][z] = new int[numberOfBuffers];
+					drawableStorageBufferIds[x][z] = new int[numberOfBuffers];
+					bufferPreviousCapacity[x][z] = new int[numberOfBuffers];
 				}
 				else
 				{
 					// we only need one buffer for this region
-					bufferSize[x][z] = 1;
+					numberOfBuffersPerRegion[x][z] = 1;
 					buildableBuffers[x][z] = new BufferBuilder[1];
 					buildableVbos[x][z] = new VertexBuffer[1];
 					drawableVbos[x][z] = new VertexBuffer[1];
+					
+					buildableStorageBufferIds[x][z] = new int[1];
+					drawableStorageBufferIds[x][z] = new int[1];
+					bufferPreviousCapacity[x][z] = new int[1];
 				}
 				
 				
-				for (int i = 0; i < bufferSize[x][z]; i++)
+				for (int i = 0; i < numberOfBuffersPerRegion[x][z]; i++)
 				{
-					bufferPreviousCapacity[x][z] = (int) regionMemoryRequired;
+					bufferPreviousCapacity[x][z][i] = (int) regionMemoryRequired;
 					
 					buildableBuffers[x][z][i] = new BufferBuilder((int) regionMemoryRequired);
 					
@@ -503,13 +520,13 @@ public class LodBufferBuilder
 					
 					// create the buffer storage (GPU memory)
 					
-					buildableStorageBufferIds[x][z] = GL45.glGenBuffers();
-					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buildableStorageBufferIds[x][z]);
+					buildableStorageBufferIds[x][z][i] = GL45.glGenBuffers();
+					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buildableStorageBufferIds[x][z][i]);
 					GL45.glBufferStorage(GL15.GL_ARRAY_BUFFER, regionMemoryRequired, 0); // the 0 flag means to create the storage in the GPU's memory
 					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 					
-					drawableStorageBufferIds[x][z] = GL45.glGenBuffers();
-					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, drawableStorageBufferIds[x][z]);
+					drawableStorageBufferIds[x][z][i] = GL45.glGenBuffers();
+					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, drawableStorageBufferIds[x][z][i]);
 					GL45.glBufferStorage(GL15.GL_ARRAY_BUFFER, regionMemoryRequired, 0);
 					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 				}
@@ -533,21 +550,24 @@ public class LodBufferBuilder
 		// destroy the buffer storages if they aren't already
 		if (buildableStorageBufferIds != null)
 		{
-			for (int i = 0; i < buildableStorageBufferIds.length; i++)
+			for (int x = 0; x < buildableStorageBufferIds.length; x++)
 			{
-				for (int j = 0; j < buildableStorageBufferIds.length; j++)
+				for (int z = 0; z < buildableStorageBufferIds.length; z++)
 				{
-					int buildableId = buildableStorageBufferIds[i][j];
-					int drawableId = drawableStorageBufferIds[i][j];
-					
-					// Send this over to the render thread, if this is being
-					// called we aren't worried about stuttering anyway.
-					// This way we don't have to worry about what context this
-					// was called from (if any).
-					RenderSystem.recordRenderCall(() -> {
-			            GL45.glDeleteBuffers(buildableId);
-			            GL45.glDeleteBuffers(drawableId);
-			         });
+					for (int i = 0; i < buildableStorageBufferIds[x][z].length; i++)
+					{
+						int buildableId = buildableStorageBufferIds[x][z][i];
+						int drawableId = drawableStorageBufferIds[x][z][i];
+						
+						// Send this over to the render thread, if this is being
+						// called we aren't worried about stuttering anyway.
+						// This way we don't have to worry about what context this
+						// was called from (if any).
+						RenderSystem.recordRenderCall(() -> {
+				            GL45.glDeleteBuffers(buildableId);
+				            GL45.glDeleteBuffers(drawableId);
+				         });
+					}
 				}
 			}
 		}
@@ -661,7 +681,7 @@ public class LodBufferBuilder
 						for (int i = 0; i < buildableBuffers[x][z].length; i++)
 						{
 							ByteBuffer builderBuffer = buildableBuffers[x][z][i].popNextBuffer().getSecond();
-							vboUpload(buildableVbos[x][z][i], buildableStorageBufferIds[x][z], builderBuffer, x,z, true);
+							vboUpload(buildableVbos[x][z][i], buildableStorageBufferIds[x][z][i], builderBuffer, x,z,i, true);
 							lodDim.setRegenRegionBufferByArrayIndex(x, z, false);
 						}
 					}
@@ -685,7 +705,7 @@ public class LodBufferBuilder
 	
 	/** Uploads the uploadBuffer into the VBO and then into GPU memory. */
 	private void vboUpload(VertexBuffer vbo, int storageBufferId, ByteBuffer uploadBuffer,
-			int xVboIndex, int zVboIndex, boolean allowBufferExpansion) 
+			int xVboIndex, int zVboIndex, int iVboIndex, boolean allowBufferExpansion) 
 			// x/zVboIndex are just used for the debugging console logging
 			// and should be removed when the logger is removed.
 	{
@@ -693,7 +713,7 @@ public class LodBufferBuilder
 		if (vbo.id != -1 && GlProxy.getInstance().getGlContext() == GlProxyContext.LOD_BUILDER)
 		{
 			// this is how many points will be rendered
-			vbo.vertexCount = (uploadBuffer.remaining() / vbo.format.getVertexSize());
+			vbo.vertexCount = (uploadBuffer.capacity() / vbo.format.getVertexSize());
 			
 			
 			GL45.glBindBuffer(GL45.GL_ARRAY_BUFFER, vbo.id);
@@ -730,7 +750,7 @@ public class LodBufferBuilder
 						// recursively try to upload into the newly created buffer storage
 						// but don't recurse again if that fails
 						// (we don't want an infinitely expanding buffer!)
-						vboUpload(vbo, storageBufferId, uploadBuffer, xVboIndex, zVboIndex, false);
+						vboUpload(vbo, storageBufferId, uploadBuffer, xVboIndex, zVboIndex, iVboIndex, false);
 						
 						
 						
@@ -738,19 +758,20 @@ public class LodBufferBuilder
 						{
 							// NOTE: this will display twice because we are double buffering
 							// (using 1 buffer to generate into and one to draw)
-							ClientProxy.LOGGER.info("vbo (" + xVboIndex + "," + zVboIndex + ") expanded: " + bufferPreviousCapacity[xVboIndex][zVboIndex] + " -> " + (int)(uploadBuffer.capacity() * BUFFER_EXPANSION_MULTIPLIER));
-							bufferPreviousCapacity[xVboIndex][zVboIndex] = (int) (uploadBuffer.capacity() * BUFFER_EXPANSION_MULTIPLIER);
+							ClientProxy.LOGGER.info("vbo (" + xVboIndex + "," + zVboIndex + ") expanded: " + bufferPreviousCapacity[xVboIndex][zVboIndex][iVboIndex] + " -> " + (int)(uploadBuffer.capacity() * BUFFER_EXPANSION_MULTIPLIER));
+							bufferPreviousCapacity[xVboIndex][zVboIndex][iVboIndex] = (int) (uploadBuffer.capacity() * BUFFER_EXPANSION_MULTIPLIER);
 						}
 					}
 				}
 				else
 				{
 					// upload the buffer into system memory...
-					vboBuffer.put(uploadBuffer);
+					vboBuffer.put(uploadBuffer);					
 					GL15.glUnmapBuffer(GL15.GL_ARRAY_BUFFER);
 					
 					// ...then upload into GPU memory
-					// (uploading into GPU memory can only be done through )
+					// (uploading into GPU memory directly can only be done 
+					// through the glCopyBufferSubData/glCopyNamed... methods)
 					GL45.glCopyNamedBufferSubData(vbo.id, storageBufferId, 0, 0, uploadBuffer.capacity());
 				}
 			}
@@ -761,7 +782,7 @@ public class LodBufferBuilder
 			}
 			finally
 			{
-				GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);	
+				GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 			}
 			
 		}
@@ -778,7 +799,7 @@ public class LodBufferBuilder
 			drawableVbos = buildableVbos;
 			buildableVbos = tmpVbo;
 			
-			int[][] tmpStorage = drawableStorageBufferIds;
+			int[][][] tmpStorage = drawableStorageBufferIds;
 			drawableStorageBufferIds = buildableStorageBufferIds;
 			buildableStorageBufferIds = tmpStorage;
 			
@@ -800,10 +821,10 @@ public class LodBufferBuilder
 	public class VertexBuffersAndOffset
 	{
 		public VertexBuffer[][][] vbos;
-		public int[][] storageBufferIds;
+		public int[][][] storageBufferIds;
 		public ChunkPos drawableCenterChunkPos;
 		
-		public VertexBuffersAndOffset(VertexBuffer[][][] newVbos, int[][] newStorageBufferIds, ChunkPos newDrawableCenterChunkPos)
+		public VertexBuffersAndOffset(VertexBuffer[][][] newVbos, int[][][] newStorageBufferIds, ChunkPos newDrawableCenterChunkPos)
 		{
 			vbos = newVbos;
 			storageBufferIds = newStorageBufferIds;
