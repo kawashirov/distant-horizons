@@ -438,6 +438,7 @@ public class LodBufferBuilder
 		buildableStorageBufferIds = new int[numbRegionsWide][numbRegionsWide];
 		drawableStorageBufferIds = new int[numbRegionsWide][numbRegionsWide];
 		
+		bufferPreviousCapacity = new int[numbRegionsWide][numbRegionsWide];
 		
 		for (int x = 0; x < numbRegionsWide; x++)
 		{
@@ -446,26 +447,29 @@ public class LodBufferBuilder
 				regionMemoryRequired = LodUtil.calculateMaximumRegionGpuMemoryUse(x, z, LodConfig.CLIENT.graphics.lodTemplate.get());
 				
 				// if the memory required is greater than the max buffer capacity divide the memory across multiple buffers
-				if (regionMemoryRequired < LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY)
-				{
-					bufferSize[x][z] = 1;
-					buildableBuffers[x][z] = new BufferBuilder[1];
-					buildableVbos[x][z] = new VertexBuffer[1];
-					drawableVbos[x][z] = new VertexBuffer[1];
-				}
-				else
+				if (regionMemoryRequired > LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY)
 				{
 					numberOfBuffers = (int) Math.ceil(regionMemoryRequired / LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY) + 1;
-					regionMemoryRequired = LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY;
+					regionMemoryRequired = LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY; // TODO this should be determined with regionMemoryRequired?
 					bufferSize[x][z] = numberOfBuffers;
 					buildableBuffers[x][z] = new BufferBuilder[numberOfBuffers];
 					buildableVbos[x][z] = new VertexBuffer[numberOfBuffers];
 					drawableVbos[x][z] = new VertexBuffer[numberOfBuffers];
 				}
+				else
+				{
+					// we only need one buffer for this region
+					bufferSize[x][z] = 1;
+					buildableBuffers[x][z] = new BufferBuilder[1];
+					buildableVbos[x][z] = new VertexBuffer[1];
+					drawableVbos[x][z] = new VertexBuffer[1];
+				}
 				
 				
 				for (int i = 0; i < bufferSize[x][z]; i++)
 				{
+					bufferPreviousCapacity[x][z] = (int) regionMemoryRequired;
+					
 					buildableBuffers[x][z][i] = new BufferBuilder((int) regionMemoryRequired);
 					
 					buildableVbos[x][z][i] = new VertexBuffer(LodUtil.LOD_VERTEX_FORMAT);
@@ -500,6 +504,8 @@ public class LodBufferBuilder
 		
 		bufferLock.unlock();
 	}
+	
+	public int[][] bufferPreviousCapacity;
 	
 	/**
 	 * Sets the buffers and Vbos to null, forcing them to be recreated <br>
@@ -597,12 +603,11 @@ public class LodBufferBuilder
 			{
 				if (fullRegen || lodDim.doesRegionNeedBufferRegen(x, z))
 				{
-					// for some reason BufferBuilder.vertexCounts
-					// isn't reset unless this is called, which can cause
-					// a false indexOutOfBoundsException
-					
 					for (int i = 0; i < buildableBuffers[x][z].length; i++)
 					{
+						// for some reason BufferBuilder.vertexCounts
+						// isn't reset unless this is called, which can cause
+						// a false indexOutOfBoundsException
 						buildableBuffers[x][z][i].discard();
 						
 						buildableBuffers[x][z][i].begin(GL11.GL_QUADS, LodUtil.LOD_VERTEX_FORMAT);
@@ -618,12 +623,8 @@ public class LodBufferBuilder
 		for (int x = 0; x < buildableBuffers.length; x++)
 			for (int z = 0; z < buildableBuffers.length; z++)
 				for (int i = 0; i < buildableBuffers[x][z].length; i++)
-				{
 					if (buildableBuffers[x][z][i] != null && buildableBuffers[x][z][i].building() && (fullRegen || lodDim.doesRegionNeedBufferRegen(x, z)))
-					{
 						buildableBuffers[x][z][i].end();
-					}
-				}
 	}
 	
 	
@@ -702,7 +703,15 @@ public class LodBufferBuilder
 						GL45.glBufferData(GL45.GL_ARRAY_BUFFER, uploadBuffer.capacity() * 4, GL45.GL_DYNAMIC_DRAW);
 						GL45.glBufferSubData(GL45.GL_ARRAY_BUFFER, 0, uploadBuffer);
 						
-						ClientProxy.LOGGER.info("vbo (" + xVboIndex + "," + zVboIndex + ") expanded: " + previousCapacity + " -> " + (previousCapacity * 4));
+						// NOTE: this will display twice because we are double buffering
+						// (using 1 buffer to generate into and one to draw)
+						ClientProxy.LOGGER.info("vbo (" + xVboIndex + "," + zVboIndex + ") expanded: " + bufferPreviousCapacity[xVboIndex][zVboIndex] + " -> " + (previousCapacity * 4));
+						
+						// could be used if you wanted to create a CSV file
+						//ClientProxy.LOGGER.info(xVboIndex + "," + zVboIndex + "," + bufferPreviousCapacity[xVboIndex][zVboIndex] + "," + uploadBuffer.capacity());
+						
+						
+						bufferPreviousCapacity[xVboIndex][zVboIndex] = uploadBuffer.capacity() * 4;
 					}
 				}
 				else
