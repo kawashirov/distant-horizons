@@ -523,6 +523,8 @@ public class DataPointUtil
 							}
 						}
 					}
+					else
+						break;
 				}
 				if(!doesItExist(singleDataToMerge[index])){
 					singleData = dataToMerge[index * inputVerticalData];
