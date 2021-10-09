@@ -365,7 +365,7 @@ public class LodUtil
 		int xRegionSign = (int) Math.signum(regionPosX);
 		int zRegionSign = (int) Math.signum(regionPosZ);
 		
-		//we first find the center of the circle which is one of the following X position in the center region
+		// we first find the center of the circle which is one of the following X position in the center region
 		/*
 		X - X - X
 		|       |
@@ -386,17 +386,17 @@ public class LodUtil
 		long memoryUse = 0;
 		for (byte detailLevel = BLOCK_DETAIL_LEVEL; detailLevel <= REGION_DETAIL_LEVEL; detailLevel++)
 		{
-			//We find now the inner and outer detail of this area
+			// Find the inner and outer detail of this area
 			innerRadius = DetailDistanceUtil.getDrawDistanceFromDetail(detailLevel);
 			outerRadius = DetailDistanceUtil.getDrawDistanceFromDetail(detailLevel + 1);
 			
-			//we skip if the region does not intersect the two circles.
+			// skip this region if it does not intersect the two circles.
 			minDistance = LevelPosUtil.minDistance(REGION_DETAIL_LEVEL, regionPosX, regionPosZ, circleCenterX, circleCenterZ);
 			maxDistance = LevelPosUtil.maxDistance(REGION_DETAIL_LEVEL, regionPosX, regionPosZ, circleCenterX, circleCenterZ);
 			if (innerRadius > maxDistance || minDistance > outerRadius)
 				continue;
 			
-			//we proceed to count all the position in the region that fall between these two circle
+			// count every position in the region that falls between the two circles
 			size = 1 << (REGION_DETAIL_LEVEL - detailLevel);
 			count = 0;
 			for (int x = 0; x < size; x++)
@@ -409,7 +409,7 @@ public class LodUtil
 				}
 			}
 			
-			//we multiply the data with the max vertical data of this detail level
+			// we multiply the data with the max vertical data of this detail level
 			int maxVerticalData = DetailDistanceUtil.getMaxVerticalData(detailLevel);
 			
 			count *= maxVerticalData;

@@ -59,10 +59,10 @@ public class DetailDistanceUtil
 			return maxDistance;
 		
 		int distanceUnit = LodConfig.CLIENT.worldGenerator.horizontalScale.get().distanceUnit;
-		switch (LodConfig.CLIENT.worldGenerator.horizontalQuality.get()){
-		
-		case LINEAR:;
-		return (detail * distanceUnit);
+		switch (LodConfig.CLIENT.worldGenerator.horizontalQuality.get())
+		{
+		case LINEAR:
+			return (detail * distanceUnit);
 		default:
 			double base = LodConfig.CLIENT.worldGenerator.horizontalQuality.get().quadraticBase;
 			return (int) (Math.pow(base, detail) * distanceUnit);
