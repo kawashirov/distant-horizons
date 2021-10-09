@@ -5,6 +5,7 @@ import com.seibel.lod.enums.DistanceGenerationMode;
 import net.minecraft.client.renderer.texture.NativeImage;
 
 import javax.xml.crypto.Data;
+import java.util.Arrays;
 
 public class DataPointUtil
 {
@@ -371,12 +372,12 @@ public class DataPointUtil
 						boolean topExtend = false;
 						for (i = 0; i < count; i++)
 						{
-							if (depth >= heightAndDepth[i * 2] && depth <= heightAndDepth[i * 2 + 1])
+							if (depth <= heightAndDepth[i * 2] && depth >= heightAndDepth[i * 2 + 1])
 							{
 								botPos = i;
 								break;
 							}
-							else if (((i + 1 < count && depth < heightAndDepth[(i + 1) * 2]) || i + 1 == count) && depth > heightAndDepth[i * 2 + 1])
+							else if (depth < heightAndDepth[i * 2 + 1] && ((i + 1 < count && depth > heightAndDepth[(i + 1) * 2]) || i + 1 == count))
 							{
 								botPos = i;
 								botExtend = true;
@@ -385,75 +386,75 @@ public class DataPointUtil
 						}
 						for (i = 0; i < count; i++)
 						{
-							if (height >= heightAndDepth[i * 2] && height <= heightAndDepth[i * 2 + 1])
+							if (height <= heightAndDepth[i * 2] && height >= heightAndDepth[i * 2 + 1])
 							{
 								topPos = i;
 								break;
 							}
-							else if (((i + 1 < count && height < heightAndDepth[(i + 1) * 2]) || i + 1 == count) && height > heightAndDepth[i * 2 + 1])
+							else if (height < heightAndDepth[i * 2 + 1] && ((i + 1 < count && height > heightAndDepth[(i + 1) * 2]) || i + 1 == count))
 							{
 								topPos = i;
 								topExtend = true;
 								break;
 							}
 						}
-						if (botPos == -1)
+						if (topPos == -1)
 						{
-							if (topPos == -1)
+							if (botPos == -1)
 							{
-								//whole block falls below
+								//whole block falls above
 								extendArray(heightAndDepth, 2, 0, 1, count);
-								heightAndDepth[0] = depth;
-								heightAndDepth[1] = height;
+								heightAndDepth[0] = height;
+								heightAndDepth[1] = depth;
 								count++;
 							}
-							else if (!topExtend)
+							else if (!botExtend)
 							{
-								//only bottom falls below extending it there, while top is inside existing
-								shrinkArray(heightAndDepth, 2, 0, topPos, count);
-								heightAndDepth[0] = depth;
-								count -= topPos;
+								//only top falls above extending it there, while bottom is inside existing
+								shrinkArray(heightAndDepth, 2, 0, botPos, count);
+								heightAndDepth[0] = height;
+								count -= botPos;
 							}
 							else
 							{
 								//top falls between some blocks, extending those as well
-								shrinkArray(heightAndDepth, 2, 0, topPos, count);
-								heightAndDepth[0] = depth;
-								heightAndDepth[1] = height;
-								count -= topPos;
+								shrinkArray(heightAndDepth, 2, 0, botPos, count);
+								heightAndDepth[0] = height;
+								heightAndDepth[1] = depth;
+								count -= botPos;
 							}
 						}
-						else if (!botExtend)
+						else if (!topExtend)
 						{
-							if (!topExtend)
+							if (!botExtend)
 								//both top and bottom are within some exiting blocks, possibly merging them
-								heightAndDepth[botPos * 2 + 1] = heightAndDepth[topPos * 2 + 1];
+								heightAndDepth[topPos * 2 + 1] = heightAndDepth[botPos * 2 + 1];
 							else
 								//top falls between some blocks, extending it there
-								heightAndDepth[botPos * 2 + 1] = height;
-							shrinkArray(heightAndDepth, 2, botPos + 1, topPos - botPos, count);
-							count -= topPos - botPos;
+								heightAndDepth[topPos * 2 + 1] = depth;
+							shrinkArray(heightAndDepth, 2, topPos + 1, botPos - topPos, count);
+							count -= botPos - topPos;
 						}
 						else
 						{
-							if (!topExtend)
+							if (!botExtend)
 							{
 								//only top is within some exiting block, extending it
-								botPos++; //to make it easier
-								heightAndDepth[botPos * 2] = depth;
-								heightAndDepth[botPos * 2 + 1] = heightAndDepth[topPos * 2 + 1];
-								shrinkArray(heightAndDepth, 2, botPos + 1, topPos - botPos, count);
-								count -= topPos - botPos;
+								topPos++; //to make it easier
+								heightAndDepth[topPos * 2] = height;
+								heightAndDepth[topPos * 2 + 1] = heightAndDepth[botPos * 2 + 1];
+								shrinkArray(heightAndDepth, 2, topPos + 1, botPos - topPos, count);
+								count -= botPos - topPos;
 							}
 							else
 							{
 								//both top and bottom are outside existing blocks
-								shrinkArray(heightAndDepth, 2, botPos + 1, topPos - botPos, count);
-								count -= topPos - botPos;
-								extendArray(heightAndDepth, 2, botPos + 1, 1, count);
+								shrinkArray(heightAndDepth, 2, topPos + 1, botPos - topPos, count);
+								count -= botPos - topPos;
+								extendArray(heightAndDepth, 2, topPos + 1, 1, count);
 								count++;
-								heightAndDepth[botPos * 2 + 2] = depth;
-								heightAndDepth[botPos * 2 + 3] = height;
+								heightAndDepth[topPos * 2 + 2] = height;
+								heightAndDepth[topPos * 2 + 3] = depth;
 							}
 						}
 					}
@@ -473,6 +474,7 @@ public class DataPointUtil
 			dataPoint[0] = createVoidDataPoint(genMode);
 			return dataPoint;
 		}
+		
 		//we limit the vertical portion to maxVerticalData
 		int j = 0;
 		while (count > maxVerticalData)
@@ -480,9 +482,9 @@ public class DataPointUtil
 			ii = worldHeight;
 			for (i = 0; i < count - 1; i++)
 			{
-				if (heightAndDepth[(i + 1) * 2] - heightAndDepth[i * 2 + 1] < ii)
+				if (heightAndDepth[i * 2 + 1] - heightAndDepth[(i + 1) * 2]< ii)
 				{
-					ii = heightAndDepth[(i + 1) * 2] - heightAndDepth[i * 2 + 1];
+					ii = heightAndDepth[i * 2 + 1] - heightAndDepth[(i + 1) * 2];
 					j = i;
 				}
 			}
@@ -492,20 +494,18 @@ public class DataPointUtil
 				heightAndDepth[i * 2] = heightAndDepth[(i + 1) * 2];
 				heightAndDepth[i * 2 + 1] = heightAndDepth[(i + 1) * 2 + 1];
 			}
-			//System.arraycopy(heightAndDepth,j + 1, heightAndDepth, j,count - j - 1);
+			//System.arraycopy(heightAndDepth, j + 1, heightAndDepth, j, count - j - 1);
 			count--;
 		}
 		//As standard the vertical lods are ordered from top to bottom
-		for (j = 0; j < count; j++)
+		for (j = count - 1; j >= 0; j--)
 		{
-			depth = heightAndDepth[j * 2];
-			height = heightAndDepth[j * 2 + 1];
+			height = heightAndDepth[j * 2];
+			depth = heightAndDepth[j * 2 + 1];
+			
 			if ((depth == 0 && height == 0) || j >= heightAndDepth.length / 2)
 				break;
-			for (int k = 0; k < size; k++)
-			{
-				singleDataToMerge[k] = 0;
-			}
+			Arrays.fill(singleDataToMerge, 0);
 			for (int index = 0; index < size; index++)
 			{
 				for (dataIndex = 0; dataIndex < inputVerticalData; dataIndex++)
@@ -518,9 +518,7 @@ public class DataPointUtil
 								|| (depth <= getHeight(singleData) && getHeight(singleData) <= height))
 						{
 							if (getHeight(singleData) > getHeight(singleDataToMerge[index]))
-							{
 								singleDataToMerge[index] = singleData;
-							}
 						}
 					}
 					else
@@ -533,7 +531,7 @@ public class DataPointUtil
 			}
 			long data = mergeSingleData(singleDataToMerge);
 			
-			dataPoint[count - j - 1] = createDataPoint(height, depth, getColor(data), getLightSky(data), getLightBlock(data), getGenerationMode(data));
+			dataPoint[j] = createDataPoint(height, depth, getColor(data), getLightSky(data), getLightBlock(data), getGenerationMode(data));
 		}
 		return dataPoint;
 	}
