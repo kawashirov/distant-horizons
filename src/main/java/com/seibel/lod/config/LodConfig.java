@@ -39,7 +39,6 @@ import com.seibel.lod.enums.HorizontalResolution;
 import com.seibel.lod.enums.HorizontalScale;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.enums.VerticalQuality;
-import com.seibel.lod.render.LodRenderer.FovTest;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -50,7 +49,7 @@ import net.minecraftforge.fml.config.ModConfig;
  * This handles any configuration the user has access to.
  *
  * @author James Seibel
- * @version 9-26-2021
+ * @version 10-9-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -99,8 +98,6 @@ public class LodConfig
 		public ForgeConfigSpec.BooleanValue alwaysDrawAtMaxQuality;
 		
 		public ForgeConfigSpec.BooleanValue drawLods;
-		
-		public ForgeConfigSpec.EnumValue<FovTest> useFovSetting;
 		
 		
 		Graphics(ForgeConfigSpec.Builder builder)
@@ -164,12 +161,6 @@ public class LodConfig
 							+ " The mod's render distance, measured in chunks. \n")
 					.defineInRange("lodChunkRenderDistance", 64, 32, 1024);
 			
-			useFovSetting = builder
-					.comment("\n\n"
-							+ " Experimental text value. \n"
-							+ " " + FovTest.BOTH + ": is the normal value \n")
-					.defineEnum("useFovSetting", FovTest.BOTH);
-			
 			disableDirectionalCulling = builder
 					.comment("\n\n"
 							+ " If false LODs that are behind the player's camera \n"
@@ -181,18 +172,6 @@ public class LodConfig
 							+ " Disable this if you see LODs disapearing. \n"
 							+ " (This may happen if you are using a camera mod) \n")
 					.define("disableDirectionalCulling", false);
-			
-//			shadingMode = builder
-//					.comment("\n\n"
-//							+ " What kind of shading should the LODs have? \n"
-//							+ " \n"
-//							+ " " + ShadingMode.NONE + " \n"
-//							+ " " + "LODs will have the same lighting on every side. \n"
-//							+ " " + "Can make large similarly colored areas hard to differentiate. \n"
-//							+ "\n"
-//							+ " " + ShadingMode.GAME_SHADING + " \n"
-//							+ " " + "LODs will have darker sides and bottoms to simulate Minecraft's flat lighting.")
-//					.defineEnum("lightingMode", ShadingMode.GAME_SHADING);
 			
 			alwaysDrawAtMaxQuality = builder
 					.comment("\n\n"
