@@ -90,7 +90,7 @@ public class Box
 	
 	
 	/**
-	 * This indicate which position is invariable in the DIRECTION_VERTEX_MAP.
+	 * This indicates which position is invariable in the DIRECTION_VERTEX_MAP.
 	 * Is used to extract the vertex
 	 */
 	public static final Map<Direction, int[]> FACE_DIRECTION = new HashMap<Direction, int[]>()
@@ -106,7 +106,7 @@ public class Box
 	
 	/**
 	 * This is a map from Direction to the relative normal vector
-	 * we are using this since i'm not sure if the getNormal create new object at every call
+	 * we are using this since I'm not sure if the getNormal create new object at every call
 	 */
 	public static final Map<Direction, Vector3i> DIRECTION_NORMAL_MAP = new HashMap<Direction, Vector3i>()
 	{{
@@ -155,7 +155,7 @@ public class Box
 	public boolean[] culling;
 	
 	
-	/** creates a empty box */
+	/** creates an empty box */
 	public Box()
 	{
 		boxOffset = new int[3];
@@ -185,7 +185,7 @@ public class Box
 	/**
 	 * Set the color of the columns
 	 * @param color color to add
-	 * @param adjShadeDisabled this array indicate which face does not need shading
+	 * @param adjShadeDisabled this array indicates which face does not need shading
 	 */
 	public void setColor(int color, boolean[] adjShadeDisabled)
 	{
@@ -216,7 +216,7 @@ public class Box
 	}
 	
 	
-	/** clears this box, reseting everything to default values */
+	/** clears this box, resetting everything to default values */
 	public void reset()
 	{
 		Arrays.fill(boxWidth, 0);
@@ -426,7 +426,7 @@ public class Box
 	
 	/**
 	 * This method return the position of a face in the axis of the face
-	 * This is usefull for the face culling
+	 * This is useful for the face culling
 	 * @param direction that we want to check
 	 * @return position in the axis of the face
 	 */

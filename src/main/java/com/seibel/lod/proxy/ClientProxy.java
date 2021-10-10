@@ -268,7 +268,7 @@ public class ClientProxy
 			renderer = new LodRenderer(lodBufferBuilder);
 			
 			
-			// make sure the nulled objects are freed.
+			// make sure the nilled objects are freed.
 			// (this prevents an out of memory error when
 			// changing worlds)
 			System.gc();
@@ -327,7 +327,7 @@ public class ClientProxy
 	
 	
 	/**
-	 * Re-sizes all LodDimensions if they needs to be.
+	 * Re-sizes all LodDimensions if they need to be.
 	 */
 	private void viewDistanceChangedEvent()
 	{
@@ -374,7 +374,7 @@ public class ClientProxy
 	}
 	
 	/**
-	 * this method reset some of the static data everytime we change world
+	 * this method reset some static data everytime we change world
 	 **/
 	private void resetMod()
 	{

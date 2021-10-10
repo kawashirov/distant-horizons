@@ -57,7 +57,7 @@ public class ColorUtil
 	}
 
 	/**
-	 * Edit the given color as a HSV (Hue Saturation Value) color.
+	 * Edit the given color as an HSV (Hue Saturation Value) color.
 	 */
 	public static int applySaturationAndBrightnessMultipliers(int color, float saturationMultiplier, float brightnessMultiplier)
 	{
@@ -69,7 +69,7 @@ public class ColorUtil
 	}
 
 	/**
-	 * Edit the given color as a HSV (Hue Saturation Value) color.
+	 * Edit the given color as an HSV (Hue Saturation Value) color.
 	 */
 	public static int changeBrightness(int color, float brightness)
 	{
@@ -81,7 +81,7 @@ public class ColorUtil
 	}
 
 	/**
-	 * Edit the given color as a HSV (Hue Saturation Value) color.
+	 * Edit the given color as an HSV (Hue Saturation Value) color.
 	 */
 	public static int changeBrightnessValue(int color, int brightnessColor)
 	{

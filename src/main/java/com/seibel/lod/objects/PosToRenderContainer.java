@@ -35,7 +35,7 @@ public class PosToRenderContainer
 	
 	public void addPosToRender(byte detailLevel, int posX, int posZ)
 	{
-		// When rapidly changing dimensions the bufferBuidler can cause this,
+		// When rapidly changing dimensions the bufferBuilder can cause this,
 		// James isn't sure why, but this will prevent an exception at
 		// the very least (while stilling logging the problem). 
 		if (numberOfPosToRender >= posToRender.length)

@@ -64,7 +64,7 @@ public class LodRenderer
 {
 	/**
 	 * this is the light used when rendering the LODs,
-	 * it should be something different than what is used by Minecraft
+	 * it should be something different from what is used by Minecraft
 	 */
 	private static final int LOD_GL_LIGHT_NUMBER = GL11.GL_LIGHT2;
 	
@@ -88,7 +88,7 @@ public class LodRenderer
 	/**
 	 * the OpenGL IDs for the vbos of the same indices.
 	 * These have to be separate because we can't override the
-	 * buffers in the VBOs (and we don't want too)
+	 * buffers in the VBOs (and we don't want to)
 	 */
 	private int[][][] storageBufferIds;
 	
@@ -183,13 +183,13 @@ public class LodRenderer
 		// 2. we aren't already regenerating the LODs
 		// 3. we aren't waiting for the build and draw buffers to swap
 		//		(this is to prevent thread conflicts)
-		if ((partialRegen || fullRegen) && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvaliable())
+		if ((partialRegen || fullRegen) && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvailable())
 		{
 			// generate the LODs on a separate thread to prevent stuttering or freezing
 			lodBufferBuilder.generateLodBuffersAsync(this, lodDim, mc.getPlayer().blockPosition(), true);
 			
 			// the regen process has been started,
-			// it will be done when lodBufferBuilder.newBuffersAvaliable()
+			// it will be done when lodBufferBuilder.newBuffersAvailable()
 			// is true
 			fullRegen = false;
 			partialRegen = false;
@@ -198,7 +198,7 @@ public class LodRenderer
 		// TODO move the buffer regeneration logic into its own class (probably called in the client proxy instead)
 		// ...ending here
 		
-		if (lodBufferBuilder.newBuffersAvaliable())
+		if (lodBufferBuilder.newBuffersAvailable())
 		{
 			swapBuffers();
 		}
@@ -228,12 +228,12 @@ public class LodRenderer
 		GL11.glDisable(GL11.GL_LIGHT0);
 		GL11.glDisable(GL11.GL_LIGHT1);
 		
-		// get the default projection matrix so we can
+		// get the default projection matrix, so we can
 		// reset it after drawing the LODs
 		float[] mcProjMatrixRaw = new float[16];
 		GL11.glGetFloatv(GL11.GL_PROJECTION_MATRIX, mcProjMatrixRaw);
 		Matrix4f mcProjectionMatrix = new Matrix4f(mcProjMatrixRaw);
-		// OpenGl outputs their matricies in col,row form instead of row,col
+		// OpenGl outputs their matrices in col,row form instead of row,col
 		// (or maybe vice versa I have no idea :P)
 		mcProjectionMatrix.transpose();
 		
@@ -248,7 +248,7 @@ public class LodRenderer
 		
 		NearFarFogSettings fogSettings = determineFogSettings();
 		
-		// determine the current fog settings so they can be
+		// determine the current fog settings, so they can be
 		// reset after drawing the LODs
 		float defaultFogStartDist = GL11.glGetFloat(GL11.GL_FOG_START);
 		float defaultFogEndDist = GL11.glGetFloat(GL11.GL_FOG_END);
@@ -393,15 +393,10 @@ public class LodRenderer
 			{
 				// for more realistic fog when using FAR
 				if (LodConfig.CLIENT.graphics.fogDistance.get() == FogDistance.NEAR_AND_FAR)
-				{
 					RenderSystem.fogStart(farPlaneBlockDistance * 0.9f);
-					RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
-				}
 				else
-				{
 					RenderSystem.fogStart(farPlaneBlockDistance * 0.1f);
-					RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
-				}
+				RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
 			}
 			else if (fogQuality == FogQuality.FAST)
 			{
@@ -446,7 +441,7 @@ public class LodRenderer
 		RenderSystem.fogMode(defaultFogMode);
 		GL11.glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, defaultFogDistance);
 		
-		// disable fog if Minecraft wasn't rendering fog
+		// disable fog if Minecraft wasn't rendering fog,
 		// but we were
 		if (!fogSettings.vanillaIsRenderingFog &&
 				(fogSettings.near.quality != FogQuality.OFF ||
@@ -507,7 +502,7 @@ public class LodRenderer
 		boolean lodProjUseFov;
 		boolean defaultMcProjUseFov;
 		
-		private FovTest(boolean newLodProjUseFov, boolean newDefaultMcProjUseFov)
+		FovTest(boolean newLodProjUseFov, boolean newDefaultMcProjUseFov)
 		{
 			lodProjUseFov = newLodProjUseFov;
 			defaultMcProjUseFov = newDefaultMcProjUseFov;
@@ -536,7 +531,7 @@ public class LodRenderer
 		// true here means use "use fov setting" (probably)
 		
 		
-		// this logic strips away the defaultMcProj matrix so we 
+		// this logic strips away the defaultMcProj matrix, so we
 		// can get the distortionMatrix, which represents all
 		// transformations, zooming, distortions, etc. done
 		// to Minecraft's Projection matrix
@@ -556,7 +551,7 @@ public class LodRenderer
 	}
 	
 	
-	/** setup the lighting to be used for the LODs */
+	///** setup the lighting to be used for the LODs */
 	/*private void setupLighting(LodDimension lodDimension, float partialTicks)
 	{
 		// Determine if the player has night vision

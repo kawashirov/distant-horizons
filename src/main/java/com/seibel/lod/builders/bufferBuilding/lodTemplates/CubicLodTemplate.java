@@ -93,7 +93,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			height++;
 		}
 		
-		// offset the AABB by it's x/z position in the world since
+		// offset the AABB by its x/z position in the world since
 		// it uses doubles to specify its location, unlike the model view matrix
 		// which only uses floats
 		double x = -bufferCenterBlockPos.getX();

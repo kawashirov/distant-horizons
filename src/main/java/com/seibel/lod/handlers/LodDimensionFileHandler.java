@@ -158,7 +158,7 @@ public class LodDimensionFileHandler
 						{
 							// the file we are reading is a newer version,
 							// close the reader and ignore the file, we don't
-							// want to accidently delete anything the user may want.
+							// want to accidentally delete anything the user may want.
 							inputStream.close();
 							ClientProxy.LOGGER.info("Newer LOD region file for region: (" + regionX + "," + regionZ + ")"
 									+ " version found: " + fileVersion
@@ -292,7 +292,7 @@ public class LodDimensionFileHandler
 					if (fileVersion > LOD_SAVE_FILE_VERSION)
 					{
 						// the file we are reading is a newer version,
-						// don't write anything, we don't want to accidently
+						// don't write anything, we don't want to accidentally
 						// delete anything the user may want.
 						return;
 					}

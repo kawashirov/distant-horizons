@@ -26,7 +26,7 @@ public class DataPointUtil
 	 */
 	
 	// Reminder: bytes have range of [-128, 127].
-	// When converting to or from a int a 128 should be added or removed.
+	// When converting to or from an int a 128 should be added or removed.
 	// If there is a bug with color then it's probably caused by this.
 	
 	//To be used in the future for negative value
@@ -193,7 +193,7 @@ public class DataPointUtil
 	}
 
 	/**
-	 * This is used to convert a dataPoint to string (usefull for the print function)
+	 * This is used to convert a dataPoint to string (useful for the print function)
 	 * @param dataPoint
 	 * @return
 	 */

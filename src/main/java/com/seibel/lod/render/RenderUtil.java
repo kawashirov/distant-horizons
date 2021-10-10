@@ -42,7 +42,7 @@ public class RenderUtil
 	
 	/**
 	 * Returns if the given ChunkPos is in the loaded area of the world.
-	 * @param centerCoordinate the center of the loaded world (probably the player's ChunkPos)
+	 * @param center the center of the loaded world (probably the player's ChunkPos)
 	 */
 	public static boolean isChunkPosInLoadedArea(ChunkPos pos, ChunkPos center)
 	{
@@ -101,9 +101,9 @@ public class RenderUtil
 	 * Returns the maxViewDistanceMultiplier for the given LodTemplate
 	 * at the given LodDetail level.
 	 */
-	/*public static int getMaxRadiusMultiplierWithAvaliableMemory(LodTemplate lodTemplate, int detailLevel)
+	/*public static int getMaxRadiusMultiplierWithAvailableMemory(LodTemplate lodTemplate, int detailLevel)
 	{
-		int maxNumberOfLods = LodRenderer.MAX_ALOCATEABLE_DIRECT_MEMORY / lodTemplate.getBufferMemoryForSingleLod();
+		int maxNumberOfLods = LodRenderer.MAX_ALLOCATABLE_DIRECT_MEMORY / lodTemplate.getBufferMemoryForSingleLod();
 		int numbLodsWide = (int) Math.sqrt(maxNumberOfLods);
 		
 		return numbLodsWide / (2 * mc.getRenderDistance());
@@ -144,9 +144,9 @@ public class RenderUtil
 	 */
     private static boolean isNormalizedVectorInViewFrustum(Vector3d objectVector, Vector3d cameraDir)
 	{
-    	// the -0.1 is to offer a slight buffer so we are
+    	// the -0.1 is to offer a slight buffer, so we are
     	// more likely to render LODs and thus, hopefully prevent
-    	// flickering or odd disappearences
+    	// flickering or odd disappearances
     	return objectVector.dot(cameraDir) > -0.1;
 	}
 }

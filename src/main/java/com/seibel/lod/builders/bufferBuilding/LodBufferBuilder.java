@@ -103,7 +103,7 @@ public class LodBufferBuilder
 	/** used to debug how the buildableStorageBuffers are growing */
 	public int[][][] bufferPreviousCapacity;
 	/** 
-	 * This is toggled when the buffers are swapped so we only
+	 * This is toggled when the buffers are swapped, so we only
 	 * display the expansion log for one set of buffers
 	 */
 	public boolean printExpansionLog = true;
@@ -285,7 +285,7 @@ public class LodBufferBuilder
 								
 								
 								
-								// keep a local version so we don't have to worry about indexOutOfBounds Exceptions
+								// keep a local version, so we don't have to worry about indexOutOfBounds Exceptions
 								// if it changes in the LodRenderer while we are working here
 								boolean[][] vanillaRenderedChunks = renderer.vanillaRenderedChunks;
 								short gameChunkRenderDistance = (short) (vanillaRenderedChunks.length / 2 - 1);
@@ -592,7 +592,7 @@ public class LodBufferBuilder
 						
 						// variables passed into a lambda expression
 						// need to be effectively final, so we have
-						// to use a else statement here
+						// to use an else statement here
 						if (buildableVbos[i][j][k] != null)
 							buildableId = buildableVbos[i][j][k].id;
 						else
@@ -697,7 +697,7 @@ public class LodBufferBuilder
 		finally
 		{
 			// close the context so it can be re-used later.
-			// I'm guessing we can't just leave it because the executer service
+			// I'm guessing we can't just leave it because the executor service
 			// does something that invalidates the OpenGL context.
 			glProxy.setGlContext(GlProxyContext.NONE);
 		}
@@ -730,7 +730,7 @@ public class LodBufferBuilder
 					if (previousCapacity != 0 && allowBufferExpansion)
 					{
 						// the buffer(s) aren't big enough, expand them.
-						// This does cause lag/stuttering so it should be avoided!
+						// This does cause lag/stuttering, so it should be avoided!
 						
 						// expand the buffer in system memory
 						GL45.glBufferData(GL45.GL_ARRAY_BUFFER, (int) (uploadBuffer.capacity() * BUFFER_EXPANSION_MULTIPLIER), GL45.GL_DYNAMIC_DRAW);
@@ -803,7 +803,7 @@ public class LodBufferBuilder
 			drawableStorageBufferIds = buildableStorageBufferIds;
 			buildableStorageBufferIds = tmpStorage;
 			
-			// we only want to print the exapnsion log for
+			// we only want to print the expansion log for
 			// one set of buffers, not both
 			printExpansionLog = !printExpansionLog;
 			
@@ -837,7 +837,7 @@ public class LodBufferBuilder
 	 * buffers have been generated and are ready to be
 	 * sent to the LodRenderer.
 	 */
-	public boolean newBuffersAvaliable()
+	public boolean newBuffersAvailable()
 	{
 		return switchVbos;
 	}

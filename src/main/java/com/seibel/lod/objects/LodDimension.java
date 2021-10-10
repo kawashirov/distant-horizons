@@ -428,7 +428,7 @@ public class LodDimension
 							// try to get the region from file
 							regions[x][z] = getRegionFromFile(regionPos, levelToGen, generationMode, verticalQuality);
 							
-							// if there is no region file create a empty region
+							// if there is no region file create an empty region
 							if (regions[x][z] == null)
 								regions[x][z] = new LodRegion(levelToGen, regionPos, generationMode, verticalQuality);
 							
@@ -474,7 +474,7 @@ public class LodDimension
 		{
 			try
 			{
-				// mark the region as dirty so it will be saved to disk
+				// mark the region as dirty, so it will be saved to disk
 				int xIndex = (regionPosX - center.x) + halfWidth;
 				int zIndex = (regionPosZ - center.z) + halfWidth;
 				

@@ -163,7 +163,7 @@ public class GlProxy
 		else
 			// hopefully this shouldn't happen, but
 			// at least now we will be notified if it does happen
-			throw new IllegalStateException(Thread.currentThread().getName() + " has a unkown OpenGl context: [" + currentContext + "]. Minecraft context [" + minecraftGlContext + "], LodBuilder context [" + lodBuilderGlContext + "], no context [0].");
+			throw new IllegalStateException(Thread.currentThread().getName() + " has a unknown OpenGl context: [" + currentContext + "]. Minecraft context [" + minecraftGlContext + "], LodBuilder context [" + lodBuilderGlContext + "], no context [0].");
 	}
 	
 	

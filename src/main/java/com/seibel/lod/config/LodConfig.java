@@ -114,7 +114,7 @@ public class LodConfig
 			fogDistance = builder
 					.comment("\n\n"
 							+ " At what distance should Fog be drawn on the LODs? \n"
-							+ " If the fog cuts off ubruptly or you are using Optifine's \"fast\" fog option \n"
+							+ " If the fog cuts off abruptly or you are using Optifine's \"fast\" fog option \n"
 							+ " set this to " + FogDistance.NEAR + " or " + FogDistance.FAR + ". \n")
 					.defineEnum("fogDistance", FogDistance.NEAR_AND_FAR);
 			
@@ -168,7 +168,7 @@ public class LodConfig
 							+ " If true all LODs are drawn, even those behind \n"
 							+ " the player's camera, decreasing performance. \n\n"
 							+ ""
-							+ " Disable this if you see LODs disapearing. \n"
+							+ " Disable this if you see LODs disappearing. \n"
 							+ " (Which may happen if you are using a camera mod) \n")
 					.define("disableDirectionalCulling", false);
 			
@@ -295,7 +295,7 @@ public class LodConfig
 							+ " This will show player made structures, which can \n"
 							+ " be useful if you are adding the mod to a pre-existing world. \n"
 							+ " This is the most compatible, but causes server/simulation lag. \n"
-							+ " Singlethreaded - Slow (15-50 ms, with spikes up to 200 ms) \n")
+							+ " SingleThreaded - Slow (15-50 ms, with spikes up to 200 ms) \n")
 					.defineEnum("distanceGenerationMode", DistanceGenerationMode.SURFACE);
 			
 			allowUnstableFeatureGeneration = builder
@@ -346,7 +346,7 @@ public class LodConfig
 					.comment("\n\n"
 							+ " This is how many threads are used when building vertex buffers \n"
 							+ " (The things sent to your GPU to draw the LODs). \n"
-							+ " If you experience high CPU useage when NOT generating distant \n"
+							+ " If you experience high CPU usage when NOT generating distant \n"
 							+ " LODs, lower this number. \n"
 							+ " \n"
 							+ " The maximum value is the number of logical processors on your CPU. \n"

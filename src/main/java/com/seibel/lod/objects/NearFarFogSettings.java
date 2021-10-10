@@ -34,7 +34,7 @@ public class NearFarFogSettings
 	public NearOrFarSetting far = new NearOrFarSetting(FogDistance.FAR);
 	
 	/** If true that means Minecraft is
-	 * rendering fog along side us */
+	 * rendering fog alongside us */
 	public boolean vanillaIsRenderingFog = true;
 	
 	public NearFarFogSettings()

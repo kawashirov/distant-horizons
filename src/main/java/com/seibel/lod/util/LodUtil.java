@@ -204,9 +204,9 @@ public class LodUtil
 	/**
 	 * Convert a 2D absolute position into a quad tree relative position.
 	 */
-	public static int convertLevelPos(int pos, int currectDetailLevel, int targetDetailLevel)
+	public static int convertLevelPos(int pos, int currentDetailLevel, int targetDetailLevel)
 	{
-		return Math.floorDiv(pos, (int) Math.pow(2, targetDetailLevel - currectDetailLevel));
+		return Math.floorDiv(pos, (int) Math.pow(2, targetDetailLevel - currentDetailLevel));
 	}
 	
 	/**
@@ -352,7 +352,7 @@ public class LodUtil
 	
 	/**
 	 * Returns the GPU memory needed if all LODs in
-	 * a the given region are rendered.
+	 * the given region are rendered.
 	 *
 	 * @param regionPosX x region position to check
 	 * @param regionPosZ z region position to check
@@ -444,7 +444,7 @@ public class LodUtil
 				
 				if (playerPos.getY() <= lodAverageHeight)
 				{
-					// don't draw Lod's that are taller than the player
+					// don't draw LODs that are taller than the player
 					// to prevent LODs being drawn on top of the player
 					posToSkip.add(new ChunkPos(x, z));
 				}
@@ -467,17 +467,17 @@ public class LodUtil
 	{
 		HashSet<ChunkPos> loadedPos = new HashSet<>();
 		
-		// Wow those are some long names!
+		// Wow, those are some long names!
 		
 		// go through every RenderInfo to get the compiled chunks
 		WorldRenderer renderer = mc.getLevelRenderer();
-		for (WorldRenderer.LocalRenderInformationContainer worldrenderer$localrenderinformationcontainer : renderer.renderChunks)
+		for (WorldRenderer.LocalRenderInformationContainer worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
 		{
-			CompiledChunk compiledChunk = worldrenderer$localrenderinformationcontainer.chunk.getCompiledChunk();
+			CompiledChunk compiledChunk = worldRenderer$LocalRenderInformationContainer.chunk.getCompiledChunk();
 			if (!compiledChunk.hasNoRenderableLayers())
 			{
 				// add the ChunkPos for every rendered chunk
-				BlockPos bpos = worldrenderer$localrenderinformationcontainer.chunk.getOrigin();
+				BlockPos bpos = worldRenderer$LocalRenderInformationContainer.chunk.getOrigin();
 				
 				loadedPos.add(new ChunkPos(bpos));
 			}
@@ -492,7 +492,7 @@ public class LodUtil
 	 * @param vanillaRenderedChunks matrix of the vanilla rendered chunks
 	 * @param x relative (to the matrix) x chunk to check
 	 * @param z relative (to the matrix) z chunk to check
-	 * @return true if and only if the chunk is a the border of the rendereble chunks
+	 * @return true if and only if the chunk is a border of the renderable chunks
 	 */
 	public static boolean isBorderChunk(boolean[][] vanillaRenderedChunks, int x, int z)
 	{

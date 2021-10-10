@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * This class is used to mix in my rendering code
  * before Minecraft starts rendering blocks.
- * If this wasn't done and we used Forge's 
+ * If this wasn't done, and we used Forge's
  * render last event, the LODs would render on top
  * of the normal terrain.
  *
