@@ -15,15 +15,13 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.render;
 
 import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.objects.LodRegion;
-import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -31,7 +29,7 @@ import net.minecraft.util.math.vector.Vector3d;
 /**
  * This holds miscellaneous helper code
  * to be used in the rendering process.
- * 
+ *
  * @author James Seibel
  * @version 8-21-2021
  */
@@ -46,11 +44,11 @@ public class RenderUtil
 	 */
 	public static boolean isChunkPosInLoadedArea(ChunkPos pos, ChunkPos center)
 	{
-		return (pos.x >= center.x - mc.getRenderDistance() 
-				&& pos.x <= center.x + mc.getRenderDistance()) 
-				&& 
-				(pos.z >= center.z - mc.getRenderDistance() 
-				&& pos.z <= center.z + mc.getRenderDistance());
+		return (pos.x >= center.x - mc.getRenderDistance()
+				&& pos.x <= center.x + mc.getRenderDistance())
+				&&
+				(pos.z >= center.z - mc.getRenderDistance()
+						&& pos.z <= center.z + mc.getRenderDistance());
 	}
 	
 	/**
@@ -59,11 +57,11 @@ public class RenderUtil
 	 */
 	public static boolean isCoordinateInLoadedArea(int x, int z, int centerCoordinate)
 	{
-		return (x >= centerCoordinate - mc.getRenderDistance() 
-				&& x <= centerCoordinate + mc.getRenderDistance()) 
-				&& 
-				(z >= centerCoordinate - mc.getRenderDistance() 
-				&& z <= centerCoordinate + mc.getRenderDistance());
+		return (x >= centerCoordinate - mc.getRenderDistance()
+				&& x <= centerCoordinate + mc.getRenderDistance())
+				&&
+				(z >= centerCoordinate - mc.getRenderDistance()
+						&& z <= centerCoordinate + mc.getRenderDistance());
 	}
 	
 	
@@ -75,17 +73,17 @@ public class RenderUtil
 	{
 		int halfRadius = lodRadius / 2;
 		
-		return (i >= lodRadius - halfRadius 
-				&& i <= lodRadius + halfRadius) 
-				&& 
+		return (i >= lodRadius - halfRadius
+				&& i <= lodRadius + halfRadius)
+				&&
 				(j >= lodRadius - halfRadius
-				&& j <= lodRadius + halfRadius);
+						&& j <= lodRadius + halfRadius);
 	}
 	
 	
 	/**
 	 * Get how much buffer memory would be required for the given radius multiplier
-	 * 
+	 *
 	 * issue #62
 	 * TODO check if this is actually returning the correct memory needed
 	 * it is possible (albeit unlikely) to have a buffer indexOutOfBounds exception
@@ -97,10 +95,10 @@ public class RenderUtil
 		return region.getMinMemoryNeeded(LodConfig.CLIENT.graphics.lodTemplate.get());
 	}
 	
-	/**
-	 * Returns the maxViewDistanceMultiplier for the given LodTemplate
-	 * at the given LodDetail level.
-	 */
+	///**
+	// * Returns the maxViewDistanceMultiplier for the given LodTemplate
+	// * at the given LodDetail level.
+	// */
 	/*public static int getMaxRadiusMultiplierWithAvailableMemory(LodTemplate lodTemplate, int detailLevel)
 	{
 		int maxNumberOfLods = LodRenderer.MAX_ALLOCATABLE_DIRECT_MEMORY / lodTemplate.getBufferMemoryForSingleLod();
@@ -116,37 +114,37 @@ public class RenderUtil
 	 */
 	public static boolean isRegionInViewFrustum(BlockPos playerBlockPos, Vector3d cameraDir, BlockPos vboCenterPos)
 	{
-    	// convert the vbo position into a direction vector
-    	// starting from the player's position
+		// convert the vbo position into a direction vector
+		// starting from the player's position
 		Vector3d vboVec = new Vector3d(vboCenterPos.getX(), 0, vboCenterPos.getZ());
 		Vector3d playerVec = new Vector3d(playerBlockPos.getX(), playerBlockPos.getY(), playerBlockPos.getZ());
 		Vector3d vboCenterVec = vboVec.subtract(playerVec);
 		
 		
-    	int halfRegionWidth = LodUtil.REGION_WIDTH / 2;
-    	
-    	// calculate the 4 corners
-    	Vector3d vboSeVec = new Vector3d(vboCenterVec.x + halfRegionWidth, vboCenterVec.y, vboCenterVec.z + halfRegionWidth);//.normalize();
-    	Vector3d vboSwVec = new Vector3d(vboCenterVec.x - halfRegionWidth, vboCenterVec.y, vboCenterVec.z + halfRegionWidth);//.normalize();
-    	Vector3d vboNwVec = new Vector3d(vboCenterVec.x - halfRegionWidth, vboCenterVec.y, vboCenterVec.z - halfRegionWidth);//.normalize();
-    	Vector3d vboNeVec = new Vector3d(vboCenterVec.x + halfRegionWidth, vboCenterVec.y, vboCenterVec.z - halfRegionWidth);//.normalize();
-    	
-    	// if any corner is visible, this region should be rendered
-    	return isNormalizedVectorInViewFrustum(vboSeVec, cameraDir) ||
-    			isNormalizedVectorInViewFrustum(vboSwVec, cameraDir) ||
-    			isNormalizedVectorInViewFrustum(vboNwVec, cameraDir) ||
-    			isNormalizedVectorInViewFrustum(vboNeVec, cameraDir);
+		int halfRegionWidth = LodUtil.REGION_WIDTH / 2;
+		
+		// calculate the 4 corners
+		Vector3d vboSeVec = new Vector3d(vboCenterVec.x + halfRegionWidth, vboCenterVec.y, vboCenterVec.z + halfRegionWidth);//.normalize();
+		Vector3d vboSwVec = new Vector3d(vboCenterVec.x - halfRegionWidth, vboCenterVec.y, vboCenterVec.z + halfRegionWidth);//.normalize();
+		Vector3d vboNwVec = new Vector3d(vboCenterVec.x - halfRegionWidth, vboCenterVec.y, vboCenterVec.z - halfRegionWidth);//.normalize();
+		Vector3d vboNeVec = new Vector3d(vboCenterVec.x + halfRegionWidth, vboCenterVec.y, vboCenterVec.z - halfRegionWidth);//.normalize();
+		
+		// if any corner is visible, this region should be rendered
+		return isNormalizedVectorInViewFrustum(vboSeVec, cameraDir) ||
+				isNormalizedVectorInViewFrustum(vboSwVec, cameraDir) ||
+				isNormalizedVectorInViewFrustum(vboNwVec, cameraDir) ||
+				isNormalizedVectorInViewFrustum(vboNeVec, cameraDir);
 	}
-    
+	
 	/**
 	 * Currently takes the dot product of the two vectors,
 	 * but in the future could do more complicated frustum culling tests.
 	 */
-    private static boolean isNormalizedVectorInViewFrustum(Vector3d objectVector, Vector3d cameraDir)
+	private static boolean isNormalizedVectorInViewFrustum(Vector3d objectVector, Vector3d cameraDir)
 	{
-    	// the -0.1 is to offer a slight buffer, so we are
-    	// more likely to render LODs and thus, hopefully prevent
-    	// flickering or odd disappearances
-    	return objectVector.dot(cameraDir) > -0.1;
+		// the -0.1 is to offer a slight buffer, so we are
+		// more likely to render LODs and thus, hopefully prevent
+		// flickering or odd disappearances
+		return objectVector.dot(cameraDir) > -0.1;
 	}
 }
