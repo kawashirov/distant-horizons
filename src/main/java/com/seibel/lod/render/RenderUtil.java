@@ -22,6 +22,7 @@ import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
+
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -48,7 +49,7 @@ public class RenderUtil
 				&& pos.x <= center.x + mc.getRenderDistance())
 				&&
 				(pos.z >= center.z - mc.getRenderDistance()
-						&& pos.z <= center.z + mc.getRenderDistance());
+				&& pos.z <= center.z + mc.getRenderDistance());
 	}
 	
 	/**
@@ -61,7 +62,7 @@ public class RenderUtil
 				&& x <= centerCoordinate + mc.getRenderDistance())
 				&&
 				(z >= centerCoordinate - mc.getRenderDistance()
-						&& z <= centerCoordinate + mc.getRenderDistance());
+				&& z <= centerCoordinate + mc.getRenderDistance());
 	}
 	
 	
@@ -77,17 +78,12 @@ public class RenderUtil
 				&& i <= lodRadius + halfRadius)
 				&&
 				(j >= lodRadius - halfRadius
-						&& j <= lodRadius + halfRadius);
+				&& j <= lodRadius + halfRadius);
 	}
 	
 	
 	/**
 	 * Get how much buffer memory would be required for the given radius multiplier
-	 *
-	 * issue #62
-	 * TODO check if this is actually returning the correct memory needed
-	 * it is possible (albeit unlikely) to have a buffer indexOutOfBounds exception
-	 * which is caused by the buffer not being big enough.
 	 */
 	public static int getBufferMemoryForRegion(LodRegion region)
 	{
