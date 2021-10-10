@@ -74,14 +74,14 @@ public class LodRenderer
 	 */
 	public DebugMode previousDebugMode = DebugMode.OFF;
 	
-	private MinecraftWrapper mc;
-	private GameRenderer gameRender;
+	private final MinecraftWrapper mc;
+	private final GameRenderer gameRender;
 	private IProfiler profiler;
 	private int farPlaneBlockDistance;
 	
 	
 	/** This is used to generate the buildable buffers */
-	private LodBufferBuilder lodBufferBuilder;
+	private final LodBufferBuilder lodBufferBuilder;
 	
 	/** Each VertexBuffer represents 1 region */
 	private VertexBuffer[][][] vbos;

@@ -14,7 +14,7 @@ import java.util.Arrays;
 public class PosToRenderContainer
 {
 	public byte minDetail;
-	private int size;
+	private final int size;
 	private int regionPosX;
 	private int regionPosZ;
 	private int numberOfPosToRender;

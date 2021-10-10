@@ -747,10 +747,7 @@ public class LodDimension
 	public boolean doesDataExist(byte detailLevel, int posX, int posZ)
 	{
 		LodRegion region = getRegion(detailLevel, posX, posZ);
-		if (region == null)
-			return false;
-		
-		return region.doesDataExist(detailLevel, posX, posZ);
+		return region != null && region.doesDataExist(detailLevel, posX, posZ);
 	}
 	
 	/**
@@ -760,10 +757,7 @@ public class LodDimension
 	public LodRegion getRegionFromFile(RegionPos regionPos, byte detailLevel,
 			DistanceGenerationMode generationMode, VerticalQuality verticalQuality)
 	{
-		if (fileHandler != null)
-			return fileHandler.loadRegionFromFile(detailLevel, regionPos, generationMode, verticalQuality);
-		else
-			return null;
+		return fileHandler != null ? fileHandler.loadRegionFromFile(detailLevel, regionPos, generationMode, verticalQuality) : null;
 	}
 	
 	/**
@@ -804,17 +798,10 @@ public class LodDimension
 	 */
 	public int getWidth()
 	{
-		if (regions != null)
-		{
-			// we want to get the length directly from the
-			// source to make sure it is in sync with region
-			// and isRegionDirty
-			return regions.length;
-		}
-		else
-		{
-			return width;
-		}
+		// we want to get the length directly from the
+		// source to make sure it is in sync with region
+		// and isRegionDirty
+		return regions != null ? regions.length : width;
 	}
 	
 	/** Update the width of this dimension, in regions */
@@ -838,26 +825,17 @@ public class LodDimension
 	@Override
 	public String toString()
 	{
-		LodRegion region;
-		
 		StringBuilder stringBuilder = new StringBuilder();
 		stringBuilder.append("Dimension : \n");
-		for (int x = 0; x < regions.length; x++)
+		for (LodRegion[] lodRegions : regions)
 		{
-			for (int z = 0; z < regions.length; z++)
+			for (LodRegion region : lodRegions)
 			{
-				region = regions[x][z];
 				if (region == null)
-				{
 					stringBuilder.append("n");
-					stringBuilder.append("\t");
-					
-				}
 				else
-				{
 					stringBuilder.append(region.getMinDetailLevel());
-					stringBuilder.append("\t");
-				}
+				stringBuilder.append("\t");
 			}
 			stringBuilder.append("\n");
 		}
