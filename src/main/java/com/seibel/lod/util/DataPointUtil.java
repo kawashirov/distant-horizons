@@ -1,11 +1,7 @@
 package com.seibel.lod.util;
 
 import com.seibel.lod.enums.DistanceGenerationMode;
-
 import net.minecraft.client.renderer.texture.NativeImage;
-
-import javax.xml.crypto.Data;
-import java.util.Arrays;
 
 public class DataPointUtil
 {
@@ -474,8 +470,24 @@ public class DataPointUtil
 			return dataPoint;
 		}
 		
+		//we cut the 1 block gaps
+		int j;
+		for (i = 0; i < count - 1; i++)
+		{
+			if (heightAndDepth[i * 2 + 1] - heightAndDepth[(i + 1) * 2] == 1)
+			{
+				heightAndDepth[i * 2 + 1] = heightAndDepth[(i + 1) * 2 + 1];
+				for (j = i + 1; j < count - 1; j++)
+				{
+					heightAndDepth[j * 2] = heightAndDepth[(j + 1) * 2];
+					heightAndDepth[j * 2 + 1] = heightAndDepth[(j + 1) * 2 + 1];
+				}
+				count--;
+			}
+		}
+		
 		//we limit the vertical portion to maxVerticalData
-		int j = 0;
+		j = 0;
 		while (count > maxVerticalData)
 		{
 			ii = worldHeight;
