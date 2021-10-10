@@ -525,14 +525,14 @@ public class LodRenderer
 		// create the new projection matrix
 		Matrix4f lodPoj =
 				Matrix4f.perspective(
-						getFov(partialTicks, LodConfig.CLIENT.graphics.useFovSetting.get().lodProjUseFov),
+						getFov(partialTicks, true),
 						(float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight(),
 						mc.getRenderDistance() / 2,
 						farPlaneBlockDistance * LodUtil.CHUNK_WIDTH * 2 / 4);
 		
 		// get Minecraft's un-edited projection matrix
 		// (this is before it is zoomed, distorted, etc.)
-		Matrix4f defaultMcProj = mc.getGameRenderer().getProjectionMatrix(mc.getGameRenderer().getMainCamera(), partialTicks, LodConfig.CLIENT.graphics.useFovSetting.get().defaultMcProjUseFov);
+		Matrix4f defaultMcProj = mc.getGameRenderer().getProjectionMatrix(mc.getGameRenderer().getMainCamera(), partialTicks, true);
 		// true here means use "use fov setting" (probably)
 		
 		
