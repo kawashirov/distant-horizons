@@ -63,15 +63,15 @@ public class ClientProxy
 	 */
 	private boolean firstTimeSetupComplete = false;
 	
-	private static LodWorld lodWorld = new LodWorld();
-	private static LodBuilder lodBuilder = new LodBuilder();
-	private static LodBufferBuilder lodBufferBuilder = new LodBufferBuilder();
+	private static final LodWorld lodWorld = new LodWorld();
+	private static final LodBuilder lodBuilder = new LodBuilder();
+	private static final LodBufferBuilder lodBufferBuilder = new LodBufferBuilder();
 	private static LodRenderer renderer = new LodRenderer(lodBufferBuilder);
-	private static LodWorldGenerator lodWorldGenerator = LodWorldGenerator.INSTANCE;
+	private static final LodWorldGenerator lodWorldGenerator = LodWorldGenerator.INSTANCE;
 	
 	private boolean configOverrideReminderPrinted = false;
 	
-	private MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
+	private final MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	
 	/** This is used to determine if the LODs should be regenerated */
@@ -339,11 +339,8 @@ public class ClientProxy
 			chunksWide = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 2 + 1;
 		
 		int newWidth = (int) Math.ceil(chunksWide / (float) LodUtil.REGION_WIDTH_IN_CHUNKS);
-		// make sure we have a odd number of regions
-		if ((newWidth & 1) == 0)
-			newWidth += 1;
-		else
-			newWidth += 2;
+		// make sure we have an odd number of regions
+		newWidth += (newWidth & 1) == 0 ? 1 : 2;
 		
 		// do the dimensions need to change in size?
 		if (lodBuilder.defaultDimensionWidthInRegions != newWidth || recalculateWidths)
