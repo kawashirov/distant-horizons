@@ -17,8 +17,6 @@
  */
 package com.seibel.lod.enums;
 
-import net.minecraftforge.common.ForgeConfigSpec;
-
 /**
  * Near_First <br>
  * Far_First <br>
@@ -37,13 +35,13 @@ public enum BufferRebuildTimes
 	RARE(5000, 2000, 10000);
 
 	public int playerMoveTimeout;
-	public int renderdChunkTimeout;
+	public int renderedChunkTimeout;
 	public int chunkChangeTimeout;
 
-	BufferRebuildTimes(int playerMoveTimeout, int renderdChunkTimeout, int chunkChangeTimeout)
+	BufferRebuildTimes(int playerMoveTimeout, int renderedChunkTimeout, int chunkChangeTimeout)
 	{
 		this.playerMoveTimeout = playerMoveTimeout;
-		this.renderdChunkTimeout = renderdChunkTimeout;
+		this.renderedChunkTimeout = renderedChunkTimeout;
 		this.chunkChangeTimeout = chunkChangeTimeout;
 	}
 }

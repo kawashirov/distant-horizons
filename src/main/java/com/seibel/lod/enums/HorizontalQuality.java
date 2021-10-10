@@ -22,7 +22,7 @@ package com.seibel.lod.enums;
  * Medium <br>
  * High <br>
  * <br>
- * this indicate the base of the quadratic function we use for the quality drop off
+ * this indicates the base of the quadratic function we use for the quality drop off
  * 
  * @author Leonardo Amato
  * @version 9-29-2021

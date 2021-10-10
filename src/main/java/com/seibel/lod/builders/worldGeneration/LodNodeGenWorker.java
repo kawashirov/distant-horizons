@@ -248,7 +248,7 @@ public class LodNodeGenWorker implements IWorker
 			
 			// generate the terrain (this is thread safe)
 			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
-			// override the chunk status so we can run the next generator stage
+			// override the chunk status, so we can run the next generator stage
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
 			chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
@@ -336,7 +336,7 @@ public class LodNodeGenWorker implements IWorker
 			{
 				// if we are in the end, don't generate any chunks.
 				// Since we don't know where the islands are, everything
-				// generates the same and it looks really bad.
+				// generates the same, and it looks awful.
 				lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(true, true, false));
 			}
 
@@ -363,13 +363,13 @@ public class LodNodeGenWorker implements IWorker
 			
 			// generate the terrain (this is thread safe)
 			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
-			// override the chunk status so we can run the next generator stage
+			// override the chunk status, so we can run the next generator stage
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
 			chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
 			ChunkStatus.NOISE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			ChunkStatus.SURFACE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
 			
-			// this feature has been proven to be thread safe
+			// this feature has been proven to be thread safe,
 			// so we will add it
 			IceAndSnowFeature snowFeature = new IceAndSnowFeature(NoFeatureConfig.CODEC);
 			snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
@@ -400,7 +400,7 @@ public class LodNodeGenWorker implements IWorker
 			
 			// generate the terrain (this is thread safe)
 			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
-			// override the chunk status so we can run the next generator stage
+			// override the chunk status, so we can run the next generator stage
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
 			chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
 			ChunkStatus.NOISE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
@@ -456,7 +456,7 @@ public class LodNodeGenWorker implements IWorker
 						catch (ConcurrentModificationException e)
 						{
 							// This will happen. I'm not sure what to do about it
-							// except pray that it doesn't effect the normal world generation
+							// except pray that it doesn't affect the normal world generation
 							// in any harmful way.
 							// Update: this can cause crashes and high CPU usage.
 							
@@ -554,7 +554,7 @@ public class LodNodeGenWorker implements IWorker
 			}
 			else
 			{
-//				ClientProxy.LOGGER.debug("unkown decorated placement config: \"" + config.decorator.config().getClass() + "\"");
+//				ClientProxy.LOGGER.debug("unknown decorated placement config: \"" + config.decorator.config().getClass() + "\"");
 				return config;
 			}
 			
@@ -604,14 +604,14 @@ public class LodNodeGenWorker implements IWorker
 	
 	/**
 	 * Stops the current genThreads if they are running
-	 * and then recreates the Executer service. <br><br>
+	 * and then recreates the Executor service. <br><br>
 	 *
 	 * This is done to clear any outstanding tasks
 	 * that may exist after the player leaves their current world.
 	 * If this isn't done unfinished tasks may be left in the queue
 	 * preventing new LodChunks form being generated.
 	 */
-	public static void restartExecuterService()
+	public static void restartExecutorService()
 	{
 		if (genThreads != null && !genThreads.isShutdown())
 		{
@@ -648,6 +648,6 @@ public class LodNodeGenWorker implements IWorker
      At this point I would suggest using FEATURES, as it generates snow and trees
      (and any other object that is needed to make biomes distinct)
 
-     Otherwise if snow/trees aren't necessary SURFACE is the next fastest (although not by much)
+     Otherwise, if snow/trees aren't necessary SURFACE is the next fastest (although not by much)
 	 */
 }

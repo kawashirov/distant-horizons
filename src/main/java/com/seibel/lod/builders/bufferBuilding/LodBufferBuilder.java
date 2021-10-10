@@ -468,13 +468,13 @@ public class LodBufferBuilder
 				
 				// if the memory required is greater than the max buffer 
 				// capacity, divide the memory across multiple buffers
-				if (regionMemoryRequired > LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY)
+				if (regionMemoryRequired > LodUtil.MAX_ALLOCATABLE_DIRECT_MEMORY)
 				{
-					numberOfBuffers = (int) Math.ceil(regionMemoryRequired / LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY) + 1;
+					numberOfBuffers = (int) Math.ceil(regionMemoryRequired / LodUtil.MAX_ALLOCATABLE_DIRECT_MEMORY) + 1;
 					
 					// TODO shouldn't this be determined with regionMemoryRequired?
 					// always allocating the max memory is a bit expensive isn't it?
-					regionMemoryRequired = LodUtil.MAX_ALOCATEABLE_DIRECT_MEMORY;
+					regionMemoryRequired = LodUtil.MAX_ALLOCATABLE_DIRECT_MEMORY;
 					numberOfBuffersPerRegion[x][z] = numberOfBuffers;
 					buildableBuffers[x][z] = new BufferBuilder[numberOfBuffers];
 					buildableVbos[x][z] = new VertexBuffer[numberOfBuffers];

@@ -816,7 +816,7 @@ public class LodRenderer
 		
 		
 		// check if the vanilla rendered chunks changed
-		if (newTime - prevVanillaChunkTime > LodConfig.CLIENT.buffers.rebuildTimes.get().renderdChunkTimeout)
+		if (newTime - prevVanillaChunkTime > LodConfig.CLIENT.buffers.rebuildTimes.get().renderedChunkTimeout)
 		{
 			if (vanillaRenderedChunksChanged)
 			{

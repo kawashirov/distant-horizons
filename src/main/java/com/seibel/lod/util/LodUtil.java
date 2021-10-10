@@ -137,7 +137,7 @@ public class LodUtil
 	 * <p>
 	 * https://stackoverflow.com/questions/50499238/bytebuffer-allocatedirect-and-xmx
 	 */
-	public static final int MAX_ALOCATEABLE_DIRECT_MEMORY = 64 * 1024 * 1024;
+	public static final int MAX_ALLOCATABLE_DIRECT_MEMORY = 64 * 1024 * 1024;
 	
 	
 	public static final VertexFormat LOD_VERTEX_FORMAT = DefaultVertexFormats.POSITION_COLOR;
@@ -153,10 +153,10 @@ public class LodUtil
 	 */
 	public static ServerWorld getFirstValidServerWorld()
 	{
-		if (mc.hasSingleplayerServer())
+		if (mc.hasSinglePlayerServer())
 			return null;
 		
-		Iterable<ServerWorld> worlds = mc.getSingleplayerServer().getAllLevels();
+		Iterable<ServerWorld> worlds = mc.getSinglePlayerServer().getAllLevels();
 		
 		for (ServerWorld world : worlds)
 			return world;
@@ -171,7 +171,7 @@ public class LodUtil
 	 */
 	public static ServerWorld getServerWorldFromDimension(DimensionType dimension)
 	{
-		IntegratedServer server = mc.getSingleplayerServer();
+		IntegratedServer server = mc.getSinglePlayerServer();
 		if (server == null)
 			return null;
 		
@@ -236,7 +236,7 @@ public class LodUtil
 	 */
 	public static String getWorldID(IWorld world)
 	{
-		if (mc.hasSingleplayerServer())
+		if (mc.hasSinglePlayerServer())
 		{
 			// chop off the dimension ID as it is not needed/wanted
 			String dimId = getDimensionIDFromWorld(world);
@@ -264,7 +264,7 @@ public class LodUtil
 	 */
 	public static String getDimensionIDFromWorld(IWorld world)
 	{
-		if (mc.hasSingleplayerServer())
+		if (mc.hasSinglePlayerServer())
 		{
 			// this will return the world save location
 			// and the dimension folder

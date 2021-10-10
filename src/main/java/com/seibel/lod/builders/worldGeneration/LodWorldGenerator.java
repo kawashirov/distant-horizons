@@ -39,10 +39,10 @@ public class LodWorldGenerator
 	private boolean generatorThreadRunning = false;
 	
 	/**
-	 * How many chunks to generate outside of the player's view distance at one
+	 * How many chunks to generate outside the player's view distance at one
 	 * time. (or more specifically how many requests to make at one time). I
 	 * multiply by 8 to make sure there is always a buffer of chunk requests, to
-	 * make sure the CPU is always busy and we can generate LODs as quickly as
+	 * make sure the CPU is always busy, and we can generate LODs as quickly as
 	 * possible.
 	 */
 	public int maxChunkGenRequests;
@@ -77,7 +77,7 @@ public class LodWorldGenerator
 	{
 		if (LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get() != DistanceGenerationMode.NONE
 				&& !generatorThreadRunning
-				&& mc.hasSingleplayerServer())
+				&& mc.hasSinglePlayerServer())
 		{
 			// the thread is now running, don't queue up another thread
 			generatorThreadRunning = true;
@@ -115,7 +115,7 @@ public class LodWorldGenerator
 					for (int i = 0; i < posToGenerate.getNumberOfPos(); i++)
 					{
 						// I wish there was a way to compress this code, but I'm not aware of 
-						// a easy way to do so.
+						// an easy way to do so.
 
 						// add the near positions
 						if (posToGenerate.getNthDetail(nearIndex, true) != 0 && nearIndex < posToGenerate.getNumberOfNearPos())

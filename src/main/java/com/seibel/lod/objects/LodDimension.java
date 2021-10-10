@@ -104,7 +104,7 @@ public class LodDimension
 			try
 			{
 				File saveDir;
-				if (mc.hasSingleplayerServer())
+				if (mc.hasSinglePlayerServer())
 				{
 					// local world
 					

@@ -51,7 +51,7 @@ public enum HorizontalResolution
 	BLOCK(16, 0);
 
 	/** How many DataPoints should 
-	 * be drawn per side per LodChunk */
+	 * be drawn per side, per LodChunk */
 	public final int dataPointLengthCount;
 	
 	/** How wide each LOD DataPoint is */
@@ -155,8 +155,8 @@ public enum HorizontalResolution
 	public static HorizontalResolution getDetailForDistance(HorizontalResolution maxDetailLevel, int distance, int maxDistance)
 	{
 		HorizontalResolution[] lowerDetails = getSelfAndLowerDetails(maxDetailLevel);
-		int distaneBetweenDetails = maxDistance / lowerDetails.length;
-		int index = LodUtil.clamp(0, distance / distaneBetweenDetails, lowerDetails.length - 1);
+		int distanceBetweenDetails = maxDistance / lowerDetails.length;
+		int index = LodUtil.clamp(0, distance / distanceBetweenDetails, lowerDetails.length - 1);
 		
 		return lowerDetails[index];
 		

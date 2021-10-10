@@ -30,6 +30,6 @@ public enum DetailDropOff
 	/** quality is determined per-region, using the lowest quality that would be used in BY_CHUNK */
 	FAST,
 
-	/** quality is determined per-block (best quality option, may cause stuttering when moving) */
+	/** quality is determined per-block (the best quality option, may cause stuttering when moving) */
 	FANCY,
 }

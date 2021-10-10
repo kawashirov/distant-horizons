@@ -55,9 +55,9 @@ public class MinecraftWrapper
 	 * This should be called at the beginning of every frame to
 	 * clear any Minecraft data that becomes out of date after a frame. <br> <br>
 	 * 
-	 * Lightmaps and other time sensitive objects fall in this category. <br> <br>
+	 * LightMaps and other time sensitive objects fall in this category. <br> <br>
 	 * 
-	 * This doesn't effect OpenGL objects in any way.
+	 * This doesn't affect OpenGL objects in any way.
 	 */
 	public void clearFrameObjectCache()
 	{
@@ -75,7 +75,7 @@ public class MinecraftWrapper
 		return mc.level.getShade(Direction.UP, true);
 	}
 	
-	public boolean hasSingleplayerServer()
+	public boolean hasSinglePlayerServer()
 	{
 		return mc.hasSingleplayerServer();
 	}
@@ -131,7 +131,7 @@ public class MinecraftWrapper
 	{
 		if (lightMap == null)
 		{
-			// make sure the lightMap is up to date
+			// make sure the lightMap is up-to-date
 			getCurrentLightMap();
 		}
 		
@@ -218,7 +218,7 @@ public class MinecraftWrapper
 		return mc.level.getSkyDarken(partialTicks);
 	}
 	
-	public IntegratedServer getSingleplayerServer()
+	public IntegratedServer getSinglePlayerServer()
 	{
 		return mc.getSingleplayerServer();
 	}

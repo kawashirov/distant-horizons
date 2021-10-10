@@ -4,7 +4,7 @@ public interface LevelContainer
 {
 	/**With this you can add data to the level container
 	 *
-	 * @param data actual data to add in a array of long format.
+	 * @param data actual data to add in an array of long format.
 	 * @param posX x position in the detail level
 	 * @param posZ z position in the detail level
 	 * @param index z position in the detail level
@@ -14,7 +14,7 @@ public interface LevelContainer
 	
 	/**With this you can add data to the level container
 	 *
-	 * @param data actual data to add in a array of long format.
+	 * @param data actual data to add in an array of long format.
 	 * @param posX x position in the detail level
 	 * @param posZ z position in the detail level
 	 * @return true if correctly added, false otherwise
@@ -45,7 +45,7 @@ public interface LevelContainer
 	boolean doesItExist(int posX, int posZ);
 	
 	/**
-	 * @return return the deatilLevel of this level container
+	 * @return return the detailLevel of this level container
 	 */
 	byte getDetailLevel();
 	

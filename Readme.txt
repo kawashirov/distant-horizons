@@ -2,7 +2,7 @@ This mod adds a Level Of Detail (LOD) system to Minecraft.
 This implementation renders simplified chunks outside the normal render distance
 allowing for an increased view distance without harming performance.
 
-Or in other words: this mod let's you see farther without turning your game into a slide show.
+Or in other words: this mod lets you see farther without turning your game into a slide show.
 If you want to see a quick demo, check out the video I made here:
 https://youtu.be/CCT-3s02tYA
 
@@ -63,7 +63,7 @@ Other commands
 Note to self
 ============
 
-The Minecraft source code is NOT added to your workspace in a editable way. Minecraft is treated like a normal Library. Sources are there for documentation and research purposes only.
+The Minecraft source code is NOT added to your workspace in an editable way. Minecraft is treated like a normal Library. Sources are there for documentation and research purposes only.
 
 Source code uses Mojang mappings.
 
