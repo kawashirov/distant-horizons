@@ -18,14 +18,15 @@
 
 package com.seibel.lod.builders.bufferBuilding.lodTemplates;
 
+import java.util.Map;
+
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.proxy.ClientProxy;
+
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.Map;
 
 /**
  * TODO DynamicLodTemplate
@@ -45,9 +46,4 @@ public class DynamicLodTemplate extends AbstractLodTemplate
 		ClientProxy.LOGGER.error(DynamicLodTemplate.class.getSimpleName() + " is not implemented!");
 	}
 	
-	@Override
-	public int getBufferMemoryForSingleNode(int maxVerticalData)
-	{
-		return 0;
-	}
 }

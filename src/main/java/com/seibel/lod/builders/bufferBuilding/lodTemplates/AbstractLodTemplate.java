@@ -18,34 +18,31 @@
 
 package com.seibel.lod.builders.bufferBuilding.lodTemplates;
 
+import java.util.Map;
+
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.util.ColorUtil;
+
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.Map;
 
 /**
  * This is the abstract class used to create different
  * BufferBuilders.
  *
  * @author James Seibel
- * @version 8-8-2021
+ * @version 10-10-2021
  */
 public abstract class AbstractLodTemplate
 {
 	
-	/**
-	 * Uploads the given LOD to the buffer.
-	 */
+	/** Uploads the given LOD to the buffer. */
 	public abstract void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
 			byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap, boolean[] adjShadeDisabled);
 	
-	/**
-	 * add the given position and color to the buffer
-	 */
+	/** add the given position and color to the buffer */
 	protected void addPosAndColor(BufferBuilder buffer,
 			double x, double y, double z,
 			int color)
@@ -54,9 +51,4 @@ public abstract class AbstractLodTemplate
 		buffer.vertex(x, y, z).color(ColorUtil.getRed(color), ColorUtil.getGreen(color), ColorUtil.getBlue(color), 255).endVertex();
 	}
 	
-	/**
-	 * Returns in bytes how much buffer memory is required
-	 * for one LOD object
-	 */
-	public abstract int getBufferMemoryForSingleNode(int maxVerticalData);
 }

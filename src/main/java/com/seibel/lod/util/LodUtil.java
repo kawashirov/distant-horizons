@@ -18,11 +18,15 @@
 
 package com.seibel.lod.util;
 
+import java.awt.Color;
+import java.io.File;
+import java.util.HashSet;
+
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
-import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.wrappers.MinecraftWrapper;
+
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
@@ -40,15 +44,11 @@ import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 
-import java.awt.*;
-import java.io.File;
-import java.util.HashSet;
-
 /**
  * This class holds methods and constants that may be used in multiple places.
  *
  * @author James Seibel
- * @version 10-7-2021
+ * @version 10-10-2021
  */
 public class LodUtil
 {
@@ -349,74 +349,6 @@ public class LodUtil
 	{
 		return Math.min(max, Math.max(value, min));
 	}
-	
-	/**
-	 * Returns the GPU memory needed if all LODs in
-	 * the given region are rendered.
-	 *
-	 * @param regionPosX x region position to check
-	 * @param regionPosZ z region position to check
-	 * @return number of lods in the region
-	 */
-	public static long calculateMaximumRegionGpuMemoryUse(int regionPosX, int regionPosZ, LodTemplate template)
-	{
-		int xRegionSign = (int) Math.signum(regionPosX);
-		int zRegionSign = (int) Math.signum(regionPosZ);
-		
-		// we first find the center of the circle which is one of the following X position in the center region
-		/*
-		X - X - X
-		|       |
-		X   X   X
-		|       |
-		X - X - X
-		 */
-		int circleCenterX = 256 + 256 * xRegionSign;
-		int circleCenterZ = 256 + 256 * zRegionSign;
-		
-		
-		int innerRadius;
-		int outerRadius;
-		int size;
-		int count;
-		int minDistance;
-		int maxDistance;
-		long memoryUse = 0;
-		for (byte detailLevel = BLOCK_DETAIL_LEVEL; detailLevel <= REGION_DETAIL_LEVEL; detailLevel++)
-		{
-			// Find the inner and outer detail of this area
-			innerRadius = DetailDistanceUtil.getDrawDistanceFromDetail(detailLevel);
-			outerRadius = DetailDistanceUtil.getDrawDistanceFromDetail(detailLevel + 1);
-			
-			// skip this region if it does not intersect the two circles.
-			minDistance = LevelPosUtil.minDistance(REGION_DETAIL_LEVEL, regionPosX, regionPosZ, circleCenterX, circleCenterZ);
-			maxDistance = LevelPosUtil.maxDistance(REGION_DETAIL_LEVEL, regionPosX, regionPosZ, circleCenterX, circleCenterZ);
-			if (innerRadius > maxDistance || minDistance > outerRadius)
-				continue;
-			
-			// count every position in the region that falls between the two circles
-			size = 1 << (REGION_DETAIL_LEVEL - detailLevel);
-			count = 0;
-			for (int x = 0; x < size; x++)
-			{
-				for (int z = 0; z < size; z++)
-				{
-					minDistance = LevelPosUtil.minDistance(detailLevel, x, z, circleCenterX, circleCenterZ, regionPosX, regionPosZ);
-					if (innerRadius < minDistance && minDistance < outerRadius)
-						count++;
-				}
-			}
-			
-			// we multiply the data with the max vertical data of this detail level
-			int maxVerticalData = DetailDistanceUtil.getMaxVerticalData(detailLevel);
-			
-			count *= maxVerticalData;
-			memoryUse += (long) template.getBufferMemoryForSingleLod(maxVerticalData) * count;
-		}
-		
-		return memoryUse;
-	}
-	
 	
 	/**
 	 * Get a HashSet of all ChunkPos within the normal render distance

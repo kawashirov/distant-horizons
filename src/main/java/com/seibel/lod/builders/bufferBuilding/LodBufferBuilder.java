@@ -62,7 +62,7 @@ import net.minecraft.util.math.ChunkPos;
  * This object is used to create NearFarBuffer objects.
  *
  * @author James Seibel
- * @version 10-9-2021
+ * @version 10-10-2021
  */
 public class LodBufferBuilder
 {
@@ -76,6 +76,13 @@ public class LodBufferBuilder
 	 * recreate it this many times bigger than the upload payload
 	 */
 	public static final double BUFFER_EXPANSION_MULTIPLIER = 1.5;
+	
+	/**
+	 * When buffers are first created they are allocated to this size (in Bytes).
+	 * This size will be too small, more than likely. The buffers will be expanded
+	 * when need be to fit the larger sizes.
+	 */
+	public static final int DEFAULT_MEMORY_ALLOCATION = 1024;
 	
 	
 	/** This boolean matrix indicate the buffer builder in that position has to be regenerated */
@@ -464,7 +471,7 @@ public class LodBufferBuilder
 		{
 			for (int z = 0; z < numbRegionsWide; z++)
 			{
-				regionMemoryRequired = LodUtil.calculateMaximumRegionGpuMemoryUse(x, z, LodConfig.CLIENT.graphics.lodTemplate.get());
+				regionMemoryRequired = DEFAULT_MEMORY_ALLOCATION;
 				
 				// if the memory required is greater than the max buffer 
 				// capacity, divide the memory across multiple buffers
@@ -507,6 +514,7 @@ public class LodBufferBuilder
 					buildableVbos[x][z][i] = new VertexBuffer(LodUtil.LOD_VERTEX_FORMAT);
 					drawableVbos[x][z][i] = new VertexBuffer(LodUtil.LOD_VERTEX_FORMAT);
 					
+					
 					// create the initial mapped buffers (system memory)
 					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buildableVbos[x][z][i].id);
 					GL15.glBufferData(GL15.GL_ARRAY_BUFFER, regionMemoryRequired, GL45.GL_DYNAMIC_DRAW);
@@ -517,9 +525,7 @@ public class LodBufferBuilder
 					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 					
 					
-					
 					// create the buffer storage (GPU memory)
-					
 					buildableStorageBufferIds[x][z][i] = GL45.glGenBuffers();
 					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buildableStorageBufferIds[x][z][i]);
 					GL45.glBufferStorage(GL15.GL_ARRAY_BUFFER, regionMemoryRequired, 0); // the 0 flag means to create the storage in the GPU's memory
@@ -680,8 +686,8 @@ public class LodBufferBuilder
 					{
 						for (int i = 0; i < buildableBuffers[x][z].length; i++)
 						{
-							ByteBuffer builderBuffer = buildableBuffers[x][z][i].popNextBuffer().getSecond();
-							vboUpload(buildableVbos[x][z][i], buildableStorageBufferIds[x][z][i], builderBuffer, x,z,i, true);
+							ByteBuffer uploadBuffer = buildableBuffers[x][z][i].popNextBuffer().getSecond();
+							vboUpload(buildableVbos[x][z][i], buildableStorageBufferIds[x][z][i], uploadBuffer, x,z,i, true);
 							lodDim.setRegenRegionBufferByArrayIndex(x, z, false);
 						}
 					}

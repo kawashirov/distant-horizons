@@ -26,7 +26,7 @@ import com.seibel.lod.builders.bufferBuilding.lodTemplates.TriangularLodTemplate
  * Cubic, Triangular, Dynamic
  * 
  * @author James Seibel
- * @version 8-4-2021
+ * @version 10-10-2021
  */
 public enum LodTemplate
 {
@@ -51,9 +51,4 @@ public enum LodTemplate
 		template = newTemplate;
 	}
 	
-	
-	public int getBufferMemoryForSingleLod(int maxVerticalData)
-	{
-		return template.getBufferMemoryForSingleNode(maxVerticalData);
-	}
 }

@@ -18,22 +18,27 @@
 
 package com.seibel.lod.objects;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.GenerationPriority;
 import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
-import com.seibel.lod.util.*;
+import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.DetailDistanceUtil;
+import com.seibel.lod.util.LevelPosUtil;
+import com.seibel.lod.util.LodThreadFactory;
+import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
+
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 
 /**
@@ -46,7 +51,7 @@ import java.util.concurrent.Executors;
  *
  * @author Leonardo Amato
  * @author James Seibel
- * @version 9-27-2021
+ * @version 10-10-2021
  */
 public class LodDimension
 {
@@ -235,27 +240,6 @@ public class LodDimension
 		// update the new center
 		center.x += xOffset;
 		center.z += zOffset;
-	}
-	
-	
-	/**
-	 * return the minimum needed memory in bytes
-	 */
-	public int getMinMemoryNeeded()
-	{
-		int count = 0;
-		LodRegion region;
-		
-		for (LodRegion[] lodRegions : regions)
-		{
-			for (int z = 0; z < regions.length; z++)
-			{
-				region = lodRegions[z];
-				if (region != null)
-					count += region.getMinMemoryNeeded(LodConfig.CLIENT.graphics.lodTemplate.get());
-			}
-		}
-		return count;
 	}
 	
 	

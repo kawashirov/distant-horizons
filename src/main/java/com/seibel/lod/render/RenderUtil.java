@@ -18,8 +18,6 @@
 
 package com.seibel.lod.render;
 
-import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
@@ -32,7 +30,7 @@ import net.minecraft.util.math.vector.Vector3d;
  * to be used in the rendering process.
  *
  * @author James Seibel
- * @version 8-21-2021
+ * @version 10-10-2021
  */
 public class RenderUtil
 {
@@ -80,28 +78,6 @@ public class RenderUtil
 				(j >= lodRadius - halfRadius
 				&& j <= lodRadius + halfRadius);
 	}
-	
-	
-	/**
-	 * Get how much buffer memory would be required for the given radius multiplier
-	 */
-	public static int getBufferMemoryForRegion(LodRegion region)
-	{
-		// calculate the max amount of buffer memory needed (in bytes)
-		return region.getMinMemoryNeeded(LodConfig.CLIENT.graphics.lodTemplate.get());
-	}
-	
-	///**
-	// * Returns the maxViewDistanceMultiplier for the given LodTemplate
-	// * at the given LodDetail level.
-	// */
-	/*public static int getMaxRadiusMultiplierWithAvailableMemory(LodTemplate lodTemplate, int detailLevel)
-	{
-		int maxNumberOfLods = LodRenderer.MAX_ALLOCATABLE_DIRECT_MEMORY / lodTemplate.getBufferMemoryForSingleLod();
-		int numbLodsWide = (int) Math.sqrt(maxNumberOfLods);
-		
-		return numbLodsWide / (2 * mc.getRenderDistance());
-	}*/
 	
 	
 	/**

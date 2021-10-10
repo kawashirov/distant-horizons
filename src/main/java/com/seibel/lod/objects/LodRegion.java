@@ -3,7 +3,6 @@ package com.seibel.lod.objects;
 
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
@@ -19,7 +18,7 @@ import com.seibel.lod.util.LodUtil;
  * unless stated otherwise. <br>
  *
  * @author Leonardo Amato
- * @version 9-27-2021
+ * @version 10-10-2021
  */
 public class LodRegion
 {
@@ -515,20 +514,6 @@ public class LodRegion
 	public RegionPos getRegionPos()
 	{
 		return new RegionPos(regionPosX, regionPosZ);
-	}
-	
-	/**
-	 * Returns the minimum memory needed in bytes
-	 */
-	public int getMinMemoryNeeded(LodTemplate template)
-	{
-		int memory = 0;
-		for (byte detailLevelIndex = LodUtil.REGION_DETAIL_LEVEL; detailLevelIndex > minDetailLevel; detailLevelIndex--)
-		{
-			// TODO why are we multiplying the dataContainer's memory by the template's memory?
-			memory += dataContainer[detailLevelIndex].getMaxMemoryUse() * template.getBufferMemoryForSingleLod(dataContainer[detailLevelIndex].getMaxVerticalData());
-		}
-		return memory;
 	}
 	
 	/**

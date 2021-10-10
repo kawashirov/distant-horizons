@@ -33,7 +33,7 @@ import net.minecraft.util.math.BlockPos;
  * Builds LODs as rectangular prisms.
  *
  * @author James Seibel
- * @version 9-25-2021
+ * @version 10-10-2021
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {
@@ -125,13 +125,6 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				adjIndex++;
 			}
 		}
-	}
-	
-	@Override
-	public int getBufferMemoryForSingleNode(int maxVerticalData)
-	{
-		// TODO, what do these magic numbers mean
-		return 2 * 4 * (3 + 4) + 4 * 4 * Math.max((maxVerticalData + 1) / 2, 1) * (3 + 4);
 	}
 	
 }
