@@ -1,24 +1,23 @@
 package com.seibel.lod.proxy;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.seibel.lod.enums.GlProxyContext;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.seibel.lod.enums.GlProxyContext;
-
 /**
  * A singleton that holds references to different openGL contexts
  * and GPU capabilities.
- * 
+ *
  * <p>
  * Helpful OpenGL resources: <br><br>
- * 
+ *
  * https://www.seas.upenn.edu/~pcozzi/OpenGLInsights/OpenGLInsights-AsynchronousBufferTransfers.pdf <br>
  * https://learnopengl.com/Advanced-OpenGL/Advanced-Data <br>
  * https://gamedev.stackexchange.com/questions/91995/edit-vbo-data-or-create-a-new-one <br><br>
- * 
- * 
+ *
+ *
  * @author James Seibel
  * @version 10-2-2021
  */
@@ -67,7 +66,7 @@ public class GlProxy
 		
 		// Hopefully this shouldn't cause any issues with other mods that need custom contexts
 		// (although the number that do should be relatively few)
-		GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE); 
+		GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
 		
 		// create an invisible window to hold the context
 		lodBuilderGlContext = GLFW.glfwCreateWindow(640, 480, "LOD window", 0L, minecraftGlContext);
@@ -87,7 +86,7 @@ public class GlProxy
 		
 		// see if this GPU can run fancy fog
 		fancyFogAvailable = GL.getCapabilities().GL_NV_fog_distance;
-
+		
 		if (!fancyFogAvailable)
 		{
 			ClientProxy.LOGGER.info("This GPU does not support GL_NV_fog_distance. This means that the fancy fog option will not be available.");
@@ -114,7 +113,7 @@ public class GlProxy
 		GLCapabilities newGlCapabilities = null;
 		
 		// get the pointer(s) for this context
-		switch(newContext)
+		switch (newContext)
 		{
 		case LOD_BUILDER:
 			contextPointer = lodBuilderGlContext;
@@ -129,9 +128,6 @@ public class GlProxy
 		default: // default should never happen, it is just here to make the compiler happy
 		case NONE:
 			// 0L is equivalent to null
-			
-			contextPointer = 0L;
-			newGlCapabilities = null;
 			break;
 		}
 		
@@ -158,9 +154,9 @@ public class GlProxy
 		long currentContext = GLFW.glfwGetCurrentContext();
 		
 		
-		if(currentContext == lodBuilderGlContext)
+		if (currentContext == lodBuilderGlContext)
 			return GlProxyContext.LOD_BUILDER;
-		else if(currentContext == minecraftGlContext)
+		else if (currentContext == minecraftGlContext)
 			return GlProxyContext.MINECRAFT;
 		else if (currentContext == 0L)
 			return GlProxyContext.NONE;

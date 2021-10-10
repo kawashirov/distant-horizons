@@ -34,7 +34,7 @@ public class MinecraftWrapper
 {
 	public static MinecraftWrapper INSTANCE = new MinecraftWrapper();
 	
-	private Minecraft mc = Minecraft.getInstance();
+	private final Minecraft mc = Minecraft.getInstance();
 	
 	/** The lightmap for the current:
 	 * Time, dimension, brightness setting, etc. */
@@ -99,8 +99,7 @@ public class MinecraftWrapper
 		if (lightMap == null)
 		{
 			LightTexture tex = mc.gameRenderer.lightTexture();
-			NativeImage lightPixels = tex.lightPixels;
-			lightMap = lightPixels;
+			lightMap = tex.lightPixels;
 		}
 		
 //		// hotswap this to true, then back to false to write a file

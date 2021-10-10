@@ -2,26 +2,24 @@ package com.seibel.lod.objects;
 
 import com.seibel.lod.util.LevelPosUtil;
 
-import javax.swing.*;
-
 /**
  * Holds the levelPos that need to be generated.
  * TODO is that correct?
- * 
+ *
  * @author Leonardo Amato
  * @version 9-27-2021
  */
 public class PosToGenerateContainer
 {
-	private int playerPosX;
-	private int playerPosZ;
-	private byte farMinDetail;
+	private final int playerPosX;
+	private final int playerPosZ;
+	private final byte farMinDetail;
 	private int nearSize;
 	private int farSize;
 	
 	// TODO what is the format of these two arrays? [detailLevel][4-children]?
-	private int[][] nearPosToGenerate;
-	private int[][] farPosToGenerate;
+	private final int[][] nearPosToGenerate;
+	private final int[][] farPosToGenerate;
 	
 	
 	
@@ -49,9 +47,9 @@ public class PosToGenerateContainer
 		{
 			// We are introducing a position in the far array
 			
-			if(farSize < farPosToGenerate.length)
+			if (farSize < farPosToGenerate.length)
 				farSize++;
-
+			
 			index = farSize - 1;
 			while (index > 0 && LevelPosUtil.compareDistance(distance, farPosToGenerate[index - 1][3]) <= 0)
 			{
@@ -63,7 +61,7 @@ public class PosToGenerateContainer
 			}
 			
 			
-			if (index != farSize-1 || farSize != farPosToGenerate.length)
+			if (index != farSize - 1 || farSize != farPosToGenerate.length)
 			{
 				farPosToGenerate[index][0] = detailLevel + 1;
 				farPosToGenerate[index][1] = posX;
@@ -75,10 +73,10 @@ public class PosToGenerateContainer
 		{
 			//We are introducing a position in the near array
 			
-			if(nearSize < nearPosToGenerate.length)
+			if (nearSize < nearPosToGenerate.length)
 				nearSize++;
 			
-			index = nearSize-1;
+			index = nearSize - 1;
 			while (index > 0 && LevelPosUtil.compareDistance(distance, nearPosToGenerate[index - 1][3]) <= 0)
 			{
 				nearPosToGenerate[index][0] = nearPosToGenerate[index - 1][0];
@@ -89,7 +87,7 @@ public class PosToGenerateContainer
 			}
 			
 			
-			if (index != nearSize-1 || nearSize != nearPosToGenerate.length)
+			if (index != nearSize - 1 || nearSize != nearPosToGenerate.length)
 			{
 				nearPosToGenerate[index][0] = detailLevel + 1;
 				nearPosToGenerate[index][1] = posX;
@@ -103,7 +101,7 @@ public class PosToGenerateContainer
 	
 	public int getNumberOfPos()
 	{
-		return nearSize+farSize;
+		return nearSize + farSize;
 	}
 	
 	public int getNumberOfNearPos()
@@ -124,6 +122,7 @@ public class PosToGenerateContainer
 		else
 			return farPosToGenerate[n][0];
 	}
+	
 	public int getNthPosX(int n, boolean near)
 	{
 		if (near)
@@ -131,6 +130,7 @@ public class PosToGenerateContainer
 		else
 			return farPosToGenerate[n][1];
 	}
+	
 	public int getNthPosZ(int n, boolean near)
 	{
 		if (near)
@@ -138,6 +138,7 @@ public class PosToGenerateContainer
 		else
 			return farPosToGenerate[n][2];
 	}
+	
 	public int getNthGeneration(int n, boolean near)
 	{
 		if (near)
@@ -152,41 +153,41 @@ public class PosToGenerateContainer
 		// TOOD is this commented code still useful?
 		// if so why have it commented out?
 		
-
+		
 		StringBuilder builder = new StringBuilder();
 		builder.append('\n');
 		builder.append('\n');
 		builder.append('\n');
 		builder.append("near pos to generate");
 		builder.append('\n');
-		for (int i = 0; i < nearPosToGenerate.length; i++)
+		for (int[] ints : nearPosToGenerate)
 		{
-			if(nearPosToGenerate[i][0] == 0)
+			if (ints[0] == 0)
 				break;
-			builder.append(nearPosToGenerate[i][0]-1);
+			builder.append(ints[0] - 1);
 			builder.append(" ");
-			builder.append(nearPosToGenerate[i][1]);
+			builder.append(ints[1]);
 			builder.append(" ");
-			builder.append(nearPosToGenerate[i][2]);
+			builder.append(ints[2]);
 			builder.append(" ");
-			builder.append(nearPosToGenerate[i][3]);
+			builder.append(ints[3]);
 			builder.append('\n');
 		}
 		builder.append('\n');
-
+		
 		builder.append("far pos to generate");
 		builder.append('\n');
-		for (int i = 0; i < farPosToGenerate.length; i++)
+		for (int[] ints : farPosToGenerate)
 		{
-			if(farPosToGenerate[i][0] == 0)
+			if (ints[0] == 0)
 				break;
-			builder.append(farPosToGenerate[i][0]-1);
+			builder.append(ints[0] - 1);
 			builder.append(" ");
-			builder.append(farPosToGenerate[i][1]);
+			builder.append(ints[1]);
 			builder.append(" ");
-			builder.append(farPosToGenerate[i][2]);
+			builder.append(ints[2]);
 			builder.append(" ");
-			builder.append(farPosToGenerate[i][3]);
+			builder.append(ints[3]);
 			builder.append('\n');
 		}
 		return builder.toString();

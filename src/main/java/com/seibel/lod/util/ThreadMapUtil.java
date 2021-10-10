@@ -38,8 +38,7 @@ public class ThreadMapUtil
 	public static final ConcurrentMap<String, Map<Direction, long[]>> adjDataMap = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<String, Box> boxMap = new ConcurrentHashMap<>();
 	
-	/** returns the array NOT cleared every time
-	 * @return*/
+	/** returns the array NOT cleared every time */
 	public static boolean[] getAdjShadeDisabledArray()
 	{
 		if (!adjShadeDisabled.containsKey(Thread.currentThread().getName())
@@ -160,21 +159,6 @@ public class ThreadMapUtil
 	
 	
 	
-	/** returns the array filled with 0's */
-	public static short[] getProjectionArray(int arrayLength)
-	{
-		if (!projectionArrayMap.containsKey(Thread.currentThread().getName()) || (projectionArrayMap.get(Thread.currentThread().getName()) == null))
-		{
-			projectionArrayMap.put(Thread.currentThread().getName(), new short[arrayLength]);
-		}
-		else
-		{
-			Arrays.fill(projectionArrayMap.get(Thread.currentThread().getName()), (short) 0);
-		}
-		return projectionArrayMap.get(Thread.currentThread().getName());
-	}
-	
-	
 	/** returns the array NOT cleared every time */
 	public static short[] getHeightAndDepth(int arrayLength)
 	{
@@ -220,28 +204,6 @@ public class ThreadMapUtil
 		}
 		return verticalUpdate.get(Thread.currentThread().getName())[detailLevel];
 	}
-	
-	
-	/** returns the array filled with 0's */
-	public static long[] getSingleAddDataToMerge(int arrayLength)
-	{
-		if (!singleDataToMergeMap.containsKey(Thread.currentThread().getName()) || (singleDataToMergeMap.get(Thread.currentThread().getName()) == null))
-		{
-			singleDataToMergeMap.put(Thread.currentThread().getName(), new long[arrayLength]);
-		}
-		else if (singleDataToMergeMap.get(Thread.currentThread().getName()).length != arrayLength)
-		{
-			singleDataToMergeMap.replace(Thread.currentThread().getName(), new long[arrayLength]);
-		}
-		else
-		{
-			Arrays.fill(singleDataToMergeMap.get(Thread.currentThread().getName()), 0);
-		}
-		return singleDataToMergeMap.get(Thread.currentThread().getName());
-	}
-	
-	
-	
 	
 	/** clears all arrays so they will have to be rebuilt */
 	public static void clearMaps()

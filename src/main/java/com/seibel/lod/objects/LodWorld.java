@@ -15,14 +15,14 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.objects;
+
+import com.seibel.lod.proxy.ClientProxy;
+import net.minecraft.world.DimensionType;
 
 import java.util.Hashtable;
 import java.util.Map;
-
-import com.seibel.lod.proxy.ClientProxy;
-
-import net.minecraft.world.DimensionType;
 
 /**
  * This stores all LODs for a given world.
@@ -57,10 +57,10 @@ public class LodWorld
 	/**
 	 * Set up the LodWorld with the given newWorldName. <br>
 	 * This should be done whenever loading a new world. <br><br>
-	 * 
+	 *
 	 * Note a System.gc() call may be in order after calling this <Br>
 	 * since a lot of LOD data is now homeless. <br>
-	 * 
+	 *
 	 * @param newWorldName name of the world
 	 */
 	public void selectWorld(String newWorldName)
@@ -77,7 +77,7 @@ public class LodWorld
 			return;
 		
 		worldName = newWorldName;
-		lodDimensions = new Hashtable<DimensionType, LodDimension>();
+		lodDimensions = new Hashtable<>();
 		isWorldLoaded = true;
 	}
 	
@@ -85,7 +85,7 @@ public class LodWorld
 	 * Set the worldName to "No world loaded"
 	 * and clear the lodDimensions Map. <br>
 	 * This should be done whenever unloaded a world. <br><br>
-	 * 
+	 *
 	 * Note a System.gc() call may be in order after calling this <Br>
 	 * since a lot of LOD data is now homeless. <br>
 	 */

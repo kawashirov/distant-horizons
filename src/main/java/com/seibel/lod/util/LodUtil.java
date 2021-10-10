@@ -15,18 +15,14 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.util;
 
-import java.awt.Color;
-import java.io.File;
-import java.util.HashSet;
+package com.seibel.lod.util;
 
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
 import com.seibel.lod.enums.LodTemplate;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
@@ -44,6 +40,10 @@ import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 
+import java.awt.*;
+import java.io.File;
+import java.util.HashSet;
+
 /**
  * This class holds methods and constants that may be used in multiple places.
  *
@@ -52,7 +52,7 @@ import net.minecraft.world.server.ServerWorld;
  */
 public class LodUtil
 {
-	private static MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
+	private static final MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	
 	/** The maximum number of LODs that can be rendered vertically */
@@ -71,7 +71,7 @@ public class LodUtil
 	 * In order of nearest to farthest: <br>
 	 * Red, Orange, Yellow, Green, Cyan, Blue, Magenta, white, gray, black
 	 */
-	public static final Color DEBUG_DETAIL_LEVEL_COLORS[] = new Color[]{Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA, Color.WHITE, Color.GRAY, Color.BLACK};
+	public static final Color[] DEBUG_DETAIL_LEVEL_COLORS = new Color[] { Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA, Color.WHITE, Color.GRAY, Color.BLACK };
 	
 	
 	/**
@@ -124,7 +124,7 @@ public class LodUtil
 	 * This regex finds any characters that are invalid for use in a windows
 	 * (and by extension mac and linux) file path
 	 */
-	public static final String INVALID_FILE_CHARACTERS_REGEX = "[\\\\\\/:*?\\\"<>|]";
+	public static final String INVALID_FILE_CHARACTERS_REGEX = "[\\\\/:*?\"<>|]";
 	
 	/**
 	 * 64 MB by default is the maximum amount of memory that
@@ -139,7 +139,7 @@ public class LodUtil
 	 */
 	public static final int MAX_ALOCATEABLE_DIRECT_MEMORY = 64 * 1024 * 1024;
 	
-
+	
 	public static final VertexFormat LOD_VERTEX_FORMAT = DefaultVertexFormats.POSITION_COLOR;
 	
 	
@@ -206,9 +206,7 @@ public class LodUtil
 	 */
 	public static int convertLevelPos(int pos, int currectDetailLevel, int targetDetailLevel)
 	{
-		int newPos = Math.floorDiv(pos, (int) Math.pow(2, targetDetailLevel - currectDetailLevel));
-		
-		return newPos;
+		return Math.floorDiv(pos, (int) Math.pow(2, targetDetailLevel - currectDetailLevel));
 	}
 	
 	/**
@@ -248,7 +246,8 @@ public class LodUtil
 			int slashIndex = dimId.indexOf(File.separatorChar, saveIndex);
 			dimId = dimId.substring(saveIndex, slashIndex);
 			return dimId;
-		} else
+		}
+		else
 		{
 			return getServerId();
 		}
@@ -279,7 +278,8 @@ public class LodUtil
 				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerChunkProvider for the dimension " + world.dimensionType().effectsLocation().getPath());
 			
 			return provider.dataStorage.dataFolder.toString();
-		} else
+		}
+		else
 		{
 			return getServerId() + File.separatorChar + "dim_" + world.dimensionType().effectsLocation().getPath() + File.separatorChar;
 		}
@@ -296,9 +296,7 @@ public class LodUtil
 		String serverIp = server.ip.replaceAll(INVALID_FILE_CHARACTERS_REGEX, "");
 		String serverMcVersion = server.version.getString().replaceAll(INVALID_FILE_CHARACTERS_REGEX, "");
 		
-		String serverId = serverName + ", IP " + serverIp + ", GameVersion " + serverMcVersion;
-		
-		return serverId;
+		return serverName + ", IP " + serverIp + ", GameVersion " + serverMcVersion;
 	}
 	
 	
@@ -413,7 +411,7 @@ public class LodUtil
 			int maxVerticalData = DetailDistanceUtil.getMaxVerticalData(detailLevel);
 			
 			count *= maxVerticalData;
-			memoryUse += template.getBufferMemoryForSingleLod(maxVerticalData) * count;
+			memoryUse += (long) template.getBufferMemoryForSingleLod(maxVerticalData) * count;
 		}
 		
 		return memoryUse;
@@ -512,7 +510,8 @@ public class LodUtil
 				{
 					return true;
 				}
-			}else
+			}
+			else
 			{
 				if (vanillaRenderedChunks[x][z])
 				{

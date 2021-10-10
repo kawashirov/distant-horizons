@@ -15,11 +15,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.proxy;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.lwjgl.glfw.GLFW;
+package com.seibel.lod.proxy;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder;
@@ -37,7 +34,6 @@ import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.client.event.InputEvent;
@@ -46,6 +42,9 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.lwjgl.glfw.GLFW;
 
 /**
  * This handles all events sent to the client,
@@ -58,7 +57,7 @@ public class ClientProxy
 {
 	public static final Logger LOGGER = LogManager.getLogger("LOD");
 	
-	/** 
+	/**
 	 * there is some setup that should only happen once,
 	 * once this is true that setup has completed
 	 */
@@ -99,8 +98,8 @@ public class ClientProxy
 	/**
 	 * Do any setup that is required to draw LODs
 	 * and then tell the LodRenderer to draw.
-	 * 
-	 * @param mcMatrixStack 
+	 *
+	 * @param mcMatrixStack
 	 */
 	public void renderLods(MatrixStack mcMatrixStack, float partialTicks)
 	{
@@ -140,7 +139,7 @@ public class ClientProxy
 			profiler.pop(); // get out of "terrain"
 			profiler.push("LOD");
 			
-			renderer.drawLODs(lodDim, mcMatrixStack, partialTicks, mc.getProfiler());		
+			renderer.drawLODs(lodDim, mcMatrixStack, partialTicks, mc.getProfiler());
 			
 			profiler.pop(); // end LOD
 			profiler.push("terrain"); // go back into "terrain"
@@ -170,23 +169,23 @@ public class ClientProxy
 			mc.getPlayer().sendMessage(new StringTextComponent("Debug settings enabled!"), mc.getPlayer().getUUID());
 			configOverrideReminderPrinted = true;
 		}
-		
+
 //		LodConfig.CLIENT.graphics.drawResolution.set(HorizontalResolution.BLOCK);
 //		LodConfig.CLIENT.worldGenerator.generationResolution.set(HorizontalResolution.BLOCK);
 		// requires a world restart?
 //		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(VerticalQuality.VOXEL);
-		
+
 //		LodConfig.CLIENT.graphics.fogDistance.set(FogDistance.FAR);
 //		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
 //		LodConfig.CLIENT.graphics.shadingMode.set(ShadingMode.DARKEN_SIDES);
 //		LodConfig.CLIENT.graphics.brightnessMultiplier.set(1.0);
 //		LodConfig.CLIENT.graphics.saturationMultiplier.set(1.0);
-		
+
 //		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 //		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(64);
 //		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
 //		LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.set(false);
-		
+
 //		LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
 //		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
 //		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(5000); // 5000
@@ -291,15 +290,15 @@ public class ClientProxy
 	}
 	
 	@SubscribeEvent
-	public void onKeyInput(InputEvent.KeyInputEvent event) 
+	public void onKeyInput(InputEvent.KeyInputEvent event)
 	{
-		if(LodConfig.CLIENT.debugging.enableDebugKeybindings.get()
+		if (LodConfig.CLIENT.debugging.enableDebugKeybindings.get()
 				&& event.getKey() == GLFW.GLFW_KEY_F4 && event.getAction() == GLFW.GLFW_PRESS)
 		{
 			LodConfig.CLIENT.debugging.debugMode.set(LodConfig.CLIENT.debugging.debugMode.get().getNext());
 		}
 		
-		if(LodConfig.CLIENT.debugging.enableDebugKeybindings.get()
+		if (LodConfig.CLIENT.debugging.enableDebugKeybindings.get()
 				&& event.getKey() == GLFW.GLFW_KEY_F6 && event.getAction() == GLFW.GLFW_PRESS)
 		{
 			LodConfig.CLIENT.graphics.drawLods.set(!LodConfig.CLIENT.graphics.drawLods.get());
@@ -334,13 +333,17 @@ public class ClientProxy
 	{
 		// calculate how wide the dimension(s) should be in regions
 		int chunksWide;
-		if(mc.getClientWorld().dimensionType().hasCeiling())
-			chunksWide = Math.max(LodConfig.CLIENT.graphics.lodChunkRenderDistance.get(),64) * 2 + 1;
+		if (mc.getClientWorld().dimensionType().hasCeiling())
+			chunksWide = Math.max(LodConfig.CLIENT.graphics.lodChunkRenderDistance.get(), 64) * 2 + 1;
 		else
 			chunksWide = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 2 + 1;
-			
+		
 		int newWidth = (int) Math.ceil(chunksWide / (float) LodUtil.REGION_WIDTH_IN_CHUNKS);
-		newWidth = (newWidth % 2 == 0) ? (newWidth += 1) : (newWidth += 2); // make sure we have a odd number of regions
+		// make sure we have a odd number of regions
+		if ((newWidth & 1) == 0)
+			newWidth += 1;
+		else
+			newWidth += 2;
 		
 		// do the dimensions need to change in size?
 		if (lodBuilder.defaultDimensionWidthInRegions != newWidth || recalculateWidths)
@@ -372,7 +375,7 @@ public class ClientProxy
 		
 		firstTimeSetupComplete = true;
 	}
-
+	
 	/**
 	 * this method reset some of the static data everytime we change world
 	 **/
@@ -380,7 +383,7 @@ public class ClientProxy
 	{
 		ThreadMapUtil.clearMaps();
 		LodNodeGenWorker.restartExecuterService();
-
+		
 	}
 	
 	//================//

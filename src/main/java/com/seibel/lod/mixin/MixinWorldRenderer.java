@@ -15,19 +15,18 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-package com.seibel.lod.mixin;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+package com.seibel.lod.mixin;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.seibel.lod.LodMain;
 import com.seibel.lod.config.LodConfig;
-
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.WorldRenderer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * This class is used to mix in my rendering code
@@ -35,7 +34,7 @@ import net.minecraft.client.renderer.WorldRenderer;
  * If this wasn't done and we used Forge's 
  * render last event, the LODs would render on top
  * of the normal terrain.
- * 
+ *
  * @author James Seibel
  * @version 9-19-2021
  */
@@ -44,7 +43,7 @@ public class MixinWorldRenderer
 {
 	private static float previousPartialTicks = 0;
 	
-	@Inject(at = @At("RETURN"), method = "renderSky(Lcom/mojang/blaze3d/matrix/MatrixStack;F)V", cancellable = false)
+	@Inject(at = @At("RETURN"), method = "renderSky(Lcom/mojang/blaze3d/matrix/MatrixStack;F)V")
 	private void renderSky(MatrixStack matrixStackIn, float partialTicks, CallbackInfo callback)
 	{
 		// get the partial ticks since renderBlockLayer doesn't
@@ -52,7 +51,7 @@ public class MixinWorldRenderer
 		previousPartialTicks = partialTicks;
 	}
 	
-	@Inject(at = @At("HEAD"), method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/matrix/MatrixStack;DDD)V", cancellable = false)
+	@Inject(at = @At("HEAD"), method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/matrix/MatrixStack;DDD)V")
 	private void renderChunkLayer(RenderType renderType, MatrixStack matrixStackIn, double xIn, double yIn, double zIn, CallbackInfo callback)
 	{
 		// only render if LODs are enabled and

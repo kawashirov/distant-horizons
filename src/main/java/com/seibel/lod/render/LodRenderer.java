@@ -15,14 +15,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.render;
-
-import java.util.HashSet;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL15C;
-import org.lwjgl.opengl.NVFogDistance;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -30,11 +24,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder.VertexBuffersAndOffset;
 import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.enums.DetailDropOff;
-import com.seibel.lod.enums.FogDistance;
-import com.seibel.lod.enums.FogDrawOverride;
-import com.seibel.lod.enums.FogQuality;
+import com.seibel.lod.enums.*;
 import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
@@ -45,7 +35,6 @@ import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -56,6 +45,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL15C;
+import org.lwjgl.opengl.NVFogDistance;
+
+import java.util.HashSet;
 
 
 /**
@@ -90,7 +85,7 @@ public class LodRenderer
 	
 	/** Each VertexBuffer represents 1 region */
 	private VertexBuffer[][][] vbos;
-	/** 
+	/**
 	 * the OpenGL IDs for the vbos of the same indices.
 	 * These have to be separate because we can't override the
 	 * buffers in the VBOs (and we don't want too)
@@ -101,7 +96,7 @@ public class LodRenderer
 	
 	
 	/** This is used to determine if the LODs should be regenerated */
-	private int[] previousPos = new int[]{0, 0, 0};
+	private int[] previousPos = new int[] { 0, 0, 0 };
 	
 	public NativeImage lightMap = null;
 	
@@ -227,7 +222,7 @@ public class LodRenderer
 		
 		// enable transparent rendering
 		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glEnable( GL11.GL_BLEND );
+		GL11.glEnable(GL11.GL_BLEND);
 		
 		// disable the lights Minecraft uses
 		GL11.glDisable(GL11.GL_LIGHT0);
@@ -310,7 +305,7 @@ public class LodRenderer
 		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
 		GL11.glDisable(LOD_GL_LIGHT_NUMBER);
-		GL11.glDisable( GL11.GL_BLEND );
+		GL11.glDisable(GL11.GL_BLEND);
 		// re-enable the lights Minecraft uses
 		GL11.glEnable(GL11.GL_LIGHT0);
 		GL11.glEnable(GL11.GL_LIGHT1);
@@ -378,7 +373,8 @@ public class LodRenderer
 		{
 			// fancy fog (fragment distance based fog)
 			glFogDistanceMode = NVFogDistance.GL_EYE_RADIAL_NV;
-		} else
+		}
+		else
 		{
 			// fast fog (frustum distance based fog)
 			glFogDistanceMode = NVFogDistance.GL_EYE_PLANE_ABSOLUTE_NV;
@@ -400,12 +396,14 @@ public class LodRenderer
 				{
 					RenderSystem.fogStart(farPlaneBlockDistance * 0.9f);
 					RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
-				} else
+				}
+				else
 				{
 					RenderSystem.fogStart(farPlaneBlockDistance * 0.1f);
 					RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
 				}
-			} else if (fogQuality == FogQuality.FAST)
+			}
+			else if (fogQuality == FogQuality.FAST)
 			{
 				// for the far fog of the normal chunks
 				// to start right where the LODs' end use:
@@ -413,13 +411,15 @@ public class LodRenderer
 				RenderSystem.fogStart(farPlaneBlockDistance * 1.5f);
 				RenderSystem.fogEnd(farPlaneBlockDistance * 2.0f);
 			}
-		} else if (fogDistance == FogDistance.NEAR)
+		}
+		else if (fogDistance == FogDistance.NEAR)
 		{
 			if (fogQuality == FogQuality.FANCY)
 			{
 				RenderSystem.fogEnd(mc.getRenderDistance() * 16 * 1.41f);
 				RenderSystem.fogStart(mc.getRenderDistance() * 16 * 1.6f);
-			} else if (fogQuality == FogQuality.FAST)
+			}
+			else if (fogQuality == FogQuality.FAST)
 			{
 				RenderSystem.fogEnd(mc.getRenderDistance() * 16 * 1.0f);
 				RenderSystem.fogStart(mc.getRenderDistance() * 16 * 1.5f);
@@ -450,7 +450,7 @@ public class LodRenderer
 		// but we were
 		if (!fogSettings.vanillaIsRenderingFog &&
 				(fogSettings.near.quality != FogQuality.OFF ||
-				fogSettings.far.quality != FogQuality.OFF))
+						fogSettings.far.quality != FogQuality.OFF))
 		{
 			GL11.glDisable(GL11.GL_FOG);
 		}
@@ -528,7 +528,7 @@ public class LodRenderer
 						getFov(partialTicks, true),
 						(float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight(),
 						mc.getRenderDistance() / 2,
-						farPlaneBlockDistance * LodUtil.CHUNK_WIDTH * 2 / 4);
+						farPlaneBlockDistance * LodUtil.CHUNK_WIDTH / 2);
 		
 		// get Minecraft's un-edited projection matrix
 		// (this is before it is zoomed, distorted, etc.)
@@ -671,15 +671,15 @@ public class LodRenderer
 		case ALWAYS_DRAW_FOG_FANCY:
 			quality = FogQuality.FANCY;
 			break;
-			
+		
 		case NEVER_DRAW_FOG:
 			quality = FogQuality.OFF;
 			break;
-			
+		
 		case ALWAYS_DRAW_FOG_FAST:
 			quality = FogQuality.FAST;
 			break;
-			
+		
 		case USE_OPTIFINE_FOG_SETTING:
 			// don't override anything
 			break;
@@ -706,19 +706,19 @@ public class LodRenderer
 				fogSettings.near.distance = FogDistance.NEAR;
 				fogSettings.far.distance = FogDistance.FAR;
 				break;
-				
+			
 			case NEAR:
 				fogSettings.near.distance = FogDistance.NEAR;
 				fogSettings.far.distance = FogDistance.NEAR;
 				break;
-				
+			
 			case FAR:
 				fogSettings.near.distance = FogDistance.FAR;
 				fogSettings.far.distance = FogDistance.FAR;
 				break;
 			}
 			break;
-			
+		
 		case FAST:
 			fogSettings.near.quality = FogQuality.FAST;
 			fogSettings.far.quality = FogQuality.FAST;
@@ -733,19 +733,19 @@ public class LodRenderer
 				fogSettings.near.distance = FogDistance.NEAR;
 				fogSettings.far.distance = FogDistance.NEAR;
 				break;
-				
+			
 			case NEAR:
 				fogSettings.near.distance = FogDistance.NEAR;
 				fogSettings.far.distance = FogDistance.NEAR;
 				break;
-				
+			
 			case FAR:
 				fogSettings.near.distance = FogDistance.FAR;
 				fogSettings.far.distance = FogDistance.FAR;
 				break;
 			}
 			break;
-			
+		
 		case OFF:
 			
 			fogSettings.near.quality = FogQuality.OFF;
@@ -884,7 +884,7 @@ public class LodRenderer
 		
 		
 		// if the player is high enough, draw all LODs
-		if(chunkPosToSkip.isEmpty() && mc.getPlayer().position().y > 256)
+		if (chunkPosToSkip.isEmpty() && mc.getPlayer().position().y > 256)
 		{
 			vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
 			vanillaRenderedChunksChanged = true;

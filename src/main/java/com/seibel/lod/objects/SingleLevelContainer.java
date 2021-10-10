@@ -1,15 +1,15 @@
 package com.seibel.lod.objects;
 
-import java.util.Arrays;
-
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.util.ThreadMapUtil;
 
+import java.util.Arrays;
+
 /**
  * This object holds the LOD data for a single dataPoint.
- * 
+ *
  * @author Leonardo Amato
  * @version 9-28-2021
  */
@@ -195,11 +195,13 @@ public class SingleLevelContainer implements LevelContainer
 				{
 					tempData[index] = 0;
 					index++;
-				} else if (dataContainer[x][z] == 3)
+				}
+				else if (dataContainer[x][z] == 3)
 				{
 					tempData[index] = 3;
 					index++;
-				} else
+				}
+				else
 				{
 					for (tempIndex = 0; tempIndex < 8; tempIndex++)
 						tempData[index + tempIndex] = (byte) (dataContainer[x][z] >>> (8 * tempIndex));
@@ -213,9 +215,7 @@ public class SingleLevelContainer implements LevelContainer
 	@Override
 	public String toString()
 	{
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append(detailLevel);
-		return stringBuilder.toString();
+		return String.valueOf(detailLevel);
 	}
 	
 	
