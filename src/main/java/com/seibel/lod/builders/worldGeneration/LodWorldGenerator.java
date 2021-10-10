@@ -30,7 +30,7 @@ import net.minecraftforge.common.WorldWorkerManager;
  */
 public class LodWorldGenerator
 {
-	public MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
+	public final MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	/** This holds the thread used to generate new LODs off the main thread. */
 	private final ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(this.getClass().getSimpleName() + " world generator"));
@@ -52,9 +52,9 @@ public class LodWorldGenerator
 	 * to limit how many chunks are queued at once. To prevent chunks from being
 	 * generated for a long time in an area the player is no longer in.
 	 */
-	public AtomicInteger numberOfChunksWaitingToGenerate = new AtomicInteger(0);
+	public final AtomicInteger numberOfChunksWaitingToGenerate = new AtomicInteger(0);
 	
-	public Set<ChunkPos> positionsWaitingToBeGenerated = new HashSet<>();
+	public final Set<ChunkPos> positionsWaitingToBeGenerated = new HashSet<>();
 	
 	/**
 	 * Singleton copy of this object

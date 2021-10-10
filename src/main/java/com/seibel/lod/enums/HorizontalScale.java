@@ -38,7 +38,7 @@ public enum HorizontalScale
 	/** Lods expand in three dimension */
 	HIGH(256);
 	
-	public int distanceUnit;
+	public final int distanceUnit;
 	
 	HorizontalScale(int distanceUnit)
 	{

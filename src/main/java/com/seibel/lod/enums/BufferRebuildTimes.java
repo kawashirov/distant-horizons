@@ -34,9 +34,9 @@ public enum BufferRebuildTimes
 
 	RARE(5000, 2000, 10000);
 
-	public int playerMoveTimeout;
-	public int renderedChunkTimeout;
-	public int chunkChangeTimeout;
+	public final int playerMoveTimeout;
+	public final int renderedChunkTimeout;
+	public final int chunkChangeTimeout;
 
 	BufferRebuildTimes(int playerMoveTimeout, int renderedChunkTimeout, int chunkChangeTimeout)
 	{

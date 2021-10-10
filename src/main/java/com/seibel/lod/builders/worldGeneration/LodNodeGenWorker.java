@@ -337,6 +337,7 @@ public class LodNodeGenWorker implements IWorker
 				// if we are in the end, don't generate any chunks.
 				// Since we don't know where the islands are, everything
 				// generates the same, and it looks awful.
+				//TODO it appears that 'if' can be collapsed, but comment says that it should not be a case
 				lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(true, true, false));
 			}
 
@@ -438,9 +439,9 @@ public class LodNodeGenWorker implements IWorker
 			{
 				List<List<Supplier<ConfiguredFeature<?, ?>>>> featuresForState = biome.generationSettings.features();
 				
-				for (int featureStateToGenerate = 0; featureStateToGenerate < featuresForState.size(); featureStateToGenerate++)
+				for (List<Supplier<ConfiguredFeature<?, ?>>> suppliers : featuresForState)
 				{
-					for (Supplier<ConfiguredFeature<?, ?>> featureSupplier : featuresForState.get(featureStateToGenerate))
+					for (Supplier<ConfiguredFeature<?, ?>> featureSupplier : suppliers)
 					{
 						ConfiguredFeature<?, ?> configuredFeature = featureSupplier.get();
 						

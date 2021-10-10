@@ -67,9 +67,9 @@ import net.minecraft.util.math.ChunkPos;
 public class LodBufferBuilder
 {
 	/** The thread used to generate new LODs off the main thread. */
-	public static ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(LodBufferBuilder.class.getSimpleName() + " - main"));
+	public static final ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(LodBufferBuilder.class.getSimpleName() + " - main"));
 	/** The threads used to generate buffers. */
-	public static ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfBufferBuilderThreads.get(), new ThreadFactoryBuilder().setNameFormat("Buffer-Builder-%d").build());
+	public static final ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfBufferBuilderThreads.get(), new ThreadFactoryBuilder().setNameFormat("Buffer-Builder-%d").build());
 	
 	/**
 	 * When uploading to a buffer that is too small, 
@@ -132,7 +132,7 @@ public class LodBufferBuilder
 	public int previousRegionWidth = 0;
 	
 	/** this is used to prevent multiple threads creating, destroying, or using the buffers at the same time */
-	private ReentrantLock bufferLock = new ReentrantLock();
+	private final ReentrantLock bufferLock = new ReentrantLock();
 	
 	private volatile Box[][] boxCache;
 	private volatile PosToRenderContainer[][] setsToRender;
@@ -818,11 +818,11 @@ public class LodBufferBuilder
 	}
 	
 	/** A simple container to pass multiple objects back in the getVertexBuffers method. */
-	public class VertexBuffersAndOffset
+	public static class VertexBuffersAndOffset
 	{
-		public VertexBuffer[][][] vbos;
-		public int[][][] storageBufferIds;
-		public ChunkPos drawableCenterChunkPos;
+		public final VertexBuffer[][][] vbos;
+		public final int[][][] storageBufferIds;
+		public final ChunkPos drawableCenterChunkPos;
 		
 		public VertexBuffersAndOffset(VertexBuffer[][][] newVbos, int[][][] newStorageBufferIds, ChunkPos newDrawableCenterChunkPos)
 		{

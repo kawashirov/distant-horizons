@@ -499,8 +499,8 @@ public class LodRenderer
 		NEITHER(false, false),
 		BOTH(true, true);
 		
-		boolean lodProjUseFov;
-		boolean defaultMcProjUseFov;
+		final boolean lodProjUseFov;
+		final boolean defaultMcProjUseFov;
 		
 		FovTest(boolean newLodProjUseFov, boolean newDefaultMcProjUseFov)
 		{

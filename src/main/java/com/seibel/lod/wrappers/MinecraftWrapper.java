@@ -32,7 +32,7 @@ import net.minecraft.world.DimensionType;
  */
 public class MinecraftWrapper
 {
-	public static MinecraftWrapper INSTANCE = new MinecraftWrapper();
+	public static final MinecraftWrapper INSTANCE = new MinecraftWrapper();
 	
 	private final Minecraft mc = Minecraft.getInstance();
 	

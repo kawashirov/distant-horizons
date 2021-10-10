@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadFactory;
  */
 public class LodThreadFactory implements ThreadFactory
 {
-	public String threadName;
+	public final String threadName;
 	
 	
 	public LodThreadFactory(String newThreadName)

@@ -139,20 +139,20 @@ public class Box
 		put(Direction.NORTH, 3);
 	}};
 	/** holds the box's x, y, z offset */
-	public int[] boxOffset;
+	public final int[] boxOffset;
 	/** holds the box's x, y, z width */
-	public int[] boxWidth;
+	public final int[] boxWidth;
 	
 	/** Holds each direction's color */
-	public int[] colorMap;
+	public final int[] colorMap;
 	/** The original color (before shading) of this box */
 	public int color;
 	/**  */
-	public Map<Direction, int[]> adjHeight;
-	public Map<Direction, int[]> adjDepth;
+	public final Map<Direction, int[]> adjHeight;
+	public final Map<Direction, int[]> adjDepth;
 	
 	/** Holds if the given direction should be culled or not */
-	public boolean[] culling;
+	public final boolean[] culling;
 	
 	
 	/** creates an empty box */

@@ -41,7 +41,7 @@ public enum HorizontalQuality
 	/** Lods expand in three dimension */
 	HIGH(2.2f);
 
-	public double quadraticBase;
+	public final double quadraticBase;
 
 	HorizontalQuality(double distanceUnit)
 	{

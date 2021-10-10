@@ -74,9 +74,9 @@ public class LodServerWorld implements ISeedReader
 
 	public HashMap<Heightmap.Type, Heightmap> heightmaps = new HashMap<>();
 
-	public IChunk chunk;
+	public final IChunk chunk;
 
-	public ServerWorld serverWorld;
+	public final ServerWorld serverWorld;
 
 	public LodServerWorld(ServerWorld newServerWorld, IChunk newChunk)
 	{

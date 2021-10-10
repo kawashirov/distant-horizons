@@ -82,22 +82,22 @@ public class LodConfig
 	
 	public static class Graphics
 	{
-		public ForgeConfigSpec.EnumValue<FogDistance> fogDistance;
-		public ForgeConfigSpec.EnumValue<FogDrawOverride> fogDrawOverride;
+		public final ForgeConfigSpec.EnumValue<FogDistance> fogDistance;
+		public final ForgeConfigSpec.EnumValue<FogDrawOverride> fogDrawOverride;
 		
-		public ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
+		public final ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
 		
-		public ForgeConfigSpec.EnumValue<HorizontalResolution> drawResolution;
+		public final ForgeConfigSpec.EnumValue<HorizontalResolution> drawResolution;
 		
-		public ForgeConfigSpec.EnumValue<DetailDropOff> detailDropOff;
+		public final ForgeConfigSpec.EnumValue<DetailDropOff> detailDropOff;
 		
-		public ForgeConfigSpec.IntValue lodChunkRenderDistance;
+		public final ForgeConfigSpec.IntValue lodChunkRenderDistance;
 		
-		public ForgeConfigSpec.BooleanValue disableDirectionalCulling;
+		public final ForgeConfigSpec.BooleanValue disableDirectionalCulling;
 		
-		public ForgeConfigSpec.BooleanValue alwaysDrawAtMaxQuality;
+		public final ForgeConfigSpec.BooleanValue alwaysDrawAtMaxQuality;
 		
-		public ForgeConfigSpec.BooleanValue drawLods;
+		public final ForgeConfigSpec.BooleanValue drawLods;
 		
 		
 		Graphics(ForgeConfigSpec.Builder builder)
@@ -189,13 +189,13 @@ public class LodConfig
 	
 	public static class WorldGenerator
 	{
-		public ForgeConfigSpec.EnumValue<VerticalQuality> verticalQuality;
-		public ForgeConfigSpec.EnumValue<HorizontalResolution> generationResolution;
-		public ForgeConfigSpec.EnumValue<DistanceGenerationMode> distanceGenerationMode;
-		public ForgeConfigSpec.EnumValue<GenerationPriority> generationPriority;
-		public ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
-		public ForgeConfigSpec.EnumValue<HorizontalScale> horizontalScale;
-		public ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
+		public final ForgeConfigSpec.EnumValue<VerticalQuality> verticalQuality;
+		public final ForgeConfigSpec.EnumValue<HorizontalResolution> generationResolution;
+		public final ForgeConfigSpec.EnumValue<DistanceGenerationMode> distanceGenerationMode;
+		public final ForgeConfigSpec.EnumValue<GenerationPriority> generationPriority;
+		public final ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
+		public final ForgeConfigSpec.EnumValue<HorizontalScale> horizontalScale;
+		public final ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
 		
 		WorldGenerator(ForgeConfigSpec.Builder builder)
 		{
@@ -323,8 +323,8 @@ public class LodConfig
 	
 	public static class Threading
 	{
-		public ForgeConfigSpec.IntValue numberOfWorldGenerationThreads;
-		public ForgeConfigSpec.IntValue numberOfBufferBuilderThreads;
+		public final ForgeConfigSpec.IntValue numberOfWorldGenerationThreads;
+		public final ForgeConfigSpec.IntValue numberOfBufferBuilderThreads;
 		
 		Threading(ForgeConfigSpec.Builder builder)
 		{
@@ -359,8 +359,8 @@ public class LodConfig
 	
 	public static class Debugging
 	{
-		public ForgeConfigSpec.EnumValue<DebugMode> debugMode;
-		public ForgeConfigSpec.BooleanValue enableDebugKeybindings;
+		public final ForgeConfigSpec.EnumValue<DebugMode> debugMode;
+		public final ForgeConfigSpec.BooleanValue enableDebugKeybindings;
 		
 		Debugging(ForgeConfigSpec.Builder builder)
 		{
@@ -385,7 +385,7 @@ public class LodConfig
 	
 	public static class Buffers
 	{
-		public ForgeConfigSpec.EnumValue<BufferRebuildTimes> rebuildTimes;
+		public final ForgeConfigSpec.EnumValue<BufferRebuildTimes> rebuildTimes;
 		
 		Buffers(ForgeConfigSpec.Builder builder)
 		{

@@ -30,8 +30,8 @@ import com.seibel.lod.enums.FogQuality;
  */
 public class NearFarFogSettings
 {
-	public NearOrFarSetting near = new NearOrFarSetting(FogDistance.NEAR);
-	public NearOrFarSetting far = new NearOrFarSetting(FogDistance.FAR);
+	public final NearOrFarSetting near = new NearOrFarSetting(FogDistance.NEAR);
+	public final NearOrFarSetting far = new NearOrFarSetting(FogDistance.FAR);
 	
 	/** If true that means Minecraft is
 	 * rendering fog alongside us */
