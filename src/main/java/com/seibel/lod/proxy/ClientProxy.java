@@ -18,6 +18,10 @@
 
 package com.seibel.lod.proxy;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.lwjgl.glfw.GLFW;
+
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder;
 import com.seibel.lod.builders.lodBuilding.LodBuilder;
@@ -25,6 +29,7 @@ import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.builders.worldGeneration.LodWorldGenerator;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.VanillaOverdraw;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.objects.RegionPos;
@@ -34,6 +39,7 @@ import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
+
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.client.event.InputEvent;
@@ -42,9 +48,6 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.lwjgl.glfw.GLFW;
 
 /**
  * This handles all events sent to the client,
@@ -178,8 +181,7 @@ public class ClientProxy
 //		LodConfig.CLIENT.graphics.fogDistance.set(FogDistance.FAR);
 //		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
 //		LodConfig.CLIENT.graphics.shadingMode.set(ShadingMode.DARKEN_SIDES);
-//		LodConfig.CLIENT.graphics.brightnessMultiplier.set(1.0);
-//		LodConfig.CLIENT.graphics.saturationMultiplier.set(1.0);
+		LodConfig.CLIENT.graphics.vanillaOverdraw.set(VanillaOverdraw.HALF);
 
 //		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 //		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(64);

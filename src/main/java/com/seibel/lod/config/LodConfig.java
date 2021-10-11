@@ -38,7 +38,9 @@ import com.seibel.lod.enums.HorizontalQuality;
 import com.seibel.lod.enums.HorizontalResolution;
 import com.seibel.lod.enums.HorizontalScale;
 import com.seibel.lod.enums.LodTemplate;
+import com.seibel.lod.enums.VanillaOverdraw;
 import com.seibel.lod.enums.VerticalQuality;
+import com.seibel.lod.util.LodUtil;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -49,7 +51,7 @@ import net.minecraftforge.fml.config.ModConfig;
  * This handles any configuration the user has access to.
  *
  * @author James Seibel
- * @version 10-9-2021
+ * @version 10-10-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -99,6 +101,7 @@ public class LodConfig
 		
 		public final ForgeConfigSpec.BooleanValue drawLods;
 		
+		public final ForgeConfigSpec.EnumValue<VanillaOverdraw> vanillaOverdraw;
 		
 		Graphics(ForgeConfigSpec.Builder builder)
 		{
@@ -183,6 +186,16 @@ public class LodConfig
 							+ " distances higher than 128 \n")
 					.define("alwaysDrawAtMaxQuality", false);
 			
+			vanillaOverdraw = builder
+					.comment("\n\n"
+							+ " How often should LODs be drawn on top of regular chunks? \n"
+							+ " HALF and ALWAYS will prevent holes in the world, but may look odd on transparent blocks. \n"
+							+ VanillaOverdraw.NEVER + ": LODs won't render on top of vanilla chunks. \n"
+							+ VanillaOverdraw.HALF + ": LODs will render on top of distant vanilla chunks to hide holes in the world. \n"
+							+ " " + "    For vanilla render distances less than or equal to " + LodUtil.MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW + " " + VanillaOverdraw.HALF + " defaults works the same as " + VanillaOverdraw.ALWAYS + ". \n"
+							+ VanillaOverdraw.ALWAYS + ": LODs will render on all vanilla chunks preventing holes in the world. \n")
+					.defineEnum("vanillaOverdraw", VanillaOverdraw.HALF);
+			
 			builder.pop();
 		}
 	}
@@ -207,7 +220,6 @@ public class LodConfig
 							+ " overhangs, caves, floating islands, ect. \n"
 							+ " Higher options will use more memory and lower performance. \n"
 							+ " " + VerticalQuality.LOW + ": uses at max 2 columns per position. \n"
-							+ " " + VerticalQuality.MEDIUM + ": uses at max 4 columns per position. \n"
 							+ " " + VerticalQuality.HIGH + ": uses at max 8 columns per position. \n")
 					.defineEnum("Vertical Quality", VerticalQuality.MEDIUM);
 			
