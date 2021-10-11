@@ -33,6 +33,7 @@ import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
+import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
@@ -54,6 +55,8 @@ import net.minecraft.block.IGrowable;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.TallGrassBlock;
 import net.minecraft.block.material.MaterialColor;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.world.ClientWorld;
@@ -67,10 +70,13 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeColors;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.client.model.data.ModelDataMap;
+
+import javax.xml.soap.Text;
 
 /**
  * This object is in charge of creating Lod related objects. (specifically: Lod
@@ -91,6 +97,7 @@ public class LodBuilder
 	public static final int CHUNK_SECTION_HEIGHT = CHUNK_DATA_WIDTH;
 	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
 	public static final ConcurrentMap<Block, Integer> colorMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<Block, Integer> tintColor = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<Block, Boolean> toTint = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<Block, VoxelShape> shapeMap = new ConcurrentHashMap<>();
 	
@@ -282,7 +289,6 @@ public class LodBuilder
 		int zAbs;
 		boolean hasCeiling = mc.getClientWorld().dimensionType().hasCeiling();
 		boolean hasSkyLight = mc.getClientWorld().dimensionType().hasSkyLight();
-		
 		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
 		int index;
 		
@@ -412,141 +418,11 @@ public class LodBuilder
 		return height;
 	}
 	
-	/**
-	 * Creates a single HeightMap style LOD data point.
-	 */
-	private long[] createSingleDataToMerge(HorizontalResolution detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
-	{
-		long[] dataToMerge = ThreadMapUtil.getBuilderArray(detail.detailLevel);
-		ChunkPos chunkPos = chunk.getPos();
-		
-		int size = 1 << detail.detailLevel;
-		int height = 0;
-		int depth = 0;
-		int color = 0;
-		int light = 0;
-		int generation = config.distanceGenerationMode.complexity;
-		
-		int xRel;
-		int zRel;
-		int xAbs;
-		int yAbs;
-		int zAbs;
-		int lightBlock;
-		int lightSky;
-		
-		boolean hasCeiling = mc.getClientWorld().dimensionType().hasCeiling();
-		boolean hasSkyLight = mc.getClientWorld().dimensionType().hasSkyLight();
-		
-		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
-		int index;
-		for (index = 0; index < size * size; index++)
-		{
-			xRel = Math.floorMod(index, size) + startX;
-			zRel = Math.floorDiv(index, size) + startZ;
-			xAbs = chunkPos.getMinBlockX() + xRel;
-			zAbs = chunkPos.getMinBlockZ() + zRel;
-			
-			//Calculate the height of the lod
-			height = determineHeightPoint(chunk, config, xRel, zRel, blockPos);
-			
-			//If the lod is at the default height it must be void
-			if (height == DEFAULT_HEIGHT)
-			{
-				dataToMerge[index] = DataPointUtil.createVoidDataPoint(generation);
-				continue;
-			}
-			
-			yAbs = height - 1;
-			
-			
-			color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
-			depth = determineBottomPoint(chunk, config, xRel, zRel, blockPos);
-			
-			// get the light value from the above air block
-			blockPos.set(xAbs, yAbs + 1, zAbs);
-			light = getLightValue(chunk, blockPos, hasCeiling, hasSkyLight, true);
-			lightBlock = light & 0b1111;
-			
-			
-			lightSky = DEFAULT_MAX_LIGHT;
-			dataToMerge[index] = DataPointUtil.createDataPoint(height, depth, color, lightSky, lightBlock, generation);
-		}
-		return dataToMerge;
-	}
-	
 	
 	
 	// =====================//
 	// constructor helpers //
 	// =====================//
-	
-	/**
-	 * Find the lowest valid point from the bottom.
-	 */
-	private short determineBottomPoint(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, BlockPos.Mutable blockPos)
-	{
-		ChunkSection[] chunkSections = chunk.getSections();
-		short depth = DEFAULT_DEPTH;
-		/*if (config.useHeightmap)
-		{
-			depth = 0; //DEFAULT_DEPTH == 0
-		}
-		else
-		{*/
-		boolean found = false;
-		for (int sectionIndex = 0; sectionIndex < chunkSections.length; sectionIndex++)
-		{
-			for (int yRel = 0; yRel < CHUNK_DATA_WIDTH; yRel++)
-			{
-				blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel, chunk.getPos().getMinBlockZ() + zRel);
-				if (isLayerValidLodPoint(chunk, blockPos))
-				{
-					depth = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel);
-					found = true;
-					break;
-				}
-			}
-			
-			if (found)
-				break;
-		}
-		//}
-		return depth;
-	}
-	
-	
-	/**
-	 * Find the highest valid point from the Top
-	 */
-	private short determineHeightPoint(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, BlockPos.Mutable blockPos)
-	{
-		short height = DEFAULT_HEIGHT;
-		if (config.useHeightmap)
-			height = (short) chunk.getOrCreateHeightmapUnprimed(LodUtil.DEFAULT_HEIGHTMAP).getFirstAvailable(xRel, zRel);
-		else
-		{
-			boolean voidData = true;
-			ChunkSection[] chunkSections = chunk.getSections();
-			for (int sectionIndex = chunkSections.length - 1; sectionIndex >= 0; sectionIndex--)
-			{
-				for (int yRel = CHUNK_DATA_WIDTH - 1; yRel >= 0; yRel--)
-				{
-					blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel, chunk.getPos().getMinBlockZ() + zRel);
-					if (isLayerValidLodPoint(chunk, blockPos))
-					{
-						height = (short) (sectionIndex * CHUNK_DATA_WIDTH + yRel + 1);
-						voidData = false;
-						break;
-					}
-				}
-				
-				if (!voidData)
-					break;
-			}
-		}
-		return height;
-	}
 	
 	/**
 	 * Generate the color for the given chunk using biome water color, foliage
@@ -644,29 +520,34 @@ public class LodBuilder
 		
 		World world = mc.getClientWorld();
 		TextureAtlasSprite texture;
-		List<BakedQuad> quad = null;
-		
+		List<BakedQuad> quads = null;
+		int tintIndex = Integer.MIN_VALUE;
+		boolean isTinted = false;
+		int listSize = 0;
 		// get the first quad we can for this block
 		for (Direction direction : directions)
 		{
-			quad = mc.getModelManager().getBlockModelShaper().getBlockModel(blockState).getQuads(blockState, direction, new Random(0), dataMap);
-			if (!quad.isEmpty())
+			quads = mc.getModelManager().getBlockModelShaper().getBlockModel(blockState).getQuads(blockState, direction, new Random(0), dataMap);
+			listSize = Math.max(listSize,quads.size());
+			for(BakedQuad bakedQuad : quads)
+			{
+				isTinted |= bakedQuad.isTinted();
+				tintIndex = Math.max(tintIndex, bakedQuad.getTintIndex());
+			}
+		}
+		toTint.put(block, isTinted);
+		tintColor.put(block, tintIndex);
+		for (Direction direction : directions)
+		{
+			quads = mc.getModelManager().getBlockModelShaper().getBlockModel(blockState).getQuads(blockState, direction, new Random(0), dataMap);
+			if (!quads.isEmpty())
 				break;
 		}
 		
-		
-		if (!quad.isEmpty())
-			toTint.put(block, quad.get(0).isTinted());
-		else
-			toTint.put(blockState.getBlock(), false);
-		
-		
-		if (useTopTexture && !quad.isEmpty())
-			texture = quad.get(0).getSprite();
+		if (useTopTexture && !quads.isEmpty())
+			texture = quads.get(0).getSprite();
 		else
 			texture = mc.getModelManager().getBlockModelShaper().getTexture(blockState, world, blockPos);
-		
-		
 		
 		
 		int count = 0;
@@ -731,12 +612,11 @@ public class LodBuilder
 		}
 		
 		// determine if this block should use the biome color tint
-		if (block instanceof TallGrassBlock || (useGrassTint(block) || useLeafTint(block) || useWaterTint(block)) && (float) numberOfGreyPixel / count > 0.75f)
+		if ((useGrassTint(block) || useLeafTint(block) || useWaterTint(block)) && (float) numberOfGreyPixel / count > 0.75f)
 			toTint.replace(block, true);
 		
 		// add the newly generated block color to the map for later use
 		colorMap.put(block, color);
-		
 		return color;
 	}
 	
@@ -788,27 +668,52 @@ public class LodBuilder
 					|| blockState == Blocks.CAVE_AIR.defaultBlockState()
 					|| blockState == Blocks.BARRIER.defaultBlockState())
 		{
-			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
-			tmp = tmp.darker();
-			colorInt = LodUtil.colorToInt(tmp);
+			return 0;
 		}
 		
 		blockColor = getColorTextureForBlock(blockState, blockPos, true);
+		
+		//if the blockColor is 0 we reset it and don't use the faceColor
+		if(blockColor == 0)
+		{
+			tintColor.remove(blockState.getBlock());
+			toTint.remove(blockState.getBlock());
+			colorMap.remove(blockState.getBlock());
+			blockColor = getColorTextureForBlock(blockState, blockPos, false);
+		}
+		
+		//if the blockColor is still 0 we use use the default materia color
+		if(blockColor == 0)
+		{
+			tintColor.replace(blockState.getBlock(), 0);
+			toTint.replace(blockState.getBlock(), false);
+			colorMap.replace(blockState.getBlock(), blockState.getBlock().defaultMaterialColor().col);
+		}
+		
 		if (toTint.get(blockState.getBlock()))
 		{
-			if (useLeafTint(blockState.getBlock()))
-				// leaves
-				colorInt = ColorUtil.multiplyRGBcolors(biome.getFoliageColor() | 0xFF000000, blockColor);
-			else if (useGrassTint(blockState.getBlock()))
+			int tintValue = 0;
+			if (useGrassTint(blockState.getBlock()))
+			{
 				// grass and green plants
-				colorInt = ColorUtil.multiplyRGBcolors(biome.getGrassColor(x, z) | 0xFF000000, blockColor);
+				tintValue = biome.getGrassColor(x, z);
+			}
 			else if (useWaterTint(blockState.getBlock()))
+			{
 				// water
-				colorInt = ColorUtil.multiplyRGBcolors(biome.getWaterColor() | 0xFF000000, blockColor);
+				tintValue = biome.getWaterColor();
+			}else
+			{
+				// leaves
+				tintValue = biome.getFoliageColor();
+			}
+			colorInt = ColorUtil.multiplyRGBcolors(tintValue | 0xFF000000, blockColor);
 		}
 		else
+		{
 			colorInt = blockColor;
-		
+		}
+		//colorInt = blockColor;
 		return colorInt;
 	}
 	
