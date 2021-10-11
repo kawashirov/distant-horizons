@@ -100,14 +100,12 @@ public class ColorUtil
 
 	public static String toString(int color)
 	{
-		StringBuilder s = new StringBuilder();
-		s.append(Integer.toHexString(getAlpha(color)));
-		s.append(" ");
-		s.append(Integer.toHexString(getRed(color)));
-		s.append(" ");
-		s.append(Integer.toHexString(getGreen(color)));
-		s.append(" ");
-		s.append(Integer.toHexString(getBlue(color)));
-		return s.toString();
+		return Integer.toHexString(getAlpha(color)) +
+				" " +
+				Integer.toHexString(getRed(color)) +
+				" " +
+				Integer.toHexString(getGreen(color)) +
+				" " +
+				Integer.toHexString(getBlue(color));
 	}
 }
