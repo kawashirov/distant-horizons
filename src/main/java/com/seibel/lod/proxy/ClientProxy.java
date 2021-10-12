@@ -29,7 +29,6 @@ import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
 import com.seibel.lod.builders.worldGeneration.LodWorldGenerator;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.VanillaOverdraw;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.objects.RegionPos;
@@ -181,7 +180,7 @@ public class ClientProxy
 //		LodConfig.CLIENT.graphics.fogDistance.set(FogDistance.FAR);
 //		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
 //		LodConfig.CLIENT.graphics.shadingMode.set(ShadingMode.DARKEN_SIDES);
-		LodConfig.CLIENT.graphics.vanillaOverdraw.set(VanillaOverdraw.HALF);
+//		LodConfig.CLIENT.graphics.vanillaOverdraw.set(VanillaOverdraw.HALF);
 
 //		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 //		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(64);
