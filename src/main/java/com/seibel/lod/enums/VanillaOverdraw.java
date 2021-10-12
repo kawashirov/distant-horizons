@@ -1,14 +1,14 @@
 package com.seibel.lod.enums;
 
 /** 
- * None, Half, Always
+ * None, Dynamic, Always
  * 
  * <p>
  * This represents how far the LODs should overlap with
  * the vanilla Minecraft terrain.
  * 
  * @author James Seibel
- * @version 10-10-2021
+ * @version 10-11-2021
  */
 public enum VanillaOverdraw
 {
@@ -16,7 +16,7 @@ public enum VanillaOverdraw
 	NEVER,
 	
 	/** Draw LODs over the farther minecraft chunks. */
-	HALF,
+	DYNAMIC,
 	
 	/** Draw LODs over all minecraft chunks. */
 	ALWAYS,

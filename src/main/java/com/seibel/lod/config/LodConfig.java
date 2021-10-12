@@ -51,7 +51,7 @@ import net.minecraftforge.fml.config.ModConfig;
  * This handles any configuration the user has access to.
  *
  * @author James Seibel
- * @version 10-10-2021
+ * @version 10-11-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -189,12 +189,14 @@ public class LodConfig
 			vanillaOverdraw = builder
 					.comment("\n\n"
 							+ " How often should LODs be drawn on top of regular chunks? \n"
-							+ " HALF and ALWAYS will prevent holes in the world, but may look odd on transparent blocks. \n"
-							+ VanillaOverdraw.NEVER + ": LODs won't render on top of vanilla chunks. \n"
-							+ VanillaOverdraw.HALF + ": LODs will render on top of distant vanilla chunks to hide holes in the world. \n"
-							+ " " + "    For vanilla render distances less than or equal to " + LodUtil.MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW + " " + VanillaOverdraw.HALF + " defaults works the same as " + VanillaOverdraw.ALWAYS + ". \n"
-							+ VanillaOverdraw.ALWAYS + ": LODs will render on all vanilla chunks preventing holes in the world. \n")
-					.defineEnum("vanillaOverdraw", VanillaOverdraw.HALF);
+							+ " HALF and ALWAYS will prevent holes in the world, but may look odd for transparent blocks or in caves. \n\n"
+							+ " " + VanillaOverdraw.NEVER + ": LODs won't render on top of vanilla chunks. \n"
+							+ " " + VanillaOverdraw.DYNAMIC + ": LODs will render on top of distant vanilla chunks to hide delayed loading. \n"
+							+ " " + "     More effective on higher render distances. \n"
+							+ " " + "     For vanilla render distances less than or equal to " + LodUtil.MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW + " \n"
+							+ " " + "     " + VanillaOverdraw.NEVER + " or " + VanillaOverdraw.ALWAYS + " may be used depending on the dimension. \n"
+							+ " " + VanillaOverdraw.ALWAYS + ": LODs will render on all vanilla chunks preventing holes in the world. \n")
+					.defineEnum("vanillaOverdraw", VanillaOverdraw.DYNAMIC);
 			
 			builder.pop();
 		}

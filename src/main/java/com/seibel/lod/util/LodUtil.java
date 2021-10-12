@@ -50,7 +50,7 @@ import net.minecraft.world.server.ServerWorld;
  * This class holds methods and constants that may be used in multiple places.
  *
  * @author James Seibel
- * @version 10-10-2021
+ * @version 10-11-2021
  */
 public class LodUtil
 {
@@ -367,30 +367,43 @@ public class LodUtil
 		int chunkRenderDist = mc.getRenderDistance();
 		ChunkPos centerChunk = new ChunkPos(playerPos);
 		
-		
 		int skipRadius;
 		VanillaOverdraw overdraw = LodConfig.CLIENT.graphics.vanillaOverdraw.get();
+		
+		// apply distance based rules for dynamic
+		if (overdraw == VanillaOverdraw.DYNAMIC 
+				&& chunkRenderDist <= MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW)
+		{
+			// The vanilla render distance isn't far enough 
+			// for partial skipping to make sense...
+			
+			if (!lodDim.dimension.hasCeiling())
+			{
+				// ...and the dimension is open, so we don't have to worry about
+				// LODs rendering on top of the player.
+				overdraw = VanillaOverdraw.ALWAYS;
+			}
+			else
+			{
+				// ...but we are underground, so we don't want
+				// LODs rendering on top of the player.
+				overdraw = VanillaOverdraw.NEVER;
+			}
+		}
+		
+		
+		// determine the skipping type based
+		// on the overdraw type
 		switch (overdraw)
 		{
 		case ALWAYS:
 			// don't skip any positions
 			return new HashSet<ChunkPos>();
 			
-		case HALF:
-			// for small render distances just skip everything
-			// since the distance isn't far enough 
-			// where partial skipping doesn't make sense
-			if (chunkRenderDist <= MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW)
-			{
-				// don't skip any positions
-				return new HashSet<ChunkPos>();	
-			}
-			else
-			{
-				// only skip positions that are greater than
-				// half the render distance
-				skipRadius = (int) Math.ceil(chunkRenderDist / 2.0);
-			}
+		case DYNAMIC:
+			// only skip positions that are greater than
+			// half the render distance
+			skipRadius = (int) Math.ceil(chunkRenderDist / 2.0);
 			break;
 			
 		default:
@@ -406,32 +419,21 @@ public class LodUtil
 		HashSet<ChunkPos> posToSkip = getRenderedChunks();
 		
 		
-		// apply special cases to those positions
-		for (int x = centerChunk.x - chunkRenderDist; x < centerChunk.x + chunkRenderDist; x++)
+		// remove everything outside the skipRadius,
+		// if the skipRadius is being used
+		if (skipRadius != 0)
 		{
-			for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
+			for (int x = centerChunk.x - chunkRenderDist; x < centerChunk.x + chunkRenderDist; x++)
 			{
-				// if the skipRadius is being used...
-				if (skipRadius != 0 && 
-						((x <= centerChunk.x - skipRadius || x >= centerChunk.x + skipRadius)
-						|| (z <= centerChunk.z - skipRadius || z >= centerChunk.z + skipRadius)))
+				for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
 				{
-					// ...remove everything outside the skipRadius
-					posToSkip.remove(new ChunkPos(x, z));
-					continue;
-				}
-				
-				
-				if (!lodDim.doesDataExist(LodUtil.CHUNK_DETAIL_LEVEL, x, z))
-					continue;
-				
-				long data = lodDim.getSingleData(LodUtil.CHUNK_DETAIL_LEVEL, x, z);
-				short lodAverageHeight = DataPointUtil.getHeight(data);
-				if (playerPos.getY() <= lodAverageHeight)
-				{
-					// don't draw LODs that are taller than the player
-					// to prevent LODs being drawn on top of the player
-					posToSkip.add(new ChunkPos(x, z));
+					if (x <= centerChunk.x - skipRadius || x >= centerChunk.x + skipRadius
+						|| 
+						z <= centerChunk.z - skipRadius || z >= centerChunk.z + skipRadius)
+					{
+						posToSkip.remove(new ChunkPos(x, z));
+						continue;
+					}
 				}
 			}
 		}
