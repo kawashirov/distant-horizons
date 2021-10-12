@@ -716,6 +716,8 @@ public class LodBufferBuilder
 		}
 		finally
 		{
+			GL11.glFinish();
+			
 			// close the context so it can be re-used later.
 			// I'm guessing we can't just leave it because the executor service
 			// does something that invalidates the OpenGL context.
