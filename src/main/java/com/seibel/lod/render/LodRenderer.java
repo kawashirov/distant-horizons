@@ -18,13 +18,24 @@
 
 package com.seibel.lod.render;
 
+import java.util.HashSet;
+
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL15C;
+import org.lwjgl.opengl.NVFogDistance;
+
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder.VertexBuffersAndOffset;
 import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.enums.*;
+import com.seibel.lod.enums.DebugMode;
+import com.seibel.lod.enums.DetailDropOff;
+import com.seibel.lod.enums.FogDistance;
+import com.seibel.lod.enums.FogDrawOverride;
+import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
@@ -35,6 +46,7 @@ import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
+
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -45,12 +57,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL15C;
-import org.lwjgl.opengl.NVFogDistance;
-
-import java.util.HashSet;
 
 
 /**
@@ -58,7 +64,7 @@ import java.util.HashSet;
  * This is where LODs are draw to the world.
  *
  * @author James Seibel
- * @version 10-9-2021
+ * @version 10-11-2021
  */
 public class LodRenderer
 {
@@ -286,7 +292,7 @@ public class LodRenderer
 							setupFog(fogSettings.far.distance, fogSettings.far.quality);
 						
 						
-						for (int i = 0; i < lodBufferBuilder.numberOfBuffersPerRegion[x][z]; i++)
+						for (int i = 0; i < storageBufferIds[x][z].length; i++)
 						{
 							drawBuffer(vbos[x][z][i], storageBufferIds[x][z][i], modelViewMatrix);
 						}
