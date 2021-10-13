@@ -174,12 +174,7 @@ public class DataPointUtil
 		return (int) (((dataPoint >>> COLOR_SHIFT) & COLOR_MASK) | (((dataPoint >>> (ALPHA_SHIFT - ALPHA_DOWNSIZE_SHIFT)) | 0b1111) << 24));
 	}
 
-	/**
-	 * This method apply the lightmap to the color to use
-	 * @param dataPoint
-	 * @param lightMap
-	 * @return
-	 */
+	/** This method apply the lightmap to the color to use */
 	public static int getLightColor(long dataPoint, NativeImage lightMap)
 	{
 		int lightBlock = getLightBlock(dataPoint);
@@ -192,43 +187,25 @@ public class DataPointUtil
 		return ColorUtil.multiplyRGBcolors(getColor(dataPoint), ColorUtil.rgbToInt(red, green, blue));
 	}
 
-	/**
-	 * This is used to convert a dataPoint to string (useful for the print function)
-	 * @param dataPoint
-	 * @return
-	 */
+	/** This is used to convert a dataPoint to string (useful for the print function) */
 	public static String toString(long dataPoint)
 	{
-		StringBuilder s = new StringBuilder();
-		s.append(getHeight(dataPoint));
-		s.append(" ");
-		s.append(getDepth(dataPoint));
-		s.append(" ");
-		s.append(getAlpha(dataPoint));
-		s.append(" ");
-		s.append(getRed(dataPoint));
-		s.append(" ");
-		s.append(getBlue(dataPoint));
-		s.append(" ");
-		s.append(getGreen(dataPoint));
-		s.append(" ");
-		s.append(getLightBlock(dataPoint));
-		s.append(" ");
-		s.append(getLightSky(dataPoint));
-		s.append(" ");
-		s.append(getGenerationMode(dataPoint));
-		s.append(" ");
-		s.append(isVoid(dataPoint));
-		s.append(" ");
-		s.append(doesItExist(dataPoint));
-		s.append('\n');
-		return s.toString();
+		return getHeight(dataPoint) + " " +
+				getDepth(dataPoint) + " " +
+				getAlpha(dataPoint) + " " +
+				getRed(dataPoint) + " " +
+				getBlue(dataPoint) + " " +
+				getGreen(dataPoint) + " " +
+				getLightBlock(dataPoint) + " " +
+				getLightSky(dataPoint) + " " +
+				getGenerationMode(dataPoint) + " " +
+				isVoid(dataPoint) + " " +
+				doesItExist(dataPoint) + '\n';
 	}
 
 	/**
 	 * This method merge column of single data together
-	 * @param dataToMerge
-	 * @return
+	 * @deprecated
 	 */
 	public static long mergeSingleData(long[] dataToMerge)
 	{
@@ -318,10 +295,10 @@ public class DataPointUtil
 
 	/**
 	 * This method merge column of multiple data together
-	 * @param dataToMerge
+	 * @param dataToMerge one or more columns of data
 	 * @param inputVerticalData vertical size of an input data
 	 * @param maxVerticalData max vertical size of the merged data
-	 * @return
+	 * @return 1 column of correctly parsed data
 	 */
 	public static long[] mergeMultiData(long[] dataToMerge, int inputVerticalData, int maxVerticalData)
 	{
