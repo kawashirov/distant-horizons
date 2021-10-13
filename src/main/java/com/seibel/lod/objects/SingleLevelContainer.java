@@ -111,7 +111,9 @@ public class SingleLevelContainer implements LevelContainer
 	{
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		// TODO Improve this using a thread map to long[]
+		/* TODO Improve this using a thread map to long[]
+		*   actually single level stuff is already kinda deprecated - cola*/
+		
 		return dataContainer[posX][posZ];
 	}
 	
@@ -120,7 +122,8 @@ public class SingleLevelContainer implements LevelContainer
 	{
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
-		// TODO Improve this using a thread map to long[]
+		/* TODO Improve this using a thread map to long[]
+		*   actually single level stuff is already kinda deprecated - cola*/
 		return dataContainer[posX][posZ];
 	}
 	

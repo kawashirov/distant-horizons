@@ -582,7 +582,7 @@ public class LodBuilder
 					
 					
 					// add to the running averages
-					count = colorMultiplier + count; // TODO shouldn't colorMultiplier be multiplied by?
+					count += colorMultiplier;
 					alpha += ColorUtil.getAlpha(color) * colorMultiplier;
 					red += ColorUtil.getBlue(color) * colorMultiplier;
 					green += ColorUtil.getGreen(color) * colorMultiplier;
