@@ -767,13 +767,13 @@ public class LodBufferBuilder
 						
 						
 						
-						if (printExpansionLog)
+						/*if (printExpansionLog)
 						{
 							// NOTE: this will display twice because we are double buffering
 							// (using 1 buffer to generate into and one to draw)
-//							ClientProxy.LOGGER.info("vbo (" + xVboIndex + "," + zVboIndex + ") expanded: " + bufferPreviousCapacity[xVboIndex][zVboIndex][iVboIndex] + " -> " + (int)(uploadBuffer.capacity() * BUFFER_EXPANSION_MULTIPLIER));
-//							bufferPreviousCapacity[xVboIndex][zVboIndex][iVboIndex] = (int) (uploadBuffer.capacity() * BUFFER_EXPANSION_MULTIPLIER);
-						}
+							ClientProxy.LOGGER.info("vbo (" + xVboIndex + "," + zVboIndex + ") expanded: " + bufferPreviousCapacity[xVboIndex][zVboIndex][iVboIndex] + " -> " + (int)(uploadBuffer.capacity() * BUFFER_EXPANSION_MULTIPLIER));
+							bufferPreviousCapacity[xVboIndex][zVboIndex][iVboIndex] = (int) (uploadBuffer.capacity() * BUFFER_EXPANSION_MULTIPLIER);
+						}*/
 					}
 				}
 				else
