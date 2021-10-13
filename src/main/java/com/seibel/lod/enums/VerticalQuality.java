@@ -15,19 +15,19 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.enums;
 
 /**
  * heightmap <br>
  * multi_lod <br>
- * 
  * @author Leonardo Amato
  * @version 10-07-2021
  */
 public enum VerticalQuality
 {
 	LOW(
-			new int[]{2,
+			new int[] { 2,
 					2,
 					2,
 					2,
@@ -37,11 +37,11 @@ public enum VerticalQuality
 					1,
 					1,
 					1,
-					1}
+					1 }
 	),
 	
 	MEDIUM(
-			new int[]{4,
+			new int[] { 4,
 					4,
 					2,
 					2,
@@ -51,11 +51,11 @@ public enum VerticalQuality
 					1,
 					1,
 					1,
-					1}
+					1 }
 	),
 	
 	HIGH(
-			new int[]{
+			new int[] {
 					8,
 					8,
 					4,
@@ -66,7 +66,7 @@ public enum VerticalQuality
 					1,
 					1,
 					1,
-					1}
+					1 }
 	);
 	
 	public final int[] maxVerticalData;

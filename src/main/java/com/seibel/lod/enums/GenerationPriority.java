@@ -15,6 +15,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.enums;
 
 /**
@@ -23,7 +24,6 @@ package com.seibel.lod.enums;
  * <br>
  * Determines which LODs should have priority when generating
  * outside the normal view distance.
- * 
  * @author Leonardo Amato
  * @version 9-25-2021
  */

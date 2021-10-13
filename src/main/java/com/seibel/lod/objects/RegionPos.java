@@ -15,16 +15,15 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.objects;
 
 import com.seibel.lod.util.LodUtil;
-
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 
 /**
  * This object is similar to ChunkPos or BlockPos.
- *
  * @author James Seibel
  * @version 8-21-2021
  */
@@ -36,7 +35,7 @@ public class RegionPos
 	
 	/**
 	 * Default Constructor <br><br>
-	 * 
+	 * <p>
 	 * Sets x and z to 0
 	 */
 	public RegionPos()
@@ -69,7 +68,7 @@ public class RegionPos
 	public ChunkPos chunkPos()
 	{
 		return new ChunkPos(
-				(x * LodUtil.REGION_WIDTH_IN_CHUNKS) + LodUtil.REGION_WIDTH_IN_CHUNKS / 2, 
+				(x * LodUtil.REGION_WIDTH_IN_CHUNKS) + LodUtil.REGION_WIDTH_IN_CHUNKS / 2,
 				(z * LodUtil.REGION_WIDTH_IN_CHUNKS) + LodUtil.REGION_WIDTH_IN_CHUNKS / 2);
 	}
 	

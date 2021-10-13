@@ -173,7 +173,7 @@ public class DataPointUtil
 	{
 		return (int) (((dataPoint >>> COLOR_SHIFT) & COLOR_MASK) | (((dataPoint >>> (ALPHA_SHIFT - ALPHA_DOWNSIZE_SHIFT)) | 0b1111) << 24));
 	}
-
+	
 	/** This method apply the lightmap to the color to use */
 	public static int getLightColor(long dataPoint, NativeImage lightMap)
 	{
@@ -186,7 +186,7 @@ public class DataPointUtil
 		
 		return ColorUtil.multiplyRGBcolors(getColor(dataPoint), ColorUtil.rgbToInt(red, green, blue));
 	}
-
+	
 	/** This is used to convert a dataPoint to string (useful for the print function) */
 	public static String toString(long dataPoint)
 	{
@@ -227,7 +227,7 @@ public class DataPointUtil
 			array[start + i] = 0;
 		}
 	}
-
+	
 	/**
 	 * This method merge column of multiple data together
 	 * @param dataToMerge one or more columns of data
@@ -405,7 +405,7 @@ public class DataPointUtil
 			ii = worldHeight;
 			for (i = 0; i < count - 1; i++)
 			{
-				if (heightAndDepth[i * 2 + 1] - heightAndDepth[(i + 1) * 2]< ii)
+				if (heightAndDepth[i * 2 + 1] - heightAndDepth[(i + 1) * 2] < ii)
 				{
 					ii = heightAndDepth[i * 2 + 1] - heightAndDepth[(i + 1) * 2];
 					j = i;
@@ -428,7 +428,7 @@ public class DataPointUtil
 			
 			if ((depth == 0 && height == 0) || j >= heightAndDepth.length / 2)
 				break;
-				
+			
 			int numberOfChildren = 0;
 			int tempAlpha = 0;
 			int tempRed = 0;
@@ -448,7 +448,7 @@ public class DataPointUtil
 					singleData = dataToMerge[index * inputVerticalData + dataIndex];
 					if (doesItExist(singleData) && !isVoid(singleData))
 					{
-
+						
 						if ((depth <= getDepth(singleData) && getDepth(singleData) <= height)
 								|| (depth <= getHeight(singleData) && getHeight(singleData) <= height))
 						{
@@ -459,7 +459,8 @@ public class DataPointUtil
 					else
 						break;
 				}
-				if(!doesItExist(data)){
+				if (!doesItExist(data))
+				{
 					singleData = dataToMerge[index * inputVerticalData];
 					data = createVoidDataPoint(getGenerationMode(singleData));
 				}

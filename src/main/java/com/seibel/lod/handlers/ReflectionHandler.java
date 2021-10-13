@@ -29,7 +29,6 @@ import java.lang.reflect.Method;
  * This object is used to get variables from methods
  * where they are private. Specifically the fog setting
  * in Optifine.
- *
  * @author James Seibel
  * @version 9-25-2021
  */

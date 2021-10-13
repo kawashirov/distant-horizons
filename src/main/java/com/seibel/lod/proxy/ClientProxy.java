@@ -18,10 +18,6 @@
 
 package com.seibel.lod.proxy;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.lwjgl.glfw.GLFW;
-
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder;
 import com.seibel.lod.builders.lodBuilding.LodBuilder;
@@ -38,7 +34,6 @@ import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.client.event.InputEvent;
@@ -47,11 +42,13 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.lwjgl.glfw.GLFW;
 
 /**
  * This handles all events sent to the client,
  * and is the starting point for most of the mod.
- *
  * @author James_Seibel
  * @version 9-26-2021
  */

@@ -10,10 +10,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * Holds data used by specific threads so 
+ * Holds data used by specific threads so
  * the data doesn't have to be recreated every
  * time it is needed.
- *
  * @author Leonardo Amato
  * @version 9-25-2021
  */
@@ -93,35 +92,6 @@ public class ThreadMapUtil
 	// mergeSingleData        //
 	//________________________//
 	
-	
-	
-	/** returns the array NOT cleared every time */
-	public static long[] getSingleUpdateArray()
-	{
-		if (!threadSingleUpdateMap.containsKey(Thread.currentThread().getName()) || (threadSingleUpdateMap.get(Thread.currentThread().getName()) == null))
-		{
-			threadSingleUpdateMap.put(Thread.currentThread().getName(), new long[4]);
-		}
-		return threadSingleUpdateMap.get(Thread.currentThread().getName());
-	}
-	
-	
-	/** returns the array NOT cleared every time */
-	public static long[] getBuilderArray(int detailLevel)
-	{
-		if (!threadBuilderArrayMap.containsKey(Thread.currentThread().getName()) || (threadBuilderArrayMap.get(Thread.currentThread().getName()) == null))
-		{
-			long[][] array = new long[5][];
-			int size = 1;
-			for (int i = 0; i < 5; i++)
-			{
-				array[i] = new long[size * size];
-				size = size << 1;
-			}
-			threadBuilderArrayMap.put(Thread.currentThread().getName(), array);
-		}
-		return threadBuilderArrayMap.get(Thread.currentThread().getName())[detailLevel];
-	}
 	
 	
 	/** returns the array filled with 0's */

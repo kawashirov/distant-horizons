@@ -18,17 +18,12 @@
 
 package com.seibel.lod.util;
 
-import java.awt.Color;
-import java.io.File;
-import java.util.HashSet;
-
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.VanillaOverdraw;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
@@ -46,9 +41,12 @@ import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 
+import java.awt.*;
+import java.io.File;
+import java.util.HashSet;
+
 /**
  * This class holds methods and constants that may be used in multiple places.
- *
  * @author James Seibel
  * @version 10-11-2021
  */
@@ -58,7 +56,7 @@ public class LodUtil
 	
 	/**
 	 * vanilla render distances less than or equal to this will not allow partial
-	 * overdraw. The VanillaOverdraw with either be ALWAYS or NEVER. 
+	 * overdraw. The VanillaOverdraw with either be ALWAYS or NEVER.
 	 */
 	public static final int MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW = 5;
 	
@@ -156,7 +154,6 @@ public class LodUtil
 	
 	/**
 	 * Gets the first valid ServerWorld.
-	 *
 	 * @return null if there are no ServerWorlds
 	 */
 	public static ServerWorld getFirstValidServerWorld()
@@ -174,7 +171,6 @@ public class LodUtil
 	
 	/**
 	 * Gets the ServerWorld for the relevant dimension.
-	 *
 	 * @return null if there is no ServerWorld for the given dimension
 	 */
 	public static ServerWorld getServerWorldFromDimension(DimensionType dimension)
@@ -371,7 +367,7 @@ public class LodUtil
 		VanillaOverdraw overdraw = LodConfig.CLIENT.graphics.vanillaOverdraw.get();
 		
 		// apply distance based rules for dynamic
-		if (overdraw == VanillaOverdraw.DYNAMIC 
+		if (overdraw == VanillaOverdraw.DYNAMIC
 				&& chunkRenderDist <= MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW)
 		{
 			// The vanilla render distance isn't far enough 
@@ -399,13 +395,13 @@ public class LodUtil
 		case ALWAYS:
 			// don't skip any positions
 			return new HashSet<ChunkPos>();
-			
+		
 		case DYNAMIC:
 			// only skip positions that are greater than
 			// 4/5ths the render distance
 			skipRadius = (int) Math.ceil(chunkRenderDist * (4.0 / 5.0));
 			break;
-			
+		
 		default:
 		case NEVER:
 			// skip chunks in render distance that are rendered
@@ -428,8 +424,8 @@ public class LodUtil
 				for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
 				{
 					if (x <= centerChunk.x - skipRadius || x >= centerChunk.x + skipRadius
-						|| 
-						z <= centerChunk.z - skipRadius || z >= centerChunk.z + skipRadius)
+							||
+							z <= centerChunk.z - skipRadius || z >= centerChunk.z + skipRadius)
 					{
 						posToSkip.remove(new ChunkPos(x, z));
 						continue;

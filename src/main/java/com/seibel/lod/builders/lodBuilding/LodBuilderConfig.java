@@ -25,7 +25,6 @@ import com.seibel.lod.enums.DistanceGenerationMode;
  * Generally this will only be used if we want to generate a
  * LodChunk using an incomplete Chunk, otherwise the defaults
  * work best for a fully generated chunk (IE has correct surface blocks).
- *
  * @author James Seibel
  * @version 8-14-2021
  */
@@ -56,10 +55,10 @@ public class LodBuilderConfig
 	}
 	
 	/**
-	 * @param newUseHeightmap               default = false
-	 * @param newUseBiomeColors             default = false
+	 * @param newUseHeightmap default = false
+	 * @param newUseBiomeColors default = false
 	 * @param newUseSolidBlocksInBiomeColor default = true
-	 * @param newDistanceGenerationMode     default = Server
+	 * @param newDistanceGenerationMode default = Server
 	 */
 	public LodBuilderConfig(boolean newUseHeightmap, boolean newUseBiomeColors,
 			boolean newUseSolidBlocksInBiomeColor, DistanceGenerationMode newDistanceGenerationMode)
@@ -71,8 +70,8 @@ public class LodBuilderConfig
 	}
 	
 	/**
-	 * @param newUseHeightmap               default = false
-	 * @param newUseBiomeColors             default = false
+	 * @param newUseHeightmap default = false
+	 * @param newUseBiomeColors default = false
 	 * @param newUseSolidBlocksInBiomeColor default = true
 	 */
 	public LodBuilderConfig(boolean newUseHeightmap, boolean newUseBiomeColors, boolean newUseSolidBlocksInBiomeColor)
@@ -85,7 +84,7 @@ public class LodBuilderConfig
 	}
 	
 	/**
-	 * @param newDistanceGenerationMode     default = Server
+	 * @param newDistanceGenerationMode default = Server
 	 */
 	public LodBuilderConfig(DistanceGenerationMode newDistanceGenerationMode)
 	{

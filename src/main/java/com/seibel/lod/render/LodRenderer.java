@@ -18,24 +18,13 @@
 
 package com.seibel.lod.render;
 
-import java.util.HashSet;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL15C;
-import org.lwjgl.opengl.NVFogDistance;
-
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder.VertexBuffersAndOffset;
 import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.enums.DetailDropOff;
-import com.seibel.lod.enums.FogDistance;
-import com.seibel.lod.enums.FogDrawOverride;
-import com.seibel.lod.enums.FogQuality;
+import com.seibel.lod.enums.*;
 import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
@@ -46,7 +35,6 @@ import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -57,12 +45,17 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL15C;
+import org.lwjgl.opengl.NVFogDistance;
+
+import java.util.HashSet;
 
 
 /**
  * This is where all the magic happens. <br>
  * This is where LODs are draw to the world.
- *
  * @author James Seibel
  * @version 10-11-2021
  */
@@ -152,10 +145,9 @@ public class LodRenderer
 	/**
 	 * Besides drawing the LODs this method also starts
 	 * the async process of generating the Buffers that hold those LODs.
-	 *
-	 * @param lodDim        The dimension to draw, if null doesn't replace the current dimension.
+	 * @param lodDim The dimension to draw, if null doesn't replace the current dimension.
 	 * @param mcMatrixStack This matrix stack should come straight from MC's renderChunkLayer (or future equivalent) method
-	 * @param partialTicks  how far into the current tick this method was called.
+	 * @param partialTicks how far into the current tick this method was called.
 	 */
 	@SuppressWarnings("deprecation")
 	public void drawLODs(LodDimension lodDim, MatrixStack mcMatrixStack, float partialTicks, IProfiler newProfiler)
@@ -517,9 +509,8 @@ public class LodRenderer
 	
 	/**
 	 * create a new projection matrix and send it over to the GPU
-	 *
 	 * @param currentProjectionMatrix this is Minecraft's current projection matrix
-	 * @param partialTicks            how many ticks into the frame we are
+	 * @param partialTicks how many ticks into the frame we are
 	 */
 	private void setupProjectionMatrix(Matrix4f currentProjectionMatrix, float partialTicks)
 	{

@@ -18,14 +18,6 @@
 
 package com.seibel.lod.builders.lodBuilding;
 
-import java.awt.Color;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.HorizontalResolution;
@@ -33,26 +25,9 @@ import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
-import com.seibel.lod.util.ColorUtil;
-import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.DetailDistanceUtil;
-import com.seibel.lod.util.LevelPosUtil;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.util.ThreadMapUtil;
+import com.seibel.lod.util.*;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
-import net.minecraft.block.AbstractPlantBlock;
-import net.minecraft.block.AbstractTopPlantBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.BushBlock;
-import net.minecraft.block.FlowerBlock;
-import net.minecraft.block.GrassBlock;
-import net.minecraft.block.IGrowable;
-import net.minecraft.block.LeavesBlock;
-import net.minecraft.block.TallGrassBlock;
+import net.minecraft.block.*;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -72,10 +47,17 @@ import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.client.model.data.ModelDataMap;
 
+import java.awt.*;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 /**
  * This object is in charge of creating Lod related objects. (specifically: Lod
  * World, Dimension, and Region objects)
- *
  * @author Leonardo Amato
  * @author James Seibel
  * @version 10-9-2021
@@ -111,7 +93,7 @@ public class LodBuilder
 	
 	/**
 	 * How wide LodDimensions should be in regions <br>
-	 * Is automatically set before the first frame in ClientProxy. 
+	 * Is automatically set before the first frame in ClientProxy.
 	 */
 	public int defaultDimensionWidthInRegions = 0;
 	
@@ -176,7 +158,6 @@ public class LodBuilder
 	
 	/**
 	 * Creates a LodNode for a chunk in the given world.
-	 *
 	 * @throws IllegalArgumentException thrown if either the chunk or world is null.
 	 */
 	public void generateLodNodeFromChunk(LodDimension lodDim, IChunk chunk) throws IllegalArgumentException
@@ -186,7 +167,6 @@ public class LodBuilder
 	
 	/**
 	 * Creates a LodNode for a chunk in the given world.
-	 *
 	 * @throws IllegalArgumentException thrown if either the chunk or world is null.
 	 */
 	public void generateLodNodeFromChunk(LodDimension lodDim, IChunk chunk, LodBuilderConfig config)
@@ -522,8 +502,8 @@ public class LodBuilder
 		for (Direction direction : directions)
 		{
 			quads = mc.getModelManager().getBlockModelShaper().getBlockModel(blockState).getQuads(blockState, direction, new Random(0), dataMap);
-			listSize = Math.max(listSize,quads.size());
-			for(BakedQuad bakedQuad : quads)
+			listSize = Math.max(listSize, quads.size());
+			for (BakedQuad bakedQuad : quads)
 			{
 				isTinted |= bakedQuad.isTinted();
 				tintIndex = Math.max(tintIndex, bakedQuad.getTintIndex());
@@ -618,19 +598,19 @@ public class LodBuilder
 	private boolean useGrassTint(Block block)
 	{
 		return block instanceof GrassBlock
-					   || block instanceof BushBlock
-					   || block instanceof IGrowable
-					   || block instanceof AbstractPlantBlock
-					   || block instanceof AbstractTopPlantBlock
-					   || block instanceof TallGrassBlock;
+				|| block instanceof BushBlock
+				|| block instanceof IGrowable
+				|| block instanceof AbstractPlantBlock
+				|| block instanceof AbstractTopPlantBlock
+				|| block instanceof TallGrassBlock;
 	}
 	
 	/** determine if the given block should use the biome's foliage color */
 	private boolean useLeafTint(Block block)
 	{
 		return block instanceof LeavesBlock
-					   || block == Blocks.VINE
-					   || block == Blocks.SUGAR_CANE;
+				|| block == Blocks.VINE
+				|| block == Blocks.SUGAR_CANE;
 	}
 	
 	/** determine if the given block should use the biome's water color */
@@ -643,7 +623,7 @@ public class LodBuilder
 	private int getColorForBlock(IChunk chunk, BlockPos blockPos)
 	{
 		int blockColor;
-		int colorInt = 0;
+		int colorInt;
 		
 		int xRel = blockPos.getX() - chunk.getPos().getMinBlockX();
 		int zRel = blockPos.getZ() - chunk.getPos().getMinBlockZ();
@@ -659,8 +639,8 @@ public class LodBuilder
 		// block special cases
 		// TODO: this needs to be replaced by a config file of some sort
 		if (blockState == Blocks.AIR.defaultBlockState()
-					|| blockState == Blocks.CAVE_AIR.defaultBlockState()
-					|| blockState == Blocks.BARRIER.defaultBlockState())
+				|| blockState == Blocks.CAVE_AIR.defaultBlockState()
+				|| blockState == Blocks.BARRIER.defaultBlockState())
 		{
 			return 0;
 		}
@@ -668,7 +648,7 @@ public class LodBuilder
 		blockColor = getColorTextureForBlock(blockState, blockPos, true);
 		
 		//if the blockColor is 0 we reset it and don't use the faceColor
-		if(blockColor == 0)
+		if (blockColor == 0)
 		{
 			tintColor.remove(blockState.getBlock());
 			toTint.remove(blockState.getBlock());
@@ -676,8 +656,8 @@ public class LodBuilder
 			blockColor = getColorTextureForBlock(blockState, blockPos, false);
 		}
 		
-		//if the blockColor is still 0 we use use the default materia color
-		if(blockColor == 0)
+		//if the blockColor is still 0 we use the default material color
+		if (blockColor == 0)
 		{
 			tintColor.replace(blockState.getBlock(), 0);
 			toTint.replace(blockState.getBlock(), false);
@@ -688,32 +668,22 @@ public class LodBuilder
 		{
 			int tintValue = 0;
 			if (useGrassTint(blockState.getBlock()))
-			{
 				// grass and green plants
 				tintValue = biome.getGrassColor(x, z);
-			}
 			else if (useWaterTint(blockState.getBlock()))
-			{
 				// water
 				tintValue = biome.getWaterColor();
-			}else
-			{
+			else
 				// leaves
 				tintValue = biome.getFoliageColor();
-			}
 			colorInt = ColorUtil.multiplyRGBcolors(tintValue | 0xFF000000, blockColor);
 		}
 		else
-		{
 			colorInt = blockColor;
-		}
-		//colorInt = blockColor;
 		return colorInt;
 	}
 	
-	/**
-	 * Returns a color int for the given biome.
-	 */
+	/** Returns a color int for the given biome. */
 	private int getColorForBiome(int x, int z, Biome biome)
 	{
 		int colorInt;
@@ -776,9 +746,7 @@ public class LodBuilder
 	public static final ConcurrentMap<Block, Boolean> notFullBlock = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<Block, Boolean> smallBlock = new ConcurrentHashMap<>();
 	
-	/**
-	 * Is the block at the given blockPos a valid LOD point?
-	 */
+	/** Is the block at the given blockPos a valid LOD point? */
 	private boolean isLayerValidLodPoint(IChunk chunk, BlockPos.Mutable blockPos)
 	{
 		BlockState blockState = chunk.getBlockState(blockPos);
@@ -792,9 +760,9 @@ public class LodBuilder
 			if (avoidSmallBlock || avoidNonFullBlock)
 			{
 				if (!smallBlock.containsKey(blockState.getBlock())
-							|| smallBlock.get(blockState.getBlock()) == null
-							|| !notFullBlock.containsKey(blockState.getBlock())
-							|| notFullBlock.get(blockState.getBlock()) == null
+						|| smallBlock.get(blockState.getBlock()) == null
+						|| !notFullBlock.containsKey(blockState.getBlock())
+						|| notFullBlock.get(blockState.getBlock()) == null
 				)
 				{
 					VoxelShape voxelShape = blockState.getShape(chunk, blockPos);
@@ -835,8 +803,8 @@ public class LodBuilder
 			
 			
 			return blockState.getBlock() != Blocks.AIR
-						   && blockState.getBlock() != Blocks.CAVE_AIR
-						   && blockState.getBlock() != Blocks.BARRIER;
+					&& blockState.getBlock() != Blocks.CAVE_AIR
+					&& blockState.getBlock() != Blocks.BARRIER;
 		}
 		
 		return false;

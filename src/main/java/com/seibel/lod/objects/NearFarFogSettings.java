@@ -24,7 +24,6 @@ import com.seibel.lod.enums.FogQuality;
 /**
  * This object is just a replacement for an array
  * to make things easier to understand in the LodRenderer.
- *
  * @author James Seibel
  * @version 7-03-2021
  */
@@ -33,8 +32,10 @@ public class NearFarFogSettings
 	public final NearOrFarSetting near = new NearOrFarSetting(FogDistance.NEAR);
 	public final NearOrFarSetting far = new NearOrFarSetting(FogDistance.FAR);
 	
-	/** If true that means Minecraft is
-	 * rendering fog alongside us */
+	/**
+	 * If true that means Minecraft is
+	 * rendering fog alongside us
+	 */
 	public boolean vanillaIsRenderingFog = true;
 	
 	public NearFarFogSettings()

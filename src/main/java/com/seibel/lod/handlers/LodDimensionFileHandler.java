@@ -38,7 +38,6 @@ import java.util.concurrent.Executors;
  * This object handles creating LodRegions
  * from files and saving LodRegion objects
  * to file.
- *
  * @author James Seibel
  * @author Cola
  * @version 9-25-2021
@@ -130,14 +129,20 @@ public class LodDimensionFileHandler
 						if (fileName != null)
 						{
 							file = new File(fileName);
-							if (file.exists()) break;
+							if (file.exists())
+								break;
 						}
 						//decrease gen mode
-						if (tempGenMode == DistanceGenerationMode.SERVER) tempGenMode = DistanceGenerationMode.FEATURES;
-						else if (tempGenMode == DistanceGenerationMode.FEATURES) tempGenMode = DistanceGenerationMode.SURFACE;
-						else if (tempGenMode == DistanceGenerationMode.SURFACE) tempGenMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
-						else if (tempGenMode == DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT) tempGenMode = DistanceGenerationMode.BIOME_ONLY;
-						else if (tempGenMode == DistanceGenerationMode.BIOME_ONLY) tempGenMode = DistanceGenerationMode.NONE;
+						if (tempGenMode == DistanceGenerationMode.SERVER)
+							tempGenMode = DistanceGenerationMode.FEATURES;
+						else if (tempGenMode == DistanceGenerationMode.FEATURES)
+							tempGenMode = DistanceGenerationMode.SURFACE;
+						else if (tempGenMode == DistanceGenerationMode.SURFACE)
+							tempGenMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
+						else if (tempGenMode == DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT)
+							tempGenMode = DistanceGenerationMode.BIOME_ONLY;
+						else if (tempGenMode == DistanceGenerationMode.BIOME_ONLY)
+							tempGenMode = DistanceGenerationMode.NONE;
 					}
 					if (!file.exists())
 						//there wasn't a file, don't return anything
@@ -200,7 +205,7 @@ public class LodDimensionFileHandler
 						ClientProxy.LOGGER.error("LOD file read error. Unable to read to [" + fileName + "] error [" + ioEx.getMessage() + "]: ");
 						ioEx.printStackTrace();
 					}
-				}// file datasize > 0
+				}
 			}
 			catch (Exception e)
 			{

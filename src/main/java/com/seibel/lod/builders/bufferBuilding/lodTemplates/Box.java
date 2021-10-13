@@ -16,7 +16,6 @@ import java.util.Map;
 
 /**
  * Similar to Minecraft's AxisAlignedBoundingBox.
- *
  * @author Leonardo Amato
  * @version 10-2-2021
  */
@@ -147,7 +146,9 @@ public class Box
 	public final int[] colorMap;
 	/** The original color (before shading) of this box */
 	public int color;
-	/**  */
+	/**
+	 *
+	 */
 	public final Map<Direction, int[]> adjHeight;
 	public final Map<Direction, int[]> adjDepth;
 	
@@ -241,6 +242,7 @@ public class Box
 	/** determine which faces should be culled */
 	public void setUpCulling(int cullingDistance, BlockPos playerPos)
 	{
+		//TODO is passing playerPos needed?
 		playerPos = MinecraftWrapper.INSTANCE.getPlayer().blockPosition();
 		for (Direction direction : DIRECTIONS)
 		{
@@ -439,7 +441,6 @@ public class Box
 	
 	
 	/**
-	 *
 	 * @param direction direction of the face we want to render
 	 * @param vertexIndex index of the vertex of the face (0-1-2-3)
 	 * @return position x of the relative vertex
@@ -450,7 +451,6 @@ public class Box
 	}
 	
 	/**
-	 *
 	 * @param direction direction of the face we want to render
 	 * @param vertexIndex index of the vertex of the face (0-1-2-3)
 	 * @return position y of the relative vertex
@@ -461,7 +461,6 @@ public class Box
 	}
 	
 	/**
-	 *
 	 * @param direction direction of the face we want to render
 	 * @param vertexIndex index of the vertex of the face (0-1-2-3)
 	 * @param adjIndex, index of the n-th culled face of this direction
@@ -489,7 +488,6 @@ public class Box
 	}
 	
 	/**
-	 *
 	 * @param direction direction of the face we want to render
 	 * @param vertexIndex index of the vertex of the face (0-1-2-3)
 	 * @return position z of the relative vertex

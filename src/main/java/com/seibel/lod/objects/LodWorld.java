@@ -26,7 +26,6 @@ import java.util.Map;
 
 /**
  * This stores all LODs for a given world.
- *
  * @author James Seibel
  * @author Leonardo Amato
  * @version 9-27-2021
@@ -57,10 +56,9 @@ public class LodWorld
 	/**
 	 * Set up the LodWorld with the given newWorldName. <br>
 	 * This should be done whenever loading a new world. <br><br>
-	 *
+	 * <p>
 	 * Note a System.gc() call may be in order after calling this <Br>
 	 * since a lot of LOD data is now homeless. <br>
-	 *
 	 * @param newWorldName name of the world
 	 */
 	public void selectWorld(String newWorldName)
@@ -85,7 +83,7 @@ public class LodWorld
 	 * Set the worldName to "No world loaded"
 	 * and clear the lodDimensions Map. <br>
 	 * This should be done whenever unloaded a world. <br><br>
-	 *
+	 * <p>
 	 * Note a System.gc() call may be in order after calling this <Br>
 	 * since a lot of LOD data is now homeless. <br>
 	 */

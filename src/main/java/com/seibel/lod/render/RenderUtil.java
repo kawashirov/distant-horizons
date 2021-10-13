@@ -20,7 +20,6 @@ package com.seibel.lod.render;
 
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -28,7 +27,6 @@ import net.minecraft.util.math.vector.Vector3d;
 /**
  * This holds miscellaneous helper code
  * to be used in the rendering process.
- *
  * @author James Seibel
  * @version 10-10-2021
  */
@@ -47,7 +45,7 @@ public class RenderUtil
 				&& pos.x <= center.x + mc.getRenderDistance())
 				&&
 				(pos.z >= center.z - mc.getRenderDistance()
-				&& pos.z <= center.z + mc.getRenderDistance());
+						&& pos.z <= center.z + mc.getRenderDistance());
 	}
 	
 	/**
@@ -60,7 +58,7 @@ public class RenderUtil
 				&& x <= centerCoordinate + mc.getRenderDistance())
 				&&
 				(z >= centerCoordinate - mc.getRenderDistance()
-				&& z <= centerCoordinate + mc.getRenderDistance());
+						&& z <= centerCoordinate + mc.getRenderDistance());
 	}
 	
 	
@@ -76,7 +74,7 @@ public class RenderUtil
 				&& i <= lodRadius + halfRadius)
 				&&
 				(j >= lodRadius - halfRadius
-				&& j <= lodRadius + halfRadius);
+						&& j <= lodRadius + halfRadius);
 	}
 	
 	

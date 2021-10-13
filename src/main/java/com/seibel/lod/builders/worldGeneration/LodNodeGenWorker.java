@@ -59,7 +59,6 @@ import java.util.function.Supplier;
 
 /**
  * This is used to generate a LodChunk at a given ChunkPos.
- *
  * @author James Seibel
  * @version 9-7-2021
  */
@@ -71,9 +70,11 @@ public class LodNodeGenWorker implements IWorker
 	private final LodChunkGenThread thread;
 	
 	
-	/** If a configured feature fails for whatever reason,
+	/**
+	 * If a configured feature fails for whatever reason,
 	 * add it to this list, this is to hopefully remove any
-	 * features that could cause issues down the line. */
+	 * features that could cause issues down the line.
+	 */
 	private static final ConcurrentHashMap<Integer, ConfiguredFeature<?, ?>> configuredFeaturesToAvoid = new ConcurrentHashMap<>();
 	
 	
@@ -384,7 +385,7 @@ public class LodNodeGenWorker implements IWorker
 		
 		/**
 		 * takes about 15 - 20 ms
-		 *
+		 * <p>
 		 * Causes concurrentModification Exceptions,
 		 * which could cause instability or world generation bugs
 		 */
@@ -506,9 +507,9 @@ public class LodNodeGenWorker implements IWorker
 		/**
 		 * on pre generated chunks 0 - 1 ms
 		 * on un generated chunks 0 - 50 ms
-		 * 	with the median seeming to hover around 15 - 30 ms
-		 * 	and outliers in the 100 - 200 ms range
-		 *
+		 * with the median seeming to hover around 15 - 30 ms
+		 * and outliers in the 100 - 200 ms range
+		 * <p>
 		 * Note this should not be multithreaded and does cause server/simulation lag
 		 * (Higher lag for generating than loading)
 		 */
@@ -606,7 +607,7 @@ public class LodNodeGenWorker implements IWorker
 	/**
 	 * Stops the current genThreads if they are running
 	 * and then recreates the Executor service. <br><br>
-	 *
+	 * <p>
 	 * This is done to clear any outstanding tasks
 	 * that may exist after the player leaves their current world.
 	 * If this isn't done unfinished tasks may be left in the queue

@@ -34,7 +34,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * If this wasn't done, and we used Forge's
  * render last event, the LODs would render on top
  * of the normal terrain.
- *
  * @author James Seibel
  * @version 9-19-2021
  */

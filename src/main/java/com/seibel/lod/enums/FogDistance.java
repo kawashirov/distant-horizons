@@ -15,11 +15,11 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.enums;
 
 /**
  * NEAR, FAR, or NEAR_AND_FAR.
- * 
  * @author James Seibel
  * @version 02-14-2021
  */
