@@ -110,10 +110,6 @@ public class LodBuilder
 	/** Minecraft's max light value */
 	public static final short DEFAULT_MAX_LIGHT = 15;
 	
-	/** TODO is this needed / used? */
-	public static final boolean avoidNonFullBlock = false;
-	/** TODO is this needed / used? */
-	public static final boolean avoidSmallBlock = false;
 	
 	/**
 	 * How wide LodDimensions should be in regions <br>
@@ -788,18 +784,17 @@ public class LodBuilder
 	private boolean isLayerValidLodPoint(IChunk chunk, BlockPos.Mutable blockPos)
 	{
 		BlockState blockState = chunk.getBlockState(blockPos);
-		
-		
+		boolean avoidNonFullBlock = LodConfig.CLIENT.worldGenerator.avoidNonFullBlock.get();
+		boolean	avoidBlockWithNoCollision = LodConfig.CLIENT.worldGenerator.avoidBlockWithNoCollision.get();
 		if (blockState != null)
 		{
 			// TODO this code is dead since avoidSmallBlock and onlyUseFullBlock
 			// are set to false and are never changed.
 			// should this code be changed?
-			if (avoidSmallBlock || avoidNonFullBlock)
+			
+			if (avoidNonFullBlock)
 			{
-				if (!smallBlock.containsKey(blockState.getBlock())
-							|| smallBlock.get(blockState.getBlock()) == null
-							|| !notFullBlock.containsKey(blockState.getBlock())
+				if (!notFullBlock.containsKey(blockState.getBlock())
 							|| notFullBlock.get(blockState.getBlock()) == null
 				)
 				{
@@ -807,7 +802,6 @@ public class LodBuilder
 					if (!blockState.getFluidState().isEmpty())
 					{
 						notFullBlock.put(blockState.getBlock(), false);
-						smallBlock.put(blockState.getBlock(), false);
 					}
 					
 					if (!voxelShape.isEmpty())
@@ -820,22 +814,55 @@ public class LodBuilder
 							notFullBlock.put(blockState.getBlock(), true);
 						else
 							notFullBlock.put(blockState.getBlock(), false);
-						
-						if (xWidth < 0.7 && zWidth < 0.7 && yWidth < 0.7)
-							smallBlock.put(blockState.getBlock(), true);
-						else
-							smallBlock.put(blockState.getBlock(), false);
 					}
 					else
 					{
 						notFullBlock.put(blockState.getBlock(), false);
-						smallBlock.put(blockState.getBlock(), false);
 					}
 				}
 				
-				if (notFullBlock.get(blockState.getBlock()) && avoidNonFullBlock)
+				if (notFullBlock.get(blockState.getBlock()))
 					return false;
-				if (smallBlock.get(blockState.getBlock()) && avoidSmallBlock)
+			}
+			
+			if (avoidBlockWithNoCollision)
+			{
+				if (!smallBlock.containsKey(blockState.getBlock())
+							|| smallBlock.get(blockState.getBlock()) == null
+				)
+				{
+					if(!blockState.getFluidState().isEmpty())
+						smallBlock.put(blockState.getBlock(), false);
+						
+					VoxelShape voxelShape = blockState.getCollisionShape(chunk, blockPos);
+					if (!blockState.getFluidState().isEmpty())
+					{
+						smallBlock.put(blockState.getBlock(), false);
+					}
+					else
+					{
+						
+						if (voxelShape.isEmpty())
+						{
+							smallBlock.put(blockState.getBlock(), true);
+						/*AxisAlignedBB bbox = voxelShape.bounds();
+						int xWidth = (int) (bbox.maxX - bbox.minX);
+						int yWidth = (int) (bbox.maxY - bbox.minY);
+						int zWidth = (int) (bbox.maxZ - bbox.minZ);
+						
+						if (xWidth < 0.7 && zWidth < 0.7 && yWidth < 0.7)
+							smallBlock.put(blockState.getBlock(), true);
+						else
+							smallBlock.put(blockState.getBlock(), false);*/
+						}
+						else
+						{
+							smallBlock.put(blockState.getBlock(), false);
+						}
+					}
+				}
+				
+				if (smallBlock.get(blockState.getBlock()))
 					return false;
 			}
 			

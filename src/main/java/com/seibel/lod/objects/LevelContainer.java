@@ -1,5 +1,8 @@
 package com.seibel.lod.objects;
 
+/**
+ * A level container is a quad tree level
+ */
 public interface LevelContainer
 {
 	/**With this you can add data to the level container
@@ -81,10 +84,4 @@ public interface LevelContainer
 	 * @return data as a String
 	 */
 	int getMaxNumberOfLods();
-	
-	/**
-	 * This will give the data to save in the file
-	 * @return data as a String
-	 */
-	int getMaxMemoryUse();
 }

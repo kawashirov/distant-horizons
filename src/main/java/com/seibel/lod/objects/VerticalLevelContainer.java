@@ -8,6 +8,9 @@ import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.util.ThreadMapUtil;
 
+/**
+ * a VerticalLevelContainer is a quadTree level that can contain multiple voxel column per position.
+ */
 public class VerticalLevelContainer implements LevelContainer
 {
 
@@ -254,8 +257,4 @@ public class VerticalLevelContainer implements LevelContainer
 		return size*size*getMaxVerticalData();
 	}
 
-	@Override
-	public int getMaxMemoryUse(){
-		return getMaxNumberOfLods() * 2; //2 byte
-	}
 }

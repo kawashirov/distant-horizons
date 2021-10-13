@@ -10,7 +10,7 @@ import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 
 /**
- * This object holds all loaded LevelContainers
+ * This object holds all loaded LevelContainers acting as a quad tree
  * for a given region. <Br><Br>
  *
  * <strong>Coordinate Standard: </strong><br>
@@ -500,7 +500,7 @@ public class LodRegion
 			for (byte detailLevelIndex = (byte) (minDetailLevel - 1); detailLevelIndex >= detailLevel; detailLevelIndex--)
 			{
 				if (dataContainer[detailLevelIndex + 1] == null)
-					dataContainer[detailLevelIndex + 1] = new SingleLevelContainer((byte) (detailLevelIndex + 1));
+					dataContainer[detailLevelIndex + 1] = new VerticalLevelContainer((byte) (detailLevelIndex + 1));
 				
 				dataContainer[detailLevelIndex] = dataContainer[detailLevelIndex + 1].expand();
 			}
