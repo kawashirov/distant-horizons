@@ -394,7 +394,7 @@ public class LodUtil
 		{
 		case ALWAYS:
 			// don't skip any positions
-			return new HashSet<ChunkPos>();
+			return new HashSet<>();
 		
 		case DYNAMIC:
 			// only skip positions that are greater than
@@ -424,11 +424,9 @@ public class LodUtil
 				for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
 				{
 					if (x <= centerChunk.x - skipRadius || x >= centerChunk.x + skipRadius
-							||
-							z <= centerChunk.z - skipRadius || z >= centerChunk.z + skipRadius)
+							|| z <= centerChunk.z - skipRadius || z >= centerChunk.z + skipRadius)
 					{
 						posToSkip.remove(new ChunkPos(x, z));
-						continue;
 					}
 				}
 			}

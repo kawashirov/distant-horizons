@@ -180,9 +180,7 @@ public class LodBufferBuilder
 		
 		
 		Thread thread = new Thread(() ->
-		{
-			generateLodBuffersThread(renderer, lodDim, playerBlockPos, fullRegen);
-		});
+				generateLodBuffersThread(renderer, lodDim, playerBlockPos, fullRegen));
 		
 		mainGenThread.execute(thread);
 	}
