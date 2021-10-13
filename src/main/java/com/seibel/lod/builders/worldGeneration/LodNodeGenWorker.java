@@ -170,7 +170,7 @@ public class LodNodeGenWorker implements IWorker
 				// only generate LodChunks if they can
 				// be added to the current LodDimension
 				
-				/* TODO i must disable this if, i will find a way to replace it */
+				/* TODO I must disable this 'if', if I will find a way to replace it */
 				if (lodDim.regionIsInRange(pos.x / LodUtil.REGION_WIDTH_IN_CHUNKS, pos.z / LodUtil.REGION_WIDTH_IN_CHUNKS))
 				{
 //					long startTime = System.currentTimeMillis();
@@ -377,7 +377,7 @@ public class LodNodeGenWorker implements IWorker
 			
 			lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(DistanceGenerationMode.SURFACE));
 			
-			/**TODO if we want to use Biome utils and terrain utils for overworld
+			/*TODO if we want to use Biome utils and terrain utils for overworld
 			 * lodBuilder.generateLodNodeFromChunk(lodDim, pos ,detailLevel, serverWorld.getSeed());*/
 		}
 		

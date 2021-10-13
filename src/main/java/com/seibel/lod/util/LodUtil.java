@@ -402,8 +402,8 @@ public class LodUtil
 			
 		case DYNAMIC:
 			// only skip positions that are greater than
-			// half the render distance
-			skipRadius = (int) Math.ceil(chunkRenderDist * 4 / 5);
+			// 4/5ths the render distance
+			skipRadius = (int) Math.ceil(chunkRenderDist * (4.0 / 5.0));
 			break;
 			
 		default:

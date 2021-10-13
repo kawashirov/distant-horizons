@@ -33,7 +33,6 @@ import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
-import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
@@ -55,8 +54,6 @@ import net.minecraft.block.IGrowable;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.TallGrassBlock;
 import net.minecraft.block.material.MaterialColor;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.world.ClientWorld;
@@ -70,13 +67,10 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeColors;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.client.model.data.ModelDataMap;
-
-import javax.xml.soap.Text;
 
 /**
  * This object is in charge of creating Lod related objects. (specifically: Lod
@@ -584,7 +578,7 @@ public class LodBuilder
 					
 					
 					// add to the running averages
-					count = colorMultiplier + count; // TODO shouldn't colorMultiplier be multiplied by?
+					count += colorMultiplier;
 					alpha += ColorUtil.getAlpha(color) * colorMultiplier;
 					red += ColorUtil.getBlue(color) * colorMultiplier;
 					green += ColorUtil.getGreen(color) * colorMultiplier;
