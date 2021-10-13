@@ -361,7 +361,7 @@ public class LodBufferBuilder
 												&& (!LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1) || smallRenderDistance)
 												&& vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
 												&& !DataPointUtil.isVoid(lodDim.getSingleData(detailLevel, xAdj, zAdj)))
-											adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = true;
+											adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = DataPointUtil.getAlpha(lodDim.getSingleData(detailLevel, xAdj, zAdj)) < 255;
 										adjData.get(direction)[0] = DataPointUtil.EMPTY_DATA;
 									}
 								}

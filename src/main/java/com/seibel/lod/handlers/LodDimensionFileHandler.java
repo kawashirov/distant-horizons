@@ -46,7 +46,7 @@ import java.util.concurrent.Executors;
 public class LodDimensionFileHandler
 {
 	/** This is the dimension that owns this file handler */
-	private LodDimension lodDimension = null;
+	private LodDimension lodDimension;
 	
 	private final File dimensionDataSaveFolder;
 	
@@ -118,14 +118,30 @@ public class LodDimensionFileHandler
 				if (fileName == null)
 					throw new IllegalArgumentException("Unable to read region [" + regionX + ", " + regionZ + "] file, no fileName.");
 				
-				
 				File file = new File(fileName);
-				
 				if (!file.exists())
 				{
-					// there wasn't a file, don't
-					// return anything
-					continue;
+					//there is no file for current gen mode
+					//search others above current from the most to the least detailed
+					DistanceGenerationMode tempGenMode = DistanceGenerationMode.SERVER;
+					while (tempGenMode != generationMode)
+					{
+						fileName = getFileNameAndPathForRegion(regionX, regionZ, tempGenMode, tempDetailLevel, verticalQuality);
+						if (fileName != null)
+						{
+							file = new File(fileName);
+							if (file.exists()) break;
+						}
+						//decrease gen mode
+						if (tempGenMode == DistanceGenerationMode.SERVER) tempGenMode = DistanceGenerationMode.FEATURES;
+						else if (tempGenMode == DistanceGenerationMode.FEATURES) tempGenMode = DistanceGenerationMode.SURFACE;
+						else if (tempGenMode == DistanceGenerationMode.SURFACE) tempGenMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
+						else if (tempGenMode == DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT) tempGenMode = DistanceGenerationMode.BIOME_ONLY;
+						else if (tempGenMode == DistanceGenerationMode.BIOME_ONLY) tempGenMode = DistanceGenerationMode.NONE;
+					}
+					if (!file.exists())
+						//there wasn't a file, don't return anything
+						continue;
 				}
 				
 				
@@ -137,7 +153,7 @@ public class LodDimensionFileHandler
 				{
 					try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file)))
 					{
-						int fileVersion = -1;
+						int fileVersion;
 						fileVersion = inputStream.read();
 						
 						// check if this file can be read by this file handler
@@ -249,7 +265,6 @@ public class LodDimensionFileHandler
 		for (byte detailLevel = region.getMinDetailLevel(); detailLevel <= LodUtil.REGION_DETAIL_LEVEL; detailLevel++)
 		{
 			String fileName = getFileNameAndPathForRegion(region.regionPosX, region.regionPosZ, region.getGenerationMode(), detailLevel, region.getVerticalQuality());
-			File oldFile = new File(fileName);
 			
 			// if the fileName was null that means the folder is inaccessible
 			// for some reason
@@ -258,6 +273,7 @@ public class LodDimensionFileHandler
 				ClientProxy.LOGGER.warn("Unable to save region [" + region.regionPosX + ", " + region.regionPosZ + "] to file, file is inaccessible.");
 				return;
 			}
+			File oldFile = new File(fileName);
 			//ClientProxy.LOGGER.info("saving region [" + region.regionPosX + ", " + region.regionPosZ + "] to file.");
 			
 			try
