@@ -110,7 +110,7 @@ public class ClientProxy
 				firstFrameSetup();
 			
 			
-			if (mc == null || mc.getPlayer() == null || !lodWorld.getIsWorldLoaded())
+			if (mc == null || mc.getPlayer() == null || lodWorld.getIsWorldNotLoaded())
 				return;
 			
 			LodDimension lodDim = lodWorld.getLodDimension(mc.getCurrentDimension());
@@ -195,7 +195,7 @@ public class ClientProxy
 	@SubscribeEvent
 	public void serverTickEvent(TickEvent.ServerTickEvent event)
 	{
-		if (mc == null || mc.getPlayer() == null || !lodWorld.getIsWorldLoaded())
+		if (mc == null || mc.getPlayer() == null || lodWorld.getIsWorldNotLoaded())
 			return;
 		
 		LodDimension lodDim = lodWorld.getLodDimension(mc.getPlayer().level.dimensionType());

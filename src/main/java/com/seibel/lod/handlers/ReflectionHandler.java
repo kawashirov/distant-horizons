@@ -105,10 +105,8 @@ public class ReflectionHandler
 		case 0:
 			// optifine's "default" option,
 			// it should never be called in this case
-			return FogQuality.FAST;
-		
-		
-		// normal options
+			
+			// normal options
 		case 1:
 			return FogQuality.FAST;
 		case 2:

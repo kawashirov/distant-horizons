@@ -80,29 +80,22 @@ public class LodUtil
 	public static final Color[] DEBUG_DETAIL_LEVEL_COLORS = new Color[] { Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA, Color.WHITE, Color.GRAY, Color.BLACK };
 	
 	
-	/**
-	 * 512 blocks wide
-	 */
-	public static final byte REGION_DETAIL_LEVEL = 9;
-	/**
-	 * 16 blocks wide
-	 */
-	public static final byte CHUNK_DETAIL_LEVEL = 4;
-	/**
-	 * 1 block wide
-	 */
-	public static final byte BLOCK_DETAIL_LEVEL = 0;
-	
-	
 	public static final byte DETAIL_OPTIONS = 10;
+	
+	/** 512 blocks wide */
+	public static final byte REGION_DETAIL_LEVEL = DETAIL_OPTIONS - 1;
+	/** 16 blocks wide */
+	public static final byte CHUNK_DETAIL_LEVEL = 4;
+	/** 1 block wide */
+	public static final byte BLOCK_DETAIL_LEVEL = 0;
 	
 	public static final short MAX_VERTICAL_DATA = 4;
 	
 	/**
 	 * measured in Blocks <br>
-	 * detail level 9
+	 * detail level max - 1
 	 */
-	public static final short REGION_WIDTH = 512;
+	public static final short REGION_WIDTH = 1 << REGION_DETAIL_LEVEL;
 	/**
 	 * measured in Blocks <br>
 	 * detail level 4
@@ -115,10 +108,8 @@ public class LodUtil
 	public static final short BLOCK_WIDTH = 1;
 	
 	
-	/**
-	 * number of chunks wide
-	 */
-	public static final int REGION_WIDTH_IN_CHUNKS = 32;
+	/** number of chunks wide */
+	public static final int REGION_WIDTH_IN_CHUNKS = REGION_WIDTH / CHUNK_WIDTH;
 	
 	
 	/**
@@ -194,9 +185,7 @@ public class LodUtil
 		return returnWorld;
 	}
 	
-	/**
-	 * Convert a 2D absolute position into a quad tree relative position.
-	 */
+	/** Convert a 2D absolute position into a quad tree relative position. */
 	public static RegionPos convertGenericPosToRegionPos(int x, int z, int detailLevel)
 	{
 		int relativePosX = Math.floorDiv(x, (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel));
@@ -205,9 +194,7 @@ public class LodUtil
 		return new RegionPos(relativePosX, relativePosZ);
 	}
 	
-	/**
-	 * Convert a 2D absolute position into a quad tree relative position.
-	 */
+	/** Convert a 2D absolute position into a quad tree relative position. */
 	public static int convertLevelPos(int pos, int currentDetailLevel, int targetDetailLevel)
 	{
 		return Math.floorDiv(pos, (int) Math.pow(2, targetDetailLevel - currentDetailLevel));
@@ -289,9 +276,7 @@ public class LodUtil
 		}
 	}
 	
-	/**
-	 * returns the server name, IP and game version.
-	 */
+	/** returns the server name, IP and game version. */
 	public static String getServerId()
 	{
 		ServerData server = mc.getCurrentServer();
@@ -304,9 +289,7 @@ public class LodUtil
 	}
 	
 	
-	/**
-	 * Convert a BlockColors int into a Color object.
-	 */
+	/** Convert a BlockColors int into a Color object */
 	public static Color intToColor(int num)
 	{
 		int filter = 0b11111111;
@@ -318,9 +301,7 @@ public class LodUtil
 		return new Color(red, green, blue);
 	}
 	
-	/**
-	 * Convert a Color into a BlockColors object.
-	 */
+	/** Convert a Color into a BlockColors object. */
 	public static int colorToInt(Color color)
 	{
 		return color.getRGB();

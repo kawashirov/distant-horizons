@@ -44,7 +44,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.client.model.data.ModelDataMap;
 
 import java.awt.*;
@@ -71,7 +70,6 @@ public class LodBuilder
 	public static final Direction[] directions = new Direction[] { Direction.UP, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.DOWN };
 	public static final int CHUNK_DATA_WIDTH = LodUtil.CHUNK_WIDTH;
 	public static final int CHUNK_SECTION_HEIGHT = CHUNK_DATA_WIDTH;
-	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
 	public static final ConcurrentMap<Block, Integer> colorMap = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<Block, Integer> tintColor = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<Block, Boolean> toTint = new ConcurrentHashMap<>();
@@ -112,7 +110,7 @@ public class LodBuilder
 	
 	public void generateLodNodeAsync(IChunk chunk, LodWorld lodWorld, IWorld world, DistanceGenerationMode generationMode)
 	{
-		if (lodWorld == null || !lodWorld.getIsWorldLoaded())
+		if (lodWorld == null || lodWorld.getIsWorldNotLoaded())
 			return;
 		
 		// don't try to create an LOD object
@@ -235,9 +233,7 @@ public class LodBuilder
 		lodDim.updateData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
 	}
 	
-	/**
-	 * creates a vertical DataPoint
-	 */
+	/** creates a vertical DataPoint */
 	private long[] createVerticalDataToMerge(HorizontalResolution detail, IChunk chunk, LodBuilderConfig config, int startX, int startZ, int endX, int endZ)
 	{
 		// equivalent to 2^detailLevel
@@ -359,9 +355,7 @@ public class LodBuilder
 		return depth;
 	}
 	
-	/**
-	 * Find the highest valid point from the Top
-	 */
+	/** Find the highest valid point from the Top */
 	private short determineHeightPointFrom(IChunk chunk, LodBuilderConfig config, int xRel, int zRel, int yAbs, BlockPos.Mutable blockPos)
 	{
 		short height = DEFAULT_HEIGHT;
@@ -431,9 +425,7 @@ public class LodBuilder
 		return colorInt;
 	}
 	
-	/**
-	 * Gets the light value for the given block position
-	 */
+	/** Gets the light value for the given block position */
 	private int getLightValue(IChunk chunk, BlockPos.Mutable blockPos, boolean hasCeiling, boolean hasSkyLight, boolean topBlock)
 	{
 		int skyLight;

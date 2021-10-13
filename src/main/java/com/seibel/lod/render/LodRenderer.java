@@ -722,10 +722,6 @@ public class LodRenderer
 			switch (LodConfig.CLIENT.graphics.fogDistance.get())
 			{
 			case NEAR_AND_FAR:
-				fogSettings.near.distance = FogDistance.NEAR;
-				fogSettings.far.distance = FogDistance.NEAR;
-				break;
-			
 			case NEAR:
 				fogSettings.near.distance = FogDistance.NEAR;
 				fogSettings.far.distance = FogDistance.NEAR;
@@ -739,14 +735,10 @@ public class LodRenderer
 			break;
 		
 		case OFF:
-			
 			fogSettings.near.quality = FogQuality.OFF;
 			fogSettings.far.quality = FogQuality.OFF;
 			break;
-			
 		}
-		
-		
 		return fogSettings;
 	}
 	

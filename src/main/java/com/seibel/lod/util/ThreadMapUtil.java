@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static com.seibel.lod.util.LodUtil.DETAIL_OPTIONS;
+
 /**
  * Holds data used by specific threads so
  * the data doesn't have to be recreated every
@@ -163,8 +165,8 @@ public class ThreadMapUtil
 	{
 		if (!verticalUpdate.containsKey(Thread.currentThread().getName()) || (verticalUpdate.get(Thread.currentThread().getName()) == null))
 		{
-			long[][] array = new long[10][];
-			for (int i = 1; i < 10; i++)
+			long[][] array = new long[DETAIL_OPTIONS][];
+			for (int i = 1; i < DETAIL_OPTIONS; i++)
 				array[i] = new long[DetailDistanceUtil.getMaxVerticalData(i - 1) * 4];
 			verticalUpdate.put(Thread.currentThread().getName(), array);
 		}

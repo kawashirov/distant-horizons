@@ -164,9 +164,7 @@ public class LevelPosUtil
 		boolean inXArea = playerPosX >= startPosX && playerPosX <= endPosX;
 		boolean inZArea = playerPosZ >= startPosZ && playerPosZ <= endPosZ;
 		if (inXArea && inZArea)
-		{
 			return 0;
-		}
 		else if (inXArea)
 		{
 			return Math.min(

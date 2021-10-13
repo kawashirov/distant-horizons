@@ -150,9 +150,9 @@ public class LodWorld
 	}
 	
 	
-	public boolean getIsWorldLoaded()
+	public boolean getIsWorldNotLoaded()
 	{
-		return isWorldLoaded;
+		return !isWorldLoaded;
 	}
 	
 	public String getWorldName()

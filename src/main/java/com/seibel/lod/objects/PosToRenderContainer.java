@@ -60,14 +60,10 @@ public class PosToRenderContainer
 	public boolean contains(byte detailLevel, int posX, int posZ)
 	{
 		if (LevelPosUtil.getRegion(detailLevel, posX) == regionPosX && LevelPosUtil.getRegion(detailLevel, posZ) == regionPosZ)
-		{
 			return (population[LevelPosUtil.getRegionModule(minDetail, LevelPosUtil.convert(detailLevel, posX, minDetail))]
 					[LevelPosUtil.getRegionModule(minDetail, LevelPosUtil.convert(detailLevel, posZ, minDetail))] == (detailLevel + 1));
-		}
 		else
-		{
 			return false;
-		}
 	}
 	
 	public void clear(byte minDetail, int regionPosX, int regionPosZ)

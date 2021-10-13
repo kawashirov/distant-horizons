@@ -85,11 +85,9 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			return;
 		
 		if (depth == height)
-		{
 			// if the top and bottom points are at the same height
 			// render this LOD as 1 block thick
 			height++;
-		}
 		
 		// offset the AABB by its x/z position in the world since
 		// it uses doubles to specify its location, unlike the model view matrix
