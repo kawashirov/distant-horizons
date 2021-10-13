@@ -80,7 +80,7 @@ public enum HorizontalResolution
 	
 	
 	
-	private HorizontalResolution(int newLengthCount, int newDetailLevel)
+	HorizontalResolution(int newLengthCount, int newDetailLevel)
 	{
 		detailLevel = (byte) newDetailLevel;
 		dataPointLengthCount = newLengthCount;

@@ -39,5 +39,5 @@ public enum FogDrawOverride
 	ALWAYS_DRAW_FOG_FAST,
 	
 	/** Always draw fog on the LODs */
-	ALWAYS_DRAW_FOG_FANCY;
+	ALWAYS_DRAW_FOG_FANCY
 }

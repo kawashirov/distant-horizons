@@ -32,5 +32,5 @@ public enum FogDistance
 	FAR,
 	
 	/** only looks good if the fog quality is set to Fancy. */
-	NEAR_AND_FAR;
+	NEAR_AND_FAR
 }

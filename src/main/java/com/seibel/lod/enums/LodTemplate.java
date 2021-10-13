@@ -46,7 +46,7 @@ public enum LodTemplate
 	
 	public final AbstractLodTemplate template;
 	
-	private LodTemplate(AbstractLodTemplate newTemplate)
+	LodTemplate(AbstractLodTemplate newTemplate)
 	{
 		template = newTemplate;
 	}

@@ -31,5 +31,5 @@ public enum GenerationPriority
 {
 	NEAR_FIRST,
 	
-	FAR_FIRST;
+	FAR_FIRST
 }

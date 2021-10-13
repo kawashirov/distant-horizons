@@ -97,12 +97,7 @@ public class ClientProxy
 	// render event //
 	//==============//
 	
-	/**
-	 * Do any setup that is required to draw LODs
-	 * and then tell the LodRenderer to draw.
-	 *
-	 * @param mcMatrixStack
-	 */
+	/** Do any setup that is required to draw LODs and then tell the LodRenderer to draw. */
 	public void renderLods(MatrixStack mcMatrixStack, float partialTicks)
 	{
 		// comment out when creating a release

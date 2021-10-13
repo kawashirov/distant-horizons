@@ -27,5 +27,5 @@ public enum FogQuality
 {
 	FAST,
 	FANCY,
-	OFF;
+	OFF
 }

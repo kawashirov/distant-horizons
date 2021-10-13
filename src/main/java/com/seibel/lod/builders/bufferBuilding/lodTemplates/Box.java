@@ -398,12 +398,7 @@ public class Box
 		}
 	}
 	
-	/**
-	 * We use this method to set the various width of the column
-	 * @param xWidth
-	 * @param yWidth
-	 * @param zWidth
-	 */
+	/** We use this method to set the various width of the column */
 	public void setWidth(int xWidth, int yWidth, int zWidth)
 	{
 		boxWidth[X] = xWidth;
@@ -411,12 +406,7 @@ public class Box
 		boxWidth[Z] = zWidth;
 	}
 	
-	/**
-	 * We use this method to set the various offset of the column
-	 * @param xOffset
-	 * @param yOffset
-	 * @param zOffset
-	 */
+	/** We use this method to set the various offset of the column */
 	public void setOffset(int xOffset, int yOffset, int zOffset)
 	{
 		boxOffset[X] = xOffset;
