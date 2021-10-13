@@ -188,6 +188,7 @@ public class DataPointUtil
 	}
 	
 	/** This is used to convert a dataPoint to string (useful for the print function) */
+	@SuppressWarnings("unused")
 	public static String toString(long dataPoint)
 	{
 		return getHeight(dataPoint) + " " +
@@ -233,7 +234,7 @@ public class DataPointUtil
 	 * @param dataToMerge one or more columns of data
 	 * @param inputVerticalData vertical size of an input data
 	 * @param maxVerticalData max vertical size of the merged data
-	 * @return 1 column of correctly parsed data
+	 * @return one column of correctly parsed data
 	 */
 	public static long[] mergeMultiData(long[] dataToMerge, int inputVerticalData, int maxVerticalData)
 	{

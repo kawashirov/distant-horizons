@@ -221,9 +221,12 @@ public class LevelPosUtil
 		return compareResult;
 	}
 	
+	@SuppressWarnings("unused")
 	public static String toString(int[] levelPos)
 	{
-		return (getDetailLevel(levelPos) + " " + getPosX(levelPos) + " " + getPosZ(levelPos));
+		return (getDetailLevel(levelPos) + " "
+				+ getPosX(levelPos) + " "
+				+ getPosZ(levelPos));
 	}
 	
 	public static String toString(byte detailLevel, int posX, int posZ)
