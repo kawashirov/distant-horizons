@@ -130,6 +130,7 @@ public class LodRenderer
 	 */
 	public boolean[][] vanillaRenderedChunks;
 	public boolean vanillaRenderedChunksChanged;
+	public int vanillaBlockRenderedDistance;
 	
 	
 	
@@ -242,7 +243,7 @@ public class LodRenderer
 		mcProjectionMatrix.transpose();
 		
 		Matrix4f modelViewMatrix = offsetTheModelViewMatrix(mcMatrixStack, partialTicks);
-		
+		vanillaBlockRenderedDistance = mc.getRenderDistance() * LodUtil.CHUNK_WIDTH;
 		// required for setupFog and setupProjectionMatrix
 		if (mc.getClientWorld().dimensionType().hasCeiling())
 			farPlaneBlockDistance = Math.min(LodConfig.CLIENT.graphics.lodChunkRenderDistance.get(), LodUtil.CEILED_DIMENSION_MAX_RENDER_DISTANCE) * LodUtil.CHUNK_WIDTH;
@@ -402,7 +403,7 @@ public class LodRenderer
 				if (LodConfig.CLIENT.graphics.fogDistance.get() == FogDistance.NEAR_AND_FAR)
 					RenderSystem.fogStart(farPlaneBlockDistance * 0.9f);
 				else
-					RenderSystem.fogStart(farPlaneBlockDistance * 0.1f);
+					RenderSystem.fogStart(Math.min(vanillaBlockRenderedDistance * 1.5f, farPlaneBlockDistance * 0.9f));
 				RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
 			}
 			else if (fogQuality == FogQuality.FAST)
