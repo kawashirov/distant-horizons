@@ -17,6 +17,15 @@ public interface LevelContainer
 	
 	/**
 	 * With this you can add data to the level container
+	 * @param data actual data to add in an array of long[] format.
+	 * @param posX x position in the detail level
+	 * @param posZ z position in the detail level
+	 * @return true if correctly added, false otherwise
+	 */
+	boolean addVerticalData(long[] data, int posX, int posZ);
+	
+	/**
+	 * With this you can add data to the level container
 	 * @param data actual data to add in an array of long format.
 	 * @param posX x position in the detail level
 	 * @param posZ z position in the detail level

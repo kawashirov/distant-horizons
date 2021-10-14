@@ -49,6 +49,16 @@ public class VerticalLevelContainer implements LevelContainer
 		return true;
 	}
 	
+	public boolean addVerticalData(long[] data, int posX, int posZ)
+	{
+		
+		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
+		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
+		for (int verticalIndex = 0; verticalIndex < maxVerticalData; verticalIndex++)
+			dataContainer[posX * size * maxVerticalData + posZ * maxVerticalData + verticalIndex] = data[verticalIndex];
+		return true;
+	}
+	
 	@Override
 	public boolean addSingleData(long data, int posX, int posZ)
 	{

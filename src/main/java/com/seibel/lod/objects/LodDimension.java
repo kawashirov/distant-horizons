@@ -470,6 +470,48 @@ public class LodDimension
 		return nodeAdded;
 	}
 	
+	/**
+	 * Add whole column of LODs to this dimension at the coordinate
+	 * stored in the LOD. If an LOD already exists at the given
+	 * coordinate it will be overwritten.
+	 */
+	public Boolean addVerticalData(byte detailLevel, int posX, int posZ, long[] data, boolean dontSave)
+	{
+		int regionPosX = LevelPosUtil.getRegion(detailLevel, posX);
+		int regionPosZ = LevelPosUtil.getRegion(detailLevel, posZ);
+		
+		// don't continue if the region can't be saved
+		LodRegion region = getRegion(regionPosX, regionPosZ);
+		if (region == null)
+			return false;
+		
+		boolean nodeAdded = region.addVerticalData(detailLevel, posX, posZ, data);
+		
+		// only save valid LODs to disk
+		if (!dontSave && fileHandler != null)
+		{
+			try
+			{
+				// mark the region as dirty, so it will be saved to disk
+				int xIndex = (regionPosX - center.x) + halfWidth;
+				int zIndex = (regionPosZ - center.z) + halfWidth;
+				
+				isRegionDirty[xIndex][zIndex] = true;
+				regenRegionBuffer[xIndex][zIndex] = true;
+				regenDimensionBuffers = true;
+			}
+			catch (ArrayIndexOutOfBoundsException e)
+			{
+				e.printStackTrace();
+				// If this happens, the method was probably
+				// called when the dimension was changing size.
+				// Hopefully this shouldn't be an issue.
+			}
+		}
+		
+		return nodeAdded;
+	}
+	
 	/** marks the region at the given region position to have its buffer rebuilt */
 	public void markRegionBufferToRegen(int xRegion, int zRegion)
 	{

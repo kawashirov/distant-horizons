@@ -106,6 +106,26 @@ public class LodRegion
 	}
 	
 	/**
+	 * Inserts the vertical data into the region.
+	 * <p>
+	 * TODO this will always return true unless it has
+	 * @return true if the data was added successfully
+	 */
+	public boolean addVerticalData(byte detailLevel, int posX, int posZ, long[] data)
+	{
+		//position is already relative
+		//posX = LevelPosUtil.getRegionModule(detailLevel, posX);
+		//posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
+		
+		// The dataContainer could have null entries if the
+		// detailLevel changes.
+		if (this.dataContainer[detailLevel] == null)
+			this.dataContainer[detailLevel] = new VerticalLevelContainer(detailLevel);
+		
+		return this.dataContainer[detailLevel].addVerticalData(data, posX, posZ);
+	}
+	
+	/**
 	 * Get the dataPoint at the given relative position.
 	 * @return the data at the relative pos and detail level,
 	 * 0 if the data doesn't exist.

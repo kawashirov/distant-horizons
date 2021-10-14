@@ -214,17 +214,7 @@ public class LodBuilder
 			
 			//lodDim.clear(detailLevel, posX, posZ);
 			if (data != null && data.length != 0)
-			{
-				for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ); verticalIndex++)
-				{
-					lodDim.addData(detailLevel,
-							posX,
-							posZ,
-							verticalIndex,
-							data[verticalIndex],
-							false);
-				}
-			}
+				lodDim.addVerticalData(detailLevel,	posX, posZ,	data,false);
 		}
 		lodDim.updateData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
 	}
