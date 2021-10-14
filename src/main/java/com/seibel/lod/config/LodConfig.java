@@ -18,34 +18,20 @@
 
 package com.seibel.lod.config;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.seibel.lod.ModInfo;
-import com.seibel.lod.enums.BufferRebuildTimes;
-import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.enums.DetailDropOff;
-import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.FogDistance;
-import com.seibel.lod.enums.FogDrawOverride;
-import com.seibel.lod.enums.GenerationPriority;
-import com.seibel.lod.enums.HorizontalQuality;
-import com.seibel.lod.enums.HorizontalResolution;
-import com.seibel.lod.enums.HorizontalScale;
-import com.seibel.lod.enums.LodTemplate;
-import com.seibel.lod.enums.VanillaOverdraw;
-import com.seibel.lod.enums.VerticalQuality;
+import com.seibel.lod.enums.*;
 import com.seibel.lod.util.LodUtil;
-
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * This handles any configuration the user has access to.
@@ -275,44 +261,44 @@ public class LodConfig
 							+ "       different generation options. Your mileage may vary. \n"
 							+ "\n"
 							
-															  + " " + DistanceGenerationMode.NONE + " \n"
-															  + " Don't run the distance generator. \n"
-															  
-															  + "\n"
-															  + " " + DistanceGenerationMode.BIOME_ONLY + " \n"
-															  + " Only generate the biomes and use the biome's \n"
-															  + " grass color, water color, or snow color. \n"
-															  + " Doesn't generate height, everything is shown at sea level. \n"
-															  + " Multithreaded - Fastest (2-5 ms) \n"
-															  
-															  + "\n"
-															  + " " + DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT + " \n"
-															  + " Same as BIOME_ONLY, except instead \n"
-															  + " of always using sea level as the LOD height \n"
-															  + " different biome types (mountain, ocean, forest, etc.) \n"
-															  + " use predetermined heights to simulate having height data. \n"
-															  + " Multithreaded - Fastest (2-5 ms) \n"
-															  
-															  + "\n"
-															  + " " + DistanceGenerationMode.SURFACE + " \n"
-															  + " Generate the world surface, \n"
-															  + " this does NOT include trees, \n"
-															  + " or structures. \n"
-															  + " Multithreaded - Faster (10-20 ms) \n"
-															  
-															  + "\n"
-															  + " " + DistanceGenerationMode.FEATURES + " \n"
-															  + " Generate everything except structures. \n"
-															  + " WARNING: This may cause world generation bugs or instability! \n"
-															  + " Multithreaded - Fast (15-20 ms) \n"
-															  
-															  + "\n"
-															  + " " + DistanceGenerationMode.SERVER + " \n"
-															  + " Ask the server to generate/load each chunk. \n"
-															  + " This will show player made structures, which can \n"
-															  + " be useful if you are adding the mod to a pre-existing world. \n"
-															  + " This is the most compatible, but causes server/simulation lag. \n"
-															  + " SingleThreaded - Slow (15-50 ms, with spikes up to 200 ms) \n")
+							+ " " + DistanceGenerationMode.NONE + " \n"
+							+ " Don't run the distance generator. \n"
+							
+							+ "\n"
+							+ " " + DistanceGenerationMode.BIOME_ONLY + " \n"
+							+ " Only generate the biomes and use the biome's \n"
+							+ " grass color, water color, or snow color. \n"
+							+ " Doesn't generate height, everything is shown at sea level. \n"
+							+ " Multithreaded - Fastest (2-5 ms) \n"
+							
+							+ "\n"
+							+ " " + DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT + " \n"
+							+ " Same as BIOME_ONLY, except instead \n"
+							+ " of always using sea level as the LOD height \n"
+							+ " different biome types (mountain, ocean, forest, etc.) \n"
+							+ " use predetermined heights to simulate having height data. \n"
+							+ " Multithreaded - Fastest (2-5 ms) \n"
+							
+							+ "\n"
+							+ " " + DistanceGenerationMode.SURFACE + " \n"
+							+ " Generate the world surface, \n"
+							+ " this does NOT include trees, \n"
+							+ " or structures. \n"
+							+ " Multithreaded - Faster (10-20 ms) \n"
+							
+							+ "\n"
+							+ " " + DistanceGenerationMode.FEATURES + " \n"
+							+ " Generate everything except structures. \n"
+							+ " WARNING: This may cause world generation bugs or instability! \n"
+							+ " Multithreaded - Fast (15-20 ms) \n"
+							
+							+ "\n"
+							+ " " + DistanceGenerationMode.SERVER + " \n"
+							+ " Ask the server to generate/load each chunk. \n"
+							+ " This will show player made structures, which can \n"
+							+ " be useful if you are adding the mod to a pre-existing world. \n"
+							+ " This is the most compatible, but causes server/simulation lag. \n"
+							+ " SingleThreaded - Slow (15-50 ms, with spikes up to 200 ms) \n")
 					.defineEnum("distanceGenerationMode", DistanceGenerationMode.SURFACE);
 			
 			allowUnstableFeatureGeneration = builder
@@ -443,8 +429,8 @@ public class LodConfig
 		CLIENT_SPEC = specPair.getRight();
 		CLIENT = specPair.getLeft();
 		CommentedFileConfig clientConfig = CommentedFileConfig.builder(CONFIG_PATH)
-												   .writingMode(WritingMode.REPLACE)
-												   .build();
+				.writingMode(WritingMode.REPLACE)
+				.build();
 		clientConfig.load();
 		clientConfig.save();
 		CLIENT_SPEC.setConfig(clientConfig);
