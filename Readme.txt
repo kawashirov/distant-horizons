@@ -4,7 +4,7 @@ allowing for an increased view distance without harming performance.
 
 Or in other words: this mod lets you see farther without turning your game into a slide show.
 If you want to see a quick demo, check out the video I made here:
-https://youtu.be/CCT-3s02tYA
+https://youtu.be/MDWcEvdUGUE
 
 
 Forge version: 1.16.5-36.1.0
