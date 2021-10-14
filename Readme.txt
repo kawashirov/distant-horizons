@@ -69,3 +69,6 @@ Source code uses Mojang mappings.
 
 The source code can be 'created' with the ./eclipse command and can be found in the following path:
 minecraft-lod-mod\build\fg_cache\mcp\ VERSION \joined\ RANDOM_STRING \patch\output.jar
+
+
+The mod requires OpenGL 4.5 (as of 10-13-2021)
