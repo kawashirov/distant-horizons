@@ -92,7 +92,7 @@ public class LodBuilder
 	 */
 	public int defaultDimensionWidthInRegions = 0;
 	
-	public static final boolean useExperimentalLighting = true;
+	//public static final boolean useExperimentalLighting = true;
 	
 	
 	
@@ -437,8 +437,8 @@ public class LodBuilder
 			skyLight = DEFAULT_MAX_LIGHT;
 		else
 		{
-			if (useExperimentalLighting)
-			{
+			//if (useExperimentalLighting)
+			//{
 				skyLight = world.getBrightness(LightType.SKY, blockPos);
 				if (skyLight <= 0 || skyLight >= 15)
 				{
@@ -449,7 +449,7 @@ public class LodBuilder
 					else
 						skyLight = 0;
 				}
-			}
+			/*}
 			else
 			{
 				if (chunk.isLightCorrect())
@@ -463,7 +463,7 @@ public class LodBuilder
 					else
 						skyLight = 0;
 				}
-			}
+			}*/
 		}
 		
 		blockLight = world.getBrightness(LightType.BLOCK, blockPos);
