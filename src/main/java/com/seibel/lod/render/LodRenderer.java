@@ -411,21 +411,21 @@ public class LodRenderer
 				// for the far fog of the normal chunks
 				// to start right where the LODs' end use:
 				// end = 0.8f, start = 1.5f
-				RenderSystem.fogStart(farPlaneBlockDistance * 1.5f);
-				RenderSystem.fogEnd(farPlaneBlockDistance * 2.0f);
+				RenderSystem.fogStart(farPlaneBlockDistance * 0.75f);
+				RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
 			}
 		}
 		else if (fogDistance == FogDistance.NEAR)
 		{
 			if (fogQuality == FogQuality.FANCY)
 			{
-				RenderSystem.fogEnd(mc.getRenderDistance() * 16 * 1.41f);
-				RenderSystem.fogStart(mc.getRenderDistance() * 16 * 1.6f);
+				RenderSystem.fogEnd(vanillaBlockRenderedDistance * 1.41f);
+				RenderSystem.fogStart(vanillaBlockRenderedDistance * 1.6f);
 			}
 			else if (fogQuality == FogQuality.FAST)
 			{
-				RenderSystem.fogEnd(mc.getRenderDistance() * 16 * 1.0f);
-				RenderSystem.fogStart(mc.getRenderDistance() * 16 * 1.5f);
+				RenderSystem.fogEnd(vanillaBlockRenderedDistance * 1.0f);
+				RenderSystem.fogStart(vanillaBlockRenderedDistance * 1.5f);
 			}
 		}
 		
