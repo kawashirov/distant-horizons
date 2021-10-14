@@ -448,7 +448,7 @@ public class LodBuilder
 		else
 		{
 			skyLight = world.getBrightness(LightType.SKY, blockPos);
-			if (!chunk.isLightCorrect() && (skyLight == 0 || skyLight == 15))
+			if (!chunk.isLightCorrect() && (skyLight <= 0 || skyLight >= 15))
 			{
 				// we don't know what the light here is,
 				// lets just take a guess
