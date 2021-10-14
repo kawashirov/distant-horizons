@@ -374,9 +374,7 @@ public class DataPointUtil
 		
 		//We check if there is any data that's not empty or void
 		if (allEmpty)
-		{
 			return dataPoint;
-		}
 		if (allVoid)
 		{
 			dataPoint[0] = createVoidDataPoint(genMode);
@@ -396,6 +394,7 @@ public class DataPointUtil
 					heightAndDepth[j * 2 + 1] = heightAndDepth[(j + 1) * 2 + 1];
 				}
 				count--;
+				i--;
 			}
 		}
 		

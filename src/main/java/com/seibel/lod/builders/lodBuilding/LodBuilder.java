@@ -214,9 +214,6 @@ public class LodBuilder
 			{
 				for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ); verticalIndex++)
 				{
-					
-					if (!DataPointUtil.doesItExist(data[verticalIndex]))
-						break;
 					lodDim.addData(detailLevel,
 							posX,
 							posZ,
