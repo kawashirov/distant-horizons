@@ -91,6 +91,8 @@ public class LodBuilder
 	 */
 	public int defaultDimensionWidthInRegions = 0;
 	
+	public static final boolean useExperimentalLighting = false;
+	
 	
 	
 	
@@ -444,15 +446,32 @@ public class LodBuilder
 			skyLight = DEFAULT_MAX_LIGHT;
 		else
 		{
-			skyLight = world.getBrightness(LightType.SKY, blockPos);
-			if (!chunk.isLightCorrect() && (skyLight <= 0 || skyLight >= 15))
+			if (useExperimentalLighting)
 			{
-				// we don't know what the light here is,
-				// lets just take a guess
-				if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
-					skyLight = 13;
+				skyLight = world.getBrightness(LightType.SKY, blockPos);
+				if (!chunk.isLightCorrect() && (skyLight <= 0 || skyLight >= 15))
+				{
+					// we don't know what the light here is,
+					// lets just take a guess
+					if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
+						skyLight = 13;
+					else
+						skyLight = 0;
+				}
+			}
+			else
+			{
+				if (chunk.isLightCorrect())
+					skyLight = world.getBrightness(LightType.SKY, blockPos);
 				else
-					skyLight = 0;
+				{
+					// we don't know what the light here is,
+					// lets just take a guess
+					if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
+						skyLight = 13;
+					else
+						skyLight = 0;
+				}
 			}
 		}
 		
