@@ -26,7 +26,7 @@ package com.seibel.lod;
 public final class ModInfo
 {
 	public static final String MODID = "lod";
-	public static final String MODNAME = "LOD";
+	public static final String MODNAME = "Distant Horizons";
 	public static final String MODAPI = "LodAPI";
-	public static final String VERSION = "a1.5.1-pre";
+	public static final String VERSION = "a1.5.0";
 }
