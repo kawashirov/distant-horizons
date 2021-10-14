@@ -29,7 +29,6 @@ import java.lang.reflect.Method;
  * This object is used to get variables from methods
  * where they are private. Specifically the fog setting
  * in Optifine.
- *
  * @author James Seibel
  * @version 9-25-2021
  */
@@ -106,10 +105,8 @@ public class ReflectionHandler
 		case 0:
 			// optifine's "default" option,
 			// it should never be called in this case
-			return FogQuality.FAST;
-		
-		
-		// normal options
+			
+			// normal options
 		case 1:
 			return FogQuality.FAST;
 		case 2:

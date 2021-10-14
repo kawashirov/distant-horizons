@@ -1,11 +1,5 @@
 package com.seibel.lod.builders.worldGeneration;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.seibel.lod.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
@@ -17,14 +11,18 @@ import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.WorldWorkerManager;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * A singleton that handles all long distance LOD world generation.
- *
  * @author James Seibel
  * @version 9-25-2021
  */
@@ -69,9 +67,8 @@ public class LodWorldGenerator
 	
 	/**
 	 * Queues up LodNodeGenWorkers for the given lodDimension.
-	 *
 	 * @param renderer needed so the LodNodeGenWorkers can flag that the
-	 *                 buffers need to be rebuilt.
+	 * buffers need to be rebuilt.
 	 */
 	public void queueGenerationRequests(LodDimension lodDim, LodRenderer renderer, LodBuilder lodBuilder)
 	{
@@ -104,19 +101,19 @@ public class LodWorldGenerator
 							maxChunkGenRequests,
 							playerPosX,
 							playerPosZ);
-
-
+					
+					
 					byte detailLevel;
 					int posX;
 					int posZ;
 					int nearIndex = 0;
 					int farIndex = 0;
-
+					
 					for (int i = 0; i < posToGenerate.getNumberOfPos(); i++)
 					{
 						// I wish there was a way to compress this code, but I'm not aware of 
 						// an easy way to do so.
-
+						
 						// add the near positions
 						if (posToGenerate.getNthDetail(nearIndex, true) != 0 && nearIndex < posToGenerate.getNumberOfNearPos())
 						{
@@ -126,11 +123,11 @@ public class LodWorldGenerator
 							nearIndex++;
 							
 							ChunkPos chunkPos = new ChunkPos(LevelPosUtil.getChunkPos(detailLevel, posX), LevelPosUtil.getChunkPos(detailLevel, posZ));
-
+							
 							// prevent generating the same chunk multiple times
 							if (positionsWaitingToBeGenerated.contains(chunkPos))
 								continue;
-
+							
 							// don't add more to the generation queue then allowed
 							if (numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
 								break;
@@ -140,8 +137,8 @@ public class LodWorldGenerator
 							LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, DetailDistanceUtil.getDistanceGenerationMode(detailLevel), lodBuilder, lodDim, serverWorld);
 							WorldWorkerManager.addWorker(genWorker);
 						}
-
-
+						
+						
 						// add the far positions
 						if (posToGenerate.getNthDetail(farIndex, false) != 0 && farIndex < posToGenerate.getNumberOfFarPos())
 						{
@@ -151,16 +148,16 @@ public class LodWorldGenerator
 							farIndex++;
 							
 							ChunkPos chunkPos = new ChunkPos(LevelPosUtil.getChunkPos(detailLevel, posX), LevelPosUtil.getChunkPos(detailLevel, posZ));
-
+							
 							// don't add more to the generation queue then allowed
 							if (numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)
 								continue;
-								//break;
-
+							//break;
+							
 							// prevent generating the same chunk multiple times
 							if (positionsWaitingToBeGenerated.contains(chunkPos))
 								continue;
-
+							
 							positionsWaitingToBeGenerated.add(chunkPos);
 							numberOfChunksWaitingToGenerate.addAndGet(1);
 							LodNodeGenWorker genWorker = new LodNodeGenWorker(chunkPos, DetailDistanceUtil.getDistanceGenerationMode(detailLevel), lodBuilder, lodDim, serverWorld);

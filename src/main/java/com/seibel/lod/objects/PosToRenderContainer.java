@@ -7,7 +7,6 @@ import com.seibel.lod.util.LodUtil;
 import java.util.Arrays;
 
 /**
- *
  * @author Leonardo Amato
  * @version 9-18-2021
  */
@@ -20,7 +19,7 @@ public class PosToRenderContainer
 	private int numberOfPosToRender;
 	private int[] posToRender;
 	/*TODO this population matrix could be converted to boolean to improve memory use
-	*  no since bools are stored as bytes anyway - cola*/
+	 *  no since bools are stored as bytes anyway - cola*/
 	private byte[][] population;
 	
 	public PosToRenderContainer(byte minDetail, int regionPosX, int regionPosZ)
@@ -61,14 +60,10 @@ public class PosToRenderContainer
 	public boolean contains(byte detailLevel, int posX, int posZ)
 	{
 		if (LevelPosUtil.getRegion(detailLevel, posX) == regionPosX && LevelPosUtil.getRegion(detailLevel, posZ) == regionPosZ)
-		{
 			return (population[LevelPosUtil.getRegionModule(minDetail, LevelPosUtil.convert(detailLevel, posX, minDetail))]
 					[LevelPosUtil.getRegionModule(minDetail, LevelPosUtil.convert(detailLevel, posZ, minDetail))] == (detailLevel + 1));
-		}
 		else
-		{
 			return false;
-		}
 	}
 	
 	public void clear(byte minDetail, int regionPosX, int regionPosZ)

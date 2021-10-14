@@ -1,10 +1,6 @@
 package com.seibel.lod.wrappers;
 
-import java.awt.Color;
-import java.io.File;
-
 import com.seibel.lod.util.LodUtil;
-
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
@@ -23,10 +19,12 @@ import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.Direction;
 import net.minecraft.world.DimensionType;
 
+import java.awt.*;
+import java.io.File;
+
 /**
  * A singleton that wraps the Minecraft class
  * to allow for easier movement between Minecraft versions.
- * 
  * @author James Seibel
  * @version 9-16-2021
  */
@@ -36,8 +34,10 @@ public class MinecraftWrapper
 	
 	private final Minecraft mc = Minecraft.getInstance();
 	
-	/** The lightmap for the current:
-	 * Time, dimension, brightness setting, etc. */
+	/**
+	 * The lightmap for the current:
+	 * Time, dimension, brightness setting, etc.
+	 */
 	private NativeImage lightMap = null;
 	
 	private MinecraftWrapper()
@@ -54,9 +54,9 @@ public class MinecraftWrapper
 	/**
 	 * This should be called at the beginning of every frame to
 	 * clear any Minecraft data that becomes out of date after a frame. <br> <br>
-	 * 
+	 * <p>
 	 * LightMaps and other time sensitive objects fall in this category. <br> <br>
-	 * 
+	 * <p>
 	 * This doesn't affect OpenGL objects in any way.
 	 */
 	public void clearFrameObjectCache()
@@ -90,7 +90,7 @@ public class MinecraftWrapper
 		return LodUtil.getDimensionIDFromWorld(mc.level);
 	}
 	
-	/** 
+	/**
 	 * This texture changes every frame
 	 */
 	public NativeImage getCurrentLightMap()
@@ -101,7 +101,7 @@ public class MinecraftWrapper
 			LightTexture tex = mc.gameRenderer.lightTexture();
 			lightMap = tex.lightPixels;
 		}
-		
+
 //		// hotswap this to true, then back to false to write a file
 //		// (and not write a file every frame)
 //		if (false)
@@ -123,7 +123,6 @@ public class MinecraftWrapper
 	/**
 	 * Returns the color int at the given pixel coordinates
 	 * from the current lightmap.
-	 * 
 	 * @param u x location in texture space
 	 * @param v z location in texture space
 	 */
@@ -141,7 +140,6 @@ public class MinecraftWrapper
 	/**
 	 * Returns the Color at the given pixel coordinates
 	 * from the current lightmap.
-	 * 
 	 * @param u x location in texture space
 	 * @param v z location in texture space
 	 */
@@ -166,7 +164,7 @@ public class MinecraftWrapper
 	{
 		return mc.options;
 	}
-
+	
 	public ModelManager getModelManager()
 	{
 		return mc.getModelManager();
@@ -174,9 +172,9 @@ public class MinecraftWrapper
 	
 	public ClientWorld getClientWorld()
 	{
-		return  mc.level;
+		return mc.level;
 	}
-
+	
 	/** Measured in chunks */
 	public int getRenderDistance()
 	{

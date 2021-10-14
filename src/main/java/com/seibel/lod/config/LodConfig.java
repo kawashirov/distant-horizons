@@ -18,38 +18,23 @@
 
 package com.seibel.lod.config;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.seibel.lod.ModInfo;
-import com.seibel.lod.enums.BufferRebuildTimes;
-import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.enums.DetailDropOff;
-import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.FogDistance;
-import com.seibel.lod.enums.FogDrawOverride;
-import com.seibel.lod.enums.GenerationPriority;
-import com.seibel.lod.enums.HorizontalQuality;
-import com.seibel.lod.enums.HorizontalResolution;
-import com.seibel.lod.enums.HorizontalScale;
-import com.seibel.lod.enums.LodTemplate;
-import com.seibel.lod.enums.VanillaOverdraw;
-import com.seibel.lod.enums.VerticalQuality;
+import com.seibel.lod.enums.*;
 import com.seibel.lod.util.LodUtil;
-
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * This handles any configuration the user has access to.
- *
  * @author James Seibel
  * @version 10-11-2021
  */

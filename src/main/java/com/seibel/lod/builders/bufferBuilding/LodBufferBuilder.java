@@ -15,23 +15,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.builders.bufferBuilding;
-
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL15C;
-import org.lwjgl.opengl.GL45;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -45,22 +30,30 @@ import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.proxy.GlProxy;
 import com.seibel.lod.render.LodRenderer;
-import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.DetailDistanceUtil;
-import com.seibel.lod.util.LevelPosUtil;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.util.ThreadMapUtil;
-
+import com.seibel.lod.util.*;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL15C;
+import org.lwjgl.opengl.GL45;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * This object is used to create NearFarBuffer objects.
- *
  * @author James Seibel
  * @version 10-10-2021
  */
@@ -72,7 +65,7 @@ public class LodBufferBuilder
 	public static final ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfBufferBuilderThreads.get(), new ThreadFactoryBuilder().setNameFormat("Buffer-Builder-%d").build());
 	
 	/**
-	 * When uploading to a buffer that is too small, 
+	 * When uploading to a buffer that is too small,
 	 * recreate it this many times bigger than the upload payload
 	 */
 	public static final double BUFFER_EXPANSION_MULTIPLIER = 1.5;
@@ -95,7 +88,7 @@ public class LodBufferBuilder
 	 * How many buffers there are for the given region. <Br>
 	 * This is done because some regions may require more memory than
 	 * can be directly allocated, so we split the regions into smaller sections. <Br>
-	 * This keeps track of those sections. 
+	 * This keeps track of those sections.
 	 */
 	public volatile int[][] numberOfBuffersPerRegion;
 	
@@ -109,7 +102,7 @@ public class LodBufferBuilder
 	
 	/** used to debug how the buildableStorageBuffers are growing */
 	public int[][][] bufferPreviousCapacity;
-	/** 
+	/**
 	 * This is toggled when the buffers are swapped, so we only
 	 * display the expansion log for one set of buffers
 	 */
@@ -187,9 +180,7 @@ public class LodBufferBuilder
 		
 		
 		Thread thread = new Thread(() ->
-		{
-			generateLodBuffersThread(renderer, lodDim, playerBlockPos, fullRegen);
-		});
+				generateLodBuffersThread(renderer, lodDim, playerBlockPos, fullRegen));
 		
 		mainGenThread.execute(thread);
 	}
@@ -344,9 +335,9 @@ public class LodBufferBuilder
 									chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.z;
 									if (posToRender.contains(detailLevel, xAdj, zAdj)
 											&& (gameChunkRenderDistance < Math.abs(chunkXdist)
-													|| gameChunkRenderDistance < Math.abs(chunkZdist)
-													|| !(vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
-															&& (!LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1) || smallRenderDistance))))
+											|| gameChunkRenderDistance < Math.abs(chunkZdist)
+											|| !(vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
+											&& (!LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1) || smallRenderDistance))))
 									{
 										for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
 										{
@@ -379,7 +370,7 @@ public class LodBufferBuilder
 								
 								
 							} // for pos to in list to render
-								// the thread executed successfully
+							// the thread executed successfully
 							return true;
 						};
 						
@@ -412,7 +403,7 @@ public class LodBufferBuilder
 			long buildTime = endTime - startTime;
 			@SuppressWarnings("unused")
 			long executeTime = executeEnd - executeStart;
-	
+
 //			ClientProxy.LOGGER.info("Thread Build time: " + buildTime + " ms" + '\n' +
 //					                        "thread execute time: " + executeTime + " ms");
 			
@@ -542,7 +533,7 @@ public class LodBufferBuilder
 					// create the buffer storage (GPU memory)
 					buildableStorageBufferIds[x][z][i] = GL45.glGenBuffers();
 					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buildableStorageBufferIds[x][z][i]);
-					GL45.glBufferStorage(GL15.GL_ARRAY_BUFFER, regionMemoryRequired, 0); // the 0 flag means to create the storage in the GPU's memory
+					GL45.glBufferStorage(GL15.GL_ARRAY_BUFFER, regionMemoryRequired, 0); // the 0 flag means to create the storage in the GPUs memory
 					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 					
 					drawableStorageBufferIds[x][z][i] = GL45.glGenBuffers();
@@ -584,9 +575,9 @@ public class LodBufferBuilder
 						// This way we don't have to worry about what context this
 						// was called from (if any).
 						RenderSystem.recordRenderCall(() -> {
-				            GL45.glDeleteBuffers(buildableId);
-				            GL45.glDeleteBuffers(drawableId);
-				         });
+							GL45.glDeleteBuffers(buildableId);
+							GL45.glDeleteBuffers(drawableId);
+						});
 					}
 				}
 			}
@@ -607,7 +598,7 @@ public class LodBufferBuilder
 				{
 					for (int k = 0; k < buildableVbos[i][j].length; k++)
 					{
-						int buildableId; 
+						int buildableId;
 						int drawableId;
 						
 						// variables passed into a lambda expression
@@ -622,14 +613,14 @@ public class LodBufferBuilder
 							drawableId = drawableVbos[i][j][k].id;
 						else
 							drawableId = 0;
-							
-							
+						
+						
 						RenderSystem.recordRenderCall(() -> {
 							if (buildableId != 0)
 								GL45.glDeleteBuffers(buildableId);
 							if (drawableId != 0)
 								GL45.glDeleteBuffers(drawableId);
-				         });
+						});
 					}
 				}
 			}
@@ -701,7 +692,7 @@ public class LodBufferBuilder
 						for (int i = 0; i < buildableBuffers[x][z].length; i++)
 						{
 							ByteBuffer uploadBuffer = buildableBuffers[x][z][i].popNextBuffer().getSecond();
-							vboUpload(buildableVbos[x][z][i], buildableStorageBufferIds[x][z][i], uploadBuffer, x,z,i, true);
+							vboUpload(buildableVbos[x][z][i], buildableStorageBufferIds[x][z][i], uploadBuffer, x, z, i, true);
 							lodDim.setRegenRegionBufferByArrayIndex(x, z, false);
 						}
 					}
@@ -727,9 +718,9 @@ public class LodBufferBuilder
 	
 	/** Uploads the uploadBuffer into the VBO and then into GPU memory. */
 	private void vboUpload(VertexBuffer vbo, int storageBufferId, ByteBuffer uploadBuffer,
-			int xVboIndex, int zVboIndex, int iVboIndex, boolean allowBufferExpansion) 
-			// x/zVboIndex are just used for the debugging console logging
-			// and should be removed when the logger is removed.
+			int xVboIndex, int zVboIndex, int iVboIndex, boolean allowBufferExpansion)
+	// x/zVboIndex are just used for the debugging console logging
+	// and should be removed when the logger is removed.
 	{
 		// this shouldn't happen, but just to be safe
 		if (vbo.id != -1 && GlProxy.getInstance().getGlContext() == GlProxyContext.LOD_BUILDER)
@@ -776,19 +767,19 @@ public class LodBufferBuilder
 						
 						
 						
-						if (printExpansionLog)
+						/*if (printExpansionLog)
 						{
 							// NOTE: this will display twice because we are double buffering
 							// (using 1 buffer to generate into and one to draw)
-//							ClientProxy.LOGGER.info("vbo (" + xVboIndex + "," + zVboIndex + ") expanded: " + bufferPreviousCapacity[xVboIndex][zVboIndex][iVboIndex] + " -> " + (int)(uploadBuffer.capacity() * BUFFER_EXPANSION_MULTIPLIER));
-//							bufferPreviousCapacity[xVboIndex][zVboIndex][iVboIndex] = (int) (uploadBuffer.capacity() * BUFFER_EXPANSION_MULTIPLIER);
-						}
+							ClientProxy.LOGGER.info("vbo (" + xVboIndex + "," + zVboIndex + ") expanded: " + bufferPreviousCapacity[xVboIndex][zVboIndex][iVboIndex] + " -> " + (int)(uploadBuffer.capacity() * BUFFER_EXPANSION_MULTIPLIER));
+							bufferPreviousCapacity[xVboIndex][zVboIndex][iVboIndex] = (int) (uploadBuffer.capacity() * BUFFER_EXPANSION_MULTIPLIER);
+						}*/
 					}
 				}
 				else
 				{
 					// upload the buffer into system memory...
-					vboBuffer.put(uploadBuffer);					
+					vboBuffer.put(uploadBuffer);
 					GL15.glUnmapBuffer(GL15.GL_ARRAY_BUFFER);
 					
 					// ...then upload into GPU memory
@@ -797,7 +788,7 @@ public class LodBufferBuilder
 					GL45.glCopyNamedBufferSubData(vbo.id, storageBufferId, 0, 0, uploadBuffer.capacity());
 				}
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
 				ClientProxy.LOGGER.error("vboUpload failed: " + e.getClass().getSimpleName());
 				e.printStackTrace();

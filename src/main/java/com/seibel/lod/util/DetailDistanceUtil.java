@@ -17,20 +17,6 @@ public class DetailDistanceUtil
 	private static int maxDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 16 * 2;
 	
 	
-	private static final int[] maxVerticalData = {
-			4,
-			4,
-			4,
-			2,
-			2,
-			1,
-			1,
-			1,
-			1,
-			1,
-			1 };
-	
-	
 	private static final HorizontalResolution[] lodGenDetails = {
 			HorizontalResolution.BLOCK,
 			HorizontalResolution.TWO_BLOCKS,

@@ -18,27 +18,22 @@
 
 package com.seibel.lod.objects;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.GenerationPriority;
 import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
-import com.seibel.lod.util.DataPointUtil;
-import com.seibel.lod.util.DetailDistanceUtil;
-import com.seibel.lod.util.LevelPosUtil;
-import com.seibel.lod.util.LodThreadFactory;
-import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.*;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 
 /**
@@ -48,7 +43,6 @@ import net.minecraft.world.server.ServerWorld;
  * <strong>Coordinate Standard: </strong><br>
  * Coordinate called posX or posZ are relative LevelPos coordinates <br>
  * unless stated otherwise. <br>
- *
  * @author Leonardo Amato
  * @author James Seibel
  * @version 10-10-2021
@@ -92,7 +86,6 @@ public class LodDimension
 	
 	/**
 	 * Creates the dimension centered at (0,0)
-	 *
 	 * @param newWidth in regions
 	 */
 	public LodDimension(DimensionType newDimension, LodWorld lodWorld, int newWidth)
@@ -294,7 +287,6 @@ public class LodDimension
 	
 	/**
 	 * Overwrite the LodRegion at the location of newRegion with newRegion.
-	 *
 	 * @throws ArrayIndexOutOfBoundsException if newRegion is outside what can be stored in this LodDimension.
 	 */
 	public synchronized void addOrOverwriteRegion(LodRegion newRegion) throws ArrayIndexOutOfBoundsException
@@ -597,7 +589,7 @@ public class LodDimension
 	
 	/**
 	 * Returns every node that should be rendered based on the position of the player.
-	 *
+	 * <p>
 	 * TODO why isn't posToRender returned? it would make it a bit more clear what is happening
 	 */
 	public void getPosToRender(PosToRenderContainer posToRender, RegionPos regionPos, int playerPosX,
@@ -609,7 +601,7 @@ public class LodDimension
 	}
 	
 	/**
-	 * Determines how many vertical LODs could be used 
+	 * Determines how many vertical LODs could be used
 	 * for the given region at the given detail level
 	 */
 	public int getMaxVerticalData(byte detailLevel, int posX, int posZ)
@@ -688,7 +680,7 @@ public class LodDimension
 	/**
 	 * TODO we aren't currently using this, is there a reason for that?
 	 * is this significantly different than regenRegionBuffer?
-	 *
+	 * <p>
 	 * Returns if the buffer at the given array index needs
 	 * to have its buffer resized.
 	 */

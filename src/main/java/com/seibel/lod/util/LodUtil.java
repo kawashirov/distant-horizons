@@ -18,17 +18,12 @@
 
 package com.seibel.lod.util;
 
-import java.awt.Color;
-import java.io.File;
-import java.util.HashSet;
-
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.VanillaOverdraw;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
@@ -46,9 +41,12 @@ import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 
+import java.awt.*;
+import java.io.File;
+import java.util.HashSet;
+
 /**
  * This class holds methods and constants that may be used in multiple places.
- *
  * @author James Seibel
  * @version 10-11-2021
  */
@@ -58,7 +56,7 @@ public class LodUtil
 	
 	/**
 	 * vanilla render distances less than or equal to this will not allow partial
-	 * overdraw. The VanillaOverdraw with either be ALWAYS or NEVER. 
+	 * overdraw. The VanillaOverdraw with either be ALWAYS or NEVER.
 	 */
 	public static final int MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW = 5;
 	
@@ -82,29 +80,22 @@ public class LodUtil
 	public static final Color[] DEBUG_DETAIL_LEVEL_COLORS = new Color[] { Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA, Color.WHITE, Color.GRAY, Color.BLACK };
 	
 	
-	/**
-	 * 512 blocks wide
-	 */
-	public static final byte REGION_DETAIL_LEVEL = 9;
-	/**
-	 * 16 blocks wide
-	 */
-	public static final byte CHUNK_DETAIL_LEVEL = 4;
-	/**
-	 * 1 block wide
-	 */
-	public static final byte BLOCK_DETAIL_LEVEL = 0;
-	
-	
 	public static final byte DETAIL_OPTIONS = 10;
+	
+	/** 512 blocks wide */
+	public static final byte REGION_DETAIL_LEVEL = DETAIL_OPTIONS - 1;
+	/** 16 blocks wide */
+	public static final byte CHUNK_DETAIL_LEVEL = 4;
+	/** 1 block wide */
+	public static final byte BLOCK_DETAIL_LEVEL = 0;
 	
 	public static final short MAX_VERTICAL_DATA = 4;
 	
 	/**
 	 * measured in Blocks <br>
-	 * detail level 9
+	 * detail level max - 1
 	 */
-	public static final short REGION_WIDTH = 512;
+	public static final short REGION_WIDTH = 1 << REGION_DETAIL_LEVEL;
 	/**
 	 * measured in Blocks <br>
 	 * detail level 4
@@ -117,10 +108,8 @@ public class LodUtil
 	public static final short BLOCK_WIDTH = 1;
 	
 	
-	/**
-	 * number of chunks wide
-	 */
-	public static final int REGION_WIDTH_IN_CHUNKS = 32;
+	/** number of chunks wide */
+	public static final int REGION_WIDTH_IN_CHUNKS = REGION_WIDTH / CHUNK_WIDTH;
 	
 	
 	/**
@@ -156,7 +145,6 @@ public class LodUtil
 	
 	/**
 	 * Gets the first valid ServerWorld.
-	 *
 	 * @return null if there are no ServerWorlds
 	 */
 	public static ServerWorld getFirstValidServerWorld()
@@ -174,7 +162,6 @@ public class LodUtil
 	
 	/**
 	 * Gets the ServerWorld for the relevant dimension.
-	 *
 	 * @return null if there is no ServerWorld for the given dimension
 	 */
 	public static ServerWorld getServerWorldFromDimension(DimensionType dimension)
@@ -198,9 +185,7 @@ public class LodUtil
 		return returnWorld;
 	}
 	
-	/**
-	 * Convert a 2D absolute position into a quad tree relative position.
-	 */
+	/** Convert a 2D absolute position into a quad tree relative position. */
 	public static RegionPos convertGenericPosToRegionPos(int x, int z, int detailLevel)
 	{
 		int relativePosX = Math.floorDiv(x, (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel));
@@ -209,9 +194,7 @@ public class LodUtil
 		return new RegionPos(relativePosX, relativePosZ);
 	}
 	
-	/**
-	 * Convert a 2D absolute position into a quad tree relative position.
-	 */
+	/** Convert a 2D absolute position into a quad tree relative position. */
 	public static int convertLevelPos(int pos, int currentDetailLevel, int targetDetailLevel)
 	{
 		return Math.floorDiv(pos, (int) Math.pow(2, targetDetailLevel - currentDetailLevel));
@@ -293,9 +276,7 @@ public class LodUtil
 		}
 	}
 	
-	/**
-	 * returns the server name, IP and game version.
-	 */
+	/** returns the server name, IP and game version. */
 	public static String getServerId()
 	{
 		ServerData server = mc.getCurrentServer();
@@ -308,9 +289,7 @@ public class LodUtil
 	}
 	
 	
-	/**
-	 * Convert a BlockColors int into a Color object.
-	 */
+	/** Convert a BlockColors int into a Color object */
 	public static Color intToColor(int num)
 	{
 		int filter = 0b11111111;
@@ -322,9 +301,7 @@ public class LodUtil
 		return new Color(red, green, blue);
 	}
 	
-	/**
-	 * Convert a Color into a BlockColors object.
-	 */
+	/** Convert a Color into a BlockColors object. */
 	public static int colorToInt(Color color)
 	{
 		return color.getRGB();
@@ -371,7 +348,7 @@ public class LodUtil
 		VanillaOverdraw overdraw = LodConfig.CLIENT.graphics.vanillaOverdraw.get();
 		
 		// apply distance based rules for dynamic
-		if (overdraw == VanillaOverdraw.DYNAMIC 
+		if (overdraw == VanillaOverdraw.DYNAMIC
 				&& chunkRenderDist <= MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW)
 		{
 			// The vanilla render distance isn't far enough 
@@ -398,14 +375,14 @@ public class LodUtil
 		{
 		case ALWAYS:
 			// don't skip any positions
-			return new HashSet<ChunkPos>();
-			
+			return new HashSet<>();
+		
 		case DYNAMIC:
 			// only skip positions that are greater than
 			// 4/5ths the render distance
 			skipRadius = (int) Math.ceil(chunkRenderDist * (4.0 / 5.0));
 			break;
-			
+		
 		default:
 		case NEVER:
 			// skip chunks in render distance that are rendered
@@ -428,11 +405,9 @@ public class LodUtil
 				for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
 				{
 					if (x <= centerChunk.x - skipRadius || x >= centerChunk.x + skipRadius
-						|| 
-						z <= centerChunk.z - skipRadius || z >= centerChunk.z + skipRadius)
+							|| z <= centerChunk.z - skipRadius || z >= centerChunk.z + skipRadius)
 					{
 						posToSkip.remove(new ChunkPos(x, z));
-						continue;
 					}
 				}
 			}

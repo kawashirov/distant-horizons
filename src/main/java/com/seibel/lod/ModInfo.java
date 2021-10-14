@@ -15,16 +15,16 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod;
 
 /**
  * This file is similar to mcmod.info
- * 
  * @author James Seibel
  * @version 08-29-2021
  */
 public final class ModInfo
-{	
+{
 	public static final String MODID = "lod";
 	public static final String MODNAME = "LOD";
 	public static final String MODAPI = "LodAPI";

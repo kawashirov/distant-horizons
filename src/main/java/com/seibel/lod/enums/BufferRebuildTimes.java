@@ -15,6 +15,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.enums;
 
 /**
@@ -22,22 +23,21 @@ package com.seibel.lod.enums;
  * Far_First <br>
  * <br>
  * Determines how fast the buffers need to be regenerated
- *
  * @author Leonardo Amato
  * @version 9-25-2021
  */
 public enum BufferRebuildTimes
 {
 	FREQUENT(1000, 500, 2500),
-
+	
 	NORMAL(2000, 1000, 5000),
-
+	
 	RARE(5000, 2000, 10000);
-
+	
 	public final int playerMoveTimeout;
 	public final int renderedChunkTimeout;
 	public final int chunkChangeTimeout;
-
+	
 	BufferRebuildTimes(int playerMoveTimeout, int renderedChunkTimeout, int chunkChangeTimeout)
 	{
 		this.playerMoveTimeout = playerMoveTimeout;

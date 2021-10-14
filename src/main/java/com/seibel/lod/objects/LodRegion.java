@@ -16,7 +16,6 @@ import com.seibel.lod.util.LodUtil;
  * <strong>Coordinate Standard: </strong><br>
  * Coordinate called posX or posZ are relative LevelPos coordinates <br>
  * unless stated otherwise. <br>
- *
  * @author Leonardo Amato
  * @version 10-10-2021
  */
@@ -87,7 +86,6 @@ public class LodRegion
 	 * Inserts the data point into the region.
 	 * <p>
 	 * TODO this will always return true unless it has
-	 *
 	 * @return true if the data was added successfully
 	 */
 	public boolean addData(byte detailLevel, int posX, int posZ, int verticalIndex, long data)
@@ -109,7 +107,6 @@ public class LodRegion
 	
 	/**
 	 * Get the dataPoint at the given relative position.
-	 *
 	 * @return the data at the relative pos and detail level,
 	 * 0 if the data doesn't exist.
 	 */
@@ -120,7 +117,6 @@ public class LodRegion
 	
 	/**
 	 * Get the dataPoint at the given relative position.
-	 *
 	 * @return the data at the relative pos and detail level,
 	 * 0 if the data doesn't exist.
 	 */
@@ -434,7 +430,6 @@ public class LodRegion
 	
 	/**
 	 * Returns the LevelContainer for the detailLevel
-	 *
 	 * @throws IllegalArgumentException if the detailLevel is less than minDetailLevel
 	 */
 	public LevelContainer getLevel(byte detailLevel)
@@ -448,10 +443,9 @@ public class LodRegion
 	/**
 	 * Add the levelContainer to this Region, updating the minDetailLevel
 	 * if necessary.
-	 *
 	 * @throws IllegalArgumentException if the LevelContainer's detailLevel
-	 *                                  is 2 or more detail levels lower than the
-	 *                                  minDetailLevel of this region.
+	 * is 2 or more detail levels lower than the
+	 * minDetailLevel of this region.
 	 */
 	public void addLevelContainer(LevelContainer levelContainer)
 	{

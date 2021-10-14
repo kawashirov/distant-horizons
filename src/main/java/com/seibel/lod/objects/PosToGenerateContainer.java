@@ -5,7 +5,6 @@ import com.seibel.lod.util.LevelPosUtil;
 /**
  * Holds the levelPos that need to be generated.
  * TODO is that correct?
- *
  * @author Leonardo Amato
  * @version 9-27-2021
  */

@@ -164,9 +164,7 @@ public class LevelPosUtil
 		boolean inXArea = playerPosX >= startPosX && playerPosX <= endPosX;
 		boolean inZArea = playerPosZ >= startPosZ && playerPosZ <= endPosZ;
 		if (inXArea && inZArea)
-		{
 			return 0;
-		}
 		else if (inXArea)
 		{
 			return Math.min(
@@ -221,9 +219,12 @@ public class LevelPosUtil
 		return compareResult;
 	}
 	
+	@SuppressWarnings("unused")
 	public static String toString(int[] levelPos)
 	{
-		return (getDetailLevel(levelPos) + " " + getPosX(levelPos) + " " + getPosZ(levelPos));
+		return (getDetailLevel(levelPos) + " "
+				+ getPosX(levelPos) + " "
+				+ getPosZ(levelPos));
 	}
 	
 	public static String toString(byte detailLevel, int posX, int posZ)

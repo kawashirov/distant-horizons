@@ -12,12 +12,10 @@ import org.lwjgl.opengl.GLCapabilities;
  *
  * <p>
  * Helpful OpenGL resources: <br><br>
- *
+ * <p>
  * https://www.seas.upenn.edu/~pcozzi/OpenGLInsights/OpenGLInsights-AsynchronousBufferTransfers.pdf <br>
  * https://learnopengl.com/Advanced-OpenGL/Advanced-Data <br>
  * https://gamedev.stackexchange.com/questions/91995/edit-vbo-data-or-create-a-new-one <br><br>
- *
- *
  * @author James Seibel
  * @version 10-2-2021
  */
@@ -35,8 +33,10 @@ public class GlProxy
 	/** the LodBuilder's GL context */
 	public final GLCapabilities lodBuilderGlCapabilities;
 	
-	/** This is just used for debugging, hopefully it can be removed once 
-	 * the context switching is more stable. */
+	/**
+	 * This is just used for debugging, hopefully it can be removed once
+	 * the context switching is more stable.
+	 */
 	public Thread lodBuilderOwnerThread = null;
 	
 	/** Does this computer's GPU support fancy fog? */
@@ -88,9 +88,7 @@ public class GlProxy
 		fancyFogAvailable = GL.getCapabilities().GL_NV_fog_distance;
 		
 		if (!fancyFogAvailable)
-		{
 			ClientProxy.LOGGER.info("This GPU does not support GL_NV_fog_distance. This means that the fancy fog option will not be available.");
-		}
 	}
 	
 	

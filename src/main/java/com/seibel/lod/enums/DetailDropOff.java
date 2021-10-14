@@ -15,13 +15,13 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.enums;
 
 /**
  * By_Region_Fast, <br>
  * By_Region_Fancy, <br>
  * By_Chunk
- * 
  * @author Leonardo Amato
  * @version 9-25-2021
  */
@@ -29,7 +29,7 @@ public enum DetailDropOff
 {
 	/** quality is determined per-region, using the lowest quality that would be used in BY_CHUNK */
 	FAST,
-
+	
 	/** quality is determined per-block (the best quality option, may cause stuttering when moving) */
 	FANCY,
 }

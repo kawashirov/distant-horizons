@@ -173,7 +173,7 @@ public class DataPointUtil
 	{
 		return (int) (((dataPoint >>> COLOR_SHIFT) & COLOR_MASK) | (((dataPoint >>> (ALPHA_SHIFT - ALPHA_DOWNSIZE_SHIFT)) | 0b1111) << 24));
 	}
-
+	
 	/** This method apply the lightmap to the color to use */
 	public static int getLightColor(long dataPoint, NativeImage lightMap)
 	{
@@ -186,8 +186,9 @@ public class DataPointUtil
 		
 		return ColorUtil.multiplyRGBcolors(getColor(dataPoint), ColorUtil.rgbToInt(red, green, blue));
 	}
-
+	
 	/** This is used to convert a dataPoint to string (useful for the print function) */
+	@SuppressWarnings("unused")
 	public static String toString(long dataPoint)
 	{
 		return getHeight(dataPoint) + " " +
@@ -201,71 +202,6 @@ public class DataPointUtil
 				getGenerationMode(dataPoint) + " " +
 				isVoid(dataPoint) + " " +
 				doesItExist(dataPoint) + '\n';
-	}
-
-	/**
-	 * This method merge column of single data together
-	 * @deprecated
-	 */
-	public static long mergeSingleData(long[] dataToMerge)
-	{
-		int numberOfChildren = 0;
-		
-		int tempAlpha = 0;
-		int tempRed = 0;
-		int tempGreen = 0;
-		int tempBlue = 0;
-		int tempHeight = Integer.MIN_VALUE;
-		int tempDepth = Integer.MAX_VALUE;
-		int tempLightBlock = 0;
-		int tempLightSky = 0;
-		byte tempGenMode = DistanceGenerationMode.SERVER.complexity;
-		boolean allEmpty = true;
-		boolean allVoid = true;
-		for (long data : dataToMerge)
-		{
-			if (DataPointUtil.doesItExist(data))
-			{
-				allEmpty = false;
-				if (!(DataPointUtil.isVoid(data)))
-				{
-					numberOfChildren++;
-					allVoid = false;
-					tempAlpha += DataPointUtil.getAlpha(data);
-					tempRed += DataPointUtil.getRed(data);
-					tempGreen += DataPointUtil.getGreen(data);
-					tempBlue += DataPointUtil.getBlue(data);
-					tempHeight = Math.max(tempHeight, DataPointUtil.getHeight(data));
-					tempDepth = Math.min(tempDepth, DataPointUtil.getDepth(data));
-					tempLightBlock += DataPointUtil.getLightBlock(data);
-					tempLightSky += DataPointUtil.getLightSky(data);
-				}
-				tempGenMode = (byte) Math.min(tempGenMode, DataPointUtil.getGenerationMode(data));
-			} else
-			{
-				tempGenMode = (byte) Math.min(tempGenMode, DistanceGenerationMode.NONE.complexity);
-			}
-		}
-		
-		if (allEmpty)
-		{
-			//no child has been initialized
-			return DataPointUtil.EMPTY_DATA;
-		} else if (allVoid)
-		{
-			//all the children are void
-			return DataPointUtil.createVoidDataPoint(tempGenMode);
-		} else
-		{
-			//we have at least 1 child
-			tempAlpha = tempAlpha / numberOfChildren;
-			tempRed = tempRed / numberOfChildren;
-			tempGreen = tempGreen / numberOfChildren;
-			tempBlue = tempBlue / numberOfChildren;
-			tempLightBlock = tempLightBlock / numberOfChildren;
-			tempLightSky = tempLightSky / numberOfChildren;
-			return DataPointUtil.createDataPoint(tempAlpha, tempRed, tempGreen, tempBlue, tempHeight, tempDepth, tempLightSky, tempLightBlock, tempGenMode);
-		}
 	}
 	
 	public static void shrinkArray(short[] array, int packetSize, int start, int length, int arraySize)
@@ -292,13 +228,13 @@ public class DataPointUtil
 			array[start + i] = 0;
 		}
 	}
-
+	
 	/**
 	 * This method merge column of multiple data together
 	 * @param dataToMerge one or more columns of data
 	 * @param inputVerticalData vertical size of an input data
 	 * @param maxVerticalData max vertical size of the merged data
-	 * @return 1 column of correctly parsed data
+	 * @return one column of correctly parsed data
 	 */
 	public static long[] mergeMultiData(long[] dataToMerge, int inputVerticalData, int maxVerticalData)
 	{
@@ -470,7 +406,7 @@ public class DataPointUtil
 			ii = worldHeight;
 			for (i = 0; i < count - 1; i++)
 			{
-				if (heightAndDepth[i * 2 + 1] - heightAndDepth[(i + 1) * 2]< ii)
+				if (heightAndDepth[i * 2 + 1] - heightAndDepth[(i + 1) * 2] < ii)
 				{
 					ii = heightAndDepth[i * 2 + 1] - heightAndDepth[(i + 1) * 2];
 					j = i;
@@ -493,7 +429,7 @@ public class DataPointUtil
 			
 			if ((depth == 0 && height == 0) || j >= heightAndDepth.length / 2)
 				break;
-				
+			
 			int numberOfChildren = 0;
 			int tempAlpha = 0;
 			int tempRed = 0;
@@ -513,7 +449,7 @@ public class DataPointUtil
 					singleData = dataToMerge[index * inputVerticalData + dataIndex];
 					if (doesItExist(singleData) && !isVoid(singleData))
 					{
-
+						
 						if ((depth <= getDepth(singleData) && getDepth(singleData) <= height)
 								|| (depth <= getHeight(singleData) && getHeight(singleData) <= height))
 						{
@@ -524,7 +460,8 @@ public class DataPointUtil
 					else
 						break;
 				}
-				if(!doesItExist(data)){
+				if (!doesItExist(data))
+				{
 					singleData = dataToMerge[index * inputVerticalData];
 					data = createVoidDataPoint(getGenerationMode(singleData));
 				}

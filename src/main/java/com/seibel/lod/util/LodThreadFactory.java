@@ -5,7 +5,6 @@ import java.util.concurrent.ThreadFactory;
 /**
  * Just a simple ThreadFactory to name ExecutorService
  * threads, which can be helpful when debugging.
- * 
  * @author James Seibel
  * @version 8-15-2021
  */
@@ -22,7 +21,7 @@ public class LodThreadFactory implements ThreadFactory
 	@Override
 	public Thread newThread(Runnable r)
 	{
-            return new Thread(r, threadName);
+		return new Thread(r, threadName);
 	}
 	
 }

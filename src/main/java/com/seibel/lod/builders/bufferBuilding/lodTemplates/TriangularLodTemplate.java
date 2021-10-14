@@ -18,20 +18,18 @@
 
 package com.seibel.lod.builders.bufferBuilding.lodTemplates;
 
-import java.util.Map;
-
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.proxy.ClientProxy;
-
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.Map;
+
 /**
  * TODO #21 TriangularLodTemplate
  * Builds each LOD chunk as a singular rectangular prism.
- *
  * @author James Seibel
  * @version 06-16-2021
  */

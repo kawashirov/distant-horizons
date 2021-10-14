@@ -1,12 +1,11 @@
 package com.seibel.lod.enums;
 
-/** 
+/**
  * None, Dynamic, Always
- * 
+ *
  * <p>
  * This represents how far the LODs should overlap with
  * the vanilla Minecraft terrain.
- * 
  * @author James Seibel
  * @version 10-11-2021
  */

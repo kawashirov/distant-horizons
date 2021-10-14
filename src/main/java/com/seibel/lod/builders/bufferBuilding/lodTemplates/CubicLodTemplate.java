@@ -18,20 +18,18 @@
 
 package com.seibel.lod.builders.bufferBuilding.lodTemplates;
 
-import java.util.Map;
-
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.LodUtil;
-
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
+import java.util.Map;
+
 /**
  * Builds LODs as rectangular prisms.
- *
  * @author James Seibel
  * @version 10-10-2021
  */
@@ -87,11 +85,9 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			return;
 		
 		if (depth == height)
-		{
 			// if the top and bottom points are at the same height
 			// render this LOD as 1 block thick
 			height++;
-		}
 		
 		// offset the AABB by its x/z position in the world since
 		// it uses doubles to specify its location, unlike the model view matrix

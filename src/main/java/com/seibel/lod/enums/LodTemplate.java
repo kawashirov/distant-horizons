@@ -15,6 +15,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.enums;
 
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.AbstractLodTemplate;
@@ -24,29 +25,34 @@ import com.seibel.lod.builders.bufferBuilding.lodTemplates.TriangularLodTemplate
 
 /**
  * Cubic, Triangular, Dynamic
- * 
  * @author James Seibel
  * @version 10-10-2021
  */
 public enum LodTemplate
 {
-	/** LODs are rendered as
-	 * rectangular prisms. */
+	/**
+	 * LODs are rendered as
+	 * rectangular prisms.
+	 */
 	CUBIC(new CubicLodTemplate()),
 	
-	/** LODs smoothly transition between
-	 * each other. */
+	/**
+	 * LODs smoothly transition between
+	 * each other.
+	 */
 	TRIANGULAR(new TriangularLodTemplate()),
 	
-	/** LODs smoothly transition between
+	/**
+	 * LODs smoothly transition between
 	 * each other, unless a neighboring LOD
-	 * is at a significantly different height. */
+	 * is at a significantly different height.
+	 */
 	DYNAMIC(new DynamicLodTemplate());
 	
 	
 	public final AbstractLodTemplate template;
 	
-	private LodTemplate(AbstractLodTemplate newTemplate)
+	LodTemplate(AbstractLodTemplate newTemplate)
 	{
 		template = newTemplate;
 	}

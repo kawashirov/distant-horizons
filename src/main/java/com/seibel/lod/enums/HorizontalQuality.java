@@ -15,6 +15,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.enums;
 
 /**
@@ -23,7 +24,6 @@ package com.seibel.lod.enums;
  * High <br>
  * <br>
  * this indicates the base of the quadratic function we use for the quality drop off
- * 
  * @author Leonardo Amato
  * @version 9-29-2021
  */
@@ -31,18 +31,18 @@ public enum HorizontalQuality
 {
 	/** Lods are 2D with heightMap */
 	LINEAR(1.0f),
-
+	
 	/** Lods are 2D with heightMap */
 	LOW(1.5f),
-
+	
 	/** Lods expand in three dimension */
 	MEDIUM(2.0f),
-
+	
 	/** Lods expand in three dimension */
 	HIGH(2.2f);
-
+	
 	public final double quadraticBase;
-
+	
 	HorizontalQuality(double distanceUnit)
 	{
 		this.quadraticBase = distanceUnit;

@@ -15,12 +15,13 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.enums;
+
+import com.seibel.lod.util.LodUtil;
 
 import java.util.ArrayList;
 import java.util.Collections;
-
-import com.seibel.lod.util.LodUtil;
 
 /**
  * chunk <Br>
@@ -28,7 +29,6 @@ import com.seibel.lod.util.LodUtil;
  * four_blocks <br>
  * two_blocks <Br>
  * block <br>
- * 
  * @author James Seibel
  * @author Leonardo Amato
  * @version 9-25-2021
@@ -49,16 +49,20 @@ public enum HorizontalResolution
 	
 	/** render 256 LODs for each chunk */
 	BLOCK(16, 0);
-
-	/** How many DataPoints should 
-	 * be drawn per side, per LodChunk */
+	
+	/**
+	 * How many DataPoints should
+	 * be drawn per side, per LodChunk
+	 */
 	public final int dataPointLengthCount;
 	
 	/** How wide each LOD DataPoint is */
 	public final int dataPointWidth;
 	
-	/** This is the same as detailLevel in LodQuadTreeNode, 
-	 * lowest is 0 highest is 9 */
+	/**
+	 * This is the same as detailLevel in LodQuadTreeNode,
+	 * lowest is 0 highest is 9
+	 */
 	public final byte detailLevel;
 	
 	/* Start/End X/Z give the block positions
@@ -68,19 +72,19 @@ public enum HorizontalResolution
 	
 	public final int[] endX;
 	public final int[] endZ;
-
 	
-	/** 
+	
+	/**
 	 * 1st dimension: LodDetail.detailLevel <br>
 	 * 2nd dimension: An array of all LodDetails that are less than or <br>
-	 *                equal to that detailLevel
+	 * equal to that detailLevel
 	 */
 	private static HorizontalResolution[][] lowerDetailArrays;
 	
 	
 	
 	
-	private HorizontalResolution(int newLengthCount, int newDetailLevel)
+	HorizontalResolution(int newLengthCount, int newDetailLevel)
 	{
 		detailLevel = (byte) newDetailLevel;
 		dataPointLengthCount = newLengthCount;
@@ -94,15 +98,15 @@ public enum HorizontalResolution
 		
 		
 		int index = 0;
-		for(int x = 0; x < newLengthCount; x++)
+		for (int x = 0; x < newLengthCount; x++)
 		{
-			for(int z = 0; z < newLengthCount; z++)
+			for (int z = 0; z < newLengthCount; z++)
 			{
 				startX[index] = x * dataPointWidth;
 				startZ[index] = z * dataPointWidth;
 				
-				endX[index] = (x*dataPointWidth) + dataPointWidth;
-				endZ[index] = (z*dataPointWidth) + dataPointWidth;
+				endX[index] = (x * dataPointWidth) + dataPointWidth;
+				endZ[index] = (z * dataPointWidth) + dataPointWidth;
 				
 				index++;
 			}
@@ -115,7 +119,7 @@ public enum HorizontalResolution
 	
 	
 	
-	/** 
+	/**
 	 * Returns an array of all LodDetails that have a detail level
 	 * that is less than or equal to the given LodDetail
 	 */
@@ -127,12 +131,12 @@ public enum HorizontalResolution
 			lowerDetailArrays = new HorizontalResolution[HorizontalResolution.values().length][];
 			
 			// go through each LodDetail
-			for(HorizontalResolution currentDetail : HorizontalResolution.values())
+			for (HorizontalResolution currentDetail : HorizontalResolution.values())
 			{
 				ArrayList<HorizontalResolution> lowerDetails = new ArrayList<>();
 				
 				// find the details lower than currentDetail
-				for(HorizontalResolution compareDetail : HorizontalResolution.values())
+				for (HorizontalResolution compareDetail : HorizontalResolution.values())
 				{
 					if (currentDetail.detailLevel <= compareDetail.detailLevel)
 					{

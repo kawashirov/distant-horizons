@@ -15,11 +15,11 @@
  *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.seibel.lod.enums;
 
 /**
  * off, detail, detail wireframe
- * 
  * @author James Seibel
  * @version 8-28-2021
  */
@@ -36,7 +36,8 @@ public enum DebugMode
 	
 	/** used when cycling through the different modes */
 	private DebugMode next;
-	static 
+	
+	static
 	{
 		OFF.next = SHOW_DETAIL;
 		SHOW_DETAIL.next = SHOW_DETAIL_WIREFRAME;
