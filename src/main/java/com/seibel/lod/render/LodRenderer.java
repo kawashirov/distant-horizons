@@ -18,13 +18,24 @@
 
 package com.seibel.lod.render;
 
+import java.util.HashSet;
+
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL15C;
+import org.lwjgl.opengl.NVFogDistance;
+
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder.VertexBuffersAndOffset;
 import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.enums.*;
+import com.seibel.lod.enums.DebugMode;
+import com.seibel.lod.enums.DetailDropOff;
+import com.seibel.lod.enums.FogDistance;
+import com.seibel.lod.enums.FogDrawOverride;
+import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
@@ -35,6 +46,7 @@ import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
+
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -45,19 +57,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL15C;
-import org.lwjgl.opengl.NVFogDistance;
-
-import java.util.HashSet;
 
 
 /**
  * This is where all the magic happens. <br>
  * This is where LODs are draw to the world.
  * @author James Seibel
- * @version 10-11-2021
+ * @version 10-13-2021
  */
 public class LodRenderer
 {
@@ -100,7 +106,7 @@ public class LodRenderer
 	public NativeImage lightMap = null;
 	
 	// these variables are used to determine if the buffers should be rebuilt
-	private long prevDayTime = 0;
+	private float prevSkyBrightness = 0;
 	private double prevBrightness = 0;
 	private int prevRenderDistance = 0;
 	private long prevPlayerPosTime = 0;
@@ -170,7 +176,7 @@ public class LodRenderer
 		
 		// TODO move the buffer regeneration logic into its own class (probably called in the client proxy instead)
 		// starting here...
-		determineIfLodsShouldRegenerate(lodDim);
+		determineIfLodsShouldRegenerate(lodDim, partialTicks);
 		
 		//=================//
 		// create the LODs //
@@ -746,10 +752,8 @@ public class LodRenderer
 	}
 	
 	
-	/**
-	 * Determines if the LODs should have a fullRegen or partialRegen
-	 */
-	private void determineIfLodsShouldRegenerate(LodDimension lodDim)
+	/** Determines if the LODs should have a fullRegen or partialRegen */
+	private void determineIfLodsShouldRegenerate(LodDimension lodDim, float partialTicks)
 	{
 		
 		
@@ -802,6 +806,42 @@ public class LodRenderer
 		}
 		
 		
+		
+		// determine how far the lighting has to 
+		// change in order to rebuild the buffers
+		
+		// the max brightness is 1 and the minimum is 0.2
+		float skyBrightness = lodDim.dimension.hasSkyLight() ? mc.getSkyDarken(partialTicks) : 0.2f;
+		float minLightingDifference;
+		switch (LodConfig.CLIENT.buffers.rebuildTimes.get())
+		{
+		case FREQUENT:
+			minLightingDifference = 0.025f;
+			break;
+		case NORMAL:
+			minLightingDifference = 0.05f;
+			break;
+		default:
+		case RARE:
+			minLightingDifference = 0.1f;
+			break;
+		}
+		
+		// check if the lighting changed
+		if (Math.abs(skyBrightness - prevSkyBrightness) > minLightingDifference 
+				// make sure the lighting gets to the max/minimum value
+				// (just in case the minLightingDifference is too large to notice the change)
+				|| (skyBrightness == 1.0f && prevSkyBrightness != 1.0f) // noon
+				|| (skyBrightness == 0.2f && prevSkyBrightness != 0.2f) // midnight
+				|| mc.getOptions().gamma != prevBrightness || lightMap == null)
+		{
+			fullRegen = true;
+			lightMap = mc.getCurrentLightMap();
+			prevBrightness = mc.getOptions().gamma;
+			prevSkyBrightness = skyBrightness;
+		}
+		
+		
 		//================//
 		// partial regens //
 		//================//
@@ -831,14 +871,6 @@ public class LodRenderer
 			prevChunkTime = newTime;
 		}
 		
-		// check if the lighting has changed
-		if (mc.getClientWorld().getDayTime() - prevDayTime > 1000 || mc.getOptions().gamma != prevBrightness || lightMap == null)
-		{
-			fullRegen = true;
-			lightMap = mc.getCurrentLightMap();
-			prevBrightness = mc.getOptions().gamma;
-			prevDayTime = mc.getClientWorld().getDayTime();
-		}
 		
 		
 		//==============//

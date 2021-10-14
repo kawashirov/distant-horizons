@@ -18,6 +18,10 @@
 
 package com.seibel.lod.proxy;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.lwjgl.glfw.GLFW;
+
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder;
 import com.seibel.lod.builders.lodBuilding.LodBuilder;
@@ -34,6 +38,7 @@ import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
+
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.client.event.InputEvent;
@@ -42,15 +47,12 @@ import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.lwjgl.glfw.GLFW;
 
 /**
  * This handles all events sent to the client,
  * and is the starting point for most of the mod.
  * @author James_Seibel
- * @version 9-26-2021
+ * @version 10-13-2021
  */
 public class ClientProxy
 {
@@ -179,9 +181,7 @@ public class ClientProxy
 //		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
 //		LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.set(false);
 
-//		LodConfig.CLIENT.buffers.bufferRebuildPlayerMoveTimeout.set(2000); // 2000
-//		LodConfig.CLIENT.buffers.bufferRebuildChunkChangeTimeout.set(1000); // 1000
-//		LodConfig.CLIENT.buffers.bufferRebuildLodChangeTimeout.set(5000); // 5000
+//		LodConfig.CLIENT.buffers.rebuildTimes.set(BufferRebuildTimes.FREQUENT);
 		
 		LodConfig.CLIENT.debugging.enableDebugKeybindings.set(true);
 //		LodConfig.CLIENT.debugging.debugMode.set(DebugMode.SHOW_DETAIL);
@@ -366,9 +366,7 @@ public class ClientProxy
 		firstTimeSetupComplete = true;
 	}
 	
-	/**
-	 * this method reset some static data everytime we change world
-	 **/
+	/** this method reset some static data every time we change world */
 	private void resetMod()
 	{
 		ThreadMapUtil.clearMaps();
