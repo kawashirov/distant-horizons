@@ -25,6 +25,7 @@ import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
+import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.*;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.block.*;
@@ -91,7 +92,7 @@ public class LodBuilder
 	 */
 	public int defaultDimensionWidthInRegions = 0;
 	
-	public static final boolean useExperimentalLighting = false;
+	public static final boolean useExperimentalLighting = true;
 	
 	
 	
@@ -449,7 +450,7 @@ public class LodBuilder
 			if (useExperimentalLighting)
 			{
 				skyLight = world.getBrightness(LightType.SKY, blockPos);
-				if (!chunk.isLightCorrect() && (skyLight <= 0 || skyLight >= 15))
+				if (skyLight <= 0 || skyLight >= 15)
 				{
 					// we don't know what the light here is,
 					// lets just take a guess
