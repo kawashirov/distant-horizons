@@ -267,10 +267,4 @@ public class VerticalLevelContainer implements LevelContainer
 	{
 		return size * size * getMaxVerticalData();
 	}
-	
-	@Override
-	public int getMaxMemoryUse()
-	{
-		return getMaxNumberOfLods() * 2; //2 byte
-	}
 }

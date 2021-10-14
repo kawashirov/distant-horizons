@@ -327,7 +327,7 @@ public class ClientProxy
 		// calculate how wide the dimension(s) should be in regions
 		int chunksWide;
 		if (mc.getClientWorld().dimensionType().hasCeiling())
-			chunksWide = Math.max(LodConfig.CLIENT.graphics.lodChunkRenderDistance.get(), 64) * 2 + 1;
+			chunksWide = Math.min(LodConfig.CLIENT.graphics.lodChunkRenderDistance.get(), LodUtil.CEILED_DIMENSION_MAX_RENDER_DISTANCE) * 2 + 1;
 		else
 			chunksWide = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 2 + 1;
 		

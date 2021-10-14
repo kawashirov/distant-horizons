@@ -72,6 +72,7 @@ public class LodUtil
 	public static final Color COLOR_DEBUG_WHITE = new Color(255, 255, 255, DEBUG_ALPHA);
 	public static final Color COLOR_INVISIBLE = new Color(0, 0, 0, 0);
 	
+	public static final int CEILED_DIMENSION_MAX_RENDER_DISTANCE = 64; // 0 - 255
 	
 	/**
 	 * In order of nearest to farthest: <br>

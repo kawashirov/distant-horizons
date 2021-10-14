@@ -238,7 +238,10 @@ public class LodRenderer
 		Matrix4f modelViewMatrix = offsetTheModelViewMatrix(mcMatrixStack, partialTicks);
 		
 		// required for setupFog and setupProjectionMatrix
-		farPlaneBlockDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
+		if (mc.getClientWorld().dimensionType().hasCeiling())
+			farPlaneBlockDistance = Math.min(LodConfig.CLIENT.graphics.lodChunkRenderDistance.get(), LodUtil.CEILED_DIMENSION_MAX_RENDER_DISTANCE) * LodUtil.CHUNK_WIDTH;
+		else
+			farPlaneBlockDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
 		
 		setupProjectionMatrix(mcProjectionMatrix, partialTicks);
 		// commented out until we can add shaders to handle lighting
