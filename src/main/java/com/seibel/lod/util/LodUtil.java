@@ -18,12 +18,18 @@
 
 package com.seibel.lod.util;
 
+import java.awt.Color;
+import java.io.File;
+import java.util.HashSet;
+
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
+import com.seibel.lod.enums.HorizontalResolution;
 import com.seibel.lod.enums.VanillaOverdraw;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.wrappers.MinecraftWrapper;
+
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
@@ -41,24 +47,28 @@ import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 
-import java.awt.*;
-import java.io.File;
-import java.util.HashSet;
-
 /**
  * This class holds methods and constants that may be used in multiple places.
  * @author James Seibel
- * @version 10-11-2021
+ * @version 10-13-2021
  */
 public class LodUtil
 {
 	private static final MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	/**
-	 * vanilla render distances less than or equal to this will not allow partial
-	 * overdraw. The VanillaOverdraw with either be ALWAYS or NEVER.
+	 * Vanilla render distances less than or equal to this will not allow partial
+	 * overdraw. The VanillaOverdraw will either be ALWAYS or NEVER.
 	 */
-	public static final int MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW = 5;
+	public static final int MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW = 4;
+	
+	/**
+	 * Vanilla render distances less than or equal to this will cause the overdraw to
+	 * run at a smaller fraction of the vanilla render distance.
+	 */
+	public static final int MINIMUM_RENDER_DISTANCE_FOR_FAR_OVERDRAW = 11;
+	
+	
 	
 	
 	/** The maximum number of LODs that can be rendered vertically */
@@ -347,24 +357,28 @@ public class LodUtil
 		
 		int skipRadius;
 		VanillaOverdraw overdraw = LodConfig.CLIENT.graphics.vanillaOverdraw.get();
+		HorizontalResolution horizontalRes = LodConfig.CLIENT.graphics.drawResolution.get();
 		
-		// apply distance based rules for dynamic
+		// apply distance based rules for dynamic overdraw
 		if (overdraw == VanillaOverdraw.DYNAMIC
 				&& chunkRenderDist <= MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW)
 		{
 			// The vanilla render distance isn't far enough 
 			// for partial skipping to make sense...
-			
-			if (!lodDim.dimension.hasCeiling())
+			if (!lodDim.dimension.hasCeiling() && horizontalRes == HorizontalResolution.BLOCK)
 			{
 				// ...and the dimension is open, so we don't have to worry about
-				// LODs rendering on top of the player.
+				// LODs rendering on top of the player,
+				// and the user is using a high horizontal resolution,
+				// so the overdraw shouldn't be noticeable
 				overdraw = VanillaOverdraw.ALWAYS;
 			}
 			else
 			{
 				// ...but we are underground, so we don't want
-				// LODs rendering on top of the player.
+				// LODs rendering on top of the player,
+				// Or the user is using a LOW horizontal resolution
+				// and overdraw would be very noticeable.
 				overdraw = VanillaOverdraw.NEVER;
 			}
 		}
@@ -379,9 +393,20 @@ public class LodUtil
 			return new HashSet<>();
 		
 		case DYNAMIC:
-			// only skip positions that are greater than
-			// 4/5ths the render distance
-			skipRadius = (int) Math.ceil(chunkRenderDist * (4.0 / 5.0));
+			
+			if (chunkRenderDist > MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW 
+				&& chunkRenderDist <= MINIMUM_RENDER_DISTANCE_FOR_FAR_OVERDRAW)
+			{
+				// This is a small render distance (but greater than the minimum partial
+				// distance), skip positions that are greater than 2/3 the render distance
+				skipRadius = (int) Math.ceil(chunkRenderDist * (2.0/3.0));
+			}
+			else
+			{
+				// This is a large render distance. Skip positions that are greater than
+				// 4/5ths the render distance
+				skipRadius = (int) Math.ceil(chunkRenderDist * (4.0 / 5.0));
+			}
 			break;
 		
 		default:
