@@ -119,7 +119,6 @@ public class DataPointUtil
 	
 	public static short getDepth(long dataPoint)
 	{
-		
 		return (short) ((dataPoint >>> DEPTH_SHIFT) & DEPTH_MASK);
 	}
 	
