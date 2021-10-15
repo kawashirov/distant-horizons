@@ -55,7 +55,7 @@ public class DataPointUtil
 	public final static int SKY_LIGHT_SHIFT = 8;
 	//public final static int LIGHTS_SHIFT = SKY_LIGHT_SHIFT;
 	//public final static int VERTICAL_INDEX_SHIFT = 6;
-	//public final static int FLAG_SHIFT = 5;
+	public final static int FLAG_SHIFT = 5;
 	public final static int GEN_TYPE_SHIFT = 2;
 	public final static int VOID_SHIFT = 1;
 	public final static int EXISTENCE_SHIFT = 0;
@@ -71,7 +71,7 @@ public class DataPointUtil
 	public final static long BLOCK_LIGHT_MASK = 0b1111;
 	public final static long SKY_LIGHT_MASK = 0b1111;
 	//public final static long VERTICAL_INDEX_MASK = 0b11;
-	//public final static long FLAG_MASK = 0b1;
+	public final static long FLAG_MASK = 0b1;
 	public final static long GEN_TYPE_MASK = 0b111;
 	public final static long VOID_MASK = 1;
 	public final static long EXISTENCE_MASK = 1;
@@ -86,17 +86,17 @@ public class DataPointUtil
 		return dataPoint;
 	}
 	
-	public static long createDataPoint(int height, int depth, int color, int lightSky, int lightBlock, int generationMode)
+	public static long createDataPoint(int height, int depth, int color, int lightSky, int lightBlock, int generationMode, boolean flag)
 	{
 		return createDataPoint(
 				ColorUtil.getAlpha(color),
 				ColorUtil.getRed(color),
 				ColorUtil.getGreen(color),
 				ColorUtil.getBlue(color),
-				height, depth, lightSky, lightBlock, generationMode);
+				height, depth, lightSky, lightBlock, generationMode, flag);
 	}
 	
-	public static long createDataPoint(int alpha, int red, int green, int blue, int height, int depth, int lightSky, int lightBlock, int generationMode)
+	public static long createDataPoint(int alpha, int red, int green, int blue, int height, int depth, int lightSky, int lightBlock, int generationMode, boolean flag)
 	{
 		long dataPoint = 0;
 		dataPoint += (long) (alpha >>> ALPHA_DOWNSIZE_SHIFT) << ALPHA_SHIFT;
@@ -151,6 +151,11 @@ public class DataPointUtil
 	public static int getLightBlock(long dataPoint)
 	{
 		return (int) ((dataPoint >>> BLOCK_LIGHT_SHIFT) & BLOCK_LIGHT_MASK);
+	}
+	
+	public static boolean getFlag(long dataPoint)
+	{
+		return ((dataPoint >>> FLAG_SHIFT) & FLAG_MASK) == 1;
 	}
 	
 	public static byte getGenerationMode(long dataPoint)
@@ -248,6 +253,7 @@ public class DataPointUtil
 		int genMode = DistanceGenerationMode.SERVER.complexity;
 		boolean allEmpty = true;
 		boolean allVoid = true;
+		boolean allDefault = true;
 		long singleData;
 		
 		
@@ -439,6 +445,7 @@ public class DataPointUtil
 			byte tempGenMode = DistanceGenerationMode.SERVER.complexity;
 			allEmpty = true;
 			allVoid = true;
+			allDefault = true;
 			long data = 0;
 			
 			for (int index = 0; index < size; index++)
@@ -478,6 +485,7 @@ public class DataPointUtil
 						tempBlue += getBlue(data);
 						tempLightBlock += getLightBlock(data);
 						tempLightSky += getLightSky(data);
+						if (!getFlag(data)) allDefault = false;
 					}
 					tempGenMode = (byte) Math.min(tempGenMode, getGenerationMode(data));
 				}
@@ -500,7 +508,7 @@ public class DataPointUtil
 				tempBlue = tempBlue / numberOfChildren;
 				tempLightBlock = tempLightBlock / numberOfChildren;
 				tempLightSky = tempLightSky / numberOfChildren;
-				dataPoint[j] = createDataPoint(tempAlpha, tempRed, tempGreen, tempBlue, height, depth, tempLightSky, tempLightBlock, tempGenMode);
+				dataPoint[j] = createDataPoint(tempAlpha, tempRed, tempGreen, tempBlue, height, depth, tempLightSky, tempLightBlock, tempGenMode, allDefault);
 			}
 		}
 		return dataPoint;

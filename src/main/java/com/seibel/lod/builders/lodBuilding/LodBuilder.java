@@ -259,6 +259,7 @@ public class LodBuilder
 			yAbs = DataPointUtil.worldHeight + 2;
 			int count = 0;
 			boolean topBlock = true;
+			boolean isDefault = false;
 			while (yAbs > 0)
 			{
 				height = determineHeightPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
@@ -291,9 +292,9 @@ public class LodBuilder
 				}
 				lightBlock = light & 0b1111;
 				lightSky = (light >> 4) & 0b1111;
+				if (light >> 8 == 1) isDefault = true;
 				
-				
-				dataToMerge[index * verticalData + count] = DataPointUtil.createDataPoint(height, depth, color, lightSky, lightBlock, generation);
+				dataToMerge[index * verticalData + count] = DataPointUtil.createDataPoint(height, depth, color, lightSky, lightBlock, generation, isDefault);
 				topBlock = false;
 				yAbs = depth - 1;
 				count++;
@@ -416,6 +417,7 @@ public class LodBuilder
 	{
 		int skyLight;
 		int blockLight;
+		int isDefault = 0;
 		
 		if (mc.getClientWorld() == null)
 			return 0;
@@ -445,7 +447,10 @@ public class LodBuilder
 					// we don't know what the light here is,
 					// lets just take a guess
 					if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
+					{
 						skyLight = 13;
+						isDefault = 1;
+					}
 					else
 						skyLight = 0;
 				}
@@ -469,7 +474,7 @@ public class LodBuilder
 		blockLight = world.getBrightness(LightType.BLOCK, blockPos);
 		blockLight = LodUtil.clamp(0, blockLight + blockBrightness, DEFAULT_MAX_LIGHT);
 		
-		return blockLight + (skyLight << 4);
+		return blockLight + (skyLight << 4) + (isDefault << 8);
 	}
 	
 	
