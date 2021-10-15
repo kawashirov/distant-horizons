@@ -108,7 +108,9 @@ public class DataPointUtil
 		dataPoint += (lightBlock & BLOCK_LIGHT_MASK) << BLOCK_LIGHT_SHIFT;
 		dataPoint += (lightSky & SKY_LIGHT_MASK) << SKY_LIGHT_SHIFT;
 		dataPoint += (generationMode & GEN_TYPE_MASK) << GEN_TYPE_SHIFT;
+		if (flag) dataPoint += FLAG_MASK << FLAG_SHIFT;
 		dataPoint += EXISTENCE_MASK << EXISTENCE_SHIFT;
+		
 		return dataPoint;
 	}
 	

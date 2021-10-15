@@ -31,11 +31,14 @@ import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.proxy.GlProxy;
 import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.*;
+import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.LightType;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
@@ -59,6 +62,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class LodBufferBuilder
 {
+	private static final MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
+	
 	/** The thread used to generate new LODs off the main thread. */
 	public static final ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(LodBufferBuilder.class.getSimpleName() + " - main"));
 	/** The threads used to generate buffers. */
@@ -231,6 +236,9 @@ public class LodBufferBuilder
 			// create the nodeToRenderThreads //
 			//================================//
 			
+			ClientWorld world = mc.getClientWorld();
+			int skyLightPlayer = world.getBrightness(LightType.SKY, playerBlockPos);
+			
 			for (int xRegion = 0; xRegion < lodDim.getWidth(); xRegion++)
 			{
 				for (int zRegion = 0; zRegion < lodDim.getWidth(); zRegion++)
@@ -382,9 +390,9 @@ public class LodBufferBuilder
 									data = lodDim.getData(detailLevel, posX, posZ, verticalIndex);
 									if (DataPointUtil.isVoid(data) || !DataPointUtil.doesItExist(data))
 										break;
-									
+										
 									LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffers[bufferIndex], playerBlockPosRounded, data, adjData,
-											detailLevel, posX, posZ, box, renderer.previousDebugMode, renderer.lightMap, adjShadeDisabled);
+											detailLevel, posX, posZ, box, renderer.previousDebugMode, renderer.lightMap, adjShadeDisabled, (DataPointUtil.getFlag(data) && skyLightPlayer == 0));
 								}
 								
 								

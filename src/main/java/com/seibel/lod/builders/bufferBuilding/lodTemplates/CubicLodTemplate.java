@@ -47,7 +47,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
-			byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap, boolean[] adjShadeDisabled)
+			byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap, boolean[] adjShadeDisabled, boolean caveLight)
 	{
 		if (box == null)
 			return;
@@ -61,18 +61,36 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		else
 			color = DataPointUtil.getColor(data);
 		
-		generateBoundingBox(
-				box,
-				DataPointUtil.getHeight(data),
-				DataPointUtil.getDepth(data),
-				blockWidth,
-				posX * blockWidth, 0, posZ * blockWidth, // x, y, z offset
-				bufferCenterBlockPos,
-				adjData,
-				color,
-				DataPointUtil.getLightSky(data),
-				DataPointUtil.getLightBlock(data),
-				adjShadeDisabled);
+		if (caveLight)
+		{
+			generateBoundingBox(
+					box,
+					DataPointUtil.getHeight(data),
+					DataPointUtil.getDepth(data),
+					blockWidth,
+					posX * blockWidth, 0, posZ * blockWidth, // x, y, z offset
+					bufferCenterBlockPos,
+					adjData,
+					color,
+					0,
+					DataPointUtil.getLightBlock(data),
+					adjShadeDisabled);
+		}
+		else
+		{
+			generateBoundingBox(
+					box,
+					DataPointUtil.getHeight(data),
+					DataPointUtil.getDepth(data),
+					blockWidth,
+					posX * blockWidth, 0, posZ * blockWidth, // x, y, z offset
+					bufferCenterBlockPos,
+					adjData,
+					color,
+					DataPointUtil.getLightSky(data),
+					DataPointUtil.getLightBlock(data),
+					adjShadeDisabled);
+		}
 		
 		addBoundingBoxToBuffer(buffer, box);
 	}
