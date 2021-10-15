@@ -89,6 +89,8 @@ public class LodBufferBuilder
 	/** This boolean indicates that ever buffer need to be regenerated */
 	public volatile boolean fullRegeneration = false;
 	
+	public static int skyLightPlayer = 15;
+	
 	/**
 	 * How many buffers there are for the given region. <Br>
 	 * This is done because some regions may require more memory than
@@ -237,7 +239,7 @@ public class LodBufferBuilder
 			//================================//
 			
 			ClientWorld world = mc.getClientWorld();
-			int skyLightPlayer = world.getBrightness(LightType.SKY, playerBlockPos);
+			skyLightPlayer = world.getBrightness(LightType.SKY, playerBlockPos);
 			
 			for (int xRegion = 0; xRegion < lodDim.getWidth(); xRegion++)
 			{
@@ -392,7 +394,7 @@ public class LodBufferBuilder
 										break;
 										
 									LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffers[bufferIndex], playerBlockPosRounded, data, adjData,
-											detailLevel, posX, posZ, box, renderer.previousDebugMode, renderer.lightMap, adjShadeDisabled, (DataPointUtil.getFlag(data) && skyLightPlayer == 0));
+											detailLevel, posX, posZ, box, renderer.previousDebugMode, renderer.lightMap, adjShadeDisabled);
 								}
 								
 								

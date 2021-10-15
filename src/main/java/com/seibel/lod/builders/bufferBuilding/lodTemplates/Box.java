@@ -319,16 +319,13 @@ public class Box
 		//Down direction case
 		singleAdjDataPoint = adjData.get(Direction.DOWN)[0];
 		if(DataPointUtil.doesItExist(singleAdjDataPoint))
-		{
-			skyLights.get(Direction.DOWN)[0] = (byte) DataPointUtil.getLightSky(singleAdjDataPoint);
-			
-		}else
-		{
+			skyLights.get(Direction.DOWN)[0] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
+		else
 			skyLights.get(Direction.DOWN)[0] = skyLights.get(Direction.UP)[0];
-		}
+		//other sided
+		//TODO clean some similar cases
 		for (Direction direction : ADJ_DIRECTIONS)
 		{
-			singleAdjDataPoint = 0;
 			if (isCulled(direction))
 				continue;
 			
@@ -339,6 +336,7 @@ public class Box
 				adjDepth.get(direction)[0] = minY;
 				adjHeight.get(direction)[1] = VOID_FACE;
 				adjDepth.get(direction)[1] = VOID_FACE;
+				skyLights.get(direction)[0] = 15; //in void set full sky light
 				continue;
 			}
 			
@@ -374,7 +372,7 @@ public class Box
 						else
 						{
 							adjDepth.get(direction)[faceToDraw] = getMinY();
-							skyLights.get(direction)[faceToDraw] = (byte) 0;
+							skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
 						}
 						faceToDraw++;
 						toFinish = false;
@@ -404,7 +402,7 @@ public class Box
 						else
 						{
 							adjDepth.get(direction)[faceToDraw] = height;
-							skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSky(singleAdjDataPoint);
+							skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
 						}
 						toFinish = false;
 						faceToDraw++;
@@ -415,7 +413,7 @@ public class Box
 						// the adj data intersects the higher part of the current data
 						// we start the creation of a new face
 						adjHeight.get(direction)[faceToDraw] = depth;
-						//skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSky(singleAdjDataPoint);
+						//skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
 						firstFace = false;
 						toFinish = true;
 						toFinishIndex = i + 1;
@@ -431,7 +429,7 @@ public class Box
 						}
 						
 						adjDepth.get(direction)[faceToDraw] = height;
-						skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSky(singleAdjDataPoint);
+						skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
 						faceToDraw++;
 						adjHeight.get(direction)[faceToDraw] = depth;
 						firstFace = false;
@@ -455,13 +453,9 @@ public class Box
 				{
 					singleAdjDataPoint = dataPoint[toFinishIndex];
 					if (DataPointUtil.doesItExist(singleAdjDataPoint))
-					{
-						skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSky(singleAdjDataPoint);
-					}
+						skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
 					else
-					{
 						skyLights.get(direction)[faceToDraw] = skyLights.get(Direction.UP)[0];
-					}
 				}
 				faceToDraw++;
 			}
