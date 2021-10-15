@@ -151,6 +151,8 @@ public class Box
 	 */
 	public final Map<Direction, int[]> adjHeight;
 	public final Map<Direction, int[]> adjDepth;
+	public final Map<Direction, byte[]> skyLights;
+	public byte blockLight;
 	
 	/** Holds if the given direction should be culled or not */
 	public final boolean[] culling;
@@ -163,7 +165,15 @@ public class Box
 		boxWidth = new int[3];
 		
 		colorMap = new int[6];
-		
+		skyLights = new HashMap<Direction, byte[]>()
+		{{
+			put(Direction.UP, new byte[1]);
+			put(Direction.DOWN, new byte[1]);
+			put(Direction.EAST, new byte[LodUtil.MAX_NUMBER_OF_VERTICAL_LODS]);
+			put(Direction.WEST, new byte[LodUtil.MAX_NUMBER_OF_VERTICAL_LODS]);
+			put(Direction.SOUTH, new byte[LodUtil.MAX_NUMBER_OF_VERTICAL_LODS]);
+			put(Direction.NORTH, new byte[LodUtil.MAX_NUMBER_OF_VERTICAL_LODS]);
+		}};
 		adjHeight = new HashMap<Direction, int[]>()
 		{{
 			put(Direction.EAST, new int[LodUtil.MAX_NUMBER_OF_VERTICAL_LODS]);
@@ -182,6 +192,16 @@ public class Box
 		culling = new boolean[6];
 	}
 	
+	/**
+	 * Set the light of the columns
+	 * @param skyLight
+	 * @param blockLight
+	 */
+	public void setLights(int skyLight, int blockLight)
+	{
+		this.blockLight = (byte) blockLight;
+		skyLights.get(Direction.UP)[0] = (byte) skyLight;
+	}
 	
 	/**
 	 * Set the color of the columns
@@ -216,25 +236,36 @@ public class Box
 		}
 	}
 	
+	/**
+	 */
+	public byte getSkyLight(Direction direction, int verticalIndex)
+	{
+		if(direction == Direction.UP || direction == Direction.DOWN)
+			return skyLights.get(direction)[0];
+		else
+			return skyLights.get(direction)[verticalIndex];
+	}
 	
+	/**
+	 */
+	public int getBlockLight()
+	{
+		return blockLight;
+	}
 	/** clears this box, resetting everything to default values */
 	public void reset()
 	{
 		Arrays.fill(boxWidth, 0);
 		Arrays.fill(boxOffset, 0);
 		Arrays.fill(colorMap, 0);
-		
+		blockLight = 0;
 		for (Direction direction : ADJ_DIRECTIONS)
 		{
-			// TODO wouldn't we want to set all adjHeightAndDepth
-			// to VOID_FACE regardless of the culled status?
-			if (isCulled(direction))
-				continue;
-			
 			for (int i = 0; i < adjHeight.get(direction).length; i++)
 			{
 				adjHeight.get(direction)[i] = VOID_FACE;
 				adjDepth.get(direction)[i] = VOID_FACE;
+				skyLights.get(direction)[i] = 0;
 			}
 		}
 	}
@@ -242,8 +273,6 @@ public class Box
 	/** determine which faces should be culled */
 	public void setUpCulling(int cullingDistance, BlockPos playerPos)
 	{
-		//TODO is passing playerPos needed?
-		playerPos = MinecraftWrapper.INSTANCE.getPlayer().blockPosition();
 		for (Direction direction : DIRECTIONS)
 		{
 			if (direction == Direction.DOWN || direction == Direction.WEST || direction == Direction.NORTH)
@@ -254,6 +283,7 @@ public class Box
 			{
 				culling[DIRECTION_INDEX.get(direction)] = playerPos.get(direction.getAxis()) < getFacePos(direction) - cullingDistance;
 			}
+			culling[DIRECTION_INDEX.get(direction)] = false;
 		}
 	}
 	
@@ -277,10 +307,30 @@ public class Box
 		int depth;
 		int minY = getMinY();
 		int maxY = getMaxY();
+		long singleAdjDataPoint;
+		
+		/* TODO implement attached vertical face culling
+		//Up direction case
+		if(DataPointUtil.doesItExist(adjData.get(Direction.UP)))
+		{
+			height = DataPointUtil.getHeight(singleAdjDataPoint);
+			depth = DataPointUtil.getDepth(singleAdjDataPoint);
+		}*/
+		//Down direction case
+		singleAdjDataPoint = adjData.get(Direction.DOWN)[0];
+		if(DataPointUtil.doesItExist(singleAdjDataPoint))
+		{
+			skyLights.get(Direction.DOWN)[0] = (byte) DataPointUtil.getLightSky(singleAdjDataPoint);
+			
+		}else
+		{
+			skyLights.get(Direction.DOWN)[0] = skyLights.get(Direction.UP)[0];
+		}
 		for (Direction direction : ADJ_DIRECTIONS)
 		{
-			//if (isCulled(direction))
-			//	continue;
+			singleAdjDataPoint = 0;
+			if (isCulled(direction))
+				continue;
 			
 			long[] dataPoint = adjData.get(direction);
 			if (dataPoint == null || DataPointUtil.isVoid(dataPoint[0]))
@@ -296,8 +346,8 @@ public class Box
 			int faceToDraw = 0;
 			boolean firstFace = true;
 			boolean toFinish = false;
+			int toFinishIndex = 0;
 			boolean allAbove = true;
-			long singleAdjDataPoint;
 			for (i = 0; i < dataPoint.length; i++)
 			{
 				singleAdjDataPoint = dataPoint[i];
@@ -319,10 +369,12 @@ public class Box
 						{
 							adjHeight.get(direction)[0] = getMaxY();
 							adjDepth.get(direction)[0] = getMinY();
+							skyLights.get(direction)[0] = skyLights.get(Direction.UP)[0];
 						}
 						else
 						{
 							adjDepth.get(direction)[faceToDraw] = getMinY();
+							skyLights.get(direction)[faceToDraw] = (byte) 0;
 						}
 						faceToDraw++;
 						toFinish = false;
@@ -347,10 +399,12 @@ public class Box
 						{
 							adjHeight.get(direction)[0] = getMaxY();
 							adjDepth.get(direction)[0] = height;
+							skyLights.get(direction)[0] = skyLights.get(Direction.UP)[0];
 						}
 						else
 						{
 							adjDepth.get(direction)[faceToDraw] = height;
+							skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSky(singleAdjDataPoint);
 						}
 						toFinish = false;
 						faceToDraw++;
@@ -361,8 +415,10 @@ public class Box
 						// the adj data intersects the higher part of the current data
 						// we start the creation of a new face
 						adjHeight.get(direction)[faceToDraw] = depth;
+						//skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSky(singleAdjDataPoint);
 						firstFace = false;
 						toFinish = true;
+						toFinishIndex = i + 1;
 					}
 					else
 					{
@@ -375,10 +431,12 @@ public class Box
 						}
 						
 						adjDepth.get(direction)[faceToDraw] = height;
+						skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSky(singleAdjDataPoint);
 						faceToDraw++;
 						adjHeight.get(direction)[faceToDraw] = depth;
 						firstFace = false;
 						toFinish = true;
+						toFinishIndex = i + 1;
 					}
 				}
 			}
@@ -387,11 +445,24 @@ public class Box
 			{
 				adjHeight.get(direction)[0] = getMaxY();
 				adjDepth.get(direction)[0] = getMinY();
+				skyLights.get(direction)[0] = skyLights.get(Direction.UP)[0];
 				faceToDraw++;
 			}
 			else if (toFinish)
 			{
 				adjDepth.get(direction)[faceToDraw] = minY;
+				if(toFinishIndex < dataPoint.length)
+				{
+					singleAdjDataPoint = dataPoint[toFinishIndex];
+					if (DataPointUtil.doesItExist(singleAdjDataPoint))
+					{
+						skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSky(singleAdjDataPoint);
+					}
+					else
+					{
+						skyLights.get(direction)[faceToDraw] = skyLights.get(Direction.UP)[0];
+					}
+				}
 				faceToDraw++;
 			}
 			

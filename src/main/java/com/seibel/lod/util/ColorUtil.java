@@ -1,5 +1,7 @@
 package com.seibel.lod.util;
 
+import net.minecraft.client.renderer.texture.NativeImage;
+
 import java.awt.*;
 
 public class ColorUtil
@@ -48,6 +50,17 @@ public class ColorUtil
 			return (getAlpha(color) << 24) | ((int) Math.max(getRed(color) * shade, 0) << 16) | ((int) Math.max(getGreen(color) * shade, 0) << 8) | (int) Math.max(getBlue(color) * shade, 0);
 		else
 			return (getAlpha(color) << 24) | ((int) Math.min(getRed(color) * shade, 255) << 16) | ((int) Math.min(getGreen(color) * shade, 255) << 8) | (int) Math.min(getBlue(color) * shade, 255);
+	}
+	
+	/** This method apply the lightmap to the color to use */
+	public static int applyLightValue(int color, int skyLight, int blockLight, NativeImage lightMap)
+	{
+		int lightColor = lightMap.getPixelRGBA(blockLight, skyLight);
+		int red = ColorUtil.getBlue(lightColor);
+		int green = ColorUtil.getGreen(lightColor);
+		int blue = ColorUtil.getRed(lightColor);
+		
+		return ColorUtil.multiplyRGBcolors(color, ColorUtil.rgbToInt(red, green, blue));
 	}
 	
 	/** Edit the given color as an HSV (Hue Saturation Value) color */

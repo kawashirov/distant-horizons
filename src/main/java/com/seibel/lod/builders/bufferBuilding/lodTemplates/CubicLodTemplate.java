@@ -19,8 +19,12 @@
 package com.seibel.lod.builders.bufferBuilding.lodTemplates;
 
 import com.seibel.lod.enums.DebugMode;
+import com.seibel.lod.render.LodRenderer;
+import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrappers.MinecraftWrapper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.Direction;
@@ -55,8 +59,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		if (debugging != DebugMode.OFF)
 			color = LodUtil.DEBUG_DETAIL_LEVEL_COLORS[detailLevel].getRGB();
 		else
-			color = DataPointUtil.getLightColor(data, lightMap);
-		
+			color = DataPointUtil.getColor(data);
 		
 		generateBoundingBox(
 				box,
@@ -67,6 +70,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 				bufferCenterBlockPos,
 				adjData,
 				color,
+				DataPointUtil.getLightSky(data),
+				DataPointUtil.getLightBlock(data),
 				adjShadeDisabled);
 		
 		addBoundingBoxToBuffer(buffer, box);
@@ -78,6 +83,8 @@ public class CubicLodTemplate extends AbstractLodTemplate
 			BlockPos bufferCenterBlockPos,
 			Map<Direction, long[]> adjData,
 			int color,
+			int skyLight,
+			int blockLight,
 			boolean[] adjShadeDisabled)
 	{
 		// don't add an LOD if it is empty
@@ -96,6 +103,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		double z = -bufferCenterBlockPos.getZ();
 		box.reset();
 		box.setColor(color, adjShadeDisabled);
+		box.setLights(skyLight, blockLight);
 		box.setWidth(width, height - depth, width);
 		box.setOffset((int) (xOffset + x), (int) (depth + yOffset), (int) (zOffset + z));
 		box.setUpCulling(32, bufferCenterBlockPos);
@@ -104,21 +112,29 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	
 	private void addBoundingBoxToBuffer(BufferBuilder buffer, Box box)
 	{
+		int color;
+		int skyLight;
+		int blockLight;
 		for (Direction direction : Box.DIRECTIONS)
 		{
-			// TODO what does adjacentIndex mean?
-			int adjIndex = 0;
-			while (box.shouldRenderFace(direction, adjIndex))
+			if(box.isCulled(direction))
+				continue;
+			int verticalFaceIndex = 0;
+			while (box.shouldRenderFace(direction, verticalFaceIndex))
 			{
 				for (int vertexIndex = 0; vertexIndex < 4; vertexIndex++)
 				{
+					color = box.getColor(direction);
+					skyLight = box.getSkyLight(direction, verticalFaceIndex);
+					blockLight = box.getBlockLight();
+					color = ColorUtil.applyLightValue(color, skyLight, blockLight, MinecraftWrapper.INSTANCE.getCurrentLightMap());
 					addPosAndColor(buffer,
 							box.getX(direction, vertexIndex),
-							box.getY(direction, vertexIndex, adjIndex),
+							box.getY(direction, vertexIndex, verticalFaceIndex),
 							box.getZ(direction, vertexIndex),
-							box.getColor(direction));
+							color);
 				}
-				adjIndex++;
+				verticalFaceIndex++;
 			}
 		}
 	}

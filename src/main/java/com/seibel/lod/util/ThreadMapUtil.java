@@ -56,10 +56,12 @@ public class ThreadMapUtil
 	{
 		if (!adjDataMap.containsKey(Thread.currentThread().getName())
 				|| (adjDataMap.get(Thread.currentThread().getName()) == null)
-				|| (adjDataMap.get(Thread.currentThread().getName()).get(Direction.UP) == null)
-				|| (adjDataMap.get(Thread.currentThread().getName()).get(Direction.UP).length != verticalData))
+				|| (adjDataMap.get(Thread.currentThread().getName()).get(Direction.NORTH) == null)
+				|| (adjDataMap.get(Thread.currentThread().getName()).get(Direction.NORTH).length != verticalData))
 		{
 			adjDataMap.put(Thread.currentThread().getName(), new HashMap());
+			adjDataMap.get(Thread.currentThread().getName()).put(Direction.UP, new long[1]);
+			adjDataMap.get(Thread.currentThread().getName()).put(Direction.DOWN, new long[1]);
 			for (Direction direction : Box.ADJ_DIRECTIONS)
 				adjDataMap.get(Thread.currentThread().getName()).put(direction, new long[verticalData]);
 		}

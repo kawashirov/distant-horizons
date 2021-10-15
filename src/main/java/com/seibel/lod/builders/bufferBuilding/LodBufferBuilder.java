@@ -360,6 +360,25 @@ public class LodBufferBuilder
 								long data;
 								for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ); verticalIndex++)
 								{
+									if(verticalIndex > 0)
+									{
+										adjData.get(Direction.UP)[0] = lodDim.getData(detailLevel, posX, posZ, verticalIndex - 1);
+									}
+									else
+									{
+										adjData.get(Direction.UP)[0] = DataPointUtil.EMPTY_DATA;
+									}
+									
+									
+									if(verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ) - 1)
+									{
+										adjData.get(Direction.DOWN)[0] = lodDim.getData(detailLevel, posX, posZ, verticalIndex + 1);
+									}
+									else
+									{
+										adjData.get(Direction.DOWN)[0] = DataPointUtil.EMPTY_DATA;
+									}
+									
 									data = lodDim.getData(detailLevel, posX, posZ, verticalIndex);
 									if (DataPointUtil.isVoid(data) || !DataPointUtil.doesItExist(data))
 										break;
