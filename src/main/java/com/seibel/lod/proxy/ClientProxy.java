@@ -360,9 +360,6 @@ public class ClientProxy
 		// make sure the GlProxy is created before the LodBufferBuilder needs it
 		GlProxy.getInstance();
 		
-		// TODO shouldn't these already be empty?
-		ThreadMapUtil.clearMaps();
-		
 		firstTimeSetupComplete = true;
 	}
 	

@@ -118,7 +118,7 @@ public class LodDimension
 					// connected to server
 					
 					saveDir = new File(mc.getGameDirectory().getCanonicalFile().getPath() +
-							File.separatorChar + "lod server data" + File.separatorChar + mc.getCurrentDimensionId());
+											   File.separatorChar + "lod server data" + File.separatorChar + mc.getCurrentDimensionId());
 				}
 				
 				fileHandler = new LodDimensionFileHandler(saveDir, this);
@@ -526,24 +526,29 @@ public class LodDimension
 	public PosToGenerateContainer getPosToGenerate(int maxDataToGenerate, int playerBlockPosX, int playerBlockPosZ)
 	{
 		PosToGenerateContainer posToGenerate;
-		LodRegion region;
-		// TODO what are dx, dz, and t?
+		LodRegion lodRegion;
+		// all the following values are used for the spiral matrix visit
+		// x and z are the matrix coord
+		// dx and dz is the next move on the coordinate in the range -1 0 +1
 		int x, z, dx, dz, t;
 		x = 0;
 		z = 0;
 		dx = 0;
 		dz = -1;
 		
-		// TODO please comment what this code is doing
+		// We can use two type of generation scheduling
 		switch (LodConfig.CLIENT.worldGenerator.generationPriority.get())
 		{
 		default:
 		case NEAR_FIRST:
+			//in the NEAR_FIRST generation scheduling we prioritize the nearest un-generated position to the player
+			//the chunk position to generate will be stored in a posToGenerate object
 			posToGenerate = new PosToGenerateContainer((byte) 10, maxDataToGenerate, playerBlockPosX, playerBlockPosZ);
 			
 			int playerChunkX = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerBlockPosX);
 			int playerChunkZ = LevelPosUtil.getChunkPos(LodUtil.BLOCK_DETAIL_LEVEL, playerBlockPosZ);
 			
+			int complexity;
 			int xChunkToCheck;
 			int zChunkToCheck;
 			byte detailLevel;
@@ -553,40 +558,57 @@ public class LodDimension
 			int numbChunksWide = (width) * 32;
 			int circleLimit = Integer.MAX_VALUE;
 			
+			//posToGenerate is using an insertion sort algorithm which can become really fast if the
+			//original data order is almost ordered. For this reason we explore the matrix of the position to generate
+			//with a spiral matrix visit (a square spiral is almost ordered in the "nearest to farthest" order)
 			for (int i = 0; i < numbChunksWide * numbChunksWide; i++)
 			{
-				// use this for circular generation
-				if (maxDataToGenerate < 0)
+				//Firstly we check if the posToGenerate has been filled
+				if (maxDataToGenerate == 0)
+				{
+					maxDataToGenerate--;
+					//if it has been filled then we set a stop distance
+					//the stop distance will be current distance (generically x) per square root of 2
+					//this would guarantee a circular generation since (Math.abs(x) * 1.41f) is the
+					//radius of a circle that inscribe a square
+					circleLimit = (int) (Math.abs(x) * 1.41f);
+				}
+				//This second if check if we reached the circleLimit decided in the previous if
+				//if so we stop
+				else if (maxDataToGenerate < 0)
 				{
 					if (circleLimit < Math.abs(x) && circleLimit < Math.abs(z))
 						break;
 				}
-				else if (maxDataToGenerate == 0)
-				{
-					maxDataToGenerate--;
-					circleLimit = (int) (Math.abs(x) * 1.41f);
-				}
 				
+				
+				//Now we check if the current chunk has been generated with the correct complexity
+				complexity = LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get().complexity;
 				xChunkToCheck = x + playerChunkX;
 				zChunkToCheck = z + playerChunkZ;
 				
-				region = getRegion(LodUtil.CHUNK_DETAIL_LEVEL, xChunkToCheck, zChunkToCheck);
-				if (region == null)
+				//we get the lod region in which the chunk is present
+				lodRegion = getRegion(LodUtil.CHUNK_DETAIL_LEVEL, xChunkToCheck, zChunkToCheck);
+				if (lodRegion == null)
 					continue;
 				
-				detailLevel = region.getMinDetailLevel();
-				
+				//we create the level position info of the chunk
+				detailLevel = lodRegion.getMinDetailLevel();
 				posX = LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, xChunkToCheck, detailLevel);
 				posZ = LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, zChunkToCheck, detailLevel);
+				
 				data = getSingleData(detailLevel, posX, posZ);
 				
-				if (DataPointUtil.getGenerationMode(data) < LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get().complexity)
+				//we will generate the position only if the current generation complexity is lower than the target one.
+				//an un-generated area will always have 0 generation
+				if (DataPointUtil.getGenerationMode(data) < complexity)
 				{
 					posToGenerate.addPosToGenerate(detailLevel, posX, posZ);
 					if (maxDataToGenerate >= 0)
 						maxDataToGenerate--;
 				}
 				
+				//with this code section we find the next chunk to check
 				if ((x == z) || ((x < 0) && (x == -z)) || ((x > 0) && (x == 1 - z)))
 				{
 					t = dx;
@@ -600,6 +622,9 @@ public class LodDimension
 		
 		
 		case FAR_FIRST:
+			//in the FAR_FIRST generation we dedicate part of the generation process to the far region with really
+			//low detail quality.
+			
 			posToGenerate = new PosToGenerateContainer((byte) 8, maxDataToGenerate, playerBlockPosX, playerBlockPosZ);
 			
 			int xRegion;
@@ -610,11 +635,13 @@ public class LodDimension
 				xRegion = x + center.x;
 				zRegion = z + center.z;
 				
-				region = getRegion(xRegion, zRegion);
-				if (region != null)
-					region.getPosToGenerate(posToGenerate, playerBlockPosX, playerBlockPosZ);
+				//All of this is handled directly by the region, which scan every pos from top to bottom of the quad tree
+				lodRegion = getRegion(xRegion, zRegion);
+				if (lodRegion != null)
+					lodRegion.getPosToGenerate(posToGenerate, playerBlockPosX, playerBlockPosZ);
 				
 				
+				//with this code section we find the next chunk to check
 				if ((x == z) || ((x < 0) && (x == -z)) || ((x > 0) && (x == 1 - z)))
 				{
 					t = dx;
@@ -630,9 +657,7 @@ public class LodDimension
 	}
 	
 	/**
-	 * Returns every node that should be rendered based on the position of the player.
-	 * <p>
-	 * TODO why isn't posToRender returned? it would make it a bit more clear what is happening
+	 * Fills the posToRender with the position to render for the regionPos given in input
 	 */
 	public void getPosToRender(PosToRenderContainer posToRender, RegionPos regionPos, int playerPosX,
 			int playerPosZ)
@@ -719,17 +744,6 @@ public class LodDimension
 		return regenRegionBuffer[xIndex][zIndex];
 	}
 	
-	/**
-	 * TODO we aren't currently using this, is there a reason for that?
-	 * is this significantly different than regenRegionBuffer?
-	 * <p>
-	 * Returns if the buffer at the given array index needs
-	 * to have its buffer resized.
-	 */
-	public boolean doesRegionNeedBufferResized(int xIndex, int zIndex)
-	{
-		return recreateRegionBuffer[xIndex][zIndex];
-	}
 	
 	/**
 	 * Sets if the buffer at the given array index needs
