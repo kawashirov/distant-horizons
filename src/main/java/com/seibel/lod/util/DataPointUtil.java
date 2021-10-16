@@ -4,6 +4,7 @@ import com.seibel.lod.enums.DistanceGenerationMode;
 import net.minecraft.client.renderer.texture.NativeImage;
 
 import static com.seibel.lod.builders.bufferBuilding.LodBufferBuilder.skyLightPlayer;
+import static com.seibel.lod.builders.lodBuilding.LodBuilder.USE_EXPERIMENTAL_SKYLIGHT;
 
 public class DataPointUtil
 {
@@ -153,7 +154,7 @@ public class DataPointUtil
 	
 	public static int getLightSkyAlt(long dataPoint)
 	{
-		if (skyLightPlayer == 0 && ((dataPoint >>> FLAG_SHIFT) & FLAG_MASK) == 1)
+		if (USE_EXPERIMENTAL_SKYLIGHT && skyLightPlayer == 0 && ((dataPoint >>> FLAG_SHIFT) & FLAG_MASK) == 1)
 			return 0;
 		else
 			return (int) ((dataPoint >>> SKY_LIGHT_SHIFT) & SKY_LIGHT_MASK);

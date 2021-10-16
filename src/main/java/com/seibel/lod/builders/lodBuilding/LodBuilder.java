@@ -85,6 +85,8 @@ public class LodBuilder
 	/** Minecraft's max light value */
 	public static final short DEFAULT_MAX_LIGHT = 15;
 	
+	//TODO make it config
+	public static final boolean USE_EXPERIMENTAL_SKYLIGHT = false;
 	
 	/**
 	 * How wide LodDimensions should be in regions <br>
@@ -439,21 +441,34 @@ public class LodBuilder
 			skyLight = DEFAULT_MAX_LIGHT;
 		else
 		{
-			skyLight = world.getBrightness(LightType.SKY, blockPos);
-			if (skyLight > 15 || skyLight < 0)
-				ClientProxy.LOGGER.warn("is this helpful? " + skyLight);
-			if (!chunk.isLightCorrect() && (skyLight == 0 || skyLight == 15))
+			if (USE_EXPERIMENTAL_SKYLIGHT)
 			{
-				// we don't know what the light here is,
-				// lets just take a guess
+				skyLight = world.getBrightness(LightType.SKY, blockPos);
+				if (!chunk.isLightCorrect() && (skyLight == 0 || skyLight == 15))
+				{
+					// we don't know what the light here is,
+					// lets just take a guess
+					if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
+					{
+						skyLight = 12;
+						isDefault = 1;
+					}
+					else
+						skyLight = 0;
+				}
+			}
+			else
+			{
 				if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
 				{
 					skyLight = 12;
 					isDefault = 1;
 				}
+				else
+					skyLight = 0;
 			}
-			if (skyLight == 15)
-				ClientProxy.LOGGER.warn("skylight 15 while not top block");
+			//if (skyLight == 15)
+			//	ClientProxy.LOGGER.warn("skylight 15 while not top block");
 		}
 		
 		blockLight = world.getBrightness(LightType.BLOCK, blockPos);
