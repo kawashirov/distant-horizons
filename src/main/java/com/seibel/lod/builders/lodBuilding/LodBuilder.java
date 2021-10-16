@@ -85,8 +85,6 @@ public class LodBuilder
 	/** Minecraft's max light value */
 	public static final short DEFAULT_MAX_LIGHT = 15;
 	
-	//TODO make it config
-	public static final boolean USE_EXPERIMENTAL_SKYLIGHT = false;
 	
 	/**
 	 * How wide LodDimensions should be in regions <br>
@@ -441,7 +439,7 @@ public class LodBuilder
 			skyLight = DEFAULT_MAX_LIGHT;
 		else
 		{
-			if (USE_EXPERIMENTAL_SKYLIGHT)
+			if (LodConfig.CLIENT.worldGenerator.useExperimentalSkyLight.get())
 			{
 				skyLight = world.getBrightness(LightType.SKY, blockPos);
 				if (!chunk.isLightCorrect() && (skyLight == 0 || skyLight == 15))

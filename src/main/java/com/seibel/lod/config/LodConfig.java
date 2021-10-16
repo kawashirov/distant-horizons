@@ -196,6 +196,7 @@ public class LodConfig
 		public final ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
 		public final ForgeConfigSpec.EnumValue<HorizontalScale> horizontalScale;
 		public final ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
+		public final ForgeConfigSpec.BooleanValue useExperimentalSkyLight;
 		public final ForgeConfigSpec.BooleanValue avoidBlockWithNoCollision;
 		public final ForgeConfigSpec.BooleanValue avoidNonFullBlock;
 		
@@ -319,6 +320,11 @@ public class LodConfig
 							+ " If you are a Java wizard, check out the git issue here: \n"
 							+ " https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues/35 \n")
 					.define("allowUnstableFeatureGeneration", false);
+			
+			useExperimentalSkyLight = builder
+												.comment("\n\n"
+																 + " Change how sky light value is calculated in the fake chunks \n")
+												.define("use experimental sky light system", false);
 			
 			avoidBlockWithNoCollision = builder
 					.comment("\n\n"
