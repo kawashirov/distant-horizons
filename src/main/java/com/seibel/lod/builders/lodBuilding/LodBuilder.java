@@ -94,6 +94,10 @@ public class LodBuilder
 	public static final ConcurrentMap<Block, Boolean> toTint = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<Block, VoxelShape> shapeMap = new ConcurrentHashMap<>();
 	
+	public static final ConcurrentMap<Block, Boolean> notFullBlock = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<Block, Boolean> smallBlock = new ConcurrentHashMap<>();
+	
+	
 	public static final ModelDataMap dataMap = new ModelDataMap.Builder().build();
 	
 	/** If no blocks are found in the area in determineBottomPointForArea return this */
@@ -422,9 +426,24 @@ public class LodBuilder
 				colorInt = getColorForBlock(chunk, blockPos);
 			}
 			
+			// if we are skipping non-full and non-solid blocks that means we ignore
+			// snow, flowers, etc. Get the above block so we can still get the color
+			// of the snow, flower, etc. that may be above this block
+			int aboveColorInt = 0;
+			if (LodConfig.CLIENT.worldGenerator.avoidNonFullBlock.get() || LodConfig.CLIENT.worldGenerator.avoidBlockWithNoCollision.get())
+			{
+				blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel + 1, chunk.getPos().getMinBlockZ() + zRel);
+				aboveColorInt = getColorForBlock(chunk, blockPos);
+			}
+			
 			if (colorInt == 0 && yAbs > 0)
 				// if this block is invisible, check the block below it
 				colorInt = generateLodColor(chunk, config, xRel, yAbs - 1, zRel, blockPos);
+			
+			// override this block's color if there was a block above this
+			// and we were avoiding non-full/non-solid blocks
+			if (aboveColorInt != 0)
+				colorInt = aboveColorInt;
 		}
 		
 		return colorInt;
@@ -760,9 +779,6 @@ public class LodBuilder
 		return colorInt;
 	}
 	
-	public static final ConcurrentMap<Block, Boolean> notFullBlock = new ConcurrentHashMap<>();
-	public static final ConcurrentMap<Block, Boolean> smallBlock = new ConcurrentHashMap<>();
-	
 	/** Is the block at the given blockPos a valid LOD point? */
 	private boolean isLayerValidLodPoint(IChunk chunk, BlockPos.Mutable blockPos)
 	{
@@ -777,9 +793,7 @@ public class LodBuilder
 			
 			if (avoidNonFullBlock)
 			{
-				if (!notFullBlock.containsKey(blockState.getBlock())
-							|| notFullBlock.get(blockState.getBlock()) == null
-				)
+				if (!notFullBlock.containsKey(blockState.getBlock()) || notFullBlock.get(blockState.getBlock()) == null)
 				{
 					VoxelShape voxelShape = blockState.getShape(chunk, blockPos);
 					if (!blockState.getFluidState().isEmpty())
@@ -810,9 +824,7 @@ public class LodBuilder
 			
 			if (avoidBlockWithNoCollision)
 			{
-				if (!smallBlock.containsKey(blockState.getBlock())
-							|| smallBlock.get(blockState.getBlock()) == null
-				)
+				if (!smallBlock.containsKey(blockState.getBlock()) || smallBlock.get(blockState.getBlock()) == null)
 				{
 					if(!blockState.getFluidState().isEmpty())
 						smallBlock.put(blockState.getBlock(), false);

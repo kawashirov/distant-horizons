@@ -344,7 +344,7 @@ public class LodConfig
 					.comment("\n\n"
 							+ " If true LODs will only show full bocks when generating. \n"
 							+ " Turning this on will make plains smoother since the tall grass won't be used. \n")
-					.define("avoid Non Full Block", false);
+					.define("avoid Non Full Block", true);
 			builder.pop();
 		}
 	}
