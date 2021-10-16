@@ -245,6 +245,7 @@ public class LodBuilder
 		int zAbs;
 		boolean hasCeiling = mc.getClientWorld().dimensionType().hasCeiling();
 		boolean hasSkyLight = mc.getClientWorld().dimensionType().hasSkyLight();
+		boolean isDefault;
 		BlockPos.Mutable blockPos = new BlockPos.Mutable(0, 0, 0);
 		int index;
 		
@@ -259,7 +260,6 @@ public class LodBuilder
 			yAbs = DataPointUtil.worldHeight + 2;
 			int count = 0;
 			boolean topBlock = true;
-			boolean isDefault = false;
 			while (yAbs > 0)
 			{
 				height = determineHeightPointFrom(chunk, config, xRel, zRel, yAbs, blockPos);
@@ -292,7 +292,7 @@ public class LodBuilder
 				}
 				lightBlock = light & 0b1111;
 				lightSky = (light >> 4) & 0b1111;
-				if (light >> 8 == 1) isDefault = true;
+				isDefault = ((light >> 8)) == 1;
 				
 				dataToMerge[index * verticalData + count] = DataPointUtil.createDataPoint(height, depth, color, lightSky, lightBlock, generation, isDefault);
 				topBlock = false;
@@ -439,36 +439,21 @@ public class LodBuilder
 			skyLight = DEFAULT_MAX_LIGHT;
 		else
 		{
-			//if (useExperimentalLighting)
-			//{
-				skyLight = world.getBrightness(LightType.SKY, blockPos);
-				if (skyLight <= 0 || skyLight >= 15)
-				{
-					// we don't know what the light here is,
-					// lets just take a guess
-					if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
-					{
-						skyLight = 12;
-						isDefault = 1;
-					}
-					else
-						skyLight = 0;
-				}
-			/*}
-			else
+			skyLight = world.getBrightness(LightType.SKY, blockPos);
+			if (skyLight > 15 || skyLight < 0)
+				ClientProxy.LOGGER.warn("is this helpful? " + skyLight);
+			if (!chunk.isLightCorrect() && (skyLight == 0 || skyLight == 15))
 			{
-				if (chunk.isLightCorrect())
-					skyLight = world.getBrightness(LightType.SKY, blockPos);
-				else
+				// we don't know what the light here is,
+				// lets just take a guess
+				if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
 				{
-					// we don't know what the light here is,
-					// lets just take a guess
-					if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
-						skyLight = 13;
-					else
-						skyLight = 0;
+					skyLight = 12;
+					isDefault = 1;
 				}
-			}*/
+			}
+			if (skyLight == 15)
+				ClientProxy.LOGGER.warn("skylight 15 while not top block");
 		}
 		
 		blockLight = world.getBrightness(LightType.BLOCK, blockPos);
