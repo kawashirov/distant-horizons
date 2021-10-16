@@ -432,7 +432,7 @@ public class LodConfig
 	/**
 	 * {@link Path} to the configuration file of this mod
 	 */
-	private static final Path CONFIG_PATH = Paths.get("config", ModInfo.MODID + ".toml");
+	private static final Path CONFIG_PATH = Paths.get("config", ModInfo.MODNAME + ".toml");
 	
 	public static final ForgeConfigSpec CLIENT_SPEC;
 	public static final Client CLIENT;
