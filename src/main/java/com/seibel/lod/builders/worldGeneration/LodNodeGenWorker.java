@@ -18,6 +18,15 @@
 
 package com.seibel.lod.builders.worldGeneration;
 
+import java.util.ConcurrentModificationException;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Supplier;
+
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.seibel.lod.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.builders.lodBuilding.LodBuilderConfig;
@@ -26,6 +35,7 @@ import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.ChunkPos;
@@ -38,7 +48,14 @@ import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.gen.blockstateprovider.WeightedBlockStateProvider;
-import net.minecraft.world.gen.feature.*;
+import net.minecraft.world.gen.feature.BlockClusterFeatureConfig;
+import net.minecraft.world.gen.feature.ConfiguredFeature;
+import net.minecraft.world.gen.feature.DecoratedFeatureConfig;
+import net.minecraft.world.gen.feature.FeatureSpread;
+import net.minecraft.world.gen.feature.FeatureSpreadConfig;
+import net.minecraft.world.gen.feature.IceAndSnowFeature;
+import net.minecraft.world.gen.feature.NoFeatureConfig;
+import net.minecraft.world.gen.feature.template.TemplateManager;
 import net.minecraft.world.gen.placement.ConfiguredPlacement;
 import net.minecraft.world.gen.placement.DecoratedPlacementConfig;
 import net.minecraft.world.gen.placement.IPlacementConfig;
@@ -48,19 +65,10 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.server.ServerWorldLightManager;
 import net.minecraftforge.common.WorldWorkerManager.IWorker;
 
-import java.util.ConcurrentModificationException;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.function.Supplier;
-
 /**
  * This is used to generate a LodChunk at a given ChunkPos.
  * @author James Seibel
- * @version 9-7-2021
+ * @version 10-15-2021
  */
 public class LodNodeGenWorker implements IWorker
 {
@@ -360,21 +368,24 @@ public class LodNodeGenWorker implements IWorker
 			LodServerWorld lodServerWorld = new LodServerWorld(serverWorld, chunk);
 			
 			ServerChunkProvider chunkSource = serverWorld.getChunkSource();
+			ServerWorldLightManager lightEngine = (ServerWorldLightManager) serverWorld.getLightEngine();
+			TemplateManager templateManager = serverWorld.getStructureManager();
 			ChunkGenerator chunkGen = chunkSource.generator;
 			
 			
 			// generate the terrain (this is thread safe)
-			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
+			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
 			// override the chunk status, so we can run the next generator stage
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
 			chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
-			ChunkStatus.NOISE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
-			ChunkStatus.SURFACE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
+			ChunkStatus.NOISE.generate(serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
+			ChunkStatus.SURFACE.generate(serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
 			
 			// this feature has been proven to be thread safe,
 			// so we will add it
 			IceAndSnowFeature snowFeature = new IceAndSnowFeature(NoFeatureConfig.CODEC);
 			snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
+			
 			
 			lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(DistanceGenerationMode.SURFACE));
 			
@@ -397,16 +408,18 @@ public class LodNodeGenWorker implements IWorker
 			LodServerWorld lodServerWorld = new LodServerWorld(serverWorld, chunk);
 			
 			ServerChunkProvider chunkSource = serverWorld.getChunkSource();
+			ServerWorldLightManager lightEngine = (ServerWorldLightManager) serverWorld.getLightEngine();
+			TemplateManager templateManager = serverWorld.getStructureManager();
 			ChunkGenerator chunkGen = chunkSource.generator;
 			
 			
 			// generate the terrain (this is thread safe)
-			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
+			ChunkStatus.EMPTY.generate(serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
 			// override the chunk status, so we can run the next generator stage
 			chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
 			chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
-			ChunkStatus.NOISE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
-			ChunkStatus.SURFACE.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ServerWorldLightManager) serverWorld.getLightEngine(), null, chunkList);
+			ChunkStatus.NOISE.generate(serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
+			ChunkStatus.SURFACE.generate(serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
 			
 			
 			// get all the biomes in the chunk
