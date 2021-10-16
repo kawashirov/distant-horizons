@@ -1,6 +1,5 @@
 package com.seibel.lod.util;
 
-import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import net.minecraft.client.renderer.texture.NativeImage;
 
