@@ -463,24 +463,25 @@ public class LodBuilder
 			// client world sky light (almost never accurate)
 			
 			// estimate what the lighting should be
-			if (!hasSkyLight && hasCeiling)
-				skyLight = 0;
-			else if (topBlock)
-				skyLight = DEFAULT_MAX_LIGHT;
-			else
+			if (hasSkyLight || !hasCeiling)
 			{
-				skyLight = clientWorld.getBrightness(LightType.SKY, blockPos);
-				if (!chunk.isLightCorrect() && (skyLight == 0 || skyLight == 15))
+				if (topBlock)
+					skyLight = DEFAULT_MAX_LIGHT;
+				else
 				{
-					// we don't know what the light here is,
-					// lets just take a guess
-					if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
+					skyLight = clientWorld.getBrightness(LightType.SKY, blockPos);
+					if (!chunk.isLightCorrect() && (skyLight == 0 || skyLight == 15))
 					{
-						skyLight = 12;
-						isDefault = 1;
+						// we don't know what the light here is,
+						// lets just take a guess
+						if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
+						{
+							skyLight = 12;
+							isDefault = 1;
+						}
+						else
+							skyLight = 0;
 					}
-					else
-						skyLight = 0;
 				}
 			}
 		}

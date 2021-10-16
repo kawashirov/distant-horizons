@@ -154,7 +154,7 @@ public class DataPointUtil
 	
 	public static int getLightSkyAlt(long dataPoint)
 	{
-		if (LodConfig.CLIENT.worldGenerator.useExperimentalSkyLight.get() && skyLightPlayer == 0 && ((dataPoint >>> FLAG_SHIFT) & FLAG_MASK) == 1)
+		if (skyLightPlayer == 0 && ((dataPoint >>> FLAG_SHIFT) & FLAG_MASK) == 1)
 			return 0;
 		else
 			return (int) ((dataPoint >>> SKY_LIGHT_SHIFT) & SKY_LIGHT_MASK);
