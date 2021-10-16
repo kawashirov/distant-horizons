@@ -156,7 +156,6 @@ public class LodRenderer
 	 * @param mcMatrixStack This matrix stack should come straight from MC's renderChunkLayer (or future equivalent) method
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
-	@SuppressWarnings("deprecation")
 	public void drawLODs(LodDimension lodDim, MatrixStack mcMatrixStack, float partialTicks, IProfiler newProfiler)
 	{
 		if (lodDim == null)
@@ -439,7 +438,6 @@ public class LodRenderer
 	/**
 	 * Revert any changes that were made to the fog.
 	 */
-	@SuppressWarnings("deprecation")
 	private void cleanupFog(NearFarFogSettings fogSettings,
 			float defaultFogStartDist, float defaultFogEndDist,
 			int defaultFogMode, int defaultFogDistance)

@@ -18,19 +18,18 @@
 
 package com.seibel.lod.builders.bufferBuilding.lodTemplates;
 
+import java.util.Map;
+
 import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-import net.minecraft.client.Minecraft;
+
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.Map;
 
 /**
  * Builds LODs as rectangular prisms.

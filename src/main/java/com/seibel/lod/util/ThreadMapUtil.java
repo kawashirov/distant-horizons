@@ -1,7 +1,6 @@
 package com.seibel.lod.util;
 
-import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
-import net.minecraft.util.Direction;
+import static com.seibel.lod.util.LodUtil.DETAIL_OPTIONS;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -9,7 +8,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import static com.seibel.lod.util.LodUtil.DETAIL_OPTIONS;
+import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
+
+import net.minecraft.util.Direction;
 
 /**
  * Holds data used by specific threads so
@@ -59,7 +60,7 @@ public class ThreadMapUtil
 				|| (adjDataMap.get(Thread.currentThread().getName()).get(Direction.NORTH) == null)
 				|| (adjDataMap.get(Thread.currentThread().getName()).get(Direction.NORTH).length != verticalData))
 		{
-			adjDataMap.put(Thread.currentThread().getName(), new HashMap());
+			adjDataMap.put(Thread.currentThread().getName(), new HashMap<Direction, long[]>());
 			adjDataMap.get(Thread.currentThread().getName()).put(Direction.UP, new long[1]);
 			adjDataMap.get(Thread.currentThread().getName()).put(Direction.DOWN, new long[1]);
 			for (Direction direction : Box.ADJ_DIRECTIONS)
