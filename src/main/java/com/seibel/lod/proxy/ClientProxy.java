@@ -41,6 +41,8 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunk;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.BlockEvent;
@@ -52,7 +54,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * This handles all events sent to the client,
  * and is the starting point for most of the mod.
  * @author James_Seibel
- * @version 10-13-2021
+ * @version 10-15-2021
  */
 public class ClientProxy
 {
@@ -208,7 +210,13 @@ public class ClientProxy
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
-		lodBuilder.generateLodNodeAsync(event.getChunk(), lodWorld, event.getWorld(), DistanceGenerationMode.SERVER);
+		// Optifine also returns chunks from this event
+		// which are slightly different then normal Minecraft chunks.
+		IChunk chunk = event.getChunk();
+		if (chunk.getClass() != Chunk.class)
+			return;
+		
+		lodBuilder.generateLodNodeAsync(chunk, lodWorld, event.getWorld(), DistanceGenerationMode.SERVER);
 	}
 	
 	@SubscribeEvent
@@ -298,13 +306,14 @@ public class ClientProxy
 		}
 	}
 	
+	
+	
+	
 	//============//
 	// LOD events //
 	//============//
 	
-	/**
-	 * Re-centers the given LodDimension if it needs to be.
-	 */
+	/** Re-centers the given LodDimension if it needs to be. */
 	private void playerMoveEvent(LodDimension lodDim)
 	{
 		// make sure the dimension is centered
@@ -319,9 +328,7 @@ public class ClientProxy
 	}
 	
 	
-	/**
-	 * Re-sizes all LodDimensions if they need to be.
-	 */
+	/** Re-sizes all LodDimensions if they need to be. */
 	private void viewDistanceChangedEvent()
 	{
 		// calculate how wide the dimension(s) should be in regions
@@ -352,9 +359,7 @@ public class ClientProxy
 	}
 	
 	
-	/**
-	 * This event is called once during the first frame Minecraft renders in the world.
-	 */
+	/** This event is called once during the first frame Minecraft renders in the world. */
 	public void firstFrameSetup()
 	{
 		// make sure the GlProxy is created before the LodBufferBuilder needs it
@@ -370,6 +375,9 @@ public class ClientProxy
 		LodNodeGenWorker.restartExecutorService();
 		
 	}
+	
+	
+	
 	
 	//================//
 	// public getters //
