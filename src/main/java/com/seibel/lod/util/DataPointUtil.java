@@ -265,7 +265,7 @@ public class DataPointUtil
 		int genMode = DistanceGenerationMode.SERVER.complexity;
 		boolean allEmpty = true;
 		boolean allVoid = true;
-		boolean allDefault = true;
+		boolean allDefault;
 		long singleData;
 		
 		
@@ -399,8 +399,10 @@ public class DataPointUtil
 			return dataPoint;
 		}
 		
+		
+		
 		//we cut the 1 block gaps
-		int j;
+		/*int j;
 		for (i = 0; i < count - 1; i++)
 		{
 			if (heightAndDepth[i * 2 + 1] - heightAndDepth[(i + 1) * 2] == 1)
@@ -414,10 +416,10 @@ public class DataPointUtil
 				count--;
 				i--;
 			}
-		}
+		}*/
 		
 		//we limit the vertical portion to maxVerticalData
-		j = 0;
+		int j = 0;
 		while (count > maxVerticalData)
 		{
 			ii = worldHeight;
