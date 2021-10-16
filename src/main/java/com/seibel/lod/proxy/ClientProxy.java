@@ -41,8 +41,6 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunk;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.BlockEvent;
@@ -182,7 +180,7 @@ public class ClientProxy
 //		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(64);
 //		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
 //		LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.set(false);
-
+		
 //		LodConfig.CLIENT.buffers.rebuildTimes.set(BufferRebuildTimes.FREQUENT);
 		
 		LodConfig.CLIENT.debugging.enableDebugKeybindings.set(true);
@@ -210,13 +208,7 @@ public class ClientProxy
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
-		// Optifine also returns chunks from this event
-		// which are slightly different then normal Minecraft chunks.
-		IChunk chunk = event.getChunk();
-		if (chunk.getClass() != Chunk.class)
-			return;
-		
-		lodBuilder.generateLodNodeAsync(chunk, lodWorld, event.getWorld(), DistanceGenerationMode.SERVER);
+		lodBuilder.generateLodNodeAsync(event.getChunk(), lodWorld, event.getWorld(), DistanceGenerationMode.SERVER);
 	}
 	
 	@SubscribeEvent

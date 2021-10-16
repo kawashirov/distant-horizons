@@ -18,6 +18,14 @@
 
 package com.seibel.lod.builders.lodBuilding;
 
+import java.awt.Color;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.HorizontalResolution;
@@ -25,10 +33,26 @@ import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
-import com.seibel.lod.proxy.ClientProxy;
-import com.seibel.lod.util.*;
+import com.seibel.lod.util.ColorUtil;
+import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.DetailDistanceUtil;
+import com.seibel.lod.util.LevelPosUtil;
+import com.seibel.lod.util.LodThreadFactory;
+import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-import net.minecraft.block.*;
+
+import net.minecraft.block.AbstractPlantBlock;
+import net.minecraft.block.AbstractTopPlantBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.BushBlock;
+import net.minecraft.block.FlowerBlock;
+import net.minecraft.block.GrassBlock;
+import net.minecraft.block.IGrowable;
+import net.minecraft.block.LeavesBlock;
+import net.minecraft.block.TallGrassBlock;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -45,22 +69,16 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.client.model.data.ModelDataMap;
 
-import java.awt.*;
-import java.util.List;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 /**
- * This object is in charge of creating Lod related objects. (specifically: Lod
- * World, Dimension, and Region objects)
+ * This object is in charge of creating Lod related objects.
+ * 
+ * @author Cola
  * @author Leonardo Amato
  * @author James Seibel
- * @version 10-9-2021
+ * @version 10-16-2021
  */
 public class LodBuilder
 {
@@ -415,33 +433,43 @@ public class LodBuilder
 	/** Gets the light value for the given block position */
 	private int getLightValue(IChunk chunk, BlockPos.Mutable blockPos, boolean hasCeiling, boolean hasSkyLight, boolean topBlock)
 	{
-		int skyLight;
+		int skyLight = 0;
 		int blockLight;
+		// 1 means the lighting is a guess
 		int isDefault = 0;
 		
-		if (mc.getClientWorld() == null)
+		
+		ClientWorld clientWorld = mc.getClientWorld();
+		if (clientWorld == null)
 			return 0;
+		ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(clientWorld.dimensionType());
 		
-		ClientWorld world = mc.getClientWorld();
 		
-		
-		int blockBrightness = chunk.getLightEmission(blockPos);
-		
+		// get the air block above or below this block
 		if (hasCeiling && topBlock)
 			blockPos.set(blockPos.getX(), blockPos.getY() - 1, blockPos.getZ());
 		else
 			blockPos.set(blockPos.getX(), blockPos.getY() + 1, blockPos.getZ());
 		
 		
-		if (!hasSkyLight && hasCeiling)
-			skyLight = 0;
-		else if (topBlock)
-			skyLight = DEFAULT_MAX_LIGHT;
+		
+		if (serverWorld != null)
+		{
+			// server world sky light (always accurate)
+			skyLight = serverWorld.getBrightness(LightType.SKY, blockPos);
+		}
 		else
 		{
-			if (LodConfig.CLIENT.worldGenerator.useExperimentalSkyLight.get())
+			// client world sky light (almost never accurate)
+			
+			// estimate what the lighting should be
+			if (!hasSkyLight && hasCeiling)
+				skyLight = 0;
+			else if (topBlock)
+				skyLight = DEFAULT_MAX_LIGHT;
+			else
 			{
-				skyLight = world.getBrightness(LightType.SKY, blockPos);
+				skyLight = clientWorld.getBrightness(LightType.SKY, blockPos);
 				if (!chunk.isLightCorrect() && (skyLight == 0 || skyLight == 15))
 				{
 					// we don't know what the light here is,
@@ -455,21 +483,12 @@ public class LodBuilder
 						skyLight = 0;
 				}
 			}
-			else
-			{
-				if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
-				{
-					skyLight = 12;
-					isDefault = 1;
-				}
-				else
-					skyLight = 0;
-			}
-			//if (skyLight == 15)
-			//	ClientProxy.LOGGER.warn("skylight 15 while not top block");
 		}
 		
-		blockLight = world.getBrightness(LightType.BLOCK, blockPos);
+		
+		int blockBrightness = chunk.getLightEmission(blockPos);
+		
+		blockLight = clientWorld.getBrightness(LightType.BLOCK, blockPos);
 		blockLight = LodUtil.clamp(0, blockLight + blockBrightness, DEFAULT_MAX_LIGHT);
 		
 		return blockLight + (skyLight << 4) + (isDefault << 8);

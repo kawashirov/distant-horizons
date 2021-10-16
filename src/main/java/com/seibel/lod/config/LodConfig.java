@@ -18,20 +18,34 @@
 
 package com.seibel.lod.config;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.seibel.lod.ModInfo;
-import com.seibel.lod.enums.*;
+import com.seibel.lod.enums.BufferRebuildTimes;
+import com.seibel.lod.enums.DebugMode;
+import com.seibel.lod.enums.DetailDropOff;
+import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.FogDistance;
+import com.seibel.lod.enums.FogDrawOverride;
+import com.seibel.lod.enums.GenerationPriority;
+import com.seibel.lod.enums.HorizontalQuality;
+import com.seibel.lod.enums.HorizontalResolution;
+import com.seibel.lod.enums.HorizontalScale;
+import com.seibel.lod.enums.LodTemplate;
+import com.seibel.lod.enums.VanillaOverdraw;
+import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.util.LodUtil;
+
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  * This handles any configuration the user has access to.
@@ -196,7 +210,6 @@ public class LodConfig
 		public final ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
 		public final ForgeConfigSpec.EnumValue<HorizontalScale> horizontalScale;
 		public final ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
-		public final ForgeConfigSpec.BooleanValue useExperimentalSkyLight;
 		public final ForgeConfigSpec.BooleanValue avoidBlockWithNoCollision;
 		public final ForgeConfigSpec.BooleanValue avoidNonFullBlock;
 		
@@ -321,21 +334,16 @@ public class LodConfig
 							+ " https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues/35 \n")
 					.define("allowUnstableFeatureGeneration", false);
 			
-			useExperimentalSkyLight = builder
-												.comment("\n\n"
-																 + " Change how sky light value is calculated in the fake chunks \n")
-												.define("use experimental sky light system", false);
-			
 			avoidBlockWithNoCollision = builder
 					.comment("\n\n"
-							+ " if true avoid block that have no collision box in the generation \n"
-							+ " grass,  \n")
-					.define("avoid Block With No Collision", false);
+							+ " If true LODs will only use blocks that have collisions when generating. \n"
+							+ " Turning this on will make plains smoother since the tall grass won't be used. \n")
+					.define("avoid Block With No Collision", true);
 			
 			avoidNonFullBlock = builder
 					.comment("\n\n"
-							+ " If you are a Java wizard, check out the git issue here: \n"
-							+ " If you are a Java wizard, check out the git issue here: \n")
+							+ " If true LODs will only show full bocks when generating. \n"
+							+ " Turning this on will make plains smoother since the tall grass won't be used. \n")
 					.define("avoid Non Full Block", false);
 			builder.pop();
 		}
