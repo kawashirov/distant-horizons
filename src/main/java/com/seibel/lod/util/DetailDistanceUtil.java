@@ -66,10 +66,12 @@ public class DetailDistanceUtil
 		return baseDistanceFunction(detail);
 	}
 	
-	public static byte baseInverseFunction(int distance, int minDetail)
+	public static byte baseInverseFunction(int distance, int minDetail, boolean useRenderMinDistance)
 	{
 		int detail;
-		if (distance < minDetailDistance)
+		if (distance == 0)
+			return (byte) minDetail;
+		if (distance < minDetailDistance && useRenderMinDistance)
 			return (byte) minDetail;
 		int distanceUnit = LodConfig.CLIENT.worldGenerator.horizontalScale.get().distanceUnit;
 		if (LodConfig.CLIENT.worldGenerator.horizontalQuality.get() == HorizontalQuality.LOWEST)
@@ -85,23 +87,25 @@ public class DetailDistanceUtil
 	
 	public static byte getDrawDetailFromDistance(int distance)
 	{
-		return baseInverseFunction(distance, minDrawDetail);
+		return baseInverseFunction(distance, minDrawDetail, false);
 	}
 	
 	public static byte getGenerationDetailFromDistance(int distance)
 	{
-		return baseInverseFunction((int) (distance * genMultiplier), minGenDetail);
+		return baseInverseFunction((int) (distance * genMultiplier), minGenDetail, true);
 	}
 	
 	public static byte getTreeCutDetailFromDistance(int distance)
 	{
-		return baseInverseFunction((int) (distance * treeCutMultiplier), minGenDetail);
+		
+		return baseInverseFunction((int) (distance * treeCutMultiplier), minGenDetail, true);
 	}
 	
 	
 	public static byte getTreeGenDetailFromDistance(int distance)
 	{
-		return baseInverseFunction((int) (distance * treeGenMultiplier), minGenDetail);
+		
+		return baseInverseFunction((int) (distance * treeGenMultiplier), minGenDetail, true);
 	}
 	
 	public static DistanceGenerationMode getDistanceGenerationMode(int detail)
