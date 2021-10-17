@@ -183,8 +183,10 @@ public class LodNodeGenWorker implements IWorker
 				/* TODO I must disable this 'if', if I will find a way to replace it */
 				if (lodDim.regionIsInRange(pos.x / LodUtil.REGION_WIDTH_IN_CHUNKS, pos.z / LodUtil.REGION_WIDTH_IN_CHUNKS))
 				{
+					IChunk loadedChunk = null;
 //					long startTime = System.currentTimeMillis();
-					IChunk loadedChunk = ChunkLoader.getChunkFromFile(pos);
+					if(LodConfig.CLIENT.worldGenerator.alwaysLoadPregeneratedChunks.get())
+						loadedChunk = ChunkLoader.getChunkFromFile(pos);
 					if(loadedChunk == null)
 					{
 						switch (generationMode)
