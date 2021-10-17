@@ -477,7 +477,10 @@ public class LodBuilder
 		{
 			// server world sky light (always accurate)
 			blockLight = serverWorld.getBrightness(LightType.BLOCK, blockPos);
-			skyLight = serverWorld.getBrightness(LightType.SKY, blockPos);
+			if(!hasCeiling && topBlock && hasSkyLight)
+				skyLight = DEFAULT_MAX_LIGHT;
+			else
+				skyLight = serverWorld.getBrightness(LightType.SKY, blockPos);
 		}
 		else
 		{
