@@ -50,9 +50,7 @@ public class Box
 			Direction.SOUTH,
 			Direction.NORTH };
 	
-	/**
-	 * All the faces and vertices of a cube. This is used to extract the vertex from the column
-	 */
+	/** All the faces and vertices of a cube. This is used to extract the vertex from the column */
 	public static final Map<Direction, int[][]> DIRECTION_VERTEX_MAP = new HashMap<Direction, int[][]>()
 	{{
 		put(Direction.UP, new int[][] {
@@ -117,9 +115,7 @@ public class Box
 		put(Direction.NORTH, Direction.NORTH.getNormal());
 	}};
 	
-	/**
-	 * We use this index for all array that are going to
-	 */
+	/** We use this index for all array that are going to */
 	public static final Map<Direction, Integer> DIRECTION_INDEX = new HashMap<Direction, Integer>()
 	{{
 		put(Direction.UP, 0);
@@ -192,11 +188,7 @@ public class Box
 		culling = new boolean[6];
 	}
 	
-	/**
-	 * Set the light of the columns
-	 * @param skyLight
-	 * @param blockLight
-	 */
+	/** Set the light of the columns */
 	public void setLights(int skyLight, int blockLight)
 	{
 		this.blockLight = (byte) blockLight;
@@ -227,13 +219,9 @@ public class Box
 	public int getColor(Direction direction)
 	{
 		if (LodConfig.CLIENT.debugging.debugMode.get() != DebugMode.SHOW_DETAIL)
-		{
 			return colorMap[DIRECTION_INDEX.get(direction)];
-		}
 		else
-		{
 			return ColorUtil.applyShade(color, MinecraftWrapper.INSTANCE.getClientWorld().getShade(direction, true));
-		}
 	}
 	
 	/**
@@ -276,13 +264,11 @@ public class Box
 		for (Direction direction : DIRECTIONS)
 		{
 			if (direction == Direction.DOWN || direction == Direction.WEST || direction == Direction.NORTH)
-			{
 				culling[DIRECTION_INDEX.get(direction)] = playerPos.get(direction.getAxis()) > getFacePos(direction) + cullingDistance;
-			}
+			
 			else if (direction == Direction.UP || direction == Direction.EAST || direction == Direction.SOUTH)
-			{
 				culling[DIRECTION_INDEX.get(direction)] = playerPos.get(direction.getAxis()) < getFacePos(direction) - cullingDistance;
-			}
+			
 			culling[DIRECTION_INDEX.get(direction)] = false;
 		}
 	}
@@ -498,9 +484,7 @@ public class Box
 	public boolean shouldRenderFace(Direction direction, int adjIndex)
 	{
 		if (direction == Direction.UP || direction == Direction.DOWN)
-		{
 			return adjIndex == 0;
-		}
 		return !(adjHeight.get(direction)[adjIndex] == VOID_FACE && adjDepth.get(direction)[adjIndex] == VOID_FACE);
 	}
 	
@@ -534,21 +518,15 @@ public class Box
 	public int getY(Direction direction, int vertexIndex, int adjIndex)
 	{
 		if (direction == Direction.DOWN || direction == Direction.UP)
-		{
 			return boxOffset[Y] + boxWidth[Y] * DIRECTION_VERTEX_MAP.get(direction)[vertexIndex][Y];
-		}
 		else
 		{
 			// this could probably be cleaned up more,
 			// but it still works
 			if (1 - DIRECTION_VERTEX_MAP.get(direction)[vertexIndex][Y] == ADJACENT_HEIGHT_INDEX)
-			{
 				return adjHeight.get(direction)[adjIndex];
-			}
 			else
-			{
 				return adjDepth.get(direction)[adjIndex];
-			}
 		}
 	}
 	
@@ -561,8 +539,6 @@ public class Box
 	{
 		return boxOffset[Z] + boxWidth[Z] * DIRECTION_VERTEX_MAP.get(direction)[vertexIndex][Z];
 	}
-	
-	
 	
 	public int getMinX()
 	{

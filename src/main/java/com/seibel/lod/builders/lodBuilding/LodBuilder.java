@@ -701,7 +701,7 @@ public class LodBuilder
 		
 		if (toTint.get(blockState.getBlock()))
 		{
-			int tintValue = 0;
+			int tintValue;
 			if (useGrassTint(blockState.getBlock()))
 				// grass and green plants
 				tintValue = biome.getGrassColor(x, z);
