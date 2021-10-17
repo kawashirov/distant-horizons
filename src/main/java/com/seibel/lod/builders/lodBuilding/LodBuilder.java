@@ -430,7 +430,7 @@ public class LodBuilder
 			// snow, flowers, etc. Get the above block so we can still get the color
 			// of the snow, flower, etc. that may be above this block
 			int aboveColorInt = 0;
-			if (LodConfig.CLIENT.worldGenerator.avoidNonFullBlock.get() || LodConfig.CLIENT.worldGenerator.avoidBlockWithNoCollision.get())
+			if (LodConfig.CLIENT.worldGenerator.avoidNonFullBlocks.get() || LodConfig.CLIENT.worldGenerator.avoidBlocksWithNoCollision.get())
 			{
 				blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel + 1, chunk.getPos().getMinBlockZ() + zRel);
 				aboveColorInt = getColorForBlock(chunk, blockPos);
@@ -783,8 +783,8 @@ public class LodBuilder
 	private boolean isLayerValidLodPoint(IChunk chunk, BlockPos.Mutable blockPos)
 	{
 		BlockState blockState = chunk.getBlockState(blockPos);
-		boolean avoidNonFullBlock = LodConfig.CLIENT.worldGenerator.avoidNonFullBlock.get();
-		boolean	avoidBlockWithNoCollision = LodConfig.CLIENT.worldGenerator.avoidBlockWithNoCollision.get();
+		boolean avoidNonFullBlock = LodConfig.CLIENT.worldGenerator.avoidNonFullBlocks.get();
+		boolean	avoidBlockWithNoCollision = LodConfig.CLIENT.worldGenerator.avoidBlocksWithNoCollision.get();
 		if (blockState != null)
 		{
 			// TODO this code is dead since avoidSmallBlock and onlyUseFullBlock

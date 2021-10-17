@@ -111,14 +111,14 @@ public class LodConfig
 							+ " If true, the mod is enabled and LODs will be drawn. \n"
 							+ " If false, the mod will still generate LODs, \n"
 							+ " but they won't be rendered. \n")
-					.define("drawLODs", true);
+					.define("Draw LODs", true);
 			
 			fogDistance = builder
 					.comment("\n\n"
 							+ " At what distance should Fog be drawn on the LODs? \n"
 							+ " If the fog cuts off abruptly or you are using Optifine's \"fast\" fog option \n"
 							+ " set this to " + FogDistance.NEAR + " or " + FogDistance.FAR + ". \n")
-					.defineEnum("fogDistance", FogDistance.NEAR_AND_FAR);
+					.defineEnum("Fog Distance", FogDistance.NEAR_AND_FAR);
 			
 			fogDrawOverride = builder
 					.comment("\n\n"
@@ -127,7 +127,7 @@ public class LodConfig
 							+ " " + FogDrawOverride.NEVER_DRAW_FOG + ": Never draw fog on the LODs \n"
 							+ " " + FogDrawOverride.ALWAYS_DRAW_FOG_FAST + ": Always draw fast fog on the LODs \n"
 							+ " " + FogDrawOverride.ALWAYS_DRAW_FOG_FANCY + ": Always draw fancy fog on the LODs (if your graphics card supports it) \n")
-					.defineEnum("fogDrawOverride", FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
+					.defineEnum("Fog Draw Override", FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
 			
 			lodTemplate = builder
 					.comment("\n\n"
@@ -138,14 +138,14 @@ public class LodConfig
 							+ " " + LodTemplate.TRIANGULAR + ": LOD Chunks smoothly transition between other. \n"
 							+ " " + LodTemplate.DYNAMIC + ": LOD Chunks smoothly transition between each other, \n"
 							+ " " + "         unless a neighboring chunk is at a significantly different height. \n")
-					.defineEnum("lodTemplate", LodTemplate.CUBIC);
+					.defineEnum("LOD Template", LodTemplate.CUBIC);
 			
 			detailDropOff = builder
 					.comment("\n\n"
 							+ " How smooth should the detail transition for LODs be? \n"
 							+ DetailDropOff.FANCY + ": quality is determined per-chunk (best quality option, may cause stuttering when moving)\n"
 							+ DetailDropOff.FAST + ": quality is determined per-region \n")
-					.defineEnum("detailDropOff", DetailDropOff.FANCY);
+					.defineEnum("Detail DropOff", DetailDropOff.FANCY);
 			
 			drawResolution = builder
 					.comment("\n\n"
@@ -160,7 +160,7 @@ public class LodConfig
 			lodChunkRenderDistance = builder
 					.comment("\n\n"
 							+ " The mod's render distance, measured in chunks. \n")
-					.defineInRange("lodChunkRenderDistance", 64, 32, 1024);
+					.defineInRange("Lod Render Distance", 64, 32, 1024);
 			
 			disableDirectionalCulling = builder
 					.comment("\n\n"
@@ -172,7 +172,7 @@ public class LodConfig
 							+ ""
 							+ " Disable this if you see LODs disappearing. \n"
 							+ " (Which may happen if you are using a camera mod) \n")
-					.define("disableDirectionalCulling", false);
+					.define("Disable Directional Culling", false);
 			
 			alwaysDrawAtMaxQuality = builder
 					.comment("\n\n"
@@ -183,7 +183,7 @@ public class LodConfig
 							+ " WARNING: \n"
 							+ " This could cause a Out Of Memory crash on render \n"
 							+ " distances higher than 128 \n")
-					.define("alwaysDrawAtMaxQuality", false);
+					.define("Always Use Max Quality", false);
 			
 			vanillaOverdraw = builder
 					.comment("\n\n"
@@ -195,7 +195,7 @@ public class LodConfig
 							+ " " + "     For vanilla render distances less than or equal to " + LodUtil.MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW + " \n"
 							+ " " + "     " + VanillaOverdraw.NEVER + " or " + VanillaOverdraw.ALWAYS + " may be used depending on the dimension. \n"
 							+ " " + VanillaOverdraw.ALWAYS + ": LODs will render on all vanilla chunks preventing holes in the world. \n")
-					.defineEnum("vanillaOverdraw", VanillaOverdraw.DYNAMIC);
+					.defineEnum("Vanilla Overdraw", VanillaOverdraw.DYNAMIC);
 			
 			builder.pop();
 		}
@@ -210,8 +210,8 @@ public class LodConfig
 		public final ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
 		public final ForgeConfigSpec.EnumValue<HorizontalScale> horizontalScale;
 		public final ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
-		public final ForgeConfigSpec.BooleanValue avoidBlockWithNoCollision;
-		public final ForgeConfigSpec.BooleanValue avoidNonFullBlock;
+		public final ForgeConfigSpec.BooleanValue avoidBlocksWithNoCollision;
+		public final ForgeConfigSpec.BooleanValue avoidNonFullBlocks;
 		
 		WorldGenerator(ForgeConfigSpec.Builder builder)
 		{
@@ -219,10 +219,11 @@ public class LodConfig
 			
 			verticalQuality = builder
 					.comment("\n\n"
-							+ " This indicates how detailed the LODs will be in representing \n"
+							+ " This indicates how detailed LODs will represent \n"
 							+ " overhangs, caves, floating islands, ect. \n"
-							+ " Higher options will use more memory and lower performance. \n"
+							+ " Higher options will use more memory and increase GPU usage. \n"
 							+ " " + VerticalQuality.LOW + ": uses at max 2 columns per position. \n"
+							+ " " + VerticalQuality.MEDIUM + ": uses at max 4 columns per position. \n"
 							+ " " + VerticalQuality.HIGH + ": uses at max 8 columns per position. \n")
 					.defineEnum("Vertical Quality", VerticalQuality.MEDIUM);
 			
@@ -244,7 +245,7 @@ public class LodConfig
 							+ " " + HorizontalScale.LOW + ": quality drops every " + HorizontalScale.LOW.distanceUnit / 16 + " chunks. \n"
 							+ " " + HorizontalScale.MEDIUM + ": quality drops every " + HorizontalScale.MEDIUM.distanceUnit / 16 + " chunks. \n"
 							+ " " + HorizontalScale.HIGH + ": quality drops every " + HorizontalScale.HIGH.distanceUnit / 16 + " chunks. \n")
-					.defineEnum("horizontal scale", HorizontalScale.MEDIUM);
+					.defineEnum("Horizontal Scale", HorizontalScale.MEDIUM);
 			
 			horizontalQuality = builder
 					.comment("\n\n"
@@ -253,7 +254,7 @@ public class LodConfig
 							+ " " + HorizontalQuality.LOW + ": base " + HorizontalQuality.LOW.quadraticBase + ". \n"
 							+ " " + HorizontalQuality.MEDIUM + ": base " + HorizontalQuality.MEDIUM.quadraticBase + ". \n"
 							+ " " + HorizontalQuality.HIGH + ": base " + HorizontalQuality.HIGH.quadraticBase + ". \n")
-					.defineEnum("horizontal quality", HorizontalQuality.MEDIUM);
+					.defineEnum("Horizontal Quality", HorizontalQuality.MEDIUM);
 			
 			generationPriority = builder
 					.comment("\n\n"
@@ -265,7 +266,7 @@ public class LodConfig
 							+ " " + GenerationPriority.NEAR_FIRST + " \n"
 							+ " LODs are generated around the player \n"
 							+ " in a spiral, similar to vanilla minecraft. \n")
-					.defineEnum("Generation priority", GenerationPriority.NEAR_FIRST);
+					.defineEnum("Generation Priority", GenerationPriority.NEAR_FIRST);
 			
 			distanceGenerationMode = builder
 					.comment("\n\n"
@@ -313,7 +314,7 @@ public class LodConfig
 							+ " be useful if you are adding the mod to a pre-existing world. \n"
 							+ " This is the most compatible, but causes server/simulation lag. \n"
 							+ " SingleThreaded - Slow (15-50 ms, with spikes up to 200 ms) \n")
-					.defineEnum("distanceGenerationMode", DistanceGenerationMode.SURFACE);
+					.defineEnum("Distance Generation Mode", DistanceGenerationMode.SURFACE);
 			
 			allowUnstableFeatureGeneration = builder
 					.comment("\n\n"
@@ -332,19 +333,19 @@ public class LodConfig
 							+ " but I'm not sure how to do that. \n"
 							+ " If you are a Java wizard, check out the git issue here: \n"
 							+ " https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues/35 \n")
-					.define("allowUnstableFeatureGeneration", false);
+					.define("Allow Unstable Feature Generation", false);
 			
-			avoidBlockWithNoCollision = builder
+			avoidBlocksWithNoCollision = builder
 					.comment("\n\n"
 							+ " If true LODs will only use blocks that have collisions when generating. \n"
 							+ " Turning this on will make plains smoother since the tall grass won't be used. \n")
-					.define("avoid Block With No Collision", true);
+					.define("Avoid Blocks With No Collision", true);
 			
-			avoidNonFullBlock = builder
+			avoidNonFullBlocks = builder
 					.comment("\n\n"
 							+ " If true LODs will only show full bocks when generating. \n"
 							+ " Turning this on will make plains smoother since the tall grass won't be used. \n")
-					.define("avoid Non Full Block", true);
+					.define("Avoid Non Full Blocks", true);
 			builder.pop();
 		}
 	}
