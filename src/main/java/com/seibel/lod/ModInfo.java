@@ -21,12 +21,12 @@ package com.seibel.lod;
 /**
  * This file is similar to mcmod.info
  * @author James Seibel
- * @version 08-29-2021
+ * @version 10-16-2021
  */
 public final class ModInfo
 {
 	public static final String MODID = "lod";
-	public static final String MODNAME = "Distant Horizons";
+	public static final String MODNAME = "DistantHorizons";
 	public static final String MODAPI = "LodAPI";
-	public static final String VERSION = "a1.5.0";
+	public static final String VERSION = "b1.5.0";
 }
