@@ -47,7 +47,7 @@ public class DetailDistanceUtil
 			return maxDistance;
 		
 		int distanceUnit = LodConfig.CLIENT.worldGenerator.horizontalScale.get().distanceUnit;
-		if (LodConfig.CLIENT.worldGenerator.horizontalQuality.get() == HorizontalQuality.LINEAR)
+		if (LodConfig.CLIENT.worldGenerator.horizontalQuality.get() == HorizontalQuality.LOWEST)
 			return (detail * distanceUnit);
 		else
 		{
@@ -68,7 +68,7 @@ public class DetailDistanceUtil
 		if (distance == 0)
 			return (byte) minDetail;
 		int distanceUnit = LodConfig.CLIENT.worldGenerator.horizontalScale.get().distanceUnit;
-		if (LodConfig.CLIENT.worldGenerator.horizontalQuality.get() == HorizontalQuality.LINEAR)
+		if (LodConfig.CLIENT.worldGenerator.horizontalQuality.get() == HorizontalQuality.LOWEST)
 			detail = (byte) Math.floorDiv(distance, distanceUnit);
 		else
 		{

@@ -250,7 +250,7 @@ public class LodConfig
 			horizontalQuality = builder
 					.comment("\n\n"
 							+ " This indicates the exponential base of the quadratic drop-off \n"
-							+ " " + HorizontalQuality.LINEAR + ": base " + HorizontalQuality.LINEAR.quadraticBase + ". \n"
+							+ " " + HorizontalQuality.LOWEST + ": base " + HorizontalQuality.LOWEST.quadraticBase + ". \n"
 							+ " " + HorizontalQuality.LOW + ": base " + HorizontalQuality.LOW.quadraticBase + ". \n"
 							+ " " + HorizontalQuality.MEDIUM + ": base " + HorizontalQuality.MEDIUM.quadraticBase + ". \n"
 							+ " " + HorizontalQuality.HIGH + ": base " + HorizontalQuality.HIGH.quadraticBase + ". \n")

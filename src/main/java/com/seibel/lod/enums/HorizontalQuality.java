@@ -19,6 +19,7 @@
 package com.seibel.lod.enums;
 
 /**
+ * Lowest <br>
  * Low <br>
  * Medium <br>
  * High <br>
@@ -29,16 +30,16 @@ package com.seibel.lod.enums;
  */
 public enum HorizontalQuality
 {
-	/** Lods are 2D with heightMap */
-	LINEAR(1.0f),
+	/** 1.0 AKA Linear */
+	LOWEST(1.0f),
 	
-	/** Lods are 2D with heightMap */
+	/** exponent 1.5 */
 	LOW(1.5f),
 	
-	/** Lods expand in three dimension */
+	/** exponent 2.0 */
 	MEDIUM(2.0f),
 	
-	/** Lods expand in three dimension */
+	/** exponent 2.2 */
 	HIGH(2.2f);
 	
 	public final double quadraticBase;
