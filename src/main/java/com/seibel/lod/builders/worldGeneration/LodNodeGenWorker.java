@@ -185,8 +185,9 @@ public class LodNodeGenWorker implements IWorker
 				{
 					IChunk loadedChunk = null;
 //					long startTime = System.currentTimeMillis();
-					if(LodConfig.CLIENT.worldGenerator.alwaysLoadPregeneratedChunks.get())
-						loadedChunk = ChunkLoader.getChunkFromFile(pos);
+					//if(LodConfig.CLIENT.worldGenerator.alwaysLoadPregeneratedChunks.get())
+					//	loadedChunk = ChunkLoader.getChunkFromFile(pos);
+					//loadedChunk = ChunkLoader.getChunkFromFile(pos);
 					if(loadedChunk == null)
 					{
 						switch (generationMode)

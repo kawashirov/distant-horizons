@@ -342,17 +342,16 @@ public class LodConfig
 							+ " Turning this on will make plains smoother since the tall grass won't be used. \n")
 					.define("Avoid Blocks With No Collision", true);
 			
+			/*alwaysLoadPregeneratedChunks = builder
+										 .comment("\n\n"
+														  + " if a chunk has been pre-generated, then the mod would use the real chunk for the \n"
+														  + "fake chunk creation. May require a deletion of the lod file to see the result. \n")
+										 .define("Use pre-generated chunks", true);*/
 			avoidNonFullBlocks = builder
 					.comment("\n\n"
 							+ " If true LODs will only show full bocks when generating. \n"
 							+ " Turning this on will make plains smoother since the tall grass won't be used. \n")
 					.define("Avoid Non Full Blocks", true);
-			
-			alwaysLoadPregeneratedChunks = builder
-										 .comment("\n\n"
-														  + " if a chunk has been pregenerated, then the mod would use the real chunk for the \n"
-														  + " fake chunk creation. May require a deletion of the lod file to see the result. \n")
-										 .define("Use pre-generated chunks", false);
 			builder.pop();
 		}
 	}

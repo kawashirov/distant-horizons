@@ -22,6 +22,9 @@ public class ChunkLoader
 		ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(clientWorld.dimensionType());
 		try
 		{
+			File file = new File(serverWorld.getChunkSource().getDataStorage().dataFolder.getParent() + File.separatorChar + "region", "r." + (pos.x >> 5) + "." + (pos.z >> 5) + ".mca");
+			if(!file.exists())
+				return  null;
 			IChunk loadedChunk = ChunkSerializer.read(
 					serverWorld,
 					serverWorld.getStructureManager(),
