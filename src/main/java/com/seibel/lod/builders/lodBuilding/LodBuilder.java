@@ -464,6 +464,7 @@ public class LodBuilder
 		ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(clientWorld.dimensionType());
 		
 		
+		int blockBrightness = chunk.getLightEmission(blockPos);
 		// get the air block above or below this block
 		if (hasCeiling && topBlock)
 			blockPos.set(blockPos.getX(), blockPos.getY() - 1, blockPos.getZ());
@@ -506,9 +507,7 @@ public class LodBuilder
 			}
 		}
 		
-		
-		int blockBrightness = chunk.getLightEmission(blockPos);
-		blockLight = LodUtil.clamp(0, blockLight + blockBrightness, DEFAULT_MAX_LIGHT);
+		blockLight = LodUtil.clamp(0, Math.max(blockLight, blockBrightness), DEFAULT_MAX_LIGHT);
 		
 		return blockLight + (skyLight << 4) + (isDefault << 8);
 	}
