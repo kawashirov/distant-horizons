@@ -786,10 +786,6 @@ public class LodBuilder
 		boolean	avoidBlockWithNoCollision = LodConfig.CLIENT.worldGenerator.avoidBlocksWithNoCollision.get();
 		if (blockState != null)
 		{
-			// TODO this code is dead since avoidSmallBlock and onlyUseFullBlock
-			// are set to false and are never changed.
-			// should this code be changed?
-			
 			if (avoidNonFullBlock)
 			{
 				if (!notFullBlock.containsKey(blockState.getBlock()) || notFullBlock.get(blockState.getBlock()) == null)

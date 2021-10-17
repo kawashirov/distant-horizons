@@ -149,10 +149,6 @@ public class PosToGenerateContainer
 	@Override
 	public String toString()
 	{
-		// TODO is this commented code still useful?
-		// if so why have it commented out?
-		
-		
 		StringBuilder builder = new StringBuilder();
 		builder.append('\n');
 		builder.append('\n');
