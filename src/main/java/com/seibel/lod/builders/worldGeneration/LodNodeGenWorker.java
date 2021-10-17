@@ -32,6 +32,7 @@ import com.seibel.lod.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.handlers.ChunkLoader;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
@@ -183,29 +184,36 @@ public class LodNodeGenWorker implements IWorker
 				if (lodDim.regionIsInRange(pos.x / LodUtil.REGION_WIDTH_IN_CHUNKS, pos.z / LodUtil.REGION_WIDTH_IN_CHUNKS))
 				{
 //					long startTime = System.currentTimeMillis();
-					
-					switch (generationMode)
+					IChunk loadedChunk = ChunkLoader.getChunkFromFile(pos);
+					if(loadedChunk == null)
 					{
-					case NONE:
-						// don't generate
-						break;
-					case BIOME_ONLY:
-					case BIOME_ONLY_SIMULATE_HEIGHT:
-						// fastest
-						generateUsingBiomesOnly();
-						break;
-					case SURFACE:
-						// faster
-						generateUsingSurface();
-						break;
-					case FEATURES:
-						// fast
-						generateUsingFeatures();
-						break;
-					case SERVER:
-						// very slow
-						generateWithServer();
-						break;
+						switch (generationMode)
+						{
+						case NONE:
+							// don't generate
+							break;
+						case BIOME_ONLY:
+						case BIOME_ONLY_SIMULATE_HEIGHT:
+							// fastest
+							generateUsingBiomesOnly();
+							break;
+						case SURFACE:
+							// faster
+							generateUsingSurface();
+							break;
+						case FEATURES:
+							// fast
+							generateUsingFeatures();
+							break;
+						case SERVER:
+							// very slow
+							generateWithServer();
+							break;
+						}
+					}
+					else
+					{
+						lodBuilder.generateLodNodeFromChunk(lodDim, loadedChunk, new LodBuilderConfig(DistanceGenerationMode.SERVER));
 					}
 					
 					//lodRenderer.regenerateLODsNextFrame();
