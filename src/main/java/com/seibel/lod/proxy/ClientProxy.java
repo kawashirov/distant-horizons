@@ -100,7 +100,7 @@ public class ClientProxy
 	public void renderLods(MatrixStack mcMatrixStack, float partialTicks)
 	{
 		// comment out when creating a release
-		applyConfigOverrides();
+		// applyConfigOverrides();
 		
 		// clear any out of date objects
 		mc.clearFrameObjectCache();
