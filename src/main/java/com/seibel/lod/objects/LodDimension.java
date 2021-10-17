@@ -418,6 +418,7 @@ public class LodDimension
 							
 							// Expand the region by introducing the missing layer
 							region.growTree(levelToGen);
+							regions[x][z] = getRegionFromFile(regionPos, levelToGen, generationMode, verticalQuality);
 							recreateRegionBuffer[x][z] = true;
 						}
 					}
