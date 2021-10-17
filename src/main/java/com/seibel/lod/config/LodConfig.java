@@ -212,7 +212,7 @@ public class LodConfig
 		public final ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
 		public final ForgeConfigSpec.BooleanValue avoidBlocksWithNoCollision;
 		public final ForgeConfigSpec.BooleanValue avoidNonFullBlocks;
-		public final ForgeConfigSpec.BooleanValue alwaysLoadPregeneratedChunks;
+		//public final ForgeConfigSpec.BooleanValue alwaysLoadPregeneratedChunks;
 		
 		WorldGenerator(ForgeConfigSpec.Builder builder)
 		{
@@ -267,7 +267,7 @@ public class LodConfig
 							+ " " + GenerationPriority.NEAR_FIRST + " \n"
 							+ " LODs are generated around the player \n"
 							+ " in a spiral, similar to vanilla minecraft. \n")
-					.defineEnum("Generation Priority", GenerationPriority.NEAR_FIRST);
+					.defineEnum("Generation Priority", GenerationPriority.FAR_FIRST);
 			
 			distanceGenerationMode = builder
 					.comment("\n\n"
