@@ -475,12 +475,13 @@ public class LodBuilder
 		if (serverWorld != null)
 		{
 			// server world sky light (always accurate)
+			blockLight = serverWorld.getBrightness(LightType.BLOCK, blockPos);
 			skyLight = serverWorld.getBrightness(LightType.SKY, blockPos);
 		}
 		else
 		{
 			// client world sky light (almost never accurate)
-			
+			blockLight = clientWorld.getBrightness(LightType.BLOCK, blockPos);
 			// estimate what the lighting should be
 			if (hasSkyLight || !hasCeiling)
 			{
@@ -507,8 +508,6 @@ public class LodBuilder
 		
 		
 		int blockBrightness = chunk.getLightEmission(blockPos);
-		
-		blockLight = clientWorld.getBrightness(LightType.BLOCK, blockPos);
 		blockLight = LodUtil.clamp(0, blockLight + blockBrightness, DEFAULT_MAX_LIGHT);
 		
 		return blockLight + (skyLight << 4) + (isDefault << 8);
