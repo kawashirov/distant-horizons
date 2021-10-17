@@ -4,6 +4,9 @@ import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.HorizontalQuality;
 import com.seibel.lod.enums.HorizontalResolution;
+import com.seibel.lod.objects.LodRegion;
+import com.seibel.lod.render.LodRenderer;
+import com.seibel.lod.wrappers.MinecraftWrapper;
 
 public class DetailDistanceUtil
 {
@@ -14,6 +17,7 @@ public class DetailDistanceUtil
 	private static int minDrawDetail = Math.max(LodConfig.CLIENT.graphics.drawResolution.get().detailLevel, LodConfig.CLIENT.worldGenerator.generationResolution.get().detailLevel);
 	private static final int maxDetail = LodUtil.REGION_DETAIL_LEVEL + 1;
 	private static final int minDistance = 0;
+	private static int minDetailDistance = (int) (MinecraftWrapper.INSTANCE.getRenderDistance()*16 * 1.42f);
 	private static int maxDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 16 * 2;
 	
 	
@@ -34,6 +38,7 @@ public class DetailDistanceUtil
 	
 	public static void updateSettings()
 	{
+		minDetailDistance = (int) (MinecraftWrapper.INSTANCE.getRenderDistance()*16 * 1.42f);
 		minGenDetail = LodConfig.CLIENT.worldGenerator.generationResolution.get().detailLevel;
 		minDrawDetail = Math.max(LodConfig.CLIENT.graphics.drawResolution.get().detailLevel, LodConfig.CLIENT.worldGenerator.generationResolution.get().detailLevel);
 		maxDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 16 * 8;
@@ -63,9 +68,8 @@ public class DetailDistanceUtil
 	
 	public static byte baseInverseFunction(int distance, int minDetail)
 	{
-		
 		int detail;
-		if (distance == 0)
+		if (distance < minDetailDistance)
 			return (byte) minDetail;
 		int distanceUnit = LodConfig.CLIENT.worldGenerator.horizontalScale.get().distanceUnit;
 		if (LodConfig.CLIENT.worldGenerator.horizontalQuality.get() == HorizontalQuality.LOWEST)
