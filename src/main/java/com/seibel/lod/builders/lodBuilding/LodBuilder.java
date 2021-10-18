@@ -67,6 +67,8 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeColors;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.server.ServerWorld;
@@ -672,6 +674,8 @@ public class LodBuilder
 	/** Returns a color int for the given block. */
 	private int getColorForBlock(IChunk chunk, BlockPos blockPos)
 	{
+		
+		
 		int blockColor;
 		int colorInt;
 		
@@ -681,7 +685,7 @@ public class LodBuilder
 		int y = blockPos.getY();
 		int z = blockPos.getZ();
 		
-		Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, y >> 2, zRel >> 2);
+		//Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, y >> 2, zRel >> 2);
 		BlockState blockState = chunk.getBlockState(blockPos);
 		
 		
@@ -716,16 +720,23 @@ public class LodBuilder
 		
 		if (toTint.get(blockState.getBlock()))
 		{
+			ClientWorld clientWorld = mc.getClientWorld();
+			if (clientWorld == null)
+				return 0;
+			ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(clientWorld.dimensionType());
 			int tintValue;
 			if (useGrassTint(blockState.getBlock()))
 				// grass and green plants
-				tintValue = biome.getGrassColor(x, z);
+				tintValue = BiomeColors.getAverageGrassColor(serverWorld, blockPos);
+				//tintValue = biome.getGrassColor(x, z);
 			else if (useWaterTint(blockState.getBlock()))
 				// water
-				tintValue = biome.getWaterColor();
+				tintValue = BiomeColors.getAverageWaterColor(serverWorld, blockPos);
+				//tintValue = biome.getWaterColor();
 			else
 				// leaves
-				tintValue = biome.getFoliageColor();
+				tintValue = BiomeColors.getAverageFoliageColor(serverWorld, blockPos);
+				//tintValue = biome.getFoliageColor();
 			colorInt = ColorUtil.multiplyRGBcolors(tintValue | 0xFF000000, blockColor);
 		}
 		else
