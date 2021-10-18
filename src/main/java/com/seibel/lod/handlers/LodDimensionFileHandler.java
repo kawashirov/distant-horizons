@@ -27,6 +27,9 @@ import com.seibel.lod.objects.VerticalLevelContainer;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.ThreadMapUtil;
+import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
+import org.apache.commons.compress.compressors.xz.XZCompressorOutputStream;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -156,7 +159,7 @@ public class LodDimensionFileHandler
 				dataSize -= 1;
 				if (dataSize > 0)
 				{
-					try (InputStream inputStream = new BufferedInputStream(new FileInputStream(file)))
+					try (XZCompressorInputStream inputStream = new XZCompressorInputStream(new FileInputStream(file)))
 					{
 						int fileVersion;
 						fileVersion = inputStream.read();
@@ -192,7 +195,7 @@ public class LodDimensionFileHandler
 						
 						// this file is a readable version, 
 						// read the file
-						byte[] data = new byte[(int) dataSize];
+						byte[] data = ThreadMapUtil.getSaveContainer(tempDetailLevel);
 						inputStream.read(data);
 						inputStream.close();
 						
@@ -324,7 +327,7 @@ public class LodDimensionFileHandler
 				
 				// the old file is good, now create a new temporary save file
 				File newFile = new File(fileName + TMP_FILE_EXTENSION);
-				try (OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(newFile)))
+				try (XZCompressorOutputStream outputStream = new XZCompressorOutputStream(new FileOutputStream(newFile), 3))
 				{
 					// add the version of this file
 					outputStream.write(LOD_SAVE_FILE_VERSION);

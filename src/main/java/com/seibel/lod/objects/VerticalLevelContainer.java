@@ -115,44 +115,10 @@ public class VerticalLevelContainer implements LevelContainer
 		for (int i = 0; i < x; i++)
 		{
 			newData = 0;
-			if (counter > -1)
-			{
-				dataContainer[i] = last;
-				if (last == 3)
-				{ //skip rest of void chunk
-					for (tempIndex = 1; tempIndex < maxVerticalData; tempIndex++)
-					{
-						dataContainer[i + tempIndex] = 0;
-					}
-					i += maxVerticalData - 1;
-				}
-				counter--;
-			}
-			else if ((inputData[index] & 0x3) == 0 || (inputData[index] & 0x3) == 3)
-			{
-				last = (byte) (inputData[index] & 0x3);
-				//recover counter
-				counter = (inputData[index] & 0x7c) >>> 2;
-				tempIndex = 0;
-				while ((inputData[index] & 0x80) == 0x80)
-				{ //overflow bit is on
-					index++;
-					counter += (inputData[index] & 0x7f) << (5 + 7 * tempIndex);
-					tempIndex++;
-				}
-				index++;
-				//since loop expects from us to put some data in, we just make it rerun it with new counter;
-				i--;
-			}
-			else if (index + 7 >= inputData.length)
-				break;
-			else
-			{
-				for (tempIndex = 0; tempIndex < 8; tempIndex++)
-					newData += (((long) inputData[index + tempIndex]) & 0xff) << (8 * tempIndex);
-				index = index + 8;
-				dataContainer[i] = newData;
-			}
+			for (tempIndex = 0; tempIndex < 8; tempIndex++)
+				newData += (((long) inputData[index + tempIndex]) & 0xff) << (8 * tempIndex);
+			index += 8;
+			dataContainer[i] = newData;
 		}
 	}
 	
@@ -205,7 +171,7 @@ public class VerticalLevelContainer implements LevelContainer
 		int tempIndex;
 		long current;
 		
-		byte[] tempData = ThreadMapUtil.getSaveContainer(2 + (x * 8));
+		byte[] tempData = ThreadMapUtil.getSaveContainer(detailLevel);
 		
 		tempData[index] = detailLevel;
 		index++;
@@ -215,38 +181,11 @@ public class VerticalLevelContainer implements LevelContainer
 		for (int i = 0; i < x; i++)
 		{
 			current = dataContainer[i];
-			if ((current & 0b11) == 0 || (current & 0b11) == 3)
-			{
-				current &= 0b11; //clean any garbage data after those two bits
-				last = (byte) current;
-				if (current == 3) //skip rest of void chunk
-					i += maxVerticalData - 1;
-				counter++;
-			}
-			else
-			{
-				for (tempIndex = 0; tempIndex < 8; tempIndex++)
-					tempData[index + tempIndex] = (byte) (current >>> (8 * tempIndex));
-				index += 8;
-			}
-			if (last != -1 && (i == x - 1 || last != ((dataContainer[i + 1]) & 0b11)))
-			{ //save compressed data if next is different or if we reached onf of the data
-				tempData[index] = (byte) (0x7f & ((counter << 2) + last)); //save 5 bits of counter and compressed block
-				
-				tempIndex = 0;
-				while ((counter >>> (5 + 7 * tempIndex)) != 0) //there is more of that counter
-				{
-					tempData[index] = (byte) (tempData[index] | 0x80); //set overflow bit to true
-					index++; // after setting overflow bit w can actually index++
-					tempData[index] = (byte) (0x7f & (counter >>> (5 + 7 * tempIndex))); // save 7 bits of counter
-					tempIndex++;
-				}
-				index++;
-				last = -1;
-				counter = -1;
-			}
+			for (tempIndex = 0; tempIndex < 8; tempIndex++)
+				tempData[index + tempIndex] = (byte) (current >>> (8 * tempIndex));
+			index += 8;
 		}
-		return Arrays.copyOfRange(tempData, 0, index);
+		return tempData;
 	}
 	
 	@Override

@@ -131,6 +131,7 @@ dependencies {
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.16.5-36.1.0'
+    compile group: 'org.tukaani', name: 'xz', version: '1.9'
 	
 	// these aren't needed right now
 	//implementation ('com.github.KaptainWutax:TerrainUtils:1.0.0'){
