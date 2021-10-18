@@ -375,7 +375,7 @@ public class LodConfig
 							+ " \n"
 							+ " The maximum value is the number of logical processors on your CPU. \n"
 							+ " Requires a restart to take effect. \n")
-					.defineInRange("numberOfWorldGenerationThreads", Runtime.getRuntime().availableProcessors() / 2, 1, Runtime.getRuntime().availableProcessors());
+					.defineInRange("numberOfWorldGenerationThreads", Math.max(1,Runtime.getRuntime().availableProcessors() / 2), 1, Runtime.getRuntime().availableProcessors());
 			
 			numberOfBufferBuilderThreads = builder
 					.comment("\n\n"
@@ -386,7 +386,7 @@ public class LodConfig
 							+ " \n"
 							+ " The maximum value is the number of logical processors on your CPU. \n"
 							+ " Requires a restart to take effect. \n")
-					.defineInRange("numberOfBufferBuilderThreads", Runtime.getRuntime().availableProcessors(), 1, Runtime.getRuntime().availableProcessors());
+					.defineInRange("numberOfBufferBuilderThreads", Math.max(1,Runtime.getRuntime().availableProcessors() / 2), 1, Runtime.getRuntime().availableProcessors());
 			
 			builder.pop();
 		}
