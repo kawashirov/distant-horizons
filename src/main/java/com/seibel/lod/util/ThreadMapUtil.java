@@ -117,7 +117,7 @@ public class ThreadMapUtil
 		return threadBuilderVerticalArrayMap.get(Thread.currentThread().getName())[detailLevel];
 	}
 	
-	/** returns the array filled with 0's */
+	/** returns the array NOT cleared every time */
 	public static byte[] getSaveContainer(int detailLevel)
 	{
 		if (!saveContainer.containsKey(Thread.currentThread().getName()) || (saveContainer.get(Thread.currentThread().getName()) == null))

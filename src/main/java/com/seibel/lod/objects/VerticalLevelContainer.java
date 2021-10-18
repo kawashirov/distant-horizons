@@ -102,9 +102,7 @@ public class VerticalLevelContainer implements LevelContainer
 	{
 		int tempIndex;
 		int index = 0;
-		int counter = -1;
 		long newData;
-		byte last = 0;
 		detailLevel = inputData[index];
 		index++;
 		maxVerticalData = inputData[index];
@@ -165,8 +163,6 @@ public class VerticalLevelContainer implements LevelContainer
 	public byte[] toDataString()
 	{
 		int index = 0;
-		int counter = -1;
-		byte last = -1;
 		int x = size * size * maxVerticalData;
 		int tempIndex;
 		long current;
