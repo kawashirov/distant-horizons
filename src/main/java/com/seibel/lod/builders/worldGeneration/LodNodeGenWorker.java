@@ -37,8 +37,10 @@ import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
 
+import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.palette.UpgradeData;
 import net.minecraft.util.registry.Registry;
@@ -183,13 +185,13 @@ public class LodNodeGenWorker implements IWorker
 				/* TODO I must disable this 'if', if I will find a way to replace it */
 				if (lodDim.regionIsInRange(pos.x / LodUtil.REGION_WIDTH_IN_CHUNKS, pos.z / LodUtil.REGION_WIDTH_IN_CHUNKS))
 				{
-					IChunk loadedChunk = null;
-//					long startTime = System.currentTimeMillis();
-					//if(LodConfig.CLIENT.worldGenerator.alwaysLoadPregeneratedChunks.get())
-					//	loadedChunk = ChunkLoader.getChunkFromFile(pos);
-					//loadedChunk = ChunkLoader.getChunkFromFile(pos);
-					if(loadedChunk == null)
-					{
+					
+					//if(loadedChunk != null)
+					//{
+					//	lodBuilder.generateLodNodeFromChunk(lodDim, loadedChunk, new LodBuilderConfig(DistanceGenerationMode.SERVER));
+					//}
+					//else
+					//{
 						switch (generationMode)
 						{
 						case NONE:
@@ -213,11 +215,7 @@ public class LodNodeGenWorker implements IWorker
 							generateWithServer();
 							break;
 						}
-					}
-					else
-					{
-						lodBuilder.generateLodNodeFromChunk(lodDim, loadedChunk, new LodBuilderConfig(DistanceGenerationMode.SERVER));
-					}
+					//}
 					
 					//lodRenderer.regenerateLODsNextFrame();
 					
