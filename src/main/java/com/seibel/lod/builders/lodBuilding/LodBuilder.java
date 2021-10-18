@@ -477,10 +477,23 @@ public class LodBuilder
 		{
 			// server world sky light (always accurate)
 			blockLight = serverWorld.getBrightness(LightType.BLOCK, blockPos);
-			if(!hasCeiling && topBlock && hasSkyLight)
+			if(topBlock && !hasCeiling && hasSkyLight)
 				skyLight = DEFAULT_MAX_LIGHT;
 			else
 				skyLight = serverWorld.getBrightness(LightType.SKY, blockPos);
+			
+			if (!topBlock && skyLight == 15)
+			{
+				// we are on predicted terrain, and we don't know what the light here is,
+				// lets just take a guess
+				if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
+				{
+					skyLight = 12;
+					isDefault = 1;
+				}
+				else
+					skyLight = 0;
+			}
 		}
 		else
 		{
