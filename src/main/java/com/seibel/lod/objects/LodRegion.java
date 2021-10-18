@@ -8,6 +8,14 @@ import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrappers.MinecraftWrapper;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.chunk.storage.RegionFile;
+import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
+import org.lwjgl.system.CallbackI;
+
+import java.io.File;
 
 /**
  * This object holds all loaded LevelContainers acting as a quad tree
@@ -38,6 +46,11 @@ public class LodRegion
 	private final LevelContainer[] dataContainer;
 	
 	/**
+	 * This chunk Pos has been generated
+	 */
+	//private final boolean[] preGeneratedChunkPos;
+	
+	/**
 	 * the generation mode for this region
 	 */
 	private DistanceGenerationMode generationMode;
@@ -55,15 +68,6 @@ public class LodRegion
 	 */
 	public final int regionPosZ;
 	
-	
-	public LodRegion(RegionPos regionPos)
-	{
-		this.minDetailLevel = LodUtil.REGION_DETAIL_LEVEL;
-		this.regionPosX = regionPos.x;
-		this.regionPosZ = regionPos.z;
-		dataContainer = new LevelContainer[POSSIBLE_LOD];
-	}
-	
 	public LodRegion(byte minDetailLevel, RegionPos regionPos, DistanceGenerationMode generationMode, VerticalQuality verticalQuality)
 	{
 		this.minDetailLevel = minDetailLevel;
@@ -79,8 +83,49 @@ public class LodRegion
 		{
 			dataContainer[lod] = new VerticalLevelContainer(lod);
 		}
+		
+		/*boolean fileFound = false;
+		
+		preGeneratedChunkPos = new boolean[32*32];
+		
+		if (MinecraftWrapper.INSTANCE.hasSinglePlayerServer())
+		{
+			File regionFileDirParent;
+			File regionFileDirHead;
+			// local world
+			
+			ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(MinecraftWrapper.INSTANCE.getCurrentDimension());
+			
+			// provider needs a separate variable to prevent
+			// the compiler from complaining
+			ServerChunkProvider provider = serverWorld.getChunkSource();
+			regionFileDirParent = new File(provider.dataStorage.dataFolder.getParentFile().getPath() + File.separatorChar + "region");
+			regionFileDirHead = new File("r." + regionPosZ + "." + regionPosX + ".mca");
+			try{
+				RegionFile regionFile = new RegionFile(regionFileDirParent, regionFileDirHead, true);
+				for(int x = 0; x < 32; x++)
+				{
+					for(int z = 0; z < 32; z++)
+					{
+						preGeneratedChunkPos[x*32 + z] = regionFile.hasChunk(new ChunkPos(regionPosX*32 + x, regionPosZ*32 + z));
+					}
+				}
+			}catch (Exception e){
+			}
+		}
+		
+		StringBuilder string = new StringBuilder();
+		string.append("region " + regionPosX + " " + regionPosZ + "\n");
+		for(int x = 0; x < 32; x++)
+		{
+			for(int z = 0; z < 32; z++)
+			{
+				string.append(preGeneratedChunkPos[x*32 + z] + "\t");
+			}
+			string.append("\n");
+		}
+		System.out.println(string);*/
 	}
-	
 	
 	/**
 	 * Inserts the data point into the region.
