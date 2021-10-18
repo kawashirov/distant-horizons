@@ -55,7 +55,7 @@ public class LodDimensionFileHandler
 	/** lod */
 	private static final String FILE_NAME_PREFIX = "lod";
 	/** .txt */
-	private static final String FILE_EXTENSION = ".dat";
+	private static final String FILE_EXTENSION = ".xz";
 	/** detail- */
 	private static final String DETAIL_FOLDER_NAME_PREFIX = "detail-";
 	
@@ -302,7 +302,7 @@ public class LodDimensionFileHandler
 					// (to make sure we don't overwrite a newer
 					// version file if it exists)
 					int fileVersion = LOD_SAVE_FILE_VERSION;
-					try (InputStream inputStream = new BufferedInputStream(new FileInputStream(oldFile)))
+					try (XZCompressorInputStream inputStream = new XZCompressorInputStream(new FileInputStream(oldFile)))
 					{
 						fileVersion = inputStream.read();
 						inputStream.close();
