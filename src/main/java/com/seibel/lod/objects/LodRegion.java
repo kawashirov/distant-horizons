@@ -48,7 +48,7 @@ public class LodRegion
 	/**
 	 * This chunk Pos has been generated
 	 */
-	//private final boolean[] preGeneratedChunkPos;
+	private final boolean[] preGeneratedChunkPos;
 	
 	/**
 	 * the generation mode for this region
@@ -84,47 +84,72 @@ public class LodRegion
 			dataContainer[lod] = new VerticalLevelContainer(lod);
 		}
 		
-		/*boolean fileFound = false;
+		boolean fileFound = false;
 		
-		preGeneratedChunkPos = new boolean[32*32];
+		preGeneratedChunkPos = new boolean[32 * 32];
 		
-		if (MinecraftWrapper.INSTANCE.hasSinglePlayerServer())
+		if (MinecraftWrapper.INSTANCE.hasSinglePlayerServer() && LodConfig.CLIENT.worldGenerator.useExperimentalPreGenLoading.get())
 		{
-			File regionFileDirParent;
 			File regionFileDirHead;
+			File regionFileDirParent;
 			// local world
 			
 			ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(MinecraftWrapper.INSTANCE.getCurrentDimension());
 			
 			// provider needs a separate variable to prevent
 			// the compiler from complaining
-			ServerChunkProvider provider = serverWorld.getChunkSource();
-			regionFileDirParent = new File(provider.dataStorage.dataFolder.getParentFile().getPath() + File.separatorChar + "region");
-			regionFileDirHead = new File("r." + regionPosZ + "." + regionPosX + ".mca");
-			try{
-				RegionFile regionFile = new RegionFile(regionFileDirParent, regionFileDirHead, true);
-				for(int x = 0; x < 32; x++)
+			StringBuilder string = new StringBuilder();
+			try
+			{
+				ServerChunkProvider provider = serverWorld.getChunkSource();
+				
+				//System.out.println(provider.dataStorage.dataFolder);
+				regionFileDirHead = new File(provider.dataStorage.dataFolder.getCanonicalFile().getParentFile().toPath().toAbsolutePath().toString() + File.separatorChar + "region", "r." + regionPosZ + "." + regionPosX + ".mca");
+				if (regionFileDirHead.exists())
 				{
-					for(int z = 0; z < 32; z++)
+					regionFileDirParent = regionFileDirHead.getParentFile();
+					//string.append(regionFileDirParent.toString());
+					string.append(regionFileDirHead);
+					RegionFile regionFile = new RegionFile(regionFileDirHead, regionFileDirParent, true);
+					for (int x = 0; x < 32; x++)
 					{
-						preGeneratedChunkPos[x*32 + z] = regionFile.hasChunk(new ChunkPos(regionPosX*32 + x, regionPosZ*32 + z));
+						for (int z = 0; z < 32; z++)
+						{
+							preGeneratedChunkPos[x * 32 + z] = regionFile.doesChunkExist(new ChunkPos(regionPosX * 32 + x, regionPosZ * 32 + z));
+						}
 					}
+					
+					string.append("region " + regionPosX + " " + regionPosZ + "\n");
+					for (int x = 0; x < 32; x++)
+					{
+						for (int z = 0; z < 32; z++)
+						{
+							//regionFile.doesChunkExist()
+							string.append(preGeneratedChunkPos[x * 32 + z] + "\t");
+						}
+						string.append("\n");
+					}
+					regionFile.close();
 				}
-			}catch (Exception e){
 			}
+			catch (Exception e)
+			{
+				e.printStackTrace();
+			}
+			System.out.println(string);
 		}
 		
-		StringBuilder string = new StringBuilder();
-		string.append("region " + regionPosX + " " + regionPosZ + "\n");
-		for(int x = 0; x < 32; x++)
-		{
-			for(int z = 0; z < 32; z++)
-			{
-				string.append(preGeneratedChunkPos[x*32 + z] + "\t");
-			}
-			string.append("\n");
-		}
-		System.out.println(string);*/
+	}
+	
+	
+	/**
+	 * Return true if the chunk has been pregenerated in game
+	 */
+	public boolean isChunkPreGenerated(int xChunkPos, int zChunkPos)
+	{
+		xChunkPos = LevelPosUtil.getRegionModule(LodUtil.CHUNK_DETAIL_LEVEL, xChunkPos);
+		zChunkPos = LevelPosUtil.getRegionModule(LodUtil.CHUNK_DETAIL_LEVEL, zChunkPos);
+		return preGeneratedChunkPos[xChunkPos * 32 + zChunkPos];
 	}
 	
 	/**

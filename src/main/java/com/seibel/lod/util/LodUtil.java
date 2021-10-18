@@ -291,7 +291,6 @@ public class LodUtil
 	public static String getServerId()
 	{
 		ServerData server = mc.getCurrentServer();
-		
 		String serverName = server.name.replaceAll(INVALID_FILE_CHARACTERS_REGEX, "");
 		String serverIp = server.ip.replaceAll(INVALID_FILE_CHARACTERS_REGEX, "");
 		String serverMcVersion = server.version.getString().replaceAll(INVALID_FILE_CHARACTERS_REGEX, "");

@@ -192,6 +192,12 @@ public class LodNodeGenWorker implements IWorker
 					//}
 					//else
 					//{
+					if (lodDim.isChunkPreGenerated(pos.x, pos.z) && LodConfig.CLIENT.worldGenerator.useExperimentalPreGenLoading.get())
+					{
+						generateWithServer();
+					}
+					else
+					{
 						switch (generationMode)
 						{
 						case NONE:
@@ -215,6 +221,7 @@ public class LodNodeGenWorker implements IWorker
 							generateWithServer();
 							break;
 						}
+					}
 					//}
 					
 					//lodRenderer.regenerateLODsNextFrame();
@@ -469,7 +476,7 @@ public class LodNodeGenWorker implements IWorker
 						ConfiguredFeature<?, ?> configuredFeature = featureSupplier.get();
 						
 						if (!allowUnstableFeatures &&
-								configuredFeaturesToAvoid.containsKey(configuredFeature.hashCode()))
+									configuredFeaturesToAvoid.containsKey(configuredFeature.hashCode()))
 							continue;
 						
 						

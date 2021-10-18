@@ -583,8 +583,6 @@ public class LodDimension
 				}
 				
 				
-				//Now we check if the current chunk has been generated with the correct complexity
-				complexity = LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get().complexity;
 				xChunkToCheck = x + playerChunkX;
 				zChunkToCheck = z + playerChunkZ;
 				
@@ -592,6 +590,13 @@ public class LodDimension
 				lodRegion = getRegion(LodUtil.CHUNK_DETAIL_LEVEL, xChunkToCheck, zChunkToCheck);
 				if (lodRegion == null)
 					continue;
+				
+				//Now we check if the current chunk has been generated with the correct complexity
+				//if(lodRegion.isChunkPreGenerated(xChunkToCheck,zChunkToCheck))
+				//	complexity = DistanceGenerationMode.SERVER.complexity;
+				//else
+					complexity = LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get().complexity;
+					
 				
 				//we create the level position info of the chunk
 				detailLevel = lodRegion.getMinDetailLevel();
@@ -801,6 +806,19 @@ public class LodDimension
 		fileHandler.saveDirtyRegionsToFileAsync();
 	}
 	
+	
+	/**
+	 * Return true if the chunk has been pregenerated in game
+	 */
+	public boolean isChunkPreGenerated(int xChunkPos, int zChunkPos)
+	{
+		
+		LodRegion region = getRegion(LodUtil.CHUNK_DETAIL_LEVEL, xChunkPos, zChunkPos);
+		if (region == null)
+			return false;
+		
+		return region.isChunkPreGenerated(xChunkPos, zChunkPos);
+	}
 	
 	/**
 	 * Returns whether the region at the given RegionPos
