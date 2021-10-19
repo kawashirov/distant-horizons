@@ -344,6 +344,7 @@ public class LodConfig
 														  + " if a chunk has been pre-generated, then the mod would use the real chunk for the \n"
 														  + "fake chunk creation. May require a deletion of the lod file to see the result. \n")
 										 .define("Use pre-generated chunks", false);*/
+			builder.pop();
 		}
 	}
 	
