@@ -212,7 +212,7 @@ public class LodConfig
 		public final ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
 		public final ForgeConfigSpec.BooleanValue avoidBlocksWithNoCollision;
 		public final ForgeConfigSpec.BooleanValue avoidNonFullBlocks;
-		public final ForgeConfigSpec.BooleanValue useExperimentalPreGenLoading;
+		//public final ForgeConfigSpec.BooleanValue useExperimentalPreGenLoading;
 		
 		WorldGenerator(ForgeConfigSpec.Builder builder)
 		{
@@ -342,11 +342,11 @@ public class LodConfig
 							+ " Turning this on will make plains smoother since the tall grass won't be used. \n")
 					.define("Avoid Blocks With No Collision", true);
 			
-			useExperimentalPreGenLoading = builder
+			/*useExperimentalPreGenLoading = builder
 										 .comment("\n\n"
 														  + " if a chunk has been pre-generated, then the mod would use the real chunk for the \n"
 														  + "fake chunk creation. May require a deletion of the lod file to see the result. \n")
-										 .define("Use pre-generated chunks", false);
+										 .define("Use pre-generated chunks", false);*/
 			avoidNonFullBlocks = builder
 					.comment("\n\n"
 							+ " If true LODs will only show full bocks when generating. \n"

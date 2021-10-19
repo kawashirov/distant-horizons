@@ -87,7 +87,7 @@ public class LodRegion
 		boolean fileFound = false;
 		
 		preGeneratedChunkPos = new boolean[32 * 32];
-		
+		/*
 		if (MinecraftWrapper.INSTANCE.hasSinglePlayerServer() && LodConfig.CLIENT.worldGenerator.useExperimentalPreGenLoading.get())
 		{
 			File regionFileDirHead;
@@ -137,7 +137,7 @@ public class LodRegion
 				e.printStackTrace();
 			}
 			System.out.println(string);
-		}
+		}*/
 		
 	}
 	

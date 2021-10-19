@@ -185,19 +185,50 @@ public class LodNodeGenWorker implements IWorker
 				/* TODO I must disable this 'if', if I will find a way to replace it */
 				if (lodDim.regionIsInRange(pos.x / LodUtil.REGION_WIDTH_IN_CHUNKS, pos.z / LodUtil.REGION_WIDTH_IN_CHUNKS))
 				{
-					
-					//if(loadedChunk != null)
+					//
 					//{
 					//	lodBuilder.generateLodNodeFromChunk(lodDim, loadedChunk, new LodBuilderConfig(DistanceGenerationMode.SERVER));
 					//}
 					//else
 					//{
+					/*
+					IChunk loadedChunk = null;
 					if (lodDim.isChunkPreGenerated(pos.x, pos.z) && LodConfig.CLIENT.worldGenerator.useExperimentalPreGenLoading.get())
 					{
-						generateWithServer();
+						// generate a Lod like normal
+						loadedChunk = ChunkLoader.getChunkFromFile(pos);
+						if(loadedChunk != null)
+							lodBuilder.generateLodNodeFromChunk(lodDim, loadedChunk, new LodBuilderConfig(DistanceGenerationMode.SERVER));
+						else
+						{
+							switch (generationMode)
+							{
+							case NONE:
+								// don't generate
+								break;
+							case BIOME_ONLY:
+							case BIOME_ONLY_SIMULATE_HEIGHT:
+								// fastest
+								generateUsingBiomesOnly();
+								break;
+							case SURFACE:
+								// faster
+								generateUsingSurface();
+								break;
+							case FEATURES:
+								// fast
+								generateUsingFeatures();
+								break;
+							case SERVER:
+								// very slow
+								lodBuilder.generateLodNodeFromChunk(lodDim, serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES), new LodBuilderConfig(DistanceGenerationMode.SERVER));
+								//generateWithServer();
+								break;
+							}
+						}
 					}
 					else
-					{
+					{*/
 						switch (generationMode)
 						{
 						case NONE:
@@ -218,10 +249,10 @@ public class LodNodeGenWorker implements IWorker
 							break;
 						case SERVER:
 							// very slow
-							generateWithServer();
+							lodBuilder.generateLodNodeFromChunk(lodDim, serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES), new LodBuilderConfig(DistanceGenerationMode.SERVER));
+							//generateWithServer();
 							break;
 						}
-					}
 					//}
 					
 					//lodRenderer.regenerateLODsNextFrame();
