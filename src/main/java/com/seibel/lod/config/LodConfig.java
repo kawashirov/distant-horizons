@@ -93,12 +93,13 @@ public class LodConfig
 			
 			Graphics(ForgeConfigSpec.Builder builder)
 			{
-				builder.comment("These settings control how mod will look in game").push(this.getClass().getSimpleName());
+				builder.comment("These settings control how mod will look in game").push("Graphics");
 				{
 					qualityOption = new QualityOption(builder);
-					fogQualityOption = new FogQualityOption(builder);
 					advancedGraphicsOption = new AdvancedGraphicsOption(builder);
+					fogQualityOption = new FogQualityOption(builder);
 				}
+				builder.pop();
 			}
 			
 			public static class QualityOption
@@ -208,14 +209,16 @@ public class LodConfig
 				AdvancedGraphicsOption(ForgeConfigSpec.Builder builder)
 				{
 					
+					builder.comment("Advanced graphics option for the mod").push(this.getClass().getSimpleName());
+					
 					lodTemplate = builder
 										  .comment("\n\n"
 														   + " How should the LODs be drawn? \n"
 														   + " NOTE: Currently only " + LodTemplate.CUBIC + " is implemented! \n"
 														   + " \n"
 														   + " " + LodTemplate.CUBIC + ": LOD Chunks are drawn as rectangular prisms (boxes). \n"
-														   + " " + LodTemplate.TRIANGULAR + ": LOD Chunks smoothly transition between other. \n"
-														   + " " + LodTemplate.DYNAMIC + ": LOD Chunks smoothly transition between each other, \n"
+														   + " " + LodTemplate.TRIANGULAR + ": NOT IMPLEMENTED YET: LOD Chunks smoothly transition between other. \n"
+														   + " " + LodTemplate.DYNAMIC + ": NOT IMPLEMENTED YET: LOD Chunks smoothly transition between each other, \n"
 														   + " " + "         unless a neighboring chunk is at a significantly different height. \n")
 										  .defineEnum("LOD Template", LodTemplate.CUBIC);
 					
@@ -274,7 +277,7 @@ public class LodConfig
 			
 			WorldGenerator(ForgeConfigSpec.Builder builder)
 			{
-				builder.comment("These settings control how LODs outside your normal view range are generated.").push(this.getClass().getSimpleName());
+				builder.comment("These settings control how LODs outside your normal view range are generated.").push("Generation");
 				
 				generationPriority = builder
 											 .comment("\n\n"
@@ -401,6 +404,7 @@ public class LodConfig
 					debugging = new Debugging(builder);
 					buffers = new Buffers(builder);
 				}
+				builder.pop();
 			}
 			
 			public static class Threading
