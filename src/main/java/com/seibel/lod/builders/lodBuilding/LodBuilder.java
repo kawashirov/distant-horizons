@@ -432,7 +432,7 @@ public class LodBuilder
 			// snow, flowers, etc. Get the above block so we can still get the color
 			// of the snow, flower, etc. that may be above this block
 			int aboveColorInt = 0;
-			if (LodConfig.CLIENT.worldGenerator.avoidNonFullBlocks.get() || LodConfig.CLIENT.worldGenerator.avoidBlocksWithNoCollision.get())
+			if (LodConfig.CLIENT.worldGenerator.blockToAvoid.get().nonFull || LodConfig.CLIENT.worldGenerator.blockToAvoid.get().noCollision)
 			{
 				blockPos.set(chunk.getPos().getMinBlockX() + xRel, sectionIndex * CHUNK_DATA_WIDTH + yRel + 1, chunk.getPos().getMinBlockZ() + zRel);
 				aboveColorInt = getColorForBlock(chunk, blockPos);
@@ -808,11 +808,11 @@ public class LodBuilder
 	private boolean isLayerValidLodPoint(IChunk chunk, BlockPos.Mutable blockPos)
 	{
 		BlockState blockState = chunk.getBlockState(blockPos);
-		boolean avoidNonFullBlock = LodConfig.CLIENT.worldGenerator.avoidNonFullBlocks.get();
-		boolean	avoidBlockWithNoCollision = LodConfig.CLIENT.worldGenerator.avoidBlocksWithNoCollision.get();
+		boolean nonFullAvoidance = LodConfig.CLIENT.worldGenerator.blockToAvoid.get().nonFull;
+		boolean	noCollisionAvoidance = LodConfig.CLIENT.worldGenerator.blockToAvoid.get().noCollision;
 		if (blockState != null)
 		{
-			if (avoidNonFullBlock)
+			if (nonFullAvoidance)
 			{
 				if (!notFullBlock.containsKey(blockState.getBlock()) || notFullBlock.get(blockState.getBlock()) == null)
 				{
@@ -843,7 +843,7 @@ public class LodBuilder
 					return false;
 			}
 			
-			if (avoidBlockWithNoCollision)
+			if (noCollisionAvoidance)
 			{
 				if (!smallBlock.containsKey(blockState.getBlock()) || smallBlock.get(blockState.getBlock()) == null)
 				{

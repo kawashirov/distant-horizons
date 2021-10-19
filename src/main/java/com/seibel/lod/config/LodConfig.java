@@ -21,25 +21,13 @@ package com.seibel.lod.config;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import com.seibel.lod.enums.*;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.seibel.lod.ModInfo;
-import com.seibel.lod.enums.BufferRebuildTimes;
-import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.enums.DetailDropOff;
-import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.enums.FogDistance;
-import com.seibel.lod.enums.FogDrawOverride;
-import com.seibel.lod.enums.GenerationPriority;
-import com.seibel.lod.enums.HorizontalQuality;
-import com.seibel.lod.enums.HorizontalResolution;
-import com.seibel.lod.enums.HorizontalScale;
-import com.seibel.lod.enums.LodTemplate;
-import com.seibel.lod.enums.VanillaOverdraw;
-import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraftforge.common.ForgeConfigSpec;
@@ -210,8 +198,7 @@ public class LodConfig
 		public final ForgeConfigSpec.BooleanValue allowUnstableFeatureGeneration;
 		public final ForgeConfigSpec.EnumValue<HorizontalScale> horizontalScale;
 		public final ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
-		public final ForgeConfigSpec.BooleanValue avoidBlocksWithNoCollision;
-		public final ForgeConfigSpec.BooleanValue avoidNonFullBlocks;
+		public final ForgeConfigSpec.EnumValue<BlockToAvoid> blockToAvoid;
 		//public final ForgeConfigSpec.BooleanValue useExperimentalPreGenLoading;
 		
 		WorldGenerator(ForgeConfigSpec.Builder builder)
@@ -336,23 +323,27 @@ public class LodConfig
 							+ " https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues/35 \n")
 					.define("Allow Unstable Feature Generation", false);
 			
-			avoidBlocksWithNoCollision = builder
-					.comment("\n\n"
-							+ " If true LODs will only use blocks that have collisions when generating. \n"
-							+ " Turning this on will make plains smoother since the tall grass won't be used. \n")
-					.define("Avoid Blocks With No Collision", true);
+			blockToAvoid = builder
+								   .comment("\n\n"
+													+ " " + BlockToAvoid.NONE + " \n"
+													+ " Use all block in the generation \n"
+													+ "\n"
+													+ " " + BlockToAvoid.NON_FULL + " \n"
+													+ " Avoid block that are not full (slab, lantern, grass, torches ..) \n"
+													+ "\n"
+													+ " " + BlockToAvoid.NO_COLLISION + " \n"
+													+ " Avoid block that have no collision (grass, torches ..) \n"
+													+ "\n"
+													+ " " + BlockToAvoid.BOTH + " \n"
+													+ " Avoid both type of blocks \n"
+													+ "\n")
+								   .defineEnum("Block to avoid", BlockToAvoid.BOTH);
 			
 			/*useExperimentalPreGenLoading = builder
 										 .comment("\n\n"
 														  + " if a chunk has been pre-generated, then the mod would use the real chunk for the \n"
 														  + "fake chunk creation. May require a deletion of the lod file to see the result. \n")
 										 .define("Use pre-generated chunks", false);*/
-			avoidNonFullBlocks = builder
-					.comment("\n\n"
-							+ " If true LODs will only show full bocks when generating. \n"
-							+ " Turning this on will make plains smoother since the tall grass won't be used. \n")
-					.define("Avoid Non Full Blocks", true);
-			builder.pop();
 		}
 	}
 	
