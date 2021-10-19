@@ -810,15 +810,15 @@ public class LodDimension
 	/**
 	 * Return true if the chunk has been pregenerated in game
 	 */
-	public boolean isChunkPreGenerated(int xChunkPos, int zChunkPos)
-	{
-		
-		LodRegion region = getRegion(LodUtil.CHUNK_DETAIL_LEVEL, xChunkPos, zChunkPos);
-		if (region == null)
-			return false;
-		
-		return region.isChunkPreGenerated(xChunkPos, zChunkPos);
-	}
+	//public boolean isChunkPreGenerated(int xChunkPos, int zChunkPos)
+	//{
+	//
+	//	LodRegion region = getRegion(LodUtil.CHUNK_DETAIL_LEVEL, xChunkPos, zChunkPos);
+	//	if (region == null)
+	//		return false;
+	//
+	//	return region.isChunkPreGenerated(xChunkPos, zChunkPos);
+	//}
 	
 	/**
 	 * Returns whether the region at the given RegionPos

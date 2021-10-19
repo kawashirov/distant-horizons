@@ -48,7 +48,7 @@ public class LodRegion
 	/**
 	 * This chunk Pos has been generated
 	 */
-	private final boolean[] preGeneratedChunkPos;
+	//private final boolean[] preGeneratedChunkPos;
 	
 	/**
 	 * the generation mode for this region
@@ -86,8 +86,8 @@ public class LodRegion
 		
 		boolean fileFound = false;
 		
-		preGeneratedChunkPos = new boolean[32 * 32];
 		/*
+		preGeneratedChunkPos = new boolean[32 * 32];
 		if (MinecraftWrapper.INSTANCE.hasSinglePlayerServer() && LodConfig.CLIENT.worldGenerator.useExperimentalPreGenLoading.get())
 		{
 			File regionFileDirHead;
@@ -145,12 +145,12 @@ public class LodRegion
 	/**
 	 * Return true if the chunk has been pregenerated in game
 	 */
-	public boolean isChunkPreGenerated(int xChunkPos, int zChunkPos)
-	{
-		xChunkPos = LevelPosUtil.getRegionModule(LodUtil.CHUNK_DETAIL_LEVEL, xChunkPos);
-		zChunkPos = LevelPosUtil.getRegionModule(LodUtil.CHUNK_DETAIL_LEVEL, zChunkPos);
-		return preGeneratedChunkPos[xChunkPos * 32 + zChunkPos];
-	}
+	//public boolean isChunkPreGenerated(int xChunkPos, int zChunkPos)
+	//{
+	//	xChunkPos = LevelPosUtil.getRegionModule(LodUtil.CHUNK_DETAIL_LEVEL, xChunkPos);
+	//	zChunkPos = LevelPosUtil.getRegionModule(LodUtil.CHUNK_DETAIL_LEVEL, zChunkPos);
+	//	return preGeneratedChunkPos[xChunkPos * 32 + zChunkPos];
+	//}
 	
 	/**
 	 * Inserts the data point into the region.
