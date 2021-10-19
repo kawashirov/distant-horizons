@@ -115,14 +115,14 @@ public class DetailDistanceUtil
 	{
 		if (detail < minDrawDetail)
 		{
-			if (LodConfig.CLIENT.graphics.advancedOption.alwaysDrawAtMaxQuality.get())
+			if (LodConfig.CLIENT.graphics.advancedGraphicsOption.alwaysDrawAtMaxQuality.get())
 				return getLodGenDetail(minDrawDetail).detailLevel;
 			else
 				return (byte) minDrawDetail;
 		}
 		else
 		{
-			if (LodConfig.CLIENT.graphics.advancedOption.alwaysDrawAtMaxQuality.get())
+			if (LodConfig.CLIENT.graphics.advancedGraphicsOption.alwaysDrawAtMaxQuality.get())
 				return getLodGenDetail(detail).detailLevel;
 			else
 				return (byte) detail;

@@ -43,12 +43,32 @@ import net.minecraftforge.fml.config.ModConfig;
 @Mod.EventBusSubscriber
 public class LodConfig
 {
+	// CONFIG STRUCTURE
+	// 	-> Client
+	//		|
+	//		|-> Graphics
+	//		|		|-> QualityOption
+	//		|		|-> FogQualityOption
+	//		|		|-> AdvancedGraphicsOption
+	//		|
+	//		|-> World Generation
+	//		|
+	//		|-> Advanced Mod Option
+	//				|-> Threads
+	//				|-> Buffers
+	//				|-> Debugging
+	
+	
+	
 	public static class Client
 	{
 		public final Graphics graphics;
 		public final WorldGenerator worldGenerator;
 		public final AdvancedModOptions advancedModOptions;
 		
+		//================//
+		// Client Configs //
+		//================//
 		public Client(ForgeConfigSpec.Builder builder)
 		{
 			builder.push("client");
@@ -60,16 +80,16 @@ public class LodConfig
 			builder.pop();
 		}
 		
-		//================//
-		// Client Configs //
-		//================//
 		
+		//==================//
+		// Graphics Configs //
+		//==================//
 		public static class Graphics
 		{
 			
 			public final QualityOption qualityOption;
 			public final FogQualityOption fogQualityOption;
-			public final AdvancedOption advancedOption;
+			public final AdvancedGraphicsOption advancedGraphicsOption;
 			
 			Graphics(ForgeConfigSpec.Builder builder)
 			{
@@ -77,7 +97,7 @@ public class LodConfig
 				{
 					qualityOption = new QualityOption(builder);
 					fogQualityOption = new FogQualityOption(builder);
-					advancedOption = new AdvancedOption(builder);
+					advancedGraphicsOption = new AdvancedGraphicsOption(builder);
 				}
 				builder.pop();
 			}
@@ -176,7 +196,7 @@ public class LodConfig
 				}
 			}
 			
-			public static class AdvancedOption
+			public static class AdvancedGraphicsOption
 			{
 				public final ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
 				
@@ -186,7 +206,7 @@ public class LodConfig
 				
 				public final ForgeConfigSpec.EnumValue<VanillaOverdraw> vanillaOverdraw;
 				
-				AdvancedOption(ForgeConfigSpec.Builder builder)
+				AdvancedGraphicsOption(ForgeConfigSpec.Builder builder)
 				{
 					
 					lodTemplate = builder
@@ -239,6 +259,12 @@ public class LodConfig
 			}
 		}
 		
+		
+		
+		
+		//========================//
+		// WorldGenerator Configs //
+		//========================//
 		public static class WorldGenerator
 		{
 			public final ForgeConfigSpec.EnumValue<GenerationPriority> generationPriority;
@@ -356,6 +382,11 @@ public class LodConfig
 		}
 		
 		
+		
+		
+		//============================//
+		// AdvancedModOptions Configs //
+		//============================//
 		public static class AdvancedModOptions
 		{
 			

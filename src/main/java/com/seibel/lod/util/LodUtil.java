@@ -355,7 +355,7 @@ public class LodUtil
 		ChunkPos centerChunk = new ChunkPos(playerPos);
 		
 		int skipRadius;
-		VanillaOverdraw overdraw = LodConfig.CLIENT.graphics.advancedOption.vanillaOverdraw.get();
+		VanillaOverdraw overdraw = LodConfig.CLIENT.graphics.advancedGraphicsOption.vanillaOverdraw.get();
 		HorizontalResolution drawRes = LodConfig.CLIENT.graphics.qualityOption.drawResolution.get();
 		
 		// apply distance based rules for dynamic overdraw

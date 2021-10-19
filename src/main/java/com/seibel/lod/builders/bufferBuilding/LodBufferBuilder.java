@@ -393,7 +393,7 @@ public class LodBufferBuilder
 									if (DataPointUtil.isVoid(data) || !DataPointUtil.doesItExist(data))
 										break;
 										
-									LodConfig.CLIENT.graphics.advancedOption.lodTemplate.get().template.addLodToBuffer(currentBuffers[bufferIndex], playerBlockPosRounded, data, adjData,
+									LodConfig.CLIENT.graphics.advancedGraphicsOption.lodTemplate.get().template.addLodToBuffer(currentBuffers[bufferIndex], playerBlockPosRounded, data, adjData,
 											detailLevel, posX, posZ, box, renderer.previousDebugMode, renderer.lightMap, adjShadeDisabled);
 								}
 								

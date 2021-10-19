@@ -273,7 +273,7 @@ public class LodRenderer
 			ActiveRenderInfo renderInfo = mc.getGameRenderer().getMainCamera();
 			Vector3d cameraDir = new Vector3d(renderInfo.getLookVector());
 			
-			boolean cullingDisabled = LodConfig.CLIENT.graphics.advancedOption.disableDirectionalCulling.get();
+			boolean cullingDisabled = LodConfig.CLIENT.graphics.advancedGraphicsOption.disableDirectionalCulling.get();
 			
 			// used to determine what type of fog to render
 			int halfWidth = vbos.length / 2;
