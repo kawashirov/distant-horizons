@@ -218,7 +218,7 @@ public class Box
 	 */
 	public int getColor(Direction direction)
 	{
-		if (LodConfig.CLIENT.debugging.debugMode.get() != DebugMode.SHOW_DETAIL)
+		if (LodConfig.CLIENT.advancedModOptions.debugging.debugMode.get() != DebugMode.SHOW_DETAIL)
 			return colorMap[DIRECTION_INDEX.get(direction)];
 		else
 			return ColorUtil.applyShade(color, MinecraftWrapper.INSTANCE.getClientWorld().getShade(direction, true));

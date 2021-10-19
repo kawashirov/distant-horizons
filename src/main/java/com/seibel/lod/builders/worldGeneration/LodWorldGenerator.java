@@ -80,7 +80,7 @@ public class LodWorldGenerator
 			generatorThreadRunning = true;
 			
 			// just in case the config changed
-			maxChunkGenRequests = LodConfig.CLIENT.threading.numberOfWorldGenerationThreads.get() * 8;
+			maxChunkGenRequests = LodConfig.CLIENT.advancedModOptions.threading.numberOfWorldGenerationThreads.get() * 8;
 			
 			Thread generatorThread = new Thread(() ->
 			{

@@ -67,7 +67,7 @@ public class LodBufferBuilder
 	/** The thread used to generate new LODs off the main thread. */
 	public static final ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(LodBufferBuilder.class.getSimpleName() + " - main"));
 	/** The threads used to generate buffers. */
-	public static final ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.threading.numberOfBufferBuilderThreads.get(), new ThreadFactoryBuilder().setNameFormat("Buffer-Builder-%d").build());
+	public static final ExecutorService bufferBuilderThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.advancedModOptions.threading.numberOfBufferBuilderThreads.get(), new ThreadFactoryBuilder().setNameFormat("Buffer-Builder-%d").build());
 	
 	/**
 	 * When uploading to a buffer that is too small,
@@ -393,7 +393,7 @@ public class LodBufferBuilder
 									if (DataPointUtil.isVoid(data) || !DataPointUtil.doesItExist(data))
 										break;
 										
-									LodConfig.CLIENT.graphics.lodTemplate.get().template.addLodToBuffer(currentBuffers[bufferIndex], playerBlockPosRounded, data, adjData,
+									LodConfig.CLIENT.graphics.advancedOption.lodTemplate.get().template.addLodToBuffer(currentBuffers[bufferIndex], playerBlockPosRounded, data, adjData,
 											detailLevel, posX, posZ, box, renderer.previousDebugMode, renderer.lightMap, adjShadeDisabled);
 								}
 								

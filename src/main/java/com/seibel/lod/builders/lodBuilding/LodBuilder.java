@@ -213,7 +213,7 @@ public class LodBuilder
 		
 		
 		// determine how many LODs to generate vertically
-		VerticalQuality verticalQuality = LodConfig.CLIENT.worldGenerator.verticalQuality.get();
+		VerticalQuality verticalQuality = LodConfig.CLIENT.graphics.qualityOption.verticalQuality.get();
 		byte detailLevel = detail.detailLevel;
 		
 		

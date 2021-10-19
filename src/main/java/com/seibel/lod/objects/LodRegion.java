@@ -345,38 +345,17 @@ public class LodRegion
 		
 		byte desiredLevel;
 		int maxDistance;
-		boolean stopNow;
 		int minDistance;
 		int childLevel;
 		
 		
 		// calculate the LevelPos that are in range
-		switch (LodConfig.CLIENT.graphics.detailDropOff.get())
-		{
+		maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
+		desiredLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
+		minDistance = LevelPosUtil.minDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
+		childLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(minDistance));
 		
-		case FAST:
-			int playerRegionX = LevelPosUtil.getRegion(LodUtil.BLOCK_DETAIL_LEVEL, playerPosX);
-			int playerRegionZ = LevelPosUtil.getRegion(LodUtil.BLOCK_DETAIL_LEVEL, playerPosZ);
-			if (playerRegionX == regionPosX && playerRegionZ == regionPosZ)
-			{
-				maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
-				desiredLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
-				minDistance = LevelPosUtil.minDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
-				childLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(minDistance));
-				stopNow = detailLevel == childLevel - 1;
-				break;
-			}
-		default:
-		case FANCY:
-			maxDistance = LevelPosUtil.maxDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
-			desiredLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(maxDistance));
-			minDistance = LevelPosUtil.minDistance(detailLevel, posX, posZ, playerPosX, playerPosZ, regionPosX, regionPosZ);
-			childLevel = DetailDistanceUtil.getLodDrawDetail(DetailDistanceUtil.getDrawDetailFromDistance(minDistance));
-			stopNow = detailLevel == childLevel - 1;
-			break;
-		}
-		
-		if (stopNow)
+		if (detailLevel == childLevel - 1)
 		{
 			posToRender.addPosToRender(detailLevel,
 					posX + regionPosX * size,

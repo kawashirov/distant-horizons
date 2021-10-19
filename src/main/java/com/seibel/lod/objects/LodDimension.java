@@ -362,7 +362,7 @@ public class LodDimension
 	{
 		DistanceGenerationMode generationMode = LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get();
 		ChunkPos newPlayerChunk = new ChunkPos(LevelPosUtil.getChunkPos((byte) 0, playerPosX), LevelPosUtil.getChunkPos((byte) 0, playerPosZ));
-		VerticalQuality verticalQuality = LodConfig.CLIENT.worldGenerator.verticalQuality.get();
+		VerticalQuality verticalQuality = LodConfig.CLIENT.graphics.qualityOption.verticalQuality.get();
 		
 		
 		if (lastExpandedChunk == null)

@@ -32,7 +32,6 @@ import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder.VertexBuffersAndOffset;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.enums.DetailDropOff;
 import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.FogQuality;
@@ -214,7 +213,7 @@ public class LodRenderer
 		
 		// set the required open GL settings
 		
-		if (LodConfig.CLIENT.debugging.debugMode.get() == DebugMode.SHOW_DETAIL_WIREFRAME)
+		if (LodConfig.CLIENT.advancedModOptions.debugging.debugMode.get() == DebugMode.SHOW_DETAIL_WIREFRAME)
 			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
 		else
 			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
@@ -245,9 +244,9 @@ public class LodRenderer
 		vanillaBlockRenderedDistance = mc.getRenderDistance() * LodUtil.CHUNK_WIDTH;
 		// required for setupFog and setupProjectionMatrix
 		if (mc.getClientWorld().dimensionType().hasCeiling())
-			farPlaneBlockDistance = Math.min(LodConfig.CLIENT.graphics.lodChunkRenderDistance.get(), LodUtil.CEILED_DIMENSION_MAX_RENDER_DISTANCE) * LodUtil.CHUNK_WIDTH;
+			farPlaneBlockDistance = Math.min(LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get(), LodUtil.CEILED_DIMENSION_MAX_RENDER_DISTANCE) * LodUtil.CHUNK_WIDTH;
 		else
-			farPlaneBlockDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
+			farPlaneBlockDistance = LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
 		
 		setupProjectionMatrix(mcProjectionMatrix, partialTicks);
 		// commented out until we can add shaders to handle lighting
@@ -274,7 +273,7 @@ public class LodRenderer
 			ActiveRenderInfo renderInfo = mc.getGameRenderer().getMainCamera();
 			Vector3d cameraDir = new Vector3d(renderInfo.getLookVector());
 			
-			boolean cullingDisabled = LodConfig.CLIENT.graphics.disableDirectionalCulling.get();
+			boolean cullingDisabled = LodConfig.CLIENT.graphics.advancedOption.disableDirectionalCulling.get();
 			
 			// used to determine what type of fog to render
 			int halfWidth = vbos.length / 2;
@@ -399,7 +398,7 @@ public class LodRenderer
 			if (fogQuality == FogQuality.FANCY)
 			{
 				// for more realistic fog when using FAR
-				if (LodConfig.CLIENT.graphics.fogDistance.get() == FogDistance.NEAR_AND_FAR)
+				if (LodConfig.CLIENT.graphics.fogQualityOption.fogDistance.get() == FogDistance.NEAR_AND_FAR)
 					RenderSystem.fogStart(farPlaneBlockDistance * 0.9f);
 				else
 					RenderSystem.fogStart(Math.min(vanillaBlockRenderedDistance * 1.5f, farPlaneBlockDistance * 0.9f));
@@ -450,8 +449,8 @@ public class LodRenderer
 		// disable fog if Minecraft wasn't rendering fog,
 		// but we were
 		if (!fogSettings.vanillaIsRenderingFog &&
-				(fogSettings.near.quality != FogQuality.OFF ||
-						fogSettings.far.quality != FogQuality.OFF))
+					(fogSettings.near.quality != FogQuality.OFF ||
+							 fogSettings.far.quality != FogQuality.OFF))
 		{
 			GL11.glDisable(GL11.GL_FOG);
 		}
@@ -659,7 +658,7 @@ public class LodRenderer
 		
 		
 		FogQuality quality = ReflectionHandler.INSTANCE.getFogQuality();
-		FogDrawOverride override = LodConfig.CLIENT.graphics.fogDrawOverride.get();
+		FogDrawOverride override = LodConfig.CLIENT.graphics.fogQualityOption.fogDrawOverride.get();
 		
 		
 		fogSettings.vanillaIsRenderingFog = quality != FogQuality.OFF;
@@ -700,7 +699,7 @@ public class LodRenderer
 			fogSettings.near.quality = FogQuality.FANCY;
 			fogSettings.far.quality = FogQuality.FANCY;
 			
-			switch (LodConfig.CLIENT.graphics.fogDistance.get())
+			switch (LodConfig.CLIENT.graphics.fogQualityOption.fogDistance.get())
 			{
 			case NEAR_AND_FAR:
 				fogSettings.near.distance = FogDistance.NEAR;
@@ -727,7 +726,7 @@ public class LodRenderer
 			// fog, since the LODs are separated into a near
 			// and far portion; and fast fog is rendered from the
 			// frustrum's perspective instead of the camera
-			switch (LodConfig.CLIENT.graphics.fogDistance.get())
+			switch (LodConfig.CLIENT.graphics.fogQualityOption.fogDistance.get())
 			{
 			case NEAR_AND_FAR:
 			case NEAR:
@@ -764,44 +763,41 @@ public class LodRenderer
 		//=============//
 		
 		// check if the view distance changed
-		if (ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.graphics.lodChunkRenderDistance.get()
-				|| chunkRenderDistance != prevRenderDistance
-				|| prevFogDistance != LodConfig.CLIENT.graphics.fogDistance.get())
+		if (ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get()
+					|| chunkRenderDistance != prevRenderDistance
+					|| prevFogDistance != LodConfig.CLIENT.graphics.fogQualityOption.fogDistance.get())
 		{
 			
 			vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
 			DetailDistanceUtil.updateSettings();
 			fullRegen = true;
 			previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
-			prevFogDistance = LodConfig.CLIENT.graphics.fogDistance.get();
+			prevFogDistance = LodConfig.CLIENT.graphics.fogQualityOption.fogDistance.get();
 			prevRenderDistance = chunkRenderDistance;
 		}
 		
 		// did the user change the debug setting?
-		if (LodConfig.CLIENT.debugging.debugMode.get() != previousDebugMode)
+		if (LodConfig.CLIENT.advancedModOptions.debugging.debugMode.get() != previousDebugMode)
 		{
-			previousDebugMode = LodConfig.CLIENT.debugging.debugMode.get();
+			previousDebugMode = LodConfig.CLIENT.advancedModOptions.debugging.debugMode.get();
 			fullRegen = true;
 		}
 		
 		
 		long newTime = System.currentTimeMillis();
 		
-		if (LodConfig.CLIENT.graphics.detailDropOff.get() == DetailDropOff.FANCY)
+		// check if the player has moved
+		if (newTime - prevPlayerPosTime > LodConfig.CLIENT.advancedModOptions.buffers.rebuildTimes.get().playerMoveTimeout)
 		{
-			// check if the player has moved
-			if (newTime - prevPlayerPosTime > LodConfig.CLIENT.buffers.rebuildTimes.get().playerMoveTimeout)
-			{
-				if (LevelPosUtil.getDetailLevel(previousPos) == 0
+			if (LevelPosUtil.getDetailLevel(previousPos) == 0
 						|| mc.getPlayer().xChunk != LevelPosUtil.getPosX(previousPos)
 						|| mc.getPlayer().zChunk != LevelPosUtil.getPosZ(previousPos))
-				{
-					vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
-					fullRegen = true;
-					previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
-				}
-				prevPlayerPosTime = newTime;
+			{
+				vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
+				fullRegen = true;
+				previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
 			}
+			prevPlayerPosTime = newTime;
 		}
 		
 		
@@ -812,7 +808,7 @@ public class LodRenderer
 		// the max brightness is 1 and the minimum is 0.2
 		float skyBrightness = lodDim.dimension.hasSkyLight() ? mc.getSkyDarken(partialTicks) : 0.2f;
 		float minLightingDifference;
-		switch (LodConfig.CLIENT.buffers.rebuildTimes.get())
+		switch (LodConfig.CLIENT.advancedModOptions.buffers.rebuildTimes.get())
 		{
 		case FREQUENT:
 			minLightingDifference = 0.025f;
@@ -827,12 +823,12 @@ public class LodRenderer
 		}
 		
 		// check if the lighting changed
-		if (Math.abs(skyBrightness - prevSkyBrightness) > minLightingDifference 
-				// make sure the lighting gets to the max/minimum value
-				// (just in case the minLightingDifference is too large to notice the change)
-				|| (skyBrightness == 1.0f && prevSkyBrightness != 1.0f) // noon
-				|| (skyBrightness == 0.2f && prevSkyBrightness != 0.2f) // midnight
-				|| mc.getOptions().gamma != prevBrightness || lightMap == null)
+		if (Math.abs(skyBrightness - prevSkyBrightness) > minLightingDifference
+					// make sure the lighting gets to the max/minimum value
+					// (just in case the minLightingDifference is too large to notice the change)
+					|| (skyBrightness == 1.0f && prevSkyBrightness != 1.0f) // noon
+					|| (skyBrightness == 0.2f && prevSkyBrightness != 0.2f) // midnight
+					|| mc.getOptions().gamma != prevBrightness || lightMap == null)
 		{
 			fullRegen = true;
 			lightMap = mc.getCurrentLightMap();
@@ -847,7 +843,7 @@ public class LodRenderer
 		
 		
 		// check if the vanilla rendered chunks changed
-		if (newTime - prevVanillaChunkTime > LodConfig.CLIENT.buffers.rebuildTimes.get().renderedChunkTimeout)
+		if (newTime - prevVanillaChunkTime > LodConfig.CLIENT.advancedModOptions.buffers.rebuildTimes.get().renderedChunkTimeout)
 		{
 			if (vanillaRenderedChunksChanged)
 			{
@@ -860,7 +856,7 @@ public class LodRenderer
 		
 		
 		// check if there is any newly generated terrain to show
-		if (newTime - prevChunkTime > LodConfig.CLIENT.buffers.rebuildTimes.get().chunkChangeTimeout)
+		if (newTime - prevChunkTime > LodConfig.CLIENT.advancedModOptions.buffers.rebuildTimes.get().chunkChangeTimeout)
 		{
 			if (lodDim.regenDimensionBuffers)
 			{
@@ -888,8 +884,8 @@ public class LodRenderer
 			// sometimes we are given chunks that are outside the render distance,
 			// This prevents index out of bounds exceptions
 			if (xIndex >= 0 && zIndex >= 0
-					&& xIndex < vanillaRenderedChunks.length
-					&& zIndex < vanillaRenderedChunks.length)
+						&& xIndex < vanillaRenderedChunks.length
+						&& zIndex < vanillaRenderedChunks.length)
 			{
 				if (!vanillaRenderedChunks[xIndex][zIndex])
 				{

@@ -355,9 +355,8 @@ public class LodUtil
 		ChunkPos centerChunk = new ChunkPos(playerPos);
 		
 		int skipRadius;
-		VanillaOverdraw overdraw = LodConfig.CLIENT.graphics.vanillaOverdraw.get();
-		HorizontalResolution drawRes = LodConfig.CLIENT.graphics.drawResolution.get();
-		HorizontalResolution genRes = LodConfig.CLIENT.worldGenerator.generationResolution.get();
+		VanillaOverdraw overdraw = LodConfig.CLIENT.graphics.advancedOption.vanillaOverdraw.get();
+		HorizontalResolution drawRes = LodConfig.CLIENT.graphics.qualityOption.drawResolution.get();
 		
 		// apply distance based rules for dynamic overdraw
 		if (overdraw == VanillaOverdraw.DYNAMIC
@@ -365,7 +364,7 @@ public class LodUtil
 		{
 			// The vanilla render distance isn't far enough 
 			// for partial skipping to make sense...
-			if (!lodDim.dimension.hasCeiling() && (drawRes == HorizontalResolution.BLOCK && genRes == HorizontalResolution.BLOCK))
+			if (!lodDim.dimension.hasCeiling() && (drawRes == HorizontalResolution.BLOCK))
 			{
 				// ...and the dimension is open, so we don't have to worry about
 				// LODs rendering on top of the player,

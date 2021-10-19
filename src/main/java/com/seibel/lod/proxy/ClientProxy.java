@@ -144,7 +144,7 @@ public class ClientProxy
 			// these can't be set until after the buffers are built (in renderer.drawLODs)
 			// otherwise the buffers may be set to the wrong size, or not changed at all
 			previousChunkRenderDistance = mc.getRenderDistance();
-			previousLodRenderDistance = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get();
+			previousLodRenderDistance = LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get();
 		}
 		catch (Exception e)
 		{
@@ -183,7 +183,7 @@ public class ClientProxy
 		
 //		LodConfig.CLIENT.buffers.rebuildTimes.set(BufferRebuildTimes.FREQUENT);
 		
-		LodConfig.CLIENT.debugging.enableDebugKeybindings.set(true);
+		LodConfig.CLIENT.advancedModOptions.debugging.enableDebugKeybindings.set(true);
 //		LodConfig.CLIENT.debugging.debugMode.set(DebugMode.SHOW_DETAIL);
 	}
 	
@@ -285,16 +285,16 @@ public class ClientProxy
 	@SubscribeEvent
 	public void onKeyInput(InputEvent.KeyInputEvent event)
 	{
-		if (LodConfig.CLIENT.debugging.enableDebugKeybindings.get()
+		if (LodConfig.CLIENT.advancedModOptions.debugging.enableDebugKeybindings.get()
 				&& event.getKey() == GLFW.GLFW_KEY_F4 && event.getAction() == GLFW.GLFW_PRESS)
 		{
-			LodConfig.CLIENT.debugging.debugMode.set(LodConfig.CLIENT.debugging.debugMode.get().getNext());
+			LodConfig.CLIENT.advancedModOptions.debugging.debugMode.set(LodConfig.CLIENT.advancedModOptions.debugging.debugMode.get().getNext());
 		}
 		
-		if (LodConfig.CLIENT.debugging.enableDebugKeybindings.get()
+		if (LodConfig.CLIENT.advancedModOptions.debugging.enableDebugKeybindings.get()
 				&& event.getKey() == GLFW.GLFW_KEY_F6 && event.getAction() == GLFW.GLFW_PRESS)
 		{
-			LodConfig.CLIENT.graphics.drawLods.set(!LodConfig.CLIENT.graphics.drawLods.get());
+			LodConfig.CLIENT.advancedModOptions.debugging.drawLods.set(!LodConfig.CLIENT.advancedModOptions.debugging.drawLods.get());
 		}
 	}
 	
@@ -326,9 +326,9 @@ public class ClientProxy
 		// calculate how wide the dimension(s) should be in regions
 		int chunksWide;
 		if (mc.getClientWorld().dimensionType().hasCeiling())
-			chunksWide = Math.min(LodConfig.CLIENT.graphics.lodChunkRenderDistance.get(), LodUtil.CEILED_DIMENSION_MAX_RENDER_DISTANCE) * 2 + 1;
+			chunksWide = Math.min(LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get(), LodUtil.CEILED_DIMENSION_MAX_RENDER_DISTANCE) * 2 + 1;
 		else
-			chunksWide = LodConfig.CLIENT.graphics.lodChunkRenderDistance.get() * 2 + 1;
+			chunksWide = LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get() * 2 + 1;
 		
 		int newWidth = (int) Math.ceil(chunksWide / (float) LodUtil.REGION_WIDTH_IN_CHUNKS);
 		// make sure we have an odd number of regions
