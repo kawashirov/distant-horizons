@@ -71,7 +71,7 @@ public class LodConfig
 		//================//
 		public Client(ForgeConfigSpec.Builder builder)
 		{
-			builder.push("client");
+			builder.push(this.getClass().getSimpleName());
 			{
 				graphics = new Graphics(builder);
 				worldGenerator = new WorldGenerator(builder);
@@ -93,13 +93,12 @@ public class LodConfig
 			
 			Graphics(ForgeConfigSpec.Builder builder)
 			{
-				builder.comment("These settings control how LODs will look in game").push(this.getClass().getSimpleName());
+				builder.comment("These settings control how mod will look in game").push(this.getClass().getSimpleName());
 				{
 					qualityOption = new QualityOption(builder);
 					fogQualityOption = new FogQualityOption(builder);
 					advancedGraphicsOption = new AdvancedGraphicsOption(builder);
 				}
-				builder.pop();
 			}
 			
 			public static class QualityOption
@@ -402,7 +401,6 @@ public class LodConfig
 					debugging = new Debugging(builder);
 					buffers = new Buffers(builder);
 				}
-				builder.pop();
 			}
 			
 			public static class Threading
