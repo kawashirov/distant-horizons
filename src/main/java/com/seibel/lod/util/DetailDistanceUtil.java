@@ -4,8 +4,6 @@ import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.HorizontalQuality;
 import com.seibel.lod.enums.HorizontalResolution;
-import com.seibel.lod.objects.LodRegion;
-import com.seibel.lod.render.LodRenderer;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 public class DetailDistanceUtil

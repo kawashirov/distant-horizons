@@ -35,20 +35,24 @@ import java.util.Collections;
  */
 public enum HorizontalResolution
 {
-	/** render 1 LOD for each chunk */
-	CHUNK(1, 4),
-	
-	/** render 4 LODs for each chunk */
-	HALF_CHUNK(2, 3),
-	
-	/** render 16 LODs for each chunk */
-	FOUR_BLOCKS(4, 2),
+	/** render 256 LODs for each chunk */
+	BLOCK(16, 0),
 	
 	/** render 64 LODs for each chunk */
 	TWO_BLOCKS(8, 1),
 	
-	/** render 256 LODs for each chunk */
-	BLOCK(16, 0);
+	/** render 16 LODs for each chunk */
+	FOUR_BLOCKS(4, 2),
+	
+	/** render 4 LODs for each chunk */
+	HALF_CHUNK(2, 3),
+	
+	/** render 1 LOD for each chunk */
+	CHUNK(1, 4);
+	
+	
+	
+	
 	
 	/**
 	 * How many DataPoints should
