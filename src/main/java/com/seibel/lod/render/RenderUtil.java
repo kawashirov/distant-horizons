@@ -31,7 +31,7 @@ import net.minecraft.util.math.vector.Vector3d;
  * to be used in the rendering process.
  * 
  * @author James Seibel
- * @version 10-10-2021
+ * @version 10-19-2021
  */
 public class RenderUtil
 {
@@ -97,10 +97,10 @@ public class RenderUtil
 		int halfRegionWidth = LodUtil.REGION_WIDTH / 2;
 		
 		// calculate the 4 corners
-		Vector3d vboSeVec = new Vector3d(vboCenterVec.x + halfRegionWidth, vboCenterVec.y, vboCenterVec.z + halfRegionWidth);//.normalize();
-		Vector3d vboSwVec = new Vector3d(vboCenterVec.x - halfRegionWidth, vboCenterVec.y, vboCenterVec.z + halfRegionWidth);//.normalize();
-		Vector3d vboNwVec = new Vector3d(vboCenterVec.x - halfRegionWidth, vboCenterVec.y, vboCenterVec.z - halfRegionWidth);//.normalize();
-		Vector3d vboNeVec = new Vector3d(vboCenterVec.x + halfRegionWidth, vboCenterVec.y, vboCenterVec.z - halfRegionWidth);//.normalize();
+		Vector3d vboSeVec = new Vector3d(vboCenterVec.x + halfRegionWidth, vboCenterVec.y, vboCenterVec.z + halfRegionWidth);
+		Vector3d vboSwVec = new Vector3d(vboCenterVec.x - halfRegionWidth, vboCenterVec.y, vboCenterVec.z + halfRegionWidth);
+		Vector3d vboNwVec = new Vector3d(vboCenterVec.x - halfRegionWidth, vboCenterVec.y, vboCenterVec.z - halfRegionWidth);
+		Vector3d vboNeVec = new Vector3d(vboCenterVec.x + halfRegionWidth, vboCenterVec.y, vboCenterVec.z - halfRegionWidth);
 		
 		// if any corner is visible, this region should be rendered
 		return isNormalizedVectorInViewFrustum(vboSeVec, cameraDir) ||

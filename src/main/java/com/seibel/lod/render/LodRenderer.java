@@ -64,7 +64,7 @@ import net.minecraft.util.math.vector.Vector3d;
  * This is where LODs are draw to the world.
  * 
  * @author James Seibel
- * @version 10-13-2021
+ * @version 10-19-2021
  */
 public class LodRenderer
 {
@@ -281,14 +281,21 @@ public class LodRenderer
 			int halfWidth = vbos.length / 2;
 			int quarterWidth = vbos.length / 4;
 			
+			// where the center of the built buffers is (needed when culling regions)
+			RegionPos vboCenterRegionPos = new RegionPos(vbosCenter);
+			
+			
 			for (int x = 0; x < vbos.length; x++)
 			{
 				for (int z = 0; z < vbos.length; z++)
 				{
-					RegionPos vboPos = new RegionPos(x + lodDim.getCenterRegionPosX() - lodDim.getWidth() / 2, z + lodDim.getCenterRegionPosZ() - lodDim.getWidth() / 2);
+					RegionPos vboPos = new RegionPos(
+							x + vboCenterRegionPos.x - (lodDim.getWidth() / 2),
+							z + vboCenterRegionPos.z - (lodDim.getWidth() / 2));
 					if (cullingDisabled || RenderUtil.isRegionInViewFrustum(renderInfo.getBlockPosition(), cameraDir, vboPos.blockPos()))
 					{
-						if ((x > halfWidth - quarterWidth && x < halfWidth + quarterWidth) && (z > halfWidth - quarterWidth && z < halfWidth + quarterWidth))
+						if ((x > halfWidth - quarterWidth && x < halfWidth + quarterWidth) 
+							&& (z > halfWidth - quarterWidth && z < halfWidth + quarterWidth))
 							setupFog(fogSettings.near.distance, fogSettings.near.quality);
 						else
 							setupFog(fogSettings.far.distance, fogSettings.far.quality);
