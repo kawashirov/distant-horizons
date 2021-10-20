@@ -72,7 +72,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * @author James Seibel
  * @version 10-15-2021
  */
-public class LodNodeGenWorker implements IWorker
+public class LodGenWorker implements IWorker
 {
 	public static ExecutorService genThreads = Executors.newFixedThreadPool(LodConfig.CLIENT.advancedModOptions.threading.numberOfWorldGenerationThreads.get(), new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
 	
@@ -89,7 +89,7 @@ public class LodNodeGenWorker implements IWorker
 	
 	
 	
-	public LodNodeGenWorker(ChunkPos newPos, DistanceGenerationMode newGenerationMode,
+	public LodGenWorker(ChunkPos newPos, DistanceGenerationMode newGenerationMode,
 			LodBuilder newLodBuilder,
 			LodDimension newLodDimension, ServerWorld newServerWorld)
 	{

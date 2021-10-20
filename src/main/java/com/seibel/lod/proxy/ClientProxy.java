@@ -26,7 +26,7 @@ import org.lwjgl.glfw.GLFW;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder;
 import com.seibel.lod.builders.lodBuilding.LodBuilder;
-import com.seibel.lod.builders.worldGeneration.LodNodeGenWorker;
+import com.seibel.lod.builders.worldGeneration.LodGenWorker;
 import com.seibel.lod.builders.worldGeneration.LodWorldGenerator;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
@@ -365,7 +365,7 @@ public class ClientProxy
 	private void resetMod()
 	{
 		ThreadMapUtil.clearMaps();
-		LodNodeGenWorker.restartExecutorService();
+		LodGenWorker.restartExecutorService();
 		
 	}
 	
