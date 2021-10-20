@@ -676,19 +676,19 @@ public class LodRenderer
 		// use any fog overrides the user may have set
 		switch (override)
 		{
-		case ALWAYS_DRAW_FOG_FANCY:
+		case FANCY:
 			quality = FogQuality.FANCY;
 			break;
 		
-		case NEVER_DRAW_FOG:
+		case NO_FOG:
 			quality = FogQuality.OFF;
 			break;
 		
-		case ALWAYS_DRAW_FOG_FAST:
+		case FAST:
 			quality = FogQuality.FAST;
 			break;
 		
-		case USE_OPTIFINE_FOG_SETTING:
+		case OPTIFINE_SETTING:
 			// don't override anything
 			break;
 		}

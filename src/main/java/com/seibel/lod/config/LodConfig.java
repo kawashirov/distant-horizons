@@ -202,11 +202,11 @@ public class LodConfig
 					fogDrawOverride = builder
 							.comment("\n\n"
 									+ " When should fog be drawn? \n"
-									+ " " + FogDrawOverride.USE_OPTIFINE_FOG_SETTING + ": Use whatever Fog setting Optifine is using. If Optifine isn't installed this defaults to " + FogDrawOverride.ALWAYS_DRAW_FOG_FANCY + ". \n"
-									+ " " + FogDrawOverride.NEVER_DRAW_FOG + ": Never draw fog on the LODs \n"
-									+ " " + FogDrawOverride.ALWAYS_DRAW_FOG_FAST + ": Always draw fast fog on the LODs \n"
-									+ " " + FogDrawOverride.ALWAYS_DRAW_FOG_FANCY + ": Always draw fancy fog on the LODs (if your graphics card supports it) \n")
-							.defineEnum("Fog Draw Override", FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
+									+ " " + FogDrawOverride.OPTIFINE_SETTING + ": Use whatever Fog setting Optifine is using. If Optifine isn't installed this defaults to " + FogDrawOverride.FANCY + ". \n"
+									+ " " + FogDrawOverride.NO_FOG + ": Never draw fog on the LODs \n"
+									+ " " + FogDrawOverride.FAST + ": Always draw fast fog on the LODs \n"
+									+ " " + FogDrawOverride.FANCY + ": Always draw fancy fog on the LODs (if your graphics card supports it) \n")
+							.defineEnum("Fog Draw Override", FogDrawOverride.FANCY);
 					builder.pop();
 				}
 			}
