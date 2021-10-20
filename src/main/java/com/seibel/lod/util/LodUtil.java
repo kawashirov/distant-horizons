@@ -47,6 +47,7 @@ import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
+import org.lwjgl.system.CallbackI;
 
 /**
  * This class holds methods and constants that may be used in multiple places.
@@ -364,6 +365,8 @@ public class LodUtil
 		if (overdraw == VanillaOverdraw.DYNAMIC
 				&& chunkRenderDist <= MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW)
 		{
+			overdraw = VanillaOverdraw.NEVER;
+			/*
 			// The vanilla render distance isn't far enough 
 			// for partial skipping to make sense...
 			if (!lodDim.dimension.hasCeiling() && (drawRes == HorizontalResolution.BLOCK))
@@ -381,7 +384,7 @@ public class LodUtil
 				// Or the user is using a LOW horizontal resolution
 				// and overdraw would be very noticeable.
 				overdraw = VanillaOverdraw.NEVER;
-			}
+			}*/
 		}
 		
 		
@@ -391,6 +394,7 @@ public class LodUtil
 		{
 		case ALWAYS:
 			// don't skip any positions
+			System.out.println("going to return");
 			return new HashSet<>();
 		
 		case DYNAMIC:
@@ -433,13 +437,11 @@ public class LodUtil
 				{
 					if (x <= centerChunk.x - skipRadius || x >= centerChunk.x + skipRadius
 							|| z <= centerChunk.z - skipRadius || z >= centerChunk.z + skipRadius)
-					{
 						posToSkip.remove(new ChunkPos(x, z));
-					}
+					
 				}
 			}
 		}
-		
 		return posToSkip;
 	}
 	

@@ -494,24 +494,25 @@ public class LodBufferBuilder
 		int chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.x;
 		int chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.z;
 		
+		//We use this to check if the chunk is
 		boolean isItBorderPos;
 		if (LodConfig.CLIENT.graphics.advancedGraphicsOption.vanillaOverdraw.get() == VanillaOverdraw.NEVER)
 			isItBorderPos = LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1);
 		else
 			isItBorderPos = false;
 		
-		boolean nearPlayer = Math.abs(chunkXdist) <= 1 && Math.abs(chunkZdist) <= 1;;
-		boolean smallRenderDistance = gameChunkRenderDistance <= 4;
 		
+		boolean smallRenderDistance = gameChunkRenderDistance <= 4;
 		
 		//We check if the position is
 		
-		return (gameChunkRenderDistance >= Math.abs(chunkXdist)
-					&& gameChunkRenderDistance >= Math.abs(chunkZdist)
-					&& detailLevel <= LodUtil.CHUNK_DETAIL_LEVEL
-					&& vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
-					&& (!isItBorderPos || smallRenderDistance)
-					|| nearPlayer);
+		boolean vanillaRenderedPosition = gameChunkRenderDistance >= Math.abs(chunkXdist)
+												  && gameChunkRenderDistance >= Math.abs(chunkZdist)
+												  && detailLevel <= LodUtil.CHUNK_DETAIL_LEVEL
+												  && vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1];
+		
+		
+		return (vanillaRenderedPosition && (!(isItBorderPos && smallRenderDistance)));
 	}
 	
 	
