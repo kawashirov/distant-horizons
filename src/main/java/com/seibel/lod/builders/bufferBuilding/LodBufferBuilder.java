@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.seibel.lod.enums.VanillaOverdraw;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
@@ -89,13 +90,6 @@ public class LodBufferBuilder
 	 * when need be to fit the larger sizes.
 	 */
 	public static final int DEFAULT_MEMORY_ALLOCATION = 1024;
-	
-	
-	/** This boolean matrix indicate the buffer builder in that position has to be regenerated */
-	public volatile boolean[][] regenPos;
-	
-	/** This boolean indicates that ever buffer need to be regenerated */
-	public volatile boolean fullRegeneration = false;
 	
 	public static int skyLightPlayer = 15;
 	
@@ -195,7 +189,7 @@ public class LodBufferBuilder
 		
 		
 		Thread thread = new Thread(() ->
-				generateLodBuffersThread(renderer, lodDim, playerBlockPos, fullRegen));
+										   generateLodBuffersThread(renderer, lodDim, playerBlockPos, fullRegen));
 		
 		mainGenThread.execute(thread);
 	}
@@ -302,6 +296,8 @@ public class LodBufferBuilder
 							if (setsToRender[xR][zR] == null)
 								setsToRender[xR][zR] = new PosToRenderContainer(minDetail, regionPos.x, regionPos.z);
 							
+							
+							//We ask the lod dimension which block we have to render given the player position
 							PosToRenderContainer posToRender = setsToRender[xR][zR];
 							posToRender.clear(minDetail, regionPos.x, regionPos.z);
 							
@@ -313,13 +309,10 @@ public class LodBufferBuilder
 							
 							
 							
-							
-							
 							// keep a local version, so we don't have to worry about indexOutOfBounds Exceptions
 							// if it changes in the LodRenderer while we are working here
 							boolean[][] vanillaRenderedChunks = renderer.vanillaRenderedChunks;
 							short gameChunkRenderDistance = (short) (vanillaRenderedChunks.length / 2 - 1);
-							boolean smallRenderDistance = gameChunkRenderDistance <= 4;
 							
 							
 							
@@ -330,19 +323,18 @@ public class LodBufferBuilder
 								posX = posToRender.getNthPosX(index);
 								posZ = posToRender.getNthPosZ(index);
 								
-								// skip any chunks that Minecraft is going to render
-								chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.x;
-								chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.z;
 								
-								boolean isItBorderPos = LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1);
-								if (gameChunkRenderDistance >= Math.abs(chunkXdist)
-										&& gameChunkRenderDistance >= Math.abs(chunkZdist)
-										&& detailLevel <= LodUtil.CHUNK_DETAIL_LEVEL
-										&& vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
-										&& (!isItBorderPos || smallRenderDistance))
+								//We don't want to render this fake block if
+								//The block is inside the render distance with, is not bigger than a chunk and is positioned in a chunk set as vanilla rendered
+								//
+								//The block is in the player chunk or in a chunk adjacent to the player
+								if(isThisPositionGoingToBeRendered(detailLevel, posX, posZ, playerChunkPos, vanillaRenderedChunks, gameChunkRenderDistance))
 								{
 									continue;
 								}
+								
+								// We extract the adj data in the four cardinal direction
+								
 								Arrays.fill(adjShadeDisabled, false);
 								// skip any chunks that Minecraft is going to render
 								for (Direction direction : Box.ADJ_DIRECTIONS)
@@ -351,34 +343,41 @@ public class LodBufferBuilder
 									zAdj = posZ + Box.DIRECTION_NORMAL_MAP.get(direction).getZ();
 									chunkXdist = LevelPosUtil.getChunkPos(detailLevel, xAdj) - playerChunkPos.x;
 									chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.z;
-									if (posToRender.contains(detailLevel, xAdj, zAdj)
-											&& (gameChunkRenderDistance < Math.abs(chunkXdist)
-											|| gameChunkRenderDistance < Math.abs(chunkZdist)
-											|| !(vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
-											&& (!LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1) || smallRenderDistance))))
+									if(/*posToRender.contains(detailLevel, xAdj, zAdj)
+										&&*/ !isThisPositionGoingToBeRendered(detailLevel, xAdj, zAdj, playerChunkPos, vanillaRenderedChunks, gameChunkRenderDistance))
+									/*if (posToRender.contains(detailLevel, xAdj, zAdj)
+												&& (gameChunkRenderDistance < Math.abs(chunkXdist)
+															|| gameChunkRenderDistance < Math.abs(chunkZdist)
+															|| !(vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
+																		 && (!LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1) || smallRenderDistance))))*/
 									{
 										for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
 										{
 											long data = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
+											adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = DataPointUtil.getAlpha(data) < 255;
 											adjData.get(direction)[verticalIndex] = data;
 										}
 									}
 									else
 									{
-										if (gameChunkRenderDistance >= Math.abs(chunkXdist)
-												&& gameChunkRenderDistance >= Math.abs(chunkZdist)
-												&& (!LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1) || smallRenderDistance)
-												&& vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
-												&& !DataPointUtil.isVoid(lodDim.getSingleData(detailLevel, xAdj, zAdj)))
+										if (!isThisPositionGoingToBeRendered(detailLevel, xAdj, zAdj, playerChunkPos, vanillaRenderedChunks, gameChunkRenderDistance)
+													&& !DataPointUtil.isVoid(lodDim.getSingleData(detailLevel, xAdj, zAdj)))
+										{
 											adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = DataPointUtil.getAlpha(lodDim.getSingleData(detailLevel, xAdj, zAdj)) < 255;
-										adjData.get(direction)[0] = DataPointUtil.EMPTY_DATA;
+											adjData.get(direction)[0] = DataPointUtil.EMPTY_DATA;
+										}
 									}
 								}
 								
+								
+								// We render every vertical lod present in this position
+								// We only stop when we find a block that is void or non existing block
 								long data;
 								for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ); verticalIndex++)
 								{
-									if(verticalIndex > 0)
+									
+									//we get the above block as adj UP
+									if (verticalIndex > 0)
 									{
 										adjData.get(Direction.UP)[0] = lodDim.getData(detailLevel, posX, posZ, verticalIndex - 1);
 									}
@@ -388,7 +387,8 @@ public class LodBufferBuilder
 									}
 									
 									
-									if(verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ) - 1)
+									//we get the below block as adj DOWN
+									if (verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ) - 1)
 									{
 										adjData.get(Direction.DOWN)[0] = lodDim.getData(detailLevel, posX, posZ, verticalIndex + 1);
 									}
@@ -397,10 +397,14 @@ public class LodBufferBuilder
 										adjData.get(Direction.DOWN)[0] = DataPointUtil.EMPTY_DATA;
 									}
 									
+									//We extract the data to render
 									data = lodDim.getData(detailLevel, posX, posZ, verticalIndex);
+									
+									//If the data is not renderable (Void or non existing) we stop since there is no data left in this position
 									if (DataPointUtil.isVoid(data) || !DataPointUtil.doesItExist(data))
 										break;
-										
+									
+									//We send the call to create the vertices
 									LodConfig.CLIENT.graphics.advancedGraphicsOption.lodTemplate.get().template.addLodToBuffer(currentBuffers[bufferIndex], playerBlockPosRounded, data, adjData,
 											detailLevel, posX, posZ, box, renderer.previousDebugMode, renderer.lightMap, adjShadeDisabled);
 								}
@@ -475,6 +479,34 @@ public class LodBufferBuilder
 			bufferLock.unlock();
 		}
 	}
+	
+	private boolean isThisPositionGoingToBeRendered(byte detailLevel, int posX, int posZ, ChunkPos playerChunkPos, boolean[][] vanillaRenderedChunks, int gameChunkRenderDistance){
+		
+		
+		// skip any chunks that Minecraft is going to render
+		int chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.x;
+		int chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.z;
+		
+		boolean isItBorderPos;
+		if (LodConfig.CLIENT.graphics.advancedGraphicsOption.vanillaOverdraw.get() == VanillaOverdraw.NEVER)
+			isItBorderPos = LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1);
+		else
+			isItBorderPos = false;
+		
+		boolean nearPlayer = Math.abs(chunkXdist) <= 1 && Math.abs(chunkZdist) <= 1;;
+		boolean smallRenderDistance = gameChunkRenderDistance <= 4;
+		
+		
+		//We check if the position is
+		
+		return (gameChunkRenderDistance >= Math.abs(chunkXdist)
+					&& gameChunkRenderDistance >= Math.abs(chunkZdist)
+					&& detailLevel <= LodUtil.CHUNK_DETAIL_LEVEL
+					&& vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
+					&& (!isItBorderPos || smallRenderDistance)
+					|| nearPlayer);
+	}
+	
 	
 	
 	
@@ -584,6 +616,8 @@ public class LodBufferBuilder
 		bufferLock.unlock();
 	}
 	
+	
+	
 	/**
 	 * Sets the buffers and Vbos to null, forcing them to be recreated <br>
 	 * and destroys any bound OpenGL objects. <br><br>
@@ -611,7 +645,8 @@ public class LodBufferBuilder
 						// called we aren't worried about stuttering anyway.
 						// This way we don't have to worry about what context this
 						// was called from (if any).
-						RenderSystem.recordRenderCall(() -> {
+						RenderSystem.recordRenderCall(() ->
+						{
 							GL45.glDeleteBuffers(buildableId);
 							GL45.glDeleteBuffers(drawableId);
 						});
@@ -652,7 +687,8 @@ public class LodBufferBuilder
 							drawableId = 0;
 						
 						
-						RenderSystem.recordRenderCall(() -> {
+						RenderSystem.recordRenderCall(() ->
+						{
 							if (buildableId != 0)
 								GL45.glDeleteBuffers(buildableId);
 							if (drawableId != 0)
