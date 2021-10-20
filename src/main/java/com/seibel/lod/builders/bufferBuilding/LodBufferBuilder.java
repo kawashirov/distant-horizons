@@ -30,7 +30,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.seibel.lod.enums.VanillaOverdraw;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
@@ -41,6 +40,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.GlProxyContext;
+import com.seibel.lod.enums.VanillaOverdraw;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.PosToRenderContainer;
@@ -494,7 +494,7 @@ public class LodBufferBuilder
 		int chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.x;
 		int chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.z;
 		
-		//We use this to check if the chunk is
+		// check if the chunk is on the border
 		boolean isItBorderPos;
 		if (LodConfig.CLIENT.graphics.advancedGraphicsOption.vanillaOverdraw.get() == VanillaOverdraw.NEVER)
 			isItBorderPos = LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1);
@@ -504,7 +504,7 @@ public class LodBufferBuilder
 		
 		boolean smallRenderDistance = gameChunkRenderDistance <= LodUtil.MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW;
 		
-		//We check if the position is
+		// get the positions that will be rendered
 		
 		boolean vanillaRenderedPosition = gameChunkRenderDistance >= Math.abs(chunkXdist)
 												  && gameChunkRenderDistance >= Math.abs(chunkZdist)
