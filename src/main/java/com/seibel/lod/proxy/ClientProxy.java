@@ -172,13 +172,13 @@ public class ClientProxy
 		// requires a world restart?
 //		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(VerticalQuality.VOXEL);
 
-//		LodConfig.CLIENT.graphics.fogDistance.set(FogDistance.FAR);
+//		LodConfig.CLIENT.graphics.fogQualityOption.fogDistance.set(FogDistance.FAR);
 //		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
 //		LodConfig.CLIENT.graphics.shadingMode.set(ShadingMode.DARKEN_SIDES);
 //		LodConfig.CLIENT.graphics.vanillaOverdraw.set(VanillaOverdraw.HALF);
 
 //		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
-//		LodConfig.CLIENT.graphics.lodChunkRenderDistance.set(64);
+//		LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.set(128);
 //		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
 //		LodConfig.CLIENT.worldGenerator.allowUnstableFeatureGeneration.set(false);
 		
