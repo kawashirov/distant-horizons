@@ -335,37 +335,44 @@ public class LodBufferBuilder
 								
 								// We extract the adj data in the four cardinal direction
 								
+								// we first reset the adjShadeDisabled. This is used to disable the shade on the border when we have transparent block like water or glass
+								// to avoid having a "darker border" underground
 								Arrays.fill(adjShadeDisabled, false);
-								// skip any chunks that Minecraft is going to render
+								
+								//We check every adj block in each direction
 								for (Direction direction : Box.ADJ_DIRECTIONS)
 								{
+									
 									xAdj = posX + Box.DIRECTION_NORMAL_MAP.get(direction).getX();
 									zAdj = posZ + Box.DIRECTION_NORMAL_MAP.get(direction).getZ();
-									chunkXdist = LevelPosUtil.getChunkPos(detailLevel, xAdj) - playerChunkPos.x;
-									chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.z;
-									if(/*posToRender.contains(detailLevel, xAdj, zAdj)
-										&&*/ !isThisPositionGoingToBeRendered(detailLevel, xAdj, zAdj, playerChunkPos, vanillaRenderedChunks, gameChunkRenderDistance))
-									/*if (posToRender.contains(detailLevel, xAdj, zAdj)
-												&& (gameChunkRenderDistance < Math.abs(chunkXdist)
-															|| gameChunkRenderDistance < Math.abs(chunkZdist)
-															|| !(vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1]
-																		 && (!LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1) || smallRenderDistance))))*/
+									long data;
+									
+									//If the adj block is rendered in the same region and with same detail
+									// and is positioned in a place that is not going to be rendered by vanilla game
+									// then we can set this position as adj
+									if(posToRender.contains(detailLevel, xAdj, zAdj)
+										&& !isThisPositionGoingToBeRendered(detailLevel, xAdj, zAdj, playerChunkPos, vanillaRenderedChunks, gameChunkRenderDistance))
 									{
 										for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
 										{
-											long data = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
-											adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = DataPointUtil.getAlpha(data) < 255;
+											data = lodDim.getData(detailLevel, xAdj, zAdj, verticalIndex);
+											adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = false;
 											adjData.get(direction)[verticalIndex] = data;
 										}
 									}
 									else
 									{
-										if (!isThisPositionGoingToBeRendered(detailLevel, xAdj, zAdj, playerChunkPos, vanillaRenderedChunks, gameChunkRenderDistance)
-													&& !DataPointUtil.isVoid(lodDim.getSingleData(detailLevel, xAdj, zAdj)))
+										//Other wise we check if this position is
+										data = lodDim.getSingleData(detailLevel, xAdj, zAdj);
+										adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = DataPointUtil.getAlpha(data) < 255;
+										adjData.get(direction)[0] = DataPointUtil.EMPTY_DATA;
+										
+										/*if (isThisPositionGoingToBeRendered(detailLevel, xAdj, zAdj, playerChunkPos, vanillaRenderedChunks, gameChunkRenderDistance)
+													&& !DataPointUtil.isVoid(data))
 										{
-											adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = DataPointUtil.getAlpha(lodDim.getSingleData(detailLevel, xAdj, zAdj)) < 255;
+											adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = DataPointUtil.getAlpha(data) < 255;
 											adjData.get(direction)[0] = DataPointUtil.EMPTY_DATA;
-										}
+										}*/
 									}
 								}
 								
