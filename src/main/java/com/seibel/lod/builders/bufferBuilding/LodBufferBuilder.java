@@ -502,7 +502,7 @@ public class LodBufferBuilder
 			isItBorderPos = false;
 		
 		
-		boolean smallRenderDistance = gameChunkRenderDistance <= 4;
+		boolean smallRenderDistance = gameChunkRenderDistance <= LodUtil.MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW;
 		
 		//We check if the position is
 		
