@@ -1,5 +1,6 @@
 /*
- *    This file is part of the LOD Mod, licensed under the GNU GPL v3 License.
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
  *
  *    Copyright (C) 2020  James Seibel
  *
@@ -32,15 +33,12 @@ import com.seibel.lod.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
-import com.seibel.lod.handlers.ChunkLoader;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
 
-import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.palette.UpgradeData;
 import net.minecraft.util.registry.Registry;
@@ -70,6 +68,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
 
 /**
  * This is used to generate a LodChunk at a given ChunkPos.
+ * 
  * @author James Seibel
  * @version 10-15-2021
  */

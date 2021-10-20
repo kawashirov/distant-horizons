@@ -1,5 +1,6 @@
 /*
- *    This file is part of the LOD Mod, licensed under the GNU GPL v3 License.
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
  *
  *    Copyright (C) 2020  James Seibel
  *
@@ -18,17 +19,18 @@
 
 package com.seibel.lod.handlers;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 
 /**
  * This object is used to get variables from methods
  * where they are private. Specifically the fog setting
  * in Optifine.
+ * 
  * @author James Seibel
  * @version 9-25-2021
  */

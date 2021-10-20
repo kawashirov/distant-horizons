@@ -1,5 +1,6 @@
 /*
- *    This file is part of the LOD Mod, licensed under the GNU GPL v3 License.
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
  *
  *    Copyright (C) 2020  James Seibel
  *
@@ -23,6 +24,7 @@ package com.seibel.lod.enums;
  * NEVER_DRAW_FOG, <br>
  * ALWAYS_DRAW_FOG_FAST, <br>
  * ALWAYS_DRAW_FOG_FANCY <br>
+ * 
  * @author James Seibel
  * @version 7-3-2021
  */

@@ -1,5 +1,6 @@
 /*
- *    This file is part of the LOD Mod, licensed under the GNU GPL v3 License.
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
  *
  *    Copyright (C) 2020  James Seibel
  *
@@ -23,6 +24,7 @@ package com.seibel.lod.enums;
  * Far_First <br>
  * <br>
  * Determines how fast the buffers need to be regenerated
+ * 
  * @author Leonardo Amato
  * @version 9-25-2021
  */

@@ -1,5 +1,6 @@
 /*
- *    This file is part of the LOD Mod, licensed under the GNU GPL v3 License.
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
  *
  *    Copyright (C) 2020  James Seibel
  *
@@ -18,15 +19,17 @@
 
 package com.seibel.lod.mixin;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.seibel.lod.LodMain;
-import com.seibel.lod.config.LodConfig;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.WorldRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.seibel.lod.LodMain;
+import com.seibel.lod.config.LodConfig;
+
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.WorldRenderer;
 
 /**
  * This class is used to mix in my rendering code
@@ -34,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * If this wasn't done, and we used Forge's
  * render last event, the LODs would render on top
  * of the normal terrain.
+ * 
  * @author James Seibel
  * @version 9-19-2021
  */

@@ -1,5 +1,6 @@
 /*
- *    This file is part of the LOD Mod, licensed under the GNU GPL v3 License.
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
  *
  *    Copyright (C) 2020  James Seibel
  *
@@ -24,6 +25,7 @@ import com.seibel.lod.enums.FogQuality;
 /**
  * This object is just a replacement for an array
  * to make things easier to understand in the LodRenderer.
+ * 
  * @author James Seibel
  * @version 7-03-2021
  */

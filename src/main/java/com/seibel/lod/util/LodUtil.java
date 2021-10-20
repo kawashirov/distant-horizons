@@ -1,5 +1,6 @@
 /*
- *    This file is part of the LOD Mod, licensed under the GNU GPL v3 License.
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
  *
  *    Copyright (C) 2020  James Seibel
  *
@@ -49,6 +50,7 @@ import net.minecraft.world.server.ServerWorld;
 
 /**
  * This class holds methods and constants that may be used in multiple places.
+ * 
  * @author James Seibel
  * @version 10-13-2021
  */

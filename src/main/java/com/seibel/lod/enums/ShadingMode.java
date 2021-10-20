@@ -2,20 +2,21 @@ package com.seibel.lod.enums;
 
 /**
  * NONE, GAME_SHADING
+ * 
  * @author James Seibel
  * @version 7-25-2020
  */
 public enum ShadingMode
 {
 	/**
-	 * LODs will have the same lighting on every side.
-	 * can make large similarly colored areas hard to differentiate
+	 * LODs will have darker sides and bottoms to simulate
+	 * Minecraft's fast lighting.
 	 */
-	NONE,
+	GAME_SHADING,
 	
 	/**
-	 * LODs will have darker sides and bottoms to simulate
-	 * Minecraft's fast, top down lighting.
+	 * LODs will use ambient occlusion to mimic Minecarft's
+	 * Fancy lighting.
 	 */
-	GAME_SHADING
+	AMBIENT_OCCLUSION
 }

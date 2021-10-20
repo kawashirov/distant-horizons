@@ -1,5 +1,6 @@
 /*
- *    This file is part of the LOD Mod, licensed under the GNU GPL v3 License.
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
  *
  *    Copyright (C) 2020  James Seibel
  *
@@ -18,14 +19,15 @@
 
 package com.seibel.lod.builders.bufferBuilding.lodTemplates;
 
+import java.util.Map;
+
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.proxy.ClientProxy;
+
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.Map;
 
 /**
  * TODO DynamicLodTemplate

@@ -1,9 +1,35 @@
+/*
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
+ *
+ *    Copyright (C) 2020  James Seibel
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, version 3.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.seibel.lod.objects;
 
-import com.seibel.lod.util.*;
+import com.seibel.lod.util.DataPointUtil;
+import com.seibel.lod.util.DetailDistanceUtil;
+import com.seibel.lod.util.LevelPosUtil;
+import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.util.ThreadMapUtil;
 
-import java.util.Arrays;
-
+/**
+ * 
+ * @author Leonardo Amato
+ * @version ??
+ */
 public class VerticalLevelContainer implements LevelContainer
 {
 	
@@ -49,6 +75,7 @@ public class VerticalLevelContainer implements LevelContainer
 		return true;
 	}
 	
+	@Override
 	public boolean addVerticalData(long[] data, int posX, int posZ)
 	{
 		

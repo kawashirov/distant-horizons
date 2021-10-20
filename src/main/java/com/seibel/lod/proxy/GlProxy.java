@@ -1,10 +1,30 @@
+/*
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
+ *
+ *    Copyright (C) 2020  James Seibel
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, version 3.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.seibel.lod.proxy;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.seibel.lod.enums.GlProxyContext;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.seibel.lod.enums.GlProxyContext;
 
 /**
  * A singleton that holds references to different openGL contexts
@@ -16,6 +36,7 @@ import org.lwjgl.opengl.GLCapabilities;
  * https://www.seas.upenn.edu/~pcozzi/OpenGLInsights/OpenGLInsights-AsynchronousBufferTransfers.pdf <br>
  * https://learnopengl.com/Advanced-OpenGL/Advanced-Data <br>
  * https://gamedev.stackexchange.com/questions/91995/edit-vbo-data-or-create-a-new-one <br><br>
+ * 
  * @author James Seibel
  * @version 10-2-2021
  */

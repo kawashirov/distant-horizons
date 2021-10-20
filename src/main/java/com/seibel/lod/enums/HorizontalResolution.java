@@ -1,5 +1,6 @@
 /*
- *    This file is part of the LOD Mod, licensed under the GNU GPL v3 License.
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
  *
  *    Copyright (C) 2020  James Seibel
  *
@@ -18,10 +19,10 @@
 
 package com.seibel.lod.enums;
 
-import com.seibel.lod.util.LodUtil;
-
 import java.util.ArrayList;
 import java.util.Collections;
+
+import com.seibel.lod.util.LodUtil;
 
 /**
  * chunk <Br>
@@ -29,6 +30,7 @@ import java.util.Collections;
  * four_blocks <br>
  * two_blocks <Br>
  * block <br>
+ * 
  * @author James Seibel
  * @author Leonardo Amato
  * @version 9-25-2021

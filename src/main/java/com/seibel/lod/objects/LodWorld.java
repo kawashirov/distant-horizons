@@ -1,5 +1,6 @@
 /*
- *    This file is part of the LOD Mod, licensed under the GNU GPL v3 License.
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
  *
  *    Copyright (C) 2020  James Seibel
  *
@@ -18,14 +19,16 @@
 
 package com.seibel.lod.objects;
 
-import com.seibel.lod.proxy.ClientProxy;
-import net.minecraft.world.DimensionType;
-
 import java.util.Hashtable;
 import java.util.Map;
 
+import com.seibel.lod.proxy.ClientProxy;
+
+import net.minecraft.world.DimensionType;
+
 /**
  * This stores all LODs for a given world.
+ * 
  * @author James Seibel
  * @author Leonardo Amato
  * @version 9-27-2021

@@ -1,5 +1,6 @@
 /*
- *    This file is part of the LOD Mod, licensed under the GNU GPL v3 License.
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
  *
  *    Copyright (C) 2020  James Seibel
  *
@@ -153,7 +154,7 @@ public class ClientProxy
 		}
 	}
 	
-	
+	/** used in a development environment to change settings on the fly */
 	private void applyConfigOverrides()
 	{
 		// remind the developer(s) that the config override is active

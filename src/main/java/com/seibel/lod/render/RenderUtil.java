@@ -1,5 +1,6 @@
 /*
- *    This file is part of the LOD Mod, licensed under the GNU GPL v3 License.
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
  *
  *    Copyright (C) 2020  James Seibel
  *
@@ -20,6 +21,7 @@ package com.seibel.lod.render;
 
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
+
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -27,6 +29,7 @@ import net.minecraft.util.math.vector.Vector3d;
 /**
  * This holds miscellaneous helper code
  * to be used in the rendering process.
+ * 
  * @author James Seibel
  * @version 10-10-2021
  */

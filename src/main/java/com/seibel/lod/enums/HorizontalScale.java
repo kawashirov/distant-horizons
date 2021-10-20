@@ -1,5 +1,6 @@
 /*
- *    This file is part of the LOD Mod, licensed under the GNU GPL v3 License.
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
  *
  *    Copyright (C) 2020  James Seibel
  *
@@ -24,6 +25,7 @@ package com.seibel.lod.enums;
  * High <br>
  * <br>
  * this is a quality scale for the detail drop-off
+ * 
  * @author Leonardo Amato
  * @version 9-25-2021
  */

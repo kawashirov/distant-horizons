@@ -1,21 +1,30 @@
+/*
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
+ *
+ *    Copyright (C) 2020  James Seibel
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, version 3.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.seibel.lod.objects;
 
-
-import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.wrappers.MinecraftWrapper;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.chunk.storage.RegionFile;
-import net.minecraft.world.server.ServerChunkProvider;
-import net.minecraft.world.server.ServerWorld;
-import org.lwjgl.system.CallbackI;
-
-import java.io.File;
 
 /**
  * This object holds all loaded LevelContainers acting as a quad tree
@@ -24,6 +33,7 @@ import java.io.File;
  * <strong>Coordinate Standard: </strong><br>
  * Coordinate called posX or posZ are relative LevelPos coordinates <br>
  * unless stated otherwise. <br>
+ * 
  * @author Leonardo Amato
  * @version 10-10-2021
  */

@@ -1,5 +1,6 @@
 /*
- *    This file is part of the LOD Mod, licensed under the GNU GPL v3 License.
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
  *
  *    Copyright (C) 2020  James Seibel
  *
@@ -20,6 +21,7 @@ package com.seibel.lod;
 
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.proxy.ClientProxy;
+
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -35,6 +37,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
  * <br>
  * If you are looking for the real start of the mod
  * check out the ClientProxy.
+ * 
  * @author James Seibel
  * @version 7-3-2021
  */
