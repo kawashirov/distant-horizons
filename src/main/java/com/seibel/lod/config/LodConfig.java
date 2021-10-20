@@ -50,7 +50,7 @@ import net.minecraftforge.fml.config.ModConfig;
 /**
  * This handles any configuration the user has access to.
  * @author James Seibel
- * @version 10-11-2021
+ * @version 10-19-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -77,6 +77,7 @@ public class LodConfig
 		public final Graphics graphics;
 		public final WorldGenerator worldGenerator;
 		public final AdvancedModOptions advancedModOptions;
+		
 		
 		//================//
 		// Client Configs //
@@ -105,7 +106,7 @@ public class LodConfig
 			
 			Graphics(ForgeConfigSpec.Builder builder)
 			{
-				builder.comment("These settings control how mod will look in game").push("Graphics");
+				builder.comment("These settings control how the mod will look in game").push("Graphics");
 				{
 					qualityOption = new QualityOption(builder);
 					advancedGraphicsOption = new AdvancedGraphicsOption(builder);
@@ -113,6 +114,7 @@ public class LodConfig
 				}
 				builder.pop();
 			}
+			
 			
 			public static class QualityOption
 			{
@@ -129,11 +131,11 @@ public class LodConfig
 				
 				QualityOption(ForgeConfigSpec.Builder builder)
 				{
-					builder.comment("These settings control how the LODs look.").push(this.getClass().getSimpleName());
+					builder.comment("These settings control how detailed the fake chunks will be.").push(this.getClass().getSimpleName());
 					
 					verticalQuality = builder
 							.comment("\n\n"
-									+ " This indicates how detailed LODs will represent \n"
+									+ " This indicates how detailed fake chunks will represent \n"
 									+ " overhangs, caves, floating islands, ect. \n"
 									+ " Higher options will use more memory and increase GPU usage. \n"
 									+ " " + VerticalQuality.LOW + ": uses at max 2 columns per position. \n"
@@ -141,10 +143,9 @@ public class LodConfig
 									+ " " + VerticalQuality.HIGH + ": uses at max 8 columns per position. \n")
 							.defineEnum("Vertical Quality", VerticalQuality.MEDIUM);
 					
-					
 					horizontalScale = builder
 							.comment("\n\n"
-									+ " This indicates how quickly LODs drop off in quality. \n"
+									+ " This indicates how quickly fake chunks drop off in quality. \n"
 									+ " " + HorizontalScale.LOW + ": quality drops every " + HorizontalScale.LOW.distanceUnit / 16 + " chunks. \n"
 									+ " " + HorizontalScale.MEDIUM + ": quality drops every " + HorizontalScale.MEDIUM.distanceUnit / 16 + " chunks. \n"
 									+ " " + HorizontalScale.HIGH + ": quality drops every " + HorizontalScale.HIGH.distanceUnit / 16 + " chunks. \n")
@@ -161,7 +162,7 @@ public class LodConfig
 					
 					drawResolution = builder
 							.comment("\n\n"
-									+ " What is the maximum detail LODs should be drawn at? \n"
+									+ " What is the maximum detail fake chunks should be drawn at? \n"
 									+ " " + HorizontalResolution.CHUNK + ": render 1 LOD for each Chunk. \n"
 									+ " " + HorizontalResolution.HALF_CHUNK + ": render 4 LODs for each Chunk. \n"
 									+ " " + HorizontalResolution.FOUR_BLOCKS + ": render 16 LODs for each Chunk. \n"
@@ -178,6 +179,7 @@ public class LodConfig
 				}
 			}
 			
+			
 			public static class FogQualityOption
 			{
 				public final ForgeConfigSpec.EnumValue<FogDistance> fogDistance;
@@ -191,7 +193,7 @@ public class LodConfig
 					
 					fogDistance = builder
 							.comment("\n\n"
-									+ " At what distance should Fog be drawn on the LODs? \n"
+									+ " At what distance should Fog be drawn on the fake chunks? \n"
 									+ " If the fog cuts off abruptly or you are using Optifine's \"fast\" fog option \n"
 									+ " set this to " + FogDistance.NEAR + " or " + FogDistance.FAR + ". \n")
 							.defineEnum("Fog Distance", FogDistance.NEAR_AND_FAR);
@@ -207,6 +209,7 @@ public class LodConfig
 					builder.pop();
 				}
 			}
+			
 			
 			public static class AdvancedGraphicsOption
 			{
@@ -229,14 +232,14 @@ public class LodConfig
 									+ " NOTE: Currently only " + LodTemplate.CUBIC + " is implemented! \n"
 									+ " \n"
 									+ " " + LodTemplate.CUBIC + ": LOD Chunks are drawn as rectangular prisms (boxes). \n"
-									+ " " + LodTemplate.TRIANGULAR + ": NOT IMPLEMENTED YET: LOD Chunks smoothly transition between other. \n"
-									+ " " + LodTemplate.DYNAMIC + ": NOT IMPLEMENTED YET: LOD Chunks smoothly transition between each other, \n"
+									+ " " + LodTemplate.TRIANGULAR + ": LOD Chunks smoothly transition between other. \n"
+									+ " " + LodTemplate.DYNAMIC + ": LOD Chunks smoothly transition between each other, \n"
 									+ " " + "         unless a neighboring chunk is at a significantly different height. \n")
 							.defineEnum("LOD Template", LodTemplate.CUBIC);
 					
 					disableDirectionalCulling = builder
 							.comment("\n\n"
-									+ " If false LODs that are behind the player's camera \n"
+									+ " If false fake chunks behind the player's camera \n"
 									+ " aren't drawn, increasing performance. \n\n"
 									+ ""
 									+ " If true all LODs are drawn, even those behind \n"
@@ -248,8 +251,8 @@ public class LodConfig
 					
 					alwaysDrawAtMaxQuality = builder
 							.comment("\n\n"
-									+ " Disable LOD quality falloff, \n"
-									+ " all LODs will be drawn at the highest \n"
+									+ " Disable quality falloff, \n"
+									+ " all fake chunks will be drawn at the highest \n"
 									+ " available detail level. \n\n"
 									+ " "
 									+ " WARNING: \n"
@@ -289,7 +292,7 @@ public class LodConfig
 			
 			WorldGenerator(ForgeConfigSpec.Builder builder)
 			{
-				builder.comment("These settings control how LODs outside your normal view range are generated.").push("Generation");
+				builder.comment("These settings control how fake chunks outside your normal view range are generated.").push("Generation");
 				
 				generationPriority = builder
 						.comment("\n\n"
@@ -311,44 +314,44 @@ public class LodConfig
 								+ "       different generation options. Your mileage may vary. \n"
 								+ "\n"
 								
-																  + " " + DistanceGenerationMode.NONE + " \n"
-																  + " Don't run the distance generator. \n"
-																  
-																  + "\n"
-																  + " " + DistanceGenerationMode.BIOME_ONLY + " \n"
-																  + " Only generate the biomes and use the biome's \n"
-																  + " grass color, water color, or snow color. \n"
-																  + " Doesn't generate height, everything is shown at sea level. \n"
-																  + " Multithreaded - Fastest (2-5 ms) \n"
-																  
-																  + "\n"
-																  + " " + DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT + " \n"
-																  + " Same as BIOME_ONLY, except instead \n"
-																  + " of always using sea level as the LOD height \n"
-																  + " different biome types (mountain, ocean, forest, etc.) \n"
-																  + " use predetermined heights to simulate having height data. \n"
-																  + " Multithreaded - Fastest (2-5 ms) \n"
-																  
-																  + "\n"
-																  + " " + DistanceGenerationMode.SURFACE + " \n"
-																  + " Generate the world surface, \n"
-																  + " this does NOT include trees, \n"
-																  + " or structures. \n"
-																  + " Multithreaded - Faster (10-20 ms) \n"
-																  
-																  + "\n"
-																  + " " + DistanceGenerationMode.FEATURES + " \n"
-																  + " Generate everything except structures. \n"
-																  + " WARNING: This may cause world generation bugs or instability! \n"
-																  + " Multithreaded - Fast (15-20 ms) \n"
-																  
-																  + "\n"
-																  + " " + DistanceGenerationMode.SERVER + " \n"
-																  + " Ask the server to generate/load each chunk. \n"
-																  + " This will show player made structures, which can \n"
-																  + " be useful if you are adding the mod to a pre-existing world. \n"
-																  + " This is the most compatible, but causes server/simulation lag. \n"
-																  + " SingleThreaded - Slow (15-50 ms, with spikes up to 200 ms) \n")
+								+ " " + DistanceGenerationMode.NONE + " \n"
+								+ " Don't run the distance generator. \n"
+								
+								+ "\n"
+								+ " " + DistanceGenerationMode.BIOME_ONLY + " \n"
+								+ " Only generate the biomes and use the biome's \n"
+								+ " grass color, water color, or snow color. \n"
+								+ " Doesn't generate height, everything is shown at sea level. \n"
+								+ " Multithreaded - Fastest (2-5 ms) \n"
+								
+								+ "\n"
+								+ " " + DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT + " \n"
+								+ " Same as BIOME_ONLY, except instead \n"
+								+ " of always using sea level as the LOD height \n"
+								+ " different biome types (mountain, ocean, forest, etc.) \n"
+								+ " use predetermined heights to simulate having height data. \n"
+								+ " Multithreaded - Fastest (2-5 ms) \n"
+								
+								+ "\n"
+								+ " " + DistanceGenerationMode.SURFACE + " \n"
+								+ " Generate the world surface, \n"
+								+ " this does NOT include trees, \n"
+								+ " or structures. \n"
+								+ " Multithreaded - Faster (10-20 ms) \n"
+								
+								+ "\n"
+								+ " " + DistanceGenerationMode.FEATURES + " \n"
+								+ " Generate everything except structures. \n"
+								+ " WARNING: This may cause world generation bugs or instability! \n"
+								+ " Multithreaded - Fast (15-20 ms) \n"
+								
+								+ "\n"
+								+ " " + DistanceGenerationMode.SERVER + " \n"
+								+ " Ask the server to generate/load each chunk. \n"
+								+ " This will show player made structures, which can \n"
+								+ " be useful if you are adding the mod to a pre-existing world. \n"
+								+ " This is the most compatible, but causes server/simulation lag. \n"
+								+ " SingleThreaded - Slow (15-50 ms, with spikes up to 200 ms) \n")
 						.defineEnum("Distance Generation Mode", DistanceGenerationMode.SURFACE);
 				
 				allowUnstableFeatureGeneration = builder
@@ -372,25 +375,21 @@ public class LodConfig
 				
 				blockToAvoid = builder
 						.comment("\n\n"
-								+ " " + BlockToAvoid.NONE + " \n"
-								+ " Use all block in the generation \n"
-								+ "\n"
-								+ " " + BlockToAvoid.NON_FULL + " \n"
-								+ " Avoid block that are not full (slab, lantern, grass, torches ..) \n"
-								+ "\n"
-								+ " " + BlockToAvoid.NO_COLLISION + " \n"
-								+ " Avoid block that have no collision (grass, torches ..) \n"
-								+ "\n"
-								+ " " + BlockToAvoid.BOTH + " \n"
-								+ " Avoid both type of blocks \n"
+								+ " " + BlockToAvoid.NONE + ": Use all blocks when generating fake chunks \n\n"
+								+ ""
+								+ " " + BlockToAvoid.NON_FULL + ": Only use full blocks when generating fake chunks (ignores slabs, lanterns, torches, grass, etc.) \n\n"
+								+ ""
+								+ " " + BlockToAvoid.NO_COLLISION + ": Only use solid blocks when generating fake chunks (ignores grass, torches, etc.) \n"
+								+ ""
+								+ " " + BlockToAvoid.BOTH + ": Only use full solid blocks when generating fake chunks \n"
 								+ "\n")
 						.defineEnum("Block to avoid", BlockToAvoid.BOTH);
 				
 				/*useExperimentalPreGenLoading = builder
-										 .comment("\n\n"
-														  + " if a chunk has been pre-generated, then the mod would use the real chunk for the \n"
-														  + "fake chunk creation. May require a deletion of the lod file to see the result. \n")
-										 .define("Use pre-generated chunks", false);*/
+						 .comment("\n\n"
+								+ " if a chunk has been pre-generated, then the mod would use the real chunk for the \n"
+								+ "fake chunk creation. May require a deletion of the lod file to see the result. \n")
+						 .define("Use pre-generated chunks", false);*/
 				builder.pop();
 			}
 		}
@@ -434,8 +433,8 @@ public class LodConfig
 									+ " the normal render distance. \n"
 									+ " If you experience stuttering when generating distant LODs, decrease \n"
 									+ " this number. If you want to increase LOD generation speed, \n"
-									+ " increase this number. \n"
-									+ " \n"
+									+ " increase this number. \n\n"
+									+ ""
 									+ " The maximum value is the number of logical processors on your CPU. \n"
 									+ " Requires a restart to take effect. \n")
 							.defineInRange("numberOfWorldGenerationThreads", Math.max(1, Runtime.getRuntime().availableProcessors() / 2), 1, Runtime.getRuntime().availableProcessors());
@@ -443,9 +442,9 @@ public class LodConfig
 					numberOfBufferBuilderThreads = builder
 							.comment("\n\n"
 									+ " This is how many threads are used when building vertex buffers \n"
-									+ " (The things sent to your GPU to draw the LODs). \n"
+									+ " (The things sent to your GPU to draw the fake chunks). \n"
 									+ " If you experience high CPU usage when NOT generating distant \n"
-									+ " LODs, lower this number. \n"
+									+ " fake chunks, lower this number. \n"
 									+ " \n"
 									+ " The maximum value is the number of logical processors on your CPU. \n"
 									+ " Requires a restart to take effect. \n")
@@ -454,7 +453,13 @@ public class LodConfig
 					builder.pop();
 				}
 			}
+
 			
+			
+			
+			//===============//
+			// Debug Options //
+			//===============//
 			public static class Debugging
 			{
 				public final ForgeConfigSpec.BooleanValue drawLods;
@@ -467,27 +472,28 @@ public class LodConfig
 					
 					drawLods = builder
 							.comment("\n\n"
-									+ " If true, the mod is enabled and LODs will be drawn. \n"
-									+ " If false, the mod will still generate LODs, \n"
+									+ " If true, the mod is enabled and fake chunks will be drawn. \n"
+									+ " If false, the mod will still generate fake chunks, \n"
 									+ " but they won't be rendered. \n")
-							.define("Disable Draw", true);
+							.define("Disable Drawing", true);
 					
 					debugMode = builder
 							.comment("\n\n"
-									+ " " + DebugMode.OFF + ": LODs will draw with their normal colors. \n"
-									+ " " + DebugMode.SHOW_DETAIL + ": LOD colors will be based on their detail level. \n"
-									+ " " + DebugMode.SHOW_DETAIL_WIREFRAME + ": LOD colors will be based on their detail level, drawn as a wireframe. \n")
-							.defineEnum("debugMode", DebugMode.OFF);
+									+ " " + DebugMode.OFF + ": Fake chunks will be drawn with their normal colors. \n"
+									+ " " + DebugMode.SHOW_DETAIL + ": Fake chunks color will be based on their detail level. \n"
+									+ " " + DebugMode.SHOW_DETAIL_WIREFRAME + ": Fake chunks color will be based on their detail level, drawn as a wireframe. \n")
+							.defineEnum("Debug Mode", DebugMode.OFF);
 					
 					enableDebugKeybindings = builder
 							.comment("\n\n"
 									+ " If true the F4 key can be used to cycle through the different debug modes. \n"
 									+ " and the F6 key can be used to enable and disable LOD rendering.")
-							.define("enableDebugKeybinding", false);
+							.define("Enable Debug Keybinding", false);
 					
 					builder.pop();
 				}
 			}
+			
 			
 			public static class Buffers
 			{
@@ -495,12 +501,12 @@ public class LodConfig
 				
 				Buffers(ForgeConfigSpec.Builder builder)
 				{
-					builder.comment("These settings affect when Vertex Buffers are built.").push(this.getClass().getSimpleName());
+					builder.comment("These settings affect how often geometry is are built.").push(this.getClass().getSimpleName());
 					
 					rebuildTimes = builder
 							.comment("\n\n"
 									+ " How frequently should geometry be rebuilt and sent to the GPU? \n"
-									+ " Faster settings may cause stuttering, but will prevent holes in the world \n")
+									+ " Higher settings may cause stuttering, but will prevent holes in the world \n")
 							.defineEnum("rebuildFrequency", BufferRebuildTimes.NORMAL);
 					
 					builder.pop();
@@ -510,9 +516,7 @@ public class LodConfig
 	}
 	
 	
-	/**
-	 * {@link Path} to the configuration file of this mod
-	 */
+	/** {@link Path} to the configuration file of this mod */
 	private static final Path CONFIG_PATH = Paths.get("config", ModInfo.MODNAME + ".toml");
 	
 	public static final ForgeConfigSpec CLIENT_SPEC;
