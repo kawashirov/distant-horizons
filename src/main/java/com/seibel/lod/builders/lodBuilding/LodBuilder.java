@@ -48,6 +48,7 @@ import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -678,7 +679,8 @@ public class LodBuilder
 		//Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, y >> 2, zRel >> 2);
 		BlockState blockState = chunk.getBlockState(blockPos);
 		
-		
+		if(isInWater(blockState))
+			blockState = Blocks.WATER.defaultBlockState();
 		
 		// block special cases
 		// TODO: this needs to be replaced by a config file of some sort
@@ -794,10 +796,29 @@ public class LodBuilder
 		return colorInt;
 	}
 	
+	private boolean isInWater(BlockState blockState)
+	{
+		//This type of block is always in water
+		if((blockState.getBlock() instanceof ILiquidContainer) && !(blockState.getBlock() instanceof IWaterLoggable))
+			return true;
+		
+		//This type of block could be in water
+		if(blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).isPresent() && blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).get())
+			return true;
+		
+		return false;
+	}
+	
+	
 	/** Is the block at the given blockPos a valid LOD point? */
 	private boolean isLayerValidLodPoint(IChunk chunk, BlockPos.Mutable blockPos)
 	{
+		
 		BlockState blockState = chunk.getBlockState(blockPos);
+		
+		if (isInWater(blockState))
+			return true;
+			
 		boolean nonFullAvoidance = LodConfig.CLIENT.worldGenerator.blockToAvoid.get().nonFull;
 		boolean	noCollisionAvoidance = LodConfig.CLIENT.worldGenerator.blockToAvoid.get().noCollision;
 		if (blockState != null)
@@ -837,7 +858,8 @@ public class LodBuilder
 			{
 				if (!smallBlock.containsKey(blockState.getBlock()) || smallBlock.get(blockState.getBlock()) == null)
 				{
-					if(!blockState.getFluidState().isEmpty() || blockState.getBlock() instanceof IWaterLoggable)
+					
+					if(!blockState.getFluidState().isEmpty())
 						smallBlock.put(blockState.getBlock(), false);
 						
 					VoxelShape voxelShape = blockState.getCollisionShape(chunk, blockPos);
