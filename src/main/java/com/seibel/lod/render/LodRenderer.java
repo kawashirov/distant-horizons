@@ -531,7 +531,7 @@ public class LodRenderer
 	private void setupProjectionMatrix(Matrix4f currentProjectionMatrix, float partialTicks)
 	{
 		//Minimum radious of view in 2 render distance
-		int minDistance = 8;
+		int minDistance = 1;
 		// create the new projection matrix
 		Matrix4f lodPoj =
 				Matrix4f.perspective(

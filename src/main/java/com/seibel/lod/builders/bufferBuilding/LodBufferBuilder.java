@@ -281,6 +281,8 @@ public class LodBufferBuilder
 							int xAdj;
 							int zAdj;
 							int bufferIndex;
+							boolean posNotInPlayerChunk;
+							boolean adjPosInPlayerChunk;
 							Box box = ThreadMapUtil.getBox();
 							boolean[] adjShadeDisabled = ThreadMapUtil.getAdjShadeDisabledArray();
 							
@@ -321,6 +323,8 @@ public class LodBufferBuilder
 								posX = posToRender.getNthPosX(index);
 								posZ = posToRender.getNthPosZ(index);
 								
+								int chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.x;
+								int chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.z;
 								
 								//We don't want to render this fake block if
 								//The block is inside the render distance with, is not bigger than a chunk and is positioned in a chunk set as vanilla rendered
@@ -331,7 +335,10 @@ public class LodBufferBuilder
 									continue;
 								}
 								
-								// We extract the adj data in the four cardinal direction
+								//we check if the block to render is not in player chunk
+								posNotInPlayerChunk = !(chunkXdist == 0 && chunkZdist == 0);
+										
+																					// We extract the adj data in the four cardinal direction
 								
 								// we first reset the adjShadeDisabled. This is used to disable the shade on the border when we have transparent block like water or glass
 								// to avoid having a "darker border" underground
@@ -344,12 +351,18 @@ public class LodBufferBuilder
 									xAdj = posX + Box.DIRECTION_NORMAL_MAP.get(direction).getX();
 									zAdj = posZ + Box.DIRECTION_NORMAL_MAP.get(direction).getZ();
 									long data;
+									chunkXdist = LevelPosUtil.getChunkPos(detailLevel, xAdj) - playerChunkPos.x;
+									chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.z;
+									adjPosInPlayerChunk = (chunkXdist == 0 && chunkZdist == 0);
 									
 									//If the adj block is rendered in the same region and with same detail
 									// and is positioned in a place that is not going to be rendered by vanilla game
 									// then we can set this position as adj
+									// We avoid cases where the adjPosition is in player chunk while the position is not
+									// to always have a wall underwater
 									if(posToRender.contains(detailLevel, xAdj, zAdj)
-										&& !isThisPositionGoingToBeRendered(detailLevel, xAdj, zAdj, playerChunkPos, vanillaRenderedChunks, gameChunkRenderDistance))
+										&& !isThisPositionGoingToBeRendered(detailLevel, xAdj, zAdj, playerChunkPos, vanillaRenderedChunks, gameChunkRenderDistance)
+										&& !(posNotInPlayerChunk && adjPosInPlayerChunk))
 									{
 										for (int verticalIndex = 0; verticalIndex < lodDim.getMaxVerticalData(detailLevel, xAdj, zAdj); verticalIndex++)
 										{
@@ -365,7 +378,7 @@ public class LodBufferBuilder
 										
 										adjData.get(direction)[0] = DataPointUtil.EMPTY_DATA;
 										
-										if (isThisPositionGoingToBeRendered(detailLevel, xAdj, zAdj, playerChunkPos, vanillaRenderedChunks, gameChunkRenderDistance)
+										if ((isThisPositionGoingToBeRendered(detailLevel, xAdj, zAdj, playerChunkPos, vanillaRenderedChunks, gameChunkRenderDistance) || (posNotInPlayerChunk && adjPosInPlayerChunk))
 													&& !DataPointUtil.isVoid(data))
 										{
 											adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = DataPointUtil.getAlpha(data) < 255;
