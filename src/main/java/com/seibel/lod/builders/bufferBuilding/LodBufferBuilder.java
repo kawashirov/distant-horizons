@@ -364,15 +364,13 @@ public class LodBufferBuilder
 									{
 										//Other wise we check if this position is
 										data = lodDim.getSingleData(detailLevel, xAdj, zAdj);
-										adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = DataPointUtil.getAlpha(data) < 255;
-										adjData.get(direction)[0] = DataPointUtil.EMPTY_DATA;
 										
-										/*if (isThisPositionGoingToBeRendered(detailLevel, xAdj, zAdj, playerChunkPos, vanillaRenderedChunks, gameChunkRenderDistance)
+										if (isThisPositionGoingToBeRendered(detailLevel, xAdj, zAdj, playerChunkPos, vanillaRenderedChunks, gameChunkRenderDistance)
 													&& !DataPointUtil.isVoid(data))
 										{
 											adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = DataPointUtil.getAlpha(data) < 255;
 											adjData.get(direction)[0] = DataPointUtil.EMPTY_DATA;
-										}*/
+										}
 									}
 								}
 								
