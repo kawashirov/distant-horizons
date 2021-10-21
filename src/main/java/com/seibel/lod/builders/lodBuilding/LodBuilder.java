@@ -825,20 +825,20 @@ public class LodBuilder
 		{
 			if (nonFullAvoidance)
 			{
+				if(!blockState.getFluidState().isEmpty() || blockState.getBlock() instanceof SixWayBlock)
+				{
+					notFullBlock.put(blockState.getBlock(), false);
+				}
 				if (!notFullBlock.containsKey(blockState.getBlock()) || notFullBlock.get(blockState.getBlock()) == null)
 				{
-					VoxelShape voxelShape = blockState.getShape(chunk, blockPos);
-					if (!blockState.getFluidState().isEmpty())
-					{
-						notFullBlock.put(blockState.getBlock(), false);
-					}
+					VoxelShape voxelShape = blockState.getBlock().defaultBlockState().getShape(chunk, blockPos);
 					
 					if (!voxelShape.isEmpty())
 					{
 						AxisAlignedBB bbox = voxelShape.bounds();
-						int xWidth = (int) (bbox.maxX - bbox.minX);
-						int yWidth = (int) (bbox.maxY - bbox.minY);
-						int zWidth = (int) (bbox.maxZ - bbox.minZ);
+						double xWidth = (bbox.maxX - bbox.minX);
+						double yWidth = (bbox.maxY - bbox.minY);
+						double zWidth = (bbox.maxZ - bbox.minZ);
 						if (xWidth < 1 && zWidth < 1 && yWidth < 1)
 							notFullBlock.put(blockState.getBlock(), true);
 						else
@@ -851,17 +851,18 @@ public class LodBuilder
 				}
 				
 				if (notFullBlock.get(blockState.getBlock()))
+				{
 					return false;
+				}
 			}
 			
 			if (noCollisionAvoidance)
 			{
+				if(!blockState.getFluidState().isEmpty() || blockState.getBlock() instanceof SixWayBlock)
+					smallBlock.put(blockState.getBlock(), false);
+				
 				if (!smallBlock.containsKey(blockState.getBlock()) || smallBlock.get(blockState.getBlock()) == null)
 				{
-					
-					if(!blockState.getFluidState().isEmpty())
-						smallBlock.put(blockState.getBlock(), false);
-						
 					VoxelShape voxelShape = blockState.getCollisionShape(chunk, blockPos);
 					if (!blockState.getFluidState().isEmpty())
 					{
@@ -873,15 +874,6 @@ public class LodBuilder
 						if (voxelShape.isEmpty())
 						{
 							smallBlock.put(blockState.getBlock(), true);
-						/*AxisAlignedBB bbox = voxelShape.bounds();
-						int xWidth = (int) (bbox.maxX - bbox.minX);
-						int yWidth = (int) (bbox.maxY - bbox.minY);
-						int zWidth = (int) (bbox.maxZ - bbox.minZ);
-						
-						if (xWidth < 0.7 && zWidth < 0.7 && yWidth < 0.7)
-							smallBlock.put(blockState.getBlock(), true);
-						else
-							smallBlock.put(blockState.getBlock(), false);*/
 						}
 						else
 						{
@@ -891,7 +883,9 @@ public class LodBuilder
 				}
 				
 				if (smallBlock.get(blockState.getBlock()))
+				{
 					return false;
+				}
 			}
 			
 			
