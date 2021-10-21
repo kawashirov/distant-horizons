@@ -368,8 +368,6 @@ public class LodBufferBuilder
 										if (isThisPositionGoingToBeRendered(detailLevel, xAdj, zAdj, playerChunkPos, vanillaRenderedChunks, gameChunkRenderDistance)
 													&& !DataPointUtil.isVoid(data))
 										{
-											if(DataPointUtil.getAlpha(data) < 255)
-												System.out.println(DataPointUtil.getAlpha(data));
 											adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = DataPointUtil.getAlpha(data) < 255;
 											adjData.get(direction)[0] = DataPointUtil.EMPTY_DATA;
 										}
