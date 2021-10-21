@@ -153,7 +153,7 @@ public class DataPointUtil
 	
 	public static short getAlpha(long dataPoint)
 	{
-		return (short) (((dataPoint >>> ALPHA_SHIFT) & ALPHA_MASK) << ALPHA_DOWNSIZE_SHIFT);
+		return (short) ((((dataPoint >>> ALPHA_SHIFT) & ALPHA_MASK) << ALPHA_DOWNSIZE_SHIFT) | 0b1111);
 	}
 	
 	public static short getRed(long dataPoint)
@@ -212,7 +212,7 @@ public class DataPointUtil
 	
 	public static int getColor(long dataPoint)
 	{
-		return (int) (((dataPoint >>> COLOR_SHIFT) & COLOR_MASK) | (((dataPoint >>> (ALPHA_SHIFT - ALPHA_DOWNSIZE_SHIFT)) | 0b1111) << 24));
+		return (int) (((dataPoint >>> COLOR_SHIFT) & COLOR_MASK) | (/*((dataPoint >>> (ALPHA_SHIFT - ALPHA_DOWNSIZE_SHIFT)) | 0b1111)*/255 << 24));
 	}
 	
 	/** This method apply the lightmap to the color to use */
