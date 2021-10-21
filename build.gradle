@@ -19,7 +19,7 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = 'b1.5.0'
+version = 'a1.5.0'
 group = 'com.seibel.lod'
 archivesBaseName = 'Distant-Horizons_1.16.5'
 
@@ -131,28 +131,10 @@ dependencies {
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.16.5-36.1.0'
+    
+    
     compile group: 'org.tukaani', name: 'xz', version: '1.9'
 	
-	// these aren't needed right now
-	//implementation ('com.github.KaptainWutax:TerrainUtils:1.0.0'){
-    //    transitive = false
-    //}
-	//implementation ('com.github.KaptainWutax:BiomeUtils:1.0.0'){
-    //    transitive = false
-    //}
-    //implementation ('com.github.KaptainWutax:SeedUtils:-SNAPSHOT'){
-    //    transitive = false
-    //}
-    //implementation ('com.github.KaptainWutax:MCUtils:1.0.0'){
-    //    transitive = false
-    //}
-    //implementation ('com.github.KaptainWutax:NoiseUtils:1.0.0'){
-    //    transitive = false
-    //}
-    //implementation ('com.github.KaptainWutax:MathUtils:-SNAPSHOT'){
-    //    transitive = false
-    //}
-    
     // these were added to hopefully allow for cloning
     // configuredFeatures to allow for safe
     // multi threaded feature generation. Sadly I couldn't find

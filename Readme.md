@@ -65,4 +65,5 @@ The source code can be 'created' with the `./eclipse` command and can be found i
 ## Open Source Acknowledgements
 
 XZ for Java (data compression)
+
 https://tukaani.org/xz/java.html
