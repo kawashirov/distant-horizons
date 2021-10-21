@@ -280,8 +280,6 @@ public class LodBufferBuilder
 							int posZ;
 							int xAdj;
 							int zAdj;
-							int chunkXdist;
-							int chunkZdist;
 							int bufferIndex;
 							Box box = ThreadMapUtil.getBox();
 							boolean[] adjShadeDisabled = ThreadMapUtil.getAdjShadeDisabledArray();
@@ -365,11 +363,12 @@ public class LodBufferBuilder
 										//Other wise we check if this position is
 										data = lodDim.getSingleData(detailLevel, xAdj, zAdj);
 										
+										adjData.get(direction)[0] = DataPointUtil.EMPTY_DATA;
+										
 										if (isThisPositionGoingToBeRendered(detailLevel, xAdj, zAdj, playerChunkPos, vanillaRenderedChunks, gameChunkRenderDistance)
 													&& !DataPointUtil.isVoid(data))
 										{
 											adjShadeDisabled[Box.DIRECTION_INDEX.get(direction)] = DataPointUtil.getAlpha(data) < 255;
-											adjData.get(direction)[0] = DataPointUtil.EMPTY_DATA;
 										}
 									}
 								}
@@ -494,13 +493,13 @@ public class LodBufferBuilder
 		
 		// check if the chunk is on the border
 		boolean isItBorderPos;
-		if (LodConfig.CLIENT.graphics.advancedGraphicsOption.vanillaOverdraw.get() == VanillaOverdraw.NEVER)
+		if (LodConfig.CLIENT.graphics.advancedGraphicsOption.vanillaOverdraw.get() == VanillaOverdraw.BORDER)
 			isItBorderPos = LodUtil.isBorderChunk(vanillaRenderedChunks, chunkXdist + gameChunkRenderDistance + 1, chunkZdist + gameChunkRenderDistance + 1);
 		else
 			isItBorderPos = false;
 		
 		
-		boolean smallRenderDistance = gameChunkRenderDistance <= LodUtil.MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW;
+		//boolean smallRenderDistance = gameChunkRenderDistance <= LodUtil.MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW;
 		
 		// get the positions that will be rendered
 		
@@ -510,7 +509,7 @@ public class LodBufferBuilder
 												  && vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1];
 		
 		
-		return (vanillaRenderedPosition && (!(isItBorderPos && smallRenderDistance)));
+		return (vanillaRenderedPosition && (!(isItBorderPos)));
 	}
 	
 	

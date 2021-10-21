@@ -530,12 +530,14 @@ public class LodRenderer
 	 */
 	private void setupProjectionMatrix(Matrix4f currentProjectionMatrix, float partialTicks)
 	{
+		//Minimum radious of view in 2 render distance
+		int minDistance = 8;
 		// create the new projection matrix
 		Matrix4f lodPoj =
 				Matrix4f.perspective(
 						getFov(partialTicks, true),
 						(float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight(),
-						mc.getRenderDistance() / 2,
+						minDistance,
 						farPlaneBlockDistance * LodUtil.CHUNK_WIDTH / 2);
 		
 		// get Minecraft's un-edited projection matrix

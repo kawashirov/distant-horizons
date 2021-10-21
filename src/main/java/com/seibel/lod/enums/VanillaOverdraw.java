@@ -39,4 +39,7 @@ public enum VanillaOverdraw
 	
 	/** Draw LODs over all minecraft chunks. */
 	ALWAYS,
+	
+	/** Draw LODs over border chunks. */
+	BORDER,
 }

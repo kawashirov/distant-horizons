@@ -411,6 +411,7 @@ public class LodUtil
 			break;
 		
 		default:
+		case BORDER:
 		case NEVER:
 			// skip chunks in render distance that are rendered
 			// by vanilla minecraft
