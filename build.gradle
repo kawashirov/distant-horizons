@@ -11,6 +11,7 @@ buildscript {
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
 		classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
@@ -18,6 +19,7 @@ apply plugin: 'org.spongepowered.mixin'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'com.github.johnrengelman.shadow'
 
 version = 'a1.5.0'
 group = 'com.seibel.lod'
@@ -126,6 +128,11 @@ repositories {
 	maven { url 'https://jitpack.io' }
 }
 
+configurations {
+    // configuration that holds jars to include in the jar
+    extraLibs
+}
+
 dependencies {
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
@@ -133,7 +140,8 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.1.0'
     
     
-    compile group: 'org.tukaani', name: 'xz', version: '1.9'
+    extraLibs 'org.tukaani:xz:1.9'
+    configurations.compile.extendsFrom(configurations.extraLibs)
 	
     // these were added to hopefully allow for cloning
     // configuredFeatures to allow for safe
@@ -179,6 +187,9 @@ jar {
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
 			"MixinConfigs": "lod.mixins.json",
         ])
+    }
+    from {
+        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
 
