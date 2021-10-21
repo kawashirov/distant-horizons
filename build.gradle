@@ -129,8 +129,7 @@ repositories {
 }
 
 configurations {
-    // configuration that holds jars to include in the jar
-    extraLibs
+    shadowMe
 }
 
 dependencies {
@@ -138,11 +137,11 @@ dependencies {
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.16.5-36.1.0'
-    
-    
-    extraLibs 'org.tukaani:xz:1.9'
-    configurations.compile.extendsFrom(configurations.extraLibs)
-	
+
+
+    compile group: 'org.tukaani', name: 'xz', version: '1.9'
+    shadowMe group: 'org.tukaani', name: 'xz', version: '1.9'
+
     // these were added to hopefully allow for cloning
     // configuredFeatures to allow for safe
     // multi threaded feature generation. Sadly I couldn't find
@@ -176,6 +175,11 @@ dependencies {
 
 }
 
+shadowJar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    configurations = [project.configurations.getByName("shadowMe")]
+}
+
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
     manifest {
@@ -188,11 +192,8 @@ jar {
 			"MixinConfigs": "lod.mixins.json",
         ])
     }
-    from {
-        configurations.extraLibs.collect { it.isDirectory() ? it : zipTree(it) }
-    }
 }
-
+shadowJar.finalizedBy('reobfJar')
 // Example configuration to allow publishing using the maven-publish task
 // This is the preferred method to reobfuscate your jar file
 jar.finalizedBy('reobfJar') 
