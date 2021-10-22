@@ -130,6 +130,7 @@ repositories {
 
 configurations {
     shadowMe
+    compileOnly.extendsFrom(embed)
 }
 
 dependencies {
@@ -139,8 +140,10 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.1.0'
 
 
-    compile group: 'org.tukaani', name: 'xz', version: '1.9'
-    shadowMe group: 'org.tukaani', name: 'xz', version: '1.9'
+    compile 'org.tukaani:xz:1.9'
+    shadowMe 'org.tukaani:xz:1.9'
+    compile 'org.apache.commons:commons-compress:1.21'
+    shadowMe 'org.apache.commons:commons-compress:1.21'
 
     // these were added to hopefully allow for cloning
     // configuredFeatures to allow for safe
@@ -176,8 +179,22 @@ dependencies {
 }
 
 shadowJar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
     configurations = [project.configurations.getByName("shadowMe")]
+    relocate 'org.tukaani', 'shaded.tukaani'
+    relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
+    classifier = ''
+}
+
+reobf {
+    shadowJar {
+        dependsOn tasks.createMcpToSrg
+        mappings = tasks.createMcpToSrg.outputs.files.singleFile
+    }
+}
+
+artifacts {
+    archives tasks.shadowJar
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
@@ -193,10 +210,9 @@ jar {
         ])
     }
 }
-shadowJar.finalizedBy('reobfJar')
 // Example configuration to allow publishing using the maven-publish task
 // This is the preferred method to reobfuscate your jar file
-jar.finalizedBy('reobfJar') 
+jar.finalizedBy('reobfJar')
 // However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
 //publish.dependsOn('reobfJar')
 
