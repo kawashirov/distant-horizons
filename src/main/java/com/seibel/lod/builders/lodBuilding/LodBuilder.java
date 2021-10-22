@@ -43,7 +43,20 @@ import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
-import net.minecraft.block.*;
+import net.minecraft.block.AbstractPlantBlock;
+import net.minecraft.block.AbstractTopPlantBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.BushBlock;
+import net.minecraft.block.FlowerBlock;
+import net.minecraft.block.GrassBlock;
+import net.minecraft.block.IGrowable;
+import net.minecraft.block.ILiquidContainer;
+import net.minecraft.block.IWaterLoggable;
+import net.minecraft.block.LeavesBlock;
+import net.minecraft.block.SixWayBlock;
+import net.minecraft.block.TallGrassBlock;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -71,7 +84,7 @@ import net.minecraftforge.client.model.data.ModelDataMap;
  * @author Cola
  * @author Leonardo Amato
  * @author James Seibel
- * @version 10-16-2021
+ * @version 10-22-2021
  */
 public class LodBuilder
 {
@@ -712,23 +725,50 @@ public class LodBuilder
 		
 		if (toTint.get(blockState.getBlock()))
 		{
+			Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, y >> 2, zRel >> 2);
+			
 			ClientWorld clientWorld = mc.getClientWorld();
 			if (clientWorld == null)
 				return 0;
 			ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(clientWorld.dimensionType());
+			
 			int tintValue;
 			if (useGrassTint(blockState.getBlock()))
+			{
 				// grass and green plants
-				tintValue = BiomeColors.getAverageGrassColor(serverWorld, blockPos);
-				//tintValue = biome.getGrassColor(x, z);
+				try
+				{
+					tintValue = BiomeColors.getAverageGrassColor(serverWorld, blockPos);
+				}
+				catch(NullPointerException e)
+				{
+					tintValue = biome.getGrassColor(x, z);	
+				}
+			}
 			else if (useWaterTint(blockState.getBlock()))
+			{
 				// water
-				tintValue = BiomeColors.getAverageWaterColor(serverWorld, blockPos);
-				//tintValue = biome.getWaterColor();
+				try
+				{
+						tintValue = BiomeColors.getAverageWaterColor(serverWorld, blockPos);
+				}
+				catch(NullPointerException e)
+				{
+					tintValue = biome.getWaterColor();	
+				}
+			}
 			else
+			{
 				// leaves
+				try
+				{
 				tintValue = BiomeColors.getAverageFoliageColor(serverWorld, blockPos);
-				//tintValue = biome.getFoliageColor();
+				}
+				catch(NullPointerException e)
+				{
+					tintValue = biome.getFoliageColor();	
+				}
+			}
 			colorInt = ColorUtil.multiplyRGBcolors(tintValue | 0xFF000000, blockColor);
 		}
 		else
