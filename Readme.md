@@ -7,7 +7,7 @@ allowing for an increased view distance without harming performance.
 Or in other words: this mod lets you see farther without turning your game into a slide show.\
 If you want to see a quick demo, check out a video covering the mod here:
 
-[![Minecraft Level Of Detail (LOD) mod - Alpha 1.4](https://i.ytimg.com/vi_webp/MDWcEvdUGUE/mqdefault.webp)](https://www.youtube.com/watch?v=MDWcEvdUGUE)
+[![Minecraft Level Of Detail (LOD) mod - Alpha 1.4](https://i.ytimg.com/vi_webp/H2tnvEVbO1c/mqdefault.webp)](https://www.youtube.com/watch?v=H2tnvEVbO1c)
 
 
 Forge version: 1.16.5-36.1.0
