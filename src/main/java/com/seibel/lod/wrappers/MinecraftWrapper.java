@@ -122,22 +122,6 @@ public class MinecraftWrapper
 			LightTexture tex = mc.gameRenderer.lightTexture();
 			lightMap = tex.lightPixels;
 		}
-
-//		// hotswap this to true, then back to false to write a file
-//		// (and not write a file every frame)
-//		if (false)
-//		{
-//			try
-//			{
-//				// obviously change the filepath to somewhere on your PC
-//				lightPixels.writeToFile(new File("C:\\Users\\James Seibel\\Desktop\\image.png"));
-//			}
-//			catch(Exception e)
-//			{
-//				e.printStackTrace();
-//			}
-//		}
-		
 		return lightMap;
 	}
 	
