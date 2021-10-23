@@ -70,7 +70,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  * 
  * @author James Seibel
- * @version 10-15-2021
+ * @version 10-22-2021
  */
 public class LodGenWorker implements IWorker
 {
@@ -248,8 +248,7 @@ public class LodGenWorker implements IWorker
 							break;
 						case SERVER:
 							// very slow
-							lodBuilder.generateLodNodeFromChunk(lodDim, serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES), new LodBuilderConfig(DistanceGenerationMode.SERVER));
-							//generateWithServer();
+							generateWithServer();
 							break;
 						}
 					//}
@@ -574,7 +573,7 @@ public class LodGenWorker implements IWorker
 		 */
 		private void generateWithServer()
 		{
-			lodBuilder.generateLodNodeAsync(serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES), ClientProxy.getLodWorld(), serverWorld);
+			lodBuilder.generateLodNodeFromChunk(lodDim, serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES), new LodBuilderConfig(DistanceGenerationMode.SERVER));
 		}
 		
 		
