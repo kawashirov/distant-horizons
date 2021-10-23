@@ -41,7 +41,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
  * @author James Seibel
  * @version 7-3-2021
  */
-@Mod(ModInfo.MODID)
+@Mod(ModInfo.ID)
 public class LodMain
 {
 	public static LodMain instance;

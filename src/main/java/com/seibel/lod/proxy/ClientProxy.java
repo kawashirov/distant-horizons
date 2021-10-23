@@ -53,7 +53,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * This handles all events sent to the client,
  * and is the starting point for most of the mod.
  * @author James_Seibel
- * @version 10-15-2021
+ * @version 10-23-2021
  */
 public class ClientProxy
 {
@@ -176,6 +176,8 @@ public class ClientProxy
 //		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
 //		LodConfig.CLIENT.graphics.shadingMode.set(ShadingMode.DARKEN_SIDES);
 //		LodConfig.CLIENT.graphics.vanillaOverdraw.set(VanillaOverdraw.HALF);
+		
+//		LodConfig.CLIENT.graphics.advancedGraphicsOption.gpuUploadMethod.set(GpuUploadMethod.BUFFER_STORAGE);
 
 //		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 //		LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.set(128);

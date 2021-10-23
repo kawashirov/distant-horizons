@@ -22,6 +22,8 @@ package com.seibel.lod.wrappers;
 import java.awt.Color;
 import java.io.File;
 
+import com.seibel.lod.ModInfo;
+import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraft.client.GameSettings;
@@ -36,6 +38,7 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.model.ModelManager;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.Entity;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.server.integrated.IntegratedServer;
@@ -234,5 +237,21 @@ public class MinecraftWrapper
 	public WorldRenderer getLevelRenderer()
 	{
 		return mc.levelRenderer;
+	}
+	
+	
+	/**
+	 * Crashes Minecraft, displaying the given errorMessage <br> <br>
+	 * In the following format: <br>
+	 * 
+	 * The game crashed whilst <strong>errorMessage</strong>  <br>
+	 * Error: <strong>java.lang.ExceptionClass: exceptionErrorMessage</strong>  <br>
+	 * Exit Code: -1  <br>
+	 */
+	public void crashMinecraft(String errorMessage, Throwable exception)
+	{
+		ClientProxy.LOGGER.error(ModInfo.READABLE_NAME + " had the following error: [" + errorMessage + "]. Crashing Minecraft...");
+		CrashReport report = new CrashReport(errorMessage, exception);
+		Minecraft.crash(report);
 	}
 }

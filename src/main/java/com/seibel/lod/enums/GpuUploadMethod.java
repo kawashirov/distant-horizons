@@ -17,19 +17,22 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.seibel.lod;
+package com.seibel.lod.enums;
 
 /**
- * This file is similar to mcmod.info
+ * Buffer_Storage, Sub_Data, Buffer_Mapping
+ * 
  * @author James Seibel
  * @version 10-23-2021
  */
-public final class ModInfo
+public enum GpuUploadMethod
 {
-	public static final String ID = "lod";
-	public static final String NAME = "DistantHorizons";
-	/** Human readable version of MOD_NAME */
-	public static final String READABLE_NAME = "Distant Horizons";
-	public static final String API = "LodAPI";
-	public static final String VERSION = "a1.5.1";
+	/** Default if OpenGL 4.5 is supported. Fast rendering, no stuttering. */
+	BUFFER_STORAGE,
+	
+	/** Default if OpenGL 4.5 is NOT supported. Fast rendering but may stutter when uploading. */
+	SUB_DATA,
+	
+	/** May end up storing buffers in System memory. Slower rendering but won't stutter when uploading. */
+	BUFFER_MAPPING,
 }

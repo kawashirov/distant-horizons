@@ -35,6 +35,7 @@ import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.GenerationPriority;
+import com.seibel.lod.enums.GpuUploadMethod;
 import com.seibel.lod.enums.HorizontalQuality;
 import com.seibel.lod.enums.HorizontalResolution;
 import com.seibel.lod.enums.HorizontalScale;
@@ -51,7 +52,7 @@ import net.minecraftforge.fml.config.ModConfig;
 /**
  * This handles any configuration the user has access to.
  * @author James Seibel
- * @version 10-19-2021
+ * @version 10-23-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -222,6 +223,8 @@ public class LodConfig
 				
 				public final ForgeConfigSpec.EnumValue<VanillaOverdraw> vanillaOverdraw;
 				
+				public final ForgeConfigSpec.EnumValue<GpuUploadMethod> gpuUploadMethod;
+				
 				AdvancedGraphicsOption(ForgeConfigSpec.Builder builder)
 				{
 					
@@ -273,6 +276,17 @@ public class LodConfig
 									+ " " + VanillaOverdraw.ALWAYS + ": LODs will render on all vanilla chunks preventing holes in the world. \n"
 									+ " " + VanillaOverdraw.BORDER + ": LODs will render only on the border of vanilla chunks preventing only some holes in the world. \n")
 							.defineEnum("Vanilla Overdraw", VanillaOverdraw.DYNAMIC);
+					
+					gpuUploadMethod = builder
+							.comment("\n\n"
+									+ " What method should be used to upload geometry to the GPU? \n\\n"
+									+ ""
+									+ " " + GpuUploadMethod.BUFFER_STORAGE + ": Default if OpenGL 4.5 is supported. Fast rendering, no stuttering. \n"
+									+ " " + GpuUploadMethod.SUB_DATA + ": Default if OpenGL 4.5 is NOT supported. Fast rendering but may stutter when uploading. \n"
+									+ " " + GpuUploadMethod.BUFFER_MAPPING + ": Slow rendering but won't stutter when uploading. Possibly better than " + GpuUploadMethod.SUB_DATA + " if using a integrated GPU. \n")
+							.defineEnum("GPU Upload Method", GpuUploadMethod.BUFFER_STORAGE);
+					
+					
 					builder.pop();
 				}
 			}
@@ -519,7 +533,7 @@ public class LodConfig
 	
 	
 	/** {@link Path} to the configuration file of this mod */
-	private static final Path CONFIG_PATH = Paths.get("config", ModInfo.MODNAME + ".toml");
+	private static final Path CONFIG_PATH = Paths.get("config", ModInfo.NAME + ".toml");
 	
 	public static final ForgeConfigSpec CLIENT_SPEC;
 	public static final Client CLIENT;
@@ -540,13 +554,13 @@ public class LodConfig
 	@SubscribeEvent
 	public static void onLoad(final ModConfig.Loading configEvent)
 	{
-		LogManager.getLogger().debug(ModInfo.MODNAME, "Loaded forge config file {}", configEvent.getConfig().getFileName());
+		LogManager.getLogger().debug(ModInfo.NAME, "Loaded forge config file {}", configEvent.getConfig().getFileName());
 	}
 	
 	@SubscribeEvent
 	public static void onFileChange(final ModConfig.Reloading configEvent)
 	{
-		LogManager.getLogger().debug(ModInfo.MODNAME, "Forge config just got changed on the file system!");
+		LogManager.getLogger().debug(ModInfo.NAME, "Forge config just got changed on the file system!");
 	}
 	
 }

@@ -24,7 +24,9 @@ import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLCapabilities;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.seibel.lod.ModInfo;
 import com.seibel.lod.enums.GlProxyContext;
+import com.seibel.lod.wrappers.MinecraftWrapper;
 
 /**
  * A singleton that holds references to different openGL contexts
@@ -38,11 +40,13 @@ import com.seibel.lod.enums.GlProxyContext;
  * https://gamedev.stackexchange.com/questions/91995/edit-vbo-data-or-create-a-new-one <br><br>
  * 
  * @author James Seibel
- * @version 10-2-2021
+ * @version 10-23-2021
  */
 public class GlProxy
 {
 	private static GlProxy instance = null;
+	
+	private static MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	/** Minecraft's GLFW window */
 	public final long minecraftGlContext;
@@ -63,16 +67,22 @@ public class GlProxy
 	/** Does this computer's GPU support fancy fog? */
 	public final boolean fancyFogAvailable;
 	
+	/** Requires OpenGL 4.5, and offers the best buffer uploading */
+	public final boolean bufferStorageSupported;
+	
+	/** Requires OpenGL 3.0 */
+	public final boolean mapBufferRangeSupported;
 	
 	
 	private GlProxy()
 	{
+		ClientProxy.LOGGER.error("Creating " + GlProxy.class.getSimpleName() + "... If this is the last message you see in the log there must have been a OpenGL error.");
+		
 		// getting Minecraft's context has to be done on the render thread,
 		// where the GL context is
 		if (!RenderSystem.isOnRenderThread())
 			throw new IllegalStateException(GlProxy.class.getSimpleName() + " was created outside the render thread!");
-		
-		
+				
 		
 		
 		//============================//
@@ -101,6 +111,30 @@ public class GlProxy
 		
 		
 		
+		//==============================//
+		// determine the OpenGL version // 
+		//==============================//
+		
+		bufferStorageSupported = minecraftGlCapabilities.OpenGL45;
+		mapBufferRangeSupported = minecraftGlCapabilities.OpenGL30;
+		
+		if (!minecraftGlCapabilities.OpenGL15)
+		{
+			String errorMessage = ModInfo.READABLE_NAME + " was initializing " + GlProxy.class.getSimpleName() + " and discoverd this GPU doesn't support OpenGL 1.5 or greater.";
+			mc.crashMinecraft(errorMessage + " Sorry I couldn't tell you sooner :(", new UnsupportedOperationException("This GPU doesn't support OpenGL 1.5 or greater."));
+		}
+		
+		if (!bufferStorageSupported)
+		{
+			String fallBackVersion = mapBufferRangeSupported ? "3.0" : "1.5";  
+			
+			ClientProxy.LOGGER.error("This GPU doesn't support OpenGL 4.5, falling back to OpenGL " + fallBackVersion + ". This may cause stuttering and reduced performance.");			
+		}
+			
+		
+		
+		
+		
 		//==================================//
 		// get any GPU related capabilities //
 		//==================================//
@@ -110,6 +144,12 @@ public class GlProxy
 		
 		if (!fancyFogAvailable)
 			ClientProxy.LOGGER.info("This GPU does not support GL_NV_fog_distance. This means that the fancy fog option will not be available.");
+		
+		
+		
+		
+		// GlProxy creation success
+		ClientProxy.LOGGER.error(GlProxy.class.getSimpleName() + " creation successful. OpenGL smiles upon you this day.");
 	}
 	
 	
@@ -188,15 +228,8 @@ public class GlProxy
 	
 	public static GlProxy getInstance()
 	{
-		try
-		{
-			if (instance == null)
-				instance = new GlProxy();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		if (instance == null)
+			instance = new GlProxy();
 		
 		return instance;
 	}

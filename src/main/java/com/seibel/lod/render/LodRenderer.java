@@ -36,6 +36,7 @@ import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.enums.FogDistance;
 import com.seibel.lod.enums.FogDrawOverride;
 import com.seibel.lod.enums.FogQuality;
+import com.seibel.lod.enums.GpuUploadMethod;
 import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
@@ -64,7 +65,7 @@ import net.minecraft.util.math.vector.Vector3d;
  * This is where LODs are draw to the world.
  * 
  * @author James Seibel
- * @version 10-19-2021
+ * @version 10-23-2021
  */
 public class LodRenderer
 {
@@ -157,6 +158,7 @@ public class LodRenderer
 	 * @param mcMatrixStack This matrix stack should come straight from MC's renderChunkLayer (or future equivalent) method
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
+	@SuppressWarnings("deprecation")
 	public void drawLODs(LodDimension lodDim, MatrixStack mcMatrixStack, float partialTicks, IProfiler newProfiler)
 	{
 		if (lodDim == null)
@@ -276,6 +278,7 @@ public class LodRenderer
 			Vector3d cameraDir = new Vector3d(renderInfo.getLookVector());
 			
 			boolean cullingDisabled = LodConfig.CLIENT.graphics.advancedGraphicsOption.disableDirectionalCulling.get();
+			boolean renderBufferStorage = LodConfig.CLIENT.graphics.advancedGraphicsOption.gpuUploadMethod.get() == GpuUploadMethod.BUFFER_STORAGE && GlProxy.getInstance().bufferStorageSupported;
 			
 			// used to determine what type of fog to render
 			int halfWidth = vbos.length / 2;
@@ -292,6 +295,7 @@ public class LodRenderer
 					RegionPos vboPos = new RegionPos(
 							x + vboCenterRegionPos.x - (lodDim.getWidth() / 2),
 							z + vboCenterRegionPos.z - (lodDim.getWidth() / 2));
+					
 					if (cullingDisabled || RenderUtil.isRegionInViewFrustum(renderInfo.getBlockPosition(), cameraDir, vboPos.blockPos()))
 					{
 						if ((x > halfWidth - quarterWidth && x < halfWidth + quarterWidth) 
@@ -301,10 +305,12 @@ public class LodRenderer
 							setupFog(fogSettings.far.distance, fogSettings.far.quality);
 						
 						
-						for (int i = 0; i < storageBufferIds[x][z].length; i++)
-						{
-							drawBuffer(vbos[x][z][i], storageBufferIds[x][z][i], modelViewMatrix);
-						}
+						if (storageBufferIds != null && renderBufferStorage)
+							for (int i = 0; i < storageBufferIds[x][z].length; i++)
+								drawStorageBuffer(vbos[x][z][i], storageBufferIds[x][z][i], modelViewMatrix);
+						else
+							for (int i = 0; i < vbos[x][z].length; i++)
+								drawVertexBuffer(vbos[x][z][i], modelViewMatrix);
 					}
 				}
 			}
@@ -345,12 +351,29 @@ public class LodRenderer
 	
 	
 	/** This is where the actual drawing happens. */
-	private void drawBuffer(VertexBuffer vbo, int bufferStorageId, Matrix4f modelViewMatrix)
+	private void drawStorageBuffer(VertexBuffer vbo, int bufferStorageId, Matrix4f modelViewMatrix)
 	{
 		if (vbo == null)
 			return;
 		
-		GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, bufferStorageId);
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, bufferStorageId);
+		// 0L is the starting pointer
+		LodUtil.LOD_VERTEX_FORMAT.setupBufferState(0L);
+		
+		vbo.draw(modelViewMatrix, GL11.GL_QUADS);
+		
+		GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+		LodUtil.LOD_VERTEX_FORMAT.clearBufferState();
+	}
+	
+
+	/** This is where the actual drawing happens. */
+	private void drawVertexBuffer(VertexBuffer vbo, Matrix4f modelViewMatrix)
+	{
+		if (vbo == null)
+			return;
+		
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.id);
 		// 0L is the starting pointer
 		LodUtil.LOD_VERTEX_FORMAT.setupBufferState(0L);
 		
@@ -446,6 +469,7 @@ public class LodRenderer
 	/**
 	 * Revert any changes that were made to the fog.
 	 */
+	@SuppressWarnings("deprecation")
 	private void cleanupFog(NearFarFogSettings fogSettings,
 			float defaultFogStartDist, float defaultFogEndDist,
 			int defaultFogMode, int defaultFogDistance)
