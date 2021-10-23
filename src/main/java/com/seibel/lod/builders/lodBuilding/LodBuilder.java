@@ -155,6 +155,11 @@ public class LodBuilder
 				if (mc.getClientWorld() == null)
 					return;
 				
+				// don't try to generate LODs if the user isn't in the world anymore
+				// (this happens a lot when the user leaves a world/server)
+				if (mc.getSinglePlayerServer() == null && mc.getCurrentServer() == null)
+					return;
+				
 				DimensionType dim = world.dimensionType();
 				
 				// make sure the dimension exists
