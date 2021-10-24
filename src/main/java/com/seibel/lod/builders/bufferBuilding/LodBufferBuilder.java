@@ -243,8 +243,8 @@ public class LodBufferBuilder
 					if (lodDim.doesRegionNeedBufferRegen(xRegion, zRegion) || fullRegen)
 					{
 						RegionPos regionPos = new RegionPos(
-								xRegion + lodDim.getCenterRegionPosX() - Math.floorDiv(lodDim.getWidth(), 2),
-								zRegion + lodDim.getCenterRegionPosZ() - Math.floorDiv(lodDim.getWidth(), 2));
+								xRegion + lodDim.getCenterRegionPosX() - lodDim.getWidth() / 2,
+								zRegion + lodDim.getCenterRegionPosZ() - lodDim.getWidth() / 2);
 						
 						// local position in the vbo and bufferBuilder arrays
 						BufferBuilder[] currentBuffers = buildableBuffers[xRegion][zRegion];
@@ -311,7 +311,7 @@ public class LodBufferBuilder
 							
 							for (int index = 0; index < posToRender.getNumberOfPos(); index++)
 							{
-								bufferIndex = Math.floorMod(index, currentBuffers.length);
+								bufferIndex = index % currentBuffers.length;
 								detailLevel = posToRender.getNthDetailLevel(index);
 								posX = posToRender.getNthPosX(index);
 								posZ = posToRender.getNthPosZ(index);

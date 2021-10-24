@@ -97,12 +97,13 @@ public class DetailDistanceUtil
 			return (byte) minDetail;
 		int distanceUnit = LodConfig.CLIENT.graphics.qualityOption.horizontalScale.get().distanceUnit;
 		if (LodConfig.CLIENT.graphics.qualityOption.horizontalQuality.get() == HorizontalQuality.LOWEST)
-			detail = (byte) Math.floorDiv(distance, distanceUnit);
+			detail = (byte) distance / distanceUnit;
 		else
 		{
 			double base = LodConfig.CLIENT.graphics.qualityOption.horizontalQuality.get().quadraticBase;
 			double logBase = Math.log(base);
-			detail = (byte) (Math.log(Math.floorDiv(distance, distanceUnit)) / logBase);
+			//noinspection IntegerDivisionInFloatingPointContext
+			detail = (byte) (Math.log(distance / distanceUnit) / logBase);
 		}
 		return (byte) LodUtil.clamp(minDetail, detail, maxDetail - 1);
 	}

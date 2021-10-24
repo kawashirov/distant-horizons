@@ -201,8 +201,8 @@ public class LodUtil
 	/** Convert a 2D absolute position into a quad tree relative position. */
 	public static RegionPos convertGenericPosToRegionPos(int x, int z, int detailLevel)
 	{
-		int relativePosX = Math.floorDiv(x, (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel));
-		int relativePosZ = Math.floorDiv(z, (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel));
+		int relativePosX = Math.floorDiv(x, 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel));
+		int relativePosZ = Math.floorDiv(z, 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel));
 		
 		return new RegionPos(relativePosX, relativePosZ);
 	}
@@ -210,7 +210,7 @@ public class LodUtil
 	/** Convert a 2D absolute position into a quad tree relative position. */
 	public static int convertLevelPos(int pos, int currentDetailLevel, int targetDetailLevel)
 	{
-		return Math.floorDiv(pos, (int) Math.pow(2, targetDetailLevel - currentDetailLevel));
+		return pos / (1 << (targetDetailLevel - currentDetailLevel));
 	}
 	
 	/**

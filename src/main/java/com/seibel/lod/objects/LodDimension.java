@@ -866,7 +866,7 @@ public class LodDimension
 	public void setRegionWidth(int newWidth)
 	{
 		width = newWidth;
-		halfWidth = Math.floorDiv(width, 2);
+		halfWidth = width/ 2;
 		
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];
