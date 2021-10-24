@@ -134,7 +134,7 @@ public class VerticalLevelContainer implements LevelContainer
 		index++;
 		maxVerticalData = inputData[index];
 		index++;
-		size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
+		size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
 		int x = size * size * maxVerticalData;
 		this.dataContainer = new long[x];
 		for (int i = 0; i < x; i++)
@@ -217,7 +217,7 @@ public class VerticalLevelContainer implements LevelContainer
 	{
 		/*
 		StringBuilder stringBuilder = new StringBuilder();
-		int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
+		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
 		stringBuilder.append(detailLevel);
 		stringBuilder.append(DATA_DELIMITER);
 		for (int x = 0; x < size; x++)
