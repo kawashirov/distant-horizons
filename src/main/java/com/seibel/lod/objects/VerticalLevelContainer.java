@@ -174,13 +174,7 @@ public class VerticalLevelContainer implements LevelContainer
 		}
 		data = DataPointUtil.mergeMultiData(dataToMerge, lowerMaxVertical, getMaxVerticalData());
 		
-		for (int verticalIndex = 0; (verticalIndex < data.length) && (verticalIndex < maxVerticalData); verticalIndex++)
-		{
-			addData(data[verticalIndex],
-					posX,
-					posZ,
-					verticalIndex);
-		}
+		addVerticalData(data, posX, posZ);
 	}
 	
 	@Override

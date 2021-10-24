@@ -437,6 +437,7 @@ public class LodDimension
 	}
 	
 	/**
+	 * Use addVerticalData when possible.
 	 * Add the given LOD to this dimension at the coordinate
 	 * stored in the LOD. If an LOD already exists at the given
 	 * coordinate it will be overwritten.
