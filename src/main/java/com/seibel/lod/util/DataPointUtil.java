@@ -282,7 +282,7 @@ public class DataPointUtil
 		int size = dataToMerge.length / inputVerticalData;
 		
 		// We initialize the arrays that are going to be used
-		short[] heightAndDepth = ThreadMapUtil.getHeightAndDepth((worldHeight + 1) * 2);
+		short[] heightAndDepth = ThreadMapUtil.getHeightAndDepth((worldHeight / 2 + 1) * 2);
 		long[] dataPoint = ThreadMapUtil.getVerticalDataArray(DetailDistanceUtil.getMaxVerticalData(0));
 		
 		

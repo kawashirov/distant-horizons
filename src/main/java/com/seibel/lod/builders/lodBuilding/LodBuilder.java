@@ -238,7 +238,7 @@ public class LodBuilder
 			
 			long[] data;
 			long[] dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-			data = DataPointUtil.mergeMultiData(dataToMergeVertical, DataPointUtil.worldHeight, DetailDistanceUtil.getMaxVerticalData(detailLevel));
+			data = DataPointUtil.mergeMultiData(dataToMergeVertical, DataPointUtil.worldHeight / 2 + 1, DetailDistanceUtil.getMaxVerticalData(detailLevel));
 			
 			
 			//lodDim.clear(detailLevel, posX, posZ);
@@ -260,7 +260,7 @@ public class LodBuilder
 		
 		long[] dataToMerge = ThreadMapUtil.getBuilderVerticalArray(detail.detailLevel);
 		
-		int verticalData = DataPointUtil.worldHeight;
+		int verticalData = DataPointUtil.worldHeight / 2 + 1;
 		
 		ChunkPos chunkPos = chunk.getPos();
 		int height;
