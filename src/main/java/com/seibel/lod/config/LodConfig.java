@@ -491,7 +491,7 @@ public class LodConfig
 									+ " If true, the mod is enabled and fake chunks will be drawn. \n"
 									+ " If false, the mod will still generate fake chunks, \n"
 									+ " but they won't be rendered. \n")
-							.define("Disable Drawing", true);
+							.define("Enable Rendering", true);
 					
 					debugMode = builder
 							.comment("\n\n"
