@@ -205,7 +205,6 @@ public class LodBuilder
 	{
 		if (chunk == null)
 			throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
-		long startTime = System.currentTimeMillis();
 		
 		int startX;
 		int startZ;
@@ -251,9 +250,6 @@ public class LodBuilder
 			}
 		}
 		lodDim.updateData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
-		
-		startTime = System.currentTimeMillis() - startTime;
-		ClientProxy.LOGGER.info("gen time: " + startTime + " ms.");
 	}
 	
 	/** creates a vertical DataPoint */
