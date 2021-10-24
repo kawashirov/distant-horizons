@@ -160,13 +160,10 @@ public class LevelPosUtil
 		
 		int startPosX = posX * width;
 		int startPosZ = posZ * width;
-		int endPosX = startPosX + width;
-		int endPosZ = startPosZ + width;
-		
+		int endPosX = myPow2(playerPosX - startPosX - width);
+		int endPosZ = myPow2(playerPosZ - startPosZ - width);
 		startPosX = myPow2(playerPosX - startPosX);
 		startPosZ = myPow2(playerPosZ - startPosZ);
-		endPosX = myPow2(playerPosX - endPosX);
-		endPosZ = myPow2(playerPosZ - endPosZ);
 		
 		int maxDistance = (int) Math.sqrt(startPosX + startPosZ);
 		maxDistance = Math.max(maxDistance, (int) Math.sqrt(startPosX + endPosZ));
