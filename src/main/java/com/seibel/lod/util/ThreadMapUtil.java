@@ -128,7 +128,7 @@ public class ThreadMapUtil
 			int size = 1;
 			for (int i = 0; i < 5; i++)
 			{
-				array[i] = new long[size * size * DataPointUtil.worldHeight + 1];
+				array[i] = new long[size * size * DataPointUtil.worldHeight / 2 + 1];
 				size = size << 1;
 			}
 			threadBuilderVerticalArrayMap.put(Thread.currentThread().getName(), array);

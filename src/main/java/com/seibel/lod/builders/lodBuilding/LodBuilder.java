@@ -34,6 +34,7 @@ import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodRegion;
 import com.seibel.lod.objects.LodWorld;
+import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
@@ -216,13 +217,12 @@ public class LodBuilder
 			return;
 		
 		// determine how many LODs to generate horizontally
-		HorizontalResolution detail;
 		byte minDetailLevel = region.getMinDetailLevel();
-		detail = DetailDistanceUtil.getLodGenDetail(minDetailLevel);
+		HorizontalResolution detail = DetailDistanceUtil.getLodGenDetail(minDetailLevel);
 		
 		
 		// determine how many LODs to generate vertically
-		VerticalQuality verticalQuality = LodConfig.CLIENT.graphics.qualityOption.verticalQuality.get();
+		//VerticalQuality verticalQuality = LodConfig.CLIENT.graphics.qualityOption.verticalQuality.get();
 		byte detailLevel = detail.detailLevel;
 		
 		
@@ -236,18 +236,18 @@ public class LodBuilder
 			endX = detail.endX[i];
 			endZ = detail.endZ[i];
 			
-			posX = LevelPosUtil.convert((byte) 0, chunk.getPos().x * 16 + startX, detail.detailLevel);
-			posZ = LevelPosUtil.convert((byte) 0, chunk.getPos().z * 16 + startZ, detail.detailLevel);
-			
-			
 			long[] data;
 			long[] dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ, endX, endZ);
-			data = DataPointUtil.mergeMultiData(dataToMergeVertical, DataPointUtil.worldHeight, DetailDistanceUtil.getMaxVerticalData(detailLevel));
+			data = DataPointUtil.mergeMultiData(dataToMergeVertical, DataPointUtil.worldHeight / 2 + 1, DetailDistanceUtil.getMaxVerticalData(detailLevel));
 			
 			
 			//lodDim.clear(detailLevel, posX, posZ);
 			if (data != null && data.length != 0)
-				lodDim.addVerticalData(detailLevel,	posX, posZ,	data,false);
+			{
+				posX = LevelPosUtil.convert((byte) 0, chunk.getPos().x * 16 + startX, detail.detailLevel);
+				posZ = LevelPosUtil.convert((byte) 0, chunk.getPos().z * 16 + startZ, detail.detailLevel);
+				lodDim.addVerticalData(detailLevel, posX, posZ, data, false);
+			}
 		}
 		lodDim.updateData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, chunk.getPos().z);
 	}
@@ -260,7 +260,7 @@ public class LodBuilder
 		
 		long[] dataToMerge = ThreadMapUtil.getBuilderVerticalArray(detail.detailLevel);
 		
-		int verticalData = DataPointUtil.worldHeight;
+		int verticalData = DataPointUtil.worldHeight / 2 + 1;
 		
 		ChunkPos chunkPos = chunk.getPos();
 		int height;
@@ -284,8 +284,8 @@ public class LodBuilder
 		
 		for (index = 0; index < size * size; index++)
 		{
-			xRel = Math.floorMod(index, size) + startX;
-			zRel = Math.floorDiv(index, size) + startZ;
+			xRel = startX + index % size;
+			zRel = startZ + index / size;
 			xAbs = chunkPos.getMinBlockX() + xRel;
 			zAbs = chunkPos.getMinBlockZ() + zRel;
 			

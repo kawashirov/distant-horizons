@@ -149,6 +149,10 @@ public class LevelPosUtil
 		return convert(detailLevel, pos, LodUtil.CHUNK_DETAIL_LEVEL);
 	}
 	
+	public static int myPow2(int x)
+	{
+		return x*x;
+	}
 	
 	public static int maxDistance(byte detailLevel, int posX, int posZ, int playerPosX, int playerPosZ)
 	{
@@ -156,13 +160,15 @@ public class LevelPosUtil
 		
 		int startPosX = posX * width;
 		int startPosZ = posZ * width;
-		int endPosX = startPosX + width;
-		int endPosZ = startPosZ + width;
+		int endPosX = myPow2(playerPosX - startPosX - width);
+		int endPosZ = myPow2(playerPosZ - startPosZ - width);
+		startPosX = myPow2(playerPosX - startPosX);
+		startPosZ = myPow2(playerPosZ - startPosZ);
 		
-		int maxDistance = (int) Math.sqrt(Math.pow(playerPosX - startPosX, 2) + Math.pow(playerPosZ - startPosZ, 2));
-		maxDistance = Math.max(maxDistance, (int) Math.sqrt(Math.pow(playerPosX - startPosX, 2) + Math.pow(playerPosZ - endPosZ, 2)));
-		maxDistance = Math.max(maxDistance, (int) Math.sqrt(Math.pow(playerPosX - endPosX, 2) + Math.pow(playerPosZ - startPosZ, 2)));
-		maxDistance = Math.max(maxDistance, (int) Math.sqrt(Math.pow(playerPosX - endPosX, 2) + Math.pow(playerPosZ - endPosZ, 2)));
+		int maxDistance = (int) Math.sqrt(startPosX + startPosZ);
+		maxDistance = Math.max(maxDistance, (int) Math.sqrt(startPosX + endPosZ));
+		maxDistance = Math.max(maxDistance, (int) Math.sqrt(endPosX + startPosZ));
+		maxDistance = Math.max(maxDistance, (int) Math.sqrt(endPosX + endPosZ));
 		
 		return maxDistance;
 	}
@@ -205,10 +211,15 @@ public class LevelPosUtil
 		}
 		else
 		{
-			int minDistance = (int) Math.sqrt(Math.pow(playerPosX - startPosX, 2) + Math.pow(playerPosZ - startPosZ, 2));
-			minDistance = Math.min(minDistance, (int) Math.sqrt(Math.pow(playerPosX - startPosX, 2) + Math.pow(playerPosZ - endPosZ, 2)));
-			minDistance = Math.min(minDistance, (int) Math.sqrt(Math.pow(playerPosX - endPosX, 2) + Math.pow(playerPosZ - startPosZ, 2)));
-			minDistance = Math.min(minDistance, (int) Math.sqrt(Math.pow(playerPosX - endPosX, 2) + Math.pow(playerPosZ - endPosZ, 2)));
+			startPosX = myPow2(playerPosX - startPosX);
+			startPosZ = myPow2(playerPosZ - startPosZ);
+			endPosX = myPow2(playerPosX - endPosX);
+			endPosZ = myPow2(playerPosZ - endPosZ);
+			
+			int minDistance = (int) Math.sqrt(startPosX + startPosZ);
+			minDistance = Math.min(minDistance, (int) Math.sqrt(startPosX + endPosZ));
+			minDistance = Math.min(minDistance, (int) Math.sqrt(endPosX + startPosZ));
+			minDistance = Math.min(minDistance, (int) Math.sqrt(endPosX + endPosZ));
 			return minDistance;
 		}
 	}
