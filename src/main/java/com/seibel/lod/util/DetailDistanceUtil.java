@@ -120,14 +120,11 @@ public class DetailDistanceUtil
 	
 	public static byte getTreeCutDetailFromDistance(int distance)
 	{
-		
 		return baseInverseFunction((int) (distance * treeCutMultiplier), minGenDetail, true);
 	}
 	
-	
 	public static byte getTreeGenDetailFromDistance(int distance)
 	{
-		
 		return baseInverseFunction((int) (distance * treeGenMultiplier), minGenDetail, true);
 	}
 	
@@ -157,30 +154,20 @@ public class DetailDistanceUtil
 	public static HorizontalResolution getLodGenDetail(int detail)
 	{
 		if (detail < minGenDetail)
-		{
 			return lodGenDetails[minGenDetail];
-		}
 		else
-		{
 			return lodGenDetails[detail];
-		}
 	}
 	
 	
 	public static byte getCutLodDetail(int detail)
 	{
 		if (detail < minGenDetail)
-		{
 			return lodGenDetails[minGenDetail].detailLevel;
-		}
 		else if (detail == maxDetail)
-		{
 			return LodUtil.REGION_DETAIL_LEVEL;
-		}
 		else
-		{
 			return lodGenDetails[detail].detailLevel;
-		}
 	}
 	
 	public static int getMaxVerticalData(int detail)

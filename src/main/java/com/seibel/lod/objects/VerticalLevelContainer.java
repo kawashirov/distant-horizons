@@ -56,7 +56,6 @@ public class VerticalLevelContainer implements LevelContainer
 	@Override
 	public void clear(int posX, int posZ)
 	{
-		
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		for (int verticalIndex = 0; verticalIndex < maxVerticalData; verticalIndex++)
@@ -68,7 +67,6 @@ public class VerticalLevelContainer implements LevelContainer
 	@Override
 	public boolean addData(long data, int posX, int posZ, int verticalIndex)
 	{
-		
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		dataContainer[posX * size * maxVerticalData + posZ * maxVerticalData + verticalIndex] = data;
@@ -78,7 +76,6 @@ public class VerticalLevelContainer implements LevelContainer
 	@Override
 	public boolean addVerticalData(long[] data, int posX, int posZ)
 	{
-		
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		for (int verticalIndex = 0; verticalIndex < maxVerticalData; verticalIndex++)

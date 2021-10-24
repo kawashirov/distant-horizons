@@ -224,9 +224,7 @@ public class LodUtil
 		for (ChunkSection section : blockStorage)
 		{
 			if (section != null && !section.isEmpty())
-			{
 				return true;
-			}
 		}
 		
 		return false;
@@ -492,20 +490,9 @@ public class LodUtil
 		{
 			tempX = x + Box.DIRECTION_NORMAL_MAP.get(direction).getX();
 			tempZ = z + Box.DIRECTION_NORMAL_MAP.get(direction).getZ();
-			if (!(tempX < 0 || tempZ < 0 || tempX >= vanillaRenderedChunks.length || tempZ >= vanillaRenderedChunks[0].length))
-			{
-				if (!vanillaRenderedChunks[tempX][tempZ])
-				{
-					return true;
-				}
-			}
-			else
-			{
-				if (vanillaRenderedChunks[x][z])
-				{
-					return true;
-				}
-			}
+			if (vanillaRenderedChunks[x][z] || (!(tempX < 0 || tempZ < 0 || tempX >= vanillaRenderedChunks.length || tempZ >= vanillaRenderedChunks[0].length)
+				&& !vanillaRenderedChunks[tempX][tempZ]))
+				return true;
 		}
 		return false;
 	}
