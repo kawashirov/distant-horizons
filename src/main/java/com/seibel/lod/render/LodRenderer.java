@@ -51,6 +51,7 @@ import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
+import net.minecraft.potion.Effects;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -159,12 +160,27 @@ public class LodRenderer
 	@SuppressWarnings("deprecation")
 	public void drawLODs(LodDimension lodDim, MatrixStack mcMatrixStack, float partialTicks, IProfiler newProfiler)
 	{
+		//=================================//
+		// determine if LODs should render //
+		//=================================//
+		
 		if (lodDim == null)
 		{
 			// if there aren't any loaded LodChunks
 			// don't try drawing anything
 			return;
 		}
+		
+		if (mc.getPlayer().getActiveEffectsMap().get(Effects.BLINDNESS) != null)
+		{
+			// if the player is blind don't render LODs,
+			// and don't change minecraft's fog
+			// which blindness relies on.
+			return;
+		}
+		
+		
+		
 		
 		
 		//===============//
