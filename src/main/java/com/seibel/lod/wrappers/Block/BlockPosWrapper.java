@@ -1,4 +1,4 @@
-package com.seibel.lod.wrappers;
+package com.seibel.lod.wrappers.Block;
 
 import com.seibel.lod.util.ColorUtil;
 import net.minecraft.block.*;

@@ -1,10 +1,10 @@
-package com.seibel.lod.wrappers;
+package com.seibel.lod.wrappers.Block;
 
 import com.seibel.lod.util.ColorUtil;
+import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.block.*;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraftforge.client.model.data.ModelDataMap;
 

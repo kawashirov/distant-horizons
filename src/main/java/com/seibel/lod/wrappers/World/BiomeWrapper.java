@@ -1,13 +1,10 @@
-package com.seibel.lod.wrappers;
+package com.seibel.lod.wrappers.World;
 
 import com.seibel.lod.util.ColorUtil;
-import com.seibel.lod.util.LodUtil;
-import net.minecraft.block.Block;
+import com.seibel.lod.wrappers.Block.BlockWrapper;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.material.MaterialColor;
 import net.minecraft.world.biome.Biome;
 
-import java.awt.*;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

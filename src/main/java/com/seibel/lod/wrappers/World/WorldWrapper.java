@@ -1,7 +1,7 @@
-package com.seibel.lod.wrappers;
+package com.seibel.lod.wrappers.World;
 
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
 import net.minecraft.world.IWorld;
-import net.minecraft.world.biome.Biome;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;

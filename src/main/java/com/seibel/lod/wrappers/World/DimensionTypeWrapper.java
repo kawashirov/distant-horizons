@@ -1,4 +1,4 @@
-package com.seibel.lod.wrappers;
+package com.seibel.lod.wrappers.World;
 
 import net.minecraft.world.DimensionType;
 
