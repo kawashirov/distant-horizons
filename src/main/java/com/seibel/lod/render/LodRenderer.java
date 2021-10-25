@@ -105,6 +105,7 @@ public class LodRenderer
 	private int[] previousPos = new int[] { 0, 0, 0 };
 	
 	public NativeImage lightMap = null;
+	public NativeImage lastLightMap = null;
 	
 	// these variables are used to determine if the buffers should be rebuilt
 	private float prevSkyBrightness = 0;
@@ -131,6 +132,7 @@ public class LodRenderer
 	 */
 	public boolean[][] vanillaRenderedChunks;
 	public boolean vanillaRenderedChunksChanged;
+	public boolean vanillaRenderedChunksEmptySkip = false;
 	public int vanillaBlockRenderedDistance;
 	
 	
@@ -872,6 +874,11 @@ public class LodRenderer
 			prevSkyBrightness = skyBrightness;
 		}
 		
+		/*if (lightMap != lastLightMap)
+		{
+			fullRegen = true;
+			lastLightMap = lightMap;
+		}*/
 		
 		//================//
 		// partial regens //
@@ -885,7 +892,6 @@ public class LodRenderer
 			{
 				partialRegen = true;
 				vanillaRenderedChunksChanged = false;
-				
 			}
 			prevVanillaChunkTime = newTime;
 		}
@@ -914,6 +920,8 @@ public class LodRenderer
 		int zIndex;
 		for (ChunkPos pos : chunkPosToSkip)
 		{
+			vanillaRenderedChunksEmptySkip = false;
+			
 			xIndex = (pos.x - mc.getPlayer().xChunk) + (chunkRenderDistance + 1);
 			zIndex = (pos.z - mc.getPlayer().zChunk) + (chunkRenderDistance + 1);
 			
@@ -934,10 +942,11 @@ public class LodRenderer
 		
 		
 		// if the player is high enough, draw all LODs
-		if (chunkPosToSkip.isEmpty() && mc.getPlayer().position().y > 256)
+		if (chunkPosToSkip.isEmpty() && mc.getPlayer().position().y > 256 && !vanillaRenderedChunksEmptySkip)
 		{
 			vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
 			vanillaRenderedChunksChanged = true;
+			vanillaRenderedChunksEmptySkip = true;
 		}
 	}
 	
