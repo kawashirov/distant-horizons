@@ -105,6 +105,7 @@ public class LodRenderer
 	private int[] previousPos = new int[] { 0, 0, 0 };
 	
 	public NativeImage lightMap = null;
+	public NativeImage lastLightMap = null;
 	
 	// these variables are used to determine if the buffers should be rebuilt
 	private float prevSkyBrightness = 0;
@@ -881,11 +882,11 @@ public class LodRenderer
 		// check if the vanilla rendered chunks changed
 		if (newTime - prevVanillaChunkTime > LodConfig.CLIENT.advancedModOptions.buffers.rebuildTimes.get().renderedChunkTimeout)
 		{
-			if (vanillaRenderedChunksChanged)
+			if (vanillaRenderedChunksChanged && lightMap != lastLightMap)
 			{
 				partialRegen = true;
 				vanillaRenderedChunksChanged = false;
-				
+				lastLightMap = lightMap;
 			}
 			prevVanillaChunkTime = newTime;
 		}
