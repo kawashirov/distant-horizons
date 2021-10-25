@@ -282,12 +282,12 @@ public class LodConfig
 									+ " How often should LODs be drawn on top of regular chunks? \n"
 									+ " HALF and ALWAYS will prevent holes in the world, but may look odd for transparent blocks or in caves. \n\n"
 									+ " " + VanillaOverdraw.NEVER + ": LODs won't render on top of vanilla chunks. \n"
+									+ " " + VanillaOverdraw.BORDER + ": LODs will render only on the border of vanilla chunks preventing only some holes in the world. \n"
 									+ " " + VanillaOverdraw.DYNAMIC + ": LODs will render on top of distant vanilla chunks to hide delayed loading. \n"
 									+ " " + "     More effective on higher render distances. \n"
 									+ " " + "     For vanilla render distances less than or equal to " + LodUtil.MINIMUM_RENDER_DISTANCE_FOR_PARTIAL_OVERDRAW + " \n"
 									+ " " + "     " + VanillaOverdraw.NEVER + " or " + VanillaOverdraw.ALWAYS + " may be used depending on the dimension. \n"
-									+ " " + VanillaOverdraw.ALWAYS + ": LODs will render on all vanilla chunks preventing holes in the world. \n"
-									+ " " + VanillaOverdraw.BORDER + ": LODs will render only on the border of vanilla chunks preventing only some holes in the world. \n")
+									+ " " + VanillaOverdraw.ALWAYS + ": LODs will render on all vanilla chunks preventing holes in the world. \n")
 							.defineEnum("Vanilla Overdraw", VanillaOverdraw.DYNAMIC);
 					
 					gpuUploadMethod = builder
