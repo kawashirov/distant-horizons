@@ -105,6 +105,7 @@ public class LodRenderer
 	private int[] previousPos = new int[] { 0, 0, 0 };
 	
 	public NativeImage lightMap = null;
+	public NativeImage lastLightMap = null;
 	
 	// these variables are used to determine if the buffers should be rebuilt
 	private float prevSkyBrightness = 0;
@@ -131,6 +132,7 @@ public class LodRenderer
 	 */
 	public boolean[][] vanillaRenderedChunks;
 	public boolean vanillaRenderedChunksChanged;
+	public boolean vanillaRenderedChunksEmptySkip = false;
 	public int vanillaBlockRenderedDistance;
 	
 	
@@ -266,7 +268,8 @@ public class LodRenderer
 		else
 			farPlaneBlockDistance = LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
 		
-		setupProjectionMatrix(mcProjectionMatrix, partialTicks);
+		setupProjectionMatrix(mcProjectionMatrix, vanillaBlockRenderedDistance, partialTicks);
+		
 		// commented out until we can add shaders to handle lighting
 		//setupLighting(lodDim, partialTicks);
 		
@@ -555,18 +558,17 @@ public class LodRenderer
 	/**
 	 * create a new projection matrix and send it over to the GPU
 	 * @param currentProjectionMatrix this is Minecraft's current projection matrix
+	 * @param vanillaBlockRenderedDistance Minecraft's vanilla far plane distance
 	 * @param partialTicks how many ticks into the frame we are
 	 */
-	private void setupProjectionMatrix(Matrix4f currentProjectionMatrix, float partialTicks)
+	private void setupProjectionMatrix(Matrix4f currentProjectionMatrix, float vanillaBlockRenderedDistance, float partialTicks)
 	{
-		//Minimum radius of view in 2 render distance
-		int minDistance = 1;
 		// create the new projection matrix
 		Matrix4f lodPoj =
 				Matrix4f.perspective(
 						getFov(partialTicks, true),
 						(float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight(),
-						minDistance,
+						vanillaBlockRenderedDistance / 5,
 						farPlaneBlockDistance * LodUtil.CHUNK_WIDTH / 2);
 		
 		// get Minecraft's un-edited projection matrix
@@ -872,6 +874,11 @@ public class LodRenderer
 			prevSkyBrightness = skyBrightness;
 		}
 		
+		/*if (lightMap != lastLightMap)
+		{
+			fullRegen = true;
+			lastLightMap = lightMap;
+		}*/
 		
 		//================//
 		// partial regens //
@@ -885,7 +892,6 @@ public class LodRenderer
 			{
 				partialRegen = true;
 				vanillaRenderedChunksChanged = false;
-				
 			}
 			prevVanillaChunkTime = newTime;
 		}
@@ -914,6 +920,8 @@ public class LodRenderer
 		int zIndex;
 		for (ChunkPos pos : chunkPosToSkip)
 		{
+			vanillaRenderedChunksEmptySkip = false;
+			
 			xIndex = (pos.x - mc.getPlayer().xChunk) + (chunkRenderDistance + 1);
 			zIndex = (pos.z - mc.getPlayer().zChunk) + (chunkRenderDistance + 1);
 			
@@ -934,10 +942,11 @@ public class LodRenderer
 		
 		
 		// if the player is high enough, draw all LODs
-		if (chunkPosToSkip.isEmpty() && mc.getPlayer().position().y > 256)
+		if (chunkPosToSkip.isEmpty() && mc.getPlayer().position().y > 256 && !vanillaRenderedChunksEmptySkip)
 		{
 			vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
 			vanillaRenderedChunksChanged = true;
+			vanillaRenderedChunksEmptySkip = true;
 		}
 	}
 	
