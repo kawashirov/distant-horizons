@@ -266,7 +266,8 @@ public class LodRenderer
 		else
 			farPlaneBlockDistance = LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
 		
-		setupProjectionMatrix(mcProjectionMatrix, partialTicks);
+		setupProjectionMatrix(mcProjectionMatrix, vanillaBlockRenderedDistance, partialTicks);
+		
 		// commented out until we can add shaders to handle lighting
 		//setupLighting(lodDim, partialTicks);
 		
@@ -555,18 +556,17 @@ public class LodRenderer
 	/**
 	 * create a new projection matrix and send it over to the GPU
 	 * @param currentProjectionMatrix this is Minecraft's current projection matrix
+	 * @param vanillaBlockRenderedDistance Minecraft's vanilla far plane distance
 	 * @param partialTicks how many ticks into the frame we are
 	 */
-	private void setupProjectionMatrix(Matrix4f currentProjectionMatrix, float partialTicks)
+	private void setupProjectionMatrix(Matrix4f currentProjectionMatrix, float vanillaBlockRenderedDistance, float partialTicks)
 	{
-		//Minimum radius of view in 2 render distance
-		int minDistance = 1;
 		// create the new projection matrix
 		Matrix4f lodPoj =
 				Matrix4f.perspective(
 						getFov(partialTicks, true),
 						(float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight(),
-						minDistance,
+						vanillaBlockRenderedDistance / 5,
 						farPlaneBlockDistance * LodUtil.CHUNK_WIDTH / 2);
 		
 		// get Minecraft's un-edited projection matrix
