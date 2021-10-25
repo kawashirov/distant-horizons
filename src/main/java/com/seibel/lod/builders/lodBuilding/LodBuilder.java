@@ -62,6 +62,7 @@ import net.minecraft.block.material.MaterialColor;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.data.BlockModelProvider;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -99,7 +100,6 @@ public class LodBuilder
 	public static final ConcurrentMap<Block, Integer> colorMap = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<Block, Integer> tintColor = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<Block, Boolean> toTint = new ConcurrentHashMap<>();
-	public static final ConcurrentMap<Block, VoxelShape> shapeMap = new ConcurrentHashMap<>();
 	
 	public static final ConcurrentMap<Block, Boolean> notFullBlock = new ConcurrentHashMap<>();
 	public static final ConcurrentMap<Block, Boolean> smallBlock = new ConcurrentHashMap<>();
@@ -550,8 +550,6 @@ public class LodBuilder
 		Block block = blockState.getBlock();
 		if (colorMap.containsKey(block) && toTint.containsKey(block))
 			return colorMap.get(block);
-		
-		
 		
 		World world = mc.getClientWorld();
 		TextureAtlasSprite texture;
