@@ -46,7 +46,7 @@ public class BlockPosWrapper
 		return blockPos.getZ();
 	}
 	
-	private BlockPos.Mutable getBlockPos()
+	public BlockPos.Mutable getBlockPos()
 	{
 		return blockPos;
 	}
