@@ -437,6 +437,7 @@ public class LodDimension
 	}
 	
 	/**
+	 * Use addVerticalData when possible.
 	 * Add the given LOD to this dimension at the coordinate
 	 * stored in the LOD. If an LOD already exists at the given
 	 * coordinate it will be overwritten.
@@ -866,7 +867,7 @@ public class LodDimension
 	public void setRegionWidth(int newWidth)
 	{
 		width = newWidth;
-		halfWidth = Math.floorDiv(width, 2);
+		halfWidth = width/ 2;
 		
 		regions = new LodRegion[width][width];
 		isRegionDirty = new boolean[width][width];

@@ -56,7 +56,6 @@ public class VerticalLevelContainer implements LevelContainer
 	@Override
 	public void clear(int posX, int posZ)
 	{
-		
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		for (int verticalIndex = 0; verticalIndex < maxVerticalData; verticalIndex++)
@@ -68,7 +67,6 @@ public class VerticalLevelContainer implements LevelContainer
 	@Override
 	public boolean addData(long data, int posX, int posZ, int verticalIndex)
 	{
-		
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		dataContainer[posX * size * maxVerticalData + posZ * maxVerticalData + verticalIndex] = data;
@@ -78,7 +76,6 @@ public class VerticalLevelContainer implements LevelContainer
 	@Override
 	public boolean addVerticalData(long[] data, int posX, int posZ)
 	{
-		
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		for (int verticalIndex = 0; verticalIndex < maxVerticalData; verticalIndex++)
@@ -134,7 +131,7 @@ public class VerticalLevelContainer implements LevelContainer
 		index++;
 		maxVerticalData = inputData[index];
 		index++;
-		size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
+		size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
 		int x = size * size * maxVerticalData;
 		this.dataContainer = new long[x];
 		for (int i = 0; i < x; i++)
@@ -177,13 +174,7 @@ public class VerticalLevelContainer implements LevelContainer
 		}
 		data = DataPointUtil.mergeMultiData(dataToMerge, lowerMaxVertical, getMaxVerticalData());
 		
-		for (int verticalIndex = 0; (verticalIndex < data.length) && (verticalIndex < maxVerticalData); verticalIndex++)
-		{
-			addData(data[verticalIndex],
-					posX,
-					posZ,
-					verticalIndex);
-		}
+		addVerticalData(data, posX, posZ);
 	}
 	
 	@Override
@@ -217,7 +208,7 @@ public class VerticalLevelContainer implements LevelContainer
 	{
 		/*
 		StringBuilder stringBuilder = new StringBuilder();
-		int size = (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel);
+		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
 		stringBuilder.append(detailLevel);
 		stringBuilder.append(DATA_DELIMITER);
 		for (int x = 0; x < size; x++)

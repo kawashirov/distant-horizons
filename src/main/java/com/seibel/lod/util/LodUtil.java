@@ -201,8 +201,8 @@ public class LodUtil
 	/** Convert a 2D absolute position into a quad tree relative position. */
 	public static RegionPos convertGenericPosToRegionPos(int x, int z, int detailLevel)
 	{
-		int relativePosX = Math.floorDiv(x, (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel));
-		int relativePosZ = Math.floorDiv(z, (int) Math.pow(2, LodUtil.REGION_DETAIL_LEVEL - detailLevel));
+		int relativePosX = Math.floorDiv(x, 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel));
+		int relativePosZ = Math.floorDiv(z, 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel));
 		
 		return new RegionPos(relativePosX, relativePosZ);
 	}
@@ -210,7 +210,7 @@ public class LodUtil
 	/** Convert a 2D absolute position into a quad tree relative position. */
 	public static int convertLevelPos(int pos, int currentDetailLevel, int targetDetailLevel)
 	{
-		return Math.floorDiv(pos, (int) Math.pow(2, targetDetailLevel - currentDetailLevel));
+		return pos / (1 << (targetDetailLevel - currentDetailLevel));
 	}
 	
 	/**
@@ -224,9 +224,7 @@ public class LodUtil
 		for (ChunkSection section : blockStorage)
 		{
 			if (section != null && !section.isEmpty())
-			{
 				return true;
-			}
 		}
 		
 		return false;
@@ -492,20 +490,9 @@ public class LodUtil
 		{
 			tempX = x + Box.DIRECTION_NORMAL_MAP.get(direction).getX();
 			tempZ = z + Box.DIRECTION_NORMAL_MAP.get(direction).getZ();
-			if (!(tempX < 0 || tempZ < 0 || tempX >= vanillaRenderedChunks.length || tempZ >= vanillaRenderedChunks[0].length))
-			{
-				if (!vanillaRenderedChunks[tempX][tempZ])
-				{
-					return true;
-				}
-			}
-			else
-			{
-				if (vanillaRenderedChunks[x][z])
-				{
-					return true;
-				}
-			}
+			if (vanillaRenderedChunks[x][z] || (!(tempX < 0 || tempZ < 0 || tempX >= vanillaRenderedChunks.length || tempZ >= vanillaRenderedChunks[0].length)
+				&& !vanillaRenderedChunks[tempX][tempZ]))
+				return true;
 		}
 		return false;
 	}

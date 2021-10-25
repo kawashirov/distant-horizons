@@ -21,7 +21,6 @@ package com.seibel.lod.render;
 
 import java.util.HashSet;
 
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL15C;
 import org.lwjgl.opengl.NVFogDistance;
@@ -65,7 +64,7 @@ import net.minecraft.util.math.vector.Vector3d;
  * This is where LODs are draw to the world.
  * 
  * @author James Seibel
- * @version 10-23-2021
+ * @version 10-24-2021
  */
 public class LodRenderer
 {
@@ -73,7 +72,7 @@ public class LodRenderer
 	 * this is the light used when rendering the LODs,
 	 * it should be something different from what is used by Minecraft
 	 */
-	private static final int LOD_GL_LIGHT_NUMBER = GL11.GL_LIGHT2;
+	private static final int LOD_GL_LIGHT_NUMBER = GL15.GL_LIGHT2;
 	
 	/**
 	 * If true the LODs colors will be replaced with
@@ -218,27 +217,27 @@ public class LodRenderer
 		// set the required open GL settings
 		
 		if (LodConfig.CLIENT.advancedModOptions.debugging.debugMode.get() == DebugMode.SHOW_DETAIL_WIREFRAME)
-			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE);
+			GL15.glPolygonMode(GL15.GL_FRONT_AND_BACK, GL15.GL_LINE);
 		else
-			GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
+			GL15.glPolygonMode(GL15.GL_FRONT_AND_BACK, GL15.GL_FILL);
 		
-		GL11.glDisable(GL11.GL_TEXTURE_2D);
-		GL11.glEnable(GL11.GL_CULL_FACE);
-		GL11.glEnable(GL11.GL_COLOR_MATERIAL);
-		GL11.glEnable(GL11.GL_DEPTH_TEST);
+		GL15.glDisable(GL15.GL_TEXTURE_2D);
+		GL15.glEnable(GL15.GL_CULL_FACE);
+		GL15.glEnable(GL15.GL_COLOR_MATERIAL);
+		GL15.glEnable(GL15.GL_DEPTH_TEST);
 		
 		// enable transparent rendering
-		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
-		GL11.glEnable(GL11.GL_BLEND);
+		GL15.glBlendFunc(GL15.GL_SRC_ALPHA, GL15.GL_ONE_MINUS_SRC_ALPHA);
+		GL15.glEnable(GL15.GL_BLEND);
 		
 		// disable the lights Minecraft uses
-		GL11.glDisable(GL11.GL_LIGHT0);
-		GL11.glDisable(GL11.GL_LIGHT1);
+		GL15.glDisable(GL15.GL_LIGHT0);
+		GL15.glDisable(GL15.GL_LIGHT1);
 		
 		// get the default projection matrix, so we can
 		// reset it after drawing the LODs
 		float[] mcProjMatrixRaw = new float[16];
-		GL11.glGetFloatv(GL11.GL_PROJECTION_MATRIX, mcProjMatrixRaw);
+		GL15.glGetFloatv(GL15.GL_PROJECTION_MATRIX, mcProjMatrixRaw);
 		Matrix4f mcProjectionMatrix = new Matrix4f(mcProjMatrixRaw);
 		// OpenGl outputs their matrices in col,row form instead of row,col
 		// (or maybe vice versa I have no idea :P)
@@ -260,11 +259,10 @@ public class LodRenderer
 		
 		// determine the current fog settings, so they can be
 		// reset after drawing the LODs
-		float defaultFogStartDist = GL11.glGetFloat(GL11.GL_FOG_START);
-		float defaultFogEndDist = GL11.glGetFloat(GL11.GL_FOG_END);
-		int defaultFogMode = GL11.glGetInteger(GL11.GL_FOG_MODE);
-		int defaultFogDistance = GL11.glGetInteger(NVFogDistance.GL_FOG_DISTANCE_MODE_NV);
-		
+		float defaultFogStartDist = GL15.glGetFloat(GL15.GL_FOG_START);
+		float defaultFogEndDist = GL15.glGetFloat(GL15.GL_FOG_END);
+		int defaultFogMode = GL15.glGetInteger(GL15.GL_FOG_MODE);
+		int defaultFogDistance = GlProxy.getInstance().fancyFogAvailable ? GL15.glGetInteger(NVFogDistance.GL_FOG_DISTANCE_MODE_NV) : -1;
 		
 		//===========//
 		// rendering //
@@ -323,13 +321,13 @@ public class LodRenderer
 		
 		profiler.popPush("LOD cleanup");
 		
-		GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL);
-		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		GL11.glDisable(LOD_GL_LIGHT_NUMBER);
-		GL11.glDisable(GL11.GL_BLEND);
+		GL15.glPolygonMode(GL15.GL_FRONT_AND_BACK, GL15.GL_FILL);
+		GL15.glEnable(GL15.GL_TEXTURE_2D);
+		GL15.glDisable(LOD_GL_LIGHT_NUMBER);
+		GL15.glDisable(GL15.GL_BLEND);
 		// re-enable the lights Minecraft uses
-		GL11.glEnable(GL11.GL_LIGHT0);
-		GL11.glEnable(GL11.GL_LIGHT1);
+		GL15.glEnable(GL15.GL_LIGHT0);
+		GL15.glEnable(GL15.GL_LIGHT1);
 		RenderSystem.disableLighting();
 		
 		// reset the fog settings so the normal chunks
@@ -342,7 +340,7 @@ public class LodRenderer
 		
 		// clear the depth buffer so anything drawn is drawn
 		// over the LODs
-		GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
+		GL15.glClear(GL15.GL_DEPTH_BUFFER_BIT);
 		
 		
 		// end of internal LOD profiling
@@ -360,7 +358,7 @@ public class LodRenderer
 		// 0L is the starting pointer
 		LodUtil.LOD_VERTEX_FORMAT.setupBufferState(0L);
 		
-		vbo.draw(modelViewMatrix, GL11.GL_QUADS);
+		vbo.draw(modelViewMatrix, GL15.GL_QUADS);
 		
 		GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		LodUtil.LOD_VERTEX_FORMAT.clearBufferState();
@@ -377,7 +375,7 @@ public class LodRenderer
 		// 0L is the starting pointer
 		LodUtil.LOD_VERTEX_FORMAT.setupBufferState(0L);
 		
-		vbo.draw(modelViewMatrix, GL11.GL_QUADS);
+		vbo.draw(modelViewMatrix, GL15.GL_QUADS);
 		
 		GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		LodUtil.LOD_VERTEX_FORMAT.clearBufferState();
@@ -459,16 +457,16 @@ public class LodRenderer
 			}
 		}
 		
-		GL11.glEnable(GL11.GL_FOG);
+		GL15.glEnable(GL15.GL_FOG);
 		RenderSystem.enableFog();
 		RenderSystem.setupNvFogDistance();
 		RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
-		GL11.glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, glFogDistanceMode);
+		
+		if (GlProxy.getInstance().fancyFogAvailable)
+			GL15.glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, glFogDistanceMode);
 	}
 	
-	/**
-	 * Revert any changes that were made to the fog.
-	 */
+	/** Revert any changes that were made to the fog. */
 	@SuppressWarnings("deprecation")
 	private void cleanupFog(NearFarFogSettings fogSettings,
 			float defaultFogStartDist, float defaultFogEndDist,
@@ -477,15 +475,18 @@ public class LodRenderer
 		RenderSystem.fogStart(defaultFogStartDist);
 		RenderSystem.fogEnd(defaultFogEndDist);
 		RenderSystem.fogMode(defaultFogMode);
-		GL11.glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, defaultFogDistance);
+		
+		// this setting is only valid if the GPU supports fancy fog
+		if (GlProxy.getInstance().fancyFogAvailable)
+			GL15.glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, defaultFogDistance);
 		
 		// disable fog if Minecraft wasn't rendering fog,
 		// but we were
 		if (!fogSettings.vanillaIsRenderingFog &&
 					(fogSettings.near.quality != FogQuality.OFF ||
-							 fogSettings.far.quality != FogQuality.OFF))
+					 fogSettings.far.quality != FogQuality.OFF))
 		{
-			GL11.glDisable(GL11.GL_FOG);
+			GL15.glDisable(GL15.GL_FOG);
 		}
 	}
 	
@@ -524,29 +525,7 @@ public class LodRenderer
 		
 		return lodModelViewMatrix;
 	}
-	
-	
-	/**
-	 * James added this to test if Vivecraft is not using
-	 * the MC FOV setting or if the problem is deeper
-	 */
-	public enum FovTest
-	{
-		LOD_USE_FOV(true, false),
-		MC_USE_FOV(false, true),
-		NEITHER(false, false),
-		BOTH(true, true);
 		
-		final boolean lodProjUseFov;
-		final boolean defaultMcProjUseFov;
-		
-		FovTest(boolean newLodProjUseFov, boolean newDefaultMcProjUseFov)
-		{
-			lodProjUseFov = newLodProjUseFov;
-			defaultMcProjUseFov = newDefaultMcProjUseFov;
-		}
-	}
-	
 	/**
 	 * create a new projection matrix and send it over to the GPU
 	 * @param currentProjectionMatrix this is Minecraft's current projection matrix
@@ -554,7 +533,7 @@ public class LodRenderer
 	 */
 	private void setupProjectionMatrix(Matrix4f currentProjectionMatrix, float partialTicks)
 	{
-		//Minimum radious of view in 2 render distance
+		//Minimum radius of view in 2 render distance
 		int minDistance = 1;
 		// create the new projection matrix
 		Matrix4f lodPoj =
@@ -625,8 +604,8 @@ public class LodRenderer
 
 		ByteBuffer temp = ByteBuffer.allocateDirect(16);
 		temp.order(ByteOrder.nativeOrder());
-		GL11.glLightfv(LOD_GL_LIGHT_NUMBER, GL11.GL_AMBIENT, (FloatBuffer) temp.asFloatBuffer().put(lightAmbient).flip());
-		GL11.glEnable(LOD_GL_LIGHT_NUMBER); // Enable the above lighting
+		GL15.glLightfv(LOD_GL_LIGHT_NUMBER, GL15.GL_AMBIENT, (FloatBuffer) temp.asFloatBuffer().put(lightAmbient).flip());
+		GL15.glEnable(LOD_GL_LIGHT_NUMBER); // Enable the above lighting
 
 		RenderSystem.enableLighting();
 	}*/
@@ -669,9 +648,7 @@ public class LodRenderer
 		vbosCenter = result.drawableCenterChunkPos;
 	}
 	
-	/**
-	 * Calls the BufferBuilder's destroyBuffers method.
-	 */
+	/** Calls the BufferBuilder's destroyBuffers method. */
 	public void destroyBuffers()
 	{
 		lodBufferBuilder.destroyBuffers();
@@ -684,9 +661,7 @@ public class LodRenderer
 	}
 	
 	
-	/**
-	 * Return what fog settings should be used when rendering.
-	 */
+	/** Return what fog settings should be used when rendering. */
 	private NearFarFogSettings determineFogSettings()
 	{
 		NearFarFogSettings fogSettings = new NearFarFogSettings();
