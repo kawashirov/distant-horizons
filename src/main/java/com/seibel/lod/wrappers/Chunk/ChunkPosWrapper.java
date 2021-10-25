@@ -18,12 +18,12 @@ public class ChunkPosWrapper
 	
 	public int getX()
 	{
-		return chunkPos.getX();
+		return chunkPos.x;
 	}
 	
 	public int getZ()
 	{
-		return chunkPos.getZ();
+		return chunkPos.z;
 	}
 	
 	public ChunkPos getChunkPos()
