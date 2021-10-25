@@ -51,8 +51,9 @@ import net.minecraftforge.fml.config.ModConfig;
 
 /**
  * This handles any configuration the user has access to.
+ * @author Leonardo Amato
  * @author James Seibel
- * @version 10-23-2021
+ * @version 10-24-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -188,6 +189,8 @@ public class LodConfig
 				
 				public final ForgeConfigSpec.EnumValue<FogDrawOverride> fogDrawOverride;
 				
+				public final ForgeConfigSpec.BooleanValue disableVanillaFog;
+				
 				FogQualityOption(ForgeConfigSpec.Builder builder)
 				{
 					
@@ -198,7 +201,7 @@ public class LodConfig
 									+ " At what distance should Fog be drawn on the fake chunks? \n"
 									+ " If the fog cuts off abruptly or you are using Optifine's \"fast\" fog option \n"
 									+ " set this to " + FogDistance.NEAR + " or " + FogDistance.FAR + ". \n")
-							.defineEnum("Fog Distance", FogDistance.NEAR_AND_FAR);
+							.defineEnum("Fog Distance", FogDistance.FAR);
 					
 					fogDrawOverride = builder
 							.comment("\n\n"
@@ -208,6 +211,16 @@ public class LodConfig
 									+ " " + FogDrawOverride.FAST + ": Always draw fast fog on the LODs \n"
 									+ " " + FogDrawOverride.FANCY + ": Always draw fancy fog on the LODs (if your graphics card supports it) \n")
 							.defineEnum("Fog Draw Override", FogDrawOverride.FANCY);
+					
+					disableVanillaFog = builder
+							.comment("\n\n"
+									+ " If true disable vanilla Minecraft's fog. \n\n"
+									+ ""
+									+ " Unlike Optifine or Sodium's fog disabling option this won't change \n"
+									+ " performance (we don't actually disable the fog, we just tell it to render a infinite distance away). \n"
+									+ " May or may not play nice with other mods edit fog. \n")
+							.define("Disable Vanilla Fog", true);
+					
 					builder.pop();
 				}
 			}

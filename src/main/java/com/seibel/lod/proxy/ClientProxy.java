@@ -173,9 +173,11 @@ public class ClientProxy
 //		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(VerticalQuality.VOXEL);
 
 //		LodConfig.CLIENT.graphics.fogQualityOption.fogDistance.set(FogDistance.FAR);
-//		LodConfig.CLIENT.graphics.fogDrawOverride.set(FogDrawOverride.ALWAYS_DRAW_FOG_FANCY);
+//		LodConfig.CLIENT.graphics.fogQualityOption.fogDrawOverride.set(FogDrawOverride.FANCY);
+//		LodConfig.CLIENT.graphics.fogQualityOption.disableVanillaFog.set(true);
 //		LodConfig.CLIENT.graphics.shadingMode.set(ShadingMode.DARKEN_SIDES);
-//		LodConfig.CLIENT.graphics.vanillaOverdraw.set(VanillaOverdraw.HALF);
+		
+//		LodConfig.CLIENT.graphics.advancedGraphicsOption.vanillaOverdraw.set(VanillaOverdraw.DYNAMIC);
 		
 //		LodConfig.CLIENT.graphics.advancedGraphicsOption.gpuUploadMethod.set(GpuUploadMethod.BUFFER_STORAGE);
 

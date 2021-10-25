@@ -48,7 +48,6 @@ import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
@@ -393,8 +392,7 @@ public class LodRenderer
 	{
 		if (fogQuality == FogQuality.OFF)
 		{
-			FogRenderer.setupNoFog();
-			RenderSystem.disableFog();
+			GL15.glDisable(GL15.GL_FOG);
 			return;
 		}
 		
@@ -466,7 +464,10 @@ public class LodRenderer
 			GL15.glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, glFogDistanceMode);
 	}
 	
-	/** Revert any changes that were made to the fog. */
+	/** 
+	 * Revert any changes that were made to the fog
+	 * and sets up the fog for Minecraft.
+	 */
 	@SuppressWarnings("deprecation")
 	private void cleanupFog(NearFarFogSettings fogSettings,
 			float defaultFogStartDist, float defaultFogEndDist,
@@ -480,13 +481,22 @@ public class LodRenderer
 		if (GlProxy.getInstance().fancyFogAvailable)
 			GL15.glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, defaultFogDistance);
 		
-		// disable fog if Minecraft wasn't rendering fog,
-		// but we were
-		if (!fogSettings.vanillaIsRenderingFog &&
-					(fogSettings.near.quality != FogQuality.OFF ||
-					 fogSettings.far.quality != FogQuality.OFF))
+		// disable fog if Minecraft wasn't rendering fog
+		// or we want it disabled
+		if (!fogSettings.vanillaIsRenderingFog
+			|| LodConfig.CLIENT.graphics.fogQualityOption.disableVanillaFog.get())
 		{
-			GL15.glDisable(GL15.GL_FOG);
+			// Make fog render a infinite distance away.
+			// This doesn't technically disable Minecraft's fog
+			// so performance will probably be the same regardless, unlike
+			// Optifine's no fog setting.
+			
+			// we can't disable minecraft's fog outright because by default
+			// minecraft will re-enable the fog after our code
+			
+			RenderSystem.fogStart(0.0F);
+			RenderSystem.fogEnd(Float.MAX_VALUE);
+			RenderSystem.fogDensity(0.0F);
 		}
 	}
 	

@@ -36,7 +36,7 @@ public class NearFarFogSettings
 	
 	/**
 	 * If true that means Minecraft is
-	 * rendering fog alongside us
+	 * rendering fog
 	 */
 	public boolean vanillaIsRenderingFog = true;
 	
