@@ -113,9 +113,8 @@ public class BlockColorWrapper
 		}
 		else
 		{
-			isColored = false;
+			isColored = true;
 			texture = mc.getModelManager().getBlockModelShaper().getTexture(block.defaultBlockState(), mc.getClientWorld(), blockPosWrapper.getBlockPos());
-			//return;
 		}
 		
 		int count = 0;
@@ -230,10 +229,7 @@ public class BlockColorWrapper
 	
 	public int getColor()
 	{
-		if (hasColor())
 			return color;
-		else
-			return block.defaultMaterialColor().col;
 	}
 
 //------------//
