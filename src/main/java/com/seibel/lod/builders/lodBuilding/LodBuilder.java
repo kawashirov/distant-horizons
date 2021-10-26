@@ -471,23 +471,23 @@ public class LodBuilder
 		int z = blockPos.getZ();
 		
 		BlockColorWrapper blockColorWrapper;
+		BlockShapeWrapper blockShapeWrapper = chunk.getBlockShapeWrapper(blockPos);
 		
 		if (chunk.isWaterLogged(blockPos))
 		{
 			BiomeWrapper biome = chunk.getBiome(xRel, y, zRel);
 			return  biome.getWaterTint();
-			//blockColorWrapper = BlockColorWrapper.WATER_COLOR;
 		}
 		else
 		{
 			blockColorWrapper = chunk.getBlockColorWrapper(blockPos);
 		}
-		/*
+		
 		if (blockShapeWrapper.isToAvoid())
 		{
 			return 0;
 		}
-		*/
+		
 		colorOfBlock = blockColorWrapper.getColor();
 		
 		
@@ -520,7 +520,7 @@ public class LodBuilder
 		}
 		else
 			colorInt = colorOfBlock;
-		return colorInt;
+		return colorOfBlock;
 	}
 	
 	
