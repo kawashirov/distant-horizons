@@ -47,7 +47,7 @@ public class ChunkWrapper
 	
 	public BlockColorWrapper getBlockColorWrapper(BlockPosWrapper blockPos)
 	{
-		return BlockColorWrapper.getBlockColorWrapper(chunk.getBlockState(blockPos.getBlockPos()).getBlock());
+		return BlockColorWrapper.getBlockColorWrapper(chunk.getBlockState(blockPos.getBlockPos()),blockPos);
 	}
 	
 	public BlockShapeWrapper getBlockShapeWrapper(BlockPosWrapper blockPos)

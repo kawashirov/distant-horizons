@@ -57,6 +57,11 @@ public class WorldWrapper
 		return BiomeWrapper.getBiomeWrapper(world.getBiome(blockPos.getBlockPos()));
 	}
 	
+	public IWorld getWorld()
+	{
+		return world;
+	}
+	
 	public boolean hasCeiling()
 	{
 		return world.dimensionType().hasCeiling();

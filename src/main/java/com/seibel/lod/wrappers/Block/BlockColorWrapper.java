@@ -1,16 +1,12 @@
 package com.seibel.lod.wrappers.Block;
 
 import com.seibel.lod.util.ColorUtil;
-import com.seibel.lod.wrappers.Chunk.ChunkWrapper;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.block.*;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.IBlockReader;
 import net.minecraftforge.client.model.data.ModelDataMap;
 
 import java.util.List;
@@ -26,8 +22,10 @@ public class BlockColorWrapper
 	//set of block which require tint
 	public static final ConcurrentMap<Block, BlockColorWrapper> blockColorWrapperMap = new ConcurrentHashMap<>();
 	public static final ModelDataMap dataMap = new ModelDataMap.Builder().build();
+	public static final BlockPos blockPos = new BlockPos(0,0,0);
 	public static Random random = new Random(0);
-	public static BlockColorWrapper WATER_COLOR = getBlockColorWrapper(Blocks.WATER);
+	//public static BlockColourWrapper WATER_COLOR = getBlockColorWrapper(Blocks.WATER);
+	public static final Direction[] directions = new Direction[] { Direction.UP, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.DOWN };
 	
 	private Block block;
 	private int color;
@@ -39,29 +37,33 @@ public class BlockColorWrapper
 	
 	
 	/**Constructor only require for the block instance we are wrapping**/
-	public BlockColorWrapper(Block block)
+	public BlockColorWrapper(BlockState blockState, BlockPosWrapper blockPosWrapper)
 	{
+		this.block = blockState.getBlock();
 		this.color = 0;
 		this.isColored = true;
 		this.toTint = false;
-		this.block = block;
-		setupColorAndTint();
+		this.folliageTint = false;
+		this.grassTint = false;
+		this.waterTint = false;
+		setupColorAndTint(blockState,blockPosWrapper);
+		System.out.println(block + " color " + Integer.toHexString(color) + " to tint " + toTint + " folliageTint " + folliageTint + " grassTint " + grassTint + " waterTint " + waterTint);
 	}
 	
 	/**
 	 * this return a wrapper of the block in input
-	 * @param block Block object to wrap
+	 * @param blockState of the block to wrap
 	 */
-	static public BlockColorWrapper getBlockColorWrapper(Block block)
+	static public BlockColorWrapper getBlockColorWrapper(BlockState blockState, BlockPosWrapper blockPosWrapper)
 	{
 		//first we check if the block has already been wrapped
-		if (blockColorWrapperMap.containsKey(block) && blockColorWrapperMap.get(block) != null)
-			return blockColorWrapperMap.get(block);
+		if (blockColorWrapperMap.containsKey(blockState.getBlock()) && blockColorWrapperMap.get(blockState.getBlock()) != null)
+			return blockColorWrapperMap.get(blockState.getBlock());
 		
 		
 		//if it hasn't been created yet, we create it and save it in the map
-		BlockColorWrapper blockWrapper = new BlockColorWrapper(block);
-		blockColorWrapperMap.put(block, blockWrapper);
+		BlockColorWrapper blockWrapper = new BlockColorWrapper(blockState, blockPosWrapper);
+		blockColorWrapperMap.put(blockState.getBlock(), blockWrapper);
 		
 		//we return the newly created wrapper
 		return blockWrapper;
@@ -71,7 +73,7 @@ public class BlockColorWrapper
 	 * Generate the color of the given block from its texture
 	 * and store it for later use.
 	 */
-	private void setupColorAndTint()
+	private void setupColorAndTint(BlockState blockState, BlockPosWrapper blockPosWrapper)
 	{
 		MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 		TextureAtlasSprite texture;
@@ -81,9 +83,9 @@ public class BlockColorWrapper
 		int listSize = 0;
 		
 		// first step is to check if this block has a tinted face
-		for (Direction direction : Direction.values())
+		for (Direction direction : directions)
 		{
-			quads = mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(block.defaultBlockState(), direction, random, dataMap);
+			quads = mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
 			listSize = Math.max(listSize, quads.size());
 			for (BakedQuad bakedQuad : quads)
 			{
@@ -96,19 +98,24 @@ public class BlockColorWrapper
 			this.toTint = true;
 		
 		//now we get the first non empty face
-		for (Direction direction : Direction.values())
+		for (Direction direction : directions)
 		{
-			quads = mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(block.defaultBlockState(), direction, random, dataMap);
+			quads = mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
 			if (!quads.isEmpty())
 				break;
 		}
 		
 		//the quads list is not empty we extract the first one
 		if (!quads.isEmpty())
+		{
+			isColored = true;
 			texture = quads.get(0).getSprite();
+		}
 		else
 		{
-			return;
+			isColored = false;
+			texture = mc.getModelManager().getBlockModelShaper().getTexture(block.defaultBlockState(), mc.getClientWorld(), blockPosWrapper.getBlockPos());
+			//return;
 		}
 		
 		int count = 0;
@@ -128,10 +135,11 @@ public class BlockColorWrapper
 			{
 				for (int v = 0; v < texture.getWidth(); v++)
 				{
-					if (texture.isTransparent(frameIndex, u, v))
-						continue;
 					
 					tempColor = texture.getPixelRGBA(frameIndex, u, v);
+					
+					if (ColorUtil.getAlpha(texture.getPixelRGBA(frameIndex, u, v)) == 0)
+						continue;
 					
 					// determine if this pixel is gray
 					int colorMax = Math.max(Math.max(ColorUtil.getBlue(tempColor), ColorUtil.getGreen(tempColor)), ColorUtil.getRed(tempColor));
@@ -177,14 +185,11 @@ public class BlockColorWrapper
 			this.toTint = true;
 		
 		// we check which kind of tint we need to apply
-		if (grassInstance())
-			this.grassTint = true;
+		this.grassTint = grassInstance() && toTint;
 		
-		if (leavesInstance())
-			this.folliageTint = true;
+		this.folliageTint = leavesInstance() && toTint;
 		
-		if (waterIstance())
-			this.waterTint = true;
+		this.waterTint = waterIstance() && toTint;
 		
 		color = tempColor;
 	}
@@ -225,7 +230,7 @@ public class BlockColorWrapper
 	
 	public int getColor()
 	{
-		if(hasColor())
+		if (hasColor())
 			return color;
 		else
 			return block.defaultMaterialColor().col;

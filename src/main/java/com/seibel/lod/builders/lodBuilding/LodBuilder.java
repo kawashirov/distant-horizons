@@ -42,11 +42,11 @@ import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 import com.seibel.lod.wrappers.Chunk.ChunkWrapper;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
+import com.seibel.lod.wrappers.World.BiomeColorWrapper;
 import com.seibel.lod.wrappers.World.BiomeWrapper;
 import com.seibel.lod.wrappers.World.WorldWrapper;
 
 
-import net.minecraft.block.Blocks;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
 
@@ -215,7 +215,6 @@ public class LodBuilder
 		int size = 1 << detail.detailLevel;
 		
 		long[] dataToMerge = ThreadMapUtil.getBuilderVerticalArray(detail.detailLevel);
-		
 		int verticalData = DataPointUtil.worldHeight / 2 + 1;
 		
 		ChunkPosWrapper chunkPos = chunk.getPos();
@@ -323,7 +322,6 @@ public class LodBuilder
 			for (int y = yAbs; y >= 0; y--)
 			{
 				blockPos.set(xAbs, y, zAbs);
-				blockPos.set(xAbs, y, zAbs);
 				if (isLayerValidLodPoint(chunk, blockPos))
 				{
 					height = (short) (y + 1);
@@ -368,9 +366,9 @@ public class LodBuilder
 				aboveColorInt = getColorForBlock(chunk, blockPos);
 			}
 			
-			if (colorInt == 0 && yAbs > 0)
+			//if (colorInt == 0 && yAbs > 0)
 				// if this block is invisible, check the block below it
-				colorInt = generateLodColor(chunk, config, xRel, yAbs - 1, zRel, blockPos);
+			//	colorInt = generateLodColor(chunk, config, xRel, yAbs - 1, zRel, blockPos);
 			
 			// override this block's color if there was a block above this
 			// and we were avoiding non-full/non-solid blocks
@@ -472,48 +470,51 @@ public class LodBuilder
 		int y = blockPos.getY();
 		int z = blockPos.getZ();
 		
-		//Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, y >> 2, zRel >> 2);
 		BlockColorWrapper blockColorWrapper;
-		BlockShapeWrapper blockShapeWrapper;
 		
 		if (chunk.isWaterLogged(blockPos))
 		{
-			blockColorWrapper = BlockColorWrapper.WATER_COLOR;
-			blockShapeWrapper = BlockShapeWrapper.WATER_SHAPE;
+			BiomeWrapper biome = chunk.getBiome(xRel, y, zRel);
+			return  biome.getWaterTint();
+			//blockColorWrapper = BlockColorWrapper.WATER_COLOR;
 		}
 		else
 		{
 			blockColorWrapper = chunk.getBlockColorWrapper(blockPos);
-			blockShapeWrapper = chunk.getBlockShapeWrapper(blockPos);
 		}
-		
+		/*
 		if (blockShapeWrapper.isToAvoid())
 		{
 			return 0;
 		}
-		
+		*/
 		colorOfBlock = blockColorWrapper.getColor();
 		
 		
 		if (blockColorWrapper.hasTint())
 		{
-			BiomeWrapper biome = chunk.getBiome(xRel, y, zRel);
+			
+			WorldWrapper world = MinecraftWrapper.INSTANCE.getWrappedServerWorld();
+			
+			if (world.isEmpty())
+			{
+				world = MinecraftWrapper.INSTANCE.getWrappedClientWorld();
+			}
 			
 			int tintValue;
 			if (blockColorWrapper.hasGrassTint())
 			{
 				// grass and green plants
-				tintValue = biome.getGrassTint(x, z);
+				tintValue = BiomeColorWrapper.getGrassColor(world,blockPos);
 			}
 			else if (blockColorWrapper.hasFolliageTint())
 			{
-				tintValue = biome.getFolliageTint();
+				tintValue = BiomeColorWrapper.getFoliageColor(world,blockPos);
 			}
 			else
 			{
 				//we can reintroduce this with the wrappers
-				//tintValue = BiomeColors.getAverageFoliageColor(serverWorld, blockPos);
-				tintValue = biome.getWaterTint();
+				tintValue = BiomeColorWrapper.getWaterColor(world,blockPos);
 			}
 			colorInt = ColorUtil.multiplyRGBcolors(tintValue | 0xFF000000, colorOfBlock);
 		}
@@ -535,8 +536,7 @@ public class LodBuilder
 		boolean noCollisionAvoidance = LodConfig.CLIENT.worldGenerator.blockToAvoid.get().noCollision;
 		
 		BlockShapeWrapper block = chunk.getBlockShapeWrapper(blockPos);
-		return block != null
-					   && !block.isToAvoid()
+		return !block.isToAvoid()
 					   && !(nonFullAvoidance && block.isNonFull())
 					   && !(noCollisionAvoidance && block.hasNoCollision());
 		

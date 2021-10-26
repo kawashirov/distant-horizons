@@ -125,11 +125,11 @@ public class ThreadMapUtil
 		if (!threadBuilderVerticalArrayMap.containsKey(Thread.currentThread().getName()) || (threadBuilderVerticalArrayMap.get(Thread.currentThread().getName()) == null))
 		{
 			long[][] array = new long[5][];
-			int size = 1;
+			int size;
 			for (int i = 0; i < 5; i++)
 			{
+				size = 1 << i;
 				array[i] = new long[size * size * DataPointUtil.worldHeight / 2 + 1];
-				size = size << 1;
 			}
 			threadBuilderVerticalArrayMap.put(Thread.currentThread().getName(), array);
 		}

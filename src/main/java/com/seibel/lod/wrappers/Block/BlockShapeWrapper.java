@@ -37,8 +37,9 @@ public class BlockShapeWrapper
 		this.block = block;
 		this.nonFull = false;
 		this.noCollision = false;
-		this.toAvoid = false;
+		this.toAvoid = ofBlockToAvoid();
 		setupShapes(chunkWrapper, blockPosWrapper);
+		System.out.println(block + " non full " + nonFull + " no collision " + noCollision + " to avoid " + toAvoid);
 	}
 	
 	private BlockShapeWrapper()
@@ -91,10 +92,7 @@ public class BlockShapeWrapper
 				double xWidth = (bbox.maxX - bbox.minX);
 				double yWidth = (bbox.maxY - bbox.minY);
 				double zWidth = (bbox.maxZ - bbox.minZ);
-				if (xWidth < 1 && zWidth < 1 && yWidth < 1)
-					nonFull = true;
-				else
-					nonFull = false;
+				nonFull = xWidth < 1 && zWidth < 1 && yWidth < 1;
 			}
 			else
 			{
@@ -107,15 +105,13 @@ public class BlockShapeWrapper
 			VoxelShape collisionShape = block.defaultBlockState().getCollisionShape(chunk, blockPos);
 			noCollision = collisionShape.isEmpty();
 		}
-		
-		toAvoid = ofBlockToAvoid(block);
 	}
 	
-	private boolean ofBlockToAvoid(Block block)
+	public boolean ofBlockToAvoid()
 	{
-		return block == Blocks.AIR
-					   || block != Blocks.CAVE_AIR
-					   || block != Blocks.BARRIER;
+		return block.equals(Blocks.AIR)
+					   || block.equals(Blocks.CAVE_AIR)
+					   || block.equals(Blocks.BARRIER);
 	}
 //-----------------//
 //Avoidance getters//
