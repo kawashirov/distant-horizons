@@ -267,20 +267,14 @@ public class LodBuilder
 				{
 					yAbs = depth;
 					blockPos.set(xAbs, yAbs, zAbs);
-					if(hasSkyLight)
-						light = getLightValue(chunk, blockPos, hasCeiling, hasSkyLight, topBlock);
-					else
-						light = 0;
+					light = getLightValue(chunk, blockPos, hasCeiling, hasSkyLight, topBlock);
 					color = generateLodColor(chunk, config, xAbs, yAbs, zAbs, blockPos);
 					blockPos.set(xAbs, yAbs - 1, zAbs);
 				}
 				else
 				{
 					blockPos.set(xAbs, yAbs, zAbs);
-					if(hasSkyLight)
-						light = getLightValue(chunk, blockPos, hasCeiling, hasSkyLight, topBlock);
-					else
-						light = 0;
+					light = getLightValue(chunk, blockPos, hasCeiling, hasSkyLight, topBlock);
 					color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
 					blockPos.set(xAbs, yAbs + 1, zAbs);
 				}
@@ -373,7 +367,7 @@ public class LodBuilder
 			}
 			
 			//if (colorInt == 0 && yAbs > 0)
-				// if this block is invisible, check the block below it
+			// if this block is invisible, check the block below it
 			//	colorInt = generateLodColor(chunk, config, xRel, yAbs - 1, zRel, blockPos);
 			
 			// override this block's color if there was a block above this
@@ -411,8 +405,12 @@ public class LodBuilder
 			if (topBlock && !hasCeiling && hasSkyLight)
 				skyLight = DEFAULT_MAX_LIGHT;
 			else
-				skyLight = world.getSkyLight(blockPos);
-			
+			{
+				if (hasSkyLight)
+					skyLight = world.getSkyLight(blockPos);
+				else
+					skyLight = 0;
+			}
 			if (!topBlock && skyLight == 15)
 			{
 				// we are on predicted terrain, and we don't know what the light here is,
@@ -429,7 +427,7 @@ public class LodBuilder
 		else
 		{
 			world = MinecraftWrapper.INSTANCE.getWrappedClientWorld();
-			if(world.isEmpty())
+			if (world.isEmpty())
 				return 0;
 			// client world sky light (almost never accurate)
 			blockLight = world.getBlockLight(blockPos);
@@ -440,7 +438,12 @@ public class LodBuilder
 					skyLight = DEFAULT_MAX_LIGHT;
 				else
 				{
-					skyLight = world.getSkyLight(blockPos);
+					
+					if (hasSkyLight)
+						skyLight = world.getSkyLight(blockPos);
+					else
+						skyLight = 0;
+					
 					if (!chunk.isLightCorrect() && (skyLight == 0 || skyLight == 15))
 					{
 						// we don't know what the light here is,
@@ -454,6 +457,8 @@ public class LodBuilder
 							skyLight = 0;
 					}
 				}
+				if (hasSkyLight)
+					skyLight = 0;
 			}
 		}
 		
@@ -482,7 +487,7 @@ public class LodBuilder
 		if (chunk.isWaterLogged(blockPos))
 		{
 			BiomeWrapper biome = chunk.getBiome(xRel, y, zRel);
-			return  biome.getWaterTint();
+			return biome.getWaterTint();
 		}
 		else
 		{
@@ -511,16 +516,16 @@ public class LodBuilder
 			if (blockColorWrapper.hasGrassTint())
 			{
 				// grass and green plants
-				tintValue = BiomeColorWrapper.getGrassColor(world,blockPos);
+				tintValue = BiomeColorWrapper.getGrassColor(world, blockPos);
 			}
 			else if (blockColorWrapper.hasFolliageTint())
 			{
-				tintValue = BiomeColorWrapper.getFoliageColor(world,blockPos);
+				tintValue = BiomeColorWrapper.getFoliageColor(world, blockPos);
 			}
 			else
 			{
 				//we can reintroduce this with the wrappers
-				tintValue = BiomeColorWrapper.getWaterColor(world,blockPos);
+				tintValue = BiomeColorWrapper.getWaterColor(world, blockPos);
 			}
 			colorInt = ColorUtil.multiplyRGBcolors(tintValue | 0xFF000000, colorOfBlock);
 		}
