@@ -64,7 +64,7 @@ import net.minecraft.util.math.vector.Vector3d;
  * This is where LODs are draw to the world.
  * 
  * @author James Seibel
- * @version 10-24-2021
+ * @version 10-25-2021
  */
 public class LodRenderer
 {
@@ -541,10 +541,10 @@ public class LodRenderer
 		// (AxisAlignedBoundingBoxes (LODs) use doubles and thus have a higher
 		// accuracy vs the model view matrix, which only uses floats)
 		BlockPos bufferPos = vbosCenter.getWorldPosition();
-		Vector3d eyePos = mc.getPlayer().getEyePosition(partialTicks);
-		double xDiff = eyePos.x - bufferPos.getX();
-		double zDiff = eyePos.z - bufferPos.getZ();
+		double xDiff = projectedView.x - bufferPos.getX();
+		double zDiff = projectedView.z - bufferPos.getZ();
 		mcMatrixStack.translate(-xDiff, -projectedView.y, -zDiff);
+		
 		
 		
 		// get the modified model view matrix
