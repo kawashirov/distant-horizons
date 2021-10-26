@@ -16,7 +16,8 @@ public class WorldWrapper
 		this.world = world;
 	}
 	
-	public WorldWrapper getWorldWrapper(IWorld world)
+	
+	public static WorldWrapper getWorldWrapper(IWorld world)
 	{
 		//first we check if the biome has already been wrapped
 		if(worldWrapperMap.containsKey(world) && worldWrapperMap.get(world) != null)
@@ -64,5 +65,10 @@ public class WorldWrapper
 	public boolean hasSkyLight()
 	{
 		return world.dimensionType().hasSkyLight();
+	}
+	
+	public boolean isEmpty()
+	{
+		return world == null;
 	}
 }

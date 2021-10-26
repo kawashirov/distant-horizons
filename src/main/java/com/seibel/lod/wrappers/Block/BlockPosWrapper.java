@@ -23,7 +23,7 @@ public class BlockPosWrapper
 	
 	public BlockPosWrapper()
 	{
-		this.blockPos = new BlockPos.Mutable();
+		this.blockPos = new BlockPos.Mutable(0,0,0);
 	}
 	
 	public void set(int x, int y, int z)

@@ -115,6 +115,22 @@ public class BiomeWrapper
 		return colorInt;
 	}
 	
+	public int getGrassTint(int x, int z)
+	{
+		return biome.getGrassColor(x, z);
+	}
+	
+	public int getFolliageTint()
+	{
+		return biome.getFoliageColor();
+	}
+	
+	public int getWaterTint()
+	{
+		return biome.getWaterColor();
+	}
+	
+	
 	@Override public boolean equals(Object o)
 	{
 		if (this == o)

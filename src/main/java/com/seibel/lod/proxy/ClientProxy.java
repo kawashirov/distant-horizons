@@ -19,6 +19,7 @@
 
 package com.seibel.lod.proxy;
 
+import com.seibel.lod.wrappers.Chunk.ChunkWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -213,7 +214,7 @@ public class ClientProxy
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
-		lodBuilder.generateLodNodeAsync(event.getChunk(), lodWorld, event.getWorld(), DistanceGenerationMode.SERVER);
+		lodBuilder.generateLodNodeAsync(new ChunkWrapper(event.getChunk()), lodWorld, event.getWorld(), DistanceGenerationMode.SERVER);
 	}
 	
 	@SubscribeEvent
@@ -283,7 +284,7 @@ public class ClientProxy
 				event.getClass() == BlockEvent.PortalSpawnEvent.class)
 		{
 			// recreate the LOD where the blocks were changed
-			lodBuilder.generateLodNodeAsync(event.getWorld().getChunk(event.getPos()), lodWorld, event.getWorld());
+			lodBuilder.generateLodNodeAsync(new ChunkWrapper(event.getWorld().getChunk(event.getPos())), lodWorld, event.getWorld());
 		}
 	}
 	
