@@ -267,14 +267,20 @@ public class LodBuilder
 				{
 					yAbs = depth;
 					blockPos.set(xAbs, yAbs, zAbs);
-					light = getLightValue(chunk, blockPos, hasCeiling, hasSkyLight, topBlock);
+					if(hasSkyLight)
+						light = getLightValue(chunk, blockPos, hasCeiling, hasSkyLight, topBlock);
+					else
+						light = 0;
 					color = generateLodColor(chunk, config, xAbs, yAbs, zAbs, blockPos);
 					blockPos.set(xAbs, yAbs - 1, zAbs);
 				}
 				else
 				{
 					blockPos.set(xAbs, yAbs, zAbs);
-					light = getLightValue(chunk, blockPos, hasCeiling, hasSkyLight, topBlock);
+					if(hasSkyLight)
+						light = getLightValue(chunk, blockPos, hasCeiling, hasSkyLight, topBlock);
+					else
+						light = 0;
 					color = generateLodColor(chunk, config, xRel, yAbs, zRel, blockPos);
 					blockPos.set(xAbs, yAbs + 1, zAbs);
 				}

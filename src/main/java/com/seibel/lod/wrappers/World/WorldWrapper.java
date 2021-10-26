@@ -44,12 +44,12 @@ public class WorldWrapper
 	
 	public int getBlockLight(BlockPosWrapper blockPos)
 	{
-		return world.getLightEngine().skyEngine.getLightValue(blockPos.getBlockPos());
+		return world.getLightEngine().blockEngine.getLightValue(blockPos.getBlockPos());
 	}
 	
 	public int getSkyLight(BlockPosWrapper blockPos)
 	{
-		return world.getLightEngine().blockEngine.getLightValue(blockPos.getBlockPos());
+		return world.getLightEngine().skyEngine.getLightValue(blockPos.getBlockPos());
 	}
 	
 	public BiomeWrapper getBiome(BlockPosWrapper blockPos)
