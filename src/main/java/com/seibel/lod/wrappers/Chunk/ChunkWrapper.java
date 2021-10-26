@@ -1,19 +1,15 @@
 package com.seibel.lod.wrappers.Chunk;
 
 import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.wrappers.Block.BlockWrapper;
+import com.seibel.lod.wrappers.Block.BlockColorWrapper;
 import com.seibel.lod.wrappers.Block.BlockPosWrapper;
+import com.seibel.lod.wrappers.Block.BlockShapeWrapper;
 import com.seibel.lod.wrappers.World.BiomeWrapper;
-import com.sun.javafx.scene.control.behavior.OptionalBoolean;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ILiquidContainer;
 import net.minecraft.block.IWaterLoggable;
-import net.minecraft.loot.conditions.BlockStateProperty;
-import net.minecraft.state.Property;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.world.chunk.IChunk;
-
-import java.util.Optional;
 
 public class ChunkWrapper
 {
@@ -49,11 +45,15 @@ public class ChunkWrapper
 		return BiomeWrapper.getBiomeWrapper(chunk.getBiomes().getNoiseBiome(xRel >> 2, yAbs >> 2, zRel >> 2));
 	}
 	
-	public BlockWrapper getBlock(BlockPosWrapper blockPos)
+	public BlockColorWrapper getBlockColorWrapper(BlockPosWrapper blockPos)
 	{
-		return BlockWrapper.getBlockWrapper(chunk.getBlockState(blockPos.getBlockPos()).getBlock(), this, blockPos);
+		return BlockColorWrapper.getBlockColorWrapper(chunk.getBlockState(blockPos.getBlockPos()).getBlock());
 	}
 	
+	public BlockShapeWrapper getBlockShapeWrapper(BlockPosWrapper blockPos)
+	{
+		return BlockShapeWrapper.getBlockShapeWrapper(chunk.getBlockState(blockPos.getBlockPos()).getBlock(), this, blockPos);
+	}
 	
 	public ChunkWrapper(IChunk chunk)
 	{

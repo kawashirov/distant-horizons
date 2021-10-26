@@ -13,24 +13,23 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
 import net.minecraftforge.client.model.data.ModelDataMap;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 
 //This class wraps the minecraft Block class
-public class BlockWrapper
+public class BlockColorWrapper
 {
 	//set of block which require tint
-	public static final ConcurrentMap<Block, BlockWrapper> blockWrapperMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<Block, BlockColorWrapper> blockColorWrapperMap = new ConcurrentHashMap<>();
 	public static final ModelDataMap dataMap = new ModelDataMap.Builder().build();
 	public static Random random = new Random(0);
-	
+	public static BlockColorWrapper WATER_COLOR = getBlockColorWrapper(Blocks.WATER);
 	
 	private Block block;
-	private boolean toAvoid;
-	private boolean nonFull;
-	private boolean noCollision;
 	private int color;
 	private boolean isColored;
 	private boolean toTint;
@@ -40,10 +39,8 @@ public class BlockWrapper
 	
 	
 	/**Constructor only require for the block instance we are wrapping**/
-	public BlockWrapper(Block block)
+	public BlockColorWrapper(Block block)
 	{
-		this.nonFull = false;
-		this.noCollision = false;
 		this.color = 0;
 		this.isColored = true;
 		this.toTint = false;
@@ -51,57 +48,24 @@ public class BlockWrapper
 		setupColorAndTint();
 	}
 	
-	/**Constructor only require for the block instance we are wrapping**/
-	public BlockWrapper(Block block, ChunkWrapper chunkWrapper, BlockPosWrapper blockPosWrapper)
-	{
-		this.nonFull = true;
-		this.noCollision = true;
-		this.color = 0;
-		this.isColored = true;
-		this.toTint = false;
-		this.block = block;
-		setupColorAndTint();
-		setupShapes(chunkWrapper, blockPosWrapper);
-	}
-	
 	/**
 	 * this return a wrapper of the block in input
 	 * @param block Block object to wrap
 	 */
-	static public BlockWrapper getBlockWrapper(Block block)
+	static public BlockColorWrapper getBlockColorWrapper(Block block)
 	{
 		//first we check if the block has already been wrapped
-		if (blockWrapperMap.containsKey(block) && blockWrapperMap.get(block) != null)
-			return blockWrapperMap.get(block);
+		if (blockColorWrapperMap.containsKey(block) && blockColorWrapperMap.get(block) != null)
+			return blockColorWrapperMap.get(block);
 		
 		
 		//if it hasn't been created yet, we create it and save it in the map
-		BlockWrapper blockWrapper = new BlockWrapper(block);
-		blockWrapperMap.put(block, blockWrapper);
+		BlockColorWrapper blockWrapper = new BlockColorWrapper(block);
+		blockColorWrapperMap.put(block, blockWrapper);
 		
 		//we return the newly created wrapper
 		return blockWrapper;
 	}
-	
-	/**
-	 * this return a wrapper of the block in input
-	 * @param block Block object to wrap
-	 */
-	static public BlockWrapper getBlockWrapper(Block block, ChunkWrapper chunkWrapper, BlockPosWrapper blockPosWrapper)
-	{
-		//first we check if the block has already been wrapped
-		if (blockWrapperMap.containsKey(block) && blockWrapperMap.get(block) != null)
-			return blockWrapperMap.get(block);
-		
-		
-		//if it hasn't been created yet, we create it and save it in the map
-		BlockWrapper blockWrapper = new BlockWrapper(block, chunkWrapper, blockPosWrapper);
-		blockWrapperMap.put(block, blockWrapper);
-		
-		//we return the newly created wrapper
-		return blockWrapper;
-	}
-	
 	
 	/**
 	 * Generate the color of the given block from its texture
@@ -213,13 +177,13 @@ public class BlockWrapper
 			this.toTint = true;
 		
 		// we check which kind of tint we need to apply
-		if (grassInstance() && this.toTint)
+		if (grassInstance())
 			this.grassTint = true;
 		
-		if (leavesInstance() && this.toTint)
+		if (leavesInstance())
 			this.folliageTint = true;
 		
-		if (waterIstance() && this.toTint)
+		if (waterIstance())
 			this.waterTint = true;
 		
 		color = tempColor;
@@ -249,56 +213,7 @@ public class BlockWrapper
 	{
 		return block == Blocks.WATER;
 	}
-	
-	private void setupShapes(ChunkWrapper chunkWrapper, BlockPosWrapper blockPosWrapper)
-	{
-		IBlockReader chunk = chunkWrapper.getChunk();
-		BlockPos blockPos = blockPosWrapper.getBlockPos();
-		boolean noCollisionSetted = false;
-		boolean nonFullSetted = false;
-		if (!block.defaultBlockState().getFluidState().isEmpty() || block instanceof SixWayBlock)
-		{
-			noCollisionSetted = true;
-			nonFullSetted = true;
-			noCollision = false;
-			nonFull = false;
-		}
-		if (!nonFullSetted)
-		{
-			VoxelShape voxelShape = block.defaultBlockState().getShape(chunk, blockPos);
-			
-			if (!voxelShape.isEmpty())
-			{
-				AxisAlignedBB bbox = voxelShape.bounds();
-				double xWidth = (bbox.maxX - bbox.minX);
-				double yWidth = (bbox.maxY - bbox.minY);
-				double zWidth = (bbox.maxZ - bbox.minZ);
-				if (xWidth < 1 && zWidth < 1 && yWidth < 1)
-					nonFull = true;
-				else
-					nonFull = false;
-			}
-			else
-			{
-				nonFull = false;
-			}
-		}
-		
-		if (!noCollisionSetted)
-		{
-			VoxelShape collisionShape = block.defaultBlockState().getCollisionShape(chunk, blockPos);
-			noCollision = collisionShape.isEmpty();
-		}
-		
-		toAvoid = ofBlockToAvoid(block);
-	}
-	
-	private boolean ofBlockToAvoid(Block block)
-	{
-		return block == Blocks.AIR
-					   || block != Blocks.CAVE_AIR
-					   || block != Blocks.BARRIER;
-	}
+
 //--------------//
 //Colors getters//
 //--------------//
@@ -342,36 +257,15 @@ public class BlockWrapper
 	}
 	
 	
-//-----------------//
-//Avoidance getters//
-//-----------------//
-	
-	
-	public boolean isNonFull()
-	{
-		return nonFull;
-	}
-	
-	public boolean hasNoCollision()
-	{
-		return noCollision;
-	}
-	
-	public boolean isToAvoid()
-	{
-		return folliageTint;
-	}
-	
-	
 	
 	
 	@Override public boolean equals(Object o)
 	{
 		if (this == o)
 			return true;
-		if (!(o instanceof BlockWrapper))
+		if (!(o instanceof BlockColorWrapper))
 			return false;
-		BlockWrapper that = (BlockWrapper) o;
+		BlockColorWrapper that = (BlockColorWrapper) o;
 		return Objects.equals(block, that.block);
 	}
 	
@@ -381,3 +275,4 @@ public class BlockWrapper
 	}
 	
 }
+

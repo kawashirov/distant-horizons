@@ -19,8 +19,6 @@
 
 package com.seibel.lod.builders.lodBuilding;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -38,7 +36,8 @@ import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.Block.BlockPosWrapper;
-import com.seibel.lod.wrappers.Block.BlockWrapper;
+import com.seibel.lod.wrappers.Block.BlockColorWrapper;
+import com.seibel.lod.wrappers.Block.BlockShapeWrapper;
 import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 import com.seibel.lod.wrappers.Chunk.ChunkWrapper;
 import com.seibel.lod.wrappers.MinecraftWrapper;
@@ -192,8 +191,6 @@ public class LodBuilder
 		{
 			startX = detail.startX[i];
 			startZ = detail.startZ[i];
-			endX = detail.endX[i];
-			endZ = detail.endZ[i];
 			
 			long[] data;
 			long[] dataToMergeVertical = createVerticalDataToMerge(detail, chunk, config, startX, startZ);
@@ -466,7 +463,7 @@ public class LodBuilder
 	{
 		
 		
-		int blockColor;
+		int colorOfBlock;
 		int colorInt;
 		
 		int xRel = blockPos.getX() - chunk.getPos().getMinBlockX();
@@ -476,31 +473,39 @@ public class LodBuilder
 		int z = blockPos.getZ();
 		
 		//Biome biome = chunk.getBiomes().getNoiseBiome(xRel >> 2, y >> 2, zRel >> 2);
-		BlockWrapper block;
-		if (chunk.isWaterLogged(blockPos))
-			block = BlockWrapper.getBlockWrapper(Blocks.WATER);
-		else
-			block = chunk.getBlock(blockPos);
+		BlockColorWrapper blockColorWrapper;
+		BlockShapeWrapper blockShapeWrapper;
 		
-		if (block.isToAvoid())
+		if (chunk.isWaterLogged(blockPos))
+		{
+			blockColorWrapper = BlockColorWrapper.WATER_COLOR;
+			blockShapeWrapper = BlockShapeWrapper.WATER_SHAPE;
+		}
+		else
+		{
+			blockColorWrapper = chunk.getBlockColorWrapper(blockPos);
+			blockShapeWrapper = chunk.getBlockShapeWrapper(blockPos);
+		}
+		
+		if (blockShapeWrapper.isToAvoid())
 		{
 			return 0;
 		}
 		
-		blockColor = block.getColor();
+		colorOfBlock = blockColorWrapper.getColor();
 		
 		
-		if (block.hasTint())
+		if (blockColorWrapper.hasTint())
 		{
 			BiomeWrapper biome = chunk.getBiome(xRel, y, zRel);
 			
 			int tintValue;
-			if (block.hasGrassTint())
+			if (blockColorWrapper.hasGrassTint())
 			{
 				// grass and green plants
 				tintValue = biome.getGrassTint(x, z);
 			}
-			else if (block.hasFolliageTint())
+			else if (blockColorWrapper.hasFolliageTint())
 			{
 				tintValue = biome.getFolliageTint();
 			}
@@ -510,10 +515,10 @@ public class LodBuilder
 				//tintValue = BiomeColors.getAverageFoliageColor(serverWorld, blockPos);
 				tintValue = biome.getWaterTint();
 			}
-			colorInt = ColorUtil.multiplyRGBcolors(tintValue | 0xFF000000, blockColor);
+			colorInt = ColorUtil.multiplyRGBcolors(tintValue | 0xFF000000, colorOfBlock);
 		}
 		else
-			colorInt = blockColor;
+			colorInt = colorOfBlock;
 		return colorInt;
 	}
 	
@@ -529,7 +534,7 @@ public class LodBuilder
 		boolean nonFullAvoidance = LodConfig.CLIENT.worldGenerator.blockToAvoid.get().nonFull;
 		boolean noCollisionAvoidance = LodConfig.CLIENT.worldGenerator.blockToAvoid.get().noCollision;
 		
-		BlockWrapper block = chunk.getBlock(blockPos);
+		BlockShapeWrapper block = chunk.getBlockShapeWrapper(blockPos);
 		return block != null
 					   && !block.isToAvoid()
 					   && !(nonFullAvoidance && block.isNonFull())
