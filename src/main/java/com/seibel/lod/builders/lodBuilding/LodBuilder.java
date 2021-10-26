@@ -398,7 +398,7 @@ public class LodBuilder
 		
 		
 		
-		if (world.isEmpty())
+		if (!world.isEmpty())
 		{
 			// server world sky light (always accurate)
 			blockLight = world.getBlockLight(blockPos);

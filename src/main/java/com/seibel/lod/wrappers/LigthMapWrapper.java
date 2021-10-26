@@ -9,7 +9,7 @@ public class LigthMapWrapper
 	
 	public static void setLightMap(NativeImage lightMap)
 	{
-		lightMap = null;
+		lightMap = lightMap;
 	}
 	
 	public static int getLightValue(int skyLight, int blockLight)
