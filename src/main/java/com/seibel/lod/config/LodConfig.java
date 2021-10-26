@@ -53,7 +53,7 @@ import net.minecraftforge.fml.config.ModConfig;
  * This handles any configuration the user has access to.
  * @author Leonardo Amato
  * @author James Seibel
- * @version 10-24-2021
+ * @version 10-25-2021
  */
 @Mod.EventBusSubscriber
 public class LodConfig
@@ -238,6 +238,8 @@ public class LodConfig
 				
 				public final ForgeConfigSpec.EnumValue<GpuUploadMethod> gpuUploadMethod;
 				
+				public final ForgeConfigSpec.BooleanValue useExtendedNearClipPlane;
+				
 				AdvancedGraphicsOption(ForgeConfigSpec.Builder builder)
 				{
 					
@@ -298,6 +300,14 @@ public class LodConfig
 									+ " " + GpuUploadMethod.SUB_DATA + ": Default if OpenGL 4.5 is NOT supported. Fast rendering but may stutter when uploading. \n"
 									+ " " + GpuUploadMethod.BUFFER_MAPPING + ": Slow rendering but won't stutter when uploading. Possibly better than " + GpuUploadMethod.SUB_DATA + " if using a integrated GPU. \n")
 							.defineEnum("GPU Upload Method", GpuUploadMethod.BUFFER_STORAGE);
+					
+					// This is a temporary fix (like vanilla overdraw)
+					// hopefully we can remove both once we get individual chunk rendering figured out
+					useExtendedNearClipPlane = builder
+							.comment("\n\n"
+									+ " Will prevent some overdraw issues, but may cause nearby fake chunks to render incorrectly \n"
+									+ " especially when in/near an ocean. \n")
+							.define("Use Extended Near Clip Plane", false);
 					
 					
 					builder.pop();

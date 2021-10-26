@@ -568,7 +568,7 @@ public class LodRenderer
 				Matrix4f.perspective(
 						getFov(partialTicks, true),
 						(float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight(),
-						vanillaBlockRenderedDistance / 5,
+						LodConfig.CLIENT.graphics.advancedGraphicsOption.useExtendedNearClipPlane.get() ? vanillaBlockRenderedDistance / 5 : 1,
 						farPlaneBlockDistance * LodUtil.CHUNK_WIDTH / 2);
 		
 		// get Minecraft's un-edited projection matrix
