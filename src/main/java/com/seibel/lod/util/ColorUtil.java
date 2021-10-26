@@ -21,7 +21,7 @@ package com.seibel.lod.util;
 
 import java.awt.Color;
 
-import net.minecraft.client.renderer.texture.NativeImage;
+import com.seibel.lod.wrappers.MinecraftWrapper;
 
 /**
  * 
@@ -78,9 +78,9 @@ public class ColorUtil
 	}
 	
 	/** This method apply the lightmap to the color to use */
-	public static int applyLightValue(int color, int skyLight, int blockLight, NativeImage lightMap)
+	public static int applyLightValue(int color, int skyLight, int blockLight)
 	{
-		int lightColor = lightMap.getPixelRGBA(blockLight, skyLight);
+		int lightColor = MinecraftWrapper.INSTANCE.getColorIntFromLightMap(blockLight, skyLight);
 		int red = ColorUtil.getBlue(lightColor);
 		int green = ColorUtil.getGreen(lightColor);
 		int blue = ColorUtil.getRed(lightColor);

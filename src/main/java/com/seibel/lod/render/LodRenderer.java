@@ -49,7 +49,6 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.potion.Effects;
 import net.minecraft.profiler.IProfiler;
@@ -103,9 +102,6 @@ public class LodRenderer
 	
 	/** This is used to determine if the LODs should be regenerated */
 	private int[] previousPos = new int[] { 0, 0, 0 };
-	
-	public NativeImage lightMap = null;
-	public NativeImage lastLightMap = null;
 	
 	// these variables are used to determine if the buffers should be rebuilt
 	private float prevSkyBrightness = 0;
@@ -866,10 +862,9 @@ public class LodRenderer
 					// (just in case the minLightingDifference is too large to notice the change)
 					|| (skyBrightness == 1.0f && prevSkyBrightness != 1.0f) // noon
 					|| (skyBrightness == 0.2f && prevSkyBrightness != 0.2f) // midnight
-					|| mc.getOptions().gamma != prevBrightness || lightMap == null)
+					|| mc.getOptions().gamma != prevBrightness)
 		{
 			fullRegen = true;
-			lightMap = mc.getCurrentLightMap();
 			prevBrightness = mc.getOptions().gamma;
 			prevSkyBrightness = skyBrightness;
 		}

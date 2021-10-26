@@ -25,10 +25,8 @@ import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
@@ -47,7 +45,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	
 	@Override
 	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
-			byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, NativeImage lightMap, boolean[] adjShadeDisabled)
+			byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, boolean[] adjShadeDisabled)
 	{
 		if (box == null)
 			return;
@@ -128,7 +126,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 					color = box.getColor(direction);
 					skyLight = box.getSkyLight(direction, verticalFaceIndex);
 					blockLight = box.getBlockLight();
-					color = ColorUtil.applyLightValue(color, skyLight, blockLight, MinecraftWrapper.INSTANCE.getCurrentLightMap());
+					color = ColorUtil.applyLightValue(color, skyLight, blockLight);
 					addPosAndColor(buffer,
 							box.getX(direction, vertexIndex),
 							box.getY(direction, vertexIndex, verticalFaceIndex),
