@@ -520,7 +520,7 @@ public class LodBuilder
 		}
 		else
 			colorInt = colorOfBlock;
-		return colorOfBlock;
+		return colorInt;
 	}
 	
 	
