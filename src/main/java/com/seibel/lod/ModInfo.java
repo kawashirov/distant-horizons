@@ -31,5 +31,5 @@ public final class ModInfo
 	/** Human readable version of MOD_NAME */
 	public static final String READABLE_NAME = "Distant Horizons";
 	public static final String API = "LodAPI";
-	public static final String VERSION = "a1.5.1";
+	public static final String VERSION = "a1.5.2";
 }
