@@ -415,7 +415,7 @@ public class LodBufferBuilder
 									
 									//We send the call to create the vertices
 									LodConfig.CLIENT.graphics.advancedGraphicsOption.lodTemplate.get().template.addLodToBuffer(currentBuffers[bufferIndex], playerBlockPosRounded, data, adjData,
-											detailLevel, posX, posZ, box, renderer.previousDebugMode, renderer.lightMap, adjShadeDisabled);
+											detailLevel, posX, posZ, box, renderer.previousDebugMode, adjShadeDisabled);
 								}
 								
 								

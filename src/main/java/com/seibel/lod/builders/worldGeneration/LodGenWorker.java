@@ -37,6 +37,7 @@ import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
 
+import com.seibel.lod.wrappers.Chunk.ChunkWrapper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.ChunkPos;
@@ -384,7 +385,7 @@ public class LodGenWorker implements IWorker
 			
 			if (!inTheEnd)
 			{
-				lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(true, true, false));
+				lodBuilder.generateLodNodeFromChunk(lodDim, new ChunkWrapper(chunk), new LodBuilderConfig(true, true, false));
 			}
 			else
 			{
@@ -392,7 +393,7 @@ public class LodGenWorker implements IWorker
 				// Since we don't know where the islands are, everything
 				// generates the same, and it looks awful.
 				//TODO it appears that 'if' can be collapsed, but comment says that it should not be a case
-				lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(true, true, false));
+				lodBuilder.generateLodNodeFromChunk(lodDim, new ChunkWrapper(chunk), new LodBuilderConfig(true, true, false));
 			}
 
 
@@ -432,7 +433,7 @@ public class LodGenWorker implements IWorker
 			snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
 			
 			
-			lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(DistanceGenerationMode.SURFACE));
+			lodBuilder.generateLodNodeFromChunk(lodDim,  new ChunkWrapper(chunk), new LodBuilderConfig(DistanceGenerationMode.SURFACE));
 			
 			/*TODO if we want to use Biome utils and terrain utils for overworld
 			 * lodBuilder.generateLodNodeFromChunk(lodDim, pos ,detailLevel, serverWorld.getSeed());*/
@@ -558,7 +559,7 @@ public class LodGenWorker implements IWorker
 			}
 			
 			// generate a Lod like normal
-			lodBuilder.generateLodNodeFromChunk(lodDim, chunk, new LodBuilderConfig(DistanceGenerationMode.FEATURES));
+			lodBuilder.generateLodNodeFromChunk(lodDim,  new ChunkWrapper(chunk), new LodBuilderConfig(DistanceGenerationMode.FEATURES));
 		}
 		
 		
@@ -573,7 +574,7 @@ public class LodGenWorker implements IWorker
 		 */
 		private void generateWithServer()
 		{
-			lodBuilder.generateLodNodeFromChunk(lodDim, serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES), new LodBuilderConfig(DistanceGenerationMode.SERVER));
+			lodBuilder.generateLodNodeFromChunk(lodDim,  new ChunkWrapper(serverWorld.getChunk(pos.x, pos.z, ChunkStatus.FEATURES)), new LodBuilderConfig(DistanceGenerationMode.SERVER));
 		}
 		
 		

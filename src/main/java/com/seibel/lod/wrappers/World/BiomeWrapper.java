@@ -1,10 +1,16 @@
 package com.seibel.lod.wrappers.World;
 
 import com.seibel.lod.util.ColorUtil;
-import com.seibel.lod.wrappers.Block.BlockWrapper;
+import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrappers.Block.BlockColorWrapper;
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.material.MaterialColor;
+import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeColors;
 
+import java.awt.*;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -42,78 +48,77 @@ public class BiomeWrapper
 	public int getColorForBiome(int x, int z)
 	{
 		int colorInt;
-		int color;
-		int tint;
 		
 		switch (biome.getBiomeCategory())
 		{
 		
 		case NETHER:
-			colorInt = BlockWrapper.getBlockWrapper(Blocks.NETHERRACK).getColor();
+			colorInt = Blocks.NETHERRACK.defaultBlockState().materialColor.col;
 			break;
 		
 		case THEEND:
-			colorInt = BlockWrapper.getBlockWrapper(Blocks.END_STONE).getColor();
+			colorInt = Blocks.END_STONE.defaultBlockState().materialColor.col;
 			break;
 		
 		case BEACH:
 		case DESERT:
-			colorInt = BlockWrapper.getBlockWrapper(Blocks.SAND).getColor();
+			colorInt = Blocks.SAND.defaultBlockState().materialColor.col;
 			break;
 		
 		case EXTREME_HILLS:
-			colorInt = BlockWrapper.getBlockWrapper(Blocks.STONE).getColor();
+			colorInt = Blocks.STONE.defaultMaterialColor().col;
 			break;
 		
 		case MUSHROOM:
-			colorInt = BlockWrapper.getBlockWrapper(Blocks.MYCELIUM).getColor();
+			colorInt = MaterialColor.COLOR_LIGHT_GRAY.col;
 			break;
 		
 		case ICY:
-			colorInt = BlockWrapper.getBlockWrapper(Blocks.SNOW).getColor();
+			colorInt = Blocks.SNOW.defaultMaterialColor().col;
 			break;
 		
 		case MESA:
-			colorInt = BlockWrapper.getBlockWrapper(Blocks.RED_SAND).getColor();
+			colorInt = Blocks.RED_SAND.defaultMaterialColor().col;
 			break;
 		
 		case OCEAN:
 		case RIVER:
 			colorInt = biome.getWaterColor();
 			break;
-			
-		case SWAMP:
-		case FOREST:
-			color = BlockWrapper.getBlockWrapper(Blocks.OAK_LEAVES).getColor();
-			tint = biome.getFoliageColor();
-			colorInt = ColorUtil.multiplyRGBcolors(color, tint);
-			break;
-			
-		case TAIGA:
-			color = BlockWrapper.getBlockWrapper(Blocks.SPRUCE_LEAVES).getColor();
-			tint = biome.getFoliageColor();
-			colorInt = ColorUtil.multiplyRGBcolors(color, tint);
-			break;
-			
-		case JUNGLE:
-			color = BlockWrapper.getBlockWrapper(Blocks.JUNGLE_LEAVES).getColor();
-			tint = biome.getFoliageColor();
-			colorInt = ColorUtil.multiplyRGBcolors(color, tint);
-			break;
-			
-		default:
+		
 		case NONE:
+		case FOREST:
+		case TAIGA:
+		case JUNGLE:
 		case PLAINS:
 		case SAVANNA:
-			color = BlockWrapper.getBlockWrapper(Blocks.GRASS_BLOCK).getColor();
-			tint = biome.getGrassColor(x,z);
-			colorInt = ColorUtil.multiplyRGBcolors(color, tint);
+		case SWAMP:
+		default:
+			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
+			tmp = tmp.darker();
+			colorInt = LodUtil.colorToInt(tmp);
 			break;
 			
 		}
 		
 		return colorInt;
 	}
+	
+	public int getGrassTint(int x, int z)
+	{
+		return biome.getGrassColor(x, z);
+	}
+	
+	public int getFolliageTint()
+	{
+		return biome.getFoliageColor();
+	}
+	
+	public int getWaterTint()
+	{
+		return biome.getWaterColor();
+	}
+	
 	
 	@Override public boolean equals(Object o)
 	{

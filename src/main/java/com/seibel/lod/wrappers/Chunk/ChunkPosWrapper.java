@@ -26,6 +26,26 @@ public class ChunkPosWrapper
 		return chunkPos.z;
 	}
 	
+	public int getMinBlockX()
+	{
+		return chunkPos.getMinBlockX();
+	}
+	
+	public int getMinBlockZ()
+	{
+		return chunkPos.getMinBlockZ();
+	}
+	
+	public int getRegionX()
+	{
+		return chunkPos.getRegionX();
+	}
+	
+	public int getRegionZ()
+	{
+		return chunkPos.getRegionZ();
+	}
+	
 	public ChunkPos getChunkPos()
 	{
 		return chunkPos;

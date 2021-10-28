@@ -26,6 +26,7 @@ import com.seibel.lod.ModInfo;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
 
+import com.seibel.lod.wrappers.World.WorldWrapper;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
@@ -44,6 +45,7 @@ import net.minecraft.profiler.IProfiler;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.Direction;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.server.ServerWorld;
 
 /**
  * A singleton that wraps the Minecraft class
@@ -181,6 +183,36 @@ public class MinecraftWrapper
 	public ClientWorld getClientWorld()
 	{
 		return mc.level;
+	}
+	
+	public WorldWrapper getWrappedClientWorld()
+	{
+		return WorldWrapper.getWorldWrapper(mc.level);
+	}
+	
+	public WorldWrapper getWrappedServerWorld()
+	{
+		
+		if (mc.level == null)
+			return null;
+		DimensionType dimension = mc.level.dimensionType();
+		IntegratedServer server = mc.getSingleplayerServer();
+		if (server == null)
+			return null;
+		
+		Iterable<ServerWorld> worlds = server.getAllLevels();
+		ServerWorld returnWorld = null;
+		
+		for (ServerWorld world : worlds)
+		{
+			if (world.dimensionType() == dimension)
+			{
+				returnWorld = world;
+				break;
+			}
+		}
+		
+		return WorldWrapper.getWorldWrapper(returnWorld);
 	}
 	
 	/** Measured in chunks */

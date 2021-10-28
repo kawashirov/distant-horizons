@@ -16,7 +16,8 @@ public class WorldWrapper
 		this.world = world;
 	}
 	
-	public WorldWrapper getWorldWrapper(IWorld world)
+	
+	public static WorldWrapper getWorldWrapper(IWorld world)
 	{
 		//first we check if the biome has already been wrapped
 		if(worldWrapperMap.containsKey(world) && worldWrapperMap.get(world) != null)
@@ -43,17 +44,22 @@ public class WorldWrapper
 	
 	public int getBlockLight(BlockPosWrapper blockPos)
 	{
-		return world.getLightEngine().skyEngine.getLightValue(blockPos.getBlockPos());
+		return world.getLightEngine().blockEngine.getLightValue(blockPos.getBlockPos());
 	}
 	
 	public int getSkyLight(BlockPosWrapper blockPos)
 	{
-		return world.getLightEngine().blockEngine.getLightValue(blockPos.getBlockPos());
+		return world.getLightEngine().skyEngine.getLightValue(blockPos.getBlockPos());
 	}
 	
 	public BiomeWrapper getBiome(BlockPosWrapper blockPos)
 	{
 		return BiomeWrapper.getBiomeWrapper(world.getBiome(blockPos.getBlockPos()));
+	}
+	
+	public IWorld getWorld()
+	{
+		return world;
 	}
 	
 	public boolean hasCeiling()
@@ -64,5 +70,10 @@ public class WorldWrapper
 	public boolean hasSkyLight()
 	{
 		return world.dimensionType().hasSkyLight();
+	}
+	
+	public boolean isEmpty()
+	{
+		return world == null;
 	}
 }
