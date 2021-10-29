@@ -19,23 +19,13 @@
 
 package com.seibel.lod.render;
 
-import java.util.HashSet;
-
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL15C;
-import org.lwjgl.opengl.NVFogDistance;
-
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder.VertexBuffersAndOffset;
 import com.seibel.lod.config.LodConfig;
-import com.seibel.lod.enums.DebugMode;
-import com.seibel.lod.enums.FogDistance;
-import com.seibel.lod.enums.FogDrawOverride;
-import com.seibel.lod.enums.FogQuality;
-import com.seibel.lod.enums.GpuUploadMethod;
+import com.seibel.lod.enums.*;
 import com.seibel.lod.handlers.ReflectionHandler;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.NearFarFogSettings;
@@ -46,7 +36,6 @@ import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
@@ -56,12 +45,16 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL15C;
+import org.lwjgl.opengl.NVFogDistance;
+
+import java.util.HashSet;
 
 
 /**
  * This is where all the magic happens. <br>
  * This is where LODs are draw to the world.
- * 
  * @author James Seibel
  * @version 10-25-2021
  */
@@ -130,7 +123,7 @@ public class LodRenderer
 	public boolean vanillaRenderedChunksChanged;
 	public boolean vanillaRenderedChunksEmptySkip = false;
 	public int vanillaBlockRenderedDistance;
-
+	
 	boolean vivecraftDetected = ReflectionHandler.INSTANCE.detectVivecraft();
 	
 	
@@ -312,8 +305,8 @@ public class LodRenderer
 					
 					if (cullingDisabled || RenderUtil.isRegionInViewFrustum(renderInfo.getBlockPosition(), cameraDir, vboPos.blockPos()))
 					{
-						if ((x > halfWidth - quarterWidth && x < halfWidth + quarterWidth) 
-							&& (z > halfWidth - quarterWidth && z < halfWidth + quarterWidth))
+						if ((x > halfWidth - quarterWidth && x < halfWidth + quarterWidth)
+								&& (z > halfWidth - quarterWidth && z < halfWidth + quarterWidth))
 							setupFog(fogSettings.near.distance, fogSettings.near.quality);
 						else
 							setupFog(fogSettings.far.distance, fogSettings.far.quality);
@@ -380,7 +373,7 @@ public class LodRenderer
 		LodUtil.LOD_VERTEX_FORMAT.clearBufferState();
 	}
 	
-
+	
 	/** This is where the actual drawing happens. */
 	private void drawVertexBuffer(VertexBuffer vbo, Matrix4f modelViewMatrix)
 	{
@@ -481,7 +474,7 @@ public class LodRenderer
 			GL15.glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, glFogDistanceMode);
 	}
 	
-	/** 
+	/**
 	 * Revert any changes that were made to the fog
 	 * and sets up the fog for Minecraft.
 	 */
@@ -501,7 +494,7 @@ public class LodRenderer
 		// disable fog if Minecraft wasn't rendering fog
 		// or we want it disabled
 		if (!fogSettings.vanillaIsRenderingFog
-			|| LodConfig.CLIENT.graphics.fogQualityOption.disableVanillaFog.get())
+				|| LodConfig.CLIENT.graphics.fogQualityOption.disableVanillaFog.get())
 		{
 			// Make fog render a infinite distance away.
 			// This doesn't technically disable Minecraft's fog
@@ -552,7 +545,7 @@ public class LodRenderer
 		
 		return lodModelViewMatrix;
 	}
-		
+	
 	/**
 	 * create a new projection matrix and send it over to the GPU
 	 * @param currentProjectionMatrix this is Minecraft's current projection matrix
@@ -564,43 +557,46 @@ public class LodRenderer
 		Matrix4f lodPoj;
 		float nearClipPlane = LodConfig.CLIENT.graphics.advancedGraphicsOption.useExtendedNearClipPlane.get() ? vanillaBlockRenderedDistance / 5 : 1;
 		float farClipPlane = farPlaneBlockDistance * LodUtil.CHUNK_WIDTH / 2;
-
-		if (vivecraftDetected){
+		
+		if (vivecraftDetected)
+		{
 			//use modify clip plane method to modify the current projection matrix's clip planes.
 			lodPoj = ReflectionHandler.INSTANCE.Matrix4fModifyClipPlanes(
 					currentProjectionMatrix,
 					nearClipPlane,
 					farClipPlane);
-		} else {
+		}
+		else
+		{
 			// create the new projection matrix
 			lodPoj = Matrix4f.perspective(
-						getFov(partialTicks, true),
-						(float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight(),
-						nearClipPlane,
-						farClipPlane);
-
+					getFov(partialTicks, true),
+					(float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight(),
+					nearClipPlane,
+					farClipPlane);
+			
 			// get Minecraft's un-edited projection matrix
 			// (this is before it is zoomed, distorted, etc.)
 			Matrix4f defaultMcProj = mc.getGameRenderer().getProjectionMatrix(mc.getGameRenderer().getMainCamera(), partialTicks, true);
 			// true here means use "use fov setting" (probably)
-
-
+			
+			
 			// this logic strips away the defaultMcProj matrix, so we
 			// can get the distortionMatrix, which represents all
 			// transformations, zooming, distortions, etc. done
 			// to Minecraft's Projection matrix
 			Matrix4f defaultMcProjInv = defaultMcProj.copy();
 			defaultMcProjInv.invert();
-
+			
 			Matrix4f distortionMatrix = defaultMcProjInv.copy();
 			distortionMatrix.multiply(currentProjectionMatrix);
-
-
+			
+			
 			// edit the lod projection to match Minecraft's
 			// (so the LODs line up with the real world)
 			lodPoj.multiply(distortionMatrix);
 		}
-
+		
 		// send the projection over to the GPU
 		gameRender.resetProjectionMatrix(lodPoj);
 	}
@@ -811,8 +807,8 @@ public class LodRenderer
 		
 		// check if the view distance changed
 		if (ClientProxy.previousLodRenderDistance != LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get()
-					|| chunkRenderDistance != prevRenderDistance
-					|| prevFogDistance != LodConfig.CLIENT.graphics.fogQualityOption.fogDistance.get())
+				|| chunkRenderDistance != prevRenderDistance
+				|| prevFogDistance != LodConfig.CLIENT.graphics.fogQualityOption.fogDistance.get())
 		{
 			
 			vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
@@ -837,8 +833,8 @@ public class LodRenderer
 		if (newTime - prevPlayerPosTime > LodConfig.CLIENT.advancedModOptions.buffers.rebuildTimes.get().playerMoveTimeout)
 		{
 			if (LevelPosUtil.getDetailLevel(previousPos) == 0
-						|| mc.getPlayer().xChunk != LevelPosUtil.getPosX(previousPos)
-						|| mc.getPlayer().zChunk != LevelPosUtil.getPosZ(previousPos))
+					|| mc.getPlayer().xChunk != LevelPosUtil.getPosX(previousPos)
+					|| mc.getPlayer().zChunk != LevelPosUtil.getPosZ(previousPos))
 			{
 				vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
 				fullRegen = true;
@@ -871,11 +867,11 @@ public class LodRenderer
 		
 		// check if the lighting changed
 		if (Math.abs(skyBrightness - prevSkyBrightness) > minLightingDifference
-					// make sure the lighting gets to the max/minimum value
-					// (just in case the minLightingDifference is too large to notice the change)
-					|| (skyBrightness == 1.0f && prevSkyBrightness != 1.0f) // noon
-					|| (skyBrightness == 0.2f && prevSkyBrightness != 0.2f) // midnight
-					|| mc.getOptions().gamma != prevBrightness)
+				// make sure the lighting gets to the max/minimum value
+				// (just in case the minLightingDifference is too large to notice the change)
+				|| (skyBrightness == 1.0f && prevSkyBrightness != 1.0f) // noon
+				|| (skyBrightness == 0.2f && prevSkyBrightness != 0.2f) // midnight
+				|| mc.getOptions().gamma != prevBrightness)
 		{
 			fullRegen = true;
 			prevBrightness = mc.getOptions().gamma;
@@ -936,8 +932,8 @@ public class LodRenderer
 			// sometimes we are given chunks that are outside the render distance,
 			// This prevents index out of bounds exceptions
 			if (xIndex >= 0 && zIndex >= 0
-						&& xIndex < vanillaRenderedChunks.length
-						&& zIndex < vanillaRenderedChunks.length)
+					&& xIndex < vanillaRenderedChunks.length
+					&& zIndex < vanillaRenderedChunks.length)
 			{
 				if (!vanillaRenderedChunks[xIndex][zIndex])
 				{

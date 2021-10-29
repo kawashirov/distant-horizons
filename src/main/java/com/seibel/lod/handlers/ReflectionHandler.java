@@ -19,19 +19,18 @@
 
 package com.seibel.lod.handlers;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import com.seibel.lod.enums.FogQuality;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.util.math.vector.Matrix4f;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 /**
  * This object is used to get variables from methods
  * where they are private. Specifically the fog setting
  * in Optifine.
- *
  * @author James Seibel
  * @version 9 -25-2021
  */
@@ -39,7 +38,7 @@ public class ReflectionHandler
 {
 	public static final ReflectionHandler INSTANCE = new ReflectionHandler();
 	private final MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
-
+	
 	public Field ofFogField = null;
 	public Method vertexBufferUploadMethod = null;
 	
@@ -74,71 +73,80 @@ public class ReflectionHandler
 		// optifine changed the name of the variable
 		ClientProxy.LOGGER.info(ReflectionHandler.class.getSimpleName() + ": unable to find the Optifine fog field. If Optifine isn't installed this can be ignored.");
 	}
-
-
+	
+	
 	/**
 	 * Get what type of fog optifine is currently set to render.
-	 *
 	 * @return the fog quality
 	 */
-	public FogQuality getFogQuality() {
-		if (ofFogField == null) {
+	public FogQuality getFogQuality()
+	{
+		if (ofFogField == null)
+		{
 			// either optifine isn't installed,
 			// the variable name was changed, or
 			// the setup method wasn't called yet.
 			return FogQuality.FANCY;
 		}
-
+		
 		int returnNum = 0;
-
-		try {
+		
+		try
+		{
 			returnNum = (int) ofFogField.get(mc.getOptions());
-		} catch (IllegalArgumentException | IllegalAccessException e) {
+		}
+		catch (IllegalArgumentException | IllegalAccessException e)
+		{
 			e.printStackTrace();
 		}
-
-		switch (returnNum) {
-			default:
-			case 0:
-				// optifine's "default" option,
-				// it should never be called in this case
-
-				// normal options
-			case 1:
-				return FogQuality.FAST;
-			case 2:
-				return FogQuality.FANCY;
-			case 3:
-				return FogQuality.OFF;
+		
+		switch (returnNum)
+		{
+		default:
+		case 0:
+			// optifine's "default" option,
+			// it should never be called in this case
+			
+			// normal options
+		case 1:
+			return FogQuality.FAST;
+		case 2:
+			return FogQuality.FANCY;
+		case 3:
+			return FogQuality.OFF;
 		}
 	}
-
+	
 	/** Detect if Vivecraft is present using reflection. Attempts to find the "VRRenderer" class. */
-	public boolean detectVivecraft(){
-		try {
+	public boolean detectVivecraft()
+	{
+		try
+		{
 			Class.forName("org.vivecraft.provider.VRRenderer");
 			return true;
-		} catch (ClassNotFoundException ignored){
+		}
+		catch (ClassNotFoundException ignored)
+		{
 			System.out.println("Vivecraft not detected.");
 		}
 		return false;
 	}
-
+	
 	/**
 	 * Modifies a projection matrix's clip planes.
 	 * The projection matrix must be in a column-major format.
-	 *
 	 * @param projectionMatrix The projection matrix to be modified.
 	 * @param n the new near clip plane value.
-	 * @param f  the new far clip plane value.
+	 * @param f the new far clip plane value.
 	 * @return The modified matrix.
-	 *
 	 */
-	public Matrix4f Matrix4fModifyClipPlanes(Matrix4f projectionMatrix, float n,float f){
+	public Matrix4f Matrix4fModifyClipPlanes(Matrix4f projectionMatrix, float n, float f)
+	{
 		//find the matrix values.
-		float nMatrixValue = -((f+n)/(f-n));
-		float fMatrixValue = -((2*f*n)/(f-n));
-		try{
+		float nMatrixValue = -((f + n) / (f - n));
+		float fMatrixValue = -((2 * f * n) / (f - n));
+		try
+		{
 			//get the fields of the projectionMatrix
 			Field[] fields = projectionMatrix.getClass().getDeclaredFields();
 			//bypass the security protections on the fields that encode near and far plane values.
@@ -147,7 +155,9 @@ public class ReflectionHandler
 			//Change the values of the near and far plane.
 			fields[10].set(projectionMatrix, nMatrixValue);
 			fields[11].set(projectionMatrix, fMatrixValue);
-		}catch (Exception e){
+		}
+		catch (Exception e)
+		{
 			e.printStackTrace();
 		}
 		return projectionMatrix;
