@@ -47,7 +47,7 @@ public class BlockColorWrapper
 		this.grassTint = false;
 		this.waterTint = false;
 		setupColorAndTint(blockState,blockPosWrapper);
-		System.out.println(block + " color " + Integer.toHexString(color) + " to tint " + toTint + " folliageTint " + folliageTint + " grassTint " + grassTint + " waterTint " + waterTint);
+		//System.out.println(block + " color " + Integer.toHexString(color) + " to tint " + toTint + " folliageTint " + folliageTint + " grassTint " + grassTint + " waterTint " + waterTint);
 	}
 	
 	/**

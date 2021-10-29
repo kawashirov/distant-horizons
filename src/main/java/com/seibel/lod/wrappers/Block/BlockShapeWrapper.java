@@ -35,7 +35,7 @@ public class BlockShapeWrapper
 		this.noCollision = false;
 		this.toAvoid = ofBlockToAvoid();
 		setupShapes(chunkWrapper, blockPosWrapper);
-		System.out.println(block + " non full " + nonFull + " no collision " + noCollision + " to avoid " + toAvoid);
+		//System.out.println(block + " non full " + nonFull + " no collision " + noCollision + " to avoid " + toAvoid);
 	}
 	
 	private BlockShapeWrapper()
