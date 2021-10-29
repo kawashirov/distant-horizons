@@ -111,7 +111,8 @@ public class BlockShapeWrapper
 	{
 		return block.equals(Blocks.AIR)
 					   || block.equals(Blocks.CAVE_AIR)
-					   || block.equals(Blocks.BARRIER);
+					   || block.equals(Blocks.BARRIER)
+					   || block.equals(Blocks.VOID_AIR);
 	}
 //-----------------//
 //Avoidance getters//
