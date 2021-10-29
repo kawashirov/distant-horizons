@@ -130,9 +130,9 @@ public class BlockColorWrapper
 		for (int frameIndex = 0; frameIndex < texture.getFrameCount(); frameIndex++)
 		{
 			// textures normally use u and v instead of x and y
-			for (int u = 0; u < texture.getHeight(); u++)
+			for (int u = 0; u < texture.getWidth(); u++)
 			{
-				for (int v = 0; v < texture.getWidth(); v++)
+				for (int v = 0; v < texture.getHeight(); v++)
 				{
 					
 					tempColor = texture.getPixelRGBA(frameIndex, u, v);
