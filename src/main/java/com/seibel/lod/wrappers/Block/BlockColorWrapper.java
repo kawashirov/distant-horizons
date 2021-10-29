@@ -1,5 +1,6 @@
 package com.seibel.lod.wrappers.Block;
 
+import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.block.*;
