@@ -130,6 +130,8 @@ public class LodRenderer
 	public boolean vanillaRenderedChunksChanged;
 	public boolean vanillaRenderedChunksEmptySkip = false;
 	public int vanillaBlockRenderedDistance;
+
+	boolean vivecraftDetected = ReflectionHandler.INSTANCE.detectVivecraft();
 	
 	
 	
@@ -559,35 +561,46 @@ public class LodRenderer
 	 */
 	private void setupProjectionMatrix(Matrix4f currentProjectionMatrix, float vanillaBlockRenderedDistance, float partialTicks)
 	{
-		// create the new projection matrix
-		Matrix4f lodPoj =
-				Matrix4f.perspective(
+		Matrix4f lodPoj;
+		float nearClipPlane = LodConfig.CLIENT.graphics.advancedGraphicsOption.useExtendedNearClipPlane.get() ? vanillaBlockRenderedDistance / 5 : 1;
+		float farClipPlane = farPlaneBlockDistance * LodUtil.CHUNK_WIDTH / 2;
+
+		if (vivecraftDetected){
+			//use modify clip plane method to modify the current projection matrix's clip planes.
+			lodPoj = ReflectionHandler.INSTANCE.Matrix4fModifyClipPlanes(
+					currentProjectionMatrix,
+					nearClipPlane,
+					farClipPlane);
+		} else {
+			// create the new projection matrix
+			lodPoj = Matrix4f.perspective(
 						getFov(partialTicks, true),
 						(float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight(),
-						LodConfig.CLIENT.graphics.advancedGraphicsOption.useExtendedNearClipPlane.get() ? vanillaBlockRenderedDistance / 5 : 1,
-						farPlaneBlockDistance * LodUtil.CHUNK_WIDTH / 2);
-		
-		// get Minecraft's un-edited projection matrix
-		// (this is before it is zoomed, distorted, etc.)
-		Matrix4f defaultMcProj = mc.getGameRenderer().getProjectionMatrix(mc.getGameRenderer().getMainCamera(), partialTicks, true);
-		// true here means use "use fov setting" (probably)
-		
-		
-		// this logic strips away the defaultMcProj matrix, so we
-		// can get the distortionMatrix, which represents all
-		// transformations, zooming, distortions, etc. done
-		// to Minecraft's Projection matrix
-		Matrix4f defaultMcProjInv = defaultMcProj.copy();
-		defaultMcProjInv.invert();
-		
-		Matrix4f distortionMatrix = defaultMcProjInv.copy();
-		distortionMatrix.multiply(currentProjectionMatrix);
-		
-		
-		// edit the lod projection to match Minecraft's
-		// (so the LODs line up with the real world)
-		lodPoj.multiply(distortionMatrix);
-		
+						nearClipPlane,
+						farClipPlane);
+
+			// get Minecraft's un-edited projection matrix
+			// (this is before it is zoomed, distorted, etc.)
+			Matrix4f defaultMcProj = mc.getGameRenderer().getProjectionMatrix(mc.getGameRenderer().getMainCamera(), partialTicks, true);
+			// true here means use "use fov setting" (probably)
+
+
+			// this logic strips away the defaultMcProj matrix, so we
+			// can get the distortionMatrix, which represents all
+			// transformations, zooming, distortions, etc. done
+			// to Minecraft's Projection matrix
+			Matrix4f defaultMcProjInv = defaultMcProj.copy();
+			defaultMcProjInv.invert();
+
+			Matrix4f distortionMatrix = defaultMcProjInv.copy();
+			distortionMatrix.multiply(currentProjectionMatrix);
+
+
+			// edit the lod projection to match Minecraft's
+			// (so the LODs line up with the real world)
+			lodPoj.multiply(distortionMatrix);
+		}
+
 		// send the projection over to the GPU
 		gameRender.resetProjectionMatrix(lodPoj);
 	}
