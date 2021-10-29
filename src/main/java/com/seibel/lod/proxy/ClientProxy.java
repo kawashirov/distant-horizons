@@ -114,7 +114,7 @@ public class ClientProxy
 				firstFrameSetup();
 			
 			
-			if (mc == null || mc.getPlayer() == null || lodWorld.getIsWorldNotLoaded())
+			if (mc.getPlayer() == null || lodWorld.getIsWorldNotLoaded())
 				return;
 			
 			LodDimension lodDim = lodWorld.getLodDimension(mc.getCurrentDimension());
@@ -201,7 +201,7 @@ public class ClientProxy
 	@SubscribeEvent
 	public void serverTickEvent(TickEvent.ServerTickEvent event)
 	{
-		if (mc == null || mc.getPlayer() == null || lodWorld.getIsWorldNotLoaded())
+		if (mc.getPlayer() == null || lodWorld.getIsWorldNotLoaded())
 			return;
 		
 		LodDimension lodDim = lodWorld.getLodDimension(mc.getPlayer().level.dimensionType());
@@ -220,8 +220,7 @@ public class ClientProxy
 	@SubscribeEvent
 	public void worldSaveEvent(WorldEvent.Save event)
 	{
-		if (lodWorld != null)
-			lodWorld.saveAllDimensions();
+		lodWorld.saveAllDimensions();
 	}
 	
 	/** This is also called when a new dimension loads */

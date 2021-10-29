@@ -166,8 +166,6 @@ public class LodBuilder
 		
 		int startX;
 		int startZ;
-		int endX;
-		int endZ;
 		
 		
 		LodRegion region = lodDim.getRegion(chunk.getPos().getRegionX(), chunk.getPos().getRegionZ());
@@ -267,7 +265,7 @@ public class LodBuilder
 				{
 					yAbs = depth;
 					blockPos.set(xAbs, yAbs, zAbs);
-					light = getLightValue(chunk, blockPos, hasCeiling, hasSkyLight, topBlock);
+					light = getLightValue(chunk, blockPos, true, hasSkyLight, true);
 					color = generateLodColor(chunk, config, xAbs, yAbs, zAbs, blockPos);
 					blockPos.set(xAbs, yAbs - 1, zAbs);
 				}
@@ -344,7 +342,7 @@ public class LodBuilder
 	 */
 	private int generateLodColor(ChunkWrapper chunk, LodBuilderConfig config, int xRel, int yAbs, int zRel, BlockPosWrapper blockPos)
 	{
-		int colorInt = 0;
+		int colorInt;
 		if (config.useBiomeColors)
 		{
 			// I have no idea why I need to bit shift to the right, but
@@ -408,8 +406,8 @@ public class LodBuilder
 			{
 				if (hasSkyLight)
 					skyLight = world.getSkyLight(blockPos);
-				else
-					skyLight = 0;
+				//else
+				//	skyLight = 0;
 			}
 			if (!topBlock && skyLight == 15)
 			{
@@ -441,8 +439,8 @@ public class LodBuilder
 					
 					if (hasSkyLight)
 						skyLight = world.getSkyLight(blockPos);
-					else
-						skyLight = 0;
+					//else
+					//	skyLight = 0;
 					
 					if (!chunk.isLightCorrect() && (skyLight == 0 || skyLight == 15))
 					{
@@ -477,9 +475,9 @@ public class LodBuilder
 		
 		int xRel = blockPos.getX() - chunk.getPos().getMinBlockX();
 		int zRel = blockPos.getZ() - chunk.getPos().getMinBlockZ();
-		int x = blockPos.getX();
+		//int x = blockPos.getX();
 		int y = blockPos.getY();
-		int z = blockPos.getZ();
+		//int z = blockPos.getZ();
 		
 		BlockColorWrapper blockColorWrapper;
 		BlockShapeWrapper blockShapeWrapper = chunk.getBlockShapeWrapper(blockPos);
@@ -490,43 +488,31 @@ public class LodBuilder
 			return biome.getWaterTint();
 		}
 		else
-		{
 			blockColorWrapper = chunk.getBlockColorWrapper(blockPos);
-		}
 		
 		if (blockShapeWrapper.isToAvoid())
-		{
 			return 0;
-		}
 		
 		colorOfBlock = blockColorWrapper.getColor();
 		
 		
 		if (blockColorWrapper.hasTint())
 		{
-			
 			WorldWrapper world = MinecraftWrapper.INSTANCE.getWrappedServerWorld();
 			
 			if (world.isEmpty())
-			{
 				world = MinecraftWrapper.INSTANCE.getWrappedClientWorld();
-			}
 			
 			int tintValue;
 			if (blockColorWrapper.hasGrassTint())
-			{
 				// grass and green plants
 				tintValue = BiomeColorWrapper.getGrassColor(world, blockPos);
-			}
 			else if (blockColorWrapper.hasFolliageTint())
-			{
 				tintValue = BiomeColorWrapper.getFoliageColor(world, blockPos);
-			}
 			else
-			{
 				//we can reintroduce this with the wrappers
 				tintValue = BiomeColorWrapper.getWaterColor(world, blockPos);
-			}
+			
 			colorInt = ColorUtil.multiplyRGBcolors(tintValue | 0xFF000000, colorOfBlock);
 		}
 		else

@@ -387,24 +387,16 @@ public class LodBufferBuilder
 									
 									//we get the above block as adj UP
 									if (verticalIndex > 0)
-									{
 										adjData.get(Direction.UP)[0] = lodDim.getData(detailLevel, posX, posZ, verticalIndex - 1);
-									}
 									else
-									{
 										adjData.get(Direction.UP)[0] = DataPointUtil.EMPTY_DATA;
-									}
 									
 									
 									//we get the below block as adj DOWN
 									if (verticalIndex < lodDim.getMaxVerticalData(detailLevel, posX, posZ) - 1)
-									{
 										adjData.get(Direction.DOWN)[0] = lodDim.getData(detailLevel, posX, posZ, verticalIndex + 1);
-									}
 									else
-									{
 										adjData.get(Direction.DOWN)[0] = DataPointUtil.EMPTY_DATA;
-									}
 									
 									//We extract the data to render
 									data = lodDim.getData(detailLevel, posX, posZ, verticalIndex);
@@ -418,15 +410,12 @@ public class LodBufferBuilder
 											detailLevel, posX, posZ, box, renderer.previousDebugMode, adjShadeDisabled);
 								}
 								
-								
 							} // for pos to in list to render
 							// the thread executed successfully
 							return true;
 						};
 						
-						
 						nodeToRenderThreads.add(dataToRenderThread);
-						
 						
 					}
 				} // region z
@@ -506,13 +495,11 @@ public class LodBufferBuilder
 		
 		// get the positions that will be rendered
 		
-		boolean vanillaRenderedPosition = gameChunkRenderDistance >= Math.abs(chunkXdist)
-												  && gameChunkRenderDistance >= Math.abs(chunkZdist)
-												  && detailLevel <= LodUtil.CHUNK_DETAIL_LEVEL
-												  && vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1];
-		
-		
-		return (vanillaRenderedPosition && (!(isItBorderPos)));
+		return (gameChunkRenderDistance >= Math.abs(chunkXdist)
+				&& gameChunkRenderDistance >= Math.abs(chunkZdist)
+				&& detailLevel <= LodUtil.CHUNK_DETAIL_LEVEL
+				&& vanillaRenderedChunks[chunkXdist + gameChunkRenderDistance + 1][chunkZdist + gameChunkRenderDistance + 1])
+				&& (!isItBorderPos);
 	}
 	
 	
@@ -815,8 +802,7 @@ public class LodBufferBuilder
 		}
 	}
 	
-	/** Uploads the uploadBuffer so the GPU can use it. 
-	 * @param uploadMethod */
+	/** Uploads the uploadBuffer so the GPU can use it. */
 	private void vboUpload(VertexBuffer vbo, int storageBufferId, ByteBuffer uploadBuffer,
 			boolean allowBufferExpansion, GpuUploadMethod uploadMethod)
 	{
@@ -888,7 +874,7 @@ public class LodBufferBuilder
 					// in that case this will actually work better than SUB_DATA.
 					
 					
-					ByteBuffer vboBuffer = null;
+					ByteBuffer vboBuffer;
 					
 					// map buffer range is better since it can be explicitly unsynchronized 
 					if (GlProxy.getInstance().mapBufferRangeSupported)

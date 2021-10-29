@@ -337,8 +337,6 @@ public class LodGenWorker implements IWorker
 							heightmap.setHeight(x, z, seaLevel + 30);
 							break;
 						case MESA:
-							heightmap.setHeight(x, z, seaLevel + 20);
-							break;
 						case JUNGLE:
 							heightmap.setHeight(x, z, seaLevel + 20);
 							break;
@@ -514,7 +512,7 @@ public class LodGenWorker implements IWorker
 						{
 							configuredFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition());
 						}
-						catch (ConcurrentModificationException e)
+						catch (ConcurrentModificationException | UnsupportedOperationException e)
 						{
 							// This will happen. I'm not sure what to do about it
 							// except pray that it doesn't affect the normal world generation
@@ -534,16 +532,9 @@ public class LodGenWorker implements IWorker
 								configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
 //							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
 						}
-						catch (UnsupportedOperationException e)
-						{
-							// This will happen when the LodServerWorld
-							// isn't able to return something that a feature
-							// generator needs
-							
-							if (!allowUnstableFeatures)
-								configuredFeaturesToAvoid.put(configuredFeature.hashCode(), configuredFeature);
-//							ClientProxy.LOGGER.info(configuredFeaturesToAvoid.mappingCount());
-						}
+						// This will happen when the LodServerWorld
+						// isn't able to return something that a feature
+						// generator needs
 						catch (Exception e)
 						{
 							// I'm not sure what happened, print to the log

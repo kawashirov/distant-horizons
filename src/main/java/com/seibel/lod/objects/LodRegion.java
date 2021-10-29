@@ -479,7 +479,7 @@ public class LodRegion
 		posX = LevelPosUtil.getRegionModule(detailLevel, posX);
 		posZ = LevelPosUtil.getRegionModule(detailLevel, posZ);
 		
-		if (dataContainer == null || dataContainer[detailLevel] == null)
+		if (dataContainer[detailLevel] == null)
 			return false;
 		
 		return dataContainer[detailLevel].doesItExist(posX, posZ);

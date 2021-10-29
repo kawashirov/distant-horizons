@@ -27,7 +27,7 @@ public class BlockColorWrapper
 	//public static BlockColourWrapper WATER_COLOR = getBlockColorWrapper(Blocks.WATER);
 	public static final Direction[] directions = new Direction[] { Direction.UP, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.DOWN };
 	
-	private Block block;
+	private final Block block;
 	private int color;
 	private boolean isColored;
 	private boolean toTint;

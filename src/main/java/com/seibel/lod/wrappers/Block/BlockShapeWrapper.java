@@ -1,20 +1,16 @@
 
 package com.seibel.lod.wrappers.Block;
 
-import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.wrappers.Chunk.ChunkWrapper;
-import com.seibel.lod.wrappers.MinecraftWrapper;
-import net.minecraft.block.*;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.Direction;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.SixWayBlock;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
-import net.minecraftforge.client.model.data.ModelDataMap;
 
-import java.util.*;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -26,8 +22,8 @@ public class BlockShapeWrapper
 	public static final ConcurrentMap<Block, BlockShapeWrapper> blockShapeWrapperMap = new ConcurrentHashMap<>();
 	public static BlockShapeWrapper WATER_SHAPE = new BlockShapeWrapper();
 	
-	private Block block;
-	private boolean toAvoid;
+	private final Block block;
+	private final boolean toAvoid;
 	private boolean nonFull;
 	private boolean noCollision;
 	
