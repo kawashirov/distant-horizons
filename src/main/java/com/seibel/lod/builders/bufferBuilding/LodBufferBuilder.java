@@ -201,7 +201,7 @@ public class LodBufferBuilder
 			BlockPos playerBlockPosRounded = playerChunkPos.getWorldPosition();
 			
 			
-			long startTime = System.currentTimeMillis();
+			//long startTime = System.currentTimeMillis();
 			
 			ArrayList<Callable<Boolean>> nodeToRenderThreads = new ArrayList<>(lodDim.getWidth() * lodDim.getWidth());
 			
@@ -433,7 +433,7 @@ public class LodBufferBuilder
 			} // region z
 			
 			
-			long executeStart = System.currentTimeMillis();
+			//long executeStart = System.currentTimeMillis();
 			// wait for all threads to finish
 			List<Future<Boolean>> futuresBuffer = bufferBuilderThreads.invokeAll(nodeToRenderThreads);
 			for (Future<Boolean> future : futuresBuffer)
@@ -445,14 +445,12 @@ public class LodBufferBuilder
 					break;
 				}
 			}
-			long executeEnd = System.currentTimeMillis();
+			//long executeEnd = System.currentTimeMillis();
 			
 			
-			long endTime = System.currentTimeMillis();
-			@SuppressWarnings("unused")
-			long buildTime = endTime - startTime;
-			@SuppressWarnings("unused")
-			long executeTime = executeEnd - executeStart;
+			//long endTime = System.currentTimeMillis();
+			//long buildTime = endTime - startTime;
+			//long executeTime = executeEnd - executeStart;
 
 //			ClientProxy.LOGGER.info("Thread Build time: " + buildTime + " ms" + '\n' +
 //					                        "thread execute time: " + executeTime + " ms");
@@ -564,7 +562,7 @@ public class LodBufferBuilder
 				// capacity, divide the memory across multiple buffers
 				if (regionMemoryRequired > LodUtil.MAX_ALLOCATABLE_DIRECT_MEMORY)
 				{
-					numberOfBuffers = (int) Math.ceil(regionMemoryRequired / LodUtil.MAX_ALLOCATABLE_DIRECT_MEMORY) + 1;
+					numberOfBuffers = (int) regionMemoryRequired / LodUtil.MAX_ALLOCATABLE_DIRECT_MEMORY + 1;
 					
 					// TODO shouldn't this be determined with regionMemoryRequired?
 					// always allocating the max memory is a bit expensive isn't it?
