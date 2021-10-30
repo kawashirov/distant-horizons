@@ -23,7 +23,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
@@ -45,9 +44,7 @@ import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.util.LodUtil;
 
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 
 /**
  * This handles any configuration the user has access to.
@@ -572,11 +569,5 @@ public class LodConfig
 		clientConfig.load();
 		clientConfig.save();
 		CLIENT_SPEC.setConfig(clientConfig);
-	}
-	
-	@SubscribeEvent
-	public static void onChange(final ModConfig configEvent)
-	{
-		LogManager.getLogger().debug(ModInfo.NAME, "forge config file {} changed.", configEvent.getFileName());
 	}
 }
