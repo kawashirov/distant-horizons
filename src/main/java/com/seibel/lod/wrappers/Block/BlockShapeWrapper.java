@@ -71,7 +71,7 @@ public class BlockShapeWrapper
 		BlockPos blockPos = blockPosWrapper.getBlockPos();
 		boolean noCollisionSetted = false;
 		boolean nonFullSetted = false;
-		if (!block.defaultBlockState().getFluidState().isEmpty() || block instanceof SixWayBlock)
+		if (!block.defaultBlockState().getFluidState().isEmpty())// || block instanceof SixWayBlock)
 		{
 			noCollisionSetted = true;
 			nonFullSetted = true;

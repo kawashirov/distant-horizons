@@ -21,9 +21,8 @@ package com.seibel.lod.util;
 
 import static com.seibel.lod.builders.bufferBuilding.LodBufferBuilder.skyLightPlayer;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import com.seibel.lod.enums.DistanceGenerationMode;
-
-import net.minecraft.client.renderer.texture.NativeImage;
 
 /**
  * 

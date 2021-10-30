@@ -1,5 +1,7 @@
 package com.seibel.lod.wrappers.World;
 
+import java.awt.Color;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -8,7 +10,6 @@ import com.seibel.lod.util.LodUtil;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.MaterialColor;
-import net.minecraftforge.client.event.RenderTooltipEvent.Color;
 
 //This class wraps the minecraft BlockPos.Mutable (and BlockPos) class
 public class BiomeWrapper

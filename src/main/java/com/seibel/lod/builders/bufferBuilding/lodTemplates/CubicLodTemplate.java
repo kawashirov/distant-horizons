@@ -21,14 +21,14 @@ package com.seibel.lod.builders.bufferBuilding.lodTemplates;
 
 import java.util.Map;
 
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
 
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.Direction;
 
 /**
  * Builds LODs as rectangular prisms.
@@ -44,7 +44,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	}
 	
 	@Override
-	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
+	public void addLodToBuffer(BufferBuilder buffer, BlockPosWrapper bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
 			byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, boolean[] adjShadeDisabled)
 	{
 		if (box == null)
@@ -79,7 +79,7 @@ public class CubicLodTemplate extends AbstractLodTemplate
 	private void generateBoundingBox(Box box,
 			int height, int depth, int width,
 			double xOffset, double yOffset, double zOffset,
-			BlockPos bufferCenterBlockPos,
+			BlockPosWrapper bufferCenterBlockPos,
 			Map<Direction, long[]> adjData,
 			int color,
 			int skyLight,

@@ -93,6 +93,7 @@ public class LodBufferBuilder
 	 */
 	public static final int DEFAULT_MEMORY_ALLOCATION = 1024;
 	
+	// TODO this should be moved to LodUtil
 	public static int skyLightPlayer = 15;
 	
 	/**

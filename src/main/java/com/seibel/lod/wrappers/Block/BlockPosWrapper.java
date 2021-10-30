@@ -3,6 +3,7 @@ package com.seibel.lod.wrappers.Block;
 import java.util.Objects;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 
 
 //This class wraps the minecraft BlockPos.Mutable (and BlockPos) class
@@ -42,6 +43,13 @@ public class BlockPosWrapper
 	{
 		return blockPos.getZ();
 	}
+	
+	
+	public int get(Direction.Axis axis)
+	{
+		return axis.choose(getX(), getY(), getZ());
+	}
+	
 	
 	public BlockPos.MutableBlockPos getBlockPos()
 	{

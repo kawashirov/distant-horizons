@@ -1,15 +1,14 @@
 package com.seibel.lod.wrappers;
 
-import net.minecraft.client.renderer.texture.NativeImage;
+import com.mojang.blaze3d.platform.NativeImage;
 
-
-public class LigthMapWrapper
+public class LightMapWrapper
 {
 	static NativeImage lightMap = null;
 	
-	public static void setLightMap(NativeImage lightMap)
+	public static void setLightMap(NativeImage newLightMap)
 	{
-		lightMap = lightMap;
+		lightMap = newLightMap;
 	}
 	
 	public static int getLightValue(int skyLight, int blockLight)

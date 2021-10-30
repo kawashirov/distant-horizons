@@ -26,7 +26,7 @@ public class ChunkWrapper
 		BlockState blockState = chunk.getBlockState(blockPos.getBlockPos());
 		
 		//This type of block is always in water
-		if((blockState.getBlock() instanceof LiquidBlock) && !(blockState.getBlock() instanceof IWaterLoggable))
+		if((blockState.getBlock() instanceof LiquidBlock))// && !(blockState.getBlock() instanceof IWaterLoggable))
 			return true;
 		
 		//This type of block could be in water
@@ -77,9 +77,9 @@ public class ChunkWrapper
 	{
 		BlockState blockState = chunk.getBlockState(blockPos.getBlockPos());
 		
-		//This type of block is always in water
-		if((blockState.getBlock() instanceof ILiquidContainer) && !(blockState.getBlock() instanceof IWaterLoggable))
-			return true;
+//		//This type of block is always in water
+//		if((blockState.getBlock() instanceof ILiquidContainer) && !(blockState.getBlock() instanceof IWaterLoggable))
+//			return true;
 		
 		//This type of block could be in water
 		if(blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).isPresent() && blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).get())
