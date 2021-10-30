@@ -89,7 +89,9 @@ public class ChunkPosWrapper
 
 	public BlockPosWrapper getWorldPosition()
 	{
-		return null;
+		// the parameter here is the y position
+		BlockPos blockPos = chunkPos.getMiddleBlockPosition(0);
+		return new BlockPosWrapper(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 	}
 	
 }
