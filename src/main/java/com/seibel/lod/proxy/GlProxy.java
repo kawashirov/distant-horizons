@@ -100,9 +100,9 @@ public class GlProxy
 		GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
 		
 		// create an invisible window to hold the context
+		lodBuilderGlCapabilities = GL.createCapabilities();
 		lodBuilderGlContext = GLFW.glfwCreateWindow(640, 480, "LOD window", 0L, minecraftGlContext);
 		GLFW.glfwMakeContextCurrent(lodBuilderGlContext);
-		lodBuilderGlCapabilities = GL.createCapabilities();
 		
 		// Since this is called on the render thread, make sure the Minecraft context is used in the end
 		GLFW.glfwMakeContextCurrent(minecraftGlContext);
@@ -115,8 +115,8 @@ public class GlProxy
 		// determine the OpenGL version // 
 		//==============================//
 		
-		bufferStorageSupported = minecraftGlCapabilities.OpenGL45;
-		mapBufferRangeSupported = minecraftGlCapabilities.OpenGL30;
+		bufferStorageSupported = minecraftGlCapabilities.glBufferStorage != 0;
+		mapBufferRangeSupported = minecraftGlCapabilities.glMapBufferRange != 0;
 		
 		if (!minecraftGlCapabilities.OpenGL15)
 		{
@@ -128,7 +128,7 @@ public class GlProxy
 		{
 			String fallBackVersion = mapBufferRangeSupported ? "3.0" : "1.5";  
 			
-			ClientProxy.LOGGER.error("This GPU doesn't support OpenGL 4.5, falling back to OpenGL " + fallBackVersion + ". This may cause stuttering and reduced performance.");			
+			ClientProxy.LOGGER.error("This GPU doesn't support Buffer Storage (OpenGL 4.5), falling back to OpenGL " + fallBackVersion + ". This may cause stuttering and reduced performance.");			
 		}
 			
 		
