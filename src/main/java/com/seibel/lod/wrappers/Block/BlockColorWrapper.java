@@ -134,7 +134,8 @@ public class BlockColorWrapper
 		int colorMultiplier;
 		
 		// generate the block's color
-		for (int frameIndex = 0; frameIndex < texture.getFrameCount(); frameIndex++)
+		//for (int frameIndex = 0; frameIndex < texture.getFrameCount(); frameIndex++)
+		int frameIndex = 0; // TODO
 		{
 			// textures normally use u and v instead of x and y
 			for (int u = 0; u < texture.getHeight(); u++)
