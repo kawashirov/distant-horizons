@@ -59,7 +59,7 @@ public class MixinWorldRenderer
 	{
 		// only render if LODs are enabled and
 		// only render before solid blocks
-		if (LodConfig.CLIENT.advancedModOptions.debugging.drawLods.get() && renderType.equals(RenderType.solid()))
+		if (renderType.equals(RenderType.solid()))
 			LodMain.client_proxy.renderLods(matrixStackIn, previousPartialTicks);
 	}
 }

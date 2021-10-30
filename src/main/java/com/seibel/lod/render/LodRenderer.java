@@ -197,17 +197,22 @@ public class LodRenderer
 		// 2. we aren't already regenerating the LODs
 		// 3. we aren't waiting for the build and draw buffers to swap
 		//		(this is to prevent thread conflicts)
-		if ((partialRegen || fullRegen) && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvailable())
+		if (LodConfig.CLIENT.advancedModOptions.debugging.drawLods.get())
 		{
-			// generate the LODs on a separate thread to prevent stuttering or freezing
-			lodBufferBuilder.generateLodBuffersAsync(this, lodDim, mc.getPlayer().blockPosition(), true);
-			
-			// the regen process has been started,
-			// it will be done when lodBufferBuilder.newBuffersAvailable()
-			// is true
-			fullRegen = false;
-			partialRegen = false;
+			if ((partialRegen || fullRegen) && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvailable())
+			{
+				// generate the LODs on a separate thread to prevent stuttering or freezing
+				lodBufferBuilder.generateLodBuffersAsync(this, lodDim, mc.getPlayer().blockPosition(), true);
+				
+				// the regen process has been started,
+				// it will be done when lodBufferBuilder.newBuffersAvailable()
+				// is true
+				fullRegen = false;
+				partialRegen = false;
+			}
 		}
+		else
+			lodBufferBuilder.destroyBuffers();
 		
 		// TODO move the buffer regeneration logic into its own class (probably called in the client proxy instead)
 		// ...ending here
