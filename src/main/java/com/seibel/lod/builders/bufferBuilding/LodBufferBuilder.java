@@ -21,10 +21,13 @@ package com.seibel.lod.builders.bufferBuilding;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.lwjgl.opengl.GL11;
@@ -36,6 +39,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexBuffer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.GlProxyContext;
@@ -59,9 +63,8 @@ import com.seibel.lod.wrappers.Block.BlockPosWrapper;
 import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LightLayer;
 
 /**
  * This object is used to create NearFarBuffer objects.
@@ -139,11 +142,11 @@ public class LodBufferBuilder
 	private volatile RegionPos center;
 	
 	/**
-	 * This is the ChunkPos the player was at the last time the buffers were built.
+	 * This is the ChunkPosWrapper the player was at the last time the buffers were built.
 	 * IE the center of the buffers last time they were built
 	 */
-	private volatile ChunkPos drawableCenterChunkPos = new ChunkPos(0, 0);
-	private volatile ChunkPos buildableCenterChunkPos = new ChunkPos(0, 0);
+	private volatile ChunkPosWrapper drawableCenterChunkPos = new ChunkPosWrapper(0, 0);
+	private volatile ChunkPosWrapper buildableCenterChunkPos = new ChunkPosWrapper(0, 0);
 	
 	
 	
@@ -188,15 +191,15 @@ public class LodBufferBuilder
 	// more easily edited by hot swapping. Because, As far as James is aware
 	// you can't hot swap lambda expressions.
 	private void generateLodBuffersThread(LodRenderer renderer, LodDimension lodDim,
-			BlockPos playerBlockPos, boolean fullRegen)
+			BlockPosWrapper playerBlockPos, boolean fullRegen)
 	{
 		bufferLock.lock();
 		
 		try
 		{
 			// round the player's block position down to the nearest chunk BlockPos
-			ChunkPos playerChunkPos = new ChunkPos(playerBlockPos);
-			BlockPos playerBlockPosRounded = playerChunkPos.getWorldPosition();
+			ChunkPosWrapper playerChunkPos = new ChunkPosWrapper(playerBlockPos);
+			BlockPosWrapper playerBlockPosRounded = playerChunkPos.getWorldPosition();
 			
 			
 			long startTime = System.currentTimeMillis();
@@ -231,7 +234,7 @@ public class LodBufferBuilder
 			//================================//
 			
 			ClientLevel world = mc.getClientLevel();
-			skyLightPlayer = world.getBrightness(LightType.SKY, playerBlockPos);
+			skyLightPlayer = world.getBrightness(LightLayer.SKY, playerBlockPos.getBlockPos());
 			
 			for (int xRegion = 0; xRegion < lodDim.getWidth(); xRegion++)
 			{
@@ -313,8 +316,8 @@ public class LodBufferBuilder
 								posX = posToRender.getNthPosX(index);
 								posZ = posToRender.getNthPosZ(index);
 								
-								int chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.x;
-								int chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.z;
+								int chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.getX();
+								int chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.getZ();
 								
 								//We don't want to render this fake block if
 								//The block is inside the render distance with, is not bigger than a chunk and is positioned in a chunk set as vanilla rendered
@@ -341,8 +344,8 @@ public class LodBufferBuilder
 									xAdj = posX + Box.DIRECTION_NORMAL_MAP.get(direction).getX();
 									zAdj = posZ + Box.DIRECTION_NORMAL_MAP.get(direction).getZ();
 									long data;
-									chunkXdist = LevelPosUtil.getChunkPos(detailLevel, xAdj) - playerChunkPos.x;
-									chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.z;
+									chunkXdist = LevelPosUtil.getChunkPos(detailLevel, xAdj) - playerChunkPos.getX();
+									chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.getZ();
 									adjPosInPlayerChunk = (chunkXdist == 0 && chunkZdist == 0);
 									
 									//If the adj block is rendered in the same region and with same detail
@@ -487,12 +490,12 @@ public class LodBufferBuilder
 		}
 	}
 	
-	private boolean isThisPositionGoingToBeRendered(byte detailLevel, int posX, int posZ, ChunkPos playerChunkPos, boolean[][] vanillaRenderedChunks, int gameChunkRenderDistance){
+	private boolean isThisPositionGoingToBeRendered(byte detailLevel, int posX, int posZ, ChunkPosWrapper playerChunkPos, boolean[][] vanillaRenderedChunks, int gameChunkRenderDistance){
 		
 		
 		// skip any chunks that Minecraft is going to render
-		int chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.x;
-		int chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.z;
+		int chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.getX();
+		int chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.getZ();
 		
 		// check if the chunk is on the border
 		boolean isItBorderPos;
@@ -598,16 +601,16 @@ public class LodBufferBuilder
 				{
 					buildableBuffers[x][z][i] = new BufferBuilder((int) regionMemoryRequired);
 					
-					buildableVbos[x][z][i] = new VertexBuffer(LodUtil.LOD_VERTEX_FORMAT);
-					drawableVbos[x][z][i] = new VertexBuffer(LodUtil.LOD_VERTEX_FORMAT);
+					buildableVbos[x][z][i] = new VertexBuffer();
+					drawableVbos[x][z][i] = new VertexBuffer();
 					
 					
 					// create the initial mapped buffers (system memory)
-					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buildableVbos[x][z][i].id);
+					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, buildableVbos[x][z][i].vertextBufferId);
 					GL15.glBufferData(GL15.GL_ARRAY_BUFFER, regionMemoryRequired, GL15.GL_DYNAMIC_DRAW);
 					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 					
-					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, drawableVbos[x][z][i].id);
+					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, drawableVbos[x][z][i].vertextBufferId);
 					GL15.glBufferData(GL15.GL_ARRAY_BUFFER, regionMemoryRequired, GL15.GL_DYNAMIC_DRAW);
 					GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 					
@@ -693,12 +696,12 @@ public class LodBufferBuilder
 						// need to be effectively final, so we have
 						// to use an else statement here
 						if (buildableVbos[i][j][k] != null)
-							buildableId = buildableVbos[i][j][k].id;
+							buildableId = buildableVbos[i][j][k].vertextBufferId;
 						else
 							buildableId = 0;
 						
 						if (drawableVbos[i][j][k] != null)
-							drawableId = drawableVbos[i][j][k].id;
+							drawableId = drawableVbos[i][j][k].vertextBufferId;
 						else
 							drawableId = 0;
 						
@@ -742,7 +745,7 @@ public class LodBufferBuilder
 						// a false indexOutOfBoundsException
 						buildableBuffers[x][z][i].discard();
 						
-						buildableBuffers[x][z][i].begin(GL11.GL_QUADS, LodUtil.LOD_VERTEX_FORMAT);
+						buildableBuffers[x][z][i].begin(VertexFormat.Mode.QUADS, LodUtil.LOD_VERTEX_FORMAT);
 					}
 				}
 			}
@@ -821,13 +824,13 @@ public class LodBufferBuilder
 			boolean allowBufferExpansion, GpuUploadMethod uploadMethod)
 	{
 		// this shouldn't happen, but just to be safe
-		if (vbo.id != -1 && GlProxy.getInstance().getGlContext() == GlProxyContext.LOD_BUILDER)
+		if (vbo.vertextBufferId != -1 && GlProxy.getInstance().getGlContext() == GlProxyContext.LOD_BUILDER)
 		{
 			// this is how many points will be rendered
-			vbo.vertexCount = (uploadBuffer.capacity() / vbo.format.getVertexSize());
+			vbo.indexCount = (uploadBuffer.capacity() / vbo.getFormat().getVertexSize());
 			
 			
-			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.id);
+			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.vertextBufferId);
 			try
 			{
 				// if possible use the faster buffer storage route
@@ -876,7 +879,7 @@ public class LodBufferBuilder
 						// ...then upload into GPU memory
 						// (uploading into GPU memory directly can only be done 
 						// through the glCopyBufferSubData/glCopyNamed... methods)
-						GL45.glCopyNamedBufferSubData(vbo.id, storageBufferId, 0, 0, uploadBuffer.capacity());
+						GL45.glCopyNamedBufferSubData(vbo.vertextBufferId, storageBufferId, 0, 0, uploadBuffer.capacity());
 					}
 				}
 				else if (uploadMethod == GpuUploadMethod.BUFFER_MAPPING)

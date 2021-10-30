@@ -205,9 +205,6 @@ public class BlockColorWrapper
 	{
 		return block instanceof GrassBlock
 					   || block instanceof BushBlock
-					   || block instanceof IGrowable
-					   || block instanceof AbstractPlantBlock
-					   || block instanceof AbstractTopPlantBlock
 					   || block instanceof TallGrassBlock;
 	}
 	
