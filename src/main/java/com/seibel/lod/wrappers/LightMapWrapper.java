@@ -3,13 +3,13 @@ package com.seibel.lod.wrappers;
 import net.minecraft.client.renderer.texture.NativeImage;
 
 
-public class LigthMapWrapper
+public class LightMapWrapper
 {
 	static NativeImage lightMap = null;
 	
-	public static void setLightMap(NativeImage lightMap)
+	public static void setLightMap(NativeImage newlightMap)
 	{
-		lightMap = lightMap;
+		lightMap = newlightMap;
 	}
 	
 	public static int getLightValue(int skyLight, int blockLight)

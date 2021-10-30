@@ -124,7 +124,7 @@ public class LodRenderer
 	public boolean vanillaRenderedChunksEmptySkip = false;
 	public int vanillaBlockRenderedDistance;
 	
-	boolean vivecraftDetected = ReflectionHandler.INSTANCE.detectVivecraft();
+	final boolean vivecraftDetected = ReflectionHandler.INSTANCE.detectVivecraft();
 	
 	
 	
@@ -205,7 +205,7 @@ public class LodRenderer
 			if ((partialRegen || fullRegen) && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvailable())
 			{
 				// generate the LODs on a separate thread to prevent stuttering or freezing
-				lodBufferBuilder.generateLodBuffersAsync(this, lodDim, mc.getPlayer().blockPosition(), true);
+				lodBufferBuilder.generateLodBuffersAsync(this, lodDim, mc.getPlayer().blockPosition(), fullRegen);
 				
 				// the regen process has been started,
 				// it will be done when lodBufferBuilder.newBuffersAvailable()
@@ -564,7 +564,7 @@ public class LodRenderer
 	{
 		Matrix4f lodPoj;
 		float nearClipPlane = LodConfig.CLIENT.graphics.advancedGraphicsOption.useExtendedNearClipPlane.get() ? vanillaBlockRenderedDistance / 5 : 1;
-		float farClipPlane = farPlaneBlockDistance * LodUtil.CHUNK_WIDTH / 2;
+		float farClipPlane = farPlaneBlockDistance * LodUtil.CHUNK_WIDTH >> 1;
 		
 		if (vivecraftDetected)
 		{
@@ -885,12 +885,6 @@ public class LodRenderer
 			prevBrightness = mc.getOptions().gamma;
 			prevSkyBrightness = skyBrightness;
 		}
-		
-		/*if (lightMap != lastLightMap)
-		{
-			fullRegen = true;
-			lastLightMap = lightMap;
-		}*/
 		
 		//================//
 		// partial regens //

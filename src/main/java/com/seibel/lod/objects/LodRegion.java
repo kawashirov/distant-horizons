@@ -39,15 +39,11 @@ import com.seibel.lod.util.LodUtil;
  */
 public class LodRegion
 {
-	/**
-	 * Number of detail level supported by a region
-	 */
+	/** Number of detail level supported by a region */
 	private static final byte POSSIBLE_LOD = 10;
 	
 	
-	/**
-	 * Holds the lowest (least detailed) detail level in this region
-	 */
+	/** Holds the lowest (least detailed) detail level in this region */
 	private byte minDetailLevel;
 	
 	/**
@@ -55,27 +51,17 @@ public class LodRegion
 	 */
 	private final LevelContainer[] dataContainer;
 	
-	/**
-	 * This chunk Pos has been generated
-	 */
+	/** This chunk Pos has been generated */
 	//private final boolean[] preGeneratedChunkPos;
 	
-	/**
-	 * the generation mode for this region
-	 */
-	private DistanceGenerationMode generationMode;
-	/**
-	 * the vertical quality of this region
-	 */
-	private VerticalQuality verticalQuality;
+	/** the generation mode for this region */
+	private final DistanceGenerationMode generationMode;
+	/** the vertical quality of this region */
+	private final VerticalQuality verticalQuality;
 	
-	/**
-	 * this region's x RegionPos
-	 */
+	/** this region's x RegionPos */
 	public final int regionPosX;
-	/**
-	 * this region's z RegionPos
-	 */
+	/** this region's z RegionPos */
 	public final int regionPosZ;
 	
 	public LodRegion(byte minDetailLevel, RegionPos regionPos, DistanceGenerationMode generationMode, VerticalQuality verticalQuality)
@@ -152,9 +138,7 @@ public class LodRegion
 	}
 	
 	
-	/**
-	 * Return true if the chunk has been pregenerated in game
-	 */
+	/** Return true if the chunk has been pregenerated in game */
 	//public boolean isChunkPreGenerated(int xChunkPos, int zChunkPos)
 	//{
 	//	xChunkPos = LevelPosUtil.getRegionModule(LodUtil.CHUNK_DETAIL_LEVEL, xChunkPos);

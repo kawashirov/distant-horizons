@@ -23,7 +23,7 @@ public class BlockColorWrapper
 	public static final ConcurrentMap<Block, BlockColorWrapper> blockColorWrapperMap = new ConcurrentHashMap<>();
 	public static final ModelDataMap dataMap = new ModelDataMap.Builder().build();
 	public static final BlockPos blockPos = new BlockPos(0,0,0);
-	public static Random random = new Random(0);
+	public static final Random random = new Random(0);
 	//public static BlockColourWrapper WATER_COLOR = getBlockColorWrapper(Blocks.WATER);
 	public static final Direction[] directions = new Direction[] { Direction.UP, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.DOWN };
 	
@@ -31,7 +31,7 @@ public class BlockColorWrapper
 	private int color;
 	private boolean isColored;
 	private boolean toTint;
-	private boolean folliageTint;
+	private boolean foliageTint;
 	private boolean grassTint;
 	private boolean waterTint;
 	
@@ -43,7 +43,7 @@ public class BlockColorWrapper
 		this.color = 0;
 		this.isColored = true;
 		this.toTint = false;
-		this.folliageTint = false;
+		this.foliageTint = false;
 		this.grassTint = false;
 		this.waterTint = false;
 		setupColorAndTint(blockState,blockPosWrapper);
@@ -186,7 +186,7 @@ public class BlockColorWrapper
 		// we check which kind of tint we need to apply
 		this.grassTint = grassInstance() && toTint;
 		
-		this.folliageTint = leavesInstance() && toTint;
+		this.foliageTint = leavesInstance() && toTint;
 		
 		this.waterTint = waterIstance() && toTint;
 		
@@ -249,7 +249,7 @@ public class BlockColorWrapper
 	
 	public boolean hasFolliageTint()
 	{
-		return folliageTint;
+		return foliageTint;
 	}
 	
 	public boolean hasWaterTint()

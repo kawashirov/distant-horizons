@@ -32,7 +32,6 @@ import com.seibel.lod.util.LodUtil;
 public class PosToRenderContainer
 {
 	public byte minDetail;
-	private final int size;
 	private int regionPosX;
 	private int regionPosZ;
 	private int numberOfPosToRender;
@@ -47,7 +46,7 @@ public class PosToRenderContainer
 		this.numberOfPosToRender = 0;
 		this.regionPosX = regionPosX;
 		this.regionPosZ = regionPosZ;
-		this.size = 1 << (LodUtil.REGION_DETAIL_LEVEL - minDetail);
+		int size = 1 << (LodUtil.REGION_DETAIL_LEVEL - minDetail);
 		posToRender = new int[size * size * 3];
 		population = new byte[size][size];
 	}

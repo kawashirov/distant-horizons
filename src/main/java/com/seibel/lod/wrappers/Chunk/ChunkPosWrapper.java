@@ -9,7 +9,7 @@ import java.util.Objects;
 //This class wraps the minecraft ChunkPos class
 public class ChunkPosWrapper
 {
-	private ChunkPos chunkPos;
+	private final ChunkPos chunkPos;
 	
 	public ChunkPosWrapper(ChunkPos chunkPos)
 	{

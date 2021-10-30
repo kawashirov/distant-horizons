@@ -21,7 +21,7 @@ public class BiomeWrapper
 {
 	
 	public static final ConcurrentMap<Biome, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
-	private Biome biome;
+	private final Biome biome;
 	
 	public BiomeWrapper(Biome biome)
 	{

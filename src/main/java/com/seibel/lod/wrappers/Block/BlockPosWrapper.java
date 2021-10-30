@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentMap;
 //This class wraps the minecraft BlockPos.Mutable (and BlockPos) class
 public class BlockPosWrapper
 {
-	private BlockPos.Mutable blockPos;
+	private final BlockPos.Mutable blockPos;
 	
 	
 	public BlockPosWrapper()

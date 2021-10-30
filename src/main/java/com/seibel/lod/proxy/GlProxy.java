@@ -46,7 +46,7 @@ public class GlProxy
 {
 	private static GlProxy instance = null;
 	
-	private static MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
+	private static final MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	/** Minecraft's GLFW window */
 	public final long minecraftGlContext;

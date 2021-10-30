@@ -23,8 +23,6 @@ import static com.seibel.lod.builders.bufferBuilding.LodBufferBuilder.skyLightPl
 
 import com.seibel.lod.enums.DistanceGenerationMode;
 
-import net.minecraft.client.renderer.texture.NativeImage;
-
 /**
  * 
  * @author Leonardo Amato
@@ -171,22 +169,22 @@ public class DataPointUtil
 		return (short) ((dataPoint >>> BLUE_SHIFT) & BLUE_MASK);
 	}
 	
-	public static int getLightSky(long dataPoint)
+	public static byte getLightSky(long dataPoint)
 	{
-		return (int) ((dataPoint >>> SKY_LIGHT_SHIFT) & SKY_LIGHT_MASK);
+		return (byte) ((dataPoint >>> SKY_LIGHT_SHIFT) & SKY_LIGHT_MASK);
 	}
 	
-	public static int getLightSkyAlt(long dataPoint)
+	public static byte getLightSkyAlt(long dataPoint)
 	{
 		if (skyLightPlayer == 0 && ((dataPoint >>> FLAG_SHIFT) & FLAG_MASK) == 1)
 			return 0;
 		else
-			return (int) ((dataPoint >>> SKY_LIGHT_SHIFT) & SKY_LIGHT_MASK);
+			return (byte) ((dataPoint >>> SKY_LIGHT_SHIFT) & SKY_LIGHT_MASK);
 	}
 	
-	public static int getLightBlock(long dataPoint)
+	public static byte getLightBlock(long dataPoint)
 	{
-		return (int) ((dataPoint >>> BLOCK_LIGHT_SHIFT) & BLOCK_LIGHT_MASK);
+		return (byte) ((dataPoint >>> BLOCK_LIGHT_SHIFT) & BLOCK_LIGHT_MASK);
 	}
 	
 	public static boolean getFlag(long dataPoint)
@@ -213,19 +211,6 @@ public class DataPointUtil
 	public static int getColor(long dataPoint)
 	{
 		return (int) (((dataPoint >>> COLOR_SHIFT) & COLOR_MASK) | (/*((dataPoint >>> (ALPHA_SHIFT - ALPHA_DOWNSIZE_SHIFT)) | 0b1111)*/255 << 24));
-	}
-	
-	/** This method apply the lightmap to the color to use */
-	public static int getLightColor(long dataPoint, NativeImage lightMap)
-	{
-		int lightBlock = getLightBlock(dataPoint);
-		int lightSky = getLightSky(dataPoint);
-		int color = lightMap.getPixelRGBA(lightBlock, lightSky);
-		int red = ColorUtil.getBlue(color);
-		int green = ColorUtil.getGreen(color);
-		int blue = ColorUtil.getRed(color);
-		
-		return ColorUtil.multiplyRGBcolors(getColor(dataPoint), ColorUtil.rgbToInt(red, green, blue));
 	}
 	
 	/** This is used to convert a dataPoint to string (useful for the print function) */

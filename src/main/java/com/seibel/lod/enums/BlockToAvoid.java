@@ -36,8 +36,8 @@ public enum BlockToAvoid
 	
 	BOTH(true, true);
 	
-	public boolean nonFull;
-	public boolean noCollision;
+	public final boolean nonFull;
+	public final boolean noCollision;
 	
 	BlockToAvoid(boolean nonFull, boolean noCollision)
 	{

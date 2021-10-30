@@ -14,8 +14,8 @@ import net.minecraft.world.chunk.IChunk;
 public class ChunkWrapper
 {
 	
-	private IChunk chunk;
-	private ChunkPosWrapper chunkPos;
+	private final IChunk chunk;
+	private final ChunkPosWrapper chunkPos;
 	
 	public int getHeight(){
 		return chunk.getMaxBuildHeight();
@@ -26,14 +26,9 @@ public class ChunkWrapper
 		BlockState blockState = chunk.getBlockState(blockPos.getBlockPos());
 		
 		//This type of block is always in water
-		if((blockState.getBlock() instanceof ILiquidContainer) && !(blockState.getBlock() instanceof IWaterLoggable))
-			return true;
-		
 		//This type of block could be in water
-		if(blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).isPresent() && blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).get())
-			return true;
-		
-		return false;
+		return ((blockState.getBlock() instanceof ILiquidContainer) && !(blockState.getBlock() instanceof IWaterLoggable))
+				|| (blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).isPresent() && blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).get());
 	}
 	
 	public int getHeightMapValue(int xRel, int zRel){
@@ -78,14 +73,9 @@ public class ChunkWrapper
 		BlockState blockState = chunk.getBlockState(blockPos.getBlockPos());
 		
 		//This type of block is always in water
-		if((blockState.getBlock() instanceof ILiquidContainer) && !(blockState.getBlock() instanceof IWaterLoggable))
-			return true;
-		
 		//This type of block could be in water
-		if(blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).isPresent() && blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).get())
-			return true;
-		
-		return false;
+		return ((blockState.getBlock() instanceof ILiquidContainer) && !(blockState.getBlock() instanceof IWaterLoggable))
+				|| (blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).isPresent() && blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).get());
 	}
 	
 	public int getEmittedBrightness(BlockPosWrapper blockPos)

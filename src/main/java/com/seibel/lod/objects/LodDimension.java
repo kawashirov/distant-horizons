@@ -755,7 +755,7 @@ public class LodDimension
 	 */
 	public boolean doesRegionNeedBufferRegen(int xIndex, int zIndex)
 	{
-		return regenRegionBuffer[xIndex][zIndex];
+		return regenRegionBuffer[xIndex][zIndex] || recreateRegionBuffer[xIndex][zIndex];
 	}
 	
 	
@@ -787,9 +787,7 @@ public class LodDimension
 		region.updateArea(detailLevel, posX, posZ);
 	}
 	
-	/**
-	 * Returns true if a region exists at the given LevelPos
-	 */
+	/** Returns true if a region exists at the given LevelPos */
 	public boolean doesDataExist(byte detailLevel, int posX, int posZ)
 	{
 		LodRegion region = getRegion(detailLevel, posX, posZ);
@@ -806,18 +804,14 @@ public class LodDimension
 		return fileHandler != null ? fileHandler.loadRegionFromFile(detailLevel, regionPos, generationMode, verticalQuality) : null;
 	}
 	
-	/**
-	 * Save all dirty regions in this LodDimension to file.
-	 */
+	/** Save all dirty regions in this LodDimension to file. */
 	public void saveDirtyRegionsToFileAsync()
 	{
 		fileHandler.saveDirtyRegionsToFileAsync();
 	}
 	
 	
-	/**
-	 * Return true if the chunk has been pregenerated in game
-	 */
+	/** Return true if the chunk has been pregenerated in game */
 	//public boolean isChunkPreGenerated(int xChunkPos, int zChunkPos)
 	//{
 	//
@@ -852,9 +846,7 @@ public class LodDimension
 		return center.z;
 	}
 	
-	/**
-	 * returns the width of the dimension in regions
-	 */
+	/** returns the width of the dimension in regions */
 	public int getWidth()
 	{
 		// we want to get the length directly from the

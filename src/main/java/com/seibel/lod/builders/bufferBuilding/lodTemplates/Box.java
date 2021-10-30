@@ -325,7 +325,7 @@ public class Box
 		//Down direction case
 		singleAdjDataPoint = adjData.get(Direction.DOWN)[0];
 		if(DataPointUtil.doesItExist(singleAdjDataPoint))
-			skyLights.get(Direction.DOWN)[0] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
+			skyLights.get(Direction.DOWN)[0] = DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
 		else
 			skyLights.get(Direction.DOWN)[0] = skyLights.get(Direction.UP)[0];
 		//other sided
@@ -373,12 +373,12 @@ public class Box
 						{
 							adjHeight.get(direction)[0] = getMaxY();
 							adjDepth.get(direction)[0] = getMinY();
-							skyLights.get(direction)[0] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint); //skyLights.get(Direction.UP)[0];
+							skyLights.get(direction)[0] = DataPointUtil.getLightSkyAlt(singleAdjDataPoint); //skyLights.get(Direction.UP)[0];
 						}
 						else
 						{
 							adjDepth.get(direction)[faceToDraw] = getMinY();
-							skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
+							skyLights.get(direction)[faceToDraw] = DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
 						}
 						faceToDraw++;
 						toFinish = false;
@@ -404,12 +404,12 @@ public class Box
 							{
 								adjHeight.get(direction)[0] = getMaxY();
 								adjDepth.get(direction)[0] = height;
-								skyLights.get(direction)[0] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint); //skyLights.get(Direction.UP)[0];
+								skyLights.get(direction)[0] = DataPointUtil.getLightSkyAlt(singleAdjDataPoint); //skyLights.get(Direction.UP)[0];
 							}
 							else
 							{
 								adjDepth.get(direction)[faceToDraw] = height;
-								skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
+								skyLights.get(direction)[faceToDraw] = DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
 							}
 							toFinish = false;
 							faceToDraw++;
@@ -437,7 +437,7 @@ public class Box
 						}
 						
 						adjDepth.get(direction)[faceToDraw] = height;
-						skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
+						skyLights.get(direction)[faceToDraw] = DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
 						faceToDraw++;
 						adjHeight.get(direction)[faceToDraw] = depth;
 						firstFace = false;
@@ -461,7 +461,7 @@ public class Box
 				{
 					singleAdjDataPoint = dataPoint[toFinishIndex];
 					if (DataPointUtil.doesItExist(singleAdjDataPoint))
-						skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
+						skyLights.get(direction)[faceToDraw] = DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
 					else
 						skyLights.get(direction)[faceToDraw] = skyLights.get(Direction.UP)[0];
 				}

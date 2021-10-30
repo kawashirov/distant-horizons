@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentMap;
 public class WorldWrapper
 {
 	private static final ConcurrentMap<IWorld, WorldWrapper> worldWrapperMap = new ConcurrentHashMap<>();
-	private IWorld world;
+	private final IWorld world;
 	
 	public WorldWrapper(IWorld world)
 	{
