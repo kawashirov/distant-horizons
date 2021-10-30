@@ -68,8 +68,8 @@ public class BlockPosWrapper
 
 	public BlockPosWrapper offset(int x, int y, int z)
 	{
-		// TODO Auto-generated method stub
-		return null;
+		blockPos.set(blockPos.getX() + x, blockPos.getY() + y, blockPos.getZ() + z);
+		return this;
 	}
 	
 }
