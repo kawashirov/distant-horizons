@@ -22,7 +22,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'com.github.johnrengelman.shadow'
 
-version = 'a1.5.2'
+version = '1.5.3a'
 group = 'com.seibel.lod'
 archivesBaseName = 'Distant-Horizons_1.16.5'
 
