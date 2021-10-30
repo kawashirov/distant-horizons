@@ -214,12 +214,14 @@ public class LodConfig
 					
 					disableVanillaFog = builder
 							.comment("\n\n"
-									+ " If true disable vanilla Minecraft's fog. \n\n"
+									+ " If true disable Minecraft's fog. \n\n"
+									+ ""
+									+ " Experimental! May cause issues with Sodium. \n\n"
 									+ ""
 									+ " Unlike Optifine or Sodium's fog disabling option this won't change \n"
 									+ " performance (we don't actually disable the fog, we just tell it to render a infinite distance away). \n"
-									+ " May or may not play nice with other mods edit fog. \n")
-							.define("Disable Vanilla Fog", true);
+									+ " May or may not play nice with other mods that edit fog. \n")
+							.define("Experimental Disable Vanilla Fog", false);
 					
 					builder.pop();
 				}
