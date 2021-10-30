@@ -75,7 +75,7 @@ public class RegionPos
 	}
 	
 	/** Returns the BlockPos at the center of this region */
-	public ChunkPosWrapper blockPos()
+	public BlockPosWrapper blockPos()
 	{
 		return chunkPos().getWorldPosition()
 				.offset(LodUtil.CHUNK_WIDTH / 2, 0, LodUtil.CHUNK_WIDTH / 2);

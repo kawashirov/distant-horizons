@@ -19,15 +19,16 @@
 
 package com.seibel.lod.render;
 
+import java.nio.FloatBuffer;
 import java.util.HashSet;
 
 import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL15C;
 import org.lwjgl.opengl.NVFogDistance;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexBuffer;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Vector3f;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder.VertexBuffersAndOffset;
 import com.seibel.lod.config.LodConfig;
@@ -46,16 +47,15 @@ import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
+import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 
-import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.vertex.VertexBuffer;
-import net.minecraft.potion.Effects;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.phys.Vec3;
 
 
 /**
@@ -81,7 +81,7 @@ public class LodRenderer
 	
 	private final MinecraftWrapper mc;
 	private final GameRenderer gameRender;
-	private IProfiler profiler;
+	private ProfilerFiller profiler;
 	private int farPlaneBlockDistance;
 	
 	
@@ -97,7 +97,7 @@ public class LodRenderer
 	 */
 	private int[][][] storageBufferIds;
 	
-	private ChunkPos vbosCenter = new ChunkPos(0, 0);
+	private ChunkPosWrapper vbosCenter = new ChunkPosWrapper(0, 0);
 	
 	
 	/** This is used to determine if the LODs should be regenerated */
@@ -152,11 +152,11 @@ public class LodRenderer
 	 * Besides drawing the LODs this method also starts
 	 * the async process of generating the Buffers that hold those LODs.
 	 * @param lodDim The dimension to draw, if null doesn't replace the current dimension.
-	 * @param mcMatrixStack This matrix stack should come straight from MC's renderChunkLayer (or future equivalent) method
+	 * @param mcModelViewMatrix This matrix stack should come straight from MC's renderChunkLayer (or future equivalent) method
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
 	@SuppressWarnings("deprecation")
-	public void drawLODs(LodDimension lodDim, MatrixStack mcMatrixStack, float partialTicks, IProfiler newProfiler)
+	public void drawLODs(LodDimension lodDim, PoseStack mcModelViewMatrix, float partialTicks, ProfilerFiller newProfiler)
 	{
 		//=================================//
 		// determine if LODs should render //
@@ -169,7 +169,7 @@ public class LodRenderer
 			return;
 		}
 		
-		if (mc.getPlayer().getActiveEffectsMap().get(Effects.BLINDNESS) != null)
+		if (mc.getPlayer().getActiveEffectsMap().get(MobEffects.BLINDNESS) != null)
 		{
 			// if the player is blind don't render LODs,
 			// and don't change minecraft's fog
@@ -205,7 +205,7 @@ public class LodRenderer
 		if ((partialRegen || fullRegen) && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvailable())
 		{
 			// generate the LODs on a separate thread to prevent stuttering or freezing
-			lodBufferBuilder.generateLodBuffersAsync(this, lodDim, mc.getPlayer().blockPosition(), true);
+			lodBufferBuilder.generateLodBuffersAsync(this, lodDim, mc.getPlayerBlockPos(), true);
 			
 			// the regen process has been started,
 			// it will be done when lodBufferBuilder.newBuffersAvailable()
@@ -256,7 +256,7 @@ public class LodRenderer
 		// (or maybe vice versa I have no idea :P)
 		mcProjectionMatrix.transpose();
 		
-		Matrix4f modelViewMatrix = offsetTheModelViewMatrix(mcMatrixStack, partialTicks);
+		Matrix4f modelViewMatrix = offsetTheModelViewMatrix(mcModelViewMatrix, partialTicks);
 		vanillaBlockRenderedDistance = mc.getRenderDistance() * LodUtil.CHUNK_WIDTH;
 		// required for setupFog and setupProjectionMatrix
 		if (mc.getClientLevel().dimensionType().hasCeiling())
@@ -286,8 +286,8 @@ public class LodRenderer
 		
 		if (vbos != null)
 		{
-			ActiveRenderInfo renderInfo = mc.getGameRenderer().getMainCamera();
-			Vector3d cameraDir = new Vector3d(renderInfo.getLookVector());
+			Camera camera = mc.getGameRenderer().getMainCamera();
+			Vector3f cameraDir = camera.getLookVector();
 			
 			boolean cullingDisabled = LodConfig.CLIENT.graphics.advancedGraphicsOption.disableDirectionalCulling.get();
 			boolean renderBufferStorage = LodConfig.CLIENT.graphics.advancedGraphicsOption.gpuUploadMethod.get() == GpuUploadMethod.BUFFER_STORAGE && GlProxy.getInstance().bufferStorageSupported;
@@ -308,7 +308,7 @@ public class LodRenderer
 							x + vboCenterRegionPos.x - (lodDim.getWidth() / 2),
 							z + vboCenterRegionPos.z - (lodDim.getWidth() / 2));
 					
-					if (cullingDisabled || RenderUtil.isRegionInViewFrustum(renderInfo.getBlockPosition(), cameraDir, vboPos.blockPos()))
+					if (cullingDisabled || RenderUtil.isRegionInViewFrustum(camera.getBlockPosition(), cameraDir, vboPos.blockPos()))
 					{
 						if ((x > halfWidth - quarterWidth && x < halfWidth + quarterWidth) 
 							&& (z > halfWidth - quarterWidth && z < halfWidth + quarterWidth))
@@ -319,10 +319,10 @@ public class LodRenderer
 						
 						if (storageBufferIds != null && renderBufferStorage)
 							for (int i = 0; i < storageBufferIds[x][z].length; i++)
-								drawStorageBuffer(vbos[x][z][i], storageBufferIds[x][z][i], modelViewMatrix);
+								drawArrays(modelViewMatrix, storageBufferIds[x][z][i], vbos[x][z][i].indexCount);
 						else
 							for (int i = 0; i < vbos[x][z].length; i++)
-								drawVertexBuffer(vbos[x][z][i], modelViewMatrix);
+								drawArrays(modelViewMatrix, vbos[x][z][i].vertextBufferId, vbos[x][z][i].indexCount);
 					}
 				}
 			}
@@ -342,7 +342,7 @@ public class LodRenderer
 		// re-enable the lights Minecraft uses
 		GL15.glEnable(GL15.GL_LIGHT0);
 		GL15.glEnable(GL15.GL_LIGHT1);
-		RenderSystem.disableLighting();
+		GL15.glDisable(GL15.GL_LIGHTING);
 		
 		// reset the fog settings so the normal chunks
 		// will be drawn correctly
@@ -361,39 +361,31 @@ public class LodRenderer
 		profiler.pop();
 	}
 	
-	
 	/** This is where the actual drawing happens. */
-	private void drawStorageBuffer(VertexBuffer vbo, int bufferStorageId, Matrix4f modelViewMatrix)
+	private void drawArrays(Matrix4f modelViewMatrix, int glBufferId, int vertexCount)
 	{
-		if (vbo == null)
+		if (glBufferId == 0)
 			return;
 		
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, bufferStorageId);
-		// 0L is the starting pointer
-		LodUtil.LOD_VERTEX_FORMAT.setupBufferState(0L);
+		// pre draw setup
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, glBufferId);
+		LodUtil.LOD_VERTEX_FORMAT.setupBufferState();
 		
-		vbo.draw(modelViewMatrix, GL15.GL_QUADS);
+		// set up the model view matrix
+		GL15.glPushMatrix();
+		GL15.glLoadIdentity();
+		FloatBuffer matrixBuffer = FloatBuffer.allocate(16);
+		modelViewMatrix.store(matrixBuffer);
+		GL15.glMultMatrixf(matrixBuffer);
 		
-		GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+		GL15.glDrawArrays(GL15.GL_QUADS, 0, vertexCount);
+		
+		// post draw cleanup
+		GL15.glPopMatrix();
+		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		LodUtil.LOD_VERTEX_FORMAT.clearBufferState();
 	}
 	
-
-	/** This is where the actual drawing happens. */
-	private void drawVertexBuffer(VertexBuffer vbo, Matrix4f modelViewMatrix)
-	{
-		if (vbo == null)
-			return;
-		
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.id);
-		// 0L is the starting pointer
-		LodUtil.LOD_VERTEX_FORMAT.setupBufferState(0L);
-		
-		vbo.draw(modelViewMatrix, GL15.GL_QUADS);
-		
-		GL15C.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-		LodUtil.LOD_VERTEX_FORMAT.clearBufferState();
-	}
 	
 	
 	
@@ -442,38 +434,36 @@ public class LodRenderer
 			{
 				// for more realistic fog when using FAR
 				if (LodConfig.CLIENT.graphics.fogQualityOption.fogDistance.get() == FogDistance.NEAR_AND_FAR)
-					RenderSystem.fogStart(farPlaneBlockDistance * 1.6f * 0.9f);
+					GL15.glFogf(GL15.GL_FOG_START, farPlaneBlockDistance * 1.6f * 0.9f);
 				else
-					RenderSystem.fogStart(Math.min(vanillaBlockRenderedDistance * 1.5f, farPlaneBlockDistance * 0.9f * 1.6f));
-				RenderSystem.fogEnd(farPlaneBlockDistance * 1.6f);
+					GL15.glFogf(GL15.GL_FOG_START, Math.min(vanillaBlockRenderedDistance * 1.5f, farPlaneBlockDistance * 0.9f * 1.6f));
+				GL15.glFogf(GL15.GL_FOG_END, farPlaneBlockDistance * 1.6f);
 			}
 			else if (fogQuality == FogQuality.FAST)
 			{
 				// for the far fog of the normal chunks
 				// to start right where the LODs' end use:
 				// end = 0.8f, start = 1.5f
-				RenderSystem.fogStart(farPlaneBlockDistance * 0.75f);
-				RenderSystem.fogEnd(farPlaneBlockDistance * 1.0f);
+				GL15.glFogf(GL15.GL_FOG_START, farPlaneBlockDistance * 0.75f);
+				GL15.glFogf(GL15.GL_FOG_END, farPlaneBlockDistance * 1.0f);
 			}
 		}
 		else if (fogDistance == FogDistance.NEAR)
 		{
 			if (fogQuality == FogQuality.FANCY)
 			{
-				RenderSystem.fogEnd(vanillaBlockRenderedDistance * 1.41f);
-				RenderSystem.fogStart(vanillaBlockRenderedDistance * 1.6f);
+				GL15.glFogf(GL15.GL_FOG_END, vanillaBlockRenderedDistance * 1.41f);
+				GL15.glFogf(GL15.GL_FOG_START, vanillaBlockRenderedDistance * 1.6f);
 			}
 			else if (fogQuality == FogQuality.FAST)
 			{
-				RenderSystem.fogEnd(vanillaBlockRenderedDistance * 1.0f);
-				RenderSystem.fogStart(vanillaBlockRenderedDistance * 1.5f);
+				GL15.glFogf(GL15.GL_FOG_END, vanillaBlockRenderedDistance * 1.0f);
+				GL15.glFogf(GL15.GL_FOG_START, vanillaBlockRenderedDistance * 1.5f);
 			}
 		}
 		
 		GL15.glEnable(GL15.GL_FOG);
-		RenderSystem.enableFog();
-		RenderSystem.setupNvFogDistance();
-		RenderSystem.fogMode(GlStateManager.FogMode.LINEAR);
+		GL15.glFogi(GL15.GL_FOG_MODE, GL15.GL_LINEAR);
 		
 		if (GlProxy.getInstance().fancyFogAvailable)
 			GL15.glFogi(NVFogDistance.GL_FOG_DISTANCE_MODE_NV, glFogDistanceMode);
@@ -488,9 +478,9 @@ public class LodRenderer
 			float defaultFogStartDist, float defaultFogEndDist,
 			int defaultFogMode, int defaultFogDistance)
 	{
-		RenderSystem.fogStart(defaultFogStartDist);
-		RenderSystem.fogEnd(defaultFogEndDist);
-		RenderSystem.fogMode(defaultFogMode);
+		GL15.glFogf(GL15.GL_FOG_START, defaultFogStartDist);
+		GL15.glFogf(GL15.GL_FOG_END, defaultFogEndDist);
+		GL15.glFogi(GL15.GL_FOG_MODE, defaultFogMode);
 		
 		// this setting is only valid if the GPU supports fancy fog
 		if (GlProxy.getInstance().fancyFogAvailable)
@@ -509,9 +499,9 @@ public class LodRenderer
 			// we can't disable minecraft's fog outright because by default
 			// minecraft will re-enable the fog after our code
 			
-			RenderSystem.fogStart(0.0F);
-			RenderSystem.fogEnd(Float.MAX_VALUE);
-			RenderSystem.fogDensity(0.0F);
+			GL15.glFogf(GL15.GL_FOG_START, 0.0F);
+			GL15.glFogf(GL15.GL_FOG_END, Float.MAX_VALUE);
+			GL15.glFogf(GL15.GL_FOG_DENSITY, Float.MAX_VALUE);
 		}
 	}
 	
@@ -523,30 +513,30 @@ public class LodRenderer
 	 * (since AxisAlignedBoundingBoxes (LODs) use doubles and thus have a higher
 	 * accuracy vs the model view matrix, which only uses floats)
 	 */
-	private Matrix4f offsetTheModelViewMatrix(MatrixStack mcMatrixStack, float partialTicks)
+	private Matrix4f offsetTheModelViewMatrix(PoseStack mcModelViewMatrix, float partialTicks)
 	{
 		// duplicate the last matrix
-		mcMatrixStack.pushPose();
+		mcModelViewMatrix.pushPose();
 		
 		
 		// get all relevant camera info
-		ActiveRenderInfo renderInfo = mc.getGameRenderer().getMainCamera();
-		Vector3d projectedView = renderInfo.getPosition();
+		Camera camera = mc.getGameRenderer().getMainCamera();
+		Vec3 projectedView = camera.getPosition();
 		
 		// translate the camera relative to the regions' center
 		// (AxisAlignedBoundingBoxes (LODs) use doubles and thus have a higher
 		// accuracy vs the model view matrix, which only uses floats)
-		BlockPos bufferPos = vbosCenter.getWorldPosition();
+		BlockPosWrapper bufferPos = vbosCenter.getWorldPosition();
 		double xDiff = projectedView.x - bufferPos.getX();
 		double zDiff = projectedView.z - bufferPos.getZ();
-		mcMatrixStack.translate(-xDiff, -projectedView.y, -zDiff);
+		mcModelViewMatrix.translate(-xDiff, -projectedView.y, -zDiff);
 		
 		
 		
 		// get the modified model view matrix
-		Matrix4f lodModelViewMatrix = mcMatrixStack.last().pose();
+		Matrix4f lodModelViewMatrix = mcModelViewMatrix.last().pose();
 		// remove the lod ModelViewMatrix
-		mcMatrixStack.popPose();
+		mcModelViewMatrix.popPose();
 		
 		return lodModelViewMatrix;
 	}
@@ -569,7 +559,7 @@ public class LodRenderer
 		
 		// get Minecraft's un-edited projection matrix
 		// (this is before it is zoomed, distorted, etc.)
-		Matrix4f defaultMcProj = mc.getGameRenderer().getProjectionMatrix(mc.getGameRenderer().getMainCamera(), partialTicks, true);
+		Matrix4f defaultMcProj = mc.getGameRenderer().getProjectionMatrix(getFov(partialTicks, true));
 		// true here means use "use fov setting" (probably)
 		
 		
@@ -805,7 +795,7 @@ public class LodRenderer
 			vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
 			DetailDistanceUtil.updateSettings();
 			fullRegen = true;
-			previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
+			previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayerChunkPos().getZ(), mc.getPlayerChunkPos().getZ());
 			prevFogDistance = LodConfig.CLIENT.graphics.fogQualityOption.fogDistance.get();
 			prevRenderDistance = chunkRenderDistance;
 		}
@@ -824,12 +814,12 @@ public class LodRenderer
 		if (newTime - prevPlayerPosTime > LodConfig.CLIENT.advancedModOptions.buffers.rebuildTimes.get().playerMoveTimeout)
 		{
 			if (LevelPosUtil.getDetailLevel(previousPos) == 0
-						|| mc.getPlayer().xChunk != LevelPosUtil.getPosX(previousPos)
-						|| mc.getPlayer().zChunk != LevelPosUtil.getPosZ(previousPos))
+						|| mc.getPlayerChunkPos().getX() != LevelPosUtil.getPosX(previousPos)
+						|| mc.getPlayerChunkPos().getZ() != LevelPosUtil.getPosZ(previousPos))
 			{
 				vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
 				fullRegen = true;
-				previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
+				previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayerChunkPos().getX(), mc.getPlayerChunkPos().getZ());
 			}
 			prevPlayerPosTime = newTime;
 		}
@@ -910,15 +900,15 @@ public class LodRenderer
 		//==============//
 		
 		// determine which LODs should not be rendered close to the player
-		HashSet<ChunkPos> chunkPosToSkip = LodUtil.getNearbyLodChunkPosToSkip(lodDim, mc.getPlayer().blockPosition());
+		HashSet<ChunkPos> chunkPosToSkip = LodUtil.getNearbyLodChunkPosToSkip(lodDim, mc.getPlayerBlockPos());
 		int xIndex;
 		int zIndex;
 		for (ChunkPos pos : chunkPosToSkip)
 		{
 			vanillaRenderedChunksEmptySkip = false;
 			
-			xIndex = (pos.x - mc.getPlayer().xChunk) + (chunkRenderDistance + 1);
-			zIndex = (pos.z - mc.getPlayer().zChunk) + (chunkRenderDistance + 1);
+			xIndex = (pos.x - mc.getPlayerChunkPos().getX()) + (chunkRenderDistance + 1);
+			zIndex = (pos.z - mc.getPlayerChunkPos().getZ()) + (chunkRenderDistance + 1);
 			
 			// sometimes we are given chunks that are outside the render distance,
 			// This prevents index out of bounds exceptions

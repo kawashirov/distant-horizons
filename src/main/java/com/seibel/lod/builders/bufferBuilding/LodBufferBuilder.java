@@ -55,6 +55,8 @@ import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
+import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -163,7 +165,7 @@ public class LodBufferBuilder
 	 * swapped with the drawable buffers in the LodRenderer to be drawn.
 	 */
 	public void generateLodBuffersAsync(LodRenderer renderer, LodDimension lodDim,
-			BlockPos playerBlockPos, boolean fullRegen)
+			BlockPosWrapper playerBlockPos, boolean fullRegen)
 	{
 		
 		// only allow one generation process to happen at a time
@@ -965,9 +967,9 @@ public class LodBufferBuilder
 	{
 		public final VertexBuffer[][][] vbos;
 		public final int[][][] storageBufferIds;
-		public final ChunkPos drawableCenterChunkPos;
+		public final ChunkPosWrapper drawableCenterChunkPos;
 		
-		public VertexBuffersAndOffset(VertexBuffer[][][] newVbos, int[][][] newStorageBufferIds, ChunkPos newDrawableCenterChunkPos)
+		public VertexBuffersAndOffset(VertexBuffer[][][] newVbos, int[][][] newStorageBufferIds, ChunkPosWrapper newDrawableCenterChunkPos)
 		{
 			vbos = newVbos;
 			storageBufferIds = newStorageBufferIds;

@@ -32,12 +32,15 @@ import com.seibel.lod.enums.VanillaOverdraw;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.wrappers.MinecraftWrapper;
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
+import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -348,10 +351,10 @@ public class LodUtil
 	 * Get a HashSet of all ChunkPos within the normal render distance
 	 * that should not be rendered.
 	 */
-	public static HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodDimension lodDim, BlockPos playerPos)
+	public static HashSet<ChunkPos> getNearbyLodChunkPosToSkip(LodDimension lodDim, BlockPosWrapper blockPosWrapper)
 	{
 		int chunkRenderDist = mc.getRenderDistance();
-		ChunkPos centerChunk = new ChunkPos(playerPos);
+		ChunkPosWrapper centerChunk = new ChunkPosWrapper(blockPosWrapper);
 		
 		int skipRadius;
 		VanillaOverdraw overdraw = LodConfig.CLIENT.graphics.advancedGraphicsOption.vanillaOverdraw.get();
@@ -425,12 +428,12 @@ public class LodUtil
 		// if the skipRadius is being used
 		if (skipRadius != 0)
 		{
-			for (int x = centerChunk.x - chunkRenderDist; x < centerChunk.x + chunkRenderDist; x++)
+			for (int x = centerChunk.getX() - chunkRenderDist; x < centerChunk.getX() + chunkRenderDist; x++)
 			{
-				for (int z = centerChunk.z - chunkRenderDist; z < centerChunk.z + chunkRenderDist; z++)
+				for (int z = centerChunk.getZ() - chunkRenderDist; z < centerChunk.getZ() + chunkRenderDist; z++)
 				{
-					if (x <= centerChunk.x - skipRadius || x >= centerChunk.x + skipRadius
-							|| z <= centerChunk.z - skipRadius || z >= centerChunk.z + skipRadius)
+					if (x <= centerChunk.getX() - skipRadius || x >= centerChunk.getX() + skipRadius
+							|| z <= centerChunk.getZ() - skipRadius || z >= centerChunk.getZ() + skipRadius)
 						posToSkip.remove(new ChunkPos(x, z));
 					
 				}

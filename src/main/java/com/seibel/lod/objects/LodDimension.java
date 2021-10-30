@@ -118,7 +118,7 @@ public class LodDimension
 					// provider needs a separate variable to prevent
 					// the compiler from complaining
 					ServerChunkCache provider = serverWorld.getChunkSource();
-					saveDir = new File(provider.dataStorage.dataFolder.getCanonicalFile().getPath() + File.separatorChar + "lod");
+					saveDir = new File(provider.getDataStorage().dataFolder.getCanonicalFile().getPath() + File.separatorChar + "lod");
 				}
 				else
 				{

@@ -27,6 +27,8 @@ import com.mojang.blaze3d.platform.Window;
 import com.seibel.lod.ModInfo;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
+import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 import com.seibel.lod.wrappers.World.WorldWrapper;
 
 import net.minecraft.CrashReport;
@@ -41,10 +43,12 @@ import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.dimension.DimensionType;
 
 /**
@@ -170,6 +174,18 @@ public class MinecraftWrapper
 		return mc.player;
 	}
 	
+	public BlockPosWrapper getPlayerBlockPos()
+	{
+		BlockPos playerPos = getPlayer().blockPosition();
+		return new BlockPosWrapper(playerPos.getX(), playerPos.getY(), playerPos.getZ());
+	}
+	
+	public ChunkPosWrapper getPlayerChunkPos()
+	{
+		ChunkPos playerPos = getPlayer().chunkPosition();
+		return new ChunkPosWrapper(playerPos.x, playerPos.z);
+	}
+	
 	public Options getOptions()
 	{
 		return mc.options;
@@ -270,6 +286,8 @@ public class MinecraftWrapper
 	{
 		return mc.levelRenderer;
 	}
+	
+	
 	
 	
 	/**

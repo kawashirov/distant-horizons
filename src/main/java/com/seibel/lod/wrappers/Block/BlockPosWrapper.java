@@ -2,8 +2,6 @@ package com.seibel.lod.wrappers.Block;
 
 import java.util.Objects;
 
-import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
-
 import net.minecraft.core.BlockPos;
 
 
@@ -60,7 +58,7 @@ public class BlockPosWrapper
 		return Objects.hash(blockPos);
 	}
 
-	public ChunkPosWrapper offset(int x, int y, int z)
+	public BlockPosWrapper offset(int x, int y, int z)
 	{
 		// TODO Auto-generated method stub
 		return null;
