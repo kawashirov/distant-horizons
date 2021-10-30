@@ -36,9 +36,9 @@ import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
+import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraftforge.common.WorldWorkerManager;
 
 /**
@@ -72,7 +72,7 @@ public class LodWorldGenerator
 	 */
 	public final AtomicInteger numberOfChunksWaitingToGenerate = new AtomicInteger(0);
 	
-	public final Set<ChunkPos> positionsWaitingToBeGenerated = new HashSet<>();
+	public final Set<ChunkPosWrapper> positionsWaitingToBeGenerated = new HashSet<>();
 	
 	/**
 	 * Singleton copy of this object
@@ -115,7 +115,7 @@ public class LodWorldGenerator
 					// fill in positionsWaitingToBeGenerated //
 					//=======================================//
 					
-					ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(lodDim.dimension);
+					ServerLevel serverWorld = LodUtil.getServerLevelFromDimension(lodDim.dimension);
 					
 					PosToGenerateContainer posToGenerate = lodDim.getPosToGenerate(
 							maxChunkGenRequests,
@@ -142,7 +142,7 @@ public class LodWorldGenerator
 							posZ = posToGenerate.getNthPosZ(nearIndex, true);
 							nearIndex++;
 							
-							ChunkPos chunkPos = new ChunkPos(LevelPosUtil.getChunkPos(detailLevel, posX), LevelPosUtil.getChunkPos(detailLevel, posZ));
+							ChunkPosWrapper chunkPos = new ChunkPosWrapper(LevelPosUtil.getChunkPos(detailLevel, posX), LevelPosUtil.getChunkPos(detailLevel, posZ));
 							
 							// prevent generating the same chunk multiple times
 							if (positionsWaitingToBeGenerated.contains(chunkPos))
@@ -167,7 +167,7 @@ public class LodWorldGenerator
 							posZ = posToGenerate.getNthPosZ(farIndex, false);
 							farIndex++;
 							
-							ChunkPos chunkPos = new ChunkPos(LevelPosUtil.getChunkPos(detailLevel, posX), LevelPosUtil.getChunkPos(detailLevel, posZ));
+							ChunkPosWrapper chunkPos = new ChunkPosWrapper(LevelPosUtil.getChunkPos(detailLevel, posX), LevelPosUtil.getChunkPos(detailLevel, posZ));
 							
 							// don't add more to the generation queue then allowed
 							if (numberOfChunksWaitingToGenerate.get() >= maxChunkGenRequests)

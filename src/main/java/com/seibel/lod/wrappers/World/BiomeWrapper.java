@@ -1,20 +1,14 @@
 package com.seibel.lod.wrappers.World;
 
-import com.seibel.lod.util.ColorUtil;
-import com.seibel.lod.util.LodUtil;
-import com.seibel.lod.wrappers.Block.BlockColorWrapper;
-import com.seibel.lod.wrappers.Block.BlockPosWrapper;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.material.MaterialColor;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeColors;
-
-import java.awt.*;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.seibel.lod.util.LodUtil;
+
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.MaterialColor;
+import net.minecraftforge.client.event.RenderTooltipEvent.Color;
 
 //This class wraps the minecraft BlockPos.Mutable (and BlockPos) class
 public class BiomeWrapper
@@ -53,16 +47,16 @@ public class BiomeWrapper
 		{
 		
 		case NETHER:
-			colorInt = Blocks.NETHERRACK.defaultBlockState().materialColor.col;
+			colorInt = Blocks.NETHERRACK.defaultBlockState().getMaterial().getColor().col;
 			break;
 		
 		case THEEND:
-			colorInt = Blocks.END_STONE.defaultBlockState().materialColor.col;
+			colorInt = Blocks.END_STONE.defaultBlockState().getMaterial().getColor().col;
 			break;
 		
 		case BEACH:
 		case DESERT:
-			colorInt = Blocks.SAND.defaultBlockState().materialColor.col;
+			colorInt = Blocks.SAND.defaultBlockState().getMaterial().getColor().col;
 			break;
 		
 		case EXTREME_HILLS:

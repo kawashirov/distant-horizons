@@ -20,47 +20,23 @@
 package com.seibel.lod.builders.worldGeneration;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Random;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import com.seibel.lod.util.LodUtil;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.SectionPos;
-import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
 import net.minecraft.world.DifficultyInstance;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.EmptyTickList;
-import net.minecraft.world.ISeedReader;
-import net.minecraft.world.ITickList;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeManager;
-import net.minecraft.world.border.WorldBorder;
-import net.minecraft.world.chunk.AbstractChunkProvider;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.gen.Heightmap.Type;
-import net.minecraft.world.gen.feature.structure.Structure;
-import net.minecraft.world.gen.feature.structure.StructureStart;
-import net.minecraft.world.lighting.WorldLightManager;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.IWorldInfo;
-
+import net.minecraft.world.level.EmptyTickList;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.border.WorldBorder;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.material.FluidState;
 
 /**
  * This is a fake ServerWorld used when generating features.
@@ -70,7 +46,7 @@ import net.minecraft.world.storage.IWorldInfo;
  * @author James Seibel
  * @version 7-26-2021
  */
-public class LodServerWorld implements ISeedReader
+public class LodServerLevel implements Level
 {
 	
 	public HashMap<Heightmap.Type, Heightmap> heightmaps = new HashMap<>();
@@ -79,7 +55,7 @@ public class LodServerWorld implements ISeedReader
 	
 	public final ServerWorld serverWorld;
 	
-	public LodServerWorld(ServerWorld newServerWorld, IChunk newChunk)
+	public LodServerLevel(ServerWorld newServerWorld, IChunk newChunk)
 	{
 		chunk = newChunk;
 		serverWorld = newServerWorld;

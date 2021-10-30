@@ -157,6 +157,7 @@ public class ClientProxy
 	}
 	
 	/** used in a development environment to change settings on the fly */
+	@SuppressWarnings("unused")
 	private void applyConfigOverrides()
 	{
 		// remind the developer(s) that the config override is active
@@ -316,13 +317,12 @@ public class ClientProxy
 	private void playerMoveEvent(LodDimension lodDim)
 	{
 		// make sure the dimension is centered
-		RegionPos playerRegionPos = new RegionPos(mc.getPlayer().blockPosition());
+		RegionPos playerRegionPos = new RegionPos(mc.getPlayerBlockPos());
 		RegionPos worldRegionOffset = new RegionPos(playerRegionPos.x - lodDim.getCenterRegionPosX(), playerRegionPos.z - lodDim.getCenterRegionPosZ());
 		if (worldRegionOffset.x != 0 || worldRegionOffset.z != 0)
 		{
 			lodWorld.saveAllDimensions();
 			lodDim.move(worldRegionOffset);
-			//LOGGER.info("offset: " + worldRegionOffset.x + "," + worldRegionOffset.z + "\t center: " + lodDim.getCenterX() + "," + lodDim.getCenterZ());
 		}
 	}
 	

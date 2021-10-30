@@ -1,23 +1,24 @@
 package com.seibel.lod.wrappers.World;
 
-import com.seibel.lod.wrappers.Block.BlockPosWrapper;
-import net.minecraft.world.IWorld;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
+
+import net.minecraft.world.level.Level;
+
 public class WorldWrapper
 {
-	private static final ConcurrentMap<IWorld, WorldWrapper> worldWrapperMap = new ConcurrentHashMap<>();
-	private IWorld world;
+	private static final ConcurrentMap<Level, WorldWrapper> worldWrapperMap = new ConcurrentHashMap<>();
+	private Level world;
 	
-	public WorldWrapper(IWorld world)
+	public WorldWrapper(Level world)
 	{
 		this.world = world;
 	}
 	
 	
-	public static WorldWrapper getWorldWrapper(IWorld world)
+	public static WorldWrapper getWorldWrapper(Level world)
 	{
 		//first we check if the biome has already been wrapped
 		if(worldWrapperMap.containsKey(world) && worldWrapperMap.get(world) != null)
@@ -57,7 +58,7 @@ public class WorldWrapper
 		return BiomeWrapper.getBiomeWrapper(world.getBiome(blockPos.getBlockPos()));
 	}
 	
-	public IWorld getWorld()
+	public Level getWorld()
 	{
 		return world;
 	}

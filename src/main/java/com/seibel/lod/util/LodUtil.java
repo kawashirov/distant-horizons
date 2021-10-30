@@ -37,14 +37,13 @@ import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -238,12 +237,12 @@ public class LodUtil
 	 * world, if in multiplayer it will return the server name, IP,
 	 * and game version.
 	 */
-	public static String getWorldID(Level world)
+	public static String getWorldID(LevelAccessor levelAccessor)
 	{
 		if (mc.hasSinglePlayerServer())
 		{
 			// chop off the dimension ID as it is not needed/wanted
-			String dimId = getDimensionIDFromWorld(world);
+			String dimId = getDimensionIDFromWorld(levelAccessor);
 			
 			// get the world name
 			int saveIndex = dimId.indexOf("saves") + 1 + "saves".length();
@@ -266,26 +265,26 @@ public class LodUtil
 	 * This can be used to determine where to save files for a given
 	 * dimension.
 	 */
-	public static String getDimensionIDFromWorld(Level world)
+	public static String getDimensionIDFromWorld(LevelAccessor levelAccessor)
 	{
 		if (mc.hasSinglePlayerServer())
 		{
 			// this will return the world save location
 			// and the dimension folder
 			
-			ServerLevel ServerLevel = LodUtil.getServerLevelFromDimension(world.dimensionType());
+			ServerLevel ServerLevel = LodUtil.getServerLevelFromDimension(levelAccessor.dimensionType());
 			if (ServerLevel == null)
-				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerLevel for the dimension " + world.dimensionType().effectsLocation().getPath());
+				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerLevel for the dimension " + levelAccessor.dimensionType().effectsLocation().getPath());
 			
 			ServerChunkCache provider = ServerLevel.getChunkSource();
 			if (provider == null)
-				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerChunkProvider for the dimension " + world.dimensionType().effectsLocation().getPath());
+				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerChunkProvider for the dimension " + levelAccessor.dimensionType().effectsLocation().getPath());
 			
 			return provider.getDataStorage().dataFolder.toString();
 		}
 		else
 		{
-			return getServerId() + File.separatorChar + "dim_" + world.dimensionType().effectsLocation().getPath() + File.separatorChar;
+			return getServerId() + File.separatorChar + "dim_" + levelAccessor.dimensionType().effectsLocation().getPath() + File.separatorChar;
 		}
 	}
 	
@@ -459,13 +458,12 @@ public class LodUtil
 		
 		// go through every RenderInfo to get the compiled chunks
 		LevelRenderer renderer = mc.getLevelRenderer();
-		for (LevelRenderer.LocalRenderInformationContainer worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
+		for (LevelRenderer.RenderChunkInfo chunkInfo : renderer.renderChunks)
 		{
-			CompiledChunk compiledChunk = worldRenderer$LocalRenderInformationContainer.chunk.getCompiledChunk();
-			if (!compiledChunk.hasNoRenderableLayers())
+			if (!chunkInfo.chunk.getCompiledChunk().hasNoRenderableLayers())
 			{
 				// add the ChunkPos for every rendered chunk
-				BlockPos bpos = worldRenderer$LocalRenderInformationContainer.chunk.getOrigin();
+				BlockPos bpos = chunkInfo.chunk.getOrigin();
 				
 				loadedPos.add(new ChunkPos(bpos));
 			}

@@ -35,20 +35,18 @@ import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.util.ThreadMapUtil;
-import com.seibel.lod.wrappers.Block.BlockPosWrapper;
+import com.seibel.lod.wrappers.MinecraftWrapper;
 import com.seibel.lod.wrappers.Block.BlockColorWrapper;
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
 import com.seibel.lod.wrappers.Block.BlockShapeWrapper;
 import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 import com.seibel.lod.wrappers.Chunk.ChunkWrapper;
-import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import com.seibel.lod.wrappers.World.BiomeColorWrapper;
 import com.seibel.lod.wrappers.World.BiomeWrapper;
 import com.seibel.lod.wrappers.World.WorldWrapper;
 
-
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.IWorld;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.dimension.DimensionType;
 
 /**
  * This object is in charge of creating Lod related objects.
@@ -89,12 +87,12 @@ public class LodBuilder
 	
 	}
 	
-	public void generateLodNodeAsync(ChunkWrapper chunk, LodWorld lodWorld, IWorld world)
+	public void generateLodNodeAsync(ChunkWrapper chunk, LodWorld lodWorld, LevelAccessor world)
 	{
 		generateLodNodeAsync(chunk, lodWorld, world, DistanceGenerationMode.SERVER);
 	}
 	
-	public void generateLodNodeAsync(ChunkWrapper chunk, LodWorld lodWorld, IWorld world, DistanceGenerationMode generationMode)
+	public void generateLodNodeAsync(ChunkWrapper chunk, LodWorld lodWorld, LevelAccessor world, DistanceGenerationMode generationMode)
 	{
 		if (lodWorld == null || lodWorld.getIsWorldNotLoaded())
 			return;
@@ -387,7 +385,7 @@ public class LodBuilder
 		// 1 means the lighting is a guess
 		int isDefault = 0;
 		
-		WorldWrapper world = MinecraftWrapper.INSTANCE.getWrappedServerWorld();
+		WorldWrapper world = MinecraftWrapper.INSTANCE.getWrappedServerLevel();
 		
 		int blockBrightness = chunk.getEmittedBrightness(blockPos);
 		// get the air block above or below this block
@@ -505,7 +503,7 @@ public class LodBuilder
 		if (blockColorWrapper.hasTint())
 		{
 			
-			WorldWrapper world = MinecraftWrapper.INSTANCE.getWrappedServerWorld();
+			WorldWrapper world = MinecraftWrapper.INSTANCE.getWrappedServerLevel();
 			
 			if (world.isEmpty())
 			{
