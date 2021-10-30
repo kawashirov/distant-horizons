@@ -35,17 +35,15 @@ import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.util.ThreadMapUtil;
-import com.seibel.lod.wrappers.Block.BlockPosWrapper;
+import com.seibel.lod.wrappers.MinecraftWrapper;
 import com.seibel.lod.wrappers.Block.BlockColorWrapper;
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
 import com.seibel.lod.wrappers.Block.BlockShapeWrapper;
 import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 import com.seibel.lod.wrappers.Chunk.ChunkWrapper;
-import com.seibel.lod.wrappers.MinecraftWrapper;
-
 import com.seibel.lod.wrappers.World.BiomeColorWrapper;
 import com.seibel.lod.wrappers.World.BiomeWrapper;
 import com.seibel.lod.wrappers.World.WorldWrapper;
-
 
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
@@ -170,6 +168,10 @@ public class LodBuilder
 		
 		LodRegion region = lodDim.getRegion(chunk.getPos().getRegionX(), chunk.getPos().getRegionZ());
 		if (region == null)
+			return;
+		
+		// this happens if a LOD is generated after the user leaves the world.
+		if (MinecraftWrapper.INSTANCE.getWrappedClientWorld() == null)
 			return;
 		
 		// determine how many LODs to generate horizontally
@@ -396,7 +398,7 @@ public class LodBuilder
 		
 		
 		
-		if (!world.isEmpty())
+		if (world != null && !world.isEmpty())
 		{
 			// server world sky light (always accurate)
 			blockLight = world.getBlockLight(blockPos);
@@ -500,7 +502,7 @@ public class LodBuilder
 		{
 			WorldWrapper world = MinecraftWrapper.INSTANCE.getWrappedServerWorld();
 			
-			if (world.isEmpty())
+			if (world == null || world.isEmpty())
 				world = MinecraftWrapper.INSTANCE.getWrappedClientWorld();
 			
 			int tintValue;
