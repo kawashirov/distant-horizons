@@ -287,7 +287,7 @@ public class LodRenderer
 		
 		profiler.popPush("LOD draw");
 		
-		if (vbos != null)
+		if (vbos != null && LodConfig.CLIENT.advancedModOptions.debugging.drawLods.get())
 		{
 			ActiveRenderInfo renderInfo = mc.getGameRenderer().getMainCamera();
 			Vector3d cameraDir = new Vector3d(renderInfo.getLookVector());
