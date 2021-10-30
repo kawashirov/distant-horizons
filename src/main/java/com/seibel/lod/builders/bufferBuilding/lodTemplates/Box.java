@@ -373,7 +373,7 @@ public class Box
 						{
 							adjHeight.get(direction)[0] = getMaxY();
 							adjDepth.get(direction)[0] = getMinY();
-							skyLights.get(direction)[0] = skyLights.get(Direction.UP)[0];
+							skyLights.get(direction)[0] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint); //skyLights.get(Direction.UP)[0];
 						}
 						else
 						{
@@ -386,32 +386,34 @@ public class Box
 						// break since all the other data will be lower
 						break;
 					}
-					else if (depth <= minY && height >= maxY)
+					else if (depth <= minY)
 					{
-						// the adj data is inside the current data
-						// don't draw the face
-						adjHeight.get(direction)[0] = VOID_FACE;
-						adjDepth.get(direction)[0] = VOID_FACE;
-						break;
-					}
-					else if (depth <= minY)//&& height < maxY
-					{
-						// the adj data intersects the lower part of the current data
-						// if this is the only face, use the maxY and break,
-						// if there was another face we finish the last one and break
-						if (firstFace)
+						if (height >= maxY)
 						{
-							adjHeight.get(direction)[0] = getMaxY();
-							adjDepth.get(direction)[0] = height;
-							skyLights.get(direction)[0] = skyLights.get(Direction.UP)[0];
+							// the adj data is inside the current data
+							// don't draw the face
+							adjHeight.get(direction)[0] = VOID_FACE;
+							adjDepth.get(direction)[0] = VOID_FACE;
 						}
-						else
+						else // height < maxY
 						{
-							adjDepth.get(direction)[faceToDraw] = height;
-							skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
+							// the adj data intersects the lower part of the current data
+							// if this is the only face, use the maxY and break,
+							// if there was another face we finish the last one and break
+							if (firstFace)
+							{
+								adjHeight.get(direction)[0] = getMaxY();
+								adjDepth.get(direction)[0] = height;
+								skyLights.get(direction)[0] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint); //skyLights.get(Direction.UP)[0];
+							}
+							else
+							{
+								adjDepth.get(direction)[faceToDraw] = height;
+								skyLights.get(direction)[faceToDraw] = (byte) DataPointUtil.getLightSkyAlt(singleAdjDataPoint);
+							}
+							toFinish = false;
+							faceToDraw++;
 						}
-						toFinish = false;
-						faceToDraw++;
 						break;
 					}
 					else if (height >= maxY)//depth > minY &&

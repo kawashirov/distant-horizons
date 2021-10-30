@@ -365,7 +365,7 @@ public class LodBufferBuilder
 									}
 									else
 									{
-										//Other wise we check if this position is
+										//Otherwise, we check if this position is
 										data = lodDim.getSingleData(detailLevel, xAdj, zAdj);
 										
 										adjData.get(direction)[0] = DataPointUtil.EMPTY_DATA;
