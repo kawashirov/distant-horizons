@@ -144,10 +144,10 @@ dependencies {
     // The userdev artifact is a special name and will get all sorts of transformations applied to it.
     minecraft 'net.minecraftforge:forge:1.17.1-37.0.103'
 
-    //compile 'org.tukaani:xz:1.9'
-    //shadowMe 'org.tukaani:xz:1.9'
-    //compile 'org.apache.commons:commons-compress:1.21'
-    //shadowMe 'org.apache.commons:commons-compress:1.21'
+    implementation 'org.tukaani:xz:1.9'
+    shadowMe 'org.tukaani:xz:1.9'
+    implementation 'org.apache.commons:commons-compress:1.21'
+    shadowMe 'org.apache.commons:commons-compress:1.21'
 
     // these were added to hopefully allow for cloning
     // configuredFeatures to allow for safe
