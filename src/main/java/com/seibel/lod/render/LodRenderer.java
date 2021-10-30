@@ -155,7 +155,6 @@ public class LodRenderer
 	 * @param mcModelViewMatrix This matrix stack should come straight from MC's renderChunkLayer (or future equivalent) method
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
-	@SuppressWarnings("deprecation")
 	public void drawLODs(LodDimension lodDim, PoseStack mcModelViewMatrix, float partialTicks, ProfilerFiller newProfiler)
 	{
 		//=================================//
@@ -394,7 +393,6 @@ public class LodRenderer
 	// Setup Functions //
 	//=================//
 	
-	@SuppressWarnings("deprecation")
 	private void setupFog(FogDistance fogDistance, FogQuality fogQuality)
 	{
 		if (fogQuality == FogQuality.OFF)
@@ -473,7 +471,6 @@ public class LodRenderer
 	 * Revert any changes that were made to the fog
 	 * and sets up the fog for Minecraft.
 	 */
-	@SuppressWarnings("deprecation")
 	private void cleanupFog(NearFarFogSettings fogSettings,
 			float defaultFogStartDist, float defaultFogEndDist,
 			int defaultFogMode, int defaultFogDistance)
