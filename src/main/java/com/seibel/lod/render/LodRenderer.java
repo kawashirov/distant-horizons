@@ -199,6 +199,9 @@ public class LodRenderer
 		//		(this is to prevent thread conflicts)
 		if (LodConfig.CLIENT.advancedModOptions.debugging.drawLods.get())
 		{
+			if (lodBufferBuilder.buildableBuffers == null)
+				lodBufferBuilder.setupBuffers(lodDim);
+			
 			if ((partialRegen || fullRegen) && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvailable())
 			{
 				// generate the LODs on a separate thread to prevent stuttering or freezing
