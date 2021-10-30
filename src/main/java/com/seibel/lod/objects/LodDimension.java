@@ -36,10 +36,10 @@ import com.seibel.lod.util.LodThreadFactory;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.server.ServerChunkProvider;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.dimension.DimensionType;
 
 
 /**
@@ -113,11 +113,11 @@ public class LodDimension
 				{
 					// local world
 					
-					ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(newDimension);
+					ServerLevel serverWorld = LodUtil.getServerLevelFromDimension(newDimension);
 					
 					// provider needs a separate variable to prevent
 					// the compiler from complaining
-					ServerChunkProvider provider = serverWorld.getChunkSource();
+					ServerChunkCache provider = serverWorld.getChunkSource();
 					saveDir = new File(provider.dataStorage.dataFolder.getCanonicalFile().getPath() + File.separatorChar + "lod");
 				}
 				else

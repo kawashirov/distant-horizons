@@ -1,19 +1,26 @@
 package com.seibel.lod.wrappers.Block;
 
-import com.seibel.lod.util.ColorUtil;
-import com.seibel.lod.wrappers.MinecraftWrapper;
-import net.minecraft.block.*;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.client.model.data.ModelDataMap;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import com.seibel.lod.util.ColorUtil;
+import com.seibel.lod.wrappers.MinecraftWrapper;
+
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.FlowerBlock;
+import net.minecraft.world.level.block.GrassBlock;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.TallGrassBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.model.data.ModelDataMap;
 
 
 //This class wraps the minecraft Block class
@@ -22,7 +29,7 @@ public class BlockColorWrapper
 	//set of block which require tint
 	public static final ConcurrentMap<Block, BlockColorWrapper> blockColorWrapperMap = new ConcurrentHashMap<>();
 	public static final ModelDataMap dataMap = new ModelDataMap.Builder().build();
-	public static final BlockPos blockPos = new BlockPos(0,0,0);
+	public static final BlockPosWrapper blockPos = new BlockPosWrapper(0,0,0);
 	public static Random random = new Random(0);
 	//public static BlockColourWrapper WATER_COLOR = getBlockColorWrapper(Blocks.WATER);
 	public static final Direction[] directions = new Direction[] { Direction.UP, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.DOWN };
@@ -114,7 +121,7 @@ public class BlockColorWrapper
 		else
 		{
 			isColored = true;
-			texture = mc.getModelManager().getBlockModelShaper().getTexture(block.defaultBlockState(), mc.getClientWorld(), blockPosWrapper.getBlockPos());
+			texture = mc.getModelManager().getBlockModelShaper().getTexture(block.defaultBlockState(), mc.getClientLevel(), blockPosWrapper.getBlockPos());
 		}
 		
 		int count = 0;

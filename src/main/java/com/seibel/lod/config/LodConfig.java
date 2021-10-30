@@ -575,15 +575,8 @@ public class LodConfig
 	}
 	
 	@SubscribeEvent
-	public static void onLoad(final ModConfig.Loading configEvent)
+	public static void onChange(final ModConfig configEvent)
 	{
-		LogManager.getLogger().debug(ModInfo.NAME, "Loaded forge config file {}", configEvent.getConfig().getFileName());
+		LogManager.getLogger().debug(ModInfo.NAME, "forge config file {} changed.", configEvent.getFileName());
 	}
-	
-	@SubscribeEvent
-	public static void onFileChange(final ModConfig.Reloading configEvent)
-	{
-		LogManager.getLogger().debug(ModInfo.NAME, "Forge config just got changed on the file system!");
-	}
-	
 }

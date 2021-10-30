@@ -21,13 +21,10 @@ package com.seibel.lod.builders.bufferBuilding;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.lwjgl.opengl.GL11;
@@ -37,6 +34,8 @@ import org.lwjgl.opengl.GL45;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.GlProxyContext;
@@ -57,13 +56,10 @@ import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.vertex.VertexBuffer;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.LightType;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.ChunkPos;
 
 /**
  * This object is used to create NearFarBuffer objects.
@@ -232,7 +228,7 @@ public class LodBufferBuilder
 			// create the nodeToRenderThreads //
 			//================================//
 			
-			ClientWorld world = mc.getClientWorld();
+			ClientLevel world = mc.getClientLevel();
 			skyLightPlayer = world.getBrightness(LightType.SKY, playerBlockPos);
 			
 			for (int xRegion = 0; xRegion < lodDim.getWidth(); xRegion++)

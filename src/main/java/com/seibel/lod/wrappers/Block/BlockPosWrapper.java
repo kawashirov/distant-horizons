@@ -1,30 +1,29 @@
 package com.seibel.lod.wrappers.Block;
 
-import com.seibel.lod.util.ColorUtil;
-import net.minecraft.block.*;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.client.model.data.ModelDataMap;
-
-import java.util.List;
 import java.util.Objects;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
+
+import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
+
+import net.minecraft.core.BlockPos;
 
 
 //This class wraps the minecraft BlockPos.Mutable (and BlockPos) class
 public class BlockPosWrapper
 {
-	private BlockPos.Mutable blockPos;
+	private BlockPos.MutableBlockPos blockPos;
 	
 	
 	public BlockPosWrapper()
 	{
-		this.blockPos = new BlockPos.Mutable(0,0,0);
+		this.blockPos = new BlockPos.MutableBlockPos(0,0,0);
 	}
+	
+	public BlockPosWrapper(int x, int y, int z)
+	{
+		this.blockPos = new BlockPos.MutableBlockPos(x, y, z);
+	}
+	
+	
 	
 	public void set(int x, int y, int z)
 	{
@@ -46,7 +45,7 @@ public class BlockPosWrapper
 		return blockPos.getZ();
 	}
 	
-	public BlockPos.Mutable getBlockPos()
+	public BlockPos.MutableBlockPos getBlockPos()
 	{
 		return blockPos;
 	}
@@ -59,6 +58,12 @@ public class BlockPosWrapper
 	@Override public int hashCode()
 	{
 		return Objects.hash(blockPos);
+	}
+
+	public ChunkPosWrapper offset(int x, int y, int z)
+	{
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

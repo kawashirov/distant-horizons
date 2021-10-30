@@ -19,12 +19,12 @@
 
 package com.seibel.lod.proxy;
 
-import com.seibel.lod.wrappers.Chunk.ChunkWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import com.seibel.lod.builders.bufferBuilding.LodBufferBuilder;
 import com.seibel.lod.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.builders.worldGeneration.LodGenWorker;
@@ -40,9 +40,10 @@ import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.util.ThreadMapUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
+import com.seibel.lod.wrappers.Chunk.ChunkWrapper;
 
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.BlockEvent;
@@ -99,7 +100,7 @@ public class ClientProxy
 	//==============//
 	
 	/** Do any setup that is required to draw LODs and then tell the LodRenderer to draw. */
-	public void renderLods(MatrixStack mcMatrixStack, float partialTicks)
+	public void renderLods(PoseStack mcModelViewMatrix, Matrix4f projectionMatrix, float partialTicks)
 	{
 		// comment out when creating a release
 		// applyConfigOverrides();
@@ -133,11 +134,11 @@ public class ClientProxy
 			// if "unspecified" shows up in the pie chart, it is
 			// possibly because the amount of time between sections
 			// is too small for the profiler to measure
-			IProfiler profiler = mc.getProfiler();
+			ProfilerFiller profiler = mc.getProfiler();
 			profiler.pop(); // get out of "terrain"
 			profiler.push("LOD");
 			
-			renderer.drawLODs(lodDim, mcMatrixStack, partialTicks, mc.getProfiler());
+			renderer.drawLODs(lodDim, mcModelViewMatrix, partialTicks, mc.getProfiler());
 			
 			profiler.pop(); // end LOD
 			profiler.push("terrain"); // go back into "terrain"
@@ -161,10 +162,10 @@ public class ClientProxy
 		// remind the developer(s) that the config override is active
 		if (!configOverrideReminderPrinted)
 		{
-//			mc.getPlayer().sendMessage(new StringTextComponent("LOD experimental build 1.5.1"), mc.getPlayer().getUUID());
-//			mc.getPlayer().sendMessage(new StringTextComponent("Here be dragons!"), mc.getPlayer().getUUID());
+//			mc.getPlayer().sendMessage(new TextComponent("LOD experimental build 1.5.1"), mc.getPlayer().getUUID());
+//			mc.getPlayer().sendMessage(new TextComponent("Here be dragons!"), mc.getPlayer().getUUID());
 			
-			mc.getPlayer().sendMessage(new StringTextComponent("Debug settings enabled!"), mc.getPlayer().getUUID());
+			mc.getPlayer().sendMessage(new TextComponent("Debug settings enabled!"), mc.getPlayer().getUUID());
 			configOverrideReminderPrinted = true;
 		}
 
@@ -331,7 +332,7 @@ public class ClientProxy
 	{
 		// calculate how wide the dimension(s) should be in regions
 		int chunksWide;
-		if (mc.getClientWorld().dimensionType().hasCeiling())
+		if (mc.getClientLevel().dimensionType().hasCeiling())
 			chunksWide = Math.min(LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get(), LodUtil.CEILED_DIMENSION_MAX_RENDER_DISTANCE) * 2 + 1;
 		else
 			chunksWide = LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get() * 2 + 1;
@@ -348,7 +349,7 @@ public class ClientProxy
 			// update the dimensions to fit the new width
 			lodWorld.resizeDimensionRegionWidth(newWidth);
 			lodBuilder.defaultDimensionWidthInRegions = newWidth;
-			renderer.setupBuffers(lodWorld.getLodDimension(mc.getClientWorld().dimensionType()));
+			renderer.setupBuffers(lodWorld.getLodDimension(mc.getClientLevel().dimensionType()));
 			
 			recalculateWidths = false;
 			//LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );

@@ -22,30 +22,30 @@ package com.seibel.lod.wrappers;
 import java.awt.Color;
 import java.io.File;
 
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.platform.Window;
 import com.seibel.lod.ModInfo;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
-
 import com.seibel.lod.wrappers.World.WorldWrapper;
-import net.minecraft.client.GameSettings;
-import net.minecraft.client.MainWindow;
+
+import net.minecraft.CrashReport;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.Options;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.network.play.ClientPlayNetHandler;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.WorldRenderer;
-import net.minecraft.client.renderer.model.ModelManager;
-import net.minecraft.client.renderer.texture.NativeImage;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.crash.CrashReport;
-import net.minecraft.entity.Entity;
-import net.minecraft.profiler.IProfiler;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.util.Direction;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.client.resources.model.ModelManager;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.dimension.DimensionType;
 
 /**
  * A singleton that wraps the Minecraft class
@@ -165,12 +165,12 @@ public class MinecraftWrapper
 	// Simple gets //
 	//=============//
 	
-	public ClientPlayerEntity getPlayer()
+	public LocalPlayer getPlayer()
 	{
 		return mc.player;
 	}
 	
-	public GameSettings getOptions()
+	public Options getOptions()
 	{
 		return mc.options;
 	}
@@ -180,17 +180,17 @@ public class MinecraftWrapper
 		return mc.getModelManager();
 	}
 	
-	public ClientWorld getClientWorld()
+	public ClientLevel getClientLevel()
 	{
 		return mc.level;
 	}
 	
-	public WorldWrapper getWrappedClientWorld()
+	public WorldWrapper getWrappedClientLevel()
 	{
 		return WorldWrapper.getWorldWrapper(mc.level);
 	}
 	
-	public WorldWrapper getWrappedServerWorld()
+	public WorldWrapper getWrappedServerLevel()
 	{
 		
 		if (mc.level == null)
@@ -200,10 +200,10 @@ public class MinecraftWrapper
 		if (server == null)
 			return null;
 		
-		Iterable<ServerWorld> worlds = server.getAllLevels();
-		ServerWorld returnWorld = null;
+		Iterable<ServerLevel> worlds = server.getAllLevels();
+		ServerLevel returnWorld = null;
 		
-		for (ServerWorld world : worlds)
+		for (ServerLevel world : worlds)
 		{
 			if (world.dimensionType() == dimension)
 			{
@@ -226,12 +226,12 @@ public class MinecraftWrapper
 		return mc.gameDirectory;
 	}
 	
-	public IProfiler getProfiler()
+	public ProfilerFiller getProfiler()
 	{
 		return mc.getProfiler();
 	}
 	
-	public ClientPlayNetHandler getConnection()
+	public ClientPacketListener getConnection()
 	{
 		return mc.getConnection();
 	}
@@ -246,7 +246,7 @@ public class MinecraftWrapper
 		return mc.cameraEntity;
 	}
 	
-	public MainWindow getWindow()
+	public Window getWindow()
 	{
 		return mc.getWindow();
 	}
@@ -266,7 +266,7 @@ public class MinecraftWrapper
 		return mc.getCurrentServer();
 	}
 	
-	public WorldRenderer getLevelRenderer()
+	public LevelRenderer getLevelRenderer()
 	{
 		return mc.levelRenderer;
 	}

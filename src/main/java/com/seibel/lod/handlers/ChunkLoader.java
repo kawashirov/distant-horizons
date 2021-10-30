@@ -24,11 +24,11 @@ import java.io.File;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.chunk.storage.ChunkSerializer;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 
 /**
  * 
@@ -37,18 +37,18 @@ import net.minecraft.world.server.ServerWorld;
  */
 public class ChunkLoader
 {
-	public static IChunk getChunkFromFile(ChunkPos pos){
+	public static ChunkAccess getChunkFromFile(ChunkPos pos){
 		
-		ClientWorld clientWorld = MinecraftWrapper.INSTANCE.getClientWorld();
-		if (clientWorld == null)
+		ClientLevel ClientLevel = MinecraftWrapper.INSTANCE.getClientLevel();
+		if (ClientLevel == null)
 			return null;
-		ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(clientWorld.dimensionType());
+		ServerLevel serverWorld = LodUtil.getServerLevelFromDimension(ClientLevel.dimensionType());
 		try
 		{
 			File file = new File(serverWorld.getChunkSource().getDataStorage().dataFolder.getParent() + File.separatorChar + "region", "r." + (pos.x >> 5) + "." + (pos.z >> 5) + ".mca");
 			if(!file.exists())
 				return  null;
-			IChunk loadedChunk = ChunkSerializer.read(
+			ChunkAccess loadedChunk = ChunkSerializer.read(
 					serverWorld,
 					serverWorld.getStructureManager(),
 					serverWorld.getPoiManager(),

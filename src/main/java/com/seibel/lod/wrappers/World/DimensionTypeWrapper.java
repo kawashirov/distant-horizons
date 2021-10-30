@@ -1,9 +1,9 @@
 package com.seibel.lod.wrappers.World;
 
-import net.minecraft.world.DimensionType;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import net.minecraft.world.level.dimension.DimensionType;
 
 public class DimensionTypeWrapper
 {

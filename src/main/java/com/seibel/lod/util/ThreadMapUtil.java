@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
 
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
 
 /**
  * Holds data used by specific threads so

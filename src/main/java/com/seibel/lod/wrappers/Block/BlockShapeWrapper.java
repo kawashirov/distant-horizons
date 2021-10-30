@@ -1,22 +1,18 @@
 
 package com.seibel.lod.wrappers.Block;
 
-import com.seibel.lod.util.ColorUtil;
-import com.seibel.lod.wrappers.Chunk.ChunkWrapper;
-import com.seibel.lod.wrappers.MinecraftWrapper;
-import net.minecraft.block.*;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.IBlockReader;
-import net.minecraftforge.client.model.data.ModelDataMap;
-
-import java.util.*;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
+import com.seibel.lod.wrappers.Chunk.ChunkWrapper;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 
 //This class wraps the minecraft Block class
@@ -71,7 +67,7 @@ public class BlockShapeWrapper
 	
 	private void setupShapes(ChunkWrapper chunkWrapper, BlockPosWrapper blockPosWrapper)
 	{
-		IBlockReader chunk = chunkWrapper.getChunk();
+		ChunkAccess chunk = chunkWrapper.getChunk();
 		BlockPos blockPos = blockPosWrapper.getBlockPos();
 		boolean noCollisionSetted = false;
 		boolean nonFullSetted = false;
@@ -88,7 +84,7 @@ public class BlockShapeWrapper
 			
 			if (!voxelShape.isEmpty())
 			{
-				AxisAlignedBB bbox = voxelShape.bounds();
+				AABB bbox = voxelShape.bounds();
 				double xWidth = (bbox.maxX - bbox.minX);
 				double yWidth = (bbox.maxY - bbox.minY);
 				double zWidth = (bbox.maxZ - bbox.minZ);

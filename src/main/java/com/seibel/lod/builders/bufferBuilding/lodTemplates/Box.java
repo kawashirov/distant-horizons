@@ -30,9 +30,9 @@ import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 
 /**
  * Similar to Minecraft's AxisAlignedBoundingBox.
@@ -125,7 +125,7 @@ public class Box
 	 * This is a map from Direction to the relative normal vector
 	 * we are using this since I'm not sure if the getNormal create new object at every call
 	 */
-	public static final Map<Direction, Vector3i> DIRECTION_NORMAL_MAP = new HashMap<Direction, Vector3i>()
+	public static final Map<Direction, Vec3i> DIRECTION_NORMAL_MAP = new HashMap<Direction, Vec3i>()
 	{{
 		put(Direction.UP, Direction.UP.getNormal());
 		put(Direction.DOWN, Direction.DOWN.getNormal());
@@ -226,7 +226,7 @@ public class Box
 		for (Direction direction : DIRECTIONS)
 		{
 			if (!adjShadeDisabled[DIRECTION_INDEX.get(direction)])
-				colorMap[DIRECTION_INDEX.get(direction)] = ColorUtil.applyShade(color, MinecraftWrapper.INSTANCE.getClientWorld().getShade(direction, true));
+				colorMap[DIRECTION_INDEX.get(direction)] = ColorUtil.applyShade(color, MinecraftWrapper.INSTANCE.getClientLevel().getShade(direction, true));
 			else
 				colorMap[DIRECTION_INDEX.get(direction)] = color;
 		}
@@ -241,7 +241,7 @@ public class Box
 		if (LodConfig.CLIENT.advancedModOptions.debugging.debugMode.get() != DebugMode.SHOW_DETAIL)
 			return colorMap[DIRECTION_INDEX.get(direction)];
 		else
-			return ColorUtil.applyShade(color, MinecraftWrapper.INSTANCE.getClientWorld().getShade(direction, true));
+			return ColorUtil.applyShade(color, MinecraftWrapper.INSTANCE.getClientLevel().getShade(direction, true));
 	}
 	
 	/**

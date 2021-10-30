@@ -1,21 +1,47 @@
 package com.seibel.lod.wrappers.Chunk;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-
 import java.util.Objects;
+
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.ChunkPos;
 
 
 //This class wraps the minecraft ChunkPos class
 public class ChunkPosWrapper
 {
-	private ChunkPos chunkPos;
+	private net.minecraft.world.level.ChunkPos chunkPos;
 	
-	public ChunkPosWrapper(ChunkPos chunkPos)
+	public ChunkPosWrapper(ChunkPos newChunkPos)
 	{
-		this.chunkPos = chunkPos;
+		this.chunkPos = newChunkPos;
 	}
 	
+	public ChunkPosWrapper(BlockPos blockPos)
+	{
+		this.chunkPos = new ChunkPos(blockPos);
+	}
+	
+	
+	public ChunkPosWrapper(ChunkPosWrapper newChunkPos)
+	{
+		this.chunkPos = newChunkPos.chunkPos;
+	}
+	
+	public ChunkPosWrapper(BlockPosWrapper blockPos)
+	{
+		this.chunkPos = new ChunkPos(blockPos.getBlockPos());
+	}
+	
+	
+	
+	
+	public ChunkPosWrapper(int chunkX, int chunkZ)
+	{
+		this.chunkPos = new ChunkPos(chunkX, chunkZ);
+	}
+
 	public int getX()
 	{
 		return chunkPos.x;
@@ -59,6 +85,11 @@ public class ChunkPosWrapper
 	@Override public int hashCode()
 	{
 		return Objects.hash(chunkPos);
+	}
+
+	public BlockPosWrapper getWorldPosition()
+	{
+		return null;
 	}
 	
 }

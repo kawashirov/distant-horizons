@@ -23,6 +23,8 @@ import java.awt.Color;
 import java.io.File;
 import java.util.HashSet;
 
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import com.seibel.lod.builders.bufferBuilding.lodTemplates.Box;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.HorizontalResolution;
@@ -32,21 +34,18 @@ import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.client.multiplayer.ServerData;
-import net.minecraft.client.renderer.WorldRenderer;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.client.renderer.vertex.VertexFormat;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.DimensionType;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.IChunk;
-import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.server.ServerChunkProvider;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
  * This class holds methods and constants that may be used in multiple places.
@@ -128,7 +127,7 @@ public class LodUtil
 	/**
 	 * If we ever need to use a heightmap for any reason, use this one.
 	 */
-	public static final Heightmap.Type DEFAULT_HEIGHTMAP = Heightmap.Type.WORLD_SURFACE_WG;
+	public static final Heightmap.Types DEFAULT_HEIGHTMAP = Heightmap.Types.WORLD_SURFACE_WG;
 	
 	/**
 	 * This regex finds any characters that are invalid for use in a windows
@@ -150,43 +149,43 @@ public class LodUtil
 	public static final int MAX_ALLOCATABLE_DIRECT_MEMORY = 64 * 1024 * 1024;
 	
 	
-	public static final VertexFormat LOD_VERTEX_FORMAT = DefaultVertexFormats.POSITION_COLOR;
+	public static final VertexFormat LOD_VERTEX_FORMAT = DefaultVertexFormat.POSITION_COLOR;
 	
 	
 	
 	
 	
 	/**
-	 * Gets the first valid ServerWorld.
-	 * @return null if there are no ServerWorlds
+	 * Gets the first valid ServerLevel.
+	 * @return null if there are no ServerLevels
 	 */
-	public static ServerWorld getFirstValidServerWorld()
+	public static ServerLevel getFirstValidServerLevel()
 	{
 		if (mc.hasSinglePlayerServer())
 			return null;
 		
-		Iterable<ServerWorld> worlds = mc.getSinglePlayerServer().getAllLevels();
+		Iterable<ServerLevel> worlds = mc.getSinglePlayerServer().getAllLevels();
 		
-		for (ServerWorld world : worlds)
+		for (ServerLevel world : worlds)
 			return world;
 		
 		return null;
 	}
 	
 	/**
-	 * Gets the ServerWorld for the relevant dimension.
-	 * @return null if there is no ServerWorld for the given dimension
+	 * Gets the ServerLevel for the relevant dimension.
+	 * @return null if there is no ServerLevel for the given dimension
 	 */
-	public static ServerWorld getServerWorldFromDimension(DimensionType dimension)
+	public static ServerLevel getServerLevelFromDimension(DimensionType dimension)
 	{
 		IntegratedServer server = mc.getSinglePlayerServer();
 		if (server == null)
 			return null;
 		
-		Iterable<ServerWorld> worlds = server.getAllLevels();
-		ServerWorld returnWorld = null;
+		Iterable<ServerLevel> worlds = server.getAllLevels();
+		ServerLevel returnWorld = null;
 		
-		for (ServerWorld world : worlds)
+		for (ServerLevel world : worlds)
 		{
 			if (world.dimensionType() == dimension)
 			{
@@ -217,11 +216,11 @@ public class LodUtil
 	 * Return whether the given chunk
 	 * has any data in it.
 	 */
-	public static boolean chunkHasBlockData(IChunk chunk)
+	public static boolean chunkHasBlockData(ChunkAccess chunk)
 	{
-		ChunkSection[] blockStorage = chunk.getSections();
+		LevelChunkSection[] blockStorage = chunk.getSections();
 		
-		for (ChunkSection section : blockStorage)
+		for (LevelChunkSection section : blockStorage)
 		{
 			if (section != null && !section.isEmpty())
 				return true;
@@ -236,7 +235,7 @@ public class LodUtil
 	 * world, if in multiplayer it will return the server name, IP,
 	 * and game version.
 	 */
-	public static String getWorldID(IWorld world)
+	public static String getWorldID(Level world)
 	{
 		if (mc.hasSinglePlayerServer())
 		{
@@ -264,22 +263,22 @@ public class LodUtil
 	 * This can be used to determine where to save files for a given
 	 * dimension.
 	 */
-	public static String getDimensionIDFromWorld(IWorld world)
+	public static String getDimensionIDFromWorld(Level world)
 	{
 		if (mc.hasSinglePlayerServer())
 		{
 			// this will return the world save location
 			// and the dimension folder
 			
-			ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(world.dimensionType());
-			if (serverWorld == null)
-				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerWorld for the dimension " + world.dimensionType().effectsLocation().getPath());
+			ServerLevel ServerLevel = LodUtil.getServerLevelFromDimension(world.dimensionType());
+			if (ServerLevel == null)
+				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerLevel for the dimension " + world.dimensionType().effectsLocation().getPath());
 			
-			ServerChunkProvider provider = serverWorld.getChunkSource();
+			ServerChunkCache provider = ServerLevel.getChunkSource();
 			if (provider == null)
 				throw new NullPointerException("getDimensionIDFromWorld wasn't able to get the ServerChunkProvider for the dimension " + world.dimensionType().effectsLocation().getPath());
 			
-			return provider.dataStorage.dataFolder.toString();
+			return provider.getDataStorage().dataFolder.toString();
 		}
 		else
 		{
@@ -456,8 +455,8 @@ public class LodUtil
 		// Wow, those are some long names!
 		
 		// go through every RenderInfo to get the compiled chunks
-		WorldRenderer renderer = mc.getLevelRenderer();
-		for (WorldRenderer.LocalRenderInformationContainer worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
+		LevelRenderer renderer = mc.getLevelRenderer();
+		for (LevelRenderer.LocalRenderInformationContainer worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
 		{
 			CompiledChunk compiledChunk = worldRenderer$LocalRenderInformationContainer.chunk.getCompiledChunk();
 			if (!compiledChunk.hasNoRenderableLayers())
