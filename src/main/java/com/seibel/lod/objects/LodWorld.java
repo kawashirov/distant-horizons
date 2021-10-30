@@ -119,7 +119,7 @@ public class LodWorld
 		if (lodDimensions == null)
 			return null;
 		
-		return lodDimensions.get(dimension);
+		return lodDimensions.get(DimensionTypeWrapper.getDimensionTypeWrapper(dimension));
 	}
 	
 	/**
