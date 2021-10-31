@@ -31,6 +31,7 @@ import com.seibel.lod.builders.worldGeneration.LodGenWorker;
 import com.seibel.lod.builders.worldGeneration.LodWorldGenerator;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.enums.GlProxyContext;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.objects.LodWorld;
 import com.seibel.lod.objects.RegionPos;
@@ -55,17 +56,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * This handles all events sent to the client,
  * and is the starting point for most of the mod.
  * @author James_Seibel
- * @version 10-23-2021
+ * @version 10-31-2021
  */
 public class ClientProxy
 {
 	public static final Logger LOGGER = LogManager.getLogger("LOD");
-	
-	/**
-	 * there is some setup that should only happen once,
-	 * once this is true that setup has completed
-	 */
-	private boolean firstTimeSetupComplete = false;
 	
 	private static final LodWorld lodWorld = new LodWorld();
 	private static final LodBuilder lodBuilder = new LodBuilder();
@@ -108,13 +103,11 @@ public class ClientProxy
 		// clear any out of date objects
 		mc.clearFrameObjectCache();
 		
+		// make sure the GlProxy is created before the LodBufferBuilder needs it
+		GlProxy glProxy = GlProxy.getInstance();
+		
 		try
 		{
-			// only run the first time setup once
-			if (!firstTimeSetupComplete)
-				firstFrameSetup();
-			
-			
 			if (mc == null || mc.getPlayer() == null || lodWorld.getIsWorldNotLoaded())
 				return;
 			
@@ -138,6 +131,7 @@ public class ClientProxy
 			profiler.pop(); // get out of "terrain"
 			profiler.push("LOD");
 			
+			glProxy.setGlContext(GlProxyContext.LOD_RENDER);
 			renderer.drawLODs(lodDim, mcModelViewMatrix, partialTicks, mc.getProfiler());
 			
 			profiler.pop(); // end LOD
@@ -153,6 +147,10 @@ public class ClientProxy
 		{
 			LOGGER.error("client proxy: " + e.getMessage());
 			e.printStackTrace();
+		}
+		finally
+		{
+			glProxy.setGlContext(GlProxyContext.MINECRAFT);
 		}
 	}
 	
@@ -355,16 +353,6 @@ public class ClientProxy
 			//LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );
 		}
 		DetailDistanceUtil.updateSettings();
-	}
-	
-	
-	/** This event is called once during the first frame Minecraft renders in the world. */
-	public void firstFrameSetup()
-	{
-		// make sure the GlProxy is created before the LodBufferBuilder needs it
-		GlProxy.getInstance();
-		
-		firstTimeSetupComplete = true;
 	}
 	
 	/** this method reset some static data every time we change world */

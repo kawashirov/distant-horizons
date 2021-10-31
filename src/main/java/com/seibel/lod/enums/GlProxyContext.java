@@ -20,10 +20,10 @@
 package com.seibel.lod.enums;
 
 /**
- * Minecraft, Lod_Builder, None
+ * Minecraft, Lod_Builder, Lod_Render, None
  * 
  * @author James Seibel
- * @version 10-1-2021
+ * @version 10-31-2021
  */
 public enum GlProxyContext
 {
@@ -32,6 +32,9 @@ public enum GlProxyContext
 	
 	/** The context we send buffers to the GPU on */
 	LOD_BUILDER,
+	
+	/** The context we draw LODs on */
+	LOD_RENDER,
 	
 	/** used to un-bind threads */
 	NONE,

@@ -63,7 +63,7 @@ import net.minecraft.world.phys.Vec3;
  * This is where LODs are draw to the world.
  * 
  * @author James Seibel
- * @version 10-25-2021
+ * @version 10-31-2021
  */
 public class LodRenderer
 {
@@ -180,14 +180,6 @@ public class LodRenderer
 		
 		
 		
-		//===============//
-		// initial setup //
-		//===============//
-		
-		profiler = newProfiler;
-		profiler.push("LOD setup");
-		
-		
 		// TODO move the buffer regeneration logic into its own class (probably called in the client proxy instead)
 		// starting here...
 		determineIfLodsShouldRegenerate(lodDim, partialTicks);
@@ -222,9 +214,18 @@ public class LodRenderer
 		}
 		
 		
-		//===========================//
-		// GL settings for rendering //
-		//===========================//
+		
+		
+		//===============//
+		// initial setup //
+		//===============//
+		
+		profiler = newProfiler;
+		profiler.push("LOD setup");
+		
+		GlProxy glProxy = GlProxy.getInstance();
+		
+		
 		
 		// set the required open GL settings
 		
@@ -246,6 +247,7 @@ public class LodRenderer
 		GL15.glDisable(GL15.GL_LIGHT0);
 		GL15.glDisable(GL15.GL_LIGHT1);
 		
+		
 		// get the default projection matrix, so we can
 		// reset it after drawing the LODs
 		float[] mcProjMatrixRaw = new float[16];
@@ -255,6 +257,7 @@ public class LodRenderer
 		// (or maybe vice versa I have no idea :P)
 		mcProjectionMatrix.transpose();
 		
+		
 		Matrix4f modelViewMatrix = offsetTheModelViewMatrix(mcModelViewMatrix, partialTicks);
 		vanillaBlockRenderedDistance = mc.getRenderDistance() * LodUtil.CHUNK_WIDTH;
 		// required for setupFog and setupProjectionMatrix
@@ -263,19 +266,26 @@ public class LodRenderer
 		else
 			farPlaneBlockDistance = LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
 		
+		
 		setupProjectionMatrix(mcProjectionMatrix, vanillaBlockRenderedDistance, partialTicks);
+		
 		
 		// commented out until we can add shaders to handle lighting
 		//setupLighting(lodDim, partialTicks);
 		
-		NearFarFogSettings fogSettings = determineFogSettings();
 		
 		// determine the current fog settings, so they can be
 		// reset after drawing the LODs
 		float defaultFogStartDist = GL15.glGetFloat(GL15.GL_FOG_START);
 		float defaultFogEndDist = GL15.glGetFloat(GL15.GL_FOG_END);
 		int defaultFogMode = GL15.glGetInteger(GL15.GL_FOG_MODE);
-		int defaultFogDistance = GlProxy.getInstance().fancyFogAvailable ? GL15.glGetInteger(NVFogDistance.GL_FOG_DISTANCE_MODE_NV) : -1;
+		int defaultFogDistance = glProxy.fancyFogAvailable ? GL15.glGetInteger(NVFogDistance.GL_FOG_DISTANCE_MODE_NV) : -1;
+		
+		NearFarFogSettings fogSettings = determineFogSettings();
+		
+		
+		
+		
 		
 		//===========//
 		// rendering //
@@ -289,7 +299,7 @@ public class LodRenderer
 			Vector3f cameraDir = camera.getLookVector();
 			
 			boolean cullingDisabled = LodConfig.CLIENT.graphics.advancedGraphicsOption.disableDirectionalCulling.get();
-			boolean renderBufferStorage = LodConfig.CLIENT.graphics.advancedGraphicsOption.gpuUploadMethod.get() == GpuUploadMethod.BUFFER_STORAGE && GlProxy.getInstance().bufferStorageSupported;
+			boolean renderBufferStorage = LodConfig.CLIENT.graphics.advancedGraphicsOption.gpuUploadMethod.get() == GpuUploadMethod.BUFFER_STORAGE && glProxy.bufferStorageSupported;
 			
 			// used to determine what type of fog to render
 			int halfWidth = vbos.length / 2;
@@ -326,6 +336,9 @@ public class LodRenderer
 				}
 			}
 		}
+		
+		
+		
 		
 		
 		//=========//
@@ -371,17 +384,17 @@ public class LodRenderer
 		LodUtil.LOD_VERTEX_FORMAT.setupBufferState();
 		
 		// set up the model view matrix
-		GL15.glPushMatrix();
-		GL15.glLoadIdentity();
+//		GL15.glPushMatrix(); // matrix code is only available in OpenGL 3.2 and lower
+//		GL15.glLoadIdentity();
 		FloatBuffer matrixBuffer = FloatBuffer.allocate(16);
 		modelViewMatrix.store(matrixBuffer);
-		GL15.glMultMatrixf(matrixBuffer);
+//		GL15.glMultMatrixf(matrixBuffer);
 		
 		GL15.glDrawArrays(GL15.GL_QUADS, 0, vertexCount);
 		
 		// post draw cleanup
-		GL15.glPopMatrix();
-		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+//		GL15.glPopMatrix();
+//		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		LodUtil.LOD_VERTEX_FORMAT.clearBufferState();
 	}
 	

@@ -21,6 +21,7 @@ package com.seibel.lod.proxy;
 
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GLCapabilities;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -40,7 +41,7 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
  * https://gamedev.stackexchange.com/questions/91995/edit-vbo-data-or-create-a-new-one <br><br>
  * 
  * @author James Seibel
- * @version 10-23-2021
+ * @version 10-31-2021
  */
 public class GlProxy
 {
@@ -50,13 +51,18 @@ public class GlProxy
 	
 	/** Minecraft's GLFW window */
 	public final long minecraftGlContext;
-	/** Minecraft's GL context */
+	/** Minecraft's GL capabilities */
 	public final GLCapabilities minecraftGlCapabilities;
 	
 	/** the LodBuilder's GLFW window */
 	public final long lodBuilderGlContext;
-	/** the LodBuilder's GL context */
+	/** the LodBuilder's GL capabilities */
 	public final GLCapabilities lodBuilderGlCapabilities;
+	
+	/** the LodRender's GLFW window */
+	public final long lodRenderGlContext;
+	/** the LodRender's GL capabilities */
+	public final GLCapabilities lodRenderGlCapabilities;
 	
 	/**
 	 * This is just used for debugging, hopefully it can be removed once
@@ -93,44 +99,27 @@ public class GlProxy
 		minecraftGlContext = GLFW.glfwGetCurrentContext();
 		minecraftGlCapabilities = GL.getCapabilities();
 		
-		// create the LodBuilder's context
 		
-		// Hopefully this shouldn't cause any issues with other mods that need custom contexts
-		// (although the number that do should be relatively few)
+		// context creation setup
+		GLFW.glfwDefaultWindowHints();
+		// make the context window invisible
 		GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
+		// by default the context should get the highest available OpenGL version
+		// but this can be explicitly set for testing
+//		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 4);
+//		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 5);
 		
-		// create an invisible window to hold the context
-		lodBuilderGlCapabilities = GL.createCapabilities();
-		lodBuilderGlContext = GLFW.glfwCreateWindow(640, 480, "LOD window", 0L, minecraftGlContext);
+		
+		// create the LodRender context 
+		lodRenderGlContext = GLFW.glfwCreateWindow(64, 48, "LOD Render Window", 0L, 0L); // create a window to hold the context
+		GLFW.glfwMakeContextCurrent(lodRenderGlContext);
+		lodRenderGlCapabilities = GL.createCapabilities();
+		
+		// create the LodBuilder context
+		lodBuilderGlContext = GLFW.glfwCreateWindow(64, 48, "LOD Builder Window", 0L, lodRenderGlContext);
 		GLFW.glfwMakeContextCurrent(lodBuilderGlContext);
+		lodBuilderGlCapabilities = GL.createCapabilities();
 		
-		// Since this is called on the render thread, make sure the Minecraft context is used in the end
-		GLFW.glfwMakeContextCurrent(minecraftGlContext);
-		GL.setCapabilities(minecraftGlCapabilities);
-		
-		
-		
-		
-		//==============================//
-		// determine the OpenGL version // 
-		//==============================//
-		
-		bufferStorageSupported = minecraftGlCapabilities.glBufferStorage != 0;
-		mapBufferRangeSupported = minecraftGlCapabilities.glMapBufferRange != 0;
-		
-		if (!minecraftGlCapabilities.OpenGL15)
-		{
-			String errorMessage = ModInfo.READABLE_NAME + " was initializing " + GlProxy.class.getSimpleName() + " and discoverd this GPU doesn't support OpenGL 1.5 or greater.";
-			mc.crashMinecraft(errorMessage + " Sorry I couldn't tell you sooner :(", new UnsupportedOperationException("This GPU doesn't support OpenGL 1.5 or greater."));
-		}
-		
-		if (!bufferStorageSupported)
-		{
-			String fallBackVersion = mapBufferRangeSupported ? "3.0" : "1.5";  
-			
-			ClientProxy.LOGGER.error("This GPU doesn't support Buffer Storage (OpenGL 4.5), falling back to OpenGL " + fallBackVersion + ". This may cause stuttering and reduced performance.");			
-		}
-			
 		
 		
 		
@@ -139,13 +128,46 @@ public class GlProxy
 		// get any GPU related capabilities //
 		//==================================//
 		
-		// see if this GPU can run fancy fog
-		fancyFogAvailable = GL.getCapabilities().GL_NV_fog_distance;
+		ClientProxy.LOGGER.info("Lod Render OpenGL version [" + GL11.glGetString(GL11.GL_VERSION) + "].");
+		
+		// crash the game if the GPU doesn't support OpenGL 1.5
+		if (!minecraftGlCapabilities.OpenGL15)
+		{
+			// Note: as of MC 1.17 this shouldn't happen since MC
+			// requires OpenGL 3.3, but just in case.
+			String errorMessage = ModInfo.READABLE_NAME + " was initializing " + GlProxy.class.getSimpleName() + " and discoverd this GPU doesn't support OpenGL 1.5 or greater.";
+			mc.crashMinecraft(errorMessage + " Sorry I couldn't tell you sooner :(", new UnsupportedOperationException("This GPU doesn't support OpenGL 1.5 or greater."));
+		}
+		
+		
+		
+		// get specific capabilities
+		bufferStorageSupported = lodBuilderGlCapabilities.glBufferStorage != 0;
+		mapBufferRangeSupported = lodBuilderGlCapabilities.glMapBufferRange != 0;
+		fancyFogAvailable = minecraftGlCapabilities.GL_NV_fog_distance;
+		
+		
+		// display the capabilities
+		if (!bufferStorageSupported)
+		{
+			String fallBackVersion = mapBufferRangeSupported ? "3.0" : "1.5";  
+			ClientProxy.LOGGER.error("This GPU doesn't support Buffer Storage (OpenGL 4.5), falling back to OpenGL " + fallBackVersion + ". This may cause stuttering and reduced performance.");			
+		}
 		
 		if (!fancyFogAvailable)
 			ClientProxy.LOGGER.info("This GPU does not support GL_NV_fog_distance. This means that the fancy fog option will not be available.");
 		
 		
+		
+		
+		
+		//==========//
+		// clean up //
+		//==========//
+		
+		// Since this is created on the render thread, make sure the Minecraft context is used in the end
+		GLFW.glfwMakeContextCurrent(minecraftGlContext);
+		GL.setCapabilities(minecraftGlCapabilities);
 		
 		
 		// GlProxy creation success
@@ -163,12 +185,12 @@ public class GlProxy
 	{
 		GlProxyContext currentContext = getGlContext();
 		
-		// we don't have to change the context, we're already there.
+		// we don't have to change the context, we are already there.
 		if (currentContext == newContext)
 			return;
 		
 		
-		long contextPointer = 0L;
+		long contextPointer;
 		GLCapabilities newGlCapabilities = null;
 		
 		// get the pointer(s) for this context
@@ -177,6 +199,11 @@ public class GlProxy
 		case LOD_BUILDER:
 			contextPointer = lodBuilderGlContext;
 			newGlCapabilities = lodBuilderGlCapabilities;
+			break;
+			
+		case LOD_RENDER:
+			contextPointer = lodRenderGlContext;
+			newGlCapabilities = lodRenderGlCapabilities;
 			break;
 		
 		case MINECRAFT:
@@ -187,6 +214,7 @@ public class GlProxy
 		default: // default should never happen, it is just here to make the compiler happy
 		case NONE:
 			// 0L is equivalent to null
+			contextPointer = 0L;
 			break;
 		}
 		
@@ -215,14 +243,19 @@ public class GlProxy
 		
 		if (currentContext == lodBuilderGlContext)
 			return GlProxyContext.LOD_BUILDER;
+		else if (currentContext == lodRenderGlContext)
+			return GlProxyContext.LOD_RENDER;
 		else if (currentContext == minecraftGlContext)
 			return GlProxyContext.MINECRAFT;
 		else if (currentContext == 0L)
 			return GlProxyContext.NONE;
 		else
-			// hopefully this shouldn't happen, but
-			// at least now we will be notified if it does happen
-			throw new IllegalStateException(Thread.currentThread().getName() + " has a unknown OpenGl context: [" + currentContext + "]. Minecraft context [" + minecraftGlContext + "], LodBuilder context [" + lodBuilderGlContext + "], no context [0].");
+			// hopefully this shouldn't happen
+			throw new IllegalStateException(Thread.currentThread().getName() + 
+					" has a unknown OpenGl context: [" + currentContext + "]. "
+					+ "Minecraft context [" + minecraftGlContext + "], "
+					+ "LodBuilder context [" + lodBuilderGlContext + "], "
+					+ "LodRender context [" + lodRenderGlContext + "], no context [0].");
 	}
 	
 	
