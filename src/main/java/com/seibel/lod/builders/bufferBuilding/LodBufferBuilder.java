@@ -30,7 +30,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GL45;
@@ -810,7 +809,7 @@ public class LodBufferBuilder
 		}
 		finally
 		{
-			GL11.glFinish();
+			GL15.glFinish();
 			
 			// close the context so it can be re-used later.
 			// I'm guessing we can't just leave it because the executor service
@@ -828,7 +827,8 @@ public class LodBufferBuilder
 		if (vbo.vertextBufferId != -1 && GlProxy.getInstance().getGlContext() == GlProxyContext.LOD_BUILDER)
 		{
 			// this is how many points will be rendered
-			vbo.indexCount = (uploadBuffer.capacity() / vbo.getFormat().getVertexSize());
+			// TODO double check that 4 * 6 is correct for the number of points
+			vbo.indexCount = (uploadBuffer.capacity() / (4 * 6));
 			
 			
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.vertextBufferId);
