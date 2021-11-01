@@ -26,9 +26,8 @@ public class ChunkWrapper
 		BlockState blockState = chunk.getBlockState(blockPos.getBlockPos());
 		
 		//This type of block is always in water
-		//This type of block could be in water
 		return ((blockState.getBlock() instanceof ILiquidContainer) && !(blockState.getBlock() instanceof IWaterLoggable))
-				|| (blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).isPresent() && blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).get());
+				|| (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED).booleanValue());
 	}
 	
 	public int getHeightMapValue(int xRel, int zRel){
@@ -42,7 +41,7 @@ public class ChunkWrapper
 	
 	public BlockColorWrapper getBlockColorWrapper(BlockPosWrapper blockPos)
 	{
-		return BlockColorWrapper.getBlockColorWrapper(chunk.getBlockState(blockPos.getBlockPos()),blockPos);
+		return BlockColorWrapper.getBlockColorWrapper(chunk.getBlockState(blockPos.getBlockPos()).getBlock());
 	}
 	
 	public BlockShapeWrapper getBlockShapeWrapper(BlockPosWrapper blockPos)
@@ -73,9 +72,8 @@ public class ChunkWrapper
 		BlockState blockState = chunk.getBlockState(blockPos.getBlockPos());
 		
 		//This type of block is always in water
-		//This type of block could be in water
 		return ((blockState.getBlock() instanceof ILiquidContainer) && !(blockState.getBlock() instanceof IWaterLoggable))
-				|| (blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).isPresent() && blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).get());
+					   || (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED).booleanValue());
 	}
 	
 	public int getEmittedBrightness(BlockPosWrapper blockPos)

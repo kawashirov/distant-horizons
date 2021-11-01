@@ -3,11 +3,17 @@ package com.seibel.lod.wrappers.Block;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.block.*;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.color.BlockColors;
+import net.minecraft.client.renderer.color.IBlockColor;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.state.Property;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.client.model.data.ModelDataMap;
+import org.lwjgl.system.CallbackI;
 
 import java.util.List;
 import java.util.Objects;
@@ -22,7 +28,7 @@ public class BlockColorWrapper
 	//set of block which require tint
 	public static final ConcurrentMap<Block, BlockColorWrapper> blockColorWrapperMap = new ConcurrentHashMap<>();
 	public static final ModelDataMap dataMap = new ModelDataMap.Builder().build();
-	public static final BlockPos blockPos = new BlockPos(0,0,0);
+	public static final BlockPos blockPos = new BlockPos(0, 0, 0);
 	public static final Random random = new Random(0);
 	//public static BlockColourWrapper WATER_COLOR = getBlockColorWrapper(Blocks.WATER);
 	public static final Direction[] directions = new Direction[] { Direction.UP, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.NORTH, Direction.DOWN };
@@ -37,33 +43,51 @@ public class BlockColorWrapper
 	
 	
 	/**Constructor only require for the block instance we are wrapping**/
-	public BlockColorWrapper(BlockState blockState, BlockPosWrapper blockPosWrapper)
+	public BlockColorWrapper(Block block)
 	{
-		this.block = blockState.getBlock();
+		this.block = block;
 		this.color = 0;
 		this.isColored = true;
 		this.toTint = false;
 		this.foliageTint = false;
 		this.grassTint = false;
 		this.waterTint = false;
-		setupColorAndTint(blockState,blockPosWrapper);
+		setupColorAndTint();
+		/*StringBuilder s = new StringBuilder();
+		s.append(block + "\n"
+								   + Integer.toHexString(
+				Minecraft.getInstance().getBlockColors().createDefault().getColor(
+						block.defaultBlockState(),
+						(World) MinecraftWrapper.INSTANCE.getWrappedServerWorld().getWorld(),
+						blockPosWrapper.getBlockPos())) + "\n"
+		);
+		for(Property x : Minecraft.getInstance().getBlockColors().getColoringProperties(block))
+			s.append(x.getName() + " " + x.getPossibleValues() + '\n');
+		System.out.println(s);*/
 		//System.out.println(block + " color " + Integer.toHexString(color) + " to tint " + toTint + " folliageTint " + folliageTint + " grassTint " + grassTint + " waterTint " + waterTint);
 	}
 	
 	/**
-	 * this return a wrapper of the block in input
-	 * @param blockState of the block to wrap
+	 * return base color of water (grey value)
 	 */
-	static public BlockColorWrapper getBlockColorWrapper(BlockState blockState, BlockPosWrapper blockPosWrapper)
+	static public BlockColorWrapper getWaterColor()
+	{
+		return getBlockColorWrapper(Blocks.WATER);
+	}
+	/**
+	 * this return a wrapper of the block in input
+	 * @param block object of the block to wrap
+	 */
+	static public BlockColorWrapper getBlockColorWrapper(Block block)
 	{
 		//first we check if the block has already been wrapped
-		if (blockColorWrapperMap.containsKey(blockState.getBlock()) && blockColorWrapperMap.get(blockState.getBlock()) != null)
-			return blockColorWrapperMap.get(blockState.getBlock());
+		if (blockColorWrapperMap.containsKey(block) && blockColorWrapperMap.get(block) != null)
+			return blockColorWrapperMap.get(block);
 		
 		
 		//if it hasn't been created yet, we create it and save it in the map
-		BlockColorWrapper blockWrapper = new BlockColorWrapper(blockState, blockPosWrapper);
-		blockColorWrapperMap.put(blockState.getBlock(), blockWrapper);
+		BlockColorWrapper blockWrapper = new BlockColorWrapper(block);
+		blockColorWrapperMap.put(block, blockWrapper);
 		
 		//we return the newly created wrapper
 		return blockWrapper;
@@ -73,8 +97,10 @@ public class BlockColorWrapper
 	 * Generate the color of the given block from its texture
 	 * and store it for later use.
 	 */
-	private void setupColorAndTint(BlockState blockState, BlockPosWrapper blockPosWrapper)
+	private void setupColorAndTint()
 	{
+		BlockState blockState = block.defaultBlockState();
+		BlockPosWrapper blockPosWrapper = new BlockPosWrapper();
 		MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 		TextureAtlasSprite texture;
 		List<BakedQuad> quads = null;
@@ -229,7 +255,7 @@ public class BlockColorWrapper
 	
 	public int getColor()
 	{
-			return color;
+		return color;
 	}
 
 //------------//

@@ -23,7 +23,7 @@ public class BlockShapeWrapper
 	public static BlockShapeWrapper WATER_SHAPE = new BlockShapeWrapper();
 	
 	private final Block block;
-	private final boolean toAvoid;
+	private boolean toAvoid;
 	private boolean nonFull;
 	private boolean noCollision;
 	

@@ -485,10 +485,7 @@ public class LodBuilder
 		BlockShapeWrapper blockShapeWrapper = chunk.getBlockShapeWrapper(blockPos);
 		
 		if (chunk.isWaterLogged(blockPos))
-		{
-			BiomeWrapper biome = chunk.getBiome(xRel, y, zRel);
-			return biome.getWaterTint();
-		}
+			blockColorWrapper = BlockColorWrapper.getWaterColor();
 		else
 			blockColorWrapper = chunk.getBlockColorWrapper(blockPos);
 		
@@ -500,20 +497,16 @@ public class LodBuilder
 		
 		if (blockColorWrapper.hasTint())
 		{
-			WorldWrapper world = MinecraftWrapper.INSTANCE.getWrappedServerWorld();
-			
-			if (world == null || world.isEmpty())
-				world = MinecraftWrapper.INSTANCE.getWrappedClientWorld();
-			
+			BiomeWrapper biome = chunk.getBiome(xRel, y, zRel);
 			int tintValue;
 			if (blockColorWrapper.hasGrassTint())
 				// grass and green plants
-				tintValue = BiomeColorWrapper.getGrassColor(world, blockPos);
+				tintValue = biome.getGrassTint(0,0);
 			else if (blockColorWrapper.hasFolliageTint())
-				tintValue = BiomeColorWrapper.getFoliageColor(world, blockPos);
+				tintValue = biome.getFolliageTint();
 			else
 				//we can reintroduce this with the wrappers
-				tintValue = BiomeColorWrapper.getWaterColor(world, blockPos);
+				tintValue = biome.getWaterTint();
 			
 			colorInt = ColorUtil.multiplyRGBcolors(tintValue | 0xFF000000, colorOfBlock);
 		}
