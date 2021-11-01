@@ -289,6 +289,7 @@ public class LodDimensionFileHandler
 			}
 			File oldFile = new File(fileName);
 			//ClientProxy.LOGGER.info("saving region [" + region.regionPosX + ", " + region.regionPosZ + "] to file.");
+			byte[] temp = region.getLevel(detailLevel).toDataString();
 			
 			try
 			{
@@ -308,9 +309,12 @@ public class LodDimensionFileHandler
 					// (to make sure we don't overwrite a newer
 					// version file if it exists)
 					int fileVersion = LOD_SAVE_FILE_VERSION;
+					int isFull = 0;
 					try (XZCompressorInputStream inputStream = new XZCompressorInputStream(new FileInputStream(oldFile)))
 					{
 						fileVersion = inputStream.read();
+						inputStream.skip(1);
+						isFull = inputStream.read() & 0b10000000;
 						inputStream.close();
 					}
 					catch (IOException ex)
@@ -326,11 +330,17 @@ public class LodDimensionFileHandler
 						// delete anything the user may want.
 						return;
 					}
-					
+					if ((temp[1] & 0b10000000) != 0b10000000 && isFull == 0b10000000)
+					{
+						// existing file is complete while new one is only partially generate
+						// this can happen is for some reason loading failed
+						// this doesn't fix the bug, but at least protects old data
+						ClientProxy.LOGGER.error("LOD file write error. Attempted to overwrite complete region with incomplete one [" + fileName + "]");
+						return;
+					}
 					// if we got this far then we are good
 					// to overwrite the old file
 				}
-				
 				// the old file is good, now create a new temporary save file
 				File newFile = new File(fileName + TMP_FILE_EXTENSION);
 				try (XZCompressorOutputStream outputStream = new XZCompressorOutputStream(new FileOutputStream(newFile), 3))
@@ -339,7 +349,7 @@ public class LodDimensionFileHandler
 					outputStream.write(LOD_SAVE_FILE_VERSION);
 					
 					// add each LodChunk to the file
-					outputStream.write(region.getLevel(detailLevel).toDataString());
+					outputStream.write(temp);
 					outputStream.close();
 					
 					// overwrite the old file with the new one

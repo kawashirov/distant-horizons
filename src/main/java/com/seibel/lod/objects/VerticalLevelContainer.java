@@ -129,7 +129,7 @@ public class VerticalLevelContainer implements LevelContainer
 		long newData;
 		detailLevel = inputData[index];
 		index++;
-		maxVerticalData = inputData[index];
+		maxVerticalData = inputData[index] & 0b01111111;
 		index++;
 		size = 1 << (LodUtil.REGION_DETAIL_LEVEL - detailLevel);
 		int x = size * size * maxVerticalData;
@@ -181,24 +181,31 @@ public class VerticalLevelContainer implements LevelContainer
 	public byte[] toDataString()
 	{
 		int index = 0;
-		int x = size * size * maxVerticalData;
+		int x = size * size;
 		int tempIndex;
 		long current;
-		
+		boolean allGenerated = true;
 		byte[] tempData = ThreadMapUtil.getSaveContainer(detailLevel);
 		
 		tempData[index] = detailLevel;
 		index++;
 		tempData[index] = (byte) maxVerticalData;
 		index++;
-		
+		int j;
 		for (int i = 0; i < x; i++)
 		{
-			current = dataContainer[i];
-			for (tempIndex = 0; tempIndex < 8; tempIndex++)
-				tempData[index + tempIndex] = (byte) (current >>> (8 * tempIndex));
-			index += 8;
+			for (j = 0; j < maxVerticalData; j++)
+			{
+				current = dataContainer[i * maxVerticalData + j];
+				for (tempIndex = 0; tempIndex < 8; tempIndex++)
+					tempData[index + tempIndex] = (byte) (current >>> (8 * tempIndex));
+				index += 8;
+			}
+			if(!DataPointUtil.doesItExist(dataContainer[i]))
+				allGenerated = false;
 		}
+		if (allGenerated)
+			tempData[1] |= 0b10000000;
 		return tempData;
 	}
 	
