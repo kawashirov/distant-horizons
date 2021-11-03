@@ -192,7 +192,7 @@ public class LodGenWorker implements IWorker
 					//else
 					//{
 					IChunk loadedChunk = null;
-					if (lodDim.isChunkPreGenerated(pos.x, pos.z) && ClientProxy.pregen)
+					if (LodConfig.CLIENT.advancedModOptions.debugging.usePregen.get() && lodDim.isChunkPreGenerated(pos.x, pos.z))
 					{
 						// generate a Lod like normal
 						loadedChunk = ChunkLoader.getChunkFromFile(pos);

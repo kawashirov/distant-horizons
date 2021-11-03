@@ -603,7 +603,7 @@ public class LodDimension
 				//if(lodRegion.isChunkPreGenerated(xChunkToCheck,zChunkToCheck))
 				//	complexity = DistanceGenerationMode.SERVER.complexity;
 				//else
-				if(ClientProxy.pregen)
+				if(LodConfig.CLIENT.advancedModOptions.debugging.usePregen.get() && isChunkPreGenerated(xChunkToCheck, zChunkToCheck))
 					complexity = DistanceGenerationMode.SERVER.complexity;
 				else
 					complexity = LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get().complexity;

@@ -67,8 +67,6 @@ public class ClientProxy
 	 */
 	private boolean firstTimeSetupComplete = false;
 	
-	public static boolean pregen = false;
-	
 	private static final LodWorld lodWorld = new LodWorld();
 	private static final LodBuilder lodBuilder = new LodBuilder();
 	private static final LodBufferBuilder lodBufferBuilder = new LodBufferBuilder();
@@ -229,7 +227,6 @@ public class ClientProxy
 	@SubscribeEvent
 	public void worldLoadEvent(WorldEvent.Load event)
 	{
-		pregen = false;
 		DataPointUtil.worldHeight = event.getWorld().getHeight();
 		//LodNodeGenWorker.restartExecutorService();
 		//ThreadMapUtil.clearMaps();
@@ -245,7 +242,6 @@ public class ClientProxy
 	@SubscribeEvent
 	public void worldUnloadEvent(WorldEvent.Unload event)
 	{
-		pregen = false;
 		// the player just unloaded a world/dimension
 		ThreadMapUtil.clearMaps();
 		
@@ -309,9 +305,9 @@ public class ClientProxy
 		if (LodConfig.CLIENT.advancedModOptions.debugging.enableDebugKeybindings.get()
 					&& event.getKey() == GLFW.GLFW_KEY_F7 && event.getAction() == GLFW.GLFW_PRESS)
 		{
-			pregen = !pregen;
+			LodConfig.CLIENT.advancedModOptions.debugging.usePregen.set(!LodConfig.CLIENT.advancedModOptions.debugging.usePregen.get());
 			ClientPlayerEntity player = MinecraftWrapper.INSTANCE.getPlayer();
-			if(pregen)
+			if(LodConfig.CLIENT.advancedModOptions.debugging.usePregen.get())
 				player.sendMessage(new StringTextComponent("pregen activated."),player.getUUID());
 			else
 				player.sendMessage(new StringTextComponent("pregen de-activated."),player.getUUID());
