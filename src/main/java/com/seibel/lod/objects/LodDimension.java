@@ -29,6 +29,7 @@ import com.seibel.lod.enums.DistanceGenerationMode;
 import com.seibel.lod.enums.GenerationPriority;
 import com.seibel.lod.enums.VerticalQuality;
 import com.seibel.lod.handlers.LodDimensionFileHandler;
+import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
@@ -602,6 +603,9 @@ public class LodDimension
 				//if(lodRegion.isChunkPreGenerated(xChunkToCheck,zChunkToCheck))
 				//	complexity = DistanceGenerationMode.SERVER.complexity;
 				//else
+				if(ClientProxy.pregen)
+					complexity = DistanceGenerationMode.SERVER.complexity;
+				else
 					complexity = LodConfig.CLIENT.worldGenerator.distanceGenerationMode.get().complexity;
 					
 				
@@ -817,15 +821,15 @@ public class LodDimension
 	/**
 	 * Return true if the chunk has been pregenerated in game
 	 */
-	//public boolean isChunkPreGenerated(int xChunkPos, int zChunkPos)
-	//{
-	//
-	//	LodRegion region = getRegion(LodUtil.CHUNK_DETAIL_LEVEL, xChunkPos, zChunkPos);
-	//	if (region == null)
-	//		return false;
-	//
-	//	return region.isChunkPreGenerated(xChunkPos, zChunkPos);
-	//}
+	public boolean isChunkPreGenerated(int xChunkPos, int zChunkPos)
+	{
+	
+		LodRegion region = getRegion(LodUtil.CHUNK_DETAIL_LEVEL, xChunkPos, zChunkPos);
+		if (region == null)
+			return false;
+	
+		return region.isChunkPreGenerated(xChunkPos, zChunkPos);
+	}
 	
 	/**
 	 * Returns whether the region at the given RegionPos

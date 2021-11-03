@@ -25,6 +25,13 @@ import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrappers.MinecraftWrapper;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.chunk.storage.RegionFile;
+import net.minecraft.world.server.ServerChunkProvider;
+import net.minecraft.world.server.ServerWorld;
+
+import java.io.File;
 
 /**
  * This object holds all loaded LevelContainers acting as a quad tree
@@ -58,7 +65,7 @@ public class LodRegion
 	/**
 	 * This chunk Pos has been generated
 	 */
-	//private final boolean[] preGeneratedChunkPos;
+	private final boolean[] preGeneratedChunkPos;
 	
 	/**
 	 * the generation mode for this region
@@ -96,9 +103,9 @@ public class LodRegion
 		
 		boolean fileFound = false;
 		
-		/*
+		
 		preGeneratedChunkPos = new boolean[32 * 32];
-		if (MinecraftWrapper.INSTANCE.hasSinglePlayerServer() && LodConfig.CLIENT.worldGenerator.useExperimentalPreGenLoading.get())
+		if (MinecraftWrapper.INSTANCE.hasSinglePlayerServer())
 		{
 			File regionFileDirHead;
 			File regionFileDirParent;
@@ -108,7 +115,7 @@ public class LodRegion
 			
 			// provider needs a separate variable to prevent
 			// the compiler from complaining
-			StringBuilder string = new StringBuilder();
+			//StringBuilder string = new StringBuilder();
 			try
 			{
 				ServerChunkProvider provider = serverWorld.getChunkSource();
@@ -119,7 +126,7 @@ public class LodRegion
 				{
 					regionFileDirParent = regionFileDirHead.getParentFile();
 					//string.append(regionFileDirParent.toString());
-					string.append(regionFileDirHead);
+					//string.append(regionFileDirHead);
 					RegionFile regionFile = new RegionFile(regionFileDirHead, regionFileDirParent, true);
 					for (int x = 0; x < 32; x++)
 					{
@@ -129,7 +136,7 @@ public class LodRegion
 						}
 					}
 					
-					string.append("region " + regionPosX + " " + regionPosZ + "\n");
+					/*string.append("region " + regionPosX + " " + regionPosZ + "\n");
 					for (int x = 0; x < 32; x++)
 					{
 						for (int z = 0; z < 32; z++)
@@ -137,8 +144,8 @@ public class LodRegion
 							//regionFile.doesChunkExist()
 							string.append(preGeneratedChunkPos[x * 32 + z] + "\t");
 						}
-						string.append("\n");
-					}
+						//string.append("\n");
+					}*/
 					regionFile.close();
 				}
 			}
@@ -146,8 +153,8 @@ public class LodRegion
 			{
 				e.printStackTrace();
 			}
-			System.out.println(string);
-		}*/
+			//System.out.println(string);
+		}
 		
 	}
 	
@@ -155,12 +162,12 @@ public class LodRegion
 	/**
 	 * Return true if the chunk has been pregenerated in game
 	 */
-	//public boolean isChunkPreGenerated(int xChunkPos, int zChunkPos)
-	//{
-	//	xChunkPos = LevelPosUtil.getRegionModule(LodUtil.CHUNK_DETAIL_LEVEL, xChunkPos);
-	//	zChunkPos = LevelPosUtil.getRegionModule(LodUtil.CHUNK_DETAIL_LEVEL, zChunkPos);
-	//	return preGeneratedChunkPos[xChunkPos * 32 + zChunkPos];
-	//}
+	public boolean isChunkPreGenerated(int xChunkPos, int zChunkPos)
+	{
+		xChunkPos = LevelPosUtil.getRegionModule(LodUtil.CHUNK_DETAIL_LEVEL, xChunkPos);
+		zChunkPos = LevelPosUtil.getRegionModule(LodUtil.CHUNK_DETAIL_LEVEL, zChunkPos);
+		return preGeneratedChunkPos[xChunkPos * 32 + zChunkPos];
+	}
 	
 	/**
 	 * Inserts the data point into the region.

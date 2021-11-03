@@ -33,6 +33,7 @@ import com.seibel.lod.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.config.LodConfig;
 import com.seibel.lod.enums.DistanceGenerationMode;
+import com.seibel.lod.handlers.ChunkLoader;
 import com.seibel.lod.objects.LodDimension;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
@@ -190,9 +191,8 @@ public class LodGenWorker implements IWorker
 					//}
 					//else
 					//{
-					/*
 					IChunk loadedChunk = null;
-					if (lodDim.isChunkPreGenerated(pos.x, pos.z) && LodConfig.CLIENT.worldGenerator.useExperimentalPreGenLoading.get())
+					if (lodDim.isChunkPreGenerated(pos.x, pos.z) && ClientProxy.pregen)
 					{
 						// generate a Lod like normal
 						loadedChunk = ChunkLoader.getChunkFromFile(pos);
@@ -227,7 +227,7 @@ public class LodGenWorker implements IWorker
 						}
 					}
 					else
-					{*/
+					{
 						switch (generationMode)
 						{
 						case NONE:
@@ -251,7 +251,7 @@ public class LodGenWorker implements IWorker
 							generateWithServer();
 							break;
 						}
-					//}
+					}
 					
 					//lodRenderer.regenerateLODsNextFrame();
 					

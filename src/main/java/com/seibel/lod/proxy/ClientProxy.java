@@ -19,6 +19,8 @@
 
 package com.seibel.lod.proxy;
 
+import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.util.text.TextComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -64,6 +66,8 @@ public class ClientProxy
 	 * once this is true that setup has completed
 	 */
 	private boolean firstTimeSetupComplete = false;
+	
+	public static boolean pregen = false;
 	
 	private static final LodWorld lodWorld = new LodWorld();
 	private static final LodBuilder lodBuilder = new LodBuilder();
@@ -225,6 +229,7 @@ public class ClientProxy
 	@SubscribeEvent
 	public void worldLoadEvent(WorldEvent.Load event)
 	{
+		pregen = false;
 		DataPointUtil.worldHeight = event.getWorld().getHeight();
 		//LodNodeGenWorker.restartExecutorService();
 		//ThreadMapUtil.clearMaps();
@@ -240,6 +245,7 @@ public class ClientProxy
 	@SubscribeEvent
 	public void worldUnloadEvent(WorldEvent.Unload event)
 	{
+		pregen = false;
 		// the player just unloaded a world/dimension
 		ThreadMapUtil.clearMaps();
 		
@@ -298,6 +304,17 @@ public class ClientProxy
 				&& event.getKey() == GLFW.GLFW_KEY_F6 && event.getAction() == GLFW.GLFW_PRESS)
 		{
 			LodConfig.CLIENT.advancedModOptions.debugging.drawLods.set(!LodConfig.CLIENT.advancedModOptions.debugging.drawLods.get());
+		}
+		
+		if (LodConfig.CLIENT.advancedModOptions.debugging.enableDebugKeybindings.get()
+					&& event.getKey() == GLFW.GLFW_KEY_F7 && event.getAction() == GLFW.GLFW_PRESS)
+		{
+			pregen = !pregen;
+			ClientPlayerEntity player = MinecraftWrapper.INSTANCE.getPlayer();
+			if(pregen)
+				player.sendMessage(new StringTextComponent("pregen activated."),player.getUUID());
+			else
+				player.sendMessage(new StringTextComponent("pregen de-activated."),player.getUUID());
 		}
 	}
 	

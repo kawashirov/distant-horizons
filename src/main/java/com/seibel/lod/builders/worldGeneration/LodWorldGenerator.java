@@ -135,7 +135,7 @@ public class LodWorldGenerator
 						// an easy way to do so.
 						
 						// add the near positions
-						if (posToGenerate.getNthDetail(nearIndex, true) != 0 && nearIndex < posToGenerate.getNumberOfNearPos())
+						if (nearIndex < posToGenerate.getNumberOfNearPos() && posToGenerate.getNthDetail(nearIndex, true) != 0)
 						{
 							detailLevel = (byte) (posToGenerate.getNthDetail(nearIndex, true) - 1);
 							posX = posToGenerate.getNthPosX(nearIndex, true);
@@ -160,7 +160,7 @@ public class LodWorldGenerator
 						
 						
 						// add the far positions
-						if (posToGenerate.getNthDetail(farIndex, false) != 0 && farIndex < posToGenerate.getNumberOfFarPos())
+						if (farIndex < posToGenerate.getNumberOfFarPos() && posToGenerate.getNthDetail(farIndex, false) != 0)
 						{
 							detailLevel = (byte) (posToGenerate.getNthDetail(farIndex, false) - 1);
 							posX = posToGenerate.getNthPosX(farIndex, false);

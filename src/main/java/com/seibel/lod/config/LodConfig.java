@@ -480,11 +480,17 @@ public class LodConfig
 			{
 				public final ForgeConfigSpec.BooleanValue drawLods;
 				public final ForgeConfigSpec.EnumValue<DebugMode> debugMode;
+				public final ForgeConfigSpec.BooleanValue usePregen;
 				public final ForgeConfigSpec.BooleanValue enableDebugKeybindings;
 				
 				Debugging(ForgeConfigSpec.Builder builder)
 				{
 					builder.comment("These settings can be used to look for bugs, or see how certain aspects of the mod work.").push(this.getClass().getSimpleName());
+					
+					usePregen = builder
+									   .comment("\n\n"
+														+ " if true the game will use pregen when possible \n")
+									   .define("Use Pregen", false);
 					
 					drawLods = builder
 							.comment("\n\n"
