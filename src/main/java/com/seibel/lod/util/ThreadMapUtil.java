@@ -78,7 +78,7 @@ public class ThreadMapUtil
 				|| (adjDataMap.get(Thread.currentThread().getName()).get(Direction.NORTH) == null)
 				|| (adjDataMap.get(Thread.currentThread().getName()).get(Direction.NORTH).length != verticalData))
 		{
-			adjDataMap.put(Thread.currentThread().getName(), new HashMap<Direction, long[]>());
+			adjDataMap.put(Thread.currentThread().getName(), new HashMap<>());
 			adjDataMap.get(Thread.currentThread().getName()).put(Direction.UP, new long[1]);
 			adjDataMap.get(Thread.currentThread().getName()).put(Direction.DOWN, new long[1]);
 			for (Direction direction : Box.ADJ_DIRECTIONS)
