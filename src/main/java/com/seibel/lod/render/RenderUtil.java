@@ -21,10 +21,10 @@ package com.seibel.lod.render;
 
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.Block.BlockPosWrapper;
+import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Vector3d;
 
 /**
@@ -43,13 +43,13 @@ public class RenderUtil
 	 * Returns if the given ChunkPos is in the loaded area of the world.
 	 * @param center the center of the loaded world (probably the player's ChunkPos)
 	 */
-	public static boolean isChunkPosInLoadedArea(ChunkPos pos, ChunkPos center)
+	public static boolean isChunkPosInLoadedArea(ChunkPosWrapper pos, ChunkPosWrapper center)
 	{
-		return (pos.x >= center.x - mc.getRenderDistance()
-				&& pos.x <= center.x + mc.getRenderDistance())
+		return (pos.getX() >= center.getX() - mc.getRenderDistance()
+				&& pos.getX() <= center.getX() + mc.getRenderDistance())
 				&&
-				(pos.z >= center.z - mc.getRenderDistance()
-						&& pos.z <= center.z + mc.getRenderDistance());
+				(pos.getZ() >= center.getZ() - mc.getRenderDistance()
+						&& pos.getZ() <= center.getZ() + mc.getRenderDistance());
 	}
 	
 	/**
