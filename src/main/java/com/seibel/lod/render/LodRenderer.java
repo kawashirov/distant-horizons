@@ -43,7 +43,6 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.potion.Effects;
 import net.minecraft.profiler.IProfiler;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;

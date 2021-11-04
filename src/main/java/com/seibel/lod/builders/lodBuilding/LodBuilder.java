@@ -41,7 +41,6 @@ import com.seibel.lod.wrappers.Block.BlockPosWrapper;
 import com.seibel.lod.wrappers.Block.BlockShapeWrapper;
 import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 import com.seibel.lod.wrappers.Chunk.ChunkWrapper;
-import com.seibel.lod.wrappers.World.BiomeColorWrapper;
 import com.seibel.lod.wrappers.World.BiomeWrapper;
 import com.seibel.lod.wrappers.World.WorldWrapper;
 
