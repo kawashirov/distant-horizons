@@ -20,9 +20,8 @@
 package com.seibel.lod.objects;
 
 import com.seibel.lod.util.LodUtil;
-
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
+import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 
 /**
  * This object is similar to ChunkPos or BlockPos.
@@ -55,28 +54,28 @@ public class RegionPos
 	}
 	
 	/** Converts from a BlockPos to a RegionPos */
-	public RegionPos(BlockPos pos)
+	public RegionPos(BlockPosWrapper pos)
 	{
-		this(new ChunkPos(pos));
+		this(new ChunkPosWrapper(pos));
 	}
 	
 	/** Converts from a ChunkPos to a RegionPos */
-	public RegionPos(ChunkPos pos)
+	public RegionPos(ChunkPosWrapper pos)
 	{
-		x = Math.floorDiv(pos.x, LodUtil.REGION_WIDTH_IN_CHUNKS);
-		z = Math.floorDiv(pos.z, LodUtil.REGION_WIDTH_IN_CHUNKS);
+		x = Math.floorDiv(pos.getX(), LodUtil.REGION_WIDTH_IN_CHUNKS);
+		z = Math.floorDiv(pos.getZ(), LodUtil.REGION_WIDTH_IN_CHUNKS);
 	}
 	
 	/** Returns the ChunkPos at the center of this region */
-	public ChunkPos chunkPos()
+	public ChunkPosWrapper chunkPos()
 	{
-		return new ChunkPos(
+		return new ChunkPosWrapper(
 				(x * LodUtil.REGION_WIDTH_IN_CHUNKS) + LodUtil.REGION_WIDTH_IN_CHUNKS / 2,
 				(z * LodUtil.REGION_WIDTH_IN_CHUNKS) + LodUtil.REGION_WIDTH_IN_CHUNKS / 2);
 	}
 	
 	/** Returns the BlockPos at the center of this region */
-	public BlockPos blockPos()
+	public BlockPosWrapper blockPos()
 	{
 		return chunkPos().getWorldPosition()
 				.offset(LodUtil.CHUNK_WIDTH / 2, 0, LodUtil.CHUNK_WIDTH / 2);

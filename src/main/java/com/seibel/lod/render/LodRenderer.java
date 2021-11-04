@@ -35,6 +35,8 @@ import com.seibel.lod.proxy.GlProxy;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
+import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.GameRenderer;
@@ -90,7 +92,7 @@ public class LodRenderer
 	 */
 	private int[][][] storageBufferIds;
 	
-	private ChunkPos vbosCenter = new ChunkPos(0, 0);
+	private ChunkPosWrapper vbosCenter = new ChunkPosWrapper(0, 0);
 	
 	
 	/** This is used to determine if the LODs should be regenerated */
@@ -125,7 +127,6 @@ public class LodRenderer
 	public int vanillaBlockRenderedDistance;
 	
 	final boolean vivecraftDetected = ReflectionHandler.INSTANCE.detectVivecraft();
-	
 	
 	
 	
@@ -205,7 +206,7 @@ public class LodRenderer
 			if ((partialRegen || fullRegen) && !lodBufferBuilder.generatingBuffers && !lodBufferBuilder.newBuffersAvailable())
 			{
 				// generate the LODs on a separate thread to prevent stuttering or freezing
-				lodBufferBuilder.generateLodBuffersAsync(this, lodDim, mc.getPlayer().blockPosition(), fullRegen);
+				lodBufferBuilder.generateLodBuffersAsync(this, lodDim, mc.getPlayerBlockPos(), fullRegen);
 				
 				// the regen process has been started,
 				// it will be done when lodBufferBuilder.newBuffersAvailable()
@@ -539,7 +540,7 @@ public class LodRenderer
 		// translate the camera relative to the regions' center
 		// (AxisAlignedBoundingBoxes (LODs) use doubles and thus have a higher
 		// accuracy vs the model view matrix, which only uses floats)
-		BlockPos bufferPos = vbosCenter.getWorldPosition();
+		BlockPosWrapper bufferPos = vbosCenter.getWorldPosition();
 		double xDiff = projectedView.x - bufferPos.getX();
 		double zDiff = projectedView.z - bufferPos.getZ();
 		mcMatrixStack.translate(-xDiff, -projectedView.y, -zDiff);
@@ -841,12 +842,12 @@ public class LodRenderer
 		if (newTime - prevPlayerPosTime > LodConfig.CLIENT.advancedModOptions.buffers.rebuildTimes.get().playerMoveTimeout)
 		{
 			if (LevelPosUtil.getDetailLevel(previousPos) == 0
-					|| mc.getPlayer().xChunk != LevelPosUtil.getPosX(previousPos)
-					|| mc.getPlayer().zChunk != LevelPosUtil.getPosZ(previousPos))
+					|| mc.getPlayerChunkPos().getX() != LevelPosUtil.getPosX(previousPos)
+					|| mc.getPlayerChunkPos().getZ() != LevelPosUtil.getPosZ(previousPos))
 			{
 				vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
 				fullRegen = true;
-				previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayer().xChunk, mc.getPlayer().zChunk);
+				previousPos = LevelPosUtil.createLevelPos((byte) 4, mc.getPlayerChunkPos().getX(), mc.getPlayerChunkPos().getZ());
 			}
 			prevPlayerPosTime = newTime;
 		}
@@ -921,15 +922,15 @@ public class LodRenderer
 		//==============//
 		
 		// determine which LODs should not be rendered close to the player
-		HashSet<ChunkPos> chunkPosToSkip = LodUtil.getNearbyLodChunkPosToSkip(lodDim, mc.getPlayer().blockPosition());
+		HashSet<ChunkPos> chunkPosToSkip = LodUtil.getNearbyLodChunkPosToSkip(lodDim, mc.getPlayerBlockPos());
 		int xIndex;
 		int zIndex;
 		for (ChunkPos pos : chunkPosToSkip)
 		{
 			vanillaRenderedChunksEmptySkip = false;
 			
-			xIndex = (pos.x - mc.getPlayer().xChunk) + (chunkRenderDistance + 1);
-			zIndex = (pos.z - mc.getPlayer().zChunk) + (chunkRenderDistance + 1);
+			xIndex = (pos.x - mc.getPlayerChunkPos().getX()) + (chunkRenderDistance + 1);
+			zIndex = (pos.z - mc.getPlayerChunkPos().getZ()) + (chunkRenderDistance + 1);
 			
 			// sometimes we are given chunks that are outside the render distance,
 			// This prevents index out of bounds exceptions

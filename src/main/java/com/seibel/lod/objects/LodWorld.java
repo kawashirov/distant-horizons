@@ -24,6 +24,7 @@ import java.util.Map;
 
 import com.seibel.lod.proxy.ClientProxy;
 
+import com.seibel.lod.wrappers.World.DimensionTypeWrapper;
 import net.minecraft.world.DimensionType;
 
 /**
@@ -39,7 +40,7 @@ public class LodWorld
 	private String worldName;
 	
 	/** dimensions in this world */
-	private Map<DimensionType, LodDimension> lodDimensions;
+	private Map<DimensionTypeWrapper, LodDimension> lodDimensions;
 	
 	/** If true then the LOD world is setup and ready to use */
 	private boolean isWorldLoaded = false;
@@ -107,7 +108,7 @@ public class LodWorld
 		if (lodDimensions == null)
 			return;
 		
-		lodDimensions.put(newDimension.dimension, newDimension);
+		lodDimensions.put(DimensionTypeWrapper.getDimensionTypeWrapper(newDimension.dimension), newDimension);
 	}
 	
 	/**
@@ -118,7 +119,7 @@ public class LodWorld
 		if (lodDimensions == null)
 			return null;
 		
-		return lodDimensions.get(dimension);
+		return lodDimensions.get(DimensionTypeWrapper.getDimensionTypeWrapper(dimension));
 	}
 	
 	/**
@@ -132,7 +133,7 @@ public class LodWorld
 		
 		saveAllDimensions();
 		
-		for (DimensionType key : lodDimensions.keySet())
+		for (DimensionTypeWrapper key : lodDimensions.keySet())
 			lodDimensions.get(key).setRegionWidth(newRegionWidth);
 	}
 	
@@ -148,7 +149,7 @@ public class LodWorld
 		// but that requires a LodDimension.hasDirtyRegions() method or something similar
 		ClientProxy.LOGGER.info("Saving LODs");
 		
-		for (DimensionType key : lodDimensions.keySet())
+		for (DimensionTypeWrapper key : lodDimensions.keySet())
 			lodDimensions.get(key).saveDirtyRegionsToFileAsync();
 	}
 	

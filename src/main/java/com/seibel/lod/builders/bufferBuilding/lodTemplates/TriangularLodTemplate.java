@@ -24,9 +24,9 @@ import java.util.Map;
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.proxy.ClientProxy;
 
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
 
 /**
  * TODO #21 TriangularLodTemplate
@@ -37,7 +37,7 @@ import net.minecraft.util.math.BlockPos;
 public class TriangularLodTemplate extends AbstractLodTemplate
 {
 	@Override
-	public void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
+	public void addLodToBuffer(BufferBuilder buffer, BlockPosWrapper bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
 			byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, boolean[] adjShadeDisabled)
 	{
 		ClientProxy.LOGGER.error(DynamicLodTemplate.class.getSimpleName() + " is not implemented!");

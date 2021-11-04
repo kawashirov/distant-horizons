@@ -23,10 +23,10 @@ import java.util.Map;
 
 import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.util.ColorUtil;
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
 
 /**
  * This is the abstract class used to create different
@@ -38,7 +38,7 @@ public abstract class AbstractLodTemplate
 {
 	
 	/** Uploads the given LOD to the buffer. */
-	public abstract void addLodToBuffer(BufferBuilder buffer, BlockPos bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
+	public abstract void addLodToBuffer(BufferBuilder buffer, BlockPosWrapper bufferCenterBlockPos, long data, Map<Direction, long[]> adjData,
 			byte detailLevel, int posX, int posZ, Box box, DebugMode debugging, boolean[] adjShadeDisabled);
 	
 	/** add the given position and color to the buffer */

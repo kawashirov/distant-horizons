@@ -20,6 +20,7 @@
 package com.seibel.lod.render;
 
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.util.math.BlockPos;
@@ -85,7 +86,7 @@ public class RenderUtil
 	 * Returns true if one of the region's 4 corners is in front
 	 * of the camera.
 	 */
-	public static boolean isRegionInViewFrustum(BlockPos playerBlockPos, Vector3d cameraDir, BlockPos vboCenterPos)
+	public static boolean isRegionInViewFrustum(BlockPos playerBlockPos, Vector3d cameraDir, BlockPosWrapper vboCenterPos)
 	{
 		// convert the vbo position into a direction vector
 		// starting from the player's position

@@ -19,8 +19,6 @@
 
 package com.seibel.lod.util;
 
-import static com.seibel.lod.util.LodUtil.DETAIL_OPTIONS;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -142,9 +140,9 @@ public class ThreadMapUtil
 	{
 		if (!saveContainer.containsKey(Thread.currentThread().getName()) || (saveContainer.get(Thread.currentThread().getName()) == null))
 		{
-			byte[][] array = new byte[DETAIL_OPTIONS][];
+			byte[][] array = new byte[LodUtil.DETAIL_OPTIONS][];
 			int size = 1;
-			for (int i = DETAIL_OPTIONS - 1; i >= 0; i--)
+			for (int i = LodUtil.DETAIL_OPTIONS - 1; i >= 0; i--)
 			{
 				array[i] = new byte[2 + 8 * size * size * DetailDistanceUtil.getMaxVerticalData(i)];
 				size = size << 1;
@@ -188,8 +186,8 @@ public class ThreadMapUtil
 	{
 		if (!verticalUpdate.containsKey(Thread.currentThread().getName()) || (verticalUpdate.get(Thread.currentThread().getName()) == null))
 		{
-			long[][] array = new long[DETAIL_OPTIONS][];
-			for (int i = 1; i < DETAIL_OPTIONS; i++)
+			long[][] array = new long[LodUtil.DETAIL_OPTIONS][];
+			for (int i = 1; i < LodUtil.DETAIL_OPTIONS; i++)
 				array[i] = new long[DetailDistanceUtil.getMaxVerticalData(i - 1) * 4];
 			verticalUpdate.put(Thread.currentThread().getName(), array);
 		}

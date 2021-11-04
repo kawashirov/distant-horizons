@@ -28,10 +28,10 @@ import com.seibel.lod.enums.DebugMode;
 import com.seibel.lod.util.ColorUtil;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.LodUtil;
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3i;
 
 /**
@@ -279,7 +279,7 @@ public class Box
 	}
 	
 	/** determine which faces should be culled */
-	public void setUpCulling(int cullingDistance, BlockPos playerPos)
+	public void setUpCulling(int cullingDistance, BlockPosWrapper playerPos)
 	{
 		for (Direction direction : DIRECTIONS)
 		{

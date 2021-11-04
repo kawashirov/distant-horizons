@@ -314,7 +314,7 @@ public class ClientProxy
 	private void playerMoveEvent(LodDimension lodDim)
 	{
 		// make sure the dimension is centered
-		RegionPos playerRegionPos = new RegionPos(mc.getPlayer().blockPosition());
+		RegionPos playerRegionPos = new RegionPos(mc.getPlayerBlockPos());
 		RegionPos worldRegionOffset = new RegionPos(playerRegionPos.x - lodDim.getCenterRegionPosX(), playerRegionPos.z - lodDim.getCenterRegionPosZ());
 		if (worldRegionOffset.x != 0 || worldRegionOffset.z != 0)
 		{

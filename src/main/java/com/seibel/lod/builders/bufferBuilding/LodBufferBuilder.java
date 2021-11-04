@@ -30,6 +30,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL30;
@@ -49,6 +50,7 @@ import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.proxy.GlProxy;
 import com.seibel.lod.render.LodRenderer;
+import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 import com.seibel.lod.util.DataPointUtil;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
@@ -61,8 +63,6 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.LightType;
 
 /**
@@ -141,11 +141,11 @@ public class LodBufferBuilder
 	private volatile RegionPos center;
 	
 	/**
-	 * This is the ChunkPos the player was at the last time the buffers were built.
+	 * This is the ChunkPosWrapper the player was at the last time the buffers were built.
 	 * IE the center of the buffers last time they were built
 	 */
-	private volatile ChunkPos drawableCenterChunkPos = new ChunkPos(0, 0);
-	private volatile ChunkPos buildableCenterChunkPos = new ChunkPos(0, 0);
+	private volatile ChunkPosWrapper drawableCenterChunkPos = new ChunkPosWrapper(0, 0);
+	private volatile ChunkPosWrapper buildableCenterChunkPos = new ChunkPosWrapper(0, 0);
 	
 	
 	
@@ -167,7 +167,7 @@ public class LodBufferBuilder
 	 * swapped with the drawable buffers in the LodRenderer to be drawn.
 	 */
 	public void generateLodBuffersAsync(LodRenderer renderer, LodDimension lodDim,
-			BlockPos playerBlockPos, boolean fullRegen)
+			BlockPosWrapper playerBlockPos, boolean fullRegen)
 	{
 		
 		// only allow one generation process to happen at a time
@@ -190,15 +190,15 @@ public class LodBufferBuilder
 	// more easily edited by hot swapping. Because, As far as James is aware
 	// you can't hot swap lambda expressions.
 	private void generateLodBuffersThread(LodRenderer renderer, LodDimension lodDim,
-			BlockPos playerBlockPos, boolean fullRegen)
+			BlockPosWrapper playerBlockPos, boolean fullRegen)
 	{
 		bufferLock.lock();
 		
 		try
 		{
 			// round the player's block position down to the nearest chunk BlockPos
-			ChunkPos playerChunkPos = new ChunkPos(playerBlockPos);
-			BlockPos playerBlockPosRounded = playerChunkPos.getWorldPosition();
+			ChunkPosWrapper playerChunkPos = new ChunkPosWrapper(playerBlockPos);
+			BlockPosWrapper playerBlockPosRounded = playerChunkPos.getWorldPosition();
 			
 			
 			//long startTime = System.currentTimeMillis();
@@ -233,7 +233,7 @@ public class LodBufferBuilder
 			//================================//
 			
 			ClientWorld world = mc.getClientWorld();
-			skyLightPlayer = world.getBrightness(LightType.SKY, playerBlockPos);
+			skyLightPlayer = world.getBrightness(LightType.SKY, playerBlockPos.getBlockPos());
 			
 			for (int xRegion = 0; xRegion < lodDim.getWidth(); xRegion++)
 			{
@@ -315,8 +315,8 @@ public class LodBufferBuilder
 								posX = posToRender.getNthPosX(index);
 								posZ = posToRender.getNthPosZ(index);
 								
-								int chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.x;
-								int chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.z;
+								int chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.getX();
+								int chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.getZ();
 								
 								//We don't want to render this fake block if
 								//The block is inside the render distance with, is not bigger than a chunk and is positioned in a chunk set as vanilla rendered
@@ -343,8 +343,8 @@ public class LodBufferBuilder
 									xAdj = posX + Box.DIRECTION_NORMAL_MAP.get(direction).getX();
 									zAdj = posZ + Box.DIRECTION_NORMAL_MAP.get(direction).getZ();
 									long data;
-									chunkXdist = LevelPosUtil.getChunkPos(detailLevel, xAdj) - playerChunkPos.x;
-									chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.z;
+									chunkXdist = LevelPosUtil.getChunkPos(detailLevel, xAdj) - playerChunkPos.getX();
+									chunkZdist = LevelPosUtil.getChunkPos(detailLevel, zAdj) - playerChunkPos.getZ();
 									adjPosInPlayerChunk = (chunkXdist == 0 && chunkZdist == 0);
 									
 									//If the adj block is rendered in the same region and with same detail
@@ -476,13 +476,13 @@ public class LodBufferBuilder
 		}
 	}
 	
-	private boolean isThisPositionGoingToBeRendered(byte detailLevel, int posX, int posZ, ChunkPos playerChunkPos, boolean[][] vanillaRenderedChunks, int gameChunkRenderDistance){
+	private boolean isThisPositionGoingToBeRendered(byte detailLevel, int posX, int posZ, ChunkPosWrapper playerChunkPos, boolean[][] vanillaRenderedChunks, int gameChunkRenderDistance){
 		
 		
 		// skip any chunks that Minecraft is going to render
-		int chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.x;
-		int chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.z;
-		
+		int chunkXdist = LevelPosUtil.getChunkPos(detailLevel, posX) - playerChunkPos.getX();
+		int chunkZdist = LevelPosUtil.getChunkPos(detailLevel, posZ) - playerChunkPos.getZ();
+
 		// check if the chunk is on the border
 		boolean isItBorderPos;
 		if (LodConfig.CLIENT.graphics.advancedGraphicsOption.vanillaOverdraw.get() == VanillaOverdraw.BORDER)
@@ -793,7 +793,7 @@ public class LodBufferBuilder
 		}
 		finally
 		{
-			GL11.glFinish();
+			GL15.glFinish();
 			
 			// close the context so it can be re-used later.
 			// I'm guessing we can't just leave it because the executor service
@@ -953,9 +953,9 @@ public class LodBufferBuilder
 	{
 		public final VertexBuffer[][][] vbos;
 		public final int[][][] storageBufferIds;
-		public final ChunkPos drawableCenterChunkPos;
+		public final ChunkPosWrapper drawableCenterChunkPos;
 		
-		public VertexBuffersAndOffset(VertexBuffer[][][] newVbos, int[][][] newStorageBufferIds, ChunkPos newDrawableCenterChunkPos)
+		public VertexBuffersAndOffset(VertexBuffer[][][] newVbos, int[][][] newStorageBufferIds, ChunkPosWrapper newDrawableCenterChunkPos)
 		{
 			vbos = newVbos;
 			storageBufferIds = newStorageBufferIds;

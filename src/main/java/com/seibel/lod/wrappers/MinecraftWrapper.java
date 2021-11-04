@@ -26,6 +26,8 @@ import com.seibel.lod.ModInfo;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.util.LodUtil;
 
+import com.seibel.lod.wrappers.Block.BlockPosWrapper;
+import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 import com.seibel.lod.wrappers.World.WorldWrapper;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.MainWindow;
@@ -44,6 +46,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 
@@ -170,6 +174,17 @@ public class MinecraftWrapper
 		return mc.player;
 	}
 	
+	public BlockPosWrapper getPlayerBlockPos()
+	{
+		BlockPos playerPos = getPlayer().blockPosition();
+		return new BlockPosWrapper(playerPos.getX(), playerPos.getY(), playerPos.getZ());
+	}
+
+	public ChunkPosWrapper getPlayerChunkPos()
+	{
+		return new ChunkPosWrapper(getPlayer().xChunk, getPlayer().zChunk);
+	}
+
 	public GameSettings getOptions()
 	{
 		return mc.options;
