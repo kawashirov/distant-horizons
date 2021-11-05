@@ -108,7 +108,7 @@ public class LodBuilder
 			{
 				// we need a loaded client world in order to
 				// get the textures for blocks
-				if (mc.getClientWorld() == null)
+				if (mc.getClientLevel() == null)
 					return;
 				
 				// don't try to generate LODs if the user isn't in the world anymore
@@ -170,7 +170,7 @@ public class LodBuilder
 			return;
 		
 		// this happens if a LOD is generated after the user leaves the world.
-		if (MinecraftWrapper.INSTANCE.getWrappedClientWorld() == null)
+		if (MinecraftWrapper.INSTANCE.getWrappedClientLevel() == null)
 			return;
 		
 		// determine how many LODs to generate horizontally
@@ -230,8 +230,8 @@ public class LodBuilder
 		int xAbs;
 		int yAbs;
 		int zAbs;
-		boolean hasCeiling = mc.getClientWorld().dimensionType().hasCeiling();
-		boolean hasSkyLight = mc.getClientWorld().dimensionType().hasSkyLight();
+		boolean hasCeiling = mc.getClientLevel().dimensionType().hasCeiling();
+		boolean hasSkyLight = mc.getClientLevel().dimensionType().hasSkyLight();
 		boolean isDefault;
 		BlockPosWrapper blockPos = new BlockPosWrapper();
 		int index;
@@ -386,7 +386,7 @@ public class LodBuilder
 		// 1 means the lighting is a guess
 		int isDefault = 0;
 		
-		WorldWrapper world = MinecraftWrapper.INSTANCE.getWrappedServerWorld();
+		WorldWrapper world = MinecraftWrapper.INSTANCE.getWrappedServerLevel();
 		
 		int blockBrightness = chunk.getEmittedBrightness(blockPos);
 		// get the air block above or below this block
@@ -414,7 +414,7 @@ public class LodBuilder
 			{
 				// we are on predicted terrain, and we don't know what the light here is,
 				// lets just take a guess
-				if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
+				if (blockPos.getY() >= mc.getClientLevel().getSeaLevel() - 5)
 				{
 					skyLight = 12;
 					isDefault = 1;
@@ -425,7 +425,7 @@ public class LodBuilder
 		}
 		else
 		{
-			world = MinecraftWrapper.INSTANCE.getWrappedClientWorld();
+			world = MinecraftWrapper.INSTANCE.getWrappedClientLevel();
 			if (world.isEmpty())
 				return 0;
 			// client world sky light (almost never accurate)
@@ -447,7 +447,7 @@ public class LodBuilder
 					{
 						// we don't know what the light here is,
 						// lets just take a guess
-						if (blockPos.getY() >= mc.getClientWorld().getSeaLevel() - 5)
+						if (blockPos.getY() >= mc.getClientLevel().getSeaLevel() - 5)
 						{
 							skyLight = 12;
 							isDefault = 1;

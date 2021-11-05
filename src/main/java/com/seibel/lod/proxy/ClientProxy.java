@@ -330,7 +330,7 @@ public class ClientProxy
 	{
 		// calculate how wide the dimension(s) should be in regions
 		int chunksWide;
-		if (mc.getClientWorld().dimensionType().hasCeiling())
+		if (mc.getClientLevel().dimensionType().hasCeiling())
 			chunksWide = Math.min(LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get(), LodUtil.CEILED_DIMENSION_MAX_RENDER_DISTANCE) * 2 + 1;
 		else
 			chunksWide = LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get() * 2 + 1;
@@ -347,7 +347,7 @@ public class ClientProxy
 			// update the dimensions to fit the new width
 			lodWorld.resizeDimensionRegionWidth(newWidth);
 			lodBuilder.defaultDimensionWidthInRegions = newWidth;
-			renderer.setupBuffers(lodWorld.getLodDimension(mc.getClientWorld().dimensionType()));
+			renderer.setupBuffers(lodWorld.getLodDimension(mc.getClientLevel().dimensionType()));
 			
 			recalculateWidths = false;
 			//LOGGER.info("new dimension width in regions: " + newWidth + "\t potential: " + newWidth );

@@ -229,7 +229,7 @@ public class LodBufferBuilder
 			// create the nodeToRenderThreads //
 			//================================//
 			
-			skyLightPlayer = MinecraftWrapper.INSTANCE.getWrappedClientWorld().getSkyLight(playerBlockPos);
+			skyLightPlayer = MinecraftWrapper.INSTANCE.getWrappedClientLevel().getSkyLight(playerBlockPos);
 			
 			for (int xRegion = 0; xRegion < lodDim.getWidth(); xRegion++)
 			{

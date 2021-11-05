@@ -52,7 +52,7 @@ public class BlockColorWrapper
 								   + Integer.toHexString(
 				Minecraft.getInstance().getBlockColors().createDefault().getColor(
 						block.defaultBlockState(),
-						(World) MinecraftWrapper.INSTANCE.getWrappedServerWorld().getWorld(),
+						(World) MinecraftWrapper.INSTANCE.getWrappedServerLevel().getLevel(),
 						blockPosWrapper.getBlockPos())) + "\n"
 		);
 		for(Property x : Minecraft.getInstance().getBlockColors().getColoringProperties(block))
@@ -134,7 +134,7 @@ public class BlockColorWrapper
 		else
 		{
 			isColored = true;
-			texture = mc.getModelManager().getBlockModelShaper().getTexture(block.defaultBlockState(), mc.getClientWorld(), blockPosWrapper.getBlockPos());
+			texture = mc.getModelManager().getBlockModelShaper().getTexture(block.defaultBlockState(), mc.getClientLevel(), blockPosWrapper.getBlockPos());
 		}
 		
 		int count = 0;

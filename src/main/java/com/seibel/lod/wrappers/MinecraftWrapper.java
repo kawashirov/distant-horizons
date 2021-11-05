@@ -194,17 +194,17 @@ public class MinecraftWrapper
 		return mc.getModelManager();
 	}
 	
-	public ClientWorld getClientWorld()
+	public ClientWorld getClientLevel()
 	{
 		return mc.level;
 	}
 	
-	public WorldWrapper getWrappedClientWorld()
+	public WorldWrapper getWrappedClientLevel()
 	{
 		return WorldWrapper.getWorldWrapper(mc.level);
 	}
 	
-	public WorldWrapper getWrappedServerWorld()
+	public WorldWrapper getWrappedServerLevel()
 	{
 		
 		if (mc.level == null)

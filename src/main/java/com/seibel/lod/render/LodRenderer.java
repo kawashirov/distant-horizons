@@ -262,7 +262,7 @@ public class LodRenderer
 		Matrix4f modelViewMatrix = offsetTheModelViewMatrix(mcMatrixStack, partialTicks);
 		vanillaBlockRenderedDistance = mc.getRenderDistance() * LodUtil.CHUNK_WIDTH;
 		// required for setupFog and setupProjectionMatrix
-		if (mc.getClientWorld().dimensionType().hasCeiling())
+		if (mc.getClientLevel().dimensionType().hasCeiling())
 			farPlaneBlockDistance = Math.min(LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get(), LodUtil.CEILED_DIMENSION_MAX_RENDER_DISTANCE) * LodUtil.CHUNK_WIDTH;
 		else
 			farPlaneBlockDistance = LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;

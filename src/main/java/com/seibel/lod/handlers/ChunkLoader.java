@@ -39,7 +39,7 @@ public class ChunkLoader
 {
 	public static IChunk getChunkFromFile(ChunkPos pos){
 		
-		WorldWrapper clientLevel = MinecraftWrapper.INSTANCE.getWrappedClientWorld();
+		WorldWrapper clientLevel = MinecraftWrapper.INSTANCE.getWrappedClientLevel();
 		if (clientLevel == null)
 			return null;
 		ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(clientLevel.getWorld().dimensionType());
