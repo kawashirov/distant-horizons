@@ -24,7 +24,7 @@ import java.io.File;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
-import net.minecraft.client.world.ClientWorld;
+import com.seibel.lod.wrappers.World.WorldWrapper;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.chunk.storage.ChunkSerializer;
@@ -39,10 +39,10 @@ public class ChunkLoader
 {
 	public static IChunk getChunkFromFile(ChunkPos pos){
 		
-		ClientWorld clientWorld = MinecraftWrapper.INSTANCE.getClientWorld();
-		if (clientWorld == null)
+		WorldWrapper clientLevel = MinecraftWrapper.INSTANCE.getWrappedClientWorld();
+		if (clientLevel == null)
 			return null;
-		ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(clientWorld.dimensionType());
+		ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(clientLevel.getWorld().dimensionType());
 		try
 		{
 			File file = new File(serverWorld.getChunkSource().getDataStorage().dataFolder.getParent() + File.separatorChar + "region", "r." + (pos.x >> 5) + "." + (pos.z >> 5) + ".mca");

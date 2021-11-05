@@ -37,7 +37,6 @@ import java.lang.reflect.Method;
 public class ReflectionHandler
 {
 	public static final ReflectionHandler INSTANCE = new ReflectionHandler();
-	private final MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	public Field ofFogField = null;
 	public Method vertexBufferUploadMethod = null;
@@ -56,7 +55,7 @@ public class ReflectionHandler
 	private void setupFogField()
 	{
 		// get every variable from the entity renderer
-		Field[] optionFields = mc.getOptions().getClass().getDeclaredFields();
+		Field[] optionFields = MinecraftWrapper.INSTANCE.getOptions().getClass().getDeclaredFields();
 		
 		// try and find the ofFogType variable in gameSettings
 		for (Field field : optionFields)
@@ -93,7 +92,7 @@ public class ReflectionHandler
 		
 		try
 		{
-			returnNum = (int) ofFogField.get(mc.getOptions());
+			returnNum = (int) ofFogField.get(MinecraftWrapper.INSTANCE.getOptions());
 		}
 		catch (IllegalArgumentException | IllegalAccessException e)
 		{

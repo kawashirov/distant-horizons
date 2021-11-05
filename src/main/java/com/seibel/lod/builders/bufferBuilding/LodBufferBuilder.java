@@ -61,9 +61,7 @@ import com.seibel.lod.wrappers.MinecraftWrapper;
 
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.vertex.VertexBuffer;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.Direction;
-import net.minecraft.world.LightType;
 
 /**
  * This object is used to create NearFarBuffer objects.
@@ -72,7 +70,6 @@ import net.minecraft.world.LightType;
  */
 public class LodBufferBuilder
 {
-	private static final MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
 	
 	/** The thread used to generate new LODs off the main thread. */
 	public static final ExecutorService mainGenThread = Executors.newSingleThreadExecutor(new LodThreadFactory(LodBufferBuilder.class.getSimpleName() + " - main"));
@@ -232,8 +229,7 @@ public class LodBufferBuilder
 			// create the nodeToRenderThreads //
 			//================================//
 			
-			ClientWorld world = mc.getClientWorld();
-			skyLightPlayer = world.getBrightness(LightType.SKY, playerBlockPos.getBlockPos());
+			skyLightPlayer = MinecraftWrapper.INSTANCE.getWrappedClientWorld().getSkyLight(playerBlockPos);
 			
 			for (int xRegion = 0; xRegion < lodDim.getWidth(); xRegion++)
 			{
