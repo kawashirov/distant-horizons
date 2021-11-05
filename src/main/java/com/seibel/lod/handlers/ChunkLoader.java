@@ -24,7 +24,7 @@ import java.io.File;
 import com.seibel.lod.util.LodUtil;
 import com.seibel.lod.wrappers.MinecraftWrapper;
 
-import com.seibel.lod.wrappers.World.WorldWrapper;
+import com.seibel.lod.wrappers.World.LevelWrapper;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.chunk.storage.ChunkSerializer;
@@ -39,7 +39,7 @@ public class ChunkLoader
 {
 	public static IChunk getChunkFromFile(ChunkPos pos){
 		
-		WorldWrapper clientLevel = MinecraftWrapper.INSTANCE.getWrappedClientLevel();
+		LevelWrapper clientLevel = MinecraftWrapper.INSTANCE.getWrappedClientLevel();
 		if (clientLevel == null)
 			return null;
 		ServerWorld serverWorld = LodUtil.getServerWorldFromDimension(clientLevel.getWorld().dimensionType());

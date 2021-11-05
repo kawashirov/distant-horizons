@@ -42,7 +42,7 @@ import com.seibel.lod.wrappers.Block.BlockShapeWrapper;
 import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 import com.seibel.lod.wrappers.Chunk.ChunkWrapper;
 import com.seibel.lod.wrappers.World.BiomeWrapper;
-import com.seibel.lod.wrappers.World.WorldWrapper;
+import com.seibel.lod.wrappers.World.LevelWrapper;
 
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
@@ -386,7 +386,7 @@ public class LodBuilder
 		// 1 means the lighting is a guess
 		int isDefault = 0;
 		
-		WorldWrapper world = MinecraftWrapper.INSTANCE.getWrappedServerLevel();
+		LevelWrapper world = MinecraftWrapper.INSTANCE.getWrappedServerLevel();
 		
 		int blockBrightness = chunk.getEmittedBrightness(blockPos);
 		// get the air block above or below this block

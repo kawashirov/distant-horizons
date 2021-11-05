@@ -6,18 +6,18 @@ import net.minecraft.world.IWorld;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-public class WorldWrapper
+public class LevelWrapper
 {
-	private static final ConcurrentMap<IWorld, WorldWrapper> worldWrapperMap = new ConcurrentHashMap<>();
+	private static final ConcurrentMap<IWorld, LevelWrapper> worldWrapperMap = new ConcurrentHashMap<>();
 	private final IWorld world;
 	
-	public WorldWrapper(IWorld world)
+	public LevelWrapper(IWorld world)
 	{
 		this.world = world;
 	}
 	
 	
-	public static WorldWrapper getWorldWrapper(IWorld world)
+	public static LevelWrapper getLevelWrapper(IWorld world)
 	{
 		//first we check if the biome has already been wrapped
 		if(worldWrapperMap.containsKey(world) && worldWrapperMap.get(world) != null)
@@ -25,11 +25,11 @@ public class WorldWrapper
 		
 		
 		//if it hasn't been created yet, we create it and save it in the map
-		WorldWrapper worldWrapper = new WorldWrapper(world);
-		worldWrapperMap.put(world, worldWrapper);
+		LevelWrapper levelWrapper = new LevelWrapper(world);
+		worldWrapperMap.put(world, levelWrapper);
 		
 		//we return the newly created wrapper
-		return worldWrapper;
+		return levelWrapper;
 	}
 	
 	public static void clearMap()

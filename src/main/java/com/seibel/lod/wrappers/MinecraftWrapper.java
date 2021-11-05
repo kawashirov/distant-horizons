@@ -28,7 +28,7 @@ import com.seibel.lod.util.LodUtil;
 
 import com.seibel.lod.wrappers.Block.BlockPosWrapper;
 import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
-import com.seibel.lod.wrappers.World.WorldWrapper;
+import com.seibel.lod.wrappers.World.LevelWrapper;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
@@ -199,12 +199,12 @@ public class MinecraftWrapper
 		return mc.level;
 	}
 	
-	public WorldWrapper getWrappedClientLevel()
+	public LevelWrapper getWrappedClientLevel()
 	{
-		return WorldWrapper.getWorldWrapper(mc.level);
+		return LevelWrapper.getLevelWrapper(mc.level);
 	}
 	
-	public WorldWrapper getWrappedServerLevel()
+	public LevelWrapper getWrappedServerLevel()
 	{
 		
 		if (mc.level == null)
@@ -226,7 +226,7 @@ public class MinecraftWrapper
 			}
 		}
 		
-		return WorldWrapper.getWorldWrapper(returnWorld);
+		return LevelWrapper.getLevelWrapper(returnWorld);
 	}
 	
 	/** Measured in chunks */
