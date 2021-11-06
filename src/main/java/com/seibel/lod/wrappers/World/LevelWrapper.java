@@ -2,6 +2,7 @@ package com.seibel.lod.wrappers.World;
 
 import com.seibel.lod.wrappers.Block.BlockPosWrapper;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.LightType;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -44,12 +45,12 @@ public class LevelWrapper
 	
 	public int getBlockLight(BlockPosWrapper blockPos)
 	{
-		return world.getLightEngine().blockEngine.getLightValue(blockPos.getBlockPos());
+		return world.getBrightness(LightType.BLOCK, blockPos.getBlockPos());
 	}
 	
 	public int getSkyLight(BlockPosWrapper blockPos)
 	{
-		return world.getLightEngine().skyEngine.getLightValue(blockPos.getBlockPos());
+		return world.getBrightness(LightType.SKY, blockPos.getBlockPos());
 	}
 	
 	public BiomeWrapper getBiome(BlockPosWrapper blockPos)
