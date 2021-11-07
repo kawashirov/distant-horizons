@@ -38,6 +38,9 @@ displayURL="https://www.curseforge.com/minecraft/mc-mods/lod-level-of-detail" #o
 #// A file name (in the root of the mod JAR) containing a logo for display
 logoFile="logo.png" #optional
 
+#// A file name (in the root of the mod JAR) containing a icon for display by catalogue
+catalogueImageIcon="icon.png"
+
 #// A text field displayed in the mod UI
 credits="TechnoVision, Vike, and Darkhax for their modding tutorials." #optional
 
