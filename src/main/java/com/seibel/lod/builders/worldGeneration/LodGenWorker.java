@@ -52,7 +52,7 @@ import net.minecraftforge.common.WorldWorkerManager.IWorker;
  * This is used to generate a LodChunk at a given ChunkPos.
  * 
  * @author James Seibel
- * @version 10-22-2021
+ * @version 11-8-2021
  */
 public class LodGenWorker implements IWorker
 {
@@ -165,7 +165,7 @@ public class LodGenWorker implements IWorker
 				
 				if (lodDim.regionIsInRange(pos.getX() / LodUtil.REGION_WIDTH_IN_CHUNKS, pos.getZ() / LodUtil.REGION_WIDTH_IN_CHUNKS))
 				{
-					// TODO test if anything has changed vs MC 1.16.5
+					// TODO Only server appears to be working currently
 					generateWithServer();
 					
 //					switch (generationMode)
