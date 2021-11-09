@@ -19,12 +19,14 @@
 
 package com.seibel.lod.render;
 
-import java.nio.FloatBuffer;
 import java.util.HashSet;
 
 import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.NVFogDistance;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.mojang.math.Matrix4f;
@@ -43,6 +45,7 @@ import com.seibel.lod.objects.NearFarFogSettings;
 import com.seibel.lod.objects.RegionPos;
 import com.seibel.lod.proxy.ClientProxy;
 import com.seibel.lod.proxy.GlProxy;
+import com.seibel.lod.render.shader.LodShaderProgram;
 import com.seibel.lod.util.DetailDistanceUtil;
 import com.seibel.lod.util.LevelPosUtil;
 import com.seibel.lod.util.LodUtil;
@@ -52,6 +55,7 @@ import com.seibel.lod.wrappers.Chunk.ChunkPosWrapper;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.ChunkPos;
@@ -63,7 +67,7 @@ import net.minecraft.world.phys.Vec3;
  * This is where LODs are draw to the world.
  * 
  * @author James Seibel
- * @version 10-31-2021
+ * @version 11-8-2021
  */
 public class LodRenderer
 {
@@ -153,9 +157,10 @@ public class LodRenderer
 	 * the async process of generating the Buffers that hold those LODs.
 	 * @param lodDim The dimension to draw, if null doesn't replace the current dimension.
 	 * @param mcModelViewMatrix This matrix stack should come straight from MC's renderChunkLayer (or future equivalent) method
+	 * @param mcProjectionMatrix 
 	 * @param partialTicks how far into the current tick this method was called.
 	 */
-	public void drawLODs(LodDimension lodDim, PoseStack mcModelViewMatrix, float partialTicks, ProfilerFiller newProfiler)
+	public void drawLODs(LodDimension lodDim, PoseStack mcModelViewMatrix, Matrix4f mcProjectionMatrix, float partialTicks, ProfilerFiller newProfiler)
 	{
 		//=================================//
 		// determine if LODs should render //
@@ -234,28 +239,13 @@ public class LodRenderer
 		else
 			GL15.glPolygonMode(GL15.GL_FRONT_AND_BACK, GL15.GL_FILL);
 		
-		GL15.glDisable(GL15.GL_TEXTURE_2D);
 		GL15.glEnable(GL15.GL_CULL_FACE);
-		GL15.glEnable(GL15.GL_COLOR_MATERIAL);
 		GL15.glEnable(GL15.GL_DEPTH_TEST);
 		
 		// enable transparent rendering
 		GL15.glBlendFunc(GL15.GL_SRC_ALPHA, GL15.GL_ONE_MINUS_SRC_ALPHA);
 		GL15.glEnable(GL15.GL_BLEND);
 		
-		// disable the lights Minecraft uses
-		GL15.glDisable(GL15.GL_LIGHT0);
-		GL15.glDisable(GL15.GL_LIGHT1);
-		
-		
-		// get the default projection matrix, so we can
-		// reset it after drawing the LODs
-		float[] mcProjMatrixRaw = new float[16];
-		GL15.glGetFloatv(GL15.GL_PROJECTION_MATRIX, mcProjMatrixRaw);
-		Matrix4f mcProjectionMatrix = new Matrix4f(mcProjMatrixRaw);
-		// OpenGl outputs their matrices in col,row form instead of row,col
-		// (or maybe vice versa I have no idea :P)
-		mcProjectionMatrix.transpose();
 		
 		
 		Matrix4f modelViewMatrix = offsetTheModelViewMatrix(mcModelViewMatrix, partialTicks);
@@ -267,19 +257,21 @@ public class LodRenderer
 			farPlaneBlockDistance = LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get() * LodUtil.CHUNK_WIDTH;
 		
 		
-		setupProjectionMatrix(mcProjectionMatrix, vanillaBlockRenderedDistance, partialTicks);
+		Matrix4f projectionMatrix = createProjectionMatrix(mcProjectionMatrix, vanillaBlockRenderedDistance, partialTicks);
 		
 		
 		// commented out until we can add shaders to handle lighting
 		//setupLighting(lodDim, partialTicks);
 		
 		
-		// determine the current fog settings, so they can be
-		// reset after drawing the LODs
-		float defaultFogStartDist = GL15.glGetFloat(GL15.GL_FOG_START);
-		float defaultFogEndDist = GL15.glGetFloat(GL15.GL_FOG_END);
-		int defaultFogMode = GL15.glGetInteger(GL15.GL_FOG_MODE);
-		int defaultFogDistance = glProxy.fancyFogAvailable ? GL15.glGetInteger(NVFogDistance.GL_FOG_DISTANCE_MODE_NV) : -1;
+//		// determine the current fog settings, so they can be
+//		// reset after drawing the LODs
+//		float defaultFogStartDist = GL15.glGetFloat(GL15.GL_FOG_START);
+//		float defaultFogEndDist = GL15.glGetFloat(GL15.GL_FOG_END);
+//		int defaultFogMode = GL15.glGetInteger(GL15.GL_FOG_MODE);
+//		int defaultFogDistance = glProxy.fancyFogAvailable ? GL15.glGetInteger(NVFogDistance.GL_FOG_DISTANCE_MODE_NV) : -1;
+		
+		ShaderInstance mcShader = RenderSystem.getShader();
 		
 		NearFarFogSettings fogSettings = determineFogSettings();
 		
@@ -298,7 +290,8 @@ public class LodRenderer
 			Camera camera = mc.getGameRenderer().getMainCamera();
 			Vector3f cameraDir = camera.getLookVector();
 			
-			boolean cullingDisabled = LodConfig.CLIENT.graphics.advancedGraphicsOption.disableDirectionalCulling.get();
+			// TODO re-enable once rendering is totally working
+			boolean cullingDisabled = true; //LodConfig.CLIENT.graphics.advancedGraphicsOption.disableDirectionalCulling.get();
 			boolean renderBufferStorage = LodConfig.CLIENT.graphics.advancedGraphicsOption.gpuUploadMethod.get() == GpuUploadMethod.BUFFER_STORAGE && glProxy.bufferStorageSupported;
 			
 			// used to determine what type of fog to render
@@ -309,6 +302,31 @@ public class LodRenderer
 			RegionPos vboCenterRegionPos = new RegionPos(vbosCenter);
 			
 			
+			
+			
+			// can be used when testing shaders
+			//glProxy.createShaderProgram();
+			
+			
+			LodShaderProgram shaderProgram = glProxy.lodShaderProgram;
+			shaderProgram.use();
+			
+			
+			// determine the VertexArrayObject's element positions
+	        int posAttrib = shaderProgram.getAttributeLocation("vPosition");
+	        shaderProgram.enableVertexAttribute(posAttrib);
+	        int colAttrib = shaderProgram.getAttributeLocation("color");
+	        shaderProgram.enableVertexAttribute(colAttrib);
+			
+	        
+	        // upload the required uniforms
+	        int mvmUniform = shaderProgram.getUniformLocation("modelViewMatrix");
+	        shaderProgram.setUniform(mvmUniform, modelViewMatrix);
+			int projUniform = shaderProgram.getUniformLocation("projectionMatrix");
+			shaderProgram.setUniform(projUniform, projectionMatrix);
+	        
+			
+			// render each of the buffers
 			for (int x = 0; x < vbos.length; x++)
 			{
 				for (int z = 0; z < vbos.length; z++)
@@ -319,19 +337,19 @@ public class LodRenderer
 					
 					if (cullingDisabled || RenderUtil.isRegionInViewFrustum(camera.getBlockPosition(), cameraDir, vboPos.blockPos()))
 					{
-						if ((x > halfWidth - quarterWidth && x < halfWidth + quarterWidth) 
-							&& (z > halfWidth - quarterWidth && z < halfWidth + quarterWidth))
-							setupFog(fogSettings.near.distance, fogSettings.near.quality);
-						else
-							setupFog(fogSettings.far.distance, fogSettings.far.quality);
-						
+						// TODO add fog to the fragment shader
+//						if ((x > halfWidth - quarterWidth && x < halfWidth + quarterWidth) 
+//							&& (z > halfWidth - quarterWidth && z < halfWidth + quarterWidth))
+//							setupFog(fogSettings.near.distance, fogSettings.near.quality);
+//						else
+//							setupFog(fogSettings.far.distance, fogSettings.far.quality);
 						
 						if (storageBufferIds != null && renderBufferStorage)
 							for (int i = 0; i < storageBufferIds[x][z].length; i++)
-								drawArrays(modelViewMatrix, storageBufferIds[x][z][i], vbos[x][z][i].indexCount);
+								drawArrays(storageBufferIds[x][z][i], vbos[x][z][i].indexCount, posAttrib, colAttrib);
 						else
 							for (int i = 0; i < vbos[x][z].length; i++)
-								drawArrays(modelViewMatrix, vbos[x][z][i].vertextBufferId, vbos[x][z][i].indexCount);
+								drawArrays(vbos[x][z][i].vertextBufferId, vbos[x][z][i].indexCount, posAttrib, colAttrib);
 					}
 				}
 			}
@@ -348,23 +366,11 @@ public class LodRenderer
 		profiler.popPush("LOD cleanup");
 		
 		GL15.glPolygonMode(GL15.GL_FRONT_AND_BACK, GL15.GL_FILL);
-		GL15.glEnable(GL15.GL_TEXTURE_2D);
-		GL15.glDisable(LOD_GL_LIGHT_NUMBER);
-		GL15.glDisable(GL15.GL_BLEND);
-		// re-enable the lights Minecraft uses
-		GL15.glEnable(GL15.GL_LIGHT0);
-		GL15.glEnable(GL15.GL_LIGHT1);
-		GL15.glDisable(GL15.GL_LIGHTING);
+		GL15.glDisable(GL15.GL_BLEND); // TODO: what should this be reset to?
 		
-		// reset the fog settings so the normal chunks
-		// will be drawn correctly
-		cleanupFog(fogSettings, defaultFogStartDist, defaultFogEndDist, defaultFogMode, defaultFogDistance);
+		RenderSystem.setShader(() -> mcShader);
 		
-		// reset the projection matrix so anything drawn after
-		// the LODs will use the correct projection matrix
-		gameRender.resetProjectionMatrix(mcProjectionMatrix);
-		
-		// clear the depth buffer so anything drawn is drawn
+		// clear the depth buffer so everything drawn is drawn
 		// over the LODs
 		GL15.glClear(GL15.GL_DEPTH_BUFFER_BIT);
 		
@@ -374,28 +380,29 @@ public class LodRenderer
 	}
 	
 	/** This is where the actual drawing happens. */
-	private void drawArrays(Matrix4f modelViewMatrix, int glBufferId, int vertexCount)
+	private void drawArrays(int glBufferId, int vertexCount, int posAttrib, int colAttrib)
 	{
 		if (glBufferId == 0)
 			return;
 		
-		// pre draw setup
+		// can be used to check for OpenGL errors
+//		int error = GL15.glGetError();
+//		ClientProxy.LOGGER.info(Integer.toHexString(error));
+		
+		
+        // bind the buffer we are going to draw
 		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, glBufferId);
-		LodUtil.LOD_VERTEX_FORMAT.setupBufferState();
-		
-		// set up the model view matrix
-//		GL15.glPushMatrix(); // matrix code is only available in OpenGL 3.2 and lower
-//		GL15.glLoadIdentity();
-		FloatBuffer matrixBuffer = FloatBuffer.allocate(16);
-		modelViewMatrix.store(matrixBuffer);
-//		GL15.glMultMatrixf(matrixBuffer);
-		
-		GL15.glDrawArrays(GL15.GL_QUADS, 0, vertexCount);
-		
-		// post draw cleanup
-//		GL15.glPopMatrix();
-//		GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
-		LodUtil.LOD_VERTEX_FORMAT.clearBufferState();
+		GL30.glBindVertexArray(GlProxy.getInstance().vertexArrayObjectId);
+        
+		// let OpenGL know how our buffer is set up
+		int vertexByteCount = (Float.BYTES * 3) + (Byte.BYTES * 4);
+        GL20.glEnableVertexAttribArray(posAttrib);
+        GL20.glVertexAttribPointer(posAttrib, 3, GL15.GL_FLOAT, false, vertexByteCount, 0);
+        GL20.glEnableVertexAttribArray(colAttrib);
+        GL20.glVertexAttribPointer(colAttrib, 4, GL15.GL_UNSIGNED_BYTE, true, vertexByteCount, Float.BYTES * 3);
+        
+        // draw the LODs
+		GL30.glDrawArrays(GL30.GL_TRIANGLES, 0, vertexCount);
 	}
 	
 	
@@ -552,15 +559,15 @@ public class LodRenderer
 	}
 		
 	/**
-	 * create a new projection matrix and send it over to the GPU
+	 * create and return a new projection matrix based on MC's projection matrix
 	 * @param currentProjectionMatrix this is Minecraft's current projection matrix
 	 * @param vanillaBlockRenderedDistance Minecraft's vanilla far plane distance
 	 * @param partialTicks how many ticks into the frame we are
 	 */
-	private void setupProjectionMatrix(Matrix4f currentProjectionMatrix, float vanillaBlockRenderedDistance, float partialTicks)
+	private Matrix4f createProjectionMatrix(Matrix4f currentProjectionMatrix, float vanillaBlockRenderedDistance, float partialTicks)
 	{
 		// create the new projection matrix
-		Matrix4f lodPoj =
+		Matrix4f lodProj =
 				Matrix4f.perspective(
 						getFov(partialTicks, true),
 						(float) this.mc.getWindow().getScreenWidth() / (float) this.mc.getWindow().getScreenHeight(),
@@ -586,10 +593,9 @@ public class LodRenderer
 		
 		// edit the lod projection to match Minecraft's
 		// (so the LODs line up with the real world)
-		lodPoj.multiply(distortionMatrix);
+		lodProj.multiply(distortionMatrix);
 		
-		// send the projection over to the GPU
-		gameRender.resetProjectionMatrix(lodPoj);
+		return lodProj;
 	}
 	
 	
@@ -678,7 +684,7 @@ public class LodRenderer
 		lodBufferBuilder.destroyBuffers();
 	}
 	
-	
+	// TODO move this into the MC wrapper
 	private double getFov(float partialTicks, boolean useFovSetting)
 	{
 		return mc.getGameRenderer().getFov(mc.getGameRenderer().getMainCamera(), partialTicks, useFovSetting);
@@ -787,8 +793,6 @@ public class LodRenderer
 	/** Determines if the LODs should have a fullRegen or partialRegen */
 	private void determineIfLodsShouldRegenerate(LodDimension lodDim, float partialTicks)
 	{
-		
-		
 		short chunkRenderDistance = (short) mc.getRenderDistance();
 		int vanillaRenderedChunksWidth = chunkRenderDistance * 2 + 2;
 		
@@ -943,6 +947,8 @@ public class LodRenderer
 			vanillaRenderedChunksChanged = true;
 			vanillaRenderedChunksEmptySkip = true;
 		}
+		
+		vanillaRenderedChunks = new boolean[vanillaRenderedChunksWidth][vanillaRenderedChunksWidth];
 	}
 	
 }

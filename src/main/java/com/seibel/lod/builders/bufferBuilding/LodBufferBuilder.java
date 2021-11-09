@@ -68,7 +68,7 @@ import net.minecraft.world.level.LightLayer;
 /**
  * This object is used to create NearFarBuffer objects.
  * @author James Seibel
- * @version 10-23-2021
+ * @version 11-8-2021
  */
 public class LodBufferBuilder
 {
@@ -535,12 +535,15 @@ public class LodBufferBuilder
 	 */
 	public void setupBuffers(LodDimension lodDimension)
 	{
-		GlProxy glProxy = GlProxy.getInstance();
-		
 		bufferLock.lock();
 		int numbRegionsWide = lodDimension.getWidth();
 		long regionMemoryRequired;
 		int numberOfBuffers;
+		
+		GlProxy glProxy = GlProxy.getInstance();
+		GlProxyContext oldContext = glProxy.getGlContext();
+		glProxy.setGlContext(GlProxyContext.LOD_BUILDER);
+		
 		
 		previousRegionWidth = numbRegionsWide;
 		numberOfBuffersPerRegion = new int[numbRegionsWide][numbRegionsWide];
@@ -632,6 +635,7 @@ public class LodBufferBuilder
 			}
 		}
 		
+		glProxy.setGlContext(oldContext);
 		bufferLock.unlock();
 	}
 	
@@ -794,7 +798,11 @@ public class LodBufferBuilder
 						for (int i = 0; i < buildableBuffers[x][z].length; i++)
 						{
 							ByteBuffer uploadBuffer = buildableBuffers[x][z][i].popNextBuffer().getSecond();
-							vboUpload(buildableVbos[x][z][i], buildableStorageBufferIds[x][z][i], uploadBuffer, true, uploadMethod);
+							int storageBufferId = 0;
+							if (buildableStorageBufferIds != null)
+								storageBufferId = buildableStorageBufferIds[x][z][i];
+							
+							vboUpload(buildableVbos[x][z][i], storageBufferId, uploadBuffer, true, uploadMethod);
 							lodDim.setRegenRegionBufferByArrayIndex(x, z, false);
 						}
 					}
@@ -818,8 +826,7 @@ public class LodBufferBuilder
 		}
 	}
 	
-	/** Uploads the uploadBuffer so the GPU can use it. 
-	 * @param uploadMethod */
+	/** Uploads the uploadBuffer so the GPU can use it. */
 	private void vboUpload(VertexBuffer vbo, int storageBufferId, ByteBuffer uploadBuffer,
 			boolean allowBufferExpansion, GpuUploadMethod uploadMethod)
 	{
@@ -827,15 +834,14 @@ public class LodBufferBuilder
 		if (vbo.vertextBufferId != -1 && GlProxy.getInstance().getGlContext() == GlProxyContext.LOD_BUILDER)
 		{
 			// this is how many points will be rendered
-			// TODO double check that 4 * 6 is correct for the number of points
-			vbo.indexCount = (uploadBuffer.capacity() / (4 * 6));
+			vbo.indexCount = (uploadBuffer.capacity() / (6 * 6)); // TODO make this change with the LodTemplate
 			
 			
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.vertextBufferId);
 			try
 			{
 				// if possible use the faster buffer storage route
-				if (uploadMethod == GpuUploadMethod.BUFFER_STORAGE)
+				if (uploadMethod == GpuUploadMethod.BUFFER_STORAGE && storageBufferId != 0)
 				{
 					// get a pointer to the buffer in system memory
 					ByteBuffer vboBuffer = GL30.glMapBufferRange(GL15.GL_ARRAY_BUFFER, 0, uploadBuffer.capacity(), GL30.GL_MAP_WRITE_BIT | GL30.GL_MAP_UNSYNCHRONIZED_BIT);
@@ -916,7 +922,6 @@ public class LodBufferBuilder
 					// hybrid subData/bufferData //
 					// less stutter, low GPU usage
 					
-					//long size = GL31.glGetBufferParameteri64(GL15.GL_ARRAY_BUFFER, GL15.GL_BUFFER_SIZE); // hopefully just a int should be long enough
 					long size = GL15.glGetBufferParameteri(GL15.GL_ARRAY_BUFFER, GL15.GL_BUFFER_SIZE);
 					if (size < uploadBuffer.capacity() * BUFFER_EXPANSION_MULTIPLIER)
 					{

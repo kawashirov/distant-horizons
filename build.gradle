@@ -11,7 +11,7 @@ buildscript {
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
 		classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
-        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
+        classpath "gradle.plugin.com.github.johnrengelman:shadow:7.1.0"
     }
 }
 
@@ -22,9 +22,9 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'com.github.johnrengelman.shadow'
 
-version = '1.5.3a'
+version = '1.5.4a'
 group = 'com.seibel.lod'
-archivesBaseName = 'Distant-Horizons_1.16.5'
+archivesBaseName = 'Distant-Horizons_1.17.1'
 
 // Mojang ships Java 16 to end users in 1.17+ instead of Java 8 in 1.16 or lower, so your mod should target Java 16.
 java.toolchain.languageVersion = JavaLanguageVersion.of(16)

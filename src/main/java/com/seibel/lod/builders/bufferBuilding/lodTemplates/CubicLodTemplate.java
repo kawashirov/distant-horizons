@@ -33,7 +33,7 @@ import net.minecraft.core.Direction;
 /**
  * Builds LODs as rectangular prisms.
  * @author James Seibel
- * @version 10-10-2021
+ * @version 11-8-2021
  */
 public class CubicLodTemplate extends AbstractLodTemplate
 {
@@ -118,10 +118,11 @@ public class CubicLodTemplate extends AbstractLodTemplate
 		{
 			if(box.isCulled(direction))
 				continue;
+			
 			int verticalFaceIndex = 0;
 			while (box.shouldRenderFace(direction, verticalFaceIndex))
 			{
-				for (int vertexIndex = 0; vertexIndex < 4; vertexIndex++)
+				for (int vertexIndex = 0; vertexIndex < 6; vertexIndex++)
 				{
 					color = box.getColor(direction);
 					skyLight = box.getSkyLight(direction, verticalFaceIndex);

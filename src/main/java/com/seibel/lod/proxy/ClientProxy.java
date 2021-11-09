@@ -56,7 +56,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  * This handles all events sent to the client,
  * and is the starting point for most of the mod.
  * @author James_Seibel
- * @version 10-31-2021
+ * @version 11-8-2021
  */
 public class ClientProxy
 {
@@ -131,8 +131,7 @@ public class ClientProxy
 			profiler.pop(); // get out of "terrain"
 			profiler.push("LOD");
 			
-			glProxy.setGlContext(GlProxyContext.LOD_RENDER);
-			renderer.drawLODs(lodDim, mcModelViewMatrix, partialTicks, mc.getProfiler());
+			renderer.drawLODs(lodDim, mcModelViewMatrix, projectionMatrix, partialTicks, mc.getProfiler());
 			
 			profiler.pop(); // end LOD
 			profiler.push("terrain"); // go back into "terrain"
@@ -161,18 +160,19 @@ public class ClientProxy
 		// remind the developer(s) that the config override is active
 		if (!configOverrideReminderPrinted)
 		{
-//			mc.getPlayer().sendMessage(new TextComponent("LOD experimental build 1.5.1"), mc.getPlayer().getUUID());
+			// TODO add a send message method to the MC wrapper
+//			mc.getPlayer().sendMessage(new TextComponent("LOD experimental build " + ModInfo.VERSION), mc.getPlayer().getUUID());
 //			mc.getPlayer().sendMessage(new TextComponent("Here be dragons!"), mc.getPlayer().getUUID());
 			
 			mc.getPlayer().sendMessage(new TextComponent("Debug settings enabled!"), mc.getPlayer().getUUID());
 			configOverrideReminderPrinted = true;
 		}
-
+		
 //		LodConfig.CLIENT.graphics.drawResolution.set(HorizontalResolution.BLOCK);
 //		LodConfig.CLIENT.worldGenerator.generationResolution.set(HorizontalResolution.BLOCK);
 		// requires a world restart?
 //		LodConfig.CLIENT.worldGenerator.lodQualityMode.set(VerticalQuality.VOXEL);
-
+		
 //		LodConfig.CLIENT.graphics.fogQualityOption.fogDistance.set(FogDistance.FAR);
 //		LodConfig.CLIENT.graphics.fogQualityOption.fogDrawOverride.set(FogDrawOverride.FANCY);
 //		LodConfig.CLIENT.graphics.fogQualityOption.disableVanillaFog.set(true);
@@ -181,7 +181,7 @@ public class ClientProxy
 //		LodConfig.CLIENT.graphics.advancedGraphicsOption.vanillaOverdraw.set(VanillaOverdraw.DYNAMIC);
 		
 //		LodConfig.CLIENT.graphics.advancedGraphicsOption.gpuUploadMethod.set(GpuUploadMethod.BUFFER_STORAGE);
-
+		
 //		LodConfig.CLIENT.worldGenerator.distanceGenerationMode.set(DistanceGenerationMode.SURFACE);
 //		LodConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.set(128);
 //		LodConfig.CLIENT.worldGenerator.lodDistanceCalculatorType.set(DistanceCalculatorType.LINEAR);
@@ -251,23 +251,25 @@ public class ClientProxy
 		{
 			// the player just left the server
 			
+			// TODO should "resetMod()" be called here? -James
+			
 			// if this isn't done unfinished tasks may be left in the queue
 			// preventing new LodChunks form being generated
-			//LodNodeGenWorker.restartExecutorService();
+			//LodNodeGenWorker.restartExecutorService(); // TODO why was this commented out? -James
 			//ThreadMapUtil.clearMaps();
 			
 			LodWorldGenerator.INSTANCE.numberOfChunksWaitingToGenerate.set(0);
 			lodWorld.deselectWorld();
 			
 			
-			// hopefully this should reduce issues related to the buffer builder
+			// prevent issues related to the buffer builder
 			// breaking when changing worlds.
 			renderer.destroyBuffers();
 			recalculateWidths = true;
 			renderer = new LodRenderer(lodBufferBuilder);
 			
 			
-			// make sure the nilled objects are freed.
+			// make sure the nulled objects are freed.
 			// (this prevents an out of memory error when
 			// changing worlds)
 			System.gc();
@@ -358,6 +360,7 @@ public class ClientProxy
 	/** this method reset some static data every time we change world */
 	private void resetMod()
 	{
+		// TODO when should this be used?
 		ThreadMapUtil.clearMaps();
 		LodGenWorker.restartExecutorService();
 		
