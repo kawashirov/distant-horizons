@@ -68,7 +68,7 @@ import net.minecraft.world.level.LightLayer;
 /**
  * This object is used to create NearFarBuffer objects.
  * @author James Seibel
- * @version 11-8-2021
+ * @version 11-9-2021
  */
 public class LodBufferBuilder
 {
@@ -834,7 +834,7 @@ public class LodBufferBuilder
 		if (vbo.vertextBufferId != -1 && GlProxy.getInstance().getGlContext() == GlProxyContext.LOD_BUILDER)
 		{
 			// this is how many points will be rendered
-			vbo.indexCount = (uploadBuffer.capacity() / (6 * 6)); // TODO make this change with the LodTemplate
+			vbo.indexCount = (uploadBuffer.capacity() / (Float.BYTES * 3) + (Byte.BYTES * 4)); // TODO make this change with the LodTemplate
 			
 			
 			GL15.glBindBuffer(GL15.GL_ARRAY_BUFFER, vbo.vertextBufferId);
