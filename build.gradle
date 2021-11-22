@@ -233,7 +233,7 @@ mixin {
     add sourceSets.main, "lod.refmap.json"
 }
 
-// add Distant Horizon Core's source folders
+// add Distant Horizon's Core source folders
 sourceSets {
     core {
         java {
