@@ -235,7 +235,7 @@ mixin {
 
 // add Distant Horizon's Core source folders
 sourceSets {
-    core {
+    main {
         java {
             srcDirs("core/src/main/java");
             srcDirs("core/src/main/resources")
