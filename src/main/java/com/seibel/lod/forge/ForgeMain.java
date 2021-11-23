@@ -17,10 +17,9 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.seibel.lod;
+package com.seibel.lod.forge;
 
-import com.seibel.lod.forge.ForgeClientProxy;
-import com.seibel.lod.forge.ForgeConfig;
+import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
 
 import net.minecraftforge.common.MinecraftForge;
@@ -34,30 +33,27 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fmlserverevents.FMLServerStartedEvent;
 
 /**
- * Initialize and setup the Mod.
- * <br>
+ * Initialize and setup the Mod. <br>
  * If you are looking for the real start of the mod
  * check out the ClientProxy.
  * 
  * @author James Seibel
- * @version 7-3-2021
+ * @version 11-21-2021
  */
 @Mod(ModInfo.ID)
-public class LodMain
+public class ForgeMain
 {
-	public static LodMain instance;
-	
-	public static ForgeClientProxy client_proxy;
-	
+	public static ForgeClientProxy forgeClientProxy;
 	
 	private void init(final FMLCommonSetupEvent event)
 	{
+		// make sure the dependencies are set up before the mod needs them
 		ForgeDependencySetup.createInitialBindings();
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ForgeConfig.CLIENT_SPEC);
 	}
 	
 	
-	public LodMain()
+	public ForgeMain()
 	{
 		// Register the methods
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::init);
@@ -69,8 +65,8 @@ public class LodMain
 	
 	private void onClientStart(final FMLClientSetupEvent event)
 	{
-		client_proxy = new ForgeClientProxy();
-		MinecraftForge.EVENT_BUS.register(client_proxy);
+		forgeClientProxy = new ForgeClientProxy();
+		MinecraftForge.EVENT_BUS.register(forgeClientProxy);
 	}
 	
 	

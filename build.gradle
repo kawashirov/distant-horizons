@@ -228,3 +228,14 @@ publishing {
 mixin {
     add sourceSets.main, "lod.refmap.json"
 }
+
+
+// add Distant Horizon's Core source folders
+sourceSets {
+    main {
+        java {
+            srcDirs("core/src/main/java");
+            srcDirs("core/src/main/resources")
+        }
+    }
+}
