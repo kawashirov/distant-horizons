@@ -24,3 +24,26 @@ run
 # Files from Forge MDK
 logs
 forge*changelog.txt
+
+.architectury-transformer/
+build/
+*.ipr
+run/
+*.iws
+out/
+*.iml
+.gradle/
+output/
+bin/
+libs/
+
+.classpath
+.project
+.idea/
+classes/
+.metadata
+.vscode
+.settings
+*.launch
+
+**/src/generated/

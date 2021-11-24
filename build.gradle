@@ -1,236 +1,51 @@
-buildscript {
-    repositories {
-        maven { url = 'https://files.minecraftforge.net' }
-        mavenCentral()
-        // potential replacement in case of problems:
-		// https://dist.creeper.host/Sponge/maven
-		maven { url = 'https://repo.spongepowered.org/maven/' }
-		// used to download and compile dependencies from git repos 
-		maven { url 'https://jitpack.io' }
+plugins {
+    id "architectury-plugin" version "3.4-SNAPSHOT"
+    id "dev.architectury.loom" version "0.10.0.194" apply false
+}
+
+architectury {
+    minecraft = rootProject.minecraft_version
+}
+
+subprojects {
+    apply plugin: "dev.architectury.loom"
+
+    loom {
+        silentMojangMappingsLicense()
     }
+
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-		classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
-        classpath "gradle.plugin.com.github.johnrengelman:shadow:7.1.0"
+        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+        // The following line declares the mojmap mappings
+        mappings loom.officialMojangMappings()
     }
 }
 
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.spongepowered.mixin'
-// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-apply plugin: 'com.github.johnrengelman.shadow'
+allprojects {
+    apply plugin: "java"
+    apply plugin: "architectury-plugin"
+    apply plugin: "maven-publish"
 
-version = '1.5.4a'
-group = 'com.seibel.lod'
-archivesBaseName = 'Distant-Horizons_1.17.1'
+    archivesBaseName = rootProject.archives_base_name
+    version = rootProject.mod_version
+    group = rootProject.maven_group
 
-// Mojang ships Java 16 to end users in 1.17+ instead of Java 8 in 1.16 or lower, so your mod should target Java 16.
-java.toolchain.languageVersion = JavaLanguageVersion.of(16)
-
-println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
-minecraft {
-    // The mappings can be changed at any time and must be in the following format.
-    // Channel:   Version:
-    // snapshot   YYYYMMDD   Snapshot are built nightly.
-    // stable     #          Stables are built at the discretion of the MCP team.
-    // official   MCVersion  Official field/method names from Mojang mapping files
-    //
-    // You must be aware of the Mojang license when using the 'official' mappings.
-    // See more information here: https://github.com/MinecraftForge/MCPConfig/blob/master/Mojang.md
-    //
-    // Use non-default mappings at your own risk. They may not always work.
-    // Simply re-run your setup task after changing the mappings to update your workspace.
-    mappings channel: 'official', version: '1.17.1'
-
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
-    // Default run configurations.
-    // These can be tweaked, removed, or duplicated as needed.
-    runs {
-        client {
-            workingDirectory project.file('run')
-			arg "-mixin.config=lod.mixins.json"
-
-            // Recommended logging data for a userdev environment
-            // The markers can be added/remove as needed separated by commas.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                examplemod {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-			arg "-mixin.config=lod.mixins.json"
-			
-            // Recommended logging data for a userdev environment
-            // The markers can be added/remove as needed separated by commas.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                examplemod {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-
-            // Recommended logging data for a userdev environment
-            // The markers can be added/remove as needed separated by commas.
-            // "SCAN": For mods scan.
-            // "REGISTRIES": For firing of registry events.
-            // "REGISTRYDUMP": For getting the contents of all registries.
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            // Recommended logging level for the console
-            // You can set various levels here.
-            // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
-            property 'forge.logging.console.level', 'debug'
-
-            // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'lod', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-            mods {
-                examplemod {
-                    source sourceSets.main
-                }
-            }
-        }
-    }
-}
-
-// Include resources generated by data generators.
-sourceSets.main.resources { srcDir 'src/generated/resources' }
-
-// this is required so that we can use 
-// jitpack in the dependencies section below 
-repositories {
-    mavenCentral()
-	// used to download and compile dependencies from git repos 
-	maven { url 'https://jitpack.io' }
-}
-
-configurations {
-    shadowMe
-    compileOnly.extendsFrom(embed)
-}
-
-dependencies {
-    // Specify the version of Minecraft to use. If this is any group other than 'net.minecraft', it is assumed
-    // that the dep is a ForgeGradle 'patcher' dependency, and its patches will be applied.
-    // The userdev artifact is a special name and will get all sorts of transformations applied to it.
-    minecraft 'net.minecraftforge:forge:1.17.1-37.0.103'
-
-    implementation 'org.tukaani:xz:1.9'
-    shadowMe 'org.tukaani:xz:1.9'
-    implementation 'org.apache.commons:commons-compress:1.21'
-    shadowMe 'org.apache.commons:commons-compress:1.21'
-
-    // these were added to hopefully allow for cloning
-    // configuredFeatures to allow for safe
-    // multi threaded feature generation. Sadly I couldn't find
-    // a way to duplicate lambda functions (which features use)
-    // so for now I'm not sure what to do.
-    //implementation 'io.github.kostaskougios:cloning:1.10.3'
-    //
-    //implementation ('com.esotericsoftware:kryo:5.1.1') {
-    //  exclude group: "org.objenesis"
-    //}
-    //implementation 'org.objenesis:objenesis:3.2'
-
-
-    // Real mod deobf dependency examples - these get remapped to your current mappings
-    // compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api") // Adds JEI API as a compile dependency
-    // runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}") // Adds the full JEI mod as a runtime dependency
-    // implementation fg.deobf("com.tterrag.registrate:Registrate:MC${mc_version}-${registrate_version}") // Adds registrate as a dependency
-
-    // For more info...
-    // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
-    // http://www.gradle.org/docs/current/userguide/dependency_management.html
-
-}
-
-shadowJar {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    configurations = [project.configurations.getByName("shadowMe")]
-    relocate 'org.tukaani', 'shaded.tukaani'
-    relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
-    classifier = ''
-}
-
-reobf {
-    shadowJar {
-        dependsOn tasks.createMcpToSrg
-        mappings = tasks.createMcpToSrg.outputs.files.singleFile
-    }
-}
-
-artifacts {
-    archives tasks.shadowJar
-}
-
-// Example for how to get properties into the manifest for reading by the runtime..
-jar {
-    manifest {
-        attributes([
-            "Specification-Title": "LOD",
-            "Specification-Version": "1", // We are version 1 of ourselves
-            "Implementation-Title": project.name,
-            "Implementation-Version"  : project.jar.archiveVersion,
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-			"MixinConfigs": "lod.mixins.json",
-        ])
-    }
-}
-
-// Example configuration to allow publishing using the maven-publish task
-// This is the preferred method to reobfuscate your jar file
-jar.finalizedBy('reobfJar')
-// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
-//publish.dependsOn('reobfJar')
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact jar
-        }
-    }
     repositories {
-        maven {
-            url "file://${project.projectDir}/mcmodsrepo"
-        }
+        mavenCentral()
+        // used to download and compile dependencies from git repos
+        maven { url 'https://jitpack.io' }
+    }
+
+    tasks.withType(JavaCompile) {
+        options.encoding = "UTF-8"
+        options.release = 16
+    }
+
+    java {
+        withSourcesJar()
     }
 }
 
-mixin {
-    add sourceSets.main, "lod.refmap.json"
-}
-
-
-// add Distant Horizon's Core source folders
 sourceSets {
     main {
         java {
@@ -239,3 +54,4 @@ sourceSets {
         }
     }
 }
+

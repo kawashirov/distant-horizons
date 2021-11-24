@@ -1,0 +1,10 @@
+{
+	"required": true,
+	"package": "com.seibel.lod.forge.mixins",
+	"compatibilityLevel": "JAVA_8",
+	"refmap": "lod.refmap.json",
+	"mixins": [
+		"MixinWorldRenderer"
+	],
+	"minVersion": "0.8"
+}
