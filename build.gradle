@@ -45,13 +45,3 @@ allprojects {
         withSourcesJar()
     }
 }
-
-sourceSets {
-    main {
-        java {
-            srcDirs("core/src/main/java");
-            srcDirs("core/src/main/resources")
-        }
-    }
-}
-

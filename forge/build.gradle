@@ -32,6 +32,10 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
+    common(project(":core"))
+    shadowMe(project(":core"))
+    forgeDependencies(project(":core"))
+
     forgeDependencies('org.tukaani:xz:1.9')
     forgeDependencies('org.apache.commons:commons-compress:1.21')
     shadowMe 'org.tukaani:xz:1.9'
