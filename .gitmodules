@@ -1,6 +1,3 @@
-[submodule "distant-horizons-core"]
-	path = distant-horizons-core
-	url = git@gitlab.com:jeseibel/distant-horizons-core.git
 [submodule "core"]
 	path = core
 	url = git@gitlab.com:jeseibel/distant-horizons-core.git
