@@ -41,7 +41,7 @@ import com.seibel.lod.core.enums.config.VanillaOverdraw;
 import com.seibel.lod.core.enums.config.VerticalQuality;
 import com.seibel.lod.core.enums.rendering.DebugMode;
 import com.seibel.lod.core.enums.rendering.FogDistance;
-import com.seibel.lod.core.enums.rendering.FogDrawOverride;
+import com.seibel.lod.core.enums.rendering.FogDrawMode;
 import com.seibel.lod.core.objects.MinDefaultMax;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics;
@@ -173,7 +173,7 @@ public class ForgeConfig
 			public static class FogQualityOption
 			{
 				public final ForgeConfigSpec.EnumValue<FogDistance> fogDistance;
-				public final ForgeConfigSpec.EnumValue<FogDrawOverride> fogDrawOverride;
+				public final ForgeConfigSpec.EnumValue<FogDrawMode> fogDrawMode;
 				public final ForgeConfigSpec.BooleanValue disableVanillaFog;
 				
 				FogQualityOption(ForgeConfigSpec.Builder builder)
@@ -185,10 +185,10 @@ public class ForgeConfig
 									+ IFogQuality.FOG_DISTANCE_DESC)
 							.defineEnum("Fog Distance", IFogQuality.FOG_DISTANCE_DEFAULT);
 					
-					fogDrawOverride = builder
+					fogDrawMode = builder
 							.comment("\n\n"
-									+ IFogQuality.FOG_DRAW_OVERRIDE_DESC)
-							.defineEnum("Fog Draw Override", IFogQuality.FOG_DRAW_OVERRIDE_DEFAULT);
+									+ IFogQuality.FOG_DRAW_MODE_DESC)
+							.defineEnum("Fog Draw Override", IFogQuality.FOG_DRAW_MODE_DEFAULT);
 					
 					disableVanillaFog = builder
 							.comment("\n\n"

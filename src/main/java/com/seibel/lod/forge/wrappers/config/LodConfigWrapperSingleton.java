@@ -32,7 +32,7 @@ import com.seibel.lod.core.enums.config.VanillaOverdraw;
 import com.seibel.lod.core.enums.config.VerticalQuality;
 import com.seibel.lod.core.enums.rendering.DebugMode;
 import com.seibel.lod.core.enums.rendering.FogDistance;
-import com.seibel.lod.core.enums.rendering.FogDrawOverride;
+import com.seibel.lod.core.enums.rendering.FogDrawMode;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.forge.ForgeConfig;
 
@@ -206,14 +206,14 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				
 				
 				@Override
-				public FogDrawOverride getFogDrawOverride()
+				public FogDrawMode getFogDrawMode()
 				{
-					return ForgeConfig.CLIENT.graphics.fogQuality.fogDrawOverride.get();
+					return ForgeConfig.CLIENT.graphics.fogQuality.fogDrawMode.get();
 				}
 				@Override
-				public void setFogDrawOverride(FogDrawOverride newFogDrawOverride)
+				public void setFogDrawMode(FogDrawMode newFogDrawOverride)
 				{
-					ForgeConfig.CLIENT.graphics.fogQuality.fogDrawOverride.set(newFogDrawOverride);
+					ForgeConfig.CLIENT.graphics.fogQuality.fogDrawMode.set(newFogDrawOverride);
 				}
 				
 				
