@@ -5,21 +5,25 @@ buildscript {
         // potential replacement in case of problems:
 		// https://dist.creeper.host/Sponge/maven
 		maven { url = 'https://repo.spongepowered.org/maven/' }
-		// used to download and compile dependencies from git repos 
+		// used to download and compile dependencies from git repos
 		maven { url 'https://jitpack.io' }
+        gradlePluginPortal()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
 		classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
-        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
     }
 }
+
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.0.0"
+}
+
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
-apply plugin: 'com.github.johnrengelman.shadow'
 
 version = 'a1.5.2'
 group = 'com.seibel.lod'
@@ -178,12 +182,16 @@ dependencies {
 
 }
 
+jar {
+    classifier 'withoutDependencies'
+}
+
 shadowJar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     configurations = [project.configurations.getByName("shadowMe")]
     relocate 'org.tukaani', 'shaded.tukaani'
     relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
-    classifier = ''
+    classifier ''
 }
 
 reobf {
