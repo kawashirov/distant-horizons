@@ -1,6 +1,9 @@
 package com.seibel.lod.forge.wrappers.minecraft;
 
+import java.awt.Color;
 import java.util.HashSet;
+
+import org.lwjgl.opengl.GL15;
 
 import com.seibel.lod.core.objects.math.Mat4f;
 import com.seibel.lod.core.objects.math.Vec3d;
@@ -27,7 +30,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * related to rendering in Minecraft.
  * 
  * @author James Seibel
- * @version 11-18-2021
+ * @version 11-26-2021
  */
 public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 {
@@ -79,6 +82,14 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	public double getGamma()
 	{
 		return mc.options.gamma;
+	}
+	
+	@Override
+	public Color getFogColor()
+	{
+		float[] colorValues = new float[4];
+		GL15.glGetFloatv(GL15.GL_FOG_COLOR, colorValues);
+		return new Color(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
 	}
 	
 	@Override
