@@ -40,18 +40,19 @@ import com.seibel.lod.core.enums.config.LodTemplate;
 import com.seibel.lod.core.enums.config.VanillaOverdraw;
 import com.seibel.lod.core.enums.config.VerticalQuality;
 import com.seibel.lod.core.enums.rendering.DebugMode;
+import com.seibel.lod.core.enums.rendering.FogColorMode;
 import com.seibel.lod.core.enums.rendering.FogDistance;
 import com.seibel.lod.core.enums.rendering.FogDrawMode;
 import com.seibel.lod.core.objects.MinDefaultMax;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced;
-import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics;
-import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IWorldGenerator;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced.IBuffers;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced.IDebugging;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced.IThreading;
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.IAdvancedGraphics;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.IFogQuality;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.IQuality;
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IWorldGenerator;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -174,6 +175,7 @@ public class ForgeConfig
 			{
 				public final ForgeConfigSpec.EnumValue<FogDistance> fogDistance;
 				public final ForgeConfigSpec.EnumValue<FogDrawMode> fogDrawMode;
+				public final ForgeConfigSpec.EnumValue<FogColorMode> fogColorMode;
 				public final ForgeConfigSpec.BooleanValue disableVanillaFog;
 				
 				FogQualityOption(ForgeConfigSpec.Builder builder)
@@ -188,7 +190,12 @@ public class ForgeConfig
 					fogDrawMode = builder
 							.comment("\n\n"
 									+ IFogQuality.FOG_DRAW_MODE_DESC)
-							.defineEnum("Fog Draw Override", IFogQuality.FOG_DRAW_MODE_DEFAULT);
+							.defineEnum("Fog Draw Mode", IFogQuality.FOG_DRAW_MODE_DEFAULT);
+					
+					fogColorMode = builder
+							.comment("\n\n"
+									+ IFogQuality.FOG_COLOR_MODE_DESC)
+							.defineEnum("Fog Color Mode", IFogQuality.FOG_COLOR_MODE_DEFAULT);
 					
 					disableVanillaFog = builder
 							.comment("\n\n"

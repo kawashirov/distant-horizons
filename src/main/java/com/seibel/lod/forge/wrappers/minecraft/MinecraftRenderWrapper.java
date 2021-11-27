@@ -93,6 +93,20 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	}
 	
 	@Override
+	public Color getSkyColor()
+	{
+		if (mc.level.dimensionType().hasSkyLight())
+		{
+			Vector3d colorValues = mc.level.getSkyColor(mc.gameRenderer.getMainCamera().getBlockPosition(), mc.getFrameTime());
+			return new Color((float) colorValues.x, (float) colorValues.y, (float) colorValues.z);
+		}
+		else
+		{
+			return new Color(0, 0, 0);
+		}
+	}
+	
+	@Override
 	public double getFov(float partialTicks)
 	{
 		return gameRenderer.getFov(gameRenderer.getMainCamera(), partialTicks, true);
@@ -147,4 +161,5 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		
 		return loadedPos;
 	}
+	
 }
