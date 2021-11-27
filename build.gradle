@@ -182,6 +182,18 @@ dependencies {
 
 }
 
+task copyCoreResources(type: Copy) {
+    from file("core/src/main/resources/shaders")
+    into file("src/generated/resources/shaders")
+}
+
+task copyCoreResourcesAtRuntime(type: Copy) {
+    from file("core/src/main/resources/shaders")
+    into file("build/resources/main/shaders")
+}
+
+compileJava.dependsOn(copyCoreResources).dependsOn(copyCoreResourcesAtRuntime)
+
 jar {
     classifier 'withoutDependencies'
 }
