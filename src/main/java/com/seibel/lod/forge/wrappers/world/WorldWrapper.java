@@ -14,6 +14,8 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 
+import javax.annotation.Nullable;
+
 /**
  * @author James Seibel
  * @author ??
@@ -39,9 +41,10 @@ public class WorldWrapper implements IWorldWrapper
 	}
 	
 	
-	
+	@Nullable
 	public static WorldWrapper getWorldWrapper(IWorld world)
 	{
+		if (world == null) return null;
 		//first we check if the biome has already been wrapped
 		if(worldWrapperMap.containsKey(world) && worldWrapperMap.get(world) != null)
 			return worldWrapperMap.get(world);
