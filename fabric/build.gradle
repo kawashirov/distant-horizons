@@ -68,7 +68,7 @@ task copyAccessWidenerAtRuntime(type: Copy) {
 }
 
 task deleteAccessWidenerAtRuntime(type: Delete) {
-    file("build/resources/main/lod.accesswidener")
+    delete file("build/resources/main/lod.accesswidener")
 }
 
 runClient {

@@ -43,6 +43,9 @@ dependencies {
 }
 
 shadowJar {
+    dependencies {
+        exclude(dependency("net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"))
+    }
     exclude "fabric.mod.json"
     configurations = [project.configurations.shadowMe]
     relocate 'org.tukaani', 'shaded.tukaani'
