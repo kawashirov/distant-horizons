@@ -11,6 +11,7 @@ import com.seibel.lod.forge.wrappers.block.BlockPosWrapper;
 
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.LightType;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 
@@ -78,13 +79,13 @@ public class WorldWrapper implements IWorldWrapper
 	@Override
 	public int getBlockLight(AbstractBlockPosWrapper blockPos)
 	{
-		return world.getLightEngine().blockEngine.getLightValue(((BlockPosWrapper) blockPos).getBlockPos());
+		return world.getBrightness(LightType.BLOCK, ((BlockPosWrapper) blockPos).getBlockPos());
 	}
 	
 	@Override
 	public int getSkyLight(AbstractBlockPosWrapper blockPos)
 	{
-		return world.getLightEngine().skyEngine.getLightValue(((BlockPosWrapper) blockPos).getBlockPos());
+		return world.getBrightness(LightType.SKY, ((BlockPosWrapper) blockPos).getBlockPos());
 	}
 	
 	@Override
