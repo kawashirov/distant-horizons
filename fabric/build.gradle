@@ -12,12 +12,9 @@ architectury {
 }
 
 configurations {
-    common
-    shadowMe // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
-    implementation.extendsFrom shadowMe
 }
 
 repositories {
@@ -46,9 +43,6 @@ dependencies {
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
-
-    common(project(":core"))
-    shadowMe(project(":core"))
 
     common 'org.tukaani:xz:1.9'
     common 'org.apache.commons:commons-compress:1.21'

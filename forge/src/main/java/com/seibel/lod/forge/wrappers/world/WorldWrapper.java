@@ -33,6 +33,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelAccessor;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author James Seibel
@@ -59,9 +60,10 @@ public class WorldWrapper implements IWorldWrapper
 	}
 	
 	
-	
+	@Nullable
 	public static WorldWrapper getWorldWrapper(LevelAccessor world)
 	{
+		if (world == null) return null;
 		//first we check if the biome has already been wrapped
 		if(worldWrapperMap.containsKey(world) && worldWrapperMap.get(world) != null)
 			return worldWrapperMap.get(world);

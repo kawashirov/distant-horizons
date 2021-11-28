@@ -18,12 +18,9 @@ architectury {
 }
 
 configurations {
-    common
-    shadowMe // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common
-    implementation.extendsFrom shadowMe
 }
 
 dependencies {
@@ -32,9 +29,7 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    common(project(":core"))
-    shadowMe(project(":core"))
-    forgeDependencies(project(":core"))
+//    forgeDependencies(project(":core")) { transitive false }
 
     forgeDependencies('org.tukaani:xz:1.9')
     forgeDependencies('org.apache.commons:commons-compress:1.21')
