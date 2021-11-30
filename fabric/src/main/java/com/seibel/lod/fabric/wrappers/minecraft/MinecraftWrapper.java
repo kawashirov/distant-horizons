@@ -58,7 +58,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.dimension.DimensionType;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A singleton that wraps the Minecraft class
@@ -114,12 +116,15 @@ public class MinecraftWrapper implements IMinecraftWrapper
 	//=================//
 	
 	@Override
-	public float getShade(LodDirection lodDirection)
-	{
-		Direction mcDir = McObjectConverter.Convert(lodDirection);
-		return mc.level.getShade(mcDir, true);
+	public float getShade(LodDirection lodDirection) {
+		if (mc.level != null)
+		{
+			Direction mcDir = McObjectConverter.Convert(lodDirection);
+			return mc.level.getShade(mcDir, true);
+		}
+		else return 0.0f;
 	}
-	
+
 	@Override
 	public boolean hasSinglePlayerServer()
 	{
@@ -211,7 +216,7 @@ public class MinecraftWrapper implements IMinecraftWrapper
 	{
 		return mc.player;
 	}
-	
+
 	@Override
 	public boolean playerExists()
 	{
@@ -228,7 +233,8 @@ public class MinecraftWrapper implements IMinecraftWrapper
 	@Override
 	public ChunkPosWrapper getPlayerChunkPos()
 	{
-		return new ChunkPosWrapper(getPlayer().chunkPosition().x, getPlayer().chunkPosition().z);
+		ChunkPos playerPos = getPlayer().chunkPosition();
+		return new ChunkPosWrapper(playerPos.x, playerPos.z);
 	}
 	
 	public Options getOptions()
@@ -241,16 +247,11 @@ public class MinecraftWrapper implements IMinecraftWrapper
 		return mc.getModelManager();
 	}
 	
-	public ClientLevel getClientWorld()
+	public ClientLevel getClientLevel()
 	{
 		return mc.level;
 	}
 	
-	/** 
-	 * Attempts to get the ServerWorld for the dimension
-	 * the user is currently in.
-	 * @returns null if no ServerWorld is available
-	 */
 	@Override
 	public IWorldWrapper getWrappedServerWorld()
 	{
@@ -276,6 +277,37 @@ public class MinecraftWrapper implements IMinecraftWrapper
 		return WorldWrapper.getWorldWrapper(serverWorld);
 	}
 	
+	public WorldWrapper getWrappedClientLevel()
+	{
+		return WorldWrapper.getWorldWrapper(mc.level);
+	}
+	
+	public WorldWrapper getWrappedServerLevel()
+	{
+		
+		if (mc.level == null)
+			return null;
+		DimensionType dimension = mc.level.dimensionType();
+		IntegratedServer server = mc.getSingleplayerServer();
+		if (server == null)
+			return null;
+		
+		Iterable<ServerLevel> worlds = server.getAllLevels();
+		ServerLevel returnWorld = null;
+		
+		for (ServerLevel world : worlds)
+		{
+			if (world.dimensionType() == dimension)
+			{
+				returnWorld = world;
+				break;
+			}
+		}
+		
+		return WorldWrapper.getWorldWrapper(returnWorld);
+	}
+
+	@Nullable
 	@Override
 	public IWorldWrapper getWrappedClientWorld()
 	{
@@ -296,8 +328,7 @@ public class MinecraftWrapper implements IMinecraftWrapper
 		else if (mc.getProfiler() != profilerWrapper.profiler)
 			profilerWrapper.profiler = mc.getProfiler();
 		
-		return profilerWrapper;
-	}
+		return profilerWrapper;	}
 	
 	public ClientPacketListener getConnection()
 	{
@@ -384,11 +415,9 @@ public class MinecraftWrapper implements IMinecraftWrapper
 		CrashReport report = new CrashReport(errorMessage, exception);
 		Minecraft.crash(report);
 	}
-	
-	
 
 
-	
-	
+
+
 	
 }

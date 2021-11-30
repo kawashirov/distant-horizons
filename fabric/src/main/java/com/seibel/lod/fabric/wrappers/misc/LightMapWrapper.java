@@ -3,24 +3,22 @@ package com.seibel.lod.fabric.wrappers.misc;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.seibel.lod.core.wrapperInterfaces.misc.ILightMapWrapper;
 
-
 /**
- * 
- * @author Leonardo Amato
- * @version 11-13-2021
+ * @author James Seibel
+ * @version 11-21-2021
  */
 public class LightMapWrapper implements ILightMapWrapper
 {
-	private NativeImage lightMap = null;
+	static NativeImage lightMap = null;
 	
-	public LightMapWrapper(NativeImage newlightMap)
+	public LightMapWrapper(NativeImage newLightMap)
 	{
-		lightMap = newlightMap;
+		lightMap = newLightMap;
 	}
 	
-	public void setLightMap(NativeImage newlightMap)
+	public static void setLightMap(NativeImage newLightMap)
 	{
-		lightMap = newlightMap;
+		lightMap = newLightMap;
 	}
 	
 	@Override

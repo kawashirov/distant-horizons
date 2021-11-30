@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
@@ -26,20 +29,16 @@ import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ThreadedLevelLightEngine;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.*;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.SnowAndFreezeFeature;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 /**
- * This is used for generating chunks
- * in a variety of detail and threading levels.
- *
- * @author coolGi2007
  * @author James Seibel
- * @version 11-23-2021
+ * @version 11-13-2021
  */
 public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 {
@@ -51,6 +50,8 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 	 * features that could cause issues down the line.
 	 */
 	private static final ConcurrentHashMap<Integer, ConfiguredFeature<?, ?>> FEATURES_TO_AVOID = new ConcurrentHashMap<>();
+
+	private static ExecutorService Executor = Executors.newSingleThreadExecutor();
 	
 	
 	public final ServerLevel serverWorld;
@@ -76,30 +77,29 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 	@Override
 	public void generateBiomesOnly(AbstractChunkPosWrapper pos, DistanceGenerationMode generationMode)
 	{
-		/*
 		List<ChunkAccess> chunkList = new LinkedList<>();
-		ProtoChunk chunk = new ProtoChunk((ChunkPosWrapper) pos, UpgradeData.EMPTY, serverWorld);
+		ProtoChunk chunk = new ProtoChunk(((ChunkPosWrapper) pos).getChunkPos(), UpgradeData.EMPTY, serverWorld);
 		chunkList.add(chunk);
 
 		ServerChunkCache chunkSource = serverWorld.getChunkSource();
 		ChunkGenerator chunkGen = chunkSource.getGenerator();
-		
+
 		// generate the terrain (this is thread safe)
-//		ChunkStatus.EMPTY.generate(serverWorld, chunkGen, serverWorld.getStructureManager(), (ThreadedLevelLightEngine) serverWorld.getLightEngine(), null, chunkList);
+		ChunkStatus.EMPTY.generate(Executor, serverWorld, chunkGen, serverWorld.getStructureManager(), (ThreadedLevelLightEngine) serverWorld.getLightEngine(), null, chunkList);
 		// override the chunk status, so we can run the next generator stage
 		chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
 		chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
 		chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
-		
-		
-		
-		
+
+
+
+
 		// generate fake height data for this LOD
 		int seaLevel = serverWorld.getSeaLevel();
-		
+
 		boolean simulateHeight = generationMode == DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
 		boolean inTheEnd = false;
-		
+
 		// add fake heightmap data so our LODs aren't at height 0
 		Heightmap heightmap = new Heightmap(chunk, WrapperUtil.DEFAULT_HEIGHTMAP);
 		for (int x = 0; x < LodUtil.CHUNK_WIDTH && !inTheEnd; x++)
@@ -115,7 +115,7 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 					case NETHER:
 						heightmap.setHeight(x, z, serverWorld.getHeight() / 2);
 						break;
-					
+
 					case EXTREME_HILLS:
 						heightmap.setHeight(x, z, seaLevel + 30);
 						break;
@@ -129,16 +129,16 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 					case NONE:
 						heightmap.setHeight(x, z, 0);
 						break;
-					
+
 					case OCEAN:
 					case RIVER:
 						heightmap.setHeight(x, z, seaLevel);
 						break;
-					
+
 					case THEEND:
 						inTheEnd = true;
 						break;
-					
+
 					// DESERT
 					// FOREST
 					// ICY
@@ -160,10 +160,10 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 				}
 			}// z
 		}// x
-		
+
 		chunk.setHeightmap(WrapperUtil.DEFAULT_HEIGHTMAP, heightmap.getRawData());
-		
-		
+
+
 		if (!inTheEnd)
 		{
 			lodBuilder.generateLodNodeFromChunk(lodDim, new ChunkWrapper(chunk), new LodBuilderConfig(true, true, false));
@@ -181,7 +181,6 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 //		long startTime = System.currentTimeMillis();
 //		long endTime = System.currentTimeMillis();
 //		System.out.println(endTime - startTime);
-		 */
 	}
 	
 	
@@ -189,9 +188,8 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 	@Override
 	public void generateSurface(AbstractChunkPosWrapper pos)
 	{
-		/*
 		List<ChunkAccess> chunkList = new LinkedList<>();
-		ProtoChunk chunk = new ProtoChunk(((ChunkPosWrapper) pos).getChunkPos(), UpgradeData.EMPTY);
+		ProtoChunk chunk = new ProtoChunk(((ChunkPosWrapper) pos).getChunkPos(), UpgradeData.EMPTY, serverWorld);
 		chunkList.add(chunk);
 		LodServerWorld lodServerWorld = new LodServerWorld(serverWorld, chunk);
 
@@ -202,17 +200,18 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 
 
 		// generate the terrain (this is thread safe)
-		ChunkStatus.EMPTY.generate(serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
+		ChunkStatus.EMPTY.generate(Executor, serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
 		// override the chunk status, so we can run the next generator stage
 		chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
 		chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
-		ChunkStatus.NOISE.generate(serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
-		ChunkStatus.SURFACE.generate(serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
+		ChunkStatus.NOISE.generate(Executor, serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
+		// TODO[FABRIC]: Find whay this dosnt work
+		ChunkStatus.SURFACE.generate(Executor, serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
 
 		// this feature has been proven to be thread safe,
 		// so we will add it
-		IceAndSnowFeature snowFeature = new IceAndSnowFeature(NoFeatureConfig.CODEC);
-		snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
+//		SnowAndFreezeFeature snowFeature = new SnowAndFreezeFeature(NoFeatureConfig.CODEC);
+//		snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
 
 
 		lodBuilder.generateLodNodeFromChunk(lodDim,  new ChunkWrapper(chunk), new LodBuilderConfig(DistanceGenerationMode.SURFACE));
@@ -220,8 +219,8 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 		/*TODO if we want to use Biome utils and terrain utils for overworld
 		 * lodBuilder.generateLodNodeFromChunk(lodDim, pos ,detailLevel, serverWorld.getSeed());*/
 	}
-
-
+	
+	
 	/**
 	 * takes about 15 - 20 ms
 	 * <p>
@@ -231,25 +230,25 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 	@Override
 	public void generateFeatures(AbstractChunkPosWrapper pos)
 	{
-		/*
 		List<ChunkAccess> chunkList = new LinkedList<>();
-		ProtoChunk chunk = new ProtoChunk(((ChunkPosWrapper) pos).getChunkPos(), UpgradeData.EMPTY);
+		ProtoChunk chunk = new ProtoChunk(((ChunkPosWrapper) pos).getChunkPos(), UpgradeData.EMPTY, serverWorld);
 		chunkList.add(chunk);
 		LodServerWorld lodServerWorld = new LodServerWorld(serverWorld, chunk);
 
-		ServerChunkProvider chunkSource = serverWorld.getChunkSource();
-		ServerWorldLightManager lightEngine = (ServerWorldLightManager) serverWorld.getLightEngine();
-		TemplateManager templateManager = serverWorld.getStructureManager();
-		ChunkGenerator chunkGen = chunkSource.generator;
+		ServerChunkCache chunkSource = serverWorld.getChunkSource();
+		ThreadedLevelLightEngine lightEngine = (ThreadedLevelLightEngine) serverWorld.getLightEngine();
+		StructureManager templateManager = serverWorld.getStructureManager();
+		ChunkGenerator chunkGen = chunkSource.getGenerator();
 
 
 		// generate the terrain (this is thread safe)
-		ChunkStatus.EMPTY.generate(serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
+		ChunkStatus.EMPTY.generate(Executor, serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
 		// override the chunk status, so we can run the next generator stage
 		chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
 		chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
-		ChunkStatus.NOISE.generate(serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
-		ChunkStatus.SURFACE.generate(serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
+		ChunkStatus.NOISE.generate(Executor, serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
+		// TODO[FABRIC]: Find whay this dosnt work
+		ChunkStatus.SURFACE.generate(Executor, serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
 
 
 		// get all the biomes in the chunk
@@ -337,7 +336,6 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 
 		// generate a Lod like normal
 		lodBuilder.generateLodNodeFromChunk(lodDim,  new ChunkWrapper(chunk), new LodBuilderConfig(DistanceGenerationMode.FEATURES));
-		*/
 	}
 	
 	

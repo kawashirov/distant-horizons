@@ -11,48 +11,47 @@ import net.minecraft.world.level.ChunkPos;
 
 
 /**
- * This class wraps minecraft's ChunkPos class
- * 
  * @author James Seibel
- * @version 11-18-2021
+ * @version 11-21-2021
  */
 public class ChunkPosWrapper extends AbstractChunkPosWrapper
 {
-	private final ChunkPos chunkPos;
+	private net.minecraft.world.level.ChunkPos chunkPos;
 	
-    public ChunkPosWrapper(ChunkPos newChunkPos)
-    {
-        this.chunkPos = newChunkPos;
-    }
-
-    public ChunkPosWrapper(BlockPos blockPos)
-    {
-        this.chunkPos = new ChunkPos(blockPos);
-    }
-
-
-    public ChunkPosWrapper(AbstractChunkPosWrapper newChunkPos)
-    {
-        this.chunkPos = ((ChunkPosWrapper) newChunkPos).chunkPos;
-    }
-
-    public ChunkPosWrapper(AbstractBlockPosWrapper blockPos)
+	public ChunkPosWrapper()
 	{
-        this.chunkPos = new ChunkPos(((BlockPosWrapper) blockPos).getBlockPos());
-    }
-
-    public ChunkPosWrapper(int chunkX, int chunkZ)
-    {
-        this.chunkPos = new ChunkPos(chunkX, chunkZ);
+		this.chunkPos = new ChunkPos(0, 0);
 	}
 	
-    public ChunkPosWrapper()
-    {
-        this.chunkPos = new ChunkPos(0, 0);
+	public ChunkPosWrapper(BlockPos blockPos)
+	{
+		this.chunkPos = new ChunkPos(blockPos);
 	}
-    
-    
-    
+	
+	public ChunkPosWrapper(AbstractChunkPosWrapper newChunkPos)
+	{
+		this.chunkPos = ((ChunkPosWrapper) newChunkPos).chunkPos;
+	}
+	
+	public ChunkPosWrapper(AbstractBlockPosWrapper blockPos)
+	{
+		this.chunkPos = new ChunkPos(((BlockPosWrapper) blockPos).getBlockPos());
+	}
+	
+	public ChunkPosWrapper(int chunkX, int chunkZ)
+	{
+		this.chunkPos = new ChunkPos(chunkX, chunkZ);
+	}
+	
+
+	public ChunkPosWrapper(ChunkPos pos)
+	{
+		this.chunkPos = pos;
+	}
+	
+	
+	
+
 	@Override
 	public int getX()
 	{
@@ -94,8 +93,6 @@ public class ChunkPosWrapper extends AbstractChunkPosWrapper
 		return chunkPos;
 	}
 	
-	
-	
 	@Override
 	public boolean equals(Object o)
 	{
@@ -107,11 +104,12 @@ public class ChunkPosWrapper extends AbstractChunkPosWrapper
 	{
 		return Objects.hash(chunkPos);
 	}
-	
+
 	@Override
-	public BlockPosWrapper getWorldPosition()
+	public AbstractBlockPosWrapper getWorldPosition()
 	{
-		BlockPos blockPos = chunkPos.getWorldPosition();
+		// the parameter here is the y position
+		BlockPos blockPos = chunkPos.getMiddleBlockPosition(0);
 		return new BlockPosWrapper(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 	}
 	

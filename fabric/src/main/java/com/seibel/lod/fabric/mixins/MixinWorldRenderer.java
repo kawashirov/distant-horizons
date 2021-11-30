@@ -48,6 +48,7 @@ import net.minecraft.client.renderer.RenderType;
 @Mixin(LevelRenderer.class)
 public class MixinWorldRenderer
 {
+	/*
 	private static float previousPartialTicks = 0;
 	
 	@Inject(at = @At("RETURN"), method = "renderClouds")
@@ -77,6 +78,32 @@ public class MixinWorldRenderer
 
 			Mat4f mcModelViewMatrix = McObjectConverter.Convert(matrixStackIn.last().pose());
 			
+			ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
+		}
+	}
+	*/
+
+
+	private static float previousPartialTicks = 0;
+
+	@Inject(at = @At("RETURN"), method = "renderClouds(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/math/Matrix4f;FDDD)V")
+	private void renderClouds(PoseStack modelViewMatrixStack, Matrix4f projectionMatrix, float partialTicks, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, CallbackInfo callback)
+	{
+		// get the partial ticks since renderChunkLayer doesn't
+		// have access to them
+		previousPartialTicks = partialTicks;
+	}
+
+	// HEAD or RETURN
+	@Inject(at = @At("HEAD"), method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V")
+	private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
+	{
+		// only render before solid blocks
+		if (renderType.equals(RenderType.solid()))
+		{
+			Mat4f mcModelViewMatrix = McObjectConverter.Convert(modelViewMatrixStack.last().pose());
+			Mat4f mcProjectionMatrix = McObjectConverter.Convert(projectionMatrix);
+
 			ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
 		}
 	}

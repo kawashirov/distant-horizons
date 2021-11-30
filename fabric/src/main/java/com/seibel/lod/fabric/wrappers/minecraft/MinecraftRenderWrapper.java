@@ -1,8 +1,10 @@
 package com.seibel.lod.fabric.wrappers.minecraft;
 
+import java.awt.*;
 import java.util.HashSet;
 
-import com.mojang.math.Vector3d;
+import org.lwjgl.opengl.GL20;
+
 import com.mojang.math.Vector3f;
 import com.seibel.lod.core.objects.math.Mat4f;
 import com.seibel.lod.core.objects.math.Vec3d;
@@ -18,17 +20,19 @@ import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
+import net.minecraft.client.renderer.LevelRenderer.RenderChunkInfo;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.phys.Vec3;
+
 
 /**
  * A singleton that contains everything
  * related to rendering in Minecraft.
  * 
  * @author James Seibel
- * @version 11-18-2021
+ * @version 11-26-2021
  */
 public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 {
@@ -73,8 +77,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public Mat4f getDefaultProjectionMatrix(float partialTicks)
 	{
-//		return McObjectConverter.Convert(gameRenderer.getProjectionMatrix(gameRenderer.getMainCamera(), partialTicks, true));
-		return McObjectConverter.Convert(gameRenderer.getProjectionMatrix(partialTicks));
+		return McObjectConverter.Convert(gameRenderer.getProjectionMatrix(gameRenderer.getFov(gameRenderer.getMainCamera(), partialTicks, true)));
 	}
 	
 	@Override
@@ -82,7 +85,23 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	{
 		return mc.options.gamma;
 	}
-	
+
+	@Override
+	public Color getFogColor() {
+		float[] colorValues = new float[4];
+		GL20.glGetFloatv(GL20.GL_FOG_COLOR, colorValues);
+		return new Color(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
+	}
+
+	@Override
+	public Color getSkyColor() {
+		if (mc.level.dimensionType().hasSkyLight()) {
+			Vec3 colorValues = mc.level.getSkyColor(mc.gameRenderer.getMainCamera().getPosition(), mc.getFrameTime());
+			return new Color((float) colorValues.x, (float) colorValues.y, (float) colorValues.z);
+		} else
+			return new Color(0, 0, 0);
+	}
+
 	@Override
 	public double getFov(float partialTicks)
 	{
@@ -124,7 +143,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		
 		// go through every RenderInfo to get the compiled chunks
 		LevelRenderer renderer = mc.levelRenderer;
-		for (LevelRenderer.RenderChunkInfo worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
+		for (RenderChunkInfo worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
 		{
 			CompiledChunk compiledChunk = worldRenderer$LocalRenderInformationContainer.chunk.getCompiledChunk();
 			if (!compiledChunk.hasNoRenderableLayers())
@@ -138,4 +157,5 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		
 		return loadedPos;
 	}
+
 }

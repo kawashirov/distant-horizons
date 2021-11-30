@@ -5,8 +5,6 @@ import com.seibel.lod.core.wrapperInterfaces.minecraft.IProfilerWrapper;
 import net.minecraft.util.profiling.ProfilerFiller;
 
 /**
- * 
- * 
  * @author James Seibel
  * @version 11-20-2021
  */

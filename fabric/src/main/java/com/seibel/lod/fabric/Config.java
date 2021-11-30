@@ -31,7 +31,7 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry;
 /**
  * This handles any configuration the user has access to.
  * @author coolGi2007
- * @version 11-23-2021
+ * @version 11-29-2021
  */
 @me.shedaniel.autoconfig.annotation.Config(name = ModInfo.ID)
 public class Config implements ConfigData
@@ -53,10 +53,6 @@ public class Config implements ConfigData
 
 	// Since the original config system uses forge stuff, that means we have to rewrite the whole config system
 	// TODO: Stop using autoconfig and use manual config for cloth config
-
-	@ConfigEntry.Gui.Excluded
-	//@ConfigEntry.Category("lod.debug")
-	public int ConfigVersion = 1;
 
 	@ConfigEntry.Gui.CollapsibleObject
 	public Client client = new Client();
@@ -117,7 +113,11 @@ public class Config implements ConfigData
 
 				@ConfigEntry.Category("lod.Graphics.FogQualityOption")
 				@ConfigEntry.Gui.Tooltip
-				public static FogDrawOverride fogDrawOverride = IFogQuality.FOG_DRAW_OVERRIDE_DEFAULT;
+				public static FogDrawMode fogDrawMode = IFogQuality.FOG_DRAW_MODE_DEFAULT;
+
+				@ConfigEntry.Category("lod.Graphics.FogQualityOption")
+				@ConfigEntry.Gui.Tooltip
+				public static FogColorMode fogColorMode = IFogQuality.FOG_COLOR_MODE_DEFAULT;
 
 				@ConfigEntry.Category("lod.Graphics.FogQualityOption")
 				@ConfigEntry.Gui.Tooltip
@@ -145,6 +145,11 @@ public class Config implements ConfigData
 				@ConfigEntry.Category("lod.Graphics.AdvancedGraphicsOption")
 				@ConfigEntry.Gui.Tooltip
 				public static GpuUploadMethod gpuUploadMethod = IAdvancedGraphics.GPU_UPLOAD_METHOD_DEFAULT;
+
+				@ConfigEntry.Category("lod.Graphics.AdvancedGraphicsOption")
+				@ConfigEntry.Gui.Tooltip
+				@ConfigEntry.BoundedDiscrete(min = 0, max = 5000)
+				public static int gpuUploadTimeoutInMilleseconds = IAdvancedGraphics.GPU_UPLOAD_TIMEOUT_IN_MILLISECONDS_DEFAULT.defaultValue;
 
 				@ConfigEntry.Category("lod.Graphics.AdvancedGraphicsOption")
 				@ConfigEntry.Gui.Tooltip

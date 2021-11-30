@@ -8,13 +8,13 @@ import com.seibel.lod.core.wrapperInterfaces.block.IBlockColorSingletonWrapper;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftWrapper;
-import com.seibel.lod.fabric.wrappers.block.BlockColorSingletonWrapper;
 import com.seibel.lod.fabric.wrappers.config.LodConfigWrapperSingleton;
+import com.seibel.lod.fabric.wrappers.block.BlockColorSingletonWrapper;
 import com.seibel.lod.fabric.wrappers.minecraft.MinecraftRenderWrapper;
 import com.seibel.lod.fabric.wrappers.minecraft.MinecraftWrapper;
 
 /**
- * Binds all necessary dependencies so we
+ * Binds all necessary dependencies, so we
  * can access them in Core. <br>
  * This needs to be called before any Core classes
  * are loaded.

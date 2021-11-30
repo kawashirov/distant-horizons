@@ -19,10 +19,8 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 
 /**
- * This class wraps Minecraft's Block class
- * 
- * @author ??
- * @version 11-18-2021
+ * @author James Seibel
+ * @version 11-21-2021
  */
 public class BlockShapeWrapper implements IBlockShapeWrapper
 {
@@ -31,7 +29,7 @@ public class BlockShapeWrapper implements IBlockShapeWrapper
 	public static BlockShapeWrapper WATER_SHAPE = new BlockShapeWrapper();
 	
 	private final Block block;
-	private boolean toAvoid;
+	private final boolean toAvoid;
 	private boolean nonFull;
 	private boolean noCollision;
 	
@@ -42,8 +40,8 @@ public class BlockShapeWrapper implements IBlockShapeWrapper
 		this.nonFull = false;
 		this.noCollision = false;
 		this.toAvoid = ofBlockToAvoid();
-		setupShapes((ChunkWrapper) chunkWrapper, (BlockPosWrapper) blockPosWrapper);
-		//System.out.println(block + " non full " + nonFull + " no collision " + noCollision + " to avoid " + toAvoid);
+		setupShapes(chunkWrapper, blockPosWrapper);
+		System.out.println(block + " non full " + nonFull + " no collision " + noCollision + " to avoid " + toAvoid);
 	}
 	
 	private BlockShapeWrapper()
@@ -58,7 +56,7 @@ public class BlockShapeWrapper implements IBlockShapeWrapper
 	 * this return a wrapper of the block in input
 	 * @param block Block object to wrap
 	 */
-	static public BlockShapeWrapper getBlockShapeWrapper(Block block, IChunkWrapper chunkWrapper, AbstractBlockPosWrapper blockPosWrapper)
+	static public BlockShapeWrapper getBlockShapeWrapper(Block block, ChunkWrapper chunkWrapper, AbstractBlockPosWrapper blockPosWrapper)
 	{
 		//first we check if the block has already been wrapped
 		if (blockShapeWrapperMap.containsKey(block) && blockShapeWrapperMap.get(block) != null)
@@ -73,13 +71,13 @@ public class BlockShapeWrapper implements IBlockShapeWrapper
 		return blockWrapper;
 	}
 	
-	private void setupShapes(ChunkWrapper chunkWrapper, BlockPosWrapper blockPosWrapper)
+	private void setupShapes(IChunkWrapper chunkWrapper, AbstractBlockPosWrapper blockPosWrapper)
 	{
-		ChunkAccess chunk = chunkWrapper.getChunk();
-		BlockPos blockPos = blockPosWrapper.getBlockPos();
+		ChunkAccess chunk = ((ChunkWrapper) chunkWrapper).getChunk();
+		BlockPos blockPos = ((BlockPosWrapper) blockPosWrapper).getBlockPos();
 		boolean noCollisionSetted = false;
 		boolean nonFullSetted = false;
-		if (!block.defaultBlockState().getFluidState().isEmpty()) // || block instanceof SixWayBlock)
+		if (!block.defaultBlockState().getFluidState().isEmpty())// || block instanceof SixWayBlock)
 		{
 			noCollisionSetted = true;
 			nonFullSetted = true;
@@ -116,8 +114,7 @@ public class BlockShapeWrapper implements IBlockShapeWrapper
 	{
 		return block.equals(Blocks.AIR)
 					   || block.equals(Blocks.CAVE_AIR)
-					   || block.equals(Blocks.BARRIER)
-					   || block.equals(Blocks.VOID_AIR);
+					   || block.equals(Blocks.BARRIER);
 	}
 //-----------------//
 //Avoidance getters//

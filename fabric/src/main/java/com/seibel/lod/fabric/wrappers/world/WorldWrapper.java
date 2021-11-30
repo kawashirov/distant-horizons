@@ -1,3 +1,22 @@
+/*
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
+ *
+ *    Copyright (C) 2020  James Seibel
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, version 3.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.seibel.lod.fabric.wrappers.world;
 
 import java.io.File;
@@ -6,28 +25,30 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.seibel.lod.core.enums.WorldType;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
+import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
 import com.seibel.lod.fabric.wrappers.block.BlockPosWrapper;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LightLayer;
+import org.jetbrains.annotations.Nullable;
 
 /**
- * 
  * @author James Seibel
  * @author ??
- * @version 11-15-2021
+ * @version 11-21-2021
  */
 public class WorldWrapper implements IWorldWrapper
 {
-	private static final ConcurrentMap<Level, WorldWrapper> worldWrapperMap = new ConcurrentHashMap<>();
-	private final Level world;
+	private static final ConcurrentMap<LevelAccessor, WorldWrapper> worldWrapperMap = new ConcurrentHashMap<>();
+	private final LevelAccessor world;
 	public final WorldType worldType;
 	
 	
-	public WorldWrapper(Level newWorld)
+	public WorldWrapper(LevelAccessor newWorld)
 	{
 		world = newWorld;
 		
@@ -40,8 +61,8 @@ public class WorldWrapper implements IWorldWrapper
 	}
 	
 	
-	
-	public static WorldWrapper getWorldWrapper(Level world)
+	@Nullable
+	public static WorldWrapper getWorldWrapper(LevelAccessor world)
 	{
 		if (world == null) return null;
 		//first we check if the biome has already been wrapped
@@ -61,9 +82,10 @@ public class WorldWrapper implements IWorldWrapper
 	{
 		worldWrapperMap.clear();
 	}
-
+	
 	@Override
-	public WorldType getWorldType() {
+	public WorldType getWorldType()
+	{
 		return worldType;
 	}
 	
@@ -72,26 +94,26 @@ public class WorldWrapper implements IWorldWrapper
 	{
 		return DimensionTypeWrapper.getDimensionTypeWrapper(world.dimensionType());
 	}
-
+	
 	@Override
 	public int getBlockLight(AbstractBlockPosWrapper blockPos)
 	{
-		return world.getLightEngine().blockEngine.getLightValue(((BlockPosWrapper) blockPos).getBlockPos());
+		return world.getBrightness(LightLayer.BLOCK, ((BlockPosWrapper) blockPos).getBlockPos());
 	}
 	
 	@Override
 	public int getSkyLight(AbstractBlockPosWrapper blockPos)
 	{
-		return world.getLightEngine().skyEngine.getLightValue(((BlockPosWrapper) blockPos).getBlockPos());
+		return world.getBrightness(LightLayer.SKY, ((BlockPosWrapper) blockPos).getBlockPos());
 	}
 	
 	@Override
-	public BiomeWrapper getBiome(AbstractBlockPosWrapper blockPos)
+	public IBiomeWrapper getBiome(AbstractBlockPosWrapper blockPos)
 	{
 		return BiomeWrapper.getBiomeWrapper(world.getBiome(((BlockPosWrapper) blockPos).getBlockPos()));
 	}
 	
-	public Level getWorld()
+	public LevelAccessor getWorld()
 	{
 		return world;
 	}
@@ -128,7 +150,7 @@ public class WorldWrapper implements IWorldWrapper
 			throw new UnsupportedOperationException("getSaveFolder can only be called for ServerWorlds.");
 		
 		ServerChunkCache chunkSource = ((ServerLevel) world).getChunkSource();
-		return chunkSource.dataStorage.dataFolder;
+		return chunkSource.getDataStorage().dataFolder;
 	}
 	
 	

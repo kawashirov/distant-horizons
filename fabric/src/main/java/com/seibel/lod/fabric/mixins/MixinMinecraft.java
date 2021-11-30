@@ -8,6 +8,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * Loads the mod after minecraft loads.
+ * @author Ran
+ */
 @Mixin(value = Minecraft.class)
 public class MixinMinecraft {
     @Inject(method = "<init>", at = @At("TAIL"))

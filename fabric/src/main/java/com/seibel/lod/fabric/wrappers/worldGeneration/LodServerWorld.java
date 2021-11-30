@@ -27,8 +27,6 @@ import java.util.stream.Stream;
 
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.fabric.wrappers.WrapperUtil;
-
-import com.sun.jna.Structure;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
@@ -60,6 +58,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
@@ -136,8 +135,8 @@ public class LodServerWorld implements WorldGenLevel
 	}
 
 	@Override
-	public boolean isFluidAtPosition(BlockPos pos, Predicate<FluidState> state) {
-		return state.test(chunk.getFluidState(pos));
+	public boolean isFluidAtPosition(BlockPos blockPos, Predicate<FluidState> predicate) {
+		return predicate.test(chunk.getFluidState(blockPos));
 	}
 
 	@Override
@@ -157,9 +156,9 @@ public class LodServerWorld implements WorldGenLevel
 	{
 		return serverWorld.startsForFeature(p_241827_1_, p_241827_2_);
 	}
-	
+
 	@Override
-	public TickList getLiquidTicks()
+	public TickList<Fluid> getLiquidTicks()
 	{
 		return EmptyTickList.empty();
 	}
@@ -194,7 +193,7 @@ public class LodServerWorld implements WorldGenLevel
 	{
 		throw new UnsupportedOperationException("Not Implemented");
 	}
-	
+
 	@Override
 	public void playSound(Player player, BlockPos pos, SoundEvent soundIn, SoundSource category, float volume,
 						  float pitch)
@@ -220,13 +219,13 @@ public class LodServerWorld implements WorldGenLevel
 	{
 		throw new UnsupportedOperationException("Not Implemented");
 	}
-	
+
 	@Override
 	public float getShade(Direction p_230487_1_, boolean p_230487_2_)
 	{
 		throw new UnsupportedOperationException("Not Implemented");
 	}
-	
+
 	@Override
 	public WorldBorder getWorldBorder()
 	{
@@ -287,11 +286,11 @@ public class LodServerWorld implements WorldGenLevel
 		
 	}
 
+	// TODO: Check if this causes any issues
 	@Override
 	public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos) {
 		throw new UnsupportedOperationException("Not Implemented");
 	}
-
 
 
 	@Override

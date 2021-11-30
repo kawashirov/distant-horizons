@@ -27,7 +27,6 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraftforge.common.WorldWorkerManager;
 
 /**
  * Initialize and setup the Mod. <br>
@@ -51,30 +50,19 @@ public class Main implements ClientModInitializer
 
 
 	// Do if implements ClientModInitializer
+	// This loads the mod before minecraft loads which causes a lot of issues
 	@Override
 	public void onInitializeClient() {
-
+		// no.
 	}
 
+	// This loads the mod after minecraft loads which doesn't causes a lot of issues
 	public static void init() {
-		if (instance != null) return;
-        instance = new Main();
-
-        DependencySetup.createInitialBindings();
+		DependencySetup.createInitialBindings();
 		ClientApi.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
-		initializeForge();
 
 		// Check if this works
 		client_proxy = new ClientProxy();
 		client_proxy.registerEvents();
-    }
-
-	/**
-	 * This method makes forge classes work instead of just sitting there
-	 * @author Ran
-	 */
-	public static void initializeForge() {
-		ServerTickEvents.START_SERVER_TICK.register((server) -> WorldWorkerManager.tick(true));
-		ServerTickEvents.END_SERVER_TICK.register((server) -> WorldWorkerManager.tick(false));
 	}
 }

@@ -3,31 +3,33 @@ package com.seibel.lod.fabric.wrappers.chunk;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockColorWrapper;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockShapeWrapper;
+import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
+import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 import com.seibel.lod.fabric.wrappers.WrapperUtil;
 import com.seibel.lod.fabric.wrappers.block.BlockColorWrapper;
 import com.seibel.lod.fabric.wrappers.block.BlockPosWrapper;
 import com.seibel.lod.fabric.wrappers.block.BlockShapeWrapper;
 import com.seibel.lod.fabric.wrappers.world.BiomeWrapper;
-import net.minecraft.world.level.block.LiquidBlockContainer;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
+
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
 /**
  * 
- * @author ??
- * @version 11-17-2021
+ * @author James Seibel
+ * @version 11-21-2021
  */
 public class ChunkWrapper implements IChunkWrapper
 {
-	private final ChunkAccess chunk;
-	private final ChunkPosWrapper chunkPos;
+	
+	private ChunkAccess chunk;
+	private AbstractChunkPosWrapper chunkPos;
 	
 	@Override
-	public int getHeight()
-	{
+	public int getHeight(){
 		return chunk.getMaxBuildHeight();
 	}
 	
@@ -37,8 +39,14 @@ public class ChunkWrapper implements IChunkWrapper
 		BlockState blockState = chunk.getBlockState(((BlockPosWrapper) blockPos).getBlockPos());
 		
 		//This type of block is always in water
-		return ((blockState.getBlock() instanceof LiquidBlockContainer) && !(blockState.getBlock() instanceof SimpleWaterloggedBlock))
-				|| (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED));
+		if((blockState.getBlock() instanceof LiquidBlock))// && !(blockState.getBlock() instanceof IWaterLoggable))
+			return true;
+		
+		//This type of block could be in water
+		if(blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).isPresent() && blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).get())
+			return true;
+		
+		return false;
 	}
 	
 	@Override
@@ -48,7 +56,7 @@ public class ChunkWrapper implements IChunkWrapper
 	}
 	
 	@Override
-	public BiomeWrapper getBiome(int xRel, int yAbs, int zRel)
+	public IBiomeWrapper getBiome(int xRel, int yAbs, int zRel)
 	{
 		return BiomeWrapper.getBiomeWrapper(chunk.getBiomes().getNoiseBiome(xRel >> 2, yAbs >> 2, zRel >> 2));
 	}
@@ -56,7 +64,7 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public IBlockColorWrapper getBlockColorWrapper(AbstractBlockPosWrapper blockPos)
 	{
-		return BlockColorWrapper.getBlockColorWrapper(chunk.getBlockState(((BlockPosWrapper) blockPos).getBlockPos()).getBlock());
+		return BlockColorWrapper.getBlockColorWrapper(chunk.getBlockState(((BlockPosWrapper) blockPos).getBlockPos()), blockPos);
 	}
 	
 	@Override
@@ -71,36 +79,52 @@ public class ChunkWrapper implements IChunkWrapper
 		this.chunkPos = new ChunkPosWrapper(chunk.getPos());
 	}
 	
-	public ChunkAccess getChunk()
-	{
+	public ChunkAccess getChunk(){
 		return chunk;
 	}
-	
 	@Override
-	public ChunkPosWrapper getPos()
+	public AbstractChunkPosWrapper getPos()
 	{
 		return chunkPos;
 	}
 	
 	@Override
-	public boolean isLightCorrect()
-	{
+	public boolean isLightCorrect(){
 		return chunk.isLightCorrect();
 	}
 	
+	public boolean
+	isWaterLogged(BlockPosWrapper blockPos)
+	{
+		BlockState blockState = chunk.getBlockState(blockPos.getBlockPos());
+		
+//		//This type of block is always in water
+//		if((blockState.getBlock() instanceof ILiquidContainer) && !(blockState.getBlock() instanceof IWaterLoggable))
+//			return true;
+		
+		//This type of block could be in water
+		if(blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).isPresent() && blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).get())
+			return true;
+		
+		return false;
+	}
+	
+	public int getEmittedBrightness(BlockPosWrapper blockPos)
+	{
+		return chunk.getLightEmission(blockPos.getBlockPos());
+	}
+
 	@Override
 	public boolean isWaterLogged(AbstractBlockPosWrapper blockPos)
 	{
-		BlockState blockState = chunk.getBlockState(((BlockPosWrapper)blockPos).getBlockPos());
-		
-		//This type of block is always in water
-		return ((blockState.getBlock() instanceof LiquidBlockContainer) && !(blockState.getBlock() instanceof SimpleWaterloggedBlock))
-				|| (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED));
+		// TODO Auto-generated method stub
+		return false;
 	}
-	
+
 	@Override
 	public int getEmittedBrightness(AbstractBlockPosWrapper blockPos)
 	{
-		return chunk.getLightEmission(((BlockPosWrapper)blockPos).getBlockPos());
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }

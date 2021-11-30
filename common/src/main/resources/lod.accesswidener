@@ -1,77 +1,30 @@
-accessWidener	v1	named
-accessible	class	net/minecraft/client/renderer/LightTexture
-accessible	class	net/minecraft/world/entity/ai/behavior/ShufflingList
-accessible	class	net/minecraft/world/level/block/state/BlockBehaviour$BlockStateBase
-accessible	class	net/minecraft/world/level/levelgen/feature/stateproviders/WeightedStateProvider
-accessible	class	net/minecraft/world/level/lighting/LevelLightEngine
-accessible	class	net/minecraft/client/renderer/LevelRenderer
-accessible	class	net/minecraft/world/level/levelgen/structure/templatesystem/StructureManager
-accessible	class	net/minecraft/world/level/levelgen/placement/ConfiguredDecorator
-accessible	class	com/mojang/blaze3d/vertex/BufferBuilder
-accessible	class	net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo
-accessible	class	net/minecraft/world/level/levelgen/Heightmap
-accessible	class	net/minecraft/world/level/biome/Biome
-accessible	class	net/minecraft/server/level/ServerLevel
-accessible	class	net/minecraft/server/MinecraftServer
-accessible	class	net/minecraft/util/UniformInt
-accessible	class	net/minecraft/client/gui/screens/MenuScreens$ScreenConstructor
-accessible	class	net/minecraft/world/level/storage/DimensionDataStorage
-accessible	class	net/minecraft/world/level/levelgen/feature/Feature
-accessible	class	net/minecraft/client/renderer/GameRenderer
-accessible	class	net/minecraft/server/level/ServerChunkCache
-accessible	class	net/minecraft/core/SerializableUUID
-accessible	class	net/minecraft/server/level/ChunkMap
-accessible	class	net/minecraft/Util
-accessible	class	net/minecraft/world/level/chunk/ProtoChunk
-accessible	class	net/minecraft/world/level/levelgen/feature/ConfiguredFeature
-accessible	class	com/mojang/blaze3d/vertex/VertexBuffer
-accessible	class	net/minecraft/world/level/chunk/LevelChunk
-accessible	class	net/minecraft/client/renderer/LevelRenderer
-accessible	class	net/minecraft/client/renderer/texture/TextureAtlasSprite
-accessible	class	net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture
-accessible	method	net/minecraft/client/renderer/GameRenderer	bobView	(Lcom/mojang/blaze3d/vertex/PoseStack;F)V
-accessible	method	net/minecraft/client/renderer/GameRenderer	getFov	(Lnet/minecraft/client/Camera;FZ)D
-accessible	method	net/minecraft/client/renderer/GameRenderer	bobHurt	(Lcom/mojang/blaze3d/vertex/PoseStack;F)V
-accessible	method	net/minecraft/world/level/levelgen/Heightmap	setHeight	(III)V
-accessible	method	net/minecraft/core/SerializableUUID	leastMostToIntArray	(JJ)[I
-accessible	method	net/minecraft/world/level/levelgen/feature/ConfiguredFeature	place	(Lnet/minecraft/world/level/WorldGenLevel;Lnet/minecraft/world/level/chunk/ChunkGenerator;Ljava/util/Random;Lnet/minecraft/core/BlockPos;)Z
-accessible	method	net/minecraft/world/level/levelgen/Heightmap	getIndex	(II)I
-accessible	method	net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture	getFrameX	(I)I
-accessible	method	net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture	getFrameY	(I)I
-accessible	method	net/minecraft/Util	makeExecutor	(Ljava/lang/String;)Ljava/util/concurrent/ExecutorService;
-accessible	field	com/mojang/blaze3d/vertex/VertexBuffer	vertexCount	I
-accessible	field	net/minecraft/world/level/levelgen/placement/ConfiguredDecorator	config	Lnet/minecraft/world/level/levelgen/feature/configurations/DecoratorConfiguration;
-accessible	field	net/minecraft/world/level/chunk/LevelChunk	sections	[Lnet/minecraft/world/level/chunk/LevelChunkSection;
-accessible	field	net/minecraft/world/level/lighting/LevelLightEngine	skyEngine	Lnet/minecraft/world/level/lighting/LayerLightEngine;
-accessible	field	net/minecraft/world/level/biome/Biome	generationSettings	Lnet/minecraft/world/level/biome/BiomeGenerationSettings;
-accessible	field	net/minecraft/server/level/ChunkMap	lightEngine	Lnet/minecraft/server/level/ThreadedLevelLightEngine;
-accessible	field	net/minecraft/server/MinecraftServer	random	Ljava/util/Random;
-accessible	field	net/minecraft/world/entity/ai/behavior/ShufflingList	entries	Ljava/util/List;
-accessible	field	com/mojang/blaze3d/vertex/VertexBuffer	format	Lcom/mojang/blaze3d/vertex/VertexFormat;
-accessible	field	net/minecraft/client/renderer/GameRenderer	tick	I
-accessible	field	net/minecraft/world/level/levelgen/placement/ConfiguredDecorator	decorator	Lnet/minecraft/world/level/levelgen/placement/FeatureDecorator;
-accessible	field	com/mojang/blaze3d/vertex/BufferBuilder	buffer	Ljava/nio/ByteBuffer;
-accessible	field	net/minecraft/world/level/chunk/ProtoChunk	sections	[Lnet/minecraft/world/level/chunk/LevelChunkSection;
-accessible	field	net/minecraft/world/level/block/state/BlockBehaviour$BlockStateBase	materialColor	Lnet/minecraft/world/level/material/MaterialColor;
-accessible	field	net/minecraft/server/level/ServerLevel	structureFeatureManager	Lnet/minecraft/world/level/StructureFeatureManager;
-accessible	field	net/minecraft/client/renderer/LevelRenderer	renderChunks	Lit/unimi/dsi/fastutil/objects/ObjectList;
-accessible	field	net/minecraft/server/level/ServerChunkCache	dataStorage	Lnet/minecraft/world/level/storage/DimensionDataStorage;
-accessible	field	net/minecraft/util/UniformInt	baseValue	I
-accessible	field	net/minecraft/world/level/lighting/LevelLightEngine	blockEngine	Lnet/minecraft/world/level/lighting/LayerLightEngine;
-accessible	field	net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo	chunk	Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk;
-accessible	field	com/mojang/blaze3d/vertex/VertexBuffer	vertextBufferId	I
-accessible	field	net/minecraft/util/UniformInt	spread	I
-accessible	field	net/minecraft/client/renderer/LightTexture	lightPixels	Lcom/mojang/blaze3d/platform/NativeImage;
-accessible	field	net/minecraft/server/level/ChunkMap	structureManager	Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureManager;
-accessible	field	net/minecraft/world/level/levelgen/structure/templatesystem/StructureManager	structureRepository	Ljava/util/Map;
-accessible	field	net/minecraft/world/level/levelgen/feature/Feature	configuredCodec	Lcom/mojang/serialization/Codec;
-accessible	field	net/minecraft/world/level/storage/DimensionDataStorage	dataFolder	Ljava/io/File;
-accessible	field	net/minecraft/world/level/chunk/LevelChunk	heightmaps	Ljava/util/Map;
-accessible	field	net/minecraft/world/level/levelgen/feature/stateproviders/WeightedStateProvider	weightedList	Lnet/minecraft/util/random/SimpleWeightedRandomList;
-accessible	field	com/mojang/blaze3d/vertex/VertexBuffer	indexCount	I
-accessible	field	net/minecraft/client/renderer/LevelRenderer	renderChunks	Lit/unimi/dsi/fastutil/objects/ObjectArrayList;
-accessible	field	net/minecraft/client/renderer/texture/TextureAtlasSprite	animatedTexture	Lnet/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture;
-accessible	field	net/minecraft/client/renderer/texture/TextureAtlasSprite	width	I
-accessible	field	net/minecraft/client/renderer/texture/TextureAtlasSprite	height	I
-accessible	field	net/minecraft/client/renderer/texture/TextureAtlasSprite	mainImage	[Lcom/mojang/blaze3d/platform/NativeImage;
-extendable	class	com/mojang/math/Matrix4f
+accessWidener v1 named
+
+# used when determining where to save files too
+accessible field net/minecraft/world/level/storage/DimensionDataStorage dataFolder Ljava/io/File;
+
+# used when rendering
+accessible field com/mojang/blaze3d/vertex/VertexBuffer indexCount I
+accessible field com/mojang/blaze3d/vertex/VertexBuffer vertextBufferId I
+accessible method net/minecraft/client/renderer/GameRenderer getFov (Lnet/minecraft/client/Camera;FZ)D
+
+# pre-render setup
+accessible field net/minecraft/client/renderer/LevelRenderer renderChunks Lit/unimi/dsi/fastutil/objects/ObjectArrayList;
+accessible class net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo
+accessible field net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo chunk Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk;
+
+# lighting
+accessible field net/minecraft/client/renderer/LightTexture lightPixels Lcom/mojang/blaze3d/platform/NativeImage;
+accessible field net/minecraft/world/level/lighting/LevelLightEngine blockEngine Lnet/minecraft/world/level/lighting/LayerLightEngine;
+accessible field net/minecraft/world/level/lighting/LevelLightEngine skyEngine Lnet/minecraft/world/level/lighting/LayerLightEngine;
+
+# world generation
+accessible method net/minecraft/world/level/levelgen/Heightmap setHeight (III)V
+accessible field net/minecraft/world/level/biome/Biome generationSettings Lnet/minecraft/world/level/biome/BiomeGenerationSettings;
+
+# idk what's going on here
+accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite animatedTexture Lnet/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture;
+accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite width I
+accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite height I
+accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite mainImage [Lcom/mojang/blaze3d/platform/NativeImage;
+extendable class com/mojang/math/Matrix4f

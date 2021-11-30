@@ -26,9 +26,7 @@ import com.seibel.lod.fabric.wrappers.block.BlockPosWrapper;
 
 import net.minecraft.client.renderer.BiomeColors;
 
-
 /**
- * 
  * @author Cola?
  * @version 11-15-2021
  */

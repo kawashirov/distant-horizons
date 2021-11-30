@@ -1,34 +1,49 @@
+/*
+ *    This file is part of the Distant Horizon mod (formerly the LOD Mod),
+ *    licensed under the GNU GPL v3 License.
+ *
+ *    Copyright (C) 2020  James Seibel
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, version 3.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.seibel.lod.fabric.wrappers.world;
 
+import java.awt.Color;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.seibel.lod.core.util.ColorUtil;
+import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
-import com.seibel.lod.fabric.wrappers.block.BlockColorSingletonWrapper;
-import com.seibel.lod.fabric.wrappers.block.BlockColorWrapper;
+
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.MaterialColor;
 
-
-/**
- * This class wraps the minecraft BlockPos.Mutable (and BlockPos) class
- * 
- * @author James Seibel
- * @version 11-15-2021
- */
+//This class wraps the minecraft BlockPos.Mutable (and BlockPos) class
 public class BiomeWrapper implements IBiomeWrapper
 {
+	
 	public static final ConcurrentMap<Biome, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
-	private final Biome biome;
+	private Biome biome;
 	
 	public BiomeWrapper(Biome biome)
 	{
 		this.biome = biome;
 	}
 	
-	static public BiomeWrapper getBiomeWrapper(Biome biome)
+	static public IBiomeWrapper getBiomeWrapper(Biome biome)
 	{
 		//first we check if the biome has already been wrapped
 		if(biomeWrapperMap.containsKey(biome) && biomeWrapperMap.get(biome) != null)
@@ -49,72 +64,57 @@ public class BiomeWrapper implements IBiomeWrapper
 	public int getColorForBiome(int x, int z)
 	{
 		int colorInt;
-		int tintValue = 0;
 		
 		switch (biome.getBiomeCategory())
 		{
 		
 		case NETHER:
-			colorInt = BlockColorWrapper.getBlockColorWrapper(Blocks.NETHERRACK).getColor();
+			colorInt = Blocks.NETHERRACK.defaultBlockState().getMaterial().getColor().col;
 			break;
 		
 		case THEEND:
-			colorInt = BlockColorWrapper.getBlockColorWrapper(Blocks.END_STONE).getColor();
+			colorInt = Blocks.END_STONE.defaultBlockState().getMaterial().getColor().col;
 			break;
 		
 		case BEACH:
 		case DESERT:
-			colorInt = BlockColorWrapper.getBlockColorWrapper(Blocks.SAND).getColor();
+			colorInt = Blocks.SAND.defaultBlockState().getMaterial().getColor().col;
 			break;
 		
 		case EXTREME_HILLS:
-			colorInt = BlockColorWrapper.getBlockColorWrapper(Blocks.STONE).getColor();
+			colorInt = Blocks.STONE.defaultMaterialColor().col;
 			break;
 		
 		case MUSHROOM:
-			colorInt = BlockColorWrapper.getBlockColorWrapper(Blocks.MYCELIUM).getColor();
+			colorInt = MaterialColor.COLOR_LIGHT_GRAY.col;
 			break;
 		
 		case ICY:
-			colorInt = BlockColorWrapper.getBlockColorWrapper(Blocks.SNOW).getColor();
+			colorInt = Blocks.SNOW.defaultMaterialColor().col;
 			break;
 		
 		case MESA:
-			colorInt = BlockColorWrapper.getBlockColorWrapper(Blocks.RED_SAND).getColor();
+			colorInt = Blocks.RED_SAND.defaultMaterialColor().col;
 			break;
 		
 		case OCEAN:
 		case RIVER:
-			colorInt = BlockColorSingletonWrapper.INSTANCE.getWaterColor().getColor();
-			tintValue = biome.getWaterColor();
-			break;
-		
-		case PLAINS:
-		case SAVANNA:
-			colorInt = BlockColorWrapper.getBlockColorWrapper(Blocks.GRASS_BLOCK).getColor();
-			tintValue = biome.getGrassColor(x, z);
-			colorInt = ColorUtil.multiplyRGBcolors(colorInt,tintValue);
-			break;
-		
-		case TAIGA:
-			colorInt = BlockColorWrapper.getBlockColorWrapper(Blocks.SPRUCE_LEAVES).getColor();
-			tintValue = biome.getFoliageColor();
-			colorInt = ColorUtil.multiplyRGBcolors(colorInt,tintValue);
-			break;
-		case JUNGLE:
-			colorInt = BlockColorWrapper.getBlockColorWrapper(Blocks.JUNGLE_LEAVES).getColor();
-			tintValue = biome.getFoliageColor();
-			colorInt = ColorUtil.multiplyRGBcolors(colorInt,tintValue);
+			colorInt = biome.getWaterColor();
 			break;
 		
 		case NONE:
-		default:
-		case SWAMP:
 		case FOREST:
-			colorInt = BlockColorWrapper.getBlockColorWrapper(Blocks.OAK_LEAVES).getColor();
-			tintValue = biome.getFoliageColor();
-			colorInt = ColorUtil.multiplyRGBcolors(colorInt,tintValue);
+		case TAIGA:
+		case JUNGLE:
+		case PLAINS:
+		case SAVANNA:
+		case SWAMP:
+		default:
+			Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
+			tmp = tmp.darker();
+			colorInt = LodUtil.colorToInt(tmp);
 			break;
+			
 		}
 		
 		return colorInt;
@@ -139,13 +139,13 @@ public class BiomeWrapper implements IBiomeWrapper
 	}
 	
 	
-	@Override public boolean equals(Object o)
+	@Override public boolean equals(Object obj)
 	{
-		if (this == o)
+		if (this == obj)
 			return true;
-		if (!(o instanceof BiomeWrapper))
+		if (!(obj instanceof BiomeWrapper))
 			return false;
-		BiomeWrapper that = (BiomeWrapper) o;
+		BiomeWrapper that = (BiomeWrapper) obj;
 		return Objects.equals(biome, that.biome);
 	}
 	

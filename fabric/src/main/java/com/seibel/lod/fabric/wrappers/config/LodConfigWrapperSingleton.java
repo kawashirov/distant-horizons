@@ -8,49 +8,49 @@ import com.seibel.lod.fabric.Config;
 /**
  * This holds the config defaults and setters/getters
  * that should be hooked into the host mod loader (Fabric, Forge, etc.).
- * 
+ *
  * @author James Seibel
  * @version 11-16-2021
  */
 public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 {
 	public static final LodConfigWrapperSingleton INSTANCE = new LodConfigWrapperSingleton();
-	
-	
+
+
 	private static final Client client = new Client();
 	@Override
 	public IClient client()
 	{
 		return client;
 	}
-	
+
 	public static class Client implements IClient
 	{
 		public final IGraphics graphics;
 		public final IWorldGenerator worldGenerator;
 		public final IAdvanced advanced;
-		
+
 
 		@Override
 		public IGraphics graphics()
 		{
 			return graphics;
 		}
-		
+
 		@Override
 		public IWorldGenerator worldGenerator()
 		{
 			return worldGenerator;
 		}
-		
+
 		@Override
 		public IAdvanced advanced()
 		{
 			return advanced;
 		}
-		
-		
-		
+
+
+
 		//================//
 		// Client Configs //
 		//================//
@@ -60,8 +60,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			worldGenerator = new WorldGenerator();
 			advanced = new Advanced();
 		}
-		
-		
+
+
 		//==================//
 		// Graphics Configs //
 		//==================//
@@ -70,8 +70,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			public final IQuality quality;
 			public final IFogQuality fogQuality;
 			public final IAdvancedGraphics advancedGraphics;
-			
-			
+
+
 
 			@Override
 			public IQuality quality()
@@ -90,16 +90,16 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			{
 				return advancedGraphics;
 			}
-			
-			
+
+
 			Graphics()
 			{
 				quality = new Quality();
 				advancedGraphics = new AdvancedGraphics();
 				fogQuality = new FogQuality();
 			}
-			
-			
+
+
 			public static class Quality implements IQuality
 			{
 				@Override
@@ -112,8 +112,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					Config.Client.Graphics.QualityOption.drawResolution = newHorizontalResolution;
 				}
-				
-				
+
+
 				@Override
 				public int getLodChunkRenderDistance()
 				{
@@ -124,8 +124,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					Config.Client.Graphics.QualityOption.lodChunkRenderDistance = newLodChunkRenderDistance;
 				}
-				
-				
+
+
 				@Override
 				public VerticalQuality getVerticalQuality()
 				{
@@ -136,8 +136,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					Config.Client.Graphics.QualityOption.verticalQuality = newVerticalQuality;
 				}
-				
-				
+
+
 				@Override
 				public HorizontalScale getHorizontalScale()
 				{
@@ -148,8 +148,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					Config.Client.Graphics.QualityOption.horizontalScale = newHorizontalScale;
 				}
-				
-				
+
+
 				@Override
 				public HorizontalQuality getHorizontalQuality()
 				{
@@ -161,8 +161,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					Config.Client.Graphics.QualityOption.horizontalQuality = newHorizontalQuality;
 				}
 			}
-			
-			
+
+
 			public static class FogQuality implements IFogQuality
 			{
 				@Override
@@ -175,20 +175,34 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					Config.Client.Graphics.FogQualityOption.fogDistance = newFogDistance;
 				}
-				
-				
+
+
 				@Override
-				public FogDrawOverride getFogDrawOverride()
+				public FogDrawMode getFogDrawMode()
 				{
-					return Config.Client.Graphics.FogQualityOption.fogDrawOverride;
+					return Config.Client.Graphics.FogQualityOption.fogDrawMode;
 				}
+
 				@Override
-				public void setFogDrawOverride(FogDrawOverride newFogDrawOverride)
+				public void setFogDrawMode(FogDrawMode setFogDrawMode)
 				{
-					Config.Client.Graphics.FogQualityOption.fogDrawOverride = newFogDrawOverride;
+					Config.Client.Graphics.FogQualityOption.fogDrawMode = setFogDrawMode;
 				}
-				
-				
+
+
+				@Override
+				public FogColorMode getFogColorMode()
+				{
+					return Config.Client.Graphics.FogQualityOption.fogColorMode;
+				}
+
+				@Override
+				public void setFogColorMode(FogColorMode newFogColorMode)
+				{
+					Config.Client.Graphics.FogQualityOption.fogColorMode = newFogColorMode;
+				}
+
+
 				@Override
 				public boolean getDisableVanillaFog()
 				{
@@ -200,8 +214,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					Config.Client.Graphics.FogQualityOption.disableVanillaFog = newDisableVanillaFog;
 				}
 			}
-			
-			
+
+
 			public static class AdvancedGraphics implements IAdvancedGraphics
 			{
 				@Override
@@ -214,8 +228,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					Config.Client.Graphics.AdvancedGraphicsOption.lodTemplate = newLodTemplate;
 				}
-				
-				
+
+
 				@Override
 				public boolean getDisableDirectionalCulling()
 				{
@@ -226,8 +240,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					Config.Client.Graphics.AdvancedGraphicsOption.disableDirectionalCulling = newDisableDirectionalCulling;
 				}
-				
-				
+
+
 				@Override
 				public boolean getAlwaysDrawAtMaxQuality()
 				{
@@ -238,8 +252,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					Config.Client.Graphics.AdvancedGraphicsOption.alwaysDrawAtMaxQuality = newAlwaysDrawAtMaxQuality;
 				}
-				
-				
+
+
 				@Override
 				public VanillaOverdraw getVanillaOverdraw()
 				{
@@ -250,8 +264,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					Config.Client.Graphics.AdvancedGraphicsOption.vanillaOverdraw = newVanillaOverdraw;
 				}
-				
-				
+
+
 				@Override
 				public GpuUploadMethod getGpuUploadMethod()
 				{
@@ -262,8 +276,19 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					Config.Client.Graphics.AdvancedGraphicsOption.gpuUploadMethod = newDisableVanillaFog;
 				}
-				
-				
+
+
+				@Override
+				public int getGpuUploadTimeoutInMilliseconds()
+				{
+					return Config.Client.Graphics.AdvancedGraphicsOption.gpuUploadTimeoutInMilleseconds;
+				}
+				@Override
+				public void setGpuUploadTimeoutInMilliseconds(int newTimeoutInMilliseconds) {
+					Config.Client.Graphics.AdvancedGraphicsOption.gpuUploadTimeoutInMilleseconds = newTimeoutInMilliseconds;
+				}
+
+
 				@Override
 				public boolean getUseExtendedNearClipPlane()
 				{
@@ -276,10 +301,10 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				}
 			}
 		}
-		
-		
-		
-		
+
+
+
+
 		//========================//
 		// WorldGenerator Configs //
 		//========================//
@@ -295,8 +320,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			{
 				Config.Client.WorldGenerator.generationPriority = newGenerationPriority;
 			}
-			
-			
+
+
 			@Override
 			public DistanceGenerationMode getDistanceGenerationMode()
 			{
@@ -307,8 +332,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			{
 				Config.Client.WorldGenerator.distanceGenerationMode = newDistanceGenerationMode;
 			}
-			
-			
+
+
 			@Override
 			public boolean getAllowUnstableFeatureGeneration()
 			{
@@ -319,8 +344,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			{
 				Config.Client.WorldGenerator.allowUnstableFeatureGeneration = newAllowUnstableFeatureGeneration;
 			}
-			
-			
+
+
 			@Override
 			public BlocksToAvoid getBlocksToAvoid()
 			{
@@ -332,10 +357,10 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				Config.Client.WorldGenerator.blocksToAvoid = newBlockToAvoid;
 			}
 		}
-		
-		
-		
-		
+
+
+
+
 		//============================//
 		// AdvancedModOptions Configs //
 		//============================//
@@ -344,8 +369,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			public final IThreading threading;
 			public final IDebugging debugging;
 			public final IBuffers buffers;
-			
-			
+
+
 			@Override
 			public IThreading threading()
 			{
@@ -365,15 +390,15 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			{
 				return buffers;
 			}
-			
-			
+
+
 			public Advanced()
 			{
 				threading = new Threading();
 				debugging = new Debugging();
 				buffers = new Buffers();
 			}
-			
+
 			public static class Threading implements IThreading
 			{
 				@Override
@@ -386,8 +411,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					Config.Client.AdvancedModOptions.Threading.numberOfWorldGenerationThreads = newNumberOfWorldGenerationThreads;
 				}
-				
-				
+
+
 				@Override
 				public int getNumberOfBufferBuilderThreads()
 				{
@@ -399,10 +424,10 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					Config.Client.AdvancedModOptions.Threading.numberOfBufferBuilderThreads = newNumberOfWorldBuilderThreads;
 				}
 			}
-			
-			
-			
-			
+
+
+
+
 			//===============//
 			// Debug Options //
 			//===============//
@@ -418,8 +443,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					Config.Client.AdvancedModOptions.Debugging.drawLods = newDrawLods;
 				}
-				
-				
+
+
 				@Override
 				public DebugMode getDebugMode()
 				{
@@ -430,8 +455,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					Config.Client.AdvancedModOptions.Debugging.debugMode = newDebugMode;
 				}
-				
-				
+
+
 				@Override
 				public boolean getDebugKeybindingsEnabled()
 				{
@@ -443,8 +468,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					Config.Client.AdvancedModOptions.Debugging.enableDebugKeybindings = newEnableDebugKeybindings;
 				}
 			}
-			
-			
+
+
 			public static class Buffers implements IBuffers
 			{
 				@Override
@@ -458,6 +483,6 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					Config.Client.AdvancedModOptions.Buffers.rebuildTimes = newBufferRebuildTimes;
 				}
 			}
-		}	
-	}	
+		}
+	}
 }
