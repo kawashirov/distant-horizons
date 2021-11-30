@@ -63,7 +63,7 @@ import net.minecraftforge.fml.config.ModConfig;
  * This handles any configuration the user has access to.
  * @author Leonardo Amato
  * @author James Seibel
- * @version 11-16-2021
+ * @version 11-29-2021
  */
 @Mod.EventBusSubscriber
 public class ForgeConfig
@@ -214,6 +214,7 @@ public class ForgeConfig
 				public final ForgeConfigSpec.BooleanValue alwaysDrawAtMaxQuality;
 				public final ForgeConfigSpec.EnumValue<VanillaOverdraw> vanillaOverdraw;
 				public final ForgeConfigSpec.EnumValue<GpuUploadMethod> gpuUploadMethod;
+				public final ForgeConfigSpec.IntValue gpuUploadTimeoutInMilleseconds;
 				public final ForgeConfigSpec.BooleanValue useExtendedNearClipPlane;
 				
 				AdvancedGraphicsOption(ForgeConfigSpec.Builder builder)
@@ -244,6 +245,12 @@ public class ForgeConfig
 							.comment("\n\n"
 									+ IAdvancedGraphics.GPU_UPLOAD_METHOD_DESC)
 							.defineEnum("GPU Upload Method", IAdvancedGraphics.GPU_UPLOAD_METHOD_DEFAULT);
+					
+					MinDefaultMax<Integer> minDefaultMax = IAdvancedGraphics.GPU_UPLOAD_TIMEOUT_IN_MILLISECONDS_DEFAULT;
+					gpuUploadTimeoutInMilleseconds = builder
+							.comment("\n\n"
+									+ IAdvancedGraphics.GPU_UPLOAD_TIMEOUT_IN_MILLISECONDS_DESC)
+							.defineInRange("GPU Upload Timeout in Milleseconds", minDefaultMax.defaultValue, minDefaultMax.minValue, minDefaultMax.maxValue);
 					
 					// This is a temporary fix (like vanilla overdraw)
 					// hopefully we can remove both once we get individual chunk rendering figured out

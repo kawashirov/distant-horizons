@@ -39,7 +39,7 @@ import com.seibel.lod.forge.ForgeConfig;
 
 /**
  * @author James Seibel
- * @version 11-16-2021
+ * @version 11-29-2021
  */
 public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 {
@@ -302,6 +302,18 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setGpuUploadMethod(GpuUploadMethod newDisableVanillaFog)
 				{
 					ForgeConfig.CLIENT.graphics.advancedGraphicsOption.gpuUploadMethod.set(newDisableVanillaFog);
+				}
+				
+				
+				@Override
+				public int getGpuUploadTimeoutInMilliseconds()
+				{
+					return ForgeConfig.CLIENT.graphics.advancedGraphicsOption.gpuUploadTimeoutInMilleseconds.get();
+				}
+				@Override
+				public void setGpuUploadTimeoutInMilliseconds(int newTimeoutInMilliseconds)
+				{
+					ForgeConfig.CLIENT.graphics.advancedGraphicsOption.gpuUploadTimeoutInMilleseconds.set(newTimeoutInMilliseconds);
 				}
 				
 				

@@ -27,7 +27,7 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = 'a1.5.3'
+version = 'a1.5.4'
 group = 'com.seibel.lod'
 archivesBaseName = 'Distant-Horizons_1.16.5'
 
