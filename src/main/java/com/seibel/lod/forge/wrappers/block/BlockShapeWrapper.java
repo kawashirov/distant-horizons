@@ -48,7 +48,7 @@ public class BlockShapeWrapper implements IBlockShapeWrapper
 	public static BlockShapeWrapper WATER_SHAPE = new BlockShapeWrapper();
 	
 	private final Block block;
-	private boolean toAvoid;
+	private final boolean toAvoid;
 	private boolean nonFull;
 	private boolean noCollision;
 	
