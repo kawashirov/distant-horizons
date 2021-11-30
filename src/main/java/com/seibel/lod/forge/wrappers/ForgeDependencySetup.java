@@ -14,7 +14,7 @@ import com.seibel.lod.forge.wrappers.minecraft.MinecraftRenderWrapper;
 import com.seibel.lod.forge.wrappers.minecraft.MinecraftWrapper;
 
 /**
- * Binds all necessary dependencies so we
+ * Binds all necessary dependencies, so we
  * can access them in Core. <br>
  * This needs to be called before any Core classes
  * are loaded.

@@ -144,7 +144,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
 		if (isTinted)
 			this.toTint = true;
 		
-		//now we get the first non empty face
+		//now we get the first non-empty face
 		for (Direction direction : directions)
 		{
 			quads = mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
