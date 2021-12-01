@@ -19,10 +19,18 @@
 
 package com.seibel.lod;
 
+import com.seibel.lod.common.LodCommonMain;
+import com.seibel.lod.common.forge.LodForgeMethodCaller;
+import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
 import com.seibel.lod.forge.ForgeClientProxy;
 import com.seibel.lod.forge.ForgeConfig;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
 
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -32,6 +40,9 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fmlserverevents.FMLServerStartedEvent;
+
+import java.util.List;
+import java.util.Random;
 
 /**
  * Initialize and setup the Mod.
@@ -43,7 +54,7 @@ import net.minecraftforge.fmlserverevents.FMLServerStartedEvent;
  * @version 7-3-2021
  */
 @Mod(ModInfo.ID)
-public class LodMain
+public class LodMain implements LodForgeMethodCaller
 {
 	public static LodMain instance;
 	
@@ -52,6 +63,7 @@ public class LodMain
 	
 	private void init(final FMLCommonSetupEvent event)
 	{
+		LodCommonMain.startup(this);
 		ForgeDependencySetup.createInitialBindings();
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ForgeConfig.CLIENT_SPEC);
 	}
@@ -80,5 +92,9 @@ public class LodMain
 	{
 		// this is called when the server starts
 	}
-	
+
+	@Override
+	public List<BakedQuad> getQuads(MinecraftWrapper mc, Block block, BlockState blockState, Direction direction, Random random, ModelDataMap dataMap) {
+		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
+	}
 }

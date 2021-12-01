@@ -100,7 +100,9 @@ public class ClientProxy
 	/** This is also called when a new dimension loads */
 	public void worldLoadEvent(Level level)
 	{
-		eventApi.worldLoadEvent(WorldWrapper.getWorldWrapper(level));
+		if (level != null) {
+			eventApi.worldLoadEvent(WorldWrapper.getWorldWrapper(level));
+		}
 	}
 
 	public void worldUnloadEvent()

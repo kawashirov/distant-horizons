@@ -19,6 +19,7 @@
 
 package com.seibel.lod.fabric;
 
+import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.fabric.wrappers.DependencySetup;
@@ -35,7 +36,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
  * 
  * @author coolGi2007
  * @author Ran
- * @version 11-21-2021
+ * @version 12-1-2021
  */
 public class Main implements ClientModInitializer
 {
@@ -58,6 +59,7 @@ public class Main implements ClientModInitializer
 
 	// This loads the mod after minecraft loads which doesn't causes a lot of issues
 	public static void init() {
+		LodCommonMain.startup(null);
 		DependencySetup.createInitialBindings();
 		ClientApi.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 
