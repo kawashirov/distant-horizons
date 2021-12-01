@@ -19,9 +19,17 @@
 
 package com.seibel.lod.forge;
 
+import com.seibel.lod.common.LodCommonMain;
+import com.seibel.lod.common.forge.LodForgeMethodCaller;
+import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
 
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -32,6 +40,9 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fmlserverevents.FMLServerStartedEvent;
 
+import java.util.List;
+import java.util.Random;
+
 /**
  * Initialize and setup the Mod. <br>
  * If you are looking for the real start of the mod
@@ -41,13 +52,14 @@ import net.minecraftforge.fmlserverevents.FMLServerStartedEvent;
  * @version 11-21-2021
  */
 @Mod(ModInfo.ID)
-public class ForgeMain
+public class ForgeMain implements LodForgeMethodCaller
 {
 	public static ForgeClientProxy forgeClientProxy;
 	
 	private void init(final FMLCommonSetupEvent event)
 	{
 		// make sure the dependencies are set up before the mod needs them
+		LodCommonMain.startup(this);
 		ForgeDependencySetup.createInitialBindings();
 		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ForgeConfig.CLIENT_SPEC);
 	}
@@ -76,5 +88,10 @@ public class ForgeMain
 	{
 		// this is called when the server starts
 	}
-	
+
+	private ModelDataMap dataMap = new ModelDataMap.Builder().build();
+	@Override
+	public List<BakedQuad> getQuads(MinecraftWrapper mc, Block block, BlockState blockState, Direction direction, Random random) {
+		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
+	}
 }

@@ -23,7 +23,6 @@ import net.minecraft.world.level.block.GrassBlock;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.TallGrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.ModelDataMap;
 
 
 /**
@@ -34,7 +33,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
 {
     //set of block which require tint
     public static final ConcurrentMap<Block, IBlockColorWrapper> blockColorWrapperMap = new ConcurrentHashMap<>();
-    public static final ModelDataMap dataMap = new ModelDataMap.Builder().build();
+    //public static final ModelDataMap dataMap = new ModelDataMap.Builder().build();
     public static final AbstractBlockPosWrapper blockPos = new BlockPosWrapper(0,0,0);
     public static Random random = new Random(0);
     //public static BlockColourWrapper WATER_COLOR = getBlockColorWrapper(Blocks.WATER);
@@ -99,7 +98,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
         for (Direction direction : directions)
         {
             if (LodCommonMain.forge) {
-                quads = LodCommonMain.forgeMethodCaller.getQuads(mc, block, blockState, direction, random, dataMap);
+                quads = LodCommonMain.forgeMethodCaller.getQuads(mc, block, blockState, direction, random);
             } else {
                 quads = mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random);
             }
@@ -118,7 +117,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
         for (Direction direction : directions)
         {
             if (LodCommonMain.forge) {
-                quads = LodCommonMain.forgeMethodCaller.getQuads(mc, block, blockState, direction, random, dataMap);
+                quads = LodCommonMain.forgeMethodCaller.getQuads(mc, block, blockState, direction, random);
             } else {
                 quads = mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random);
             }

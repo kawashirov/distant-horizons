@@ -67,7 +67,9 @@ public class ForgeClientProxy
 	@SubscribeEvent
 	public void worldLoadEvent(WorldEvent.Load event)
 	{
-		eventApi.worldLoadEvent(WorldWrapper.getWorldWrapper(event.getWorld()));
+		if (event.getWorld() != null) {
+			eventApi.worldLoadEvent(WorldWrapper.getWorldWrapper(event.getWorld()));
+		}
 	}
 	
 	@SubscribeEvent

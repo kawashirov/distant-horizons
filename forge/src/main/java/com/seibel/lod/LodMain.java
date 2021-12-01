@@ -93,8 +93,9 @@ public class LodMain implements LodForgeMethodCaller
 		// this is called when the server starts
 	}
 
+	private ModelDataMap dataMap = new ModelDataMap.Builder().build();
 	@Override
-	public List<BakedQuad> getQuads(MinecraftWrapper mc, Block block, BlockState blockState, Direction direction, Random random, ModelDataMap dataMap) {
+	public List<BakedQuad> getQuads(MinecraftWrapper mc, Block block, BlockState blockState, Direction direction, Random random) {
 		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
 	}
 }

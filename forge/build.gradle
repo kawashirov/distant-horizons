@@ -42,19 +42,14 @@ task copyCoreResources(type: Copy) {
     into file("build/resources/main")
 }
 
-task deleteResources(type: Delete) {
-    delete file("build/resources/main")
-}
-
 task copyCommonResources(type: Copy) {
     from fileTree(project(":common").file("src/main/resources"))
     into file("build/resources/main")
 }
 
-runClient {
+processResources {
     dependsOn(copyCoreResources)
     dependsOn(copyCommonResources)
-    finalizedBy(deleteResources)
 }
 
 shadowJar {
