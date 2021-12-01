@@ -56,18 +56,24 @@ task copyAccessWidener(type: Copy) {
     into file("src/generated/resources")
 }
 
-task copyAccessWidenerAtRuntime(type: Copy) {
-    from project(":common").file("src/main/resources/lod.accesswidener")
+task copyCoreResources(type: Copy) {
+    from fileTree(project(":core").file("src/main/resources"))
     into file("build/resources/main")
 }
 
-task deleteAccessWidenerAtRuntime(type: Delete) {
-    delete file("build/resources/main/lod.accesswidener")
+task deleteResources(type: Delete) {
+    delete file("build/resources/main")
+}
+
+task copyCommonResources(type: Copy) {
+    from fileTree(project(":common").file("src/main/resources"))
+    into file("build/resources/main")
 }
 
 runClient {
-    dependsOn(copyAccessWidenerAtRuntime)
-    finalizedBy(deleteAccessWidenerAtRuntime)
+    dependsOn(copyCoreResources)
+    dependsOn(copyCommonResources)
+    finalizedBy(deleteResources)
 }
 
 processResources {

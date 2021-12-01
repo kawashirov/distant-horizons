@@ -22,9 +22,11 @@ accessible field net/minecraft/world/level/lighting/LevelLightEngine skyEngine L
 accessible method net/minecraft/world/level/levelgen/Heightmap setHeight (III)V
 accessible field net/minecraft/world/level/biome/Biome generationSettings Lnet/minecraft/world/level/biome/BiomeGenerationSettings;
 
-# idk what's going on here
+# grabbing textures
 accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite animatedTexture Lnet/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture;
 accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite width I
 accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite height I
 accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite mainImage [Lcom/mojang/blaze3d/platform/NativeImage;
+accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameX (I)I
+accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameY (I)I
 extendable class com/mojang/math/Matrix4f
