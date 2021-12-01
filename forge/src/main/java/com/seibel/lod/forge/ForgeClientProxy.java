@@ -21,9 +21,9 @@ package com.seibel.lod.forge;
 
 import com.seibel.lod.core.api.EventApi;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
-import com.seibel.lod.forge.wrappers.chunk.ChunkWrapper;
-import com.seibel.lod.forge.wrappers.world.DimensionTypeWrapper;
-import com.seibel.lod.forge.wrappers.world.WorldWrapper;
+import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
+import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
+import com.seibel.lod.common.wrappers.world.WorldWrapper;
 
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.TickEvent;

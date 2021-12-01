@@ -21,6 +21,7 @@ package com.seibel.lod.fabric.mixins;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
+import com.seibel.lod.common.wrappers.McObjectConverter;
 import net.minecraft.client.renderer.LevelRenderer;
 import org.lwjgl.opengl.GL15;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,7 +31,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.objects.math.Mat4f;
-import com.seibel.lod.fabric.wrappers.McObjectConverter;
 
 import net.minecraft.client.renderer.RenderType;
 

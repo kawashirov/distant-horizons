@@ -21,9 +21,9 @@ package com.seibel.lod.fabric;
 
 import com.seibel.lod.core.api.EventApi;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
-import com.seibel.lod.fabric.wrappers.chunk.ChunkWrapper;
-import com.seibel.lod.fabric.wrappers.world.DimensionTypeWrapper;
-import com.seibel.lod.fabric.wrappers.world.WorldWrapper;
+import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
+import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
+import com.seibel.lod.common.wrappers.world.WorldWrapper;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;

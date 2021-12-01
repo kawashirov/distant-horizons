@@ -28,7 +28,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.objects.math.Mat4f;
-import com.seibel.lod.forge.wrappers.McObjectConverter;
+import com.seibel.lod.common.wrappers.McObjectConverter;
 
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
