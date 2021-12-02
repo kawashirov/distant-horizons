@@ -22,14 +22,15 @@ This version has been confirmed to work in Eclipse and Retail Minecraft.\
 See the Forge Documentation online for more detailed instructions:\
 http://mcforge.readthedocs.io/en/latest/gettingstarted/
 
-1. Create a system variable called "JAVA_MC_HOME" with the location of the JDK 1.8.0_251 (This is needed for gradle to work correctly)
-2. replace JAVA_HOME with JAVA_MC_HOME in gradle.bat
-3. open a command line in the project folder
+### Prerequisites
+
+* A Java Development Kit (JDK) for Java 16 (recommended) or newer. Visit https://adoptium.net/releases.html for installers.
+* Any Java IDE, for example Intellij IDEA and Eclipse. You may also use any other code editors, such as Visual Studio Code.
 
 **If using Ecplise:**
 1. run the command: `./gradlew geneclipseruns`
 2. run the command: `./gradlew eclipse`
-3. Make sure eclipse has the JDK 1.8.0_251 installed. (This is needed so that eclipse can run minecraft)
+3. Make sure eclipse has the JDK 16 installed. (This is needed so that eclipse can run minecraft)
 4. Import the project into eclipse
 
 **If using IntelliJ:**
@@ -37,12 +38,18 @@ http://mcforge.readthedocs.io/en/latest/gettingstarted/
 2. run the command: `./gradlew genIntellijRuns`
 3. refresh the Gradle project in IDEA if required
 
-
 ## Compiling
 
+**Using GUI**
 1. open a command line in the project folder
 2. run the command: `./gradlew build`
-3. the compiled jar file will be in the folder `build\libs`
+3. the compiled jar file will be in the folder `fabric/build/libs/` and `forge/build/libs/`
+
+**If in terminal:**
+1. `git clone -b 1.17.1 --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
+2. `cd minecraft-lod-mod`
+3. `./gradlew build` (must be run as root)
+4. The build should be in `fabric/build/libs/` and `forge/build/libs/`
 
 
 ## Other commands
