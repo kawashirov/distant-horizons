@@ -17,6 +17,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Objects;
 
+/**
+ * Adds a button to the menu to goto the config
+ *
+ * @author coolGi2007
+ * @version 12-02-2021
+*/
 @Mixin(OptionsScreen.class)
 public class MixinOptionsScreen extends Screen {
     // Get the texture for the button
@@ -29,7 +35,7 @@ public class MixinOptionsScreen extends Screen {
     private void lodconfig$init(CallbackInfo ci) {
         this.addRenderableWidget(new TexturedButtonWidget(
                 // Where the button is on the screen
-                this.width / 2 - 180, this.height / 6 - 12,
+                this.width / 2 + 159, this.height / 6 - 12,
                 // Width and height of the button
                 20, 20,
                 // Offset
@@ -38,6 +44,7 @@ public class MixinOptionsScreen extends Screen {
                 20, ICON_TEXTURE, 20, 40,
                 // Create the button and tell it where to go
                 (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(AutoConfig.getConfigScreen(Config.class, this).get()),
+//              (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(Config.getScreen(this, ModInfo.ID)),
                 // Add a title to the screen
                 new TranslatableComponent("text.autoconfig." + ModInfo.ID + ".title")));
     }

@@ -25,34 +25,35 @@ import com.seibel.lod.core.enums.rendering.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IWorldGenerator;
+import com.seibel.lod.fabric.wrappers.config.ConfigGui;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 
 /**
  * This handles any configuration the user has access to.
  * @author coolGi2007
- * @version 11-29-2021
+ * @version 12-02-2021
  */
 @me.shedaniel.autoconfig.annotation.Config(name = ModInfo.ID)
 public class Config implements ConfigData
+//public class Config extends ConfigGui
 {
 	// CONFIG STRUCTURE
 	// 	-> Client
 	//		|
 	//		|-> Graphics
-	//		|		|-> QualityOption
-	//		|		|-> FogQualityOption
-	//		|		|-> AdvancedGraphicsOption
+	//		|		|-> Quality
+	//		|		|-> FogQuality
+	//		|		|-> AdvancedGraphics
 	//		|
 	//		|-> World Generation
 	//		|
-	//		|-> Advanced Mod Option
+	//		|-> Advanced
 	//				|-> Threads
 	//				|-> Buffers
 	//				|-> Debugging
 
 	// Since the original config system uses forge stuff, that means we have to rewrite the whole config system
-	// TODO: Stop using autoconfig and use manual config for cloth config
 
 	@ConfigEntry.Gui.CollapsibleObject
 	public Client client = new Client();
@@ -66,22 +67,22 @@ public class Config implements ConfigData
 		public WorldGenerator worldGenerator = new WorldGenerator();
 
 		@ConfigEntry.Gui.CollapsibleObject
-		public AdvancedModOptions advancedModOptions = new AdvancedModOptions();
+		public Advanced advanced = new Advanced();
 
 
 		public static class Graphics
 		{
 			@ConfigEntry.Gui.CollapsibleObject
-			public QualityOption qualityOption = new QualityOption();
+			public Quality quality = new Quality();
 
 			@ConfigEntry.Gui.CollapsibleObject
-			public FogQualityOption fogQualityOption = new FogQualityOption();
+			public FogQuality fogQuality = new FogQuality();
 
 			@ConfigEntry.Gui.CollapsibleObject
-			public AdvancedGraphicsOption advancedGraphicsOption = new AdvancedGraphicsOption();
+			public AdvancedGraphics advancedGraphicsOption = new AdvancedGraphics();
 
 
-			public static class QualityOption
+			public static class Quality
 			{
 				@ConfigEntry.Category("lod.Graphics.QualityOption")
 				@ConfigEntry.Gui.Tooltip
@@ -104,8 +105,8 @@ public class Config implements ConfigData
 				@ConfigEntry.Gui.Tooltip
 				public static HorizontalQuality horizontalQuality = IQuality.HORIZONTAL_QUALITY_DEFAULT;
 			}
-			
-			public static class FogQualityOption
+
+			public static class FogQuality
 			{
 				@ConfigEntry.Category("lod.Graphics.FogQualityOption")
 				@ConfigEntry.Gui.Tooltip
@@ -123,8 +124,8 @@ public class Config implements ConfigData
 				@ConfigEntry.Gui.Tooltip
 				public static boolean disableVanillaFog = IFogQuality.DISABLE_VANILLA_FOG_DEFAULT;
 			}
-			
-			public static class AdvancedGraphicsOption
+
+			public static class AdvancedGraphics
 			{
 				@ConfigEntry.Category("lod.Graphics.AdvancedGraphicsOption")
 				@ConfigEntry.Gui.Tooltip
@@ -144,20 +145,11 @@ public class Config implements ConfigData
 
 				@ConfigEntry.Category("lod.Graphics.AdvancedGraphicsOption")
 				@ConfigEntry.Gui.Tooltip
-				public static GpuUploadMethod gpuUploadMethod = IAdvancedGraphics.GPU_UPLOAD_METHOD_DEFAULT;
-
-				@ConfigEntry.Category("lod.Graphics.AdvancedGraphicsOption")
-				@ConfigEntry.Gui.Tooltip
-				@ConfigEntry.BoundedDiscrete(min = 0, max = 5000)
-				public static int gpuUploadTimeoutInMilleseconds = IAdvancedGraphics.GPU_UPLOAD_TIMEOUT_IN_MILLISECONDS_DEFAULT.defaultValue;
-
-				@ConfigEntry.Category("lod.Graphics.AdvancedGraphicsOption")
-				@ConfigEntry.Gui.Tooltip
 				public static boolean useExtendedNearClipPlane = IAdvancedGraphics.USE_EXTENDED_NEAR_CLIP_PLANE_DEFAULT;
 			}
 		}
 
-		
+
 		//========================//
 		// WorldGenerator Configs //
 		//========================//
@@ -185,12 +177,12 @@ public class Config implements ConfigData
 			public static boolean useExperimentalPreGenLoading = false;
 			 */
 		}
-		
-		
-		//============================//
-		// AdvancedModOptions Configs //
-		//============================//
-		public static class AdvancedModOptions
+
+
+		//==================//
+		// Advanced Configs //
+		//==================//
+		public static class Advanced
 		{
 			@ConfigEntry.Gui.CollapsibleObject
 			public Threading threading = new Threading();
@@ -201,7 +193,7 @@ public class Config implements ConfigData
 			@ConfigEntry.Gui.CollapsibleObject
 			public Buffers buffers = new Buffers();
 
-			
+
 			public static class Threading
 			{
 				@ConfigEntry.Category("lod.AdvancedModOptions.Threading")
@@ -217,9 +209,9 @@ public class Config implements ConfigData
 				public static int numberOfBufferBuilderThreads = IThreading.NUMBER_OF_BUFFER_BUILDER_THREADS_MIN_DEFAULT_MAX.defaultValue;
 			}
 
-			
-			
-			
+
+
+
 			//===============//
 			// Debug Options //
 			//===============//
@@ -237,10 +229,19 @@ public class Config implements ConfigData
 				@ConfigEntry.Gui.Tooltip
 				public static boolean enableDebugKeybindings = IDebugging.DEBUG_KEYBINDINGS_ENABLED_DEFAULT;
 			}
-			
-			
+
+
 			public static class Buffers
 			{
+				@ConfigEntry.Category("lod.Graphics.AdvancedGraphicsOption")
+				@ConfigEntry.Gui.Tooltip
+				public static GpuUploadMethod gpuUploadMethod = IBuffers.GPU_UPLOAD_METHOD_DEFAULT;
+
+				@ConfigEntry.Category("lod.Graphics.AdvancedGraphicsOption")
+				@ConfigEntry.Gui.Tooltip
+				@ConfigEntry.BoundedDiscrete(min = 0, max = 5000)
+				public static int gpuUploadTimeoutInMilleseconds = IBuffers.GPU_UPLOAD_TIMEOUT_IN_MILLISECONDS_DEFAULT.defaultValue;
+
 				@ConfigEntry.Category("lod.AdvancedModOptions.Buffers")
 				@ConfigEntry.Gui.Tooltip
 				public static BufferRebuildTimes rebuildTimes = IBuffers.REBUILD_TIMES_DEFAULT;

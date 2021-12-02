@@ -6,6 +6,7 @@
   "mixins": [],
   "client": [
     "MixinMinecraft",
+    "MixinOptionsScreen",
     "MixinWorldRenderer",
     "events.MixinClientLevel",
     "events.MixinMinecraft",

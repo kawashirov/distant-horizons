@@ -24,6 +24,7 @@ import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.fabric.wrappers.DependencySetup;
 
+import com.seibel.lod.fabric.wrappers.config.ConfigGui;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
@@ -59,6 +60,7 @@ public class Main implements ClientModInitializer
 
 	// This loads the mod after minecraft loads which doesn't causes a lot of issues
 	public static void init() {
+//		ConfigGui.init(ModInfo.ID, Config.class);
 		LodCommonMain.startup(null);
 		DependencySetup.createInitialBindings();
 		ClientApi.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);

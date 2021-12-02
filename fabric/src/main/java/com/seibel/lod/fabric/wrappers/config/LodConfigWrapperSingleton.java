@@ -105,60 +105,60 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public HorizontalResolution getDrawResolution()
 				{
-					return Config.Client.Graphics.QualityOption.drawResolution;
+					return Config.Client.Graphics.Quality.drawResolution;
 				}
 				@Override
 				public void setDrawResolution(HorizontalResolution newHorizontalResolution)
 				{
-					Config.Client.Graphics.QualityOption.drawResolution = newHorizontalResolution;
+					Config.Client.Graphics.Quality.drawResolution = newHorizontalResolution;
 				}
 
 
 				@Override
 				public int getLodChunkRenderDistance()
 				{
-					return Config.Client.Graphics.QualityOption.lodChunkRenderDistance;
+					return Config.Client.Graphics.Quality.lodChunkRenderDistance;
 				}
 				@Override
 				public void setLodChunkRenderDistance(int newLodChunkRenderDistance)
 				{
-					Config.Client.Graphics.QualityOption.lodChunkRenderDistance = newLodChunkRenderDistance;
+					Config.Client.Graphics.Quality.lodChunkRenderDistance = newLodChunkRenderDistance;
 				}
 
 
 				@Override
 				public VerticalQuality getVerticalQuality()
 				{
-					return Config.Client.Graphics.QualityOption.verticalQuality;
+					return Config.Client.Graphics.Quality.verticalQuality;
 				}
 				@Override
 				public void setVerticalQuality(VerticalQuality newVerticalQuality)
 				{
-					Config.Client.Graphics.QualityOption.verticalQuality = newVerticalQuality;
+					Config.Client.Graphics.Quality.verticalQuality = newVerticalQuality;
 				}
 
 
 				@Override
 				public HorizontalScale getHorizontalScale()
 				{
-					return Config.Client.Graphics.QualityOption.horizontalScale;
+					return Config.Client.Graphics.Quality.horizontalScale;
 				}
 				@Override
 				public void setHorizontalScale(HorizontalScale newHorizontalScale)
 				{
-					Config.Client.Graphics.QualityOption.horizontalScale = newHorizontalScale;
+					Config.Client.Graphics.Quality.horizontalScale = newHorizontalScale;
 				}
 
 
 				@Override
 				public HorizontalQuality getHorizontalQuality()
 				{
-					return Config.Client.Graphics.QualityOption.horizontalQuality;
+					return Config.Client.Graphics.Quality.horizontalQuality;
 				}
 				@Override
 				public void setHorizontalQuality(HorizontalQuality newHorizontalQuality)
 				{
-					Config.Client.Graphics.QualityOption.horizontalQuality = newHorizontalQuality;
+					Config.Client.Graphics.Quality.horizontalQuality = newHorizontalQuality;
 				}
 			}
 
@@ -168,50 +168,50 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public FogDistance getFogDistance()
 				{
-					return Config.Client.Graphics.FogQualityOption.fogDistance;
+					return Config.Client.Graphics.FogQuality.fogDistance;
 				}
 				@Override
 				public void setFogDistance(FogDistance newFogDistance)
 				{
-					Config.Client.Graphics.FogQualityOption.fogDistance = newFogDistance;
+					Config.Client.Graphics.FogQuality.fogDistance = newFogDistance;
 				}
 
 
 				@Override
 				public FogDrawMode getFogDrawMode()
 				{
-					return Config.Client.Graphics.FogQualityOption.fogDrawMode;
+					return Config.Client.Graphics.FogQuality.fogDrawMode;
 				}
 
 				@Override
 				public void setFogDrawMode(FogDrawMode setFogDrawMode)
 				{
-					Config.Client.Graphics.FogQualityOption.fogDrawMode = setFogDrawMode;
+					Config.Client.Graphics.FogQuality.fogDrawMode = setFogDrawMode;
 				}
 
 
 				@Override
 				public FogColorMode getFogColorMode()
 				{
-					return Config.Client.Graphics.FogQualityOption.fogColorMode;
+					return Config.Client.Graphics.FogQuality.fogColorMode;
 				}
 
 				@Override
 				public void setFogColorMode(FogColorMode newFogColorMode)
 				{
-					Config.Client.Graphics.FogQualityOption.fogColorMode = newFogColorMode;
+					Config.Client.Graphics.FogQuality.fogColorMode = newFogColorMode;
 				}
 
 
 				@Override
 				public boolean getDisableVanillaFog()
 				{
-					return Config.Client.Graphics.FogQualityOption.disableVanillaFog;
+					return Config.Client.Graphics.FogQuality.disableVanillaFog;
 				}
 				@Override
 				public void setDisableVanillaFog(boolean newDisableVanillaFog)
 				{
-					Config.Client.Graphics.FogQualityOption.disableVanillaFog = newDisableVanillaFog;
+					Config.Client.Graphics.FogQuality.disableVanillaFog = newDisableVanillaFog;
 				}
 			}
 
@@ -221,83 +221,60 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public LodTemplate getLodTemplate()
 				{
-					return Config.Client.Graphics.AdvancedGraphicsOption.lodTemplate;
+					return Config.Client.Graphics.AdvancedGraphics.lodTemplate;
 				}
 				@Override
 				public void setLodTemplate(LodTemplate newLodTemplate)
 				{
-					Config.Client.Graphics.AdvancedGraphicsOption.lodTemplate = newLodTemplate;
+					Config.Client.Graphics.AdvancedGraphics.lodTemplate = newLodTemplate;
 				}
 
 
 				@Override
 				public boolean getDisableDirectionalCulling()
 				{
-					return Config.Client.Graphics.AdvancedGraphicsOption.disableDirectionalCulling;
+					return Config.Client.Graphics.AdvancedGraphics.disableDirectionalCulling;
 				}
 				@Override
 				public void setDisableDirectionalCulling(boolean newDisableDirectionalCulling)
 				{
-					Config.Client.Graphics.AdvancedGraphicsOption.disableDirectionalCulling = newDisableDirectionalCulling;
+					Config.Client.Graphics.AdvancedGraphics.disableDirectionalCulling = newDisableDirectionalCulling;
 				}
 
 
 				@Override
 				public boolean getAlwaysDrawAtMaxQuality()
 				{
-					return Config.Client.Graphics.AdvancedGraphicsOption.alwaysDrawAtMaxQuality;
+					return Config.Client.Graphics.AdvancedGraphics.alwaysDrawAtMaxQuality;
 				}
 				@Override
 				public void setAlwaysDrawAtMaxQuality(boolean newAlwaysDrawAtMaxQuality)
 				{
-					Config.Client.Graphics.AdvancedGraphicsOption.alwaysDrawAtMaxQuality = newAlwaysDrawAtMaxQuality;
+					Config.Client.Graphics.AdvancedGraphics.alwaysDrawAtMaxQuality = newAlwaysDrawAtMaxQuality;
 				}
 
 
 				@Override
 				public VanillaOverdraw getVanillaOverdraw()
 				{
-					return Config.Client.Graphics.AdvancedGraphicsOption.vanillaOverdraw;
+					return Config.Client.Graphics.AdvancedGraphics.vanillaOverdraw;
 				}
 				@Override
 				public void setVanillaOverdraw(VanillaOverdraw newVanillaOverdraw)
 				{
-					Config.Client.Graphics.AdvancedGraphicsOption.vanillaOverdraw = newVanillaOverdraw;
-				}
-
-
-				@Override
-				public GpuUploadMethod getGpuUploadMethod()
-				{
-					return Config.Client.Graphics.AdvancedGraphicsOption.gpuUploadMethod;
-				}
-				@Override
-				public void setGpuUploadMethod(GpuUploadMethod newDisableVanillaFog)
-				{
-					Config.Client.Graphics.AdvancedGraphicsOption.gpuUploadMethod = newDisableVanillaFog;
-				}
-
-
-				@Override
-				public int getGpuUploadTimeoutInMilliseconds()
-				{
-					return Config.Client.Graphics.AdvancedGraphicsOption.gpuUploadTimeoutInMilleseconds;
-				}
-				@Override
-				public void setGpuUploadTimeoutInMilliseconds(int newTimeoutInMilliseconds) {
-					Config.Client.Graphics.AdvancedGraphicsOption.gpuUploadTimeoutInMilleseconds = newTimeoutInMilliseconds;
+					Config.Client.Graphics.AdvancedGraphics.vanillaOverdraw = newVanillaOverdraw;
 				}
 
 
 				@Override
 				public boolean getUseExtendedNearClipPlane()
 				{
-					return Config.Client.Graphics.AdvancedGraphicsOption.useExtendedNearClipPlane;
+					return Config.Client.Graphics.AdvancedGraphics.useExtendedNearClipPlane;
 				}
 				@Override
 				public void setUseExtendedNearClipPlane(boolean newUseExtendedNearClipPlane)
 				{
-					Config.Client.Graphics.AdvancedGraphicsOption.useExtendedNearClipPlane = newUseExtendedNearClipPlane;
+					Config.Client.Graphics.AdvancedGraphics.useExtendedNearClipPlane = newUseExtendedNearClipPlane;
 				}
 			}
 		}
@@ -404,24 +381,24 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public int getNumberOfWorldGenerationThreads()
 				{
-					return Config.Client.AdvancedModOptions.Threading.numberOfWorldGenerationThreads;
+					return Config.Client.Advanced.Threading.numberOfWorldGenerationThreads;
 				}
 				@Override
 				public void setNumberOfWorldGenerationThreads(int newNumberOfWorldGenerationThreads)
 				{
-					Config.Client.AdvancedModOptions.Threading.numberOfWorldGenerationThreads = newNumberOfWorldGenerationThreads;
+					Config.Client.Advanced.Threading.numberOfWorldGenerationThreads = newNumberOfWorldGenerationThreads;
 				}
 
 
 				@Override
 				public int getNumberOfBufferBuilderThreads()
 				{
-					return Config.Client.AdvancedModOptions.Threading.numberOfBufferBuilderThreads;
+					return Config.Client.Advanced.Threading.numberOfBufferBuilderThreads;
 				}
 				@Override
 				public void setNumberOfBufferBuilderThreads(int newNumberOfWorldBuilderThreads)
 				{
-					Config.Client.AdvancedModOptions.Threading.numberOfBufferBuilderThreads = newNumberOfWorldBuilderThreads;
+					Config.Client.Advanced.Threading.numberOfBufferBuilderThreads = newNumberOfWorldBuilderThreads;
 				}
 			}
 
@@ -436,51 +413,75 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public boolean getDrawLods()
 				{
-					return Config.Client.AdvancedModOptions.Debugging.drawLods;
+					return Config.Client.Advanced.Debugging.drawLods;
 				}
 				@Override
 				public void setDrawLods(boolean newDrawLods)
 				{
-					Config.Client.AdvancedModOptions.Debugging.drawLods = newDrawLods;
+					Config.Client.Advanced.Debugging.drawLods = newDrawLods;
 				}
 
 
 				@Override
 				public DebugMode getDebugMode()
 				{
-					return Config.Client.AdvancedModOptions.Debugging.debugMode;
+					return Config.Client.Advanced.Debugging.debugMode;
 				}
 				@Override
 				public void setDebugMode(DebugMode newDebugMode)
 				{
-					Config.Client.AdvancedModOptions.Debugging.debugMode = newDebugMode;
+					Config.Client.Advanced.Debugging.debugMode = newDebugMode;
 				}
 
 
 				@Override
 				public boolean getDebugKeybindingsEnabled()
 				{
-					return Config.Client.AdvancedModOptions.Debugging.enableDebugKeybindings;
+					return Config.Client.Advanced.Debugging.enableDebugKeybindings;
 				}
 				@Override
 				public void setDebugKeybindingsEnabled(boolean newEnableDebugKeybindings)
 				{
-					Config.Client.AdvancedModOptions.Debugging.enableDebugKeybindings = newEnableDebugKeybindings;
+					Config.Client.Advanced.Debugging.enableDebugKeybindings = newEnableDebugKeybindings;
 				}
 			}
 
 
 			public static class Buffers implements IBuffers
 			{
+
+				@Override
+				public GpuUploadMethod getGpuUploadMethod()
+				{
+					return Config.Client.Advanced.Buffers.gpuUploadMethod;
+				}
+				@Override
+				public void setGpuUploadMethod(GpuUploadMethod newDisableVanillaFog)
+				{
+					Config.Client.Advanced.Buffers.gpuUploadMethod = newDisableVanillaFog;
+				}
+
+
+				@Override
+				public int getGpuUploadTimeoutInMilliseconds()
+				{
+					return Config.Client.Advanced.Buffers.gpuUploadTimeoutInMilleseconds;
+				}
+				@Override
+				public void setGpuUploadTimeoutInMilliseconds(int newTimeoutInMilliseconds) {
+					Config.Client.Advanced.Buffers.gpuUploadTimeoutInMilleseconds = newTimeoutInMilliseconds;
+				}
+
+
 				@Override
 				public BufferRebuildTimes getRebuildTimes()
 				{
-					return Config.Client.AdvancedModOptions.Buffers.rebuildTimes;
+					return Config.Client.Advanced.Buffers.rebuildTimes;
 				}
 				@Override
 				public void setRebuildTimes(BufferRebuildTimes newBufferRebuildTimes)
 				{
-					Config.Client.AdvancedModOptions.Buffers.rebuildTimes = newBufferRebuildTimes;
+					Config.Client.Advanced.Buffers.rebuildTimes = newBufferRebuildTimes;
 				}
 			}
 		}

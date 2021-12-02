@@ -19,10 +19,27 @@
 
 package com.seibel.lod.forge;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import net.minecraftforge.fml.event.config.ModConfigEvent;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.LogManager;
+
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
 import com.seibel.lod.core.ModInfo;
-import com.seibel.lod.core.enums.config.*;
+import com.seibel.lod.core.enums.config.BlocksToAvoid;
+import com.seibel.lod.core.enums.config.BufferRebuildTimes;
+import com.seibel.lod.core.enums.config.DistanceGenerationMode;
+import com.seibel.lod.core.enums.config.GenerationPriority;
+import com.seibel.lod.core.enums.config.GpuUploadMethod;
+import com.seibel.lod.core.enums.config.HorizontalQuality;
+import com.seibel.lod.core.enums.config.HorizontalResolution;
+import com.seibel.lod.core.enums.config.HorizontalScale;
+import com.seibel.lod.core.enums.config.LodTemplate;
+import com.seibel.lod.core.enums.config.VanillaOverdraw;
+import com.seibel.lod.core.enums.config.VerticalQuality;
 import com.seibel.lod.core.enums.rendering.DebugMode;
 import com.seibel.lod.core.enums.rendering.FogColorMode;
 import com.seibel.lod.core.enums.rendering.FogDistance;
@@ -37,21 +54,17 @@ import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.I
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.IFogQuality;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.IQuality;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IWorldGenerator;
+
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.config.ModConfigEvent;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.LogManager;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import net.minecraftforge.fml.config.ModConfig;
 
 /**
  * This handles any configuration the user has access to.
  * @author Leonardo Amato
  * @author James Seibel
- * @version 11-29-2021
+ * @version 12-1-2021
  */
 @Mod.EventBusSubscriber
 public class ForgeConfig
@@ -60,13 +73,13 @@ public class ForgeConfig
 	// 	-> Client
 	//		|
 	//		|-> Graphics
-	//		|		|-> QualityOption
-	//		|		|-> FogQualityOption
-	//		|		|-> AdvancedGraphicsOption
+	//		|		|-> Quality
+	//		|		|-> FogQuality
+	//		|		|-> AdvancedGraphics
 	//		|
 	//		|-> World Generation
 	//		|
-	//		|-> Advanced Mod Option
+	//		|-> Advanced
 	//				|-> Threads
 	//				|-> Buffers
 	//				|-> Debugging
@@ -77,7 +90,7 @@ public class ForgeConfig
 	{
 		public final Graphics graphics;
 		public final WorldGenerator worldGenerator;
-		public final AdvancedModOptions advancedModOptions;
+		public final Advanced advanced;
 
 
 		//================//
@@ -89,7 +102,7 @@ public class ForgeConfig
 			{
 				graphics = new Graphics(builder);
 				worldGenerator = new WorldGenerator(builder);
-				advancedModOptions = new AdvancedModOptions(builder);
+				advanced = new Advanced(builder);
 			}
 			builder.pop();
 		}
@@ -100,23 +113,23 @@ public class ForgeConfig
 		//==================//
 		public static class Graphics
 		{
-			public final QualityOption qualityOption;
-			public final FogQualityOption fogQuality;
-			public final AdvancedGraphicsOption advancedGraphicsOption;
+			public final Quality quality;
+			public final FogQuality fogQuality;
+			public final AdvancedGraphics advancedGraphics;
 
 			Graphics(ForgeConfigSpec.Builder builder)
 			{
 				builder.comment(IGraphics.DESC).push("Graphics");
 				{
-					qualityOption = new QualityOption(builder);
-					advancedGraphicsOption = new AdvancedGraphicsOption(builder);
-					fogQuality = new FogQualityOption(builder);
+					quality = new Quality(builder);
+					advancedGraphics = new AdvancedGraphics(builder);
+					fogQuality = new FogQuality(builder);
 				}
 				builder.pop();
 			}
 
 
-			public static class QualityOption
+			public static class Quality
 			{
 				public final ForgeConfigSpec.EnumValue<HorizontalResolution> drawResolution;
 				public final ForgeConfigSpec.IntValue lodChunkRenderDistance;
@@ -124,7 +137,7 @@ public class ForgeConfig
 				public final ForgeConfigSpec.EnumValue<HorizontalScale> horizontalScale;
 				public final ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
 
-				QualityOption(ForgeConfigSpec.Builder builder)
+				Quality(ForgeConfigSpec.Builder builder)
 				{
 					builder.comment(IQuality.DESC).push(this.getClass().getSimpleName());
 
@@ -159,14 +172,14 @@ public class ForgeConfig
 			}
 
 
-			public static class FogQualityOption
+			public static class FogQuality
 			{
 				public final ForgeConfigSpec.EnumValue<FogDistance> fogDistance;
 				public final ForgeConfigSpec.EnumValue<FogDrawMode> fogDrawMode;
 				public final ForgeConfigSpec.EnumValue<FogColorMode> fogColorMode;
 				public final ForgeConfigSpec.BooleanValue disableVanillaFog;
 
-				FogQualityOption(ForgeConfigSpec.Builder builder)
+				FogQuality(ForgeConfigSpec.Builder builder)
 				{
 					builder.comment(IFogQuality.DESC).push(this.getClass().getSimpleName());
 
@@ -195,17 +208,15 @@ public class ForgeConfig
 			}
 
 
-			public static class AdvancedGraphicsOption
+			public static class AdvancedGraphics
 			{
 				public final ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
 				public final ForgeConfigSpec.BooleanValue disableDirectionalCulling;
 				public final ForgeConfigSpec.BooleanValue alwaysDrawAtMaxQuality;
 				public final ForgeConfigSpec.EnumValue<VanillaOverdraw> vanillaOverdraw;
-				public final ForgeConfigSpec.EnumValue<GpuUploadMethod> gpuUploadMethod;
-				public final ForgeConfigSpec.IntValue gpuUploadTimeoutInMilleseconds;
 				public final ForgeConfigSpec.BooleanValue useExtendedNearClipPlane;
 
-				AdvancedGraphicsOption(ForgeConfigSpec.Builder builder)
+				AdvancedGraphics(ForgeConfigSpec.Builder builder)
 				{
 					builder.comment(IAdvancedGraphics.DESC).push(this.getClass().getSimpleName());
 
@@ -228,17 +239,6 @@ public class ForgeConfig
 							.comment("\n\n"
 									+ IAdvancedGraphics.VANILLA_OVERDRAW_DESC)
 							.defineEnum("Vanilla Overdraw", IAdvancedGraphics.VANILLA_OVERDRAW_DEFAULT);
-
-					gpuUploadMethod = builder
-							.comment("\n\n"
-									+ IAdvancedGraphics.GPU_UPLOAD_METHOD_DESC)
-							.defineEnum("GPU Upload Method", IAdvancedGraphics.GPU_UPLOAD_METHOD_DEFAULT);
-
-					MinDefaultMax<Integer> minDefaultMax = IAdvancedGraphics.GPU_UPLOAD_TIMEOUT_IN_MILLISECONDS_DEFAULT;
-					gpuUploadTimeoutInMilleseconds = builder
-							.comment("\n\n"
-									+ IAdvancedGraphics.GPU_UPLOAD_TIMEOUT_IN_MILLISECONDS_DESC)
-							.defineInRange("GPU Upload Timeout in Milleseconds", minDefaultMax.defaultValue, minDefaultMax.minValue, minDefaultMax.maxValue);
 
 					// This is a temporary fix (like vanilla overdraw)
 					// hopefully we can remove both once we get individual chunk rendering figured out
@@ -303,16 +303,16 @@ public class ForgeConfig
 
 
 
-		//============================//
-		// AdvancedModOptions Configs //
-		//============================//
-		public static class AdvancedModOptions
+		//==================//
+		// Advanced Configs //
+		//==================//
+		public static class Advanced
 		{
 			public final Threading threading;
 			public final Debugging debugging;
 			public final Buffers buffers;
 
-			public AdvancedModOptions(ForgeConfigSpec.Builder builder)
+			public Advanced(ForgeConfigSpec.Builder builder)
 			{
 				builder.comment(IAdvanced.DESC).push(this.getClass().getSimpleName());
 				{
@@ -387,11 +387,26 @@ public class ForgeConfig
 
 			public static class Buffers
 			{
+
+				public final ForgeConfigSpec.EnumValue<GpuUploadMethod> gpuUploadMethod;
+				public final ForgeConfigSpec.IntValue gpuUploadTimeoutInMilleseconds;
 				public final ForgeConfigSpec.EnumValue<BufferRebuildTimes> rebuildTimes;
 
 				Buffers(ForgeConfigSpec.Builder builder)
 				{
 					builder.comment(IBuffers.DESC).push(this.getClass().getSimpleName());
+
+					gpuUploadMethod = builder
+							.comment("\n\n"
+									+ IBuffers.GPU_UPLOAD_METHOD_DESC)
+							.defineEnum("GPU Upload Method", IBuffers.GPU_UPLOAD_METHOD_DEFAULT);
+
+					MinDefaultMax<Integer> minDefaultMax = IBuffers.GPU_UPLOAD_TIMEOUT_IN_MILLISECONDS_DEFAULT;
+					gpuUploadTimeoutInMilleseconds = builder
+							.comment("\n\n"
+									+ IBuffers.GPU_UPLOAD_TIMEOUT_IN_MILLISECONDS_DESC)
+							.defineInRange("GPU Upload Timeout in Milleseconds", minDefaultMax.defaultValue, minDefaultMax.minValue, minDefaultMax.maxValue);
+
 
 					rebuildTimes = builder
 							.comment("\n\n"
@@ -437,4 +452,3 @@ public class ForgeConfig
 	}
 
 }
-

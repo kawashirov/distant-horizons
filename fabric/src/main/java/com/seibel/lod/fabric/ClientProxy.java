@@ -142,14 +142,14 @@ public class ClientProxy
 	boolean PreDebugToggle = false;
 	boolean PreDrawToggle = false;
 	public void onKeyInput() {
-		if (Config.Client.AdvancedModOptions.Debugging.enableDebugKeybindings)
+		if (Config.Client.Advanced.Debugging.enableDebugKeybindings)
 		{
 			// Only activates when you press the key
 			if (DebugToggle.isDown() && DebugToggle.isDown() != PreDebugToggle)
-				Config.Client.AdvancedModOptions.Debugging.debugMode = Config.Client.AdvancedModOptions.Debugging.debugMode.getNext();
+				Config.Client.Advanced.Debugging.debugMode = Config.Client.Advanced.Debugging.debugMode.getNext();
 
 			if (DrawToggle.isDown() && DrawToggle.isDown() != PreDebugToggle)
-				Config.Client.AdvancedModOptions.Debugging.drawLods = !Config.Client.AdvancedModOptions.Debugging.drawLods;
+				Config.Client.Advanced.Debugging.drawLods = !Config.Client.Advanced.Debugging.drawLods;
 		}
 		PreDebugToggle = DebugToggle.isDown();
 		PreDrawToggle = DrawToggle.isDown();
