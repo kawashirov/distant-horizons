@@ -134,60 +134,60 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public HorizontalResolution getDrawResolution()
 				{
-					return ForgeConfig.CLIENT.graphics.qualityOption.drawResolution.get();
+					return ForgeConfig.CLIENT.graphics.quality.drawResolution.get();
 				}
 				@Override
 				public void setDrawResolution(HorizontalResolution newHorizontalResolution)
 				{
-					ForgeConfig.CLIENT.graphics.qualityOption.drawResolution.set(newHorizontalResolution);
+					ForgeConfig.CLIENT.graphics.quality.drawResolution.set(newHorizontalResolution);
 				}
 				
 				
 				@Override
 				public int getLodChunkRenderDistance()
 				{
-					return ForgeConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.get();
+					return ForgeConfig.CLIENT.graphics.quality.lodChunkRenderDistance.get();
 				}
 				@Override
 				public void setLodChunkRenderDistance(int newLodChunkRenderDistance)
 				{
-					ForgeConfig.CLIENT.graphics.qualityOption.lodChunkRenderDistance.set(newLodChunkRenderDistance);
+					ForgeConfig.CLIENT.graphics.quality.lodChunkRenderDistance.set(newLodChunkRenderDistance);
 				}
 				
 				
 				@Override
 				public VerticalQuality getVerticalQuality()
 				{
-					return ForgeConfig.CLIENT.graphics.qualityOption.verticalQuality.get();
+					return ForgeConfig.CLIENT.graphics.quality.verticalQuality.get();
 				}
 				@Override
 				public void setVerticalQuality(VerticalQuality newVerticalQuality)
 				{
-					ForgeConfig.CLIENT.graphics.qualityOption.verticalQuality.set(newVerticalQuality);
+					ForgeConfig.CLIENT.graphics.quality.verticalQuality.set(newVerticalQuality);
 				}
 				
 				
 				@Override
 				public HorizontalScale getHorizontalScale()
 				{
-					return ForgeConfig.CLIENT.graphics.qualityOption.horizontalScale.get();
+					return ForgeConfig.CLIENT.graphics.quality.horizontalScale.get();
 				}
 				@Override
 				public void setHorizontalScale(HorizontalScale newHorizontalScale)
 				{
-					ForgeConfig.CLIENT.graphics.qualityOption.horizontalScale.set(newHorizontalScale);
+					ForgeConfig.CLIENT.graphics.quality.horizontalScale.set(newHorizontalScale);
 				}
 				
 				
 				@Override
 				public HorizontalQuality getHorizontalQuality()
 				{
-					return ForgeConfig.CLIENT.graphics.qualityOption.horizontalQuality.get();
+					return ForgeConfig.CLIENT.graphics.quality.horizontalQuality.get();
 				}
 				@Override
 				public void setHorizontalQuality(HorizontalQuality newHorizontalQuality)
 				{
-					ForgeConfig.CLIENT.graphics.qualityOption.horizontalQuality.set(newHorizontalQuality);
+					ForgeConfig.CLIENT.graphics.quality.horizontalQuality.set(newHorizontalQuality);
 				}
 			}
 			
@@ -248,84 +248,60 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public LodTemplate getLodTemplate()
 				{
-					return ForgeConfig.CLIENT.graphics.advancedGraphicsOption.lodTemplate.get();
+					return ForgeConfig.CLIENT.graphics.advancedGraphics.lodTemplate.get();
 				}
 				@Override
 				public void setLodTemplate(LodTemplate newLodTemplate)
 				{
-					ForgeConfig.CLIENT.graphics.advancedGraphicsOption.lodTemplate.set(newLodTemplate);
+					ForgeConfig.CLIENT.graphics.advancedGraphics.lodTemplate.set(newLodTemplate);
 				}
 				
 				
 				@Override
 				public boolean getDisableDirectionalCulling()
 				{
-					return ForgeConfig.CLIENT.graphics.advancedGraphicsOption.disableDirectionalCulling.get();
+					return ForgeConfig.CLIENT.graphics.advancedGraphics.disableDirectionalCulling.get();
 				}
 				@Override
 				public void setDisableDirectionalCulling(boolean newDisableDirectionalCulling)
 				{
-					ForgeConfig.CLIENT.graphics.advancedGraphicsOption.disableDirectionalCulling.set(newDisableDirectionalCulling);
+					ForgeConfig.CLIENT.graphics.advancedGraphics.disableDirectionalCulling.set(newDisableDirectionalCulling);
 				}
 				
 				
 				@Override
 				public boolean getAlwaysDrawAtMaxQuality()
 				{
-					return ForgeConfig.CLIENT.graphics.advancedGraphicsOption.alwaysDrawAtMaxQuality.get();
+					return ForgeConfig.CLIENT.graphics.advancedGraphics.alwaysDrawAtMaxQuality.get();
 				}
 				@Override
 				public void setAlwaysDrawAtMaxQuality(boolean newAlwaysDrawAtMaxQuality)
 				{
-					ForgeConfig.CLIENT.graphics.advancedGraphicsOption.alwaysDrawAtMaxQuality.set(newAlwaysDrawAtMaxQuality);
+					ForgeConfig.CLIENT.graphics.advancedGraphics.alwaysDrawAtMaxQuality.set(newAlwaysDrawAtMaxQuality);
 				}
 				
 				
 				@Override
 				public VanillaOverdraw getVanillaOverdraw()
 				{
-					return ForgeConfig.CLIENT.graphics.advancedGraphicsOption.vanillaOverdraw.get();
+					return ForgeConfig.CLIENT.graphics.advancedGraphics.vanillaOverdraw.get();
 				}
 				@Override
 				public void setVanillaOverdraw(VanillaOverdraw newVanillaOverdraw)
 				{
-					ForgeConfig.CLIENT.graphics.advancedGraphicsOption.vanillaOverdraw.set(newVanillaOverdraw);
-				}
-				
-				
-				@Override
-				public GpuUploadMethod getGpuUploadMethod()
-				{
-					return ForgeConfig.CLIENT.graphics.advancedGraphicsOption.gpuUploadMethod.get();
-				}
-				@Override
-				public void setGpuUploadMethod(GpuUploadMethod newDisableVanillaFog)
-				{
-					ForgeConfig.CLIENT.graphics.advancedGraphicsOption.gpuUploadMethod.set(newDisableVanillaFog);
-				}
-				
-				
-				@Override
-				public int getGpuUploadTimeoutInMilliseconds()
-				{
-					return ForgeConfig.CLIENT.graphics.advancedGraphicsOption.gpuUploadTimeoutInMilleseconds.get();
-				}
-				@Override
-				public void setGpuUploadTimeoutInMilliseconds(int newTimeoutInMilliseconds)
-				{
-					ForgeConfig.CLIENT.graphics.advancedGraphicsOption.gpuUploadTimeoutInMilleseconds.set(newTimeoutInMilliseconds);
+					ForgeConfig.CLIENT.graphics.advancedGraphics.vanillaOverdraw.set(newVanillaOverdraw);
 				}
 				
 				
 				@Override
 				public boolean getUseExtendedNearClipPlane()
 				{
-					return ForgeConfig.CLIENT.graphics.advancedGraphicsOption.useExtendedNearClipPlane.get();
+					return ForgeConfig.CLIENT.graphics.advancedGraphics.useExtendedNearClipPlane.get();
 				}
 				@Override
 				public void setUseExtendedNearClipPlane(boolean newUseExtendedNearClipPlane)
 				{
-					ForgeConfig.CLIENT.graphics.advancedGraphicsOption.useExtendedNearClipPlane.set(newUseExtendedNearClipPlane);
+					ForgeConfig.CLIENT.graphics.advancedGraphics.useExtendedNearClipPlane.set(newUseExtendedNearClipPlane);
 				}
 			}
 		}
@@ -432,24 +408,24 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public int getNumberOfWorldGenerationThreads()
 				{
-					return ForgeConfig.CLIENT.advancedModOptions.threading.numberOfWorldGenerationThreads.get();
+					return ForgeConfig.CLIENT.advanced.threading.numberOfWorldGenerationThreads.get();
 				}
 				@Override
 				public void setNumberOfWorldGenerationThreads(int newNumberOfWorldGenerationThreads)
 				{
-					ForgeConfig.CLIENT.advancedModOptions.threading.numberOfWorldGenerationThreads.set(newNumberOfWorldGenerationThreads);
+					ForgeConfig.CLIENT.advanced.threading.numberOfWorldGenerationThreads.set(newNumberOfWorldGenerationThreads);
 				}
 				
 				
 				@Override
 				public int getNumberOfBufferBuilderThreads()
 				{
-					return ForgeConfig.CLIENT.advancedModOptions.threading.numberOfBufferBuilderThreads.get();
+					return ForgeConfig.CLIENT.advanced.threading.numberOfBufferBuilderThreads.get();
 				}
 				@Override
 				public void setNumberOfBufferBuilderThreads(int newNumberOfWorldBuilderThreads)
 				{
-					ForgeConfig.CLIENT.advancedModOptions.threading.numberOfBufferBuilderThreads.set(newNumberOfWorldBuilderThreads);
+					ForgeConfig.CLIENT.advanced.threading.numberOfBufferBuilderThreads.set(newNumberOfWorldBuilderThreads);
 				}
 			}
 			
@@ -464,36 +440,36 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public boolean getDrawLods()
 				{
-					return ForgeConfig.CLIENT.advancedModOptions.debugging.drawLods.get();
+					return ForgeConfig.CLIENT.advanced.debugging.drawLods.get();
 				}
 				@Override
 				public void setDrawLods(boolean newDrawLods)
 				{
-					ForgeConfig.CLIENT.advancedModOptions.debugging.drawLods.set(newDrawLods);
+					ForgeConfig.CLIENT.advanced.debugging.drawLods.set(newDrawLods);
 				}
 				
 				
 				@Override
 				public DebugMode getDebugMode()
 				{
-					return ForgeConfig.CLIENT.advancedModOptions.debugging.debugMode.get();
+					return ForgeConfig.CLIENT.advanced.debugging.debugMode.get();
 				}
 				@Override
 				public void setDebugMode(DebugMode newDebugMode)
 				{
-					ForgeConfig.CLIENT.advancedModOptions.debugging.debugMode.set(newDebugMode);
+					ForgeConfig.CLIENT.advanced.debugging.debugMode.set(newDebugMode);
 				}
 				
 				
 				@Override
 				public boolean getDebugKeybindingsEnabled()
 				{
-					return ForgeConfig.CLIENT.advancedModOptions.debugging.enableDebugKeybindings.get();
+					return ForgeConfig.CLIENT.advanced.debugging.enableDebugKeybindings.get();
 				}
 				@Override
 				public void setDebugKeybindingsEnabled(boolean newEnableDebugKeybindings)
 				{
-					ForgeConfig.CLIENT.advancedModOptions.debugging.enableDebugKeybindings.set(newEnableDebugKeybindings);
+					ForgeConfig.CLIENT.advanced.debugging.enableDebugKeybindings.set(newEnableDebugKeybindings);
 				}
 			}
 			
@@ -501,14 +477,38 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			public static class Buffers implements IBuffers
 			{
 				@Override
+				public GpuUploadMethod getGpuUploadMethod()
+				{
+					return ForgeConfig.CLIENT.advanced.buffers.gpuUploadMethod.get();
+				}
+				@Override
+				public void setGpuUploadMethod(GpuUploadMethod newDisableVanillaFog)
+				{
+					ForgeConfig.CLIENT.advanced.buffers.gpuUploadMethod.set(newDisableVanillaFog);
+				}
+				
+				
+				@Override
+				public int getGpuUploadTimeoutInMilliseconds()
+				{
+					return ForgeConfig.CLIENT.advanced.buffers.gpuUploadTimeoutInMilleseconds.get();
+				}
+				@Override
+				public void setGpuUploadTimeoutInMilliseconds(int newTimeoutInMilliseconds)
+				{
+					ForgeConfig.CLIENT.advanced.buffers.gpuUploadTimeoutInMilleseconds.set(newTimeoutInMilliseconds);
+				}
+				
+				
+				@Override
 				public BufferRebuildTimes getRebuildTimes()
 				{
-					return ForgeConfig.CLIENT.advancedModOptions.buffers.rebuildTimes.get();
+					return ForgeConfig.CLIENT.advanced.buffers.rebuildTimes.get();
 				}
 				@Override
 				public void setRebuildTimes(BufferRebuildTimes newBufferRebuildTimes)
 				{
-					ForgeConfig.CLIENT.advancedModOptions.buffers.rebuildTimes.set(newBufferRebuildTimes);
+					ForgeConfig.CLIENT.advanced.buffers.rebuildTimes.set(newBufferRebuildTimes);
 				}
 			}
 		}	

@@ -60,8 +60,6 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.server.ServerWorld;
 
-import javax.annotation.Nullable;
-
 /**
  * A singleton that wraps the Minecraft class
  * to allow for easier movement between Minecraft versions.
@@ -277,8 +275,7 @@ public class MinecraftWrapper implements IMinecraftWrapper
 		}
 		return WorldWrapper.getWorldWrapper(serverWorld);
 	}
-
-	@Nullable
+	
 	@Override
 	public IWorldWrapper getWrappedClientWorld()
 	{
