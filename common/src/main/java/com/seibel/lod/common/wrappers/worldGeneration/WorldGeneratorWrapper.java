@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
@@ -33,7 +32,9 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.*;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
 import net.minecraft.world.level.levelgen.feature.SnowAndFreezeFeature;
+import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 
 /**
@@ -205,13 +206,14 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
         chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
         chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
         ChunkStatus.NOISE.generate(Executor, serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
-        // TODO[FABRIC]: Find whay this dosnt work
+        // TODO: Find why this dosnt work (seems like the "Executor" is doing this)
         ChunkStatus.SURFACE.generate(Executor, serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
 
         // this feature has been proven to be thread safe,
         // so we will add it
-//		SnowAndFreezeFeature snowFeature = new SnowAndFreezeFeature(NoFeatureConfig.CODEC);
-//		snowFeature.place(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
+        FeaturePlaceContext<NoneFeatureConfiguration> featurePlaceContext = new FeaturePlaceContext<>(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
+        SnowAndFreezeFeature snowFeature = new SnowAndFreezeFeature(NoneFeatureConfiguration.CODEC);
+        snowFeature.place(featurePlaceContext);
 
 
         lodBuilder.generateLodNodeFromChunk(lodDim,  new ChunkWrapper(chunk), new LodBuilderConfig(DistanceGenerationMode.SURFACE));
