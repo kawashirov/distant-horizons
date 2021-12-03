@@ -52,31 +52,45 @@ import java.util.regex.Pattern;
  * Credits to Minenash, TeamMidnightDust & Motschen
  *
  * @author coolGi2007
- * @version 11-28-2021
+ * @version 12-03-2021
  */
 @SuppressWarnings("unchecked")
 public abstract class ConfigGui {
 
     /*
-        Small wiki on how to use this config
+         Small wiki on how to use this config
 
-    Create a new class that extends this class
-    Every time you want to add a button put a @Entry before it and if you want it to be within a range then do @Entry(min = 0, max = 10)
-    MAKE SURE THE VARIABLE YOU ARE PUTTING IN IS A STATIC VARIABLE
+     Create a new class that extends this class
+     Every time you want to add a button put a @Entry before it and if you want it to be within a range then do @Entry(min = 0, max = 10)
+     MAKE SURE THE VARIABLE YOU ARE PUTTING IN IS A STATIC VARIABLE
 
-    If you want to make a config asking if you want coolness then do this
+     If you want to make a config asking if you want coolness then do this
 
-    public class Config extends ConfigGui {
-        @Entry
-        public static bool coolness = false;
-    }
+     public class Config extends ConfigGui {
+         @Entry
+         public static bool coolness = false;
+     }
 
-    If you want a comment then do this
+     If you want a comment then do this
      @Comment public static Comment text1;
 
      FOR THE CONFIG TO SHOW
      you need to have this somewhere in the main class
      ConfigGui.init(ModInfo.ID, Config.class);
+
+     For putting nested classes do @ScreenEntry for example
+
+     public class Config extends ConfigGui {
+        @Entry
+        public static bool coolness = false;
+
+        public static NestedScreen nestedScreen = new NestedScreen();
+        public static void NestedScreen() {
+            @Entry(min = 0, max = 100)
+            public static int howMuchCoolness = 0;
+        }
+     }
+
     */
     private static final Pattern INTEGER_ONLY = Pattern.compile("(-?[0-9]*)");
     private static final Pattern DECIMAL_ONLY = Pattern.compile("-?([\\d]+\\.?[\\d]*|[\\d]*\\.?[\\d]+|\\.)");
@@ -109,10 +123,8 @@ public abstract class ConfigGui {
 
         for (Field field : config.getFields()) {
             EntryInfo info = new EntryInfo();
-            if (field.isAnnotationPresent(Entry.class) || field.isAnnotationPresent(Comment.class))
-                if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) initEntry(modid, field, info);
-                else if (field.isAnnotationPresent(ScreenEntry.class))
-                    if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) initScreen(modid, field, info);
+            if (field.isAnnotationPresent(Entry.class) || field.isAnnotationPresent(Comment.class) || field.isAnnotationPresent(ScreenEntry.class))
+                if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) initClient(modid, field, info);
             if (field.isAnnotationPresent(Entry.class))
                 try {
                     info.defaultValue = field.get(null);
@@ -131,17 +143,21 @@ public abstract class ConfigGui {
         }
     }
     @Environment(EnvType.CLIENT)
-    private static void initEntry(String modid, Field field, EntryInfo info) {
+    private static void initClient(String modid, Field field, EntryInfo info) {
         Class<?> type = field.getType();
         Entry e = field.getAnnotation(Entry.class);
+        ScreenEntry s = field.getAnnotation(ScreenEntry.class);
         info.width = e != null ? e.width() : 0;
         info.field = field;
         info.id = modid;
 
         if (e != null) {
-            if (!e.name().equals("")) info.name = new TranslatableComponent(e.name());
-            if (type == int.class) textField(info, Integer::parseInt, INTEGER_ONLY, e.min(), e.max(), true);
-            else if (type == double.class) textField(info, Double::parseDouble, DECIMAL_ONLY, e.min(), e.max(), false);
+            if (!e.name().equals(""))
+                info.name = new TranslatableComponent(e.name());
+            if (type == int.class)
+                textField(info, Integer::parseInt, INTEGER_ONLY, e.min(), e.max(), true);
+            else if (type == double.class)
+                textField(info, Double::parseDouble, DECIMAL_ONLY, e.min(), e.max(), false);
             else if (type == String.class || type == List.class) {
                 info.max = e.max() == Double.MAX_VALUE ? Integer.MAX_VALUE : (int) e.max();
                 textField(info, String::length, null, Math.min(e.min(), 0), Math.max(e.max(), 1), true);
@@ -160,19 +176,14 @@ public abstract class ConfigGui {
                     button.setMessage(func.apply(info.value));
                 }, func);
             }
+        } else if (s != null) {
+            if (!s.name().equals("")) info.name = new TranslatableComponent(s.name());
+            Function<Object, Component> func = value -> new TextComponent((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
+            info.widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
+                button.setMessage(info.name);
+            }, func);
         }
         entries.add(info);
-    }
-    @Environment(EnvType.CLIENT)
-    public static void initScreen(String modid, Field field, EntryInfo info) {
-//        entries.add(new Button(this.width / 2 - 100, this.height - 28, 200, 20, new TranslatableComponent(modid +".config.title"), (button) ->
-//                Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, modid))));
-//        ButtonEntry.create(
-//                new Button(this.width / 2 - 100, this.height - 28, 200, 20, new TranslatableComponent(modid +".config.title"), (button) ->
-//                        Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, modid))),
-//                new TranslatableComponent(modid +".config.title"),
-//
-//                );
     }
 
     private static void textField(EntryInfo info, Function<String,Number> f, Pattern pattern, double min, double max, boolean cast) {
@@ -442,6 +453,7 @@ public abstract class ConfigGui {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface ScreenEntry {
+        String name() default "";
     }
 
     // Where the @Comment is defined

@@ -35,7 +35,7 @@ public class MixinOptionsScreen extends Screen {
     private void lodconfig$init(CallbackInfo ci) {
         this.addRenderableWidget(new TexturedButtonWidget(
                 // Where the button is on the screen
-                this.width / 2 + 159, this.height / 6 - 12,
+                this.width / 2 - 180, this.height / 6 - 12,
                 // Width and height of the button
                 20, 20,
                 // Offset
