@@ -178,12 +178,12 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				
 				
 				@Override
-				public HorizontalScale getHorizontalScale()
+				public int getHorizontalScale()
 				{
 					return ForgeConfig.CLIENT.graphics.quality.horizontalScale.get();
 				}
 				@Override
-				public void setHorizontalScale(HorizontalScale newHorizontalScale)
+				public void setHorizontalScale(int newHorizontalScale)
 				{
 					ForgeConfig.CLIENT.graphics.quality.horizontalScale.set(newHorizontalScale);
 				}
