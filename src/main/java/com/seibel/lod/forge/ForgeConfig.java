@@ -22,6 +22,7 @@ package com.seibel.lod.forge;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import com.seibel.lod.forge.wrappers.block.BlockPosWrapper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 
@@ -135,6 +136,7 @@ public class ForgeConfig
 				public final ForgeConfigSpec.EnumValue<VerticalQuality> verticalQuality;
 				public final ForgeConfigSpec.EnumValue<HorizontalScale> horizontalScale;
 				public final ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
+				public final ForgeConfigSpec.IntValue drawResolutionOffset;
 				
 				Quality(ForgeConfigSpec.Builder builder)
 				{
@@ -160,7 +162,13 @@ public class ForgeConfig
 									+ IQuality.DRAW_RESOLUTION_DESC)
 							.defineEnum("Block size", IQuality.DRAW_RESOLUTION_DEFAULT);
 					
-					MinDefaultMax<Integer> minDefaultMax = IQuality.LOD_CHUNK_RENDER_DISTANCE_MIN_DEFAULT_MAX;
+					MinDefaultMax<Integer> minDefaultMax = IQuality.DRAW_RESOLUTION_OFFSET_MIN_DEFAULT_MAX;
+					drawResolutionOffset = builder
+							.comment("\n\n"
+									+ IQuality.DRAW_RESOLUTION_OFFSET_DESC)
+							.defineInRange("Block size offset", minDefaultMax.defaultValue, minDefaultMax.minValue, minDefaultMax.maxValue);
+					
+					minDefaultMax = IQuality.LOD_CHUNK_RENDER_DISTANCE_MIN_DEFAULT_MAX;
 					lodChunkRenderDistance = builder
 							.comment("\n\n"
 									+ IQuality.LOD_CHUNK_RENDER_DISTANCE_DESC)
