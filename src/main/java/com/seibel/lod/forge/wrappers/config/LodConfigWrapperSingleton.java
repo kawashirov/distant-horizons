@@ -143,17 +143,6 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				}
 				
 				@Override
-				public Integer getDrawResolutionOffset()
-				{
-					return ForgeConfig.CLIENT.graphics.quality.drawResolutionOffset.get();
-				}
-				@Override
-				public void setDrawResolutionOffset(int newDrawResolutionOffset)
-				{
-					ForgeConfig.CLIENT.graphics.quality.drawResolutionOffset.set(newDrawResolutionOffset);
-				}
-				
-				@Override
 				public int getLodChunkRenderDistance()
 				{
 					return ForgeConfig.CLIENT.graphics.quality.lodChunkRenderDistance.get();

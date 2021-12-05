@@ -136,7 +136,6 @@ public class ForgeConfig
 				public final ForgeConfigSpec.EnumValue<VerticalQuality> verticalQuality;
 				public final ForgeConfigSpec.IntValue horizontalScale;
 				public final ForgeConfigSpec.EnumValue<HorizontalQuality> horizontalQuality;
-				public final ForgeConfigSpec.IntValue drawResolutionOffset;
 				
 				Quality(ForgeConfigSpec.Builder builder)
 				{
@@ -162,12 +161,6 @@ public class ForgeConfig
 							.comment("\n\n"
 									+ IQuality.DRAW_RESOLUTION_DESC)
 							.defineEnum("Block size", IQuality.DRAW_RESOLUTION_DEFAULT);
-					
-					minDefaultMax = IQuality.DRAW_RESOLUTION_OFFSET_MIN_DEFAULT_MAX;
-					drawResolutionOffset = builder
-							.comment("\n\n"
-									+ IQuality.DRAW_RESOLUTION_OFFSET_DESC)
-							.defineInRange("Block size offset", minDefaultMax.defaultValue, minDefaultMax.minValue, minDefaultMax.maxValue);
 					
 					minDefaultMax = IQuality.LOD_CHUNK_RENDER_DISTANCE_MIN_DEFAULT_MAX;
 					lodChunkRenderDistance = builder
