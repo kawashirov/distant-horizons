@@ -31,7 +31,7 @@ dependencies {
     modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
     // Mod Menu
-    modImplementation("com.terraformersmc:modmenu:2.0.14") {
+    modImplementation("com.terraformersmc:modmenu:${rootProject.modmenu_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 

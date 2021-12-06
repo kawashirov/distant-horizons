@@ -139,12 +139,12 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 
 
 				@Override
-				public HorizontalScale getHorizontalScale()
+				public int getHorizontalScale()
 				{
 					return Config.Client.Graphics.Quality.horizontalScale;
 				}
 				@Override
-				public void setHorizontalScale(HorizontalScale newHorizontalScale)
+				public void setHorizontalScale(int newHorizontalScale)
 				{
 					Config.Client.Graphics.Quality.horizontalScale = newHorizontalScale;
 				}

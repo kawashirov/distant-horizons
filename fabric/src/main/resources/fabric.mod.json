@@ -31,7 +31,8 @@
   },
 
   "mixins": [
-    "lod.mixins.json"
+    "lod.mixins.json",
+    "lod.common.mixins.json"
   ],
 
   "accessWidener" : "lod.accesswidener",

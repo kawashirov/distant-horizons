@@ -25,7 +25,8 @@ public class ModMenuIntegration implements ModMenuApi {
     @Override
     public Map<String, ConfigScreenFactory<?>> getProvidedConfigScreenFactories() {
         HashMap<String, ConfigScreenFactory<?>> map = new HashMap<>();
-        Config.configClass.forEach((modid, cClass) -> map.put(modid, parent -> ConfigGui.getScreen(parent, modid, "")));
+        // For now it goes to the client option by default
+        Config.configClass.forEach((modid, cClass) -> map.put(modid, parent -> ConfigGui.getScreen(parent, modid, "client")));
         return map;
     }
 }

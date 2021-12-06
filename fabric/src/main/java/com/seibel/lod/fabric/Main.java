@@ -56,7 +56,7 @@ public class Main implements ClientModInitializer
 
 	// This loads the mod after minecraft loads which doesn't causes a lot of issues
 	public static void init() {
-		initConfig();
+		LodCommonMain.initConfig();
 		LodCommonMain.startup(null);
 		DependencySetup.createInitialBindings();
 		ClientApi.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
@@ -64,20 +64,5 @@ public class Main implements ClientModInitializer
 		// Check if this works
 		client_proxy = new ClientProxy();
 		client_proxy.registerEvents();
-	}
-
-	// TODO[CONFIG]: Find a better way to initialise everything
-	private static void initConfig() {
-		ConfigGui.init(ModInfo.ID, Config.class);
-		ConfigGui.init(ModInfo.ID, Config.Client.class);
-		ConfigGui.init(ModInfo.ID, Config.Client.Graphics.class);
-		ConfigGui.init(ModInfo.ID, Config.Client.Graphics.Quality.class);
-		ConfigGui.init(ModInfo.ID, Config.Client.Graphics.FogQuality.class);
-		ConfigGui.init(ModInfo.ID, Config.Client.Graphics.AdvancedGraphics.class);
-		ConfigGui.init(ModInfo.ID, Config.Client.WorldGenerator.class);
-		ConfigGui.init(ModInfo.ID, Config.Client.Advanced.class);
-		ConfigGui.init(ModInfo.ID, Config.Client.Advanced.Threading.class);
-		ConfigGui.init(ModInfo.ID, Config.Client.Advanced.Debugging.class);
-		ConfigGui.init(ModInfo.ID, Config.Client.Advanced.Buffers.class);
 	}
 }

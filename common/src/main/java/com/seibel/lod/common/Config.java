@@ -100,8 +100,8 @@ public class Config extends ConfigGui
 				public static VerticalQuality verticalQuality = IQuality.VERTICAL_QUALITY_DEFAULT;
 
 				@Category("client.graphics.quality")
-				@Entry
-				public static HorizontalScale horizontalScale = IQuality.HORIZONTAL_SCALE_DEFAULT;
+				@Entry(min = 2, max = 32)
+				public static int horizontalScale = IQuality.HORIZONTAL_SCALE_MIN_DEFAULT_MAX.defaultValue;
 
 				@Category("client.graphics.quality")
 				@Entry
