@@ -8,11 +8,6 @@ accessible field com/mojang/blaze3d/vertex/VertexBuffer indexCount I
 accessible field com/mojang/blaze3d/vertex/VertexBuffer vertextBufferId I
 accessible method net/minecraft/client/renderer/GameRenderer getFov (Lnet/minecraft/client/Camera;FZ)D
 
-# pre-render setup
-accessible field net/minecraft/client/renderer/LevelRenderer renderChunks Lit/unimi/dsi/fastutil/objects/ObjectArrayList;
-accessible class net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo
-accessible field net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo chunk Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk;
-
 # lighting
 accessible field net/minecraft/client/renderer/LightTexture lightPixels Lcom/mojang/blaze3d/platform/NativeImage;
 accessible field net/minecraft/world/level/lighting/LevelLightEngine blockEngine Lnet/minecraft/world/level/lighting/LayerLightEngine;
