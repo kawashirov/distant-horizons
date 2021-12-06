@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "lod",
+  "version": "${version}",
+
+  "name": "Distant Horizons Fabric",
+  "description": "This mod generates and renders simplified terrain beyond the normal view distance, at a low performance cost",
+  "authors": [
+    "coolGi2007",
+    "Ran",
+    "Original LOD Creators"
+  ],
+
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/lod-level-of-detail",
+    "sources": "https://gitlab.com/jeseibel/minecraft-lod-mod/-/tree/1.17.1_fabric",
+    "issues": "https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues"
+  },
+
+  "license": "CC0-1.0",
+  "icon": "icon.png",
+
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.seibel.lod.fabric.Main"
+    ],
+    "modmenu": [
+      "com.seibel.lod.fabric.wrappers.config.ModMenuIntegration"
+    ]
+  },
+
+  "mixins": [
+    "lod.mixins.json",
+    "lod.common.mixins.json"
+  ],
+
+  "accessWidener" : "lod.accesswidener",
+  "depends": {
+    "fabricloader": ">=0.12.6",
+    "fabric": "*",
+    "minecraft": "1.18",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  },
+
+  "custom": {
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://discord.gg/xAB8G4cENx"
+      }
+    }
+  }
+}

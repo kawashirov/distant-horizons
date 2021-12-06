@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.seibel.lod.fabric.mixins",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [],
+  "client": [
+    "MixinMinecraft",
+    "events.MixinClientLevel",
+    "events.MixinMinecraft",
+    "events.MixinServerLevel"
+  ],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
