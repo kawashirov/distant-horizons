@@ -1,9 +1,9 @@
-package com.seibel.lod.fabric.wrappers.config;
+package com.seibel.lod.common.wrappers.config;
 
 import com.seibel.lod.core.enums.config.*;
 import com.seibel.lod.core.enums.rendering.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
-import com.seibel.lod.fabric.Config;
+import com.seibel.lod.common.Config;
 
 /**
  * This holds the config defaults and setters/getters

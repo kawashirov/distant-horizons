@@ -19,8 +19,10 @@
 
 package com.seibel.lod.forge;
 
+import com.seibel.lod.common.Config;
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
+import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
@@ -61,7 +63,9 @@ public class ForgeMain implements LodForgeMethodCaller
 		// make sure the dependencies are set up before the mod needs them
 		LodCommonMain.startup(this);
 		ForgeDependencySetup.createInitialBindings();
-		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ForgeConfig.CLIENT_SPEC);
+
+		initConfig();
+//		ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ForgeConfig.CLIENT_SPEC);
 	}
 	
 	
@@ -93,5 +97,20 @@ public class ForgeMain implements LodForgeMethodCaller
 	@Override
 	public List<BakedQuad> getQuads(MinecraftWrapper mc, Block block, BlockState blockState, Direction direction, Random random) {
 		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
+	}
+
+	// TODO[CONFIG]: Find a better way to initialise everything
+	private static void initConfig() {
+		ConfigGui.init(ModInfo.ID, Config.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Graphics.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Graphics.Quality.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Graphics.FogQuality.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Graphics.AdvancedGraphics.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.WorldGenerator.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Advanced.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Advanced.Threading.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Advanced.Debugging.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Advanced.Buffers.class);
 	}
 }

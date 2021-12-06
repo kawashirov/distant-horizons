@@ -19,16 +19,14 @@
 
 package com.seibel.lod.fabric;
 
+import com.seibel.lod.common.Config;
 import com.seibel.lod.common.LodCommonMain;
+import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.fabric.wrappers.DependencySetup;
 
-import com.seibel.lod.fabric.wrappers.config.ConfigGui;
-import me.shedaniel.autoconfig.AutoConfig;
-import me.shedaniel.autoconfig.serializer.Toml4jConfigSerializer;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 
 /**
  * Initialize and setup the Mod. <br>
@@ -48,8 +46,6 @@ public class Main implements ClientModInitializer
 
 	public static ClientProxy client_proxy;
 
-	public static final Config CONFIG = AutoConfig.register(Config.class, Toml4jConfigSerializer::new).getConfig();
-
 
 	// Do if implements ClientModInitializer
 	// This loads the mod before minecraft loads which causes a lot of issues
@@ -60,7 +56,7 @@ public class Main implements ClientModInitializer
 
 	// This loads the mod after minecraft loads which doesn't causes a lot of issues
 	public static void init() {
-//		ConfigGui.init(ModInfo.ID, Config.class);
+		initConfig();
 		LodCommonMain.startup(null);
 		DependencySetup.createInitialBindings();
 		ClientApi.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
@@ -68,5 +64,20 @@ public class Main implements ClientModInitializer
 		// Check if this works
 		client_proxy = new ClientProxy();
 		client_proxy.registerEvents();
+	}
+
+	// TODO[CONFIG]: Find a better way to initialise everything
+	private static void initConfig() {
+		ConfigGui.init(ModInfo.ID, Config.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Graphics.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Graphics.Quality.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Graphics.FogQuality.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Graphics.AdvancedGraphics.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.WorldGenerator.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Advanced.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Advanced.Threading.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Advanced.Debugging.class);
+		ConfigGui.init(ModInfo.ID, Config.Client.Advanced.Buffers.class);
 	}
 }

@@ -48,42 +48,6 @@ import net.minecraft.client.renderer.RenderType;
 @Mixin(LevelRenderer.class)
 public class MixinWorldRenderer
 {
-	/*
-	private static float previousPartialTicks = 0;
-	
-	@Inject(at = @At("RETURN"), method = "renderClouds")
-	private void renderClouds(PoseStack poseStack, Matrix4f matrix4f, float f, double d, double e, double g, CallbackInfo ci)
-//	private void renderClouds(PoseStack matrixStackIn, float partialTicks, CallbackInfo callback)
-	{
-		// get the partial ticks since renderBlockLayer doesn't
-		// have access to them
-		previousPartialTicks = f;
-	}
-
-	@Inject(at = @At("HEAD"), method = "renderChunkLayer")
-	private void renderChunkLayer(RenderType renderType, PoseStack matrixStackIn, double d, double e, double f, Matrix4f matrix4f, CallbackInfo ci)
-	{
-		// only render if LODs are enabled and
-		// only render before solid blocks
-		if (renderType.equals(RenderType.solid()))
-		{
-			// get MC's current projection matrix
-			float[] mcProjMatrixRaw = new float[16];
-			GL15.glGetFloatv(GL15.GL_PROJECTION_MATRIX, mcProjMatrixRaw);
-			Mat4f mcProjectionMatrix = new Mat4f(mcProjMatrixRaw);
-			// OpenGl outputs their matrices in col,row form instead of row,col
-			// (or maybe vice versa I have no idea :P)
-			mcProjectionMatrix.transpose();
-
-
-			Mat4f mcModelViewMatrix = McObjectConverter.Convert(matrixStackIn.last().pose());
-			
-			ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
-		}
-	}
-	*/
-
-
 	private static float previousPartialTicks = 0;
 
 	@Inject(at = @At("RETURN"), method = "renderClouds(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/math/Matrix4f;FDDD)V")
