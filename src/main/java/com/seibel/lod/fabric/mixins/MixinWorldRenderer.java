@@ -17,19 +17,22 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.seibel.lod.common.mixins;
+package com.seibel.lod.fabric.mixins;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.seibel.lod.common.wrappers.McObjectConverter;
-import com.seibel.lod.core.api.ClientApi;
-import com.seibel.lod.core.objects.math.Mat4f;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.RenderType;
+import org.lwjgl.opengl.GL15;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import com.seibel.lod.core.api.ClientApi;
+import com.seibel.lod.core.objects.math.Mat4f;
+
+import net.minecraft.client.renderer.RenderType;
 
 /**
  * This class is used to mix in my rendering code
@@ -37,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * If this wasn't done, and we used Forge's
  * render last event, the LODs would render on top
  * of the normal terrain.
- * 
+ *
  * @author coolGi2007
  * @author James Seibel
  * @version 11-21-2021
@@ -47,13 +50,13 @@ public class MixinWorldRenderer
 {
 	private static float previousPartialTicks = 0;
 
-	@Inject(at = @At("RETURN"), method = "renderClouds(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/math/Matrix4f;FDDD)V")
-	private void renderClouds(PoseStack modelViewMatrixStack, Matrix4f projectionMatrix, float partialTicks, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, CallbackInfo callback)
-	{
-		// get the partial ticks since renderChunkLayer doesn't
-		// have access to them
-		previousPartialTicks = partialTicks;
-	}
+//	@Inject(at = @At("RETURN"), method = "renderClouds(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/math/Matrix4f;FDDD)V")
+//	private void renderClouds(PoseStack modelViewMatrixStack, Matrix4f projectionMatrix, float partialTicks, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, CallbackInfo callback)
+//	{
+//		// get the partial ticks since renderChunkLayer doesn't
+//		// have access to them
+//		previousPartialTicks = partialTicks;
+//	}
 
 	// HEAD or RETURN
 	@Inject(at = @At("HEAD"), method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V")

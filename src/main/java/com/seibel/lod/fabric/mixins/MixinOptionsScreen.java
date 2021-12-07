@@ -1,4 +1,4 @@
-package com.seibel.lod.common.mixins;
+package com.seibel.lod.fabric.mixins;
 
 import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.common.wrappers.config.TexturedButtonWidget;

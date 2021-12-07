@@ -28,7 +28,7 @@ import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractWorldGeneratorWrapper;
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
 import com.seibel.lod.common.wrappers.chunk.ChunkPosWrapper;
-import com.seibel.lod.fabric.wrappers.worldGeneration.WorldGeneratorWrapper;
+import com.seibel.lod.common.wrappers.worldGeneration.WorldGeneratorWrapper;
 
 /**
  * This handles creating abstract wrapper objects.

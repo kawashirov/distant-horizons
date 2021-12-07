@@ -17,7 +17,7 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.seibel.lod.fabric.wrappers.worldGeneration;
+package com.seibel.lod.common.wrappers.worldGeneration;
 
 import java.util.HashMap;
 import java.util.List;
@@ -60,7 +60,6 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.ticks.LevelTickAccess;
-import net.minecraft.world.ticks.TickAccess;
 import org.jetbrains.annotations.Nullable;
 
 
@@ -70,9 +69,8 @@ import org.jetbrains.annotations.Nullable;
  * of the actual ServerWorld, allowing
  * multithread generation.
  *
- * @author coolGi2007
  * @author James Seibel
- * @version 12-06-2021
+ * @version 7-26-2021
  */
 public class LodServerWorld implements WorldGenLevel
 {

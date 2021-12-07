@@ -1,4 +1,4 @@
-package com.seibel.lod.fabric.wrappers.worldGeneration;
+package com.seibel.lod.common.wrappers.worldGeneration;
 
 import java.util.ConcurrentModificationException;
 import java.util.HashSet;
@@ -24,7 +24,6 @@ import com.seibel.lod.common.wrappers.chunk.ChunkPosWrapper;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
 
-import com.seibel.lod.fabric.wrappers.worldGeneration.LodServerWorld;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;

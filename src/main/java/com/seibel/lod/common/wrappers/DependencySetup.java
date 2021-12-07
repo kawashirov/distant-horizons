@@ -1,7 +1,7 @@
 package com.seibel.lod.common.wrappers;
 
 import com.seibel.lod.common.wrappers.block.BlockColorSingletonWrapper;
-import com.seibel.lod.fabric.wrappers.minecraft.MinecraftRenderWrapper;
+import com.seibel.lod.common.wrappers.minecraft.MinecraftRenderWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
 import com.seibel.lod.core.handlers.IReflectionHandler;
 import com.seibel.lod.core.handlers.ReflectionHandler;

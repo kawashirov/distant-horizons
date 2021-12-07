@@ -1,4 +1,4 @@
-package com.seibel.lod.fabric.wrappers.minecraft;
+package com.seibel.lod.common.wrappers.minecraft;
 
 import java.awt.*;
 import java.util.HashSet;
@@ -142,7 +142,6 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
         // go through every RenderInfo to get the compiled chunks
         LevelRenderer renderer = mc.levelRenderer;
-        // TODO[1.18]: Fix this
         /*
         for (RenderChunkInfo worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
         {

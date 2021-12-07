@@ -96,14 +96,14 @@ public class DetailDistanceUtil
 	
 	public static byte baseInverseFunction(int distance, byte minDetail, boolean useRenderMinDistance)
 	{
-		int detail;
+		byte detail;
 		if (distance == 0
 				|| (distance < minDetailDistance && useRenderMinDistance)
 				|| CONFIG.client().graphics().advancedGraphics().getAlwaysDrawAtMaxQuality())
 			return minDetail;
 		int distanceUnit = CONFIG.client().graphics().quality().getHorizontalScale() * 16;
 		if (CONFIG.client().graphics().quality().getHorizontalQuality() == HorizontalQuality.LOWEST)
-			detail = (byte) distance / distanceUnit;
+			detail = (byte) (distance / distanceUnit);
 		else
 		{
 			double base = CONFIG.client().graphics().quality().getHorizontalQuality().quadraticBase;
