@@ -188,6 +188,7 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 	@Override
 	public void generateSurface(AbstractChunkPosWrapper pos)
 	{
+		//long executeTime = System.currentTimeMillis();
 		List<IChunk> chunkList = new LinkedList<>();
 		ChunkPrimer chunk = new ChunkPrimer(((ChunkPosWrapper) pos).getChunkPos(), UpgradeData.EMPTY);
 		chunkList.add(chunk);
@@ -217,6 +218,8 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 		
 		/*TODO if we want to use Biome utils and terrain utils for overworld
 		 * lodBuilder.generateLodNodeFromChunk(lodDim, pos ,detailLevel, serverWorld.getSeed());*/
+		//executeTime = System.currentTimeMillis() - executeTime;
+		//if (executeTime > 0) ClientApi.LOGGER.info("generateSurface time ms: " + executeTime);
 	}
 	
 	
