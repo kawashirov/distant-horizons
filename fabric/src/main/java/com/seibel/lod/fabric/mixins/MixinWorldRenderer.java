@@ -17,19 +17,22 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.seibel.lod.common.mixins;
+package com.seibel.lod.fabric.mixins;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.seibel.lod.common.wrappers.McObjectConverter;
-import com.seibel.lod.core.api.ClientApi;
-import com.seibel.lod.core.objects.math.Mat4f;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.RenderType;
+import org.lwjgl.opengl.GL15;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import com.seibel.lod.core.api.ClientApi;
+import com.seibel.lod.core.objects.math.Mat4f;
+
+import net.minecraft.client.renderer.RenderType;
 
 /**
  * This class is used to mix in my rendering code
@@ -37,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * If this wasn't done, and we used Forge's
  * render last event, the LODs would render on top
  * of the normal terrain.
- * 
+ *
  * @author coolGi2007
  * @author James Seibel
  * @version 11-21-2021
