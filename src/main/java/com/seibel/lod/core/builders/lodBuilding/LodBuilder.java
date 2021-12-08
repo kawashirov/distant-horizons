@@ -162,6 +162,7 @@ import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
 	public void generateLodNodeFromChunk(LodDimension lodDim, IChunkWrapper chunk, LodBuilderConfig config)
 			throws IllegalArgumentException
 	{
+		//long executeTime = System.currentTimeMillis();
 		if (chunk == null)
 			throw new IllegalArgumentException("generateLodFromChunk given a null chunk");
 		
@@ -209,6 +210,8 @@ import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
 			}
 		}
 		lodDim.updateData(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().getX(), chunk.getPos().getZ());
+		//executeTime = System.currentTimeMillis() - executeTime;
+		//if (executeTime > 0) ClientApi.LOGGER.info("generateLodNodeFromChunk level: " + detailLevel + " time ms: " + executeTime);
 	}
 	
 	/** creates a vertical DataPoint */

@@ -19,7 +19,6 @@
 
 package com.seibel.lod.core.render;
 
-import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -100,17 +99,15 @@ public class GLProxy
 	
 	
 	
-	
+	// May throw IllegalStateException, RuntimeException, FileNotFoundException
 	private GLProxy()
 	{
-		ClientApi.LOGGER.error("Creating " + GLProxy.class.getSimpleName() + "... If this is the last message you see in the log there must have been a OpenGL error.");
+		ClientApi.LOGGER.info("Lod: Creating " + GLProxy.class.getSimpleName() + "...");
 		
 		// getting Minecraft's context has to be done on the render thread,
 		// where the GL context is
 		if (GLFW.glfwGetCurrentContext() == 0L)
 			throw new IllegalStateException(GLProxy.class.getSimpleName() + " was created outside the render thread!");
-		
-		
 		
 		//============================//
 		// create the builder context //
@@ -243,50 +240,45 @@ public class GLProxy
 		
 		
 		// GLProxy creation success
-		ClientApi.LOGGER.error(GLProxy.class.getSimpleName() + " creation successful. OpenGL smiles upon you this day.");
+		ClientApi.LOGGER.info(GLProxy.class.getSimpleName() + " creation completed");
 	}
 	
 	/** Creates all required shaders */
+	// May throw RuntimeException, FileNotFoundException
 	public void createShaderProgram()
 	{
 		LodShader vertexShader = null;
 		LodShader fragmentShader = null;
 		
-		try
-		{
-			// get the shaders from the resource folder
-			vertexShader = LodShader.loadShader(GL20.GL_VERTEX_SHADER, "shaders" + File.separator + "standard.vert", false);
-			fragmentShader = LodShader.loadShader(GL20.GL_FRAGMENT_SHADER, "shaders" + File.separator + "flat_shaded.frag", false);
-			
-			// this can be used when testing shaders, 
-			// since we can't hot swap the files in the resource folder 
-//			vertexShader = LodShader.loadShader(GL20.GL_VERTEX_SHADER, "C:/Users/James Seibel/Desktop/shaders/standard.vert", true);
-//			fragmentShader = LodShader.loadShader(GL20.GL_FRAGMENT_SHADER, "C:/Users/James Seibel/Desktop/shaders/flat_shaded.frag", true);
-			
-			
-			// create the shaders
-			
-			lodShaderProgram = new LodShaderProgram();
-		    
-		    // Attach the compiled shaders to the program
-		    lodShaderProgram.attachShader(vertexShader);
-		    lodShaderProgram.attachShader(fragmentShader);
-		    
-		    // activate the fragment shader output
-		    GL30.glBindFragDataLocation(lodShaderProgram.id, 0, "fragColor");
-		    
-		    // attach the shader program to the OpenGL context
-		    lodShaderProgram.link();
-		    
-		    // after the shaders have been attached to the program
-		    // we don't need their OpenGL references anymore
-		    GL20.glDeleteShader(vertexShader.id);
-		    GL20.glDeleteShader(fragmentShader.id);
-		}
-		catch (Exception e)
-		{
-			ClientApi.LOGGER.error("Unable to compile shaders. Error: " + e.getMessage());
-		}
+		// get the shaders from the resource folder
+		// Use File.separator ONLY if the file is external (not in the resourse), otherwise use "/"
+		vertexShader = LodShader.loadShader(GL20.GL_VERTEX_SHADER, "shaders/standard.vert", false);
+		fragmentShader = LodShader.loadShader(GL20.GL_FRAGMENT_SHADER, "shaders/flat_shaded.frag", false);
+		
+		// this can be used when testing shaders, 
+		// since we can't hot swap the files in the resource folder 
+		// vertexShader = LodShader.loadShader(GL20.GL_VERTEX_SHADER, "C:/Users/James Seibel/Desktop/shaders/standard.vert", true);
+		// fragmentShader = LodShader.loadShader(GL20.GL_FRAGMENT_SHADER, "C:/Users/James Seibel/Desktop/shaders/flat_shaded.frag", true);
+		
+		
+		// create the shaders
+		lodShaderProgram = new LodShaderProgram();
+	    
+	    // Attach the compiled shaders to the program, throws RuntimeException on link error
+	    lodShaderProgram.attachShader(vertexShader);
+	    lodShaderProgram.attachShader(fragmentShader);
+	    
+	    // activate the fragment shader output
+	    GL30.glBindFragDataLocation(lodShaderProgram.id, 0, "fragColor");
+	    
+	    // attach the shader program to the OpenGL context
+	    lodShaderProgram.link();
+	    
+	    // after the shaders have been attached to the program
+	    // we don't need their OpenGL references anymore
+	    GL20.glDeleteShader(vertexShader.id);
+	    GL20.glDeleteShader(fragmentShader.id);
+
 	}
 	
 	

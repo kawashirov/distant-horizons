@@ -73,7 +73,7 @@ public class LodShaderProgram
 	 * Links the shader program to the current OpenGL context.
 	 * @throws Exception Exception if the program failed to link
 	 */
-	public void link() throws Exception
+	public void link()
 	{
 		GL20.glLinkProgram(this.id);
 	    checkLinkStatus();
@@ -83,11 +83,11 @@ public class LodShaderProgram
 	 * Checks if the program was linked successfully.
 	 * @throws Exception if the program failed to link
 	 */
-	public void checkLinkStatus() throws Exception
+	public void checkLinkStatus()
 	{
 		int status = GL20.glGetProgrami(this.id, GL20.GL_LINK_STATUS);
 		if (status != GL20.GL_TRUE)
-			throw new Exception(GL20.glGetProgramInfoLog(this.id));
+			throw new RuntimeException("Shader Link Error. Details: "+GL20.glGetProgramInfoLog(this.id));
 	}
 	
 	

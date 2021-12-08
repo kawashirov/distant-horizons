@@ -21,13 +21,12 @@ package com.seibel.lod.core.render.shader;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import org.lwjgl.opengl.GL20;
-
-import com.seibel.lod.core.api.ClientApi;
 
 /**
  * This object holds a OpenGL reference to a shader
@@ -59,14 +58,23 @@ public class LodShader
 	 * @param absoluteFilePath If false the file path is relative to the resource jar folder.
 	 * @throws Exception if the shader fails to compile 
 	 */
-	public static LodShader loadShader(int type, String path, boolean absoluteFilePath) throws Exception
+	public static LodShader loadShader(int type, String path, boolean absoluteFilePath)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 		
 		try
 		{
 			// open the file
-			InputStream in = absoluteFilePath ? new FileInputStream(path) : LodShader.class.getClassLoader().getResourceAsStream(path);
+			InputStream in;
+			if (absoluteFilePath) {
+				// Throws FileNotFoundException
+				in = new FileInputStream(path); // Note: this should use OS path seperator
+			} else {
+				in = LodShader.class.getClassLoader().getResourceAsStream(path); // Note: path seperator should be '/'
+				if (in == null) {
+					throw new FileNotFoundException("Shader file not found in resource: "+path);
+				}
+			}
 			BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 			
 			// read in the file
@@ -76,7 +84,7 @@ public class LodShader
 		}
 		catch (IOException e)
 		{
-			ClientApi.LOGGER.error("Unable to load shader from file [" + path + "]. Error: " + e.getMessage());
+			throw new RuntimeException("Unable to load shader from file [" + path + "]. Error: " + e.getMessage());
 		}
 		CharSequence shaderFileSource = stringBuilder.toString();
 		
@@ -90,7 +98,7 @@ public class LodShader
 	 * @param source Source of the shader
 	 * @throws Exception if the shader fails to compile
 	 */
-	public static LodShader createShader(int type, CharSequence source) throws Exception
+	public static LodShader createShader(int type, CharSequence source)
 	{
 		LodShader shader = new LodShader(type);
 		GL20.glShaderSource(shader.id, source);
@@ -103,14 +111,14 @@ public class LodShader
 	 * Compiles the shader and checks its status afterwards.
 	 * @throws Exception if the shader fails to compile
 	 */
-	public void compile() throws Exception
+	public void compile()
 	{
 		GL20.glCompileShader(id);
 		
 		// check if the shader compiled
 		int status = GL20.glGetShaderi(id, GL20.GL_COMPILE_STATUS);
 		if (status != GL20.GL_TRUE)
-			throw new Exception(GL20.glGetShaderInfoLog(id));
+			throw new RuntimeException("Shader compiler error. Details: "+GL20.glGetShaderInfoLog(id));
 	}
 	
 }
