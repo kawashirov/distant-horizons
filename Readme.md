@@ -7,8 +7,6 @@ allowing for an increased view distance without harming performance.
 Or in other words: this mod lets you see farther without turning your game into a slide show.\
 If you want to see a quick demo, check out a video covering the mod here:
 
-# WARNING: This is a very early version of the 1.18 version, EXPECT BUGS
-
 <a href="https://www.youtube.com/watch?v=H2tnvEVbO1c" target="_blank">![Minecraft Level Of Detail (LOD) mod - Alpha 1.5](https://i.ytimg.com/vi_webp/H2tnvEVbO1c/mqdefault.webp)</a>
 
 Fabric version: 0.12.6\

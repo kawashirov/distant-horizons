@@ -1,0 +1,107 @@
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.0"
+}
+
+loom {
+    accessWidenerPath.set(project(":common").file("src/main/resources/lod.accesswidener"))
+
+    forge {
+        convertAccessWideners.set(true)
+        extraAccessWideners.add("lod.accesswidener")
+        mixinConfigs("lod.mixins.json")
+    }
+}
+
+architectury {
+    platformSetupLoomIde()
+    forge()
+}
+
+configurations {
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentForge.extendsFrom common
+}
+
+dependencies {
+    forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
+
+    common(project(path: ":common", configuration: "namedElements")) { transitive false }
+    shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+
+    implementation("com.moandjiezana.toml:toml4j:${rootProject.toml_version}")
+    forgeDependencies("com.moandjiezana.toml:toml4j:${rootProject.toml_version}") {
+        exclude(module: "gson")
+    }
+
+//    forgeDependencies(project(":core")) { transitive false }
+
+    forgeDependencies('org.tukaani:xz:1.9')
+    forgeDependencies('org.apache.commons:commons-compress:1.21')
+    shadowMe 'org.tukaani:xz:1.9'
+    shadowMe 'org.apache.commons:commons-compress:1.21'
+}
+
+task copyCoreResources(type: Copy) {
+    from fileTree(project(":core").file("src/main/resources"))
+    into file("build/resources/main")
+}
+
+task copyCommonResources(type: Copy) {
+    from fileTree(project(":common").file("src/main/resources"))
+    into file("build/resources/main")
+}
+
+processResources {
+    dependsOn(copyCoreResources)
+    dependsOn(copyCommonResources)
+}
+
+shadowJar {
+    dependencies {
+        exclude(dependency("net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"))
+    }
+    exclude "fabric.mod.json"
+    configurations = [project.configurations.shadowMe]
+    relocate 'org.tukaani', 'shaded.tukaani'
+    relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
+    relocate 'com.moandjiezana.toml', 'shaded.moandjiezana.toml'
+
+    classifier "dev-shadow"
+}
+
+remapJar {
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    classifier null
+}
+
+jar {
+    classifier "dev"
+}
+
+sourcesJar {
+    def commonSources = project(":common").sourcesJar
+    dependsOn commonSources
+    from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
+}
+
+publishing {
+    publications {
+        mavenForge(MavenPublication) {
+            artifactId = rootProject.archives_base_name + "-" + project.name
+            from components.java
+        }
+    }
+
+    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+    repositories {
+        // Add repositories to publish to here.
+    }
+}
