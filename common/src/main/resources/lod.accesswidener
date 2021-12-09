@@ -32,5 +32,4 @@ accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$Anima
 extendable class com/mojang/math/Matrix4f
 
 # hacky stuff
-mutable field Lnet/minecraft/world/level/chunk/PalettedContainer traces Lnet/minecraft/util/DebugBuffer;
 mutable field Lnet/minecraft/world/level/chunk/PalettedContainer lock Ljava/util/concurrent/Semaphore;
