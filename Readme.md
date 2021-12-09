@@ -29,15 +29,14 @@ http://mcforge.readthedocs.io/en/latest/gettingstarted/
 * Any Java IDE, for example Intellij IDEA and Eclipse. You may also use any other code editors, such as Visual Studio Code.
 
 **If using Ecplise:**
-1. run the command: `./gradlew geneclipseruns`
-2. run the command: `./gradlew eclipse`
-3. Make sure eclipse has the JDK 16 installed. (This is needed so that eclipse can run minecraft)
-4. Import the project into eclipse
+not supported...
 
 **If using IntelliJ:**
 1. open IDEA and import the build.gradle
-2. run the command: `./gradlew genIntellijRuns`
-3. refresh the Gradle project in IDEA if required
+2. refresh the Gradle project in IDEA if required
+3. wait for the minecraft jars to generate
+
+Side note: invalidate caches and restart if required
 
 ## Compiling
 
