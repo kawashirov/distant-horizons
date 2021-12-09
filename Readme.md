@@ -9,12 +9,13 @@ If you want to see a quick demo, check out a video covering the mod here:
 
 <a href="https://www.youtube.com/watch?v=H2tnvEVbO1c" target="_blank">![Minecraft Level Of Detail (LOD) mod - Alpha 1.5](https://i.ytimg.com/vi_webp/H2tnvEVbO1c/mqdefault.webp)</a>
 
+Forge version: 38.0.14\
 Fabric version: 0.12.6\
 Fabric API version: 0.43.1+1.18
 
 Notes:\
 This version has been confirmed to work in Eclipse and Retail Minecraft.\
-(Retail running fabric version 1.18-0.12.6)
+(Retail running forge version 1.18-38.0.14 and fabric version 1.18-0.12.6)
 
 
 ## source code installation
@@ -43,13 +44,13 @@ https://fabricmc.net/wiki/tutorial:setup
 **Using GUI**
 1. open a command line in the project folder
 2. run the command: `./gradlew build`
-3. the compiled jar file will be in the folder `build/libs/`
+3. the compiled jar file will be in the folder `fabric/build/libs/` and `forge/build/libs/`
 
 **If in terminal:**
-1. `git clone -b 1.18 https://gitlab.com/jeseibel/minecraft-lod-mod.git`
+1. `git clone -b 1.18 --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
 2. `cd minecraft-lod-mod`
 3. `./gradlew build` (must be run as root on linux)
-4. The build should be in `build/libs/`
+4. The build should be in `fabric/build/libs/` and `forge/build/libs/`
 
 
 ## Other commands
