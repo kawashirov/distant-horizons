@@ -35,6 +35,11 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
+    implementation("com.moandjiezana.toml:toml4j:${rootProject.toml_version}")
+    shadowMe("com.moandjiezana.toml:toml4j:${rootProject.toml_version}") {
+        exclude(module: "gson")
+    }
+
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
@@ -83,6 +88,7 @@ shadowJar {
     configurations = [project.configurations.shadowMe]
     relocate 'org.tukaani', 'shaded.tukaani'
     relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
+    relocate 'com.moandjiezana.toml', 'shaded.moandjiezana.toml'
 
     classifier "dev-shadow"
 }

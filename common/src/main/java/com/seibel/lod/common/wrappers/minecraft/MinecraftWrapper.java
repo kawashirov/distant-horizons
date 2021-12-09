@@ -73,7 +73,7 @@ public class MinecraftWrapper implements IMinecraftWrapper
 {
     public static final MinecraftWrapper INSTANCE = new MinecraftWrapper();
 
-    private final Minecraft mc = Minecraft.getInstance();
+    public final Minecraft mc = Minecraft.getInstance();
 
     /**
      * The lightmap for the current:
@@ -178,31 +178,36 @@ public class MinecraftWrapper implements IMinecraftWrapper
     /**
      * Returns the color int at the given pixel coordinates
      * from the current lightmap.
-     * @param u x location in texture space
-     * @param v z location in texture space
+     * @param blockLight x location in texture space
+     * @param skyLight z location in texture space
      */
     @Override
-    public int getColorIntFromLightMap(int u, int v)
+    public int getColorIntFromLightMap(int blockLight, int skyLight)
     {
         if (lightMap == null)
         {
+            sendChatMessage("new");
             // make sure the lightMap is up-to-date
             getCurrentLightMap();
         }
 
-        return lightMap.getPixelRGBA(u, v);
+        return lightMap.getPixelRGBA(blockLight, skyLight);
     }
 
     /**
      * Returns the Color at the given pixel coordinates
      * from the current lightmap.
-     * @param u x location in texture space
-     * @param v z location in texture space
+     * @param blockLight x location in texture space
+     * @param skyLight z location in texture space
      */
     @Override
-    public Color getColorFromLightMap(int u, int v)
-    {
-        return LodUtil.intToColor(lightMap.getPixelRGBA(u, v));
+    public Color getColorFromLightMap(int blockLight, int skyLight) {
+        if (lightMap == null) {
+            // make sure the lightMap is up-to-date
+            getCurrentLightMap();
+        }
+
+        return LodUtil.intToColor(lightMap.getPixelRGBA(blockLight, skyLight));
     }
 
 

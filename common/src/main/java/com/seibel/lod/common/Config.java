@@ -52,37 +52,37 @@ public class Config extends ConfigGui
 	// Since the original config system uses forge stuff, that means we have to rewrite the whole config system
 
 	@ScreenEntry(to = "client")
-	public static ScreenEntry client;
+	public static Client client;
 
 
 	public static class Client
 	{
 		@Category("client")
 		@ScreenEntry(to = "graphics")
-		public static ScreenEntry graphics;
+		public static Graphics graphics;
 
 		@Category("client")
 		@ScreenEntry(to = "worldGenerator")
-		public static ScreenEntry worldGenerator;
+		public static WorldGenerator worldGenerator;
 
 		@Category("client")
 		@ScreenEntry(to = "advanced")
-		public static ScreenEntry advanced;
+		public static Advanced advanced;
 
 
 		public static class Graphics
 		{
 			@Category("client.graphics")
 			@ScreenEntry(to = "quality")
-			public static ScreenEntry quality;
+			public static Quality quality;
 
 			@Category("client.graphics")
 			@ScreenEntry(to = "fogQuality")
-			public static ScreenEntry fogQuality;
+			public static FogQuality fogQuality;
 
 			@Category("client.graphics")
 			@ScreenEntry(to = "advancedGraphics")
-			public static ScreenEntry advancedGraphics;
+			public static AdvancedGraphics advancedGraphics;
 
 
 			public static class Quality
@@ -179,15 +179,15 @@ public class Config extends ConfigGui
 		{
 			@Category("client.advanced")
 			@ScreenEntry(to = "threading")
-			public static ScreenEntry threading;
+			public static Threading threading;
 
 			@Category("client.advanced")
 			@ScreenEntry(to = "debugging")
-			public static ScreenEntry debugging;
+			public static Debugging debugging;
 
 			@Category("client.advanced")
 			@ScreenEntry(to = "buffers")
-			public static ScreenEntry buffers;
+			public static Buffers buffers;
 
 
 			public static class Threading

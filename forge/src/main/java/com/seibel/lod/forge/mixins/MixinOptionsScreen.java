@@ -41,7 +41,8 @@ public class MixinOptionsScreen extends Screen {
                 // Some textuary stuff
                 20, ICON_TEXTURE, 20, 40,
                 // Create the button and tell it where to go
-                (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, ModInfo.ID, "")),
+                // For now it goes to the client option by default
+                (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, ModInfo.ID, "client")),
                 // Add a title to the screen
                 new TranslatableComponent("text.autoconfig." + ModInfo.ID + ".title")));
     }

@@ -2,13 +2,10 @@ package com.seibel.lod.common.wrappers.config;
 
 import com.google.gson.ExclusionStrategy;
 import com.google.gson.FieldAttributes;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.moandjiezana.toml.Toml;
+import com.moandjiezana.toml.TomlWriter;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.seibel.lod.core.ModInfo;
-//import net.fabricmc.api.EnvType;
-//import net.fabricmc.api.Environment;
-//import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -26,6 +23,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -39,15 +38,14 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-
 /**
- * which is based upon TinyConfig
+ * Based upon TinyConfig
  * https://github.com/Minenash/TinyConfig
  *
  * Credits to Motschen
  *
  * @author coolGi2007
- * @version 12-06-2021
+ * @version 12-09-2021
  */
 // Everything required is packed into 1 class, so it is easier to copy
 // This config should work for both Fabric and Forge as long as you use Mojang mappings
@@ -106,6 +104,13 @@ public abstract class ConfigGui {
      To make a textured button to the options screen look in the mixins/MixinOptionsScreen class and TexturedButtonWidget class
      Remember to add the MixinOptionsScreen to your ModID.mixins.json
     */
+
+    /*
+            This is a small to do list for the config
+
+        Make config save
+        Add a way to add min and max from another variable
+     */
     private static final Pattern INTEGER_ONLY = Pattern.compile("(-?[0-9]*)");
     private static final Pattern DECIMAL_ONLY = Pattern.compile("-?([\\d]+\\.?[\\d]*|[\\d]*\\.?[\\d]+|\\.)");
 
@@ -114,14 +119,14 @@ public abstract class ConfigGui {
     protected static class EntryInfo {
         Field field;
         Object widget;
-        int width;
+        int width = 0;
         int max;
         Map.Entry<EditBox, Component> error;
         Object defaultValue;
         Object value;
         String tempValue;
         boolean inLimits = true;
-        String id;
+        String id;              // ModID
         TranslatableComponent name;
         int index;
         boolean button = false; // This asks if it is a button to goto a new screen
@@ -132,28 +137,29 @@ public abstract class ConfigGui {
     public static final Map<String,Class<?>> configClass = new HashMap<>();
     private static Path path;
 
-    private static final Gson gson = new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT).excludeFieldsWithModifiers(Modifier.PRIVATE).addSerializationExclusionStrategy(new HiddenAnnotationExclusionStrategy()).setPrettyPrinting().create();
-
     public static void init(String modid, Class<?> config) {
-        path = Minecraft.getInstance().gameDirectory.toPath().resolve("config").resolve(modid + ".json");
+        path = Minecraft.getInstance().gameDirectory.toPath().resolve("config").resolve(modid + ".toml");
         configClass.put(modid, config);
 
         for (Field field : config.getFields()) {
             EntryInfo info = new EntryInfo();
             if (field.isAnnotationPresent(Entry.class) || field.isAnnotationPresent(Comment.class) || field.isAnnotationPresent(ScreenEntry.class))
-                // TODO: Fix the check for client/server
+                // TODO[CONFIG]: Fix the check for client/server
 //                if (Minecraft.getInstance().getEnvironmentType() == EnvType.CLIENT)
                     initClient(modid, field, info);
             if (field.isAnnotationPresent(Entry.class))
                 try {
                     info.defaultValue = field.get(null);
                 } catch (IllegalAccessException ignored) {}
+            if (field.isAnnotationPresent(ScreenEntry.class)) {
+                ConfigGui.init(modid, field.getType());
+            }
+
         }
 
         // File saving stuff
-        // TODO[CONFIG]: Change to .toml
         try {
-            gson.fromJson(Files.newBufferedReader(path), config);
+            new Toml().read(Files.newBufferedReader(path)).to(config);
         }   catch (Exception e) {
             write(modid);
         }
@@ -168,11 +174,15 @@ public abstract class ConfigGui {
         }
     }
     private static void initClient(String modid, Field field, EntryInfo info) {
+        // This adds the buttons to the queue to be rendered
         Class<?> type = field.getType();
         Category c = field.getAnnotation(Category.class);
         Entry e = field.getAnnotation(Entry.class);
         ScreenEntry s = field.getAnnotation(ScreenEntry.class);
-        info.width = e != null ? e.width() : 0;
+        if (e!=null)
+            info.width = e.width();
+        else if (s!=null)
+            info.width = s.width();
         info.field = field;
         info.id = modid;
         info.category = c != null ? c.value() : "";
@@ -180,20 +190,20 @@ public abstract class ConfigGui {
         if (e != null) {
             if (!e.name().equals(""))
                 info.name = new TranslatableComponent(e.name());
-            if (type == int.class)
+            if (type == int.class) // For int
                 textField(info, Integer::parseInt, INTEGER_ONLY, e.min(), e.max(), true);
-            else if (type == double.class)
+            else if (type == double.class) // For double
                 textField(info, Double::parseDouble, DECIMAL_ONLY, e.min(), e.max(), false);
-            else if (type == String.class || type == List.class) {
+            else if (type == String.class || type == List.class) {  // For string or list
                 info.max = e.max() == Double.MAX_VALUE ? Integer.MAX_VALUE : (int) e.max();
                 textField(info, String::length, null, Math.min(e.min(), 0), Math.max(e.max(), 1), true);
-            } else if (type == boolean.class) {
+            } else if (type == boolean.class) { // For boolean
                 Function<Object, Component> func = value -> new TextComponent((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
                 info.widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
                     info.value = !(Boolean) info.value;
                     button.setMessage(func.apply(info.value));
                 }, func);
-            } else if (type.isEnum()) {
+            } else if (type.isEnum()) { // For enum
                 List<?> values = Arrays.asList(field.getType().getEnumConstants());
                 Function<Object, Component> func = value -> new TranslatableComponent(modid + ".config." + "enum." + type.getSimpleName() + "." + info.value.toString());
                 info.widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
@@ -244,13 +254,13 @@ public abstract class ConfigGui {
         };
     }
 
-    // Creates the modid.json
+    // Creates the modid.toml
     public static void write(String modid) {
-        path = Minecraft.getInstance().gameDirectory.toPath().resolve("config").resolve(modid + ".json");
+        path = Minecraft.getInstance().gameDirectory.toPath().resolve("config").resolve(modid + ".toml");
         try {
             if (!Files.exists(path))
                 Files.createFile(path);
-            Files.write(path, gson.toJson(configClass.get(modid).getDeclaredConstructor().newInstance()).getBytes());
+            new TomlWriter().write(configClass.get(modid).getDeclaredConstructor().newInstance(), path.toFile());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -284,7 +294,7 @@ public abstract class ConfigGui {
         }
         private void loadValues() {
             try {
-                gson.fromJson(Files.newBufferedReader(path), configClass.get(modid));
+                new Toml().read(Files.newBufferedReader(path)).to(configClass.get(modid));
             }   catch (Exception e) {
                 write(modid);
             }
@@ -368,7 +378,7 @@ public abstract class ConfigGui {
                         widget.setFilter(processor);
                         this.list.addButton(widget, resetButton, null, name);
                     } else if (info.button) {
-                        Button widget = new Button(this.width / 2 - 100, this.height - 28, 200, 20, name, (button -> {
+                        Button widget = new Button(this.width / 2 - info.width, this.height - 28, info.width*2, 20, name, (button -> {
                             Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, ModInfo.ID, info.gotoScreen));
                         }));
                         this.list.addButton(widget, null, null, null);
@@ -493,6 +503,7 @@ public abstract class ConfigGui {
     public @interface ScreenEntry {
         String to();
         String name() default "";
+        int width() default 100;
     }
 
     // Where the @Category is defined

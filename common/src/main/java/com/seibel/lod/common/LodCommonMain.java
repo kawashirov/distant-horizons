@@ -23,18 +23,7 @@ public class LodCommonMain {
     }
 
 
-    // TODO[CONFIG]: Find a better way to initialise everything
     public static void initConfig() {
         ConfigGui.init(ModInfo.ID, Config.class);
-        ConfigGui.init(ModInfo.ID, Config.Client.class);
-        ConfigGui.init(ModInfo.ID, Config.Client.Graphics.class);
-        ConfigGui.init(ModInfo.ID, Config.Client.Graphics.Quality.class);
-        ConfigGui.init(ModInfo.ID, Config.Client.Graphics.FogQuality.class);
-        ConfigGui.init(ModInfo.ID, Config.Client.Graphics.AdvancedGraphics.class);
-        ConfigGui.init(ModInfo.ID, Config.Client.WorldGenerator.class);
-        ConfigGui.init(ModInfo.ID, Config.Client.Advanced.class);
-        ConfigGui.init(ModInfo.ID, Config.Client.Advanced.Threading.class);
-        ConfigGui.init(ModInfo.ID, Config.Client.Advanced.Debugging.class);
-        ConfigGui.init(ModInfo.ID, Config.Client.Advanced.Buffers.class);
     }
 }
