@@ -247,6 +247,11 @@ public class BlockColorWrapper implements IBlockColorWrapper
     }
 
     @Override
+    public String getName() {
+        return block.getName().toString();
+    }
+
+    @Override
     public int getColor()
     {
         return color;

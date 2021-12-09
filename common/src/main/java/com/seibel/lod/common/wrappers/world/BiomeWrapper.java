@@ -121,6 +121,11 @@ public class BiomeWrapper implements IBiomeWrapper
     }
 
     @Override
+    public String getName() {
+        return biome.toString();
+    }
+
+    @Override
     public int getGrassTint(int x, int z)
     {
         return biome.getGrassColor(x, z);
