@@ -235,7 +235,12 @@ public class BlockColorWrapper implements IBlockColorWrapper
     {
         return block == Blocks.WATER;
     }
-
+    
+    @Override
+    public String getName()
+    {
+        return block.getName().toString();
+    }
 //--------------//
 //Colors getters//
 //--------------//
