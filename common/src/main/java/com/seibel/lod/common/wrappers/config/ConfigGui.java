@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
  * Credits to Motschen
  *
  * @author coolGi2007
- * @version 12-06-2021
+ * @version 12-09-2021
  */
 // Everything required is packed into 1 class, so it is easier to copy
 // This config should work for both Fabric and Forge as long as you use Mojang mappings
