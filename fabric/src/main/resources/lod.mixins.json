@@ -3,7 +3,9 @@
   "minVersion": "0.8",
   "package": "com.seibel.lod.fabric.mixins",
   "compatibilityLevel": "JAVA_16",
-  "mixins": [],
+  "mixins": [
+    "unsafe.MixinPalettedContainer"
+  ],
   "client": [
     "MixinMinecraft",
     "MixinOptionsScreen",

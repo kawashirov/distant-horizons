@@ -206,14 +206,16 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
         chunk.setStatus(ChunkStatus.STRUCTURE_REFERENCES);
         chunkGen.createBiomes(serverWorld.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunk);
         ChunkStatus.NOISE.generate(Executor, serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
-        // TODO: Find why this dosnt work (seems like the "Executor" is doing this)
+        // TODO: Find why this doesn't work (seems like the "Executor" is doing this)
         ChunkStatus.SURFACE.generate(Executor, serverWorld, chunkGen, templateManager, lightEngine, null, chunkList);
 
         // this feature has been proven to be thread safe,
         // so we will add it
-        FeaturePlaceContext<NoneFeatureConfiguration> featurePlaceContext = new FeaturePlaceContext<>(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
-        SnowAndFreezeFeature snowFeature = new SnowAndFreezeFeature(NoneFeatureConfiguration.CODEC);
-        snowFeature.place(featurePlaceContext);
+
+        // TODO: Find why this doesn't work
+//        FeaturePlaceContext<NoneFeatureConfiguration> featurePlaceContext = new FeaturePlaceContext<>(lodServerWorld, chunkGen, serverWorld.random, chunk.getPos().getWorldPosition(), null);
+//        SnowAndFreezeFeature snowFeature = new SnowAndFreezeFeature(NoneFeatureConfiguration.CODEC);
+//        snowFeature.place(featurePlaceContext);
 
 
         lodBuilder.generateLodNodeFromChunk(lodDim,  new ChunkWrapper(chunk), new LodBuilderConfig(DistanceGenerationMode.SURFACE));
