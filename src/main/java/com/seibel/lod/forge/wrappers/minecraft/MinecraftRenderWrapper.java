@@ -202,9 +202,9 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 //							(0b11111111 << 24); // blue
 				
 				int col = 
-						((c.getRed() & 0xFF) << 16) | // red
+						((c.getRed() & 0xFF) << 16) | // blue
 						((c.getGreen() & 0xFF) << 8) | // green
-						((c.getBlue() & 0xFF)) | // blue
+						((c.getBlue() & 0xFF)) | // red
 						((c.getAlpha() & 0xFF) << 24); // alpha
 				
 				// 2D array stored in a 1D array.
