@@ -29,6 +29,11 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
+    implementation("com.moandjiezana.toml:toml4j:${rootProject.toml_version}")
+    forgeDependencies("com.moandjiezana.toml:toml4j:${rootProject.toml_version}") {
+        exclude(module: "gson")
+    }
+
 //    forgeDependencies(project(":core")) { transitive false }
 
     forgeDependencies('org.tukaani:xz:1.9')
@@ -60,6 +65,7 @@ shadowJar {
     configurations = [project.configurations.shadowMe]
     relocate 'org.tukaani', 'shaded.tukaani'
     relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
+    relocate 'com.moandjiezana.toml', 'shaded.moandjiezana.toml'
 
     classifier "dev-shadow"
 }

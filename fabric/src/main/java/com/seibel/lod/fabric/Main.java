@@ -42,8 +42,6 @@ public class Main implements ClientModInitializer
 	// This is a client mod so it should implement ClientModInitializer and in fabric.mod.json it should have "environment": "client"
 	// Once it works on servers change the implement to ModInitializer and in fabric.mod.json it should be "environment": "*"
 
-	public static Main instance;
-
 	public static ClientProxy client_proxy;
 
 

@@ -116,9 +116,5 @@
   "lod.config.enum.GpuUploadMethod.DATA": "Data",
   "lod.config.enum.BufferRebuildTimes.FREQUENT": "Frequent",
   "lod.config.enum.BufferRebuildTimes.NORMAL": "Normal",
-  "lod.config.enum.BufferRebuildTimes.RARE": "Rare",
-  "toast.lod.title": "Distant Horizons",
-  "key.lod.category": "Distant Horizons",
-  "key.lod.DebugToggle": "Debug toggle",
-  "key.lod.DrawToggle": "Draw toggle"
+  "lod.config.enum.BufferRebuildTimes.RARE": "Rare"
 }

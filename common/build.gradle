@@ -27,3 +27,10 @@ publishing {
         // Add repositories to publish to here.
     }
 }
+
+dependencies {
+    implementation("com.moandjiezana.toml:toml4j:${rootProject.toml_version}")
+    shadowMe("com.moandjiezana.toml:toml4j:${rootProject.toml_version}") {
+        exclude(module: "gson")
+    }
+}
