@@ -241,6 +241,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
     {
         return block.getName().toString();
     }
+
 //--------------//
 //Colors getters//
 //--------------//
