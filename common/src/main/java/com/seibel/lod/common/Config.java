@@ -133,10 +133,6 @@ public class Config extends ConfigGui
 			{
 				@Category("client.graphics.advancedGraphics")
 				@Entry
-				public static LodTemplate lodTemplate = IAdvancedGraphics.LOD_TEMPLATE_DEFAULT;
-
-				@Category("client.graphics.advancedGraphics")
-				@Entry
 				public static boolean disableDirectionalCulling = IAdvancedGraphics.DISABLE_DIRECTIONAL_CULLING_DEFAULT;
 
 				@Category("client.graphics.advancedGraphics")
