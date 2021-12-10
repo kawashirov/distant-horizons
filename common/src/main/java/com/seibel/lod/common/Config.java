@@ -131,9 +131,6 @@ public class Config extends ConfigGui
 
 			public static class AdvancedGraphics
 			{
-				@Category("client.graphics.advancedGraphics")
-				@Entry
-				public static LodTemplate lodTemplate = IAdvancedGraphics.LOD_TEMPLATE_DEFAULT;
 
 				@Category("client.graphics.advancedGraphics")
 				@Entry

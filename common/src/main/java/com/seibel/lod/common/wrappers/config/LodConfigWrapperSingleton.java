@@ -219,18 +219,6 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			public static class AdvancedGraphics implements IAdvancedGraphics
 			{
 				@Override
-				public LodTemplate getLodTemplate()
-				{
-					return Config.Client.Graphics.AdvancedGraphics.lodTemplate;
-				}
-				@Override
-				public void setLodTemplate(LodTemplate newLodTemplate)
-				{
-					Config.Client.Graphics.AdvancedGraphics.lodTemplate = newLodTemplate;
-				}
-
-
-				@Override
 				public boolean getDisableDirectionalCulling()
 				{
 					return Config.Client.Graphics.AdvancedGraphics.disableDirectionalCulling;
