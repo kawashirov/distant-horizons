@@ -35,6 +35,7 @@ import net.minecraft.block.IWaterLoggable;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.IChunk;
+import net.minecraft.world.gen.Heightmap;
 
 /**
  * @author ??
@@ -122,6 +123,10 @@ public class ChunkWrapper implements IChunkWrapper
 	}
 	
 	@Override
+	public int getMaxY(int x, int z){
+		return chunk.getHeight(Heightmap.Type.MOTION_BLOCKING, x, z);
+	}
+	@Override
 	public int getMaxX(){
 		return chunk.getPos().getMaxBlockX();
 	}
@@ -151,8 +156,9 @@ public class ChunkWrapper implements IChunkWrapper
 		
 		//This type of block is always in water
 		return ((blockState.getBlock() instanceof ILiquidContainer) && !(blockState.getBlock() instanceof IWaterLoggable))
-				|| (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED));
+					   || (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED));
 	}
+	
 	
 	@Override
 	public int getEmittedBrightness(int x, int y, int z)
