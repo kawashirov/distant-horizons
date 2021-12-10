@@ -22,7 +22,6 @@ package com.seibel.lod.forge;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import com.seibel.lod.forge.wrappers.block.BlockPosWrapper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 
@@ -36,8 +35,6 @@ import com.seibel.lod.core.enums.config.GenerationPriority;
 import com.seibel.lod.core.enums.config.GpuUploadMethod;
 import com.seibel.lod.core.enums.config.HorizontalQuality;
 import com.seibel.lod.core.enums.config.HorizontalResolution;
-import com.seibel.lod.core.enums.config.HorizontalScale;
-import com.seibel.lod.core.enums.config.LodTemplate;
 import com.seibel.lod.core.enums.config.VanillaOverdraw;
 import com.seibel.lod.core.enums.config.VerticalQuality;
 import com.seibel.lod.core.enums.rendering.DebugMode;
@@ -211,7 +208,6 @@ public class ForgeConfig
 			
 			public static class AdvancedGraphics
 			{
-				public final ForgeConfigSpec.EnumValue<LodTemplate> lodTemplate;
 				public final ForgeConfigSpec.BooleanValue disableDirectionalCulling;
 				public final ForgeConfigSpec.BooleanValue alwaysDrawAtMaxQuality;
 				public final ForgeConfigSpec.EnumValue<VanillaOverdraw> vanillaOverdraw;
@@ -220,11 +216,6 @@ public class ForgeConfig
 				AdvancedGraphics(ForgeConfigSpec.Builder builder)
 				{
 					builder.comment(IAdvancedGraphics.DESC).push(this.getClass().getSimpleName());
-					
-					lodTemplate = builder
-							.comment("\n\n"
-									+ IAdvancedGraphics.LOD_TEMPLATE_DESC)
-							.defineEnum("LOD Template", IAdvancedGraphics.LOD_TEMPLATE_DEFAULT);
 					
 					disableDirectionalCulling = builder
 							.comment("\n\n"

@@ -26,8 +26,6 @@ import com.seibel.lod.core.enums.config.GenerationPriority;
 import com.seibel.lod.core.enums.config.GpuUploadMethod;
 import com.seibel.lod.core.enums.config.HorizontalQuality;
 import com.seibel.lod.core.enums.config.HorizontalResolution;
-import com.seibel.lod.core.enums.config.HorizontalScale;
-import com.seibel.lod.core.enums.config.LodTemplate;
 import com.seibel.lod.core.enums.config.VanillaOverdraw;
 import com.seibel.lod.core.enums.config.VerticalQuality;
 import com.seibel.lod.core.enums.rendering.DebugMode;
@@ -244,18 +242,6 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			
 			public static class AdvancedGraphics implements IAdvancedGraphics
 			{
-				@Override
-				public LodTemplate getLodTemplate()
-				{
-					return ForgeConfig.CLIENT.graphics.advancedGraphics.lodTemplate.get();
-				}
-				@Override
-				public void setLodTemplate(LodTemplate newLodTemplate)
-				{
-					ForgeConfig.CLIENT.graphics.advancedGraphics.lodTemplate.set(newLodTemplate);
-				}
-				
-				
 				@Override
 				public boolean getDisableDirectionalCulling()
 				{
