@@ -68,6 +68,12 @@ Source code uses Mojang mappings.
 The source code can be 'created' with the `./eclipse` command and can be found in the following path:\
 `minecraft-lod-mod\build\fg_cache\mcp\ VERSION \joined\ RANDOM_STRING \patch\output.jar`
 
+## Useful commands
+
+Build only Fabric: `./gradlew fabric:build`\
+Build only Forge: `./gradlew forge:build`\
+Run the Fabric client: `./gradlew fabric:runClient`\
+Run the Forge client: `./gradlew fabric:runClient`
 
 ## Open Source Acknowledgements
 
