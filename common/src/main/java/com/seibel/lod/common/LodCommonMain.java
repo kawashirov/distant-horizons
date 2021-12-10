@@ -11,9 +11,11 @@ import com.seibel.lod.core.ModInfo;
  */
 public class LodCommonMain {
     public static boolean forge = false;
+    public static boolean serverSided;
     public static LodForgeMethodCaller forgeMethodCaller;
 
-    public static void startup(LodForgeMethodCaller caller) {
+    public static void startup(LodForgeMethodCaller caller, boolean serverSided) {
+        LodCommonMain.serverSided = serverSided;
         if (caller != null) {
             LodCommonMain.forge = true;
             forgeMethodCaller = caller;

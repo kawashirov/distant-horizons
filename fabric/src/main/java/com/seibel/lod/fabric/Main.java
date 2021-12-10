@@ -52,10 +52,10 @@ public class Main implements ClientModInitializer
 		// no.
 	}
 
-	// This loads the mod after minecraft loads which doesn't causes a lot of issues
+	// This loads the mod after minecraft loads which doesn't causes a lot of issues (client sided)
 	public static void init() {
 		LodCommonMain.initConfig();
-		LodCommonMain.startup(null);
+		LodCommonMain.startup(null, false);
 		DependencySetup.createInitialBindings();
 		ClientApi.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 
