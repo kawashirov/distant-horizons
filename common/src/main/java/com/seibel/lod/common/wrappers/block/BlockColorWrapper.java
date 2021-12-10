@@ -62,6 +62,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
         System.out.println(block + " color " + Integer.toHexString(color) + " to tint " + toTint + " folliageTint " + folliageTint + " grassTint " + grassTint + " waterTint " + waterTint);
     }
 
+
     /**
      * this return a wrapper of the block in input
      * @param blockState of the block to wrap
@@ -236,6 +237,11 @@ public class BlockColorWrapper implements IBlockColorWrapper
         return block == Blocks.WATER;
     }
 
+    @Override
+    public String getName() {
+        return block.getName().toString();
+    }
+
 //--------------//
 //Colors getters//
 //--------------//
@@ -246,10 +252,6 @@ public class BlockColorWrapper implements IBlockColorWrapper
         return isColored;
     }
 
-    @Override
-    public String getName() {
-        return block.getName().toString();
-    }
 
     @Override
     public int getColor()

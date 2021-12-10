@@ -49,3 +49,10 @@ authors="James Seibel, Leonardo Amato, and Cola" #optional
 
 #// The description text for the mod (multi line!) (#mandatory)
 description='''This mod generates and renders simplified terrain beyond the normal view distance, at a low performance cost.'''
+
+#// to make mod be not required on forge server
+acceptableRemoteVersions="*"
+
+#// to not load on server at all as there is no integration at all
+#// TODO remove when we add server support
+clientSideOnly=true
