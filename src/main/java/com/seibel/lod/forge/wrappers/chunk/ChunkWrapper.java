@@ -155,8 +155,8 @@ public class ChunkWrapper implements IChunkWrapper
 		BlockState blockState = chunk.getSections()[y >> CHUNK_SECTION_SHIFT].getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK);
 		
 		//This type of block is always in water
-		return ((blockState.getBlock() instanceof ILiquidContainer) && !(blockState.getBlock() instanceof IWaterLoggable))
-					   || (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED));
+		return (!(blockState.getBlock() instanceof ILiquidContainer) && (blockState.getBlock() instanceof IWaterLoggable))
+					   && (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED));
 	}
 	
 	
