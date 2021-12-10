@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 
+import com.seibel.lod.forge.wrappers.block.BlockPosWrapper;
+import com.seibel.lod.forge.wrappers.chunk.ChunkPosWrapper;
 import org.lwjgl.opengl.GL15;
 
 import com.seibel.lod.core.objects.math.Mat4f;
@@ -14,8 +16,6 @@ import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import com.seibel.lod.forge.wrappers.McObjectConverter;
-import com.seibel.lod.forge.wrappers.block.BlockPosWrapper;
-import com.seibel.lod.forge.wrappers.chunk.ChunkPosWrapper;
 import com.seibel.lod.forge.wrappers.misc.LightMapWrapper;
 
 import net.minecraft.client.Minecraft;

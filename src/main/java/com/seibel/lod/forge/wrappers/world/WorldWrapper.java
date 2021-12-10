@@ -5,11 +5,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.seibel.lod.core.enums.WorldType;
-import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
-import com.seibel.lod.forge.wrappers.block.BlockPosWrapper;
 
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.LightType;
 import net.minecraft.world.server.ServerChunkProvider;
@@ -77,22 +76,18 @@ public class WorldWrapper implements IWorldWrapper
 	}
 	
 	@Override
-	public int getBlockLight(AbstractBlockPosWrapper blockPos)
+	public int getBlockLight(int x, int y, int z)
 	{
-		return world.getBrightness(LightType.BLOCK, ((BlockPosWrapper) blockPos).getBlockPos());
+		
+		return world.getBrightness(LightType.BLOCK, new BlockPos(x,y,z));
 	}
 	
 	@Override
-	public int getSkyLight(AbstractBlockPosWrapper blockPos)
+	public int getSkyLight(int x, int y, int z)
 	{
-		return world.getBrightness(LightType.SKY, ((BlockPosWrapper) blockPos).getBlockPos());
+		return world.getBrightness(LightType.SKY, new BlockPos(x,y,z));
 	}
 	
-	@Override
-	public BiomeWrapper getBiome(AbstractBlockPosWrapper blockPos)
-	{
-		return BiomeWrapper.getBiomeWrapper(world.getBiome(((BlockPosWrapper) blockPos).getBlockPos()));
-	}
 	
 	public IWorld getWorld()
 	{
