@@ -393,8 +393,9 @@ public abstract class ConfigGui {
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             this.renderBackground(matrices);
             this.list.render(matrices, mouseX, mouseY, delta);
-            drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF);
+//            drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF);
 
+            /*
             // TODO[CONFIG]: Fix the tooltip
             for (EntryInfo info : entries) {
                 if (info.id.equals(modid) && info.category.matches(category)) {
@@ -415,6 +416,7 @@ public abstract class ConfigGui {
                     }
                 }
             }
+             */
             super.render(matrices,mouseX,mouseY,delta);
         }
     }
