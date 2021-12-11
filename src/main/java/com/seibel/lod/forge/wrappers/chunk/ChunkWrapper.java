@@ -88,7 +88,6 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public IBlockShapeWrapper getBlockShapeWrapper(int x, int y, int z)
 	{
-		if (y < 0) y = 0; //TODO replace with value from version specific constants
 		Block block = chunk.getSections()[y >> CHUNK_SECTION_SHIFT].getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK).getBlock();
 		return BlockShapeWrapper.getBlockShapeWrapper(block, this, x, y, z);
 	}
