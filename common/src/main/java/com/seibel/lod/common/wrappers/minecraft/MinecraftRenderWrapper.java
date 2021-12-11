@@ -168,6 +168,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     public int[] getLightmapPixels()
     {
         LightTexture tex = GAME_RENDERER.lightTexture();
+        tex.tick(); // This call makes no sense, but it fixes pause menu flicker bug
         NativeImage lightMapPixels = tex.lightPixels;
         LightMapWrapper lightMap = new LightMapWrapper(lightMapPixels);
 

@@ -40,7 +40,7 @@ public class BlockColorSingletonWrapper implements IBlockColorSingletonWrapper
     @Override
     public IBlockColorWrapper getWaterColor()
     {
-        return BlockColorWrapper.getBlockColorWrapper(Blocks.WATER.defaultBlockState(), new BlockPosWrapper(0,0, 0));
+        return BlockColorWrapper.getBlockColorWrapper(Blocks.WATER);
     }
 }
 

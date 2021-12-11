@@ -34,13 +34,13 @@ public class BlockShapeWrapper implements IBlockShapeWrapper
     private boolean noCollision;
 
     /**Constructor only require for the block instance we are wrapping**/
-    public BlockShapeWrapper(Block block, IChunkWrapper chunkWrapper, AbstractBlockPosWrapper blockPosWrapper)
+    public BlockShapeWrapper(Block block, IChunkWrapper chunkWrapper, int x, int y, int z)
     {
         this.block = block;
         this.nonFull = false;
         this.noCollision = false;
         this.toAvoid = ofBlockToAvoid();
-        setupShapes(chunkWrapper, blockPosWrapper);
+        setupShapes(chunkWrapper, x, y, z);
         System.out.println(block + " non full " + nonFull + " no collision " + noCollision + " to avoid " + toAvoid);
     }
 
@@ -56,7 +56,7 @@ public class BlockShapeWrapper implements IBlockShapeWrapper
      * this return a wrapper of the block in input
      * @param block Block object to wrap
      */
-    static public BlockShapeWrapper getBlockShapeWrapper(Block block, ChunkWrapper chunkWrapper, AbstractBlockPosWrapper blockPosWrapper)
+    static public BlockShapeWrapper getBlockShapeWrapper(Block block, ChunkWrapper chunkWrapper, int x, int y, int z)
     {
         //first we check if the block has already been wrapped
         if (blockShapeWrapperMap.containsKey(block) && blockShapeWrapperMap.get(block) != null)
@@ -64,17 +64,17 @@ public class BlockShapeWrapper implements IBlockShapeWrapper
 
 
         //if it hasn't been created yet, we create it and save it in the map
-        BlockShapeWrapper blockWrapper = new BlockShapeWrapper(block, chunkWrapper, blockPosWrapper);
+        BlockShapeWrapper blockWrapper = new BlockShapeWrapper(block, chunkWrapper, x, y, z);
         blockShapeWrapperMap.put(block, blockWrapper);
 
         //we return the newly created wrapper
         return blockWrapper;
     }
 
-    private void setupShapes(IChunkWrapper chunkWrapper, AbstractBlockPosWrapper blockPosWrapper)
+    private void setupShapes(IChunkWrapper chunkWrapper, int x, int y, int z)
     {
         ChunkAccess chunk = ((ChunkWrapper) chunkWrapper).getChunk();
-        BlockPos blockPos = ((BlockPosWrapper) blockPosWrapper).getBlockPos();
+        BlockPos blockPos = new BlockPos(x, y, z);
         boolean noCollisionSetted = false;
         boolean nonFullSetted = false;
         if (!block.defaultBlockState().getFluidState().isEmpty())// || block instanceof SixWayBlock)
