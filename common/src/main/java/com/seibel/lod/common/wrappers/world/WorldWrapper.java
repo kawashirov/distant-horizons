@@ -30,6 +30,7 @@ import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
 
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelAccessor;
@@ -96,21 +97,15 @@ public class WorldWrapper implements IWorldWrapper
     }
 
     @Override
-    public int getBlockLight(AbstractBlockPosWrapper blockPos)
+    public int getBlockLight(int x, int y, int z)
     {
-        return world.getBrightness(LightLayer.BLOCK, ((BlockPosWrapper) blockPos).getBlockPos());
+        return world.getBrightness(LightLayer.BLOCK, new BlockPos(x,y,z));
     }
 
     @Override
-    public int getSkyLight(AbstractBlockPosWrapper blockPos)
+    public int getSkyLight(int x, int y, int z)
     {
-        return world.getBrightness(LightLayer.SKY, ((BlockPosWrapper) blockPos).getBlockPos());
-    }
-
-    @Override
-    public IBiomeWrapper getBiome(AbstractBlockPosWrapper blockPos)
-    {
-        return BiomeWrapper.getBiomeWrapper(world.getBiome(((BlockPosWrapper) blockPos).getBlockPos()));
+        return world.getBrightness(LightLayer.SKY, new BlockPos(x,y,z));
     }
 
     public LevelAccessor getWorld()

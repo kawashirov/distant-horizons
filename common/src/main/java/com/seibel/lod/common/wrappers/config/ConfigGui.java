@@ -109,6 +109,7 @@ public abstract class ConfigGui {
             This is a small to do list for the config
 
         Make config save
+        Make wiki better
         Add a way to add min and max from another variable
      */
     private static final Pattern INTEGER_ONLY = Pattern.compile("(-?[0-9]*)");
@@ -146,7 +147,7 @@ public abstract class ConfigGui {
             if (field.isAnnotationPresent(Entry.class) || field.isAnnotationPresent(Comment.class) || field.isAnnotationPresent(ScreenEntry.class))
                 // TODO[CONFIG]: Fix the check for client/server
 //                if (Minecraft.getInstance().getEnvironmentType() == EnvType.CLIENT)
-                    initClient(modid, field, info);
+                initClient(modid, field, info);
             if (field.isAnnotationPresent(Entry.class))
                 try {
                     info.defaultValue = field.get(null);
@@ -393,18 +394,19 @@ public abstract class ConfigGui {
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             this.renderBackground(matrices);
             this.list.render(matrices, mouseX, mouseY, delta);
-//            drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF);
+            // Render title
+            drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF);
 
-            /*
+
             // TODO[CONFIG]: Fix the tooltip
+            /*
             for (EntryInfo info : entries) {
-                if (info.id.equals(modid) && info.category.matches(category)) {
+                if (info.id.equals(modid)) {
                     if (list.getHoveredButton(mouseX,mouseY).isPresent()) {
                         AbstractWidget buttonWidget = list.getHoveredButton(mouseX,mouseY).get();
                         Component text = ButtonEntry.buttonsWithText.get(buttonWidget);
-                        TranslatableComponent name = new TranslatableComponent(this.translationPrefix + info.field.getName());
-                        // When you fixed the config then add a @ before the tooltip in this line
-                        String key = translationPrefix + info.field.getName() + (info.category != "" ? info.category + "." : "") + ".tooltip";
+                        TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category != "" ? info.category + "." : "") + info.field.getName());
+                        String key = translationPrefix + (info.category != "" ? info.category + "." : "") + info.field.getName() + ".@tooltip";
 
                         if (info.error != null && text.equals(name)) renderTooltip(matrices, info.error.getValue(), mouseX, mouseY);
                         else if (I18n.exists(key) && text.equals(name)) {

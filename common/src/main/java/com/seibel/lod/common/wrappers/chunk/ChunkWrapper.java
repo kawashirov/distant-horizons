@@ -12,10 +12,15 @@ import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
 import com.seibel.lod.common.wrappers.block.BlockShapeWrapper;
 import com.seibel.lod.common.wrappers.world.BiomeWrapper;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.LiquidBlockContainer;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
  *
@@ -24,9 +29,11 @@ import net.minecraft.world.level.chunk.ChunkAccess;
  */
 public class ChunkWrapper implements IChunkWrapper
 {
-
     private ChunkAccess chunk;
-    private AbstractChunkPosWrapper chunkPos;
+    private final int CHUNK_SECTION_SHIFT = 4;
+    private final int CHUNK_SECTION_MASK = 0b1111;
+    private final int CHUNK_SIZE_SHIFT = 4;
+    private final int CHUNK_SIZE_MASK = 0b1111;
 
     @Override
     public int getHeight(){
@@ -34,9 +41,9 @@ public class ChunkWrapper implements IChunkWrapper
     }
 
     @Override
-    public boolean isPositionInWater(AbstractBlockPosWrapper blockPos)
+    public boolean isPositionInWater(int x, int y, int z)
     {
-        BlockState blockState = chunk.getBlockState(((BlockPosWrapper) blockPos).getBlockPos());
+        BlockState blockState = chunk.getSections()[y >> CHUNK_SECTION_SHIFT].getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK);
 
         //This type of block is always in water
         if((blockState.getBlock() instanceof LiquidBlock))// && !(blockState.getBlock() instanceof IWaterLoggable))
@@ -56,36 +63,74 @@ public class ChunkWrapper implements IChunkWrapper
     }
 
     @Override
-    public IBiomeWrapper getBiome(int xRel, int yAbs, int zRel)
+    public IBiomeWrapper getBiome(int x, int y, int z)
     {
-        return BiomeWrapper.getBiomeWrapper(chunk.getNoiseBiome(xRel >> 2, yAbs >> 2, zRel >> 2));
+        return BiomeWrapper.getBiomeWrapper(chunk.getNoiseBiome((x & CHUNK_SIZE_MASK) >> 2, y >> 2, (z & CHUNK_SIZE_MASK) >> 2));
     }
 
     @Override
-    public IBlockColorWrapper getBlockColorWrapper(AbstractBlockPosWrapper blockPos)
+    public IBlockColorWrapper getBlockColorWrapper(int x, int y, int z)
     {
-        return BlockColorWrapper.getBlockColorWrapper(chunk.getBlockState(((BlockPosWrapper) blockPos).getBlockPos()), blockPos);
+        Block block = chunk.getSections()[y >> CHUNK_SECTION_SHIFT].getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK).getBlock();
+        return BlockColorWrapper.getBlockColorWrapper(block);
     }
 
     @Override
-    public IBlockShapeWrapper getBlockShapeWrapper(AbstractBlockPosWrapper blockPos)
+    public IBlockShapeWrapper getBlockShapeWrapper(int x, int y, int z)
     {
-        return BlockShapeWrapper.getBlockShapeWrapper(chunk.getBlockState(((BlockPosWrapper) blockPos).getBlockPos()).getBlock(), this, blockPos);
+        Block block = chunk.getSections()[y >> CHUNK_SECTION_SHIFT].getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK).getBlock();
+        return BlockShapeWrapper.getBlockShapeWrapper(block, this, x, y, z);
     }
 
     public ChunkWrapper(ChunkAccess chunk)
     {
         this.chunk = chunk;
-        this.chunkPos = new ChunkPosWrapper(chunk.getPos());
     }
 
-    public ChunkAccess getChunk(){
+    public ChunkAccess getChunk() {
         return chunk;
     }
+
     @Override
-    public AbstractChunkPosWrapper getPos()
-    {
-        return chunkPos;
+    public int getChunkPosX(){
+        return chunk.getPos().x;
+    }
+
+    @Override
+    public int getChunkPosZ(){
+        return chunk.getPos().z;
+    }
+
+    @Override
+    public int getRegionPosX(){
+        return chunk.getPos().getRegionX();
+    }
+
+    @Override
+    public int getRegionPosZ(){
+        return chunk.getPos().getRegionZ();
+    }
+
+    @Override
+    public int getMaxY(int x, int z) {
+        return chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
+    }
+
+    @Override
+    public int getMaxX(){
+        return chunk.getPos().getMaxBlockX();
+    }
+    @Override
+    public int getMaxZ(){
+        return chunk.getPos().getMaxBlockZ();
+    }
+    @Override
+    public int getMinX(){
+        return chunk.getPos().getMinBlockX();
+    }
+    @Override
+    public int getMinZ() {
+        return chunk.getPos().getMinBlockZ();
     }
 
     @Override
@@ -93,38 +138,20 @@ public class ChunkWrapper implements IChunkWrapper
         return chunk.isLightCorrect();
     }
 
-    public boolean
-    isWaterLogged(BlockPosWrapper blockPos)
+    public boolean isWaterLogged(int x, int y, int z)
     {
-        BlockState blockState = chunk.getBlockState(blockPos.getBlockPos());
+        BlockState blockState = chunk.getSections()[y >> CHUNK_SECTION_SHIFT].getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK);
 
 //		//This type of block is always in water
-//		if((blockState.getBlock() instanceof ILiquidContainer) && !(blockState.getBlock() instanceof IWaterLoggable))
-//			return true;
-
-        //This type of block could be in water
-        if(blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).isPresent() && blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).get())
-            return true;
-
-        return false;
-    }
-
-    public int getEmittedBrightness(BlockPosWrapper blockPos)
-    {
-        return chunk.getLightEmission(blockPos.getBlockPos());
+        return (!(blockState.getBlock() instanceof LiquidBlockContainer) && (blockState.getBlock() instanceof SimpleWaterloggedBlock))
+                && (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED));
     }
 
     @Override
-    public boolean isWaterLogged(AbstractBlockPosWrapper blockPos)
+    public int getEmittedBrightness(int x, int y, int z)
     {
-        // TODO Auto-generated method stub
-        return false;
-    }
+        BlockPos blockPos = new BlockPos(x,y,z);
 
-    @Override
-    public int getEmittedBrightness(AbstractBlockPosWrapper blockPos)
-    {
-        // TODO Auto-generated method stub
-        return 0;
+        return chunk.getLightEmission(blockPos);
     }
 }
