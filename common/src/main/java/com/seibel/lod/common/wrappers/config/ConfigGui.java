@@ -117,6 +117,13 @@ public abstract class ConfigGui {
 
     private static final List<EntryInfo> entries = new ArrayList<>();
 
+    private static class ConfigScreenConfigs {
+        // This contains all the configs for the configs
+        public static final int SpaceFromRightScreen = 10;
+        public static final int ButtonWidthSpacing = 5;
+        public static final int ResetButtonWidth = 40;
+    }
+
     protected static class EntryInfo {
         Field field;
         Object widget;
@@ -335,7 +342,7 @@ public abstract class ConfigGui {
             for (EntryInfo info : entries) {
                 if (info.id.equals(modid) && info.category.matches(category)) {
                     TranslatableComponent name = Objects.requireNonNullElseGet(info.name, () -> new TranslatableComponent(translationPrefix + (info.category != "" ? info.category + "." : "") + info.field.getName()));
-                    Button resetButton = new Button(width - 205, 0, 40, 20, new TextComponent("Reset").withStyle(ChatFormatting.RED), (button -> {
+                    Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - info.width - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, new TextComponent("Reset").withStyle(ChatFormatting.RED), (button -> {
                         info.value = info.defaultValue;
                         info.tempValue = info.defaultValue.toString();
                         info.index = 0;
@@ -349,10 +356,10 @@ public abstract class ConfigGui {
                         Map.Entry<Button.OnPress, Function<Object, Component>> widget = (Map.Entry<Button.OnPress, Function<Object, Component>>) info.widget;
                         if (info.field.getType().isEnum())
                             widget.setValue(value -> new TranslatableComponent(translationPrefix + "enum." + info.field.getType().getSimpleName() + "." + info.value.toString()));
-                        this.list.addButton(new Button(width - 160, 0, 150, 20, widget.getValue().apply(info.value), widget.getKey()), resetButton, null, name);
+                        this.list.addButton(new Button(this.width - info.width - ConfigScreenConfigs.SpaceFromRightScreen, 0, info.width, 20, widget.getValue().apply(info.value), widget.getKey()), resetButton, null, name);
                     } else if (info.field.getType() == List.class) {
                         if (!reload) info.index = 0;
-                        EditBox widget = new EditBox(font, width - 160, 0, 150, 20, null);
+                        EditBox widget = new EditBox(font, this.width - info.width - ConfigScreenConfigs.SpaceFromRightScreen, 0, info.width, 20, null);
                         widget.setMaxLength(info.width);
                         if (info.index < ((List<String>) info.value).size())
                             widget.insertText((String.valueOf(((List<String>) info.value).get(info.index))));
@@ -361,7 +368,7 @@ public abstract class ConfigGui {
                         widget.setFilter(processor);
                         resetButton.setWidth(20);
                         resetButton.setMessage(new TextComponent("R").withStyle(ChatFormatting.RED));
-                        Button cycleButton = new Button(width - 185, 0, 20, 20, new TextComponent(String.valueOf(info.index)).withStyle(ChatFormatting.GOLD), (button -> {
+                        Button cycleButton = new Button(this.width - 185, 0, 20, 20, new TextComponent(String.valueOf(info.index)).withStyle(ChatFormatting.GOLD), (button -> {
                             ((List<String>) info.value).remove("");
                             double scrollAmount = list.getScrollAmount();
                             this.reload = true;
@@ -372,7 +379,7 @@ public abstract class ConfigGui {
                         }));
                         this.list.addButton(widget, resetButton, cycleButton, name);
                     } else if (info.widget != null) {
-                        EditBox widget = new EditBox(font, width - 160, 0, 150, 20, null);
+                        EditBox widget = new EditBox(font, this.width - info.width - ConfigScreenConfigs.SpaceFromRightScreen + 2, 0, info.width - 4, 20, null);
                         widget.setMaxLength(info.width);
                         widget.insertText(info.tempValue);
                         Predicate<String> processor = ((BiFunction<EditBox, Button, Predicate<String>>) info.widget).apply(widget, done);
@@ -430,7 +437,7 @@ public abstract class ConfigGui {
             this.centerListVertically = false;
             textRenderer = minecraftClient.font;
         }
-        //        @Override
+//        @Override
         public int getScrollbarPositionX() { return this.width -7; }
 
         public void addButton(AbstractWidget button, AbstractWidget resetButton, AbstractWidget indexButton, Component text) {
@@ -495,7 +502,7 @@ public abstract class ConfigGui {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface Entry {
-        int width() default 100;
+        int width() default 150;
         double min() default Double.MIN_NORMAL;
         double max() default Double.MAX_VALUE;
         String name() default "";
