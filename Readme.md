@@ -25,30 +25,31 @@ http://mcforge.readthedocs.io/en/latest/gettingstarted/
 
 ### Prerequisites
 
-* A Java Development Kit (JDK) for Java 16 (recommended) or newer. Visit https://adoptium.net/releases.html for installers.
-* Any Java IDE, for example Intellij IDEA and Eclipse. You may also use any other code editors, such as Visual Studio Code.
+* A Java Development Kit (JDK) for Java 16 (recommended) or newer. Visit https://www.oracle.com/java/technologies/downloads/ for installers.
+* Git or someway to clone git projects. Visit https://git-scm.com/ for installers.
+* Any Java IDE, for example Intellij IDEA and Eclipse. You may also use any other code editors, such as Visual Studio Code. (Optional)
 
 **If using Ecplise:**
-not supported...
+Not supported...
 
 **If using IntelliJ:**
-1. open IDEA and import the build.gradle
-2. refresh the Gradle project in IDEA if required
-3. wait for the minecraft jars to generate
+1. Open IDEA and import the build.gradle
+2. Refresh the Gradle project in IDEA if required
+3. Wait for the minecraft jars to generate
 
 Side note: invalidate caches and restart if required
 
 ## Compiling
 
 **Using GUI**
-1. open a command line in the project folder
-2. run the command: `./gradlew build`
-3. the compiled jar file will be in the folder `fabric/build/libs/` and `forge/build/libs/`
+1. Open a command line in the project folder
+2. Run the command: `./gradlew build`
+3. The compiled jar file will be in the folder `fabric/build/libs/` and `forge/build/libs/`
 
 **If in terminal:**
 1. `git clone -b 1.17.1 --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
 2. `cd minecraft-lod-mod`
-3. `./gradlew build` (must be run as root on linux)
+3. `./gradlew build`
 4. The build should be in `fabric/build/libs/` and `forge/build/libs/`
 
 
@@ -64,9 +65,6 @@ Side note: invalidate caches and restart if required
 The Minecraft source code is NOT added to your workspace in an editable way. Minecraft is treated like a normal Library. Sources are there for documentation and research purposes only.
 
 Source code uses Mojang mappings.
-
-The source code can be 'created' with the `./eclipse` command and can be found in the following path:\
-`minecraft-lod-mod\build\fg_cache\mcp\ VERSION \joined\ RANDOM_STRING \patch\output.jar`
 
 ## Useful commands
 
