@@ -49,6 +49,7 @@ public class ChunkWrapper implements IChunkWrapper
 	private final int CHUNK_SECTION_MASK = 0b1111;
 	private final int CHUNK_SIZE_SHIFT = 4;
 	private final int CHUNK_SIZE_MASK = 0b1111;
+	public static final int MIN_HEIGHT = 0; //TODO move this to specific file
 	
 	@Override
 	public int getHeight()
