@@ -34,6 +34,7 @@ import net.minecraft.block.ILiquidContainer;
 import net.minecraft.block.IWaterLoggable;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
 
@@ -49,7 +50,6 @@ public class ChunkWrapper implements IChunkWrapper
 	private final int CHUNK_SECTION_MASK = 0b1111;
 	private final int CHUNK_SIZE_SHIFT = 4;
 	private final int CHUNK_SIZE_MASK = 0b1111;
-	public static final int MIN_HEIGHT = 0; //TODO move this to specific file
 	
 	@Override
 	public int getHeight()
@@ -89,7 +89,9 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public IBlockShapeWrapper getBlockShapeWrapper(int x, int y, int z)
 	{
-		Block block = chunk.getSections()[y >> CHUNK_SECTION_SHIFT].getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK).getBlock();
+		ChunkSection section = chunk.getSections()[y >> CHUNK_SECTION_SHIFT];
+		if (section == null) return null;
+		Block block = section.getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK).getBlock();
 		return BlockShapeWrapper.getBlockShapeWrapper(block, this, x, y, z);
 	}
 	
@@ -153,7 +155,9 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public boolean isWaterLogged(int x, int y, int z)
 	{
-		BlockState blockState = chunk.getSections()[y >> CHUNK_SECTION_SHIFT].getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK);
+		ChunkSection section = chunk.getSections()[y >> CHUNK_SECTION_SHIFT];
+		if (section == null) return false;
+		BlockState blockState = section.getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK);
 		
 		//This type of block is always in water
 		return (!(blockState.getBlock() instanceof ILiquidContainer) && (blockState.getBlock() instanceof IWaterLoggable))
