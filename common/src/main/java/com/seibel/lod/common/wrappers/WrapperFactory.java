@@ -90,5 +90,4 @@ public class WrapperFactory implements IWrapperFactory
     
     @Override
     public boolean isWorldGeneratorSingleThreaded() {return true;}
-
 }
