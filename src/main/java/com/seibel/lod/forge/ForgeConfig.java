@@ -51,6 +51,7 @@ import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.I
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.IFogQuality;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.IQuality;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IWorldGenerator;
+import com.seibel.lod.forge.wrappers.VersionConstants;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -61,7 +62,7 @@ import net.minecraftforge.fml.config.ModConfig;
  * This handles any configuration the user has access to.
  * @author Leonardo Amato
  * @author James Seibel
- * @version 12-1-2021
+ * @version 12-11-2021
  */
 @Mod.EventBusSubscriber
 public class ForgeConfig
@@ -270,7 +271,7 @@ public class ForgeConfig
 				
 				distanceGenerationMode = builder
 						.comment("\n\n"
-								+ IWorldGenerator.DISTANCE_GENERATION_MODE_DESC)
+								+ IWorldGenerator.getDistanceGenerationModeDesc(VersionConstants.INSTANCE))
 						.defineEnum("Distance Generation Mode", IWorldGenerator.DISTANCE_GENERATION_MODE_DEFAULT);
 				
 				allowUnstableFeatureGeneration = builder

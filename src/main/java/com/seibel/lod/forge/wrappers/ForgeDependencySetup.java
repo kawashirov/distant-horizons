@@ -3,6 +3,7 @@ package com.seibel.lod.forge.wrappers;
 import com.seibel.lod.core.handlers.IReflectionHandler;
 import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.util.SingletonHandler;
+import com.seibel.lod.core.wrapperInterfaces.IVersionConstants;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockColorSingletonWrapper;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
@@ -20,7 +21,7 @@ import com.seibel.lod.forge.wrappers.minecraft.MinecraftWrapper;
  * are loaded.
  * 
  * @author James Seibel
- * @version 11-20-2021
+ * @version 12-11-2021
  */
 public class ForgeDependencySetup
 {
@@ -31,6 +32,7 @@ public class ForgeDependencySetup
 		SingletonHandler.bind(IMinecraftWrapper.class, MinecraftWrapper.INSTANCE);
 		SingletonHandler.bind(IMinecraftRenderWrapper.class, MinecraftRenderWrapper.INSTANCE);
 		SingletonHandler.bind(IWrapperFactory.class, WrapperFactory.INSTANCE);
+		SingletonHandler.bind(IVersionConstants.class, VersionConstants.INSTANCE);
 		
 		SingletonHandler.bind(IReflectionHandler.class, ReflectionHandler.createSingleton(MinecraftWrapper.INSTANCE.getOptions().getClass().getDeclaredFields(), MinecraftWrapper.INSTANCE.getOptions()));
 	}
