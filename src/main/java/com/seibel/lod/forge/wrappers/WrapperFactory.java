@@ -61,13 +61,13 @@ public class WrapperFactory implements IWrapperFactory
 	{
 		return new ChunkPosWrapper();
 	}
-
+	
 	@Override
 	public AbstractChunkPosWrapper createChunkPos(int x, int z)
 	{
 		return new ChunkPosWrapper(x, z);
 	}
-
+	
 	@Override
 	public AbstractChunkPosWrapper createChunkPos(AbstractChunkPosWrapper newChunkPos)
 	{

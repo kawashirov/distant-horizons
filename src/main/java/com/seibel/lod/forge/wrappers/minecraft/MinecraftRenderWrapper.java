@@ -4,10 +4,10 @@ import java.awt.Color;
 import java.nio.ByteBuffer;
 import java.util.HashSet;
 
-import com.seibel.lod.forge.wrappers.block.BlockPosWrapper;
-import com.seibel.lod.forge.wrappers.chunk.ChunkPosWrapper;
 import org.lwjgl.opengl.GL15;
 
+import com.seibel.lod.core.handlers.IReflectionHandler;
+import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.objects.math.Mat4f;
 import com.seibel.lod.core.objects.math.Vec3d;
 import com.seibel.lod.core.objects.math.Vec3f;
@@ -16,6 +16,8 @@ import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import com.seibel.lod.forge.wrappers.McObjectConverter;
+import com.seibel.lod.forge.wrappers.block.BlockPosWrapper;
+import com.seibel.lod.forge.wrappers.chunk.ChunkPosWrapper;
 import com.seibel.lod.forge.wrappers.misc.LightMapWrapper;
 
 import net.minecraft.client.Minecraft;
@@ -35,17 +37,19 @@ import net.minecraft.util.math.vector.Vector3f;
  * related to rendering in Minecraft.
  * 
  * @author James Seibel
- * @version 12-5-2021
+ * @version 12-12-2021
  */
 public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 {
 	public static final MinecraftRenderWrapper INSTANCE = new MinecraftRenderWrapper();
-	public static final MinecraftWrapper MC_WRAPPER = MinecraftWrapper.INSTANCE;
+	
+	private static final MinecraftWrapper MC_WRAPPER = MinecraftWrapper.INSTANCE;
 	
 	private static final Minecraft MC = Minecraft.getInstance();
 	private static final GameRenderer GAME_RENDERER = MC.gameRenderer;
 	
 	private ByteBuffer lightMapByteBuffer = null;
+	
 	
 	
 	
@@ -151,19 +155,29 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	{
 		HashSet<AbstractChunkPosWrapper> loadedPos = new HashSet<>();
 		
-		// Wow, those are some long names!
+		// TODO James needs to allow for circular references in the SingletonHandler
+		IReflectionHandler reflectionHandler = ReflectionHandler.instance;
 		
-		// go through every RenderInfo to get the compiled chunks
-		WorldRenderer renderer = MC.levelRenderer;
-		for (WorldRenderer.LocalRenderInformationContainer worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
+		if (reflectionHandler.sodiumPresent())
 		{
-			CompiledChunk compiledChunk = worldRenderer$LocalRenderInformationContainer.chunk.getCompiledChunk();
-			if (!compiledChunk.hasNoRenderableLayers())
+			loadedPos = reflectionHandler.getSodiumRenderedChunks();
+		}
+		else
+		{
+			// Wow, those are some long names!
+			
+			// go through every RenderInfo to get the compiled chunks
+			WorldRenderer renderer = MC.levelRenderer;
+			for (WorldRenderer.LocalRenderInformationContainer worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
 			{
-				// add the ChunkPos for every rendered chunk
-				BlockPos bpos = worldRenderer$LocalRenderInformationContainer.chunk.getOrigin();
-				
-				loadedPos.add(new ChunkPosWrapper(bpos));
+				CompiledChunk compiledChunk = worldRenderer$LocalRenderInformationContainer.chunk.getCompiledChunk();
+				if (!compiledChunk.hasNoRenderableLayers())
+				{
+					// add the ChunkPos for every rendered chunk
+					BlockPos bpos = worldRenderer$LocalRenderInformationContainer.chunk.getOrigin();
+					
+					loadedPos.add(new ChunkPosWrapper(bpos));
+				}
 			}
 		}
 		
