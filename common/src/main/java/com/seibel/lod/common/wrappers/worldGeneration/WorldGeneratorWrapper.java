@@ -26,18 +26,6 @@ import net.minecraft.world.level.chunk.*;
  */
 public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 {
-    //private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
-
-    /**
-     * If a configured feature fails for whatever reason,
-     * add it to this list. This will hopefully remove any
-     * features that could cause issues down the line.
-     */
-    //private static final ConcurrentHashMap<Integer, ConfiguredFeature<?, ?>> FEATURES_TO_AVOID = new ConcurrentHashMap<>();
-
-    //private static ExecutorService Executor = Executors.newSingleThreadExecutor();
-
-
     public final ServerLevel serverWorld;
     public final LodDimension lodDim;
     public final LodBuilder lodBuilder;
@@ -51,14 +39,12 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
         serverWorld = ((WorldWrapper) worldWrapper).getServerWorld();
     }
 
-
     /** takes about 2-5 ms */
     @Override
     public void generateBiomesOnly(AbstractChunkPosWrapper pos, DistanceGenerationMode generationMode)
     {
     	generate(pos.getX(), pos.getZ(), generationMode);
     }
-
 
     /** takes about 10 - 20 ms */
     @Override
@@ -67,19 +53,14 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
     	generate(pos.getX(), pos.getZ(), DistanceGenerationMode.SURFACE);
     }
 
-
     /**
      * takes about 15 - 20 ms
-     * <p>
-     * Causes concurrentModification Exceptions,
-     * which could cause instability or world generation bugs
      */
     @Override
     public void generateFeatures(AbstractChunkPosWrapper pos)
     {
     	generate(pos.getX(), pos.getZ(), DistanceGenerationMode.FEATURES);
     }
-
 
     /**
      * Generates using MC's ServerWorld.
@@ -100,7 +81,7 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
     
     private void generate(int chunkX, int chunkZ, DistanceGenerationMode generationMode) {
     	
-    	long t = System.nanoTime();
+    	// long t = System.nanoTime();
     	
     	ChunkStatus targetStatus;
 		switch (generationMode) {
@@ -125,23 +106,19 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 			return;
 		}
 		
+		// The bool=true means that we wants to generate chunk, and that the returned ChunkAccess must not be null
 		ChunkAccess ca = serverWorld.getChunkSource().getChunk(chunkX, chunkZ, targetStatus, true);
 		if (ca == null) throw new RuntimeException("This should NEVER be null due to bool being true");
 		lodBuilder.generateLodNodeFromChunk(lodDim, new ChunkWrapper(ca), new LodBuilderConfig(generationMode));
 		
-		long duration = System.nanoTime()-t;
+		// long duration = System.nanoTime()-t;
 		
-		System.out.println("LodChunkGenFull["+chunkX+","+chunkZ+"]: "+(double)(duration)/1000.);
+		// Debug print the duration
+		// System.out.println("LodChunkGenFull["+chunkX+","+chunkZ+"]: "+(double)(duration)/1000.);
     	
     }
 
-
-
-
-
-
-
-	/*
+	/* TODO: Update this chart
 	 * performance/generation tests related to
 	 * serverWorld.getChunk(x, z, ChunkStatus. *** )
 
@@ -160,7 +137,6 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
      ChunkStatus.LIGHT					20 - 40 ms	true
      ChunkStatus.FULL 					30 - 50 ms	true
      ChunkStatus.SPAWN			   		50 - 80 ms	true
-
 
      At this point I would suggest using FEATURES, as it generates snow and trees
      (and any other object that are needed to make biomes distinct)

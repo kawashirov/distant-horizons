@@ -23,6 +23,10 @@ public class VersionConstants implements IVersionConstants {
 
     @Override
     public boolean isWorldGeneratorSingleThreaded(DistanceGenerationMode distanceGenerationMode) {
+    	// We are always asking the server to generate the chunk,
+    	// so no use running this stuff multithreaded.
+    	return true;
+    	/*
         switch (distanceGenerationMode) {
             default:
             case NONE:
@@ -34,6 +38,6 @@ public class VersionConstants implements IVersionConstants {
 
             case FULL:
                 return true;
-        }
+        }*/
     }
 }
