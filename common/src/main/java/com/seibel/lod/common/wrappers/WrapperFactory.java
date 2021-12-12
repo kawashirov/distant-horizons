@@ -80,12 +80,12 @@ public class WrapperFactory implements IWrapperFactory
         return new ChunkPosWrapper(blockPos);
     }
 
-
-
     @Override
     public AbstractWorldGeneratorWrapper createWorldGenerator(LodBuilder newLodBuilder, LodDimension newLodDimension, IWorldWrapper worldWrapper)
     {
         return new WorldGeneratorWrapper(newLodBuilder, newLodDimension, worldWrapper);
     }
 
+    @Override
+    public boolean isWorldGeneratorSingleThreaded() {return true;}
 }
