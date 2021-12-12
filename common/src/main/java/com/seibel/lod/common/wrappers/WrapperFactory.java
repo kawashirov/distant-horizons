@@ -85,7 +85,4 @@ public class WrapperFactory implements IWrapperFactory
     {
         return new WorldGeneratorWrapper(newLodBuilder, newLodDimension, worldWrapper);
     }
-
-    @Override
-    public boolean isWorldGeneratorSingleThreaded() {return true;}
 }
