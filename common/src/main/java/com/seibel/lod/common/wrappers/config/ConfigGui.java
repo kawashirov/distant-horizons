@@ -5,7 +5,6 @@ import com.moandjiezana.toml.Toml;
 // TomlWriter is threadsave while Writer is not
 import com.moandjiezana.toml.TomlWriter;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.seibel.lod.core.ModInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -401,7 +400,7 @@ public abstract class ConfigGui {
                         this.list.addButton(widget, resetButton, null, name);
                     } else if (info.button) {
                         Button widget = new Button(this.width / 2 - info.width, this.height - 28, info.width*2, 20, name, (button -> {
-                            Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, ModInfo.ID, info.gotoScreen));
+                            Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, modid, info.gotoScreen));
                         }));
                         this.list.addButton(widget, null, null, null);
                     } else {
