@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
@@ -78,7 +79,9 @@ public class ChunkWrapper implements IChunkWrapper
     @Override
     public IBlockShapeWrapper getBlockShapeWrapper(int x, int y, int z)
     {
-        Block block = chunk.getSections()[y >> CHUNK_SECTION_SHIFT].getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK).getBlock();
+        LevelChunkSection section = chunk.getSections()[y >> CHUNK_SECTION_SHIFT];
+        if (section == null) return null;
+        Block block = section.getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK).getBlock();
         return BlockShapeWrapper.getBlockShapeWrapper(block, this, x, y, z);
     }
 
@@ -140,9 +143,11 @@ public class ChunkWrapper implements IChunkWrapper
 
     public boolean isWaterLogged(int x, int y, int z)
     {
-        BlockState blockState = chunk.getSections()[y >> CHUNK_SECTION_SHIFT].getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK);
+        LevelChunkSection section = chunk.getSections()[y >> CHUNK_SECTION_SHIFT];
+        if (section == null) return false;
+        BlockState blockState = section.getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK);
 
-//		//This type of block is always in water
+		//This type of block is always in water
         return (!(blockState.getBlock() instanceof LiquidBlockContainer) && (blockState.getBlock() instanceof SimpleWaterloggedBlock))
                 && (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED));
     }
