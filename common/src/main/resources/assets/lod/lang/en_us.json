@@ -1,6 +1,7 @@
 {
   "lod.title": "Distant Horizons",
   "lod.config.title": "Distant Horizons config",
+  "lod.config.ShowButton": "Show menu button",
   "lod.config.client": "Client",
   "lod.config.client.graphics": "Graphics",
   "lod.config.client.graphics.quality": "Quality options",

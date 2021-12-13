@@ -1,5 +1,6 @@
 package com.seibel.lod.forge.mixins;
 
+import com.seibel.lod.common.Config;
 import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.common.wrappers.config.TexturedButtonWidget;
 import com.seibel.lod.core.ModInfo;
@@ -31,7 +32,8 @@ public class MixinOptionsScreen extends Screen {
 
     @Inject(at = @At("HEAD"),method = "init")
     private void lodconfig$init(CallbackInfo ci) {
-        this.addRenderableWidget(new TexturedButtonWidget(
+        if (Config.ShowButton)
+            this.addRenderableWidget(new TexturedButtonWidget(
                 // Where the button is on the screen
                 this.width / 2 - 180, this.height / 6 - 12,
                 // Width and height of the button

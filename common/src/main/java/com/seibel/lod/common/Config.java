@@ -54,6 +54,8 @@ public class Config extends ConfigGui
 	@ScreenEntry(to = "client")
 	public static Client client;
 
+	@Entry
+	public static boolean ShowButton = true;
 
 	public static class Client
 	{

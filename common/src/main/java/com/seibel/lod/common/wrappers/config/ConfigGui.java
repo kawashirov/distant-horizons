@@ -1,8 +1,8 @@
 package com.seibel.lod.common.wrappers.config;
 
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
+// Uses https://github.com/mwanji/toml4j for toml
 import com.moandjiezana.toml.Toml;
+// TomlWriter is threadsave while Writer is not
 import com.moandjiezana.toml.TomlWriter;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.seibel.lod.core.ModInfo;
@@ -142,30 +142,17 @@ public abstract class ConfigGui {
         String category;
     }
 
-    public static final Map<String,Class<?>> configClass = new HashMap<>();
+    public static final Map<String, Class<?>> configClass = new HashMap<>();
+//    public static List<String> nestedClasses = new ArrayList<>();
     private static Path path;
 
     public static void init(String modid, Class<?> config) {
         path = Minecraft.getInstance().gameDirectory.toPath().resolve("config").resolve(modid + ".toml");
-        configClass.put(modid, config);
 
-        for (Field field : config.getFields()) {
-            EntryInfo info = new EntryInfo();
-            if (field.isAnnotationPresent(Entry.class) || field.isAnnotationPresent(Comment.class) || field.isAnnotationPresent(ScreenEntry.class))
-                // TODO[CONFIG]: Fix the check for client/server
-//                if (Minecraft.getInstance().getEnvironmentType() == EnvType.CLIENT)
-                    initClient(modid, field, info);
-            if (field.isAnnotationPresent(Entry.class))
-                try {
-                    info.defaultValue = field.get(null);
-                } catch (IllegalAccessException ignored) {}
-            if (field.isAnnotationPresent(ScreenEntry.class)) {
-                ConfigGui.init(modid, field.getType());
-            }
+        // Goes through all the nested classes and normal classes and inits them
+        initClass(modid, config, "");
 
-        }
-
-        // File saving stuff
+        // Save and read the file
         try {
             new Toml().read(Files.newBufferedReader(path)).to(config);
         }   catch (Exception e) {
@@ -181,8 +168,31 @@ public abstract class ConfigGui {
                 }
         }
     }
+    private static void initClass(String modid, Class<?> config, String category) {
+        String e = modid + (category != "" ? "." + category : "");
+        configClass.put(e, config);
+//        nestedClasses.add(e);
+        for (Field field : config.getFields()) {
+            EntryInfo info = new EntryInfo();
+            if (field.isAnnotationPresent(Entry.class) || field.isAnnotationPresent(Comment.class) || field.isAnnotationPresent(ScreenEntry.class))
+                // TODO[CONFIG]: Fix the check for client/server
+//                if (Minecraft.getInstance().getEnvironmentType() == EnvType.CLIENT)
+                initClient(modid, field, info);
+            if (field.isAnnotationPresent(Entry.class))
+                try {
+                    info.defaultValue = field.get(null);
+                } catch (IllegalAccessException ignored) {}
+            if (field.isAnnotationPresent(ScreenEntry.class)) {
+                String c = field.getAnnotation(Category.class) != null ? field.getAnnotation(Category.class).value() : "";
+                initClass(modid, field.getType(),
+                        (c != "" ? c + "." : "")
+                                + field.getAnnotation(ScreenEntry.class).to());
+            }
+        }
+    }
     private static void initClient(String modid, Field field, EntryInfo info) {
         // This adds the buttons to the queue to be rendered
+        // DONT CALL ON SERVER AS SERVERS CANT RENDER STUFF
         Class<?> type = field.getType();
         Category c = field.getAnnotation(Category.class);
         Entry e = field.getAnnotation(Entry.class);
@@ -268,6 +278,7 @@ public abstract class ConfigGui {
         try {
             if (!Files.exists(path))
                 Files.createFile(path);
+
             new TomlWriter().write(configClass.get(modid).getDeclaredConstructor().newInstance(), path.toFile());
         } catch (Exception e) {
             e.printStackTrace();
@@ -301,11 +312,14 @@ public abstract class ConfigGui {
             }
         }
         private void loadValues() {
-            try {
-                new Toml().read(Files.newBufferedReader(path)).to(configClass.get(modid));
-            }   catch (Exception e) {
-                write(modid);
-            }
+//            for (int i = 0; i < nestedClasses.size(); i++) {
+                try {
+//                    new Toml().read(Files.newBufferedReader(path)).to(configClass.get(nestedClasses.get(i)));
+                    new Toml().read(Files.newBufferedReader(path)).to(configClass.get(modid));
+                } catch (Exception e) {
+                    write(modid);
+                }
+//            }
 
             for (EntryInfo info : entries) {
                 if (info.field.isAnnotationPresent(Entry.class))
@@ -528,11 +542,4 @@ public abstract class ConfigGui {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface Comment {}
-
-    public static class HiddenAnnotationExclusionStrategy implements ExclusionStrategy {
-        public boolean shouldSkipClass(Class<?> clazz) { return false; }
-        public boolean shouldSkipField(FieldAttributes fieldAttributes) {
-            return fieldAttributes.getAnnotation(Entry.class) == null;
-        }
-    }
 }
