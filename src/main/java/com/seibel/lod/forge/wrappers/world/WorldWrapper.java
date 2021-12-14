@@ -146,5 +146,10 @@ public class WorldWrapper implements IWorldWrapper
 		return world.getSeaLevel();
 	}
 	
+	@Override
+	public short getMinHeight()
+	{
+		return 0;
+	}
 	
 }
