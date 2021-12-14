@@ -145,11 +145,4 @@ public class WorldWrapper implements IWorldWrapper
 		// TODO this is depreciated, what should we use instead?
 		return world.getSeaLevel();
 	}
-	
-	@Override
-	public short getMinHeight()
-	{
-		return 0;
-	}
-	
 }
