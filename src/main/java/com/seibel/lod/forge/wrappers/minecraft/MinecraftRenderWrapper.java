@@ -6,8 +6,6 @@ import java.util.HashSet;
 
 import org.lwjgl.opengl.GL15;
 
-import com.seibel.lod.core.handlers.IReflectionHandler;
-import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.objects.math.Mat4f;
 import com.seibel.lod.core.objects.math.Vec3d;
 import com.seibel.lod.core.objects.math.Vec3f;
@@ -37,7 +35,7 @@ import net.minecraft.util.math.vector.Vector3f;
  * related to rendering in Minecraft.
  * 
  * @author James Seibel
- * @version 12-12-2021
+ * @version 12-14-2021
  */
 public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 {
@@ -151,35 +149,26 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	 * will be incorrectly added, even though they are outside render range).
 	 */
 	@Override
-	public HashSet<AbstractChunkPosWrapper> getRenderedChunks()
+	public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks()
 	{
 		HashSet<AbstractChunkPosWrapper> loadedPos = new HashSet<>();
 		
-		// TODO James needs to allow for circular references in the SingletonHandler
-		IReflectionHandler reflectionHandler = ReflectionHandler.instance;
+		// Wow, those are some long names!
 		
-		if (reflectionHandler.sodiumPresent())
+		// go through every RenderInfo to get the compiled chunks
+		WorldRenderer renderer = MC.levelRenderer;
+		for (WorldRenderer.LocalRenderInformationContainer worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
 		{
-			loadedPos = reflectionHandler.getSodiumRenderedChunks();
-		}
-		else
-		{
-			// Wow, those are some long names!
-			
-			// go through every RenderInfo to get the compiled chunks
-			WorldRenderer renderer = MC.levelRenderer;
-			for (WorldRenderer.LocalRenderInformationContainer worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
+			CompiledChunk compiledChunk = worldRenderer$LocalRenderInformationContainer.chunk.getCompiledChunk();
+			if (!compiledChunk.hasNoRenderableLayers())
 			{
-				CompiledChunk compiledChunk = worldRenderer$LocalRenderInformationContainer.chunk.getCompiledChunk();
-				if (!compiledChunk.hasNoRenderableLayers())
-				{
-					// add the ChunkPos for every rendered chunk
-					BlockPos bpos = worldRenderer$LocalRenderInformationContainer.chunk.getOrigin();
-					
-					loadedPos.add(new ChunkPosWrapper(bpos));
-				}
+				// add the ChunkPos for every rendered chunk
+				BlockPos bpos = worldRenderer$LocalRenderInformationContainer.chunk.getOrigin();
+				
+				loadedPos.add(new ChunkPosWrapper(bpos));
 			}
 		}
+		
 		
 		return loadedPos;
 	}
