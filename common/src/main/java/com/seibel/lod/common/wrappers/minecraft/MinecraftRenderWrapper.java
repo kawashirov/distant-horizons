@@ -142,39 +142,40 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
      * will be incorrectly added, even though they are outside render range).
      */
     @Override
-    public HashSet<AbstractChunkPosWrapper> getRenderedChunks()
+    public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks()
     {
+        // TODO: Fix/Implement this!
+        /*
+        
         HashSet<AbstractChunkPosWrapper> loadedPos = new HashSet<>();
-
-        // TODO James needs to allow for circular references in the SingletonHandler
-        IReflectionHandler reflectionHandler = ReflectionHandler.instance;
-
-        if (reflectionHandler.sodiumPresent())
+        
+        // Wow, those are some long names!
+        // go through every RenderInfo to get the compiled chunks
+        
+        LevelRenderer renderer = MC.levelRenderer;
+        for (LevelRenderer.RenderChunkInfo worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
         {
-            loadedPos = reflectionHandler.getSodiumRenderedChunks();
-        }
-        else
-        {
-            // Wow, those are some long names!
-
-            // go through every RenderInfo to get the compiled chunks
-            /*
-            LevelRenderer renderer = MC.levelRenderer;
-            for (LevelRenderer.RenderChunkInfo worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
+            CompiledChunk compiledChunk = worldRenderer$LocalRenderInformationContainer.chunk.getCompiledChunk();
+            if (!compiledChunk.hasNoRenderableLayers())
             {
-                CompiledChunk compiledChunk = worldRenderer$LocalRenderInformationContainer.chunk.getCompiledChunk();
-                if (!compiledChunk.hasNoRenderableLayers())
-                {
-                    // add the ChunkPos for every rendered chunk
-                    BlockPos bpos = worldRenderer$LocalRenderInformationContainer.chunk.getOrigin();
+                // add the ChunkPos for every rendered chunk
+                BlockPos bpos = worldRenderer$LocalRenderInformationContainer.chunk.getOrigin();
 
-                    loadedPos.add(new ChunkPosWrapper(bpos));
-                }
+                loadedPos.add(new ChunkPosWrapper(bpos));
             }
-             */
         }
-
-        return loadedPos;
+        
+        */
+        // For now, call the default method 
+        return IMinecraftRenderWrapper.super.getVanillaRenderedChunks();
+    }
+    
+    @Override
+    public HashSet<AbstractChunkPosWrapper> getSodiumRenderedChunks()
+    {
+    	// TODO: Implement this!
+        // For now, call the default method 
+        return IMinecraftRenderWrapper.super.getVanillaRenderedChunks();
     }
 
 
