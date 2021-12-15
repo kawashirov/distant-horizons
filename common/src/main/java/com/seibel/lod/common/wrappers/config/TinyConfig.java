@@ -1,11 +1,13 @@
 package com.seibel.lod.common.wrappers.config;
 
-// Uses https://github.com/mwanji/toml4j for toml
-import com.moandjiezana.toml.Toml;
-// TomlWriter is threadsave while Writer is not
-import com.moandjiezana.toml.TomlWriter;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.seibel.lod.core.ModInfo;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -23,8 +25,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -38,127 +38,58 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+
 /**
- * Based upon TinyConfig
- * https://github.com/Minenash/TinyConfig
- *
- * Credits to Motschen
+ *  Based on https://github.com/Minenash/TinyConfig
+ *  Credits to Minenash
  *
  * @author coolGi2007
- * @version 12-09-2021
  */
-// Everything required is packed into 1 class, so it is easier to copy
-// This config should work for both Fabric and Forge as long as you use Mojang mappings
+
+// Original tiny config updated to use mojang mappings
+// This is only used for testing and should be deleted once testing is done
 @SuppressWarnings("unchecked")
-public abstract class ConfigGui {
-    /*
-         Small wiki on how to use this config
-
-     Create a new class that extends this class
-     Every time you want to add a button put an @Entry before it and if you want it to be within a range then do @Entry(min = 0, max = 10)
-     MAKE SURE THE VARIABLE YOU ARE PUTTING IN IS A STATIC VARIABLE
-
-
-
-     If you want to make a config asking if you want coolness then do this
-
-     public class Config extends ConfigGui {
-         @Entry
-         public static bool coolness = false;
-     }
-
-
-
-     If you want a comment then do this
-     @Comment public static Comment ThisIsACoolComment;
-
-
-
-     For putting nested classes do @ScreenEntry for example
-
-     public class Config extends ConfigGui {
-        @Entry
-        public static bool coolness = false;
-
-        @ScreenEntry
-        public static NestedScreen nestedScreen = new NestedScreen();
-
-        public static void NestedScreen() {
-            @Category("nestedScreen")
-            @Entry(min = 0, max = 100)
-            public static int howMuchCoolness = 0;
-        }
-     }
-
-
-    All the text should be in your language file
-    There won't be a tutorial on how to make on since it is easy
-
-
-        FOR THE CONFIG TO SHOW
-     you need to have this somewhere in the main class
-     ConfigGui.init(ModInfo.ID, Config.class);
-
-     For mod-menu integration look at the ModMenuIntegration class and put a reference to it in the fabric.mod.json
-
-     To make a textured button to the options screen look in the mixins/MixinOptionsScreen class and TexturedButtonWidget class
-     Remember to add the MixinOptionsScreen to your ModID.mixins.json
-    */
-
-    /*
-            This is a small to do list for the config
-
-        Make config save
-        Make wiki better
-        Add a way to add min and max from another variable
-     */
+public abstract class TinyConfig {
     private static final Pattern INTEGER_ONLY = Pattern.compile("(-?[0-9]*)");
     private static final Pattern DECIMAL_ONLY = Pattern.compile("-?([\\d]+\\.?[\\d]*|[\\d]*\\.?[\\d]+|\\.)");
 
     private static final List<EntryInfo> entries = new ArrayList<>();
 
-    private static class ConfigScreenConfigs {
-        // This contains all the configs for the configs
-        public static final int SpaceFromRightScreen = 10;
-        public static final int ButtonWidthSpacing = 5;
-        public static final int ResetButtonWidth = 40;
-    }
-
     protected static class EntryInfo {
         Field field;
         Object widget;
-        int width = 0;
+        int width;
         int max;
         Map.Entry<EditBox, Component> error;
         Object defaultValue;
         Object value;
         String tempValue;
         boolean inLimits = true;
-        String id;              // ModID
+        String id;
         TranslatableComponent name;
         int index;
-        boolean hideOption = false; // Hides the button
-        boolean button = false; // This asks if it is a button to goto a new screen
-        String gotoScreen = ""; // This is only called if button is true
-        String category;
     }
 
-    public static final Map<String, Class<?>> configClass = new HashMap<>();
-//    public static List<String> nestedClasses = new ArrayList<>();
+    public static final Map<String,Class<?>> configClass = new HashMap<>();
     private static Path path;
 
+    private static final Gson gson = new GsonBuilder().excludeFieldsWithModifiers(Modifier.TRANSIENT).excludeFieldsWithModifiers(Modifier.PRIVATE).addSerializationExclusionStrategy(new HiddenAnnotationExclusionStrategy()).setPrettyPrinting().create();
+
     public static void init(String modid, Class<?> config) {
-        path = Minecraft.getInstance().gameDirectory.toPath().resolve("config").resolve(modid + ".toml");
+        path = FabricLoader.getInstance().getConfigDir().resolve(modid + ".json");
+        configClass.put(modid, config);
 
-        // Goes through all the nested classes and normal classes and inits them
-        initClass(modid, config, "");
-
-        // Save and read the file
-        try {
-            new Toml().read(Files.newBufferedReader(path)).to(config);
-        }   catch (Exception e) {
-            write(modid);
+        for (Field field : config.getFields()) {
+            EntryInfo info = new EntryInfo();
+            if (field.isAnnotationPresent(Entry.class) || field.isAnnotationPresent(Comment.class))
+                if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) initClient(modid, field, info);
+            if (field.isAnnotationPresent(Entry.class))
+                try {
+                    info.defaultValue = field.get(null);
+                } catch (IllegalAccessException ignored) {}
         }
+        try { gson.fromJson(Files.newBufferedReader(path), config); }
+        catch (Exception e) { write(modid); }
 
         for (EntryInfo info : entries) {
             if (info.field.isAnnotationPresent(Entry.class))
@@ -169,59 +100,28 @@ public abstract class ConfigGui {
                 }
         }
     }
-    private static void initClass(String modid, Class<?> config, String category) {
-        String e = modid + (category != "" ? "." + category : "");
-        configClass.put(e, config);
-        for (Field field : config.getFields()) {
-            EntryInfo info = new EntryInfo();
-            if (field.isAnnotationPresent(Entry.class) || field.isAnnotationPresent(Comment.class) || field.isAnnotationPresent(ScreenEntry.class))
-                // TODO[CONFIG]: Fix the check for client/server
-//                if (Minecraft.getInstance().getEnvironmentType() == EnvType.CLIENT)
-                initClient(modid, field, info);
-            if (field.isAnnotationPresent(Entry.class))
-                try {
-                    info.defaultValue = field.get(null);
-                } catch (IllegalAccessException ignored) {}
-            if (field.isAnnotationPresent(ScreenEntry.class)) {
-                String c = field.getAnnotation(Category.class) != null ? field.getAnnotation(Category.class).value() : "";
-                initClass(modid, field.getType(),
-                        (c != "" ? c + "." : "")
-                                + field.getAnnotation(ScreenEntry.class).to());
-            }
-        }
-    }
+    @Environment(EnvType.CLIENT)
     private static void initClient(String modid, Field field, EntryInfo info) {
-        // This adds the buttons to the queue to be rendered
-        // DONT CALL ON SERVER AS SERVERS CANT RENDER STUFF
         Class<?> type = field.getType();
-        Category c = field.getAnnotation(Category.class);
         Entry e = field.getAnnotation(Entry.class);
-        ScreenEntry s = field.getAnnotation(ScreenEntry.class);
-        if (e!=null)
-            info.width = e.width();
-        else if (s!=null)
-            info.width = s.width();
+        info.width = e != null ? e.width() : 0;
         info.field = field;
         info.id = modid;
-        info.category = c != null ? c.value() : "";
 
         if (e != null) {
-            if (!e.name().equals(""))
-                info.name = new TranslatableComponent(e.name());
-            if (type == int.class) // For int
-                textField(info, Integer::parseInt, INTEGER_ONLY, e.min(), e.max(), true);
-            else if (type == double.class) // For double
-                textField(info, Double::parseDouble, DECIMAL_ONLY, e.min(), e.max(), false);
-            else if (type == String.class || type == List.class) {  // For string or list
+            if (!e.name().equals("")) info.name = new TranslatableComponent(e.name());
+            if (type == int.class) textField(info, Integer::parseInt, INTEGER_ONLY, e.min(), e.max(), true);
+            else if (type == double.class) textField(info, Double::parseDouble, DECIMAL_ONLY, e.min(), e.max(), false);
+            else if (type == String.class || type == List.class) {
                 info.max = e.max() == Double.MAX_VALUE ? Integer.MAX_VALUE : (int) e.max();
                 textField(info, String::length, null, Math.min(e.min(), 0), Math.max(e.max(), 1), true);
-            } else if (type == boolean.class) { // For boolean
+            } else if (type == boolean.class) {
                 Function<Object, Component> func = value -> new TextComponent((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
                 info.widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
                     info.value = !(Boolean) info.value;
                     button.setMessage(func.apply(info.value));
                 }, func);
-            } else if (type.isEnum()) { // For enum
+            } else if (type.isEnum()) {
                 List<?> values = Arrays.asList(field.getType().getEnumConstants());
                 Function<Object, Component> func = value -> new TranslatableComponent(modid + ".config." + "enum." + type.getSimpleName() + "." + info.value.toString());
                 info.widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
@@ -230,11 +130,6 @@ public abstract class ConfigGui {
                     button.setMessage(func.apply(info.value));
                 }, func);
             }
-        } else if (s != null) {
-            if (!s.name().equals(""))
-                info.name = new TranslatableComponent(s.name());
-            info.button = true;
-            info.gotoScreen = (info.category != "" ? info.category + "." : "") + s.to();
         }
         entries.add(info);
     }
@@ -272,34 +167,31 @@ public abstract class ConfigGui {
         };
     }
 
-    // Creates the modid.toml
     public static void write(String modid) {
-        path = Minecraft.getInstance().gameDirectory.toPath().resolve("config").resolve(modid + ".toml");
+        path = FabricLoader.getInstance().getConfigDir().resolve(modid + ".json");
         try {
-            if (!Files.exists(path))
-                Files.createFile(path);
-            new TomlWriter().write(configClass.get(modid).getDeclaredConstructor().newInstance(), path.toFile());
+            if (!Files.exists(path)) Files.createFile(path);
+            Files.write(path, gson.toJson(configClass.get(modid).getDeclaredConstructor().newInstance()).getBytes());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
-    public static Screen getScreen(Screen parent, String modid, String category) {
-        return new ConfigScreen(parent, modid, category);
+    @Environment(EnvType.CLIENT)
+    public static Screen getScreen(Screen parent, String modid, String a) {
+        return new ConfigScreen(parent, modid);
     }
+    @Environment(EnvType.CLIENT)
     private static class ConfigScreen extends Screen {
-        protected ConfigScreen(Screen parent, String modid, String category) {
-            super(new TranslatableComponent(modid + ".config.title"));
+        protected ConfigScreen(Screen parent, String modid) {
+            super(new TranslatableComponent(modid + ".config." + "title"));
             this.parent = parent;
             this.modid = modid;
-            this.category = category;
             this.translationPrefix = modid + ".config.";
         }
         private final String translationPrefix;
         private final Screen parent;
         private final String modid;
-        private String category;
-        private ConfigListWidget list;
+        private MidnightConfigListWidget list;
         private boolean reload = false;
 
         // Real Time config update //
@@ -311,14 +203,8 @@ public abstract class ConfigGui {
             }
         }
         private void loadValues() {
-//            for (int i = 0; i < nestedClasses.size(); i++) {
-                try {
-//                    new Toml().read(Files.newBufferedReader(path)).to(configClass.get(nestedClasses.get(i)));
-                    new Toml().read(Files.newBufferedReader(path)).to(configClass.get(modid));
-                } catch (Exception e) {
-                    write(modid);
-                }
-//            }
+            try { gson.fromJson(Files.newBufferedReader(path), configClass.get(modid)); }
+            catch (Exception e) { write(modid); }
 
             for (EntryInfo info : entries) {
                 if (info.field.isAnnotationPresent(Entry.class))
@@ -349,13 +235,13 @@ public abstract class ConfigGui {
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }));
 
-            this.list = new ConfigListWidget(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
+            this.list = new MidnightConfigListWidget(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
             if (this.minecraft != null && this.minecraft.level != null) this.list.setRenderBackground(false);
             this.addWidget(this.list);
             for (EntryInfo info : entries) {
-                if (info.id.equals(modid) && info.category.matches(category) && !info.hideOption) {
-                    TranslatableComponent name = Objects.requireNonNullElseGet(info.name, () -> new TranslatableComponent(translationPrefix + (info.category != "" ? info.category + "." : "") + info.field.getName()));
-                    Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - info.width - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, new TextComponent("Reset").withStyle(ChatFormatting.RED), (button -> {
+                if (info.id.equals(modid)) {
+                    TranslatableComponent name = Objects.requireNonNullElseGet(info.name, () -> new TranslatableComponent(translationPrefix + info.field.getName()));
+                    Button resetButton = new Button(width - 205, 0, 40, 20, new TextComponent("Reset").withStyle(ChatFormatting.RED), (button -> {
                         info.value = info.defaultValue;
                         info.tempValue = info.defaultValue.toString();
                         info.index = 0;
@@ -367,44 +253,37 @@ public abstract class ConfigGui {
 
                     if (info.widget instanceof Map.Entry) {
                         Map.Entry<Button.OnPress, Function<Object, Component>> widget = (Map.Entry<Button.OnPress, Function<Object, Component>>) info.widget;
-                        if (info.field.getType().isEnum())
-                            widget.setValue(value -> new TranslatableComponent(translationPrefix + "enum." + info.field.getType().getSimpleName() + "." + info.value.toString()));
-                        this.list.addButton(new Button(this.width - info.width - ConfigScreenConfigs.SpaceFromRightScreen, 0, info.width, 20, widget.getValue().apply(info.value), widget.getKey()), resetButton, null, name);
+                        if (info.field.getType().isEnum()) widget.setValue(value -> new TranslatableComponent(translationPrefix + "enum." + info.field.getType().getSimpleName() + "." + info.value.toString()));
+                        this.list.addButton(new Button(width - 160, 0,150, 20, widget.getValue().apply(info.value), widget.getKey()),resetButton, null,name);
                     } else if (info.field.getType() == List.class) {
                         if (!reload) info.index = 0;
-                        EditBox widget = new EditBox(font, this.width - info.width - ConfigScreenConfigs.SpaceFromRightScreen, 0, info.width, 20, null);
+                        EditBox widget = new EditBox(font, width - 160, 0, 150, 20, null);
                         widget.setMaxLength(info.width);
-                        if (info.index < ((List<String>) info.value).size())
-                            widget.insertText((String.valueOf(((List<String>) info.value).get(info.index))));
-                        else widget.insertText("");
+                        if (info.index < ((List<String>)info.value).size()) widget.setValue((String.valueOf(((List<String>)info.value).get(info.index))));
+                        else widget.setValue("");
                         Predicate<String> processor = ((BiFunction<EditBox, Button, Predicate<String>>) info.widget).apply(widget, done);
                         widget.setFilter(processor);
                         resetButton.setWidth(20);
                         resetButton.setMessage(new TextComponent("R").withStyle(ChatFormatting.RED));
-                        Button cycleButton = new Button(this.width - 185, 0, 20, 20, new TextComponent(String.valueOf(info.index)).withStyle(ChatFormatting.GOLD), (button -> {
-                            ((List<String>) info.value).remove("");
+                        Button cycleButton = new Button(width - 185, 0, 20, 20, new TextComponent(String.valueOf(info.index)).withStyle(ChatFormatting.GOLD), (button -> {
+                            ((List<String>)info.value).remove("");
                             double scrollAmount = list.getScrollAmount();
                             this.reload = true;
                             info.index = info.index + 1;
-                            if (info.index > ((List<String>) info.value).size()) info.index = 0;
+                            if (info.index > ((List<String>)info.value).size()) info.index = 0;
                             Objects.requireNonNull(minecraft).setScreen(this);
                             list.setScrollAmount(scrollAmount);
                         }));
                         this.list.addButton(widget, resetButton, cycleButton, name);
                     } else if (info.widget != null) {
-                        EditBox widget = new EditBox(font, this.width - info.width - ConfigScreenConfigs.SpaceFromRightScreen + 2, 0, info.width - 4, 20, null);
+                        EditBox widget = new EditBox(font, width - 160, 0, 150, 20, null);
                         widget.setMaxLength(info.width);
                         widget.insertText(info.tempValue);
                         Predicate<String> processor = ((BiFunction<EditBox, Button, Predicate<String>>) info.widget).apply(widget, done);
                         widget.setFilter(processor);
                         this.list.addButton(widget, resetButton, null, name);
-                    } else if (info.button) {
-                        Button widget = new Button(this.width / 2 - info.width, this.height - 28, info.width*2, 20, name, (button -> {
-                            Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, ModInfo.ID, info.gotoScreen));
-                        }));
-                        this.list.addButton(widget, null, null, null);
                     } else {
-                        this.list.addButton(null, null, null, name);
+                        this.list.addButton(null,null,null,name);
                     }
                 }
             }
@@ -414,19 +293,15 @@ public abstract class ConfigGui {
         public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
             this.renderBackground(matrices);
             this.list.render(matrices, mouseX, mouseY, delta);
-            // Render title
             drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF);
 
-
-            // TODO[CONFIG]: Fix the tooltip
-            /*
             for (EntryInfo info : entries) {
                 if (info.id.equals(modid)) {
                     if (list.getHoveredButton(mouseX,mouseY).isPresent()) {
                         AbstractWidget buttonWidget = list.getHoveredButton(mouseX,mouseY).get();
                         Component text = ButtonEntry.buttonsWithText.get(buttonWidget);
-                        TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category != "" ? info.category + "." : "") + info.field.getName());
-                        String key = translationPrefix + (info.category != "" ? info.category + "." : "") + info.field.getName() + ".@tooltip";
+                        TranslatableComponent name = new TranslatableComponent(this.translationPrefix + info.field.getName());
+                        String key = translationPrefix + info.field.getName() + ".tooltip";
 
                         if (info.error != null && text.equals(name)) renderTooltip(matrices, info.error.getValue(), mouseX, mouseY);
                         else if (I18n.exists(key) && text.equals(name)) {
@@ -438,14 +313,14 @@ public abstract class ConfigGui {
                     }
                 }
             }
-             */
             super.render(matrices,mouseX,mouseY,delta);
         }
     }
-    public static class ConfigListWidget extends ContainerObjectSelectionList<ButtonEntry> {
+    @Environment(EnvType.CLIENT)
+    public static class MidnightConfigListWidget extends ContainerObjectSelectionList<ButtonEntry> {
         Font textRenderer;
 
-        public ConfigListWidget(Minecraft minecraftClient, int i, int j, int k, int l, int m) {
+        public MidnightConfigListWidget(Minecraft minecraftClient, int i, int j, int k, int l, int m) {
             super(minecraftClient, i, j, k, l, m);
             this.centerListVertically = false;
             textRenderer = minecraftClient.font;
@@ -510,35 +385,30 @@ public abstract class ConfigGui {
         @Override
         public List<? extends NarratableEntry> narratables() {return children;}
     }
-
-    // Where the @Entry is defined
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface Entry {
-        int width() default 150;
+        int width() default 100;
         double min() default Double.MIN_NORMAL;
         double max() default Double.MAX_VALUE;
         String name() default "";
     }
-
-    // Where the @ScreenEntry is defined
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface ScreenEntry {
-        String to();
-        String name() default "";
-        int width() default 100;
+        String to() default "";
     }
-
-    // Where the @Category is defined
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface Category {
-        String value() default "";
+        String value();
     }
+    @Retention(RetentionPolicy.RUNTIME) @Target(ElementType.FIELD) public @interface Comment {}
 
-    // Where the @Comment is defined
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    public @interface Comment {}
+    public static class HiddenAnnotationExclusionStrategy implements ExclusionStrategy {
+        public boolean shouldSkipClass(Class<?> clazz) { return false; }
+        public boolean shouldSkipField(FieldAttributes fieldAttributes) {
+            return fieldAttributes.getAnnotation(Entry.class) == null;
+        }
+    }
 }
