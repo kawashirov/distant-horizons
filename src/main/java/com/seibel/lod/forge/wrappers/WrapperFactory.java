@@ -63,6 +63,15 @@ public class WrapperFactory implements IWrapperFactory
 	}
 	
 	@Override
+	public AbstractChunkPosWrapper createChunkPos(long xAndZPositionCombined)
+	{
+		int x = (int) (xAndZPositionCombined & Integer.MAX_VALUE);
+		int z = (int) (xAndZPositionCombined >> Long.SIZE / 2) & Integer.MAX_VALUE;
+		
+		return new ChunkPosWrapper(x, z);
+	}
+	
+	@Override
 	public AbstractChunkPosWrapper createChunkPos(int x, int z)
 	{
 		return new ChunkPosWrapper(x, z);
