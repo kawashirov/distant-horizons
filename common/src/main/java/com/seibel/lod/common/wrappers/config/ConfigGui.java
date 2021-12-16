@@ -5,6 +5,7 @@ import com.moandjiezana.toml.Toml;
 // TomlWriter is threadsave while Writer is not
 import com.moandjiezana.toml.TomlWriter;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.seibel.lod.common.Config;
 import com.seibel.lod.core.ModInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -111,6 +112,12 @@ public abstract class ConfigGui {
         Make config save
         Make wiki better
         Add a way to add min and max from another variable
+     */
+    /*
+            List of hacky things that are done that should be done properly
+
+        The buttons that dont show are still loded but just not rendered
+        The screen with is set to double so the scroll bar dosnt show
      */
     private static final Pattern INTEGER_ONLY = Pattern.compile("(-?[0-9]*)");
     private static final Pattern DECIMAL_ONLY = Pattern.compile("-?([\\d]+\\.?[\\d]*|[\\d]*\\.?[\\d]+|\\.)");
@@ -311,14 +318,11 @@ public abstract class ConfigGui {
             }
         }
         private void loadValues() {
-//            for (int i = 0; i < nestedClasses.size(); i++) {
-                try {
-//                    new Toml().read(Files.newBufferedReader(path)).to(configClass.get(nestedClasses.get(i)));
-                    new Toml().read(Files.newBufferedReader(path)).to(configClass.get(modid));
-                } catch (Exception e) {
-                    write(modid);
-                }
-//            }
+            try {
+                new Toml().read(Files.newBufferedReader(path)).to(configClass.get(modid));
+            } catch (Exception e) {
+                write(modid);
+            }
 
             for (EntryInfo info : entries) {
                 if (info.field.isAnnotationPresent(Entry.class))
@@ -349,20 +353,19 @@ public abstract class ConfigGui {
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }));
 
-            this.list = new ConfigListWidget(this.minecraft, this.width, this.height, 32, this.height - 32, 25);
+            this.list = new ConfigListWidget(this.minecraft, this.width*2, this.height, 32, this.height - 32, 25);
             if (this.minecraft != null && this.minecraft.level != null) this.list.setRenderBackground(false);
             this.addWidget(this.list);
             for (EntryInfo info : entries) {
                 if (info.id.equals(modid) && info.category.matches(category) && !info.hideOption) {
+//                if (info.id.equals(modid) && !info.hideOption) {
                     TranslatableComponent name = Objects.requireNonNullElseGet(info.name, () -> new TranslatableComponent(translationPrefix + (info.category != "" ? info.category + "." : "") + info.field.getName()));
                     Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - info.width - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, new TextComponent("Reset").withStyle(ChatFormatting.RED), (button -> {
                         info.value = info.defaultValue;
                         info.tempValue = info.defaultValue.toString();
                         info.index = 0;
-                        double scrollAmount = list.getScrollAmount();
                         this.reload = true;
                         Objects.requireNonNull(minecraft).setScreen(this);
-                        list.setScrollAmount(scrollAmount);
                     }));
 
                     if (info.widget instanceof Map.Entry) {
@@ -372,7 +375,7 @@ public abstract class ConfigGui {
                         this.list.addButton(new Button(this.width - info.width - ConfigScreenConfigs.SpaceFromRightScreen, 0, info.width, 20, widget.getValue().apply(info.value), widget.getKey()), resetButton, null, name);
                     } else if (info.field.getType() == List.class) {
                         if (!reload) info.index = 0;
-                        EditBox widget = new EditBox(font, this.width - info.width - ConfigScreenConfigs.SpaceFromRightScreen, 0, info.width, 20, null);
+                        EditBox widget = new EditBox(font, this.width- info.width - ConfigScreenConfigs.SpaceFromRightScreen, 0, info.width, 20, null);
                         widget.setMaxLength(info.width);
                         if (info.index < ((List<String>) info.value).size())
                             widget.insertText((String.valueOf(((List<String>) info.value).get(info.index))));
@@ -383,12 +386,10 @@ public abstract class ConfigGui {
                         resetButton.setMessage(new TextComponent("R").withStyle(ChatFormatting.RED));
                         Button cycleButton = new Button(this.width - 185, 0, 20, 20, new TextComponent(String.valueOf(info.index)).withStyle(ChatFormatting.GOLD), (button -> {
                             ((List<String>) info.value).remove("");
-                            double scrollAmount = list.getScrollAmount();
                             this.reload = true;
                             info.index = info.index + 1;
                             if (info.index > ((List<String>) info.value).size()) info.index = 0;
                             Objects.requireNonNull(minecraft).setScreen(this);
-                            list.setScrollAmount(scrollAmount);
                         }));
                         this.list.addButton(widget, resetButton, cycleButton, name);
                     } else if (info.widget != null) {
@@ -450,8 +451,6 @@ public abstract class ConfigGui {
             this.centerListVertically = false;
             textRenderer = minecraftClient.font;
         }
-//        @Override
-        public int getScrollbarPositionX() { return this.width -7; }
 
         public void addButton(AbstractWidget button, AbstractWidget resetButton, AbstractWidget indexButton, Component text) {
             this.addEntry(ButtonEntry.create(button, text, resetButton, indexButton));

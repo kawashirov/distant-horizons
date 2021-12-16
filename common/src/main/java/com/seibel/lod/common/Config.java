@@ -20,8 +20,6 @@
 package com.seibel.lod.common;
 
 import com.seibel.lod.common.wrappers.config.ConfigGui;
-import com.seibel.lod.common.wrappers.config.TinyConfig;
-import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.enums.config.*;
 import com.seibel.lod.core.enums.rendering.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced.*;
