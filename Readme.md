@@ -9,13 +9,13 @@ If you want to see a quick demo, check out a video covering the mod here:
 
 <a href="https://www.youtube.com/watch?v=H2tnvEVbO1c" target="_blank">![Minecraft Level Of Detail (LOD) mod - Alpha 1.5](https://i.ytimg.com/vi_webp/H2tnvEVbO1c/mqdefault.webp)</a>
 
-Forge version: 39.0.5\
+Forge version: 39.0.5 and 38.0.14\
 Fabric version: 0.12.12\
 Fabric API version: 0.44.0+1.18
 
 Notes:\
 This version has been confirmed to work in Eclipse and Retail Minecraft.\
-(Retail running forge version 1.18.1-39.0.5 and fabric version 1.18-0.12.12)
+(Retail running forge version 1.18.1-39.0.5 and fabric version 1.18-0.12.12 and 1.18.1-0.12.12)
 
 
 ## source code installation
