@@ -152,7 +152,7 @@ public abstract class ConfigGui {
     }
 
     public static final Map<String, Class<?>> configClass = new HashMap<>();
-//    public static List<String> nestedClasses = new ArrayList<>();
+    //    public static List<String> nestedClasses = new ArrayList<>();
     private static Path path;
 
     public static void init(String modid, Class<?> config) {
