@@ -71,8 +71,8 @@ Source code uses Mojang mappings.
 
 Build only Fabric: `./gradlew fabric:build`\
 Build only Forge: `./gradlew forge:build`\
-Run the Fabric client: `./gradlew fabric:runClient`\
-Run the Forge client: `./gradlew fabric:runClient`
+Run the Fabric client (for debugging): `./gradlew fabric:runClient`\
+Run the Forge client (for debugging): `./gradlew forge:runClient`
 
 ## Open Source Acknowledgements
 
