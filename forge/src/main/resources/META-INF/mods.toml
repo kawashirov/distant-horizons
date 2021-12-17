@@ -1,58 +1,27 @@
-#// This is an example mods.toml file. It contains the data relating to the loading mods.
-#// There are several mandatory fields (#mandatory), and many more that are optional (#optional).
-#// The overall format is standard TOML format, v0.5.0.
-#// Note that there are a couple of TOML lists in this file.
-#// Find more information on toml format here:  https://github.com/toml-lang/toml
-#// The name of the mod loader type to load - for regular FML @Mod mods it should be javafml
-modLoader="javafml" #mandatory
 
-#// A version range to match for said mod loader - for regular FML @Mod it will be the forge version
-loaderVersion="[36,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
-
-#// The license for you mod. This is mandatory metadata and allows for easier comprehension of your redistributive properties.
-#// Review your options at https://choosealicense.com/. All rights reserved is the default copyright stance, and is thus the default here.
+modLoader="javafml" #//mandatory
+loaderVersion="[36,)" # // mandatory. This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
 license="GNU GPLv3"
+issueTrackerURL="https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues"
 
-#// A URL to refer people to when problems occur with this mod
-issueTrackerURL="https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues" #optional
-#// A list of mods - how many allowed here is determined by the individual mod loader
-[[mods]] #mandatory
 
-#// The modid of the mod
-modId="lod" #mandatory
+[[mods]] #//mandatory
+	modId="lod" #//mandatory
+	version= "${file.jarVersion}" #//mandatory, gets the version number from jar populated by the build.gradle script
+	displayName="Distant Horizons" #//mandatory
+	#//updateJSONURL="https://change.me.example.invalid/updates.json" # A URL to query for updates for this mod. See the JSON update specification https://mcforge.readthedocs.io/en/latest/gettingstarted/autoupdate/
+	displayURL="https://www.curseforge.com/minecraft/mc-mods/lod-level-of-detail"
+	logoFile="logo.png"
+	catalogueImageIcon="icon.png"
+	credits="Massive thanks to: Leonardo, Cola, Ran, and CoolGi. For their hard work to bring Distant Horizons to where it is today. - James"
+	authors="James Seibel, Leonardo Amato, and Cola"
+	#//mandatory. The description text for the mod
+	description= ''' This mod generates and renders simplified terrain beyond the normal view distance at a low performance cost. Allowing you to see much farther without turning your game into a slideshow. '''
+	#// if not set defaults to "false"
+	clientSideOnly="true"
+	#// if not set defaults to "BOTH"
+	#// TODO change to "BOTH" when we add server support
+	side="CLIENT"
+	#// Allow any version to be present (or not) on the server
+	acceptableRemoteVersions="*"
 
-#// The version number of the mod - there's a few well known ${} variables useable here or just hardcode it
-#//${file.jarVersion} will substitute the value of the Implementation-Version as read from the mod's JAR file metadata
-#// see the associated build.gradle script for how to populate this completely automatically during a build
-version="1.5.4a" #mandatory
-
-#// A display name for the mod
-displayName="Distant Horizons" #mandatory
-
-#// A URL to query for updates for this mod. See the JSON update specification https://mcforge.readthedocs.io/en/latest/gettingstarted/autoupdate/
-#//updateJSONURL="https://change.me.example.invalid/updates.json" #optional
-
-#// A URL for the "homepage" for this mod, displayed in the mod UI
-displayURL="https://www.curseforge.com/minecraft/mc-mods/lod-level-of-detail" #optional
-
-#// A file name (in the root of the mod JAR) containing a logo for display
-logoFile="logo.png" #optional
-
-#// A file name (in the root of the mod JAR) containing a icon for display by catalogue
-catalogueImageIcon="icon.png"
-
-#// A text field displayed in the mod UI
-credits="TechnoVision, Vike, and Darkhax for their modding tutorials." #optional
-
-#// A text field displayed in the mod UI
-authors="James Seibel, Leonardo Amato, and Cola" #optional
-
-#// The description text for the mod (multi line!) (#mandatory)
-description='''This mod generates and renders simplified terrain beyond the normal view distance, at a low performance cost.'''
-
-#// to make mod be not required on forge server
-acceptableRemoteVersions="*"
-
-#// to not load on server at all as there is no integration at all
-#// TODO remove when we add server support
-clientSideOnly=true
