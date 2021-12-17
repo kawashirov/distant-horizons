@@ -4,16 +4,18 @@
   "version": "${version}",
 
   "name": "Distant Horizons Fabric",
-  "description": "This mod generates and renders simplified terrain beyond the normal view distance, at a low performance cost",
+  "description": "This mod generates and renders simplified terrain beyond the normal view distance at a low performance cost. Allowing you to see much farther without turning your game into a slideshow.",
   "authors": [
+	"James Seibel",
+	"Leonardo Amato",
+	"Cola",
     "coolGi2007",
-    "Ran",
-    "Original LOD Creators"
+    "Ran"
   ],
 
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/lod-level-of-detail",
-    "sources": "https://gitlab.com/jeseibel/minecraft-lod-mod/-/tree/1.17.1_fabric",
+    "sources": "https://gitlab.com/jeseibel/minecraft-lod-mod/",
     "issues": "https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues"
   },
 
