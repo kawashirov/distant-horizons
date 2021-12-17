@@ -137,6 +137,11 @@ public class WorldWrapper implements IWorldWrapper
         return world.getHeight();
     }
 
+    @Override
+    public short getMinHeight() {
+        return (short) world.getMinBuildHeight();
+    }
+
     /** @throws UnsupportedOperationException if the WorldWrapper isn't for a ServerWorld */
     @Override
     public File getSaveFolder() throws UnsupportedOperationException

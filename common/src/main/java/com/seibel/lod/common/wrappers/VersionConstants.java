@@ -41,4 +41,9 @@ public class VersionConstants implements IVersionConstants {
         }
          */
     }
+
+    @Override
+    public int getWorldGenerationCountPerThread() {
+        return 1;
+    }
 }

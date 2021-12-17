@@ -5,7 +5,6 @@ import com.moandjiezana.toml.Toml;
 // TomlWriter is threadsave while Writer is not
 import com.moandjiezana.toml.TomlWriter;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.seibel.lod.common.Config;
 import com.seibel.lod.core.ModInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -32,6 +31,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -123,6 +123,8 @@ public abstract class ConfigGui {
     private static final Pattern DECIMAL_ONLY = Pattern.compile("-?([\\d]+\\.?[\\d]*|[\\d]*\\.?[\\d]+|\\.)");
 
     private static final List<EntryInfo> entries = new ArrayList<>();
+
+    private static TomlWriter tomlWriter = new TomlWriter();
 
     private static class ConfigScreenConfigs {
         // This contains all the configs for the configs
@@ -285,7 +287,7 @@ public abstract class ConfigGui {
         try {
             if (!Files.exists(path))
                 Files.createFile(path);
-            new TomlWriter().write(configClass.get(modid).getDeclaredConstructor().newInstance(), path.toFile());
+            tomlWriter.write(configClass.get(modid).getDeclaredConstructor().newInstance());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -401,7 +403,7 @@ public abstract class ConfigGui {
                         this.list.addButton(widget, resetButton, null, name);
                     } else if (info.button) {
                         Button widget = new Button(this.width / 2 - info.width, this.height - 28, info.width*2, 20, name, (button -> {
-                            Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, ModInfo.ID, info.gotoScreen));
+                            Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, modid, info.gotoScreen));
                         }));
                         this.list.addButton(widget, null, null, null);
                     } else {
