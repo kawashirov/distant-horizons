@@ -236,9 +236,9 @@ jar {
     manifest {
         attributes([
             "Specification-Title": "LOD",
-            "Specification-Version": "1", // We are version 1 of ourselves
+            "Specification-Version": version,
             "Implementation-Title": project.name,
-            "Implementation-Version": "1",
+            "Implementation-Version": version,
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
 			"MixinConfigs": "lod.mixins.json",
         ])
