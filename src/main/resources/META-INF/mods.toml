@@ -14,7 +14,7 @@ issueTrackerURL="https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues"
 	logoFile="logo.png"
 	catalogueImageIcon="icon.png"
 	credits="Massive thanks to: Leonardo, Cola, Ran, and CoolGi. For their hard work to bring Distant Horizons to where it is today. - James"
-	authors="James Seibel, Leonardo Amato, and Cola"
+	authors="James Seibel, Leonardo Amato, Cola, Ran, and coolGi2007"
 	#//mandatory. The description text for the mod
 	description= ''' This mod generates and renders simplified terrain beyond the normal view distance at a low performance cost. Allowing you to see much farther without turning your game into a slideshow. '''
 	#// if not set defaults to "false"
