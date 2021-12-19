@@ -162,9 +162,10 @@ public class Config extends ConfigGui
 			@Entry
 			public static DistanceGenerationMode distanceGenerationMode = IWorldGenerator.DISTANCE_GENERATION_MODE_DEFAULT;
 
+			// FIXME: Temperary override. In 1.18, the newer Unstable gnerator is more usable
 			@Category("client.worldGenerator")
 			@Entry
-			public static boolean allowUnstableFeatureGeneration = IWorldGenerator.ALLOW_UNSTABLE_FEATURE_GENERATION_DEFAULT;
+			public static boolean allowUnstableFeatureGeneration = true;//IWorldGenerator.ALLOW_UNSTABLE_FEATURE_GENERATION_DEFAULT;
 
 			@Category("client.worldGenerator")
 			@Entry
