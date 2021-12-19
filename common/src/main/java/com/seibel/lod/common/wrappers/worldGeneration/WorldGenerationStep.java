@@ -8,10 +8,13 @@ import com.seibel.lod.core.objects.lod.LodDimension;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -35,6 +38,12 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
 public class WorldGenerationStep {
+	
+	private static <T> T joinAsync(CompletableFuture<T> f) {
+		//while (!f.isDone()) Thread.yield();
+		return f.join();
+	}
+	
 	ServerLevel level;
 	ChunkGenerator generator;
 	StructureManager structures;
@@ -42,7 +51,10 @@ public class WorldGenerationStep {
     LodBuilder lodBuilder;
     LodDimension lodDim;
     Registry<Biome> biomes;
-	public ExecutorService executors = Executors.newFixedThreadPool(8, new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
+    //public ExecutorService executors = Executors.newWorkStealingPool();
+    public ExecutorService executors = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
+    
+	//public ExecutorService executors = Executors.newFixedThreadPool(8, new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
 	
 	public WorldGenerationStep(ServerLevel level, LodBuilder lodBuilder, LodDimension lodDim) {
 		System.out.println("================WORLD_GEN_STEP_INITING=============");
@@ -143,8 +155,8 @@ public class WorldGenerationStep {
 		return chunk;
 	}
 
-	public void generateLodFromList(ChunkPos pos, int range, Steps step) {
-		System.out.println("generateLodFromList("+pos.toString()+", "+range+", "+step+")");
+	public void generateLodFromList(int i, ChunkPos pos, int range, Steps step) {
+		System.out.println(i+": generateLodFromList("+pos.toString()+", "+range+", "+step+")");
 		GridList<ChunkSynconizer> referencedChunks;
 		DistanceGenerationMode generationMode;
 		switch (step) {
@@ -178,9 +190,9 @@ public class WorldGenerationStep {
 			referencedChunks = generateFeatures(pos, range);
 			generationMode = DistanceGenerationMode.FEATURES;
 			break;
-		case Light:
-			return;
 		case LiquidCarvers:
+			return;
+		case Light:
 			return;
 		default:
 			return;
@@ -194,11 +206,15 @@ public class WorldGenerationStep {
 				lodBuilder.generateLodNodeFromChunk(lodDim, new ChunkWrapper(target.chunk), new LodBuilderConfig(generationMode));
 			}
 		}
-		System.out.println("EXIT: generateLodFromList("+pos.toString()+", "+range+", "+step+")");
+		for (ChunkSynconizer sync : referencedChunks) {
+			chunks.remove(sync.chunk.getPos().toLong());
+		}
+		
+		System.out.println(i+": EXIT: generateLodFromList("+pos.toString()+", "+range+", "+step+")");
 	} 
 	
 	public GridList<ChunkSynconizer> generateStructureStart(ChunkPos pos, int range) {
-		System.out.println("generateStructureStart("+pos.toString()+", "+range+")");
+		//System.out.println("generateStructureStart("+pos.toString()+", "+range+")");
 		int cx = pos.x;
 		int cy = pos.z;
 		GridList<ChunkSynconizer> chunks = new GridList<ChunkSynconizer>(range);
@@ -233,7 +249,7 @@ public class WorldGenerationStep {
 	public GridList<ChunkSynconizer> generateStructureReference(ChunkPos pos, int range) {
 		int prestepRange = range + StepStructureReference.RANGE;
 		GridList<ChunkSynconizer> referencedChunks = generateStructureStart(pos, prestepRange);
-		System.out.println("generateStructureReference(" + pos.toString() + ", " + range + ")");
+		//System.out.println("generateStructureReference(" + pos.toString() + ", " + range + ")");
 		int centreIndex = referencedChunks.size() / 2;
 
 		for (int ox = -range; ox <= range; ox++) {
@@ -267,7 +283,7 @@ public class WorldGenerationStep {
 	public GridList<ChunkSynconizer> generateBiomes(ChunkPos pos, int range) {
 		int prestepRange = range + 1;
 		GridList<ChunkSynconizer> referencedChunks = generateStructureReference(pos, prestepRange);
-		System.out.println("generateBiomes("+pos.toString()+", "+range+")");
+		//System.out.println("generateBiomes("+pos.toString()+", "+range+")");
 		int centreIndex = referencedChunks.size() / 2;
 
 		for (int ox = -range; ox <= range; ox++) {
@@ -300,6 +316,7 @@ public class WorldGenerationStep {
 		// System.out.println("generateNoise("+pos.toString()+", "+range+")");
 		int prestepRange = range + 1;
 		GridList<ChunkSynconizer> referencedChunks = generateBiomes(pos, prestepRange);
+		//System.out.println("generateNoise("+pos.toString()+", "+range+")");
 		int centreIndex = referencedChunks.size() / 2;
 
 		for (int ox = -range; ox <= range; ox++) {
@@ -332,6 +349,7 @@ public class WorldGenerationStep {
 	public GridList<ChunkSynconizer> generateSurface(ChunkPos pos, int range) {
 		int prestepRange = range + 1;
 		GridList<ChunkSynconizer> referencedChunks = generateNoise(pos, prestepRange);
+		//System.out.println("generateSurface("+pos.toString()+", "+range+")");
 		int centreIndex = referencedChunks.size() / 2;
 
 		for (int ox = -range; ox <= range; ox++) {
@@ -366,6 +384,7 @@ public class WorldGenerationStep {
 	public GridList<ChunkSynconizer> generateCarvers(ChunkPos pos, int range) {
 		int prestepRange = range + 1;
 		GridList<ChunkSynconizer> referencedChunks = generateSurface(pos, prestepRange);
+		//System.out.println("generateCarvers("+pos.toString()+", "+range+")");
 		int centreIndex = referencedChunks.size() / 2;
 
 		for (int ox = -range; ox <= range; ox++) {
@@ -399,6 +418,7 @@ public class WorldGenerationStep {
 	public GridList<ChunkSynconizer> generateFeatures(ChunkPos pos, int range) {
 		int prestepRange = range + 1;
 		GridList<ChunkSynconizer> referencedChunks = generateCarvers(pos, prestepRange);
+		//System.out.println("generateFeatures("+pos.toString()+", "+range+")");
 		int centreIndex = referencedChunks.size() / 2;
 
 		for (int ox = -range; ox <= range; ox++) {
@@ -499,8 +519,8 @@ public class WorldGenerationStep {
 		public static final ChunkAccess generate(ServerLevel level, ChunkGenerator generator,
 				List<ChunkAccess> chunkList, ChunkAccess chunk, Executor worker) {
 			WorldGenRegion worldGenRegion = new WorldGenRegion(level, chunkList, STATUS, -1);
-			chunk = generator.createBiomes(biomeRegistry, worker, Blender.of(worldGenRegion),
-					level.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunk).join();
+				chunk = joinAsync(generator.createBiomes(biomeRegistry, worker, Blender.of(worldGenRegion),
+						level.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunk));
 			((ProtoChunk) chunk).setStatus(STATUS);
 			return chunk;
 		}
@@ -519,8 +539,8 @@ public class WorldGenerationStep {
 		public static final ChunkAccess generate(ServerLevel level, ChunkGenerator generator,
 				List<ChunkAccess> chunkList, ChunkAccess chunk, Executor worker) {
 			WorldGenRegion worldGenRegion = new WorldGenRegion(level, chunkList, STATUS, 0);
-			chunk = generator.fillFromNoise(worker, Blender.of(worldGenRegion),
-					level.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunk).join();
+			chunk = joinAsync(generator.fillFromNoise(worker, Blender.of(worldGenRegion),
+					level.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunk));
 			((ProtoChunk) chunk).setStatus(STATUS);
 			return chunk;
 		}
@@ -635,12 +655,12 @@ public class WorldGenerationStep {
 
 		public static final ChunkAccess generate(ChunkAccess chunk) {
 			((ProtoChunk) chunk).setStatus(STATUS);
-			return lightEngine.lightChunk(chunk, chunk.isLightCorrect()).join();
+			return joinAsync(lightEngine.lightChunk(chunk, chunk.isLightCorrect()));
 		}
 
 		public static final ChunkAccess load(ChunkAccess chunk) {
 			((ProtoChunk) chunk).setStatus(STATUS);
-			return lightEngine.lightChunk(chunk, chunk.isLightCorrect()).join();
+			return joinAsync(lightEngine.lightChunk(chunk, chunk.isLightCorrect()));
 		}
 	}
 
