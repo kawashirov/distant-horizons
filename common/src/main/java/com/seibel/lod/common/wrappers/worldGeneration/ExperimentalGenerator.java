@@ -26,7 +26,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 	private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 	public WorldGenerationStep generationGroup;
 	public LodDimension targetLodDim;
-	public static final int generationGroupSize = 1;
+	public static final int generationGroupSize = 8;
 	public static int numberOfGenerationPoints = 8;
 	private int generationFutureDebugIDs = 0;
 
