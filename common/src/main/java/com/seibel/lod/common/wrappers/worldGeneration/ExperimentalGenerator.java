@@ -110,6 +110,26 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 
 		for (int i = 0; i < maxIteration; i++) {
 
+			// We have nearPos to go though
+			if (i < nearCount && posToGenerate.getNthDetail(i, true) != 0) {
+				positionGoneThough++;
+				// TODO: Add comment here on why theres a '-1'.
+				// Not sure what's happening here. This is copied from previous codes.
+				byte detailLevel = (byte) (posToGenerate.getNthDetail(i, true) - 1);
+				int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, true));
+				int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, true));
+				if (checkIfPositionIsValid(chunkX, chunkZ)) {
+					ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
+					futuresChunkPos.add(chunkPos);
+					futures.add(executor.submit(() -> {
+						generationGroup.generateLodFromList(generationFutureDebugIDs++, chunkPos, generationGroupSize,
+								Steps.Features);
+					}));
+					toGenerate--;
+				}
+			}
+			if (toGenerate <= 0)
+				break;
 
 			// We have farPos to go though
 			if (i < farCount && posToGenerate.getNthDetail(i, false) != 0) {
@@ -133,26 +153,6 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 				break;
 			
 
-			// We have nearPos to go though
-			if (i < nearCount && posToGenerate.getNthDetail(i, true) != 0) {
-				positionGoneThough++;
-				// TODO: Add comment here on why theres a '-1'.
-				// Not sure what's happening here. This is copied from previous codes.
-				byte detailLevel = (byte) (posToGenerate.getNthDetail(i, true) - 1);
-				int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, true));
-				int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, true));
-				if (checkIfPositionIsValid(chunkX, chunkZ)) {
-					ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
-					futuresChunkPos.add(chunkPos);
-					futures.add(executor.submit(() -> {
-						generationGroup.generateLodFromList(generationFutureDebugIDs++, chunkPos, generationGroupSize,
-								Steps.Features);
-					}));
-					toGenerate--;
-				}
-			}
-			if (toGenerate <= 0)
-				break;
 			
 		}
 		if (targetToGenerate != toGenerate) {
