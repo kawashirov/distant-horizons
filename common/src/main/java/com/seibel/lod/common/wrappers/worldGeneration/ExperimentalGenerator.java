@@ -3,7 +3,6 @@ package com.seibel.lod.common.wrappers.worldGeneration;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
@@ -22,18 +21,48 @@ import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractExperimenta
 import net.minecraft.world.level.ChunkPos;
 
 public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWrapper {
+	private static class GenerationEvent {
+		private static int generationFutureDebugIDs = 0;
+		ChunkPos p;
+		int r;
+		Future<?> f;
+		public GenerationEvent(ChunkPos pos, int range, WorldGenerationStep generationGroup) {
+			p = pos;
+			r = range;
+			f = generationGroup.executors.submit(() -> {
+				generationGroup.generateLodFromList(generationFutureDebugIDs++, pos, range,
+						Steps.Features);
+				});
+		}
+		public boolean isCompleted() {
+			return f.isDone();
+		}
+		public void join() {
+			try {
+				f.get();
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+		public boolean tooClose(int cx, int cz, int cr) {
+			int dist = Math.min(Math.abs(cx - p.x), Math.abs(cz - p.z));
+			return dist<r+cr;
+		}
+		
+	}
+	
+	
 	private static final IMinecraftWrapper MC = SingletonHandler.get(IMinecraftWrapper.class);
 	private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 	public WorldGenerationStep generationGroup;
 	public LodDimension targetLodDim;
 	public static final int generationGroupSize = 8;
+	public static final int generationGroupSizeFar = 0;
 	public static int numberOfGenerationPoints = 8;
-	private int generationFutureDebugIDs = 0;
 
 	private int estimatedSampleNeeded = 128;
 
-	private LinkedList<Future<?>> futures = new LinkedList<Future<?>>();
-	private LinkedList<ChunkPos> futuresChunkPos = new LinkedList<ChunkPos>();
+	private LinkedList<GenerationEvent> events = new LinkedList<GenerationEvent>();
 
 	public ExperimentalGenerator(LodBuilder newLodBuilder, LodDimension newLodDimension, IWorldWrapper worldWrapper) {
 		super(newLodBuilder, newLodDimension, worldWrapper);
@@ -42,53 +71,35 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 				newLodDimension);
 	}
 
-	private static boolean isFarEnough(int genRange, int cax, int cay, int cbx, int cby) {
-		int dist = Math.min(Math.abs(cax - cbx), Math.abs(cay - cby));
-		// return true;
-		// TODO: tune this value
-		return dist > genRange * 2 + 8;
-	}
-
-	private boolean checkIfPositionIsValid(int chunkX, int chunkZ) {
-		for (ChunkPos pos : futuresChunkPos) {
-			if (!isFarEnough(generationGroupSize, pos.x, pos.z, chunkX, chunkZ)) {
-				return false;
-			}
+	private boolean checkIfPositionIsValid(int chunkX, int chunkZ, int range) {
+		for (GenerationEvent event : events) {
+			if (event.tooClose(chunkX, chunkZ, range)) return false;
 		}
 		return true;
 	}
 
 	@Override
 	public void queueGenerationRequests(LodDimension lodDim, LodBuilder lodBuilder) {
-		ExecutorService executor = generationGroup.executors;
 		DistanceGenerationMode mode = CONFIG.client().worldGenerator().getDistanceGenerationMode();
 
 		if (mode == DistanceGenerationMode.NONE || !MC.hasSinglePlayerServer())
 			return;
 
 		// Update all current out standing jobs
-		Iterator<Future<?>> iter = futures.iterator();
-		Iterator<ChunkPos> posIter = futuresChunkPos.iterator();
+		Iterator<GenerationEvent> iter = events.iterator();
 		while (iter.hasNext()) {
-			posIter.next();
-			Future<?> future = iter.next();
-			if (future.isDone()) {
-				try {
-					future.get();
-				} catch (InterruptedException | ExecutionException e) {
-					e.printStackTrace();
-				} finally {
-					iter.remove();
-					posIter.remove();
-				}
+			GenerationEvent event = iter.next();
+			if (event.isCompleted()) {
+				event.join();
+				iter.remove();
 			}
 		}
 
 		// If we still all jobs running, return.
-		if (futures.size() >= numberOfGenerationPoints)
+		if (events.size() >= numberOfGenerationPoints)
 			return;
 
-		final int targetToGenerate = numberOfGenerationPoints - futures.size();
+		final int targetToGenerate = numberOfGenerationPoints - events.size();
 		int toGenerate = targetToGenerate;
 		int positionGoneThough = 0;
 
@@ -118,13 +129,9 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 				byte detailLevel = (byte) (posToGenerate.getNthDetail(i, true) - 1);
 				int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, true));
 				int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, true));
-				if (checkIfPositionIsValid(chunkX, chunkZ)) {
+				if (checkIfPositionIsValid(chunkX, chunkZ, generationGroupSize)) {
 					ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
-					futuresChunkPos.add(chunkPos);
-					futures.add(executor.submit(() -> {
-						generationGroup.generateLodFromList(generationFutureDebugIDs++, chunkPos, generationGroupSize,
-								Steps.Features);
-					}));
+					events.add(new GenerationEvent(chunkPos, generationGroupSize, generationGroup));
 					toGenerate--;
 				}
 			}
@@ -139,13 +146,9 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 				byte detailLevel = (byte) (posToGenerate.getNthDetail(i, false) - 1);
 				int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, false));
 				int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, false));
-				if (checkIfPositionIsValid(chunkX, chunkZ)) {
+				if (checkIfPositionIsValid(chunkX, chunkZ, generationGroupSizeFar)) {
 					ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
-					futuresChunkPos.add(chunkPos);
-					futures.add(executor.submit(() -> {
-						generationGroup.generateLodFromList(generationFutureDebugIDs++, chunkPos, generationGroupSize,
-								Steps.Features);
-					}));
+					events.add(new GenerationEvent(chunkPos, generationGroupSizeFar, generationGroup));
 					toGenerate--;
 				}
 			}
