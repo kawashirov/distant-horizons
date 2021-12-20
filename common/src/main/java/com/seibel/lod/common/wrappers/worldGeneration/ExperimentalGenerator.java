@@ -4,8 +4,10 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
+import com.seibel.lod.common.wrappers.worldGeneration.WorldGenerationStep.GenerationEvent;
 import com.seibel.lod.common.wrappers.worldGeneration.WorldGenerationStep.Steps;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
@@ -21,44 +23,14 @@ import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractExperimenta
 import net.minecraft.world.level.ChunkPos;
 
 public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWrapper {
-	private static class GenerationEvent {
-		private static int generationFutureDebugIDs = 0;
-		ChunkPos p;
-		int r;
-		Future<?> f;
-		public GenerationEvent(ChunkPos pos, int range, WorldGenerationStep generationGroup) {
-			p = pos;
-			r = range;
-			f = generationGroup.executors.submit(() -> {
-				generationGroup.generateLodFromList(generationFutureDebugIDs++, pos, range,
-						Steps.Features);
-				});
-		}
-		public boolean isCompleted() {
-			return f.isDone();
-		}
-		public void join() {
-			try {
-				f.get();
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
-			}
-		}
-		public boolean tooClose(int cx, int cz, int cr) {
-			int dist = Math.min(Math.abs(cx - p.x), Math.abs(cz - p.z));
-			return dist<r+cr;
-		}
-		
-	}
-	
 	
 	private static final IMinecraftWrapper MC = SingletonHandler.get(IMinecraftWrapper.class);
 	private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 	public WorldGenerationStep generationGroup;
 	public LodDimension targetLodDim;
-	public static final int generationGroupSize = 8;
+	public static final int generationGroupSize = 4;
 	public static final int generationGroupSizeFar = 0;
-	public static int numberOfGenerationPoints = 8;
+	public static int numberOfGenerationPoints = CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads()*2;
 
 	private int estimatedSampleNeeded = 128;
 
@@ -81,6 +53,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 	@Override
 	public void queueGenerationRequests(LodDimension lodDim, LodBuilder lodBuilder) {
 		DistanceGenerationMode mode = CONFIG.client().worldGenerator().getDistanceGenerationMode();
+		numberOfGenerationPoints = CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads();
 
 		if (mode == DistanceGenerationMode.NONE || !MC.hasSinglePlayerServer())
 			return;
@@ -91,6 +64,10 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 			GenerationEvent event = iter.next();
 			if (event.isCompleted()) {
 				event.join();
+				iter.remove();
+			} else if (event.hasTimeout(5, TimeUnit.SECONDS)) {
+				System.err.println(event.id+": Timed out and terminated!");
+				event.terminate();
 				iter.remove();
 			}
 		}
@@ -120,7 +97,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		int maxIteration = Math.max(nearCount, farCount);
 
 		for (int i = 0; i < maxIteration; i++) {
-
+			
 			// We have nearPos to go though
 			if (i < nearCount && posToGenerate.getNthDetail(i, true) != 0) {
 				positionGoneThough++;
@@ -131,12 +108,12 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 				int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, true));
 				if (checkIfPositionIsValid(chunkX, chunkZ, generationGroupSize)) {
 					ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
-					events.add(new GenerationEvent(chunkPos, generationGroupSize, generationGroup));
+					events.add(new GenerationEvent(chunkPos, generationGroupSize, generationGroup, Steps.Features));
 					toGenerate--;
 				}
 			}
-			if (toGenerate <= 0)
-				break;
+			//if (toGenerate <= 0)
+			//	break;
 
 			// We have farPos to go though
 			if (i < farCount && posToGenerate.getNthDetail(i, false) != 0) {
@@ -148,18 +125,16 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 				int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, false));
 				if (checkIfPositionIsValid(chunkX, chunkZ, generationGroupSizeFar)) {
 					ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
-					events.add(new GenerationEvent(chunkPos, generationGroupSizeFar, generationGroup));
+					events.add(new GenerationEvent(chunkPos, generationGroupSizeFar, generationGroup, Steps.Surface));
 					toGenerate--;
 				}
 			}
 			if (toGenerate <= 0)
 				break;
 			
-
-			
 		}
 		if (targetToGenerate != toGenerate) {
-			if (toGenerate == 0) {
+			if (toGenerate <= 0) {
 				System.out.println(
 						"WorldGenerator: Sampled " + posToGenerate.getNumberOfPos() + " out of " + estimatedSampleNeeded
 								+ " points, started all targeted " + targetToGenerate + " generations.");
@@ -179,7 +154,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 				estimatedSampleNeeded = 32768;
 			System.out.println("WorldGenerator: Increasing estimatedSampleNeeeded to " + estimatedSampleNeeded);
 
-		} else if (toGenerate == 0 && positionGoneThough * 1.5 < posToGenerate.getNumberOfPos()) {
+		} else if (toGenerate <= 0 && positionGoneThough * 1.5 < posToGenerate.getNumberOfPos()) {
 			// We haven't gone though half of them and it's already enough.
 			// Let's shink the estimatedSampleNeeded.
 			estimatedSampleNeeded /= 1.2;

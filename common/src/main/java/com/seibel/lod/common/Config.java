@@ -121,9 +121,10 @@ public class Config extends ConfigGui
 				@Entry
 				public static FogDrawMode fogDrawMode = IFogQuality.FOG_DRAW_MODE_DEFAULT;
 
+				// FIXME: Currently worldFogColor gives black.
 				@Category("client.graphics.fogQuality")
 				@Entry
-				public static FogColorMode fogColorMode = IFogQuality.FOG_COLOR_MODE_DEFAULT;
+				public static FogColorMode fogColorMode = FogColorMode.USE_SKY_COLOR; //IFogQuality.FOG_COLOR_MODE_DEFAULT;
 
 				@Category("client.graphics.fogQuality")
 				@Entry

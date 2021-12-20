@@ -15,11 +15,13 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
+import com.seibel.lod.common.wrappers.worldGeneration.WorldGenerationStep.Steps;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
@@ -38,6 +40,65 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureMana
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
 public class WorldGenerationStep {
+
+	public static class GenerationEvent {
+		private static int generationFutureDebugIDs = 0;
+		ChunkPos pos;
+		int range;
+		Future<?> future;
+		long nanotime;
+		int id;
+		Steps target;
+		
+		public GenerationEvent(ChunkPos pos, int range, WorldGenerationStep generationGroup, Steps target) {
+			nanotime = System.nanoTime();
+			this.pos = pos;
+			this.range = range;
+			id = generationFutureDebugIDs++;
+			this.target = target;
+			future = generationGroup.executors.submit(() -> {
+				generationGroup.generateLodFromList(this);
+				});
+		}
+		public boolean isCompleted() {
+			return future.isDone();
+		}
+		public boolean hasTimeout(int duration, TimeUnit unit) {
+			long currentTime = System.nanoTime();
+			long delta = currentTime - nanotime;
+			return (delta > TimeUnit.NANOSECONDS.convert(duration, unit));
+		}
+		public void terminate() {
+			future.cancel(true);
+		}
+		public void join() {
+			try {
+				future.get();
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+		}
+		public boolean tooClose(int cx, int cz, int cr) {
+			int dist = Math.min(Math.abs(cx - pos.x), Math.abs(cz - pos.z));
+			return dist<range+cr;
+		}
+		public void refreshTimeout() {
+			nanotime = System.nanoTime();
+		}
+		
+		@Override
+		public String toString() {
+			return id + ":"+ range + "@"+ pos+"("+target+")";
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	private static <T> T joinAsync(CompletableFuture<T> f) {
 		//while (!f.isDone()) Thread.yield();
@@ -155,39 +216,41 @@ public class WorldGenerationStep {
 		return chunk;
 	}
 
-	public void generateLodFromList(int i, ChunkPos pos, int range, Steps step) {
-		System.out.println(i+": generateLodFromList("+pos.toString()+", "+range+", "+step+")");
+	public void generateLodFromList(GenerationEvent event) {
+		
+		System.out.println("Started event: "+event);
 		GridList<ChunkSynconizer> referencedChunks;
 		DistanceGenerationMode generationMode;
-		switch (step) {
+		Runnable lambda = () -> {event.refreshTimeout();};
+		switch (event.target) {
 		case Empty:
 			return;
 		case StructureStart:
-			referencedChunks = generateStructureStart(pos, range);
+			referencedChunks = generateStructureStart(lambda, event.pos, event.range);
 			generationMode = DistanceGenerationMode.NONE;
 			break;
 		case StructureReference:
-			referencedChunks = generateStructureReference(pos, range);
+			referencedChunks = generateStructureReference(lambda, event.pos, event.range);
 			generationMode = DistanceGenerationMode.NONE;
 			break;
 		case Biomes:
-			referencedChunks = generateBiomes(pos, range);
+			referencedChunks = generateBiomes(lambda, event.pos, event.range);
 			generationMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
 			break;
 		case Noise:
-			referencedChunks = generateNoise(pos, range);
+			referencedChunks = generateNoise(lambda, event.pos, event.range);
 			generationMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
 			break;
 		case Surface:
-			referencedChunks = generateSurface(pos, range);
+			referencedChunks = generateSurface(lambda, event.pos, event.range);
 			generationMode = DistanceGenerationMode.SURFACE;
 			break;
 		case Carvers:
-			referencedChunks = generateCarvers(pos, range);
+			referencedChunks = generateCarvers(lambda, event.pos, event.range);
 			generationMode = DistanceGenerationMode.SURFACE;
 			break;
 		case Features:
-			referencedChunks = generateFeatures(pos, range);
+			referencedChunks = generateFeatures(lambda, event.pos, event.range);
 			generationMode = DistanceGenerationMode.FEATURES;
 			break;
 		case LiquidCarvers:
@@ -199,26 +262,24 @@ public class WorldGenerationStep {
 		}
 		int centreIndex = referencedChunks.size() / 2;
 
-		for (int ox = -range; ox <= range; ox++) {
-			for (int oy = -range; oy <= range; oy++) {
+		for (int ox = -event.range; ox <= event.range; ox++) {
+			for (int oy = -event.range; oy <= event.range; oy++) {
 				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
 				ChunkSynconizer target = referencedChunks.get(targetIndex);
 				lodBuilder.generateLodNodeFromChunk(lodDim, new ChunkWrapper(target.chunk), new LodBuilderConfig(generationMode));
 			}
 		}
+		lambda.run();
 		for (ChunkSynconizer sync : referencedChunks) {
 			chunks.remove(sync.chunk.getPos().toLong());
 		}
-		
-		System.out.println(i+": EXIT: generateLodFromList("+pos.toString()+", "+range+", "+step+")");
+		System.out.println("Ended event: "+event);
 	} 
 	
-	public GridList<ChunkSynconizer> generateStructureStart(ChunkPos pos, int range) {
-		//System.out.println("generateStructureStart("+pos.toString()+", "+range+")");
+	public GridList<ChunkSynconizer> generateStructureStart(Runnable r, ChunkPos pos, int range) {
 		int cx = pos.x;
 		int cy = pos.z;
 		GridList<ChunkSynconizer> chunks = new GridList<ChunkSynconizer>(range);
-		
 		
 		for (int ox = -range; ox <= range; ox++) {
 			for (int oy = -range; oy <= range; oy++) {
@@ -242,14 +303,13 @@ public class WorldGenerationStep {
 				}
 			}
 		}
-		//System.out.println("EXIT: generateStructureStart("+pos.toString()+", "+range+") -> "+chunks);
+		r.run();
 		return chunks;
 	}
 
-	public GridList<ChunkSynconizer> generateStructureReference(ChunkPos pos, int range) {
+	public GridList<ChunkSynconizer> generateStructureReference(Runnable r, ChunkPos pos, int range) {
 		int prestepRange = range + StepStructureReference.RANGE;
-		GridList<ChunkSynconizer> referencedChunks = generateStructureStart(pos, prestepRange);
-		//System.out.println("generateStructureReference(" + pos.toString() + ", " + range + ")");
+		GridList<ChunkSynconizer> referencedChunks = generateStructureStart(r, pos, prestepRange);
 		int centreIndex = referencedChunks.size() / 2;
 
 		for (int ox = -range; ox <= range; ox++) {
@@ -275,15 +335,13 @@ public class WorldGenerationStep {
 				}
 			}
 		}
-		//System.out.println(
-		//		"EXIT: generateStructureReference(" + pos.toString() + ", " + range + ") -> " + referencedChunks);
+		r.run();
 		return referencedChunks;
 	}
 
-	public GridList<ChunkSynconizer> generateBiomes(ChunkPos pos, int range) {
+	public GridList<ChunkSynconizer> generateBiomes(Runnable r, ChunkPos pos, int range) {
 		int prestepRange = range + 1;
-		GridList<ChunkSynconizer> referencedChunks = generateStructureReference(pos, prestepRange);
-		//System.out.println("generateBiomes("+pos.toString()+", "+range+")");
+		GridList<ChunkSynconizer> referencedChunks = generateStructureReference(r, pos, prestepRange);
 		int centreIndex = referencedChunks.size() / 2;
 
 		for (int ox = -range; ox <= range; ox++) {
@@ -308,15 +366,13 @@ public class WorldGenerationStep {
 				}
 			}
 		}
-		//System.out.println("EXIT: generateBiomes("+pos.toString()+", "+range+") -> "+referencedChunks);
+		r.run();
 		return referencedChunks;
 	}
 
-	public GridList<ChunkSynconizer> generateNoise(ChunkPos pos, int range) {
-		// System.out.println("generateNoise("+pos.toString()+", "+range+")");
+	public GridList<ChunkSynconizer> generateNoise(Runnable r, ChunkPos pos, int range) {
 		int prestepRange = range + 1;
-		GridList<ChunkSynconizer> referencedChunks = generateBiomes(pos, prestepRange);
-		//System.out.println("generateNoise("+pos.toString()+", "+range+")");
+		GridList<ChunkSynconizer> referencedChunks = generateBiomes(r, pos, prestepRange);
 		int centreIndex = referencedChunks.size() / 2;
 
 		for (int ox = -range; ox <= range; ox++) {
@@ -342,14 +398,13 @@ public class WorldGenerationStep {
 				}
 			}
 		}
-		//System.out.println("EXIT: generateNoise(" + pos.toString() + ", " + range + ") -> " + referencedChunks);
+		r.run();
 		return referencedChunks;
 	}
 
-	public GridList<ChunkSynconizer> generateSurface(ChunkPos pos, int range) {
+	public GridList<ChunkSynconizer> generateSurface(Runnable r, ChunkPos pos, int range) {
 		int prestepRange = range + 1;
-		GridList<ChunkSynconizer> referencedChunks = generateNoise(pos, prestepRange);
-		//System.out.println("generateSurface("+pos.toString()+", "+range+")");
+		GridList<ChunkSynconizer> referencedChunks = generateNoise(r, pos, prestepRange);
 		int centreIndex = referencedChunks.size() / 2;
 
 		for (int ox = -range; ox <= range; ox++) {
@@ -376,15 +431,14 @@ public class WorldGenerationStep {
 				}
 			}
 		}
-		//System.out.println("EXIT: generateNoise(" + pos.toString() + ", " + range + ") -> " + referencedChunks);
+		r.run();
 		return referencedChunks;
 	}
 
 
-	public GridList<ChunkSynconizer> generateCarvers(ChunkPos pos, int range) {
+	public GridList<ChunkSynconizer> generateCarvers(Runnable r, ChunkPos pos, int range) {
 		int prestepRange = range + 1;
-		GridList<ChunkSynconizer> referencedChunks = generateSurface(pos, prestepRange);
-		//System.out.println("generateCarvers("+pos.toString()+", "+range+")");
+		GridList<ChunkSynconizer> referencedChunks = generateSurface(r, pos, prestepRange);
 		int centreIndex = referencedChunks.size() / 2;
 
 		for (int ox = -range; ox <= range; ox++) {
@@ -410,15 +464,14 @@ public class WorldGenerationStep {
 				}
 			}
 		}
-		//System.out.println("EXIT: generateNoise(" + pos.toString() + ", " + range + ") -> " + referencedChunks);
+		r.run();
 		return referencedChunks;
 	}
 
 
-	public GridList<ChunkSynconizer> generateFeatures(ChunkPos pos, int range) {
+	public GridList<ChunkSynconizer> generateFeatures(Runnable r, ChunkPos pos, int range) {
 		int prestepRange = range + 1;
-		GridList<ChunkSynconizer> referencedChunks = generateCarvers(pos, prestepRange);
-		//System.out.println("generateFeatures("+pos.toString()+", "+range+")");
+		GridList<ChunkSynconizer> referencedChunks = generateCarvers(r, pos, prestepRange);
 		int centreIndex = referencedChunks.size() / 2;
 
 		for (int ox = -range; ox <= range; ox++) {
@@ -444,7 +497,7 @@ public class WorldGenerationStep {
 				}
 			}
 		}
-		//System.out.println("EXIT: generateNoise(" + pos.toString() + ", " + range + ") -> " + referencedChunks);
+		r.run();
 		return referencedChunks;
 	}
 	
