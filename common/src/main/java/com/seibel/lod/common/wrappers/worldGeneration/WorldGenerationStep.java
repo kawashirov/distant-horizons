@@ -19,27 +19,58 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.WorldGenerationStep.Steps;
 
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.world.entity.ai.village.VillageSiege;
+import net.minecraft.world.entity.npc.CatSpawner;
+import net.minecraft.world.entity.npc.WanderingTraderSpawner;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.*;
+import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.server.level.ThreadedLevelLightEngine;
+import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.nbt.StreamTagVisitor;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.PatrolSpawner;
+import net.minecraft.world.level.levelgen.PhantomSpawner;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.blending.Blender;
+import net.minecraft.world.level.levelgen.structure.StructureCheck;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.world.level.storage.ServerLevelData;
+import net.minecraft.world.level.storage.WorldData;
 
 public class WorldGenerationStep {
+	
+	/*
+	public static class ChunkScanner implements ChunkScanAccess {
+
+		@Override
+		public CompletableFuture<Void> scanChunk(ChunkPos paramChunkPos, StreamTagVisitor paramStreamTagVisitor) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+		
+	}*/
+	
 
 	public static class GenerationEvent {
 		private static int generationFutureDebugIDs = 0;
@@ -97,9 +128,6 @@ public class WorldGenerationStep {
 	
 	
 	
-	
-	
-	
 	private static <T> T joinAsync(CompletableFuture<T> f) {
 		//while (!f.isDone()) Thread.yield();
 		return f.join();
@@ -108,10 +136,16 @@ public class WorldGenerationStep {
 	ServerLevel level;
 	ChunkGenerator generator;
 	StructureManager structures;
+	BiomeManager biomeManager;
+	WorldGenSettings worldGenSettings;
 	ThreadedLevelLightEngine lightEngine;
     LodBuilder lodBuilder;
     LodDimension lodDim;
+    StructureFeatureManager structureFeatureManager;
+    StructureCheck structureCheck;
     Registry<Biome> biomes;
+    RegistryAccess registry;
+    long worldSeed;
     //public ExecutorService executors = Executors.newWorkStealingPool();
     public ExecutorService executors = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
     
@@ -122,17 +156,44 @@ public class WorldGenerationStep {
 		this.level = level;
 		this.lodBuilder = lodBuilder;
 		this.lodDim = lodDim;
-		lightEngine = (ThreadedLevelLightEngine) level.getLightEngine();
-		biomes = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
-		generator = level.getChunkSource().getGenerator();
-		structures = level.getStructureManager();
-		StepStructureStart.onLevelLoad(level.getServer().getWorldData().worldGenSettings());
-		StepBiomes.onLevelLoad(level.registryAccess());
-		// Note: This will be problematic...
+		setupStuff();
+		
+		StepStructureStart.onLevelLoad(generator, worldGenSettings, registry, structureFeatureManager, structures, worldSeed, structureCheck);
+		StepStructureReference.onLevelLoad(level, generator, structureFeatureManager);
+		StepBiomes.onLevelLoad(level, generator, biomes, structureFeatureManager);
+		StepNoise.onLevelLoad(level, generator, structureFeatureManager);
+		StepSurface.onLevelLoad(level, generator, structureFeatureManager);
+		StepCarvers.onLevelLoad(level, generator, structureFeatureManager, worldSeed, biomeManager);
+		StepFeatures.onLevelLoad(level, generator, structureFeatureManager, lightEngine);
 		StepLight.onLevelLoad(lightEngine);
 		
 	}
 
+
+	private void setupStuff() {
+		lightEngine = (ThreadedLevelLightEngine) level.getLightEngine();
+		MinecraftServer server = level.getServer();
+		WorldData worldData = server.getWorldData();
+		worldGenSettings = worldData.worldGenSettings();
+		registry = server.registryAccess();
+		biomes = registry.registryOrThrow(Registry.BIOME_REGISTRY);
+		worldSeed = worldGenSettings.seed();
+		long biomeSeed = BiomeManager.obfuscateSeed(worldSeed);
+		biomeManager = new BiomeManager(level, biomeSeed);
+		structures = server.getStructureManager();
+		// TODO: Get the current level dimension
+		MappedRegistry<LevelStem> mappedRegistry = worldGenSettings.dimensions();
+		LevelStem levelStem = (LevelStem) mappedRegistry.get(LevelStem.OVERWORLD);
+		if (levelStem == null) {
+			throw new RuntimeException("There should already be a level.... Right???");
+		} else {
+			generator = levelStem.generator();
+		}
+		structureCheck = new StructureCheck(level.getChunkSource().chunkScanner(), registry, structures,
+				Level.OVERWORLD, generator, level, generator.getBiomeSource(), worldSeed, server.getFixerUpper());
+		structureFeatureManager = new StructureFeatureManager(level, worldGenSettings, structureCheck);
+	}
+	
 	public static final class GridList<T> extends ArrayList<T> implements List<T> {
 
 		private static final long serialVersionUID = 1585978374811888116L;
@@ -156,12 +217,29 @@ public class WorldGenerationStep {
 				int end = offsetOf(centreIndex, gridCentreToEdge, oy);
 				subGrid.addAll(this.subList(begin, end+1));
 			}
+			
+			//System.out.println("========================================\n"+
+			//this.toDetailString() + "\nTOOOOOOOOOOOOO\n"+subGrid.toDetailString()+
+			//"==========================================\n");
 			return subGrid;
 		}
 		
 		@Override
 		public String toString() {
 			return "GridList "+gridSize+"*"+gridSize+"["+size()+"]";
+		}
+		public String toDetailString() {
+			StringBuilder str = new StringBuilder("\n");
+			int i = 0;
+			for (T t : this) {
+				str.append(t.toString());
+				str.append(", ");
+				i++;
+				if (i%gridSize == 0) {
+					str.append("\n");
+				}
+			}
+			return str.toString();
 		}
 	}
 
@@ -195,6 +273,11 @@ public class WorldGenerationStep {
 		public void set(Steps newStep) {
 			completedStep = newStep;
 		}
+		
+		@Override
+		public String toString() {
+			return chunk.getPos().toString();
+		}
 	}
 
 	ConcurrentHashMap<Long, ChunkSynconizer> chunks = new ConcurrentHashMap<Long, ChunkSynconizer>();
@@ -217,7 +300,7 @@ public class WorldGenerationStep {
 	}
 
 	public void generateLodFromList(GenerationEvent event) {
-		
+		try {
 		System.out.println("Started event: "+event);
 		GridList<ChunkSynconizer> referencedChunks;
 		DistanceGenerationMode generationMode;
@@ -274,6 +357,10 @@ public class WorldGenerationStep {
 			chunks.remove(sync.chunk.getPos().toLong());
 		}
 		System.out.println("Ended event: "+event);
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			throw e;
+		}
 	} 
 	
 	public GridList<ChunkSynconizer> generateStructureStart(Runnable r, ChunkPos pos, int range) {
@@ -281,8 +368,8 @@ public class WorldGenerationStep {
 		int cy = pos.z;
 		GridList<ChunkSynconizer> chunks = new GridList<ChunkSynconizer>(range);
 		
-		for (int ox = -range; ox <= range; ox++) {
-			for (int oy = -range; oy <= range; oy++) {
+		for (int oy = -range; oy <= range; oy++) {
+			for (int ox = -range; ox <= range; ox++) {
 				ChunkSynconizer target = getChunkSynconizer(toLongPos(cx + ox, cy + oy));
 				chunks.add(target);
 				if (!target.hasCompletedStep(Steps.StructureStart)) {
@@ -291,7 +378,7 @@ public class WorldGenerationStep {
 					if (owned) {
 						try {
 							ChunkAccess access = target.chunk;
-								target.set(StepStructureStart.generate(level, generator, structures, access),
+								target.set(StepStructureStart.generate(access),
 										Steps.StructureStart);
 						} finally {
 							target.releaseOwnerLock();
@@ -312,8 +399,8 @@ public class WorldGenerationStep {
 		GridList<ChunkSynconizer> referencedChunks = generateStructureStart(r, pos, prestepRange);
 		int centreIndex = referencedChunks.size() / 2;
 
-		for (int ox = -range; ox <= range; ox++) {
-			for (int oy = -range; oy <= range; oy++) {
+		for (int oy = -range; oy <= range; oy++) {
+			for (int ox = -range; ox <= range; ox++) {
 				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
 				ChunkSynconizer target = referencedChunks.get(targetIndex);
 				if (!target.hasCompletedStep(Steps.StructureReference)) {
@@ -326,7 +413,7 @@ public class WorldGenerationStep {
 							for (ChunkSynconizer ref : reference) {
 								referenceAccess.add(ref.chunk);
 							}
-							StepStructureReference.generate(level, generator, referenceAccess, target.chunk);
+							StepStructureReference.generate(referenceAccess, target.chunk);
 							target.set(Steps.StructureReference);
 						} finally {
 							target.releaseOwnerLock();
@@ -344,8 +431,8 @@ public class WorldGenerationStep {
 		GridList<ChunkSynconizer> referencedChunks = generateStructureReference(r, pos, prestepRange);
 		int centreIndex = referencedChunks.size() / 2;
 
-		for (int ox = -range; ox <= range; ox++) {
-			for (int oy = -range; oy <= range; oy++) {
+		for (int oy = -range; oy <= range; oy++) {
+			for (int ox = -range; ox <= range; ox++) {
 				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
 				ChunkSynconizer target = referencedChunks.get(targetIndex);
 				if (!target.hasCompletedStep(Steps.Biomes)) {
@@ -358,7 +445,7 @@ public class WorldGenerationStep {
 							for (ChunkSynconizer ref : reference) {
 								referenceAccess.add(ref.chunk);
 							}
-							target.set(StepBiomes.generate(level, generator, referenceAccess, target.chunk, executors), Steps.Biomes);
+							target.set(StepBiomes.generate(referenceAccess, target.chunk, executors), Steps.Biomes);
 						} finally {
 							target.releaseOwnerLock();
 						}
@@ -375,8 +462,8 @@ public class WorldGenerationStep {
 		GridList<ChunkSynconizer> referencedChunks = generateBiomes(r, pos, prestepRange);
 		int centreIndex = referencedChunks.size() / 2;
 
-		for (int ox = -range; ox <= range; ox++) {
-			for (int oy = -range; oy <= range; oy++) {
+		for (int oy = -range; oy <= range; oy++) {
+			for (int ox = -range; ox <= range; ox++) {
 				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
 				ChunkSynconizer target = referencedChunks.get(targetIndex);
 				if (!target.hasCompletedStep(Steps.Noise)) {
@@ -389,7 +476,7 @@ public class WorldGenerationStep {
 							for (ChunkSynconizer ref : reference) {
 								referenceAccess.add(ref.chunk);
 							}
-							target.set(StepNoise.generate(level, generator, referenceAccess, target.chunk, executors),
+							target.set(StepNoise.generate(referenceAccess, target.chunk, executors),
 									Steps.Noise);
 						} finally {
 							target.releaseOwnerLock();
@@ -407,8 +494,8 @@ public class WorldGenerationStep {
 		GridList<ChunkSynconizer> referencedChunks = generateNoise(r, pos, prestepRange);
 		int centreIndex = referencedChunks.size() / 2;
 
-		for (int ox = -range; ox <= range; ox++) {
-			for (int oy = -range; oy <= range; oy++) {
+		for (int oy = -range; oy <= range; oy++) {
+			for (int ox = -range; ox <= range; ox++) {
 				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
 				ChunkSynconizer target = referencedChunks.get(targetIndex);
 				if (!target.hasCompletedStep(Steps.Surface)) {
@@ -422,7 +509,7 @@ public class WorldGenerationStep {
 								referenceAccess.add(ref.chunk);
 							}
 							
-							target.set(StepSurface.generate(level, generator, referenceAccess, target.chunk),
+							target.set(StepSurface.generate(referenceAccess, target.chunk),
 									Steps.Surface);
 						} finally {
 							target.releaseOwnerLock();
@@ -441,8 +528,8 @@ public class WorldGenerationStep {
 		GridList<ChunkSynconizer> referencedChunks = generateSurface(r, pos, prestepRange);
 		int centreIndex = referencedChunks.size() / 2;
 
-		for (int ox = -range; ox <= range; ox++) {
-			for (int oy = -range; oy <= range; oy++) {
+		for (int oy = -range; oy <= range; oy++) {
+			for (int ox = -range; ox <= range; ox++) {
 				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
 				ChunkSynconizer target = referencedChunks.get(targetIndex);
 				if (!target.hasCompletedStep(Steps.Carvers)) {
@@ -455,7 +542,7 @@ public class WorldGenerationStep {
 							for (ChunkSynconizer ref : reference) {
 								referenceAccess.add(ref.chunk);
 							}
-							target.set(StepCarvers.generate(level, generator, referenceAccess, target.chunk),
+							target.set(StepCarvers.generate(referenceAccess, target.chunk),
 									Steps.Carvers);
 						} finally {
 							target.releaseOwnerLock();
@@ -474,8 +561,8 @@ public class WorldGenerationStep {
 		GridList<ChunkSynconizer> referencedChunks = generateCarvers(r, pos, prestepRange);
 		int centreIndex = referencedChunks.size() / 2;
 
-		for (int ox = -range; ox <= range; ox++) {
-			for (int oy = -range; oy <= range; oy++) {
+		for (int oy = -range; oy <= range; oy++) {
+			for (int ox = -range; ox <= range; ox++) {
 				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
 				ChunkSynconizer target = referencedChunks.get(targetIndex);
 				if (!target.hasCompletedStep(Steps.Features)) {
@@ -488,7 +575,7 @@ public class WorldGenerationStep {
 							for (ChunkSynconizer ref : reference) {
 								referenceAccess.add(ref.chunk);
 							}
-							target.set(StepFeatures.generate(level, generator, lightEngine, referenceAccess, target.chunk),
+							target.set(StepFeatures.generate(referenceAccess, target.chunk),
 									Steps.Features);
 						} finally {
 							target.releaseOwnerLock();
@@ -512,28 +599,38 @@ public class WorldGenerationStep {
 		public static final ChunkStatus STATUS = ChunkStatus.STRUCTURE_STARTS;
 		public static final int RANGE = STATUS.getRange();
 		public static final EnumSet<Heightmap.Types> HEIGHTMAP_TYPES = STATUS.heightmapsAfter();
-		static boolean doGenerateFeatures = true;
+		private static ChunkGenerator gen;
+		private static boolean doGenerateFeatures = true;
+		private static RegistryAccess registry;
+		private static StructureFeatureManager structFeat;
+		private static StructureManager struct;
+		private static long seed;
+		private static StructureCheck structCheck;
 
-		public final static void onLevelLoad(WorldGenSettings genSettings) {
+		public final static void onLevelLoad(ChunkGenerator generator, WorldGenSettings genSettings, RegistryAccess registryAccess, 
+				StructureFeatureManager structureFeature, StructureManager structures, long worldSeed, StructureCheck structureCheck) {
+			gen = generator;
 			doGenerateFeatures = genSettings.generateFeatures();
+			registry = registryAccess;
+			structFeat = structureFeature;
+			struct = structures;
+			seed = worldSeed;
+			structCheck = structureCheck;
 		}
 
-		public final static ChunkAccess generate(ServerLevel level, ChunkGenerator generator,
-				StructureManager structures, ChunkAccess chunk) {
-
+		public final static ChunkAccess generate(ChunkAccess chunk) {
 			if (doGenerateFeatures) {
 				// Should be thread safe
-				generator.createStructures(level.registryAccess(), level.structureFeatureManager(), chunk, structures,
-						level.getSeed());
+				gen.createStructures(registry, structFeat, chunk, struct, seed);
 			}
 			((ProtoChunk) chunk).setStatus(STATUS);
-			level.onStructureStartsAvailable(chunk);
+			structCheck.onStructureLoad(chunk.getPos(), chunk.getAllStarts());
 			return chunk;
 		}
 
 		static ChunkAccess load(ServerLevel level, ChunkAccess chunk) {
 			((ProtoChunk) chunk).setStatus(STATUS);
-			level.onStructureStartsAvailable(chunk);
+			structCheck.onStructureLoad(chunk.getPos(), chunk.getAllStarts());
 			return chunk;
 		}
 	}
@@ -542,14 +639,20 @@ public class WorldGenerationStep {
 		public static final ChunkStatus STATUS = ChunkStatus.STRUCTURE_REFERENCES;
 		public static final int RANGE = STATUS.getRange();
 		public static final EnumSet<Heightmap.Types> HEIGHTMAP_TYPES = STATUS.heightmapsAfter();
+		private static ChunkGenerator gen;
+		private static StructureFeatureManager structFeat;
+		private static ServerLevel level;
 
-		public static final void generate(ServerLevel level, ChunkGenerator generator, List<ChunkAccess> chunkList,
-				ChunkAccess chunk) {
+		public final static void onLevelLoad(ServerLevel serverLevel, ChunkGenerator generator, StructureFeatureManager structureFeature) {
+			gen = generator;
+			structFeat = structureFeature;
+			level = serverLevel;
+		}
+		
+		public static final void generate(List<ChunkAccess> chunkList, ChunkAccess chunk) {
 			WorldGenRegion worldGenRegion = new WorldGenRegion(level, chunkList, STATUS, -1);
-			// Note: Not certain StructureFeatureManager.forWorldGenRegion(...) is thread
-			// safe
-			generator.createReferences((WorldGenLevel) worldGenRegion,
-					level.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunk);
+			// Note: Not certain StructureFeatureManager.forWorldGenRegion(...) is thread safe
+			gen.createReferences(worldGenRegion, structFeat.forWorldGenRegion(worldGenRegion), chunk);
 			((ProtoChunk) chunk).setStatus(STATUS);
 		}
 
@@ -564,16 +667,21 @@ public class WorldGenerationStep {
 		public static final int RANGE = STATUS.getRange();
 		public static final EnumSet<Heightmap.Types> HEIGHTMAP_TYPES = STATUS.heightmapsAfter();
 		public static Registry<Biome> biomeRegistry;
+		private static ChunkGenerator gen;
+		private static StructureFeatureManager structFeat;
+		private static ServerLevel level;
 
-		public final static void onLevelLoad(RegistryAccess registry) {
-			biomeRegistry = registry.registryOrThrow(Registry.BIOME_REGISTRY);
+		public final static void onLevelLoad(ServerLevel serverLevel, ChunkGenerator generator, Registry<Biome> registry, StructureFeatureManager structureFeature) {
+			biomeRegistry = registry;
+			gen = generator;
+			structFeat = structureFeature;
+			level = serverLevel;
 		}
 
-		public static final ChunkAccess generate(ServerLevel level, ChunkGenerator generator,
-				List<ChunkAccess> chunkList, ChunkAccess chunk, Executor worker) {
+		public static final ChunkAccess generate(List<ChunkAccess> chunkList, ChunkAccess chunk, Executor worker) {
 			WorldGenRegion worldGenRegion = new WorldGenRegion(level, chunkList, STATUS, -1);
-				chunk = joinAsync(generator.createBiomes(biomeRegistry, worker, Blender.of(worldGenRegion),
-						level.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunk));
+				chunk = joinAsync(gen.createBiomes(biomeRegistry, worker, Blender.of(worldGenRegion),
+						structFeat.forWorldGenRegion(worldGenRegion), chunk));
 			((ProtoChunk) chunk).setStatus(STATUS);
 			return chunk;
 		}
@@ -588,12 +696,20 @@ public class WorldGenerationStep {
 		public static final ChunkStatus STATUS = ChunkStatus.NOISE;
 		public static final int RANGE = STATUS.getRange();
 		public static final EnumSet<Heightmap.Types> HEIGHTMAP_TYPES = STATUS.heightmapsAfter();
+		private static ChunkGenerator gen;
+		private static StructureFeatureManager structFeat;
+		private static ServerLevel level;
 
-		public static final ChunkAccess generate(ServerLevel level, ChunkGenerator generator,
-				List<ChunkAccess> chunkList, ChunkAccess chunk, Executor worker) {
+		public final static void onLevelLoad(ServerLevel serverLevel, ChunkGenerator generator, StructureFeatureManager structureFeature) {
+			gen = generator;
+			structFeat = structureFeature;
+			level = serverLevel;
+		}
+		
+		public static final ChunkAccess generate(List<ChunkAccess> chunkList, ChunkAccess chunk, Executor worker) {
 			WorldGenRegion worldGenRegion = new WorldGenRegion(level, chunkList, STATUS, 0);
-			chunk = joinAsync(generator.fillFromNoise(worker, Blender.of(worldGenRegion),
-					level.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunk));
+			chunk = joinAsync(gen.fillFromNoise(worker, Blender.of(worldGenRegion),
+					structFeat.forWorldGenRegion(worldGenRegion), chunk));
 			((ProtoChunk) chunk).setStatus(STATUS);
 			return chunk;
 		}
@@ -608,11 +724,19 @@ public class WorldGenerationStep {
 		public static final ChunkStatus STATUS = ChunkStatus.SURFACE;
 		public static final int RANGE = STATUS.getRange();
 		public static final EnumSet<Heightmap.Types> HEIGHTMAP_TYPES = STATUS.heightmapsAfter();
+		private static ChunkGenerator gen;
+		private static StructureFeatureManager structFeat;
+		private static ServerLevel level;
 
-		public static final ChunkAccess generate(ServerLevel level, ChunkGenerator generator,
-				List<ChunkAccess> chunkList, ChunkAccess chunk) {
+		public final static void onLevelLoad(ServerLevel serverLevel, ChunkGenerator generator, StructureFeatureManager structureFeature) {
+			gen = generator;
+			structFeat = structureFeature;
+			level = serverLevel;
+		}
+		
+		public static final ChunkAccess generate(List<ChunkAccess> chunkList, ChunkAccess chunk) {
 			WorldGenRegion worldGenRegion = new WorldGenRegion(level, chunkList, STATUS, 0);
-			generator.buildSurface(worldGenRegion, level.structureFeatureManager().forWorldGenRegion(worldGenRegion),
+			gen.buildSurface(worldGenRegion, structFeat.forWorldGenRegion(worldGenRegion),
 					chunk);
 			((ProtoChunk) chunk).setStatus(STATUS);
 			return chunk;
@@ -628,13 +752,26 @@ public class WorldGenerationStep {
 		public static final ChunkStatus STATUS = ChunkStatus.CARVERS;
 		public static final int RANGE = STATUS.getRange();
 		public static final EnumSet<Heightmap.Types> HEIGHTMAP_TYPES = STATUS.heightmapsAfter();
+		private static ChunkGenerator gen;
+		private static StructureFeatureManager structFeat;
+		private static ServerLevel level;
+		private static long seed;
+		private static BiomeManager biomes;
 
-		public static final ChunkAccess generate(ServerLevel level, ChunkGenerator generator,
-				List<ChunkAccess> chunkList, ChunkAccess chunk) {
+		public final static void onLevelLoad(ServerLevel serverLevel, ChunkGenerator generator, StructureFeatureManager structureFeature,
+				long worldSeed, BiomeManager biomeManger) {
+			gen = generator;
+			structFeat = structureFeature;
+			level = serverLevel;
+			seed = worldSeed;
+			biomes = biomeManger;
+		}
+		
+
+		public static final ChunkAccess generate(List<ChunkAccess> chunkList, ChunkAccess chunk) {
 			WorldGenRegion worldGenRegion = new WorldGenRegion(level, chunkList, STATUS, 0);
 			Blender.addAroundOldChunksCarvingMaskFilter((WorldGenLevel) worldGenRegion, (ProtoChunk) chunk);
-			generator.applyCarvers(worldGenRegion, level.getSeed(), level.getBiomeManager(),
-					level.structureFeatureManager().forWorldGenRegion(worldGenRegion), chunk,
+			gen.applyCarvers(worldGenRegion, seed, biomes, structFeat.forWorldGenRegion(worldGenRegion), chunk,
 					GenerationStep.Carving.AIR);
 			((ProtoChunk) chunk).setStatus(STATUS);
 			return chunk;
@@ -651,8 +788,7 @@ public class WorldGenerationStep {
 		public static final int RANGE = STATUS.getRange();
 		public static final EnumSet<Heightmap.Types> HEIGHTMAP_TYPES = STATUS.heightmapsAfter();
 
-		public static final ChunkAccess generate(ServerLevel level, ChunkGenerator generator,
-				List<ChunkAccess> chunkList, ChunkAccess chunk, Executor worker) {
+		public static final ChunkAccess generate(List<ChunkAccess> chunkList, ChunkAccess chunk, Executor worker) {
 			// FIXME: I think the decompiler failed on this one. Find the actual body and
 			// put it here.
 			((ProtoChunk) chunk).setStatus(STATUS);
@@ -669,24 +805,44 @@ public class WorldGenerationStep {
 		public static final ChunkStatus STATUS = ChunkStatus.FEATURES;
 		public static final int RANGE = STATUS.getRange();
 		public static final EnumSet<Heightmap.Types> HEIGHTMAP_TYPES = STATUS.heightmapsAfter();
+		private static ChunkGenerator gen;
+		private static StructureFeatureManager structFeat;
+		private static ServerLevel level;
+		private static LevelLightEngine lights;
 
-		public static final ChunkAccess generate(ServerLevel level, ChunkGenerator generator,
-				ThreadedLevelLightEngine lightEngine, List<ChunkAccess> chunkList, ChunkAccess chunk) {
+		public final static void onLevelLoad(ServerLevel serverLevel, ChunkGenerator generator, StructureFeatureManager structureFeature,
+				LevelLightEngine lightEngine) {
+			gen = generator;
+			structFeat = structureFeature;
+			level = serverLevel;
+			lights = lightEngine;
+		}
+
+		private static ReentrantLock testLock = new ReentrantLock();
+		public static final ChunkAccess generate(List<ChunkAccess> chunkList, ChunkAccess chunk) {
 			ProtoChunk protoChunk = (ProtoChunk) chunk;
-			protoChunk.setLightEngine((LevelLightEngine) lightEngine);
-
-			Heightmap.primeHeightmaps(chunk,
-					EnumSet.of(Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-							Heightmap.Types.OCEAN_FLOOR, Heightmap.Types.WORLD_SURFACE));
-
-			// This could be problematic. May need to lock the 8 surrounding chunks then.
-			WorldGenRegion worldGenRegion = new WorldGenRegion(level, chunkList, STATUS, 1);
-
-			generator.applyBiomeDecoration((WorldGenLevel) worldGenRegion, chunk,
-					level.structureFeatureManager().forWorldGenRegion(worldGenRegion));
-			Blender.generateBorderTicks(worldGenRegion, chunk);
-
-			protoChunk.setStatus(STATUS);
+			if (chunk.getStatus() == STATUS) return chunk;
+			testLock.lock();
+			try {
+				if (chunk.getStatus() != STATUS) {
+				
+					protoChunk.setLightEngine(lights);
+		
+					Heightmap.primeHeightmaps(chunk,
+							EnumSet.of(Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+									Heightmap.Types.OCEAN_FLOOR, Heightmap.Types.WORLD_SURFACE));
+		
+					// This could be problematic. May need to lock the 8 surrounding chunks then.
+					WorldGenRegion worldGenRegion = new WorldGenRegion(level, chunkList, STATUS, 1);
+		
+					gen.applyBiomeDecoration(worldGenRegion, chunk, structFeat.forWorldGenRegion(worldGenRegion));
+					//Blender.generateBorderTicks(worldGenRegion, chunk);
+		
+					protoChunk.setStatus(STATUS);
+				}
+			} finally {
+				testLock.unlock();
+			}
 			return chunk;
 		}
 

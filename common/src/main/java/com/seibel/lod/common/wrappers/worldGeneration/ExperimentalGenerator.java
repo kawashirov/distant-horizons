@@ -108,7 +108,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 				int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, true));
 				if (checkIfPositionIsValid(chunkX, chunkZ, generationGroupSize)) {
 					ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
-					events.add(new GenerationEvent(chunkPos, generationGroupSize, generationGroup, Steps.Features));
+					events.add(new GenerationEvent(chunkPos, generationGroupSize, generationGroup, Steps.Surface));
 					toGenerate--;
 				}
 			}
