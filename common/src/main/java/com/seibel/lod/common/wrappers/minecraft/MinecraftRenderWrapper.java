@@ -4,6 +4,7 @@ import java.awt.*;
 import java.util.HashSet;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
 import com.seibel.lod.core.handlers.IReflectionHandler;
 import com.seibel.lod.core.handlers.ReflectionHandler;
@@ -42,8 +43,6 @@ import net.minecraft.world.phys.Vec3;
 public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 {
     public static final MinecraftRenderWrapper INSTANCE = new MinecraftRenderWrapper();
-
-    private static final MinecraftWrapper MC_WRAPPER = MinecraftWrapper.INSTANCE;
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static final GameRenderer GAME_RENDERER = MC.gameRenderer;
@@ -95,8 +94,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
     @Override
     public Color getFogColor() {
-        float[] colorValues = new float[4];
-        GL20.glGetFloatv(GL20.GL_FOG_COLOR, colorValues);
+        float[] colorValues = RenderSystem.getShaderFogColor();
         return new Color(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
     }
 
