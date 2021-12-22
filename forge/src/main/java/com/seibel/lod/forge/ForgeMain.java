@@ -41,6 +41,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.loading.FMLLoader;
 
 import java.util.List;
 import java.util.Random;
@@ -62,7 +63,7 @@ public class ForgeMain implements LodForgeMethodCaller
 	{
 		// make sure the dependencies are set up before the mod needs them
 		LodCommonMain.initConfig();
-		LodCommonMain.startup(this);
+		LodCommonMain.startup(this, !FMLLoader.getDist().isClient());
 		ForgeDependencySetup.createInitialBindings();
 	}
 	

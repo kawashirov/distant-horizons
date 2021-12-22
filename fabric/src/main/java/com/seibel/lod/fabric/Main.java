@@ -55,12 +55,19 @@ public class Main implements ClientModInitializer
 	// This loads the mod after minecraft loads which doesn't causes a lot of issues
 	public static void init() {
 		LodCommonMain.initConfig();
-		LodCommonMain.startup(null);
+		LodCommonMain.startup(null, false);
 		DependencySetup.createInitialBindings();
 		ClientApi.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 
 		// Check if this works
 		client_proxy = new ClientProxy();
 		client_proxy.registerEvents();
+	}
+
+	public static void initServer() {
+		LodCommonMain.initConfig();
+		LodCommonMain.startup(null, true);
+		DependencySetup.createInitialBindings();
+		ClientApi.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 	}
 }
