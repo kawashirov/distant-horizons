@@ -1,13 +1,6 @@
 package com.seibel.lod.common.wrappers.worldGeneration;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
-import com.seibel.lod.common.wrappers.worldGeneration.WorldGenerationStep.GenerationEvent;
 import com.seibel.lod.common.wrappers.worldGeneration.WorldGenerationStep.Steps;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
@@ -19,8 +12,6 @@ import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractExperimentalWorldGeneratorWrapper;
-
-import net.minecraft.world.level.ChunkPos;
 
 public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWrapper {
 	
@@ -34,49 +25,27 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 
 	private int estimatedSampleNeeded = 128;
 
-	private LinkedList<GenerationEvent> events = new LinkedList<GenerationEvent>();
-
 	public ExperimentalGenerator(LodBuilder newLodBuilder, LodDimension newLodDimension, IWorldWrapper worldWrapper) {
 		super(newLodBuilder, newLodDimension, worldWrapper);
 		System.out.println("================ExperimentalGenerator INIT=============");
 		generationGroup = new WorldGenerationStep(((WorldWrapper) worldWrapper).getServerWorld(), newLodBuilder,
 				newLodDimension);
 	}
-
-	private boolean checkIfPositionIsValid(int chunkX, int chunkZ, int range) {
-		for (GenerationEvent event : events) {
-			if (event.tooClose(chunkX, chunkZ, range)) return false;
-		}
-		return true;
-	}
-
+	
 	@Override
 	public void queueGenerationRequests(LodDimension lodDim, LodBuilder lodBuilder) {
 		DistanceGenerationMode mode = CONFIG.client().worldGenerator().getDistanceGenerationMode();
 		numberOfGenerationPoints = CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads();
 
+		generationGroup.updateAllFutures();
 		if (mode == DistanceGenerationMode.NONE || !MC.hasSinglePlayerServer())
 			return;
-
-		// Update all current out standing jobs
-		Iterator<GenerationEvent> iter = events.iterator();
-		while (iter.hasNext()) {
-			GenerationEvent event = iter.next();
-			if (event.isCompleted()) {
-				event.join();
-				iter.remove();
-			} else if (event.hasTimeout(5, TimeUnit.SECONDS)) {
-				System.err.println(event.id+": Timed out and terminated!");
-				event.terminate();
-				iter.remove();
-			}
-		}
-
+		int eventsCount = generationGroup.events.size();
 		// If we still all jobs running, return.
-		if (events.size() >= numberOfGenerationPoints)
+		if (eventsCount >= numberOfGenerationPoints)
 			return;
 
-		final int targetToGenerate = numberOfGenerationPoints - events.size();
+		final int targetToGenerate = numberOfGenerationPoints - eventsCount;
 		int toGenerate = targetToGenerate;
 		int positionGoneThough = 0;
 
@@ -106,9 +75,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 				byte detailLevel = (byte) (posToGenerate.getNthDetail(i, true) - 1);
 				int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, true));
 				int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, true));
-				if (checkIfPositionIsValid(chunkX, chunkZ, generationGroupSize)) {
-					ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
-					events.add(new GenerationEvent(chunkPos, generationGroupSize, generationGroup, Steps.Surface));
+				if (generationGroup.tryAddPoint(chunkX, chunkZ, generationGroupSize,  Steps.Features)) {
 					toGenerate--;
 				}
 			}
@@ -123,9 +90,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 				byte detailLevel = (byte) (posToGenerate.getNthDetail(i, false) - 1);
 				int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, false));
 				int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, false));
-				if (checkIfPositionIsValid(chunkX, chunkZ, generationGroupSizeFar)) {
-					ChunkPos chunkPos = new ChunkPos(chunkX, chunkZ);
-					events.add(new GenerationEvent(chunkPos, generationGroupSizeFar, generationGroup, Steps.Surface));
+				if (generationGroup.tryAddPoint(chunkX, chunkZ, generationGroupSize,  Steps.Surface)) {
 					toGenerate--;
 				}
 			}
