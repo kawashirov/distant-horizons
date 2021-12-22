@@ -5,6 +5,7 @@ import com.moandjiezana.toml.Toml;
 // TomlWriter is threadsave while Writer is not
 import com.moandjiezana.toml.TomlWriter;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.seibel.lod.core.ModInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -52,67 +53,6 @@ import java.util.regex.Pattern;
 @SuppressWarnings("unchecked")
 public abstract class ConfigGui {
     /*
-         Small wiki on how to use this config
-
-     Create a new class that extends this class
-     Every time you want to add a button put an @Entry before it and if you want it to be within a range then do @Entry(min = 0, max = 10)
-     MAKE SURE THE VARIABLE YOU ARE PUTTING IN IS A STATIC VARIABLE
-
-
-
-     If you want to make a config asking if you want coolness then do this
-
-     public class Config extends ConfigGui {
-         @Entry
-         public static bool coolness = false;
-     }
-
-
-
-     If you want a comment then do this
-     @Comment public static Comment ThisIsACoolComment;
-
-
-
-     For putting nested classes do @ScreenEntry for example
-
-     public class Config extends ConfigGui {
-        @Entry
-        public static bool coolness = false;
-
-        @ScreenEntry
-        public static NestedScreen nestedScreen = new NestedScreen();
-
-        public static void NestedScreen() {
-            @Category("nestedScreen")
-            @Entry(min = 0, max = 100)
-            public static int howMuchCoolness = 0;
-        }
-     }
-
-
-    All the text should be in your language file
-    There won't be a tutorial on how to make on since it is easy
-
-
-        FOR THE CONFIG TO SHOW
-     you need to have this somewhere in the main class
-     ConfigGui.init(ModInfo.ID, Config.class);
-
-     For mod-menu integration look at the ModMenuIntegration class and put a reference to it in the fabric.mod.json
-
-     To make a textured button to the options screen look in the mixins/MixinOptionsScreen class and TexturedButtonWidget class
-     Remember to add the MixinOptionsScreen to your ModID.mixins.json
-    */
-
-    /*
-            This is a small to do list for the config
-
-        Make config save
-        Make wiki better
-        Add a way to add min and max from another variable
-     */
-    /*
             List of hacky things that are done that should be done properly
 
         The buttons that dont show are still loded but just not rendered
@@ -152,7 +92,7 @@ public abstract class ConfigGui {
     }
 
     public static final Map<String, Class<?>> configClass = new HashMap<>();
-    //    public static List<String> nestedClasses = new ArrayList<>();
+//    public static List<String> nestedClasses = new ArrayList<>();
     private static Path path;
 
     public static void init(String modid, Class<?> config) {
@@ -194,7 +134,7 @@ public abstract class ConfigGui {
                 String c = field.getAnnotation(Category.class) != null ? field.getAnnotation(Category.class).value() : "";
                 initClass(modid, field.getType(),
                         (c != "" ? c + "." : "")
-                                + field.getAnnotation(ScreenEntry.class).to());
+                                + field.getName());
             }
         }
     }
@@ -242,7 +182,7 @@ public abstract class ConfigGui {
             if (!s.name().equals(""))
                 info.name = new TranslatableComponent(s.name());
             info.button = true;
-            info.gotoScreen = (info.category != "" ? info.category + "." : "") + s.to();
+            info.gotoScreen = (info.category != "" ? info.category + "." : "") + field.getName();
         }
         entries.add(info);
     }
@@ -515,17 +455,16 @@ public abstract class ConfigGui {
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface Entry {
+        String name() default "";
         int width() default 150;
         double min() default Double.MIN_NORMAL;
         double max() default Double.MAX_VALUE;
-        String name() default "";
     }
 
     // Where the @ScreenEntry is defined
     @Retention(RetentionPolicy.RUNTIME)
     @Target(ElementType.FIELD)
     public @interface ScreenEntry {
-        String to();
         String name() default "";
         int width() default 100;
     }

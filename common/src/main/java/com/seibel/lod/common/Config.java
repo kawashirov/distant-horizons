@@ -20,7 +20,6 @@
 package com.seibel.lod.common;
 
 import com.seibel.lod.common.wrappers.config.ConfigGui;
-import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.enums.config.*;
 import com.seibel.lod.core.enums.rendering.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced.*;
@@ -30,9 +29,10 @@ import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.I
 /**
  * This handles any configuration the user has access to.
  * @author coolGi2007
- * @version 12-02-2021
+ * @version 12-12-2021
  */
 public class Config extends ConfigGui
+//public class Config extends TinyConfig
 {
 	// CONFIG STRUCTURE
 	// 	-> Client
@@ -51,7 +51,7 @@ public class Config extends ConfigGui
 
 	// Since the original config system uses forge stuff, that means we have to rewrite the whole config system
 
-	@ScreenEntry(to = "client")
+	@ScreenEntry
 	public static Client client;
 
 	@Entry
@@ -60,30 +60,30 @@ public class Config extends ConfigGui
 	public static class Client
 	{
 		@Category("client")
-		@ScreenEntry(to = "graphics")
+		@ScreenEntry
 		public static Graphics graphics;
 
 		@Category("client")
-		@ScreenEntry(to = "worldGenerator")
+		@ScreenEntry
 		public static WorldGenerator worldGenerator;
 
 		@Category("client")
-		@ScreenEntry(to = "advanced")
+		@ScreenEntry
 		public static Advanced advanced;
 
 
 		public static class Graphics
 		{
 			@Category("client.graphics")
-			@ScreenEntry(to = "quality")
+			@ScreenEntry
 			public static Quality quality;
 
 			@Category("client.graphics")
-			@ScreenEntry(to = "fogQuality")
+			@ScreenEntry
 			public static FogQuality fogQuality;
 
 			@Category("client.graphics")
-			@ScreenEntry(to = "advancedGraphics")
+			@ScreenEntry
 			public static AdvancedGraphics advancedGraphics;
 
 
@@ -121,10 +121,9 @@ public class Config extends ConfigGui
 				@Entry
 				public static FogDrawMode fogDrawMode = IFogQuality.FOG_DRAW_MODE_DEFAULT;
 
-				// FIXME: Currently worldFogColor gives black.
 				@Category("client.graphics.fogQuality")
 				@Entry
-				public static FogColorMode fogColorMode = FogColorMode.USE_SKY_COLOR; //IFogQuality.FOG_COLOR_MODE_DEFAULT;
+				public static FogColorMode fogColorMode = IFogQuality.FOG_COLOR_MODE_DEFAULT;
 
 				@Category("client.graphics.fogQuality")
 				@Entry
@@ -134,6 +133,7 @@ public class Config extends ConfigGui
 
 			public static class AdvancedGraphics
 			{
+
 				@Category("client.graphics.advancedGraphics")
 				@Entry
 				public static boolean disableDirectionalCulling = IAdvancedGraphics.DISABLE_DIRECTIONAL_CULLING_DEFAULT;
@@ -171,22 +171,20 @@ public class Config extends ConfigGui
 			@Category("client.worldGenerator")
 			@Entry
 			public static BlocksToAvoid blocksToAvoid = IWorldGenerator.BLOCKS_TO_AVOID_DEFAULT;
-
-//			public static boolean useExperimentalPreGenLoading = false;
 		}
 
 		public static class Advanced
 		{
 			@Category("client.advanced")
-			@ScreenEntry(to = "threading")
+			@ScreenEntry
 			public static Threading threading;
 
 			@Category("client.advanced")
-			@ScreenEntry(to = "debugging")
+			@ScreenEntry
 			public static Debugging debugging;
 
 			@Category("client.advanced")
-			@ScreenEntry(to = "buffers")
+			@ScreenEntry
 			public static Buffers buffers;
 
 
