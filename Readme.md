@@ -28,17 +28,17 @@ https://fabricmc.net/wiki/tutorial:setup
 * A Java Development Kit (JDK) for Java 17 (recommended) or newer. Visit https://www.oracle.com/java/technologies/downloads/ for installers.
 * Git or someway to clone git projects. Visit https://git-scm.com/ for installers.
 * Any Java IDE, for example Intellij IDEA and Eclipse. You may also use any other code editors, such as Visual Studio Code. (Optional)
+It's better to use IntelliJ IDEA since Eclipse is not supported by Architectury, but it still works.
+
+**If using IntelliJ:**
+1. open IDEA and import the build.gradle
+2. refresh the Gradle project in IDEA if required
 
 **If using Ecplise:**
 1. run the command: `./gradlew geneclipseruns`
 2. run the command: `./gradlew eclipse`
 3. Make sure eclipse has the JDK 17 installed. (This is needed so that eclipse can run minecraft)
 4. Import the project into eclipse
-
-**If using IntelliJ:**
-1. open IDEA and import the build.gradle
-2. run the command: `./gradlew genIntellijRuns`
-3. refresh the Gradle project in IDEA if required
 
 ## Compiling
 
@@ -50,7 +50,7 @@ https://fabricmc.net/wiki/tutorial:setup
 **If in terminal:**
 1. `git clone -b 1.18.X --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
 2. `cd minecraft-lod-mod`
-3. `./gradlew build`
+3. `./gradlew assemble` or `./gradlew build`
 4. The build should be in `fabric/build/libs/` and `forge/build/libs/`
 
 
@@ -69,8 +69,8 @@ Source code uses Mojang mappings.
 
 ## Useful commands
 
-Build only Fabric: `./gradlew fabric:build`\
-Build only Forge: `./gradlew forge:build`\
+Build only Fabric: `./gradlew fabric:assemble` or `./gradlew fabric:build`\
+Build only Forge: `./gradlew fabric:assemble` or `./gradlew forge:build`\
 Run the Fabric client (for debugging): `./gradlew fabric:runClient`\
 Run the Forge client (for debugging): `./gradlew forge:runClient`
 
