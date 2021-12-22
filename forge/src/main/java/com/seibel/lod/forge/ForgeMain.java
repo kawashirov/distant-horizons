@@ -42,6 +42,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fmlclient.ConfigGuiHandler;
 import net.minecraftforge.fmlserverevents.FMLServerStartedEvent;
 
 import java.util.List;
@@ -80,6 +81,8 @@ public class ForgeMain implements LodForgeMethodCaller
 	
 	private void onClientStart(final FMLClientSetupEvent event)
 	{
+		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
+				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> Config.getScreen(parent, ModInfo.ID, "")));
 		LodCommonMain.initConfig();
 		forgeClientProxy = new ForgeClientProxy();
 		MinecraftForge.EVENT_BUS.register(forgeClientProxy);
