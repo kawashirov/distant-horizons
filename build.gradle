@@ -64,4 +64,9 @@ allprojects { p ->
     java {
         withSourcesJar()
     }
+
+    if (p == project(":core") || p == project(":common")) {
+        runClient.enabled = false
+        runServer.enabled = false
+    }
 }
