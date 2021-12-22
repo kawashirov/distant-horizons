@@ -51,7 +51,7 @@ public class Config extends ConfigGui
 
 	// Since the original config system uses forge stuff, that means we have to rewrite the whole config system
 
-	@ScreenEntry(to = "client")
+	@ScreenEntry
 	public static Client client;
 
 	@Entry
@@ -60,30 +60,30 @@ public class Config extends ConfigGui
 	public static class Client
 	{
 		@Category("client")
-		@ScreenEntry(to = "graphics")
+		@ScreenEntry
 		public static Graphics graphics;
 
 		@Category("client")
-		@ScreenEntry(to = "worldGenerator")
+		@ScreenEntry
 		public static WorldGenerator worldGenerator;
 
 		@Category("client")
-		@ScreenEntry(to = "advanced")
+		@ScreenEntry
 		public static Advanced advanced;
 
 
 		public static class Graphics
 		{
 			@Category("client.graphics")
-			@ScreenEntry(to = "quality")
+			@ScreenEntry
 			public static Quality quality;
 
 			@Category("client.graphics")
-			@ScreenEntry(to = "fogQuality")
+			@ScreenEntry
 			public static FogQuality fogQuality;
 
 			@Category("client.graphics")
-			@ScreenEntry(to = "advancedGraphics")
+			@ScreenEntry
 			public static AdvancedGraphics advancedGraphics;
 
 
@@ -175,15 +175,15 @@ public class Config extends ConfigGui
 		public static class Advanced
 		{
 			@Category("client.advanced")
-			@ScreenEntry(to = "threading")
+			@ScreenEntry
 			public static Threading threading;
 
 			@Category("client.advanced")
-			@ScreenEntry(to = "debugging")
+			@ScreenEntry
 			public static Debugging debugging;
 
 			@Category("client.advanced")
-			@ScreenEntry(to = "buffers")
+			@ScreenEntry
 			public static Buffers buffers;
 
 
