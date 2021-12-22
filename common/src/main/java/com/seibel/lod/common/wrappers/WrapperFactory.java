@@ -19,12 +19,14 @@
 
 package com.seibel.lod.common.wrappers;
 
+import com.seibel.lod.common.wrappers.worldGeneration.ExperimentalGenerator;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.objects.lod.LodDimension;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
+import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractExperimentalWorldGeneratorWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractWorldGeneratorWrapper;
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
 import com.seibel.lod.common.wrappers.chunk.ChunkPosWrapper;
@@ -36,32 +38,27 @@ import com.seibel.lod.common.wrappers.worldGeneration.WorldGeneratorWrapper;
  * @author James Seibel
  * @version 11-20-2021
  */
-public class WrapperFactory implements IWrapperFactory
-{
+public class WrapperFactory implements IWrapperFactory {
     public static final WrapperFactory INSTANCE = new WrapperFactory();
 
 
     @Override
-    public AbstractBlockPosWrapper createBlockPos()
-    {
+    public AbstractBlockPosWrapper createBlockPos() {
         return new BlockPosWrapper();
     }
 
     @Override
-    public AbstractBlockPosWrapper createBlockPos(int x, int y, int z)
-    {
-        return new BlockPosWrapper(x,y,z);
+    public AbstractBlockPosWrapper createBlockPos(int x, int y, int z) {
+        return new BlockPosWrapper(x, y, z);
     }
 
     @Override
-    public AbstractChunkPosWrapper createChunkPos()
-    {
+    public AbstractChunkPosWrapper createChunkPos() {
         return new ChunkPosWrapper();
     }
 
     @Override
-    public AbstractChunkPosWrapper createChunkPos(long xAndZPositionCombined)
-    {
+    public AbstractChunkPosWrapper createChunkPos(long xAndZPositionCombined) {
         int x = (int) (xAndZPositionCombined & Integer.MAX_VALUE);
         int z = (int) (xAndZPositionCombined >> Long.SIZE / 2) & Integer.MAX_VALUE;
 
@@ -69,26 +66,27 @@ public class WrapperFactory implements IWrapperFactory
     }
 
     @Override
-    public AbstractChunkPosWrapper createChunkPos(int x, int z)
-    {
+    public AbstractChunkPosWrapper createChunkPos(int x, int z) {
         return new ChunkPosWrapper(x, z);
     }
 
     @Override
-    public AbstractChunkPosWrapper createChunkPos(AbstractChunkPosWrapper newChunkPos)
-    {
+    public AbstractChunkPosWrapper createChunkPos(AbstractChunkPosWrapper newChunkPos) {
         return new ChunkPosWrapper(newChunkPos);
     }
 
     @Override
-    public AbstractChunkPosWrapper createChunkPos(AbstractBlockPosWrapper blockPos)
-    {
+    public AbstractChunkPosWrapper createChunkPos(AbstractBlockPosWrapper blockPos) {
         return new ChunkPosWrapper(blockPos);
     }
 
     @Override
-    public AbstractWorldGeneratorWrapper createWorldGenerator(LodBuilder newLodBuilder, LodDimension newLodDimension, IWorldWrapper worldWrapper)
-    {
+    public AbstractWorldGeneratorWrapper createWorldGenerator(LodBuilder newLodBuilder, LodDimension newLodDimension, IWorldWrapper worldWrapper) {
         return new WorldGeneratorWrapper(newLodBuilder, newLodDimension, worldWrapper);
+    }
+
+    @Override
+    public AbstractExperimentalWorldGeneratorWrapper createExperimentalWorldGenerator(LodBuilder newLodBuilder, LodDimension newLodDimension, IWorldWrapper worldWrapper) {
+        return new ExperimentalGenerator(newLodBuilder, newLodDimension, worldWrapper);
     }
 }

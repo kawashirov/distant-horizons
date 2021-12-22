@@ -170,8 +170,6 @@ public class Config extends ConfigGui
 			@Category("client.worldGenerator")
 			@Entry
 			public static BlocksToAvoid blocksToAvoid = IWorldGenerator.BLOCKS_TO_AVOID_DEFAULT;
-
-//			public static boolean useExperimentalPreGenLoading = false;
 		}
 
 		public static class Advanced
