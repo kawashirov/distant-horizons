@@ -39,7 +39,7 @@ subprojects { p ->
     }
 }
 
-allprojects {
+allprojects { p ->
     apply plugin: "java"
     apply plugin: "architectury-plugin"
     apply plugin: "maven-publish"
@@ -55,8 +55,10 @@ allprojects {
     }
 
     tasks.withType(JavaCompile) {
-        // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
-        options.release = 17
+        if (p != project(":core")) {
+            // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
+            options.release = 17
+        }
     }
 
     java {
