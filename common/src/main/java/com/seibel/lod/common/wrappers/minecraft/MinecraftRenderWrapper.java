@@ -9,6 +9,8 @@ import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
 import com.seibel.lod.core.handlers.IReflectionHandler;
 import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.util.LodUtil;
+import com.seibel.lod.core.util.SingletonHandler;
+
 import net.minecraft.client.renderer.LightTexture;
 import org.lwjgl.opengl.GL20;
 
@@ -16,10 +18,13 @@ import com.mojang.math.Vector3f;
 import com.seibel.lod.core.objects.math.Mat4f;
 import com.seibel.lod.core.objects.math.Vec3d;
 import com.seibel.lod.core.objects.math.Vec3f;
+import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
+import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftWrapper;
 import com.seibel.lod.common.wrappers.McObjectConverter;
+import com.seibel.lod.common.wrappers.WrapperFactory;
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
 import com.seibel.lod.common.wrappers.chunk.ChunkPosWrapper;
 
@@ -46,8 +51,8 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static final GameRenderer GAME_RENDERER = MC.gameRenderer;
-
-
+    private static final MinecraftWrapper MC_WRAPPER = MinecraftWrapper.INSTANCE;
+    private static final WrapperFactory FACTORY = WrapperFactory.INSTANCE;
 
     @Override
     public Vec3f getLookAtVector()
@@ -164,8 +169,26 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
         }
         
         */
-        // For now, call the default method 
-        return IMinecraftRenderWrapper.super.getVanillaRenderedChunks();
+    	
+        // For now, use a circle check
+		int chunkRenderDist = this.getRenderDistance();
+		// if we have a odd render distance, we'll have a empty gap. This way we'll overlap by 1 instead, 
+		// which is preferable to having a hole in the world
+		chunkRenderDist = chunkRenderDist % 2 == 0 ? chunkRenderDist : chunkRenderDist - 1;
+		
+		AbstractChunkPosWrapper centerChunkPos = MC_WRAPPER.getPlayerChunkPos();
+		
+		// add every position within render distance
+		HashSet<AbstractChunkPosWrapper> renderedPos = new HashSet<AbstractChunkPosWrapper>();
+		for (int chunkDeltaX = -chunkRenderDist; chunkDeltaX <= chunkRenderDist; chunkDeltaX++)
+		{
+			for(int chunkDeltaZ = -chunkRenderDist; chunkDeltaZ <= chunkRenderDist; chunkDeltaZ++)
+			{
+				if (chunkDeltaX*chunkDeltaX+chunkDeltaZ*chunkDeltaZ >= chunkRenderDist*chunkRenderDist) continue;
+				renderedPos.add(FACTORY.createChunkPos(centerChunkPos.getX() + chunkDeltaX, centerChunkPos.getZ() + chunkDeltaZ));
+			}
+		}
+		return renderedPos;
     }
     
     @Override
@@ -173,7 +196,26 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     {
     	// TODO: Implement this!
         // For now, call the default method 
-        return IMinecraftRenderWrapper.super.getVanillaRenderedChunks();
+    	
+        // For now, use a circle check
+		int chunkRenderDist = this.getRenderDistance();
+		// if we have a odd render distance, we'll have a empty gap. This way we'll overlap by 1 instead, 
+		// which is preferable to having a hole in the world
+		chunkRenderDist = chunkRenderDist % 2 == 0 ? chunkRenderDist : chunkRenderDist - 1;
+		
+		AbstractChunkPosWrapper centerChunkPos = MC_WRAPPER.getPlayerChunkPos();
+		
+		// add every position within render distance
+		HashSet<AbstractChunkPosWrapper> renderedPos = new HashSet<AbstractChunkPosWrapper>();
+		for (int chunkDeltaX = -chunkRenderDist; chunkDeltaX <= chunkRenderDist; chunkDeltaX++)
+		{
+			for(int chunkDeltaZ = -chunkRenderDist; chunkDeltaZ <= chunkRenderDist; chunkDeltaZ++)
+			{
+				if (chunkDeltaX*chunkDeltaX+chunkDeltaZ*chunkDeltaZ >= chunkRenderDist*chunkRenderDist) continue;
+				renderedPos.add(FACTORY.createChunkPos(centerChunkPos.getX() + chunkDeltaX, centerChunkPos.getZ() + chunkDeltaZ));
+			}
+		}
+		return renderedPos;
     }
 
 
