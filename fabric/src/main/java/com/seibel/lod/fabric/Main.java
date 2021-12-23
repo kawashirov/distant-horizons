@@ -63,4 +63,11 @@ public class Main implements ClientModInitializer
 		client_proxy = new ClientProxy();
 		client_proxy.registerEvents();
 	}
+
+	public static void initServer() {
+		LodCommonMain.initConfig();
+		LodCommonMain.startup(null, true);
+		DependencySetup.createInitialBindings();
+		ClientApi.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
+	}
 }

@@ -3,9 +3,10 @@
 	"package": "com.seibel.lod.forge.mixins",
 	"compatibilityLevel": "JAVA_16",
 	"refmap": "lod.refmap.json",
-	"mixins": [
+	"client": [
       "MixinWorldRenderer",
       "MixinOptionsScreen"
 	],
+	"mixins": [],
 	"minVersion": "0.8"
 }

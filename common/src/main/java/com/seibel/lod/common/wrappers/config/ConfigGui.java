@@ -5,6 +5,7 @@ import com.moandjiezana.toml.Toml;
 // TomlWriter is threadsave while Writer is not
 import com.moandjiezana.toml.TomlWriter;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -52,6 +53,14 @@ import java.util.regex.Pattern;
 // This config should work for both Fabric and Forge as long as you use Mojang mappings
 @SuppressWarnings("unchecked")
 public abstract class ConfigGui {
+    /*
+            TODO list
+
+        Make wiki
+        Make it so you can enable and disable buttons from showing
+        Make min and max not final
+        Move the ConfigScreenConfigs class to the config class that extends this
+     */
     /*
             List of hacky things that are done that should be done properly
 
@@ -103,9 +112,10 @@ public abstract class ConfigGui {
 
         // Save and read the file
         try {
-            new Toml().read(Files.newBufferedReader(path)).to(config);
+            new Toml().read(path.toFile()).to(config);
+//            new Toml().read(path.toFile()).
         }   catch (Exception e) {
-            write(modid);
+            createFile(modid);
         }
 
         for (EntryInfo info : entries) {
@@ -123,9 +133,9 @@ public abstract class ConfigGui {
         for (Field field : config.getFields()) {
             EntryInfo info = new EntryInfo();
             if (field.isAnnotationPresent(Entry.class) || field.isAnnotationPresent(Comment.class) || field.isAnnotationPresent(ScreenEntry.class))
-                // TODO[CONFIG]: Fix the check for client/server
-//                if (Minecraft.getInstance().getEnvironmentType() == EnvType.CLIENT)
-                initClient(modid, field, info);
+                // If putting in your own mod then put your own check for server sided
+                if (!LodCommonMain.serverSided)
+                    initClient(modid, field, info);
             if (field.isAnnotationPresent(Entry.class))
                 try {
                     info.defaultValue = field.get(null);
@@ -140,7 +150,6 @@ public abstract class ConfigGui {
     }
     private static void initClient(String modid, Field field, EntryInfo info) {
         // This adds the buttons to the queue to be rendered
-        // DONT CALL ON SERVER AS SERVERS CANT RENDER STUFF
         Class<?> type = field.getType();
         Category c = field.getAnnotation(Category.class);
         Entry e = field.getAnnotation(Entry.class);
@@ -221,12 +230,11 @@ public abstract class ConfigGui {
     }
 
     // Creates the modid.toml
-    public static void write(String modid) {
+    private static void createFile(String modid) {
         path = Minecraft.getInstance().gameDirectory.toPath().resolve("config").resolve(modid + ".toml");
         try {
             if (!Files.exists(path))
                 Files.createFile(path);
-            tomlWriter.write(configClass.get(modid).getDeclaredConstructor().newInstance());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -260,9 +268,9 @@ public abstract class ConfigGui {
         }
         private void loadValues() {
             try {
-                new Toml().read(Files.newBufferedReader(path)).to(configClass.get(modid));
+                new Toml().read(path.toFile()).to(configClass.get(modid));
             } catch (Exception e) {
-                write(modid);
+                createFile(modid);
             }
 
             for (EntryInfo info : entries) {
@@ -290,7 +298,7 @@ public abstract class ConfigGui {
                             info.field.set(null, info.value);
                         } catch (IllegalAccessException ignored) {}
                     }
-                write(modid);
+                createFile(modid);
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }));
 

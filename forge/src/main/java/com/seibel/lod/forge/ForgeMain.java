@@ -64,6 +64,7 @@ public class ForgeMain implements LodForgeMethodCaller
 	private void init(final FMLCommonSetupEvent event)
 	{
 		// make sure the dependencies are set up before the mod needs them
+		LodCommonMain.initConfig();
 		LodCommonMain.startup(this, !FMLLoader.getDist().isClient());
 		ForgeDependencySetup.createInitialBindings();
 	}
@@ -83,7 +84,6 @@ public class ForgeMain implements LodForgeMethodCaller
 	{
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
 				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> Config.getScreen(parent, ModInfo.ID, "")));
-		LodCommonMain.initConfig();
 		forgeClientProxy = new ForgeClientProxy();
 		MinecraftForge.EVENT_BUS.register(forgeClientProxy);
 	}
