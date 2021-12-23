@@ -12,7 +12,8 @@
     "MixinOptionsScreen",
     "MixinWorldRenderer",
     "events.MixinClientLevel",
-    "events.MixinMinecraft"
+    "events.MixinMinecraft",
+    "events.MixinBlockUpdate"
   ],
   "server": [],
   "injectors": {
