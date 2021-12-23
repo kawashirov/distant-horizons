@@ -11,6 +11,7 @@
     "MixinMinecraft",
     "MixinOptionsScreen",
     "MixinWorldRenderer",
+    "MixinFogRenderer",
     "events.MixinClientLevel",
     "events.MixinMinecraft"
   ],
