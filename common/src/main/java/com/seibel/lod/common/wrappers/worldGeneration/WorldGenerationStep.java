@@ -68,6 +68,8 @@ import net.minecraft.world.level.storage.WorldData;
 
 public final class WorldGenerationStep {
 	
+	public static final int TIMEOUT_SECONDS = 30;
+	
 	enum Steps {
 		Empty, StructureStart, StructureReference, Biomes, Noise, Surface, Carvers, LiquidCarvers, Features, Light,
 	}
@@ -283,7 +285,7 @@ public final class WorldGenerationStep {
 				} finally {
 					iter.remove();
 				}
-			} else if (event.hasTimeout(5, TimeUnit.SECONDS)) {
+			} else if (event.hasTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
 				System.err.println(event.id+": Timed out and terminated!");
 				try {
 					event.terminate();
