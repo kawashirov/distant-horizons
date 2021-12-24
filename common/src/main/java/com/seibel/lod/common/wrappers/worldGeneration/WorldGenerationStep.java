@@ -24,6 +24,8 @@ import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
 import com.seibel.lod.core.objects.lod.LodDimension;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -54,15 +56,20 @@ import net.minecraft.world.level.chunk.*;
 import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.server.level.ThreadedLevelLightEngine;
+import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.SectionPos;
+import net.minecraft.network.protocol.game.DebugPackets;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
+import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.storage.WorldData;
 
@@ -139,7 +146,7 @@ public final class WorldGenerationStep {
 			return str.toString();
 		}
 	}
-
+	
 	public static final class GlobalParameters {
 		final ChunkGenerator generator;
 		final StructureManager structures;
@@ -268,13 +275,15 @@ public final class WorldGenerationStep {
     public final ExecutorService executors = Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
 	//public ExecutorService executors = Executors.newFixedThreadPool(8, new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
 
-	public final boolean tryAddPoint(int x, int z, int range, Steps target) {
-		x = Math.floorDiv(x, range) * range;
-		z = Math.floorDiv(z, range) * range;
+	public final boolean tryAddPoint(int px, int pz, int range, Steps target) {
+		int boxSize = range*2+1;
+		int x = Math.floorDiv(px, boxSize) * boxSize + range;
+		int z = Math.floorDiv(pz, boxSize) * boxSize + range;
 		
 		for (GenerationEvent event : events) {
 			if (event.tooClose(x, z, range)) return false;
 		}
+		//System.out.println(x + ", "+z);
 		events.add(new GenerationEvent(new ChunkPos(x,z), range, this, target));
 		return true;
 	}
@@ -326,6 +335,7 @@ public final class WorldGenerationStep {
 	public final void generateLodFromList(GenerationEvent event) {
 		try {
 		//System.out.println("Started event: "+event);
+		Instant start = Instant.now();
 		GridList<ChunkAccess> referencedChunks;
 		DistanceGenerationMode generationMode;
 		switch (event.target) {
@@ -356,7 +366,7 @@ public final class WorldGenerationStep {
 			generationMode = DistanceGenerationMode.SURFACE;
 			break;
 		case Features:
-			referencedChunks = generateFeatures(event, event.range);
+			referencedChunks = generateDirect(event, event.range);
 			generationMode = DistanceGenerationMode.FEATURES;
 			break;
 		case LiquidCarvers:
@@ -380,12 +390,50 @@ public final class WorldGenerationStep {
 		//for (ChunkAccess sync : referencedChunks) {
 		//	chunks.remove(sync.getPos().toLong());
 		//}
-		//System.out.println("Ended event: "+event);
+		Instant finish = Instant.now();
+		Duration timeElapsed = Duration.between(start, finish);
+		System.out.println("Ended event: "+event + "("+timeElapsed+")");
 		} catch (RuntimeException e) {
 			e.printStackTrace();
 			throw e;
 		}
 	} 
+	
+	public final GridList<ChunkAccess> generateDirect(GenerationEvent e, int range) {
+		int cx = e.pos.x;
+		int cy = e.pos.z;
+		int rangeEmpty = range+3;
+		if (rangeEmpty < 7) rangeEmpty = 7; // For some reason the Blender needs at least range 7???
+		GridList<ChunkAccess> chunks = new GridList<ChunkAccess>(rangeEmpty);
+		
+		for (int oy = -rangeEmpty; oy <= rangeEmpty; oy++) {
+			for (int ox = -rangeEmpty; ox <= rangeEmpty; ox++) {
+				//ChunkAccess target = getCachedChunk(new ChunkPos(cx+ox, cy+oy));
+				ChunkAccess target = new ProtoChunk(new ChunkPos(cx+ox, cy+oy), UpgradeData.EMPTY, params.level, params.biomes, null);
+				chunks.add(target);
+			}
+		}
+		e.refreshTimeout();
+		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.STRUCTURE_STARTS, range+1);
+		GridList<ChunkAccess> subRange = chunks.subGrid(range);
+		stepStructureStart.generateGroup(e.tParam, region, subRange);
+		e.refreshTimeout();
+		stepStructureReference.generateGroup(e.tParam, region, subRange);
+		e.refreshTimeout();
+		stepBiomes.generateGroup(e.tParam, region, subRange);
+		e.refreshTimeout();
+		stepNoise.generateGroup(e.tParam, region, subRange);
+		e.refreshTimeout();
+		stepSurface.generateGroup(e.tParam, region, subRange);
+		e.refreshTimeout();
+		stepCarvers.generateGroup(e.tParam, region, subRange);
+		e.refreshTimeout();
+		stepFeatures.generateGroup(e.tParam, region, subRange);
+		e.refreshTimeout();
+		return subRange;
+	}
+	
+	
 	
 	public final GridList<ChunkAccess> generateEmpty(GenerationEvent e, int range) {
 		int cx = e.pos.x;
@@ -404,10 +452,10 @@ public final class WorldGenerationStep {
 	}
 	
 	public final GridList<ChunkAccess> generateStructureStart(GenerationEvent e, int range) {
-		int prestepRange = range+8;
+		int prestepRange = range+3; //For feature stage
 		GridList<ChunkAccess> chunks = generateEmpty(e, prestepRange);
 		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.STRUCTURE_STARTS, range);
-		//System.out.println("DEBUG: StructureStart:"+pos);
+		//System.out.println("DEBUG: StructureStart:"+e.pos);
 		//System.out.println("DEBUG: StructureStart:\n"+referencedChunks.toDetailString());
 		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
 		stepStructureStart.generateGroup(e.tParam, region, chunks.subGrid(range));
@@ -419,7 +467,7 @@ public final class WorldGenerationStep {
 		int prestepRange = range;
 		GridList<ChunkAccess> chunks = generateStructureStart(e, prestepRange);
 		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.STRUCTURE_REFERENCES, range);
-		//System.out.println("DEBUG: StructureReference:"+pos);
+		//System.out.println("DEBUG: StructureReference:"+e.pos);
 		//System.out.println("DEBUG: StructureReference:\n"+referencedChunks.toDetailString());
 		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
 		stepStructureReference.generateGroup(e.tParam, region, chunks.subGrid(range));
@@ -431,7 +479,7 @@ public final class WorldGenerationStep {
 		int prestepRange = range;
 		GridList<ChunkAccess> chunks = generateStructureReference(e, prestepRange);
 		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.BIOMES, range);
-		//System.out.println("DEBUG: Biomes:"+pos);
+		//System.out.println("DEBUG: Biomes:"+e.pos);
 		//System.out.println("DEBUG: Biomes:\n"+referencedChunks.toDetailString());
 		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
 		stepBiomes.generateGroup(e.tParam, region, chunks.subGrid(range));
@@ -443,7 +491,7 @@ public final class WorldGenerationStep {
 		int prestepRange = range;
 		GridList<ChunkAccess> chunks = generateBiomes(e, prestepRange);
 		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.NOISE, range);
-		//System.out.println("DEBUG: Noise:"+pos);
+		//System.out.println("DEBUG: Noise:"+e.pos);
 		//System.out.println("DEBUG: Noise:\n"+referencedChunks.toDetailString());
 		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
 		stepNoise.generateGroup(e.tParam, region, chunks.subGrid(range));
@@ -455,7 +503,7 @@ public final class WorldGenerationStep {
 		int prestepRange = range;
 		GridList<ChunkAccess> chunks = generateNoise(e, prestepRange);
 		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.SURFACE, range);
-		//System.out.println("DEBUG: Surface:"+pos);
+		//System.out.println("DEBUG: Surface:"+e.pos);
 		//System.out.println("DEBUG: Surface:\n"+referencedChunks.toDetailString());
 		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
 		stepSurface.generateGroup(e.tParam, region, chunks.subGrid(range));
@@ -468,7 +516,7 @@ public final class WorldGenerationStep {
 		int prestepRange = range;
 		GridList<ChunkAccess> chunks = generateSurface(e, prestepRange);
 		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.CARVERS, range);
-		//System.out.println("DEBUG: Carvers:"+pos);
+		//System.out.println("DEBUG: Carvers:"+e.pos);
 		//System.out.println("DEBUG: Carvers:\n"+referencedChunks.toDetailString());
 		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
 		stepCarvers.generateGroup(e.tParam, region, chunks.subGrid(range));
@@ -481,7 +529,7 @@ public final class WorldGenerationStep {
 		int prestepRange = range;
 		GridList<ChunkAccess> chunks = generateCarvers(e, prestepRange);
 		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.FEATURES, range + 1);
-		//System.out.println("DEBUG: Features:"+pos+" range:"+range);
+		//System.out.println("DEBUG: Features:"+e.pos);
 		//System.out.println("DEBUG: Features:\n"+referencedChunks.toDetailString());
 		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
 		stepFeatures.generateGroup(e.tParam, region, chunks.subGrid(range));
@@ -518,12 +566,51 @@ public final class WorldGenerationStep {
 		public final ChunkStatus STATUS = ChunkStatus.STRUCTURE_REFERENCES;
 		public final int RANGE = STATUS.getRange();
 		public final EnumSet<Heightmap.Types> HEIGHTMAP_TYPES = STATUS.heightmapsAfter();
-		
+
+		private void createReferences(WorldGenLevel worldGenLevel, StructureFeatureManager structureFeatureManager,
+				ChunkAccess chunkAccess) {
+			int i = 8;
+			ChunkPos chunkPos = chunkAccess.getPos();
+			int j = chunkPos.x;
+			int k = chunkPos.z;
+			int l = chunkPos.getMinBlockX();
+			int m = chunkPos.getMinBlockZ();
+
+			SectionPos sectionPos = SectionPos.bottomOf(chunkAccess);
+
+			for (int n = j - 8; n <= j + 8; n++) {
+				for (int o = k - 8; o <= k + 8; o++) {
+					long p = ChunkPos.asLong(n, o);
+					if (!worldGenLevel.hasChunk(n, o)) continue;
+
+					for (StructureStart<?> structureStart : worldGenLevel.getChunk(n, o).getAllStarts().values()) {
+						try {
+							if (structureStart.isValid()
+									&& structureStart.getBoundingBox().intersects(l, m, l + 15, m + 15)) {
+								structureFeatureManager.addReferenceForFeature(sectionPos, structureStart.getFeature(),
+										p, chunkAccess);
+							}
+						} catch (Exception exception) {
+							CrashReport crashReport = CrashReport.forThrowable(exception,
+									"Generating structure reference");
+							CrashReportCategory crashReportCategory = crashReport.addCategory("Structure");
+							crashReportCategory.setDetail("Id",
+									() -> Registry.STRUCTURE_FEATURE.getKey(structureStart.getFeature()).toString());
+							crashReportCategory.setDetail("Name", () -> structureStart.getFeature().getFeatureName());
+							crashReportCategory.setDetail("Class",
+									() -> structureStart.getFeature().getClass().getCanonicalName());
+							throw new ReportedException(crashReport);
+						}
+					}
+				}
+			}
+		}
+
 		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion, List<ChunkAccess> chunks) {
 			// Note: Not certain StructureFeatureManager.forWorldGenRegion(...) is thread safe
 			for (ChunkAccess chunk : chunks) {
 				//System.out.println("StepStructureReference: "+chunk.getPos());
-				params.generator.createReferences(worldGenRegion, tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk);
+				createReferences(worldGenRegion, tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk);
 				((ProtoChunk) chunk).setStatus(STATUS);
 			}
 		}
@@ -602,9 +689,9 @@ public final class WorldGenerationStep {
 		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion, List<ChunkAccess> chunks) {
 			for (ChunkAccess chunk : chunks) {
 				//System.out.println("StepCarvers: "+chunk.getPos());
-				Blender.addAroundOldChunksCarvingMaskFilter((WorldGenLevel) worldGenRegion, (ProtoChunk) chunk);
-				params.generator.applyCarvers(worldGenRegion, params.worldSeed, params.biomeManager, tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk,
-						GenerationStep.Carving.AIR);
+				//Blender.addAroundOldChunksCarvingMaskFilter((WorldGenLevel) worldGenRegion, (ProtoChunk) chunk);
+				//params.generator.applyCarvers(worldGenRegion, params.worldSeed, params.biomeManager, tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk,
+				//		GenerationStep.Carving.AIR);
 				((ProtoChunk) chunk).setStatus(STATUS);
 			}
 		}
@@ -649,7 +736,7 @@ public final class WorldGenerationStep {
 					params.generator.applyBiomeDecoration(worldGenRegion, chunk, tParams.structFeat.forWorldGenRegion(worldGenRegion));
 					Blender.generateBorderTicks(worldGenRegion, chunk);
 				} catch (ReportedException e) {
-					e.printStackTrace();
+					//e.printStackTrace();
 					// FIXME: Features concurrent modification issue. Something about cocobeans just aren't happy
 					// For now just retry.
 				} finally {

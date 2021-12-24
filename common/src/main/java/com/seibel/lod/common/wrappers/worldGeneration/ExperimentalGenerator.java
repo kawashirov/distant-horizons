@@ -146,7 +146,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 				byte detailLevel = (byte) (posToGenerate.getNthDetail(i, false) - 1);
 				int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, false));
 				int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, false));
-				if (generationGroup.tryAddPoint(chunkX, chunkZ, generationGroupSize, targetStep)) {
+				if (generationGroup.tryAddPoint(chunkX, chunkZ, generationGroupSizeFar, targetStep)) {
 					toGenerate--;
 				}
 			}
