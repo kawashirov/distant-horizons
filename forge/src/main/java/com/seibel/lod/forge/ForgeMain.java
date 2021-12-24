@@ -78,7 +78,7 @@ public class ForgeMain implements LodForgeMethodCaller
 	private void onClientStart(final FMLClientSetupEvent event)
 	{
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
-				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> Config.getScreen(parent, ModInfo.ID, "")));
+				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> Config.getScreen(parent, "")));
 		forgeClientProxy = new ForgeClientProxy();
 		MinecraftForge.EVENT_BUS.register(forgeClientProxy);
 	}

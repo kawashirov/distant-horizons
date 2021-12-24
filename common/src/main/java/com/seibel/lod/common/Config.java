@@ -94,7 +94,7 @@ public class Config extends ConfigGui
 				public static HorizontalResolution drawResolution = IQuality.DRAW_RESOLUTION_DEFAULT;
 
 				@Category("client.graphics.quality")
-				@Entry(min = 16, max = 1024)
+				@Entry(minValue = 16, maxValue = 1024)
 				public static int lodChunkRenderDistance = IQuality.LOD_CHUNK_RENDER_DISTANCE_MIN_DEFAULT_MAX.defaultValue;
 
 				@Category("client.graphics.quality")
@@ -102,7 +102,7 @@ public class Config extends ConfigGui
 				public static VerticalQuality verticalQuality = IQuality.VERTICAL_QUALITY_DEFAULT;
 
 				@Category("client.graphics.quality")
-				@Entry(min = 2, max = 32)
+				@Entry(minValue = 2, maxValue = 32)
 				public static int horizontalScale = IQuality.HORIZONTAL_SCALE_MIN_DEFAULT_MAX.defaultValue;
 
 				@Category("client.graphics.quality")
@@ -191,11 +191,11 @@ public class Config extends ConfigGui
 			public static class Threading
 			{
 				@Category("client.advanced.threading")
-				@Entry(min = 1, max = 50)
+				@Entry(minValue = 1, maxValue = 50)
 				public static int numberOfWorldGenerationThreads = IThreading.NUMBER_OF_WORLD_GENERATION_THREADS_DEFAULT.defaultValue;
 
 				@Category("client.advanced.threading")
-				@Entry(min = 1, max = 50)
+				@Entry(minValue = 1, maxValue = 50)
 				public static int numberOfBufferBuilderThreads = IThreading.NUMBER_OF_BUFFER_BUILDER_THREADS_MIN_DEFAULT_MAX.defaultValue;
 			}
 
@@ -223,7 +223,7 @@ public class Config extends ConfigGui
 				public static GpuUploadMethod gpuUploadMethod = IBuffers.GPU_UPLOAD_METHOD_DEFAULT;
 
 				@Category("client.advanced.buffers")
-				@Entry(min = 0, max = 5000)
+				@Entry(minValue = 0, maxValue = 5000)
 				public static int gpuUploadTimeoutInMilleseconds = IBuffers.GPU_UPLOAD_TIMEOUT_IN_MILLISECONDS_DEFAULT.defaultValue;
 
 				@Category("client.advanced.buffers")
