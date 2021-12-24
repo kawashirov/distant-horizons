@@ -161,7 +161,7 @@ public class Config extends ConfigGui
 
 			@Category("client.worldGenerator")
 			@Entry
-			public static DistanceGenerationMode distanceGenerationMode = IWorldGenerator.DISTANCE_GENERATION_MODE_DEFAULT;
+			public static DistanceGenerationMode distanceGenerationMode = DistanceGenerationMode.FEATURES; //IWorldGenerator.DISTANCE_GENERATION_MODE_DEFAULT;
 
 			// FIXME: Temperary override. In 1.18, the newer Unstable gnerator is more usable
 			@Category("client.worldGenerator")

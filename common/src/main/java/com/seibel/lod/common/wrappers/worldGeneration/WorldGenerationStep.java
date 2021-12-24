@@ -338,35 +338,30 @@ public final class WorldGenerationStep {
 		Instant start = Instant.now();
 		GridList<ChunkAccess> referencedChunks;
 		DistanceGenerationMode generationMode;
+		referencedChunks = generateDirect(event, event.range, event.target);
+		
 		switch (event.target) {
 		case Empty:
 			return;
 		case StructureStart:
-			referencedChunks = generateStructureStart(event, event.range);
 			generationMode = DistanceGenerationMode.NONE;
 			break;
 		case StructureReference:
-			referencedChunks = generateStructureReference(event, event.range);
 			generationMode = DistanceGenerationMode.NONE;
 			break;
 		case Biomes:
-			referencedChunks = generateBiomes(event, event.range);
 			generationMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
 			break;
 		case Noise:
-			referencedChunks = generateNoise(event, event.range);
 			generationMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
 			break;
 		case Surface:
-			referencedChunks = generateSurface(event, event.range);
 			generationMode = DistanceGenerationMode.SURFACE;
 			break;
 		case Carvers:
-			referencedChunks = generateCarvers(event, event.range);
 			generationMode = DistanceGenerationMode.SURFACE;
 			break;
 		case Features:
-			referencedChunks = generateDirect(event, event.range);
 			generationMode = DistanceGenerationMode.FEATURES;
 			break;
 		case LiquidCarvers:
@@ -399,7 +394,7 @@ public final class WorldGenerationStep {
 		}
 	} 
 	
-	public final GridList<ChunkAccess> generateDirect(GenerationEvent e, int range) {
+	public final GridList<ChunkAccess> generateDirect(GenerationEvent e, int range, Steps step) {
 		int cx = e.pos.x;
 		int cy = e.pos.z;
 		int rangeEmpty = range+3;
@@ -418,124 +413,27 @@ public final class WorldGenerationStep {
 		GridList<ChunkAccess> subRange = chunks.subGrid(range);
 		stepStructureStart.generateGroup(e.tParam, region, subRange);
 		e.refreshTimeout();
+		if (step == Steps.StructureStart) return subRange;
 		stepStructureReference.generateGroup(e.tParam, region, subRange);
 		e.refreshTimeout();
+		if (step == Steps.StructureReference) return subRange;
 		stepBiomes.generateGroup(e.tParam, region, subRange);
 		e.refreshTimeout();
+		if (step == Steps.Biomes) return subRange;
 		stepNoise.generateGroup(e.tParam, region, subRange);
 		e.refreshTimeout();
+		if (step == Steps.Noise) return subRange;
 		stepSurface.generateGroup(e.tParam, region, subRange);
 		e.refreshTimeout();
+		if (step == Steps.Surface) return subRange;
 		stepCarvers.generateGroup(e.tParam, region, subRange);
 		e.refreshTimeout();
+		if (step == Steps.Carvers) return subRange;
 		stepFeatures.generateGroup(e.tParam, region, subRange);
 		e.refreshTimeout();
 		return subRange;
 	}
 	
-	
-	
-	public final GridList<ChunkAccess> generateEmpty(GenerationEvent e, int range) {
-		int cx = e.pos.x;
-		int cy = e.pos.z;
-		GridList<ChunkAccess> chunks = new GridList<ChunkAccess>(range);
-		
-		for (int oy = -range; oy <= range; oy++) {
-			for (int ox = -range; ox <= range; ox++) {
-				//ChunkAccess target = getCachedChunk(new ChunkPos(cx+ox, cy+oy));
-				ChunkAccess target = new ProtoChunk(new ChunkPos(cx+ox, cy+oy), UpgradeData.EMPTY, params.level, params.biomes, null);
-				chunks.add(target);
-			}
-		}
-		e.refreshTimeout();
-		return chunks;
-	}
-	
-	public final GridList<ChunkAccess> generateStructureStart(GenerationEvent e, int range) {
-		int prestepRange = range+3; //For feature stage
-		GridList<ChunkAccess> chunks = generateEmpty(e, prestepRange);
-		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.STRUCTURE_STARTS, range);
-		//System.out.println("DEBUG: StructureStart:"+e.pos);
-		//System.out.println("DEBUG: StructureStart:\n"+referencedChunks.toDetailString());
-		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
-		stepStructureStart.generateGroup(e.tParam, region, chunks.subGrid(range));
-		e.refreshTimeout();
-		return chunks;
-	}
-
-	public final GridList<ChunkAccess> generateStructureReference(GenerationEvent e, int range) {
-		int prestepRange = range;
-		GridList<ChunkAccess> chunks = generateStructureStart(e, prestepRange);
-		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.STRUCTURE_REFERENCES, range);
-		//System.out.println("DEBUG: StructureReference:"+e.pos);
-		//System.out.println("DEBUG: StructureReference:\n"+referencedChunks.toDetailString());
-		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
-		stepStructureReference.generateGroup(e.tParam, region, chunks.subGrid(range));
-		e.refreshTimeout();
-		return chunks;
-	}
-
-	public final GridList<ChunkAccess> generateBiomes(GenerationEvent e, int range) {
-		int prestepRange = range;
-		GridList<ChunkAccess> chunks = generateStructureReference(e, prestepRange);
-		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.BIOMES, range);
-		//System.out.println("DEBUG: Biomes:"+e.pos);
-		//System.out.println("DEBUG: Biomes:\n"+referencedChunks.toDetailString());
-		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
-		stepBiomes.generateGroup(e.tParam, region, chunks.subGrid(range));
-		e.refreshTimeout();
-		return chunks;
-	}
-
-	public final GridList<ChunkAccess> generateNoise(GenerationEvent e, int range) {
-		int prestepRange = range;
-		GridList<ChunkAccess> chunks = generateBiomes(e, prestepRange);
-		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.NOISE, range);
-		//System.out.println("DEBUG: Noise:"+e.pos);
-		//System.out.println("DEBUG: Noise:\n"+referencedChunks.toDetailString());
-		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
-		stepNoise.generateGroup(e.tParam, region, chunks.subGrid(range));
-		e.refreshTimeout();
-		return chunks;
-	}
-
-	public final GridList<ChunkAccess> generateSurface(GenerationEvent e, int range) {
-		int prestepRange = range;
-		GridList<ChunkAccess> chunks = generateNoise(e, prestepRange);
-		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.SURFACE, range);
-		//System.out.println("DEBUG: Surface:"+e.pos);
-		//System.out.println("DEBUG: Surface:\n"+referencedChunks.toDetailString());
-		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
-		stepSurface.generateGroup(e.tParam, region, chunks.subGrid(range));
-		e.refreshTimeout();
-		return chunks;
-	}
-
-
-	public final GridList<ChunkAccess> generateCarvers(GenerationEvent e, int range) {
-		int prestepRange = range;
-		GridList<ChunkAccess> chunks = generateSurface(e, prestepRange);
-		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.CARVERS, range);
-		//System.out.println("DEBUG: Carvers:"+e.pos);
-		//System.out.println("DEBUG: Carvers:\n"+referencedChunks.toDetailString());
-		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
-		stepCarvers.generateGroup(e.tParam, region, chunks.subGrid(range));
-		e.refreshTimeout();
-		return chunks;
-	}
-
-
-	public final GridList<ChunkAccess> generateFeatures(GenerationEvent e, int range) {
-		int prestepRange = range;
-		GridList<ChunkAccess> chunks = generateCarvers(e, prestepRange);
-		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.FEATURES, range + 1);
-		//System.out.println("DEBUG: Features:"+e.pos);
-		//System.out.println("DEBUG: Features:\n"+referencedChunks.toDetailString());
-		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
-		stepFeatures.generateGroup(e.tParam, region, chunks.subGrid(range));
-		e.refreshTimeout();
-		return chunks;
-	}
 	
 	public final class StepStructureStart {
 		public final ChunkStatus STATUS = ChunkStatus.STRUCTURE_STARTS;
