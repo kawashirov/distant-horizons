@@ -29,6 +29,7 @@ import com.seibel.lod.core.enums.config.DistanceGenerationMode;
 import com.seibel.lod.core.objects.PosToGenerateContainer;
 import com.seibel.lod.core.objects.lod.LodDimension;
 import com.seibel.lod.core.util.LevelPosUtil;
+import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftWrapper;
@@ -59,6 +60,14 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 	
 	@Override
 	public void queueGenerationRequests(LodDimension lodDim, LodBuilder lodBuilder) {
+		if (lodDim != targetLodDim) {
+			stop();
+			WorldWrapper dim = (WorldWrapper) LodUtil.getServerWorldFromDimension(lodDim.dimension);
+			generationGroup = new WorldGenerationStep(dim.getServerWorld(), lodBuilder, lodDim);
+			targetLodDim = lodDim;
+			ClientApi.LOGGER.info("1.18 Experimental Chunk Generator reinitialized");
+		}
+		
 		DistanceGenerationMode mode = CONFIG.client().worldGenerator().getDistanceGenerationMode();
 		numberOfGenerationPoints = CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads();
 

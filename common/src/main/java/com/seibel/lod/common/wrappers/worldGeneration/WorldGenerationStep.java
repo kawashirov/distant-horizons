@@ -167,12 +167,7 @@ public final class WorldGenerationStep {
 			worldSeed = worldGenSettings.seed();
 			biomeManager = new BiomeManager(level, BiomeManager.obfuscateSeed(worldSeed));
 			structures = server.getStructureManager();
-			// TODO: Get the current level dimension
-			MappedRegistry<LevelStem> mappedRegistry = worldGenSettings.dimensions();
-			LevelStem levelStem = (LevelStem) mappedRegistry.get(LevelStem.OVERWORLD);
-			if (levelStem == null)
-				throw new RuntimeException("There should already be a level.... Right???");
-			generator = levelStem.generator();
+			generator = level.getChunkSource().getGenerator();
 			chunkScanner = level.getChunkSource().chunkScanner();
 			fixerUpper = server.getFixerUpper();
 	    }
@@ -183,7 +178,7 @@ public final class WorldGenerationStep {
 		final StructureCheck structCheck;
 	    public ThreadedParameters(GlobalParameters param) {
 	    	structCheck = new StructureCheck(param.chunkScanner, param.registry, param.structures,
-					Level.OVERWORLD, param.generator, param.level, param.generator.getBiomeSource(), param.worldSeed, param.fixerUpper);
+					param.level.dimension(), param.generator, param.level, param.generator.getBiomeSource(), param.worldSeed, param.fixerUpper);
 	    	structFeat = new StructureFeatureManager(param.level, param.worldGenSettings, structCheck);
 	    }
 	}
