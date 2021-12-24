@@ -127,23 +127,23 @@ public class BlockColorWrapper implements IBlockColorWrapper
 		TextureAtlasSprite texture;
 		List<BakedQuad> quads = null;
 		
-		boolean isTinted = false;
-		int listSize = 0;
+		//boolean isTinted = false;
+		//int listSize = 0;
 		
 		// first step is to check if this block has a tinted face
-		for (Direction direction : directions)
-		{
-			quads = mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
-			listSize = Math.max(listSize, quads.size());
-			for (BakedQuad bakedQuad : quads)
-			{
-				isTinted |= bakedQuad.isTinted();
-			}
-		}
+		//for (Direction direction : directions)
+		//{
+		//	quads = mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
+		//	listSize = Math.max(listSize, quads.size());
+		//	for (BakedQuad bakedQuad : quads)
+		//	{
+		//		isTinted |= bakedQuad.isTinted();
+		//	}
+		//}
 		
 		//if it contains a tinted face then we store this block in the toTint set
-		if (isTinted)
-			this.toTint = true;
+		//if (isTinted)
+		//	this.toTint = true;
 		
 		//now we get the first non-empty face
 		for (Direction direction : directions)
