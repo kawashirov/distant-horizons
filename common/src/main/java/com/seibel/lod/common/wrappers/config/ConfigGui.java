@@ -1,7 +1,6 @@
 package com.seibel.lod.common.wrappers.config;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -22,15 +21,20 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.Logger;
+
 // Uses https://github.com/mwanji/toml4j for toml
 
 import com.moandjiezana.toml.Toml;
 import com.moandjiezana.toml.TomlWriter;
 import com.mojang.blaze3d.vertex.PoseStack;
+
+// Gets info from our own mod
+
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
-
 import com.seibel.lod.core.api.ClientApi;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -46,6 +50,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.resources.language.I18n;
 
 /**
  * Based upon TinyConfig
@@ -56,7 +61,7 @@ import net.minecraft.network.chat.TranslatableComponent;
  * 
  * Credits to Motschen
  * @author coolGi2007
- * @version 12-23-2021
+ * @version 12-24-2021
  */
 @SuppressWarnings("unchecked")
 public abstract class ConfigGui
@@ -81,8 +86,11 @@ public abstract class ConfigGui
 	private static final Pattern DECIMAL_ONLY_REGEX = Pattern.compile("-?([\\d]+\\.?[\\d]*|[\\d]*\\.?[\\d]+|\\.)");
 	
 	private static final List<EntryInfo> entries = new ArrayList<>();
-	
-	private static final String MOD_NAME = ModInfo.NAME;
+
+	// Chainge these to your own mod
+	private static final String MOD_NAME = ModInfo.NAME;					// For file saving and identifying
+	private static final String MOD_NAME_READABLE = ModInfo.READABLE_NAME;	// For logs
+	private static Logger LOGGER = ClientApi.LOGGER;							// For logs
 	
 	private static TomlWriter tomlWriter = new TomlWriter();
 	
@@ -117,7 +125,7 @@ public abstract class ConfigGui
 		/** Hides the button */
 		boolean hideOption = false;
 		/** This asks if it is a button to goto a new screen */
-		boolean button = false;
+		boolean screenButton = false;
 		/** This is only called if button is true */
 		String gotoScreen = "";
 		String category;
@@ -264,7 +272,7 @@ public abstract class ConfigGui
 			if (!screenEntry.name().equals(""))
 				info.name = new TranslatableComponent(screenEntry.name());
 			
-			info.button = true;
+			info.screenButton = true;
 			info.gotoScreen = (!info.category.isBlank() ? info.category + "." : "") + field.getName();
 		}
 		entries.add(info);
@@ -327,7 +335,6 @@ public abstract class ConfigGui
 	public static void saveToFile()
 	{
 		// First try to create a config file
-		File file;
 		try
 		{
 			if (!Files.exists(configFilePath))
@@ -335,13 +342,13 @@ public abstract class ConfigGui
 		}
 		catch (Exception e)
 		{
-			ClientApi.LOGGER.info("Failed creating config file for " + ModInfo.READABLE_NAME + " at the path [" + configFilePath.toString() + "].");
+			LOGGER.info("Failed creating config file for " + MOD_NAME_READABLE + " at the path [" + configFilePath.toString() + "].");
 			e.printStackTrace();
 		}
 		// If this line fails then delete the modid.toml and start the mod again
 		Toml toml = new Toml().read(configFilePath.toFile());
 		
-		ClientApi.LOGGER.info("TomlWriter stuff not made yet");
+		LOGGER.info("TomlWriter stuff not made yet");
 	}
 	
 	/**
@@ -357,26 +364,25 @@ public abstract class ConfigGui
 		}
 		catch (Exception e)
 		{
-			ClientApi.LOGGER.info("Config file not found for " + ModInfo.READABLE_NAME + ". Creating config...");
+			LOGGER.info("Config file not found for " + MOD_NAME_READABLE + ". Creating config...");
 			saveToFile();
+			return;
 		}
 
-        /*
+		/*
         for (EntryInfo info : entries) {
-            if (info.id.equals(modid)) {
-                if (info.widget instanceof Map.Entry) { // For enum
-                    info.value = toml.getList((info.category != "" ? info.category + "." : "") + info.field.getName());
-                } else if (info.field.getType() == String.class) {
-                    info.value = toml.getString((info.category != "" ? info.category + "." : "") + info.field.getName());
-                } else if (info.field.getType() == Double.class) {
-                    info.value = toml.getDouble((info.category != "" ? info.category + "." : "") + info.field.getName());
-                } else if (info.field.getType() == Long.class) {
-                    info.value = toml.getLong((info.category != "" ? info.category + "." : "") + info.field.getName());
-                } else if (info.field.getType() == List.class) {
-                    info.value = toml.getList((info.category != "" ? info.category + "." : "") + info.field.getName());
-                }
-            }
-        }*/
+			if (info.widget instanceof Map.Entry) { // For enum
+				info.value = toml.getList((info.category != "" ? info.category + "." : "") + info.field.getName());
+			} else if (info.field.getType() == String.class) {
+				info.value = toml.getString((info.category != "" ? info.category + "." : "") + info.field.getName());
+			} else if (info.field.getType() == Double.class) {
+				info.value = toml.getDouble((info.category != "" ? info.category + "." : "") + info.field.getName());
+			} else if (info.field.getType() == Long.class) {
+				info.value = toml.getLong((info.category != "" ? info.category + "." : "") + info.field.getName());
+			} else if (info.field.getType() == List.class) {
+				info.value = toml.getList((info.category != "" ? info.category + "." : "") + info.field.getName());
+			}
+		}*/
 	}
 	
 	
@@ -524,7 +530,7 @@ public abstract class ConfigGui
 						widget.setFilter(processor);
 						this.list.addButton(widget, resetButton, null, name);
 					}
-					else if (info.button)
+					else if (info.screenButton)
 					{
 						Button widget = new Button(this.width / 2 - info.width, this.height - 28, info.width * 2, 20, name, (button -> {
 							Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, info.gotoScreen));
@@ -543,16 +549,14 @@ public abstract class ConfigGui
 		@Override
 		public void render(PoseStack matrices, int mouseX, int mouseY, float delta)
 		{
-			this.renderBackground(matrices);
-			this.list.render(matrices, mouseX, mouseY, delta);
-			// Render title
-			drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF);
+			this.renderBackground(matrices); // Renders background
+			this.list.render(matrices, mouseX, mouseY, delta); // Render buttons
+			drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title
 			
 			
-			// TODO[CONFIG]: Fix the tooltip
-            /*
+			// Render the tooltip only if it can find a tooltip in the language file
             for (EntryInfo info : entries) {
-                if (info.id.equals(modid)) {
+				if (info.category.matches(category) && !info.hideOption) {
                     if (list.getHoveredButton(mouseX,mouseY).isPresent()) {
                         AbstractWidget buttonWidget = list.getHoveredButton(mouseX,mouseY).get();
                         Component text = ButtonEntry.buttonsWithText.get(buttonWidget);
@@ -564,12 +568,11 @@ public abstract class ConfigGui
                             List<Component> list = new ArrayList<>();
                             for (String str : I18n.get(key).split("\n"))
                                 list.add(new TextComponent(str));
-                            renderTooltip(matrices, (Component) list, mouseX, mouseY);
+							renderComponentTooltip(matrices, list, mouseX, mouseY);
                         }
                     }
                 }
             }
-             */
 			super.render(matrices, mouseX, mouseY, delta);
 		}
 	}
@@ -689,6 +692,7 @@ public abstract class ConfigGui
 	//=============//
 	
 	// These could probably be moved into core since they don't rely on any Minecraft code. - James
+	// Better not to since I want everything to be in 1 file. - coolGi
 	
 	/** a textField, button, etc. that can be interacted with */
 	@Retention(RetentionPolicy.RUNTIME)
@@ -720,11 +724,11 @@ public abstract class ConfigGui
 	@Target(ElementType.FIELD)
 	public @interface Category
 	{
-		String value() default "";
+		String value();
 	}
 	
 	
-	/** displayed in a tooltip when hoving over a config button */
+	/** Makes text (looks like @Entry but dosnt save and has no button */
 	@Retention(RetentionPolicy.RUNTIME)
 	@Target(ElementType.FIELD)
 	public @interface Comment
