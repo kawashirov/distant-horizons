@@ -27,7 +27,7 @@ public class LodCommonMain {
     }
 
     public static void initConfig() {
-        ConfigGui.init(ModInfo.ID, Config.class);
+        ConfigGui.init(Config.class);
     }
 
     public static void registerNetworking(NetworkInterface networkInterface) {

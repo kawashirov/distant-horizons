@@ -4,15 +4,17 @@
   "package": "com.seibel.lod.fabric.mixins",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
-    "unsafe.MixinPalettedContainer",
-    "events.MixinServerLevel"
+    "events.MixinServerLevel",
+    "unsafe.MixinPalettedContainer"
   ],
   "client": [
     "MixinMinecraft",
     "MixinOptionsScreen",
     "MixinWorldRenderer",
+    "MixinFogRenderer",
     "events.MixinClientLevel",
-    "events.MixinMinecraft"
+    "events.MixinMinecraft",
+    "events.MixinBlockUpdate"
   ],
   "server": [],
   "injectors": {

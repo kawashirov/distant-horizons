@@ -1,6 +1,7 @@
 package com.seibel.lod.fabric.mixins;
 
 import com.seibel.lod.common.Config;
+import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.common.wrappers.config.TexturedButtonWidget;
 import com.seibel.lod.core.ModInfo;
 import net.minecraft.client.gui.screens.OptionsScreen;
@@ -43,7 +44,7 @@ public class MixinOptionsScreen extends Screen {
                 20, ICON_TEXTURE, 20, 40,
                 // Create the button and tell it where to go
                 // For now it goes to the client option by default
-                (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(Config.getScreen(this, ModInfo.ID, "client")),
+                    (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, "client")),
                 // Add a title to the screen
                 new TranslatableComponent("text.autoconfig." + ModInfo.ID + ".title")));
     }

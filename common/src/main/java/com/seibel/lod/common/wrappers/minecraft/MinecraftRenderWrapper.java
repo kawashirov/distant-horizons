@@ -5,6 +5,7 @@ import java.util.HashSet;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.seibel.lod.common.wrappers.WrapperFactory;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
 import com.seibel.lod.core.handlers.IReflectionHandler;
 import com.seibel.lod.core.handlers.ReflectionHandler;

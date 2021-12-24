@@ -25,6 +25,7 @@ import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
 
+import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -32,6 +33,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -95,7 +97,7 @@ public class ClientProxy
 	{
 		eventApi.worldSaveEvent();
 	}
-	
+
 	/** This is also called when a new dimension loads */
 	public void worldLoadEvent(Level level)
 	{
@@ -109,24 +111,33 @@ public class ClientProxy
 		eventApi.worldUnloadEvent();
 	}
 
-	/*
-	public void blockChangeEvent(BlockEventData event)
-	{
-		// we only care about certain block events
-		if (event.getClass() == BlockEventData.BreakEvent.class ||
-				event.getClass() == BlockEventData.EntityPlaceEvent.class ||
-				event.getClass() == BlockEventData.EntityMultiPlaceEvent.class ||
-				event.getClass() == BlockEventData.FluidPlaceBlockEvent.class ||
-				event.getClass() == BlockEventData.PortalSpawnEvent.class)
-		{
-			IChunkWrapper chunk = new ChunkWrapper(event.getWorld().getChunk(event.getPos()));
-			DimensionTypeWrapper dimType = DimensionTypeWrapper.getDimensionTypeWrapper(event.getWorld().dimensionType());
-			
-			// recreate the LOD where the blocks were changed
-			eventApi.blockChangeEvent(chunk, dimType);
-		}
+	/**
+	 * Can someone tell me how to make this better
+	 * @author Ran
+	 *
+	 * public void blockChangeEvent(BlockEventData event) {
+	 * 		// we only care about certain block events
+	 * 		if (event.getClass() == BlockEventData.BreakEvent.class ||
+	 * 				event.getClass() == BlockEventData.EntityPlaceEvent.class ||
+	 * 				event.getClass() == BlockEventData.EntityMultiPlaceEvent.class ||
+	 * 				event.getClass() == BlockEventData.FluidPlaceBlockEvent.class ||
+	 * 				event.getClass() == BlockEventData.PortalSpawnEvent.class)
+	 *        {
+	 * 			IChunkWrapper chunk = new ChunkWrapper(event.getWorld().getChunk(event.getPos()));
+	 * 			DimensionTypeWrapper dimType = DimensionTypeWrapper.getDimensionTypeWrapper(event.getWorld().dimensionType());
+	 *
+	 * 			// recreate the LOD where the blocks were changed
+	 * 			eventApi.blockChangeEvent(chunk, dimType);
+	 *        }
+	 * }
+	 */
+	public void blockChangeEvent(LevelAccessor world, BlockPos pos) {
+		IChunkWrapper chunk = new ChunkWrapper(world.getChunk(pos));
+		DimensionTypeWrapper dimType = DimensionTypeWrapper.getDimensionTypeWrapper(world.dimensionType());
+
+		// recreate the LOD where the blocks were changed
+		eventApi.blockChangeEvent(chunk, dimType);
 	}
-	*/
 
 
 

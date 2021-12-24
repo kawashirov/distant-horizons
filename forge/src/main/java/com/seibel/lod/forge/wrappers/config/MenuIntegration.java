@@ -8,6 +8,6 @@ import net.minecraftforge.fmlclient.ConfigGuiHandler;
 public class MenuIntegration {
     public static void registerModsPage() {
         ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
-                () -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> Config.getScreen(parent, ModInfo.ID, "")));
+                () -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> Config.getScreen(parent,  "")));
     }
 }

@@ -19,6 +19,6 @@ public class ModMenuIntegration implements ModMenuApi {
     // For the custom config code
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return parent -> Config.getScreen(parent, ModInfo.ID, "");
+        return parent -> Config.getScreen(parent, "");
     }
 }
