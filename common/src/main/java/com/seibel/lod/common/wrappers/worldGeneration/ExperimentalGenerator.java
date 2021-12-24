@@ -154,7 +154,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 				break;
 			
 		}
-		/*  //Enable this for logging
+		  //Enable this for logging
 		if (targetToGenerate != toGenerate) {
 			if (toGenerate <= 0) {
 				System.out.println(
@@ -165,7 +165,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 						+ estimatedSampleNeeded + " points, started " + (targetToGenerate - toGenerate)
 						+ " out of targeted " + targetToGenerate + " generations.");
 			}
-		}*/
+		}
 
 		if (toGenerate > 0 && estimatedSampleNeeded <= posToGenerate.getNumberOfPos()) {
 			// We failed to generate enough points from the samples.

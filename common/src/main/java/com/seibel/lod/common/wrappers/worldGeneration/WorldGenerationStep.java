@@ -174,12 +174,24 @@ public final class WorldGenerationStep {
 	}
 	
 	public static final class ThreadedParameters {
+		private static ThreadLocal<ThreadedParameters> localParam = new ThreadLocal<ThreadedParameters>();
+		final ServerLevel level;
 		final StructureFeatureManager structFeat;
 		final StructureCheck structCheck;
-	    public ThreadedParameters(GlobalParameters param) {
+		
+		public static final ThreadedParameters getOrMake(GlobalParameters param) {
+			ThreadedParameters tParam = localParam.get();
+			if (tParam != null && tParam.level == param.level) return tParam;
+			tParam = new ThreadedParameters(param);
+			localParam.set(tParam);
+			return tParam;
+		}
+		
+	    private ThreadedParameters(GlobalParameters param) {
+	    	level = param.level;
 	    	structCheck = new StructureCheck(param.chunkScanner, param.registry, param.structures,
-					param.level.dimension(), param.generator, param.level, param.generator.getBiomeSource(), param.worldSeed, param.fixerUpper);
-	    	structFeat = new StructureFeatureManager(param.level, param.worldGenSettings, structCheck);
+					param.level.dimension(), param.generator, level, param.generator.getBiomeSource(), param.worldSeed, param.fixerUpper);
+	    	structFeat = new StructureFeatureManager(level, param.worldGenSettings, structCheck);
 	    }
 	}
 
@@ -199,7 +211,7 @@ public final class WorldGenerationStep {
 			this.range = range;
 			id = generationFutureDebugIDs++;
 			this.target = target;
-			this.tParam = new ThreadedParameters(generationGroup.params);
+			this.tParam = ThreadedParameters.getOrMake(generationGroup.params);
 			future = generationGroup.executors.submit(() -> {
 				generationGroup.generateLodFromList(this);
 				});
@@ -356,6 +368,7 @@ public final class WorldGenerationStep {
 		}
 		int centreIndex = referencedChunks.size() / 2;
 
+		//System.out.println("Lod Generate Event: "+event);
 		for (int oy = -event.range; oy <= event.range; oy++) {
 			for (int ox = -event.range; ox <= event.range; ox++) {
 				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
@@ -421,7 +434,7 @@ public final class WorldGenerationStep {
 		//System.out.println("DEBUG: Biomes:"+pos);
 		//System.out.println("DEBUG: Biomes:\n"+referencedChunks.toDetailString());
 		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
-		stepBiomes.generateGroup(e.tParam, region, chunks.subGrid(range), executors);
+		stepBiomes.generateGroup(e.tParam, region, chunks.subGrid(range));
 		e.refreshTimeout();
 		return chunks;
 	}
@@ -433,7 +446,7 @@ public final class WorldGenerationStep {
 		//System.out.println("DEBUG: Noise:"+pos);
 		//System.out.println("DEBUG: Noise:\n"+referencedChunks.toDetailString());
 		//System.out.println("to:\n"+referencedChunks.subGrid(centreIndex, range).toDetailString());
-		stepNoise.generateGroup(e.tParam, region, chunks.subGrid(range), executors);
+		stepNoise.generateGroup(e.tParam, region, chunks.subGrid(range));
 		e.refreshTimeout();
 		return chunks;
 	}
@@ -526,10 +539,10 @@ public final class WorldGenerationStep {
 		public final int RANGE = STATUS.getRange();
 		public final EnumSet<Heightmap.Types> HEIGHTMAP_TYPES = STATUS.heightmapsAfter();
 		
-		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion, List<ChunkAccess> chunks, Executor worker) {
+		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion, List<ChunkAccess> chunks) {
 			for (ChunkAccess chunk : chunks) {
 				//System.out.println("StepBiomes: "+chunk.getPos());
-				chunk = joinAsync(params.generator.createBiomes(params.biomes, worker, Blender.of(worldGenRegion),
+				chunk = joinAsync(params.generator.createBiomes(params.biomes, Runnable::run, Blender.of(worldGenRegion),
 						tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
 				((ProtoChunk) chunk).setStatus(STATUS);
 			}
@@ -546,10 +559,10 @@ public final class WorldGenerationStep {
 		public final int RANGE = STATUS.getRange();
 		public final EnumSet<Heightmap.Types> HEIGHTMAP_TYPES = STATUS.heightmapsAfter();
 
-		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion, List<ChunkAccess> chunks, Executor worker) {
+		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion, List<ChunkAccess> chunks) {
 			for (ChunkAccess chunk : chunks) {
 				//System.out.println("StepNoise: "+chunk.getPos());
-				chunk = joinAsync(params.generator.fillFromNoise(worker, Blender.of(worldGenRegion),
+				chunk = joinAsync(params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion),
 						tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
 				((ProtoChunk) chunk).setStatus(STATUS);
 			}
@@ -636,7 +649,7 @@ public final class WorldGenerationStep {
 					params.generator.applyBiomeDecoration(worldGenRegion, chunk, tParams.structFeat.forWorldGenRegion(worldGenRegion));
 					Blender.generateBorderTicks(worldGenRegion, chunk);
 				} catch (ReportedException e) {
-					//e.printStackTrace();
+					e.printStackTrace();
 					// FIXME: Features concurrent modification issue. Something about cocobeans just aren't happy
 					// For now just retry.
 				} finally {
