@@ -143,7 +143,7 @@ public class ClientProxy
 
 	// The debug mode keybinding, which will be registered
 	public static final KeyMapping DebugToggle = KeyBindingHelper.registerKeyBinding(
-			new KeyMapping("key.lod.DebugToggle", GLFW.GLFW_KEY_F4, "key.lod.category"));
+			new KeyMapping("key.lod.DebugToggle", GLFW.GLFW_KEY_F8, "key.lod.category"));
 
 	// The draw toggle keybinding, which will be registered
 	public static final KeyMapping DrawToggle = KeyBindingHelper.registerKeyBinding(
