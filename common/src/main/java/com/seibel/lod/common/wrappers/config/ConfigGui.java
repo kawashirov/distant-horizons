@@ -21,12 +21,14 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+import com.electronwill.nightconfig.core.file.CommentedFileConfig;
+import com.electronwill.nightconfig.core.file.CommentedFileConfigBuilder;
 import org.apache.logging.log4j.Logger;
 
 // Uses https://github.com/mwanji/toml4j for toml
 
-import com.moandjiezana.toml.Toml;
-import com.moandjiezana.toml.TomlWriter;
+import com.electronwill.nightconfig.toml.*;
+import com.electronwill.nightconfig.core.file.FileConfig;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 // Gets info from our own mod
@@ -90,7 +92,7 @@ public abstract class ConfigGui
 	// Chainge these to your own mod
 	private static final String MOD_NAME = ModInfo.NAME;					// For file saving and identifying
 	private static final String MOD_NAME_READABLE = ModInfo.READABLE_NAME;	// For logs
-	private static Logger LOGGER = ClientApi.LOGGER;							// For logs
+//	private static Logger LOGGER;											// For logs
 	
 	private static TomlWriter tomlWriter = new TomlWriter();
 	
@@ -144,31 +146,6 @@ public abstract class ConfigGui
 		initNestedClass(config, "");
 		
 		loadFromFile();
-		
-		// Save and read the file
-		try
-		{
-			new Toml().read(Files.newBufferedReader(configFilePath)).to(config);
-		}
-		catch (Exception e)
-		{
-			saveToFile();
-		}
-		
-		for (EntryInfo info : entries)
-		{
-			if (info.field.isAnnotationPresent(Entry.class))
-			{
-				try
-				{
-					info.value = info.field.get(null);
-					info.tempValue = info.value.toString();
-				}
-				catch (IllegalAccessException ignored)
-				{
-				}
-			}
-		}
 	}
 	
 	private static void initNestedClass(Class<?> config, String category)
@@ -334,21 +311,34 @@ public abstract class ConfigGui
 	/** Grabs what is in the config and puts it in modid.toml */
 	public static void saveToFile()
 	{
+		// If this line fails then delete the modid.toml and start the mod again
+		CommentedFileConfig config = CommentedFileConfig.builder(configFilePath.toFile()).build();
+
 		// First try to create a config file
-		try
-		{
+		try {
 			if (!Files.exists(configFilePath))
 				Files.createFile(configFilePath);
 		}
-		catch (Exception e)
-		{
-			LOGGER.info("Failed creating config file for " + MOD_NAME_READABLE + " at the path [" + configFilePath.toString() + "].");
+		catch (Exception e) {
+//			ClientApi.LOGGER.info("Failed creating config file for " + MOD_NAME_READABLE + " at the path [" + configFilePath.toString() + "].");
 			e.printStackTrace();
 		}
-		// If this line fails then delete the modid.toml and start the mod again
-		Toml toml = new Toml().read(configFilePath.toFile());
-		
-		LOGGER.info("TomlWriter stuff not made yet");
+
+		config.load();
+
+		for (EntryInfo info : entries) {
+			if (info.field.isAnnotationPresent(Entry.class)) {
+				try {
+					info.value = info.field.get(null);
+					info.tempValue = info.value.toString();
+				} catch (IllegalAccessException ignored) {}
+
+				config.set((info.category != "" ? info.category + "." : "") + info.field.getName(), info.value);
+			}
+		}
+
+		config.save();
+		config.close();
 	}
 	
 	/**
@@ -357,32 +347,27 @@ public abstract class ConfigGui
 	 */
 	public static void loadFromFile()
 	{
-		Toml toml;
-		try
-		{
-			toml = new Toml().read(configFilePath.toFile());
-		}
-		catch (Exception e)
-		{
-			LOGGER.info("Config file not found for " + MOD_NAME_READABLE + ". Creating config...");
+		CommentedFileConfig config = CommentedFileConfig.builder(configFilePath.toFile()).build();
+
+		// First checks if the config file was already made
+		if (!Files.exists(configFilePath)) {
+//			ClientApi.LOGGER.info("Config file not found for " + MOD_NAME_READABLE + ". Creating config...");
 			saveToFile();
 			return;
 		}
 
-		/*
-        for (EntryInfo info : entries) {
-			if (info.widget instanceof Map.Entry) { // For enum
-				info.value = toml.getList((info.category != "" ? info.category + "." : "") + info.field.getName());
-			} else if (info.field.getType() == String.class) {
-				info.value = toml.getString((info.category != "" ? info.category + "." : "") + info.field.getName());
-			} else if (info.field.getType() == Double.class) {
-				info.value = toml.getDouble((info.category != "" ? info.category + "." : "") + info.field.getName());
-			} else if (info.field.getType() == Long.class) {
-				info.value = toml.getLong((info.category != "" ? info.category + "." : "") + info.field.getName());
-			} else if (info.field.getType() == List.class) {
-				info.value = toml.getList((info.category != "" ? info.category + "." : "") + info.field.getName());
+		config.load();
+
+		for (EntryInfo info : entries) {
+			if (info.field.isAnnotationPresent(Entry.class)) {
+//				if (info.field.getType().isEnum())
+//					info.value = Enum.valueOf(info.field.getType(), config.get((info.category != "" ? info.category + "." : "") + info.field.getName()).toString());
+//				else
+//					info.value = config.get((info.category != "" ? info.category + "." : "") + info.field.getName());
 			}
-		}*/
+		}
+
+		config.close();
 	}
 	
 	
@@ -415,34 +400,12 @@ public abstract class ConfigGui
 		public void tick()
 		{
 			super.tick();
-			for (EntryInfo info : entries)
-			{
-				try
-				{
-					info.field.set(null, info.value);
-				}
-				catch (IllegalAccessException ignored)
-				{
-				}
-			}
-		}
-		
-		private void loadValues()
-		{
-			loadFromFile();
-			
-			for (EntryInfo info : entries)
-			{
-				if (info.field.isAnnotationPresent(Entry.class))
-					try
-					{
-						info.value = info.field.get(null);
-						info.tempValue = info.value.toString();
-					}
-					catch (IllegalAccessException ignored)
-					{
-					}
-			}
+//			for (EntryInfo info : entries)
+//			{
+//				try {
+//					info.field.set(null, info.value);
+//				} catch (IllegalAccessException ignored) {}
+//			}
 		}
 		
 		@Override
@@ -450,10 +413,10 @@ public abstract class ConfigGui
 		{
 			super.init();
 			if (!reload)
-				loadValues();
+				loadFromFile();
 			
 			this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
-				loadValues();
+				loadFromFile();
 				Objects.requireNonNull(minecraft).setScreen(parent);
 			}));
 			

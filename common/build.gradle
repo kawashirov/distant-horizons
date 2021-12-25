@@ -29,8 +29,8 @@ publishing {
 }
 
 dependencies {
-    implementation("com.moandjiezana.toml:toml4j:${rootProject.toml_version}")
-    shadowMe("com.moandjiezana.toml:toml4j:${rootProject.toml_version}") {
+    implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
+    shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {
         exclude(module: "gson")
     }
 }
