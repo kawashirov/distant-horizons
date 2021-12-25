@@ -155,8 +155,6 @@ public class ChunkWrapper implements IChunkWrapper
     @Override
     public int getEmittedBrightness(int x, int y, int z)
     {
-        BlockPos blockPos = new BlockPos(x,y,z);
-
-        return chunk.getLightEmission(blockPos);
+        return chunk.getLightEmission(new BlockPos(x,y,z));
     }
 }
