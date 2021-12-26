@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-// Uses https://github.com/mwanji/toml4j for toml
+// Uses https://github.com/TheElectronWill/night-config for toml (only for Fabric since Forge allready includes this)
 
 import com.electronwill.nightconfig.toml.*;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
