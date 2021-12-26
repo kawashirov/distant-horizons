@@ -216,8 +216,14 @@ public class BlockColorWrapper implements IBlockColorWrapper
         this.foliageTint = leavesInstance() && toTint;
 
         this.waterTint = waterIstance() && toTint;
-
-        color = tempColor;
+        
+        //hardcoded leaves
+        if (block == Blocks.SPRUCE_LEAVES)
+            color = ColorUtil.multiplyRGBcolors(tempColor, 0xFF619961);
+        else if (block == Blocks.BIRCH_LEAVES)
+            color = ColorUtil.multiplyRGBcolors(tempColor, 0xFF80A755);
+        else
+            color = tempColor;
     }
 
     /** determine if the given block should use the biome's grass color */
@@ -234,7 +240,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
     /** determine if the given block should use the biome's foliage color */
     private boolean leavesInstance()
     {
-        return block instanceof LeavesBlock
+        return (block instanceof LeavesBlock && block != Blocks.SPRUCE_LEAVES && block != Blocks.BIRCH_LEAVES)
                 || block == Blocks.VINE
                 || block == Blocks.SUGAR_CANE;
     }
