@@ -21,21 +21,20 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import com.electronwill.nightconfig.core.file.CommentedFileConfigBuilder;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 // Uses https://github.com/mwanji/toml4j for toml
 
 import com.electronwill.nightconfig.toml.*;
-import com.electronwill.nightconfig.core.file.FileConfig;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 
 // Gets info from our own mod
 
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
-import com.seibel.lod.core.api.ClientApi;
+
+// Minecraft imports
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -52,7 +51,9 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.language.I18n;	// translation
+import net.minecraft.world.item.ItemStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 /**
  * Based upon TinyConfig
@@ -92,7 +93,8 @@ public abstract class ConfigGui
 	// Chainge these to your own mod
 	private static final String MOD_NAME = ModInfo.NAME;					// For file saving and identifying
 	private static final String MOD_NAME_READABLE = ModInfo.READABLE_NAME;	// For logs
-//	private static Logger LOGGER;											// For logs
+//	private static Logger LOGGER = ClientApi.LOGGER;						// For logs
+	private static Logger LOGGER = LogManager.getLogger(ModInfo.NAME);		// For logs (this inits before ClientAPI so this is a temp fix)
 	
 	private static TomlWriter tomlWriter = new TomlWriter();
 	
@@ -111,7 +113,7 @@ public abstract class ConfigGui
 		public static final int ResetButtonWidth = 40;
 	}
 	
-	protected static class EntryInfo
+	protected static class EntryInfo<T>
 	{
 		Field field;
 		Object widget;
@@ -131,9 +133,9 @@ public abstract class ConfigGui
 		/** This is only called if button is true */
 		String gotoScreen = "";
 		String category;
+		Class<T> varClass;
 	}
-	
-	public static final Map<String, Class<?>> configClass = new HashMap<>();
+
 	private static Path configFilePath;
 	
 	
@@ -144,14 +146,23 @@ public abstract class ConfigGui
 		configFilePath = mc.gameDirectory.toPath().resolve("config").resolve(MOD_NAME + ".toml");
 		
 		initNestedClass(config, "");
-		
+
+		for (EntryInfo info : entries) {
+			if (info.field.isAnnotationPresent(Entry.class)) {
+				try {
+					info.value = info.field.get(null);
+					info.tempValue = info.value.toString();
+				} catch (IllegalAccessException ignored) {
+				}
+			}
+		}
+
 		loadFromFile();
 	}
 	
 	private static void initNestedClass(Class<?> config, String category)
 	{
 		String modCategory = MOD_NAME + (!category.isBlank() ? "." + category : "");
-		configClass.put(modCategory, config);
 		for (Field field : config.getFields())
 		{
 			EntryInfo info = new EntryInfo();
@@ -164,6 +175,7 @@ public abstract class ConfigGui
 			
 			if (field.isAnnotationPresent(Entry.class))
 			{
+				info.varClass = field.getType();
 				try
 				{
 					info.defaultValue = field.get(null);
@@ -204,8 +216,7 @@ public abstract class ConfigGui
 		{
 			if (!entry.name().equals(""))
 				info.name = new TranslatableComponent(entry.name());
-			
-			
+
 			
 			if (fieldClass == int.class)
 			{
@@ -320,7 +331,7 @@ public abstract class ConfigGui
 				Files.createFile(configFilePath);
 		}
 		catch (Exception e) {
-//			ClientApi.LOGGER.info("Failed creating config file for " + MOD_NAME_READABLE + " at the path [" + configFilePath.toString() + "].");
+			LOGGER.info("Failed creating config file for " + MOD_NAME_READABLE + " at the path [" + configFilePath.toString() + "].");
 			e.printStackTrace();
 		}
 
@@ -328,11 +339,6 @@ public abstract class ConfigGui
 
 		for (EntryInfo info : entries) {
 			if (info.field.isAnnotationPresent(Entry.class)) {
-				try {
-					info.value = info.field.get(null);
-					info.tempValue = info.value.toString();
-				} catch (IllegalAccessException ignored) {}
-
 				config.set((info.category != "" ? info.category + "." : "") + info.field.getName(), info.value);
 			}
 		}
@@ -351,19 +357,24 @@ public abstract class ConfigGui
 
 		// First checks if the config file was already made
 		if (!Files.exists(configFilePath)) {
-//			ClientApi.LOGGER.info("Config file not found for " + MOD_NAME_READABLE + ". Creating config...");
+			LOGGER.info("Config file not found for " + MOD_NAME_READABLE + ". Creating config...");
 			saveToFile();
 			return;
 		}
 
 		config.load();
 
+		// Puts everything into its variable
 		for (EntryInfo info : entries) {
 			if (info.field.isAnnotationPresent(Entry.class)) {
-//				if (info.field.getType().isEnum())
-//					info.value = Enum.valueOf(info.field.getType(), config.get((info.category != "" ? info.category + "." : "") + info.field.getName()).toString());
-//				else
-//					info.value = config.get((info.category != "" ? info.category + "." : "") + info.field.getName());
+				if (info.field.getType().isEnum())
+					info.value = Enum.valueOf(info.varClass, config.get((info.category != "" ? info.category + "." : "") + info.field.getName()).toString());
+				else
+					info.value = config.get((info.category != "" ? info.category + "." : "") + info.field.getName());
+
+				try {
+					info.field.set(null, info.value);
+				} catch (IllegalAccessException ignored) {}
 			}
 		}
 
@@ -400,12 +411,6 @@ public abstract class ConfigGui
 		public void tick()
 		{
 			super.tick();
-//			for (EntryInfo info : entries)
-//			{
-//				try {
-//					info.field.set(null, info.value);
-//				} catch (IllegalAccessException ignored) {}
-//			}
 		}
 		
 		@Override
@@ -526,7 +531,8 @@ public abstract class ConfigGui
                         TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category != "" ? info.category + "." : "") + info.field.getName());
                         String key = translationPrefix + (info.category != "" ? info.category + "." : "") + info.field.getName() + ".@tooltip";
 
-                        if (info.error != null && text.equals(name)) renderTooltip(matrices, info.error.getValue(), mouseX, mouseY);
+						// TODO
+                        if (info.error != null && text.equals(name)) renderTooltip(matrices, (ItemStack) info.error.getValue(), mouseX, mouseY);
                         else if (I18n.exists(key) && text.equals(name)) {
                             List<Component> list = new ArrayList<>();
                             for (String str : I18n.get(key).split("\n"))
