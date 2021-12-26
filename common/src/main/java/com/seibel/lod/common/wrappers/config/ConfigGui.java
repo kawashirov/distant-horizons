@@ -1,6 +1,5 @@
 package com.seibel.lod.common.wrappers.config;
 
-import java.io.File;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -21,12 +20,12 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+// Logger (for debug stuff)
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 // Uses https://github.com/TheElectronWill/night-config for toml (only for Fabric since Forge allready includes this)
 
-import com.electronwill.nightconfig.toml.*;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 
 // Gets info from our own mod
@@ -52,7 +51,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.client.resources.language.I18n;	// translation
-import net.minecraft.world.item.ItemStack;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 /**
@@ -63,6 +61,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
  * This config should work for both Fabric and Forge as long as you use Mojang mappings
  * 
  * Credits to Motschen
+ *
  * @author coolGi2007
  * @version 12-24-2021
  */
@@ -90,13 +89,11 @@ public abstract class ConfigGui
 	
 	private static final List<EntryInfo> entries = new ArrayList<>();
 
-	// Chainge these to your own mod
+	// Change these to your own mod
 	private static final String MOD_NAME = ModInfo.NAME;					// For file saving and identifying
 	private static final String MOD_NAME_READABLE = ModInfo.READABLE_NAME;	// For logs
 //	private static Logger LOGGER = ClientApi.LOGGER;						// For logs
 	private static Logger LOGGER = LogManager.getLogger(ModInfo.NAME);		// For logs (this inits before ClientAPI so this is a temp fix)
-	
-	private static TomlWriter tomlWriter = new TomlWriter();
 	
 	
 	
@@ -145,7 +142,7 @@ public abstract class ConfigGui
 		Minecraft mc =  Minecraft.getInstance();
 		configFilePath = mc.gameDirectory.toPath().resolve("config").resolve(MOD_NAME + ".toml");
 		
-		initNestedClass(config, "");
+		initNestedClass(config);
 
 		for (EntryInfo info : entries) {
 			if (info.field.isAnnotationPresent(Entry.class)) {
@@ -160,9 +157,8 @@ public abstract class ConfigGui
 		loadFromFile();
 	}
 	
-	private static void initNestedClass(Class<?> config, String category)
+	private static void initNestedClass(Class<?> config)
 	{
-		String modCategory = MOD_NAME + (!category.isBlank() ? "." + category : "");
 		for (Field field : config.getFields())
 		{
 			EntryInfo info = new EntryInfo();
@@ -186,12 +182,7 @@ public abstract class ConfigGui
 			}
 			
 			if (field.isAnnotationPresent(ScreenEntry.class))
-			{
-				String className = field.getAnnotation(Category.class) != null ? field.getAnnotation(Category.class).value() : "";
-				initNestedClass(field.getType(),
-						(!className.isBlank() ? className + "." : "")
-								+ field.getName());
-			}
+				initNestedClass(field.getType());
 		}
 	}
 	
@@ -223,7 +214,7 @@ public abstract class ConfigGui
 				// For int
 				textField(info, Integer::parseInt, INTEGER_ONLY_REGEX, entry.minValue(), entry.maxValue(), true);
 			}
-			else if (fieldClass == double.class) 
+			else if (fieldClass == double.class)
 			{
 				// For double
 				textField(info, Double::parseDouble, DECIMAL_ONLY_REGEX, entry.minValue(), entry.maxValue(), false);
@@ -367,10 +358,18 @@ public abstract class ConfigGui
 		// Puts everything into its variable
 		for (EntryInfo info : entries) {
 			if (info.field.isAnnotationPresent(Entry.class)) {
-				if (info.field.getType().isEnum())
-					info.value = Enum.valueOf(info.varClass, config.get((info.category != "" ? info.category + "." : "") + info.field.getName()).toString());
-				else
-					info.value = config.get((info.category != "" ? info.category + "." : "") + info.field.getName());
+				try {
+					if (info.field.getType().isEnum())
+						info.value = config.getEnum((info.category != "" ? info.category + "." : "") + info.field.getName(), info.varClass);
+					else if (info.varClass == int.class)
+						info.value = config.getInt((info.category != "" ? info.category + "." : "") + info.field.getName());
+					else if (info.varClass == long.class)
+						info.value = config.getLong((info.category != "" ? info.category + "." : "") + info.field.getName());
+					else
+						info.value = config.get((info.category != "" ? info.category + "." : "") + info.field.getName());
+				} catch (Exception e) {
+					config.set((info.category != "" ? info.category + "." : "") + info.field.getName(), info.value);
+				}
 
 				try {
 					info.field.set(null, info.value);
@@ -426,17 +425,6 @@ public abstract class ConfigGui
 			}));
 			
 			Button done = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
-				for (EntryInfo info : entries)
-				{
-					try
-					{
-						info.field.set(null, info.value);
-					}
-					catch (IllegalAccessException ignored)
-					{
-					}
-				}
-				
 				saveToFile();
 				Objects.requireNonNull(minecraft).setScreen(parent);
 			}));
@@ -532,7 +520,7 @@ public abstract class ConfigGui
                         String key = translationPrefix + (info.category != "" ? info.category + "." : "") + info.field.getName() + ".@tooltip";
 
 						// TODO
-                        if (info.error != null && text.equals(name)) renderTooltip(matrices, (ItemStack) info.error.getValue(), mouseX, mouseY);
+                        if (info.error != null && text.equals(name)) renderTooltip(matrices, (Component) info.error.getValue(), mouseX, mouseY);
                         else if (I18n.exists(key) && text.equals(name)) {
                             List<Component> list = new ArrayList<>();
                             for (String str : I18n.get(key).split("\n"))
