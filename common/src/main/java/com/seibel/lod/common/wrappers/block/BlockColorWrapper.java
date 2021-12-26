@@ -154,6 +154,10 @@ public class BlockColorWrapper implements IBlockColorWrapper
 
         // generate the block's color
 //        for (int frameIndex = 0; frameIndex < texture.getFrameCount(); frameIndex++)
+        boolean lookForTint = false;
+        if (grassInstance() || leavesInstance() || waterIstance())
+            lookForTint = true;
+            
         int frameIndex = 0; // TODO
         {
             // textures normally use u and v instead of x and y
@@ -161,18 +165,20 @@ public class BlockColorWrapper implements IBlockColorWrapper
             {
                 for (int v = 0; v < texture.getHeight(); v++)
                 {
-
                     tempColor = TextureAtlasSpriteWrapper.getPixelRGBA(texture, frameIndex, u, v);
 
                     if (ColorUtil.getAlpha(TextureAtlasSpriteWrapper.getPixelRGBA(texture, frameIndex, u, v)) == 0)
                         continue;
 
-                    // determine if this pixel is gray
-                    int colorMax = Math.max(Math.max(ColorUtil.getBlue(tempColor), ColorUtil.getGreen(tempColor)), ColorUtil.getRed(tempColor));
-                    int colorMin = 4 + Math.min(Math.min(ColorUtil.getBlue(tempColor), ColorUtil.getGreen(tempColor)), ColorUtil.getRed(tempColor));
-                    boolean isGray = colorMax < colorMin;
-                    if (isGray)
-                        numberOfGreyPixel++;
+                    if (lookForTint)
+                    {
+                        // determine if this pixel is gray
+                        int colorMax = Math.max(Math.max(ColorUtil.getBlue(tempColor), ColorUtil.getGreen(tempColor)), ColorUtil.getRed(tempColor));
+                        int colorMin = 4 + Math.min(Math.min(ColorUtil.getBlue(tempColor), ColorUtil.getGreen(tempColor)), ColorUtil.getRed(tempColor));
+                        boolean isGray = colorMax < colorMin;
+                        if (isGray)
+                            numberOfGreyPixel++;
+                    }
 
 
                     // for flowers, weight their non-green color higher
@@ -207,7 +213,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
         }
 
         // determine if this block should use the biome color tint
-        if ((grassInstance() || leavesInstance() || waterIstance()) && (float) numberOfGreyPixel / count > 0.75f)
+        if (lookForTint && (float) numberOfGreyPixel / count > 0.75f)
             this.toTint = true;
 
         // we check which kind of tint we need to apply
