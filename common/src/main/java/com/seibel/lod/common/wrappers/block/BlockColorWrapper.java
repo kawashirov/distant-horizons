@@ -240,7 +240,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
     /** determine if the given block should use the biome's foliage color */
     private boolean leavesInstance()
     {
-        return (block instanceof LeavesBlock && block != Blocks.SPRUCE_LEAVES && block != Blocks.BIRCH_LEAVES)
+        return (block instanceof LeavesBlock && block != Blocks.SPRUCE_LEAVES && block != Blocks.BIRCH_LEAVES/* && block != Blocks.AZALEA_LEAVES && block != Blocks.FLOWERING_AZALEA_LEAVES*/)
                 || block == Blocks.VINE
                 || block == Blocks.SUGAR_CANE;
     }
