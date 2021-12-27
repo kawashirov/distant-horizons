@@ -404,8 +404,12 @@ public final class WorldGenerationStep {
 			if (event.isCompleted()) {
 				try {
 					event.join();
-				} catch (RuntimeException e) {
-					// Ignore.
+				} catch (Throwable e) {
+					e.printStackTrace();
+					while (e.getCause() != null) {
+						e = e.getCause();
+						e.printStackTrace();
+					}
 				} finally {
 					iter.remove();
 				}
@@ -426,7 +430,6 @@ public final class WorldGenerationStep {
 	}
 
 	public final void generateLodFromList(GenerationEvent event) {
-		try {
 			// System.out.println("Started event: "+event);
 			event.pEvent.beginNano = System.nanoTime();
 			GridList<ChunkAccess> referencedChunks;
@@ -481,10 +484,6 @@ public final class WorldGenerationStep {
 				event.tParam.perf.recordEvent(event.pEvent);
 				ClientApi.LOGGER.info(event.tParam.perf);
 			}
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-			throw e;
-		}
 	}
 
 	public final GridList<ChunkAccess> generateDirect(GenerationEvent e, int range, Steps step) {

@@ -224,7 +224,7 @@ public class Config extends ConfigGui
 
 				@Category("client.advanced.buffers")
 				@Entry(minValue = 0, maxValue = 5000)
-				public static int gpuUploadTimeoutInMilleseconds = IBuffers.GPU_UPLOAD_TIMEOUT_IN_MILLISECONDS_DEFAULT.defaultValue;
+				public static int gpuUploadPerMegabyteInMilliseconds = IBuffers.GPU_UPLOAD_PER_MEGABYTE_IN_MILLISECONDS_DEFAULT.defaultValue;
 
 				@Category("client.advanced.buffers")
 				@Entry

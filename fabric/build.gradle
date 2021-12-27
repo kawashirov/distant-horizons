@@ -70,6 +70,7 @@ task copyCommonResources(type: Copy) {
 runClient {
     dependsOn(copyCoreResources)
     dependsOn(copyCommonResources)
+    jvmArgs "-XX:-OmitStackTraceInFastThrow"
     finalizedBy(deleteResources)
 }
 
