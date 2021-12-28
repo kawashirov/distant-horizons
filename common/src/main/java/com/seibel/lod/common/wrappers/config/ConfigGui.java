@@ -293,7 +293,7 @@ public abstract class ConfigGui
 			{
 				if (((List<String>) info.value).size() == info.index)
 					((List<String>) info.value).add("");
-				((List<String>) info.value).set(info.index, Arrays.stream(info.tempValue.replace("[", "").replace("]", "").split(", ")).collect(Collectors.toList()).get(0));
+				((List<String>) info.value).set(info.index, Arrays.stream(info.tempValue.replace("[", "").replace("]", "").split(", ")).toList().get(0));
 			}
 
 			return true;
