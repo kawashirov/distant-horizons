@@ -27,4 +27,5 @@ accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$Anima
 extendable class com/mojang/math/Matrix4f
 
 # hacky stuff
+accessible field net/minecraft/util/ThreadingDetector lock Ljava/util/concurrent/Semaphore;
 mutable field net/minecraft/util/ThreadingDetector lock Ljava/util/concurrent/Semaphore;
