@@ -22,6 +22,7 @@ accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite animat
 accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite width I
 accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite height I
 accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite mainImage [Lcom/mojang/blaze3d/platform/NativeImage;
+accessible class net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture
 accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameX (I)I
 accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameY (I)I
 extendable class com/mojang/math/Matrix4f
