@@ -157,11 +157,11 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		  //Enable this for logging
 		if (targetToGenerate != toGenerate) {
 			if (toGenerate <= 0) {
-				System.out.println(
+				ClientApi.LOGGER.debug(
 						"WorldGenerator: Sampled " + posToGenerate.getNumberOfPos() + " out of " + estimatedSampleNeeded
 								+ " points, started all targeted " + targetToGenerate + " generations.");
 			} else {
-				System.out.println("WorldGenerator: Sampled " + posToGenerate.getNumberOfPos() + " out of "
+				ClientApi.LOGGER.debug("WorldGenerator: Sampled " + posToGenerate.getNumberOfPos() + " out of "
 						+ estimatedSampleNeeded + " points, started " + (targetToGenerate - toGenerate)
 						+ " out of targeted " + targetToGenerate + " generations.");
 			}
@@ -194,7 +194,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		generationGroup.executors.shutdownNow();
 		try {
 			if (!generationGroup.executors.awaitTermination(3, TimeUnit.SECONDS)) {
-				ClientApi.LOGGER.info("1.18 Experimental Chunk Generator shutdown failed! Ignoring child threads...");
+				ClientApi.LOGGER.warn("1.18 Experimental Chunk Generator shutdown failed! Ignoring child threads...");
 			}
 		} catch (InterruptedException e) {}
 	}
