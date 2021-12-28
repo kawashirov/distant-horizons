@@ -52,8 +52,6 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.entity.EntityTypeTest;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -132,11 +130,6 @@ public class LodServerWorld implements WorldGenLevel
     public boolean isStateAtPosition(BlockPos pos, Predicate<BlockState> state)
     {
         return state.test(chunk.getBlockState(pos));
-    }
-
-    @Override
-    public boolean isFluidAtPosition(BlockPos blockPos, Predicate<FluidState> predicate) {
-        return predicate.test(chunk.getFluidState(blockPos));
     }
 
     @Override
@@ -265,13 +258,6 @@ public class LodServerWorld implements WorldGenLevel
         throw new UnsupportedOperationException("Not Implemented");
     }
 
-    @Nullable
-    @Override
-    public MinecraftServer getServer() {
-        return serverWorld.getServer();
-    }
-
-
     @Override
     public LevelData getLevelData()
     {
@@ -286,13 +272,6 @@ public class LodServerWorld implements WorldGenLevel
 
     }
 
-    // TODO: Check if this causes any issues
-    @Override
-    public void gameEvent(@Nullable Entity entity, GameEvent gameEvent, BlockPos blockPos) {
-        throw new UnsupportedOperationException("Not Implemented");
-    }
-
-
     @Override
     public List<Entity> getEntities(Entity arg0, AABB arg1, Predicate<? super Entity> arg2)
     {
@@ -300,18 +279,9 @@ public class LodServerWorld implements WorldGenLevel
     }
 
     @Override
-    public <T extends Entity> List<T> getEntities(EntityTypeTest<Entity, T> entityTypeTest, AABB aABB, Predicate<? super T> predicate) {
+    public <T extends Entity> List<T> getEntitiesOfClass(Class<? extends T> class_, AABB aABB, @Nullable Predicate<? super T> predicate) {
         throw new UnsupportedOperationException("Not Implemented");
     }
-
-
-    @Override
-    public <T extends Entity> List<T> getEntitiesOfClass(Class<T> arg0, AABB arg1,
-                                                         Predicate<? super T> arg2)
-    {
-        throw new UnsupportedOperationException("Not Implemented");
-    }
-
 
     @Override
     public List<? extends Player> players()

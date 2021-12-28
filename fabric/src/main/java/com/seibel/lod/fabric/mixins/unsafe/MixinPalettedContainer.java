@@ -1,7 +1,6 @@
 package com.seibel.lod.fabric.mixins.unsafe;
 
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.util.DebugBuffer;
 import net.minecraft.world.level.chunk.PalettedContainer;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;

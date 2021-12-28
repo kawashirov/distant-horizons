@@ -11,9 +11,9 @@ import net.minecraft.resources.ResourceLocation;
  * Creates a button with a texture on it
  */
 public class TexturedButtonWidget extends ImageButton {
-    public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, ResourceLocation texture, OnPress pressAction) {
-        super(x, y, width, height, u, v, texture, pressAction);
-    }
+//    public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, ResourceLocation texture, OnPress pressAction) {
+//        super(x, y, width, height, u, v, texture, pressAction);
+//    }
     public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction) {
         super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction);
     }

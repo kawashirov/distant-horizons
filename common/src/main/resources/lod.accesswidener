@@ -33,4 +33,4 @@ extendable class com/mojang/math/Matrix4f
 
 # hacky stuff
 accessible field net/minecraft/world/level/chunk/PalettedContainer lock Ljava/util/concurrent/Semaphore;
-mutable field net/minecraft/world/level/chunk/PalettedContainer lock Ljava/util/concurrent/Semaphore;
+accessible field net/minecraft/world/level/chunk/PalettedContainer lock Ljava/util/concurrent/Semaphore;

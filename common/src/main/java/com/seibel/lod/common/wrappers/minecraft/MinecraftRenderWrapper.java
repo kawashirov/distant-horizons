@@ -5,12 +5,14 @@ import java.util.HashSet;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.math.Vector3d;
 import com.seibel.lod.common.wrappers.WrapperFactory;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
 import com.seibel.lod.core.handlers.IReflectionHandler;
 import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.util.LodUtil;
 import net.minecraft.client.renderer.LightTexture;
+import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 
 import com.mojang.math.Vector3f;
@@ -85,7 +87,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     @Override
     public Mat4f getDefaultProjectionMatrix(float partialTicks)
     {
-        return McObjectConverter.Convert(GAME_RENDERER.getProjectionMatrix(GAME_RENDERER.getFov(GAME_RENDERER.getMainCamera(), partialTicks, true)));
+        return McObjectConverter.Convert(GAME_RENDERER.getProjectionMatrix(GAME_RENDERER.getMainCamera(), partialTicks, true));
     }
 
     @Override
@@ -96,14 +98,15 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
     @Override
     public Color getFogColor() {
-        float[] colorValues = RenderSystem.getShaderFogColor();
+        float[] colorValues = new float[4];
+        GL15.glGetFloatv(GL15.GL_FOG_COLOR, colorValues);
         return new Color(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
     }
 
     @Override
     public Color getSkyColor() {
         if (MC.level.dimensionType().hasSkyLight()) {
-            Vec3 colorValues = MC.level.getSkyColor(MC.gameRenderer.getMainCamera().getPosition(), MC.getFrameTime());
+            Vec3 colorValues = MC.level.getSkyColor(MC.gameRenderer.getMainCamera().getBlockPosition(), MC.getFrameTime());
             return new Color((float) colorValues.x, (float) colorValues.y, (float) colorValues.z);
         } else
             return new Color(0, 0, 0);
@@ -149,18 +152,19 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
         // Wow, those are some long names!
 
         // go through every RenderInfo to get the compiled chunks
-        LevelRenderer renderer = MC.levelRenderer;
-        for (LevelRenderer.RenderChunkInfo worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
-        {
-            CompiledChunk compiledChunk = worldRenderer$LocalRenderInformationContainer.chunk.getCompiledChunk();
-            if (!compiledChunk.hasNoRenderableLayers())
-            {
-                // add the ChunkPos for every rendered chunk
-                BlockPos bpos = worldRenderer$LocalRenderInformationContainer.chunk.getOrigin();
-
-                loadedPos.add(new ChunkPosWrapper(bpos));
-            }
-        }
+        // FIXME[1.16.5]: pls fix
+//        LevelRenderer renderer = MC.levelRenderer;
+//        for (LevelRenderer.RenderChunkInfo worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
+//        {
+//            CompiledChunk compiledChunk = worldRenderer$LocalRenderInformationContainer.chunk.getCompiledChunk();
+//            if (!compiledChunk.hasNoRenderableLayers())
+//            {
+//                // add the ChunkPos for every rendered chunk
+//                BlockPos bpos = worldRenderer$LocalRenderInformationContainer.chunk.getOrigin();
+//
+//                loadedPos.add(new ChunkPosWrapper(bpos));
+//            }
+//        }
 
 
         return loadedPos;

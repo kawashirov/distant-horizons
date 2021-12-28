@@ -19,10 +19,12 @@ public class TextureAtlasSpriteWrapper {
      */
     public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
         if (sprite.animatedTexture != null) {
-            x += sprite.animatedTexture.getFrameX(frameIndex) * sprite.width;
-            y += sprite.animatedTexture.getFrameY(frameIndex) * sprite.height;
+            x += sprite.animatedTexture.getFrameX(frameIndex) * sprite.getWidth();
+            y += sprite.animatedTexture.getFrameY(frameIndex) * sprite.getHeight();
         }
 
         return sprite.mainImage[0].getPixelRGBA(x, y);
+
+//        return this.mainImage[0].getPixelRGBA(x + this.framesX[frameIndex] * sprite.getWidth(), y + this.framesY[frameIndex] * sprite.getHeight());
     }
 }

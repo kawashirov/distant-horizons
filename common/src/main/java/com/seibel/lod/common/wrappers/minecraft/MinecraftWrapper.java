@@ -238,8 +238,7 @@ public class MinecraftWrapper implements IMinecraftWrapper
     @Override
     public ChunkPosWrapper getPlayerChunkPos()
     {
-        ChunkPos playerPos = getPlayer().chunkPosition();
-        return new ChunkPosWrapper(playerPos.x, playerPos.z);
+        return new ChunkPosWrapper(getPlayer().xChunk, getPlayer().zChunk);
     }
 
     public Options getOptions()

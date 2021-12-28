@@ -109,7 +109,7 @@ public class ChunkPosWrapper extends AbstractChunkPosWrapper
     public AbstractBlockPosWrapper getWorldPosition()
     {
         // the parameter here is the y position
-        BlockPos blockPos = chunkPos.getMiddleBlockPosition(0);
+        BlockPos blockPos = chunkPos.getWorldPosition();
         return new BlockPosWrapper(blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 

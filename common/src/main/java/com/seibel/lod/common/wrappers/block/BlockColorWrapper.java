@@ -158,7 +158,8 @@ public class BlockColorWrapper implements IBlockColorWrapper
         if (grassInstance() || leavesInstance() || waterIstance())
             lookForTint = true;
 
-        int frameIndex = 0; // TODO
+        // generate the block's color
+        for (int frameIndex = 0; frameIndex < texture.getFrameCount(); frameIndex++)
         {
             // textures normally use u and v instead of x and y
             for (int u = 0; u < texture.getWidth(); u++)
@@ -167,7 +168,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
                 {
                     tempColor = TextureAtlasSpriteWrapper.getPixelRGBA(texture, frameIndex, u, v);
 
-                    if (ColorUtil.getAlpha(TextureAtlasSpriteWrapper.getPixelRGBA(texture, frameIndex, u, v)) == 0)
+                    if (texture.isTransparent(frameIndex, u, v))
                         continue;
 
                     if (lookForTint)

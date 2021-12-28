@@ -49,8 +49,8 @@ public class MixinWorldRenderer
 {
 	private static float previousPartialTicks = 0;
 
-	@Inject(at = @At("RETURN"), method = "renderClouds(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/math/Matrix4f;FDDD)V")
-	private void renderClouds(PoseStack modelViewMatrixStack, Matrix4f projectionMatrix, float partialTicks, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, CallbackInfo callback)
+	@Inject(at = @At("RETURN"), method = "renderSky(Lcom/mojang/blaze3d/matrix/MatrixStack;F)V")
+	private void renderSky(PoseStack modelViewMatrixStack, Matrix4f projectionMatrix, float partialTicks, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, CallbackInfo callback)
 	{
 		// get the partial ticks since renderChunkLayer doesn't
 		// have access to them
@@ -58,7 +58,7 @@ public class MixinWorldRenderer
 	}
 
 	// HEAD or RETURN
-	@Inject(at = @At("HEAD"), method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V")
+	@Inject(at = @At("HEAD"), method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/matrix/MatrixStack;DDD)V")
 	private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
 	{
 		// only render before solid blocks

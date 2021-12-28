@@ -15,6 +15,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 // Logger (for debug stuff)
 import org.apache.logging.log4j.LogManager;
@@ -41,7 +42,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -248,7 +248,7 @@ public abstract class ConfigGui
                 info.name = new TranslatableComponent(screenEntry.name());
 
             info.screenButton = true;
-            info.gotoScreen = (!info.category.isBlank() ? info.category + "." : "") + field.getName();
+            info.gotoScreen = (!info.category.isEmpty() ? info.category + "." : "") + field.getName();
         }
         entries.add(info);
     }
@@ -263,13 +263,13 @@ public abstract class ConfigGui
         info.widget = (BiFunction<EditBox, Button, Predicate<String>>) (editBox, button) -> stringValue ->
         {
             stringValue = stringValue.trim();
-            if (!(stringValue.isBlank() || !isNumber || pattern.matcher(stringValue).matches()))
+            if (!(stringValue.isEmpty() || !isNumber || pattern.matcher(stringValue).matches()))
                 return false;
 
             Number value = 0;
             boolean inLimits = false;
             info.error = null;
-            if (isNumber && !stringValue.isBlank() && !stringValue.equals("-") && !stringValue.equals("."))
+            if (isNumber && !stringValue.isEmpty() && !stringValue.equals("-") && !stringValue.equals("."))
             {
                 value = func.apply(stringValue);
                 inLimits = value.doubleValue() >= minValue && value.doubleValue() <= maxValue;
@@ -292,7 +292,7 @@ public abstract class ConfigGui
             {
                 if (((List<String>) info.value).size() == info.index)
                     ((List<String>) info.value).add("");
-                ((List<String>) info.value).set(info.index, Arrays.stream(info.tempValue.replace("[", "").replace("]", "").split(", ")).toList().get(0));
+                ((List<String>) info.value).set(info.index, Arrays.stream(info.tempValue.replace("[", "").replace("]", "").split(", ")).collect(Collectors.toList()).get(0));
             }
 
             return true;
@@ -326,7 +326,7 @@ public abstract class ConfigGui
 
         for (EntryInfo info : entries) {
             if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
-                config.set((info.category.isBlank() ? "" : info.category + ".") + info.field.getName(), info.value);
+                config.set((info.category.isEmpty() ? "" : info.category + ".") + info.field.getName(), info.value);
             }
         }
 
@@ -383,9 +383,9 @@ public abstract class ConfigGui
         protected ConfigScreen(Screen parent, String category)
         {
             super(new TranslatableComponent(
-                    I18n.exists(MOD_NAME + ".config" + (category.isBlank()? "." + category : "") + ".title") ?
+                    I18n.exists(MOD_NAME + ".config" + (category.isEmpty()? "." + category : "") + ".title") ?
                             MOD_NAME + ".config.title" :
-                            MOD_NAME + ".config" + (category.isBlank() ? "" : "." + category) + ".title")
+                            MOD_NAME + ".config" + (category.isEmpty() ? "" : "." + category) + ".title")
             );
             this.parent = parent;
             this.category = category;
@@ -412,12 +412,12 @@ public abstract class ConfigGui
             if (!reload)
                 loadFromFile();
 
-            this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
+            this.addWidget(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
                 loadFromFile();
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }));
 
-            Button done = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
+            Button done = this.addWidget(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
                 saveToFile();
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }));
@@ -430,7 +430,7 @@ public abstract class ConfigGui
             {
                 if (info.category.matches(category) && !info.hideOption)
                 {
-                    TranslatableComponent name = Objects.requireNonNullElseGet(info.name, () -> new TranslatableComponent(translationPrefix + (!info.category.isBlank() ? info.category + "." : "") + info.field.getName()));
+                    TranslatableComponent name = (info.name == null ? new TranslatableComponent(translationPrefix + (!info.category.isEmpty() ? info.category + "." : "") + info.field.getName()) : info.name);
                     Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - info.width - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, new TextComponent("Reset").withStyle(ChatFormatting.RED), (button -> {
                         info.value = info.defaultValue;
                         info.tempValue = info.defaultValue.toString();
@@ -508,8 +508,8 @@ public abstract class ConfigGui
                     if (list.getHoveredButton(mouseX,mouseY).isPresent()) {
                         AbstractWidget buttonWidget = list.getHoveredButton(mouseX,mouseY).get();
                         Component text = ButtonEntry.buttonsWithText.get(buttonWidget);
-                        TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category.isBlank() ? "" : info.category + ".") + info.field.getName());
-                        String key = translationPrefix + (info.category.isBlank() ? "" : info.category + ".") + info.field.getName() + ".@tooltip";
+                        TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName());
+                        String key = translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName() + ".@tooltip";
 
                         if (info.error != null && text.equals(name)) renderTooltip(matrices, (Component) info.error.getValue(), mouseX, mouseY);
                         else if (I18n.exists(key) && text.equals(name)) {
@@ -625,10 +625,10 @@ public abstract class ConfigGui
             return children;
         }
 
-        @Override
-        public List<? extends NarratableEntry> narratables()
-        {
-            return children;
-        }
+//        @Override
+//        public List<? extends NarratableEntry> narratables()
+//        {
+//            return children;
+//        }
     }
 }
