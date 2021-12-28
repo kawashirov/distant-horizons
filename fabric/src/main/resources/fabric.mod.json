@@ -6,9 +6,9 @@
   "name": "Distant Horizons Fabric",
   "description": "This mod generates and renders simplified terrain beyond the normal view distance at a low performance cost. Allowing you to see much farther without turning your game into a slideshow.",
   "authors": [
-	"James Seibel",
-	"Leonardo Amato",
-	"Cola",
+	  "James Seibel",
+	  "Leonardo Amato",
+	  "Cola",
     "coolGi2007",
     "Ran"
   ],

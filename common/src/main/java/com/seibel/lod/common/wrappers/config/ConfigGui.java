@@ -15,6 +15,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 // Logger (for debug stuff)
 import org.apache.logging.log4j.LogManager;
@@ -41,7 +42,6 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -49,13 +49,14 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.client.resources.language.I18n;	// translation
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.narration.NarratableEntry; // Remove in 1.16
 
 /**
  * Based upon TinyConfig
  * https://github.com/Minenash/TinyConfig
  *
  * This config should work for both Fabric and Forge as long as you use Mojang mappings
- * 
+ *
  * Credits to Motschen
  *
  * @author coolGi2007
@@ -78,26 +79,26 @@ public abstract class ConfigGui
 		The buttons that don't show are still loaded but just not rendered
 		The screen with is set to double so the scroll bar doesn't show
 	 */
-	
-	
+
+
 	private static final Pattern INTEGER_ONLY_REGEX = Pattern.compile("(-?[0-9]*)");
 	private static final Pattern DECIMAL_ONLY_REGEX = Pattern.compile("-?([\\d]+\\.?[\\d]*|[\\d]*\\.?[\\d]+|\\.)");
-	
+
 	private static final List<EntryInfo> entries = new ArrayList<>();
 
 	// Change these to your own mod
 	private static final String MOD_NAME = ModInfo.NAME;					// For file saving and identifying
 	private static final String MOD_NAME_READABLE = ModInfo.READABLE_NAME;	// For logs
-//	private static final Logger LOGGER = ClientApi.LOGGER;						// For logs
+	//	private static final Logger LOGGER = ClientApi.LOGGER;						// For logs
 	private static final Logger LOGGER = LogManager.getLogger(ModInfo.NAME);		// For logs (this inits before ClientAPI so this is a temp fix)
-	
-	
-	
-	
+
+
+
+
 	//==============//
 	// Initializers //
 	//==============//
-	
+
 	private static class ConfigScreenConfigs
 	{
 		// This contains all the configs for the configs
@@ -105,7 +106,7 @@ public abstract class ConfigGui
 		public static final int ButtonWidthSpacing = 5;
 		public static final int ResetButtonWidth = 40;
 	}
-	
+
 	protected static class EntryInfo<T>
 	{
 		Field field;
@@ -130,14 +131,14 @@ public abstract class ConfigGui
 	}
 
 	private static Path configFilePath;
-	
-	
-	
+
+
+
 	public static void init(Class<?> config)
 	{
 		Minecraft mc =  Minecraft.getInstance();
 		configFilePath = mc.gameDirectory.toPath().resolve("config").resolve(MOD_NAME + ".toml");
-		
+
 		initNestedClass(config);
 
 		for (EntryInfo info : entries) {
@@ -152,7 +153,7 @@ public abstract class ConfigGui
 
 		loadFromFile();
 	}
-	
+
 	private static void initNestedClass(Class<?> config)
 	{
 		for (Field field : config.getFields())
@@ -164,7 +165,7 @@ public abstract class ConfigGui
 				if (!LodCommonMain.serverSided)
 					initClient(field, info);
 			}
-			
+
 			if (field.isAnnotationPresent(ConfigAnnotations.Entry.class))
 			{
 				info.varClass = field.getType();
@@ -174,7 +175,7 @@ public abstract class ConfigGui
 				}
 				catch (IllegalAccessException ignored) {}
 			}
-			
+
 			if (field.isAnnotationPresent(ConfigAnnotations.ScreenEntry.class))
 				initNestedClass(field.getType());
 
@@ -182,7 +183,7 @@ public abstract class ConfigGui
 			info.field = field;
 		}
 	}
-	
+
 	/** This adds the buttons to the queue to be rendered */
 	private static void initClient(Field field, EntryInfo info)
 	{
@@ -190,21 +191,21 @@ public abstract class ConfigGui
 		ConfigAnnotations.Category category = field.getAnnotation(ConfigAnnotations.Category.class);
 		ConfigAnnotations.Entry entry = field.getAnnotation(ConfigAnnotations.Entry.class);
 		ConfigAnnotations.ScreenEntry screenEntry = field.getAnnotation(ConfigAnnotations.ScreenEntry.class);
-		
+
 		if (entry != null)
 			info.width = entry.width();
 		else if (screenEntry != null)
 			info.width = screenEntry.width();
 
 		info.category = category != null ? category.value() : "";
-		
-		
+
+
 		if (entry != null)
 		{
 			if (!entry.name().equals(""))
 				info.name = new TranslatableComponent(entry.name());
 
-			
+
 			if (fieldClass == int.class)
 			{
 				// For int
@@ -216,13 +217,13 @@ public abstract class ConfigGui
 				textField(info, Double::parseDouble, DECIMAL_ONLY_REGEX, entry.minValue(), entry.maxValue(), false);
 			}
 			else if (fieldClass == String.class || fieldClass == List.class)
-			{  
+			{
 				// For string or list
 				info.max = entry.maxValue() == Double.MAX_VALUE ? Integer.MAX_VALUE : (int) entry.maxValue();
 				textField(info, String::length, null, Math.min(entry.minValue(), 0), Math.max(entry.maxValue(), 1), true);
 			}
 			else if (fieldClass == boolean.class)
-			{ 
+			{
 				// For boolean
 				Function<Object, Component> func = value -> new TextComponent((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
 				info.widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
@@ -231,7 +232,7 @@ public abstract class ConfigGui
 				}, func);
 			}
 			else if (fieldClass.isEnum())
-			{ 
+			{
 				// For enum
 				List<?> values = Arrays.asList(field.getType().getEnumConstants());
 				Function<Object, Component> func = value -> new TranslatableComponent(MOD_NAME + ".config." + "enum." + fieldClass.getSimpleName() + "." + info.value.toString());
@@ -246,30 +247,30 @@ public abstract class ConfigGui
 		{
 			if (!screenEntry.name().equals(""))
 				info.name = new TranslatableComponent(screenEntry.name());
-			
+
 			info.screenButton = true;
-			info.gotoScreen = (!info.category.isBlank() ? info.category + "." : "") + field.getName();
+			info.gotoScreen = (!info.category.isEmpty() ? info.category + "." : "") + field.getName();
 		}
 		entries.add(info);
 	}
-	
-	
-	
-	
+
+
+
+
 	/** creates a text field */
 	private static void textField(EntryInfo info, Function<String, Number> func, Pattern pattern, double minValue, double maxValue, boolean cast)
 	{
 		boolean isNumber = pattern != null;
-		info.widget = (BiFunction<EditBox, Button, Predicate<String>>) (editBox, button) -> stringValue -> 
+		info.widget = (BiFunction<EditBox, Button, Predicate<String>>) (editBox, button) -> stringValue ->
 		{
 			stringValue = stringValue.trim();
-			if (!(stringValue.isBlank() || !isNumber || pattern.matcher(stringValue).matches()))
+			if (!(stringValue.isEmpty() || !isNumber || pattern.matcher(stringValue).matches()))
 				return false;
-			
+
 			Number value = 0;
 			boolean inLimits = false;
 			info.error = null;
-			if (isNumber && !stringValue.isBlank() && !stringValue.equals("-") && !stringValue.equals("."))
+			if (isNumber && !stringValue.isEmpty() && !stringValue.equals("-") && !stringValue.equals("."))
 			{
 				value = func.apply(stringValue);
 				inLimits = value.doubleValue() >= minValue && value.doubleValue() <= maxValue;
@@ -277,13 +278,13 @@ public abstract class ConfigGui
 						"§cMinimum " + "length" + (cast ? " is " + (int) minValue : " is " + minValue) :
 						"§cMaximum " + "length" + (cast ? " is " + (int) maxValue : " is " + maxValue)));
 			}
-			
+
 			info.tempValue = stringValue;
 			editBox.setTextColor(inLimits ? 0xFFFFFFFF : 0xFFFF7777);
 			info.inLimits = inLimits;
 			button.active = entries.stream().allMatch(e -> e.inLimits);
-			
-			
+
+
 			if (inLimits && info.field.getType() != List.class)
 			{
 				info.value = value;
@@ -294,18 +295,18 @@ public abstract class ConfigGui
 					((List<String>) info.value).add("");
 				((List<String>) info.value).set(info.index, Arrays.stream(info.tempValue.replace("[", "").replace("]", "").split(", ")).toList().get(0));
 			}
-			
+
 			return true;
 		};
 	}
-	
-	
-	
-	
+
+
+
+
 	//===============//
 	// File Handling //
 	//===============//
-	
+
 	/** Grabs what is in the config and puts it in modid.toml */
 	public static void saveToFile()
 	{
@@ -326,14 +327,14 @@ public abstract class ConfigGui
 
 		for (EntryInfo info : entries) {
 			if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
-				config.set((info.category.isBlank() ? "" : info.category + ".") + info.field.getName(), info.value);
+				config.set((info.category.isEmpty() ? "" : info.category + ".") + info.field.getName(), info.value);
 			}
 		}
 
 		config.save();
 		config.close();
 	}
-	
+
 	/**
 	 * Grabs what is in modid.toml and puts it into the config
 	 * If the file doesn't exist then it runs saveToFile
@@ -371,8 +372,8 @@ public abstract class ConfigGui
 
 		config.close();
 	}
-	
-	
+
+
 	public static Screen getScreen(Screen parent, String category)
 	{
 		return new ConfigScreen(parent, category);
@@ -383,45 +384,45 @@ public abstract class ConfigGui
 		protected ConfigScreen(Screen parent, String category)
 		{
 			super(new TranslatableComponent(
-					I18n.exists(MOD_NAME + ".config" + (category.isBlank()? "." + category : "") + ".title") ?
+					I18n.exists(MOD_NAME + ".config" + (category.isEmpty()? "." + category : "") + ".title") ?
 							MOD_NAME + ".config.title" :
-							MOD_NAME + ".config" + (category.isBlank() ? "" : "." + category) + ".title")
+							MOD_NAME + ".config" + (category.isEmpty() ? "" : "." + category) + ".title")
 			);
 			this.parent = parent;
 			this.category = category;
 			this.translationPrefix = MOD_NAME + ".config.";
 		}
-		
+
 		private final String translationPrefix;
 		private final Screen parent;
 		private String category;
 		private ConfigListWidget list;
 		private boolean reload = false;
-		
+
 		// Real Time config update //
 		@Override
 		public void tick()
 		{
 			super.tick();
 		}
-		
+
 		@Override
 		protected void init()
 		{
 			super.init();
 			if (!reload)
 				loadFromFile();
-			
-			this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
+
+			this.addWidget(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
 				loadFromFile();
 				Objects.requireNonNull(minecraft).setScreen(parent);
 			}));
-			
-			Button done = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
+
+			Button done = this.addWidget(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
 				saveToFile();
 				Objects.requireNonNull(minecraft).setScreen(parent);
 			}));
-			
+
 			this.list = new ConfigListWidget(this.minecraft, this.width * 2, this.height, 32, this.height - 32, 25);
 			if (this.minecraft != null && this.minecraft.level != null)
 				this.list.setRenderBackground(false);
@@ -430,7 +431,7 @@ public abstract class ConfigGui
 			{
 				if (info.category.matches(category) && !info.hideOption)
 				{
-					TranslatableComponent name = Objects.requireNonNullElseGet(info.name, () -> new TranslatableComponent(translationPrefix + (!info.category.isBlank() ? info.category + "." : "") + info.field.getName()));
+					TranslatableComponent name = (info.name == null ? new TranslatableComponent(translationPrefix + (!info.category.isEmpty() ? info.category + "." : "") + info.field.getName()) : info.name);
 					Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - info.width - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, new TextComponent("Reset").withStyle(ChatFormatting.RED), (button -> {
 						info.value = info.defaultValue;
 						info.tempValue = info.defaultValue.toString();
@@ -438,7 +439,7 @@ public abstract class ConfigGui
 						this.reload = true;
 						Objects.requireNonNull(minecraft).setScreen(this);
 					}));
-					
+
 					if (info.widget instanceof Map.Entry)
 					{
 						Map.Entry<Button.OnPress, Function<Object, Component>> widget = (Map.Entry<Button.OnPress, Function<Object, Component>>) info.widget;
@@ -492,9 +493,9 @@ public abstract class ConfigGui
 					}
 				}
 			}
-			
+
 		}
-		
+
 		@Override
 		public void render(PoseStack matrices, int mouseX, int mouseY, float delta)
 		{
@@ -503,53 +504,53 @@ public abstract class ConfigGui
 			drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title
 
 			// Render the tooltip only if it can find a tooltip in the language file
-            for (EntryInfo info : entries) {
+			for (EntryInfo info : entries) {
 				if (info.category.matches(category) && !info.hideOption) {
-                    if (list.getHoveredButton(mouseX,mouseY).isPresent()) {
-                        AbstractWidget buttonWidget = list.getHoveredButton(mouseX,mouseY).get();
-                        Component text = ButtonEntry.buttonsWithText.get(buttonWidget);
-                        TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category.isBlank() ? "" : info.category + ".") + info.field.getName());
-                        String key = translationPrefix + (info.category.isBlank() ? "" : info.category + ".") + info.field.getName() + ".@tooltip";
+					if (list.getHoveredButton(mouseX,mouseY).isPresent()) {
+						AbstractWidget buttonWidget = list.getHoveredButton(mouseX,mouseY).get();
+						Component text = ButtonEntry.buttonsWithText.get(buttonWidget);
+						TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName());
+						String key = translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName() + ".@tooltip";
 
-                        if (info.error != null && text.equals(name)) renderTooltip(matrices, (Component) info.error.getValue(), mouseX, mouseY);
-                        else if (I18n.exists(key) && text.equals(name)) {
-                            List<Component> list = new ArrayList<>();
-                            for (String str : I18n.get(key).split("\n"))
-                                list.add(new TextComponent(str));
+						if (info.error != null && text.equals(name)) renderTooltip(matrices, (Component) info.error.getValue(), mouseX, mouseY);
+						else if (I18n.exists(key) && text.equals(name)) {
+							List<Component> list = new ArrayList<>();
+							for (String str : I18n.get(key).split("\n"))
+								list.add(new TextComponent(str));
 							renderComponentTooltip(matrices, list, mouseX, mouseY);
-                        }
-                    }
-                }
-            }
+						}
+					}
+				}
+			}
 			super.render(matrices, mouseX, mouseY, delta);
 		}
 	}
-	
-	
-	
-	
+
+
+
+
 	public static class ConfigListWidget extends ContainerObjectSelectionList<ButtonEntry>
 	{
 		Font textRenderer;
-		
+
 		public ConfigListWidget(Minecraft minecraftClient, int i, int j, int k, int l, int m)
 		{
 			super(minecraftClient, i, j, k, l, m);
 			this.centerListVertically = false;
 			textRenderer = minecraftClient.font;
 		}
-		
+
 		public void addButton(AbstractWidget button, AbstractWidget resetButton, AbstractWidget indexButton, Component text)
 		{
 			this.addEntry(ButtonEntry.create(button, text, resetButton, indexButton));
 		}
-		
+
 		@Override
 		public int getRowWidth()
 		{
 			return 10000;
 		}
-		
+
 		public Optional<AbstractWidget> getHoveredButton(double mouseX, double mouseY)
 		{
 			for (ButtonEntry buttonEntry : this.children())
@@ -562,11 +563,11 @@ public abstract class ConfigGui
 			return Optional.empty();
 		}
 	}
-	
-	
-	
-	
-	
+
+
+
+
+
 	public static class ButtonEntry extends ContainerObjectSelectionList.Entry<ButtonEntry>
 	{
 		private static final Font textRenderer = Minecraft.getInstance().font;
@@ -576,7 +577,7 @@ public abstract class ConfigGui
 		private final Component text;
 		private final List<AbstractWidget> children = new ArrayList<>();
 		public static final Map<AbstractWidget, Component> buttonsWithText = new HashMap<>();
-		
+
 		private ButtonEntry(AbstractWidget button, Component text, AbstractWidget resetButton, AbstractWidget indexButton)
 		{
 			buttonsWithText.put(button, text);
@@ -591,12 +592,12 @@ public abstract class ConfigGui
 			if (indexButton != null)
 				children.add(indexButton);
 		}
-		
+
 		public static ButtonEntry create(AbstractWidget button, Component text, AbstractWidget resetButton, AbstractWidget indexButton)
 		{
 			return new ButtonEntry(button, text, resetButton, indexButton);
 		}
-		
+
 		@Override
 		public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta)
 		{
@@ -618,17 +619,19 @@ public abstract class ConfigGui
 			if (text != null && (!text.getString().contains("spacer") || button != null))
 				GuiComponent.drawString(matrices, textRenderer, text, 12, y + 5, 0xFFFFFF);
 		}
-		
+
 		@Override
 		public List<? extends GuiEventListener> children()
 		{
 			return children;
 		}
-		
-		@Override
-		public List<? extends NarratableEntry> narratables()
-		{
-			return children;
-		}
+
+		// Only for 1.17 and over
+		// Remove in 1.16 and below
+        @Override
+        public List<? extends NarratableEntry> narratables()
+        {
+            return children;
+        }
 	}
 }
