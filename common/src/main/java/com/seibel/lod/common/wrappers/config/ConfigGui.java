@@ -1,9 +1,5 @@
 package com.seibel.lod.common.wrappers.config;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,6 +28,7 @@ import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.core.config.*;
 
 // Minecraft imports
 
@@ -56,14 +53,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 /**
  * Based upon TinyConfig
  * https://github.com/Minenash/TinyConfig
- * 
- * Everything required is packed into 1 class, so it is easier to copy
+ *
  * This config should work for both Fabric and Forge as long as you use Mojang mappings
  * 
  * Credits to Motschen
  *
  * @author coolGi2007
- * @version 12-24-2021
+ * @version 12-28-2021
  */
 @SuppressWarnings("unchecked")
 public abstract class ConfigGui
@@ -92,8 +88,8 @@ public abstract class ConfigGui
 	// Change these to your own mod
 	private static final String MOD_NAME = ModInfo.NAME;					// For file saving and identifying
 	private static final String MOD_NAME_READABLE = ModInfo.READABLE_NAME;	// For logs
-//	private static Logger LOGGER = ClientApi.LOGGER;						// For logs
-	private static Logger LOGGER = LogManager.getLogger(ModInfo.NAME);		// For logs (this inits before ClientAPI so this is a temp fix)
+//	private static final Logger LOGGER = ClientApi.LOGGER;						// For logs
+	private static final Logger LOGGER = LogManager.getLogger(ModInfo.NAME);		// For logs (this inits before ClientAPI so this is a temp fix)
 	
 	
 	
@@ -145,7 +141,7 @@ public abstract class ConfigGui
 		initNestedClass(config);
 
 		for (EntryInfo info : entries) {
-			if (info.field.isAnnotationPresent(Entry.class)) {
+			if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
 				try {
 					info.value = info.field.get(null);
 					info.tempValue = info.value.toString();
@@ -162,27 +158,28 @@ public abstract class ConfigGui
 		for (Field field : config.getFields())
 		{
 			EntryInfo info = new EntryInfo();
-			if (field.isAnnotationPresent(Entry.class) || field.isAnnotationPresent(Comment.class) || field.isAnnotationPresent(ScreenEntry.class))
+			if (field.isAnnotationPresent(ConfigAnnotations.Entry.class) || field.isAnnotationPresent(ConfigAnnotations.Comment.class) || field.isAnnotationPresent(ConfigAnnotations.ScreenEntry.class))
 			{
 				// If putting in your own mod then put your own check for server sided
 				if (!LodCommonMain.serverSided)
 					initClient(field, info);
 			}
 			
-			if (field.isAnnotationPresent(Entry.class))
+			if (field.isAnnotationPresent(ConfigAnnotations.Entry.class))
 			{
 				info.varClass = field.getType();
 				try
 				{
 					info.defaultValue = field.get(null);
 				}
-				catch (IllegalAccessException ignored)
-				{
-				}
+				catch (IllegalAccessException ignored) {}
 			}
 			
-			if (field.isAnnotationPresent(ScreenEntry.class))
+			if (field.isAnnotationPresent(ConfigAnnotations.ScreenEntry.class))
 				initNestedClass(field.getType());
+
+
+			info.field = field;
 		}
 	}
 	
@@ -190,16 +187,15 @@ public abstract class ConfigGui
 	private static void initClient(Field field, EntryInfo info)
 	{
 		Class<?> fieldClass = field.getType();
-		Category category = field.getAnnotation(Category.class);
-		Entry entry = field.getAnnotation(Entry.class);
-		ScreenEntry screenEntry = field.getAnnotation(ScreenEntry.class);
+		ConfigAnnotations.Category category = field.getAnnotation(ConfigAnnotations.Category.class);
+		ConfigAnnotations.Entry entry = field.getAnnotation(ConfigAnnotations.Entry.class);
+		ConfigAnnotations.ScreenEntry screenEntry = field.getAnnotation(ConfigAnnotations.ScreenEntry.class);
 		
 		if (entry != null)
 			info.width = entry.width();
 		else if (screenEntry != null)
 			info.width = screenEntry.width();
-		
-		info.field = field;
+
 		info.category = category != null ? category.value() : "";
 		
 		
@@ -329,8 +325,8 @@ public abstract class ConfigGui
 		config.load();
 
 		for (EntryInfo info : entries) {
-			if (info.field.isAnnotationPresent(Entry.class)) {
-				config.set((info.category != "" ? info.category + "." : "") + info.field.getName(), info.value);
+			if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
+				config.set((info.category.isBlank() ? "" : info.category + ".") + info.field.getName(), info.value);
 			}
 		}
 
@@ -344,7 +340,7 @@ public abstract class ConfigGui
 	 */
 	public static void loadFromFile()
 	{
-		CommentedFileConfig config = CommentedFileConfig.builder(configFilePath.toFile()).build();
+		CommentedFileConfig config = CommentedFileConfig.builder(configFilePath.toFile()).autosave().build();
 
 		// First checks if the config file was already made
 		if (!Files.exists(configFilePath)) {
@@ -357,19 +353,15 @@ public abstract class ConfigGui
 
 		// Puts everything into its variable
 		for (EntryInfo info : entries) {
-			if (info.field.isAnnotationPresent(Entry.class)) {
-				try {
+			if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
+				String itemPath = (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName();
+				if (config.contains(itemPath)) {
 					if (info.field.getType().isEnum())
-						info.value = config.getEnum((info.category != "" ? info.category + "." : "") + info.field.getName(), info.varClass);
-					else if (info.varClass == int.class)
-						info.value = config.getInt((info.category != "" ? info.category + "." : "") + info.field.getName());
-					else if (info.varClass == long.class)
-						info.value = config.getLong((info.category != "" ? info.category + "." : "") + info.field.getName());
+						info.value = config.getEnum(itemPath, info.varClass);
 					else
-						info.value = config.get((info.category != "" ? info.category + "." : "") + info.field.getName());
-				} catch (Exception e) {
-					config.set((info.category != "" ? info.category + "." : "") + info.field.getName(), info.value);
-				}
+						info.value = config.get(itemPath);
+				} else
+					config.set(itemPath, info.value);
 
 				try {
 					info.field.set(null, info.value);
@@ -381,19 +373,20 @@ public abstract class ConfigGui
 	}
 	
 	
-	
-	
-	
 	public static Screen getScreen(Screen parent, String category)
 	{
 		return new ConfigScreen(parent, category);
 	}
-	
+
 	private static class ConfigScreen extends Screen
 	{
 		protected ConfigScreen(Screen parent, String category)
 		{
-			super(new TranslatableComponent(MOD_NAME + ".config.title"));
+			super(new TranslatableComponent(
+					I18n.exists(MOD_NAME + ".config" + (category.isBlank()? "." + category : "") + ".title") ?
+							MOD_NAME + ".config.title" :
+							MOD_NAME + ".config" + (category.isBlank() ? "" : "." + category) + ".title")
+			);
 			this.parent = parent;
 			this.category = category;
 			this.translationPrefix = MOD_NAME + ".config.";
@@ -508,18 +501,16 @@ public abstract class ConfigGui
 			this.renderBackground(matrices); // Renders background
 			this.list.render(matrices, mouseX, mouseY, delta); // Render buttons
 			drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title
-			
-			
+
 			// Render the tooltip only if it can find a tooltip in the language file
             for (EntryInfo info : entries) {
 				if (info.category.matches(category) && !info.hideOption) {
                     if (list.getHoveredButton(mouseX,mouseY).isPresent()) {
                         AbstractWidget buttonWidget = list.getHoveredButton(mouseX,mouseY).get();
                         Component text = ButtonEntry.buttonsWithText.get(buttonWidget);
-                        TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category != "" ? info.category + "." : "") + info.field.getName());
-                        String key = translationPrefix + (info.category != "" ? info.category + "." : "") + info.field.getName() + ".@tooltip";
+                        TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category.isBlank() ? "" : info.category + ".") + info.field.getName());
+                        String key = translationPrefix + (info.category.isBlank() ? "" : info.category + ".") + info.field.getName() + ".@tooltip";
 
-						// TODO
                         if (info.error != null && text.equals(name)) renderTooltip(matrices, (Component) info.error.getValue(), mouseX, mouseY);
                         else if (I18n.exists(key) && text.equals(name)) {
                             List<Component> list = new ArrayList<>();
@@ -639,57 +630,5 @@ public abstract class ConfigGui
 		{
 			return children;
 		}
-	}
-	
-	
-	
-	
-	//=============//
-	// annotations //
-	//=============//
-	
-	// These could probably be moved into core since they don't rely on any Minecraft code. - James
-	// Better not to since I want everything to be in 1 file. - coolGi
-	
-	/** a textField, button, etc. that can be interacted with */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
-	public @interface Entry
-	{
-		String name() default "";
-		
-		int width() default 150;
-		
-		double minValue() default Double.MIN_NORMAL;
-		
-		double maxValue() default Double.MAX_VALUE;
-	}
-	
-	
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
-	public @interface ScreenEntry
-	{
-		String name() default "";
-		
-		int width() default 100;
-	}
-	
-	
-	/** Used when sorting the configs in the menu */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
-	public @interface Category
-	{
-		String value();
-	}
-	
-	
-	/** Makes text (looks like @Entry but dosnt save and has no button */
-	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.FIELD)
-	public @interface Comment
-	{
-		
 	}
 }
