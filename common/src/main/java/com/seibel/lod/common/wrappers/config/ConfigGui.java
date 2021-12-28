@@ -1,10 +1,5 @@
 package com.seibel.lod.common.wrappers.config;
 
-import java.io.File;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,19 +16,21 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+// Logger (for debug stuff)
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-// Uses https://github.com/mwanji/toml4j for toml
+// Uses https://github.com/TheElectronWill/night-config for toml (only for Fabric since Forge allready includes this)
 
-import com.moandjiezana.toml.Toml;
-import com.moandjiezana.toml.TomlWriter;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 
 // Gets info from our own mod
 
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
-import com.seibel.lod.core.api.ClientApi;
+import com.seibel.lod.core.config.*;
+
+// Minecraft imports
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -50,18 +47,19 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.language.I18n;	// translation
+import com.mojang.blaze3d.vertex.PoseStack;
 
 /**
  * Based upon TinyConfig
  * https://github.com/Minenash/TinyConfig
  *
- * Everything required is packed into 1 class, so it is easier to copy
  * This config should work for both Fabric and Forge as long as you use Mojang mappings
  *
  * Credits to Motschen
+ *
  * @author coolGi2007
- * @version 12-24-2021
+ * @version 12-28-2021
  */
 @SuppressWarnings("unchecked")
 public abstract class ConfigGui
@@ -87,12 +85,11 @@ public abstract class ConfigGui
 
     private static final List<EntryInfo> entries = new ArrayList<>();
 
-    // Chainge these to your own mod
+    // Change these to your own mod
     private static final String MOD_NAME = ModInfo.NAME;					// For file saving and identifying
     private static final String MOD_NAME_READABLE = ModInfo.READABLE_NAME;	// For logs
-    private static Logger LOGGER = ClientApi.LOGGER;							// For logs
-
-    private static TomlWriter tomlWriter = new TomlWriter();
+    //	private static final Logger LOGGER = ClientApi.LOGGER;						// For logs
+    private static final Logger LOGGER = LogManager.getLogger(ModInfo.NAME);		// For logs (this inits before ClientAPI so this is a temp fix)
 
 
 
@@ -109,7 +106,7 @@ public abstract class ConfigGui
         public static final int ResetButtonWidth = 40;
     }
 
-    protected static class EntryInfo
+    protected static class EntryInfo<T>
     {
         Field field;
         Object widget;
@@ -129,9 +126,9 @@ public abstract class ConfigGui
         /** This is only called if button is true */
         String gotoScreen = "";
         String category;
+        Class<T> varClass;
     }
 
-    public static final Map<String, Class<?>> configClass = new HashMap<>();
     private static Path configFilePath;
 
 
@@ -141,68 +138,48 @@ public abstract class ConfigGui
         Minecraft mc =  Minecraft.getInstance();
         configFilePath = mc.gameDirectory.toPath().resolve("config").resolve(MOD_NAME + ".toml");
 
-        initNestedClass(config, "");
+        initNestedClass(config);
 
-        loadFromFile();
-
-        // Save and read the file
-        try
-        {
-            new Toml().read(Files.newBufferedReader(configFilePath)).to(config);
-        }
-        catch (Exception e)
-        {
-            saveToFile();
-        }
-
-        for (EntryInfo info : entries)
-        {
-            if (info.field.isAnnotationPresent(Entry.class))
-            {
-                try
-                {
+        for (EntryInfo info : entries) {
+            if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
+                try {
                     info.value = info.field.get(null);
                     info.tempValue = info.value.toString();
-                }
-                catch (IllegalAccessException ignored)
-                {
+                } catch (IllegalAccessException ignored) {
                 }
             }
         }
+
+        loadFromFile();
     }
 
-    private static void initNestedClass(Class<?> config, String category)
+    private static void initNestedClass(Class<?> config)
     {
-        String modCategory = MOD_NAME + (!category.isBlank() ? "." + category : "");
-        configClass.put(modCategory, config);
         for (Field field : config.getFields())
         {
             EntryInfo info = new EntryInfo();
-            if (field.isAnnotationPresent(Entry.class) || field.isAnnotationPresent(Comment.class) || field.isAnnotationPresent(ScreenEntry.class))
+            if (field.isAnnotationPresent(ConfigAnnotations.Entry.class) || field.isAnnotationPresent(ConfigAnnotations.Comment.class) || field.isAnnotationPresent(ConfigAnnotations.ScreenEntry.class))
             {
                 // If putting in your own mod then put your own check for server sided
                 if (!LodCommonMain.serverSided)
                     initClient(field, info);
             }
 
-            if (field.isAnnotationPresent(Entry.class))
+            if (field.isAnnotationPresent(ConfigAnnotations.Entry.class))
             {
+                info.varClass = field.getType();
                 try
                 {
                     info.defaultValue = field.get(null);
                 }
-                catch (IllegalAccessException ignored)
-                {
-                }
+                catch (IllegalAccessException ignored) {}
             }
 
-            if (field.isAnnotationPresent(ScreenEntry.class))
-            {
-                String className = field.getAnnotation(Category.class) != null ? field.getAnnotation(Category.class).value() : "";
-                initNestedClass(field.getType(),
-                        (!className.isBlank() ? className + "." : "")
-                                + field.getName());
-            }
+            if (field.isAnnotationPresent(ConfigAnnotations.ScreenEntry.class))
+                initNestedClass(field.getType());
+
+
+            info.field = field;
         }
     }
 
@@ -210,16 +187,15 @@ public abstract class ConfigGui
     private static void initClient(Field field, EntryInfo info)
     {
         Class<?> fieldClass = field.getType();
-        Category category = field.getAnnotation(Category.class);
-        Entry entry = field.getAnnotation(Entry.class);
-        ScreenEntry screenEntry = field.getAnnotation(ScreenEntry.class);
+        ConfigAnnotations.Category category = field.getAnnotation(ConfigAnnotations.Category.class);
+        ConfigAnnotations.Entry entry = field.getAnnotation(ConfigAnnotations.Entry.class);
+        ConfigAnnotations.ScreenEntry screenEntry = field.getAnnotation(ConfigAnnotations.ScreenEntry.class);
 
         if (entry != null)
             info.width = entry.width();
         else if (screenEntry != null)
             info.width = screenEntry.width();
 
-        info.field = field;
         info.category = category != null ? category.value() : "";
 
 
@@ -227,7 +203,6 @@ public abstract class ConfigGui
         {
             if (!entry.name().equals(""))
                 info.name = new TranslatableComponent(entry.name());
-
 
 
             if (fieldClass == int.class)
@@ -334,21 +309,29 @@ public abstract class ConfigGui
     /** Grabs what is in the config and puts it in modid.toml */
     public static void saveToFile()
     {
+        // If this line fails then delete the modid.toml and start the mod again
+        CommentedFileConfig config = CommentedFileConfig.builder(configFilePath.toFile()).build();
+
         // First try to create a config file
-        try
-        {
+        try {
             if (!Files.exists(configFilePath))
                 Files.createFile(configFilePath);
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             LOGGER.info("Failed creating config file for " + MOD_NAME_READABLE + " at the path [" + configFilePath.toString() + "].");
             e.printStackTrace();
         }
-        // If this line fails then delete the modid.toml and start the mod again
-        Toml toml = new Toml().read(configFilePath.toFile());
 
-        LOGGER.info("TomlWriter stuff not made yet");
+        config.load();
+
+        for (EntryInfo info : entries) {
+            if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
+                config.set((info.category.isBlank() ? "" : info.category + ".") + info.field.getName(), info.value);
+            }
+        }
+
+        config.save();
+        config.close();
     }
 
     /**
@@ -357,36 +340,37 @@ public abstract class ConfigGui
      */
     public static void loadFromFile()
     {
-        Toml toml;
-        try
-        {
-            toml = new Toml().read(configFilePath.toFile());
-        }
-        catch (Exception e)
-        {
+        CommentedFileConfig config = CommentedFileConfig.builder(configFilePath.toFile()).autosave().build();
+
+        // First checks if the config file was already made
+        if (!Files.exists(configFilePath)) {
             LOGGER.info("Config file not found for " + MOD_NAME_READABLE + ". Creating config...");
             saveToFile();
             return;
         }
 
-		/*
+        config.load();
+
+        // Puts everything into its variable
         for (EntryInfo info : entries) {
-			if (info.widget instanceof Map.Entry) { // For enum
-				info.value = toml.getList((info.category != "" ? info.category + "." : "") + info.field.getName());
-			} else if (info.field.getType() == String.class) {
-				info.value = toml.getString((info.category != "" ? info.category + "." : "") + info.field.getName());
-			} else if (info.field.getType() == Double.class) {
-				info.value = toml.getDouble((info.category != "" ? info.category + "." : "") + info.field.getName());
-			} else if (info.field.getType() == Long.class) {
-				info.value = toml.getLong((info.category != "" ? info.category + "." : "") + info.field.getName());
-			} else if (info.field.getType() == List.class) {
-				info.value = toml.getList((info.category != "" ? info.category + "." : "") + info.field.getName());
-			}
-		}*/
+            if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
+                String itemPath = (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName();
+                if (config.contains(itemPath)) {
+                    if (info.field.getType().isEnum())
+                        info.value = config.getEnum(itemPath, info.varClass);
+                    else
+                        info.value = config.get(itemPath);
+                } else
+                    config.set(itemPath, info.value);
+
+                try {
+                    info.field.set(null, info.value);
+                } catch (IllegalAccessException ignored) {}
+            }
+        }
+
+        config.close();
     }
-
-
-
 
 
     public static Screen getScreen(Screen parent, String category)
@@ -398,7 +382,11 @@ public abstract class ConfigGui
     {
         protected ConfigScreen(Screen parent, String category)
         {
-            super(new TranslatableComponent(MOD_NAME + ".config.title"));
+            super(new TranslatableComponent(
+                    I18n.exists(MOD_NAME + ".config" + (category.isBlank()? "." + category : "") + ".title") ?
+                            MOD_NAME + ".config.title" :
+                            MOD_NAME + ".config" + (category.isBlank() ? "" : "." + category) + ".title")
+            );
             this.parent = parent;
             this.category = category;
             this.translationPrefix = MOD_NAME + ".config.";
@@ -415,34 +403,6 @@ public abstract class ConfigGui
         public void tick()
         {
             super.tick();
-            for (EntryInfo info : entries)
-            {
-                try
-                {
-                    info.field.set(null, info.value);
-                }
-                catch (IllegalAccessException ignored)
-                {
-                }
-            }
-        }
-
-        private void loadValues()
-        {
-            loadFromFile();
-
-            for (EntryInfo info : entries)
-            {
-                if (info.field.isAnnotationPresent(Entry.class))
-                    try
-                    {
-                        info.value = info.field.get(null);
-                        info.tempValue = info.value.toString();
-                    }
-                    catch (IllegalAccessException ignored)
-                    {
-                    }
-            }
         }
 
         @Override
@@ -450,25 +410,14 @@ public abstract class ConfigGui
         {
             super.init();
             if (!reload)
-                loadValues();
+                loadFromFile();
 
             this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
-                loadValues();
+                loadFromFile();
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }));
 
             Button done = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
-                for (EntryInfo info : entries)
-                {
-                    try
-                    {
-                        info.field.set(null, info.value);
-                    }
-                    catch (IllegalAccessException ignored)
-                    {
-                    }
-                }
-
                 saveToFile();
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }));
@@ -553,17 +502,16 @@ public abstract class ConfigGui
             this.list.render(matrices, mouseX, mouseY, delta); // Render buttons
             drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title
 
-
             // Render the tooltip only if it can find a tooltip in the language file
             for (EntryInfo info : entries) {
                 if (info.category.matches(category) && !info.hideOption) {
                     if (list.getHoveredButton(mouseX,mouseY).isPresent()) {
                         AbstractWidget buttonWidget = list.getHoveredButton(mouseX,mouseY).get();
                         Component text = ButtonEntry.buttonsWithText.get(buttonWidget);
-                        TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category != "" ? info.category + "." : "") + info.field.getName());
-                        String key = translationPrefix + (info.category != "" ? info.category + "." : "") + info.field.getName() + ".@tooltip";
+                        TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category.isBlank() ? "" : info.category + ".") + info.field.getName());
+                        String key = translationPrefix + (info.category.isBlank() ? "" : info.category + ".") + info.field.getName() + ".@tooltip";
 
-                        if (info.error != null && text.equals(name)) renderTooltip(matrices, info.error.getValue(), mouseX, mouseY);
+                        if (info.error != null && text.equals(name)) renderTooltip(matrices, (Component) info.error.getValue(), mouseX, mouseY);
                         else if (I18n.exists(key) && text.equals(name)) {
                             List<Component> list = new ArrayList<>();
                             for (String str : I18n.get(key).split("\n"))
@@ -682,57 +630,5 @@ public abstract class ConfigGui
         {
             return children;
         }
-    }
-
-
-
-
-    //=============//
-    // annotations //
-    //=============//
-
-    // These could probably be moved into core since they don't rely on any Minecraft code. - James
-    // Better not to since I want everything to be in 1 file. - coolGi
-
-    /** a textField, button, etc. that can be interacted with */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    public @interface Entry
-    {
-        String name() default "";
-
-        int width() default 150;
-
-        double minValue() default Double.MIN_NORMAL;
-
-        double maxValue() default Double.MAX_VALUE;
-    }
-
-
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    public @interface ScreenEntry
-    {
-        String name() default "";
-
-        int width() default 100;
-    }
-
-
-    /** Used when sorting the configs in the menu */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    public @interface Category
-    {
-        String value();
-    }
-
-
-    /** Makes text (looks like @Entry but dosnt save and has no button */
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.FIELD)
-    public @interface Comment
-    {
-
     }
 }

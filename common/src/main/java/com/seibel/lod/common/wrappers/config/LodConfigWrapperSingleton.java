@@ -451,13 +451,13 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 
 
 				@Override
-				public int getGpuUploadTimeoutInMilliseconds()
+				public int getGpuUploadPerMegabyteInMilliseconds()
 				{
-					return Config.Client.Advanced.Buffers.gpuUploadTimeoutInMilleseconds;
+					return Config.Client.Advanced.Buffers.gpuUploadPerMegabyteInMilliseconds;
 				}
 				@Override
-				public void setGpuUploadTimeoutInMilliseconds(int newTimeoutInMilliseconds) {
-					Config.Client.Advanced.Buffers.gpuUploadTimeoutInMilleseconds = newTimeoutInMilliseconds;
+				public void setGpuUploadPerMegabyteInMilliseconds(int newMilliseconds) {
+					Config.Client.Advanced.Buffers.gpuUploadPerMegabyteInMilliseconds = newMilliseconds;
 				}
 
 

@@ -35,10 +35,8 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
-    implementation("com.moandjiezana.toml:toml4j:${rootProject.toml_version}")
-    shadowMe("com.moandjiezana.toml:toml4j:${rootProject.toml_version}") {
-        exclude(module: "gson")
-    }
+    implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
+    shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {}
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
@@ -72,6 +70,7 @@ task copyCommonResources(type: Copy) {
 runClient {
     dependsOn(copyCoreResources)
     dependsOn(copyCommonResources)
+    jvmArgs "-XX:-OmitStackTraceInFastThrow"
     finalizedBy(deleteResources)
 }
 
@@ -88,7 +87,7 @@ shadowJar {
     configurations = [project.configurations.shadowMe]
     relocate 'org.tukaani', 'shaded.tukaani'
     relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
-    relocate 'com.moandjiezana.toml', 'shaded.moandjiezana.toml'
+    relocate 'com.electronwill.nightconfig', 'shaded.electronwill.nightconfig'
 
     classifier "dev-shadow"
 }

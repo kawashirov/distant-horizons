@@ -29,10 +29,8 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    implementation("com.moandjiezana.toml:toml4j:${rootProject.toml_version}")
-    forgeDependencies(shadowMe("com.moandjiezana.toml:toml4j:${rootProject.toml_version}") {
-        exclude(module: "gson")
-    })
+//    implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
+//    forgeDependencies(shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {})
 
 //    forgeDependencies(project(":core")) { transitive false }
 
@@ -65,7 +63,7 @@ shadowJar {
     configurations = [project.configurations.shadowMe]
     relocate 'org.tukaani', 'shaded.tukaani'
     relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
-    relocate 'com.moandjiezana.toml', 'shaded.moandjiezana.toml'
+//    relocate 'com.electronwill.nightconfig', 'shaded.electronwill.nightconfig'
 
     classifier "dev-shadow"
 }

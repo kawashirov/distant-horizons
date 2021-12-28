@@ -33,7 +33,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
 {
     //set of block which require tint
     public static final ConcurrentMap<Block, BlockColorWrapper> blockColorWrapperMap = new ConcurrentHashMap<>();
-//    public static final ModelDataMap dataMap = new ModelDataMap.Builder().build();
+    //    public static final ModelDataMap dataMap = new ModelDataMap.Builder().build();
     public static final AbstractBlockPosWrapper blockPos = new BlockPosWrapper(0, 0, 0);
     public static final Random random = new Random(0);
     //public static BlockColourWrapper WATER_COLOR = getBlockColorWrapper(Blocks.WATER);
@@ -100,28 +100,28 @@ public class BlockColorWrapper implements IBlockColorWrapper
     private void setupColorAndTint()
     {
         BlockState blockState = block.defaultBlockState();
-        BlockPosWrapper blockPosWrapper = new BlockPosWrapper();
+        //BlockPosWrapper blockPosWrapper = new BlockPosWrapper();
         MinecraftWrapper mc = MinecraftWrapper.INSTANCE;
         TextureAtlasSprite texture;
         List<BakedQuad> quads = null;
 
-        boolean isTinted = false;
-        int listSize = 0;
+        //boolean isTinted = false;
+        //int listSize = 0;
 
         // first step is to check if this block has a tinted face
-        for (Direction direction : directions)
-        {
-            quads = mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random);
-            listSize = Math.max(listSize, quads.size());
-            for (BakedQuad bakedQuad : quads)
-            {
-                isTinted |= bakedQuad.isTinted();
-            }
-        }
+        //for (Direction direction : directions)
+        //{
+        //    quads = mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random);
+        //    listSize = Math.max(listSize, quads.size());
+        //    for (BakedQuad bakedQuad : quads)
+        //    {
+        //        isTinted |= bakedQuad.isTinted();
+        //    }
+        //}
 
         //if it contains a tinted face then we store this block in the toTint set
-        if (isTinted)
-            this.toTint = true;
+        //if (isTinted)
+        //    this.toTint = true;
 
         //now we get the first non-empty face
         for (Direction direction : directions)
@@ -154,6 +154,10 @@ public class BlockColorWrapper implements IBlockColorWrapper
 
         // generate the block's color
 //        for (int frameIndex = 0; frameIndex < texture.getFrameCount(); frameIndex++)
+        boolean lookForTint = false;
+        if (grassInstance() || leavesInstance() || waterIstance())
+            lookForTint = true;
+
         int frameIndex = 0; // TODO
         {
             // textures normally use u and v instead of x and y
@@ -161,18 +165,20 @@ public class BlockColorWrapper implements IBlockColorWrapper
             {
                 for (int v = 0; v < texture.getHeight(); v++)
                 {
-
                     tempColor = TextureAtlasSpriteWrapper.getPixelRGBA(texture, frameIndex, u, v);
 
                     if (ColorUtil.getAlpha(TextureAtlasSpriteWrapper.getPixelRGBA(texture, frameIndex, u, v)) == 0)
                         continue;
 
-                    // determine if this pixel is gray
-                    int colorMax = Math.max(Math.max(ColorUtil.getBlue(tempColor), ColorUtil.getGreen(tempColor)), ColorUtil.getRed(tempColor));
-                    int colorMin = 4 + Math.min(Math.min(ColorUtil.getBlue(tempColor), ColorUtil.getGreen(tempColor)), ColorUtil.getRed(tempColor));
-                    boolean isGray = colorMax < colorMin;
-                    if (isGray)
-                        numberOfGreyPixel++;
+                    if (lookForTint)
+                    {
+                        // determine if this pixel is gray
+                        int colorMax = Math.max(Math.max(ColorUtil.getBlue(tempColor), ColorUtil.getGreen(tempColor)), ColorUtil.getRed(tempColor));
+                        int colorMin = 4 + Math.min(Math.min(ColorUtil.getBlue(tempColor), ColorUtil.getGreen(tempColor)), ColorUtil.getRed(tempColor));
+                        boolean isGray = colorMax < colorMin;
+                        if (isGray)
+                            numberOfGreyPixel++;
+                    }
 
 
                     // for flowers, weight their non-green color higher
@@ -207,7 +213,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
         }
 
         // determine if this block should use the biome color tint
-        if ((grassInstance() || leavesInstance() || waterIstance()) && (float) numberOfGreyPixel / count > 0.75f)
+        if (lookForTint && (float) numberOfGreyPixel / count > 0.75f)
             this.toTint = true;
 
         // we check which kind of tint we need to apply
@@ -217,7 +223,13 @@ public class BlockColorWrapper implements IBlockColorWrapper
 
         this.waterTint = waterIstance() && toTint;
 
-        color = tempColor;
+        //hardcoded leaves
+        if (block == Blocks.SPRUCE_LEAVES)
+            color = ColorUtil.multiplyRGBcolors(tempColor, 0xFF619961);
+        else if (block == Blocks.BIRCH_LEAVES)
+            color = ColorUtil.multiplyRGBcolors(tempColor, 0xFF80A755);
+        else
+            color = tempColor;
     }
 
     /** determine if the given block should use the biome's grass color */
@@ -234,7 +246,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
     /** determine if the given block should use the biome's foliage color */
     private boolean leavesInstance()
     {
-        return block instanceof LeavesBlock
+        return (block instanceof LeavesBlock && block != Blocks.SPRUCE_LEAVES && block != Blocks.BIRCH_LEAVES/* && block != Blocks.AZALEA_LEAVES && block != Blocks.FLOWERING_AZALEA_LEAVES*/)
                 || block == Blocks.VINE
                 || block == Blocks.SUGAR_CANE;
     }
