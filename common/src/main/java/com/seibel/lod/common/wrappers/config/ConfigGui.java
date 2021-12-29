@@ -293,7 +293,7 @@ public abstract class ConfigGui
 			{
 				if (((List<String>) info.value).size() == info.index)
 					((List<String>) info.value).add("");
-				((List<String>) info.value).set(info.index, Arrays.stream(info.tempValue.replace("[", "").replace("]", "").split(", ")).toList().get(0));
+				((List<String>) info.value).set(info.index, Arrays.stream(info.tempValue.replace("[", "").replace("]", "").split(", ")).collect(Collectors.toList()).get(0));
 			}
 
 			return true;
@@ -413,12 +413,12 @@ public abstract class ConfigGui
 			if (!reload)
 				loadFromFile();
 
-			this.addWidget(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
+			this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
 				loadFromFile();
 				Objects.requireNonNull(minecraft).setScreen(parent);
 			}));
 
-			Button done = this.addWidget(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
+			Button done = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
 				saveToFile();
 				Objects.requireNonNull(minecraft).setScreen(parent);
 			}));
