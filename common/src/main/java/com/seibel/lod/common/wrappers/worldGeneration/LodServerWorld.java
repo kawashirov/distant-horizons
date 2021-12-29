@@ -258,6 +258,11 @@ public class LodServerWorld implements WorldGenLevel
         throw new UnsupportedOperationException("Not Implemented");
     }
 
+    @Nullable
+    public MinecraftServer getServer() {
+        return serverWorld.getServer();
+    }
+
     @Override
     public LevelData getLevelData()
     {

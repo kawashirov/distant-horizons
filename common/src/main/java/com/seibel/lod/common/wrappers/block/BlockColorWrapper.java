@@ -168,7 +168,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
                 {
                     tempColor = TextureAtlasSpriteWrapper.getPixelRGBA(texture, frameIndex, u, v);
 
-                    if (texture.isTransparent(frameIndex, u, v))
+                    if (!texture.isTransparent(frameIndex, u, v))   // TODO[1.16.5]: Check if this should be inverted
                         continue;
 
                     if (lookForTint)

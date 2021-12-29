@@ -49,6 +49,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.client.resources.language.I18n;	// translation
 import com.mojang.blaze3d.vertex.PoseStack;
+//import net.minecraft.client.gui.narration.NarratableEntry; // Remove in 1.16
 
 /**
  * Based upon TinyConfig
@@ -412,12 +413,12 @@ public abstract class ConfigGui
             if (!reload)
                 loadFromFile();
 
-            this.addWidget(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
+            this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
                 loadFromFile();
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }));
 
-            Button done = this.addWidget(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
+            Button done = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
                 saveToFile();
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }));
@@ -625,6 +626,8 @@ public abstract class ConfigGui
             return children;
         }
 
+        // Only for 1.17 and over
+        // Remove in 1.16 and below
 //        @Override
 //        public List<? extends NarratableEntry> narratables()
 //        {
