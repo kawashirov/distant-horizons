@@ -285,15 +285,19 @@ public final class WorldGenerationStep {
 		final ServerLevel level;
 		final StructureFeatureManager structFeat;
 		final StructureCheck structCheck;
+		boolean isValid = true;
 		public final PerfCalculator perf = new PerfCalculator();
 
 		public static final ThreadedParameters getOrMake(GlobalParameters param) {
 			ThreadedParameters tParam = localParam.get();
-			if (tParam != null && tParam.level == param.level)
+			if (tParam != null && tParam.isValid && tParam.level == param.level)
 				return tParam;
 			tParam = new ThreadedParameters(param);
 			localParam.set(tParam);
 			return tParam;
+		}
+		public void markAsInvalid() {
+			isValid = false;
 		}
 
 		private ThreadedParameters(GlobalParameters param) {
@@ -434,7 +438,12 @@ public final class WorldGenerationStep {
 			event.pEvent.beginNano = System.nanoTime();
 			GridList<ChunkAccess> referencedChunks;
 			DistanceGenerationMode generationMode;
-			referencedChunks = generateDirect(event, event.range, event.target);
+			try {
+				referencedChunks = generateDirect(event, event.range, event.target);
+			} catch (StepStructureStart.StructStartCorruptedException e) {
+				event.tParam.markAsInvalid();
+				return;
+			}
 
 			switch (event.target) {
 			case Empty:
@@ -544,6 +553,16 @@ public final class WorldGenerationStep {
 
 	public final class StepStructureStart {
 		public final ChunkStatus STATUS = ChunkStatus.STRUCTURE_STARTS;
+		
+		public static class StructStartCorruptedException extends RuntimeException {
+			private static final long serialVersionUID = -8987434342051563358L;
+
+			public StructStartCorruptedException(ArrayIndexOutOfBoundsException e) {
+				super("StructStartCorruptedException");
+				super.initCause(e);
+				fillInStackTrace();
+			}
+		}
 
 		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
@@ -553,7 +572,14 @@ public final class WorldGenerationStep {
 					params.generator.createStructures(params.registry, tParams.structFeat, chunk, params.structures,
 							params.worldSeed);
 					((ProtoChunk) chunk).setStatus(STATUS);
-					tParams.structCheck.onStructureLoad(chunk.getPos(), chunk.getAllStarts());
+					try {
+						tParams.structCheck.onStructureLoad(chunk.getPos(), chunk.getAllStarts());
+					} catch (ArrayIndexOutOfBoundsException e) {
+						// There's a rare issue with StructStart where it throws ArrayIndexOutOfBounds
+						// This means the structFeat is corrupted (For some reason) and I need to reset it.
+						// TODO: Figure out in the future why this happens even though I am using new structFeat
+						throw new StructStartCorruptedException(e);
+					}
 				}
 			}
 		}
