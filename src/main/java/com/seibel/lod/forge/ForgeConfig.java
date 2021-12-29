@@ -382,7 +382,7 @@ public class ForgeConfig
 			{
 
 				public final ForgeConfigSpec.EnumValue<GpuUploadMethod> gpuUploadMethod;
-				public final ForgeConfigSpec.IntValue gpuUploadTimeoutInMilleseconds;
+				public final ForgeConfigSpec.IntValue gpuUploadPerMegabyteInMilliseconds;
 				public final ForgeConfigSpec.EnumValue<BufferRebuildTimes> rebuildTimes;
 				
 				Buffers(ForgeConfigSpec.Builder builder)
@@ -394,10 +394,10 @@ public class ForgeConfig
 									+ IBuffers.GPU_UPLOAD_METHOD_DESC)
 							.defineEnum("GPU Upload Method", IBuffers.GPU_UPLOAD_METHOD_DEFAULT);
 					
-					MinDefaultMax<Integer> minDefaultMax = IBuffers.GPU_UPLOAD_TIMEOUT_IN_MILLISECONDS_DEFAULT;
-					gpuUploadTimeoutInMilleseconds = builder
+					MinDefaultMax<Integer> minDefaultMax = IBuffers.GPU_UPLOAD_PER_MEGABYTE_IN_MILLISECONDS_DEFAULT;
+					gpuUploadPerMegabyteInMilliseconds = builder
 							.comment("\n\n"
-									+ IBuffers.GPU_UPLOAD_TIMEOUT_IN_MILLISECONDS_DESC)
+									+ IBuffers.GPU_UPLOAD_PER_MEGABYTE_IN_MILLISECONDS_DESC)
 							.defineInRange("GPU Upload Timeout in Milleseconds", minDefaultMax.defaultValue, minDefaultMax.minValue, minDefaultMax.maxValue);
 					
 					

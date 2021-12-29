@@ -474,14 +474,14 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				
 				
 				@Override
-				public int getGpuUploadTimeoutInMilliseconds()
+				public int getGpuUploadPerMegabyteInMilliseconds()
 				{
-					return ForgeConfig.CLIENT.advanced.buffers.gpuUploadTimeoutInMilleseconds.get();
+					return ForgeConfig.CLIENT.advanced.buffers.gpuUploadPerMegabyteInMilliseconds.get();
 				}
 				@Override
-				public void setGpuUploadTimeoutInMilliseconds(int newTimeoutInMilliseconds)
+				public void setGpuUploadPerMegabyteInMilliseconds(int newTimeoutInMilliseconds)
 				{
-					ForgeConfig.CLIENT.advanced.buffers.gpuUploadTimeoutInMilleseconds.set(newTimeoutInMilliseconds);
+					ForgeConfig.CLIENT.advanced.buffers.gpuUploadPerMegabyteInMilliseconds.set(newTimeoutInMilliseconds);
 				}
 				
 				
