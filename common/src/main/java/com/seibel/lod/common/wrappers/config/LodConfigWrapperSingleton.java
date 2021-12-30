@@ -274,6 +274,14 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					Config.Client.Graphics.AdvancedGraphics.useExtendedNearClipPlane = newUseExtendedNearClipPlane;
 				}
+				@Override
+				public int getBacksideCullingRange() {
+					return Config.Client.Graphics.AdvancedGraphics.backsideCullingRange;
+				}
+				@Override
+				public void setBacksideCullingRange(int newBacksideCullingRange) {
+					Config.Client.Graphics.AdvancedGraphics.backsideCullingRange = newBacksideCullingRange;
+				}
 			}
 		}
 

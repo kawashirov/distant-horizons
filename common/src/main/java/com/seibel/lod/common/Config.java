@@ -154,6 +154,10 @@ public class Config extends ConfigGui
 				@ConfigAnnotations.Category("client.graphics.advancedGraphics")
 				@ConfigAnnotations.Entry
 				public static boolean useExtendedNearClipPlane = IAdvancedGraphics.USE_EXTENDED_NEAR_CLIP_PLANE_DEFAULT;
+
+				@ConfigAnnotations.Category("client.graphics.advancedGraphics")
+				@ConfigAnnotations.Entry(minValue = 0, maxValue = 512)
+				public static int backsideCullingRange = IAdvancedGraphics.VANILLA_CULLING_RANGE_MIN_DEFAULT_MAX.defaultValue;
 			}
 		}
 
@@ -166,7 +170,7 @@ public class Config extends ConfigGui
 
 			@ConfigAnnotations.Category("client.worldGenerator")
 			@ConfigAnnotations.Entry
-			public static DistanceGenerationMode distanceGenerationMode = DistanceGenerationMode.FEATURES; //IWorldGenerator.DISTANCE_GENERATION_MODE_DEFAULT;
+			public static DistanceGenerationMode distanceGenerationMode = IWorldGenerator.DISTANCE_GENERATION_MODE_DEFAULT;
 
 			// FIXME: Temperary override. In 1.18, the newer Unstable gnerator is more usable
 			@ConfigAnnotations.Category("client.worldGenerator")

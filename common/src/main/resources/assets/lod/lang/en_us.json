@@ -35,6 +35,8 @@
   "DistantHorizons.config.client.graphics.advancedGraphics.vanillaOverdraw.@tooltip": "How often should LODs be drawn on top of regular chunks? \nHALF and ALWAYS will prevent holes in the world, but may look odd for transparent blocks or in caves.",
   "DistantHorizons.config.client.graphics.advancedGraphics.useExtendedNearClipPlane": "Use extended near clip plane",
   "DistantHorizons.config.client.graphics.advancedGraphics.useExtendedNearClipPlane.@tooltip": "Will prevent some overdraw issues, but may cause nearby fake chunks to render incorrectly especially when in/near an ocean",
+  "DistantHorizons.config.client.graphics.advancedGraphics.backsideCullingRange": "Backside Culling Range",
+  "DistantHorizons.config.client.graphics.advancedGraphics.backsideCullingRange.@tooltip": "This indicates the minimum range where back sides of blocks start get get culled.",
   "DistantHorizons.config.client.worldGenerator": "World generator",
   "DistantHorizons.config.client.worldGenerator.generationPriority": "Generation priority",
   "DistantHorizons.config.client.worldGenerator.generationPriority.@tooltip": "What is the priority of the chunks being generated around the player",
