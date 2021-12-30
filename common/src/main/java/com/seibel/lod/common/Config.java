@@ -142,10 +142,6 @@ public class Config extends ConfigGui
 				@ConfigAnnotations.Category("client.graphics.advancedGraphics")
 				@ConfigAnnotations.Entry
 				public static boolean alwaysDrawAtMaxQuality = IAdvancedGraphics.ALWAYS_DRAW_AT_MAD_QUALITY_DEFAULT;
-
-				@ConfigAnnotations.Category("client.graphics.advancedGraphics")
-				@ConfigAnnotations.Entry
-				public static int backsideCullingRange = IAdvancedGraphics.VANILLA_CULLING_RANGE_MIN_DEFAULT_MAX.defaultValue;
 				
 				@ConfigAnnotations.Category("client.graphics.advancedGraphics")
 				@ConfigAnnotations.Entry
