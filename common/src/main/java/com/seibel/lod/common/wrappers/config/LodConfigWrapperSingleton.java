@@ -69,6 +69,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 		{
 			public final IQuality quality;
 			public final IFogQuality fogQuality;
+			public final ICloudQuality cloudQuality;
 			public final IAdvancedGraphics advancedGraphics;
 
 
@@ -86,6 +87,12 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			}
 
 			@Override
+			public ICloudQuality cloudQuality()
+			{
+				return cloudQuality;
+			}
+
+			@Override
 			public IAdvancedGraphics advancedGraphics()
 			{
 				return advancedGraphics;
@@ -95,8 +102,9 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			Graphics()
 			{
 				quality = new Quality();
-				advancedGraphics = new AdvancedGraphics();
 				fogQuality = new FogQuality();
+				cloudQuality = new CloudQuality();
+				advancedGraphics = new AdvancedGraphics();
 			}
 
 
@@ -212,6 +220,57 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setDisableVanillaFog(boolean newDisableVanillaFog)
 				{
 					Config.Client.Graphics.FogQuality.disableVanillaFog = newDisableVanillaFog;
+				}
+			}
+
+
+			public static class CloudQuality implements ICloudQuality
+			{
+				@Override
+				public boolean getCustomClouds()
+				{
+					return Config.Client.Graphics.CloudQuality.customClouds;
+				}
+				@Override
+				public void setCustomClouds(boolean newCustomClouds)
+				{
+					Config.Client.Graphics.CloudQuality.customClouds = newCustomClouds;
+				}
+
+
+				@Override
+				public boolean getFabulousClouds()
+				{
+					return Config.Client.Graphics.CloudQuality.fabulousClouds;
+				}
+				@Override
+				public void setFabulousClouds(boolean newFabulousClouds)
+				{
+					Config.Client.Graphics.CloudQuality.fabulousClouds = newFabulousClouds;
+				}
+
+
+				@Override
+				public boolean getExtendClouds()
+				{
+					return Config.Client.Graphics.CloudQuality.extendClouds;
+				}
+				@Override
+				public void setExtendClouds(boolean newExtendClouds)
+				{
+					Config.Client.Graphics.CloudQuality.extendClouds = newExtendClouds;
+				}
+
+
+				@Override
+				public double getCloudHeight()
+				{
+					return Config.Client.Graphics.CloudQuality.cloudHeight;
+				}
+				@Override
+				public void setCloudHeight(double newCloudHeight)
+				{
+					Config.Client.Graphics.CloudQuality.cloudHeight = newCloudHeight;
 				}
 			}
 

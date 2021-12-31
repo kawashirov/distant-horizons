@@ -142,15 +142,15 @@ public class Config extends ConfigGui
 			{
 				@ConfigAnnotations.Category("client.graphics.cloudQuality")
 				@ConfigAnnotations.Entry
-				public static boolean customClouds = false;
+				public static boolean customClouds = ICloudQuality.CUSTOM_CLOUDS_DEFAULT;
 
 				@ConfigAnnotations.Category("client.graphics.cloudQuality")
 				@ConfigAnnotations.Entry
-				public static boolean fabulousClouds = true;
+				public static boolean fabulousClouds = ICloudQuality.FABULOUS_CLOUDS_DEFAULT;
 
 				@ConfigAnnotations.Category("client.graphics.cloudQuality")
 				@ConfigAnnotations.Entry
-				public static boolean extendClouds = true;
+				public static boolean extendClouds = ICloudQuality.EXTEND_CLOUDS_DEFAULT;
 
 				@ConfigAnnotations.Category("client.graphics.cloudQuality")
 				@ConfigAnnotations.Entry
