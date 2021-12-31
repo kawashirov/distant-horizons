@@ -85,6 +85,10 @@ public class Config extends ConfigGui
 
 			@ConfigAnnotations.Category("client.graphics")
 			@ConfigAnnotations.ScreenEntry
+			public static CloudQuality cloudQuality;
+
+			@ConfigAnnotations.Category("client.graphics")
+			@ConfigAnnotations.ScreenEntry
 			public static AdvancedGraphics advancedGraphics;
 
 
@@ -132,6 +136,18 @@ public class Config extends ConfigGui
 			}
 
 
+			public static class CloudQuality
+			{
+				@ConfigAnnotations.Category("client.graphics.cloudQuality")
+				@ConfigAnnotations.Entry
+				public static boolean extendClouds = true;
+
+				@ConfigAnnotations.Category("client.graphics.cloudQuality")
+				@ConfigAnnotations.Entry
+				public static int cloudHeight = 192;
+			}
+
+
 			public static class AdvancedGraphics
 			{
 
@@ -142,7 +158,7 @@ public class Config extends ConfigGui
 				@ConfigAnnotations.Category("client.graphics.advancedGraphics")
 				@ConfigAnnotations.Entry
 				public static boolean alwaysDrawAtMaxQuality = IAdvancedGraphics.ALWAYS_DRAW_AT_MAD_QUALITY_DEFAULT;
-				
+
 				@ConfigAnnotations.Category("client.graphics.advancedGraphics")
 				@ConfigAnnotations.Entry
 				public static VanillaOverdraw vanillaOverdraw = IAdvancedGraphics.VANILLA_OVERDRAW_DEFAULT;
