@@ -135,7 +135,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
         if (!quads.isEmpty())
         {
             isColored = true;
-            texture = quads.get(0).getSprite();
+            texture = quads.get(0).sprite;
         }
         else
         {

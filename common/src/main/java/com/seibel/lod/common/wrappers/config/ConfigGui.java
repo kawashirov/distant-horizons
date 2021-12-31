@@ -413,12 +413,12 @@ public abstract class ConfigGui
             if (!reload)
                 loadFromFile();
 
-            this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
+            this.addWidget(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
                 loadFromFile();
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }));
 
-            Button done = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
+            Button done = this.addWidget(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
                 saveToFile();
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }));

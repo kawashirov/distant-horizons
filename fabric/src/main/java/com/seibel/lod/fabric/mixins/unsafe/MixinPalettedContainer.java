@@ -1,8 +1,6 @@
 package com.seibel.lod.fabric.mixins.unsafe;
 
-import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.level.chunk.PalettedContainer;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -21,11 +19,13 @@ import java.util.concurrent.Semaphore;
  */
 @Mixin(PalettedContainer.class)
 public class MixinPalettedContainer {
-    @Mutable
-    @Shadow @Final private Semaphore lock;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void setSemaphore(CallbackInfo ci) {
-        this.lock = new Semaphore(2);
+    @Inject(method = "acquire", at = @At("HEAD"), cancellable = true)
+    private void acquire_skip(CallbackInfo ci) {
+    	ci.cancel();
+    }
+    @Inject(method = "release", at = @At("HEAD"), cancellable = true)
+    private void release_skip(CallbackInfo ci) {
+    	ci.cancel();
     }
 }

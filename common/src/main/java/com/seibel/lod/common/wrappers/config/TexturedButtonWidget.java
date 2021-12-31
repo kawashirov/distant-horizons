@@ -2,8 +2,9 @@ package com.seibel.lod.common.wrappers.config;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
@@ -26,18 +27,20 @@ public class TexturedButtonWidget extends ImageButton {
         super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, tooltipSupplier, text);
     }
 
-    @Override
-    public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
-        int i = this.getYImage(this.isHovered());
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableDepthTest();
-        this.blit(matrices, this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
-        this.blit(matrices, this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
+	@Override
+	public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
 
-        super.renderButton(matrices, mouseX, mouseY, delta);
-    }
+		Minecraft.getInstance().getTextureManager().bind(WIDGETS_LOCATION);
+		RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.alpha);
+		int i = getYImage(isHovered());
+
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.enableDepthTest();
+		this.blit(matrices, this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
+		this.blit(matrices, this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2,
+				this.height);
+
+		super.renderButton(matrices, mouseX, mouseY, delta);
+	}
 }
