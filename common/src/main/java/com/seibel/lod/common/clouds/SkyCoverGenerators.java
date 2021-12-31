@@ -11,7 +11,7 @@ public class SkyCoverGenerators {
     public static final int COLOR = NativeImage.combine(255, 255, 255, 255);
 
     // Where the generator for clouds could be made
-    // TODO: Try to impliment this https://www.reddit.com/r/Minecraft/comments/e7xol/this_is_how_clouds_should_work_gif_simulation/
+    // TODO: Try to implement this https://www.reddit.com/r/Minecraft/comments/e7xol/this_is_how_clouds_should_work_gif_simulation/
 
     public static void clearSkyGenerator(SimplexNoise noiseSampler, NativeImage image, double cloudiness) {
         for (int x = 0; x < 256; x++) {

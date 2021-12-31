@@ -40,15 +40,12 @@ import net.minecraft.client.renderer.RenderType;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
-import com.mojang.math.Matrix4f;
 import net.minecraft.client.CloudStatus;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -92,16 +89,18 @@ public class MixinWorldRenderer
 
 	@Inject(method = "renderClouds", at = @At("HEAD"), cancellable = true)
 	public void renderClouds(PoseStack poseStack, Matrix4f model, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
-		TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-		registerClouds(textureManager);
-		NoiseCloudHandler.update();
+		if (Config.Client.Graphics.CloudQuality.customClouds) {
+			TextureManager textureManager = Minecraft.getInstance().getTextureManager();
+			registerClouds(textureManager);
+			NoiseCloudHandler.update();
 
-		if (minecraft.level.dimension() == ClientLevel.OVERWORLD) {
-			CloudTexture cloudTexture = NoiseCloudHandler.cloudTextures.get(NoiseCloudHandler.cloudTextures.size() - 1);
-			renderCloudLayer(poseStack, model, tickDelta, cameraX, cameraY, cameraZ, Config.Client.Graphics.CloudQuality.cloudHeight, 0, 1, 1, cloudTexture.resourceLocation);
+			if (minecraft.level.dimension() == ClientLevel.OVERWORLD) {
+				CloudTexture cloudTexture = NoiseCloudHandler.cloudTextures.get(NoiseCloudHandler.cloudTextures.size() - 1);
+				renderCloudLayer(poseStack, model, tickDelta, cameraX, cameraY, cameraZ, (float) (Config.Client.Graphics.CloudQuality.cloudHeight + 0.01 /* Make clouds a bit higher so it dosnt do janky stuff */), 0, 1, 1, cloudTexture.resourceLocation);
+			}
+
+			ci.cancel();
 		}
-
-		ci.cancel();
 
 		// get the partial ticks since renderChunkLayer doesn't
 		// have access to them

@@ -20,12 +20,14 @@
 package com.seibel.lod.common;
 
 import com.seibel.lod.common.wrappers.config.ConfigGui;
+import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
 import com.seibel.lod.core.config.*;
 import com.seibel.lod.core.enums.config.*;
 import com.seibel.lod.core.enums.rendering.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IWorldGenerator;
+import net.minecraft.client.renderer.DimensionSpecialEffects;
 
 /**
  * This handles any configuration the user has access to.
@@ -144,11 +146,15 @@ public class Config extends ConfigGui
 
 				@ConfigAnnotations.Category("client.graphics.cloudQuality")
 				@ConfigAnnotations.Entry
+				public static boolean fabulousClouds = true;
+
+				@ConfigAnnotations.Category("client.graphics.cloudQuality")
+				@ConfigAnnotations.Entry
 				public static boolean extendClouds = true;
 
 				@ConfigAnnotations.Category("client.graphics.cloudQuality")
 				@ConfigAnnotations.Entry
-				public static int cloudHeight = 192;
+				public static double cloudHeight = DimensionSpecialEffects.OverworldEffects.CLOUD_LEVEL;
 			}
 
 
