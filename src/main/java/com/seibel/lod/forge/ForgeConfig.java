@@ -50,6 +50,7 @@ import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.I
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.IAdvancedGraphics;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.IFogQuality;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.IQuality;
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.ICloudQuality;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IWorldGenerator;
 import com.seibel.lod.forge.wrappers.VersionConstants;
 
@@ -114,6 +115,7 @@ public class ForgeConfig
 			public final Quality quality;
 			public final FogQuality fogQuality;
 			public final AdvancedGraphics advancedGraphics;
+			public final CloudQuality cloudQuality;
 			
 			Graphics(ForgeConfigSpec.Builder builder)
 			{
@@ -122,6 +124,7 @@ public class ForgeConfig
 					quality = new Quality(builder);
 					advancedGraphics = new AdvancedGraphics(builder);
 					fogQuality = new FogQuality(builder);
+					cloudQuality = new CloudQuality(builder);
 				}
 				builder.pop();
 			}
@@ -213,6 +216,7 @@ public class ForgeConfig
 				public final ForgeConfigSpec.BooleanValue alwaysDrawAtMaxQuality;
 				public final ForgeConfigSpec.EnumValue<VanillaOverdraw> vanillaOverdraw;
 				public final ForgeConfigSpec.BooleanValue useExtendedNearClipPlane;
+				public final ForgeConfigSpec.IntValue backsideCullingRange;
 				
 				AdvancedGraphics(ForgeConfigSpec.Builder builder)
 				{
@@ -239,11 +243,51 @@ public class ForgeConfig
 							.comment("\n\n"
 									+ IAdvancedGraphics.USE_EXTENDED_NEAR_CLIP_PLANE_DESC)
 							.define("Use Extended Near Clip Plane", IAdvancedGraphics.USE_EXTENDED_NEAR_CLIP_PLANE_DEFAULT);
-					
+
+					MinDefaultMax<Integer> minDefaultMax = IAdvancedGraphics.VANILLA_CULLING_RANGE_MIN_DEFAULT_MAX;
+					backsideCullingRange = builder.comment("\n\n"
+							+ IAdvancedGraphics.VANILLA_CULLING_RANGE_DESC)
+							.defineInRange("Backside Culling Range", minDefaultMax.defaultValue, minDefaultMax.minValue, minDefaultMax.maxValue);
 					
 					builder.pop();
 				}
 			}
+
+			public static class CloudQuality
+			{
+				public final ForgeConfigSpec.BooleanValue customClouds;
+				public final ForgeConfigSpec.BooleanValue fabulousClouds;
+				public final ForgeConfigSpec.BooleanValue extendClouds;
+				public final ForgeConfigSpec.DoubleValue cloudHeight;
+				
+				CloudQuality(ForgeConfigSpec.Builder builder)
+				{
+					builder.comment(ICloudQuality.DESC).push(this.getClass().getSimpleName());
+					
+					customClouds = builder
+							.comment("\n\n"
+									+ ICloudQuality.CUSTOM_CLOUDS_DESC)
+							.define("Custom Clouds", ICloudQuality.CUSTOM_CLOUDS_DEFAULT);
+					
+					fabulousClouds = builder
+							.comment("\n\n"
+									+ ICloudQuality.FABULOUS_CLOUDS_DESC)
+							.define("Fabulous Clouds", ICloudQuality.FABULOUS_CLOUDS_DEFAULT);
+					
+					extendClouds = builder
+							.comment("\n\n"
+									+ ICloudQuality.EXTEND_CLOUDS_DESC)
+							.define("Extend Clouds", ICloudQuality.EXTEND_CLOUDS_DEFAULT);
+
+					MinDefaultMax<Double> minDefaultMax = ICloudQuality.CLOUD_HEIGHT_MIN_DEFAULT_MAX;
+					cloudHeight = builder.comment("\n\n"
+							+ ICloudQuality.CLOUD_HEIGHT_DESC)
+							.defineInRange("Cloud Height", minDefaultMax.defaultValue, minDefaultMax.minValue, minDefaultMax.maxValue);
+					
+					builder.pop();
+				}
+			}
+			
 		}
 		
 		

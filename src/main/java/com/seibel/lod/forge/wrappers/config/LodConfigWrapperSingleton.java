@@ -97,6 +97,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			public final IQuality quality;
 			public final IFogQuality fogQuality;
 			public final IAdvancedGraphics advancedGraphics;
+			public final ICloudQuality cloudQuality;
 			
 			
 
@@ -117,13 +118,19 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			{
 				return advancedGraphics;
 			}
-			
+
+			@Override
+			public ICloudQuality cloudQuality()
+			{
+				return cloudQuality;
+			}
 			
 			Graphics()
 			{
 				quality = new Quality();
 				advancedGraphics = new AdvancedGraphics();
 				fogQuality = new FogQuality();
+				cloudQuality = new CloudQuality();
 			}
 			
 			
@@ -288,6 +295,59 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					ForgeConfig.CLIENT.graphics.advancedGraphics.useExtendedNearClipPlane.set(newUseExtendedNearClipPlane);
 				}
+				@Override
+				public int getBacksideCullingRange() {
+					return ForgeConfig.CLIENT.graphics.advancedGraphics.backsideCullingRange.get();
+				}
+				@Override
+				public void setBacksideCullingRange(int backsideCullingRange) {
+					ForgeConfig.CLIENT.graphics.advancedGraphics.backsideCullingRange.set(backsideCullingRange);
+				}
+			}
+		
+			
+			public static class CloudQuality implements ICloudQuality {
+
+				@Override
+				public boolean getCustomClouds() {
+					return ForgeConfig.CLIENT.graphics.cloudQuality.customClouds.get();
+				}
+
+				@Override
+				public void setCustomClouds(boolean newCustomClouds) {
+					ForgeConfig.CLIENT.graphics.cloudQuality.customClouds.set(newCustomClouds);
+				}
+
+				@Override
+				public boolean getFabulousClouds() {
+					return ForgeConfig.CLIENT.graphics.cloudQuality.fabulousClouds.get();
+				}
+
+				@Override
+				public void setFabulousClouds(boolean newFabulousClouds) {
+					ForgeConfig.CLIENT.graphics.cloudQuality.fabulousClouds.set(newFabulousClouds);
+				}
+
+				@Override
+				public boolean getExtendClouds() {
+					return ForgeConfig.CLIENT.graphics.cloudQuality.extendClouds.get();
+				}
+
+				@Override
+				public void setExtendClouds(boolean newExtendClouds) {
+					ForgeConfig.CLIENT.graphics.cloudQuality.extendClouds.set(newExtendClouds);
+				}
+
+				@Override
+				public double getCloudHeight() {
+					return ForgeConfig.CLIENT.graphics.cloudQuality.cloudHeight.get();
+				}
+
+				@Override
+				public void setCloudHeight(double newCloudHeight) {
+					ForgeConfig.CLIENT.graphics.cloudQuality.cloudHeight.set(newCloudHeight);
+				}
+				
 			}
 		}
 		
