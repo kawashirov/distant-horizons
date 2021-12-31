@@ -92,16 +92,18 @@ public class MixinWorldRenderer
 
 	@Inject(method = "renderClouds", at = @At("HEAD"), cancellable = true)
 	public void renderClouds(PoseStack poseStack, Matrix4f model, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
-		TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-		registerClouds(textureManager);
-		NoiseCloudHandler.update();
+		if (Config.Client.Graphics.CloudQuality.customClouds) {
+			TextureManager textureManager = Minecraft.getInstance().getTextureManager();
+			registerClouds(textureManager);
+			NoiseCloudHandler.update();
 
-		if (minecraft.level.dimension() == ClientLevel.OVERWORLD) {
-			CloudTexture cloudTexture = NoiseCloudHandler.cloudTextures.get(NoiseCloudHandler.cloudTextures.size() - 1);
-			renderCloudLayer(poseStack, model, tickDelta, cameraX, cameraY, cameraZ, Config.Client.Graphics.CloudQuality.cloudHeight, 0, 1, 1, cloudTexture.resourceLocation);
+			if (minecraft.level.dimension() == ClientLevel.OVERWORLD) {
+				CloudTexture cloudTexture = NoiseCloudHandler.cloudTextures.get(NoiseCloudHandler.cloudTextures.size() - 1);
+				renderCloudLayer(poseStack, model, tickDelta, cameraX, cameraY, cameraZ, Config.Client.Graphics.CloudQuality.cloudHeight, 0, 1, 1, cloudTexture.resourceLocation);
+			}
+
+			ci.cancel();
 		}
-
-		ci.cancel();
 
 		// get the partial ticks since renderChunkLayer doesn't
 		// have access to them

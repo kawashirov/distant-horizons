@@ -140,6 +140,10 @@ public class Config extends ConfigGui
 			{
 				@ConfigAnnotations.Category("client.graphics.cloudQuality")
 				@ConfigAnnotations.Entry
+				public static boolean customClouds = false;
+
+				@ConfigAnnotations.Category("client.graphics.cloudQuality")
+				@ConfigAnnotations.Entry
 				public static boolean extendClouds = true;
 
 				@ConfigAnnotations.Category("client.graphics.cloudQuality")
