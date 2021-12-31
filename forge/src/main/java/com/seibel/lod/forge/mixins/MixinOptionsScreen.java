@@ -32,7 +32,7 @@ public class MixinOptionsScreen extends Screen {
     @Inject(at = @At("HEAD"),method = "init")
     private void lodconfig$init(CallbackInfo ci) {
         if (Config.ShowButton)
-            this.addWidget(new TexturedButtonWidget(
+            this.addButton(new TexturedButtonWidget(
                 // Where the button is on the screen
                 this.width / 2 - 180, this.height / 6 - 12,
                 // Width and height of the button
