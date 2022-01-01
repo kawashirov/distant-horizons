@@ -95,7 +95,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	}
 	
 	@Override
-	public Color getFogColor()
+	public Color getFogColor(float partialTick)
 	{
 		float[] colorValues = new float[4];
 		GL15.glGetFloatv(GL15.GL_FOG_COLOR, colorValues);
