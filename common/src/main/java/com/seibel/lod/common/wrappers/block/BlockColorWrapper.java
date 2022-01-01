@@ -141,6 +141,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
         {
             isColored = true;
             texture = mc.getModelManager().getBlockModelShaper().getParticleIcon(block.defaultBlockState());
+            texture = mc.getModelManager().getBlockModelShaper().getParticleIcon(block.defaultBlockState());
         }
 
         int count = 0;
@@ -168,7 +169,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
                 {
                     tempColor = TextureAtlasSpriteWrapper.getPixelRGBA(texture, frameIndex, u, v);
 
-                    if (!texture.isTransparent(frameIndex, u, v))   // TODO[1.16.5]: Check if this should be inverted
+                    if (texture.isTransparent(frameIndex, u, v))   // TODO[1.16.5]: Check if this should be inverted
                         continue;
 
                     if (lookForTint)

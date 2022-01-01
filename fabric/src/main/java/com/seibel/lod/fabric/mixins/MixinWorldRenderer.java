@@ -70,40 +70,40 @@ import java.util.Random;
 @Mixin(LevelRenderer.class)
 public class MixinWorldRenderer
 {
-	@Final @Shadow private static ResourceLocation CLOUDS_LOCATION;
-	@Shadow private final int ticks;
-	@Final @Shadow @NotNull private final Minecraft minecraft;
-	@Shadow private int prevCloudX;
-	@Shadow private int prevCloudY;
-	@Shadow private int prevCloudZ;
-	@Shadow @NotNull private Vec3 prevCloudColor;
-	@Shadow @NotNull private CloudStatus prevCloudsType;
-	@Shadow private boolean generateClouds;
-	@Shadow @NotNull private VertexBuffer cloudBuffer;
-	@Shadow @Final private VertexFormat format;
-	@Unique private boolean initializedClouds = false;
+//	@Final @Shadow private static ResourceLocation CLOUDS_LOCATION;
+//	@Shadow private final int ticks;
+//	@Final @Shadow @NotNull private final Minecraft minecraft;
+//	@Shadow private int prevCloudX;
+//	@Shadow private int prevCloudY;
+//	@Shadow private int prevCloudZ;
+//	@Shadow @NotNull private Vec3 prevCloudColor;
+//	@Shadow @NotNull private CloudStatus prevCloudsType;
+//	@Shadow private boolean generateClouds;
+//	@Shadow @NotNull private VertexBuffer cloudBuffer;
+//	@Shadow @Final private VertexFormat format;
+//	@Unique private boolean initializedClouds = false;
 
 	private static float previousPartialTicks = 0;
 
-	public MixinWorldRenderer() {
-		throw new NullPointerException("Null cannot be cast to non-null type.");
-	}
+//	public MixinWorldRenderer() {
+//		throw new NullPointerException("Null cannot be cast to non-null type.");
+//	}
 
-	@Inject(method = "renderClouds", at = @At("HEAD"), cancellable = true)
-	public void renderClouds(PoseStack poseStack, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
-		if (Config.Client.Graphics.CloudQuality.customClouds) {
-			TextureManager textureManager = Minecraft.getInstance().getTextureManager();
-			registerClouds(textureManager);
-			NoiseCloudHandler.update();
-
-			if (minecraft.level.dimension() == ClientLevel.OVERWORLD) {
-				CloudTexture cloudTexture = NoiseCloudHandler.cloudTextures.get(NoiseCloudHandler.cloudTextures.size() - 1);
-				renderCloudLayer(poseStack, tickDelta, cameraX, cameraY, cameraZ, (float) (Config.Client.Graphics.CloudQuality.cloudHeight + 0.01 /* Make clouds a bit higher so it dosnt do janky stuff */), 0, 1, 1, cloudTexture.resourceLocation);
-			}
-
-			ci.cancel();
-		}
-	}
+//	@Inject(method = "renderClouds", at = @At("HEAD"), cancellable = true)
+//	public void renderClouds(PoseStack poseStack, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
+//		if (Config.Client.Graphics.CloudQuality.customClouds) {
+//			TextureManager textureManager = Minecraft.getInstance().getTextureManager();
+//			registerClouds(textureManager);
+//			NoiseCloudHandler.update();
+//
+//			if (minecraft.level.dimension() == ClientLevel.OVERWORLD) {
+//				CloudTexture cloudTexture = NoiseCloudHandler.cloudTextures.get(NoiseCloudHandler.cloudTextures.size() - 1);
+//				renderCloudLayer(poseStack, tickDelta, cameraX, cameraY, cameraZ, (float) (Config.Client.Graphics.CloudQuality.cloudHeight + 0.01 /* Make clouds a bit higher so it dosnt do janky stuff */), 0, 1, 1, cloudTexture.resourceLocation);
+//			}
+//
+//			ci.cancel();
+//		}
+//	}
 
 	@Inject(at = @At("RETURN"), method = "renderSky(Lcom/mojang/blaze3d/vertex/PoseStack;F)V")
 	private void renderSky(PoseStack matrixStackIn, float partialTicks, CallbackInfo callback)
@@ -142,6 +142,7 @@ public class MixinWorldRenderer
 
 
 
+	/*
 	// TODO: Move these outside of the mixin
 	// When moved out then put credit to https://github.com/misterslime/fabulousclouds-fabric
 
@@ -323,4 +324,5 @@ public class MixinWorldRenderer
 			}
 		}
 	}
+	 */
 }

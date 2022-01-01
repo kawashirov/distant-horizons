@@ -35,34 +35,34 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 /**
  * This handles all events sent to the client,
  * and is the starting point for most of the mod.
- * 
+ *
  * @author James_Seibel
  * @version 11-12-2021
  */
 public class ForgeClientProxy
 {
 	private final EventApi eventApi = EventApi.INSTANCE;
-	
-	
-	
+
+
+
 	@SubscribeEvent
 	public void serverTickEvent(TickEvent.ServerTickEvent event)
 	{
 		eventApi.serverTickEvent();
 	}
-	
+
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
 		eventApi.chunkLoadEvent(new ChunkWrapper(event.getChunk()), DimensionTypeWrapper.getDimensionTypeWrapper(event.getWorld().dimensionType()));
 	}
-	
+
 	@SubscribeEvent
 	public void worldSaveEvent(WorldEvent.Save event)
 	{
 		eventApi.worldSaveEvent();
 	}
-	
+
 	/** This is also called when a new dimension loads */
 	@SubscribeEvent
 	public void worldLoadEvent(WorldEvent.Load event)
@@ -71,13 +71,13 @@ public class ForgeClientProxy
 			eventApi.worldLoadEvent(WorldWrapper.getWorldWrapper(event.getWorld()));
 		}
 	}
-	
+
 	@SubscribeEvent
 	public void worldUnloadEvent(WorldEvent.Unload event)
 	{
 		eventApi.worldUnloadEvent();
 	}
-	
+
 	@SubscribeEvent
 	public void blockChangeEvent(BlockEvent event)
 	{
@@ -90,18 +90,18 @@ public class ForgeClientProxy
 		{
 			IChunkWrapper chunk = new ChunkWrapper(event.getWorld().getChunk(event.getPos()));
 			DimensionTypeWrapper dimType = DimensionTypeWrapper.getDimensionTypeWrapper(event.getWorld().dimensionType());
-			
+
 			// recreate the LOD where the blocks were changed
 			eventApi.blockChangeEvent(chunk, dimType);
 		}
 	}
-	
+
 	@SubscribeEvent
 	public void onKeyInput(InputEvent.KeyInputEvent event)
 	{
 		eventApi.onKeyInput(event.getKey(), event.getAction());
 	}
-	
-	
-	
+
+
+
 }
