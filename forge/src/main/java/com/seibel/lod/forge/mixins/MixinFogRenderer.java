@@ -1,4 +1,4 @@
-package com.seibel.lod.fabric.mixins;
+package com.seibel.lod.forge.mixins;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

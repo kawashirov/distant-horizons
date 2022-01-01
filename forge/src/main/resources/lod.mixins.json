@@ -4,8 +4,9 @@
 	"compatibilityLevel": "JAVA_8",
 	"refmap": "lod.refmap.json",
 	"client": [
-      "MixinWorldRenderer",
-      "MixinOptionsScreen"
+		"MixinWorldRenderer",
+		"MixinOptionsScreen",
+		"MixinFogRenderer"
 	],
 	"mixins": [],
 	"minVersion": "0.8"
