@@ -30,11 +30,13 @@ import com.seibel.lod.common.wrappers.chunk.ChunkPosWrapper;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
 
 
@@ -98,10 +100,12 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     }
 
     @Override
-    public Color getFogColor() {
+    public Color getFogColor(float partialTicks) {
+    	FogRenderer.setupColor(GAME_RENDERER.getMainCamera(), partialTicks, MC.level, 1, GAME_RENDERER.getDarkenWorldAmount(partialTicks));
         float[] colorValues = RenderSystem.getShaderFogColor();
         return new Color(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
     }
+    // getUnderWaterFogColor() is the same as getFogColor()
 
     @Override
     public Color getSkyColor() {
@@ -316,5 +320,10 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
         }
 
         return glFormat;
+    }
+    
+    @Override
+    public boolean isFogStateInUnderWater() {
+    	return GAME_RENDERER.getMainCamera().getFluidInCamera() == FogType.WATER;
     }
 }
