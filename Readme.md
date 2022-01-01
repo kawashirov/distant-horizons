@@ -15,7 +15,7 @@ Fabric API version: 0.34.2+1.16
 
 Notes:\
 This version has been confirmed to work in Eclipse and Retail Minecraft.\
-(Retail running forge version 1.17.1-36.1.0 and fabric version 1.17.1-0.11.3)
+(Retail running forge version 1.16.5-36.1.0 and fabric version 1.16.5-0.11.3)
 
 
 ## source code installation
