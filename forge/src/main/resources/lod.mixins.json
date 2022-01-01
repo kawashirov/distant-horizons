@@ -4,8 +4,9 @@
 	"compatibilityLevel": "JAVA_16",
 	"refmap": "DistantHorizons-forge-refmap.json",
 	"client": [
-      "MixinWorldRenderer",
-      "MixinOptionsScreen"
+		"MixinWorldRenderer",
+		"MixinOptionsScreen",
+		"MixinFogRenderer"
 	],
 	"mixins": [],
 	"minVersion": "0.8"

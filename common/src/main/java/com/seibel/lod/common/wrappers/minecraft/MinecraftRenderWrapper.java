@@ -10,7 +10,9 @@ import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
 import com.seibel.lod.core.handlers.IReflectionHandler;
 import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.util.LodUtil;
+import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.world.level.material.FogType;
 import org.lwjgl.opengl.GL20;
 
 import com.mojang.math.Vector3f;
@@ -95,7 +97,8 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     }
 
     @Override
-    public Color getFogColor() {
+    public Color getFogColor(float partialTicks) {
+        FogRenderer.setupColor(GAME_RENDERER.getMainCamera(), partialTicks, MC.level, 1, GAME_RENDERER.getDarkenWorldAmount(partialTicks));
         float[] colorValues = RenderSystem.getShaderFogColor();
         return new Color(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
     }
@@ -265,5 +268,10 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
         }
 
         return glFormat;
+    }
+
+    @Override
+    public boolean isFogStateInUnderWater() {
+        return GAME_RENDERER.getMainCamera().getFluidInCamera() == FogType.WATER;
     }
 }
