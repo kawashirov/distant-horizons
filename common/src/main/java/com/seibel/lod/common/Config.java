@@ -85,6 +85,10 @@ public class Config extends ConfigGui
 
 			@ConfigAnnotations.Category("client.graphics")
 			@ConfigAnnotations.ScreenEntry
+			public static CloudQuality cloudQuality;
+
+			@ConfigAnnotations.Category("client.graphics")
+			@ConfigAnnotations.ScreenEntry
 			public static AdvancedGraphics advancedGraphics;
 
 
@@ -132,6 +136,27 @@ public class Config extends ConfigGui
 			}
 
 
+			public static class CloudQuality
+			{
+				@ConfigAnnotations.Category("client.graphics.cloudQuality")
+				@ConfigAnnotations.Entry
+//				public static boolean customClouds = ICloudQuality.CUSTOM_CLOUDS_DEFAULT;
+				public static boolean customClouds = false;
+
+				@ConfigAnnotations.Category("client.graphics.cloudQuality")
+				@ConfigAnnotations.Entry
+				public static boolean fabulousClouds = ICloudQuality.FABULOUS_CLOUDS_DEFAULT;
+
+				@ConfigAnnotations.Category("client.graphics.cloudQuality")
+				@ConfigAnnotations.Entry
+				public static boolean extendClouds = ICloudQuality.EXTEND_CLOUDS_DEFAULT;
+
+				@ConfigAnnotations.Category("client.graphics.cloudQuality")
+				@ConfigAnnotations.Entry
+				public static double cloudHeight = 128;
+			}
+
+
 			public static class AdvancedGraphics
 			{
 
@@ -150,6 +175,10 @@ public class Config extends ConfigGui
 				@ConfigAnnotations.Category("client.graphics.advancedGraphics")
 				@ConfigAnnotations.Entry
 				public static boolean useExtendedNearClipPlane = IAdvancedGraphics.USE_EXTENDED_NEAR_CLIP_PLANE_DEFAULT;
+
+				@ConfigAnnotations.Category("client.graphics.advancedGraphics")
+				@ConfigAnnotations.Entry(minValue = 0, maxValue = 512)
+				public static int backsideCullingRange = IAdvancedGraphics.VANILLA_CULLING_RANGE_MIN_DEFAULT_MAX.defaultValue;
 			}
 		}
 
@@ -162,12 +191,11 @@ public class Config extends ConfigGui
 
 			@ConfigAnnotations.Category("client.worldGenerator")
 			@ConfigAnnotations.Entry
-			public static DistanceGenerationMode distanceGenerationMode = DistanceGenerationMode.FEATURES; //IWorldGenerator.DISTANCE_GENERATION_MODE_DEFAULT;
+			public static DistanceGenerationMode distanceGenerationMode = IWorldGenerator.DISTANCE_GENERATION_MODE_DEFAULT;
 
-			// FIXME: Temperary override. In 1.18, the newer Unstable gnerator is more usable
 			@ConfigAnnotations.Category("client.worldGenerator")
 			@ConfigAnnotations.Entry
-			public static boolean allowUnstableFeatureGeneration = true;//IWorldGenerator.ALLOW_UNSTABLE_FEATURE_GENERATION_DEFAULT;
+			public static boolean allowUnstableFeatureGeneration = IWorldGenerator.ALLOW_UNSTABLE_FEATURE_GENERATION_DEFAULT;
 
 			@ConfigAnnotations.Category("client.worldGenerator")
 			@ConfigAnnotations.Entry
