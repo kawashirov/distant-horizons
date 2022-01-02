@@ -101,7 +101,7 @@ public class Config extends ConfigGui
 				@ConfigAnnotations.Entry(minValue = 2, maxValue = 32)
 				public static int horizontalScale = IQuality.HORIZONTAL_SCALE_MIN_DEFAULT_MAX.defaultValue;
 
-				@ConfigAnnotations.Category("client.graphics.quality")
+				//@ConfigAnnotations.Category("client.graphics.quality")
 				@ConfigAnnotations.Entry
 				public static HorizontalQuality horizontalQuality = IQuality.HORIZONTAL_QUALITY_DEFAULT;
 			}
