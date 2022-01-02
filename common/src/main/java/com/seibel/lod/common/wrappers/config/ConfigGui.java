@@ -413,6 +413,8 @@ public abstract class ConfigGui
 			if (!reload)
 				loadFromFile();
 
+			// addRenderableWidget in 1.17 and over
+			// addButton in 1.16 and below
 			this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
 				loadFromFile();
 				Objects.requireNonNull(minecraft).setScreen(parent);
@@ -513,7 +515,7 @@ public abstract class ConfigGui
 						String key = translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName() + ".@tooltip";
 
 						if (info.error != null && text.equals(name)) renderTooltip(matrices, (Component) info.error.getValue(), mouseX, mouseY);
-						else if (I18n.exists(key) && text.equals(name)) {
+						else if (I18n.exists(key) && (text == null ? false : text.equals(name))) {
 							List<Component> list = new ArrayList<>();
 							for (String str : I18n.get(key).split("\n"))
 								list.add(new TextComponent(str));
