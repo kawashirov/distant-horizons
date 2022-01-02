@@ -139,7 +139,7 @@ public abstract class ConfigGui
 		Minecraft mc =  Minecraft.getInstance();
 		configFilePath = mc.gameDirectory.toPath().resolve("config").resolve(MOD_NAME + ".toml");
 
-		initNestedClass(config);
+		initNestedClass(config, "");
 
 		for (EntryInfo info : entries) {
 			if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
@@ -154,7 +154,7 @@ public abstract class ConfigGui
 		loadFromFile();
 	}
 
-	private static void initNestedClass(Class<?> config)
+	private static void initNestedClass(Class<?> config, String category)
 	{
 		for (Field field : config.getFields())
 		{
@@ -162,8 +162,9 @@ public abstract class ConfigGui
 			if (field.isAnnotationPresent(ConfigAnnotations.Entry.class) || field.isAnnotationPresent(ConfigAnnotations.Comment.class) || field.isAnnotationPresent(ConfigAnnotations.ScreenEntry.class))
 			{
 				// If putting in your own mod then put your own check for server sided
+				info.category = category;
 				if (!LodCommonMain.serverSided)
-					initClient(field, info);
+					initClient(field, info, category);
 			}
 
 			if (field.isAnnotationPresent(ConfigAnnotations.Entry.class))
@@ -177,7 +178,7 @@ public abstract class ConfigGui
 			}
 
 			if (field.isAnnotationPresent(ConfigAnnotations.ScreenEntry.class))
-				initNestedClass(field.getType());
+				initNestedClass(field.getType(), (!category.isEmpty() ? category + "." : "") + field.getName());
 
 
 			info.field = field;
@@ -185,10 +186,9 @@ public abstract class ConfigGui
 	}
 
 	/** This adds the buttons to the queue to be rendered */
-	private static void initClient(Field field, EntryInfo info)
+	private static void initClient(Field field, EntryInfo info, String category)
 	{
 		Class<?> fieldClass = field.getType();
-		ConfigAnnotations.Category category = field.getAnnotation(ConfigAnnotations.Category.class);
 		ConfigAnnotations.Entry entry = field.getAnnotation(ConfigAnnotations.Entry.class);
 		ConfigAnnotations.ScreenEntry screenEntry = field.getAnnotation(ConfigAnnotations.ScreenEntry.class);
 
@@ -196,9 +196,6 @@ public abstract class ConfigGui
 			info.width = entry.width();
 		else if (screenEntry != null)
 			info.width = screenEntry.width();
-
-		info.category = category != null ? category.value() : "";
-
 
 		if (entry != null)
 		{
