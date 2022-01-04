@@ -27,7 +27,7 @@ public final class NoiseCloudHandler {
                 timeIdx = update;
                 for (CloudTexture cloudTexture : cloudTextures) {
                     if (cloudTexture.cloudsTexture.getPixels() != null) {
-                        cloudTexture.updateImage(time);
+                        cloudTexture.updateImage();
                     }
                 }
             }
