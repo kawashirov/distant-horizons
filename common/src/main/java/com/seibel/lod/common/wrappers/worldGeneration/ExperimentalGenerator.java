@@ -131,7 +131,8 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 				byte detailLevel = (byte) (posToGenerate.getNthDetail(i, true) - 1);
 				int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, true));
 				int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, true));
-				if (generationGroup.tryAddPoint(chunkX, chunkZ, generationGroupSize, targetStep)) {
+				int genSize = detailLevel > LodUtil.CHUNK_DETAIL_LEVEL ? 0 : generationGroupSize;
+				if (generationGroup.tryAddPoint(chunkX, chunkZ, genSize, targetStep)) {
 					toGenerate--;
 				}
 			}
@@ -157,11 +158,11 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		  //Enable this for logging
 		if (targetToGenerate != toGenerate) {
 			if (toGenerate <= 0) {
-				ClientApi.LOGGER.debug(
+				ClientApi.LOGGER.info(
 						"WorldGenerator: Sampled " + posToGenerate.getNumberOfPos() + " out of " + estimatedSampleNeeded
 								+ " points, started all targeted " + targetToGenerate + " generations.");
 			} else {
-				ClientApi.LOGGER.debug("WorldGenerator: Sampled " + posToGenerate.getNumberOfPos() + " out of "
+				ClientApi.LOGGER.info("WorldGenerator: Sampled " + posToGenerate.getNumberOfPos() + " out of "
 						+ estimatedSampleNeeded + " points, started " + (targetToGenerate - toGenerate)
 						+ " out of targeted " + targetToGenerate + " generations.");
 			}
