@@ -355,8 +355,11 @@ public final class WorldGenerationStep {
 		}
 
 		public final boolean tooClose(int cx, int cz, int cr) {
-			int dist = Math.min(Math.abs(cx - pos.x), Math.abs(cz - pos.z));
-			return dist < range + cr;
+			int distX = Math.abs(cx - pos.x);
+			int distZ = Math.abs(cz - pos.z);
+			int minRange = cr+range+1; //Need one to account for the center
+			minRange += 3 + 3; // Account for required empty chunks
+			return distX < minRange && distZ < minRange;
 		}
 
 		public final void refreshTimeout() {
@@ -434,7 +437,7 @@ public final class WorldGenerationStep {
 	}
 
 	public final void generateLodFromList(GenerationEvent event) {
-			// System.out.println("Started event: "+event);
+			if (event.range!=0) System.out.println("Started event: "+event);
 			event.pEvent.beginNano = System.nanoTime();
 			GridList<ChunkAccess> referencedChunks;
 			DistanceGenerationMode generationMode;

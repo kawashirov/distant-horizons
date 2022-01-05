@@ -26,6 +26,7 @@ import com.seibel.lod.common.wrappers.worldGeneration.WorldGenerationStep.Steps;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
+import com.seibel.lod.core.enums.config.GenerationPriority;
 import com.seibel.lod.core.objects.PosToGenerateContainer;
 import com.seibel.lod.core.objects.lod.LodDimension;
 import com.seibel.lod.core.util.LevelPosUtil;
@@ -70,7 +71,10 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		
 		DistanceGenerationMode mode = CONFIG.client().worldGenerator().getDistanceGenerationMode();
 		numberOfGenerationPoints = CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads();
-
+		GenerationPriority priority = CONFIG.client().worldGenerator().getGenerationPriority();
+		if (priority == GenerationPriority.AUTO)
+			priority = MC.hasSinglePlayerServer() ? GenerationPriority.FAR_FIRST : GenerationPriority.NEAR_FIRST;
+		
 		generationGroup.updateAllFutures();
 		if (mode == DistanceGenerationMode.NONE || !MC.hasSinglePlayerServer())
 			return;
@@ -95,9 +99,6 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		// We are checking one FarPos, and one NearPos per iterations. This ensure we
 		// aren't just
 		// always picking one or the other.
-		int nearCount = posToGenerate.getNumberOfNearPos();
-		int farCount = posToGenerate.getNumberOfFarPos();
-		int maxIteration = Math.max(nearCount, farCount);
 		Steps targetStep;
 		switch (mode) {
 		case NONE:
@@ -121,41 +122,87 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 			assert false;
 			return;
 		}
-		for (int i = 0; i < maxIteration; i++) {
-			
-			// We have nearPos to go though
-			if (i < nearCount && posToGenerate.getNthDetail(i, true) != 0) {
-				positionGoneThough++;
-				// TODO: Add comment here on why theres a '-1'.
-				// Not sure what's happening here. This is copied from previous codes.
-				byte detailLevel = (byte) (posToGenerate.getNthDetail(i, true) - 1);
-				int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, true));
-				int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, true));
-				int genSize = detailLevel > LodUtil.CHUNK_DETAIL_LEVEL ? 0 : generationGroupSize;
-				if (generationGroup.tryAddPoint(chunkX, chunkZ, genSize, targetStep)) {
-					toGenerate--;
+		
+		if (priority == GenerationPriority.FAR_FIRST) {
+			int nearCount = posToGenerate.getNumberOfNearPos();
+			int farCount = posToGenerate.getNumberOfFarPos();
+			int maxIteration = Math.max(nearCount, farCount);
+			for (int i = 0; i < maxIteration; i++) {
+				
+				// We have nearPos to go though
+				if (i < nearCount && posToGenerate.getNthDetail(i, true) != 0) {
+					positionGoneThough++;
+					// TODO: Add comment here on why theres a '-1'.
+					// Not sure what's happening here. This is copied from previous codes.
+					byte detailLevel = (byte) (posToGenerate.getNthDetail(i, true) - 1);
+					int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, true));
+					int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, true));
+					int genSize = detailLevel > LodUtil.CHUNK_DETAIL_LEVEL ? 0 : generationGroupSize;
+					if (generationGroup.tryAddPoint(chunkX, chunkZ, genSize, targetStep)) {
+						toGenerate--;
+					}
+				}
+	
+				// We have farPos to go though
+				if (i < farCount && posToGenerate.getNthDetail(i, false) != 0) {
+					positionGoneThough++;
+					// TODO: Add comment here on why theres a '-1'.
+					// Not sure what's happening here. This is copied from previous codes.
+					byte detailLevel = (byte) (posToGenerate.getNthDetail(i, false) - 1);
+					int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, false));
+					int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, false));
+					if (generationGroup.tryAddPoint(chunkX, chunkZ, generationGroupSizeFar, targetStep)) {
+						toGenerate--;
+					}
+				}
+				if (toGenerate <= 0)
+					break;
+			}
+		} else {
+			int nearCount = posToGenerate.getNumberOfNearPos();
+			for (int i = 0; i < nearCount; i++) {
+				
+				// We have nearPos to go though
+				if (posToGenerate.getNthDetail(i, true) != 0) {
+					positionGoneThough++;
+					// TODO: Add comment here on why theres a '-1'.
+					// Not sure what's happening here. This is copied from previous codes.
+					byte detailLevel = (byte) (posToGenerate.getNthDetail(i, true) - 1);
+					int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, true));
+					int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, true));
+					int genSize = detailLevel > LodUtil.CHUNK_DETAIL_LEVEL ? 0 : generationGroupSize;
+					if (generationGroup.tryAddPoint(chunkX, chunkZ, genSize, targetStep)) {
+						ClientApi.LOGGER.info("Added one NEAR event: "+genSize+"("+detailLevel+")");
+						toGenerate--;
+					}
+					if (toGenerate <= 0)
+						break;
 				}
 			}
-			//if (toGenerate <= 0)
-			//	break;
-
-			// We have farPos to go though
-			if (i < farCount && posToGenerate.getNthDetail(i, false) != 0) {
-				positionGoneThough++;
-				// TODO: Add comment here on why theres a '-1'.
-				// Not sure what's happening here. This is copied from previous codes.
-				byte detailLevel = (byte) (posToGenerate.getNthDetail(i, false) - 1);
-				int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, false));
-				int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, false));
-				if (generationGroup.tryAddPoint(chunkX, chunkZ, generationGroupSizeFar, targetStep)) {
-					toGenerate--;
+			// Only do far gen if toGenerate is non 0 and that we have requested all samples we can get.
+			if (toGenerate > 0 && estimatedSampleNeeded > posToGenerate.getNumberOfPos()) {
+				int farCount = posToGenerate.getNumberOfFarPos();
+				for (int i = 0; i < farCount; i++) {
+					// We have farPos to go though
+					if (posToGenerate.getNthDetail(i, false) != 0) {
+						positionGoneThough++;
+						// TODO: Add comment here on why theres a '-1'.
+						// Not sure what's happening here. This is copied from previous codes.
+						byte detailLevel = (byte) (posToGenerate.getNthDetail(i, false) - 1);
+						int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, false));
+						int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, false));
+						if (generationGroup.tryAddPoint(chunkX, chunkZ, generationGroupSizeFar, targetStep)) {
+							ClientApi.LOGGER.info("Added one FAR event: 0");
+							toGenerate--;
+						}
+					}
+					if (toGenerate <= 0)
+						break;
 				}
 			}
-			if (toGenerate <= 0)
-				break;
-			
 		}
-		  //Enable this for logging
+		
+		//Enable this for logging
 		if (targetToGenerate != toGenerate) {
 			if (toGenerate <= 0) {
 				ClientApi.LOGGER.info(
@@ -175,7 +222,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 			// Ensure wee don't go to basically infinity
 			if (estimatedSampleNeeded > 32768)
 				estimatedSampleNeeded = 32768;
-			//System.out.println("WorldGenerator: Increasing estimatedSampleNeeeded to " + estimatedSampleNeeded);
+			System.out.println("WorldGenerator: Increasing estimatedSampleNeeeded to " + estimatedSampleNeeded);
 
 		} else if (toGenerate <= 0 && positionGoneThough * 1.5 < posToGenerate.getNumberOfPos()) {
 			// We haven't gone though half of them and it's already enough.
@@ -184,7 +231,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 			// Ensure we don't go to near zero.
 			if (estimatedSampleNeeded < 4)
 				estimatedSampleNeeded = 4;
-			//System.out.println("WorldGenerator: Decreasing estimatedSampleNeeeded to " + estimatedSampleNeeded);
+			System.out.println("WorldGenerator: Decreasing estimatedSampleNeeeded to " + estimatedSampleNeeded);
 		}
 
 	}
