@@ -17,8 +17,8 @@ public class SkyCoverGenerators {
 
     /** Generates clear sky */
     public static void clearSkyGenerator(NativeImage image) {
-        for (int x = 0; x < CLOUD_TEXTURE.getWidth(); x++) {
-            for (int z = 0; z < CLOUD_TEXTURE.getHeight(); z++) {
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int z = 0; z < image.getHeight(); z++) {
                 image.setPixelRGBA(x, z, 0);
             }
         }
@@ -28,7 +28,7 @@ public class SkyCoverGenerators {
     public static void normalSkyGenerator(NativeImage image) {
         for (int x = 0; x < CLOUD_TEXTURE.getWidth(); x++) {
             for (int z = 0; z < CLOUD_TEXTURE.getHeight(); z++) {
-                image.setPixelRGBA(x, z, ((CLOUD_TEXTURE.getRGB(x, z) & 0x000000ff) > 130 ? COLOR : 0));
+                image.setPixelRGBA(x, z, ((CLOUD_TEXTURE.getRGB(x, z) & 0x0000ff) > 130 ? COLOR : 0));
             }
         }
     }

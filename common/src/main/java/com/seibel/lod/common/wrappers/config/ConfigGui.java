@@ -68,6 +68,7 @@ public abstract class ConfigGui
 	/*
 	        TODO list
 
+		Fix floats not working
         Make a wiki
         Make it so you can enable and disable buttons from showing
         Make min and max not final

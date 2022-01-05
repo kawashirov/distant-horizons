@@ -119,6 +119,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setDrawResolution(HorizontalResolution newHorizontalResolution)
 				{
 					Config.Client.Graphics.Quality.drawResolution = newHorizontalResolution;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -131,6 +132,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setLodChunkRenderDistance(int newLodChunkRenderDistance)
 				{
 					Config.Client.Graphics.Quality.lodChunkRenderDistance = newLodChunkRenderDistance;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -143,6 +145,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setVerticalQuality(VerticalQuality newVerticalQuality)
 				{
 					Config.Client.Graphics.Quality.verticalQuality = newVerticalQuality;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -155,6 +158,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setHorizontalScale(int newHorizontalScale)
 				{
 					Config.Client.Graphics.Quality.horizontalScale = newHorizontalScale;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -167,6 +171,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setHorizontalQuality(HorizontalQuality newHorizontalQuality)
 				{
 					Config.Client.Graphics.Quality.horizontalQuality = newHorizontalQuality;
+					ConfigGui.saveToFile();
 				}
 			}
 
@@ -182,6 +187,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setFogDistance(FogDistance newFogDistance)
 				{
 					Config.Client.Graphics.FogQuality.fogDistance = newFogDistance;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -195,6 +201,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setFogDrawMode(FogDrawMode setFogDrawMode)
 				{
 					Config.Client.Graphics.FogQuality.fogDrawMode = setFogDrawMode;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -208,6 +215,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setFogColorMode(FogColorMode newFogColorMode)
 				{
 					Config.Client.Graphics.FogQuality.fogColorMode = newFogColorMode;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -220,6 +228,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setDisableVanillaFog(boolean newDisableVanillaFog)
 				{
 					Config.Client.Graphics.FogQuality.disableVanillaFog = newDisableVanillaFog;
+					ConfigGui.saveToFile();
 				}
 			}
 
@@ -235,6 +244,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setCustomClouds(boolean newCustomClouds)
 				{
 					Config.Client.Graphics.CloudQuality.customClouds = newCustomClouds;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -247,6 +257,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setFabulousClouds(boolean newFabulousClouds)
 				{
 					Config.Client.Graphics.CloudQuality.fabulousClouds = newFabulousClouds;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -259,6 +270,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setExtendClouds(boolean newExtendClouds)
 				{
 					Config.Client.Graphics.CloudQuality.extendClouds = newExtendClouds;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -271,6 +283,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setCloudHeight(double newCloudHeight)
 				{
 					Config.Client.Graphics.CloudQuality.cloudHeight = newCloudHeight;
+					ConfigGui.saveToFile();
 				}
 			}
 
@@ -286,6 +299,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setDisableDirectionalCulling(boolean newDisableDirectionalCulling)
 				{
 					Config.Client.Graphics.AdvancedGraphics.disableDirectionalCulling = newDisableDirectionalCulling;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -298,6 +312,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setAlwaysDrawAtMaxQuality(boolean newAlwaysDrawAtMaxQuality)
 				{
 					Config.Client.Graphics.AdvancedGraphics.alwaysDrawAtMaxQuality = newAlwaysDrawAtMaxQuality;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -310,6 +325,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setVanillaOverdraw(VanillaOverdraw newVanillaOverdraw)
 				{
 					Config.Client.Graphics.AdvancedGraphics.vanillaOverdraw = newVanillaOverdraw;
+					ConfigGui.saveToFile();
 				}
 				
 				@Override
@@ -321,6 +337,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setBacksideCullingRange(int backsideCullingRange)
 				{
 					Config.Client.Graphics.AdvancedGraphics.backsideCullingRange = backsideCullingRange;
+					ConfigGui.saveToFile();
 				}
 				
 				@Override
@@ -332,6 +349,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setUseExtendedNearClipPlane(boolean newUseExtendedNearClipPlane)
 				{
 					Config.Client.Graphics.AdvancedGraphics.useExtendedNearClipPlane = newUseExtendedNearClipPlane;
+					ConfigGui.saveToFile();
 				}
 			}
 		}
@@ -353,6 +371,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			public void setGenerationPriority(GenerationPriority newGenerationPriority)
 			{
 				Config.Client.WorldGenerator.generationPriority = newGenerationPriority;
+				ConfigGui.saveToFile();
 			}
 
 
@@ -365,6 +384,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			public void setDistanceGenerationMode(DistanceGenerationMode newDistanceGenerationMode)
 			{
 				Config.Client.WorldGenerator.distanceGenerationMode = newDistanceGenerationMode;
+				ConfigGui.saveToFile();
 			}
 
 
@@ -377,6 +397,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			public void setAllowUnstableFeatureGeneration(boolean newAllowUnstableFeatureGeneration)
 			{
 				Config.Client.WorldGenerator.allowUnstableFeatureGeneration = newAllowUnstableFeatureGeneration;
+				ConfigGui.saveToFile();
 			}
 
 
@@ -389,6 +410,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			public void setBlockToAvoid(BlocksToAvoid newBlockToAvoid)
 			{
 				Config.Client.WorldGenerator.blocksToAvoid = newBlockToAvoid;
+				ConfigGui.saveToFile();
 			}
 		}
 
@@ -444,6 +466,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setNumberOfWorldGenerationThreads(int newNumberOfWorldGenerationThreads)
 				{
 					Config.Client.Advanced.Threading.numberOfWorldGenerationThreads = newNumberOfWorldGenerationThreads;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -456,6 +479,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setNumberOfBufferBuilderThreads(int newNumberOfWorldBuilderThreads)
 				{
 					Config.Client.Advanced.Threading.numberOfBufferBuilderThreads = newNumberOfWorldBuilderThreads;
+					ConfigGui.saveToFile();
 				}
 			}
 
@@ -476,6 +500,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setDrawLods(boolean newDrawLods)
 				{
 					Config.Client.Advanced.Debugging.drawLods = newDrawLods;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -488,6 +513,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setDebugMode(DebugMode newDebugMode)
 				{
 					Config.Client.Advanced.Debugging.debugMode = newDebugMode;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -500,6 +526,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setDebugKeybindingsEnabled(boolean newEnableDebugKeybindings)
 				{
 					Config.Client.Advanced.Debugging.enableDebugKeybindings = newEnableDebugKeybindings;
+					ConfigGui.saveToFile();
 				}
 			}
 
@@ -516,6 +543,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setGpuUploadMethod(GpuUploadMethod newDisableVanillaFog)
 				{
 					Config.Client.Advanced.Buffers.gpuUploadMethod = newDisableVanillaFog;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -527,6 +555,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setGpuUploadPerMegabyteInMilliseconds(int newMilliseconds) {
 					Config.Client.Advanced.Buffers.gpuUploadPerMegabyteInMilliseconds = newMilliseconds;
+					ConfigGui.saveToFile();
 				}
 
 
@@ -539,6 +568,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				public void setRebuildTimes(BufferRebuildTimes newBufferRebuildTimes)
 				{
 					Config.Client.Advanced.Buffers.rebuildTimes = newBufferRebuildTimes;
+					ConfigGui.saveToFile();
 				}
 			}
 		}
