@@ -93,7 +93,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 
 		// TODO: Make it so that lodDim allows feeding in a function to fast halt if
 		// position generation is completed.
-		PosToGenerateContainer posToGenerate = lodDim.getPosToGenerate(estimatedSampleNeeded, playerPosX, playerPosZ);
+		PosToGenerateContainer posToGenerate = lodDim.getPosToGenerate(estimatedSampleNeeded, playerPosX, playerPosZ, priority);
 
 		// Find the max number of iterations we need to go though.
 		// We are checking one FarPos, and one NearPos per iterations. This ensure we
@@ -172,7 +172,6 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 					int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, true));
 					int genSize = detailLevel > LodUtil.CHUNK_DETAIL_LEVEL ? 0 : generationGroupSize;
 					if (generationGroup.tryAddPoint(chunkX, chunkZ, genSize, targetStep)) {
-						ClientApi.LOGGER.info("Added one NEAR event: "+genSize+"("+detailLevel+")");
 						toGenerate--;
 					}
 					if (toGenerate <= 0)
@@ -192,7 +191,6 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 						int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, false));
 						int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, false));
 						if (generationGroup.tryAddPoint(chunkX, chunkZ, generationGroupSizeFar, targetStep)) {
-							ClientApi.LOGGER.info("Added one FAR event: 0");
 							toGenerate--;
 						}
 					}
@@ -205,11 +203,11 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		//Enable this for logging
 		if (targetToGenerate != toGenerate) {
 			if (toGenerate <= 0) {
-				ClientApi.LOGGER.info(
+				ClientApi.LOGGER.debug(
 						"WorldGenerator: Sampled " + posToGenerate.getNumberOfPos() + " out of " + estimatedSampleNeeded
 								+ " points, started all targeted " + targetToGenerate + " generations.");
 			} else {
-				ClientApi.LOGGER.info("WorldGenerator: Sampled " + posToGenerate.getNumberOfPos() + " out of "
+				ClientApi.LOGGER.debug("WorldGenerator: Sampled " + posToGenerate.getNumberOfPos() + " out of "
 						+ estimatedSampleNeeded + " points, started " + (targetToGenerate - toGenerate)
 						+ " out of targeted " + targetToGenerate + " generations.");
 			}
@@ -222,7 +220,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 			// Ensure wee don't go to basically infinity
 			if (estimatedSampleNeeded > 32768)
 				estimatedSampleNeeded = 32768;
-			System.out.println("WorldGenerator: Increasing estimatedSampleNeeeded to " + estimatedSampleNeeded);
+			ClientApi.LOGGER.debug("WorldGenerator: Increasing estimatedSampleNeeeded to " + estimatedSampleNeeded);
 
 		} else if (toGenerate <= 0 && positionGoneThough * 1.5 < posToGenerate.getNumberOfPos()) {
 			// We haven't gone though half of them and it's already enough.
@@ -231,7 +229,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 			// Ensure we don't go to near zero.
 			if (estimatedSampleNeeded < 4)
 				estimatedSampleNeeded = 4;
-			System.out.println("WorldGenerator: Decreasing estimatedSampleNeeeded to " + estimatedSampleNeeded);
+			ClientApi.LOGGER.debug("WorldGenerator: Decreasing estimatedSampleNeeeded to " + estimatedSampleNeeded);
 		}
 
 	}

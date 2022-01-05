@@ -432,12 +432,11 @@ public final class WorldGenerationStep {
 	}
 
 	public WorldGenerationStep(ServerLevel level, LodBuilder lodBuilder, LodDimension lodDim) {
-		System.out.println("================WORLD_GEN_STEP_INITING=============");
+		ClientApi.LOGGER.info("================WORLD_GEN_STEP_INITING=============");
 		params = new GlobalParameters(level, lodBuilder, lodDim);
 	}
 
 	public final void generateLodFromList(GenerationEvent event) {
-			if (event.range!=0) System.out.println("Started event: "+event);
 			event.pEvent.beginNano = System.nanoTime();
 			GridList<ChunkAccess> referencedChunks;
 			DistanceGenerationMode generationMode;
