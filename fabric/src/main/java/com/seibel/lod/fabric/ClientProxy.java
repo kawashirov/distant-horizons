@@ -20,19 +20,26 @@
 package com.seibel.lod.fabric;
 
 import com.seibel.lod.common.Config;
+import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.api.EventApi;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
 
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
+import com.seibel.lod.fabric.mixins.events.MixinClientLevel;
+
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.mixin.event.lifecycle.client.ClientChunkManagerMixin;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
@@ -61,16 +68,19 @@ public class ClientProxy
 		// TODO: Fix this if it's wrong
 
 		/* World Events */
-		ServerTickEvents.START_SERVER_TICK.register(this::serverTickEvent);
+		//ServerTickEvents.START_SERVER_TICK.register(this::serverTickEvent);
 		ServerTickEvents.END_SERVER_TICK.register(this::serverTickEvent);
 
 		/* World Events */
-		ServerChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
+		//ServerChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
 		ClientChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
+		
+		
 
 		/* World Events */
 		ServerWorldEvents.LOAD.register((server, level) -> this.worldLoadEvent(level));
-		ServerWorldEvents.UNLOAD.register((server, level) -> this.worldUnloadEvent());
+		ServerWorldEvents.UNLOAD.register((server, level) -> this.worldUnloadEvent(level));
+		
 		/* The Client World Events are in the mixins
 		Client world load event is in MixinClientLevel
 		Client world unload event is in MixinMinecraft */
@@ -106,9 +116,11 @@ public class ClientProxy
 		}
 	}
 
-	public void worldUnloadEvent()
+	public void worldUnloadEvent(Level level)
 	{
-		eventApi.worldUnloadEvent();
+		if (level != null) {
+			eventApi.worldUnloadEvent(WorldWrapper.getWorldWrapper(level));
+		}
 	}
 
 	/**

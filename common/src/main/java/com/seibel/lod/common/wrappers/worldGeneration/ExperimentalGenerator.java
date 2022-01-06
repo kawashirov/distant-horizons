@@ -126,8 +126,23 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		if (priority == GenerationPriority.FAR_FIRST) {
 			int nearCount = posToGenerate.getNumberOfNearPos();
 			int farCount = posToGenerate.getNumberOfFarPos();
+			//ClientApi.LOGGER.info("WorldGen. Near:"+nearCount+" Far:"+farCount);
 			int maxIteration = Math.max(nearCount, farCount);
 			for (int i = 0; i < maxIteration; i++) {
+
+				// We have farPos to go though
+				if (i < farCount && posToGenerate.getNthDetail(i, false) != 0) {
+					positionGoneThough++;
+					// TODO: Add comment here on why theres a '-1'.
+					// Not sure what's happening here. This is copied from previous codes.
+					byte detailLevel = (byte) (posToGenerate.getNthDetail(i, false) - 1);
+					int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, false));
+					int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, false));
+					if (generationGroup.tryAddPoint(chunkX, chunkZ, generationGroupSizeFar, targetStep)) {
+						//ClientApi.LOGGER.info("WorldGen added 1 far point");
+						toGenerate--;
+					}
+				}
 				
 				// We have nearPos to go though
 				if (i < nearCount && posToGenerate.getNthDetail(i, true) != 0) {
@@ -139,22 +154,11 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 					int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, true));
 					int genSize = detailLevel > LodUtil.CHUNK_DETAIL_LEVEL ? 0 : generationGroupSize;
 					if (generationGroup.tryAddPoint(chunkX, chunkZ, genSize, targetStep)) {
+						//ClientApi.LOGGER.info("WorldGen added 1 near point");
 						toGenerate--;
 					}
 				}
 	
-				// We have farPos to go though
-				if (i < farCount && posToGenerate.getNthDetail(i, false) != 0) {
-					positionGoneThough++;
-					// TODO: Add comment here on why theres a '-1'.
-					// Not sure what's happening here. This is copied from previous codes.
-					byte detailLevel = (byte) (posToGenerate.getNthDetail(i, false) - 1);
-					int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, false));
-					int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, false));
-					if (generationGroup.tryAddPoint(chunkX, chunkZ, generationGroupSizeFar, targetStep)) {
-						toGenerate--;
-					}
-				}
 				if (toGenerate <= 0)
 					break;
 			}
@@ -239,7 +243,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		ClientApi.LOGGER.info("1.18 Experimental Chunk Generator shutting down...");
 		generationGroup.executors.shutdownNow();
 		try {
-			if (!generationGroup.executors.awaitTermination(3, TimeUnit.SECONDS)) {
+			if (!generationGroup.executors.awaitTermination(30, TimeUnit.SECONDS)) {
 				ClientApi.LOGGER.warn("1.18 Experimental Chunk Generator shutdown failed! Ignoring child threads...");
 			}
 		} catch (InterruptedException e) {}
