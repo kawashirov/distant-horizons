@@ -19,9 +19,9 @@
 
 package com.seibel.lod.forge;
 
-import com.seibel.lod.common.Config;
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
+import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
@@ -78,7 +78,7 @@ public class ForgeMain implements LodForgeMethodCaller
 	private void onClientStart(final FMLClientSetupEvent event)
 	{
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
-				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> Config.getScreen(parent, "")));
+				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> ConfigGui.getScreen(parent, "")));
 		forgeClientProxy = new ForgeClientProxy();
 		MinecraftForge.EVENT_BUS.register(forgeClientProxy);
 	}

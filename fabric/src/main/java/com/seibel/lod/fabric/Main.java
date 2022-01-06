@@ -19,9 +19,7 @@
 
 package com.seibel.lod.fabric;
 
-import com.seibel.lod.common.Config;
 import com.seibel.lod.common.LodCommonMain;
-import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.fabric.wrappers.DependencySetup;

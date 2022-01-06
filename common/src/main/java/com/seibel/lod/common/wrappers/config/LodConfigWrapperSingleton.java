@@ -50,6 +50,18 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 		}
 
 
+		@Override
+		public boolean getOptionsButton()
+		{
+			return Config.optionsButton;
+		}
+		@Override
+		public void setOptionsButton(boolean newOptionsButton)
+		{
+			ConfigGui.editSingleOption.getEntry("optionsButton").value = newOptionsButton;
+			ConfigGui.editSingleOption.saveOption("optionsButton");
+		}
+
 
 		//================//
 		// Client Configs //
@@ -118,8 +130,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setDrawResolution(HorizontalResolution newHorizontalResolution)
 				{
-					Config.Client.Graphics.Quality.drawResolution = newHorizontalResolution;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.quality.drawResolution").value = newHorizontalResolution;
+					ConfigGui.editSingleOption.saveOption("client.graphics.quality.drawResolution");
 				}
 
 
@@ -131,8 +143,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setLodChunkRenderDistance(int newLodChunkRenderDistance)
 				{
-					Config.Client.Graphics.Quality.lodChunkRenderDistance = newLodChunkRenderDistance;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.quality.lodChunkRenderDistance").value = newLodChunkRenderDistance;
+					ConfigGui.editSingleOption.saveOption("client.graphics.quality.lodChunkRenderDistance");
 				}
 
 
@@ -144,8 +156,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setVerticalQuality(VerticalQuality newVerticalQuality)
 				{
-					Config.Client.Graphics.Quality.verticalQuality = newVerticalQuality;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.quality.verticalQuality").value = newVerticalQuality;
+					ConfigGui.editSingleOption.saveOption("client.graphics.quality.verticalQuality");
 				}
 
 
@@ -157,8 +169,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setHorizontalScale(int newHorizontalScale)
 				{
-					Config.Client.Graphics.Quality.horizontalScale = newHorizontalScale;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.quality.horizontalScale").value = newHorizontalScale;
+					ConfigGui.editSingleOption.saveOption("client.graphics.quality.horizontalScale");
 				}
 
 
@@ -170,8 +182,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setHorizontalQuality(HorizontalQuality newHorizontalQuality)
 				{
-					Config.Client.Graphics.Quality.horizontalQuality = newHorizontalQuality;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.quality.horizontalQuality").value = newHorizontalQuality;
+					ConfigGui.editSingleOption.saveOption("client.graphics.quality.horizontalQuality");
 				}
 			}
 
@@ -186,8 +198,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setFogDistance(FogDistance newFogDistance)
 				{
-					Config.Client.Graphics.FogQuality.fogDistance = newFogDistance;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.fogDistance").value = newFogDistance;
+					ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.fogDistance");
 				}
 
 
@@ -200,8 +212,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setFogDrawMode(FogDrawMode setFogDrawMode)
 				{
-					Config.Client.Graphics.FogQuality.fogDrawMode = setFogDrawMode;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.fogDrawMode").value = setFogDrawMode;
+					ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.fogDrawMode");
 				}
 
 
@@ -214,8 +226,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setFogColorMode(FogColorMode newFogColorMode)
 				{
-					Config.Client.Graphics.FogQuality.fogColorMode = newFogColorMode;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.fogColorMode").value = newFogColorMode;
+					ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.fogColorMode");
 				}
 
 
@@ -227,8 +239,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setDisableVanillaFog(boolean newDisableVanillaFog)
 				{
-					Config.Client.Graphics.FogQuality.disableVanillaFog = newDisableVanillaFog;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.disableVanillaFog").value = newDisableVanillaFog;
+					ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.disableVanillaFog");
 				}
 			}
 
@@ -243,8 +255,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setCustomClouds(boolean newCustomClouds)
 				{
-					Config.Client.Graphics.CloudQuality.customClouds = newCustomClouds;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.cloudQuality.customClouds").value = newCustomClouds;
+					ConfigGui.editSingleOption.saveOption("client.graphics.cloudQuality.customClouds");
 				}
 
 
@@ -256,8 +268,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setFabulousClouds(boolean newFabulousClouds)
 				{
-					Config.Client.Graphics.CloudQuality.fabulousClouds = newFabulousClouds;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.cloudQuality.fabulousClouds").value = newFabulousClouds;
+					ConfigGui.editSingleOption.saveOption("client.graphics.cloudQuality.fabulousClouds");
 				}
 
 
@@ -269,8 +281,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setExtendClouds(boolean newExtendClouds)
 				{
-					Config.Client.Graphics.CloudQuality.extendClouds = newExtendClouds;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.cloudQuality.extendClouds").value = newExtendClouds;
+					ConfigGui.editSingleOption.saveOption("client.graphics.cloudQuality.extendClouds");
 				}
 
 
@@ -282,8 +294,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setCloudHeight(double newCloudHeight)
 				{
-					Config.Client.Graphics.CloudQuality.cloudHeight = newCloudHeight;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.cloudQuality.cloudHeight").value = newCloudHeight;
+					ConfigGui.editSingleOption.saveOption("client.graphics.cloudQuality.cloudHeight");
 				}
 			}
 
@@ -298,8 +310,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setDisableDirectionalCulling(boolean newDisableDirectionalCulling)
 				{
-					Config.Client.Graphics.AdvancedGraphics.disableDirectionalCulling = newDisableDirectionalCulling;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.disableDirectionalCulling").value = newDisableDirectionalCulling;
+					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.disableDirectionalCulling");
 				}
 
 
@@ -311,8 +323,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setAlwaysDrawAtMaxQuality(boolean newAlwaysDrawAtMaxQuality)
 				{
-					Config.Client.Graphics.AdvancedGraphics.alwaysDrawAtMaxQuality = newAlwaysDrawAtMaxQuality;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.alwaysDrawAtMaxQuality").value = newAlwaysDrawAtMaxQuality;
+					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.alwaysDrawAtMaxQuality");
 				}
 
 
@@ -324,8 +336,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setVanillaOverdraw(VanillaOverdraw newVanillaOverdraw)
 				{
-					Config.Client.Graphics.AdvancedGraphics.vanillaOverdraw = newVanillaOverdraw;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.vanillaOverdraw").value = newVanillaOverdraw;
+					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.vanillaOverdraw");
 				}
 				
 				@Override
@@ -334,10 +346,10 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					return Config.Client.Graphics.AdvancedGraphics.backsideCullingRange;
 				}
 				@Override
-				public void setBacksideCullingRange(int backsideCullingRange)
+				public void setBacksideCullingRange(int newBacksideCullingRange)
 				{
-					Config.Client.Graphics.AdvancedGraphics.backsideCullingRange = backsideCullingRange;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.backsideCullingRange").value = newBacksideCullingRange;
+					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.backsideCullingRange");
 				}
 				
 				@Override
@@ -348,8 +360,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setUseExtendedNearClipPlane(boolean newUseExtendedNearClipPlane)
 				{
-					Config.Client.Graphics.AdvancedGraphics.useExtendedNearClipPlane = newUseExtendedNearClipPlane;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.useExtendedNearClipPlane").value = newUseExtendedNearClipPlane;
+					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.useExtendedNearClipPlane");
 				}
 			}
 		}
@@ -370,8 +382,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			@Override
 			public void setGenerationPriority(GenerationPriority newGenerationPriority)
 			{
-				Config.Client.WorldGenerator.generationPriority = newGenerationPriority;
-				ConfigGui.saveToFile();
+				ConfigGui.editSingleOption.getEntry("client.worldGenerator.generationPriority").value = newGenerationPriority;
+				ConfigGui.editSingleOption.saveOption("client.worldGenerator.generationPriority");
 			}
 
 
@@ -383,8 +395,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			@Override
 			public void setDistanceGenerationMode(DistanceGenerationMode newDistanceGenerationMode)
 			{
-				Config.Client.WorldGenerator.distanceGenerationMode = newDistanceGenerationMode;
-				ConfigGui.saveToFile();
+				ConfigGui.editSingleOption.getEntry("client.worldGenerator.distanceGenerationMode").value = newDistanceGenerationMode;
+				ConfigGui.editSingleOption.saveOption("client.worldGenerator.distanceGenerationMode");
 			}
 
 
@@ -396,8 +408,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			@Override
 			public void setAllowUnstableFeatureGeneration(boolean newAllowUnstableFeatureGeneration)
 			{
-				Config.Client.WorldGenerator.allowUnstableFeatureGeneration = newAllowUnstableFeatureGeneration;
-				ConfigGui.saveToFile();
+				ConfigGui.editSingleOption.getEntry("client.worldGenerator.allowUnstableFeatureGeneration").value = newAllowUnstableFeatureGeneration;
+				ConfigGui.editSingleOption.saveOption("client.worldGenerator.allowUnstableFeatureGeneration");
 			}
 
 
@@ -409,8 +421,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			@Override
 			public void setBlockToAvoid(BlocksToAvoid newBlockToAvoid)
 			{
-				Config.Client.WorldGenerator.blocksToAvoid = newBlockToAvoid;
-				ConfigGui.saveToFile();
+				ConfigGui.editSingleOption.getEntry("client.worldGenerator.blocksToAvoid").value = newBlockToAvoid;
+				ConfigGui.editSingleOption.saveOption("client.worldGenerator.blocksToAvoid");
 			}
 		}
 
@@ -465,8 +477,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setNumberOfWorldGenerationThreads(int newNumberOfWorldGenerationThreads)
 				{
-					Config.Client.Advanced.Threading.numberOfWorldGenerationThreads = newNumberOfWorldGenerationThreads;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.advanced.threading.numberOfWorldGenerationThreads").value = newNumberOfWorldGenerationThreads;
+					ConfigGui.editSingleOption.saveOption("client.advanced.threading.numberOfWorldGenerationThreads");
 				}
 
 
@@ -478,8 +490,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setNumberOfBufferBuilderThreads(int newNumberOfWorldBuilderThreads)
 				{
-					Config.Client.Advanced.Threading.numberOfBufferBuilderThreads = newNumberOfWorldBuilderThreads;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.advanced.threading.numberOfBufferBuilderThreads").value = newNumberOfWorldBuilderThreads;
+					ConfigGui.editSingleOption.saveOption("client.advanced.threading.numberOfBufferBuilderThreads");
 				}
 			}
 
@@ -499,8 +511,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setDrawLods(boolean newDrawLods)
 				{
-					Config.Client.Advanced.Debugging.drawLods = newDrawLods;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.advanced.debugging.drawLods").value = newDrawLods;
+					ConfigGui.editSingleOption.saveOption("client.advanced.debugging.drawLods");
 				}
 
 
@@ -512,8 +524,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setDebugMode(DebugMode newDebugMode)
 				{
-					Config.Client.Advanced.Debugging.debugMode = newDebugMode;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugMode").value = newDebugMode;
+					ConfigGui.editSingleOption.saveOption("client.advanced.debugging.debugMode");
 				}
 
 
@@ -525,8 +537,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setDebugKeybindingsEnabled(boolean newEnableDebugKeybindings)
 				{
-					Config.Client.Advanced.Debugging.enableDebugKeybindings = newEnableDebugKeybindings;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.advanced.debugging.enableDebugKeybindings").value = newEnableDebugKeybindings;
+					ConfigGui.editSingleOption.saveOption("client.advanced.debugging.enableDebugKeybindings");
 				}
 			}
 
@@ -542,8 +554,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setGpuUploadMethod(GpuUploadMethod newDisableVanillaFog)
 				{
-					Config.Client.Advanced.Buffers.gpuUploadMethod = newDisableVanillaFog;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.advanced.buffers.gpuUploadMethod").value = newDisableVanillaFog;
+					ConfigGui.editSingleOption.saveOption("client.advanced.buffers.gpuUploadMethod");
 				}
 
 
@@ -554,8 +566,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				}
 				@Override
 				public void setGpuUploadPerMegabyteInMilliseconds(int newMilliseconds) {
-					Config.Client.Advanced.Buffers.gpuUploadPerMegabyteInMilliseconds = newMilliseconds;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.advanced.buffers.gpuUploadPerMegabyteInMilliseconds").value = newMilliseconds;
+					ConfigGui.editSingleOption.saveOption("client.advanced.buffers.gpuUploadPerMegabyteInMilliseconds");
 				}
 
 
@@ -567,8 +579,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public void setRebuildTimes(BufferRebuildTimes newBufferRebuildTimes)
 				{
-					Config.Client.Advanced.Buffers.rebuildTimes = newBufferRebuildTimes;
-					ConfigGui.saveToFile();
+					ConfigGui.editSingleOption.getEntry("client.advanced.buffers.newBufferRebuildTimes").value = newBufferRebuildTimes;
+					ConfigGui.editSingleOption.saveOption("client.advanced.buffers.newBufferRebuildTimes");
 				}
 			}
 		}

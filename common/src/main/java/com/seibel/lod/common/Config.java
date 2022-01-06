@@ -20,7 +20,6 @@
 package com.seibel.lod.common;
 
 import com.seibel.lod.common.wrappers.config.ConfigGui;
-import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
 import com.seibel.lod.core.config.*;
 import com.seibel.lod.core.enums.config.*;
 import com.seibel.lod.core.enums.rendering.*;
@@ -57,8 +56,11 @@ public class Config extends ConfigGui
 	@ConfigAnnotations.ScreenEntry
 	public static Client client;
 
+	// I know this option should be in Client
+	// This is a hacky method to not show the button in the options screen but show it in the mod menu
+	// Tough it is in client in the wrapper singleton
 	@ConfigAnnotations.Entry
-	public static boolean ShowButton = true;
+	public static boolean optionsButton = true;
 
 	public static class Client
 	{

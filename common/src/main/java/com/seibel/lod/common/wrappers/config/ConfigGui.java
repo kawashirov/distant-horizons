@@ -60,7 +60,7 @@ import net.minecraft.client.gui.narration.NarratableEntry; // Remove in 1.16
  * Credits to Motschen
  *
  * @author coolGi2007
- * @version 12-28-2021
+ * @version 1-6-2022
  */
 @SuppressWarnings("unchecked")
 public abstract class ConfigGui
@@ -109,7 +109,7 @@ public abstract class ConfigGui
 		public static final int ResetButtonWidth = 40;
 	}
 
-	protected static class EntryInfo<T>
+	public static class EntryInfo<T>
 	{
 		Field field;
 		Object widget;
@@ -164,7 +164,6 @@ public abstract class ConfigGui
 			if (field.isAnnotationPresent(ConfigAnnotations.Entry.class) || field.isAnnotationPresent(ConfigAnnotations.Comment.class) || field.isAnnotationPresent(ConfigAnnotations.ScreenEntry.class))
 			{
 				// If putting in your own mod then put your own check for server sided
-				entryMap.put((!category.isEmpty() ? category + "." : "") + field.getName(), info);
 				info.category = category;
 				if (!LodCommonMain.serverSided)
 					initClient(field, info, category);
@@ -172,6 +171,7 @@ public abstract class ConfigGui
 
 			if (field.isAnnotationPresent(ConfigAnnotations.Entry.class))
 			{
+				entryMap.put((!category.isEmpty() ? category + "." : "") + field.getName(), info);
 				info.varClass = field.getType();
 				try
 				{
@@ -327,6 +327,7 @@ public abstract class ConfigGui
 
 		for (EntryInfo info : entries) {
 			if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
+//				editSingleOption.saveOption(info);
 				config.set((info.category.isEmpty() ? "" : info.category + ".") + info.field.getName(), info.value);
 			}
 		}
@@ -355,37 +356,69 @@ public abstract class ConfigGui
 		// Puts everything into its variable
 		for (EntryInfo info : entries) {
 			if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
-				saveOption(info);
+//				editSingleOption.loadOption(info);
+				String itemPath = (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName();
+				if (config.contains(itemPath)) {
+					if (info.field.getType().isEnum())
+						info.value = config.getEnum(itemPath, info.varClass);
+					else
+						info.value = config.get(itemPath);
+				} else
+					config.set(itemPath, info.value);
+
+				try {
+					info.field.set(null, info.value);
+				} catch (IllegalAccessException ignored) {
+				}
 			}
 		}
 
 		config.close();
 	}
 
-	// TODO: Use this in the config wrapper singleton
-	public static void saveOption(String name) {
-		saveOption(entryMap.get(name));
-	}
+	public static class editSingleOption {
+		public static EntryInfo getEntry(String name) {
+			return entryMap.get(name);
+		}
 
-	public static void saveOption(EntryInfo info)
-	{
-		CommentedFileConfig config = CommentedFileConfig.builder(configFilePath.toFile()).autosave().build();
-		config.load();
+		public static void saveOption(String name) {
+			saveOption(entryMap.get(name));
+		}
 
-		String itemPath = (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName();
-		if (config.contains(itemPath)) {
-			if (info.field.getType().isEnum())
-				info.value = config.getEnum(itemPath, info.varClass);
-			else
-				info.value = config.get(itemPath);
-		} else
-			config.set(itemPath, info.value);
+		public static void saveOption(EntryInfo info) {
+			CommentedFileConfig config = CommentedFileConfig.builder(configFilePath.toFile()).build();
+			config.load();
 
-		try {
-			info.field.set(null, info.value);
-		} catch (IllegalAccessException ignored) {}
+			config.set((info.category.isEmpty() ? "" : info.category + ".") + info.field.getName(), info.value);
 
-		config.close();
+			config.save();
+			config.close();
+		}
+
+		public static void loadOption(String name) {
+			loadOption(entryMap.get(name));
+		}
+
+		public static void loadOption(EntryInfo info) {
+			CommentedFileConfig config = CommentedFileConfig.builder(configFilePath.toFile()).autosave().build();
+			config.load();
+
+			String itemPath = (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName();
+			if (config.contains(itemPath)) {
+				if (info.field.getType().isEnum())
+					info.value = config.getEnum(itemPath, info.varClass);
+				else
+					info.value = config.get(itemPath);
+			} else
+				config.set(itemPath, info.value);
+
+			try {
+				info.field.set(null, info.value);
+			} catch (IllegalAccessException ignored) {
+			}
+
+			config.close();
+		}
 	}
 
 

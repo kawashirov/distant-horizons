@@ -19,14 +19,15 @@
 
 package com.seibel.lod.fabric;
 
-import com.seibel.lod.common.Config;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.api.EventApi;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
 
+import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.fabric.mixins.events.MixinClientLevel;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
@@ -164,17 +165,17 @@ public class ClientProxy
 	boolean PreDebugToggle = false;
 	boolean PreDrawToggle = false;
 	public void onKeyInput() {
-		if (Config.Client.Advanced.Debugging.enableDebugKeybindings)
+		ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
+		if (CONFIG.client().advanced().debugging().getDebugKeybindingsEnabled())
 		{
 			// Only activates when you press the key
 			if (DebugToggle.isDown() && DebugToggle.isDown() != PreDebugToggle)
-				Config.Client.Advanced.Debugging.debugMode = Config.Client.Advanced.Debugging.debugMode.getNext();
+				CONFIG.client().advanced().debugging().setDebugMode(CONFIG.client().advanced().debugging().getDebugMode().getNext());
 
 			if (DrawToggle.isDown() && DrawToggle.isDown() != PreDebugToggle)
-				Config.Client.Advanced.Debugging.drawLods = !Config.Client.Advanced.Debugging.drawLods;
+				CONFIG.client().advanced().debugging().setDrawLods(!CONFIG.client().advanced().debugging().getDrawLods());
 		}
 		PreDebugToggle = DebugToggle.isDown();
 		PreDrawToggle = DrawToggle.isDown();
 	}
-
 }

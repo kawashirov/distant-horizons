@@ -21,11 +21,11 @@ package com.seibel.lod.forge.mixins;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
-import com.seibel.lod.common.Config;
 import com.seibel.lod.common.clouds.CloudBufferSingleton;
 import com.seibel.lod.common.clouds.CloudTexture;
 import com.seibel.lod.common.clouds.NoiseCloudHandler;
 import com.seibel.lod.common.wrappers.McObjectConverter;
+import com.seibel.lod.common.wrappers.config.LodConfigWrapperSingleton;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
@@ -94,14 +94,15 @@ public class MixinWorldRenderer
 
 	@Inject(method = "renderClouds", at = @At("HEAD"), cancellable = true)
 	public void renderClouds(PoseStack poseStack, Matrix4f projectionMatrix, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
-		if (Config.Client.Graphics.CloudQuality.customClouds) {
+		ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
+		if (CONFIG.client().graphics().cloudQuality().getCustomClouds()) {
 			TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 			registerClouds(textureManager);
 			NoiseCloudHandler.update();
 
 			if (minecraft.level.dimension() == ClientLevel.OVERWORLD) {
 				CloudTexture cloudTexture = NoiseCloudHandler.cloudTextures.get(NoiseCloudHandler.cloudTextures.size() - 1);
-				renderCloudLayer(poseStack, projectionMatrix, tickDelta, cameraX, cameraY, cameraZ, (float) (Config.Client.Graphics.CloudQuality.cloudHeight + 0.01 /* Make clouds a bit higher so it dosnt do janky stuff */), 0, 1, 1, cloudTexture.resourceLocation);
+				renderCloudLayer(poseStack, projectionMatrix, tickDelta, cameraX, cameraY, cameraZ, (float) (CONFIG.client().graphics().cloudQuality().getCloudHeight() + 0.01 /* Make clouds a bit higher so it dosnt do janky stuff */), 0, 1, 1, cloudTexture.resourceLocation);
 			}
 
 			ci.cancel();
@@ -184,7 +185,7 @@ public class MixinWorldRenderer
 		}
 
 		RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
-		
+
 		//Setup custom projection matrix and override minecraft's.
 		//create needed objects
 		ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
@@ -197,8 +198,8 @@ public class MixinWorldRenderer
 		float nearClip = 0.05f;
 		float matNearClip = -((farClip + nearClip) / (farClip - nearClip));
 		float matFarClip = -((2 * farClip * nearClip) / (farClip - nearClip));
-		
-		//store projectionMatrix values to buffers
+
+		//store ProjectionMatrix values to buffers
 		projectionMatrix.store(customBuffer);
 		projectionMatrix.store(mcBuffer);
 		//change values on our custom buffer
@@ -206,7 +207,7 @@ public class MixinWorldRenderer
 		customBuffer.put(14, matFarClip);
 		//load values from our buffer to the projection matrix
 		projectionMatrix.load(customBuffer);
-		
+
 		if (this.generateClouds) {
 			this.generateClouds = false;
 			Tesselator tessellator = Tesselator.getInstance();
@@ -268,8 +269,9 @@ public class MixinWorldRenderer
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
 		float adjustedCloudY = (float)Math.floor(cloudY / cloudThickness) * cloudThickness;
 
+		ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 		if (this.prevCloudsType == CloudStatus.FANCY) {
-			int scaledViewDistance = (int) (((Config.Client.Graphics.CloudQuality.extendClouds ? Config.Client.Graphics.Quality.lodChunkRenderDistance : minecraft.options.renderDistance) / 2) / scale) / 2;
+			int scaledViewDistance = (int) (((CONFIG.client().graphics().cloudQuality().getExtendClouds() ? CONFIG.client().graphics().quality().getLodChunkRenderDistance() : minecraft.options.renderDistance) / 2) / scale) / 2;
 
 			for (int x = -scaledViewDistance - 1; x <= scaledViewDistance; ++x) {
 				for (int z = -scaledViewDistance - 1; z <= scaledViewDistance; ++z) {
@@ -322,7 +324,7 @@ public class MixinWorldRenderer
 				}
 			}
 		} else {
-			int scaledRenderDistance = (int) ((Config.Client.Graphics.CloudQuality.extendClouds ? Config.Client.Graphics.Quality.lodChunkRenderDistance : minecraft.options.renderDistance) / scale);
+			int scaledRenderDistance = (int) ((CONFIG.client().graphics().cloudQuality().getExtendClouds() ? CONFIG.client().graphics().quality().getLodChunkRenderDistance() : minecraft.options.renderDistance) / scale);
 
 			for (int x = -scaledRenderDistance; x < scaledRenderDistance; x += scaledRenderDistance) {
 				for (int z = -scaledRenderDistance; z < scaledRenderDistance; z += scaledRenderDistance) {
