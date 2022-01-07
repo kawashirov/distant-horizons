@@ -3,7 +3,7 @@ package com.seibel.lod.common.clouds;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 
 import java.util.*;
@@ -22,12 +22,9 @@ public class CloudTexture {
         this.resourceLocation = resourceLocation;
     }
 
-    public void updateImage(long time) {
-        Random random = new Random(time);
-
-        // Comment to clear sky
-        SkyCoverGenerators.cloudySkyUpdate(random, this.noise, this.cloudsTexture.getPixels(), pixels, this.cloudiness);
-
+    public void updateImage() {
+        // Comment to not update the sky
+//        SkyCoverGenerators.cloudySkyUpdate(random, this.noise, this.cloudsTexture.getPixels(), pixels, this.cloudiness);
     }
 
     public void updatePixels() {
@@ -58,22 +55,18 @@ public class CloudTexture {
         this.cloudsTexture = texture;
     }
 
+    /** Generates the noise at the start of the game */
     public void initNoise(Random random) {
-        this.noise = new SimplexNoise(new WorldgenRandom(random.nextLong()));
-//        this.noise = new SimplexNoise(new LegacyRandomSource(random.nextLong()));
+//        this.noise = new SimplexNoise(new WorldgenRandom(random.nextLong()));
+        this.noise = new SimplexNoise(new LegacyRandomSource(random.nextLong()));
     }
 
     public DynamicTexture getNativeImage() {
-        NativeImage image = new NativeImage(256, 256, false);
-
-        Random random = new Random();
-
-        this.cloudiness = random.nextDouble();
+        NativeImage image = new NativeImage(SkyCoverGenerators.CLOUD_TEXTURE.getWidth(), SkyCoverGenerators.CLOUD_TEXTURE.getHeight(), false);
 
         // Switch these out to clear sky
         // Never comment both or something weird will happen
-//        SkyCoverGenerators.clearSkyGenerator(this.noise, image, this.cloudiness);
-        SkyCoverGenerators.cloudySkyGenerator(this.noise, image, this.cloudiness);
+        SkyCoverGenerators.normalSkyGenerator(image);
 
         return new DynamicTexture(image);
     }

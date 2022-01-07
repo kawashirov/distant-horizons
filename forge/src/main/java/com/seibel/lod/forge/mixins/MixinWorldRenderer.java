@@ -21,10 +21,14 @@ package com.seibel.lod.forge.mixins;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
-import com.seibel.lod.common.Config;
+import com.seibel.lod.common.clouds.CloudBufferSingleton;
 import com.seibel.lod.common.clouds.CloudTexture;
 import com.seibel.lod.common.clouds.NoiseCloudHandler;
 import com.seibel.lod.common.wrappers.McObjectConverter;
+import com.seibel.lod.common.wrappers.config.LodConfigWrapperSingleton;
+import com.seibel.lod.core.util.LodUtil;
+import com.seibel.lod.core.util.SingletonHandler;
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,6 +55,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.*;
 
+import java.nio.FloatBuffer;
 import java.util.Random;
 
 /**
@@ -88,15 +93,17 @@ public class MixinWorldRenderer
 	}
 
 	@Inject(method = "renderClouds", at = @At("HEAD"), cancellable = true)
-	public void renderClouds(PoseStack poseStack, Matrix4f model, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
-		if (Config.Client.Graphics.CloudQuality.customClouds) {
+	public void renderClouds(PoseStack poseStack, Matrix4f projectionMatrix, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
+		ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
+		if (CONFIG.client().graphics().cloudQuality().getCustomClouds()) {
 			TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 			registerClouds(textureManager);
-			NoiseCloudHandler.update();
+			// Only use when needed since it causes lag
+//			NoiseCloudHandler.update();
 
 			if (minecraft.level.dimension() == ClientLevel.OVERWORLD) {
 				CloudTexture cloudTexture = NoiseCloudHandler.cloudTextures.get(NoiseCloudHandler.cloudTextures.size() - 1);
-				renderCloudLayer(poseStack, model, tickDelta, cameraX, cameraY, cameraZ, (float) (Config.Client.Graphics.CloudQuality.cloudHeight + 0.01 /* Make clouds a bit higher so it dosnt do janky stuff */), 0, 1, 1, cloudTexture.resourceLocation);
+				renderCloudLayer(poseStack, projectionMatrix, tickDelta, cameraX, cameraY, cameraZ, (float) (CONFIG.client().graphics().cloudQuality().getCloudHeight() + 0.01 /* Make clouds a bit higher so it dosnt do janky stuff */), 1, 1, cloudTexture.resourceLocation);
 			}
 
 			ci.cancel();
@@ -149,7 +156,7 @@ public class MixinWorldRenderer
 		}
 	}
 
-	private void renderCloudLayer(PoseStack poseStack, Matrix4f model, float tickDelta, double cameraX, double cameraY, double cameraZ, float cloudHeight, float cloudOffset, float cloudScale, float speedMod, ResourceLocation resourceLocation) {
+	private void renderCloudLayer(PoseStack poseStack, Matrix4f projectionMatrix, float tickDelta, double cameraX, double cameraY, double cameraZ, float cloudHeight, float cloudScale, float speedMod, ResourceLocation resourceLocation) {
 		RenderSystem.disableCull();
 		RenderSystem.enableBlend();
 		RenderSystem.enableDepthTest();
@@ -158,7 +165,7 @@ public class MixinWorldRenderer
 		float scale = 12.0F * cloudScale;
 		double speed = ((this.ticks + tickDelta) * (0.03F * speedMod));
 		double posX = (cameraX + speed) / scale;
-		double posY = (cloudHeight - (float) cameraY + cloudOffset) / cloudScale;
+		double posY = (cloudHeight - (float) cameraY) / cloudScale;
 		double posZ = cameraZ / scale + 0.33000001311302185D;
 		posX -= Math.floor(posX / 2048.0D) * 2048;
 		posZ -= Math.floor(posZ / 2048.0D) * 2048;
@@ -179,6 +186,29 @@ public class MixinWorldRenderer
 		}
 
 		RenderSystem.setShader(GameRenderer::getPositionTexColorNormalShader);
+
+		//Setup custom projection matrix and override minecraft's.
+		//create needed objects
+		ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
+		FloatBuffer customBuffer = CloudBufferSingleton.INSTANCE.customBuffer;
+		FloatBuffer mcBuffer = CloudBufferSingleton.INSTANCE.mcBuffer;
+		//create clip values.
+		//far clip is our clip plane value
+		float farClip = (CONFIG.client().graphics().quality().getLodChunkRenderDistance() * LodUtil.CHUNK_WIDTH) * LodUtil.CHUNK_WIDTH / 2;
+		//near clip is mc clip plane value
+		float nearClip = 0.05f;
+		float matNearClip = -((farClip + nearClip) / (farClip - nearClip));
+		float matFarClip = -((2 * farClip * nearClip) / (farClip - nearClip));
+
+		//store ProjectionMatrix values to buffers
+		projectionMatrix.store(customBuffer);
+		projectionMatrix.store(mcBuffer);
+		//change values on our custom buffer
+		customBuffer.put(10, matNearClip);
+		customBuffer.put(14, matFarClip);
+		//load values from our buffer to the projection matrix
+		projectionMatrix.load(customBuffer);
+
 		if (this.generateClouds) {
 			this.generateClouds = false;
 			Tesselator tessellator = Tesselator.getInstance();
@@ -186,7 +216,7 @@ public class MixinWorldRenderer
 			if (this.cloudBuffer != null) this.cloudBuffer.close();
 
 			this.cloudBuffer = new VertexBuffer();
-			this.buildCloudLayer(bufferBuilder, posX, posY, posZ, cloudOffset, cloudScale, cloudColor);
+			this.buildCloudLayer(bufferBuilder, posX, posY, posZ, cloudScale, cloudColor);
 			bufferBuilder.end();
 			this.cloudBuffer.upload(bufferBuilder);
 		}
@@ -207,17 +237,18 @@ public class MixinWorldRenderer
 				}
 
 				ShaderInstance shader = RenderSystem.getShader();
-				this.cloudBuffer.drawWithShader(poseStack.last().pose(), model, shader);
+				this.cloudBuffer.drawWithShader(poseStack.last().pose(), projectionMatrix, shader);
 			}
 		}
-
+		//reset the projection matrix to original values
+		projectionMatrix.load(mcBuffer);
 		poseStack.popPose();
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.enableCull();
 		RenderSystem.disableBlend();
 	}
 
-	private void buildCloudLayer(BufferBuilder bufferBuilder, double cloudX, double cloudY, double cloudZ, float offset, float scale, Vec3 color) {
+	private void buildCloudLayer(BufferBuilder bufferBuilder, double cloudX, double cloudY, double cloudZ, float scale, Vec3 color) {
 		float lowpFracAccur = (float) Math.pow(2.0, -8);
 		float mediumpFracAccur = (float) Math.pow(2.0, -10);
 		float viewDistance = 8;
@@ -237,23 +268,27 @@ public class MixinWorldRenderer
 		float greenNS = greenTop * 0.8f;
 		float blueNS = blueTop * 0.8f;
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
-		float adjustedCloudY = (float)Math.floor(cloudY / cloudThickness) * cloudThickness;
+		float adjustedCloudY = (float) Math.floor(cloudY / cloudThickness) * cloudThickness;
 
+		// Where the actual rendering happens
+		ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 		if (this.prevCloudsType == CloudStatus.FANCY) {
-			int scaledViewDistance = (int) (((Config.Client.Graphics.CloudQuality.extendClouds ? Config.Client.Graphics.Quality.lodChunkRenderDistance : minecraft.options.renderDistance) / 2) / scale) / 2;
+			int scaledViewDistance = (int) (((CONFIG.client().graphics().cloudQuality().getExtendClouds() ? CONFIG.client().graphics().quality().getLodChunkRenderDistance() : minecraft.options.renderDistance) / 2) / scale) / 2;
 
 			for (int x = -scaledViewDistance - 1; x <= scaledViewDistance; ++x) {
 				for (int z = -scaledViewDistance - 1; z <= scaledViewDistance; ++z) {
 					int n3;
 					float scaledX = x * viewDistance;
 					float scaledZ = z * viewDistance;
-					if (adjustedCloudY > -5.0f) {
+					if (adjustedCloudY >= -4.0f) {
+						// Render cloud bottom
 						bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + 0.0f, scaledZ + 8.0f).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + 8.0f) * lowpFracAccur + adjustedCloudZ).color(redBottom, greenBottom, blueBottom, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
 						bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + 0.0f, scaledZ + 8.0f).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + 8.0f) * lowpFracAccur + adjustedCloudZ).color(redBottom, greenBottom, blueBottom, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
 						bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + 0.0f, scaledZ + 0.0f).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + 0.0f) * lowpFracAccur + adjustedCloudZ).color(redBottom, greenBottom, blueBottom, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
 						bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + 0.0f, scaledZ + 0.0f).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + 0.0f) * lowpFracAccur + adjustedCloudZ).color(redBottom, greenBottom, blueBottom, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
 					}
-					if (adjustedCloudY <= 5.0f) {
+					if (adjustedCloudY < 0.0f) {
+						// Render cloud top
 						bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + cloudThickness - mediumpFracAccur, scaledZ + 8.0f).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + 8.0f) * lowpFracAccur + adjustedCloudZ).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, 1.0f, 0.0f).endVertex();
 						bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + cloudThickness - mediumpFracAccur, scaledZ + 8.0f).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + 8.0f) * lowpFracAccur + adjustedCloudZ).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, 1.0f, 0.0f).endVertex();
 						bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + cloudThickness - mediumpFracAccur, scaledZ + 0.0f).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + 0.0f) * lowpFracAccur + adjustedCloudZ).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, 1.0f, 0.0f).endVertex();
@@ -267,7 +302,7 @@ public class MixinWorldRenderer
 							bufferBuilder.vertex(scaledX + (float)n3 + 0.0f, adjustedCloudY + 0.0f, scaledZ + 0.0f).uv((scaledX + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudX, (scaledZ + 0.0f) * lowpFracAccur + adjustedCloudZ).color(redEW, greenEW, blueEW, 0.8f).normal(-1.0f, 0.0f, 0.0f).endVertex();
 						}
 					}
-					if (x <= 1) {
+					if (x <= 0) { // FIX.ME is doing to big of an area
 						for (n3 = 0; n3 < 8; ++n3) {
 							bufferBuilder.vertex(scaledX + (float)n3 + 1.0f - mediumpFracAccur, adjustedCloudY + 0.0f, scaledZ + 8.0f).uv((scaledX + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudX, (scaledZ + 8.0f) * lowpFracAccur + adjustedCloudZ).color(redEW, greenEW, blueEW, 0.8f).normal(1.0f, 0.0f, 0.0f).endVertex();
 							bufferBuilder.vertex(scaledX + (float)n3 + 1.0f - mediumpFracAccur, adjustedCloudY + cloudThickness, scaledZ + 8.0f).uv((scaledX + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudX, (scaledZ + 8.0f) * lowpFracAccur + adjustedCloudZ).color(redEW, greenEW, blueEW, 0.8f).normal(1.0f, 0.0f, 0.0f).endVertex();
@@ -283,17 +318,18 @@ public class MixinWorldRenderer
 							bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + 0.0f, scaledZ + (float)n3 + 0.0f).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, -1.0f).endVertex();
 						}
 					}
-					if (z > 1) continue;
-					for (n3 = 0; n3 < 8; ++n3) {
-						bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + cloudThickness, scaledZ + (float)n3 + 1.0f - mediumpFracAccur).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
-						bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + cloudThickness, scaledZ + (float)n3 + 1.0f - mediumpFracAccur).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
-						bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + 0.0f, scaledZ + (float)n3 + 1.0f - mediumpFracAccur).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
-						bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + 0.0f, scaledZ + (float)n3 + 1.0f - mediumpFracAccur).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
+					if (z < 1) { // FIX.ME is doing to big of an area
+						for (n3 = 0; n3 < 8; ++n3) {
+							bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + cloudThickness, scaledZ + (float) n3 + 1.0f - mediumpFracAccur).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float) n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
+							bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + cloudThickness, scaledZ + (float) n3 + 1.0f - mediumpFracAccur).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float) n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
+							bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + 0.0f, scaledZ + (float) n3 + 1.0f - mediumpFracAccur).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float) n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
+							bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + 0.0f, scaledZ + (float) n3 + 1.0f - mediumpFracAccur).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float) n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
+						}
 					}
 				}
 			}
 		} else {
-			int scaledRenderDistance = (int) ((Config.Client.Graphics.CloudQuality.extendClouds ? Config.Client.Graphics.Quality.lodChunkRenderDistance : minecraft.options.renderDistance) / scale);
+			int scaledRenderDistance = (int) ((CONFIG.client().graphics().cloudQuality().getExtendClouds() ? CONFIG.client().graphics().quality().getLodChunkRenderDistance() : minecraft.options.renderDistance) / scale);
 
 			for (int x = -scaledRenderDistance; x < scaledRenderDistance; x += scaledRenderDistance) {
 				for (int z = -scaledRenderDistance; z < scaledRenderDistance; z += scaledRenderDistance) {

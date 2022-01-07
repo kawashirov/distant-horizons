@@ -2,12 +2,13 @@
 	"required": true,
 	"minVersion": "0.8",
 	"package": "com.seibel.lod.forge.mixins",
-	"compatibilityLevel": "JAVA_8",
+	"compatibilityLevel": "JAVA_16",
 	"mixins": [
 	],
 	"client": [
 		"MixinOptionsScreen",
-		"MixinWorldRenderer"
+		"MixinWorldRenderer",
+		"MixinFogRenderer"
 	],
 	"server": []
 }

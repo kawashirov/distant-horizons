@@ -19,9 +19,7 @@
 
 package com.seibel.lod.fabric;
 
-import com.seibel.lod.common.Config;
 import com.seibel.lod.common.LodCommonMain;
-import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.fabric.wrappers.DependencySetup;
@@ -32,7 +30,7 @@ import net.fabricmc.api.ClientModInitializer;
  * Initialize and setup the Mod. <br>
  * If you are looking for the real start of the mod
  * check out the ClientProxy.
- * 
+ *
  * @author coolGi2007
  * @author Ran
  * @version 12-1-2021
@@ -52,7 +50,7 @@ public class Main implements ClientModInitializer
 		// no.
 	}
 
-	// This loads the mod after minecraft loads which doesn't causes a lot of issues (client sided)
+	// This loads the mod after minecraft loads which doesn't causes a lot of issues
 	public static void init() {
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(null, false);
