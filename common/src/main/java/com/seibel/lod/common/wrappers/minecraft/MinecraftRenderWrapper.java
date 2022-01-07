@@ -148,64 +148,13 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
      * the clipping plane. (For example, if you are high above the ground some chunks
      * will be incorrectly added, even though they are outside render range).
      */
-    @Override
-    public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks()
-    {
-        // TODO: Fix/Implement this!
-        /*
-        
-        HashSet<AbstractChunkPosWrapper> loadedPos = new HashSet<>();
-        
-        // Wow, those are some long names!
-        // go through every RenderInfo to get the compiled chunks
-        
-        LevelRenderer renderer = MC.levelRenderer;
-        for (LevelRenderer.RenderChunkInfo worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
-        {
-            CompiledChunk compiledChunk = worldRenderer$LocalRenderInformationContainer.chunk.getCompiledChunk();
-            if (!compiledChunk.hasNoRenderableLayers())
-            {
-                // add the ChunkPos for every rendered chunk
-                BlockPos bpos = worldRenderer$LocalRenderInformationContainer.chunk.getOrigin();
-
-                loadedPos.add(new ChunkPosWrapper(bpos));
-            }
-        }
-        
-        */
-    	
-        // For now, use a circle check
-		int chunkRenderDist = this.getRenderDistance();
-		// if we have a odd render distance, we'll have a empty gap. This way we'll overlap by 1 instead, 
-		// which is preferable to having a hole in the world
-		chunkRenderDist = chunkRenderDist % 2 == 0 ? chunkRenderDist : chunkRenderDist - 1;
-		
-		AbstractChunkPosWrapper centerChunkPos = MC_WRAPPER.getPlayerChunkPos();
-		
-		// add every position within render distance
-		HashSet<AbstractChunkPosWrapper> renderedPos = new HashSet<AbstractChunkPosWrapper>();
-		for (int chunkDeltaX = -chunkRenderDist; chunkDeltaX <= chunkRenderDist; chunkDeltaX++)
-		{
-			for(int chunkDeltaZ = -chunkRenderDist; chunkDeltaZ <= chunkRenderDist; chunkDeltaZ++)
-			{
-				if (chunkDeltaX*chunkDeltaX+chunkDeltaZ*chunkDeltaZ >= chunkRenderDist*chunkRenderDist) continue;
-				renderedPos.add(FACTORY.createChunkPos(centerChunkPos.getX() + chunkDeltaX, centerChunkPos.getZ() + chunkDeltaZ));
-			}
-		}
-		return renderedPos;
-    }
+    
+    //TODO: impl this properly
     
     @Override
-    public HashSet<AbstractChunkPosWrapper> getSodiumRenderedChunks()
-    {
-    	// TODO: Implement this!
-        // For now, call the default method 
-    	
+    public HashSet<AbstractChunkPosWrapper> getMaximumRenderedChunks() {
         // For now, use a circle check
 		int chunkRenderDist = this.getRenderDistance();
-		// if we have a odd render distance, we'll have a empty gap. This way we'll overlap by 1 instead, 
-		// which is preferable to having a hole in the world
-		chunkRenderDist = chunkRenderDist % 2 == 0 ? chunkRenderDist : chunkRenderDist - 1;
 		
 		AbstractChunkPosWrapper centerChunkPos = MC_WRAPPER.getPlayerChunkPos();
 		
@@ -215,12 +164,13 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		{
 			for(int chunkDeltaZ = -chunkRenderDist; chunkDeltaZ <= chunkRenderDist; chunkDeltaZ++)
 			{
-				if (chunkDeltaX*chunkDeltaX+chunkDeltaZ*chunkDeltaZ >= chunkRenderDist*chunkRenderDist) continue;
+				// The circle check using radius+1 because it seems to match the vanilla fog culled circle better
+				if (chunkDeltaX*chunkDeltaX+chunkDeltaZ*chunkDeltaZ >= (chunkRenderDist+1)*(chunkRenderDist+1)) continue;
 				renderedPos.add(FACTORY.createChunkPos(centerChunkPos.getX() + chunkDeltaX, centerChunkPos.getZ() + chunkDeltaZ));
 			}
 		}
 		return renderedPos;
-    }
+    } 
 
 
     @Override

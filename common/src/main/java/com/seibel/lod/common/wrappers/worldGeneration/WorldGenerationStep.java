@@ -486,7 +486,7 @@ public final class WorldGenerationStep {
 					int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
 					ChunkAccess target = referencedChunks.get(targetIndex);
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target),
-							new LodBuilderConfig(generationMode));
+							new LodBuilderConfig(generationMode), false);
 				}
 			}
 			event.pEvent.endNano = System.nanoTime();
