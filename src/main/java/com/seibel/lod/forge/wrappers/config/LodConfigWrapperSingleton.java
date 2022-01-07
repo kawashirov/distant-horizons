@@ -56,7 +56,16 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 		public final IGraphics graphics;
 		public final IWorldGenerator worldGenerator;
 		public final IAdvanced advanced;
-		
+
+		@Override
+		public boolean getOptionsButton() {
+			return ForgeConfig.CLIENT.optionsButton.get();
+		}
+
+		@Override
+		public void setOptionsButton(boolean newOptionsButton) {
+			ForgeConfig.CLIENT.optionsButton.set(newOptionsButton);
+		}	
 
 		@Override
 		public IGraphics graphics()
@@ -556,6 +565,6 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ForgeConfig.CLIENT.advanced.buffers.rebuildTimes.set(newBufferRebuildTimes);
 				}
 			}
-		}	
+		}
 	}	
 }

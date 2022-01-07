@@ -42,6 +42,7 @@ import com.seibel.lod.core.enums.rendering.FogColorMode;
 import com.seibel.lod.core.enums.rendering.FogDistance;
 import com.seibel.lod.core.enums.rendering.FogDrawMode;
 import com.seibel.lod.core.objects.MinDefaultMax;
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced.IBuffers;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced.IDebugging;
@@ -90,6 +91,7 @@ public class ForgeConfig
 		public final Graphics graphics;
 		public final WorldGenerator worldGenerator;
 		public final Advanced advanced;
+		public final ForgeConfigSpec.BooleanValue optionsButton;
 		
 		
 		//================//
@@ -99,6 +101,10 @@ public class ForgeConfig
 		{
 			builder.push(this.getClass().getSimpleName());
 			{
+				optionsButton = builder
+						.comment("\n\n"
+								+ IClient.OPTIONS_BUTTON_DESC)
+						.define("Options Button", IClient.OPTIONS_BUTTON_DEFAULT);
 				graphics = new Graphics(builder);
 				worldGenerator = new WorldGenerator(builder);
 				advanced = new Advanced(builder);
