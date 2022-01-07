@@ -185,6 +185,16 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.quality.horizontalQuality").value = newHorizontalQuality;
 					ConfigGui.editSingleOption.saveOption("client.graphics.quality.horizontalQuality");
 				}
+				
+				@Override
+				public DropoffQuality getDropoffQuality() {
+					return Config.Client.Graphics.Quality.dropoffQuality;
+				}
+				@Override
+				public void setDropoffQuality(DropoffQuality newDropoffQuality) {
+					ConfigGui.editSingleOption.getEntry("client.graphics.quality.dropoffQuality").value = newDropoffQuality;
+					ConfigGui.editSingleOption.saveOption("client.graphics.quality.dropoffQuality");
+				}
 			}
 
 

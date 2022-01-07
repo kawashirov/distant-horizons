@@ -105,6 +105,9 @@ public class Config extends ConfigGui
 
 				@ConfigAnnotations.Entry
 				public static HorizontalQuality horizontalQuality = IQuality.HORIZONTAL_QUALITY_DEFAULT;
+				
+				@ConfigAnnotations.Entry
+				public static DropoffQuality dropoffQuality = IQuality.DROPOFF_QUALITY_DEFAULT;
 			}
 
 
