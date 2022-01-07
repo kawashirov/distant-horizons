@@ -20,6 +20,10 @@
 package com.seibel.lod.forge.mixins;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
+import com.seibel.lod.common.Config;
+import com.seibel.lod.common.clouds.CloudTexture;
+import com.seibel.lod.common.clouds.NoiseCloudHandler;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import net.minecraft.client.renderer.LevelRenderer;
 import org.lwjgl.opengl.GL15;
@@ -33,6 +37,23 @@ import com.seibel.lod.core.objects.math.Mat4f;
 
 import net.minecraft.client.renderer.RenderType;
 
+
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
+import net.minecraft.client.CloudStatus;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.*;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.NotNull;
+import org.spongepowered.asm.mixin.*;
+
+import java.util.Random;
+
 /**
  * This class is used to mix in my rendering code
  * before Minecraft starts rendering blocks.
@@ -40,13 +61,18 @@ import net.minecraft.client.renderer.RenderType;
  * render last event, the LODs would render on top
  * of the normal terrain.
  *
+ * This is also the mixin for rendering the clouds
+ *
+ * @author coolGi2007
  * @author James Seibel
- * @version 12-29-2021
+ * @version 12-31-2021
  */
 @Mixin(LevelRenderer.class)
 public class MixinWorldRenderer
 {
+	// TODO: Fix clouds
 	private static float previousPartialTicks = 0;
+
 
 	@Inject(at = @At("RETURN"), method = "renderSky(Lcom/mojang/blaze3d/vertex/PoseStack;F)V")
 	private void renderSky(PoseStack matrixStackIn, float partialTicks, CallbackInfo callback)
@@ -56,6 +82,7 @@ public class MixinWorldRenderer
 		previousPartialTicks = partialTicks;
 	}
 
+	// HEAD or RETURN
 	@Inject(at = @At("HEAD"), method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDD)V")
 	private void renderChunkLayer(RenderType renderType, PoseStack matrixStackIn, double xIn, double yIn, double zIn, CallbackInfo callback)
 	{

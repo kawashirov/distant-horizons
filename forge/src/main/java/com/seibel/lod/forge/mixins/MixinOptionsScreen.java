@@ -1,9 +1,10 @@
 package com.seibel.lod.forge.mixins;
 
-import com.seibel.lod.common.Config;
 import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.common.wrappers.config.TexturedButtonWidget;
 import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.core.util.SingletonHandler;
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -32,7 +33,7 @@ public class MixinOptionsScreen extends Screen {
 
     @Inject(at = @At("HEAD"),method = "init")
     private void lodconfig$init(CallbackInfo ci) {
-        if (Config.ShowButton)
+        if (SingletonHandler.get(ILodConfigWrapperSingleton.class).client().getOptionsButton())
             this.addButton(new TexturedButtonWidget(
                     // Where the button is on the screen
                     this.width / 2 - 180, this.height / 6 - 12,

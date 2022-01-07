@@ -4,6 +4,8 @@ import com.seibel.lod.fabric.Main;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.server.level.ServerLevel;
+
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,11 +23,11 @@ public class MixinMinecraft {
 
     @Inject(method = "setLevel", at = @At("HEAD"))
     private void unloadWorldEvent_sL(ClientLevel clientLevel, CallbackInfo ci) {
-        if (level != null) Main.client_proxy.worldUnloadEvent();
+        if (level != null) Main.client_proxy.worldUnloadEvent(level);
     }
 
-    @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;updateScreenAndTick(Lnet/minecraft/client/gui/screens/Screen;)V", shift = At.Shift.AFTER))
+    @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("HEAD"))
     private void unloadWorldEvent_cL(Screen screen, CallbackInfo ci) {
-        if (this.level != null) Main.client_proxy.worldUnloadEvent();
+        if (this.level != null) Main.client_proxy.worldUnloadEvent(this.level);
     }
 }

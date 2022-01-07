@@ -60,7 +60,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
  * Credits to Motschen
  *
  * @author coolGi2007
- * @version 12-28-2021
+ * @version 1-6-2022
  */
 @SuppressWarnings("unchecked")
 public abstract class ConfigGui
@@ -68,6 +68,7 @@ public abstract class ConfigGui
 	/*
 	        TODO list
 
+		Fix floats not working
         Make a wiki
         Make it so you can enable and disable buttons from showing
         Make min and max not final
@@ -85,6 +86,7 @@ public abstract class ConfigGui
     private static final Pattern DECIMAL_ONLY_REGEX = Pattern.compile("-?([\\d]+\\.?[\\d]*|[\\d]*\\.?[\\d]+|\\.)");
 
     private static final List<EntryInfo> entries = new ArrayList<>();
+    public static final Map<String,EntryInfo> entryMap = new HashMap<>();
 
     // Change these to your own mod
     private static final String MOD_NAME = ModInfo.NAME;					// For file saving and identifying
@@ -107,7 +109,7 @@ public abstract class ConfigGui
         public static final int ResetButtonWidth = 40;
     }
 
-    protected static class EntryInfo<T>
+    public static class EntryInfo<T>
     {
         Field field;
         Object widget;
@@ -169,6 +171,7 @@ public abstract class ConfigGui
 
             if (field.isAnnotationPresent(ConfigAnnotations.Entry.class))
             {
+                entryMap.put((!category.isEmpty() ? category + "." : "") + field.getName(), info);
                 info.varClass = field.getType();
                 try
                 {
@@ -324,6 +327,7 @@ public abstract class ConfigGui
 
         for (EntryInfo info : entries) {
             if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
+//				editSingleOption.saveOption(info);
                 config.set((info.category.isEmpty() ? "" : info.category + ".") + info.field.getName(), info.value);
             }
         }
@@ -352,6 +356,7 @@ public abstract class ConfigGui
         // Puts everything into its variable
         for (EntryInfo info : entries) {
             if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
+//				editSingleOption.loadOption(info);
                 String itemPath = (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName();
                 if (config.contains(itemPath)) {
                     if (info.field.getType().isEnum())
@@ -363,11 +368,57 @@ public abstract class ConfigGui
 
                 try {
                     info.field.set(null, info.value);
-                } catch (IllegalAccessException ignored) {}
+                } catch (IllegalAccessException ignored) {
+                }
             }
         }
 
         config.close();
+    }
+
+    public static class editSingleOption {
+        public static EntryInfo getEntry(String name) {
+            return entryMap.get(name);
+        }
+
+        public static void saveOption(String name) {
+            saveOption(entryMap.get(name));
+        }
+
+        public static void saveOption(EntryInfo info) {
+            CommentedFileConfig config = CommentedFileConfig.builder(configFilePath.toFile()).build();
+            config.load();
+
+            config.set((info.category.isEmpty() ? "" : info.category + ".") + info.field.getName(), info.value);
+
+            config.save();
+            config.close();
+        }
+
+        public static void loadOption(String name) {
+            loadOption(entryMap.get(name));
+        }
+
+        public static void loadOption(EntryInfo info) {
+            CommentedFileConfig config = CommentedFileConfig.builder(configFilePath.toFile()).autosave().build();
+            config.load();
+
+            String itemPath = (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName();
+            if (config.contains(itemPath)) {
+                if (info.field.getType().isEnum())
+                    info.value = config.getEnum(itemPath, info.varClass);
+                else
+                    info.value = config.get(itemPath);
+            } else
+                config.set(itemPath, info.value);
+
+            try {
+                info.field.set(null, info.value);
+            } catch (IllegalAccessException ignored) {
+            }
+
+            config.close();
+        }
     }
 
 

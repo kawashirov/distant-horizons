@@ -19,7 +19,6 @@
 
 package com.seibel.lod.forge;
 
-import com.seibel.lod.common.Config;
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.wrappers.config.ConfigGui;
@@ -33,17 +32,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.client.ConfigGuiHandler;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLLoader;
 
 import java.util.List;
@@ -53,7 +47,7 @@ import java.util.Random;
  * Initialize and setup the Mod. <br>
  * If you are looking for the real start of the mod
  * check out the ClientProxy.
- * 
+ *
  * @author James Seibel
  * @version 11-21-2021
  */
@@ -61,7 +55,7 @@ import java.util.Random;
 public class ForgeMain implements LodForgeMethodCaller
 {
 	public static ForgeClientProxy forgeClientProxy;
-	
+
 	private void init(final FMLCommonSetupEvent event)
 	{
 		// make sure the dependencies are set up before the mod needs them
@@ -69,32 +63,24 @@ public class ForgeMain implements LodForgeMethodCaller
 		LodCommonMain.startup(this, !FMLLoader.getDist().isClient());
 		ForgeDependencySetup.createInitialBindings();
 	}
-	
-	
+
+
 	public ForgeMain()
 	{
 		// Register the methods
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::init);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientStart);
-		
+
 		// Register ourselves for server and other game events we are interested in
 		MinecraftForge.EVENT_BUS.register(this);
 	}
-	
+
 	private void onClientStart(final FMLClientSetupEvent event)
 	{
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY,
-				() -> (client, parent) -> Config.getScreen(parent, ""));
+				() -> (client, parent) -> ConfigGui.getScreen(parent, ""));
 		forgeClientProxy = new ForgeClientProxy();
 		MinecraftForge.EVENT_BUS.register(forgeClientProxy);
-	}
-	
-	
-	
-	@SubscribeEvent
-	public void onServerStarting(FMLServerStartingEvent event)
-	{
-		// this is called when the server starts
 	}
 
 	private ModelDataMap dataMap = new ModelDataMap.Builder().build();
