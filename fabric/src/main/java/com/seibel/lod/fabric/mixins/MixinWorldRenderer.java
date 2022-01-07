@@ -98,7 +98,8 @@ public class MixinWorldRenderer
 		if (CONFIG.client().graphics().cloudQuality().getCustomClouds()) {
 			TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 			registerClouds(textureManager);
-			NoiseCloudHandler.update();
+			// Only use when needed since it causes lag
+//			NoiseCloudHandler.update();
 
 			if (minecraft.level.dimension() == ClientLevel.OVERWORLD) {
 				CloudTexture cloudTexture = NoiseCloudHandler.cloudTextures.get(NoiseCloudHandler.cloudTextures.size() - 1);
@@ -267,7 +268,7 @@ public class MixinWorldRenderer
 		float greenNS = greenTop * 0.8f;
 		float blueNS = blueTop * 0.8f;
 		bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR_NORMAL);
-		float adjustedCloudY = (float)Math.floor(cloudY / cloudThickness) * cloudThickness;
+		float adjustedCloudY = (float) Math.floor(cloudY / cloudThickness) * cloudThickness;
 
 		// Where the actual rendering happens
 		ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
@@ -279,13 +280,15 @@ public class MixinWorldRenderer
 					int n3;
 					float scaledX = x * viewDistance;
 					float scaledZ = z * viewDistance;
-					if (adjustedCloudY > -5.0f) {
+					if (adjustedCloudY >= -4.0f) {
+						// Render cloud bottom
 						bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + 0.0f, scaledZ + 8.0f).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + 8.0f) * lowpFracAccur + adjustedCloudZ).color(redBottom, greenBottom, blueBottom, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
 						bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + 0.0f, scaledZ + 8.0f).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + 8.0f) * lowpFracAccur + adjustedCloudZ).color(redBottom, greenBottom, blueBottom, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
 						bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + 0.0f, scaledZ + 0.0f).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + 0.0f) * lowpFracAccur + adjustedCloudZ).color(redBottom, greenBottom, blueBottom, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
 						bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + 0.0f, scaledZ + 0.0f).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + 0.0f) * lowpFracAccur + adjustedCloudZ).color(redBottom, greenBottom, blueBottom, 0.8f).normal(0.0f, -1.0f, 0.0f).endVertex();
 					}
-					if (adjustedCloudY <= 5.0f) {
+					if (adjustedCloudY < 0.0f) {
+						// Render cloud top
 						bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + cloudThickness - mediumpFracAccur, scaledZ + 8.0f).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + 8.0f) * lowpFracAccur + adjustedCloudZ).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, 1.0f, 0.0f).endVertex();
 						bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + cloudThickness - mediumpFracAccur, scaledZ + 8.0f).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + 8.0f) * lowpFracAccur + adjustedCloudZ).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, 1.0f, 0.0f).endVertex();
 						bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + cloudThickness - mediumpFracAccur, scaledZ + 0.0f).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + 0.0f) * lowpFracAccur + adjustedCloudZ).color(redTop, greenTop, blueTop, 0.8f).normal(0.0f, 1.0f, 0.0f).endVertex();
@@ -299,7 +302,7 @@ public class MixinWorldRenderer
 							bufferBuilder.vertex(scaledX + (float)n3 + 0.0f, adjustedCloudY + 0.0f, scaledZ + 0.0f).uv((scaledX + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudX, (scaledZ + 0.0f) * lowpFracAccur + adjustedCloudZ).color(redEW, greenEW, blueEW, 0.8f).normal(-1.0f, 0.0f, 0.0f).endVertex();
 						}
 					}
-					if (x <= 1) {
+					if (x <= 0) { // FIX.ME is doing to big of an area
 						for (n3 = 0; n3 < 8; ++n3) {
 							bufferBuilder.vertex(scaledX + (float)n3 + 1.0f - mediumpFracAccur, adjustedCloudY + 0.0f, scaledZ + 8.0f).uv((scaledX + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudX, (scaledZ + 8.0f) * lowpFracAccur + adjustedCloudZ).color(redEW, greenEW, blueEW, 0.8f).normal(1.0f, 0.0f, 0.0f).endVertex();
 							bufferBuilder.vertex(scaledX + (float)n3 + 1.0f - mediumpFracAccur, adjustedCloudY + cloudThickness, scaledZ + 8.0f).uv((scaledX + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudX, (scaledZ + 8.0f) * lowpFracAccur + adjustedCloudZ).color(redEW, greenEW, blueEW, 0.8f).normal(1.0f, 0.0f, 0.0f).endVertex();
@@ -315,12 +318,13 @@ public class MixinWorldRenderer
 							bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + 0.0f, scaledZ + (float)n3 + 0.0f).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, -1.0f).endVertex();
 						}
 					}
-					if (z > 1) continue;
-					for (n3 = 0; n3 < 8; ++n3) {
-						bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + cloudThickness, scaledZ + (float)n3 + 1.0f - mediumpFracAccur).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
-						bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + cloudThickness, scaledZ + (float)n3 + 1.0f - mediumpFracAccur).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
-						bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + 0.0f, scaledZ + (float)n3 + 1.0f - mediumpFracAccur).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
-						bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + 0.0f, scaledZ + (float)n3 + 1.0f - mediumpFracAccur).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float)n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
+					if (z < 1) { // FIX.ME is doing to big of an area
+						for (n3 = 0; n3 < 8; ++n3) {
+							bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + cloudThickness, scaledZ + (float) n3 + 1.0f - mediumpFracAccur).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float) n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
+							bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + cloudThickness, scaledZ + (float) n3 + 1.0f - mediumpFracAccur).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float) n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
+							bufferBuilder.vertex(scaledX + 8.0f, adjustedCloudY + 0.0f, scaledZ + (float) n3 + 1.0f - mediumpFracAccur).uv((scaledX + 8.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float) n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
+							bufferBuilder.vertex(scaledX + 0.0f, adjustedCloudY + 0.0f, scaledZ + (float) n3 + 1.0f - mediumpFracAccur).uv((scaledX + 0.0f) * lowpFracAccur + adjustedCloudX, (scaledZ + (float) n3 + 0.5f) * lowpFracAccur + adjustedCloudZ).color(redNS, greenNS, blueNS, 0.8f).normal(0.0f, 0.0f, 1.0f).endVertex();
+						}
 					}
 				}
 			}
