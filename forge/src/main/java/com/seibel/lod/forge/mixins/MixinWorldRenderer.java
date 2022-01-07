@@ -20,10 +20,6 @@
 package com.seibel.lod.forge.mixins;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
-import com.seibel.lod.common.Config;
-import com.seibel.lod.common.clouds.CloudTexture;
-import com.seibel.lod.common.clouds.NoiseCloudHandler;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import net.minecraft.client.renderer.LevelRenderer;
 import org.lwjgl.opengl.GL15;
@@ -36,23 +32,6 @@ import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.objects.math.Mat4f;
 
 import net.minecraft.client.renderer.RenderType;
-
-
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
-import net.minecraft.client.CloudStatus;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.*;
-import net.minecraft.client.renderer.texture.DynamicTexture;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.NotNull;
-import org.spongepowered.asm.mixin.*;
-
-import java.util.Random;
 
 /**
  * This class is used to mix in my rendering code
