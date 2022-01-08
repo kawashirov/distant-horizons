@@ -25,9 +25,12 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.seibel.lod.core.enums.WorldType;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
+import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
+import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
+import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -35,6 +38,9 @@ import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
+
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -169,6 +175,13 @@ public class WorldWrapper implements IWorldWrapper
     {
         // TODO this is depreciated, what should we use instead?
         return world.getSeaLevel();
+    }
+    
+    @Override
+	public IChunkWrapper tryGetChunk(AbstractChunkPosWrapper pos) {
+    	ChunkAccess chunk = world.getChunk(pos.getX(), pos.getZ(), ChunkStatus.EMPTY, false);
+    	if (chunk == null) return null;
+    	return new ChunkWrapper(chunk, world);
     }
 
 

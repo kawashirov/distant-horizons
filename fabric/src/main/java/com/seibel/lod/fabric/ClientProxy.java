@@ -41,6 +41,7 @@ import net.fabricmc.fabric.mixin.event.lifecycle.client.ClientChunkManagerMixin;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientChunkCache;
+import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
@@ -59,6 +60,7 @@ import org.lwjgl.glfw.GLFW;
 public class ClientProxy
 {
 	private final EventApi eventApi = EventApi.INSTANCE;
+	private final ClientApi clientApi = ClientApi.INSTANCE;
 
 
 	/**
@@ -75,8 +77,6 @@ public class ClientProxy
 		/* World Events */
 		//ServerChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
 		ClientChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
-		
-		
 
 		/* World Events */
 		ServerWorldEvents.LOAD.register((server, level) -> this.worldLoadEvent(level));
@@ -101,7 +101,8 @@ public class ClientProxy
 
 	public void chunkLoadEvent(LevelAccessor level, LevelChunk chunk)
 	{
-		eventApi.chunkLoadEvent(new ChunkWrapper(chunk, level), DimensionTypeWrapper.getDimensionTypeWrapper(level.dimensionType()));
+		clientApi.clientChunkLoadEvent(new ChunkWrapper(chunk, level),
+				WorldWrapper.getWorldWrapper(level));
 	}
 
 	public void worldSaveEvent()

@@ -2,6 +2,7 @@ package com.seibel.lod.common.wrappers.chunk;
 
 import java.util.Objects;
 
+import com.seibel.lod.core.objects.lod.RegionPos;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
@@ -96,7 +97,16 @@ public class ChunkPosWrapper extends AbstractChunkPosWrapper
     @Override
     public boolean equals(Object o)
     {
-        return chunkPos.equals(o);
+		// If the object is compared with itself then return true 
+        if (o == this) {
+            return true;
+        }
+        // Check if o is an instance of RegionPos or not
+        if (!(o instanceof ChunkPosWrapper)) {
+            return false;
+        }
+        ChunkPosWrapper c = (ChunkPosWrapper) o;
+        return c.chunkPos.equals(chunkPos);
     }
 
     @Override

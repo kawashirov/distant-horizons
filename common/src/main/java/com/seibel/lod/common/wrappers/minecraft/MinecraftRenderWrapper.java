@@ -158,7 +158,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks() {
     	LevelRenderer levelRenderer = MC.levelRenderer;
     	LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
-    	ClientApi.LOGGER.info("getVanillaRenderedChunks: "+chunks.size());
+    	//ClientApi.LOGGER.info("getVanillaRenderedChunks: "+chunks.size());
     	return (chunks.stream().map((chunk) -> {
     		AABB chunkBoundingBox = chunk.chunk.bb;
         	return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
@@ -169,7 +169,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     public HashSet<AbstractChunkPosWrapper> getSodiumRenderedChunks() {
     	LevelRenderer levelRenderer = MC.levelRenderer;
     	LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
-    	ClientApi.LOGGER.info("gettSodiumRenderedChunks: "+chunks.size());
+    	//ClientApi.LOGGER.info("gettSodiumRenderedChunks: "+chunks.size());
     	return (chunks.stream().map((chunk) -> {
     		AABB chunkBoundingBox = chunk.chunk.bb;
         	return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
