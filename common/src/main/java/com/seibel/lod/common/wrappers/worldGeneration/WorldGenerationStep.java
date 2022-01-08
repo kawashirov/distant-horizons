@@ -25,6 +25,8 @@ import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
 import com.seibel.lod.core.objects.lod.LodDimension;
 
+import it.unimi.dsi.fastutil.objects.ObjectListIterator;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -40,18 +42,27 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.datafixers.util.Pair;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.ColorResolver;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
@@ -59,6 +70,8 @@ import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
@@ -68,6 +81,8 @@ import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.WorldData;
 
 /*
@@ -385,6 +400,7 @@ public final class WorldGenerationStep {
 	final StepSurface stepSurface = new StepSurface();
 	final StepCarvers stepCarvers = new StepCarvers();
 	final StepFeatures stepFeatures = new StepFeatures();
+	final StepLight stepLight = new StepLight();
 
 	public final ExecutorService executors = Executors
 			.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
@@ -436,122 +452,135 @@ public final class WorldGenerationStep {
 		params = new GlobalParameters(level, lodBuilder, lodDim);
 	}
 
-	public final void generateLodFromList(GenerationEvent event) {
-			event.pEvent.beginNano = System.nanoTime();
-			GridList<ChunkAccess> referencedChunks;
-			DistanceGenerationMode generationMode;
-			try {
-				referencedChunks = generateDirect(event, event.range, event.target);
-			} catch (StepStructureStart.StructStartCorruptedException e) {
-				event.tParam.markAsInvalid();
-				return;
-			}
+	public void generateLodFromList(GenerationEvent e) {
+		e.pEvent.beginNano = System.nanoTime();
+		GridList<ChunkAccess> referencedChunks;
+		DistanceGenerationMode generationMode;
+		LightedWorldGenRegion region;
+		try {
+			int cx = e.pos.x;
+			int cy = e.pos.z;
+			int rangeEmpty = e.range + 3;
+			if (rangeEmpty < 7)
+				rangeEmpty = 7; // For some reason the Blender needs at least range 7???
+			GridList<ChunkAccess> chunks = new GridList<ChunkAccess>(rangeEmpty);
 
-			switch (event.target) {
-			case Empty:
-				return;
-			case StructureStart:
-				generationMode = DistanceGenerationMode.NONE;
-				break;
-			case StructureReference:
-				generationMode = DistanceGenerationMode.NONE;
-				break;
-			case Biomes:
-				generationMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
-				break;
-			case Noise:
-				generationMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
-				break;
-			case Surface:
-				generationMode = DistanceGenerationMode.SURFACE;
-				break;
-			case Carvers:
-				generationMode = DistanceGenerationMode.SURFACE;
-				break;
-			case Features:
-				generationMode = DistanceGenerationMode.FEATURES;
-				break;
-			case LiquidCarvers:
-				return;
-			case Light:
-				return;
-			default:
-				return;
-			}
-			int centreIndex = referencedChunks.size() / 2;
-
-			// System.out.println("Lod Generate Event: "+event);
-			for (int oy = -event.range; oy <= event.range; oy++) {
-				for (int ox = -event.range; ox <= event.range; ox++) {
-					int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
-					ChunkAccess target = referencedChunks.get(targetIndex);
-					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target),
-							new LodBuilderConfig(generationMode), false);
+			for (int oy = -rangeEmpty; oy <= rangeEmpty; oy++) {
+				for (int ox = -rangeEmpty; ox <= rangeEmpty; ox++) {
+					// ChunkAccess target = getCachedChunk(new ChunkPos(cx+ox, cy+oy));
+					ChunkAccess target = new ProtoChunk(new ChunkPos(cx + ox, cy + oy), UpgradeData.EMPTY, params.level,
+							params.biomes, null);
+					chunks.add(target);
 				}
 			}
-			event.pEvent.endNano = System.nanoTime();
-			event.refreshTimeout();
-			if (ENABLE_PERF_LOGGING) {
-				event.tParam.perf.recordEvent(event.pEvent);
-				ClientApi.LOGGER.info(event.tParam.perf);
-			}
-	}
+			e.pEvent.emptyNano = System.nanoTime();
+			e.refreshTimeout();
+			region = new LightedWorldGenRegion(params.level, chunks, ChunkStatus.STRUCTURE_STARTS, e.range + 1);
+			referencedChunks = chunks.subGrid(e.range);
+			referencedChunks = generateDirect(e, referencedChunks, e.target, region);
+			
+		} catch (StepStructureStart.StructStartCorruptedException f) {
+			e.tParam.markAsInvalid();
+			return;
+		}
 
-	public final GridList<ChunkAccess> generateDirect(GenerationEvent e, int range, Steps step) {
-		int cx = e.pos.x;
-		int cy = e.pos.z;
-		int rangeEmpty = range + 3;
-		if (rangeEmpty < 7)
-			rangeEmpty = 7; // For some reason the Blender needs at least range 7???
-		GridList<ChunkAccess> chunks = new GridList<ChunkAccess>(rangeEmpty);
+		switch (e.target) {
+		case Empty:
+			return;
+		case StructureStart:
+			generationMode = DistanceGenerationMode.NONE;
+			break;
+		case StructureReference:
+			generationMode = DistanceGenerationMode.NONE;
+			break;
+		case Biomes:
+			generationMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
+			break;
+		case Noise:
+			generationMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
+			break;
+		case Surface:
+			generationMode = DistanceGenerationMode.SURFACE;
+			break;
+		case Carvers:
+			generationMode = DistanceGenerationMode.SURFACE;
+			break;
+		case Features:
+			generationMode = DistanceGenerationMode.FEATURES;
+			break;
+		case LiquidCarvers:
+			return;
+		case Light:
+			return;
+		default:
+			return;
+		}
+		int centreIndex = referencedChunks.size() / 2;
 
-		for (int oy = -rangeEmpty; oy <= rangeEmpty; oy++) {
-			for (int ox = -rangeEmpty; ox <= rangeEmpty; ox++) {
-				// ChunkAccess target = getCachedChunk(new ChunkPos(cx+ox, cy+oy));
-				ChunkAccess target = new ProtoChunk(new ChunkPos(cx + ox, cy + oy), UpgradeData.EMPTY, params.level,
-						params.biomes, null);
-				chunks.add(target);
+		// System.out.println("Lod Generate Event: "+event);
+		for (int oy = -e.range; oy <= e.range; oy++) {
+			for (int ox = -e.range; ox <= e.range; ox++) {
+				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
+				ChunkAccess target = referencedChunks.get(targetIndex);
+				params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
+						new LodBuilderConfig(generationMode), false);
 			}
 		}
-		e.pEvent.emptyNano = System.nanoTime();
+		e.pEvent.endNano = System.nanoTime();
 		e.refreshTimeout();
-		WorldGenRegion region = new WorldGenRegion(params.level, chunks, ChunkStatus.STRUCTURE_STARTS, range + 1);
-		GridList<ChunkAccess> subRange = chunks.subGrid(range);
-		stepStructureStart.generateGroup(e.tParam, region, subRange);
-		e.pEvent.structStartNano = System.nanoTime();
-		e.refreshTimeout();
-		if (step == Steps.StructureStart)
-			return subRange;
-		stepStructureReference.generateGroup(e.tParam, region, subRange);
-		e.pEvent.structRefNano = System.nanoTime();
-		e.refreshTimeout();
-		if (step == Steps.StructureReference)
-			return subRange;
-		stepBiomes.generateGroup(e.tParam, region, subRange);
-		e.pEvent.biomeNano = System.nanoTime();
-		e.refreshTimeout();
-		if (step == Steps.Biomes)
-			return subRange;
-		stepNoise.generateGroup(e.tParam, region, subRange);
-		e.pEvent.noiseNano = System.nanoTime();
-		e.refreshTimeout();
-		if (step == Steps.Noise)
-			return subRange;
-		stepSurface.generateGroup(e.tParam, region, subRange);
-		e.pEvent.surfaceNano = System.nanoTime();
-		e.refreshTimeout();
-		if (step == Steps.Surface)
-			return subRange;
-		stepCarvers.generateGroup(e.tParam, region, subRange);
-		e.pEvent.carverNano = System.nanoTime();
-		e.refreshTimeout();
-		if (step == Steps.Carvers)
-			return subRange;
-		stepFeatures.generateGroup(e.tParam, region, subRange);
-		e.pEvent.featureNano = System.nanoTime();
-		e.refreshTimeout();
-		return subRange;
+		if (ENABLE_PERF_LOGGING) {
+			e.tParam.perf.recordEvent(e.pEvent);
+			ClientApi.LOGGER.info(e.tParam.perf);
+		}
 	}
+
+	public final GridList<ChunkAccess> generateDirect(GenerationEvent e, GridList<ChunkAccess> subRange, Steps step,
+			WorldGenRegion region) {
+		try {
+			subRange.forEach((chunk) -> {
+				((ProtoChunk) chunk).setLightEngine(region.getLightEngine());
+			});
+			stepStructureStart.generateGroup(e.tParam, region, subRange);
+			e.pEvent.structStartNano = System.nanoTime();
+			e.refreshTimeout();
+			if (step == Steps.StructureStart)
+				return subRange;
+			stepStructureReference.generateGroup(e.tParam, region, subRange);
+			e.pEvent.structRefNano = System.nanoTime();
+			e.refreshTimeout();
+			if (step == Steps.StructureReference)
+				return subRange;
+			stepBiomes.generateGroup(e.tParam, region, subRange);
+			e.pEvent.biomeNano = System.nanoTime();
+			e.refreshTimeout();
+			if (step == Steps.Biomes)
+				return subRange;
+			stepNoise.generateGroup(e.tParam, region, subRange);
+			e.pEvent.noiseNano = System.nanoTime();
+			e.refreshTimeout();
+			if (step == Steps.Noise)
+				return subRange;
+			stepSurface.generateGroup(e.tParam, region, subRange);
+			e.pEvent.surfaceNano = System.nanoTime();
+			e.refreshTimeout();
+			if (step == Steps.Surface)
+				return subRange;
+			stepCarvers.generateGroup(e.tParam, region, subRange);
+			e.pEvent.carverNano = System.nanoTime();
+			e.refreshTimeout();
+			if (step == Steps.Carvers)
+				return subRange;
+			stepFeatures.generateGroup(e.tParam, region, subRange);
+			e.pEvent.featureNano = System.nanoTime();
+			e.refreshTimeout();
+			return subRange;
+		} finally {
+			stepLight.generateGroup((WorldGenLightEngine)region.getLightEngine(), subRange);
+		}
+	}
+	
+	
+	
 
 	public final class StepStructureStart {
 		public final ChunkStatus STATUS = ChunkStatus.STRUCTURE_STARTS;
@@ -707,7 +736,6 @@ public final class WorldGenerationStep {
 			for (ChunkAccess chunk : chunks) {
 				ProtoChunk protoChunk = (ProtoChunk) chunk;
 				try {
-					protoChunk.setLightEngine(params.lightEngine);
 					params.generator.applyBiomeDecoration(worldGenRegion, chunk,
 							tParams.structFeat.forWorldGenRegion(worldGenRegion));
 					Blender.generateBorderTicks(worldGenRegion, chunk);
@@ -725,4 +753,102 @@ public final class WorldGenerationStep {
 			}
 		}
 	}
+
+	public final class StepLight {
+		public final ChunkStatus STATUS = ChunkStatus.LIGHT;
+		
+		public final void generateGroup(WorldGenLightEngine lightEngine,
+				GridList<ChunkAccess> chunks) {
+			for (ChunkAccess chunk : chunks) {
+				//boolean isLighted = chunk.isLightCorrect();
+				boolean isLighted = false;
+				try {
+					lightEngine.lightChunk(chunk, isLighted);
+				} catch (Exception e) {
+					e.printStackTrace();
+					continue;
+				}
+			}
+		}
+	}
+	
+	public static class LightedWorldGenRegion extends WorldGenRegion {
+		final WorldGenLightEngine light;
+		
+		public LightedWorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list, ChunkStatus chunkStatus, int i) {
+			super(serverLevel, list, chunkStatus, i);
+			light = new WorldGenLightEngine(new LightGetterAdaptor(this));
+		}
+
+		@Override
+		public LevelLightEngine getLightEngine() {
+			return light;
+		}
+
+		@Override
+		public int getBrightness(LightLayer lightLayer, BlockPos blockPos) {
+			return light.getLayerListener(lightLayer).getLightValue(blockPos);
+		}
+		
+		@Override
+		public int getRawBrightness(BlockPos blockPos, int i) {
+			return light.getRawBrightness(blockPos, i);
+		}
+
+		@Override
+		public boolean canSeeSky(BlockPos blockPos) {
+			return (getBrightness(LightLayer.SKY, blockPos) >= getMaxLightLevel());
+		}
+		
+	}
+	
+	public static class LightGetterAdaptor implements LightChunkGetter {
+		public final WorldGenRegion genRegion;
+		public LightGetterAdaptor(WorldGenRegion genRegion) {
+			this.genRegion = genRegion;
+		}
+		@Override
+		public BlockGetter getChunkForLighting(int chunkX, int chunkZ) {
+			// May be null
+			ChunkAccess chunk = genRegion.getChunk(chunkX, chunkZ, ChunkStatus.EMPTY, false);
+			return chunk;
+		}
+		@Override
+		public BlockGetter getLevel() {
+			return genRegion;
+		}
+	}
+	public static class WorldGenLightEngine extends LevelLightEngine {
+		public WorldGenLightEngine(LightGetterAdaptor genRegion) {
+			super(genRegion, false, true);
+		}
+
+	    public void lightChunk(ChunkAccess chunkAccess, boolean isLighted) {
+	    	ChunkPos chunkPos = chunkAccess.getPos();
+	        chunkAccess.setLightCorrect(false);
+	        
+            LevelChunkSection[] levelChunkSections = chunkAccess.getSections();
+            for (int i = 0; i < chunkAccess.getSectionsCount(); ++i) {
+                LevelChunkSection levelChunkSection = levelChunkSections[i];
+                if (levelChunkSection.hasOnlyAir()) continue;
+                int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
+                super.updateSectionStatus(SectionPos.of(chunkPos, j), false);
+            }
+            super.enableLightSources(chunkPos, true);
+            if (!isLighted) {
+                chunkAccess.getLights().forEach(blockPos ->
+                super.onBlockEmissionIncrease(blockPos, chunkAccess.getLightEmission(blockPos)));
+            }
+            
+            chunkAccess.setLightCorrect(true);
+            runUpdates();
+            super.retainData(chunkPos, false);
+	    }
+	    
+	    public void runUpdates() {
+	        super.runUpdates(2147483647, true, true);
+	    }
+	}
+	
+	
 }

@@ -101,7 +101,7 @@ public class ClientProxy
 
 	public void chunkLoadEvent(LevelAccessor level, LevelChunk chunk)
 	{
-		eventApi.chunkLoadEvent(new ChunkWrapper(chunk), DimensionTypeWrapper.getDimensionTypeWrapper(level.dimensionType()));
+		eventApi.chunkLoadEvent(new ChunkWrapper(chunk, level), DimensionTypeWrapper.getDimensionTypeWrapper(level.dimensionType()));
 	}
 
 	public void worldSaveEvent()
@@ -145,7 +145,7 @@ public class ClientProxy
 	 * }
 	 */
 	public void blockChangeEvent(LevelAccessor world, BlockPos pos) {
-		IChunkWrapper chunk = new ChunkWrapper(world.getChunk(pos));
+		IChunkWrapper chunk = new ChunkWrapper(world.getChunk(pos), world);
 		DimensionTypeWrapper dimType = DimensionTypeWrapper.getDimensionTypeWrapper(world.dimensionType());
 
 		// recreate the LOD where the blocks were changed
