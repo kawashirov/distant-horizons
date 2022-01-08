@@ -2,10 +2,13 @@ package com.seibel.lod.common.wrappers.minecraft;
 
 import java.awt.*;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
+import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.handlers.IReflectionHandler;
 import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.util.LodUtil;
@@ -37,6 +40,7 @@ import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.material.FogType;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 
@@ -150,6 +154,29 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
      */
     
     //TODO: impl this properly
+    @Override
+    public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks() {
+    	LevelRenderer levelRenderer = MC.levelRenderer;
+    	LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
+    	ClientApi.LOGGER.info("getVanillaRenderedChunks: "+chunks.size());
+    	return (chunks.stream().map((chunk) -> {
+    		AABB chunkBoundingBox = chunk.chunk.bb;
+        	return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
+        			Math.floorDiv((int) chunkBoundingBox.minZ, 16));
+    	}).collect(Collectors.toCollection(HashSet::new)));
+    }
+    @Override
+    public HashSet<AbstractChunkPosWrapper> getSodiumRenderedChunks() {
+    	LevelRenderer levelRenderer = MC.levelRenderer;
+    	LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
+    	ClientApi.LOGGER.info("gettSodiumRenderedChunks: "+chunks.size());
+    	return (chunks.stream().map((chunk) -> {
+    		AABB chunkBoundingBox = chunk.chunk.bb;
+        	return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
+        			Math.floorDiv((int) chunkBoundingBox.minZ, 16));
+    	}).collect(Collectors.toCollection(HashSet::new)));
+    }
+    
     
     @Override
     public HashSet<AbstractChunkPosWrapper> getMaximumRenderedChunks() {

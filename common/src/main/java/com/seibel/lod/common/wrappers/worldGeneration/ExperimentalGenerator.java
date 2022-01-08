@@ -243,8 +243,8 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		ClientApi.LOGGER.info("1.18 Experimental Chunk Generator shutting down...");
 		generationGroup.executors.shutdownNow();
 		try {
-			if (!generationGroup.executors.awaitTermination(30, TimeUnit.SECONDS)) {
-				ClientApi.LOGGER.warn("1.18 Experimental Chunk Generator shutdown failed! Ignoring child threads...");
+			if (!generationGroup.executors.awaitTermination(10, TimeUnit.SECONDS)) {
+				ClientApi.LOGGER.error("1.18 Experimental Chunk Generator shutdown failed! Ignoring child threads...");
 			}
 		} catch (InterruptedException e) {}
 	}
