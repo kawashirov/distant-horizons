@@ -3,7 +3,7 @@ package com.seibel.lod.common.clouds;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.levelgen.LegacyRandomSource;
+import net.minecraft.world.level.levelgen.SimpleRandomSource;
 import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 
 import java.util.*;
@@ -58,7 +58,7 @@ public class CloudTexture {
     /** Generates the noise at the start of the game */
     public void initNoise(Random random) {
 //        this.noise = new SimplexNoise(new WorldgenRandom(random.nextLong()));
-        this.noise = new SimplexNoise(new LegacyRandomSource(random.nextLong()));
+        this.noise = new SimplexNoise(new SimpleRandomSource(random.nextLong()));
     }
 
     public DynamicTexture getNativeImage() {

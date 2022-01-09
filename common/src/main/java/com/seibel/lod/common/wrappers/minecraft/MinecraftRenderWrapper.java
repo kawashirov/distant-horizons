@@ -12,6 +12,7 @@ import com.seibel.lod.core.api.ModAccessorApi;
 import com.seibel.lod.core.util.LodUtil;
 
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.LevelRenderer.RenderChunkInfo;
 
 import com.mojang.math.Vector3f;
 import com.seibel.lod.core.objects.math.Mat4f;
@@ -21,6 +22,9 @@ import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
+
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.WrapperFactory;
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
@@ -149,7 +153,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
             return sodium.getNormalRenderedChunks();
         }
         LevelRenderer levelRenderer = MC.levelRenderer;
-        LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
+        ObjectArrayList<RenderChunkInfo> chunks = levelRenderer.renderChunks;
         return (chunks.stream().map((chunk) -> {
             AABB chunkBoundingBox = chunk.chunk.bb;
             return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
