@@ -1,5 +1,7 @@
 plugins {
     id "com.github.johnrengelman.shadow" version "7.1.0"
+    id 'fabric-loom' version '0.10-SNAPSHOT'
+    id "com.modrinth.minotaur" version "1.2.1"
 }
 
 loom {
@@ -20,10 +22,20 @@ configurations {
 repositories {
     // Required for ModMenu
     maven { url "https://maven.terraformersmc.com/" }
+
+    // Required for Sodium
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 
 dependencies {
+    // Fabric loader
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
     // TODO: This is only for LodMain, try to find a way to remove it
@@ -35,12 +47,22 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
+    // Sodium
+    modImplementation "maven.modrinth:sodium:${project.sodium_version}"
+    implementation "org.joml:joml:1.10.2"
+
+    // Iris
+//    modImplementation "maven.modrinth:iris:${project.iris_version}"
+
+
+    // Toml
     implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
     shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {}
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
+    // Compression
     common 'org.tukaani:xz:1.9'
     common 'org.apache.commons:commons-compress:1.21'
     shadowMe 'org.tukaani:xz:1.9'

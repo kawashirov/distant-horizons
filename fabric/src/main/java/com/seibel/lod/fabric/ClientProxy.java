@@ -69,6 +69,8 @@ public class ClientProxy
 	 */
 	public void registerEvents() {
 		// TODO: Fix this if it's wrong
+		
+		/* Registor the mod accessor*/
 
 		/* World Events */
 		//ServerTickEvents.START_SERVER_TICK.register(this::serverTickEvent);

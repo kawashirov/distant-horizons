@@ -8,35 +8,28 @@ import java.util.stream.Collectors;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
-import com.seibel.lod.core.api.ClientApi;
-import com.seibel.lod.core.handlers.IReflectionHandler;
-import com.seibel.lod.core.handlers.ReflectionHandler;
+import com.seibel.lod.core.api.ModAccessorApi;
 import com.seibel.lod.core.util.LodUtil;
-import com.seibel.lod.core.util.SingletonHandler;
 
 import net.minecraft.client.renderer.LightTexture;
-import org.lwjgl.opengl.GL20;
 
 import com.mojang.math.Vector3f;
 import com.seibel.lod.core.objects.math.Mat4f;
 import com.seibel.lod.core.objects.math.Vec3d;
 import com.seibel.lod.core.objects.math.Vec3f;
-import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
-import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftWrapper;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.WrapperFactory;
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
-import com.seibel.lod.common.wrappers.chunk.ChunkPosWrapper;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.level.material.FogType;
@@ -57,7 +50,6 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static final GameRenderer GAME_RENDERER = MC.gameRenderer;
-    private static final MinecraftWrapper MC_WRAPPER = MinecraftWrapper.INSTANCE;
     private static final WrapperFactory FACTORY = WrapperFactory.INSTANCE;
 
     @Override
@@ -148,56 +140,24 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
      * This method returns the ChunkPos of all chunks that Minecraft
      * is going to render this frame. <br><br>
      * <p>
-     * Note: This isn't perfect. It will return some chunks that are outside
-     * the clipping plane. (For example, if you are high above the ground some chunks
-     * will be incorrectly added, even though they are outside render range).
      */
-    
-    //TODO: impl this properly
+   
     @Override
     public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks() {
-    	LevelRenderer levelRenderer = MC.levelRenderer;
-    	LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
-    	//ClientApi.LOGGER.info("getVanillaRenderedChunks: "+chunks.size());
-    	return (chunks.stream().map((chunk) -> {
-    		AABB chunkBoundingBox = chunk.chunk.bb;
-        	return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
-        			Math.floorDiv((int) chunkBoundingBox.minZ, 16));
-    	}).collect(Collectors.toCollection(HashSet::new)));
-    }
-    @Override
-    public HashSet<AbstractChunkPosWrapper> getSodiumRenderedChunks() {
-    	LevelRenderer levelRenderer = MC.levelRenderer;
-    	LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
-    	//ClientApi.LOGGER.info("gettSodiumRenderedChunks: "+chunks.size());
-    	return (chunks.stream().map((chunk) -> {
-    		AABB chunkBoundingBox = chunk.chunk.bb;
-        	return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
-        			Math.floorDiv((int) chunkBoundingBox.minZ, 16));
-    	}).collect(Collectors.toCollection(HashSet::new)));
-    }
-    
-    
-    @Override
-    public HashSet<AbstractChunkPosWrapper> getMaximumRenderedChunks() {
-        // For now, use a circle check
-		int chunkRenderDist = this.getRenderDistance();
-		
-		AbstractChunkPosWrapper centerChunkPos = MC_WRAPPER.getPlayerChunkPos();
-		
-		// add every position within render distance
-		HashSet<AbstractChunkPosWrapper> renderedPos = new HashSet<AbstractChunkPosWrapper>();
-		for (int chunkDeltaX = -chunkRenderDist; chunkDeltaX <= chunkRenderDist; chunkDeltaX++)
-		{
-			for(int chunkDeltaZ = -chunkRenderDist; chunkDeltaZ <= chunkRenderDist; chunkDeltaZ++)
-			{
-				// The circle check using radius+1 because it seems to match the vanilla fog culled circle better
-				if (chunkDeltaX*chunkDeltaX+chunkDeltaZ*chunkDeltaZ >= (chunkRenderDist+1)*(chunkRenderDist+1)) continue;
-				renderedPos.add(FACTORY.createChunkPos(centerChunkPos.getX() + chunkDeltaX, centerChunkPos.getZ() + chunkDeltaZ));
-			}
+		ISodiumAccessor sodium = ModAccessorApi.get(ISodiumAccessor.class);
+		if (sodium != null) {
+			return sodium.getNormalRenderedChunks();
 		}
-		return renderedPos;
-    } 
+    	LevelRenderer levelRenderer = MC.levelRenderer;
+    	LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
+    	return (chunks.stream().map((chunk) -> {
+    		AABB chunkBoundingBox = chunk.chunk.bb;
+        	return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
+        			Math.floorDiv((int) chunkBoundingBox.minZ, 16));
+    	}).collect(Collectors.toCollection(HashSet::new)));
+    }
+    
+    
 
 
     @Override

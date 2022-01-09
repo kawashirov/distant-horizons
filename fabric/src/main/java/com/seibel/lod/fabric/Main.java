@@ -22,9 +22,13 @@ package com.seibel.lod.fabric;
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.ClientApi;
+import com.seibel.lod.core.api.ModAccessorApi;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
+import com.seibel.lod.fabric.modAccessor.SodiumAccessor;
 import com.seibel.lod.fabric.wrappers.DependencySetup;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 
 /**
  * Initialize and setup the Mod. <br>
@@ -60,6 +64,9 @@ public class Main implements ClientModInitializer
 		// Check if this works
 		client_proxy = new ClientProxy();
 		client_proxy.registerEvents();
+		if (FabricLoader.getInstance().isModLoaded("sodium")) {
+			ModAccessorApi.bind(ISodiumAccessor.class, new SodiumAccessor());
+		}
 	}
 
 	public static void initServer() {
