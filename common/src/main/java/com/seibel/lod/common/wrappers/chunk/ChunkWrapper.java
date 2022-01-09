@@ -13,6 +13,8 @@ import com.seibel.lod.common.wrappers.block.BlockShapeWrapper;
 import com.seibel.lod.common.wrappers.world.BiomeWrapper;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.LiquidBlockContainer;
@@ -31,6 +33,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 public class ChunkWrapper implements IChunkWrapper
 {
     private ChunkAccess chunk;
+    private BlockAndTintGetter lightSource;
     private final int CHUNK_SECTION_SHIFT = 4;
     private final int CHUNK_SECTION_MASK = 0b1111;
     private final int CHUNK_SIZE_SHIFT = 4;
@@ -85,9 +88,15 @@ public class ChunkWrapper implements IChunkWrapper
         return BlockShapeWrapper.getBlockShapeWrapper(block, this, x, y, z);
     }
 
+    @Deprecated
     public ChunkWrapper(ChunkAccess chunk)
     {
         this.chunk = chunk;
+        this.lightSource = null;
+    }
+    public ChunkWrapper(ChunkAccess chunk, BlockAndTintGetter lightSource) {
+        this.chunk = chunk;
+        this.lightSource = lightSource;
     }
 
     public ChunkAccess getChunk() {
@@ -156,5 +165,17 @@ public class ChunkWrapper implements IChunkWrapper
     public int getEmittedBrightness(int x, int y, int z)
     {
         return chunk.getLightEmission(new BlockPos(x,y,z));
+    }
+
+    @Override
+    public int getBlockLight(int x, int y, int z) {
+        if (lightSource == null) return -1;
+        return lightSource.getBrightness(LightLayer.BLOCK, new BlockPos(x,y,z));
+    }
+
+    @Override
+    public int getSkyLight(int x, int y, int z) {
+        if (lightSource == null) return -1;
+        return lightSource.getBrightness(LightLayer.SKY, new BlockPos(x, y, z));
     }
 }

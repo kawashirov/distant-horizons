@@ -2,16 +2,22 @@ package com.seibel.lod.common.wrappers.minecraft;
 
 import java.awt.*;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Vector3d;
 import com.seibel.lod.common.wrappers.WrapperFactory;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
+import com.seibel.lod.core.api.ModAccessorApi;
 import com.seibel.lod.core.handlers.IReflectionHandler;
 import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.util.LodUtil;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
+import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.world.phys.AABB;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 
@@ -49,6 +55,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static final GameRenderer GAME_RENDERER = MC.gameRenderer;
+    private static final WrapperFactory FACTORY = WrapperFactory.INSTANCE;
 
 
 
@@ -101,6 +108,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
         GL15.glGetFloatv(GL15.GL_FOG_COLOR, colorValues);
         return new Color(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
     }
+    // getUnderWaterFogColor() is the same as getFogColor()
 
     @Override
     public Color getSkyColor() {
@@ -139,34 +147,20 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
      * This method returns the ChunkPos of all chunks that Minecraft
      * is going to render this frame. <br><br>
      * <p>
-     * Note: This isn't perfect. It will return some chunks that are outside
-     * the clipping plane. (For example, if you are high above the ground some chunks
-     * will be incorrectly added, even though they are outside render range).
      */
     @Override
-    public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks()
-    {
-        HashSet<AbstractChunkPosWrapper> loadedPos = new HashSet<>();
-
-        // Wow, those are some long names!
-
-        // go through every RenderInfo to get the compiled chunks
-        // FIXME[1.16.5]: pls fix
-//        LevelRenderer renderer = MC.levelRenderer;
-//        for (LevelRenderer.RenderChunkInfo worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
-//        {
-//            CompiledChunk compiledChunk = worldRenderer$LocalRenderInformationContainer.chunk.getCompiledChunk();
-//            if (!compiledChunk.hasNoRenderableLayers())
-//            {
-//                // add the ChunkPos for every rendered chunk
-//                BlockPos bpos = worldRenderer$LocalRenderInformationContainer.chunk.getOrigin();
-//
-//                loadedPos.add(new ChunkPosWrapper(bpos));
-//            }
-//        }
-
-
-        return loadedPos;
+    public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks() {
+        ISodiumAccessor sodium = ModAccessorApi.get(ISodiumAccessor.class);
+        if (sodium != null) {
+            return sodium.getNormalRenderedChunks();
+        }
+        LevelRenderer levelRenderer = MC.levelRenderer;
+        ObjectList<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunks;
+        return (chunks.stream().map((chunk) -> {
+            AABB chunkBoundingBox = chunk.chunk.bb;
+            return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
+                    Math.floorDiv((int) chunkBoundingBox.minZ, 16));
+        }).collect(Collectors.toCollection(HashSet::new)));
     }
 
 

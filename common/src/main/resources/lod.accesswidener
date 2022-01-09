@@ -6,6 +6,11 @@ accessible field net/minecraft/world/level/storage/DimensionDataStorage dataFold
 # used when rendering
 accessible method net/minecraft/client/renderer/GameRenderer getFov (Lnet/minecraft/client/Camera;FZ)D
 
+# used for grabbing vanilla rendered chunks
+accessible field net/minecraft/client/renderer/LevelRenderer renderChunks Lit/unimi/dsi/fastutil/objects/ObjectList;
+accessible class net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo
+accessible field net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo chunk Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk;
+
 # lighting
 accessible field net/minecraft/client/renderer/LightTexture lightPixels Lcom/mojang/blaze3d/platform/NativeImage;
 accessible field net/minecraft/world/level/lighting/LevelLightEngine blockEngine Lnet/minecraft/world/level/lighting/LayerLightEngine;
