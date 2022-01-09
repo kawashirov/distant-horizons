@@ -20,25 +20,26 @@ public class SodiumAccessor implements ISodiumAccessor {
 
     @Override
     public String getModName() {
-        return "Sodium-Fabric-1.18.X";
+        return "Sodium-Fabric-1.17.1";
     }
 
     @Override
     public HashSet<AbstractChunkPosWrapper> getNormalRenderedChunks() {
-        SodiumWorldRenderer renderer = SodiumWorldRenderer.instance();
-        LevelHeightAccessor height =  Minecraft.getInstance().level;
-        // 0b11 = Lighted chunk & loaded chunk
-        return renderer.getChunkTracker().getChunks(0b11).filter(
-                (long l) -> {
-                    for (int i = height.getMinSection(); i<height.getMaxSection(); i++) {
-                        SectionPos p = SectionPos.of(new ChunkPos(l), i);
-                        if (renderer.isBoxVisible(p.minBlockX()+1, p.minBlockY()+1, p.minBlockZ()+1,
-                                p.maxBlockX()-1, p.maxBlockY()-1, p.maxBlockZ()-1)) return true;
-                    }
-                    return false;
-                }).mapToObj((long l) -> {
-            return (AbstractChunkPosWrapper)factory.createChunkPos(l);
-        }).collect(Collectors.toCollection(HashSet::new));
+//        SodiumWorldRenderer renderer = SodiumWorldRenderer.instance();
+//        LevelHeightAccessor height =  Minecraft.getInstance().level;
+//        // 0b11 = Lighted chunk & loaded chunk
+//        return renderer.getChunkTracker().getChunks(0b11).filter(
+//                (long l) -> {
+//                    for (int i = height.getMinSection(); i<height.getMaxSection(); i++) {
+//                        SectionPos p = SectionPos.of(new ChunkPos(l), i);
+//                        if (renderer.isBoxVisible(p.minBlockX()+1, p.minBlockY()+1, p.minBlockZ()+1,
+//                                p.maxBlockX()-1, p.maxBlockY()-1, p.maxBlockZ()-1)) return true;
+//                    }
+//                    return false;
+//                }).mapToObj((long l) -> {
+//            return (AbstractChunkPosWrapper)factory.createChunkPos(l);
+//        }).collect(Collectors.toCollection(HashSet::new));
+        return null;
     }
 
 }
