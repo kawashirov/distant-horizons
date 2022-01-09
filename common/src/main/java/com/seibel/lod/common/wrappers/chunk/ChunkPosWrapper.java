@@ -96,7 +96,16 @@ public class ChunkPosWrapper extends AbstractChunkPosWrapper
     @Override
     public boolean equals(Object o)
     {
-        return chunkPos.equals(o);
+        // If the object is compared with itself then return true
+        if (o == this) {
+            return true;
+        }
+        // Check if o is an instance of RegionPos or not
+        if (!(o instanceof ChunkPosWrapper)) {
+            return false;
+        }
+        ChunkPosWrapper c = (ChunkPosWrapper) o;
+        return c.chunkPos.equals(chunkPos);
     }
 
     @Override

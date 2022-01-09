@@ -2,18 +2,16 @@ package com.seibel.lod.common.wrappers.minecraft;
 
 import java.awt.*;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.stream.Collectors;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.seibel.lod.common.wrappers.WrapperFactory;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
-import com.seibel.lod.core.handlers.IReflectionHandler;
-import com.seibel.lod.core.handlers.ReflectionHandler;
+import com.seibel.lod.core.api.ModAccessorApi;
 import com.seibel.lod.core.util.LodUtil;
-import net.minecraft.client.renderer.FogRenderer;
+
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.world.level.material.FogType;
-import org.lwjgl.opengl.GL20;
 
 import com.mojang.math.Vector3f;
 import com.seibel.lod.core.objects.math.Mat4f;
@@ -22,18 +20,20 @@ import com.seibel.lod.core.objects.math.Vec3f;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.lod.common.wrappers.McObjectConverter;
+import com.seibel.lod.common.wrappers.WrapperFactory;
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
-import com.seibel.lod.common.wrappers.chunk.ChunkPosWrapper;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LevelRenderer.RenderChunkInfo;
-import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.level.material.FogType;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 
@@ -42,7 +42,7 @@ import net.minecraft.world.phys.Vec3;
  * related to rendering in Minecraft.
  *
  * @author James Seibel
- * @version 12-14-2021
+ * @version 12-12-2021
  */
 public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 {
@@ -50,8 +50,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static final GameRenderer GAME_RENDERER = MC.gameRenderer;
-
-
+    private static final WrapperFactory FACTORY = WrapperFactory.INSTANCE;
 
     @Override
     public Vec3f getLookAtVector()
@@ -102,6 +101,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
         float[] colorValues = RenderSystem.getShaderFogColor();
         return new Color(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
     }
+    // getUnderWaterFogColor() is the same as getFogColor()
 
     @Override
     public Color getSkyColor() {
@@ -140,34 +140,24 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
      * This method returns the ChunkPos of all chunks that Minecraft
      * is going to render this frame. <br><br>
      * <p>
-     * Note: This isn't perfect. It will return some chunks that are outside
-     * the clipping plane. (For example, if you are high above the ground some chunks
-     * will be incorrectly added, even though they are outside render range).
      */
+
     @Override
-    public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks()
-    {
-        HashSet<AbstractChunkPosWrapper> loadedPos = new HashSet<>();
-
-        // Wow, those are some long names!
-
-        // go through every RenderInfo to get the compiled chunks
-        LevelRenderer renderer = MC.levelRenderer;
-        for (LevelRenderer.RenderChunkInfo worldRenderer$LocalRenderInformationContainer : renderer.renderChunks)
-        {
-            CompiledChunk compiledChunk = worldRenderer$LocalRenderInformationContainer.chunk.getCompiledChunk();
-            if (!compiledChunk.hasNoRenderableLayers())
-            {
-                // add the ChunkPos for every rendered chunk
-                BlockPos bpos = worldRenderer$LocalRenderInformationContainer.chunk.getOrigin();
-
-                loadedPos.add(new ChunkPosWrapper(bpos));
-            }
+    public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks() {
+        ISodiumAccessor sodium = ModAccessorApi.get(ISodiumAccessor.class);
+        if (sodium != null) {
+            return sodium.getNormalRenderedChunks();
         }
-
-
-        return loadedPos;
+        LevelRenderer levelRenderer = MC.levelRenderer;
+        LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
+        return (chunks.stream().map((chunk) -> {
+            AABB chunkBoundingBox = chunk.chunk.bb;
+            return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
+                    Math.floorDiv((int) chunkBoundingBox.minZ, 16));
+        }).collect(Collectors.toCollection(HashSet::new)));
     }
+
+
 
 
     @Override
@@ -203,11 +193,10 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
                 int col =
                         ((c.getRed() & 0xFF) << 16) | // blue
-                        ((c.getGreen() & 0xFF) << 8) | // green
-                        ((c.getBlue() & 0xFF)) | // red
-                        ((c.getAlpha() & 0xFF) << 24); // alpha
+                                ((c.getGreen() & 0xFF) << 8) | // green
+                                ((c.getBlue() & 0xFF)) | // red
+                                ((c.getAlpha() & 0xFF) << 24); // alpha
 
-                        
                 // 2D array stored in a 1D array.
                 // Thank you Tim from College ;)
                 pixels[u * lightMapWidth + v] = col;

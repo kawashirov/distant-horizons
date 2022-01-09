@@ -39,8 +39,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.EmptyTickList;
-import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -62,6 +60,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.ticks.LevelTickAccess;
 import org.jetbrains.annotations.Nullable;
 
 
@@ -106,7 +105,7 @@ public class LodServerWorld implements WorldGenLevel
     @Override
     public Biome getBiome(BlockPos pos)
     {
-        return chunk.getBiomes().getNoiseBiome(pos.getX() >> 2, pos.getY() >> 2, pos.getZ() >> 2);
+        return chunk.getNoiseBiome(pos.getX() >> 2, pos.getY() >> 2, pos.getZ() >> 2);
     }
 
     @Override
@@ -140,9 +139,19 @@ public class LodServerWorld implements WorldGenLevel
     }
 
     @Override
-    public TickList<Block> getBlockTicks()
+    public long nextSubTickCount() {
+        return 0;
+    }
+
+    @Override
+    public LevelTickAccess<Block> getBlockTicks()
     {
-        return EmptyTickList.empty();
+        return null;
+    }
+
+    @Override
+    public LevelTickAccess<Fluid> getFluidTicks() {
+        return null;
     }
 
     @Override
@@ -152,15 +161,9 @@ public class LodServerWorld implements WorldGenLevel
     }
 
     @Override
-    public Stream<? extends StructureStart<?>> startsForFeature(SectionPos p_241827_1_, StructureFeature<?> p_241827_2_)
+    public List<? extends StructureStart<?>> startsForFeature(SectionPos p_241827_1_, StructureFeature<?> p_241827_2_)
     {
         return serverWorld.startsForFeature(p_241827_1_, p_241827_2_);
-    }
-
-    @Override
-    public TickList<Fluid> getLiquidTicks()
-    {
-        return EmptyTickList.empty();
     }
 
     @Override

@@ -105,6 +105,9 @@ public class Config extends ConfigGui
 
 				@ConfigAnnotations.Entry
 				public static HorizontalQuality horizontalQuality = IQuality.HORIZONTAL_QUALITY_DEFAULT;
+
+				@ConfigAnnotations.Entry
+				public static DropoffQuality dropoffQuality = IQuality.DROPOFF_QUALITY_DEFAULT;
 			}
 
 
@@ -168,8 +171,9 @@ public class Config extends ConfigGui
 			@ConfigAnnotations.Entry
 			public static DistanceGenerationMode distanceGenerationMode = IWorldGenerator.DISTANCE_GENERATION_MODE_DEFAULT;
 
+			// FIXME: Temperary override. In 1.18, the newer Unstable gnerator is more usable
 			@ConfigAnnotations.Entry
-			public static boolean allowUnstableFeatureGeneration = IWorldGenerator.ALLOW_UNSTABLE_FEATURE_GENERATION_DEFAULT;
+			public static boolean allowUnstableFeatureGeneration = true;//IWorldGenerator.ALLOW_UNSTABLE_FEATURE_GENERATION_DEFAULT;
 
 			@ConfigAnnotations.Entry
 			public static BlocksToAvoid blocksToAvoid = IWorldGenerator.BLOCKS_TO_AVOID_DEFAULT;

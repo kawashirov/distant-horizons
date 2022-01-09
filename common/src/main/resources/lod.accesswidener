@@ -13,6 +13,12 @@ accessible field net/minecraft/client/renderer/LevelRenderer renderChunks Lit/un
 accessible class net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo
 accessible field net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo chunk Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk;
 
+# used for grabbing vanilla rendered chunks
+accessible field net/minecraft/client/renderer/LevelRenderer renderChunkStorage Ljava/util/concurrent/atomic/AtomicReference;
+accessible class net/minecraft/client/renderer/LevelRenderer$RenderChunkStorage
+accessible class net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo
+accessible field net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo chunk Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk;
+
 # lighting
 accessible field net/minecraft/client/renderer/LightTexture lightPixels Lcom/mojang/blaze3d/platform/NativeImage;
 accessible field net/minecraft/world/level/lighting/LevelLightEngine blockEngine Lnet/minecraft/world/level/lighting/LayerLightEngine;

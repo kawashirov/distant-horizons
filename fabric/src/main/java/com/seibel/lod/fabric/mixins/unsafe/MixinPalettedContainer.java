@@ -23,7 +23,7 @@ import java.util.concurrent.Semaphore;
 @Mixin(PalettedContainer.class)
 public class MixinPalettedContainer {
     @Mutable
-    @Shadow @Final private Semaphore lock;
+    private Semaphore lock;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void setSemaphore(CallbackInfo ci) {
