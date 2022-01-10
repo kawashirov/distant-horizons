@@ -9,13 +9,17 @@ If you want to see a quick demo, check out a video covering the mod here:
 
 <a href="https://www.youtube.com/watch?v=H2tnvEVbO1c" target="_blank">![Minecraft Level Of Detail (LOD) mod - Alpha 1.5](https://i.ytimg.com/vi_webp/H2tnvEVbO1c/mqdefault.webp)</a>
 
+Architectury version: 3.4-SNAPSHOT\
 Forge version: 36.1.0\
-Fabric version: 0.11.3\
+Fabric version: 0.12.3\
 Fabric API version: 0.34.2+1.16
+
+Modmenu version: 1.16.22\
+Sodium version: mc1.16.5-0.2.0
 
 Notes:\
 This version has been confirmed to work in Eclipse and Retail Minecraft.\
-(Retail running forge version 1.16.5-36.1.0 and fabric version 1.16.5-0.11.3)
+(Retail running forge version 1.16.5-36.1.0 and fabric version 1.16.5-0.12.3)
 
 
 ## source code installation
@@ -27,7 +31,7 @@ http://mcforge.readthedocs.io/en/latest/gettingstarted/
 
 * A Java Development Kit (JDK) for Java 16 (recommended) or newer. Visit https://www.oracle.com/java/technologies/downloads/ for installers.
 * Git or someway to clone git projects. Visit https://git-scm.com/ for installers.
-* Any Java IDE, for example Intellij IDEA and Eclipse. You may also use any other code editors, such as Visual Studio Code. (Optional)
+* (Not required) Any Java IDE, for example Intellij IDEA and Eclipse. You may also use any other code editors, such as Visual Studio Code. (Optional)
   It's better to use IntelliJ IDEA since Eclipse is not supported by Architectury, but it still works.
 
 **If using IntelliJ:**
@@ -71,7 +75,8 @@ Source code uses Mojang mappings.
 Build only Fabric: `./gradlew fabric:assemble` or `./gradlew fabric:build`\
 Build only Forge: `./gradlew fabric:assemble` or `./gradlew forge:build`\
 Run the Fabric client (for debugging): `./gradlew fabric:runClient`\
-Run the Forge client (for debugging): `./gradlew forge:runClient`
+Run the Forge client (**THIS DOST WORK** due to a bug with architectury): `./gradlew forge:runClient`\
+To use a custom version of Java use `-D` then the path for Java
 
 ## Open Source Acknowledgements
 
