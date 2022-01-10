@@ -128,6 +128,9 @@ public class Config extends ConfigGui
 
 			public static class CloudQuality
 			{
+				@ConfigAnnotations.Comment
+				public static ConfigAnnotations.Comment cloudWarning;
+				
 				@ConfigAnnotations.Entry
 				public static boolean customClouds = ICloudQuality.CUSTOM_CLOUDS_DEFAULT;
 
