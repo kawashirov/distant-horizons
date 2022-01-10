@@ -9,9 +9,13 @@ If you want to see a quick demo, check out a video covering the mod here:
 
 <a href="https://www.youtube.com/watch?v=H2tnvEVbO1c" target="_blank">![Minecraft Level Of Detail (LOD) mod - Alpha 1.5](https://i.ytimg.com/vi_webp/H2tnvEVbO1c/mqdefault.webp)</a>
 
+Architectury version: 3.4-SNAPSHOT\
 Forge version: 39.0.5 and 38.0.14\
 Fabric version: 0.12.12\
 Fabric API version: 0.44.0+1.18
+
+Modmenu version: 3.0.0\
+Sodium version: mc1.18-0.4.0-alpha5
 
 Notes:\
 This version has been confirmed to work in Eclipse and Retail Minecraft.\
@@ -27,7 +31,7 @@ https://fabricmc.net/wiki/tutorial:setup
 
 * A Java Development Kit (JDK) for Java 17 (recommended) or newer. Visit https://www.oracle.com/java/technologies/downloads/ for installers.
 * Git or someway to clone git projects. Visit https://git-scm.com/ for installers.
-* Any Java IDE, for example Intellij IDEA and Eclipse. You may also use any other code editors, such as Visual Studio Code. (Optional)
+* (Not required) Any Java IDE, for example Intellij IDEA and Eclipse. You may also use any other code editors, such as Visual Studio Code. (Optional)
 It's better to use IntelliJ IDEA since Eclipse is not supported by Architectury, but it still works.
 
 **If using IntelliJ:**
