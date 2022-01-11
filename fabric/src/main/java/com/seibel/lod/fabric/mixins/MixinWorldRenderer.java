@@ -29,6 +29,7 @@ import com.seibel.lod.common.wrappers.config.LodConfigWrapperSingleton;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import net.minecraft.client.renderer.LevelRenderer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -221,7 +222,11 @@ public class MixinWorldRenderer
 			this.cloudBuffer.upload(bufferBuilder);
 		}
 
-		RenderSystem.setShaderTexture(0, resourceLocation);
+		if (SingletonHandler.get(IModChecker.class).isModLoaded("immersive_portals")) {
+			RenderSystem.setShaderTexture(0, CLOUDS_LOCATION);
+		} else {
+			RenderSystem.setShaderTexture(0, resourceLocation);
+		}
 		FogRenderer.levelFogColor();
 		poseStack.pushPose();
 		poseStack.scale(scale, cloudScale, scale);
