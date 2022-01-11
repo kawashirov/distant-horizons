@@ -310,7 +310,6 @@ public abstract class ConfigGui
     /** Grabs what is in the config and puts it in modid.toml */
     public static void saveToFile()
     {
-        // If this line fails then delete the modid.toml and start the mod again
         CommentedFileConfig config = CommentedFileConfig.builder(configFilePath.toFile()).build();
 
         // First try to create a config file
@@ -323,12 +322,11 @@ public abstract class ConfigGui
             e.printStackTrace();
         }
 
-        config.load();
+        loadFileWithErrorCheck(config);
 
         for (EntryInfo info : entries) {
             if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
-//				editSingleOption.saveOption(info);
-                config.set((info.category.isEmpty() ? "" : info.category + ".") + info.field.getName(), info.value);
+                editSingleOption.saveOption(info, config);
             }
         }
 
@@ -351,25 +349,12 @@ public abstract class ConfigGui
             return;
         }
 
-        config.load();
+        loadFileWithErrorCheck(config);
 
         // Puts everything into its variable
         for (EntryInfo info : entries) {
             if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
-//				editSingleOption.loadOption(info);
-                String itemPath = (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName();
-                if (config.contains(itemPath)) {
-                    if (info.field.getType().isEnum())
-                        info.value = config.getEnum(itemPath, info.varClass);
-                    else
-                        info.value = config.get(itemPath);
-                } else
-                    config.set(itemPath, info.value);
-
-                try {
-                    info.field.set(null, info.value);
-                } catch (IllegalAccessException ignored) {
-                }
+                editSingleOption.loadOption(info, config);
             }
         }
 
@@ -377,32 +362,57 @@ public abstract class ConfigGui
     }
 
     public static class editSingleOption {
-        public static EntryInfo getEntry(String name) {
+        /** Get the entry info of an item using its string name */
+        public static EntryInfo getEntry(String name)
+        {
             return entryMap.get(name);
         }
 
-        public static void saveOption(String name) {
+        /** Save a single item using its string name */
+        public static void saveOption(String name)
+        {
             saveOption(entryMap.get(name));
         }
 
-        public static void saveOption(EntryInfo info) {
-            CommentedFileConfig config = CommentedFileConfig.builder(configFilePath.toFile()).build();
-            config.load();
+        /** Saves a single item using entry info */
+        public static void saveOption(EntryInfo info)
+        {
+            CommentedFileConfig config = CommentedFileConfig.builder(configFilePath.toFile()).autosave().build();
 
-            config.set((info.category.isEmpty() ? "" : info.category + ".") + info.field.getName(), info.value);
+            loadFileWithErrorCheck(config);
 
-            config.save();
+            saveOption(info, config);
+
             config.close();
         }
 
-        public static void loadOption(String name) {
+        /** Saves a single item using its entry info and its config builder */
+        public static void saveOption(EntryInfo info, CommentedFileConfig config)
+        {
+            config.set((info.category.isEmpty() ? "" : info.category + ".") + info.field.getName(), info.value);
+        }
+
+        /** Load a single item using its string name */
+        public static void loadOption(String name)
+        {
             loadOption(entryMap.get(name));
         }
 
-        public static void loadOption(EntryInfo info) {
+        /** Load a single item using entry info */
+        public static void loadOption(EntryInfo info)
+        {
             CommentedFileConfig config = CommentedFileConfig.builder(configFilePath.toFile()).autosave().build();
-            config.load();
 
+            loadFileWithErrorCheck(config);
+
+            loadOption(info, config);
+
+            config.close();
+        }
+
+        /** Loads a single item using its entry info and its config builder */
+        public static void loadOption(EntryInfo info, CommentedFileConfig config)
+        {
             String itemPath = (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName();
             if (config.contains(itemPath)) {
                 if (info.field.getType().isEnum())
@@ -416,11 +426,33 @@ public abstract class ConfigGui
                 info.field.set(null, info.value);
             } catch (IllegalAccessException ignored) {
             }
-
-            config.close();
         }
     }
 
+    /** Dose config.load(); but with error checking to avoid crashes */
+    public static void loadFileWithErrorCheck(CommentedFileConfig config) {
+        try {
+            config.load();
+        } catch (Exception e) {
+            LOGGER.info("Error loading config for " + MOD_NAME_READABLE + " at the path [" + configFilePath.toString() + "].");
+            LOGGER.info("Creating a new config...");
+            try {
+                Files.deleteIfExists(configFilePath);
+                saveToFile();
+                return;
+            } catch (Exception f) {
+                LOGGER.info("Failed creating config file for " + MOD_NAME_READABLE + " at the path [" + configFilePath.toString() + "].");
+                f.printStackTrace();
+            }
+        }
+    }
+
+
+
+
+    //==============//
+    // GUI handling //
+    //==============//
 
     public static Screen getScreen(Screen parent, String category)
     {
