@@ -43,6 +43,10 @@ public class ChunkPosWrapper extends AbstractChunkPosWrapper
         this.chunkPos = new ChunkPos(chunkX, chunkZ);
     }
 
+    public ChunkPosWrapper(long l)
+    {
+        this.chunkPos = new ChunkPos(l);
+    }
 
     public ChunkPosWrapper(ChunkPos pos)
     {
@@ -92,6 +96,11 @@ public class ChunkPosWrapper extends AbstractChunkPosWrapper
     {
         return chunkPos;
     }
+    
+	@Override
+	public long getLong() {
+		return chunkPos.toLong();
+	}
 
     @Override
     public boolean equals(Object o)
@@ -121,5 +130,6 @@ public class ChunkPosWrapper extends AbstractChunkPosWrapper
         BlockPos blockPos = chunkPos.getWorldPosition();
         return new BlockPosWrapper(blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
+
 
 }

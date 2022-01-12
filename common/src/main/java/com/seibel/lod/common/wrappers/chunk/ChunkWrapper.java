@@ -1,14 +1,11 @@
 package com.seibel.lod.common.wrappers.chunk;
 
-import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockColorWrapper;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockShapeWrapper;
-import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 import com.seibel.lod.common.wrappers.WrapperUtil;
 import com.seibel.lod.common.wrappers.block.BlockColorWrapper;
-import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
 import com.seibel.lod.common.wrappers.block.BlockShapeWrapper;
 import com.seibel.lod.common.wrappers.world.BiomeWrapper;
 
@@ -178,4 +175,9 @@ public class ChunkWrapper implements IChunkWrapper
         if (lightSource == null) return -1;
         return lightSource.getBrightness(LightLayer.SKY, new BlockPos(x, y, z));
     }
+
+	@Override
+	public long getLongChunkPos() {
+		return chunk.getPos().toLong();
+	}
 }
