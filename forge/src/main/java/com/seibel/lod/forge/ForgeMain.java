@@ -24,8 +24,11 @@ import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
 import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.core.util.SingletonHandler;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
 
+import com.seibel.lod.forge.wrappers.modAccessor.ModChecker;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
@@ -62,6 +65,7 @@ public class ForgeMain implements LodForgeMethodCaller
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(this, !FMLLoader.getDist().isClient());
 		ForgeDependencySetup.createInitialBindings();
+		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
 	}
 
 
