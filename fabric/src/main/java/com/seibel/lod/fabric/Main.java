@@ -23,7 +23,10 @@ import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.api.ModAccessorApi;
+import com.seibel.lod.core.util.SingletonHandler;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
+import com.seibel.lod.fabric.modAccessor.ModChecker;
 import com.seibel.lod.fabric.modAccessor.SodiumAccessor;
 import com.seibel.lod.fabric.wrappers.DependencySetup;
 
@@ -59,12 +62,13 @@ public class Main implements ClientModInitializer
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(null, false);
 		DependencySetup.createInitialBindings();
+		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
 		ClientApi.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 
 		// Check if this works
 		client_proxy = new ClientProxy();
 		client_proxy.registerEvents();
-		if (FabricLoader.getInstance().isModLoaded("sodium")) {
+		if (SingletonHandler.get(IModChecker.class).isModLoaded("sodium")) {
 			ModAccessorApi.bind(ISodiumAccessor.class, new SodiumAccessor());
 		}
 	}
