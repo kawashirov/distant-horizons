@@ -1,14 +1,11 @@
 package com.seibel.lod.common.wrappers.chunk;
 
-import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockColorWrapper;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockShapeWrapper;
-import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 import com.seibel.lod.common.wrappers.WrapperUtil;
 import com.seibel.lod.common.wrappers.block.BlockColorWrapper;
-import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
 import com.seibel.lod.common.wrappers.block.BlockShapeWrapper;
 import com.seibel.lod.common.wrappers.world.BiomeWrapper;
 
@@ -22,6 +19,7 @@ import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
 
@@ -145,6 +143,11 @@ public class ChunkWrapper implements IChunkWrapper
     public int getMinZ() {
         return chunk.getPos().getMinBlockZ();
     }
+
+	@Override
+	public long getLongChunkPos() {
+		return chunk.getPos().toLong();
+	}
 
     @Override
     public boolean isLightCorrect(){
