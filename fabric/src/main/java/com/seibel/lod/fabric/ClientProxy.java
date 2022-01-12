@@ -78,7 +78,7 @@ public class ClientProxy
 
 		/* World Events */
 		//ServerChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
-		ClientChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
+		//ClientChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
 
 		/* World Events */
 		ServerWorldEvents.LOAD.register((server, level) -> this.worldLoadEvent(level));

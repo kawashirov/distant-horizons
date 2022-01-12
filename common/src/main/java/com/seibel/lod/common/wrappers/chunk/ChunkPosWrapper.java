@@ -43,6 +43,10 @@ public class ChunkPosWrapper extends AbstractChunkPosWrapper
     {
         this.chunkPos = new ChunkPos(chunkX, chunkZ);
     }
+    
+    public ChunkPosWrapper(long l) {
+    	this.chunkPos = new ChunkPos(l);
+    }
 
 
     public ChunkPosWrapper(ChunkPos pos)
@@ -87,6 +91,11 @@ public class ChunkPosWrapper extends AbstractChunkPosWrapper
     public int getRegionZ()
     {
         return chunkPos.getRegionZ();
+    }
+    
+    @Override
+    public long getLong() {
+    	return chunkPos.toLong();
     }
 
     public ChunkPos getChunkPos()
