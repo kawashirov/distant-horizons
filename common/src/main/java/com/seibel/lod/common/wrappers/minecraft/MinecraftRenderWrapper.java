@@ -264,4 +264,9 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
         return glFormat;
     }
+
+	@Override
+	public boolean tryDisableVanillaFog() {
+		return true; // Handled via the MixinFogRenderer at fabric. Forge... Yeah yeah yeah~~~ TODO!
+	}
 }
