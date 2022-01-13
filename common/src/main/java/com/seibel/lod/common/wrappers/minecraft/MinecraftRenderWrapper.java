@@ -263,4 +263,9 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     public boolean isFogStateInUnderWater() {
     	return GAME_RENDERER.getMainCamera().getFluidInCamera() == FogType.WATER;
     }
+
+	@Override
+	public boolean tryDisableVanillaFog() {
+		return true; // Handled via MixinFogRenderer in both forge and fabric
+	}
 }
