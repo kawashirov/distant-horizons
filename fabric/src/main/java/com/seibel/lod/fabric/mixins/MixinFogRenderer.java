@@ -22,16 +22,20 @@ import net.minecraft.world.level.material.FogType;
 public class MixinFogRenderer {
     private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 
-    @Inject(at = @At("RETURN"), method = "setupFog(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/FogRenderer$FogMode;FZ)V")
-    private static final void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, CallbackInfo callback) {
-        FogType fogTypes = camera.getFluidInCamera();
-        Entity entity = camera.getEntity();
-        boolean isUnderWater = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
-        if (!isUnderWater) {
-            if (fogMode == FogMode.FOG_TERRAIN && fogTypes == FogType.NONE && CONFIG.client().graphics().fogQuality().getDisableVanillaFog()) {
-                RenderSystem.setShaderFogStart(Float.MAX_VALUE);
-                RenderSystem.setShaderFogEnd(Float.MAX_VALUE);
-            }
-        }
-    }
+	// Using this instead of Float.MAX_VALUE because Sodium don't like it.
+	private static final float A_REALLY_REALLY_BIG_VALUE = 420694206942069.F;
+	private static final float A_EVEN_LARGER_VALUE = 42069420694206942069.F;
+	
+	@Inject(at = @At("RETURN"), method = "setupFog(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/FogRenderer$FogMode;FZ)V")
+	private static final void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, CallbackInfo callback) {
+	    FogType fogTypes = camera.getFluidInCamera();
+	    Entity entity = camera.getEntity();
+	    boolean isUnderWater = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
+	    if (!isUnderWater) {
+			if (fogMode == FogMode.FOG_TERRAIN && fogTypes == FogType.NONE && CONFIG.client().graphics().fogQuality().getDisableVanillaFog()) {
+			    RenderSystem.setShaderFogStart(A_REALLY_REALLY_BIG_VALUE);
+			    RenderSystem.setShaderFogEnd(A_EVEN_LARGER_VALUE);
+			}
+	    }
+	}
 }
