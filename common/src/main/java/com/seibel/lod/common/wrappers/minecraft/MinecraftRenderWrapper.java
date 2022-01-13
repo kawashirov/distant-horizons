@@ -267,6 +267,6 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
 	@Override
 	public boolean tryDisableVanillaFog() {
-		return true; // Handled via the MixinFogRenderer at fabric. Forge... Yeah yeah yeah~~~ TODO!
+		return true; // Handled via the MixinFogRenderer at fabric and forge
 	}
 }
