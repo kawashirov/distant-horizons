@@ -7,8 +7,7 @@
 	],
 	"client": [
 		"MixinOptionsScreen",
-		"MixinWorldRenderer",
-		"MixinFogRenderer"
+		"MixinWorldRenderer"
 	],
 	"server": []
 }
