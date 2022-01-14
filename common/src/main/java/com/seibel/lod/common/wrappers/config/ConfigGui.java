@@ -18,10 +18,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 // Logger (for debug stuff)
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-// Uses https://github.com/TheElectronWill/night-config for toml (only for Fabric since Forge allready includes this)
+// Uses https://github.com/TheElectronWill/night-config for toml (only for Fabric since Forge already includes this)
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 
@@ -33,6 +34,7 @@ import com.seibel.lod.core.config.*;
 
 // Minecraft imports
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -48,7 +50,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.client.resources.language.I18n;	// translation
-import com.mojang.blaze3d.vertex.PoseStack;
 //import net.minecraft.client.gui.narration.NarratableEntry; // Remove in 1.16
 
 /**
@@ -60,7 +61,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
  * Credits to Motschen
  *
  * @author coolGi2007
- * @version 1-6-2022
+ * @version 1-14-2022
  */
 @SuppressWarnings("unchecked")
 public abstract class ConfigGui
@@ -484,6 +485,15 @@ public abstract class ConfigGui
         public void tick()
         {
             super.tick();
+        }
+
+
+        /** When you close it, it goes to the previous screen and saves */
+        @Override
+        public void onClose()
+        {
+            saveToFile();
+            Objects.requireNonNull(minecraft).setScreen(this.parent);
         }
 
         @Override
