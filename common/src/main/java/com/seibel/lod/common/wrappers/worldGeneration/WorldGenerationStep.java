@@ -100,7 +100,9 @@ Lod Generation:          0.269023348s
 */
 
 public final class WorldGenerationStep {
-	public static final boolean ENABLE_PERF_LOGGING = true;
+	public static final boolean ENABLE_PERF_LOGGING = false;
+	//TODO: Make this LightMode a config
+	public static final LightMode DEFAULT_LIGHTMODE = LightMode.Fancy;
 	
 	
 	public static class Rolling {
@@ -351,7 +353,7 @@ public final class WorldGenerationStep {
 			id = generationFutureDebugIDs++;
 			this.target = target;
 			this.tParam = ThreadedParameters.getOrMake(generationGroup.params);
-			this.lightMode = LightMode.Fancy; //TODO: Make this an option/config
+			this.lightMode = DEFAULT_LIGHTMODE;
 			future = generationGroup.executors.submit(() -> {
 				generationGroup.generateLodFromList(this);
 			});
