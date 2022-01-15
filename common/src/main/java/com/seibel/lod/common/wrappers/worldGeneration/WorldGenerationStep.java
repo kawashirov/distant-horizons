@@ -20,10 +20,12 @@
 package com.seibel.lod.common.wrappers.worldGeneration;
 
 import com.seibel.lod.core.api.ClientApi;
+import com.seibel.lod.core.api.ModAccessorApi;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
 import com.seibel.lod.core.objects.lod.LodDimension;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 
 import it.unimi.dsi.fastutil.objects.ObjectListIterator;
 
@@ -52,6 +54,7 @@ import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ColorResolver;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
@@ -81,6 +84,7 @@ import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.lighting.LayerLightEngine;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.WorldData;
@@ -196,7 +200,7 @@ public final class WorldGenerationStep {
 	}
 	
 	enum LightMode {
-		Fancy, Fast, Step
+		Fancy, Fast, Step, StarLight
 	}
 
 	public static final class GridList<T> extends ArrayList<T> implements List<T> {
@@ -353,7 +357,10 @@ public final class WorldGenerationStep {
 			id = generationFutureDebugIDs++;
 			this.target = target;
 			this.tParam = ThreadedParameters.getOrMake(generationGroup.params);
-			this.lightMode = DEFAULT_LIGHTMODE;
+			LightMode mode = DEFAULT_LIGHTMODE;
+			if (ModAccessorApi.get(IStarlightAccessor.class) != null) mode = LightMode.StarLight;
+			this.lightMode = mode;
+			
 			future = generationGroup.executors.submit(() -> {
 				generationGroup.generateLodFromList(this);
 			});
@@ -591,8 +598,9 @@ public final class WorldGenerationStep {
 			return subRange;
 		} finally {
 			switch (region.lightMode) {
+			case StarLight:
 			case Fancy:
-				stepLight.generateGroup((WorldGenLightEngine)region.getLightEngine(), subRange);
+				stepLight.generateGroup(region.getLightEngine(), subRange);
 				break;
 			case Step:
 				((WorldGenLightEngine)region.getLightEngine()).runUpdates();
@@ -804,14 +812,21 @@ public final class WorldGenerationStep {
 	public final class StepLight {
 		public final ChunkStatus STATUS = ChunkStatus.LIGHT;
 		
-		public final void generateGroup(WorldGenLightEngine lightEngine,
+		public final void generateGroup(LevelLightEngine lightEngine,
 				GridList<ChunkAccess> chunks) {
 			for (ChunkAccess chunk : chunks) {
 				((ProtoChunk) chunk).setStatus(STATUS);
 			}
 			for (ChunkAccess chunk : chunks) {
 				try {
-					lightEngine.lightChunk(chunk, true);
+					if (lightEngine instanceof WorldGenLightEngine) {
+						((WorldGenLightEngine)lightEngine).lightChunk(chunk, true);
+					} else if (lightEngine instanceof ThreadedLevelLightEngine) {
+						((ThreadedLevelLightEngine) lightEngine).lightChunk(chunk, true).join();
+					} else {
+						assert(false);
+					}
+					
 				} catch (Exception e) {
 					e.printStackTrace();
 					continue;
@@ -821,13 +836,13 @@ public final class WorldGenerationStep {
 	}
 	
 	public static class LightedWorldGenRegion extends WorldGenRegion {
-		final WorldGenLightEngine light;
+		final LevelLightEngine light;
 		final LightMode lightMode;
 		
 		public LightedWorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list, ChunkStatus chunkStatus, int i, LightMode lightMode) {
 			super(serverLevel, list, chunkStatus, i);
 			this.lightMode = lightMode;
-			light = new WorldGenLightEngine(new LightGetterAdaptor(this));
+			light = lightMode==LightMode.StarLight ? serverLevel.getLightEngine() : new WorldGenLightEngine(new LightGetterAdaptor(this));
 		}
 
 		@Override
@@ -905,6 +920,5 @@ public final class WorldGenerationStep {
 	        super.runUpdates(2147483647, true, true);
 	    }
 	}
-	
 	
 }

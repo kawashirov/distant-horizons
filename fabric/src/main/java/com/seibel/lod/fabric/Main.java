@@ -26,8 +26,10 @@ import com.seibel.lod.core.api.ModAccessorApi;
 import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 import com.seibel.lod.fabric.modAccessor.ModChecker;
 import com.seibel.lod.fabric.modAccessor.SodiumAccessor;
+import com.seibel.lod.fabric.modAccessor.StarlightAccessor;
 import com.seibel.lod.fabric.wrappers.DependencySetup;
 
 import net.fabricmc.api.ClientModInitializer;
@@ -69,6 +71,9 @@ public class Main implements ClientModInitializer
 		client_proxy.registerEvents();
 		if (SingletonHandler.get(IModChecker.class).isModLoaded("sodium")) {
 			ModAccessorApi.bind(ISodiumAccessor.class, new SodiumAccessor());
+		}
+		if (SingletonHandler.get(IModChecker.class).isModLoaded("starlight")) {
+			ModAccessorApi.bind(IStarlightAccessor.class, new StarlightAccessor());
 		}
 	}
 
