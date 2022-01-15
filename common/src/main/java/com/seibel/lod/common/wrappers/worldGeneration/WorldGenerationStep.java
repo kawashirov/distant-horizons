@@ -100,7 +100,7 @@ Lod Generation:          0.269023348s
 */
 
 public final class WorldGenerationStep {
-	public static final boolean ENABLE_PERF_LOGGING = false;
+	public static final boolean ENABLE_PERF_LOGGING = true;
 	
 	
 	public static class Rolling {
@@ -140,6 +140,7 @@ public final class WorldGenerationStep {
 		long surfaceNano = 0;
 		long carverNano = 0;
 		long featureNano = 0;
+		long lightNano = 0;
 		long endNano = 0;
 	}
 
@@ -154,6 +155,7 @@ public final class WorldGenerationStep {
 		Rolling surfaceTime = new Rolling(SIZE);
 		Rolling carverTime = new Rolling(SIZE);
 		Rolling featureTime = new Rolling(SIZE);
+		Rolling lightTime = new Rolling(SIZE);
 		Rolling lodTime = new Rolling(SIZE);
 
 		public void recordEvent(PrefEvent e) {
@@ -166,7 +168,8 @@ public final class WorldGenerationStep {
 			surfaceTime.add(e.surfaceNano - e.noiseNano);
 			carverTime.add(e.carverNano - e.surfaceNano);
 			featureTime.add(e.featureNano - e.carverNano);
-			lodTime.add(e.endNano - e.featureNano);
+			lightTime.add(e.lightNano - e.featureNano);
+			lodTime.add(e.endNano - e.lightNano);
 		}
 
 		public String toString() {
@@ -178,7 +181,8 @@ public final class WorldGenerationStep {
 					+ Duration.ofNanos((long) noiseTime.getAverage()) + ", Surface: "
 					+ Duration.ofNanos((long) surfaceTime.getAverage()) + ", Carver: "
 					+ Duration.ofNanos((long) carverTime.getAverage()) + ", Feature: "
-					+ Duration.ofNanos((long) featureTime.getAverage()) + ", Lod: "
+					+ Duration.ofNanos((long) featureTime.getAverage()) + ", Light: "
+					+ Duration.ofNanos((long) lightTime.getAverage()) + ", Lod: "
 					+ Duration.ofNanos((long) lodTime.getAverage());
 		}
 	}
@@ -187,6 +191,10 @@ public final class WorldGenerationStep {
 
 	enum Steps {
 		Empty, StructureStart, StructureReference, Biomes, Noise, Surface, Carvers, LiquidCarvers, Features, Light,
+	}
+	
+	enum LightMode {
+		Fancy, Fast, Step
 	}
 
 	public static final class GridList<T> extends ArrayList<T> implements List<T> {
@@ -333,6 +341,7 @@ public final class WorldGenerationStep {
 		long nanotime;
 		final int id;
 		final Steps target;
+		final LightMode lightMode;
 		final PrefEvent pEvent = new PrefEvent();
 
 		public GenerationEvent(ChunkPos pos, int range, WorldGenerationStep generationGroup, Steps target) {
@@ -342,6 +351,7 @@ public final class WorldGenerationStep {
 			id = generationFutureDebugIDs++;
 			this.target = target;
 			this.tParam = ThreadedParameters.getOrMake(generationGroup.params);
+			this.lightMode = LightMode.Fancy; //TODO: Make this an option/config
 			future = generationGroup.executors.submit(() -> {
 				generationGroup.generateLodFromList(this);
 			});
@@ -475,7 +485,7 @@ public final class WorldGenerationStep {
 			}
 			e.pEvent.emptyNano = System.nanoTime();
 			e.refreshTimeout();
-			region = new LightedWorldGenRegion(params.level, chunks, ChunkStatus.STRUCTURE_STARTS, e.range + 1);
+			region = new LightedWorldGenRegion(params.level, chunks, ChunkStatus.STRUCTURE_STARTS, e.range + 1, e.lightMode);
 			referencedChunks = chunks.subGrid(e.range);
 			referencedChunks = generateDirect(e, referencedChunks, e.target, region);
 			
@@ -535,10 +545,13 @@ public final class WorldGenerationStep {
 	}
 
 	public final GridList<ChunkAccess> generateDirect(GenerationEvent e, GridList<ChunkAccess> subRange, Steps step,
-			WorldGenRegion region) {
+			LightedWorldGenRegion region) {
 		try {
 			subRange.forEach((chunk) -> {
 				((ProtoChunk) chunk).setLightEngine(region.getLightEngine());
+				if (region.lightMode == LightMode.Step) {
+					((WorldGenLightEngine)region.getLightEngine()).lightChunk(chunk, false);
+				}
 			});
 			stepStructureStart.generateGroup(e.tParam, region, subRange);
 			e.pEvent.structStartNano = System.nanoTime();
@@ -575,7 +588,18 @@ public final class WorldGenerationStep {
 			e.refreshTimeout();
 			return subRange;
 		} finally {
-			stepLight.generateGroup((WorldGenLightEngine)region.getLightEngine(), subRange);
+			switch (region.lightMode) {
+			case Fancy:
+				stepLight.generateGroup((WorldGenLightEngine)region.getLightEngine(), subRange);
+				break;
+			case Step:
+				((WorldGenLightEngine)region.getLightEngine()).runUpdates();
+				break;
+			case Fast:
+				break;
+			}
+			e.pEvent.lightNano = System.nanoTime();
+			e.refreshTimeout();
 		}
 	}
 	
@@ -597,12 +621,16 @@ public final class WorldGenerationStep {
 
 		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
+
+			for (ChunkAccess chunk : chunks) {
+				((ProtoChunk) chunk).setStatus(STATUS);
+			}
+			
 			if (params.worldGenSettings.generateFeatures()) {
 				for (ChunkAccess chunk : chunks) {
 					// System.out.println("StepStructureStart: "+chunk.getPos());
 					params.generator.createStructures(params.registry, tParams.structFeat, chunk, params.structures,
 							params.worldSeed);
-					((ProtoChunk) chunk).setStatus(STATUS);
 					try {
 						tParams.structCheck.onStructureLoad(chunk.getPos(), chunk.getAllStarts());
 					} catch (ArrayIndexOutOfBoundsException e) {
@@ -659,10 +687,14 @@ public final class WorldGenerationStep {
 
 		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
+
+			for (ChunkAccess chunk : chunks) {
+				((ProtoChunk) chunk).setStatus(STATUS);
+			}
+			
 			for (ChunkAccess chunk : chunks) {
 				// System.out.println("StepStructureReference: "+chunk.getPos());
 				createReferences(worldGenRegion, tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk);
-				((ProtoChunk) chunk).setStatus(STATUS);
 			}
 		}
 	}
@@ -672,11 +704,15 @@ public final class WorldGenerationStep {
 
 		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
+
+			for (ChunkAccess chunk : chunks) {
+				((ProtoChunk) chunk).setStatus(STATUS);
+			}
+			
 			for (ChunkAccess chunk : chunks) {
 				// System.out.println("StepBiomes: "+chunk.getPos());
 				chunk = joinAsync(params.generator.createBiomes(params.biomes, Runnable::run,
 						Blender.of(worldGenRegion), tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
-				((ProtoChunk) chunk).setStatus(STATUS);
 			}
 		}
 	}
@@ -686,11 +722,14 @@ public final class WorldGenerationStep {
 		
 		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
+
+			for (ChunkAccess chunk : chunks) {
+				((ProtoChunk) chunk).setStatus(STATUS);
+			}
 			for (ChunkAccess chunk : chunks) {
 				// System.out.println("StepNoise: "+chunk.getPos());
 				chunk = joinAsync(params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion),
 						tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
-				((ProtoChunk) chunk).setStatus(STATUS);
 			}
 		}
 	}
@@ -701,10 +740,12 @@ public final class WorldGenerationStep {
 		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
 			for (ChunkAccess chunk : chunks) {
+				((ProtoChunk) chunk).setStatus(STATUS);
+			}
+			for (ChunkAccess chunk : chunks) {
 				// System.out.println("StepSurface: "+chunk.getPos());
 				params.generator.buildSurface(worldGenRegion, tParams.structFeat.forWorldGenRegion(worldGenRegion),
 						chunk);
-				((ProtoChunk) chunk).setStatus(STATUS);
 			}
 		}
 	}
@@ -734,23 +775,27 @@ public final class WorldGenerationStep {
 		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				GridList<ChunkAccess> chunks) {
 			for (ChunkAccess chunk : chunks) {
-				ProtoChunk protoChunk = (ProtoChunk) chunk;
+				((ProtoChunk) chunk).setStatus(STATUS);
+			}
+			
+			for (ChunkAccess chunk : chunks) {
 				try {
 					params.generator.applyBiomeDecoration(worldGenRegion, chunk,
 							tParams.structFeat.forWorldGenRegion(worldGenRegion));
 					Blender.generateBorderTicks(worldGenRegion, chunk);
 				} catch (ReportedException e) {
-					// e.printStackTrace();
+					e.printStackTrace();
+					continue;
 					// FIXME: Features concurrent modification issue. Something about cocobeans just
 					// aren't happy
 					// For now just retry.
-				} finally {
-					Heightmap.primeHeightmaps(chunk,
-							EnumSet.of(Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-									Heightmap.Types.OCEAN_FLOOR, Heightmap.Types.WORLD_SURFACE));
-					protoChunk.setStatus(STATUS);
 				}
-			}
+			}/*
+			for (ChunkAccess chunk : chunks) {
+				Heightmap.primeHeightmaps(chunk,
+						EnumSet.of(Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
+								Heightmap.Types.OCEAN_FLOOR, Heightmap.Types.WORLD_SURFACE));
+			}*/
 		}
 	}
 
@@ -760,10 +805,11 @@ public final class WorldGenerationStep {
 		public final void generateGroup(WorldGenLightEngine lightEngine,
 				GridList<ChunkAccess> chunks) {
 			for (ChunkAccess chunk : chunks) {
-				//boolean isLighted = chunk.isLightCorrect();
-				boolean isLighted = false;
+				((ProtoChunk) chunk).setStatus(STATUS);
+			}
+			for (ChunkAccess chunk : chunks) {
 				try {
-					lightEngine.lightChunk(chunk, isLighted);
+					lightEngine.lightChunk(chunk, true);
 				} catch (Exception e) {
 					e.printStackTrace();
 					continue;
@@ -774,9 +820,11 @@ public final class WorldGenerationStep {
 	
 	public static class LightedWorldGenRegion extends WorldGenRegion {
 		final WorldGenLightEngine light;
+		final LightMode lightMode;
 		
-		public LightedWorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list, ChunkStatus chunkStatus, int i) {
+		public LightedWorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list, ChunkStatus chunkStatus, int i, LightMode lightMode) {
 			super(serverLevel, list, chunkStatus, i);
+			this.lightMode = lightMode;
 			light = new WorldGenLightEngine(new LightGetterAdaptor(this));
 		}
 
@@ -787,12 +835,19 @@ public final class WorldGenerationStep {
 
 		@Override
 		public int getBrightness(LightLayer lightLayer, BlockPos blockPos) {
-			return light.getLayerListener(lightLayer).getLightValue(blockPos);
+			if (lightMode != LightMode.Fast)
+				return light.getLayerListener(lightLayer).getLightValue(blockPos);
+			if (lightLayer == LightLayer.BLOCK) return 0;
+			BlockPos p = super.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
+			return (p.getY()<=blockPos.getY()) ? getMaxLightLevel() : 0;
 		}
 		
 		@Override
 		public int getRawBrightness(BlockPos blockPos, int i) {
-			return light.getRawBrightness(blockPos, i);
+			if (lightMode != LightMode.Fast)
+				return light.getRawBrightness(blockPos, i);
+			BlockPos p = super.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
+			return (p.getY()<=blockPos.getY()) ? getMaxLightLevel() : 0;
 		}
 
 		@Override
@@ -820,10 +875,10 @@ public final class WorldGenerationStep {
 	}
 	public static class WorldGenLightEngine extends LevelLightEngine {
 		public WorldGenLightEngine(LightGetterAdaptor genRegion) {
-			super(genRegion, false, true);
+			super(genRegion, true, true);
 		}
 
-	    public void lightChunk(ChunkAccess chunkAccess, boolean isLighted) {
+	    public void lightChunk(ChunkAccess chunkAccess, boolean hasLightBlock) {
 	    	ChunkPos chunkPos = chunkAccess.getPos();
 	        chunkAccess.setLightCorrect(false);
 	        
@@ -835,14 +890,13 @@ public final class WorldGenerationStep {
                 super.updateSectionStatus(SectionPos.of(chunkPos, j), false);
             }
             super.enableLightSources(chunkPos, true);
-            if (!isLighted) {
+            if (hasLightBlock) {
                 chunkAccess.getLights().forEach(blockPos ->
                 super.onBlockEmissionIncrease(blockPos, chunkAccess.getLightEmission(blockPos)));
             }
             
             chunkAccess.setLightCorrect(true);
             runUpdates();
-            super.retainData(chunkPos, false);
 	    }
 	    
 	    public void runUpdates() {
