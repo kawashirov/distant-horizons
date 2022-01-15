@@ -23,8 +23,21 @@ configurations {
     developmentForge.extendsFrom common
 }
 
+repositories {
+    // Required for Starlight
+    maven {
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+}
+
 dependencies {
     forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
+
+    // Starlight
+//    implementation("curse.maven:starlight-forge-526854:${project.starlight_version_forge}")
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }

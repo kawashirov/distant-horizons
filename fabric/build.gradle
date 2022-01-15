@@ -31,6 +31,14 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
+
+    // Required for Starlight
+    maven {
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 
@@ -45,6 +53,9 @@ dependencies {
     modImplementation("com.terraformersmc:modmenu:${rootProject.modmenu_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
+
+    // Starlight
+    modImplementation "curse.maven:starlight-521783:${project.starlight_version_fabric}"
 
     // Sodium
     modImplementation "maven.modrinth:sodium:${project.sodium_version}"
