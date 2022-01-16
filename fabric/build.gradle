@@ -55,7 +55,7 @@ dependencies {
     }
 
     // Starlight
-    modImplementation "curse.maven:starlight-521783:${project.starlight_version_fabric}"
+    // modImplementation "curse.maven:starlight-521783:${project.starlight_version_fabric}"
 
     // Sodium
     modImplementation "maven.modrinth:sodium:${project.sodium_version}"

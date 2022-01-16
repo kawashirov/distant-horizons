@@ -35,6 +35,7 @@ public class SodiumAccessor implements ISodiumAccessor {
 							p.maxBlockX()-1, p.maxBlockY()-1, p.maxBlockZ()-1)) return true;
 				}
 				return false;
+				//return true;
 			}).mapToObj((long l) -> {
 				return (AbstractChunkPosWrapper)factory.createChunkPos(l);
 			}).collect(Collectors.toCollection(HashSet::new));
