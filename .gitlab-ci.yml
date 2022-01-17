@@ -22,7 +22,7 @@ before_script:
 
 build:
   stage: build
-  script: gradle build
+  script: ./gradlew.bat build
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: push
