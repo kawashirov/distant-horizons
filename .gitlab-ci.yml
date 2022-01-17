@@ -24,6 +24,8 @@ before_script:
     # Writing GE_JOB_ID variable to environment file, will need the value in the next stage.
     - echo GE_JOB_ID=$CI_JOB_ID >> generate_jars.env
 
+
+# first stage
 build:
     stage: build
     script: ./gradlew build
@@ -46,6 +48,7 @@ build:
             dotenv: generate_jars.env
 
 
+# second stage
 deploy:
     stage: deploy
     image: registry.gitlab.com/gitlab-org/release-cli:latest
@@ -58,10 +61,10 @@ deploy:
         - job: build
           artifacts: true
     release:
-        name: 'Release Jars $CI_COMMIT_SHORT_SHA'
-        description: 'Created using the release-cli'
+        name: 'Unstable Jars for Latest Commit' #: $CI_COMMIT_SHORT_SHA'
+        description: 'Created automatically using the release-cli.'
         # tag_name is a mendatory field and can not be an empty string
-        tag_name: '$CI_COMMIT_SHORT_SHA'
+        tag_name: 'Unstable-$CI_COMMIT_SHORT_SHA'
         assets:
             links:
                 - name: 'Fabric Jars'
