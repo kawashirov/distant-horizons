@@ -172,7 +172,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
         int lightMapHeight = getLightmapTextureHeight();
         int lightMapWidth = getLightmapTextureWidth();
 
-        int[] pixels = new int[lightMapWidth * lightMapHeight];
+        int pixels[] = new int[lightMapWidth * lightMapHeight];
         for (int u = 0; u < lightMapWidth; u++)
         {
             for (int v = 0; v < lightMapWidth; v++)

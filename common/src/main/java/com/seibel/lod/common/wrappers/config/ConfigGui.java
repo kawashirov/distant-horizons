@@ -124,7 +124,7 @@ public abstract class ConfigGui
 		TranslatableComponent name;
 		int index;
 		/** Hides the button */
-		final boolean hideOption = false;
+		boolean hideOption = false;
 		/** This asks if it is a button to goto a new screen */
 		boolean screenButton = false;
 		/** This is only called if button is true */
@@ -170,10 +170,9 @@ public abstract class ConfigGui
 					initClient(field, info, category);
 			}
 
-			String s = (!category.isEmpty() ? category + "." : "") + field.getName();
 			if (field.isAnnotationPresent(ConfigAnnotations.Entry.class))
 			{
-				entryMap.put(s, info);
+				entryMap.put((!category.isEmpty() ? category + "." : "") + field.getName(), info);
 				info.varClass = field.getType();
 				try
 				{
@@ -183,7 +182,7 @@ public abstract class ConfigGui
 			}
 
 			if (field.isAnnotationPresent(ConfigAnnotations.ScreenEntry.class))
-				initNestedClass(field.getType(), s);
+				initNestedClass(field.getType(), (!category.isEmpty() ? category + "." : "") + field.getName());
 
 
 			info.field = field;
@@ -441,6 +440,7 @@ public abstract class ConfigGui
 			try {
 				Files.deleteIfExists(configFilePath);
 				saveToFile();
+				return;
 			} catch (Exception f) {
 				LOGGER.info("Failed creating config file for " + MOD_NAME_READABLE + " at the path [" + configFilePath.toString() + "].");
 				f.printStackTrace();
@@ -476,7 +476,7 @@ public abstract class ConfigGui
 
 		private final String translationPrefix;
 		private final Screen parent;
-		private final String category;
+		private String category;
 		private ConfigListWidget list;
 		private boolean reload = false;
 
@@ -605,7 +605,7 @@ public abstract class ConfigGui
 						String key = translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName() + ".@tooltip";
 
 						if (info.error != null && text.equals(name)) renderTooltip(matrices, (Component) info.error.getValue(), mouseX, mouseY);
-						else if (I18n.exists(key) && (text != null && text.equals(name))) {
+						else if (I18n.exists(key) && (text == null ? false : text.equals(name))) {
 							List<Component> list = new ArrayList<>();
 							for (String str : I18n.get(key).split("\n"))
 								list.add(new TextComponent(str));
@@ -623,7 +623,7 @@ public abstract class ConfigGui
 
 	public static class ConfigListWidget extends ContainerObjectSelectionList<ButtonEntry>
 	{
-		final Font textRenderer;
+		Font textRenderer;
 
 		public ConfigListWidget(Minecraft minecraftClient, int i, int j, int k, int l, int m)
 		{

@@ -15,7 +15,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
 
 public class SodiumAccessor implements ISodiumAccessor {
-	final IWrapperFactory factory = SingletonHandler.get(IWrapperFactory.class);
+	IWrapperFactory factory = SingletonHandler.get(IWrapperFactory.class);
 
 	@Override
 	public String getModName() {
@@ -37,7 +37,7 @@ public class SodiumAccessor implements ISodiumAccessor {
 				return false;
 				//return true;
 			}).mapToObj((long l) -> {
-				return factory.createChunkPos(l);
+				return (AbstractChunkPosWrapper)factory.createChunkPos(l);
 			}).collect(Collectors.toCollection(HashSet::new));
 	}
 

@@ -36,7 +36,7 @@ public class BiomeWrapper implements IBiomeWrapper
 {
 
     public static final ConcurrentMap<Biome, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
-    private final Biome biome;
+    private Biome biome;
 
     public BiomeWrapper(Biome biome)
     {

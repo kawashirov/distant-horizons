@@ -34,7 +34,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 public class DimensionTypeWrapper implements IDimensionTypeWrapper
 {
     private static final ConcurrentMap<DimensionType, DimensionTypeWrapper> dimensionTypeWrapperMap = new ConcurrentHashMap<>();
-    private final DimensionType dimensionType;
+    private DimensionType dimensionType;
 
     public DimensionTypeWrapper(DimensionType dimensionType)
     {

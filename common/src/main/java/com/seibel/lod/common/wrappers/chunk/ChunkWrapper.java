@@ -30,8 +30,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
  */
 public class ChunkWrapper implements IChunkWrapper
 {
-    private final ChunkAccess chunk;
-    private final BlockAndTintGetter lightSource;
+    private ChunkAccess chunk;
+    private BlockAndTintGetter lightSource;
     private final int CHUNK_SECTION_SHIFT = 4;
     private final int CHUNK_SECTION_MASK = 0b1111;
     private final int CHUNK_SIZE_SHIFT = 4;
@@ -46,10 +46,16 @@ public class ChunkWrapper implements IChunkWrapper
     public boolean isPositionInWater(int x, int y, int z)
     {
         BlockState blockState = chunk.getSections()[y >> CHUNK_SECTION_SHIFT].getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK);
-        
+
+        //This type of block is always in water
+        if((blockState.getBlock() instanceof LiquidBlock))// && !(blockState.getBlock() instanceof IWaterLoggable))
+            return true;
+
         //This type of block could be in water
-        return (blockState.getBlock() instanceof LiquidBlock)// && !(blockState.getBlock() instanceof IWaterLoggable))
-                || (blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).isPresent() && blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).get());
+        if(blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).isPresent() && blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).get())
+            return true;
+
+        return false;
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.seibel.lod.common.wrappers.chunk;
 
 import java.util.Objects;
 
+import com.seibel.lod.core.objects.lod.RegionPos;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
@@ -16,7 +17,7 @@ import net.minecraft.world.level.ChunkPos;
  */
 public class ChunkPosWrapper extends AbstractChunkPosWrapper
 {
-    private final net.minecraft.world.level.ChunkPos chunkPos;
+    private net.minecraft.world.level.ChunkPos chunkPos;
 
     public ChunkPosWrapper()
     {

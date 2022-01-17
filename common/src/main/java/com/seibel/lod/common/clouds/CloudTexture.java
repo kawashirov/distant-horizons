@@ -7,14 +7,15 @@ import net.minecraft.world.level.levelgen.LegacyRandomSource;
 import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 
 import java.util.*;
+import java.util.List;
 
 public class CloudTexture {
 
-    public final List<PixelCoordinate> pixels = new LinkedList<PixelCoordinate>() {};
+    public List<PixelCoordinate> pixels = new LinkedList<PixelCoordinate>() {};
 
     public SimplexNoise noise;
     public DynamicTexture cloudsTexture;
-    public final ResourceLocation resourceLocation;
+    public ResourceLocation resourceLocation;
     public double cloudiness;
 
     public CloudTexture(ResourceLocation resourceLocation) {
@@ -71,9 +72,9 @@ public class CloudTexture {
     }
 
     public static class PixelCoordinate {
-        public final int posX;
-        public final int posZ;
-        public final boolean fading;
+        public int posX;
+        public int posZ;
+        public boolean fading;
 
         public PixelCoordinate(int posX, int posZ, boolean fading) {
             this.posX = posX;

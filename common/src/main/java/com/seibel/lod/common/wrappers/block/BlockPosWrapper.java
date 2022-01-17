@@ -14,7 +14,7 @@ import net.minecraft.core.BlockPos;
  */
 public class BlockPosWrapper extends AbstractBlockPosWrapper
 {
-    private final BlockPos.MutableBlockPos blockPos;
+    private BlockPos.MutableBlockPos blockPos;
 
 
     public BlockPosWrapper()
