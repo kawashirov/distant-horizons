@@ -48,26 +48,26 @@ build:
             dotenv: generate_jars.env
 
 
-# second stage
-deploy:
-    stage: deploy
-    image: registry.gitlab.com/gitlab-org/release-cli:latest
-    script:
-        - echo 'running release_job'
-        - echo 'Previous Job ID is printed below'
-        - echo $GE_JOB_ID
-    # Specifying that this job requires artifacts from the previous job to succeed
-    needs:
-        - job: build
-          artifacts: true
-    release:
-        name: 'Unstable Jars for Latest Commit' #: $CI_COMMIT_SHORT_SHA'
-        description: 'Created automatically using the release-cli.'
-        # tag_name is a mendatory field and can not be an empty string
-        tag_name: 'Unstable-$CI_COMMIT_SHORT_SHA'
-        assets:
-            links:
-                - name: 'Fabric Jars'
-                  url: 'https://gitlab.com/jeseibel/minecraft-lod-mod/cw/-/jobs/${GE_JOB_ID}/artifacts/file/fabric/build/libs'
-                - name: 'Forge Jars'
-                  url: 'https://gitlab.com/jeseibel/minecraft-lod-mod/cw/-/jobs/${GE_JOB_ID}/artifacts/file/forge/build/libs'
+## second stage
+#deploy:
+#    stage: deploy
+#    image: registry.gitlab.com/gitlab-org/release-cli:latest
+#    script:
+#        - echo 'running release_job'
+#        - echo 'Previous Job ID is printed below'
+#        - echo $GE_JOB_ID
+#    # Specifying that this job requires artifacts from the previous job to succeed
+#    needs:
+#        - job: build
+#          artifacts: true
+#    release:
+#        name: 'Unstable Jars for Latest Commit' #: $CI_COMMIT_SHORT_SHA'
+#        description: 'Created automatically using the release-cli.'
+#        # tag_name is a mendatory field and can not be an empty string
+#        tag_name: 'Unstable-$CI_COMMIT_SHORT_SHA'
+#        assets:
+#            links:
+#                - name: 'Fabric Jars'
+#                  url: 'https://gitlab.com/jeseibel/minecraft-lod-mod/cw/-/jobs/${GE_JOB_ID}/artifacts/file/fabric/build/libs'
+#                - name: 'Forge Jars'
+#                  url: 'https://gitlab.com/jeseibel/minecraft-lod-mod/cw/-/jobs/${GE_JOB_ID}/artifacts/file/forge/build/libs'
