@@ -9,7 +9,7 @@
 # https://github.com/gradle/gradle
 
 #image: gradle:alpine
-image: gradle:eclipse-temurin:8
+image: gradle:eclipse-temurin
 
 # Disable the Gradle daemon for Continuous Integration servers as correctness
 # is usually a priority over speed in CI environments. Using a fresh
@@ -26,6 +26,7 @@ before_script:
 build:
   stage: build
   script: ./gradlew build
+  image: eclipse-temurin:8
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: push
