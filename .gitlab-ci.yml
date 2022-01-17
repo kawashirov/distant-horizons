@@ -68,6 +68,6 @@ deploy:
         assets:
             links:
                 - name: 'Fabric Jars'
-                  url: 'https://gitlab.com/jeseibel/minecraft-lod-mod/cw/-/jobs/${GE_JOB_ID}/artifacts/file/fabric/'
+                  url: 'https://gitlab.com/jeseibel/minecraft-lod-mod/cw/-/jobs/${GE_JOB_ID}/artifacts/file/fabric/build/libs'
                 - name: 'Forge Jars'
-                  url: 'https://gitlab.com/jeseibel/minecraft-lod-mod/cw/-/jobs/${GE_JOB_ID}/artifacts/file/forge/'
+                  url: 'https://gitlab.com/jeseibel/minecraft-lod-mod/cw/-/jobs/${GE_JOB_ID}/artifacts/file/forge/build/libs'
