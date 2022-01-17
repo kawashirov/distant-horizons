@@ -13,8 +13,8 @@ public class CloudBufferSingleton
 	
 	public static final CloudBufferSingleton INSTANCE = new CloudBufferSingleton();
 	
-	public FloatBuffer customBuffer = MemoryUtil.memAllocFloat(16);
-	public FloatBuffer mcBuffer = MemoryUtil.memAllocFloat(16);
+	public final FloatBuffer customBuffer = MemoryUtil.memAllocFloat(16);
+	public final FloatBuffer mcBuffer = MemoryUtil.memAllocFloat(16);
 	
 	public CloudBufferSingleton(){
 	

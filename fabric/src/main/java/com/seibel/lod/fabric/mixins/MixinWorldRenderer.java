@@ -19,27 +19,21 @@
 
 package com.seibel.lod.fabric.mixins;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.seibel.lod.common.clouds.CloudBufferSingleton;
 import com.seibel.lod.common.clouds.CloudTexture;
 import com.seibel.lod.common.clouds.NoiseCloudHandler;
 import com.seibel.lod.common.wrappers.McObjectConverter;
-import com.seibel.lod.common.wrappers.config.LodConfigWrapperSingleton;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
-import net.minecraft.client.renderer.LevelRenderer;
-import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.objects.math.Mat4f;
-
-import net.minecraft.client.renderer.RenderType;
 
 
 import com.mojang.blaze3d.platform.GlStateManager;
@@ -170,9 +164,9 @@ public class MixinWorldRenderer
 		double posZ = cameraZ / scale + 0.33000001311302185D;
 		posX -= Math.floor(posX / 2048.0D) * 2048;
 		posZ -= Math.floor(posZ / 2048.0D) * 2048;
-		float adjustedX = (float) (posX - (double) Math.floor(posX));
-		float adjustedY = (float) (posY / 4.0D - (double) Math.floor(posY / 4.0D)) * 4.0F;
-		float adjustedZ = (float) (posZ - (double) Math.floor(posZ));
+		float adjustedX = (float) (posX - Math.floor(posX));
+		float adjustedY = (float) (posY / 4.0D - Math.floor(posY / 4.0D)) * 4.0F;
+		float adjustedZ = (float) (posZ - Math.floor(posZ));
 		Vec3 cloudColor = minecraft.level.getCloudColor(tickDelta);
 		int floorX = (int) Math.floor(posX);
 		int floorY = (int) Math.floor(posY / 4.0D);

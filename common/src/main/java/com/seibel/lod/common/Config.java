@@ -60,7 +60,7 @@ public class Config extends ConfigGui
 	// This is a hacky method to not show the button in the options screen but show it in the mod menu
 	// Tough it is in client in the wrapper singleton
 	@ConfigAnnotations.Entry
-	public static boolean optionsButton = true;
+	public static final boolean optionsButton = true;
 
 	public static class Client
 	{
@@ -92,38 +92,38 @@ public class Config extends ConfigGui
 			public static class Quality
 			{
 				@ConfigAnnotations.Entry
-				public static HorizontalResolution drawResolution = IQuality.DRAW_RESOLUTION_DEFAULT;
+				public static final HorizontalResolution drawResolution = IQuality.DRAW_RESOLUTION_DEFAULT;
 
 				@ConfigAnnotations.Entry(minValue = 16, maxValue = 1024)
-				public static int lodChunkRenderDistance = IQuality.LOD_CHUNK_RENDER_DISTANCE_MIN_DEFAULT_MAX.defaultValue;
+				public static final int lodChunkRenderDistance = IQuality.LOD_CHUNK_RENDER_DISTANCE_MIN_DEFAULT_MAX.defaultValue;
 
 				@ConfigAnnotations.Entry
-				public static VerticalQuality verticalQuality = IQuality.VERTICAL_QUALITY_DEFAULT;
+				public static final VerticalQuality verticalQuality = IQuality.VERTICAL_QUALITY_DEFAULT;
 
 				@ConfigAnnotations.Entry(minValue = 2, maxValue = 32)
-				public static int horizontalScale = IQuality.HORIZONTAL_SCALE_MIN_DEFAULT_MAX.defaultValue;
+				public static final int horizontalScale = IQuality.HORIZONTAL_SCALE_MIN_DEFAULT_MAX.defaultValue;
 
 				@ConfigAnnotations.Entry
-				public static HorizontalQuality horizontalQuality = IQuality.HORIZONTAL_QUALITY_DEFAULT;
+				public static final HorizontalQuality horizontalQuality = IQuality.HORIZONTAL_QUALITY_DEFAULT;
 				
 				@ConfigAnnotations.Entry
-				public static DropoffQuality dropoffQuality = IQuality.DROPOFF_QUALITY_DEFAULT;
+				public static final DropoffQuality dropoffQuality = IQuality.DROPOFF_QUALITY_DEFAULT;
 			}
 
 
 			public static class FogQuality
 			{
 				@ConfigAnnotations.Entry
-				public static FogDistance fogDistance = IFogQuality.FOG_DISTANCE_DEFAULT;
+				public static final FogDistance fogDistance = IFogQuality.FOG_DISTANCE_DEFAULT;
 
 				@ConfigAnnotations.Entry
-				public static FogDrawMode fogDrawMode = IFogQuality.FOG_DRAW_MODE_DEFAULT;
+				public static final FogDrawMode fogDrawMode = IFogQuality.FOG_DRAW_MODE_DEFAULT;
 
 				@ConfigAnnotations.Entry
-				public static FogColorMode fogColorMode = IFogQuality.FOG_COLOR_MODE_DEFAULT;
+				public static final FogColorMode fogColorMode = IFogQuality.FOG_COLOR_MODE_DEFAULT;
 
 				@ConfigAnnotations.Entry
-				public static boolean disableVanillaFog = IFogQuality.DISABLE_VANILLA_FOG_DEFAULT;
+				public static final boolean disableVanillaFog = IFogQuality.DISABLE_VANILLA_FOG_DEFAULT;
 			}
 
 
@@ -133,35 +133,35 @@ public class Config extends ConfigGui
 				public static ConfigAnnotations.Comment cloudWarning;
 				
 				@ConfigAnnotations.Entry
-				public static boolean customClouds = ICloudQuality.CUSTOM_CLOUDS_DEFAULT;
+				public static final boolean customClouds = ICloudQuality.CUSTOM_CLOUDS_DEFAULT;
 
 				@ConfigAnnotations.Entry
-				public static boolean fabulousClouds = ICloudQuality.FABULOUS_CLOUDS_DEFAULT;
+				public static final boolean fabulousClouds = ICloudQuality.FABULOUS_CLOUDS_DEFAULT;
 
 				@ConfigAnnotations.Entry
-				public static boolean extendClouds = ICloudQuality.EXTEND_CLOUDS_DEFAULT;
+				public static final boolean extendClouds = ICloudQuality.EXTEND_CLOUDS_DEFAULT;
 
 				@ConfigAnnotations.Entry
-				public static double cloudHeight = DimensionSpecialEffects.OverworldEffects.CLOUD_LEVEL;
+				public static final double cloudHeight = DimensionSpecialEffects.OverworldEffects.CLOUD_LEVEL;
 			}
 
 
 			public static class AdvancedGraphics
 			{
 				@ConfigAnnotations.Entry
-				public static boolean disableDirectionalCulling = IAdvancedGraphics.DISABLE_DIRECTIONAL_CULLING_DEFAULT;
+				public static final boolean disableDirectionalCulling = IAdvancedGraphics.DISABLE_DIRECTIONAL_CULLING_DEFAULT;
 
 				@ConfigAnnotations.Entry
-				public static boolean alwaysDrawAtMaxQuality = IAdvancedGraphics.ALWAYS_DRAW_AT_MAD_QUALITY_DEFAULT;
+				public static final boolean alwaysDrawAtMaxQuality = IAdvancedGraphics.ALWAYS_DRAW_AT_MAD_QUALITY_DEFAULT;
 
 				@ConfigAnnotations.Entry
-				public static VanillaOverdraw vanillaOverdraw = IAdvancedGraphics.VANILLA_OVERDRAW_DEFAULT;
+				public static final VanillaOverdraw vanillaOverdraw = IAdvancedGraphics.VANILLA_OVERDRAW_DEFAULT;
 
 				@ConfigAnnotations.Entry
-				public static boolean useExtendedNearClipPlane = IAdvancedGraphics.USE_EXTENDED_NEAR_CLIP_PLANE_DEFAULT;
+				public static final boolean useExtendedNearClipPlane = IAdvancedGraphics.USE_EXTENDED_NEAR_CLIP_PLANE_DEFAULT;
 
 				@ConfigAnnotations.Entry(minValue = 0, maxValue = 512)
-				public static int backsideCullingRange = IAdvancedGraphics.VANILLA_CULLING_RANGE_MIN_DEFAULT_MAX.defaultValue;
+				public static final int backsideCullingRange = IAdvancedGraphics.VANILLA_CULLING_RANGE_MIN_DEFAULT_MAX.defaultValue;
 			}
 		}
 
@@ -169,17 +169,17 @@ public class Config extends ConfigGui
 		public static class WorldGenerator
 		{
 			@ConfigAnnotations.Entry
-			public static GenerationPriority generationPriority = IWorldGenerator.GENERATION_PRIORITY_DEFAULT;
+			public static final GenerationPriority generationPriority = IWorldGenerator.GENERATION_PRIORITY_DEFAULT;
 
 			@ConfigAnnotations.Entry
-			public static DistanceGenerationMode distanceGenerationMode = IWorldGenerator.DISTANCE_GENERATION_MODE_DEFAULT;
+			public static final DistanceGenerationMode distanceGenerationMode = IWorldGenerator.DISTANCE_GENERATION_MODE_DEFAULT;
 
 			// FIXME: Temperary override. In 1.18, the newer Unstable gnerator is more usable
 			@ConfigAnnotations.Entry
-			public static boolean allowUnstableFeatureGeneration = true;//IWorldGenerator.ALLOW_UNSTABLE_FEATURE_GENERATION_DEFAULT;
+			public static final boolean allowUnstableFeatureGeneration = true;//IWorldGenerator.ALLOW_UNSTABLE_FEATURE_GENERATION_DEFAULT;
 
 			@ConfigAnnotations.Entry
-			public static BlocksToAvoid blocksToAvoid = IWorldGenerator.BLOCKS_TO_AVOID_DEFAULT;
+			public static final BlocksToAvoid blocksToAvoid = IWorldGenerator.BLOCKS_TO_AVOID_DEFAULT;
 		}
 
 		public static class Advanced
@@ -197,36 +197,36 @@ public class Config extends ConfigGui
 			public static class Threading
 			{
 				@ConfigAnnotations.Entry(minValue = 1, maxValue = 50)
-				public static int numberOfWorldGenerationThreads = IThreading.NUMBER_OF_WORLD_GENERATION_THREADS_DEFAULT.defaultValue;
+				public static final int numberOfWorldGenerationThreads = IThreading.NUMBER_OF_WORLD_GENERATION_THREADS_DEFAULT.defaultValue;
 
 				@ConfigAnnotations.Entry(minValue = 1, maxValue = 50)
-				public static int numberOfBufferBuilderThreads = IThreading.NUMBER_OF_BUFFER_BUILDER_THREADS_MIN_DEFAULT_MAX.defaultValue;
+				public static final int numberOfBufferBuilderThreads = IThreading.NUMBER_OF_BUFFER_BUILDER_THREADS_MIN_DEFAULT_MAX.defaultValue;
 			}
 
 
 			public static class Debugging
 			{
 				@ConfigAnnotations.Entry
-				public static boolean drawLods = IDebugging.DRAW_LODS_DEFAULT;
+				public static final boolean drawLods = IDebugging.DRAW_LODS_DEFAULT;
 
 				@ConfigAnnotations.Entry
-				public static DebugMode debugMode = IDebugging.DEBUG_MODE_DEFAULT;
+				public static final DebugMode debugMode = IDebugging.DEBUG_MODE_DEFAULT;
 
 				@ConfigAnnotations.Entry
-				public static boolean enableDebugKeybindings = IDebugging.DEBUG_KEYBINDINGS_ENABLED_DEFAULT;
+				public static final boolean enableDebugKeybindings = IDebugging.DEBUG_KEYBINDINGS_ENABLED_DEFAULT;
 			}
 
 
 			public static class Buffers
 			{
 				@ConfigAnnotations.Entry
-				public static GpuUploadMethod gpuUploadMethod = IBuffers.GPU_UPLOAD_METHOD_DEFAULT;
+				public static final GpuUploadMethod gpuUploadMethod = IBuffers.GPU_UPLOAD_METHOD_DEFAULT;
 
 				@ConfigAnnotations.Entry(minValue = 0, maxValue = 5000)
-				public static int gpuUploadPerMegabyteInMilliseconds = IBuffers.GPU_UPLOAD_PER_MEGABYTE_IN_MILLISECONDS_DEFAULT.defaultValue;
+				public static final int gpuUploadPerMegabyteInMilliseconds = IBuffers.GPU_UPLOAD_PER_MEGABYTE_IN_MILLISECONDS_DEFAULT.defaultValue;
 
 				@ConfigAnnotations.Entry
-				public static BufferRebuildTimes rebuildTimes = IBuffers.REBUILD_TIMES_DEFAULT;
+				public static final BufferRebuildTimes rebuildTimes = IBuffers.REBUILD_TIMES_DEFAULT;
 			}
 		}
 	}

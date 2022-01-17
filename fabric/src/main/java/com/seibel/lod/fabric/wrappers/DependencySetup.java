@@ -18,6 +18,6 @@ public class DependencySetup
 {
 	public static void createInitialBindings()
 	{
-		SingletonHandler.bind(ILodConfigWrapperSingleton.class, LodConfigWrapperSingleton.INSTANCE);;
+		SingletonHandler.bind(ILodConfigWrapperSingleton.class, LodConfigWrapperSingleton.INSTANCE);
 	}
 }
