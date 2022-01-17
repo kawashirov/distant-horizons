@@ -8,7 +8,8 @@
 # https://gradle.org/
 # https://github.com/gradle/gradle
 
-image: gradle:alpine
+#image: gradle:alpine
+image: gradle:eclipse-temurin:8
 
 # Disable the Gradle daemon for Continuous Integration servers as correctness
 # is usually a priority over speed in CI environments. Using a fresh
@@ -20,6 +21,7 @@ variables:
 
 before_script:
   - export GRADLE_USER_HOME=`pwd`
+  #- apt-get update && apt-get -y install openjdk-8-jdk  && apt-get -y install ant
 
 build:
   stage: build
