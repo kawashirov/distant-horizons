@@ -138,6 +138,8 @@ shadowJar {
     relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
     relocate 'com.electronwill.nightconfig', 'shaded.electronwill.nightconfig'
 
+    relocate 'com.seibel.lod.common', 'fabric.com.seibel.lod.common'
+
     classifier "dev-shadow"
 }
 
