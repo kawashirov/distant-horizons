@@ -1,7 +1,17 @@
+import io.github.rancraftplayz.jarmerger.JarMergerPlugin
+
+buildscript {
+    dependencies{
+        classpath files('plugins/DHJarMerger-1.0.jar')
+    }
+}
+
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "0.10.0.195" apply false
 }
+
+apply plugin: JarMergerPlugin
 
 architectury {
     minecraft = rootProject.minecraft_version

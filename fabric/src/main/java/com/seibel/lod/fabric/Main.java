@@ -26,12 +26,11 @@ import com.seibel.lod.core.api.ModAccessorApi;
 import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
-import com.seibel.lod.fabric.modAccessor.ModChecker;
-import com.seibel.lod.fabric.modAccessor.SodiumAccessor;
+import com.seibel.lod.fabric.wrappers.modAccessor.ModChecker;
+import com.seibel.lod.fabric.wrappers.modAccessor.SodiumAccessor;
 import com.seibel.lod.fabric.wrappers.DependencySetup;
 
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.loader.api.FabricLoader;
 
 /**
  * Initialize and setup the Mod. <br>

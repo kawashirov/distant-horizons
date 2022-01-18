@@ -33,7 +33,7 @@
   },
 
   "mixins": [
-    "lod.mixins.json"
+    "fabric.lod.mixins.json"
   ],
 
   "accessWidener" : "lod.accesswidener",
