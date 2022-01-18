@@ -23,6 +23,9 @@ accessible field net/minecraft/world/level/lighting/LevelLightEngine skyEngine L
 accessible method net/minecraft/world/level/levelgen/Heightmap setHeight (III)V
 accessible field net/minecraft/world/level/biome/Biome generationSettings Lnet/minecraft/world/level/biome/BiomeGenerationSettings;
 
+# lod generation from save file
+accessible method net/minecraft/server/level/ChunkMap scheduleChunkLoad (Lnet/minecraft/world/level/ChunkPos;)Ljava/util/concurrent/CompletableFuture; 
+
 # grabbing textures
 accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite animatedTexture Lnet/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture;
 accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite width I

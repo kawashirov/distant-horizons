@@ -27,6 +27,8 @@ import com.seibel.lod.core.enums.config.DistanceGenerationMode;
 import com.seibel.lod.core.objects.lod.LodDimension;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -38,6 +40,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.datafixers.DataFixer;
@@ -92,7 +96,7 @@ Lod Generation:          0.269023348s
 */
 
 public final class WorldGenerationStep {
-	public static final boolean ENABLE_PERF_LOGGING = false;
+	public static final boolean ENABLE_PERF_LOGGING = true;
 	//TODO: Make this LightMode a config
 	public static final LightMode DEFAULT_LIGHTMODE = LightMode.Fancy;
 	
@@ -167,7 +171,7 @@ public final class WorldGenerationStep {
 		}
 
 		public String toString() {
-			return "Total: " + Duration.ofNanos((long) totalTime.getAverage()) + ", Empty: "
+			return "Total: " + Duration.ofNanos((long) totalTime.getAverage()) + ", Empty/LoadChunk: "
 					+ Duration.ofNanos((long) emptyTime.getAverage()) + ", StructStart: "
 					+ Duration.ofNanos((long) structStartTime.getAverage()) + ", StructRef: "
 					+ Duration.ofNanos((long) structRefTime.getAverage()) + ", Biome: "
@@ -380,7 +384,7 @@ public final class WorldGenerationStep {
 			int distX = Math.abs(cx - pos.x);
 			int distZ = Math.abs(cz - pos.z);
 			int minRange = cr+range+1; //Need one to account for the center
-			minRange += 3 + 3; // Account for required empty chunks
+			minRange += 1+1; // Account for required empty chunks
 			return distX < minRange && distZ < minRange;
 		}
 
@@ -458,6 +462,12 @@ public final class WorldGenerationStep {
 		ClientApi.LOGGER.info("================WORLD_GEN_STEP_INITING=============");
 		params = new GlobalParameters(level, lodBuilder, lodDim);
 	}
+	
+	public void startLoadingAllRegionsFromFile(LodDimension lodDim) {
+		ServerLevel level = params.level;
+		level.getChunkSource();
+		
+	}
 
 	public void generateLodFromList(GenerationEvent e) {
 		e.pEvent.beginNano = System.nanoTime();
@@ -467,22 +477,35 @@ public final class WorldGenerationStep {
 		try {
 			int cx = e.pos.x;
 			int cy = e.pos.z;
-			int rangeEmpty = e.range + 3;
-			if (rangeEmpty < 7)
-				rangeEmpty = 7; // For some reason the Blender needs at least range 7???
+			int rangeEmpty = e.range + 1;
 			GridList<ChunkAccess> chunks = new GridList<ChunkAccess>(rangeEmpty);
+			
+			@SuppressWarnings("resource")
+			EmptyChunkGenerator generator = (int x, int z) -> {
+				ChunkPos chunkPos = new ChunkPos(x, z);
+				ChunkAccess target = null;
+				try {
+					target = params.level.getChunkSource().chunkMap.scheduleChunkLoad(chunkPos).join().left().orElseGet(null);
+				} catch (RuntimeException e2) {
+					// Continue...
+					e2.printStackTrace();
+				}
+				if (target == null)
+					target = new ProtoChunk(chunkPos, UpgradeData.EMPTY, params.level,
+						params.biomes, null);
+				return target;
+			};
 
 			for (int oy = -rangeEmpty; oy <= rangeEmpty; oy++) {
 				for (int ox = -rangeEmpty; ox <= rangeEmpty; ox++) {
 					// ChunkAccess target = getCachedChunk(new ChunkPos(cx+ox, cy+oy));
-					ChunkAccess target = new ProtoChunk(new ChunkPos(cx + ox, cy + oy), UpgradeData.EMPTY, params.level,
-							params.biomes, null);
+					ChunkAccess target = generator.generate(cx + ox, cy + oy);
 					chunks.add(target);
 				}
 			}
 			e.pEvent.emptyNano = System.nanoTime();
 			e.refreshTimeout();
-			region = new LightedWorldGenRegion(params.level, chunks, ChunkStatus.STRUCTURE_STARTS, e.range + 1, e.lightMode);
+			region = new LightedWorldGenRegion(params.level, chunks, ChunkStatus.STRUCTURE_STARTS, e.range + 1, e.lightMode, generator);
 			referencedChunks = chunks.subGrid(e.range);
 			referencedChunks = generateDirect(e, referencedChunks, e.target, region);
 			
@@ -611,12 +634,16 @@ public final class WorldGenerationStep {
 		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
 
+			ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
+			
 			for (ChunkAccess chunk : chunks) {
+				if (chunk.getStatus().isOrAfter(STATUS)) continue;
 				((ProtoChunk) chunk).setStatus(STATUS);
+				chunksToDo.add(chunk);
 			}
 			
 			if (params.worldGenSettings.generateFeatures()) {
-				for (ChunkAccess chunk : chunks) {
+				for (ChunkAccess chunk : chunksToDo) {
 					// System.out.println("StepStructureStart: "+chunk.getPos());
 					params.generator.createStructures(params.registry, tParams.structFeat, chunk, params.structures,
 							params.worldSeed);
@@ -677,11 +704,15 @@ public final class WorldGenerationStep {
 		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
 
-			for (ChunkAccess chunk : chunks) {
-				((ProtoChunk) chunk).setStatus(STATUS);
-			}
+			ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
 			
 			for (ChunkAccess chunk : chunks) {
+				if (chunk.getStatus().isOrAfter(STATUS)) continue;
+				((ProtoChunk) chunk).setStatus(STATUS);
+				chunksToDo.add(chunk);
+			}
+			
+			for (ChunkAccess chunk : chunksToDo) {
 				// System.out.println("StepStructureReference: "+chunk.getPos());
 				createReferences(worldGenRegion, tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk);
 			}
@@ -694,14 +725,19 @@ public final class WorldGenerationStep {
 		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
 
-			for (ChunkAccess chunk : chunks) {
-				((ProtoChunk) chunk).setStatus(STATUS);
-			}
+			ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
 			
 			for (ChunkAccess chunk : chunks) {
+				if (chunk.getStatus().isOrAfter(STATUS)) continue;
+				((ProtoChunk) chunk).setStatus(STATUS);
+				chunksToDo.add(chunk);
+			}
+			
+			for (ChunkAccess chunk : chunksToDo) {
 				// System.out.println("StepBiomes: "+chunk.getPos());
 				chunk = joinAsync(params.generator.createBiomes(params.biomes, Runnable::run,
-						Blender.of(worldGenRegion), tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
+						Blender.of(worldGenRegion),
+						tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
 			}
 		}
 	}
@@ -712,10 +748,15 @@ public final class WorldGenerationStep {
 		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
 
+			ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
+			
 			for (ChunkAccess chunk : chunks) {
+				if (chunk.getStatus().isOrAfter(STATUS)) continue;
 				((ProtoChunk) chunk).setStatus(STATUS);
+				chunksToDo.add(chunk);
 			}
-			for (ChunkAccess chunk : chunks) {
+			
+			for (ChunkAccess chunk : chunksToDo) {
 				// System.out.println("StepNoise: "+chunk.getPos());
 				chunk = joinAsync(params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion),
 						tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
@@ -728,10 +769,15 @@ public final class WorldGenerationStep {
 
 		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
+			ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
+			
 			for (ChunkAccess chunk : chunks) {
+				if (chunk.getStatus().isOrAfter(STATUS)) continue;
 				((ProtoChunk) chunk).setStatus(STATUS);
+				chunksToDo.add(chunk);
 			}
-			for (ChunkAccess chunk : chunks) {
+			
+			for (ChunkAccess chunk : chunksToDo) {
 				// System.out.println("StepSurface: "+chunk.getPos());
 				params.generator.buildSurface(worldGenRegion, tParams.structFeat.forWorldGenRegion(worldGenRegion),
 						chunk);
@@ -744,7 +790,15 @@ public final class WorldGenerationStep {
 
 		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
+			ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
+			
 			for (ChunkAccess chunk : chunks) {
+				if (chunk.getStatus().isOrAfter(STATUS)) continue;
+				((ProtoChunk) chunk).setStatus(STATUS);
+				chunksToDo.add(chunk);
+			}
+			
+			for (ChunkAccess chunk : chunksToDo) {
 				// DISABLED CURRENTLY!
 				// System.out.println("StepCarvers: "+chunk.getPos());
 				// Blender.addAroundOldChunksCarvingMaskFilter((WorldGenLevel) worldGenRegion,
@@ -763,11 +817,15 @@ public final class WorldGenerationStep {
 
 		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				GridList<ChunkAccess> chunks) {
-			for (ChunkAccess chunk : chunks) {
-				((ProtoChunk) chunk).setStatus(STATUS);
-			}
+			ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
 			
 			for (ChunkAccess chunk : chunks) {
+				if (chunk.getStatus().isOrAfter(STATUS)) continue;
+				((ProtoChunk) chunk).setStatus(STATUS);
+				chunksToDo.add(chunk);
+			}
+			
+			for (ChunkAccess chunk : chunksToDo) {
 				try {
 					params.generator.applyBiomeDecoration(worldGenRegion, chunk,
 							tParams.structFeat.forWorldGenRegion(worldGenRegion));
@@ -792,9 +850,13 @@ public final class WorldGenerationStep {
 		
 		public void generateGroup(LevelLightEngine lightEngine,
 				GridList<ChunkAccess> chunks) {
+			//ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
+			
 			for (ChunkAccess chunk : chunks) {
+				if (chunk.getStatus().isOrAfter(STATUS)) continue;
 				((ProtoChunk) chunk).setStatus(STATUS);
 			}
+			
 			for (ChunkAccess chunk : chunks) {
 				try {
 					if (lightEngine instanceof WorldGenLightEngine) {
@@ -812,13 +874,20 @@ public final class WorldGenerationStep {
 		}
 	}
 	
+	public interface EmptyChunkGenerator {
+		ChunkAccess generate(int x, int z);
+	}
+	
 	public static class LightedWorldGenRegion extends WorldGenRegion {
 		final LevelLightEngine light;
 		final LightMode lightMode;
-		
-		public LightedWorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list, ChunkStatus chunkStatus, int i, LightMode lightMode) {
+		final EmptyChunkGenerator generator;
+		Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
+		public LightedWorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
+				LightMode lightMode, EmptyChunkGenerator generator) {
 			super(serverLevel, list, chunkStatus, i);
 			this.lightMode = lightMode;
+			this.generator = generator;
 			light = lightMode==LightMode.StarLight ? serverLevel.getLightEngine() : new WorldGenLightEngine(new LightGetterAdaptor(this));
 		}
 
@@ -848,6 +917,19 @@ public final class WorldGenerationStep {
 		public boolean canSeeSky(BlockPos blockPos) {
 			return (getBrightness(LightLayer.SKY, blockPos) >= getMaxLightLevel());
 		}
+
+	    @Override
+	    @Nullable
+	    public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
+	    	if (!bl || this.hasChunk(i, j)) return super.getChunk(i, j, chunkStatus, bl);
+	    	ChunkAccess chunk = chunkMap.get(ChunkPos.asLong(i, j));
+	    	if (chunk!=null) return chunk;
+	    	chunk = generator.generate(i, j);
+	    	if (chunk==null) throw new NullPointerException();
+	    	chunkMap.put(ChunkPos.asLong(i, j), chunk);
+	    	return chunk;
+	    }
+		
 		
 	}
 	
