@@ -24,7 +24,7 @@ configurations {
 }
 
 repositories {
-    // Required for importing forge mods
+    // Required for importing cursedforge mods
     maven {
         url "https://www.cursemaven.com"
         content {
