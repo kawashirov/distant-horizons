@@ -24,7 +24,7 @@ configurations {
 }
 
 repositories {
-    // Required for Starlight
+    // Required for importing forge mods
     maven {
         url "https://www.cursemaven.com"
         content {

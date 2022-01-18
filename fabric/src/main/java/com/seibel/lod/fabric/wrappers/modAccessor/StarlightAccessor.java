@@ -1,4 +1,4 @@
-package com.seibel.lod.fabric.modAccessor;
+package com.seibel.lod.fabric.wrappers.modAccessor;
 
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 

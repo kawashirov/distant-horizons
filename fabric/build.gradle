@@ -32,7 +32,7 @@ repositories {
         }
     }
 
-    // Required for Starlight
+    // Required for importoing forge mods
     maven {
         url "https://www.cursemaven.com"
         content {

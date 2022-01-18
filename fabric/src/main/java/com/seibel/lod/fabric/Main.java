@@ -27,9 +27,9 @@ import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
-import com.seibel.lod.fabric.modAccessor.ModChecker;
-import com.seibel.lod.fabric.modAccessor.SodiumAccessor;
-import com.seibel.lod.fabric.modAccessor.StarlightAccessor;
+import com.seibel.lod.fabric.wrappers.modAccessor.ModChecker;
+import com.seibel.lod.fabric.wrappers.modAccessor.SodiumAccessor;
+import com.seibel.lod.fabric.wrappers.modAccessor.StarlightAccessor;
 import com.seibel.lod.fabric.wrappers.DependencySetup;
 
 import net.fabricmc.api.ClientModInitializer;
