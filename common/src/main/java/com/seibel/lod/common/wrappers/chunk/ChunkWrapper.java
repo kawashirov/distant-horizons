@@ -30,8 +30,8 @@ import net.minecraft.world.level.levelgen.Heightmap;
  */
 public class ChunkWrapper implements IChunkWrapper
 {
-    private ChunkAccess chunk;
-    private BlockAndTintGetter lightSource;
+    private final ChunkAccess chunk;
+    private final BlockAndTintGetter lightSource;
     private final int CHUNK_SECTION_SHIFT = 4;
     private final int CHUNK_SECTION_MASK = 0b1111;
     private final int CHUNK_SIZE_SHIFT = 4;

@@ -99,10 +99,10 @@ public final class WorldGenerationStep {
 	
 	public static class Rolling {
 
-		private int size;
+		private final int size;
 		private double total = 0d;
 		private int index = 0;
-		private double[] samples;
+		private final double[] samples;
 
 		public Rolling(int size) {
 			this.size = size;
@@ -213,23 +213,23 @@ public final class WorldGenerationStep {
 			this.gridCentreToEdge = gridCentreToEdge;
 		}
 
-		public final T getOffsetOf(int index, int x, int y) {
+		public T getOffsetOf(int index, int x, int y) {
 			return get(index + x + y * gridSize);
 		}
 
-		public final int offsetOf(int index, int x, int y) {
+		public int offsetOf(int index, int x, int y) {
 			return index + x + y * gridSize;
 		}
 
-		public final Pos posOf(int index) {
+		public Pos posOf(int index) {
 			return new Pos(index % gridSize, index / gridSize);
 		}
 
-		public final int calculateOffset(int x, int y) {
+		public int calculateOffset(int x, int y) {
 			return x + y * gridSize;
 		}
 
-		public final GridList<T> subGrid(int gridCentreToEdge) {
+		public GridList<T> subGrid(int gridCentreToEdge) {
 			int centreIndex = size() / 2;
 			GridList<T> subGrid = new GridList<T>(gridCentreToEdge);
 			for (int oy = -gridCentreToEdge; oy <= gridCentreToEdge; oy++) {
@@ -298,14 +298,14 @@ public final class WorldGenerationStep {
 	}
 
 	public static final class ThreadedParameters {
-		private static ThreadLocal<ThreadedParameters> localParam = new ThreadLocal<ThreadedParameters>();
+		private static final ThreadLocal<ThreadedParameters> localParam = new ThreadLocal<ThreadedParameters>();
 		final ServerLevel level;
 		final StructureFeatureManager structFeat;
 		final StructureCheck structCheck;
 		boolean isValid = true;
 		public final PerfCalculator perf = new PerfCalculator();
 
-		public static final ThreadedParameters getOrMake(GlobalParameters param) {
+		public static ThreadedParameters getOrMake(GlobalParameters param) {
 			ThreadedParameters tParam = localParam.get();
 			if (tParam != null && tParam.isValid && tParam.level == param.level)
 				return tParam;
@@ -354,21 +354,21 @@ public final class WorldGenerationStep {
 			});
 		}
 
-		public final boolean isCompleted() {
+		public boolean isCompleted() {
 			return future.isDone();
 		}
 
-		public final boolean hasTimeout(int duration, TimeUnit unit) {
+		public boolean hasTimeout(int duration, TimeUnit unit) {
 			long currentTime = System.nanoTime();
 			long delta = currentTime - nanotime;
 			return (delta > TimeUnit.NANOSECONDS.convert(duration, unit));
 		}
 
-		public final void terminate() {
+		public void terminate() {
 			future.cancel(true);
 		}
 
-		public final void join() {
+		public void join() {
 			try {
 				future.get();
 			} catch (InterruptedException | ExecutionException e) {
@@ -376,7 +376,7 @@ public final class WorldGenerationStep {
 			}
 		}
 
-		public final boolean tooClose(int cx, int cz, int cr) {
+		public boolean tooClose(int cx, int cz, int cr) {
 			int distX = Math.abs(cx - pos.x);
 			int distZ = Math.abs(cz - pos.z);
 			int minRange = cr+range+1; //Need one to account for the center
@@ -384,7 +384,7 @@ public final class WorldGenerationStep {
 			return distX < minRange && distZ < minRange;
 		}
 
-		public final void refreshTimeout() {
+		public void refreshTimeout() {
 			nanotime = System.nanoTime();
 		}
 
@@ -394,7 +394,7 @@ public final class WorldGenerationStep {
 		}
 	}
 
-	private final static <T> T joinAsync(CompletableFuture<T> f) {
+	private static <T> T joinAsync(CompletableFuture<T> f) {
 		return f.join();
 	}
 
@@ -412,7 +412,7 @@ public final class WorldGenerationStep {
 	public final ExecutorService executors = Executors
 			.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
 
-	public final boolean tryAddPoint(int px, int pz, int range, Steps target) {
+	public boolean tryAddPoint(int px, int pz, int range, Steps target) {
 		int boxSize = range * 2 + 1;
 		int x = Math.floorDiv(px, boxSize) * boxSize + range;
 		int z = Math.floorDiv(pz, boxSize) * boxSize + range;
@@ -426,7 +426,7 @@ public final class WorldGenerationStep {
 		return true;
 	}
 
-	public final void updateAllFutures() {
+	public void updateAllFutures() {
 		// Update all current out standing jobs
 		Iterator<GenerationEvent> iter = events.iterator();
 		while (iter.hasNext()) {
@@ -541,7 +541,7 @@ public final class WorldGenerationStep {
 		}
 	}
 
-	public final GridList<ChunkAccess> generateDirect(GenerationEvent e, GridList<ChunkAccess> subRange, Steps step,
+	public GridList<ChunkAccess> generateDirect(GenerationEvent e, GridList<ChunkAccess> subRange, Steps step,
 			LightedWorldGenRegion region) {
 		try {
 			subRange.forEach((chunk) -> {
@@ -617,7 +617,7 @@ public final class WorldGenerationStep {
 			}
 		}
 
-		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
+		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
 
 			for (ChunkAccess chunk : chunks) {
@@ -683,7 +683,7 @@ public final class WorldGenerationStep {
 			}
 		}
 
-		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
+		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
 
 			for (ChunkAccess chunk : chunks) {
@@ -700,7 +700,7 @@ public final class WorldGenerationStep {
 	public final class StepBiomes {
 		public final ChunkStatus STATUS = ChunkStatus.BIOMES;
 
-		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
+		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
 
 			for (ChunkAccess chunk : chunks) {
@@ -718,7 +718,7 @@ public final class WorldGenerationStep {
 	public final class StepNoise {
 		public final ChunkStatus STATUS = ChunkStatus.NOISE;
 		
-		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
+		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
 
 			for (ChunkAccess chunk : chunks) {
@@ -735,7 +735,7 @@ public final class WorldGenerationStep {
 	public final class StepSurface {
 		public final ChunkStatus STATUS = ChunkStatus.SURFACE;
 
-		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
+		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
 			for (ChunkAccess chunk : chunks) {
 				((ProtoChunk) chunk).setStatus(STATUS);
@@ -751,7 +751,7 @@ public final class WorldGenerationStep {
 	public final class StepCarvers {
 		public final ChunkStatus STATUS = ChunkStatus.CARVERS;
 
-		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
+		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
 			for (ChunkAccess chunk : chunks) {
 				// DISABLED CURRENTLY!
@@ -770,7 +770,7 @@ public final class WorldGenerationStep {
 	public final class StepFeatures {
 		public final ChunkStatus STATUS = ChunkStatus.FEATURES;
 
-		public final void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
+		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				GridList<ChunkAccess> chunks) {
 			for (ChunkAccess chunk : chunks) {
 				((ProtoChunk) chunk).setStatus(STATUS);
@@ -799,7 +799,7 @@ public final class WorldGenerationStep {
 	public final class StepLight {
 		public final ChunkStatus STATUS = ChunkStatus.LIGHT;
 		
-		public final void generateGroup(LevelLightEngine lightEngine,
+		public void generateGroup(LevelLightEngine lightEngine,
 				GridList<ChunkAccess> chunks) {
 			for (ChunkAccess chunk : chunks) {
 				((ProtoChunk) chunk).setStatus(STATUS);
@@ -868,8 +868,7 @@ public final class WorldGenerationStep {
 		@Override
 		public BlockGetter getChunkForLighting(int chunkX, int chunkZ) {
 			// May be null
-			ChunkAccess chunk = genRegion.getChunk(chunkX, chunkZ, ChunkStatus.EMPTY, false);
-			return chunk;
+			return genRegion.getChunk(chunkX, chunkZ, ChunkStatus.EMPTY, false);
 		}
 		@Override
 		public BlockGetter getLevel() {

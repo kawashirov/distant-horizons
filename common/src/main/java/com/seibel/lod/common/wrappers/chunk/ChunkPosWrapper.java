@@ -16,7 +16,7 @@ import net.minecraft.world.level.ChunkPos;
  */
 public class ChunkPosWrapper extends AbstractChunkPosWrapper
 {
-    private net.minecraft.world.level.ChunkPos chunkPos;
+    private final net.minecraft.world.level.ChunkPos chunkPos;
 
     public ChunkPosWrapper()
     {

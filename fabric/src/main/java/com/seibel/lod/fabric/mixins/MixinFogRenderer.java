@@ -26,7 +26,7 @@ public class MixinFogRenderer {
 	private static final float A_EVEN_LARGER_VALUE = 42069420694206942069.F;
 	
 	@Inject(at = @At("RETURN"), method = "setupFog(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/FogRenderer$FogMode;FZ)V")
-	private static final void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, CallbackInfo callback) {
+	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, CallbackInfo callback) {
 	    FogType fogTypes = camera.getFluidInCamera();
 	    Entity entity = camera.getEntity();
 	    boolean isUnderWater = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);

@@ -475,7 +475,7 @@ public abstract class ConfigGui
 
 		private final String translationPrefix;
 		private final Screen parent;
-		private String category;
+		private final String category;
 		private ConfigListWidget list;
 		private boolean reload = false;
 
@@ -604,7 +604,7 @@ public abstract class ConfigGui
 						String key = translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName() + ".@tooltip";
 
 						if (info.error != null && text.equals(name)) renderTooltip(matrices, (Component) info.error.getValue(), mouseX, mouseY);
-						else if (I18n.exists(key) && (text == null ? false : text.equals(name))) {
+						else if (I18n.exists(key) && (text != null && text.equals(name))) {
 							List<Component> list = new ArrayList<>();
 							for (String str : I18n.get(key).split("\n"))
 								list.add(new TextComponent(str));
