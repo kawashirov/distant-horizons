@@ -1,13 +1,4 @@
-# This file is a template, and might need editing before it works on your project.
-# To contribute improvements to CI/CD templates, please follow the Development guide at:
-# https://docs.gitlab.com/ee/development/cicd/templates.html
-# This specific template is located at:
-# https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Gradle.gitlab-ci.yml
-
-# This is the Gradle build system for JVM applications
-# https://gradle.org/
-# https://github.com/gradle/gradle
-
+# use Eclipse's JDK
 image: gradle:eclipse-temurin
 
 variables:
@@ -15,7 +6,8 @@ variables:
     # is usually a priority over speed in CI environments. Using a fresh
     # runtime for each build is more reliable since the runtime is completely
     # isolated from any previous builds.
-    #GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    # Pull core when building
     GIT_SUBMODULE_STRATEGY: recursive
 
 
@@ -29,7 +21,7 @@ before_script:
 build:
     stage: build
     script: ./gradlew build
-    # the number here is the JDK version
+    # build using Java 17
     image: eclipse-temurin:17
     cache:
         key: "$CI_COMMIT_REF_NAME"
