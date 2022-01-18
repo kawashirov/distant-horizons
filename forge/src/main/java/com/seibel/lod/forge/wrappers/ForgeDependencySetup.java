@@ -5,7 +5,7 @@ import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 
 /**
- * Binds all necessary dependencies so we
+ * Binds all necessary dependencies, so we
  * can access them in Core. <br>
  * This needs to be called before any Core classes
  * are loaded.

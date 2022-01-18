@@ -19,27 +19,21 @@
 
 package com.seibel.lod.forge.mixins;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.seibel.lod.common.clouds.CloudBufferSingleton;
 import com.seibel.lod.common.clouds.CloudTexture;
 import com.seibel.lod.common.clouds.NoiseCloudHandler;
 import com.seibel.lod.common.wrappers.McObjectConverter;
-import com.seibel.lod.common.wrappers.config.LodConfigWrapperSingleton;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
-import net.minecraft.client.renderer.LevelRenderer;
-import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.objects.math.Mat4f;
-
-import net.minecraft.client.renderer.RenderType;
 
 
 import com.mojang.blaze3d.platform.GlStateManager;

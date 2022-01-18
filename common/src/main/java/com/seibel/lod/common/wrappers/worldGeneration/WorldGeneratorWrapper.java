@@ -1,7 +1,5 @@
 package com.seibel.lod.common.wrappers.worldGeneration;
 
-import java.util.concurrent.ExecutionException;
-
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
@@ -14,10 +12,7 @@ import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractWorldGenera
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
 
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.*;
 
 /**
@@ -90,9 +85,7 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 
         ChunkStatus targetStatus;
         switch (generationMode) {
-            case NONE:
-                return;
-            case BIOME_ONLY:
+		case BIOME_ONLY:
                 targetStatus = ChunkStatus.BIOMES;
                 break;
             case BIOME_ONLY_SIMULATE_HEIGHT:
@@ -107,11 +100,12 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
             case FULL:
                 targetStatus = ChunkStatus.FULL;
                 break;
-            default:
+		case NONE:
+		default:
                 return;
         }
 
-        // The bool=true means that we wants to generate chunk, and that the returned ChunkAccess must not be null
+        // The bool=true means that we want to generate chunk, and that the returned ChunkAccess must not be null
 
         ChunkAccess ca = serverWorld.getChunkSource().getChunk(chunkX, chunkZ, targetStatus, true);
         if (ca == null) throw new RuntimeException("This should NEVER be null due to bool being true");

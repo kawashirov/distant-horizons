@@ -2,7 +2,6 @@ package com.seibel.lod.common.wrappers.minecraft;
 
 import java.awt.*;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 import com.mojang.blaze3d.platform.NativeImage;
@@ -173,12 +172,12 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
         int lightMapHeight = getLightmapTextureHeight();
         int lightMapWidth = getLightmapTextureWidth();
 
-        int pixels[] = new int[lightMapWidth * lightMapHeight];
+        int[] pixels = new int[lightMapWidth * lightMapHeight];
         for (int u = 0; u < lightMapWidth; u++)
         {
             for (int v = 0; v < lightMapWidth; v++)
             {
-                // this could probably be kept as a int, but
+                // this could probably be kept as an int, but
                 // it is easier to test and see the colors when debugging this way.
                 // When creating a new release this should be changed to the int version.
                 Color c = LodUtil.intToColor(lightMap.getLightValue(u, v));

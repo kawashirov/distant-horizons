@@ -4,7 +4,6 @@ import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.networking.NetworkInterface;
 import com.seibel.lod.common.wrappers.DependencySetup;
 import com.seibel.lod.common.wrappers.config.ConfigGui;
-import com.seibel.lod.core.ModInfo;
 
 /**
  * This is the common main class

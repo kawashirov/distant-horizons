@@ -7,7 +7,6 @@ import net.minecraft.world.level.levelgen.WorldgenRandom;
 import net.minecraft.world.level.levelgen.synth.SimplexNoise;
 
 import java.util.*;
-import java.util.List;
 
 public class CloudTexture {
 

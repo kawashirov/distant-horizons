@@ -26,7 +26,7 @@ public class MixinFogRenderer {
 	@Inject(at = @At("RETURN"),
 		method = "setupFog(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/FogRenderer$FogMode;FZF)V",
 		remap = false) // Due to this being a forge added method
-	private static final void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, float tick, CallbackInfo callback) {
+	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, float tick, CallbackInfo callback) {
 	    ILodConfigWrapperSingleton CONFIG;
 	    try {
 	    	CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);

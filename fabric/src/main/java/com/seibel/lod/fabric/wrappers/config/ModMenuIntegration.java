@@ -6,9 +6,6 @@ import com.terraformersmc.modmenu.api.ModMenuApi;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * For making the config show up in modmenu
  */
