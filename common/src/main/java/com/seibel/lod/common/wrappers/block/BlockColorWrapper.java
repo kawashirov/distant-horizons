@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
 import com.seibel.lod.core.util.ColorUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
@@ -154,10 +153,8 @@ public class BlockColorWrapper implements IBlockColorWrapper
 
         // generate the block's color
 //        for (int frameIndex = 0; frameIndex < texture.getFrameCount(); frameIndex++)
-        boolean lookForTint = false;
-        if (grassInstance() || leavesInstance() || waterIstance())
-            lookForTint = true;
-            
+        boolean lookForTint = grassInstance() || leavesInstance() || waterIstance();
+    
         int frameIndex = 0; // TODO
         {
             // textures normally use u and v instead of x and y

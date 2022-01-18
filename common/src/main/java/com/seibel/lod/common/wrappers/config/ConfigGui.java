@@ -440,7 +440,6 @@ public abstract class ConfigGui
 			try {
 				Files.deleteIfExists(configFilePath);
 				saveToFile();
-				return;
 			} catch (Exception f) {
 				LOGGER.info("Failed creating config file for " + MOD_NAME_READABLE + " at the path [" + configFilePath.toString() + "].");
 				f.printStackTrace();

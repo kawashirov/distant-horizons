@@ -27,11 +27,8 @@ import com.seibel.lod.core.enums.config.DistanceGenerationMode;
 import com.seibel.lod.core.objects.lod.LodDimension;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 
-import it.unimi.dsi.fastutil.objects.ObjectListIterator;
-
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -44,23 +41,17 @@ import java.util.concurrent.TimeUnit;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.datafixers.DataFixer;
-import com.mojang.datafixers.util.Pair;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.ColorResolver;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -74,7 +65,6 @@ import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
@@ -84,9 +74,7 @@ import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
-import net.minecraft.world.level.lighting.LayerLightEngine;
 import net.minecraft.world.level.lighting.LevelLightEngine;
-import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.WorldData;
 
 /*
@@ -114,7 +102,7 @@ public final class WorldGenerationStep {
 		private int size;
 		private double total = 0d;
 		private int index = 0;
-		private double samples[];
+		private double[] samples;
 
 		public Rolling(int size) {
 			this.size = size;
@@ -795,7 +783,6 @@ public final class WorldGenerationStep {
 					Blender.generateBorderTicks(worldGenRegion, chunk);
 				} catch (ReportedException e) {
 					e.printStackTrace();
-					continue;
 					// FIXME: Features concurrent modification issue. Something about cocobeans just
 					// aren't happy
 					// For now just retry.
@@ -829,7 +816,6 @@ public final class WorldGenerationStep {
 					
 				} catch (Exception e) {
 					e.printStackTrace();
-					continue;
 				}
 			}
 		}
