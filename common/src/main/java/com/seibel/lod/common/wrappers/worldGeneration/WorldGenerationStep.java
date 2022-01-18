@@ -100,7 +100,6 @@ public final class WorldGenerationStep {
 	//TODO: Make this LightMode a config
 	public static final LightMode DEFAULT_LIGHTMODE = LightMode.Fancy;
 	
-	
 	public static class Rolling {
 
 		private final int size;
