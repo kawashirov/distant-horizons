@@ -89,8 +89,6 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
     	
     	ChunkStatus targetStatus;
 		switch (generationMode) {
-		case NONE:
-			return;
 		case BIOME_ONLY:
 			targetStatus = ChunkStatus.BIOMES;
 			break;
@@ -106,6 +104,7 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper
 		case FULL:
 			targetStatus = ChunkStatus.FULL;
 			break;
+		case NONE:
 		default:
 			return;
 		}

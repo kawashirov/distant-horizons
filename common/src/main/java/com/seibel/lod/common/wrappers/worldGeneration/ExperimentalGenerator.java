@@ -113,11 +113,10 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 			targetStep = Steps.Surface; //Carvers or Surface???
 			break;
 		case FEATURES:
+		case FULL:
 			targetStep = Steps.Features;
 			break;
-		case FULL:
-			targetStep = Steps.Features; // TODO!
-			break;
+		// TODO!
 		default:
 			assert false;
 			return;

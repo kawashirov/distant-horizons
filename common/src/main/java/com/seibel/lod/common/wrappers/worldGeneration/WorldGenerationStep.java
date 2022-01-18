@@ -492,33 +492,24 @@ public final class WorldGenerationStep {
 		}
 
 		switch (e.target) {
-		case Empty:
-			return;
 		case StructureStart:
-			generationMode = DistanceGenerationMode.NONE;
-			break;
 		case StructureReference:
 			generationMode = DistanceGenerationMode.NONE;
 			break;
 		case Biomes:
-			generationMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
-			break;
 		case Noise:
 			generationMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
 			break;
 		case Surface:
-			generationMode = DistanceGenerationMode.SURFACE;
-			break;
 		case Carvers:
 			generationMode = DistanceGenerationMode.SURFACE;
 			break;
 		case Features:
 			generationMode = DistanceGenerationMode.FEATURES;
 			break;
-		case LiquidCarvers:
-			return;
 		case Light:
-			return;
+		case LiquidCarvers:
+		case Empty:
 		default:
 			return;
 		}
