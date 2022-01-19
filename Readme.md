@@ -82,3 +82,4 @@ To use a custom version of Java use `-D` then the path for Java
 
 XZ for Java (data compression)\
 https://tukaani.org/xz/java.html
+
