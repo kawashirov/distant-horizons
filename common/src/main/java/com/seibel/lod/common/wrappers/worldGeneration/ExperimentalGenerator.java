@@ -93,7 +93,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 
 		// TODO: Make it so that lodDim allows feeding in a function to fast halt if
 		// position generation is completed.
-		PosToGenerateContainer posToGenerate = lodDim.getPosToGenerate(estimatedSampleNeeded, playerPosX, playerPosZ, priority);
+		PosToGenerateContainer posToGenerate = lodDim.getPosToGenerate(estimatedSampleNeeded, playerPosX, playerPosZ, priority, mode);
 
 		// Find the max number of iterations we need to go though.
 		// We are checking one FarPos, and one NearPos per iterations. This ensure we
