@@ -10,6 +10,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
 import com.seibel.lod.core.api.ModAccessorApi;
 import com.seibel.lod.core.util.LodUtil;
+import com.seibel.lod.core.util.SingletonHandler;
 
 import net.minecraft.client.renderer.LightTexture;
 
@@ -17,9 +18,12 @@ import com.mojang.math.Vector3f;
 import com.seibel.lod.core.objects.math.Mat4f;
 import com.seibel.lod.core.objects.math.Vec3d;
 import com.seibel.lod.core.objects.math.Vec3f;
+import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
+import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftWrapper;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.WrapperFactory;
@@ -148,6 +152,13 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		if (sodium != null) {
 			return sodium.getNormalRenderedChunks();
 		}
+		IOptifineAccessor optifine = ModAccessorApi.get(IOptifineAccessor.class);
+		if (optifine != null) {
+			HashSet<AbstractChunkPosWrapper> pos = optifine.getNormalRenderedChunks();
+			if (pos==null) pos = getMaximumRenderedChunks();
+			return pos;
+		}
+		
     	LevelRenderer levelRenderer = MC.levelRenderer;
     	LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
     	return (chunks.stream().map((chunk) -> {
@@ -157,7 +168,32 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     	}).collect(Collectors.toCollection(HashSet::new)));
     }
     
-    
+    @Override
+	public HashSet<AbstractChunkPosWrapper> getMaximumRenderedChunks()
+	{
+    	//TODO: Make this a circle
+		IMinecraftWrapper mcWrapper = SingletonHandler.get(IMinecraftWrapper.class);
+		IWrapperFactory factory = SingletonHandler.get(IWrapperFactory.class);
+		
+		int chunkRenderDist = this.getRenderDistance();
+		
+		AbstractChunkPosWrapper centerChunkPos = mcWrapper.getPlayerChunkPos();
+		int startChunkX = centerChunkPos.getX() - chunkRenderDist;
+		int startChunkZ = centerChunkPos.getZ() - chunkRenderDist;
+		
+		// add every position within render distance
+		HashSet<AbstractChunkPosWrapper> renderedPos = new HashSet<AbstractChunkPosWrapper>();
+		for (int chunkX = 0; chunkX < (chunkRenderDist * 2+1); chunkX++)
+		{
+			for(int chunkZ = 0; chunkZ < (chunkRenderDist * 2+1); chunkZ++)
+			{
+				renderedPos.add(factory.createChunkPos(startChunkX + chunkX, startChunkZ + chunkZ));
+			}
+		}
+		
+		return renderedPos;	
+	}
+	
 
 
     @Override

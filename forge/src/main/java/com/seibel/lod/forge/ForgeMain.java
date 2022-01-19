@@ -24,11 +24,17 @@ import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
 import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.core.api.ClientApi;
+import com.seibel.lod.core.api.ModAccessorApi;
+import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
 
 import com.seibel.lod.forge.wrappers.modAccessor.ModChecker;
+import com.seibel.lod.forge.wrappers.modAccessor.OptifineAccessor;
+
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
@@ -36,12 +42,14 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.client.ConfigGuiHandler;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.forgespi.language.IModInfo;
 
 import java.util.List;
 import java.util.Random;
@@ -65,7 +73,12 @@ public class ForgeMain implements LodForgeMethodCaller
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(this, !FMLLoader.getDist().isClient());
 		ForgeDependencySetup.createInitialBindings();
+		ClientApi.LOGGER.info("Distant Horizons initializing...");
 		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
+
+		if (ReflectionHandler.instance.optifinePresent()) {
+			ModAccessorApi.bind(IOptifineAccessor.class, new OptifineAccessor());
+		}
 	}
 	
 	
