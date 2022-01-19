@@ -19,6 +19,7 @@
 
 package com.seibel.lod.common.wrappers.worldGeneration;
 
+import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.api.ModAccessorApi;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
@@ -536,14 +537,18 @@ public final class WorldGenerationStep {
 			return;
 		}
 		int centreIndex = referencedChunks.size() / 2;
-
+		
 		// System.out.println("Lod Generate Event: "+event);
-		for (int oy = -e.range; oy <= e.range; oy++) {
-			for (int ox = -e.range; ox <= e.range; ox++) {
+		for (int oy = -e.range; oy <= e.range; oy++)
+		{
+			for (int ox = -e.range; ox <= e.range; ox++)
+			{
 				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
 				ChunkAccess target = referencedChunks.get(targetIndex);
-				params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
-						new LodBuilderConfig(generationMode), false);
+				params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region), new LodBuilderConfig(generationMode)
+						, false);
+				//params.lodBuilder.generateLodNodeAsync(new ChunkWrapper(target, region), ApiShared.lodWorld, params.lodDim.dimension,
+				//		generationMode, false, () -> {}, () -> {});
 			}
 		}
 		e.pEvent.endNano = System.nanoTime();
