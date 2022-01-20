@@ -105,7 +105,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
         float[] colorValues = RenderSystem.getShaderFogColor();
         return new Color(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
     }
-    // getUnderWaterFogColor() is the same as getFogColor()
+    // getSpecialFogColor() is the same as getFogColor()
 
     @Override
     public Color getSkyColor() {
@@ -296,8 +296,8 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     }
     
     @Override
-    public boolean isFogStateInUnderWater() {
-    	return GAME_RENDERER.getMainCamera().getFluidInCamera() == FogType.WATER;
+    public boolean isFogStateSpecial() {
+    	return GAME_RENDERER.getMainCamera().getFluidInCamera() != FogType.NONE;
     }
 
 	@Override
