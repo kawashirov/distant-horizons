@@ -95,6 +95,8 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		// position generation is completed.
 		PosToGenerateContainer posToGenerate = lodDim.getPosToGenerate(estimatedSampleNeeded, playerPosX, playerPosZ, priority, mode);
 
+		//ClientApi.LOGGER.info("PosToGenerate: {}", posToGenerate);
+		
 		// Find the max number of iterations we need to go though.
 		// We are checking one FarPos, and one NearPos per iterations. This ensure we
 		// aren't just
@@ -102,6 +104,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		Steps targetStep;
 		switch (mode) {
 		case NONE:
+		case FULL:
 			return;
 		case BIOME_ONLY:
 			targetStep = Steps.Biomes; //NOTE: No block. Require fake height in LodBuilder
@@ -113,7 +116,6 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 			targetStep = Steps.Surface; //Carvers or Surface???
 			break;
 		case FEATURES:
-		case FULL:
 			targetStep = Steps.Features;
 			break;
 		// TODO!

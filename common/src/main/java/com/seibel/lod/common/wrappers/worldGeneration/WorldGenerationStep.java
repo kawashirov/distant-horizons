@@ -30,6 +30,7 @@ import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -46,9 +47,12 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.datafixers.util.Either;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ChunkHolder;
+import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.BlockGetter;
@@ -65,6 +69,7 @@ import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
+import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -73,6 +78,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.blending.Blender;
@@ -97,7 +103,7 @@ Lod Generation:          0.269023348s
 */
 
 public final class WorldGenerationStep {
-	public static final boolean ENABLE_PERF_LOGGING = true;
+	public static final boolean ENABLE_PERF_LOGGING = false;
 	//TODO: Make this LightMode a config
 	public static final LightMode DEFAULT_LIGHTMODE = LightMode.Fancy;
 	
@@ -469,7 +475,32 @@ public final class WorldGenerationStep {
 		
 	}
 
+
+    @SuppressWarnings("resource")
+	public static CompletableFuture<ChunkAccess> scheduleChunkLoadOverride(ChunkPos chunkPos, ServerLevel level) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                CompoundTag compoundTag = level.getChunkSource().chunkMap.readChunk(chunkPos);
+                if (compoundTag != null) {
+                    boolean bl = compoundTag.contains("Status", 8);
+                    if (bl) {
+                        ProtoChunk chunkAccess = ChunkSerializer.read(level, level.getPoiManager(), chunkPos, compoundTag);
+                        return chunkAccess;
+                    }
+                    ClientApi.LOGGER.error("DistantHorizons: Chunk file at {} is missing level data, skipping", chunkPos);
+                }
+            }
+            catch (Exception e) {
+            	ClientApi.LOGGER.error("DistantHorizons: Couldn't load chunk {}", chunkPos, e);
+            }
+            return new ProtoChunk(chunkPos, UpgradeData.EMPTY, level, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null);
+        }, level.getChunkSource().chunkMap.mainThreadExecutor);
+    }
+	
+	
+	
 	public void generateLodFromList(GenerationEvent e) {
+		//System.out.println("Lod Generate Event: "+e.pos);
 		e.pEvent.beginNano = System.nanoTime();
 		GridList<ChunkAccess> referencedChunks;
 		DistanceGenerationMode generationMode;
@@ -485,7 +516,7 @@ public final class WorldGenerationStep {
 				ChunkPos chunkPos = new ChunkPos(x, z);
 				ChunkAccess target = null;
 				try {
-					target = params.level.getChunkSource().chunkMap.scheduleChunkLoad(chunkPos).join().left().orElseGet(null);
+					target = scheduleChunkLoadOverride(chunkPos, params.level).join();
 				} catch (RuntimeException e2) {
 					// Continue...
 					e2.printStackTrace();
@@ -538,7 +569,6 @@ public final class WorldGenerationStep {
 		}
 		int centreIndex = referencedChunks.size() / 2;
 		
-		// System.out.println("Lod Generate Event: "+event);
 		for (int oy = -e.range; oy <= e.range; oy++)
 		{
 			for (int ox = -e.range; ox <= e.range; ox++)
