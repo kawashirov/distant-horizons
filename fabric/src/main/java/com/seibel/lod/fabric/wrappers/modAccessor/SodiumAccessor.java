@@ -1,4 +1,4 @@
-package com.seibel.lod.fabric.modAccessor;
+package com.seibel.lod.fabric.wrappers.modAccessor;
 
 import java.util.HashSet;
 import java.util.stream.Collectors;
