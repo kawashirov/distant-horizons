@@ -10,6 +10,10 @@ import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
 import com.seibel.lod.core.api.ModAccessorApi;
 import com.seibel.lod.core.util.LodUtil;
 
+import com.seibel.lod.core.util.SingletonHandler;
+import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
+import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftWrapper;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.renderer.LightTexture;
 
@@ -101,7 +105,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
         float[] colorValues = RenderSystem.getShaderFogColor();
         return new Color(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
     }
-    // getUnderWaterFogColor() is the same as getFogColor()
+    // getSpecialFogColor() is the same as getFogColor()
 
     @Override
     public Color getSkyColor() {
@@ -148,6 +152,13 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
         if (sodium != null) {
             return sodium.getNormalRenderedChunks();
         }
+        IOptifineAccessor optifine = ModAccessorApi.get(IOptifineAccessor.class);
+        if (optifine != null) {
+            HashSet<AbstractChunkPosWrapper> pos = optifine.getNormalRenderedChunks();
+            if (pos==null) pos = getMaximumRenderedChunks();
+            return pos;
+        }
+
         LevelRenderer levelRenderer = MC.levelRenderer;
         ObjectArrayList<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunks;
         return (chunks.stream().map((chunk) -> {
@@ -157,6 +168,31 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
         }).collect(Collectors.toCollection(HashSet::new)));
     }
 
+    @Override
+    public HashSet<AbstractChunkPosWrapper> getMaximumRenderedChunks()
+    {
+        //TODO: Make this a circle
+        IMinecraftWrapper mcWrapper = SingletonHandler.get(IMinecraftWrapper.class);
+        IWrapperFactory factory = SingletonHandler.get(IWrapperFactory.class);
+
+        int chunkRenderDist = this.getRenderDistance();
+
+        AbstractChunkPosWrapper centerChunkPos = mcWrapper.getPlayerChunkPos();
+        int startChunkX = centerChunkPos.getX() - chunkRenderDist;
+        int startChunkZ = centerChunkPos.getZ() - chunkRenderDist;
+
+        // add every position within render distance
+        HashSet<AbstractChunkPosWrapper> renderedPos = new HashSet<AbstractChunkPosWrapper>();
+        for (int chunkX = 0; chunkX < (chunkRenderDist * 2+1); chunkX++)
+        {
+            for(int chunkZ = 0; chunkZ < (chunkRenderDist * 2+1); chunkZ++)
+            {
+                renderedPos.add(factory.createChunkPos(startChunkX + chunkX, startChunkZ + chunkZ));
+            }
+        }
+
+        return renderedPos;
+    }
 
 
 
@@ -260,8 +296,8 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     }
 
     @Override
-    public boolean isFogStateInUnderWater() {
-        return GAME_RENDERER.getMainCamera().getFluidInCamera() == FogType.WATER;
+    public boolean isFogStateSpecial() {
+        return GAME_RENDERER.getMainCamera().getFluidInCamera() != FogType.NONE;
     }
 
 	@Override

@@ -10,6 +10,7 @@ import com.seibel.lod.common.wrappers.block.BlockShapeWrapper;
 import com.seibel.lod.common.wrappers.world.BiomeWrapper;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.QuartPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
@@ -31,24 +32,21 @@ public class ChunkWrapper implements IChunkWrapper
 {
     private ChunkAccess chunk;
     private BlockAndTintGetter lightSource;
-    private final int CHUNK_SECTION_SHIFT = 4;
-    private final int CHUNK_SECTION_MASK = 0b1111;
-    private final int CHUNK_SIZE_SHIFT = 4;
-    private final int CHUNK_SIZE_MASK = 0b1111;
 
     @Override
     public int getHeight(){
-        return chunk.getMaxBuildHeight();
+        return chunk.getHeight();
     }
 
     @Override
-    public boolean isPositionInWater(int x, int y, int z)
+    public int getMinBuildHeight()
     {
-        BlockState blockState = chunk.getSections()[y >> CHUNK_SECTION_SHIFT].getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK);
-
-        //This type of block could be in water
-        return ((blockState.getBlock() instanceof LiquidBlock))// && !(blockState.getBlock() instanceof IWaterLoggable))
-                || blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).isPresent() && blockState.getOptionalValue(BlockStateProperties.WATERLOGGED).get();
+        return chunk.getMinBuildHeight();
+    }
+    @Override
+    public int getMaxBuildHeight()
+    {
+        return chunk.getMaxBuildHeight();
     }
 
     @Override
@@ -60,22 +58,23 @@ public class ChunkWrapper implements IChunkWrapper
     @Override
     public IBiomeWrapper getBiome(int x, int y, int z)
     {
-        return BiomeWrapper.getBiomeWrapper(chunk.getBiomes().getNoiseBiome((x & CHUNK_SIZE_MASK) >> 2, y >> 2, (z & CHUNK_SIZE_MASK) >> 2));
+        return BiomeWrapper.getBiomeWrapper(chunk.getBiomes().getNoiseBiome(
+                QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)));
     }
 
     @Override
     public IBlockColorWrapper getBlockColorWrapper(int x, int y, int z)
     {
-        Block block = chunk.getSections()[y >> CHUNK_SECTION_SHIFT].getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK).getBlock();
+        BlockState blockState = chunk.getBlockState(new BlockPos(x,y,z));
+        Block block = blockState.getBlock();
         return BlockColorWrapper.getBlockColorWrapper(block);
     }
 
     @Override
     public IBlockShapeWrapper getBlockShapeWrapper(int x, int y, int z)
     {
-        LevelChunkSection section = chunk.getSections()[y >> CHUNK_SECTION_SHIFT];
-        if (section == null) return null;
-        Block block = section.getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK).getBlock();
+        BlockState blockState = chunk.getBlockState(new BlockPos(x,y,z));
+        Block block = blockState.getBlock();
         return BlockShapeWrapper.getBlockShapeWrapper(block, this, x, y, z);
     }
 
@@ -117,7 +116,7 @@ public class ChunkWrapper implements IChunkWrapper
 
     @Override
     public int getMaxY(int x, int z) {
-        return chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, x, z);
+        return chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, Math.floorMod(x, 16), Math.floorMod(z, 16));
     }
 
     @Override
@@ -149,11 +148,9 @@ public class ChunkWrapper implements IChunkWrapper
 
     public boolean isWaterLogged(int x, int y, int z)
     {
-        LevelChunkSection section = chunk.getSections()[y >> CHUNK_SECTION_SHIFT];
-        if (section == null) return false;
-        BlockState blockState = section.getBlockState(x & CHUNK_SIZE_MASK, y & CHUNK_SECTION_MASK, z & CHUNK_SIZE_MASK);
+        BlockState blockState = chunk.getBlockState(new BlockPos(x,y,z));
 
-		//This type of block is always in water
+        //This type of block is always in water
         return (!(blockState.getBlock() instanceof LiquidBlockContainer) && (blockState.getBlock() instanceof SimpleWaterloggedBlock))
                 && (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED));
     }
