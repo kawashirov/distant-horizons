@@ -36,6 +36,9 @@ repositories {
 dependencies {
     forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
 
+    // Optifine
+//    implementation("forge-mod:OptiFine_1.18.1_HD_U_H4")
+
     // Starlight
 //    implementation("curse.maven:starlight-forge-526854:${project.starlight_version_forge}")
 

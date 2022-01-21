@@ -62,6 +62,19 @@ allprojects { p ->
         mavenCentral()
         // used to download and compile dependencies from git repos
         maven { url 'https://jitpack.io' }
+
+        flatDir {
+            dirs "${rootDir}/mods/fabric"
+            content {
+                includeGroup "fabric-mod"
+            }
+        }
+        flatDir {
+            dirs "${rootDir}/mods/forge"
+            content {
+                includeGroup "forge-mod"
+            }
+        }
     }
 
     tasks.withType(JavaCompile) {
