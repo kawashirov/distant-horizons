@@ -20,6 +20,10 @@ accessible field net/minecraft/world/level/lighting/LevelLightEngine skyEngine L
 accessible method net/minecraft/world/level/levelgen/Heightmap setHeight (III)V
 accessible field net/minecraft/world/level/biome/Biome generationSettings Lnet/minecraft/world/level/biome/BiomeGenerationSettings;
 
+# lod generation from save file
+accessible field net/minecraft/server/level/ChunkMap mainThreadExecutor Lnet/minecraft/util/thread/BlockableEventLoop;
+accessible method net/minecraft/server/level/ChunkMap readChunk (Lnet/minecraft/world/level/ChunkPos;)Lnet/minecraft/nbt/CompoundTag;
+
 # grabbing textures
 accessible field net/minecraft/client/renderer/block/model/BakedQuad sprite Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
 accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite framesX [I

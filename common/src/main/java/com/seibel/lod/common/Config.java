@@ -81,7 +81,7 @@ public class Config extends ConfigGui
 			@ConfigAnnotations.ScreenEntry
 			public static FogQuality fogQuality;
 
-			@ConfigAnnotations.ScreenEntry
+//			@ConfigAnnotations.ScreenEntry // TODO: This isnt done in 1.16 branch
 			public static CloudQuality cloudQuality;
 
 			@ConfigAnnotations.ScreenEntry
