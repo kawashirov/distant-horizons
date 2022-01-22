@@ -19,7 +19,6 @@
 
 package com.seibel.lod.common.wrappers.worldGeneration;
 
-import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.api.ModAccessorApi;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
@@ -30,9 +29,9 @@ import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,18 +44,18 @@ import java.util.concurrent.TimeUnit;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.datafixers.DataFixer;
-import com.mojang.datafixers.util.Either;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
@@ -80,6 +79,8 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.NoiseSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
@@ -108,6 +109,7 @@ public final class WorldGenerationStep {
 	//TODO: Make this LightMode a config
 	public static final LightMode DEFAULT_LIGHTMODE = LightMode.Fancy;
 	
+	//FIXME: Move this outside the WorldGenerationStep thingy
 	public static class Rolling {
 
 		private final int size;
@@ -147,6 +149,22 @@ public final class WorldGenerationStep {
 		long featureNano = 0;
 		long lightNano = 0;
 		long endNano = 0;
+		
+		@Override
+		public String toString() {
+			return
+					"beginNano: "+beginNano+",\n"+
+					"emptyNano: "+emptyNano+",\n"+
+					"structStartNano: "+structStartNano+",\n"+
+					"structRefNano: "+structRefNano+",\n"+
+					"biomeNano: "+biomeNano+",\n"+
+					"noiseNano: "+noiseNano+",\n"+
+					"surfaceNano: "+surfaceNano+",\n"+
+					"carverNano: "+carverNano+",\n"+
+					"featureNano: "+featureNano+",\n"+
+					"lightNano: "+lightNano+",\n"+
+					"endNano: "+endNano+"\n";
+		}
 	}
 
 	public static class PerfCalculator {
@@ -202,6 +220,7 @@ public final class WorldGenerationStep {
 		Fancy, Fast, Step, StarLight
 	}
 
+	//FIXME: Remove this and use the Utils one
 	public static final class GridList<T> extends ArrayList<T> implements List<T> {
 
 		public static class Pos {
@@ -337,6 +356,7 @@ public final class WorldGenerationStep {
 		}
 	}
 
+	//======================= Main Event class======================
 	public static final class GenerationEvent {
 		private static int generationFutureDebugIDs = 0;
 		final ThreadedParameters tParam;
@@ -375,8 +395,9 @@ public final class WorldGenerationStep {
 			return (delta > TimeUnit.NANOSECONDS.convert(duration, unit));
 		}
 
-		public void terminate() {
+		public boolean terminate() {
 			future.cancel(true);
+			return future.isCancelled();
 		}
 
 		public void join() {
@@ -404,8 +425,17 @@ public final class WorldGenerationStep {
 			return id + ":" + range + "@" + pos + "(" + target + ")";
 		}
 	}
+	
+	
+	
+	
+	
+	
+	
+	//=================Generation Step===================
 
-	private static <T> T joinAsync(CompletableFuture<T> f) {
+	private static <T> T joinSync(CompletableFuture<T> f) {
+		if (!f.isDone()) throw new RuntimeException("The future is concurrent!");
 		return f.join();
 	}
 
@@ -455,9 +485,10 @@ public final class WorldGenerationStep {
 					iter.remove();
 				}
 			} else if (event.hasTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-				System.err.println(event.id + ": Timed out and terminated!");
+				ClientApi.LOGGER.error("Batching World Generator: " + event + " timed out and terminated!");
+				ClientApi.LOGGER.info("Dump PrefEvent: "+event.pEvent);
 				try {
-					event.terminate();
+					if (!event.terminate()) ClientApi.LOGGER.error("Failed to terminate the stuck generation event!");
 				} finally {
 					iter.remove();
 				}
@@ -757,6 +788,11 @@ public final class WorldGenerationStep {
 	public final class StepBiomes {
 		public final ChunkStatus STATUS = ChunkStatus.BIOMES;
 
+	    private ChunkAccess createBiomes(ChunkGenerator generator, Registry<Biome> registry, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
+	            chunkAccess.fillBiomesFromNoise(generator.getBiomeSource()::getNoiseBiome, generator.climateSampler());
+	            return chunkAccess;
+	    }
+	    
 		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
 
@@ -770,16 +806,40 @@ public final class WorldGenerationStep {
 			
 			for (ChunkAccess chunk : chunksToDo) {
 				// System.out.println("StepBiomes: "+chunk.getPos());
-				chunk = joinAsync(params.generator.createBiomes(params.biomes, Runnable::run,
-						Blender.of(worldGenRegion),
-						tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
+				chunk = createBiomes(params.generator, params.biomes, Blender.of(worldGenRegion),
+						tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk);
 			}
 		}
 	}
 
 	public final class StepNoise {
 		public final ChunkStatus STATUS = ChunkStatus.NOISE;
-		
+
+	    private ChunkAccess NoiseBased$fillFromNoise(NoiseBasedChunkGenerator generator, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
+	        NoiseSettings noiseSettings = generator.settings.get().noiseSettings();
+	        LevelHeightAccessor levelHeightAccessor = chunkAccess.getHeightAccessorForGeneration();
+	        int i = Math.max(noiseSettings.minY(), levelHeightAccessor.getMinBuildHeight());
+	        int j = Math.min(noiseSettings.minY() + noiseSettings.height(), levelHeightAccessor.getMaxBuildHeight());
+	        int k = Mth.intFloorDiv(i, noiseSettings.getCellHeight());
+	        int l = Mth.intFloorDiv(j - i, noiseSettings.getCellHeight());
+	        if (l <= 0) {
+	            return chunkAccess;
+	        }
+	        int m = chunkAccess.getSectionIndex(l * noiseSettings.getCellHeight() - 1 + i);
+	        int n = chunkAccess.getSectionIndex(i);
+	        HashSet<LevelChunkSection> set = Sets.newHashSet();
+	        for (int o = m; o >= n; --o) {
+	            LevelChunkSection levelChunkSection = chunkAccess.getSection(o);
+	            levelChunkSection.acquire();
+	            set.add(levelChunkSection);
+	        }
+	        chunkAccess = generator.doFill(blender, structureFeatureManager, chunkAccess, k, l);
+            for (LevelChunkSection levelChunkSection : set) {
+                levelChunkSection.release();
+            };
+            return chunkAccess;
+	    }
+	    
 		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 				List<ChunkAccess> chunks) {
 
@@ -793,8 +853,13 @@ public final class WorldGenerationStep {
 			
 			for (ChunkAccess chunk : chunksToDo) {
 				// System.out.println("StepNoise: "+chunk.getPos());
-				chunk = joinAsync(params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion),
-						tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
+				if (params.generator instanceof NoiseBasedChunkGenerator) {
+					chunk = NoiseBased$fillFromNoise((NoiseBasedChunkGenerator)params.generator,Blender.of(worldGenRegion),
+							tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk);
+				} else {
+					chunk = joinSync(params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion),
+							tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
+				}
 			}
 		}
 	}
