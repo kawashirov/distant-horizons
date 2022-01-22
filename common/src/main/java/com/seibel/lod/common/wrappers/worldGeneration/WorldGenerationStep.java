@@ -104,6 +104,7 @@ Lod Generation:          0.269023348s
 
 public final class WorldGenerationStep {
 	public static final boolean ENABLE_PERF_LOGGING = false;
+	public static final boolean ENABLE_EVENT_LOGGING = false;
 	//TODO: Make this LightMode a config
 	public static final LightMode DEFAULT_LIGHTMODE = LightMode.Fancy;
 	
@@ -500,7 +501,8 @@ public final class WorldGenerationStep {
 	
 	
 	public void generateLodFromList(GenerationEvent e) {
-		//System.out.println("Lod Generate Event: "+e.pos);
+		if (ENABLE_EVENT_LOGGING)
+			ClientApi.LOGGER.info("Lod Generate Event: "+e.pos);
 		e.pEvent.beginNano = System.nanoTime();
 		GridList<ChunkAccess> referencedChunks;
 		DistanceGenerationMode generationMode;
@@ -529,7 +531,6 @@ public final class WorldGenerationStep {
 
 			for (int oy = -rangeEmpty; oy <= rangeEmpty; oy++) {
 				for (int ox = -rangeEmpty; ox <= rangeEmpty; ox++) {
-					// ChunkAccess target = getCachedChunk(new ChunkPos(cx+ox, cy+oy));
 					ChunkAccess target = generator.generate(cx + ox, cy + oy);
 					chunks.add(target);
 				}

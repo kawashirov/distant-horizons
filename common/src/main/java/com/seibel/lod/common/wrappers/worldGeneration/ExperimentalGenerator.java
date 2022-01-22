@@ -39,6 +39,8 @@ import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractExperimenta
 
 public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWrapper {
 	
+	public static final boolean ENABLE_GENERATOR_STATS_LOGGING = false;
+	
 	private static final IMinecraftWrapper MC = SingletonHandler.get(IMinecraftWrapper.class);
 	private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 	public WorldGenerationStep generationGroup;
@@ -59,6 +61,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		ClientApi.LOGGER.info("1.18 Experimental Chunk Generator initialized");
 	}
 	
+	@SuppressWarnings("unused")
 	@Override
 	public void queueGenerationRequests(LodDimension lodDim, LodBuilder lodBuilder) {
 		if (lodDim != targetLodDim) {
@@ -127,7 +130,8 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		if (priority == GenerationPriority.FAR_FIRST) {
 			int nearCount = posToGenerate.getNumberOfNearPos();
 			int farCount = posToGenerate.getNumberOfFarPos();
-			//ClientApi.LOGGER.info("WorldGen. Near:"+nearCount+" Far:"+farCount);
+			if (ENABLE_GENERATOR_STATS_LOGGING)
+				ClientApi.LOGGER.info("WorldGen. Near:"+nearCount+" Far:"+farCount);
 			int maxIteration = Math.max(nearCount, farCount);
 			for (int i = 0; i < maxIteration; i++) {
 
@@ -140,7 +144,6 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 					int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, false));
 					int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, false));
 					if (generationGroup.tryAddPoint(chunkX, chunkZ, generationGroupSizeFar, targetStep)) {
-						//ClientApi.LOGGER.info("WorldGen added 1 far point");
 						toGenerate--;
 					}
 				}
@@ -155,7 +158,6 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 					int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, true));
 					int genSize = detailLevel > LodUtil.CHUNK_DETAIL_LEVEL ? 0 : generationGroupSize;
 					if (generationGroup.tryAddPoint(chunkX, chunkZ, genSize, targetStep)) {
-						//ClientApi.LOGGER.info("WorldGen added 1 near point");
 						toGenerate--;
 					}
 				}
@@ -204,15 +206,14 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 				}
 			}
 		}
-		
-		//Enable this for logging
-		if (targetToGenerate != toGenerate) {
+
+		if (targetToGenerate != toGenerate && ENABLE_GENERATOR_STATS_LOGGING) {
 			if (toGenerate <= 0) {
-				ClientApi.LOGGER.debug(
+				ClientApi.LOGGER.info(
 						"WorldGenerator: Sampled " + posToGenerate.getNumberOfPos() + " out of " + estimatedSampleNeeded
 								+ " points, started all targeted " + targetToGenerate + " generations.");
 			} else {
-				ClientApi.LOGGER.debug("WorldGenerator: Sampled " + posToGenerate.getNumberOfPos() + " out of "
+				ClientApi.LOGGER.info("WorldGenerator: Sampled " + posToGenerate.getNumberOfPos() + " out of "
 						+ estimatedSampleNeeded + " points, started " + (targetToGenerate - toGenerate)
 						+ " out of targeted " + targetToGenerate + " generations.");
 			}
@@ -225,7 +226,8 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 			// Ensure wee don't go to basically infinity
 			if (estimatedSampleNeeded > 32768)
 				estimatedSampleNeeded = 32768;
-			ClientApi.LOGGER.debug("WorldGenerator: Increasing estimatedSampleNeeeded to " + estimatedSampleNeeded);
+			if (ENABLE_GENERATOR_STATS_LOGGING)
+				ClientApi.LOGGER.info("WorldGenerator: Increasing estimatedSampleNeeeded to " + estimatedSampleNeeded);
 
 		} else if (toGenerate <= 0 && positionGoneThough * 1.5 < posToGenerate.getNumberOfPos()) {
 			// We haven't gone though half of them and it's already enough.
@@ -234,7 +236,8 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 			// Ensure we don't go to near zero.
 			if (estimatedSampleNeeded < 4)
 				estimatedSampleNeeded = 4;
-			ClientApi.LOGGER.debug("WorldGenerator: Decreasing estimatedSampleNeeeded to " + estimatedSampleNeeded);
+			if (ENABLE_GENERATOR_STATS_LOGGING)
+				ClientApi.LOGGER.info("WorldGenerator: Decreasing estimatedSampleNeeeded to " + estimatedSampleNeeded);
 		}
 
 	}
