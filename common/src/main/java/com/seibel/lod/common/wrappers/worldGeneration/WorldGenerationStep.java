@@ -53,6 +53,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -60,9 +62,15 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.chunk.ProtoChunk;
@@ -86,7 +94,12 @@ import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+import net.minecraft.world.level.lighting.BlockLightEngine;
+import net.minecraft.world.level.lighting.LayerLightEngine;
+import net.minecraft.world.level.lighting.LayerLightEventListener;
 import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.world.level.lighting.LightEventListener;
+import net.minecraft.world.level.lighting.SkyLightEngine;
 import net.minecraft.world.level.storage.WorldData;
 
 /*
@@ -104,9 +117,10 @@ Lod Generation:          0.269023348s
 */
 
 public final class WorldGenerationStep {
-	public static final boolean ENABLE_PERF_LOGGING = false;
+	public static final boolean ENABLE_PERF_LOGGING = true;
 	public static final boolean ENABLE_EVENT_LOGGING = false;
 	//TODO: Make this LightMode a config
+	//TODO: Make actual proper support for StarLight
 	public static final LightMode DEFAULT_LIGHTMODE = LightMode.Fancy;
 	
 	//FIXME: Move this outside the WorldGenerationStep thingy
@@ -538,6 +552,7 @@ public final class WorldGenerationStep {
 		GridList<ChunkAccess> referencedChunks;
 		DistanceGenerationMode generationMode;
 		LightedWorldGenRegion region;
+		
 		try {
 			int cx = e.pos.x;
 			int cy = e.pos.z;
@@ -627,7 +642,7 @@ public final class WorldGenerationStep {
 			subRange.forEach((chunk) -> {
 				((ProtoChunk) chunk).setLightEngine(region.getLightEngine());
 				if (region.lightMode == LightMode.Step) {
-					((WorldGenLightEngine)region.getLightEngine()).lightChunk(chunk, false);
+					((WorldGenLevelLightEngine)region.getLightEngine()).lightChunk(chunk, false);
 				}
 			});
 			stepStructureStart.generateGroup(e.tParam, region, subRange);
@@ -671,7 +686,7 @@ public final class WorldGenerationStep {
 				stepLight.generateGroup(region.getLightEngine(), subRange);
 				break;
 			case Step:
-				((WorldGenLightEngine)region.getLightEngine()).runUpdates();
+				((WorldGenLevelLightEngine)region.getLightEngine()).runUpdates();
 				break;
 			case Fast:
 				break;
@@ -948,7 +963,7 @@ public final class WorldGenerationStep {
 	public final class StepLight {
 		public final ChunkStatus STATUS = ChunkStatus.LIGHT;
 		
-		public void generateGroup(LevelLightEngine lightEngine,
+		public void generateGroup(LightEventListener lightEngine,
 				GridList<ChunkAccess> chunks) {
 			//ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
 			
@@ -959,10 +974,13 @@ public final class WorldGenerationStep {
 			
 			for (ChunkAccess chunk : chunks) {
 				try {
-					if (lightEngine instanceof WorldGenLightEngine) {
-						((WorldGenLightEngine)lightEngine).lightChunk(chunk, true);
+					if (lightEngine == null) {
+						chunk.setLightCorrect(true);
+					} else if (lightEngine instanceof WorldGenLevelLightEngine) {
+						((WorldGenLevelLightEngine)lightEngine).lightChunk(chunk, true);
 					} else if (lightEngine instanceof ThreadedLevelLightEngine) {
 						((ThreadedLevelLightEngine) lightEngine).lightChunk(chunk, true).join();
+						chunk.setLightCorrect(true);
 					} else {
 						assert(false);
 					}
@@ -979,7 +997,7 @@ public final class WorldGenerationStep {
 	}
 	
 	public static class LightedWorldGenRegion extends WorldGenRegion {
-		final LevelLightEngine light;
+		final WorldGenLevelLightEngine light;
 		final LightMode lightMode;
 		final EmptyChunkGenerator generator;
 		Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
@@ -988,9 +1006,50 @@ public final class WorldGenerationStep {
 			super(serverLevel, list, chunkStatus, i);
 			this.lightMode = lightMode;
 			this.generator = generator;
-			light = lightMode==LightMode.StarLight ? serverLevel.getLightEngine() : new WorldGenLightEngine(new LightGetterAdaptor(this));
+			light = new WorldGenLevelLightEngine(new LightGetterAdaptor(this));
 		}
 
+	    @Override
+	    public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
+	        if (!this.ensureCanWrite(blockPos)) {
+	            return false;
+	        }
+	        ChunkAccess chunkAccess = this.getChunk(blockPos);
+	        BlockState blockState2 = chunkAccess.setBlockState(blockPos, blockState, false);
+	        if (blockState.hasBlockEntity()) {
+	            if (chunkAccess.getStatus().getChunkType() == ChunkStatus.ChunkType.LEVELCHUNK) {
+	                BlockEntity blockEntity = ((EntityBlock)((Object)blockState.getBlock())).newBlockEntity(blockPos, blockState);
+	                if (blockEntity != null) {
+	                    chunkAccess.setBlockEntity(blockEntity);
+	                } else {
+	                    chunkAccess.removeBlockEntity(blockPos);
+	                }
+	            } else {
+	                CompoundTag compoundTag = new CompoundTag();
+	                compoundTag.putInt("x", blockPos.getX());
+	                compoundTag.putInt("y", blockPos.getY());
+	                compoundTag.putInt("z", blockPos.getZ());
+	                compoundTag.putString("id", "DUMMY");
+	                chunkAccess.setBlockEntityNbt(compoundTag);
+	            }
+	        } else if (blockState2 != null && blockState2.hasBlockEntity()) {
+	            chunkAccess.removeBlockEntity(blockPos);
+	        }
+	        if (blockState.hasPostProcess(this, blockPos)) {
+	            this.getChunk(blockPos).markPosForPostprocessing(blockPos);
+	        }
+	        return true;
+	    }
+
+	    @Override
+	    public boolean destroyBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity, int i) {
+	        BlockState blockState = this.getBlockState(blockPos);
+	        if (blockState.isAir()) {
+	            return false;
+	        }
+	        return this.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3, i);
+	    }
+	    
 		@Override
 		public LevelLightEngine getLightEngine() {
 			return light;
@@ -998,8 +1057,9 @@ public final class WorldGenerationStep {
 
 		@Override
 		public int getBrightness(LightLayer lightLayer, BlockPos blockPos) {
-			if (lightMode != LightMode.Fast)
+			if (lightMode != LightMode.Fast) {
 				return light.getLayerListener(lightLayer).getLightValue(blockPos);
+			}
 			if (lightLayer == LightLayer.BLOCK) return 0;
 			BlockPos p = super.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
 			return (p.getY()<=blockPos.getY()) ? getMaxLightLevel() : 0;
@@ -1007,8 +1067,9 @@ public final class WorldGenerationStep {
 		
 		@Override
 		public int getRawBrightness(BlockPos blockPos, int i) {
-			if (lightMode != LightMode.Fast)
+			if (lightMode != LightMode.Fast) {
 				return light.getRawBrightness(blockPos, i);
+			}
 			BlockPos p = super.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
 			return (p.getY()<=blockPos.getY()) ? getMaxLightLevel() : 0;
 		}
@@ -1025,7 +1086,7 @@ public final class WorldGenerationStep {
 	    	ChunkAccess chunk = chunkMap.get(ChunkPos.asLong(i, j));
 	    	if (chunk!=null) return chunk;
 	    	chunk = generator.generate(i, j);
-	    	if (chunk==null) throw new NullPointerException();
+	    	if (chunk==null) throw new NullPointerException("The provided generator should not return null!");
 	    	chunkMap.put(ChunkPos.asLong(i, j), chunk);
 	    	return chunk;
 	    }
@@ -1034,9 +1095,11 @@ public final class WorldGenerationStep {
 	}
 	
 	public static class LightGetterAdaptor implements LightChunkGetter {
-		public final WorldGenRegion genRegion;
-		public LightGetterAdaptor(WorldGenRegion genRegion) {
+		public final LightedWorldGenRegion genRegion;
+		final boolean shouldReturnNull;
+		public LightGetterAdaptor(LightedWorldGenRegion genRegion) {
 			this.genRegion = genRegion;
+			shouldReturnNull = genRegion.lightMode==LightMode.StarLight ? true : false;
 		}
 		@Override
 		public BlockGetter getChunkForLighting(int chunkX, int chunkZ) {
@@ -1045,13 +1108,115 @@ public final class WorldGenerationStep {
 		}
 		@Override
 		public BlockGetter getLevel() {
+			return shouldReturnNull ? null : genRegion;
+		}
+		public LevelHeightAccessor getLevelHeightAccessor() {
 			return genRegion;
 		}
 	}
-	public static class WorldGenLightEngine extends LevelLightEngine {
-		public WorldGenLightEngine(LightGetterAdaptor genRegion) {
-			super(genRegion, true, true);
-		}
+
+	public static class WorldGenLevelLightEngine extends LevelLightEngine {
+		public static final int MAX_SOURCE_LEVEL = 15;
+	    public static final int LIGHT_SECTION_PADDING = 1;
+	    protected final LevelHeightAccessor levelHeightAccessor;
+	    @Nullable
+	    public final LayerLightEngine<?, ?> blockEngine;
+	    @Nullable
+	    public final LayerLightEngine<?, ?> skyEngine;
+
+	    public WorldGenLevelLightEngine(LightGetterAdaptor genRegion) {
+	    	super(genRegion, false, false);
+	        this.levelHeightAccessor = genRegion.getLevelHeightAccessor();
+	        this.blockEngine = new BlockLightEngine(genRegion);
+	        this.skyEngine = new SkyLightEngine(genRegion);
+	    }
+
+	    @Override
+	    public void checkBlock(BlockPos blockPos) {
+	        if (this.blockEngine != null) {
+	            this.blockEngine.checkBlock(blockPos);
+	        }
+	        if (this.skyEngine != null) {
+	            this.skyEngine.checkBlock(blockPos);
+	        }
+	    }
+
+	    @Override
+	    public void onBlockEmissionIncrease(BlockPos blockPos, int i) {
+	        if (this.blockEngine != null) {
+	            this.blockEngine.onBlockEmissionIncrease(blockPos, i);
+	        }
+	    }
+
+	    @Override
+	    public boolean hasLightWork() {
+	        if (this.skyEngine != null && this.skyEngine.hasLightWork()) {
+	            return true;
+	        }
+	        return this.blockEngine != null && this.blockEngine.hasLightWork();
+	    }
+
+	    @Override
+	    public int runUpdates(int i, boolean bl, boolean bl2) {
+	        if (this.blockEngine != null && this.skyEngine != null) {
+	            int j = i / 2;
+	            int k = this.blockEngine.runUpdates(j, bl, bl2);
+	            int l = i - j + k;
+	            int m = this.skyEngine.runUpdates(l, bl, bl2);
+	            if (k == 0 && m > 0) {
+	                return this.blockEngine.runUpdates(m, bl, bl2);
+	            }
+	            return m;
+	        }
+	        if (this.blockEngine != null) {
+	            return this.blockEngine.runUpdates(i, bl, bl2);
+	        }
+	        if (this.skyEngine != null) {
+	            return this.skyEngine.runUpdates(i, bl, bl2);
+	        }
+	        return i;
+	    }
+
+	    @Override
+	    public void updateSectionStatus(SectionPos sectionPos, boolean bl) {
+	        if (this.blockEngine != null) {
+	            this.blockEngine.updateSectionStatus(sectionPos, bl);
+	        }
+	        if (this.skyEngine != null) {
+	            this.skyEngine.updateSectionStatus(sectionPos, bl);
+	        }
+	    }
+
+	    @Override
+	    public void enableLightSources(ChunkPos chunkPos, boolean bl) {
+	        if (this.blockEngine != null) {
+	            this.blockEngine.enableLightSources(chunkPos, bl);
+	        }
+	        if (this.skyEngine != null) {
+	            this.skyEngine.enableLightSources(chunkPos, bl);
+	        }
+	    }
+
+	    @Override
+	    public LayerLightEventListener getLayerListener(LightLayer lightLayer) {
+	        if (lightLayer == LightLayer.BLOCK) {
+	            if (this.blockEngine == null) {
+	                return LayerLightEventListener.DummyLightLayerEventListener.INSTANCE;
+	            }
+	            return this.blockEngine;
+	        }
+	        if (this.skyEngine == null) {
+	            return LayerLightEventListener.DummyLightLayerEventListener.INSTANCE;
+	        }
+	        return this.skyEngine;
+	    }
+
+	    @Override
+	    public int getRawBrightness(BlockPos blockPos, int i) {
+	        int j = this.skyEngine == null ? 0 : this.skyEngine.getLightValue(blockPos) - i;
+	        int k = this.blockEngine == null ? 0 : this.blockEngine.getLightValue(blockPos);
+	        return Math.max(k, j);
+	    }
 
 	    public void lightChunk(ChunkAccess chunkAccess, boolean hasLightBlock) {
 	    	ChunkPos chunkPos = chunkAccess.getPos();
@@ -1062,20 +1227,45 @@ public final class WorldGenerationStep {
                 LevelChunkSection levelChunkSection = levelChunkSections[i];
                 if (levelChunkSection.hasOnlyAir()) continue;
                 int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
-                super.updateSectionStatus(SectionPos.of(chunkPos, j), false);
+                updateSectionStatus(SectionPos.of(chunkPos, j), false);
             }
-            super.enableLightSources(chunkPos, true);
+            enableLightSources(chunkPos, true);
             if (hasLightBlock) {
                 chunkAccess.getLights().forEach(blockPos ->
-                super.onBlockEmissionIncrease(blockPos, chunkAccess.getLightEmission(blockPos)));
+                onBlockEmissionIncrease(blockPos, chunkAccess.getLightEmission(blockPos)));
             }
             
             chunkAccess.setLightCorrect(true);
             runUpdates();
 	    }
-	    
+
 	    public void runUpdates() {
-	        super.runUpdates(2147483647, true, true);
+	        runUpdates(2147483647, true, true);
+	    }
+
+	    @Override
+	    public String getDebugData(LightLayer lightLayer, SectionPos sectionPos) {
+	    	throw new UnsupportedOperationException("This should never be used!");
+	    }
+	    @Override
+	    public void queueSectionData(LightLayer lightLayer, SectionPos sectionPos, @Nullable DataLayer dataLayer, boolean bl) {
+	    	throw new UnsupportedOperationException("This should never be used!");
+	    }
+	    @Override
+	    public void retainData(ChunkPos chunkPos, boolean bl) {
+	    	throw new UnsupportedOperationException("This should never be used!");
+	    }
+	    @Override
+	    public int getLightSectionCount() {
+	    	throw new UnsupportedOperationException("This should never be used!");
+	    }
+	    @Override
+	    public int getMinLightSection() {
+	    	throw new UnsupportedOperationException("This should never be used!");
+	    }
+	    @Override
+	    public int getMaxLightSection() {
+	    	throw new UnsupportedOperationException("This should never be used!");
 	    }
 	}
 	
