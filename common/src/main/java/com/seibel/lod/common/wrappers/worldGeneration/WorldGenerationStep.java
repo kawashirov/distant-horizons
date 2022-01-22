@@ -1080,6 +1080,16 @@ public final class WorldGenerationStep {
 		}
 
 	    @Override
+	    public ChunkAccess getChunk(int i, int j) {
+	        return this.getChunk(i, j, ChunkStatus.EMPTY);
+	    }
+	    
+	    @Override
+	    public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus) {
+	        return this.getChunk(i, j, chunkStatus, true);
+	    }
+	    
+	    @Override
 	    @Nullable
 	    public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
 	    	if (!bl || this.hasChunk(i, j)) return super.getChunk(i, j, chunkStatus, bl);
