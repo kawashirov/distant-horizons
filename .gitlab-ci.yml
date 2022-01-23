@@ -32,7 +32,8 @@ gradleSetup:
     # build using Java 17
     image: eclipse-temurin:17
     cache:
-        key:
+        key: "$CI_COMMIT_REF_NAME"
+        policy: pull-push
           files:
             - gradle/wrapper/gradle-wrapper.properties 
         paths:
@@ -48,7 +49,7 @@ build:
     image: eclipse-temurin:17
     cache:
         key: "$CI_COMMIT_REF_NAME"
-        policy: push
+        policy: pull-push
         paths:
             - .architectury-transformer
             - .gradle
