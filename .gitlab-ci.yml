@@ -45,7 +45,7 @@ gradleSetup:
 # second stage
 build:
     stage: build
-    script: ./gradlew build
+    script: ./gradlew --gradle-user-home cache/ build
     # build using Java 17
     image: eclipse-temurin:17
     cache:
@@ -81,7 +81,7 @@ build:
 # third stage
 merge:
     stage: merge
-    script: ./gradlew merge
+    script: ./gradlew --gradle-user-home cache/ merge
     # build using Java 17
     image: eclipse-temurin:17
     cache:
