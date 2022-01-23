@@ -29,6 +29,8 @@ before_script:
 gradleSetup:
     stage: gradleSetup
     script: ./gradlew --build-cache --gradle-user-home cache/ check
+    # build using Java 17
+    image: eclipse-temurin:17
     cache:
         key:
           files:
