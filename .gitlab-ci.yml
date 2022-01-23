@@ -36,9 +36,7 @@ gradleSetup:
           files:
             - gradle/wrapper/gradle-wrapper.properties 
         paths:
-          - cache/caches/ 
-          - cache/notifications/ 
-          - cache/wrapper/ 
+          - cache/
 
 
 
@@ -68,7 +66,7 @@ build:
             - forge/run
             - build
             - .gradle
-            - gradle
+            - cache/
     artifacts:
         paths:
             # relative to the root directory
@@ -106,6 +104,7 @@ merge:
             - forge/run
             - build
             - .gradle
+            - cache/
     artifacts:
         paths:
             # relative to the root directory
