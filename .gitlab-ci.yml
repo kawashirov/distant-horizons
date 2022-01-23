@@ -37,6 +37,8 @@ build:
             - build
             - common/.gradle
             - common/build
+            - core/.gradle
+            - core/build
             - fabric/.gradle
             - fabric/build
             - fabric/run
@@ -64,7 +66,7 @@ merge:
     image: eclipse-temurin:17
     cache:
         key: "$CI_COMMIT_REF_NAME"
-        policy: push
+        policy: pull-push
         paths:
             - fabric/build/libs
             - forge/build/libs
@@ -73,6 +75,8 @@ merge:
             - build
             - common/.gradle
             - common/build
+            - core/.gradle
+            - core/build
             - fabric/.gradle
             - fabric/build
             - fabric/run
