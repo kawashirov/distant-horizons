@@ -62,6 +62,7 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.biome.BiomeResolver;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
@@ -86,8 +87,11 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.levelgen.Beardifier;
+import net.minecraft.world.level.levelgen.BelowZeroRetrogen;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+import net.minecraft.world.level.levelgen.NoiseChunk;
 import net.minecraft.world.level.levelgen.NoiseSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.blending.Blender;
@@ -117,7 +121,7 @@ Lod Generation:          0.269023348s
 */
 
 public final class WorldGenerationStep {
-	public static final boolean ENABLE_PERF_LOGGING = true;
+	public static final boolean ENABLE_PERF_LOGGING = false;
 	public static final boolean ENABLE_EVENT_LOGGING = false;
 	//TODO: Make this LightMode a config
 	//TODO: Make actual proper support for StarLight
@@ -804,8 +808,13 @@ public final class WorldGenerationStep {
 		public final ChunkStatus STATUS = ChunkStatus.BIOMES;
 
 	    private ChunkAccess createBiomes(ChunkGenerator generator, Registry<Biome> registry, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
-	            chunkAccess.fillBiomesFromNoise(generator.getBiomeSource()::getNoiseBiome, generator.climateSampler());
-	            return chunkAccess;
+            if (generator instanceof NoiseBasedChunkGenerator) {
+            	((NoiseBasedChunkGenerator) generator).doCreateBiomes(registry, blender, structureFeatureManager, chunkAccess);
+            	return chunkAccess;
+            } else {
+            	chunkAccess.fillBiomesFromNoise(generator.getBiomeSource()::getNoiseBiome, generator.climateSampler());
+            	return chunkAccess;
+            }
 	    }
 	    
 		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
