@@ -32,6 +32,18 @@ build:
         key: "$CI_COMMIT_REF_NAME"
         policy: push
         paths:
+            - .architectury-transformer
+            - .gradle
+            - build
+            - common/.gradle
+            - common/build
+            - fabric/.gradle
+            - fabric/build
+            - fabric/run
+            - fabric/src/generated
+            - forge/.gradle
+            - forge/build
+            - forge/run
             - build
             - .gradle
             - .
@@ -56,6 +68,18 @@ merge:
         paths:
             - fabric/build/libs
             - forge/build/libs
+            - .architectury-transformer
+            - .gradle
+            - build
+            - common/.gradle
+            - common/build
+            - fabric/.gradle
+            - fabric/build
+            - fabric/run
+            - fabric/src/generated
+            - forge/.gradle
+            - forge/build
+            - forge/run
             - build
             - .gradle
             - .
