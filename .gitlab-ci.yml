@@ -56,6 +56,9 @@ merge:
         paths:
             - fabric/build/libs
             - forge/build/libs
+            - build
+            - .gradle
+            - .
     artifacts:
         paths:
             # relative to the root directory
