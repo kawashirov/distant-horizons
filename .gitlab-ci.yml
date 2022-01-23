@@ -1,137 +1,138 @@
-    # use Eclipse's JDK
-    image: gradle:eclipse-temurin
+# use Eclipse's JDK
+image: gradle:eclipse-temurin
 
-    # all stages need to be defined here
-    stages:
-      - gradleSetup
-      - build
-      - merge
+# all stages need to be defined here
+stages:
+  - gradleSetup
+  - build
+  - merge
 
-    variables:
-        # Disable the Gradle daemon for Continuous Integration servers as correctness
-        # is usually a priority over speed in CI environments. Using a fresh
-        # runtime for each build is more reliable since the runtime is completely
-        # isolated from any previous builds.
-        GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-        # Pull core when building
-        GIT_SUBMODULE_STRATEGY: recursive
-
-
-    before_script:
-        - echo $CI_JOB_ID
-        # Writing GE_JOB_ID variable to environment file, will need the value in the next stage.
-        - echo GE_JOB_ID=$CI_JOB_ID >> generate_jars.env
+variables:
+    # Disable the Gradle daemon for Continuous Integration servers as correctness
+    # is usually a priority over speed in CI environments. Using a fresh
+    # runtime for each build is more reliable since the runtime is completely
+    # isolated from any previous builds.
+    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    # Pull core when building
+    GIT_SUBMODULE_STRATEGY: recursive
 
 
-
-
-    # first stage
-    gradleSetup:
-        stage: gradleSetup
-        script: ./gradlew --build-cache --gradle-user-home cache/ check
-        # build using Java 17
-        image: eclipse-temurin:17
-        cache:
-            key:
-              files:
-                - gradle/wrapper/gradle-wrapper.properties 
-            policy: pull-push
-            paths:
-              - cache/
+before_script:
+    - echo $CI_JOB_ID
+    # Writing GE_JOB_ID variable to environment file, will need the value in the next stage.
+    - echo GE_JOB_ID=$CI_JOB_ID >> generate_jars.env
 
 
 
-    # second stage
-    build:
-        stage: build
-        script: ./gradlew --gradle-user-home cache/ build
-        # build using Java 17
-        image: eclipse-temurin:17
-        cache:
-            key: "$CI_COMMIT_REF_NAME"
-            policy: pull-push
-            paths:
-                - .architectury-transformer
-                - .gradle
-                - build
-                - common/.gradle
-                - common/build
-                - core/.gradle
-                - core/build
-                - fabric/.gradle
-                - fabric/build
-                - fabric/run
-                - fabric/src/generated
-                - forge/.gradle
-                - forge/build
-                - forge/run
-                - build
-                - .gradle
-                - cache/
-        artifacts:
-            paths:
-                # relative to the root directory
-                - fabric/build/libs
-                - forge/build/libs
-            reports:
-                # To ensure we've access to these files in the next stage
-                dotenv: generate_jars.env
 
-    # third stage
-    merge:
-        stage: merge
-        script: ./gradlew --gradle-user-home cache/ merge
-        # build using Java 17
-        image: eclipse-temurin:17
-        cache:
-            key: "$CI_COMMIT_REF_NAME"
-            policy: pull-push
-            paths:
-                - fabric/build/libs
-                - forge/build/libs
-                - .architectury-transformer
-                - .gradle
-                - build
-                - common/.gradle
-                - common/build
-                - core/.gradle
-                - core/build
-                - fabric/.gradle
-                - fabric/build
-                - fabric/run
-                - fabric/src/generated
-                - forge/.gradle
-                - forge/build
-                - forge/run
-                - build
-                - .gradle
-                - cache/
-        artifacts:
-            paths:
-                # relative to the root directory
-                - Merged
+# first stage
+# This prevents us from re-downloading Gradle every stage
+gradleSetup:
+    stage: gradleSetup
+    script: ./gradlew --build-cache --gradle-user-home cache/ check
+    # build using Java 17
+    image: eclipse-temurin:17
+    cache:
+        key:
+          files:
+            - gradle/wrapper/gradle-wrapper.properties 
+        policy: push
+        paths:
+          - cache/
 
 
-    ## forth stage
-    #deploy:
-    #    stage: deploy
-    #    image: registry.gitlab.com/gitlab-org/release-cli:latest
-    #    script:
-    #        - echo 'running release_job'
-    #        - echo 'Previous Job ID is printed below'
-    #        - echo $GE_JOB_ID
-    #    # Specifying that this job requires artifacts from the previous job to succeed
-    #    needs:
-    #        - job: build
-    #          artifacts: true
-    #    release:
-    #        name: 'Unstable Jars for Latest Commit' #: $CI_COMMIT_SHORT_SHA'
-    #        description: 'Created automatically using the release-cli.'
-    #        # tag_name is a mendatory field and can not be an empty string
-    #        tag_name: 'Unstable-$CI_COMMIT_SHORT_SHA'
-    #        assets:
-    #            links:
-    #                - name: 'Fabric Jars'
-    #                  url: 'https://gitlab.com/jeseibel/minecraft-lod-mod/cw/-/jobs/${GE_JOB_ID}/artifacts/file/fabric/build/libs'
-    #                - name: 'Forge Jars'
-    #                  url: 'https://gitlab.com/jeseibel/minecraft-lod-mod/cw/-/jobs/${GE_JOB_ID}/artifacts/file/forge/build/libs'
+
+# second stage
+build:
+    stage: build
+    script: ./gradlew build --gradle-user-home cache/
+    # build using Java 17
+    image: eclipse-temurin:17
+    cache:
+        key: "$CI_COMMIT_REF_NAME"
+        policy: pull-push
+        paths:
+            - .architectury-transformer
+            - .gradle
+            - build
+            - common/.gradle
+            - common/build
+            - core/.gradle
+            - core/build
+            - fabric/.gradle
+            - fabric/build
+            - fabric/run
+            - fabric/src/generated
+            - forge/.gradle
+            - forge/build
+            - forge/run
+            - build
+            - .gradle
+            - cache/
+    artifacts:
+        paths:
+            # relative to the root directory
+            - fabric/build/libs
+            - forge/build/libs
+        reports:
+            # To ensure we've access to these files in the next stage
+            dotenv: generate_jars.env
+
+# third stage
+merge:
+    stage: merge
+    script: ./gradlew merge --gradle-user-home cache/ 
+    # build using Java 17
+    image: eclipse-temurin:17
+    cache:
+        key: "$CI_COMMIT_REF_NAME"
+        policy: pull-push
+        paths:
+            - fabric/build/libs
+            - forge/build/libs
+            - .architectury-transformer
+            - .gradle
+            - build
+            - common/.gradle
+            - common/build
+            - core/.gradle
+            - core/build
+            - fabric/.gradle
+            - fabric/build
+            - fabric/run
+            - fabric/src/generated
+            - forge/.gradle
+            - forge/build
+            - forge/run
+            - build
+            - .gradle
+            - cache/
+    artifacts:
+        paths:
+            # relative to the root directory
+            - Merged
+
+
+## forth stage
+#deploy:
+#    stage: deploy
+#    image: registry.gitlab.com/gitlab-org/release-cli:latest
+#    script:
+#        - echo 'running release_job'
+#        - echo 'Previous Job ID is printed below'
+#        - echo $GE_JOB_ID
+#    # Specifying that this job requires artifacts from the previous job to succeed
+#    needs:
+#        - job: build
+#          artifacts: true
+#    release:
+#        name: 'Unstable Jars for Latest Commit' #: $CI_COMMIT_SHORT_SHA'
+#        description: 'Created automatically using the release-cli.'
+#        # tag_name is a mendatory field and can not be an empty string
+#        tag_name: 'Unstable-$CI_COMMIT_SHORT_SHA'
+#        assets:
+#            links:
+#                - name: 'Fabric Jars'
+#                  url: 'https://gitlab.com/jeseibel/minecraft-lod-mod/cw/-/jobs/${GE_JOB_ID}/artifacts/file/fabric/build/libs'
+#                - name: 'Forge Jars'
+#                  url: 'https://gitlab.com/jeseibel/minecraft-lod-mod/cw/-/jobs/${GE_JOB_ID}/artifacts/file/forge/build/libs'
