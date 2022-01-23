@@ -2,6 +2,8 @@ plugins {
     id "com.github.johnrengelman.shadow" version "7.1.0"
 }
 
+version = project.mod_version+"-"+project.minecraft_version+"-"+new Date().format("MM_dd_yyyy_HH:mm")
+
 loom {
     accessWidenerPath.set(project(":common").file("src/main/resources/lod.accesswidener"))
 
@@ -24,7 +26,7 @@ configurations {
 }
 
 repositories {
-    // Required for importing cursedforge mods
+    // Required for importing CurseForge mods
     maven {
         url "https://www.cursemaven.com"
         content {

@@ -70,6 +70,7 @@ build:
             - .gradle
             - cache/
     artifacts:
+        name: "NightlyBuild-$CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
         paths:
             # relative to the root directory
             - fabric/build/libs
@@ -108,6 +109,7 @@ merge:
             - .gradle
             - cache/
     artifacts:
+        name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
         paths:
             # relative to the root directory
             - Merged
