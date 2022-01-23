@@ -1,6 +1,11 @@
 # use Eclipse's JDK
 image: gradle:eclipse-temurin
 
+# all stages need to be defined here
+stages:
+  - build
+  - merge
+
 variables:
     # Disable the Gradle daemon for Continuous Integration servers as correctness
     # is usually a priority over speed in CI environments. Using a fresh
@@ -36,11 +41,31 @@ build:
             - fabric/build/libs
             - forge/build/libs
         reports:
-            # To ensure we've access to this file in the next stage
+            # To ensure we've access to these files in the next stage
             dotenv: generate_jars.env
 
+# second stage
+merge:
+    stage: merge
+    script: ./gradlew merge
+    # build using Java 17
+    image: eclipse-temurin:17
+    cache:
+        key: "$CI_COMMIT_REF_NAME"
+        policy: push
+        paths:
+            - fabric/build/libs
+            - forge/build/libs
+    artifacts:
+        paths:
+            # relative to the root directory
+            - Merged
+        reports:
+            # To ensure we've access to this file in the next stage
+            dotenv: merged_jar.env
 
-## second stage
+
+## third stage
 #deploy:
 #    stage: deploy
 #    image: registry.gitlab.com/gitlab-org/release-cli:latest
