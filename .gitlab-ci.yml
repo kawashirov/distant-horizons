@@ -73,8 +73,9 @@ build:
         name: "NightlyBuild-$CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
         paths:
             # relative to the root directory
-            - fabric/build/libs
-            - forge/build/libs
+            #- fabric/build/libs
+            #- forge/build/libs
+            - /^fabric\/build\/libs.*\.jar$/
         reports:
             # To ensure we've access to these files in the next stage
             dotenv: generate_jars.env
