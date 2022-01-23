@@ -62,7 +62,7 @@ dependencies {
     implementation "org.joml:joml:1.10.2"
 	
 	// Lithium
-    modImplementation "maven.modrinth:lithium:${project.lithium_version}"
+    //modImplementation "maven.modrinth:lithium:${project.lithium_version}"
 
     // Iris
 //    modImplementation "maven.modrinth:iris:${project.iris_version}"

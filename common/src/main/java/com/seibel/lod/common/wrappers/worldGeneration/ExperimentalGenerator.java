@@ -47,7 +47,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 	public LodDimension targetLodDim;
 	public static final int generationGroupSize = 4;
 	public static final int generationGroupSizeFar = 0;
-	public static int numberOfGenerationPoints = CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads()*2;
+	public static int numberOfGenerationPoints = CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads();
 
 	private int estimatedSampleNeeded = 128;
 

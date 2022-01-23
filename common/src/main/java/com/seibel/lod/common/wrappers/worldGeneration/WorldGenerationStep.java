@@ -25,6 +25,7 @@ import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
 import com.seibel.lod.core.objects.lod.LodDimension;
+import com.seibel.lod.core.util.LodThreadFactory;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -45,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.mojang.datafixers.DataFixer;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 
@@ -54,7 +54,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelHeightAccessor;
@@ -62,7 +61,6 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -117,7 +115,7 @@ Lod Generation:          0.269023348s
 */
 
 public final class WorldGenerationStep {
-	public static final boolean ENABLE_PERF_LOGGING = true;
+	public static final boolean ENABLE_PERF_LOGGING = false;
 	public static final boolean ENABLE_EVENT_LOGGING = false;
 	//TODO: Make this LightMode a config
 	//TODO: Make actual proper support for StarLight
@@ -465,7 +463,7 @@ public final class WorldGenerationStep {
 	final StepLight stepLight = new StepLight();
 
 	public final ExecutorService executors = Executors
-			.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
+			.newCachedThreadPool(new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY));
 
 	public boolean tryAddPoint(int px, int pz, int range, Steps target) {
 		int boxSize = range * 2 + 1;
@@ -804,8 +802,13 @@ public final class WorldGenerationStep {
 		public final ChunkStatus STATUS = ChunkStatus.BIOMES;
 
 	    private ChunkAccess createBiomes(ChunkGenerator generator, Registry<Biome> registry, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
-	            chunkAccess.fillBiomesFromNoise(generator.getBiomeSource()::getNoiseBiome, generator.climateSampler());
-	            return chunkAccess;
+            if (generator instanceof NoiseBasedChunkGenerator) {
+            	((NoiseBasedChunkGenerator) generator).doCreateBiomes(registry, blender, structureFeatureManager, chunkAccess);
+            	return chunkAccess;
+            } else {
+            	chunkAccess.fillBiomesFromNoise(generator.getBiomeSource()::getNoiseBiome, generator.climateSampler());
+            	return chunkAccess;
+            }
 	    }
 	    
 		public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
