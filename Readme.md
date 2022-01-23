@@ -82,3 +82,6 @@ Run the Forge client (for debugging): `./gradlew forge:runClient`
 
 XZ for Java (data compression)\
 https://tukaani.org/xz/java.html
+
+DHJarMerger (To merge multiple mod versions into one jar)\
+https://github.com/Ran-helo/DHJarMerger
