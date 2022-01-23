@@ -25,6 +25,7 @@ import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
 import com.seibel.lod.core.objects.lod.LodDimension;
+import com.seibel.lod.core.util.LodThreadFactory;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -469,7 +470,7 @@ public final class WorldGenerationStep {
 	final StepLight stepLight = new StepLight();
 
 	public final ExecutorService executors = Executors
-			.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("Gen-Worker-Thread-%d").build());
+			.newCachedThreadPool(new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY));
 
 	public boolean tryAddPoint(int px, int pz, int range, Steps target) {
 		int boxSize = range * 2 + 1;
