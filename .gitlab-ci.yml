@@ -72,15 +72,15 @@ build:
             # relative to the root directory
             - fabric/build/libs
             - forge/build/libs
-        #exclude:
-        #    - fabric/build/libs/*-dev.jar
-        #    - fabric/build/libs/*-dev-shadow.jar
-        #    - fabric/build/libs/*-sources-dev.jar
-        #    - fabric/build/libs/*-sources.jar
-        #    - forge/build/libs/*-dev.jar
-        #    - forge/build/libs/*-dev-shadow.jar
-        #    - forge/build/libs/*-sources-dev.jar
-        #    - forge/build/libs/*-sources.jar
+        exclude:
+            - fabric/build/libs/*-dev.jar
+            - fabric/build/libs/*-dev-shadow.jar
+            - fabric/build/libs/*-sources-dev.jar
+            - fabric/build/libs/*-sources.jar
+            - forge/build/libs/*-dev.jar
+            - forge/build/libs/*-dev-shadow.jar
+            - forge/build/libs/*-sources-dev.jar
+            - forge/build/libs/*-sources.jar
         reports:
             # To ensure we've access to these files in the next stage
             dotenv: generate_jars.env
