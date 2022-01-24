@@ -2,6 +2,8 @@ plugins {
     id "com.github.johnrengelman.shadow" version "7.0.0"
 }
 
+version = project.mod_version+"-"+project.minecraft_version+"-"+new Date().format("MM_dd_yyyy_HH_mm")
+
 loom {
     accessWidenerPath.set(project(":common").file("src/main/resources/lod.accesswidener"))
 
@@ -23,11 +25,27 @@ configurations {
     developmentForge.extendsFrom common
 }
 
+repositories {
+    // Required for importing CurseForge mods
+    maven {
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+}
+
 dependencies {
     forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+
+    // Optifine
+//    implementation("forge-mod:OptiFine_1.17.1_HD_U_H1")
+
+    // Starlight
+//    implementation("curse.maven:starlight-forge-526854:${project.starlight_version_forge}")
 
 //    implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
 //    forgeDependencies(shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {})

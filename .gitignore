@@ -48,3 +48,6 @@ classes/
 
 **/src/generated/
 Merged/
+
+# file from notepad++
+*.bak

@@ -147,15 +147,19 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
      */
 
     @Override
-    public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks() {
+    public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks()
+    {
         ISodiumAccessor sodium = ModAccessorApi.get(ISodiumAccessor.class);
-        if (sodium != null) {
+        if (sodium != null)
+        {
             return sodium.getNormalRenderedChunks();
         }
         IOptifineAccessor optifine = ModAccessorApi.get(IOptifineAccessor.class);
-        if (optifine != null) {
+        if (optifine != null)
+        {
             HashSet<AbstractChunkPosWrapper> pos = optifine.getNormalRenderedChunks();
-            if (pos==null) pos = getMaximumRenderedChunks();
+            if (pos==null)
+                pos = getMaximumRenderedChunks();
             return pos;
         }
 
