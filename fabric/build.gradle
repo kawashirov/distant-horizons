@@ -24,23 +24,6 @@ configurations {
 repositories {
     // Required for ModMenu
     maven { url "https://maven.terraformersmc.com/" }
-
-    // Required for Sodium
-    maven {
-        name = "Modrinth"
-        url = "https://api.modrinth.com/maven"
-        content {
-            includeGroup "maven.modrinth"
-        }
-    }
-
-    // Required for importing cursedforge mods
-    maven {
-        url "https://www.cursemaven.com"
-        content {
-            includeGroup "curse.maven"
-        }
-    }
 }
 
 
@@ -64,7 +47,7 @@ dependencies {
     implementation "org.joml:joml:1.10.2"
 	
 	// Lithium
-    //modImplementation "maven.modrinth:lithium:${project.lithium_version}"
+//    modImplementation "maven.modrinth:lithium:${project.lithium_version}"
 
     // Iris
 //    modImplementation "maven.modrinth:iris:${project.iris_version}"
