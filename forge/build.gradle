@@ -25,27 +25,18 @@ configurations {
     developmentForge.extendsFrom common
 }
 
-repositories {
-    // Required for importing CurseForge mods
-    maven {
-        url "https://www.cursemaven.com"
-        content {
-            includeGroup "curse.maven"
-        }
-    }
-}
-
 dependencies {
+    // Forge loader
     forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
     // Optifine
-//    implementation("forge-mod:OptiFine_1.17.1_HD_U_H1")
+//    modImplementation("forge-mod:OptiFine_1.17.1_HD_U_H1")
 
     // Starlight
-//    implementation("curse.maven:starlight-forge-526854:${project.starlight_version_forge}")
+//    modImplementation("curse.maven:starlight-forge-526854:${project.starlight_version_forge}")
 
 //    implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
 //    forgeDependencies(shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {})

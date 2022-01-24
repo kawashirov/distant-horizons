@@ -23,15 +23,6 @@ configurations {
 repositories {
     // Required for ModMenu
     maven { url "https://maven.terraformersmc.com/" }
-
-    // Required for Sodium
-    maven {
-        name = "Modrinth"
-        url = "https://api.modrinth.com/maven"
-        content {
-            includeGroup "maven.modrinth"
-        }
-    }
 }
 
 
