@@ -66,8 +66,6 @@ build:
             - build
             - .gradle
             - cache/
-        exclude:
-            - .jar
     artifacts:
         name: "NightlyBuild-$CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
         paths:
@@ -100,8 +98,6 @@ merge:
             - build
             - .gradle
             - cache/
-        exclude:
-            - .jar
     artifacts:
         name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
         paths:
