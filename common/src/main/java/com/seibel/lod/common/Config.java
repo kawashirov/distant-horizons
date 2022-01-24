@@ -94,7 +94,7 @@ public class Config extends ConfigGui
 				@ConfigAnnotations.Entry
 				public static HorizontalResolution drawResolution = IQuality.DRAW_RESOLUTION_DEFAULT;
 
-				@ConfigAnnotations.Entry(minValue = 16, maxValue = 1024)
+				@ConfigAnnotations.Entry(minValue = 16, maxValue = 8192)
 				public static int lodChunkRenderDistance = IQuality.LOD_CHUNK_RENDER_DISTANCE_MIN_DEFAULT_MAX.defaultValue;
 
 				@ConfigAnnotations.Entry
