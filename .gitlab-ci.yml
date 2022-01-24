@@ -59,6 +59,8 @@ build:
             - common/build
             - core/.gradle
             - core/build
+            - fabric/build/libs
+            - forge/build/libs
             - fabric/.gradle
             - fabric/src/generated
             - forge/.gradle
