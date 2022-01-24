@@ -145,28 +145,32 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
      * is going to render this frame. <br><br>
      * <p>
      */
-   
-    @Override
-    public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks() {
+
+	@Override
+	public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks()
+	{
 		ISodiumAccessor sodium = ModAccessorApi.get(ISodiumAccessor.class);
-		if (sodium != null) {
+		if (sodium != null)
+		{
 			return sodium.getNormalRenderedChunks();
 		}
 		IOptifineAccessor optifine = ModAccessorApi.get(IOptifineAccessor.class);
-		if (optifine != null) {
+		if (optifine != null)
+		{
 			HashSet<AbstractChunkPosWrapper> pos = optifine.getNormalRenderedChunks();
-			if (pos==null) pos = getMaximumRenderedChunks();
+			if (pos == null)
+				pos = getMaximumRenderedChunks();
 			return pos;
 		}
-		
-    	LevelRenderer levelRenderer = MC.levelRenderer;
-    	LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
-    	return (chunks.stream().map((chunk) -> {
-    		AABB chunkBoundingBox = chunk.chunk.bb;
-        	return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
-        			Math.floorDiv((int) chunkBoundingBox.minZ, 16));
-    	}).collect(Collectors.toCollection(HashSet::new)));
-    }
+	
+		LevelRenderer levelRenderer = MC.levelRenderer;
+		LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
+		return (chunks.stream().map((chunk) -> {
+			AABB chunkBoundingBox = chunk.chunk.bb;
+			return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
+					Math.floorDiv((int) chunkBoundingBox.minZ, 16));
+		}).collect(Collectors.toCollection(HashSet::new)));
+	}
     
     @Override
 	public HashSet<AbstractChunkPosWrapper> getMaximumRenderedChunks()

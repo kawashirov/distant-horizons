@@ -76,14 +76,14 @@ build:
             - fabric/build/libs
             - forge/build/libs
         exclude:
-            - fabric/*-dev.jar
-            - fabric/*-dev-shadow.jar
-            - fabric/*-sources-dev.jar
-            - fabric/*-sources.jar
-            - forge/*-dev.jar
-            - forge/*-dev-shadow.jar
-            - forge/*-sources-dev.jar
-            - forge/*-sources.jar
+            - fabric/**/*-dev.jar
+            - fabric/**/*-dev-shadow.jar
+            - fabric/**/*-sources-dev.jar
+            - fabric/**/*-sources.jar
+            - forge/**/*-dev.jar
+            - forge/**/*-dev-shadow.jar
+            - forge/**/*-sources-dev.jar
+            - forge/**/*-sources.jar
         reports:
             # To ensure we've access to these files in the next stage
             dotenv: generate_jars.env
