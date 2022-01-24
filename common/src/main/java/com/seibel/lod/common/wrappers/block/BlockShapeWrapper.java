@@ -58,16 +58,15 @@ public class BlockShapeWrapper implements IBlockShapeWrapper
     static public BlockShapeWrapper getBlockShapeWrapper(Block block, ChunkWrapper chunkWrapper, int x, int y, int z)
     {
         //first we check if the block has already been wrapped
-        if (blockShapeWrapperMap.containsKey(block) && blockShapeWrapperMap.get(block) != null)
-            return blockShapeWrapperMap.get(block);
-
+    	BlockShapeWrapper blockWrapper = blockShapeWrapperMap.get(block);
+        if (blockWrapper != null)
+            return blockWrapper;
 
         //if it hasn't been created yet, we create it and save it in the map
-        BlockShapeWrapper blockWrapper = new BlockShapeWrapper(block, chunkWrapper, x, y, z);
-        blockShapeWrapperMap.put(block, blockWrapper);
-
+        blockWrapper = new BlockShapeWrapper(block, chunkWrapper, x, y, z);
+        BlockShapeWrapper blockWrapperCAS = blockShapeWrapperMap.putIfAbsent(block, blockWrapper);
         //we return the newly created wrapper
-        return blockWrapper;
+        return blockWrapperCAS==null ? blockWrapper : blockWrapperCAS;
     }
 
     private void setupShapes(IChunkWrapper chunkWrapper, int x, int y, int z)

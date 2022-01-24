@@ -26,6 +26,8 @@ import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
 import com.seibel.lod.core.objects.lod.LodDimension;
 import com.seibel.lod.core.util.LodThreadFactory;
+import com.seibel.lod.core.util.SingletonHandler;
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -461,10 +463,20 @@ public final class WorldGenerationStep {
 	final StepCarvers stepCarvers = new StepCarvers();
 	final StepFeatures stepFeatures = new StepFeatures();
 	final StepLight stepLight = new StepLight();
+	private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 
-	public final ExecutorService executors = Executors
-			.newCachedThreadPool(new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY));
+	//public final ExecutorService executors = Executors
+	//		.newCachedThreadPool(new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY));
+	public ExecutorService executors = Executors
+			.newFixedThreadPool(CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads(),
+					new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY));
 
+	public void resizeThreadPool(int newThreadCount)
+	{
+		executors = Executors.newFixedThreadPool(newThreadCount,
+			new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY));
+	}
+	
 	public boolean tryAddPoint(int px, int pz, int range, Steps target) {
 		int boxSize = range * 2 + 1;
 		int x = Math.floorDiv(px, boxSize) * boxSize + range;
@@ -621,7 +633,7 @@ public final class WorldGenerationStep {
 				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
 				ChunkAccess target = referencedChunks.get(targetIndex);
 				params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region), new LodBuilderConfig(generationMode)
-						, false);
+						, true);
 				//params.lodBuilder.generateLodNodeAsync(new ChunkWrapper(target, region), ApiShared.lodWorld, params.lodDim.dimension,
 				//		generationMode, false, () -> {}, () -> {});
 			}
@@ -1281,5 +1293,9 @@ public final class WorldGenerationStep {
 	    	throw new UnsupportedOperationException("This should never be used!");
 	    }
 	}
+
+
+
+
 	
 }

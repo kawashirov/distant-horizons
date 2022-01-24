@@ -80,16 +80,15 @@ public class BlockColorWrapper implements IBlockColorWrapper
     public static IBlockColorWrapper getBlockColorWrapper(Block block)
     {
         //first we check if the block has already been wrapped
-        if (blockColorWrapperMap.containsKey(block) && blockColorWrapperMap.get(block) != null)
-            return blockColorWrapperMap.get(block);
-
+    	BlockColorWrapper colorWrapper = blockColorWrapperMap.get(block);
+        if (colorWrapper != null)
+            return colorWrapper;
 
         //if it hasn't been created yet, we create it and save it in the map
-        BlockColorWrapper blockWrapper = new BlockColorWrapper(block);
-        blockColorWrapperMap.put(block, blockWrapper);
-
+        colorWrapper = new BlockColorWrapper(block);
+        BlockColorWrapper colorWrapperCAS = blockColorWrapperMap.putIfAbsent(block, colorWrapper);
         //we return the newly created wrapper
-        return blockWrapper;
+        return colorWrapperCAS==null ? colorWrapper : colorWrapperCAS;
     }
 
     /**

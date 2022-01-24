@@ -47,9 +47,10 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 	public LodDimension targetLodDim;
 	public static final int generationGroupSize = 4;
 	public static final int generationGroupSizeFar = 0;
-	public static int numberOfGenerationPoints = CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads();
+	public static int previousThreadCount = CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads();
 
 	private int estimatedSampleNeeded = 128;
+	private int estimatedPointsToQueue = 1;
 
 	public ExperimentalGenerator(LodBuilder newLodBuilder, LodDimension newLodDimension, IWorldWrapper worldWrapper) {
 		super(newLodBuilder, newLodDimension, worldWrapper);
@@ -73,7 +74,13 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		}
 		
 		DistanceGenerationMode mode = CONFIG.client().worldGenerator().getDistanceGenerationMode();
-		numberOfGenerationPoints = CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads();
+		int newThreadCount = CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads();
+		if (newThreadCount != previousThreadCount) {
+			generationGroup.resizeThreadPool(newThreadCount);
+			previousThreadCount = newThreadCount;
+		}
+		if (estimatedPointsToQueue < newThreadCount) estimatedPointsToQueue = newThreadCount;
+		
 		GenerationPriority priority = CONFIG.client().worldGenerator().getGenerationPriority();
 		if (priority == GenerationPriority.AUTO)
 			priority = MC.hasSinglePlayerServer() ? GenerationPriority.FAR_FIRST : GenerationPriority.NEAR_FIRST;
@@ -83,10 +90,14 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 			return;
 		int eventsCount = generationGroup.events.size();
 		// If we still all jobs running, return.
-		if (eventsCount >= numberOfGenerationPoints)
+		if (eventsCount >= estimatedPointsToQueue) {
+			estimatedPointsToQueue--;
+			if (estimatedPointsToQueue < newThreadCount) estimatedPointsToQueue = newThreadCount;
 			return;
+		}
+		
 
-		final int targetToGenerate = numberOfGenerationPoints - eventsCount;
+		final int targetToGenerate = estimatedPointsToQueue - eventsCount;
 		int toGenerate = targetToGenerate;
 		int positionGoneThough = 0;
 
@@ -98,6 +109,11 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		// position generation is completed.
 		PosToGenerateContainer posToGenerate = lodDim.getPosToGenerate(estimatedSampleNeeded, playerPosX, playerPosZ, priority, mode);
 
+		if (eventsCount == 0 && posToGenerate.getNumberOfPos()>=estimatedSampleNeeded) {
+			estimatedPointsToQueue++;
+			if (estimatedPointsToQueue > newThreadCount*10) estimatedPointsToQueue = newThreadCount*10;
+		}
+		
 		//ClientApi.LOGGER.info("PosToGenerate: {}", posToGenerate);
 		
 		// Find the max number of iterations we need to go though.
