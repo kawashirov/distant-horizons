@@ -59,8 +59,6 @@ build:
             - common/build
             - core/.gradle
             - core/build
-            - fabric/build/libs
-            - forge/build/libs
             - fabric/.gradle
             - fabric/src/generated
             - forge/.gradle
@@ -68,6 +66,8 @@ build:
             - build
             - .gradle
             - cache/
+        exclude:
+            - .jar
     artifacts:
         name: "NightlyBuild-$CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
         paths:
@@ -97,11 +97,11 @@ merge:
         key: "$CI_COMMIT_REF_NAME"
         policy: pull-push
         paths:
-            - fabric/build/libs
-            - forge/build/libs
             - build
             - .gradle
             - cache/
+        exclude:
+            - .jar
     artifacts:
         name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
         paths:

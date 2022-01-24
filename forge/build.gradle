@@ -2,7 +2,7 @@ plugins {
     id "com.github.johnrengelman.shadow" version "7.1.0"
 }
 
-//version = project.mod_version+"-"+project.minecraft_version+"-"+new Date().format("MM_dd_yyyy_HH_mm")
+version = project.mod_version+"-"+project.minecraft_version+"-"+new Date().format("MM_dd_yyyy_HH_mm")
 
 loom {
     accessWidenerPath.set(project(":common").file("src/main/resources/lod.accesswidener"))
