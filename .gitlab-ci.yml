@@ -87,26 +87,26 @@ build:
             # To ensure we've access to these files in the next stage
             dotenv: generate_jars.env
 
-# third stage
-merge:
-    stage: merge
-    script: ./gradlew merge --gradle-user-home cache/ 
-    # build using Java 17
-    image: eclipse-temurin:17
-    cache:
-        key: "$CI_COMMIT_REF_NAME"
-        policy: pull-push
-        paths:
-            - fabric/build/libs
-            - forge/build/libs
-            - build
-            - .gradle
-            - cache/
-    artifacts:
-        name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
-        paths:
-            # relative to the root directory
-            - Merged
+## third stage
+#merge:
+#    stage: merge
+#    script: ./gradlew merge --gradle-user-home cache/ 
+#    # build using Java 17
+#    image: eclipse-temurin:17
+#    cache:
+#        key: "$CI_COMMIT_REF_NAME"
+#        policy: pull-push
+#        paths:
+#            - fabric/build/libs
+#            - forge/build/libs
+#            - build
+#            - .gradle
+#            - cache/
+#    artifacts:
+#        name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
+#        paths:
+#            # relative to the root directory
+#            - Merged
 
 
 ## forth stage
