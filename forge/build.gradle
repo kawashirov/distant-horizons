@@ -33,8 +33,8 @@ dependencies {
 //    modImplementation("forge-mod:OptiFine_1.18.1_HD_U_H4")
 
     // Starlight
-//    implementation("curse.maven:starlight-forge-526854:${project.starlight_version_forge}")
-    annotationProcessor "org.spongepowered:mixin:0.8.4:processor"
+//    modImplementation("curse.maven:starlight-forge-526854:${project.starlight_version_forge}")
+//    annotationProcessor "org.spongepowered:mixin:0.8.4:processor"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
