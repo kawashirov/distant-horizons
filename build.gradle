@@ -1,4 +1,4 @@
-import io.github.rancraftplayz.jarmerger.JarMergerPlugin
+import io.github.ran.jarmerger.JarMergerPlugin
 
 buildscript {
     dependencies{
