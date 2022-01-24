@@ -567,7 +567,7 @@ public abstract class ConfigGui
                     {
                         EditBox widget = new EditBox(font, this.width - info.width - ConfigScreenConfigs.SpaceFromRightScreen + 2, 0, info.width - 4, 20, null);
                         widget.setMaxLength(info.width);
-                        widget.insertText(info.tempValue);
+                        widget.insertText(String.valueOf(info.value));
                         Predicate<String> processor = ((BiFunction<EditBox, Button, Predicate<String>>) info.widget).apply(widget, done);
                         widget.setFilter(processor);
                         this.list.addButton(widget, resetButton, null, name);

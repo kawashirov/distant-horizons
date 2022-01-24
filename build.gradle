@@ -63,6 +63,24 @@ allprojects {
         // used to download and compile dependencies from git repos
         maven { url 'https://jitpack.io' }
 
+        // Required for importing Modrinth mods
+        maven {
+            name = "Modrinth"
+            url = "https://api.modrinth.com/maven"
+            content {
+                includeGroup "maven.modrinth"
+            }
+        }
+
+        // Required for importing CursedForge mods
+        maven {
+            url "https://www.cursemaven.com"
+            content {
+                includeGroup "curse.maven"
+            }
+        }
+
+        // These 2 are for importing mods that arnt on CursedForge, Modrinth, GitHub, GitLab or anywhere opensource
         flatDir {
             dirs "${rootDir}/mods/fabric"
             content {
