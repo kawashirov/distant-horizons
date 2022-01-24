@@ -60,12 +60,9 @@ build:
             - core/.gradle
             - core/build
             - fabric/.gradle
-            - fabric/build
-            - fabric/run
             - fabric/src/generated
             - forge/.gradle
-            - forge/build
-            - forge/run
+            - forge/src/generated
             - build
             - .gradle
             - cache/
@@ -100,20 +97,6 @@ merge:
         paths:
             - fabric/build/libs
             - forge/build/libs
-            - .architectury-transformer
-            - .gradle
-            - build
-            - common/.gradle
-            - common/build
-            - core/.gradle
-            - core/build
-            - fabric/.gradle
-            - fabric/build
-            - fabric/run
-            - fabric/src/generated
-            - forge/.gradle
-            - forge/build
-            - forge/run
             - build
             - .gradle
             - cache/
