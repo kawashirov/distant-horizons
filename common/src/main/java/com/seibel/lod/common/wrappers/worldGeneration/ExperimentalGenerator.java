@@ -46,7 +46,6 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 	public WorldGenerationStep generationGroup;
 	public LodDimension targetLodDim;
 	public static final int generationGroupSize = 4;
-	public static final int generationGroupSizeFar = 0;
 	public static int previousThreadCount = CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads();
 
 	private int estimatedSampleNeeded = 128;
@@ -142,8 +141,11 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 			assert false;
 			return;
 		}
-		
+
+		if (ENABLE_GENERATOR_STATS_LOGGING)
+			ClientApi.LOGGER.info("WorldGen. Near:"+posToGenerate.getNumberOfNearPos()+" Far:"+posToGenerate.getNumberOfFarPos());
 		if (priority == GenerationPriority.FAR_FIRST) {
+
 			int nearCount = posToGenerate.getNumberOfNearPos();
 			int farCount = posToGenerate.getNumberOfFarPos();
 			if (ENABLE_GENERATOR_STATS_LOGGING)
@@ -159,10 +161,13 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 					byte detailLevel = (byte) (posToGenerate.getNthDetail(i, false) - 1);
 					int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, false));
 					int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, false));
-					if (generationGroup.tryAddPoint(chunkX, chunkZ, generationGroupSizeFar, targetStep)) {
+					int genSize = detailLevel > LodUtil.CHUNK_DETAIL_LEVEL ? 0 : generationGroupSize;
+					if (generationGroup.tryAddPoint(chunkX, chunkZ, genSize, targetStep)) {
 						toGenerate--;
 					}
 				}
+				if (toGenerate <= 0)
+					break;
 				
 				// We have nearPos to go though
 				if (i < nearCount && posToGenerate.getNthDetail(i, true) != 0) {
@@ -181,6 +186,47 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 				if (toGenerate <= 0)
 					break;
 			}
+			/*
+			int farCount = posToGenerate.getNumberOfFarPos();
+			for (int i = 0; i < farCount; i++) {
+				
+				// We have nearPos to go though
+				if (posToGenerate.getNthDetail(i, false) != 0) {
+					positionGoneThough++;
+					// TODO: Add comment here on why theres a '-1'.
+					// Not sure what's happening here. This is copied from previous codes.
+					byte detailLevel = (byte) (posToGenerate.getNthDetail(i, false) - 1);
+					int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, false));
+					int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, false));
+					int genSize = detailLevel != 0 ? 0 : generationGroupSize;
+					if (generationGroup.tryAddPoint(chunkX, chunkZ, genSize, targetStep)) {
+						toGenerate--;
+					}
+					if (toGenerate <= 0)
+						break;
+				}
+			}
+			// Only do near gen if toGenerate is non 0 and that we have requested all samples we can get.
+			if (toGenerate > 0 && estimatedSampleNeeded > posToGenerate.getNumberOfPos()) {
+				int nearCount = posToGenerate.getNumberOfNearPos();
+				for (int i = 0; i < nearCount; i++) {
+					// We have farPos to go though
+					if (posToGenerate.getNthDetail(i, true) != 0) {
+						positionGoneThough++;
+						// TODO: Add comment here on why theres a '-1'.
+						// Not sure what's happening here. This is copied from previous codes.
+						byte detailLevel = (byte) (posToGenerate.getNthDetail(i, true) - 1);
+						int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, true));
+						int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, true));
+						int genSize = detailLevel > LodUtil.CHUNK_DETAIL_LEVEL ? 0 : generationGroupSize;
+						if (generationGroup.tryAddPoint(chunkX, chunkZ, genSize, targetStep)) {
+							toGenerate--;
+						}
+					}
+					if (toGenerate <= 0)
+						break;
+				}
+			}*/
 		} else {
 			int nearCount = posToGenerate.getNumberOfNearPos();
 			for (int i = 0; i < nearCount; i++) {
@@ -213,7 +259,8 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 						byte detailLevel = (byte) (posToGenerate.getNthDetail(i, false) - 1);
 						int chunkX = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosX(i, false));
 						int chunkZ = LevelPosUtil.getChunkPos(detailLevel, posToGenerate.getNthPosZ(i, false));
-						if (generationGroup.tryAddPoint(chunkX, chunkZ, generationGroupSizeFar, targetStep)) {
+						int genSize = detailLevel > LodUtil.CHUNK_DETAIL_LEVEL ? 0 : generationGroupSize;
+						if (generationGroup.tryAddPoint(chunkX, chunkZ, genSize, targetStep)) {
 							toGenerate--;
 						}
 					}

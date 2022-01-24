@@ -118,7 +118,7 @@ Lod Generation:          0.269023348s
 
 public final class WorldGenerationStep {
 	public static final boolean ENABLE_PERF_LOGGING = false;
-	public static final boolean ENABLE_EVENT_LOGGING = false;
+	public static final boolean ENABLE_EVENT_LOGGING = true;
 	//TODO: Make this LightMode a config
 	//TODO: Make actual proper support for StarLight
 	public static final LightMode DEFAULT_LIGHTMODE = LightMode.Fancy;
