@@ -83,3 +83,5 @@ To use a custom version of Java use `-D` then the path for Java
 XZ for Java (data compression)\
 https://tukaani.org/xz/java.html
 
+DHJarMerger (To merge multiple mod versions into one jar)\
+https://github.com/Ran-helo/DHJarMerger
