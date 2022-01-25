@@ -131,6 +131,10 @@ public abstract class ConfigGui
         String gotoScreen = "";
         String category;
         Class<T> varClass;
+
+
+        @Deprecated
+        boolean fileComment = false;
     }
 
     private static Path configFilePath;
@@ -184,6 +188,16 @@ public abstract class ConfigGui
             if (field.isAnnotationPresent(ConfigAnnotations.ScreenEntry.class))
                 initNestedClass(field.getType(), (!category.isEmpty() ? category + "." : "") + field.getName());
 
+            // File comment (WILL BE REMOVED SOON)
+            if (field.isAnnotationPresent(ConfigAnnotations.FileComment.class)) {
+                entryMap.put((!category.isEmpty() ? category + "." : "") + field.getName(), info);
+                info.fileComment = true;
+                try
+                {
+                    info.value = info.defaultValue = field.get(null);
+                }
+                catch (IllegalAccessException ignored) {}
+            }
 
             info.field = field;
         }
@@ -328,6 +342,9 @@ public abstract class ConfigGui
         for (EntryInfo info : entries) {
             if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
                 editSingleOption.saveOption(info, config);
+
+                if (editSingleOption.getEntry((info.category.isEmpty() ? "" : info.category + ".") + "_" + info.field.getName()) != null)
+                    config.setComment((info.category.isEmpty() ? "" : info.category + ".") + info.field.getName(), String.valueOf(editSingleOption.getEntry((info.category.isEmpty() ? "" : info.category + ".") + "_" + info.field.getName()).defaultValue));
             }
         }
 
@@ -356,6 +373,10 @@ public abstract class ConfigGui
         for (EntryInfo info : entries) {
             if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
                 editSingleOption.loadOption(info, config);
+
+                // File comments (WILL REMOVE SOON)
+                if (editSingleOption.getEntry((info.category.isEmpty() ? "" : info.category + ".") + "_" + info.field.getName()) != null)
+                    config.setComment((info.category.isEmpty() ? "" : info.category + ".") + info.field.getName(), String.valueOf(editSingleOption.getEntry((info.category.isEmpty() ? "" : info.category + ".") + "_" + info.field.getName()).defaultValue));
             }
         }
 
@@ -440,7 +461,6 @@ public abstract class ConfigGui
             try {
                 Files.deleteIfExists(configFilePath);
                 saveToFile();
-                return;
             } catch (Exception f) {
                 LOGGER.info("Failed creating config file for " + MOD_NAME_READABLE + " at the path [" + configFilePath.toString() + "].");
                 f.printStackTrace();
@@ -476,7 +496,7 @@ public abstract class ConfigGui
 
         private final String translationPrefix;
         private final Screen parent;
-        private String category;
+        private final String category;
         private ConfigListWidget list;
         private boolean reload = false;
 
@@ -579,7 +599,7 @@ public abstract class ConfigGui
                         }));
                         this.list.addButton(widget, null, null, null);
                     }
-                    else
+                    else if (!info.fileComment)
                     {
                         this.list.addButton(null, null, null, name);
                     }
@@ -605,7 +625,7 @@ public abstract class ConfigGui
                         String key = translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName() + ".@tooltip";
 
                         if (info.error != null && text.equals(name)) renderTooltip(matrices, (Component) info.error.getValue(), mouseX, mouseY);
-                        else if (I18n.exists(key) && (text == null ? false : text.equals(name))) {
+                        else if (I18n.exists(key) && (text != null && text.equals(name))) {
                             List<Component> list = new ArrayList<>();
                             for (String str : I18n.get(key).split("\n"))
                                 list.add(new TextComponent(str));
