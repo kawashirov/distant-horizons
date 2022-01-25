@@ -131,6 +131,10 @@ public abstract class ConfigGui
 		String gotoScreen = "";
 		String category;
 		Class<T> varClass;
+
+
+		@Deprecated
+		boolean fileComment = false;
 	}
 
 	private static Path configFilePath;
@@ -184,6 +188,16 @@ public abstract class ConfigGui
 			if (field.isAnnotationPresent(ConfigAnnotations.ScreenEntry.class))
 				initNestedClass(field.getType(), (!category.isEmpty() ? category + "." : "") + field.getName());
 
+			// File comment (WILL BE REMOVED SOON)
+			if (field.isAnnotationPresent(ConfigAnnotations.FileComment.class)) {
+				entryMap.put((!category.isEmpty() ? category + "." : "") + field.getName(), info);
+				info.fileComment = true;
+				try
+				{
+					info.value = info.defaultValue = field.get(null);
+				}
+				catch (IllegalAccessException ignored) {}
+			}
 
 			info.field = field;
 		}
@@ -328,6 +342,9 @@ public abstract class ConfigGui
 		for (EntryInfo info : entries) {
 			if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
 				editSingleOption.saveOption(info, config);
+
+				if (editSingleOption.getEntry((info.category.isEmpty() ? "" : info.category + ".") + "_" + info.field.getName()) != null)
+					config.setComment((info.category.isEmpty() ? "" : info.category + ".") + info.field.getName(), String.valueOf(editSingleOption.getEntry((info.category.isEmpty() ? "" : info.category + ".") + "_" + info.field.getName()).defaultValue));
 			}
 		}
 
@@ -356,6 +373,10 @@ public abstract class ConfigGui
 		for (EntryInfo info : entries) {
 			if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
 				editSingleOption.loadOption(info, config);
+
+				// File comments (WILL REMOVE SOON)
+				if (editSingleOption.getEntry((info.category.isEmpty() ? "" : info.category + ".") + "_" + info.field.getName()) != null)
+					config.setComment((info.category.isEmpty() ? "" : info.category + ".") + info.field.getName(), String.valueOf(editSingleOption.getEntry((info.category.isEmpty() ? "" : info.category + ".") + "_" + info.field.getName()).defaultValue));
 			}
 		}
 
@@ -578,7 +599,7 @@ public abstract class ConfigGui
 						}));
 						this.list.addButton(widget, null, null, null);
 					}
-					else
+					else if (!info.fileComment)
 					{
 						this.list.addButton(null, null, null, name);
 					}
