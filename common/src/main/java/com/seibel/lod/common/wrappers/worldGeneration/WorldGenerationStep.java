@@ -24,6 +24,7 @@ import com.seibel.lod.core.api.ModAccessorApi;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
+import com.seibel.lod.core.enums.config.LightGenerationMode;
 import com.seibel.lod.core.objects.lod.LodDimension;
 import com.seibel.lod.core.util.LodThreadFactory;
 import com.seibel.lod.core.util.SingletonHandler;
@@ -71,6 +72,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.DataLayer;
+import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.chunk.ProtoChunk;
@@ -119,9 +121,7 @@ Lod Generation:          0.269023348s
 public final class WorldGenerationStep {
 	public static final boolean ENABLE_PERF_LOGGING = false;
 	public static final boolean ENABLE_EVENT_LOGGING = true;
-	//TODO: Make this LightMode a config
 	//TODO: Make actual proper support for StarLight
-	public static final LightMode DEFAULT_LIGHTMODE = LightMode.Fancy;
 	
 	//FIXME: Move this outside the WorldGenerationStep thingy
 	public static class Rolling {
@@ -228,10 +228,6 @@ public final class WorldGenerationStep {
 
 	enum Steps {
 		Empty, StructureStart, StructureReference, Biomes, Noise, Surface, Carvers, LiquidCarvers, Features, Light,
-	}
-	
-	enum LightMode {
-		Fancy, Fast, Step, StarLight
 	}
 
 	//FIXME: Remove this and use the Utils one
@@ -380,7 +376,7 @@ public final class WorldGenerationStep {
 		long nanotime;
 		final int id;
 		final Steps target;
-		final LightMode lightMode;
+		final LightGenerationMode lightMode;
 		final PrefEvent pEvent = new PrefEvent();
 
 		public GenerationEvent(ChunkPos pos, int range, WorldGenerationStep generationGroup, Steps target) {
@@ -390,8 +386,9 @@ public final class WorldGenerationStep {
 			id = generationFutureDebugIDs++;
 			this.target = target;
 			this.tParam = ThreadedParameters.getOrMake(generationGroup.params);
-			LightMode mode = DEFAULT_LIGHTMODE;
-			if (ModAccessorApi.get(IStarlightAccessor.class) != null) mode = LightMode.StarLight;
+			LightGenerationMode mode = CONFIG.client().worldGenerator().getLightGenerationMode();
+			
+			
 			this.lightMode = mode;
 			
 			future = generationGroup.executors.submit(() -> {
@@ -541,6 +538,7 @@ public final class WorldGenerationStep {
                     boolean bl = compoundTag.contains("Status", 8);
                     if (bl) {
                         ProtoChunk chunkAccess = ChunkSerializer.read(level, level.getPoiManager(), chunkPos, compoundTag);
+                        level.getLightEngine().retainData(chunkAccess.getPos(), false);
                         return chunkAccess;
                     }
                     ClientApi.LOGGER.error("DistantHorizons: Chunk file at {} is missing level data, skipping", chunkPos);
@@ -603,11 +601,13 @@ public final class WorldGenerationStep {
 		}
 
 		switch (e.target) {
+		case Empty:
 		case StructureStart:
 		case StructureReference:
 			generationMode = DistanceGenerationMode.NONE;
 			break;
 		case Biomes:
+			generationMode = DistanceGenerationMode.BIOME_ONLY;
 		case Noise:
 			generationMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
 			break;
@@ -620,7 +620,6 @@ public final class WorldGenerationStep {
 			break;
 		case Light:
 		case LiquidCarvers:
-		case Empty:
 		default:
 			return;
 		}
@@ -632,10 +631,23 @@ public final class WorldGenerationStep {
 			{
 				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
 				ChunkAccess target = referencedChunks.get(targetIndex);
-				params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region), new LodBuilderConfig(generationMode)
-						, true);
-				//params.lodBuilder.generateLodNodeAsync(new ChunkWrapper(target, region), ApiShared.lodWorld, params.lodDim.dimension,
-				//		generationMode, false, () -> {}, () -> {});
+				boolean isFull = target.getStatus() == ChunkStatus.FULL || target instanceof ImposterProtoChunk;
+				boolean isPartial = target.isOldNoiseGeneration();
+				if (isFull) {
+					ClientApi.LOGGER.info("Detected full existing chunk ", target.getPos());
+					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
+							new LodBuilderConfig(DistanceGenerationMode.FULL), true);
+				} else if (isPartial) {
+					ClientApi.LOGGER.info("Detected old existing chunk ", target.getPos());
+					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
+							new LodBuilderConfig(generationMode), true);
+				} else if (target.getStatus() == ChunkStatus.EMPTY && generationMode == DistanceGenerationMode.NONE) {
+					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
+							LodBuilderConfig.getFillVoidConfig(), true);
+				} else {
+					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
+							new LodBuilderConfig(generationMode), true);
+				}
 			}
 		}
 		e.pEvent.endNano = System.nanoTime();
@@ -651,10 +663,9 @@ public final class WorldGenerationStep {
 		try {
 			subRange.forEach((chunk) -> {
 				((ProtoChunk) chunk).setLightEngine(region.getLightEngine());
-				if (region.lightMode == LightMode.Step) {
-					((WorldGenLevelLightEngine)region.getLightEngine()).lightChunk(chunk, false);
-				}
 			});
+			if (step == Steps.Empty)
+				return subRange;
 			stepStructureStart.generateGroup(e.tParam, region, subRange);
 			e.pEvent.structStartNano = System.nanoTime();
 			e.refreshTimeout();
@@ -691,14 +702,10 @@ public final class WorldGenerationStep {
 			return subRange;
 		} finally {
 			switch (region.lightMode) {
-			case StarLight:
-			case Fancy:
+			case FANCY:
 				stepLight.generateGroup(region.getLightEngine(), subRange);
 				break;
-			case Step:
-				((WorldGenLevelLightEngine)region.getLightEngine()).runUpdates();
-				break;
-			case Fast:
+			case FAST:
 				break;
 			}
 			e.pEvent.lightNano = System.nanoTime();
@@ -1013,11 +1020,11 @@ public final class WorldGenerationStep {
 	
 	public static class LightedWorldGenRegion extends WorldGenRegion {
 		final WorldGenLevelLightEngine light;
-		final LightMode lightMode;
+		final LightGenerationMode lightMode;
 		final EmptyChunkGenerator generator;
 		Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
 		public LightedWorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
-				LightMode lightMode, EmptyChunkGenerator generator) {
+				LightGenerationMode lightMode, EmptyChunkGenerator generator) {
 			super(serverLevel, list, chunkStatus, i);
 			this.lightMode = lightMode;
 			this.generator = generator;
@@ -1072,7 +1079,7 @@ public final class WorldGenerationStep {
 
 		@Override
 		public int getBrightness(LightLayer lightLayer, BlockPos blockPos) {
-			if (lightMode != LightMode.Fast) {
+			if (lightMode != LightGenerationMode.FAST) {
 				return light.getLayerListener(lightLayer).getLightValue(blockPos);
 			}
 			if (lightLayer == LightLayer.BLOCK) return 0;
@@ -1082,7 +1089,7 @@ public final class WorldGenerationStep {
 		
 		@Override
 		public int getRawBrightness(BlockPos blockPos, int i) {
-			if (lightMode != LightMode.Fast) {
+			if (lightMode != LightGenerationMode.FAST) {
 				return light.getRawBrightness(blockPos, i);
 			}
 			BlockPos p = super.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
@@ -1124,7 +1131,7 @@ public final class WorldGenerationStep {
 		final boolean shouldReturnNull;
 		public LightGetterAdaptor(LightedWorldGenRegion genRegion) {
 			this.genRegion = genRegion;
-			shouldReturnNull = genRegion.lightMode==LightMode.StarLight ? true : false;
+			shouldReturnNull = ModAccessorApi.get(IStarlightAccessor.class)!=null;
 		}
 		@Override
 		public BlockGetter getChunkForLighting(int chunkX, int chunkZ) {

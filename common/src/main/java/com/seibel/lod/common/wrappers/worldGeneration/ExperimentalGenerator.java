@@ -85,7 +85,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 			priority = MC.hasSinglePlayerServer() ? GenerationPriority.FAR_FIRST : GenerationPriority.NEAR_FIRST;
 		
 		generationGroup.updateAllFutures();
-		if (mode == DistanceGenerationMode.NONE || !MC.hasSinglePlayerServer())
+		if (!MC.hasSinglePlayerServer())
 			return;
 		int eventsCount = generationGroup.events.size();
 		// If we still all jobs running, return.
@@ -122,8 +122,8 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		Steps targetStep;
 		switch (mode) {
 		case NONE:
-		case FULL:
-			return;
+			targetStep = Steps.Empty; //NOTE: Only load in existing chunks. No new chunk generation
+			break;
 		case BIOME_ONLY:
 			targetStep = Steps.Biomes; //NOTE: No block. Require fake height in LodBuilder
 			break;
@@ -134,6 +134,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 			targetStep = Steps.Surface; //Carvers or Surface???
 			break;
 		case FEATURES:
+		case FULL:
 			targetStep = Steps.Features;
 			break;
 		// TODO!
@@ -144,7 +145,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 
 		if (ENABLE_GENERATOR_STATS_LOGGING)
 			ClientApi.LOGGER.info("WorldGen. Near:"+posToGenerate.getNumberOfNearPos()+" Far:"+posToGenerate.getNumberOfFarPos());
-		if (priority == GenerationPriority.FAR_FIRST) {
+		if (priority == GenerationPriority.FAR_FIRST || priority == GenerationPriority.BALANCED) {
 
 			int nearCount = posToGenerate.getNumberOfNearPos();
 			int farCount = posToGenerate.getNumberOfFarPos();
