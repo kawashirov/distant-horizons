@@ -55,7 +55,7 @@ public class ExperimentalGenerator extends AbstractExperimentalWorldGeneratorWra
 		super(newLodBuilder, newLodDimension, worldWrapper);
 		MC.sendChatMessage("WARNING: You are currently using Distant Horizon's Experimental Chunk Pre-Generator!");
 		MC.sendChatMessage("The generation mode: Feature mode is not recommended for < 8GB RAM");
-		MC.sendChatMessage("Stuff may broke at any time!");
+		MC.sendChatMessage("Stuff may break at any time!");
 		generationGroup = new WorldGenerationStep(((WorldWrapper) worldWrapper).getServerWorld(), newLodBuilder,
 				newLodDimension);
 		ClientApi.LOGGER.info("1.18 Experimental Chunk Generator initialized");
