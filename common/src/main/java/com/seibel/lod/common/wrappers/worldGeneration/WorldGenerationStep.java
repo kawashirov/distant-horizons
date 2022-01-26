@@ -119,8 +119,9 @@ Lod Generation:          0.269023348s
 */
 
 public final class WorldGenerationStep {
-	public static final boolean ENABLE_PERF_LOGGING = false;
-	public static final boolean ENABLE_EVENT_LOGGING = true;
+	public static final boolean ENABLE_PERF_LOGGING = true;
+	public static final boolean ENABLE_EVENT_LOGGING = false;
+	public static final boolean ENABLE_LOAD_EVENT_LOGGING = false;
 	//TODO: Make actual proper support for StarLight
 	
 	//FIXME: Move this outside the WorldGenerationStep thingy
@@ -196,17 +197,48 @@ public final class WorldGenerationStep {
 		Rolling lodTime = new Rolling(SIZE);
 
 		public void recordEvent(PrefEvent e) {
-			totalTime.add(e.endNano - e.beginNano);
-			emptyTime.add(e.emptyNano - e.beginNano);
-			structStartTime.add(e.structStartNano - e.emptyNano);
-			structRefTime.add(e.structRefNano - e.structStartNano);
-			biomeTime.add(e.biomeNano - e.structRefNano);
-			noiseTime.add(e.noiseNano - e.biomeNano);
-			surfaceTime.add(e.surfaceNano - e.noiseNano);
-			carverTime.add(e.carverNano - e.surfaceNano);
-			featureTime.add(e.featureNano - e.carverNano);
-			lightTime.add(e.lightNano - e.featureNano);
-			lodTime.add(e.endNano - e.lightNano);
+			long preTime = e.beginNano;
+			totalTime.add(e.endNano - preTime);
+			if (e.emptyNano!=0) {
+				emptyTime.add(e.emptyNano - preTime);
+				preTime = e.emptyNano;
+			}
+			if (e.structStartNano!=0) {
+				structStartTime.add(e.structStartNano - preTime);
+				preTime = e.structStartNano;
+			}
+			if (e.structRefNano!=0) {
+				structRefTime.add(e.structRefNano - preTime);
+				preTime = e.structRefNano;
+			}
+			if (e.biomeNano!=0) {
+				biomeTime.add(e.biomeNano - preTime);
+				preTime = e.biomeNano;
+			}
+			if (e.noiseNano!=0) {
+				noiseTime.add(e.noiseNano - preTime);
+				preTime = e.noiseNano;
+			}
+			if (e.surfaceNano!=0) {
+				surfaceTime.add(e.surfaceNano - preTime);
+				preTime = e.surfaceNano;
+			}
+			if (e.carverNano!=0) {
+				carverTime.add(e.carverNano - preTime);
+				preTime = e.carverNano;
+			}
+			if (e.featureNano!=0) {
+				featureTime.add(e.featureNano - preTime);
+				preTime = e.featureNano;
+			}
+			if (e.lightNano!=0) {
+				lightTime.add(e.lightNano - preTime);
+				preTime = e.lightNano;
+			}
+			if (e.endNano!=0) {
+				lodTime.add(e.endNano - preTime);
+				preTime = e.endNano;
+			}
 		}
 
 		public String toString() {
@@ -634,11 +666,11 @@ public final class WorldGenerationStep {
 				boolean isFull = target.getStatus() == ChunkStatus.FULL || target instanceof ImposterProtoChunk;
 				boolean isPartial = target.isOldNoiseGeneration();
 				if (isFull) {
-					ClientApi.LOGGER.info("Detected full existing chunk ", target.getPos());
+					if (ENABLE_LOAD_EVENT_LOGGING) ClientApi.LOGGER.info("Detected full existing chunk at {}", target.getPos());
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
 							new LodBuilderConfig(DistanceGenerationMode.FULL), true);
 				} else if (isPartial) {
-					ClientApi.LOGGER.info("Detected old existing chunk ", target.getPos());
+					if (ENABLE_LOAD_EVENT_LOGGING) ClientApi.LOGGER.info("Detected old existing chunk at {}", target.getPos());
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
 							new LodBuilderConfig(generationMode), true);
 				} else if (target.getStatus() == ChunkStatus.EMPTY && generationMode == DistanceGenerationMode.NONE) {
@@ -706,6 +738,9 @@ public final class WorldGenerationStep {
 				stepLight.generateGroup(region.getLightEngine(), subRange);
 				break;
 			case FAST:
+				subRange.forEach((p) -> {
+					if (p instanceof ProtoChunk) ((ProtoChunk)p).setLightCorrect(true);
+				});
 				break;
 			}
 			e.pEvent.lightNano = System.nanoTime();
