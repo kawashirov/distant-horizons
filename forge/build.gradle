@@ -29,9 +29,6 @@ dependencies {
     // Forge loader
     forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
 
-    // Optifine
-//    modImplementation("forge-mod:OptiFine_1.18.1_HD_U_H4")
-
     // Starlight
 //    modImplementation("curse.maven:starlight-forge-526854:${project.starlight_version_forge}")
 //    annotationProcessor "org.spongepowered:mixin:0.8.4:processor"
