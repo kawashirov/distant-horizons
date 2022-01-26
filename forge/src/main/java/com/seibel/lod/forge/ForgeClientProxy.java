@@ -50,6 +50,7 @@ public class ForgeClientProxy
 	@SubscribeEvent
 	public void serverTickEvent(TickEvent.ServerTickEvent event)
 	{
+		if (event.phase != TickEvent.Phase.START) return;
 		eventApi.serverTickEvent();
 	}
 

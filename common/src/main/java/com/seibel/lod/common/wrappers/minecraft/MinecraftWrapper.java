@@ -153,7 +153,9 @@ public class MinecraftWrapper implements IMinecraftWrapper
     @Override
     public IDimensionTypeWrapper getCurrentDimension()
     {
-        return DimensionTypeWrapper.getDimensionTypeWrapper(mc.player.level.dimensionType());
+        if (mc.player != null)
+            return DimensionTypeWrapper.getDimensionTypeWrapper(mc.player.level.dimensionType());
+        else return null;
     }
 
     @Override
