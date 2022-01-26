@@ -32,9 +32,6 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    // Optifine
-//    modImplementation("forge-mod:OptiFine_1.17.1_HD_U_H1")
-
     // Starlight
 //    modImplementation("curse.maven:starlight-forge-526854:${project.starlight_version_forge}")
 

@@ -349,7 +349,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.vanillaOverdraw").value = newVanillaOverdraw;
 					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.vanillaOverdraw");
 				}
-
+				/*
 				@Override
 				public int getBacksideCullingRange()
 				{
@@ -360,7 +360,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.backsideCullingRange").value = newBacksideCullingRange;
 					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.backsideCullingRange");
-				}
+				}*/
 
 				@Override
 				public boolean getUseExtendedNearClipPlane()
@@ -409,7 +409,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				ConfigGui.editSingleOption.saveOption("client.worldGenerator.distanceGenerationMode");
 			}
 
-
+			/*
 			@Override
 			public boolean getAllowUnstableFeatureGeneration()
 			{
@@ -420,7 +420,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			{
 				ConfigGui.editSingleOption.getEntry("client.worldGenerator.allowUnstableFeatureGeneration").value = newAllowUnstableFeatureGeneration;
 				ConfigGui.editSingleOption.saveOption("client.worldGenerator.allowUnstableFeatureGeneration");
-			}
+			}*/
 
 
 			@Override
@@ -433,6 +433,28 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			{
 				ConfigGui.editSingleOption.getEntry("client.worldGenerator.blocksToAvoid").value = newBlockToAvoid;
 				ConfigGui.editSingleOption.saveOption("client.worldGenerator.blocksToAvoid");
+			}
+			@Override
+			public boolean getEnableDistantGeneration()
+			{
+				return Config.Client.WorldGenerator.enableDistantGeneration;
+			}
+			@Override
+			public void setEnableDistantGeneration(boolean newEnableDistantGeneration)
+			{
+				ConfigGui.editSingleOption.getEntry("client.worldGenerator.enableDistantGeneration").value = newEnableDistantGeneration;
+				ConfigGui.editSingleOption.saveOption("client.worldGenerator.enableDistantGeneration");
+			}
+			@Override
+			public LightGenerationMode getLightGenerationMode()
+			{
+				return Config.Client.WorldGenerator.lightGenerationMode;
+			}
+			@Override
+			public void setLightGenerationMode(LightGenerationMode newLightGenerationMode)
+			{
+				ConfigGui.editSingleOption.getEntry("client.worldGenerator.lightGenerationMode").value = newLightGenerationMode;
+				ConfigGui.editSingleOption.saveOption("client.worldGenerator.lightGenerationMode");
 			}
 		}
 

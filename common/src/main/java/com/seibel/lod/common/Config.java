@@ -199,10 +199,12 @@ public class Config extends ConfigGui
 				@ConfigAnnotations.Entry
 				public static boolean useExtendedNearClipPlane = IAdvancedGraphics.USE_EXTENDED_NEAR_CLIP_PLANE_DEFAULT;
 
+				/*
 				@ConfigAnnotations.FileComment
 				public static String _backsideCullingRange = IAdvancedGraphics.VANILLA_CULLING_RANGE_DESC;
 				@ConfigAnnotations.Entry(minValue = 0, maxValue = 512)
 				public static int backsideCullingRange = IAdvancedGraphics.VANILLA_CULLING_RANGE_MIN_DEFAULT_MAX.defaultValue;
+				*/
 			}
 		}
 
@@ -210,9 +212,9 @@ public class Config extends ConfigGui
 		public static class WorldGenerator
 		{
 			@ConfigAnnotations.FileComment
-			public static String _generationPriority = IWorldGenerator.GENERATION_PRIORITY_DESC;
+			public static String _enableDistantGeneration = IWorldGenerator.ENABLE_DISTANT_GENERATION_DESC;
 			@ConfigAnnotations.Entry
-			public static GenerationPriority generationPriority = IWorldGenerator.GENERATION_PRIORITY_DEFAULT;
+			public static boolean enableDistantGeneration = IWorldGenerator.ENABLE_DISTANT_GENERATION_DEFAULT;
 
 			//			@ConfigAnnotations.FileComment
 //			public static String _distanceGenerationMode = IWorldGenerator.getDistanceGenerationModeDesc();
@@ -220,10 +222,21 @@ public class Config extends ConfigGui
 			public static DistanceGenerationMode distanceGenerationMode = IWorldGenerator.DISTANCE_GENERATION_MODE_DEFAULT;
 
 			@ConfigAnnotations.FileComment
+			public static String _lightGenerationMode = IWorldGenerator.LIGHT_GENERATION_MODE_DESC;
+			@ConfigAnnotations.Entry
+			public static LightGenerationMode lightGenerationMode = IWorldGenerator.LIGHT_GENERATION_MODE_DEFAULT;
+
+			@ConfigAnnotations.FileComment
+			public static String _generationPriority = IWorldGenerator.GENERATION_PRIORITY_DESC;
+			@ConfigAnnotations.Entry
+			public static GenerationPriority generationPriority = IWorldGenerator.GENERATION_PRIORITY_DEFAULT;
+
+			/*
+			@ConfigAnnotations.FileComment
 			public static String _allowUnstableFeatureGeneration = IWorldGenerator.ALLOW_UNSTABLE_FEATURE_GENERATION_DESC;
-			// FIXME: Temperary override. In 1.18, the newer Unstable gnerator is more usable
 			@ConfigAnnotations.Entry
 			public static boolean allowUnstableFeatureGeneration = IWorldGenerator.ALLOW_UNSTABLE_FEATURE_GENERATION_DEFAULT;
+			*/
 
 			@ConfigAnnotations.FileComment
 			public static String _blocksToAvoid = IWorldGenerator.BLOCKS_TO_AVOID_DESC;
