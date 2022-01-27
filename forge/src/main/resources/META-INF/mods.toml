@@ -7,7 +7,7 @@ issueTrackerURL="https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues"
 
 [[mods]] #//mandatory
 	modId="lod" #//mandatory
-	version= "${file.jarVersion}" #//mandatory, gets the version number from jar populated by the build.gradle script
+	version= "${version}" #//mandatory, gets the version number from jar populated by the build.gradle script
 	displayName="Distant Horizons" #//mandatory
 	#//updateJSONURL="https://change.me.example.invalid/updates.json" # A URL to query for updates for this mod. See the JSON update specification https://mcforge.readthedocs.io/en/latest/gettingstarted/autoupdate/
 	displayURL="https://www.curseforge.com/minecraft/mc-mods/lod-level-of-detail"

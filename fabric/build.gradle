@@ -43,7 +43,7 @@ dependencies {
     // modImplementation "curse.maven:starlight-521783:${project.starlight_version_fabric}"
 
     // Sodium
-    modImplementation "maven.modrinth:sodium:${project.sodium_version}"
+    modImplementation "maven.modrinth:sodium:${rootProject.sodium_version}"
     implementation "org.joml:joml:1.10.2"
 	
 	// Lithium
@@ -113,10 +113,10 @@ runClient {
 
 processResources {
     dependsOn(copyAccessWidener)
-    inputs.property "version", project.version
+    inputs.property "version", rootProject.mod_version
 
     filesMatching("fabric.mod.json") {
-        expand "version": project.version
+        expand "version": rootProject.mod_version
     }
 }
 

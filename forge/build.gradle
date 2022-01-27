@@ -60,6 +60,13 @@ task copyCommonResources(type: Copy) {
 processResources {
     dependsOn(copyCoreResources)
     dependsOn(copyCommonResources)
+
+    // Put all the stuff about the mod
+    inputs.property "version", rootProject.mod_version
+
+    filesMatching("META-INF/mods.toml") {
+        expand "version": rootProject.mod_version
+    }
 }
 
 shadowJar {
