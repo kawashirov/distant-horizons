@@ -111,12 +111,35 @@ runClient {
     finalizedBy(deleteResources)
 }
 
+// Put stuff from gradle.properties into the mod info stuff
+def resourceTargets = ["fabric.mod.json"]
+def intoTargets = ["$buildDir/resources/main/"]
+def replaceProperties = [
+        version: mod_version,
+        mod_name: mod_name,
+        authors: mod_authors,
+        description: mod_description
+]
+
 processResources {
     dependsOn(copyAccessWidener)
-    inputs.property "version", rootProject.mod_version
 
-    filesMatching("fabric.mod.json") {
-        expand "version": rootProject.mod_version
+    inputs.properties replaceProperties
+    replaceProperties.put 'project', project
+    filesMatching(resourceTargets) {
+        expand replaceProperties
+    }
+
+    intoTargets.each { target ->
+        if (file(target).exists()) {
+            copy {
+                from(sourceSets.main.resources) {
+                    include resourceTargets
+                    expand replaceProperties
+                }
+                into target
+            }
+        }
     }
 }
 
