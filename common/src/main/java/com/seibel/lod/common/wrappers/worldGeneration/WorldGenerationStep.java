@@ -33,6 +33,7 @@ import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -72,13 +73,12 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.DataLayer;
-import net.minecraft.world.level.chunk.ImposterProtoChunk;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
-import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
@@ -97,7 +97,6 @@ import net.minecraft.world.level.levelgen.structure.StructureCheck;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.lighting.BlockLightEngine;
-import net.minecraft.world.level.lighting.LayerLightEngine;
 import net.minecraft.world.level.lighting.LayerLightEventListener;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.lighting.LightEventListener;
@@ -559,29 +558,25 @@ public final class WorldGenerationStep {
 		level.getChunkSource();
 		
 	}
-
-
-    @SuppressWarnings("resource")
-	public static CompletableFuture<ChunkAccess> scheduleChunkLoadOverride(ChunkPos chunkPos, ServerLevel level) {
-        return CompletableFuture.supplyAsync(() -> {
-            try {
-                CompoundTag compoundTag = level.getChunkSource().chunkMap.readChunk(chunkPos);
-                if (compoundTag != null) {
-                    boolean bl = compoundTag.contains("Status", 8);
-                    if (bl) {
-                        ProtoChunk chunkAccess = ChunkSerializer.read(level, level.getPoiManager(), chunkPos, compoundTag);
-                        level.getLightEngine().retainData(chunkAccess.getPos(), false);
-                        return chunkAccess;
-                    }
-                    ClientApi.LOGGER.error("DistantHorizons: Chunk file at {} is missing level data, skipping", chunkPos);
-                }
-            }
-            catch (Exception e) {
-            	ClientApi.LOGGER.error("DistantHorizons: Couldn't load chunk {}", chunkPos, e);
-            }
-            return new ProtoChunk(chunkPos, UpgradeData.EMPTY, level, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null);
-        }, level.getChunkSource().chunkMap.mainThreadExecutor);
-    }
+	
+	@SuppressWarnings("resource")
+	public static ChunkAccess loadOrMakeChunk(ChunkPos chunkPos, ServerLevel level, LevelLightEngine lightEngine) {
+		CompoundTag chunkData = null;
+		try
+		{
+			chunkData = level.getChunkSource().chunkMap.readChunk(chunkPos);
+		}
+		catch (IOException e)
+		{
+        	ClientApi.LOGGER.error("DistantHorizons: Couldn't load chunk {}", chunkPos, e);
+		}
+		if (chunkData == null) {
+			return new ProtoChunk(chunkPos, UpgradeData.EMPTY, level, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null);
+		} else {
+			return ChunkLoader.read(level, lightEngine, chunkPos, chunkData);
+		}
+		
+	}
 	
 	
 	
@@ -592,8 +587,13 @@ public final class WorldGenerationStep {
 		GridList<ChunkAccess> referencedChunks;
 		DistanceGenerationMode generationMode;
 		LightedWorldGenRegion region;
+		WorldGenLevelLightEngine lightEngine;
+		LightGetterAdaptor adaptor;
 		
 		try {
+			adaptor = new LightGetterAdaptor(params.level);
+			lightEngine = new WorldGenLevelLightEngine(adaptor);
+			
 			int cx = e.pos.x;
 			int cy = e.pos.z;
 			int rangeEmpty = e.range + 1;
@@ -604,7 +604,7 @@ public final class WorldGenerationStep {
 				ChunkPos chunkPos = new ChunkPos(x, z);
 				ChunkAccess target = null;
 				try {
-					target = scheduleChunkLoadOverride(chunkPos, params.level).join();
+					target = loadOrMakeChunk(chunkPos, params.level, lightEngine);
 				} catch (RuntimeException e2) {
 					// Continue...
 					e2.printStackTrace();
@@ -623,7 +623,8 @@ public final class WorldGenerationStep {
 			}
 			e.pEvent.emptyNano = System.nanoTime();
 			e.refreshTimeout();
-			region = new LightedWorldGenRegion(params.level, chunks, ChunkStatus.STRUCTURE_STARTS, e.range + 1, e.lightMode, generator);
+			region = new LightedWorldGenRegion(params.level, lightEngine, chunks, ChunkStatus.STRUCTURE_STARTS, e.range + 1, e.lightMode, generator);
+			adaptor.setRegion(region);
 			referencedChunks = chunks.subGrid(e.range);
 			referencedChunks = generateDirect(e, referencedChunks, e.target, region);
 			
@@ -663,7 +664,9 @@ public final class WorldGenerationStep {
 			{
 				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
 				ChunkAccess target = referencedChunks.get(targetIndex);
-				boolean isFull = target.getStatus() == ChunkStatus.FULL || target instanceof ImposterProtoChunk;
+				target.setLightCorrect(true);
+				if (target instanceof LevelChunk) ((LevelChunk)target).setClientLightReady(true);
+				boolean isFull = target.getStatus() == ChunkStatus.FULL || target instanceof LevelChunk;
 				boolean isPartial = target.isOldNoiseGeneration();
 				if (isFull) {
 					if (ENABLE_LOAD_EVENT_LOGGING) ClientApi.LOGGER.info("Detected full existing chunk at {}", target.getPos());
@@ -680,6 +683,10 @@ public final class WorldGenerationStep {
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
 							new LodBuilderConfig(generationMode), true);
 				}
+				if (e.lightMode == LightGenerationMode.FANCY || isFull) {
+					lightEngine.retainData(target.getPos(), false);
+				} 
+				
 			}
 		}
 		e.pEvent.endNano = System.nanoTime();
@@ -694,7 +701,10 @@ public final class WorldGenerationStep {
 			LightedWorldGenRegion region) {
 		try {
 			subRange.forEach((chunk) -> {
-				((ProtoChunk) chunk).setLightEngine(region.getLightEngine());
+				if (chunk instanceof ProtoChunk) {
+					((ProtoChunk) chunk).setLightEngine(region.getLightEngine());
+					region.getLightEngine().retainData(chunk.getPos(), true);
+				}
 			});
 			if (step == Steps.Empty)
 				return subRange;
@@ -1030,14 +1040,14 @@ public final class WorldGenerationStep {
 			}
 			
 			for (ChunkAccess chunk : chunks) {
+				boolean hasCorrectBlockLight = (chunk instanceof LevelChunk && chunk.isLightCorrect());
 				try {
 					if (lightEngine == null) {
-						chunk.setLightCorrect(true);
+						// Do nothing
 					} else if (lightEngine instanceof WorldGenLevelLightEngine) {
-						((WorldGenLevelLightEngine)lightEngine).lightChunk(chunk, true);
+						((WorldGenLevelLightEngine)lightEngine).lightChunk(chunk, !hasCorrectBlockLight);
 					} else if (lightEngine instanceof ThreadedLevelLightEngine) {
-						((ThreadedLevelLightEngine) lightEngine).lightChunk(chunk, true).join();
-						chunk.setLightCorrect(true);
+						((ThreadedLevelLightEngine) lightEngine).lightChunk(chunk, !hasCorrectBlockLight).join();
 					} else {
 						assert(false);
 					}
@@ -1045,7 +1055,9 @@ public final class WorldGenerationStep {
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
+				chunk.setLightCorrect(true);
 			}
+			lightEngine.runUpdates(Integer.MAX_VALUE, true, true);
 		}
 	}
 	
@@ -1058,46 +1070,29 @@ public final class WorldGenerationStep {
 		final LightGenerationMode lightMode;
 		final EmptyChunkGenerator generator;
 		Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
-		public LightedWorldGenRegion(ServerLevel serverLevel, List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
+		public LightedWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine, List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
 				LightGenerationMode lightMode, EmptyChunkGenerator generator) {
 			super(serverLevel, list, chunkStatus, i);
 			this.lightMode = lightMode;
 			this.generator = generator;
-			light = new WorldGenLevelLightEngine(new LightGetterAdaptor(this));
+			light = lightEngine;
 		}
 
+		// Skip updating the related tile entities
 	    @Override
 	    public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
 	        if (!this.ensureCanWrite(blockPos)) {
 	            return false;
 	        }
 	        ChunkAccess chunkAccess = this.getChunk(blockPos);
-	        BlockState blockState2 = chunkAccess.setBlockState(blockPos, blockState, false);
-	        if (blockState.hasBlockEntity()) {
-	            if (chunkAccess.getStatus().getChunkType() == ChunkStatus.ChunkType.LEVELCHUNK) {
-	                BlockEntity blockEntity = ((EntityBlock)((Object)blockState.getBlock())).newBlockEntity(blockPos, blockState);
-	                if (blockEntity != null) {
-	                    chunkAccess.setBlockEntity(blockEntity);
-	                } else {
-	                    chunkAccess.removeBlockEntity(blockPos);
-	                }
-	            } else {
-	                CompoundTag compoundTag = new CompoundTag();
-	                compoundTag.putInt("x", blockPos.getX());
-	                compoundTag.putInt("y", blockPos.getY());
-	                compoundTag.putInt("z", blockPos.getZ());
-	                compoundTag.putString("id", "DUMMY");
-	                chunkAccess.setBlockEntityNbt(compoundTag);
-	            }
-	        } else if (blockState2 != null && blockState2.hasBlockEntity()) {
-	            chunkAccess.removeBlockEntity(blockPos);
-	        }
-	        if (blockState.hasPostProcess(this, blockPos)) {
-	            this.getChunk(blockPos).markPosForPostprocessing(blockPos);
-	        }
+	        if (chunkAccess instanceof LevelChunk) return true;
+	        chunkAccess.setBlockState(blockPos, blockState, false);
+	        //This is for post ticking for water on gen and stuff like that. Not enabled for now.
+	        //if (blockState.hasPostProcess(this, blockPos)) this.getChunk(blockPos).markPosForPostprocessing(blockPos); 
 	        return true;
 	    }
 
+	    // Skip Dropping the item on destroy
 	    @Override
 	    public boolean destroyBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity, int i) {
 	        BlockState blockState = this.getBlockState(blockPos);
@@ -1106,12 +1101,57 @@ public final class WorldGenerationStep {
 	        }
 	        return this.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3, i);
 	    }
+
+	    // Skip BlockEntity stuff. It aren't really needed
+	    @Override
+	    public BlockEntity getBlockEntity(BlockPos blockPos) {
+	        return null;
+	    }
+
+	    // Skip BlockEntity stuff. It aren't really needed
+	    @Override
+	    public boolean addFreshEntity(Entity entity) {
+	        return true;
+	    }
 	    
+	    // Allays have empty chunks even if it's outside the worldGenRegion
+	    @Override
+	    public boolean hasChunk(int i, int j) {
+	    	return true;
+	    }
+	    
+	    // Override to ensure no other mod mixins cause skipping the overrided getChunk(...)
+	    @Override
+	    public ChunkAccess getChunk(int i, int j) {
+	        return this.getChunk(i, j, ChunkStatus.EMPTY);
+	    }
+
+	    // Override to ensure no other mod mixins cause skipping the overrided getChunk(...)
+	    @Override
+	    public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus) {
+	        return this.getChunk(i, j, chunkStatus, true);
+	    }
+
+	    // Allow creating empty chunks even if it's outside the worldGenRegion
+	    @Override
+	    @Nullable
+	    public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
+	    	if (!bl || super.hasChunk(i, j)) return super.getChunk(i, j, chunkStatus, bl);
+	    	ChunkAccess chunk = chunkMap.get(ChunkPos.asLong(i, j));
+	    	if (chunk!=null) return chunk;
+	    	chunk = generator.generate(i, j);
+	    	if (chunk==null) throw new NullPointerException("The provided generator should not return null!");
+	    	chunkMap.put(ChunkPos.asLong(i, j), chunk);
+	    	return chunk;
+	    }
+	    
+	    // Override force use of my own light engine
 		@Override
 		public LevelLightEngine getLightEngine() {
 			return light;
 		}
 
+	    // Override force use of my own light engine
 		@Override
 		public int getBrightness(LightLayer lightLayer, BlockPos blockPos) {
 			if (lightMode != LightGenerationMode.FAST) {
@@ -1121,7 +1161,8 @@ public final class WorldGenerationStep {
 			BlockPos p = super.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
 			return (p.getY()<=blockPos.getY()) ? getMaxLightLevel() : 0;
 		}
-		
+
+	    // Override force use of my own light engine
 		@Override
 		public int getRawBrightness(BlockPos blockPos, int i) {
 			if (lightMode != LightGenerationMode.FAST) {
@@ -1131,54 +1172,40 @@ public final class WorldGenerationStep {
 			return (p.getY()<=blockPos.getY()) ? getMaxLightLevel() : 0;
 		}
 
+	    // Override force use of my own light engine
 		@Override
 		public boolean canSeeSky(BlockPos blockPos) {
 			return (getBrightness(LightLayer.SKY, blockPos) >= getMaxLightLevel());
 		}
 
-	    @Override
-	    public ChunkAccess getChunk(int i, int j) {
-	        return this.getChunk(i, j, ChunkStatus.EMPTY);
-	    }
-	    
-	    @Override
-	    public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus) {
-	        return this.getChunk(i, j, chunkStatus, true);
-	    }
-	    
-	    @Override
-	    @Nullable
-	    public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
-	    	if (!bl || this.hasChunk(i, j)) return super.getChunk(i, j, chunkStatus, bl);
-	    	ChunkAccess chunk = chunkMap.get(ChunkPos.asLong(i, j));
-	    	if (chunk!=null) return chunk;
-	    	chunk = generator.generate(i, j);
-	    	if (chunk==null) throw new NullPointerException("The provided generator should not return null!");
-	    	chunkMap.put(ChunkPos.asLong(i, j), chunk);
-	    	return chunk;
-	    }
 		
 		
 	}
 	
 	public static class LightGetterAdaptor implements LightChunkGetter {
-		public final LightedWorldGenRegion genRegion;
+		private final BlockGetter heightGetter;
+		public LightedWorldGenRegion genRegion = null;
 		final boolean shouldReturnNull;
-		public LightGetterAdaptor(LightedWorldGenRegion genRegion) {
-			this.genRegion = genRegion;
+		public LightGetterAdaptor(BlockGetter heightAccessor) {
+			this.heightGetter = heightAccessor;
 			shouldReturnNull = ModAccessorApi.get(IStarlightAccessor.class)!=null;
 		}
+		public void setRegion(LightedWorldGenRegion region) {
+			genRegion = region;
+		}
+		
 		@Override
 		public BlockGetter getChunkForLighting(int chunkX, int chunkZ) {
+			if (genRegion == null) throw new IllegalStateException("World Gen region has not been set!");
 			// May be null
 			return genRegion.getChunk(chunkX, chunkZ, ChunkStatus.EMPTY, false);
 		}
 		@Override
 		public BlockGetter getLevel() {
-			return shouldReturnNull ? null : genRegion;
+			return shouldReturnNull ? null : (genRegion!=null ? genRegion : heightGetter);
 		}
 		public LevelHeightAccessor getLevelHeightAccessor() {
-			return genRegion;
+			return heightGetter;
 		}
 	}
 
@@ -1187,9 +1214,9 @@ public final class WorldGenerationStep {
 	    public static final int LIGHT_SECTION_PADDING = 1;
 	    protected final LevelHeightAccessor levelHeightAccessor;
 	    @Nullable
-	    public final LayerLightEngine<?, ?> blockEngine;
+	    public final BlockLightEngine blockEngine;
 	    @Nullable
-	    public final LayerLightEngine<?, ?> skyEngine;
+	    public final SkyLightEngine skyEngine;
 
 	    public WorldGenLevelLightEngine(LightGetterAdaptor genRegion) {
 	    	super(genRegion, false, false);
@@ -1285,7 +1312,7 @@ public final class WorldGenerationStep {
 	        return Math.max(k, j);
 	    }
 
-	    public void lightChunk(ChunkAccess chunkAccess, boolean hasLightBlock) {
+	    public void lightChunk(ChunkAccess chunkAccess, boolean needLightBlockUpdate) {
 	    	ChunkPos chunkPos = chunkAccess.getPos();
 	        chunkAccess.setLightCorrect(false);
 	        
@@ -1297,17 +1324,12 @@ public final class WorldGenerationStep {
                 updateSectionStatus(SectionPos.of(chunkPos, j), false);
             }
             enableLightSources(chunkPos, true);
-            if (hasLightBlock) {
+            if (needLightBlockUpdate) {
                 chunkAccess.getLights().forEach(blockPos ->
                 onBlockEmissionIncrease(blockPos, chunkAccess.getLightEmission(blockPos)));
             }
             
             chunkAccess.setLightCorrect(true);
-            runUpdates();
-	    }
-
-	    public void runUpdates() {
-	        runUpdates(2147483647, true, true);
 	    }
 
 	    @Override
@@ -1316,11 +1338,22 @@ public final class WorldGenerationStep {
 	    }
 	    @Override
 	    public void queueSectionData(LightLayer lightLayer, SectionPos sectionPos, @Nullable DataLayer dataLayer, boolean bl) {
-	    	throw new UnsupportedOperationException("This should never be used!");
+	        if (lightLayer == LightLayer.BLOCK) {
+	            if (this.blockEngine != null) {
+	                this.blockEngine.queueSectionData(sectionPos.asLong(), dataLayer, bl);
+	            }
+	        } else if (this.skyEngine != null) {
+	            this.skyEngine.queueSectionData(sectionPos.asLong(), dataLayer, bl);
+	        }
 	    }
 	    @Override
 	    public void retainData(ChunkPos chunkPos, boolean bl) {
-	    	throw new UnsupportedOperationException("This should never be used!");
+	        if (this.blockEngine != null) {
+	            this.blockEngine.retainData(chunkPos, bl);
+	        }
+	        if (this.skyEngine != null) {
+	            this.skyEngine.retainData(chunkPos, bl);
+	        }
 	    }
 	    @Override
 	    public int getLightSectionCount() {
