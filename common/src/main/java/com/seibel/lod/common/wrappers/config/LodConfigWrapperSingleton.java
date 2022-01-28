@@ -271,15 +271,15 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 
 
 				@Override
-				public boolean getFabulousClouds()
+				public boolean getCoolClouds()
 				{
-					return Config.Client.Graphics.CloudQuality.fabulousClouds;
+					return Config.Client.Graphics.CloudQuality.coolClouds;
 				}
 				@Override
-				public void setFabulousClouds(boolean newFabulousClouds)
+				public void setCoolClouds(boolean newCoolClouds)
 				{
-					ConfigGui.editSingleOption.getEntry("client.graphics.cloudQuality.fabulousClouds").value = newFabulousClouds;
-					ConfigGui.editSingleOption.saveOption("client.graphics.cloudQuality.fabulousClouds");
+					ConfigGui.editSingleOption.getEntry("client.graphics.cloudQuality.coolClouds").value = newCoolClouds;
+					ConfigGui.editSingleOption.saveOption("client.graphics.cloudQuality.coolClouds");
 				}
 
 
