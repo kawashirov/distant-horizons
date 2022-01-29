@@ -160,9 +160,9 @@ public class Config extends ConfigGui
 				public static boolean customClouds = ICloudQuality.CUSTOM_CLOUDS_DEFAULT;
 
 				@ConfigAnnotations.FileComment
-				public static String _fabulousClouds = ICloudQuality.FABULOUS_CLOUDS_DESC;
+				public static String _coolClouds = ICloudQuality.COOL_CLOUDS_DESC;
 				@ConfigAnnotations.Entry
-				public static boolean fabulousClouds = ICloudQuality.FABULOUS_CLOUDS_DEFAULT;
+				public static boolean coolClouds = ICloudQuality.COOL_CLOUDS_DEFAULT;
 
 				@ConfigAnnotations.FileComment
 				public static String _extendClouds = ICloudQuality.EXTEND_CLOUDS_DESC;

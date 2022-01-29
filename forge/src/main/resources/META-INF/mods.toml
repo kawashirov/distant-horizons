@@ -7,16 +7,16 @@ issueTrackerURL="https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues"
 
 [[mods]] #//mandatory
 	modId="lod" #//mandatory
-	version= "${file.jarVersion}" #//mandatory, gets the version number from jar populated by the build.gradle script
-	displayName="Distant Horizons" #//mandatory
+	version= "${version}" #//mandatory, gets the version number from jar populated by the build.gradle script
+	displayName="${mod_name}" #//mandatory
 	#//updateJSONURL="https://change.me.example.invalid/updates.json" # A URL to query for updates for this mod. See the JSON update specification https://mcforge.readthedocs.io/en/latest/gettingstarted/autoupdate/
 	displayURL="https://www.curseforge.com/minecraft/mc-mods/lod-level-of-detail"
 	logoFile="logo.png"
 	catalogueImageIcon="icon.png"
 	credits="Massive thanks to: Leonardo, Cola, Ran, and CoolGi. For their hard work to bring Distant Horizons to where it is today. - James"
-	authors="James Seibel, Leonardo Amato, and Cola"
+	authors="${authors}"
 	#//mandatory. The description text for the mod
-	description= ''' This mod generates and renders simplified terrain beyond the normal view distance at a low performance cost. Allowing you to see much farther without turning your game into a slideshow. '''
+	description= ''' ${description} '''
 	#// if not set defaults to "false"
 	clientSideOnly="true"
 	#// if not set defaults to "BOTH"
