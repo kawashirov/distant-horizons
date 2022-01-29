@@ -13,13 +13,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
@@ -58,7 +56,7 @@ public class ChunkWrapper implements IChunkWrapper
     public IBiomeWrapper getBiome(int x, int y, int z)
     {
         return BiomeWrapper.getBiomeWrapper(chunk.getBiomes().getNoiseBiome(
-                x, y, z));
+                x >> 2, y >> 2, z >> 2));
     }
 
     @Override
