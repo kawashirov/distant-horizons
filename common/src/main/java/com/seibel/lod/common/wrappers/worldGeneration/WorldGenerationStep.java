@@ -1156,16 +1156,29 @@ public final class WorldGenerationStep {
 	        return this.getChunk(i, j, chunkStatus, true);
 	    }
 
+	    private static ChunkStatus debugTriggeredForStatus = null;
 	    // Allow creating empty chunks even if it's outside the worldGenRegion
-	    @Override
+		@Override
 	    @Nullable
 	    public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
-	    	if (!bl || super.hasChunk(i, j)) return super.getChunk(i, j, chunkStatus, bl);
-	    	ChunkAccess chunk = chunkMap.get(ChunkPos.asLong(i, j));
-	    	if (chunk!=null) return chunk;
-	    	chunk = generator.generate(i, j);
-	    	if (chunk==null) throw new NullPointerException("The provided generator should not return null!");
-	    	chunkMap.put(ChunkPos.asLong(i, j), chunk);
+	    	ChunkAccess chunk = super.hasChunk(i, j) ? super.getChunk(i, j, ChunkStatus.EMPTY, false) : null;
+	    	if (chunk != null && chunk.getStatus().isOrAfter(chunkStatus)) {
+                return chunk;
+            }
+	    	if (!bl) return null;
+	    	if (chunk == null) {
+		    	chunk = chunkMap.get(ChunkPos.asLong(i, j));
+		    	if (chunk == null) {
+			    	chunk = generator.generate(i, j);
+			    	if (chunk == null) throw new NullPointerException("The provided generator should not return null!");
+			    	chunkMap.put(ChunkPos.asLong(i, j), chunk);
+		    	}
+	    	}
+	    	if (chunkStatus != ChunkStatus.EMPTY && chunkStatus != debugTriggeredForStatus) {
+	    		ClientApi.LOGGER.info(
+	    				"WorldGen requiring "+chunkStatus+" outside expected range detected. Force passing EMPTY chunk and seeing if it works.");
+	    		debugTriggeredForStatus = chunkStatus;
+	    	}
 	    	return chunk;
 	    }
 	    
