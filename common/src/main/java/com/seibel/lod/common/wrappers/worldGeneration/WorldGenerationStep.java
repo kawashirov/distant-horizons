@@ -1071,14 +1071,20 @@ public final class WorldGenerationStep {
 		final LightGenerationMode lightMode;
 		final EmptyChunkGenerator generator;
 		final int writeRadius;
+		final int size;
+	    private final ChunkPos firstPos;
+	    private final List<ChunkAccess> cache;
 		Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
 		public LightedWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine, List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
 				LightGenerationMode lightMode, EmptyChunkGenerator generator) {
 			super(serverLevel, list, chunkStatus, i);
 			this.lightMode = lightMode;
+	        this.firstPos = list.get(0).getPos();
 			this.generator = generator;
 			light = lightEngine;
 			writeRadius = i;
+			cache = list;
+			size = Mth.floor(Math.sqrt(list.size()));
 		}
 
 		// Bypass BCLib mixin overrides.
@@ -1156,12 +1162,25 @@ public final class WorldGenerationStep {
 	        return this.getChunk(i, j, chunkStatus, true);
 	    }
 
+	    // Use this instead of super.getChunk() to bypass C2ME concurrency checks
+	    private ChunkAccess superGetChunk(int x, int z, ChunkStatus cs) {
+	    	int k = x - firstPos.x;
+            int l = z - firstPos.z;
+            return cache.get(k + l * size);
+	    }
+	    // Use this instead of super.hasChunk() to bypass C2ME concurrency checks
+	    private boolean superHasChunk(int x, int z) {
+	    	int k = x - firstPos.x;
+            int l = z - firstPos.z;
+	        return l>=0 && l<size && k>=0 && k<size;
+	    }
+	    
 	    private static ChunkStatus debugTriggeredForStatus = null;
 	    // Allow creating empty chunks even if it's outside the worldGenRegion
 		@Override
 	    @Nullable
 	    public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
-	    	ChunkAccess chunk = super.hasChunk(i, j) ? super.getChunk(i, j, ChunkStatus.EMPTY, false) : null;
+	    	ChunkAccess chunk = superHasChunk(i, j) ? superGetChunk(i, j, ChunkStatus.EMPTY) : null;
 	    	if (chunk != null && chunk.getStatus().isOrAfter(chunkStatus)) {
                 return chunk;
             }
