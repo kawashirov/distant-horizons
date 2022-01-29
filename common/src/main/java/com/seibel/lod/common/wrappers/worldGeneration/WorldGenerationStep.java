@@ -83,6 +83,7 @@ import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
 import net.minecraft.ReportedException;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -623,7 +624,7 @@ public final class WorldGenerationStep {
 			}
 			e.pEvent.emptyNano = System.nanoTime();
 			e.refreshTimeout();
-			region = new LightedWorldGenRegion(params.level, lightEngine, chunks, ChunkStatus.STRUCTURE_STARTS, e.range + 1, e.lightMode, generator);
+			region = new LightedWorldGenRegion(params.level, lightEngine, chunks, ChunkStatus.STRUCTURE_STARTS, rangeEmpty, e.lightMode, generator);
 			adaptor.setRegion(region);
 			referencedChunks = chunks.subGrid(e.range);
 			referencedChunks = generateDirect(e, referencedChunks, e.target, region);
@@ -1069,6 +1070,7 @@ public final class WorldGenerationStep {
 		final WorldGenLevelLightEngine light;
 		final LightGenerationMode lightMode;
 		final EmptyChunkGenerator generator;
+		final int writeRadius;
 		Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
 		public LightedWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine, List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
 				LightGenerationMode lightMode, EmptyChunkGenerator generator) {
@@ -1076,7 +1078,29 @@ public final class WorldGenerationStep {
 			this.lightMode = lightMode;
 			this.generator = generator;
 			light = lightEngine;
+			writeRadius = i;
 		}
+
+		// Bypass BCLib mixin overrides.
+	    @Override
+	    public boolean ensureCanWrite(BlockPos blockPos) {
+	        int i = SectionPos.blockToSectionCoord(blockPos.getX());
+	        int j = SectionPos.blockToSectionCoord(blockPos.getZ());
+	        ChunkPos chunkPos = this.getCenter();
+	        ChunkAccess center = this.getChunk(chunkPos.x, chunkPos.z);
+	        int k = Math.abs(chunkPos.x - i);
+	        int l = Math.abs(chunkPos.z - j);
+	        if (k > this.writeRadius || l > this.writeRadius) {
+	            return false;
+	        }
+	        if (center.isUpgrading()) {
+	            LevelHeightAccessor levelHeightAccessor = center.getHeightAccessorForGeneration();
+	            if (blockPos.getY() < levelHeightAccessor.getMinBuildHeight() || blockPos.getY() >= levelHeightAccessor.getMaxBuildHeight()) {
+	                return false;
+	            }
+	        }
+	        return true;
+	    }
 
 		// Skip updating the related tile entities
 	    @Override
