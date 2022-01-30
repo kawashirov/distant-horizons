@@ -29,7 +29,7 @@ import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractExperimenta
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractWorldGeneratorWrapper;
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
 import com.seibel.lod.common.wrappers.chunk.ChunkPosWrapper;
-import com.seibel.lod.common.wrappers.worldGeneration.ExperimentalGenerator;
+//import com.seibel.lod.common.wrappers.worldGeneration.ExperimentalGenerator;
 import com.seibel.lod.common.wrappers.worldGeneration.WorldGeneratorWrapper;
 
 /**
@@ -82,8 +82,8 @@ public class WrapperFactory implements IWrapperFactory {
         return new WorldGeneratorWrapper(newLodBuilder, newLodDimension, worldWrapper);
     }
     
-    @Override
-    public AbstractExperimentalWorldGeneratorWrapper createExperimentalWorldGenerator(LodBuilder newLodBuilder, LodDimension newLodDimension, IWorldWrapper worldWrapper) {
-		return new ExperimentalGenerator(newLodBuilder, newLodDimension, worldWrapper);
-	}
+//    @Override
+//    public AbstractExperimentalWorldGeneratorWrapper createExperimentalWorldGenerator(LodBuilder newLodBuilder, LodDimension newLodDimension, IWorldWrapper worldWrapper) {
+//		return new ExperimentalGenerator(newLodBuilder, newLodDimension, worldWrapper);
+//	}
 }

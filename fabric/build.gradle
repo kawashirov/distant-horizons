@@ -3,7 +3,7 @@ plugins {
     id "com.modrinth.minotaur" version "1.2.1"
 }
 
-version = project.mod_version+"-"+project.minecraft_version+"-"+new Date().format("MM_dd_yyyy_HH_mm")
+version = rootProject.mod_version+"-"+rootProject.minecraft_version+"-"+new Date().format("yyyy_MM_dd_HH_mm")
 
 loom {
     accessWidenerPath.set(project(":common").file("src/main/resources/lod.accesswidener"))
@@ -39,14 +39,14 @@ dependencies {
     }
 
     // Sodium
-    modImplementation "maven.modrinth:sodium:${project.sodium_version}"
+    modImplementation "maven.modrinth:sodium:${rootProject.sodium_version}"
     implementation "org.joml:joml:1.10.2"
 
     // Lithium
-//    modImplementation "maven.modrinth:lithium:${project.lithium_version}"
+//    modImplementation "maven.modrinth:lithium:${rootProject.lithium_version}"
 
     // Iris
-//    modImplementation "maven.modrinth:iris:${project.iris_version}"
+//    modImplementation "maven.modrinth:iris:${rootProject.iris_version}"
 
 
     // Toml
