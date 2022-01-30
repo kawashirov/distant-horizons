@@ -45,6 +45,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -58,8 +59,10 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -86,6 +89,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import net.minecraft.world.level.lighting.BlockLightEngine;
@@ -360,7 +364,7 @@ public final class WorldGenerationStep {
 	public static final class ThreadedParameters {
 		private static final ThreadLocal<ThreadedParameters> localParam = new ThreadLocal<ThreadedParameters>();
 		final ServerLevel level;
-		final StructureFeatureManager structFeat;
+		public WorldGenStructFeatManager structFeat = null;
 		boolean isValid = true;
 		public final PerfCalculator perf = new PerfCalculator();
 
@@ -378,7 +382,10 @@ public final class WorldGenerationStep {
 
 		private ThreadedParameters(GlobalParameters param) {
 			level = param.level;
-			structFeat = new StructureFeatureManager(level, param.worldGenSettings);
+		}
+		
+		public void makeStructFeat(WorldGenLevel genLevel, WorldGenSettings worldGenSettings) {
+			structFeat = new WorldGenStructFeatManager(level, worldGenSettings, genLevel);
 		}
 	}
 
@@ -424,6 +431,8 @@ public final class WorldGenerationStep {
 
 		public boolean terminate() {
 			future.cancel(true);
+			ClientApi.LOGGER.info("======================DUMPING ALL THREADS FOR WORLD GEN=======================");
+			threadFactory.dumpAllThreadStacks();
 			return future.isCancelled();
 		}
 
@@ -472,11 +481,13 @@ public final class WorldGenerationStep {
 	final StepLight stepLight = new StepLight();
 	private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 
+	public static final LodThreadFactory threadFactory = new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY);
+	
 	//public final ExecutorService executors = Executors
 	//		.newCachedThreadPool(new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY));
 	public ExecutorService executors = Executors
 			.newFixedThreadPool(CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads(),
-					new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY));
+					threadFactory);
 
 	public void resizeThreadPool(int newThreadCount)
 	{
@@ -603,6 +614,7 @@ public final class WorldGenerationStep {
 			e.refreshTimeout();
 			region = new LightedWorldGenRegion(params.level, lightEngine, chunks, ChunkStatus.STRUCTURE_STARTS, rangeEmpty, e.lightMode, generator);
 			adaptor.setRegion(region);
+			e.tParam.makeStructFeat(region, params.worldGenSettings);
 			referencedChunks = chunks.subGrid(e.range);
 			referencedChunks = generateDirect(e, referencedChunks, e.target, region);
 			
@@ -982,6 +994,30 @@ public final class WorldGenerationStep {
 		ChunkAccess generate(int x, int z);
 	}
 	
+	public static class WorldGenStructFeatManager extends StructureFeatureManager {
+		WorldGenLevel genLevel;
+		WorldGenSettings worldGenSettings;
+		public WorldGenStructFeatManager(LevelAccessor levelAccessor, WorldGenSettings worldGenSettings, WorldGenLevel genLevel) {
+			super(levelAccessor, worldGenSettings);
+			this.genLevel = genLevel;
+			this.worldGenSettings = worldGenSettings;
+		}
+		
+		@Override
+	    public WorldGenStructFeatManager forWorldGenRegion(WorldGenRegion worldGenRegion) {
+	        return new WorldGenStructFeatManager(worldGenRegion, worldGenSettings, worldGenRegion);
+	    }
+
+		@Override
+	    public Stream<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos2, StructureFeature<?> structureFeature) {
+	        return genLevel.getChunk(sectionPos2.x(), sectionPos2.z(), ChunkStatus.STRUCTURE_REFERENCES).getReferencesForFeature(structureFeature)
+	        		.stream().map(long_ -> SectionPos.of(new ChunkPos((long)long_), 0)).map(
+	        				sectionPos -> this.getStartForFeature((SectionPos)sectionPos, structureFeature,
+	        						genLevel.getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_STARTS))).filter(
+	        								structureStart -> structureStart != null && structureStart.isValid());
+	    }
+	}
+	
 	public static class LightedWorldGenRegion extends WorldGenRegion {
 		final WorldGenLevelLightEngine light;
 		final LightGenerationMode lightMode;
@@ -1037,10 +1073,10 @@ public final class WorldGenerationStep {
 	    }
 	    
 	    // Allays have empty chunks even if it's outside the worldGenRegion
-	    @Override
-	    public boolean hasChunk(int i, int j) {
-	    	return true;
-	    }
+	    //@Override
+	    //public boolean hasChunk(int i, int j) {
+	    //	return true;
+	    //}
 	    
 	    // Override to ensure no other mod mixins cause skipping the overrided getChunk(...)
 	    @Override
@@ -1071,7 +1107,7 @@ public final class WorldGenerationStep {
 		@Override
 	    @Nullable
 	    public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
-	    	ChunkAccess chunk = getChunkAccess(j, j, chunkStatus, bl);
+	    	ChunkAccess chunk = getChunkAccess(i, j, chunkStatus, bl);
 	    	if (chunk instanceof LevelChunk) {
 	    		chunk = new ImposterProtoChunk((LevelChunk) chunk);
 	    	}

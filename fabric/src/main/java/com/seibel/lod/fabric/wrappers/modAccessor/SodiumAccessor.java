@@ -23,6 +23,7 @@ public class SodiumAccessor implements ISodiumAccessor {
 	
     @Override
     public String getModName() {
+    	
         return "Sodium-Fabric-1.16.5";
     }
 
