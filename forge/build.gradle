@@ -2,7 +2,7 @@ plugins {
     id "com.github.johnrengelman.shadow" version "7.0.0"
 }
 
-version = project.mod_version+"-"+project.minecraft_version+"-"+new Date().format("MM_dd_yyyy_HH_mm")
+version = rootProject.mod_version+"-"+rootProject.minecraft_version+"-"+new Date().format("yyyy_MM_dd_HH_mm")
 
 loom {
     accessWidenerPath.set(project(":common").file("src/main/resources/lod.accesswidener"))
@@ -35,8 +35,8 @@ dependencies {
     // Starlight
 //    modImplementation("curse.maven:starlight-forge-526854:${rootProject.starlight_version_forge}")
 
-//    implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
-//    forgeDependencies(shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {})
+//    implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")                      // This is already included with forge
+//    forgeDependencies(shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {})      // This is already included with forge
 
 //    forgeDependencies(project(":core")) { transitive false }
 
@@ -96,7 +96,7 @@ shadowJar {
     configurations = [project.configurations.shadowMe]
     relocate 'org.tukaani', 'shaded.tukaani'
     relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
-//    relocate 'com.electronwill.nightconfig', 'shaded.electronwill.nightconfig'
+//    relocate 'com.electronwill.nightconfig', 'shaded.electronwill.nightconfig'    // This is already included with forge
 
     relocate 'com.seibel.lod.common', 'forge.com.seibel.lod.common'
 
