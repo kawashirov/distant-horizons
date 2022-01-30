@@ -68,6 +68,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.DataLayer;
+import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.LightChunkGetter;
@@ -452,12 +453,6 @@ public final class WorldGenerationStep {
 		}
 	}
 	
-	
-	
-	
-	
-	
-	
 	//=================Generation Step===================
 
 	private static <T> T joinSync(CompletableFuture<T> f) {
@@ -557,8 +552,7 @@ public final class WorldGenerationStep {
 		if (chunkData == null) {
 			return new ProtoChunk(chunkPos, UpgradeData.EMPTY);
 		} else {
-			return null;
-			//return ChunkLoader.read(level, lightEngine, chunkPos, chunkData);
+			return ChunkLoader.read(level, lightEngine, chunkPos, chunkData);
 		}
 		
 	}
@@ -1073,11 +1067,19 @@ public final class WorldGenerationStep {
 	        return l>=0 && l<size && k>=0 && k<size;
 	    }
 	    
-	    private static ChunkStatus debugTriggeredForStatus = null;
 	    // Allow creating empty chunks even if it's outside the worldGenRegion
 		@Override
 	    @Nullable
 	    public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
+	    	ChunkAccess chunk = getChunkAccess(j, j, chunkStatus, bl);
+	    	if (chunk instanceof LevelChunk) {
+	    		chunk = new ImposterProtoChunk((LevelChunk) chunk);
+	    	}
+	    	return chunk;
+	    }
+	    
+	    private static ChunkStatus debugTriggeredForStatus = null;
+	    private ChunkAccess getChunkAccess(int i, int j, ChunkStatus chunkStatus, boolean bl) {
 	    	ChunkAccess chunk = superHasChunk(i, j) ? superGetChunk(i, j, ChunkStatus.EMPTY) : null;
 	    	if (chunk != null && chunk.getStatus().isOrAfter(chunkStatus)) {
                 return chunk;

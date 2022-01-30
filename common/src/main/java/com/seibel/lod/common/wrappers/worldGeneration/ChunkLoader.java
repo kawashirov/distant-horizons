@@ -28,10 +28,11 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 
+
+
 import org.apache.logging.log4j.Logger;
 
 public class ChunkLoader {
-
 	private static final Logger LOGGER = ClientApi.LOGGER;
 
 	private static LevelChunkSection[] readSections(WorldGenLevel level, LevelLightEngine lightEngine,
@@ -85,18 +86,21 @@ public class ChunkLoader {
 		}
 	}
 
-	public static ChunkStatus.ChunkType readChunkType(CompoundTag compoundTag) {
-		return ChunkStatus.byName(compoundTag.getString("Status")).getChunkType();
+	public static ChunkStatus.ChunkType readChunkType(CompoundTag tagLevel) {
+        ChunkStatus chunkStatus = ChunkStatus.byName(tagLevel.getString("Status"));
+        if (chunkStatus != null) {
+            return chunkStatus.getChunkType();
+        }
+        return ChunkStatus.ChunkType.PROTOCHUNK;
 	}
 
 	public static LevelChunk read(WorldGenLevel level, LevelLightEngine lightEngine,
 			ChunkPos chunkPos, CompoundTag chunkData) {
-		ChunkStatus.ChunkType chunkType = readChunkType(chunkData);
-		if (chunkType == ChunkStatus.ChunkType.PROTOCHUNK)
-			return null;
-		
-		ChunkGenerator chunkGenerator = level.getLevel().getChunkSource().getGenerator();
 		CompoundTag tagLevel = chunkData.getCompound("Level");
+		
+		ChunkStatus.ChunkType chunkType = readChunkType(tagLevel);
+		if (chunkType != ChunkStatus.ChunkType.LEVELCHUNK)
+			return null;
 
 		ChunkPos actualPos = new ChunkPos(tagLevel.getInt("xPos"), tagLevel.getInt("zPos"));
 		if (!Objects.equals(chunkPos, actualPos)) {
@@ -105,34 +109,41 @@ public class ChunkLoader {
 			return null;
 		}
 
+
+		//====================== Read params for making the LevelChunk ============================
+
 		ChunkBiomeContainer chunkBiomeContainer = new ChunkBiomeContainer(
 				level.getLevel().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), chunkPos,
-				chunkGenerator.getBiomeSource(),
+				level.getLevel().getChunkSource().getGenerator().getBiomeSource(),
 				tagLevel.contains("Biomes", 11) ? tagLevel.getIntArray("Biomes") : null);
-
-
-		// Read params for making the LevelChunk
-
+		
 		UpgradeData upgradeData = tagLevel.contains("UpgradeData", 10)
 				? new UpgradeData(tagLevel.getCompound("UpgradeData"))
 				: UpgradeData.EMPTY;
+		
 		TickList<Block> blockTicks = tagLevel.contains("TileTicks", 9)
 				? ChunkTickList.create(tagLevel.getList("TileTicks", 10), Registry.BLOCK::getKey, Registry.BLOCK::get)
 				: new ProtoTickList<Block>(block -> (block == null || block.defaultBlockState().isAir()), chunkPos,
 						tagLevel.getList("ToBeTicked", 9));
+		
 		TickList<Fluid> liquidTicks = tagLevel.contains("LiquidTicks", 9)
 				? ChunkTickList.create(tagLevel.getList("LiquidTicks", 10), Registry.FLUID::getKey, Registry.FLUID::get)
 				: new ProtoTickList<Fluid>(fluid -> (fluid == null || fluid == Fluids.EMPTY), chunkPos,
 						tagLevel.getList("LiquidsToBeTicked", 9));
+		
 		long inhabitedTime = tagLevel.getLong("InhabitedTime");
+		
 		LevelChunkSection[] levelChunkSections = readSections(level, lightEngine, chunkPos, tagLevel);
 
+		//======================== Make the chunk ===========================================
 		LevelChunk chunk = new LevelChunk(level.getLevel(), chunkPos, chunkBiomeContainer, upgradeData, blockTicks,
 				liquidTicks, inhabitedTime, levelChunkSections, null);
 
+		//========================== Post setup some chunk data ==============================
 		chunk.setLightCorrect(tagLevel.getBoolean("isLightOn"));
 		readHeightmaps(chunk, tagLevel);
 		readPostPocessings(chunk, tagLevel);
+		//ClientApi.LOGGER.info("Loaded chunk @ "+chunk.getPos());
 		return chunk;
 	}
 }
