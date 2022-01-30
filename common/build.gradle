@@ -30,5 +30,4 @@ publishing {
 
 dependencies {
     implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
-    shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {}
 }

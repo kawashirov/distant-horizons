@@ -1,10 +1,9 @@
 plugins {
     id "com.github.johnrengelman.shadow" version "7.1.0"
     id 'fabric-loom' version '0.10-SNAPSHOT'
-    id "com.modrinth.minotaur" version "1.2.1"
 }
 
-version = project.mod_version+"-"+project.minecraft_version+"-"+new Date().format("MM_dd_yyyy_HH_mm")
+version = rootProject.mod_version+"-"+rootProject.minecraft_version+"-"+new Date().format("yyyy_MM_dd_HH_mm")
 
 loom {
     accessWidenerPath.set(project(":common").file("src/main/resources/lod.accesswidener"))
