@@ -4,6 +4,7 @@
 	"package": "com.seibel.lod.forge.mixins",
 	"compatibilityLevel": "JAVA_8",
 	"mixins": [
+		"MixinChunkGenerator"
 	],
 	"client": [
 		"MixinOptionsScreen",

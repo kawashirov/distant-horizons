@@ -26,6 +26,7 @@ import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
 import com.seibel.lod.core.enums.config.LightGenerationMode;
 import com.seibel.lod.core.objects.lod.LodDimension;
+import com.seibel.lod.core.util.GridList;
 import com.seibel.lod.core.util.LodThreadFactory;
 import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
@@ -39,7 +40,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -177,7 +177,8 @@ public final class WorldGenerationStep {
 	}
 
 	public static class PerfCalculator {
-		public static final int SIZE = 50;
+		public static final int SIZE = 10;
+		private int dataCount = 0;
 		Rolling totalTime = new Rolling(SIZE);
 		Rolling emptyTime = new Rolling(SIZE);
 		Rolling structStartTime = new Rolling(SIZE);
@@ -191,6 +192,7 @@ public final class WorldGenerationStep {
 		Rolling lodTime = new Rolling(SIZE);
 
 		public void recordEvent(PrefEvent e) {
+			dataCount++;
 			long preTime = e.beginNano;
 			totalTime.add(e.endNano - preTime);
 			if (e.emptyNano!=0) {
@@ -236,6 +238,7 @@ public final class WorldGenerationStep {
 		}
 
 		public String toString() {
+			if (dataCount<SIZE) return "Pref Calculator collecting samples...";
 			return "Total: " + Duration.ofNanos((long) totalTime.getAverage()) + ", Empty/LoadChunk: "
 					+ Duration.ofNanos((long) emptyTime.getAverage()) + ", StructStart: "
 					+ Duration.ofNanos((long) structStartTime.getAverage()) + ", StructRef: "
@@ -254,79 +257,6 @@ public final class WorldGenerationStep {
 
 	enum Steps {
 		Empty, StructureStart, StructureReference, Biomes, Noise, Surface, Carvers, LiquidCarvers, Features, Light,
-	}
-
-	//FIXME: Remove this and use the Utils one
-	public static final class GridList<T> extends ArrayList<T> implements List<T> {
-
-		public static class Pos {
-			public int x;
-			public int y;
-
-			public Pos(int xx, int yy) {
-				x = xx;
-				y = yy;
-			}
-		}
-
-		private static final long serialVersionUID = 1585978374811888116L;
-		public final int gridCentreToEdge;
-		public final int gridSize;
-
-		public GridList(int gridCentreToEdge) {
-			super((gridCentreToEdge * 2 + 1) * (gridCentreToEdge * 2 + 1));
-			gridSize = gridCentreToEdge * 2 + 1;
-			this.gridCentreToEdge = gridCentreToEdge;
-		}
-
-		public T getOffsetOf(int index, int x, int y) {
-			return get(index + x + y * gridSize);
-		}
-
-		public int offsetOf(int index, int x, int y) {
-			return index + x + y * gridSize;
-		}
-
-		public Pos posOf(int index) {
-			return new Pos(index % gridSize, index / gridSize);
-		}
-
-		public int calculateOffset(int x, int y) {
-			return x + y * gridSize;
-		}
-
-		public GridList<T> subGrid(int gridCentreToEdge) {
-			int centreIndex = size() / 2;
-			GridList<T> subGrid = new GridList<T>(gridCentreToEdge);
-			for (int oy = -gridCentreToEdge; oy <= gridCentreToEdge; oy++) {
-				int begin = offsetOf(centreIndex, -gridCentreToEdge, oy);
-				int end = offsetOf(centreIndex, gridCentreToEdge, oy);
-				subGrid.addAll(this.subList(begin, end + 1));
-			}
-			// System.out.println("========================================\n"+
-			// this.toDetailString() + "\nTOOOOOOOOOOOOO\n"+subGrid.toDetailString()+
-			// "==========================================\n");
-			return subGrid;
-		}
-
-		@Override
-		public String toString() {
-			return "GridList " + gridSize + "*" + gridSize + "[" + size() + "]";
-		}
-
-		public String toDetailString() {
-			StringBuilder str = new StringBuilder("\n");
-			int i = 0;
-			for (T t : this) {
-				str.append(t.toString());
-				str.append(", ");
-				i++;
-				if (i % gridSize == 0) {
-					str.append("\n");
-				}
-			}
-			return str.toString();
-		}
 	}
 
 	public static final class GlobalParameters {
@@ -364,7 +294,7 @@ public final class WorldGenerationStep {
 	public static final class ThreadedParameters {
 		private static final ThreadLocal<ThreadedParameters> localParam = new ThreadLocal<ThreadedParameters>();
 		final ServerLevel level;
-		public WorldGenStructFeatManager structFeat = null;
+		public WorldGenStructFeatManager structFeat;
 		boolean isValid = true;
 		public final PerfCalculator perf = new PerfCalculator();
 
@@ -382,6 +312,7 @@ public final class WorldGenerationStep {
 
 		private ThreadedParameters(GlobalParameters param) {
 			level = param.level;
+			structFeat = new WorldGenStructFeatManager(level, param.worldGenSettings, null);
 		}
 		
 		public void makeStructFeat(WorldGenLevel genLevel, WorldGenSettings worldGenSettings) {
@@ -463,11 +394,6 @@ public final class WorldGenerationStep {
 	}
 	
 	//=================Generation Step===================
-
-	private static <T> T joinSync(CompletableFuture<T> f) {
-		if (!f.isDone()) throw new RuntimeException("The future is concurrent!");
-		return f.join();
-	}
 
 	final LinkedList<GenerationEvent> events = new LinkedList<GenerationEvent>();
 	final GlobalParameters params;
@@ -612,7 +538,7 @@ public final class WorldGenerationStep {
 			}
 			e.pEvent.emptyNano = System.nanoTime();
 			e.refreshTimeout();
-			region = new LightedWorldGenRegion(params.level, lightEngine, chunks, ChunkStatus.STRUCTURE_STARTS, rangeEmpty, e.lightMode, generator);
+			region = new LightedWorldGenRegion(params.level, lightEngine, e.tParam.structFeat, chunks, ChunkStatus.STRUCTURE_STARTS, rangeEmpty, e.lightMode, generator);
 			adaptor.setRegion(region);
 			e.tParam.makeStructFeat(region, params.worldGenSettings);
 			referencedChunks = chunks.subGrid(e.range);
@@ -923,7 +849,7 @@ public final class WorldGenerationStep {
 			WorldgenRandom worldgenRandom = new WorldgenRandom();
 			long m = worldgenRandom.setDecorationSeed(worldGenRegion.getSeed(), k, l);
 			try {
-				synchronized(this) {
+				synchronized(generator) {
 					biome.generate(structureFeatureManager, generator, worldGenRegion, m, worldgenRandom, blockPos);
 				}
 			} catch (Exception exception) {
@@ -1005,16 +931,23 @@ public final class WorldGenerationStep {
 		
 		@Override
 	    public WorldGenStructFeatManager forWorldGenRegion(WorldGenRegion worldGenRegion) {
+			if (worldGenRegion == genLevel) return this;
 	        return new WorldGenStructFeatManager(worldGenRegion, worldGenSettings, worldGenRegion);
 	    }
 
 		@Override
 	    public Stream<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos2, StructureFeature<?> structureFeature) {
-	        return genLevel.getChunk(sectionPos2.x(), sectionPos2.z(), ChunkStatus.STRUCTURE_REFERENCES).getReferencesForFeature(structureFeature)
-	        		.stream().map(long_ -> SectionPos.of(new ChunkPos((long)long_), 0)).map(
-	        				sectionPos -> this.getStartForFeature((SectionPos)sectionPos, structureFeature,
-	        						genLevel.getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_STARTS))).filter(
-	        								structureStart -> structureStart != null && structureStart.isValid());
+			if (genLevel==null) return Stream.empty();
+			ChunkAccess chunk = genLevel.getChunk(sectionPos2.x(), sectionPos2.z(), ChunkStatus.STRUCTURE_REFERENCES, false);
+			if (chunk == null) return Stream.empty();
+	        return chunk.getReferencesForFeature(structureFeature)
+	        		.stream()
+	        		.map(pos -> {
+	        			SectionPos sectPos = SectionPos.of(ChunkPos.getX(pos), 0, ChunkPos.getZ(pos));
+	        			ChunkAccess startChunk = genLevel.getChunk(sectPos.x(), sectPos.z(), ChunkStatus.STRUCTURE_STARTS, false);
+	        			if (startChunk == null) return null;
+	        			return this.getStartForFeature(sectPos, structureFeature, startChunk);
+	        		}).filter(structureStart -> structureStart != null && structureStart.isValid());
 	    }
 	}
 	
@@ -1026,19 +959,26 @@ public final class WorldGenerationStep {
 		final int size;
 	    private final ChunkPos firstPos;
 	    private final List<ChunkAccess> cache;
+	    private final StructureFeatureManager structFeat;
 		Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
-		public LightedWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine, List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
+		public LightedWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine, StructureFeatureManager structFeat, List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
 				LightGenerationMode lightMode, EmptyChunkGenerator generator) {
 			super(serverLevel, list);
 			this.lightMode = lightMode;
 	        this.firstPos = list.get(0).getPos();
 			this.generator = generator;
+			this.structFeat = structFeat;
 			light = lightEngine;
 			writeRadius = i;
 			cache = list;
 			size = Mth.floor(Math.sqrt(list.size()));
 		}
 
+	    @Override
+	    public Stream<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos, StructureFeature<?> structureFeature) {
+	        return structFeat.startsForFeature(sectionPos, structureFeature);
+	    }
+	    
 		// Skip updating the related tile entities
 	    @Override
 	    public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
