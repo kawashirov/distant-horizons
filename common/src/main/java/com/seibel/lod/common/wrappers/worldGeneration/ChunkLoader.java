@@ -54,7 +54,8 @@ public class ChunkLoader
 	private static final String BLOCK_TICKS_TAG = "block_ticks";
 	private static final String FLUID_TICKS_TAG = "fluid_ticks";
 	
-	private static BlendingData readBlendingData(CompoundTag chunkData) {
+	private static BlendingData readBlendingData(CompoundTag chunkData)
+	{
 		BlendingData blendingData = null;
 		if (chunkData.contains("blending_data", 10))
 		{
@@ -65,7 +66,8 @@ public class ChunkLoader
 		return blendingData;
 	}
 	
-	private static LevelChunkSection[] readSections(LevelAccessor level, LevelLightEngine lightEngine, ChunkPos chunkPos, CompoundTag chunkData) {
+	private static LevelChunkSection[] readSections(LevelAccessor level, LevelLightEngine lightEngine, ChunkPos chunkPos, CompoundTag chunkData)
+	{
 		Registry<Biome> biomes = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
 		Codec<PalettedContainer<Biome>> biomeCodec = PalettedContainer.codec(
 				biomes, biomes.byNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getOrThrow(Biomes.PLAINS));
@@ -98,7 +100,8 @@ public class ChunkLoader
 				chunkSections[sectionId] = new LevelChunkSection(sectionYPos, blockStateContainer, biomeContainer);
 			}
 			
-			if (!isLightOn) continue;
+			if (!isLightOn)
+				continue;
 			
 			if (tagSection.contains("BlockLight", 7))
 				lightEngine.queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, sectionYPos), new DataLayer(tagSection.getByteArray("BlockLight")), true);
@@ -108,7 +111,8 @@ public class ChunkLoader
 		return chunkSections;
 	}
 	
-	private static void readHeightmaps(LevelChunk chunk, CompoundTag chunkData) {
+	private static void readHeightmaps(LevelChunk chunk, CompoundTag chunkData)
+	{
 		CompoundTag tagHeightmaps = chunkData.getCompound("Heightmaps");
 		for (Heightmap.Types type : ChunkStatus.FULL.heightmapsAfter())
 		{
@@ -147,7 +151,7 @@ public class ChunkLoader
 		for (String string : compoundTag2.getAllKeys())
 		{
 			String string2 = string.toLowerCase(Locale.ROOT);
-			StructureFeature<?> structureFeature =  StructureFeature.STRUCTURES_REGISTRY.get(string2);
+			StructureFeature<?> structureFeature = StructureFeature.STRUCTURES_REGISTRY.get(string2);
 			if (structureFeature == null)
 			{
 				LOGGER.warn("Found reference to unknown structure '{}' in chunk {}, discarding", (Object) string2, (Object) chunkPos);
@@ -167,14 +171,16 @@ public class ChunkLoader
 		return map;
 	}
 	
-	private static void readStructures(WorldGenLevel level, LevelChunk chunk, CompoundTag chunkData) {
+	private static void readStructures(WorldGenLevel level, LevelChunk chunk, CompoundTag chunkData)
+	{
 		CompoundTag tagStructures = chunkData.getCompound("structures");
 		chunk.setAllStarts(
 				unpackStructureStart(StructurePieceSerializationContext.fromLevel(level.getLevel()), tagStructures, level.getSeed()));
 		chunk.setAllReferences(unpackStructureReferences(chunk.getPos(), tagStructures));
 	}
 	
-	private static void readPostPocessings(LevelChunk chunk, CompoundTag chunkData) {
+	private static void readPostPocessings(LevelChunk chunk, CompoundTag chunkData)
+	{
 		ListTag tagPostProcessings = chunkData.getList("PostProcessing", 9);
 		for (int n = 0; n < tagPostProcessings.size(); ++n)
 		{
@@ -185,7 +191,7 @@ public class ChunkLoader
 			}
 		}
 	}
-
+	
 	public static ChunkStatus.ChunkType readChunkType(CompoundTag compoundTag)
 	{
 		return ChunkStatus.byName(compoundTag.getString("Status")).getChunkType();
@@ -203,11 +209,13 @@ public class ChunkLoader
 		
 		ChunkStatus.ChunkType chunkType = readChunkType(chunkData);
 		BlendingData blendingData = readBlendingData(chunkData);
-		if (chunkType == ChunkStatus.ChunkType.PROTOCHUNK && (blendingData == null || !blendingData.oldNoise())) return null;
+		if (chunkType == ChunkStatus.ChunkType.PROTOCHUNK && (blendingData == null || !blendingData.oldNoise()))
+			return null;
 		
 		// Prepare the light engine
 		boolean isLightOn = chunkData.getBoolean("isLightOn");
-		if (isLightOn) level.getLightEngine().retainData(chunkPos, true);
+		if (isLightOn)
+			level.getLightEngine().retainData(chunkPos, true);
 		
 		// Read params for making the LevelChunk
 		UpgradeData upgradeData = chunkData.contains(TAG_UPGRADE_DATA, 10)
