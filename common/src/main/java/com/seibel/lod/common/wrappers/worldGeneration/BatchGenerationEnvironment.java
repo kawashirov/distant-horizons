@@ -82,7 +82,7 @@ Lod Generation:          0.269023348s
 
 public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnvionmentWrapper
 {
-	public static final boolean ENABLE_PERF_LOGGING = true;
+	public static final boolean ENABLE_PERF_LOGGING = false;
 	public static final boolean ENABLE_EVENT_LOGGING = false;
 	public static final boolean ENABLE_LOAD_EVENT_LOGGING = false;
 	//TODO: Make actual proper support for StarLight
