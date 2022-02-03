@@ -341,6 +341,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			break;
 		case Biomes:
 			generationMode = DistanceGenerationMode.BIOME_ONLY;
+			break;
 		case Noise:
 			generationMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
 			break;
