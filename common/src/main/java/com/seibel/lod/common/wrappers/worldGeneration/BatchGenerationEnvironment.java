@@ -636,10 +636,10 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	}
 
 	@Override
-	public void stop() {
+	public void stop(boolean blocking) {
 		ClientApi.LOGGER.info("Batch Chunk Generator shutting down...");
 		executors.shutdownNow();
-		try {
+		if (blocking) try {
 			if (!executors.awaitTermination(10, TimeUnit.SECONDS)) {
 				ClientApi.LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...");
 			}
