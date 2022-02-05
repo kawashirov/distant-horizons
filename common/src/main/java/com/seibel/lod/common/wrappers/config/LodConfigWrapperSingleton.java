@@ -108,7 +108,6 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			{
 				quality = new Quality();
 				fogQuality = new FogQuality();
-				cloudQuality = new CloudQuality();
 				advancedGraphics = new AdvancedGraphics();
 			}
 

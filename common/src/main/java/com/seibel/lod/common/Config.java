@@ -85,8 +85,6 @@ public class Config extends ConfigGui
 			@ConfigAnnotations.ScreenEntry
 			public static FogQuality fogQuality;
 
-			public static CloudQuality cloudQuality;
-
 			@ConfigAnnotations.ScreenEntry
 			public static AdvancedGraphics advancedGraphics;
 
