@@ -81,7 +81,6 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 		{
 			public final IQuality quality;
 			public final IFogQuality fogQuality;
-			public final ICloudQuality cloudQuality;
 			public final IAdvancedGraphics advancedGraphics;
 
 
@@ -99,12 +98,6 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			}
 
 			@Override
-			public ICloudQuality cloudQuality()
-			{
-				return cloudQuality;
-			}
-
-			@Override
 			public IAdvancedGraphics advancedGraphics()
 			{
 				return advancedGraphics;
@@ -115,7 +108,6 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			{
 				quality = new Quality();
 				fogQuality = new FogQuality();
-				cloudQuality = new CloudQuality();
 				advancedGraphics = new AdvancedGraphics();
 			}
 
@@ -185,7 +177,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.quality.horizontalQuality").value = newHorizontalQuality;
 					ConfigGui.editSingleOption.saveOption("client.graphics.quality.horizontalQuality");
 				}
-
+				
 				@Override
 				public DropoffQuality getDropoffQuality() {
 					return Config.Client.Graphics.Quality.dropoffQuality;
@@ -255,61 +247,6 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			}
 
 
-			public static class CloudQuality implements ICloudQuality
-			{
-				@Override
-				public boolean getCustomClouds()
-				{
-					return Config.Client.Graphics.CloudQuality.customClouds;
-				}
-				@Override
-				public void setCustomClouds(boolean newCustomClouds)
-				{
-					ConfigGui.editSingleOption.getEntry("client.graphics.cloudQuality.customClouds").value = newCustomClouds;
-					ConfigGui.editSingleOption.saveOption("client.graphics.cloudQuality.customClouds");
-				}
-
-
-				@Override
-				public boolean getCoolClouds()
-				{
-					return Config.Client.Graphics.CloudQuality.coolClouds;
-				}
-				@Override
-				public void setCoolClouds(boolean newCoolClouds)
-				{
-					ConfigGui.editSingleOption.getEntry("client.graphics.cloudQuality.coolClouds").value = newCoolClouds;
-					ConfigGui.editSingleOption.saveOption("client.graphics.cloudQuality.coolClouds");
-				}
-
-
-				@Override
-				public boolean getExtendClouds()
-				{
-					return Config.Client.Graphics.CloudQuality.extendClouds;
-				}
-				@Override
-				public void setExtendClouds(boolean newExtendClouds)
-				{
-					ConfigGui.editSingleOption.getEntry("client.graphics.cloudQuality.extendClouds").value = newExtendClouds;
-					ConfigGui.editSingleOption.saveOption("client.graphics.cloudQuality.extendClouds");
-				}
-
-
-				@Override
-				public double getCloudHeight()
-				{
-					return Config.Client.Graphics.CloudQuality.cloudHeight;
-				}
-				@Override
-				public void setCloudHeight(double newCloudHeight)
-				{
-					ConfigGui.editSingleOption.getEntry("client.graphics.cloudQuality.cloudHeight").value = newCloudHeight;
-					ConfigGui.editSingleOption.saveOption("client.graphics.cloudQuality.cloudHeight");
-				}
-			}
-
-
 			public static class AdvancedGraphics implements IAdvancedGraphics
 			{
 				@Override
@@ -361,7 +298,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.backsideCullingRange").value = newBacksideCullingRange;
 					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.backsideCullingRange");
 				}*/
-
+				
 				@Override
 				public boolean getUseExtendedNearClipPlane()
 				{
