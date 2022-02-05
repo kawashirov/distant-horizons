@@ -27,7 +27,6 @@ import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IWorldGenerator;
-import net.minecraft.client.renderer.DimensionSpecialEffects;
 
 /**
  * This handles any configuration the user has access to.
@@ -84,9 +83,6 @@ public class Config extends ConfigGui
 
 			@ConfigAnnotations.ScreenEntry
 			public static FogQuality fogQuality;
-
-			@ConfigAnnotations.ScreenEntry
-			public static CloudQuality cloudQuality;
 
 			@ConfigAnnotations.ScreenEntry
 			public static AdvancedGraphics advancedGraphics;
@@ -149,34 +145,7 @@ public class Config extends ConfigGui
 				public static boolean disableVanillaFog = IFogQuality.DISABLE_VANILLA_FOG_DEFAULT;
 			}
 
-
-			public static class CloudQuality
-			{
-				@ConfigAnnotations.Comment
-				public static ConfigAnnotations.Comment cloudWarning;
-
-				@ConfigAnnotations.FileComment
-				public static String _customClouds = ICloudQuality.CUSTOM_CLOUDS_DESC;
-				@ConfigAnnotations.Entry
-				public static boolean customClouds = ICloudQuality.CUSTOM_CLOUDS_DEFAULT;
-
-				@ConfigAnnotations.FileComment
-				public static String _coolClouds = ICloudQuality.COOL_CLOUDS_DESC;
-				@ConfigAnnotations.Entry
-				public static boolean coolClouds = ICloudQuality.COOL_CLOUDS_DEFAULT;
-
-				@ConfigAnnotations.FileComment
-				public static String _extendClouds = ICloudQuality.EXTEND_CLOUDS_DESC;
-				@ConfigAnnotations.Entry
-				public static boolean extendClouds = ICloudQuality.EXTEND_CLOUDS_DEFAULT;
-
-				@ConfigAnnotations.FileComment
-				public static String _cloudHeight = ICloudQuality.CLOUD_HEIGHT_DESC;
-				@ConfigAnnotations.Entry
-				public static double cloudHeight = DimensionSpecialEffects.OverworldEffects.CLOUD_LEVEL;
-			}
-
-
+			
 			public static class AdvancedGraphics
 			{
 				@ConfigAnnotations.FileComment
