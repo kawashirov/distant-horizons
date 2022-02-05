@@ -5,7 +5,6 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment.EmptyChunkGenerator;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.enums.config.LightGenerationMode;
@@ -42,6 +41,17 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	private final List<ChunkAccess> cache;
 	private final StructureFeatureManager structFeat;
 	Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
+	private ChunkPos overrideCenterPos = null;
+	
+	public void setOverrideCenter(ChunkPos pos) {overrideCenterPos = pos;}
+	@Override
+	public int getCenterX() {
+		return overrideCenterPos==null ? super.getCenterX() : overrideCenterPos.x;
+	}
+	@Override
+	public int getCenterZ() {
+		return overrideCenterPos==null ? super.getCenterZ() : overrideCenterPos.z;
+	}
 
 	public LightedWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine,
 			StructureFeatureManager structFeat, List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
