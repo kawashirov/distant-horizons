@@ -25,6 +25,7 @@ import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
 import com.seibel.lod.core.enums.config.LightGenerationMode;
 import com.seibel.lod.core.objects.lod.LodDimension;
+import com.seibel.lod.core.util.GridList;
 import com.seibel.lod.core.util.LodThreadFactory;
 import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
@@ -44,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
+import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.ChunkLoader;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightGetterAdaptor;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.WorldGenLevelLightEngine;
@@ -206,94 +208,6 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	}
 	
 	public static final int TIMEOUT_SECONDS = 30;
-	
-	//FIXME: Remove this and use the Utils one
-	public static final class GridList<T> extends ArrayList<T> implements List<T>
-	{
-		
-		public static class Pos
-		{
-			public int x;
-			public int y;
-			
-			public Pos(int xx, int yy)
-			{
-				x = xx;
-				y = yy;
-			}
-		}
-		
-		private static final long serialVersionUID = 1585978374811888116L;
-		public final int gridCentreToEdge;
-		public final int gridSize;
-		
-		public GridList(int gridCentreToEdge)
-		{
-			super((gridCentreToEdge * 2 + 1) * (gridCentreToEdge * 2 + 1));
-			gridSize = gridCentreToEdge * 2 + 1;
-			this.gridCentreToEdge = gridCentreToEdge;
-		}
-		
-		public T getOffsetOf(int index, int x, int y)
-		{
-			return get(index + x + y * gridSize);
-		}
-		
-		public int offsetOf(int index, int x, int y)
-		{
-			return index + x + y * gridSize;
-		}
-		
-		public Pos posOf(int index)
-		{
-			return new Pos(index % gridSize, index / gridSize);
-		}
-		
-		public int calculateOffset(int x, int y)
-		{
-			return x + y * gridSize;
-		}
-		
-		public GridList<T> subGrid(int gridCentreToEdge)
-		{
-			int centreIndex = size() / 2;
-			GridList<T> subGrid = new GridList<T>(gridCentreToEdge);
-			for (int oy = -gridCentreToEdge; oy <= gridCentreToEdge; oy++)
-			{
-				int begin = offsetOf(centreIndex, -gridCentreToEdge, oy);
-				int end = offsetOf(centreIndex, gridCentreToEdge, oy);
-				subGrid.addAll(this.subList(begin, end + 1));
-			}
-			// System.out.println("========================================\n"+
-			// this.toDetailString() + "\nTOOOOOOOOOOOOO\n"+subGrid.toDetailString()+
-			// "==========================================\n");
-			return subGrid;
-		}
-		
-		@Override
-		public String toString()
-		{
-			return "GridList " + gridSize + "*" + gridSize + "[" + size() + "]";
-		}
-		
-		public String toDetailString()
-		{
-			StringBuilder str = new StringBuilder("\n");
-			int i = 0;
-			for (T t : this)
-			{
-				str.append(t.toString());
-				str.append(", ");
-				i++;
-				if (i % gridSize == 0)
-				{
-					str.append("\n");
-				}
-			}
-			return str.toString();
-		}
-	}
-	
 	
 	//=================Generation Step===================
 	

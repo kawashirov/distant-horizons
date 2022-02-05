@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.common.wrappers.worldGeneration.ThreadedParameters;
-import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment.GridList;
+import com.seibel.lod.core.util.GridList;
 
 import net.minecraft.ReportedException;
 import net.minecraft.server.level.WorldGenRegion;

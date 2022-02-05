@@ -1,5 +1,5 @@
 
-package com.seibel.lod.common.wrappers.worldGeneration;
+package com.seibel.lod.common.wrappers.worldGeneration.mimicObject;
 
 import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
