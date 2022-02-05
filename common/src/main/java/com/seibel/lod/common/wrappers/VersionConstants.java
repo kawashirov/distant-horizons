@@ -46,4 +46,10 @@ public class VersionConstants implements IVersionConstants {
     public int getWorldGenerationCountPerThread() {
         return 1;
     }
+
+
+	@Override
+	public boolean hasBatchGenerationImplementation() {
+		return true;
+	}
 }
