@@ -79,7 +79,7 @@ Lod Generation:          0.269023348s
 */
 
 public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnvionmentWrapper {
-	public static final boolean ENABLE_PERF_LOGGING = true;
+	public static final boolean ENABLE_PERF_LOGGING = false;
 	public static final boolean ENABLE_EVENT_LOGGING = false;
 	public static final boolean ENABLE_LOAD_EVENT_LOGGING = false;
 	// TODO: Make actual proper support for StarLight
@@ -460,14 +460,17 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	}
 
 	@Override
-	public void stop() {
+	public void stop(boolean blocking) {
 		ClientApi.LOGGER.info("Batch Chunk Generator shutting down...");
 		executors.shutdownNow();
-		try {
-			if (!executors.awaitTermination(10, TimeUnit.SECONDS)) {
-				ClientApi.LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...");
+		if (blocking) {
+			try {
+				if (!executors.awaitTermination(10, TimeUnit.SECONDS)) {
+					ClientApi.LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...");
+				}
+			} catch (InterruptedException e) {
+				ClientApi.LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...", e);
 			}
-		} catch (InterruptedException e) {
 		}
 	}
 }
