@@ -149,33 +149,6 @@ public class Config extends ConfigGui
 			}
 
 
-			public static class CloudQuality
-			{
-				@ConfigAnnotations.Comment
-				public static ConfigAnnotations.Comment cloudWarning;
-
-				@ConfigAnnotations.FileComment
-				public static String _customClouds = ICloudQuality.CUSTOM_CLOUDS_DESC;
-				@ConfigAnnotations.Entry
-				public static boolean customClouds = ICloudQuality.CUSTOM_CLOUDS_DEFAULT;
-
-				@ConfigAnnotations.FileComment
-				public static String _coolClouds = ICloudQuality.COOL_CLOUDS_DESC;
-				@ConfigAnnotations.Entry
-				public static boolean coolClouds = ICloudQuality.COOL_CLOUDS_DEFAULT;
-
-				@ConfigAnnotations.FileComment
-				public static String _extendClouds = ICloudQuality.EXTEND_CLOUDS_DESC;
-				@ConfigAnnotations.Entry
-				public static boolean extendClouds = ICloudQuality.EXTEND_CLOUDS_DEFAULT;
-
-				@ConfigAnnotations.FileComment
-				public static String _cloudHeight = ICloudQuality.CLOUD_HEIGHT_DESC;
-				@ConfigAnnotations.Entry
-				public static double cloudHeight = 128;
-			}
-
-
 			public static class AdvancedGraphics
 			{
 				@ConfigAnnotations.FileComment
