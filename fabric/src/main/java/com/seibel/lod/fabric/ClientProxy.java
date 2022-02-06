@@ -21,6 +21,7 @@ package com.seibel.lod.fabric;
 
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.api.EventApi;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
@@ -34,11 +35,16 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.LevelChunk;
+
+import java.util.HashSet;
+import java.util.List;
+
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -146,31 +152,40 @@ public class ClientProxy
 		// recreate the LOD where the blocks were changed
 		eventApi.blockChangeEvent(chunk, dimType);
 	}
-
-
-
-	// The debug mode keybinding, which will be registered
-	public static final KeyMapping DebugToggle = KeyBindingHelper.registerKeyBinding(
-			new KeyMapping("key.lod.DebugToggle", GLFW.GLFW_KEY_F8, "key.lod.category"));
-
-	// The draw toggle keybinding, which will be registered
-	public static final KeyMapping DrawToggle = KeyBindingHelper.registerKeyBinding(
-			new KeyMapping("key.lod.DrawToggle", GLFW.GLFW_KEY_F6, "key.lod.category"));
-
-	boolean PreDebugToggle = false;
-	boolean PreDrawToggle = false;
+	
+	private static final List<Integer> KEY_TO_CHECK_FOR = List.of(GLFW.GLFW_KEY_F6, GLFW.GLFW_KEY_F8);
+	
+	HashSet<Integer> previousKeyDown = new HashSet<Integer>();
+	
 	public void onKeyInput() {
 		ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 		if (CONFIG.client().advanced().debugging().getDebugKeybindingsEnabled())
 		{
-			// Only activates when you press the key
-			if (DebugToggle.isDown() && DebugToggle.isDown() != PreDebugToggle)
-				CONFIG.client().advanced().debugging().setDebugMode(CONFIG.client().advanced().debugging().getDebugMode().getNext());
-
-			if (DrawToggle.isDown() && DrawToggle.isDown() != PreDebugToggle)
-				CONFIG.client().advanced().debugging().setDrawLods(!CONFIG.client().advanced().debugging().getDrawLods());
+			HashSet<Integer> currectKeyDown = new HashSet<Integer>();
+			
+			// Note: Minecraft's InputConstants is same as GLFW Key values
+			//TODO: Use mixin to hook directly into the GLFW Keyboard event in minecraft KeyboardHandler
+			// Check all keys we need
+			for (int i = InputConstants.KEY_A; i <= InputConstants.KEY_Z; i++) {
+				if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), i)) {
+					currectKeyDown.add(i);
+				}
+			}
+			for (int i : KEY_TO_CHECK_FOR) {
+				if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), i)) {
+					currectKeyDown.add(i);
+				}
+			}
+			
+			// Diff and trigger events
+			for (int c : currectKeyDown) {
+				if (!previousKeyDown.contains(c)) {
+					ClientApi.INSTANCE.keyPressedEvent(c);
+				}
+			}
+			
+			// Update the set
+			previousKeyDown = currectKeyDown;
 		}
-		PreDebugToggle = DebugToggle.isDown();
-		PreDrawToggle = DrawToggle.isDown();
 	}
 }
