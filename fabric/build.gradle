@@ -42,7 +42,7 @@ dependencies {
     // modImplementation "curse.maven:starlight-521783:${rootProject.starlight_version_fabric}"
 
     // Sodium
-    modImplementation "maven.modrinth:sodium:${rootProject.sodium_version}"
+    modImplementation "curse.maven:sodium-394468:${rootProject.sodium_version}"
     implementation "org.joml:joml:1.10.2"
 	
 	// Lithium
