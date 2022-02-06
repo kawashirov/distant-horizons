@@ -36,11 +36,13 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-//    implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")                      // This is already included with forge
-//    forgeDependencies(shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {})      // This is already included with forge
-
 //    forgeDependencies(project(":core")) { transitive false }
 
+
+    // Toml
+    shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {}
+
+    // Compression
     forgeDependencies('org.tukaani:xz:1.9')
     forgeDependencies('org.apache.commons:commons-compress:1.21')
     shadowMe 'org.tukaani:xz:1.9'
@@ -70,7 +72,7 @@ shadowJar {
     configurations = [project.configurations.shadowMe]
     relocate 'org.tukaani', 'shaded.tukaani'
     relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
-//    relocate 'com.electronwill.nightconfig', 'shaded.electronwill.nightconfig'    // This is already included with forge
+    relocate 'com.electronwill.nightconfig', 'shaded.electronwill.nightconfig'    // This is already included with forge
 
     relocate 'com.seibel.lod.common', 'forge.com.seibel.lod.common'
 
