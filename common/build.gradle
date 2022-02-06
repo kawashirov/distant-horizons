@@ -27,7 +27,3 @@ publishing {
         // Add repositories to publish to here.
     }
 }
-
-dependencies {
-    implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
-}

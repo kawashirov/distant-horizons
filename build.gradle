@@ -39,6 +39,9 @@ subprojects { p ->
             // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
             // Do NOT use other classes from fabric loader unless working with fabric
             modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+
+            // Forge already comes with night config so dont implement it there
+            implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
         }
 
 
