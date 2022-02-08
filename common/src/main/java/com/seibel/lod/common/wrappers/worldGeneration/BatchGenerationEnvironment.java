@@ -233,7 +233,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY));
 	}
 	
-	public boolean tryAddPoint(int px, int pz, int range, Steps target)
+	public boolean tryAddPoint(int px, int pz, int range, Steps target, boolean genAllDetails)
 	{
 		int boxSize = range * 2 + 1;
 		int x = Math.floorDiv(px, boxSize) * boxSize + range;
@@ -245,7 +245,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				return false;
 		}
 		// System.out.println(x + ", "+z);
-		events.add(new GenerationEvent(new ChunkPos(x, z), range, this, target));
+		events.add(new GenerationEvent(new ChunkPos(x, z), range, this, target, genAllDetails));
 		return true;
 	}
 	
@@ -437,24 +437,24 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 					if (ENABLE_LOAD_EVENT_LOGGING)
 						ClientApi.LOGGER.info("Detected full existing chunk at {}", target.getPos());
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
-							new LodBuilderConfig(DistanceGenerationMode.FULL), true);
+							new LodBuilderConfig(DistanceGenerationMode.FULL), true, e.genAllDetails);
 				}
 				else if (isPartial)
 				{
 					if (ENABLE_LOAD_EVENT_LOGGING)
 						ClientApi.LOGGER.info("Detected old existing chunk at {}", target.getPos());
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
-							new LodBuilderConfig(generationMode), true);
+							new LodBuilderConfig(generationMode), true, e.genAllDetails);
 				}
 				else if (target.getStatus() == ChunkStatus.EMPTY && generationMode == DistanceGenerationMode.NONE)
 				{
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
-							LodBuilderConfig.getFillVoidConfig(), true);
+							LodBuilderConfig.getFillVoidConfig(), true, e.genAllDetails);
 				}
 				else
 				{
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
-							new LodBuilderConfig(generationMode), true);
+							new LodBuilderConfig(generationMode), true, e.genAllDetails);
 				}
 				if (e.lightMode == LightGenerationMode.FANCY || isFull)
 				{
