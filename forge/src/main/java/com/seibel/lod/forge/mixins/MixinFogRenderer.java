@@ -5,7 +5,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 
@@ -26,15 +28,15 @@ public class MixinFogRenderer {
 	private static final float A_EVEN_LARGER_VALUE = 420694206942069.F;
 	
 	@Inject(at = @At("RETURN"),
-		method = "setupFog(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/FogRenderer$FogMode;FZF)V",
-		remap = false) // Due to this being forge modified
+		method = "setupFog(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/FogRenderer$FogMode;FZF)V")
 	private static final void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, float ticks, CallbackInfo callback) {
-	    ILodConfigWrapperSingleton CONFIG;
+		ILodConfigWrapperSingleton CONFIG;
 	    try {
 	    	CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 	    } catch (NullPointerException e) {
 	    	return; // Can happen due to forge calling this before setting up the mod
 	    }
+	    ClientApi.LOGGER.debug("LOD: MixinSetupFog called!");
 		FluidState fluidState = camera.getFluidInCamera();
 	    Entity entity = camera.getEntity();
 	    boolean isUnderWater = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
