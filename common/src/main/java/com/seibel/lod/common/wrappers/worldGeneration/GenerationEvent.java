@@ -27,8 +27,9 @@ public final class GenerationEvent {
 	final Steps target;
 	final LightGenerationMode lightMode;
 	final PrefEvent pEvent = new PrefEvent();
+	final boolean genAllDetails;
 
-	public GenerationEvent(ChunkPos pos, int range, BatchGenerationEnvironment generationGroup, Steps target) {
+	public GenerationEvent(ChunkPos pos, int range, BatchGenerationEnvironment generationGroup, Steps target, boolean genAllDetails) {
 		nanotime = System.nanoTime();
 		this.pos = pos;
 		this.range = range;
@@ -38,6 +39,7 @@ public final class GenerationEvent {
 		LightGenerationMode mode = CONFIG.client().worldGenerator().getLightGenerationMode();
 
 		this.lightMode = mode;
+		this.genAllDetails = genAllDetails;
 
 		future = generationGroup.executors.submit(() -> {
 			generationGroup.generateLodFromList(this);

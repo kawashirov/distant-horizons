@@ -1,5 +1,7 @@
 package com.seibel.lod.common.wrappers.chunk;
 
+import com.seibel.lod.core.util.LevelPosUtil;
+import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockColorWrapper;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockShapeWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
@@ -102,12 +104,12 @@ public class ChunkWrapper implements IChunkWrapper
 
     @Override
     public int getRegionPosX(){
-        return chunk.getPos().getRegionX();
+        return LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, getChunkPosX(), LodUtil.REGION_DETAIL_LEVEL);
     }
 
     @Override
     public int getRegionPosZ(){
-        return chunk.getPos().getRegionZ();
+        return LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, getChunkPosZ(), LodUtil.REGION_DETAIL_LEVEL);
     }
 
     @Override

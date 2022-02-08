@@ -108,7 +108,7 @@ public class WorldGeneratorWrapper extends AbstractWorldGeneratorWrapper {
 		if (ca == null)
 			throw new RuntimeException("This should NEVER be null due to bool being true");
 		lodBuilder.generateLodNodeFromChunk(lodDim, new ChunkWrapper(ca, serverWorld),
-				new LodBuilderConfig(generationMode), false);
+				new LodBuilderConfig(generationMode), false, true);
 
 		// long duration = System.nanoTime()-t;
 

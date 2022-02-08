@@ -2,6 +2,8 @@ package com.seibel.lod.common.wrappers.chunk;
 
 import java.util.Objects;
 
+import com.seibel.lod.core.util.LevelPosUtil;
+import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
@@ -83,13 +85,13 @@ public class ChunkPosWrapper extends AbstractChunkPosWrapper
     @Override
     public int getRegionX()
     {
-        return chunkPos.getRegionX();
+        return LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, chunkPos.x, LodUtil.REGION_DETAIL_LEVEL);
     }
 
     @Override
     public int getRegionZ()
     {
-        return chunkPos.getRegionZ();
+        return LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, chunkPos.z, LodUtil.REGION_DETAIL_LEVEL);
     }
 
     public ChunkPos getChunkPos()
