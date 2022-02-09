@@ -41,6 +41,13 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	private final List<ChunkAccess> cache;
 	private final StructureFeatureManager structFeat;
 	Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
+	private ChunkPos overrideCenterPos = null;
+	
+	public void setOverrideCenter(ChunkPos pos) {overrideCenterPos = pos;}
+	@Override
+	public ChunkPos getCenter() {
+		return overrideCenterPos==null ? super.getCenter() : overrideCenterPos;
+	}
 
 	public LightedWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine,
 			StructureFeatureManager structFeat, List<ChunkAccess> list, ChunkStatus chunkStatus, int i,

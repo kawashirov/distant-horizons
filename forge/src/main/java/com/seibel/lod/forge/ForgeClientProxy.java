@@ -22,10 +22,14 @@ package com.seibel.lod.forge;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.api.EventApi;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
+
+import org.lwjgl.glfw.GLFW;
+
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
 
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.world.BlockEvent;
@@ -102,9 +106,9 @@ public class ForgeClientProxy
 	@SubscribeEvent
 	public void onKeyInput(InputEvent.KeyInputEvent event)
 	{
-		eventApi.onKeyInput(event.getKey(), event.getAction());
+		if (Minecraft.getInstance().player == null) return;
+		if (event.getAction() != GLFW.GLFW_PRESS) return;
+		clientApi.keyPressedEvent(event.getKey());
 	}
-
-
 
 }
