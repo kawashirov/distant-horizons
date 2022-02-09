@@ -330,8 +330,6 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		
 	}
 	
-	
-	
 	public void generateLodFromList(GenerationEvent e)
 	{
 		if (ENABLE_EVENT_LOGGING)
@@ -385,6 +383,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			e.refreshTimeout();
 			region = new LightedWorldGenRegion(params.level, lightEngine, e.tParam.structFeat, chunks, ChunkStatus.STRUCTURE_STARTS, rangeEmpty, e.lightMode, generator);
 			adaptor.setRegion(region);
+			e.tParam.makeStructFeat(region);
 			referencedChunks = chunks.subGrid(e.range);
 			referencedChunks = generateDirect(e, referencedChunks, e.target, region);
 			
