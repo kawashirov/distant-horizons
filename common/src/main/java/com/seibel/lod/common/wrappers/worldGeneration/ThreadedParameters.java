@@ -10,7 +10,7 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 public final class ThreadedParameters {
 	private static final ThreadLocal<ThreadedParameters> localParam = new ThreadLocal<ThreadedParameters>();
 	final ServerLevel level;
-	public WorldGenStructFeatManager structFeat;
+	public final WorldGenStructFeatManager structFeat;
 	boolean isValid = true;
 	public final PerfCalculator perf = new PerfCalculator();
 
@@ -32,7 +32,7 @@ public final class ThreadedParameters {
 		structFeat = new WorldGenStructFeatManager(level, param.worldGenSettings, null);
 	}
 
-	public void makeStructFeat(WorldGenLevel genLevel, WorldGenSettings worldGenSettings) {
-		structFeat = new WorldGenStructFeatManager(level, worldGenSettings, genLevel);
+	public void makeStructFeat(WorldGenLevel genLevel) {
+		structFeat.setGenLevel(genLevel);
 	}
 }

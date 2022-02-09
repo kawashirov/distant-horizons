@@ -23,7 +23,6 @@ import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
-import com.seibel.lod.core.enums.config.LightGenerationMode;
 import com.seibel.lod.core.objects.lod.LodDimension;
 import com.seibel.lod.core.util.GridList;
 import com.seibel.lod.core.util.LodThreadFactory;
@@ -82,6 +81,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	public static final boolean ENABLE_PERF_LOGGING = false;
 	public static final boolean ENABLE_EVENT_LOGGING = false;
 	public static final boolean ENABLE_LOAD_EVENT_LOGGING = false;
+	public static final boolean DISABLE_LOADING_SAVES = false;
 	// TODO: Make actual proper support for StarLight
 
 	public static class PrefEvent {
@@ -265,6 +265,9 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 
 	@SuppressWarnings("resource")
 	private static ChunkAccess loadOrMakeChunk(ChunkPos chunkPos, ServerLevel level, LevelLightEngine lightEngine) {
+		if (DISABLE_LOADING_SAVES) {
+			return new ProtoChunk(chunkPos, UpgradeData.EMPTY);
+		}
 		CompoundTag chunkData = null;
 		try {
 			chunkData = level.getChunkSource().chunkMap.readChunk(chunkPos);
@@ -324,7 +327,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			region = new LightedWorldGenRegion(params.level, lightEngine, e.tParam.structFeat, chunks,
 					ChunkStatus.STRUCTURE_STARTS, rangeEmpty, e.lightMode, generator);
 			adaptor.setRegion(region);
-			e.tParam.makeStructFeat(region, params.worldGenSettings);
+			e.tParam.makeStructFeat(region);
 			referencedChunks = chunks.subGrid(e.range);
 			referencedChunks = generateDirect(e, referencedChunks, e.target, region);
 
@@ -377,10 +380,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
 							new LodBuilderConfig(generationMode), true, e.genAllDetails);
 				}
-				if (e.lightMode == LightGenerationMode.FANCY || isFull) {
-					lightEngine.retainData(target.getPos(), false);
-				}
-
+				lightEngine.retainData(target.getPos(), false);
 			}
 		}
 		e.pEvent.endNano = System.nanoTime();
@@ -397,7 +397,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			subRange.forEach((chunk) -> {
 				if (chunk instanceof ProtoChunk) {
 					((ProtoChunk) chunk).setLightEngine(region.getLightEngine());
-					region.getLightEngine().retainData(chunk.getPos(), true);
+					//region.getLightEngine().retainData(chunk.getPos(), true);
 				}
 			});
 			if (step == Steps.Empty)

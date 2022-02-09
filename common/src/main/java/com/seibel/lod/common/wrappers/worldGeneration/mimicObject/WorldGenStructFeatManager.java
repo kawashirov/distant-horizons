@@ -24,6 +24,10 @@ public class WorldGenStructFeatManager extends StructureFeatureManager {
 		this.genLevel = genLevel;
 		this.worldGenSettings = worldGenSettings;
 	}
+	
+	public void setGenLevel(WorldGenLevel genLevel) {
+		this.genLevel = genLevel;
+	} 
 
 	@Override
 	public WorldGenStructFeatManager forWorldGenRegion(WorldGenRegion worldGenRegion) {
