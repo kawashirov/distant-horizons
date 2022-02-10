@@ -43,7 +43,11 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 
 
@@ -306,8 +310,13 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
     @Override
     public boolean isFogStateSpecial() {
-//        return GAME_RENDERER.getMainCamera().getFluidInCamera() != FogType.NONE;
-        return false; // FIXME
+    	Camera camera = GAME_RENDERER.getMainCamera();
+		FluidState fluidState = camera.getFluidInCamera();
+	    Entity entity = camera.getEntity();
+	    boolean isUnderWater = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
+	    isUnderWater |= fluidState.is(FluidTags.WATER);
+	    isUnderWater |= fluidState.is(FluidTags.LAVA);
+        return isUnderWater;
     }
 
     @Override
