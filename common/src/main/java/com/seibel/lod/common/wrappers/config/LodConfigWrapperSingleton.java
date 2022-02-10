@@ -263,19 +263,6 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 
 
 				@Override
-				public boolean getAlwaysDrawAtMaxQuality()
-				{
-					return Config.Client.Graphics.AdvancedGraphics.alwaysDrawAtMaxQuality;
-				}
-				@Override
-				public void setAlwaysDrawAtMaxQuality(boolean newAlwaysDrawAtMaxQuality)
-				{
-					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.alwaysDrawAtMaxQuality").value = newAlwaysDrawAtMaxQuality;
-					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.alwaysDrawAtMaxQuality");
-				}
-
-
-				@Override
 				public VanillaOverdraw getVanillaOverdraw()
 				{
 					return Config.Client.Graphics.AdvancedGraphics.vanillaOverdraw;
