@@ -145,7 +145,8 @@ public class ChunkWrapper implements IChunkWrapper
 
     @Override
     public boolean isLightCorrect(){
-        return chunk.isLightCorrect();
+    	return true;
+        //return chunk.isLightCorrect();
     }
 
     public boolean isWaterLogged(int x, int y, int z)
