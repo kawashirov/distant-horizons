@@ -475,7 +475,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public boolean getDrawLods()
 				{
-					return Config.Client.Advanced.Debugging.drawLods;
+					return (boolean) ConfigGui.editSingleOption.getEntry("client.advanced.debugging.drawLods").value;
 				}
 				@Override
 				public void setDrawLods(boolean newDrawLods)
@@ -488,7 +488,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public DebugMode getDebugMode()
 				{
-					return Config.Client.Advanced.Debugging.debugMode;
+					return (DebugMode) ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugMode").value;
 				}
 				@Override
 				public void setDebugMode(DebugMode newDebugMode)
@@ -501,7 +501,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public boolean getDebugKeybindingsEnabled()
 				{
-					return Config.Client.Advanced.Debugging.enableDebugKeybindings;
+					return (boolean) ConfigGui.editSingleOption.getEntry("client.advanced.debugging.enableDebugKeybindings").value;
 				}
 				@Override
 				public void setDebugKeybindingsEnabled(boolean newEnableDebugKeybindings)
