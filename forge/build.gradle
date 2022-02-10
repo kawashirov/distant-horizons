@@ -32,10 +32,11 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-//    implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")                      // This is already included with forge
-//    forgeDependencies(shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {})      // This is already included with forge
-
 //    forgeDependencies(project(":core")) { transitive false }
+
+
+    // Toml
+    shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {}
 
     forgeDependencies('org.tukaani:xz:1.9')
     forgeDependencies('org.apache.commons:commons-compress:1.21')

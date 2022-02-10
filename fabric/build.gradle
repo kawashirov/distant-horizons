@@ -39,7 +39,7 @@ dependencies {
     }
 
     // Sodium
-    modImplementation "maven.modrinth:sodium:${rootProject.sodium_version}"
+    modImplementation "curse.maven:sodium-394468:${rootProject.sodium_version}"
     implementation "org.joml:joml:1.10.2"
 
     // Lithium
@@ -48,10 +48,6 @@ dependencies {
     // Iris
 //    modImplementation "maven.modrinth:iris:${rootProject.iris_version}"
 
-
-    // Toml
-    implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
-    shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {}
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
