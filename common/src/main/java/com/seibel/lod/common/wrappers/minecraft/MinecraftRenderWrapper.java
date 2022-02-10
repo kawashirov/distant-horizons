@@ -36,6 +36,8 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -301,7 +303,9 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
     @Override
     public boolean isFogStateSpecial() {
-        return GAME_RENDERER.getMainCamera().getFluidInCamera() != FogType.NONE;
+	    Entity entity = GAME_RENDERER.getMainCamera().getEntity();
+	    boolean isBlind = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
+    	return GAME_RENDERER.getMainCamera().getFluidInCamera() != FogType.NONE || isBlind;
     }
 
 	@Override

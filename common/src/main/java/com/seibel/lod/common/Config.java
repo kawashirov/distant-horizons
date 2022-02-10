@@ -97,7 +97,7 @@ public class Config extends ConfigGui
 
 				@ConfigAnnotations.FileComment
 				public static String _lodChunkRenderDistance = IQuality.LOD_CHUNK_RENDER_DISTANCE_DESC;
-				@ConfigAnnotations.Entry(minValue = 16, maxValue = 8192)
+				@ConfigAnnotations.Entry(minValue = 16, maxValue = 2048)
 				public static int lodChunkRenderDistance = IQuality.LOD_CHUNK_RENDER_DISTANCE_MIN_DEFAULT_MAX.defaultValue;
 
 				@ConfigAnnotations.FileComment
@@ -152,11 +152,6 @@ public class Config extends ConfigGui
 				public static String _disableDirectionalCulling = IAdvancedGraphics.DISABLE_DIRECTIONAL_CULLING_DESC;
 				@ConfigAnnotations.Entry
 				public static boolean disableDirectionalCulling = IAdvancedGraphics.DISABLE_DIRECTIONAL_CULLING_DEFAULT;
-
-				@ConfigAnnotations.FileComment
-				public static String _alwaysDrawAtMaxQuality = IAdvancedGraphics.ALWAYS_DRAW_AT_MAD_QUALITY_DESC;
-				@ConfigAnnotations.Entry
-				public static boolean alwaysDrawAtMaxQuality = IAdvancedGraphics.ALWAYS_DRAW_AT_MAD_QUALITY_DEFAULT;
 
 				@ConfigAnnotations.FileComment
 				public static String _vanillaOverdraw = IAdvancedGraphics.VANILLA_OVERDRAW_DESC;
