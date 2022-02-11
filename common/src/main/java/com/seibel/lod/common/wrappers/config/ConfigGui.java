@@ -339,6 +339,18 @@ public abstract class ConfigGui
 
 		loadFileWithErrorCheck(config);
 
+
+		// Just put this here for the future
+		config.setComment("_Version", " DONT TOUCH THIS, IF YOU DO THEN CONFIG FILE WOULD BREAK");
+		if (config.contains("_Version")) {
+			if (config.get("_Version") != ModInfo.VERSION) {
+				LOGGER.error("THERE IS A PROBLEM WITH THE CONFIG FILE");
+				LOGGER.error("You have downgraded your mod, this could cause problems with your config");
+			}
+		}
+		config.set("_Versions", ModInfo.VERSION);
+
+
 		for (EntryInfo info : entries) {
 			if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
 				editSingleOption.saveOption(info, config);
@@ -368,6 +380,18 @@ public abstract class ConfigGui
 		}
 
 		loadFileWithErrorCheck(config);
+
+
+		// Just put this here for the future
+		config.setComment("_Version", " DONT TOUCH THIS, IF YOU DO THEN CONFIG FILE WOULD BREAK");
+		if (config.contains("_Version")) {
+			if (config.get("_Version") != ModInfo.VERSION) {
+				LOGGER.error("THERE IS A PROBLEM WITH THE CONFIG FILE");
+				LOGGER.error("You have downgraded your mod, this could cause problems with your config");
+			}
+		}
+		config.set("_Versions", ModInfo.VERSION);
+
 
 		// Puts everything into its variable
 		for (EntryInfo info : entries) {
