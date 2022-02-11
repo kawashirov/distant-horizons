@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
 import com.seibel.lod.core.util.ColorUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
@@ -162,9 +163,12 @@ public class BlockColorWrapper implements IBlockColorWrapper
             {
                 for (int v = 0; v < texture.getHeight(); v++)
                 {
-                    tempColor = TextureAtlasSpriteWrapper.getPixelRGBA(texture, frameIndex, u, v);
+                	//FIXME: Better way on the TextureAtlasSpriteWrapper!!!
+                    tempColor = LodCommonMain.forge ?
+                    		LodCommonMain.forgeMethodCaller.getPixelRGBA(texture, frameIndex, u, v)
+                    		: TextureAtlasSpriteWrapper.getPixelRGBA(texture, frameIndex, u, v);
 
-                    if (ColorUtil.getAlpha(TextureAtlasSpriteWrapper.getPixelRGBA(texture, frameIndex, u, v)) == 0)
+                    if (tempColor == 0)
                         continue;
 
                     if (lookForTint)

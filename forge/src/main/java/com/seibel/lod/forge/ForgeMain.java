@@ -35,6 +35,7 @@ import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
 import com.seibel.lod.forge.wrappers.modAccessor.ModChecker;
 import com.seibel.lod.forge.wrappers.modAccessor.OptifineAccessor;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -101,5 +102,11 @@ public class ForgeMain implements LodForgeMethodCaller
 	@Override
 	public List<BakedQuad> getQuads(MinecraftWrapper mc, Block block, BlockState blockState, Direction direction, Random random) {
 		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
+	}
+
+
+	@Override
+	public int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
+		return sprite.getPixelRGBA(frameIndex, x, y);
 	}
 }
