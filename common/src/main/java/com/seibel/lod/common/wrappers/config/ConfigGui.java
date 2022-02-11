@@ -339,6 +339,12 @@ public abstract class ConfigGui
 
 		loadFileWithErrorCheck(config);
 
+
+		// Just put this here for the future
+		config.setComment("_Version", " DONT TOUCH THIS, IF YOU DO THEN CONFIG FILE WOULD BREAK");
+		config.set("_Versions", ModInfo.VERSION);
+
+
 		for (EntryInfo info : entries) {
 			if (info.field.isAnnotationPresent(ConfigAnnotations.Entry.class)) {
 				editSingleOption.saveOption(info, config);
@@ -368,6 +374,12 @@ public abstract class ConfigGui
 		}
 
 		loadFileWithErrorCheck(config);
+
+
+		// Just put this here for the future
+		config.setComment("_Version", " DONT TOUCH THIS, IF YOU DO THEN CONFIG FILE WOULD BREAK");
+		config.set("_Versions", ModInfo.VERSION);
+		
 
 		// Puts everything into its variable
 		for (EntryInfo info : entries) {
