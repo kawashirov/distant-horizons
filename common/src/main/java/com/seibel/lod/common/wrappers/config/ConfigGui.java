@@ -342,12 +342,6 @@ public abstract class ConfigGui
 
 		// Just put this here for the future
 		config.setComment("_Version", " DONT TOUCH THIS, IF YOU DO THEN CONFIG FILE WOULD BREAK");
-		if (config.contains("_Version")) {
-			if (config.get("_Version") != ModInfo.VERSION) {
-				LOGGER.error("THERE IS A PROBLEM WITH THE CONFIG FILE");
-				LOGGER.error("You have downgraded your mod, this could cause problems with your config");
-			}
-		}
 		config.set("_Versions", ModInfo.VERSION);
 
 
@@ -384,12 +378,6 @@ public abstract class ConfigGui
 
 		// Just put this here for the future
 		config.setComment("_Version", " DONT TOUCH THIS, IF YOU DO THEN CONFIG FILE WOULD BREAK");
-		if (config.contains("_Version")) {
-			if (config.get("_Version") != ModInfo.VERSION) {
-				LOGGER.error("THERE IS A PROBLEM WITH THE CONFIG FILE");
-				LOGGER.error("You have downgraded your mod, this could cause problems with your config");
-			}
-		}
 		config.set("_Versions", ModInfo.VERSION);
 
 
