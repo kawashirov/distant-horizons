@@ -64,6 +64,10 @@ dependencies {
      */
 
 
+
+    // Toml
+    shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {}
+
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
