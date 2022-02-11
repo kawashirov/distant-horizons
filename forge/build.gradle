@@ -95,7 +95,7 @@ shadowJar {
     configurations = [project.configurations.shadowMe]
     relocate 'org.tukaani', 'shaded.tukaani'
     relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
-//    relocate 'com.electronwill.nightconfig', 'shaded.electronwill.nightconfig'    // This is already included with forge
+    relocate 'com.electronwill.nightconfig', 'shaded.electronwill.nightconfig'
 
     relocate 'com.seibel.lod.common', 'forge.com.seibel.lod.common'
 
