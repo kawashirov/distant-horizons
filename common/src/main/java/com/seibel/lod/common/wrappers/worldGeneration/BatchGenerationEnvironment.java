@@ -233,6 +233,12 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 
 	public static final LodThreadFactory threadFactory = new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY);
 	
+	public static ThreadLocal<Boolean> isDistantGeneratorThread = new ThreadLocal<Boolean>();
+	
+	public static boolean isCurrentThreadDistantGeneratorThread() {
+		return (isDistantGeneratorThread.get() != null);
+	}
+	
 	public ExecutorService executors = Executors.newFixedThreadPool(
 			CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads(), threadFactory);
 	

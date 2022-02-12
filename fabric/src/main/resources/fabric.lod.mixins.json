@@ -5,14 +5,15 @@
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "events.MixinServerLevel",
-    "unsafe.MixinPalettedContainer"
+    "unsafe.MixinPalettedContainer",
+    "MixinChunkGenerator",
+    "MixinUtilBackgroudThread"
   ],
   "client": [
     "MixinMinecraft",
     "MixinOptionsScreen",
     "MixinWorldRenderer",
     "MixinFogRenderer",
-    "MixinChunkGenerator",
     "events.MixinClientLevel",
     "events.MixinMinecraft",
     "events.MixinBlockUpdate"

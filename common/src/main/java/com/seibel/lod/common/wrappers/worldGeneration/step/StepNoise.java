@@ -34,34 +34,6 @@ public final class StepNoise {
 	}
 	
 	public final ChunkStatus STATUS = ChunkStatus.NOISE;
-
-    private ChunkAccess NoiseBased$fillFromNoise(NoiseBasedChunkGenerator generator, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
-        NoiseSettings noiseSettings = generator.settings.get().noiseSettings();
-        int i = Math.max(noiseSettings.minY(), chunkAccess.getMinBuildHeight());
-        int j = Math.min(noiseSettings.minY() + noiseSettings.height(), chunkAccess.getMaxBuildHeight());
-        int cellHeight = QuartPos.toBlock(noiseSettings.noiseSizeVertical());
-        int k = Mth.intFloorDiv(i, cellHeight);
-        int l = Mth.intFloorDiv(j - i, cellHeight);
-        if (l <= 0) {
-            return chunkAccess;
-        }
-        int m = chunkAccess.getSectionIndex(l * cellHeight - 1 + i);
-        int n = chunkAccess.getSectionIndex(i);
-        HashSet<LevelChunkSection> set = Sets.newHashSet();
-        try {
-	        for (int o = m; o >= n; --o) {
-	            LevelChunkSection levelChunkSection = chunkAccess.getOrCreateSection(o);
-	            levelChunkSection.acquire();
-	            set.add(levelChunkSection);
-	        }
-	        chunkAccess = generator.doFill(structureFeatureManager, chunkAccess, k, l);
-	        return chunkAccess;
-        } finally {
-	        for (LevelChunkSection levelChunkSection : set) {
-	            levelChunkSection.release();
-	        };
-        }
-    }
     
 	public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 			List<ChunkAccess> chunks) {
@@ -76,13 +48,8 @@ public final class StepNoise {
 		
 		for (ChunkAccess chunk : chunksToDo) {
 			// System.out.println("StepNoise: "+chunk.getPos());
-			if (environment.params.generator instanceof NoiseBasedChunkGenerator) {
-				chunk = NoiseBased$fillFromNoise((NoiseBasedChunkGenerator)environment.params.generator,
-						tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk);
-			} else {
-				chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run, 
-						tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
-			}
+			chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run, 
+					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
 		}
 	}
 }
