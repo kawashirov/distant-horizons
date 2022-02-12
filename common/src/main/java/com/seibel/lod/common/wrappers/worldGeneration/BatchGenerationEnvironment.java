@@ -233,6 +233,12 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	
 	public static final LodThreadFactory threadFactory = new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY);
 	
+	public static ThreadLocal<Boolean> isDistantGeneratorThread = new ThreadLocal<Boolean>();
+	
+	public static boolean isCurrentThreadDistantGeneratorThread() {
+		return (isDistantGeneratorThread.get() != null);
+	}
+	
 	public ExecutorService executors = Executors.newFixedThreadPool(
 			CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads(), threadFactory);
 
@@ -462,33 +468,35 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			{
 				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
 				ChunkAccess target = referencedChunks.get(targetIndex);
-				target.setLightCorrect(true);
-				if (target instanceof LevelChunk)
-					((LevelChunk) target).setClientLightReady(true);
+				ChunkWrapper wrappedChunk = new ChunkWrapper(target, region);
+				if (!wrappedChunk.isLightCorrect()) {
+					throw new RuntimeException("The generated chunk somehow has isLightCorrect() returning false");
+				}
+				
 				boolean isFull = target.getStatus() == ChunkStatus.FULL || target instanceof LevelChunk;
 				boolean isPartial = target.isOldNoiseGeneration();
 				if (isFull)
 				{
 					if (ENABLE_LOAD_EVENT_LOGGING)
 						ClientApi.LOGGER.info("Detected full existing chunk at {}", target.getPos());
-					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
+					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
 							new LodBuilderConfig(DistanceGenerationMode.FULL), true, e.genAllDetails);
 				}
 				else if (isPartial)
 				{
 					if (ENABLE_LOAD_EVENT_LOGGING)
 						ClientApi.LOGGER.info("Detected old existing chunk at {}", target.getPos());
-					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
+					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
 							new LodBuilderConfig(generationMode), true, e.genAllDetails);
 				}
 				else if (target.getStatus() == ChunkStatus.EMPTY && generationMode == DistanceGenerationMode.NONE)
 				{
-					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
+					params.lodBuilder.generateLodNodeFromChunk(params.lodDim,wrappedChunk,
 							LodBuilderConfig.getFillVoidConfig(), true, e.genAllDetails);
 				}
 				else
 				{
-					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
+					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
 							new LodBuilderConfig(generationMode), true, e.genAllDetails);
 				}
 				if (e.lightMode == LightGenerationMode.FANCY || isFull)
@@ -566,6 +574,10 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				{
 					if (p instanceof ProtoChunk)
 						((ProtoChunk) p).setLightCorrect(true);
+					if (p instanceof LevelChunk) {
+						((LevelChunk) p).setLightCorrect(true);
+						((LevelChunk) p).setClientLightReady(true);
+					}
 				});
 				break;
 			}

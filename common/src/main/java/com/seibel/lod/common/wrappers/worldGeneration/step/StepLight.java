@@ -52,6 +52,7 @@ public final class StepLight {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			if (chunk instanceof LevelChunk) ((LevelChunk)chunk).setClientLightReady(true);
 			chunk.setLightCorrect(true);
 		}
 		lightEngine.runUpdates(Integer.MAX_VALUE, true, true);

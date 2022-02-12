@@ -46,7 +46,12 @@ public final class GenerationEvent
 		
 		future = generationGroup.executors.submit(() ->
 		{
-			generationGroup.generateLodFromList(this);
+			BatchGenerationEnvironment.isDistantGeneratorThread.set(true);
+			try {
+				generationGroup.generateLodFromList(this);
+			} finally {
+				BatchGenerationEnvironment.isDistantGeneratorThread.remove();
+			}
 		});
 	}
 	

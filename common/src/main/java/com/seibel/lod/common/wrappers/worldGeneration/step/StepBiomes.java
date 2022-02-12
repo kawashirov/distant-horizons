@@ -34,21 +34,7 @@ public final class StepBiomes {
 	}
 
 	public final ChunkStatus STATUS = ChunkStatus.BIOMES;
-
-	//FIXME: Bug with TerraBlender Mod!
 	
-    private ChunkAccess createBiomes(ChunkGenerator generator, Registry<Biome> registry, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
-        if (generator instanceof NoiseBasedChunkGenerator) {
-        	((NoiseBasedChunkGenerator) generator).doCreateBiomes(registry, blender, structureFeatureManager, chunkAccess);
-        	return chunkAccess;
-        } else if (generator instanceof FlatLevelSource || generator instanceof DebugLevelSource) {
-        	chunkAccess.fillBiomesFromNoise(generator.getBiomeSource()::getNoiseBiome, generator.climateSampler());
-        	return chunkAccess;
-        } else {
-        	return environment.joinSync(generator.fillFromNoise(Runnable::run, blender, structureFeatureManager, chunkAccess));
-        }
-    }
-    
 	public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 			List<ChunkAccess> chunks) {
 
@@ -62,8 +48,8 @@ public final class StepBiomes {
 		
 		for (ChunkAccess chunk : chunksToDo) {
 			// System.out.println("StepBiomes: "+chunk.getPos());
-			chunk = createBiomes(environment.params.generator, environment.params.biomes, Blender.of(worldGenRegion),
-					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk);
+			chunk = environment.joinSync(environment.params.generator.createBiomes(environment.params.biomes, Runnable::run, Blender.of(worldGenRegion),
+					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
 		}
 	}
 }

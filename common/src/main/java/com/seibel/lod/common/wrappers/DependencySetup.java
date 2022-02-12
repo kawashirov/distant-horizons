@@ -34,5 +34,6 @@ public class DependencySetup {
         SingletonHandler.bind(IVersionConstants.class, VersionConstants.INSTANCE);
 
         SingletonHandler.bind(IWrapperFactory.class, WrapperFactory.INSTANCE);
+        DependencySetupDoneCheck.isDone = true;
     }
 }

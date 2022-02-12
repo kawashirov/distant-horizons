@@ -36,31 +36,6 @@ public final class StepNoise {
 	}
 	
 	public final ChunkStatus STATUS = ChunkStatus.NOISE;
-
-    private ChunkAccess NoiseBased$fillFromNoise(NoiseBasedChunkGenerator generator, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
-        NoiseSettings noiseSettings = generator.settings.get().noiseSettings();
-        LevelHeightAccessor levelHeightAccessor = chunkAccess.getHeightAccessorForGeneration();
-        int i = Math.max(noiseSettings.minY(), levelHeightAccessor.getMinBuildHeight());
-        int j = Math.min(noiseSettings.minY() + noiseSettings.height(), levelHeightAccessor.getMaxBuildHeight());
-        int k = Mth.intFloorDiv(i, noiseSettings.getCellHeight());
-        int l = Mth.intFloorDiv(j - i, noiseSettings.getCellHeight());
-        if (l <= 0) {
-            return chunkAccess;
-        }
-        int m = chunkAccess.getSectionIndex(l * noiseSettings.getCellHeight() - 1 + i);
-        int n = chunkAccess.getSectionIndex(i);
-        HashSet<LevelChunkSection> set = Sets.newHashSet();
-        for (int o = m; o >= n; --o) {
-            LevelChunkSection levelChunkSection = chunkAccess.getSection(o);
-            levelChunkSection.acquire();
-            set.add(levelChunkSection);
-        }
-        chunkAccess = generator.doFill(blender, structureFeatureManager, chunkAccess, k, l);
-        for (LevelChunkSection levelChunkSection : set) {
-            levelChunkSection.release();
-        };
-        return chunkAccess;
-    }
     
 	public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 			List<ChunkAccess> chunks) {
@@ -75,13 +50,8 @@ public final class StepNoise {
 		
 		for (ChunkAccess chunk : chunksToDo) {
 			// System.out.println("StepNoise: "+chunk.getPos());
-			if (environment.params.generator instanceof NoiseBasedChunkGenerator) {
-				chunk = NoiseBased$fillFromNoise((NoiseBasedChunkGenerator)environment.params.generator,Blender.of(worldGenRegion),
-						tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk);
-			} else {
-				chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion),
+			chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion),
 						tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
-			}
 		}
 	}
 }
