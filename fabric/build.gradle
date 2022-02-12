@@ -24,6 +24,12 @@ repositories {
     maven { url "https://maven.terraformersmc.com/" }
 }
 
+def addMod(path, enabled) {
+    if (enabled == "2")
+        dependencies { modImplementation(path) }
+    else if (enabled == "1")
+        dependencies { modCompileOnly(path) }
+}
 
 dependencies {
     // Fabric loader
@@ -38,20 +44,20 @@ dependencies {
     }
 
     // Starlight
-    // modImplementation "curse.maven:starlight-521783:${rootProject.starlight_version_fabric}"
+    addMod("curse.maven:starlight-521783:${rootProject.starlight_version_fabric}", rootProject.enable_starlight)
 
     // Sodium
-    modImplementation "curse.maven:sodium-394468:${rootProject.sodium_version}"
+    addMod("curse.maven:sodium-394468:${rootProject.sodium_version}", rootProject.enable_sodium)
     implementation "org.joml:joml:1.10.2"
 	
 	// Lithium
-//    modImplementation "maven.modrinth:lithium:${rootProject.lithium_version}"
+    addMod("maven.modrinth:lithium:${rootProject.lithium_version}", rootProject.enable_lithium)
 
     // Iris
-//    modImplementation "maven.modrinth:iris:${rootProject.iris_version}"
+    addMod("maven.modrinth:iris:${rootProject.iris_version}", rootProject.enable_iris)
 
     // BCLib
-//    modImplementation "com.github.paulevsGitch:BCLib:${rootProject.bclib_version}"
+    modImplementation "com.github.paulevsGitch:BCLib:${rootProject.bclib_version}"
 
     // Immersive Portals
     /*

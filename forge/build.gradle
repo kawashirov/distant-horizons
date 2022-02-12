@@ -25,13 +25,20 @@ configurations {
     developmentForge.extendsFrom common
 }
 
+def addMod(path, enabled) {
+    if (enabled == "2")
+        dependencies { modImplementation(path) }
+    else if (enabled == "1")
+        dependencies { modCompileOnly(path) }
+}
+
 dependencies {
     // Forge loader
     forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
 
     // Starlight
-//    modImplementation("curse.maven:starlight-forge-526854:${rootProject.starlight_version_forge}")
-//    annotationProcessor "org.spongepowered:mixin:0.8.4:processor"
+    addMod("curse.maven:starlight-forge-526854:${rootProject.starlight_version_forge}", rootProject.enable_starlight_forge)
+    annotationProcessor "org.spongepowered:mixin:0.8.4:processor"
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }

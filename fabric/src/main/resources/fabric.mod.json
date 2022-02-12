@@ -9,8 +9,8 @@
 
   "contact": {
     "homepage": "${homepage}",
-    "sources": "https://gitlab.com/jeseibel/minecraft-lod-mod/",
-    "issues": "https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues"
+    "sources": "${source}",
+    "issues": "${issues}"
   },
 
   "license": "CC0-1.0",
