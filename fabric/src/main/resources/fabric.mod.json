@@ -8,7 +8,7 @@
   "authors": ["${authors}"],
 
   "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/lod-level-of-detail",
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/distant-horizons",
     "sources": "https://gitlab.com/jeseibel/minecraft-lod-mod/",
     "issues": "https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues"
   },
