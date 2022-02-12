@@ -197,7 +197,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	public final LinkedList<GenerationEvent> events = new LinkedList<GenerationEvent>();
 	public final GlobalParameters params;
 	public final StepStructureStart stepStructureStart = new StepStructureStart(this);
-	public final StepStructureReference stepStructureReference = new StepStructureReference(this);
+	public final StepStructureReference stepStructureReference = new StepStructureReference();
 	public final StepBiomes stepBiomes = new StepBiomes(this);
 	public final StepNoise stepNoise = new StepNoise(this);
 	public final StepSurface stepSurface = new StepSurface(this);
@@ -212,13 +212,6 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	public long lastExceptionTriggerTime = 0;
 
 	public static final LodThreadFactory threadFactory = new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY);
-	
-	public static ThreadLocal<Boolean> isDistantGeneratorThread = new ThreadLocal<Boolean>();
-	
-	public static boolean isCurrentThreadDistantGeneratorThread() {
-		return (isDistantGeneratorThread.get() != null);
-	}
-	
 
 	public ExecutorService executors = Executors.newFixedThreadPool(
 			CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads(), threadFactory);
@@ -419,21 +412,17 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
 				ChunkAccess target = referencedChunks.get(targetIndex);
 				target.setLightCorrect(true);
-				ChunkWrapper wrappedChunk = new ChunkWrapper(target, region);
-				if (!wrappedChunk.isLightCorrect()) {
-					throw new RuntimeException("The generated chunk somehow has isLightCorrect() returning false");
-				}
 				boolean isFull = target.getStatus() == ChunkStatus.FULL || target instanceof LevelChunk;
 				if (isFull) {
 					if (ENABLE_LOAD_EVENT_LOGGING)
 						ClientApi.LOGGER.info("Detected full existing chunk at {}", target.getPos());
-					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
+					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
 							new LodBuilderConfig(DistanceGenerationMode.FULL), true, e.genAllDetails);
 				} else if (target.getStatus() == ChunkStatus.EMPTY && generationMode == DistanceGenerationMode.NONE) {
-					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
+					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
 							LodBuilderConfig.getFillVoidConfig(), true, e.genAllDetails);
 				} else {
-					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
+					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, new ChunkWrapper(target, region),
 							new LodBuilderConfig(generationMode), true, e.genAllDetails);
 				}
 				lightEngine.retainData(target.getPos(), false);

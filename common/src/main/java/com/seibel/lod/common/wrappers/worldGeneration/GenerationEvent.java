@@ -42,12 +42,7 @@ public final class GenerationEvent {
 		this.genAllDetails = genAllDetails;
 
 		future = generationGroup.executors.submit(() -> {
-			BatchGenerationEnvironment.isDistantGeneratorThread.set(true);
-			try {
-				generationGroup.generateLodFromList(this);
-			} finally {
-				BatchGenerationEnvironment.isDistantGeneratorThread.remove();
-			}
+			generationGroup.generateLodFromList(this);
 		});
 	}
 
