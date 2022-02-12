@@ -315,7 +315,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		{
 			chunkData = level.getChunkSource().chunkMap.readChunk(chunkPos);
 		}
-		catch (IOException e)
+		catch (Exception e)
 		{
 			ClientApi.LOGGER.error("DistantHorizons: Couldn't load chunk {}", chunkPos, e);
 		}
@@ -325,7 +325,12 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 		else
 		{
+			try {
 			return ChunkLoader.read(level, lightEngine, chunkPos, chunkData);
+			} catch (Exception e) {
+				ClientApi.LOGGER.error("DistantHorizons: Couldn't load chunk {}", chunkPos, e);
+				return new ProtoChunk(chunkPos, UpgradeData.EMPTY, level, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null);
+			}
 		}
 		
 	}
