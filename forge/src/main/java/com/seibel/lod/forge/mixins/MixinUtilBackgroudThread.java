@@ -9,8 +9,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.seibel.lod.common.wrappers.DependencySetupDoneCheck;
-import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
-import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.util.DummyRunExecutorService;
 
 import net.minecraft.Util;
@@ -19,11 +17,16 @@ import net.minecraft.Util;
 public class MixinUtilBackgroudThread
 {
 	
+	private static boolean shouldApplyOverride() {
+		return DependencySetupDoneCheck.getIsCurrentThreadDistantGeneratorThread.get();
+	}
+	
+	
 	@Inject(method = "wrapThreadWithTaskName(Ljava/lang/String;Ljava/lang/Runnable;)Ljava/lang/Runnable;",
 			at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$wrapThreadWithTaskName(String string, Runnable r, CallbackInfoReturnable<Runnable> ci)
 	{
-		if (DependencySetupDoneCheck.isDone && BatchGenerationEnvironment.isCurrentThreadDistantGeneratorThread())
+		if (DependencySetupDoneCheck.isDone && shouldApplyOverride())
 		{
 			//ClientApi.LOGGER.info("util wrapThreadWithTaskName(Runnable) triggered");
 			ci.setReturnValue(r);
@@ -33,7 +36,7 @@ public class MixinUtilBackgroudThread
 			at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$wrapThreadWithTaskNameForSupplier(String string, Supplier<?> r, CallbackInfoReturnable<Supplier<?>> ci)
 	{
-		if (DependencySetupDoneCheck.isDone && BatchGenerationEnvironment.isCurrentThreadDistantGeneratorThread())
+		if (DependencySetupDoneCheck.isDone && shouldApplyOverride())
 		{
 			//ClientApi.LOGGER.info("util wrapThreadWithTaskName(Supplier) triggered");
 			ci.setReturnValue(r);
@@ -43,7 +46,7 @@ public class MixinUtilBackgroudThread
 	@Inject(method = "backgroundExecutor", at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$backgroundExecutor(CallbackInfoReturnable<ExecutorService> ci)
 	{
-		if (DependencySetupDoneCheck.isDone && BatchGenerationEnvironment.isCurrentThreadDistantGeneratorThread())
+		if (DependencySetupDoneCheck.isDone && shouldApplyOverride())
 		{
 			//ClientApi.LOGGER.info("util backgroundExecutor triggered");
 			ci.setReturnValue(new DummyRunExecutorService());

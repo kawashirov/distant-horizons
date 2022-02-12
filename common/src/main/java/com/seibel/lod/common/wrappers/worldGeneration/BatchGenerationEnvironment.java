@@ -41,6 +41,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import com.seibel.lod.common.wrappers.DependencySetupDoneCheck;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.ChunkLoader;
@@ -237,6 +238,10 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	
 	public static boolean isCurrentThreadDistantGeneratorThread() {
 		return (isDistantGeneratorThread.get() != null);
+	}
+	
+	static {
+		DependencySetupDoneCheck.getIsCurrentThreadDistantGeneratorThread = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
 	}
 	
 	public ExecutorService executors = Executors.newFixedThreadPool(
