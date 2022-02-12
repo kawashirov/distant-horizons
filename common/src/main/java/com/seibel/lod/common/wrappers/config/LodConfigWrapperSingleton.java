@@ -333,20 +333,6 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				ConfigGui.editSingleOption.saveOption("client.worldGenerator.distanceGenerationMode");
 			}
 
-			/*
-			@Override
-			public boolean getAllowUnstableFeatureGeneration()
-			{
-				return Config.Client.WorldGenerator.allowUnstableFeatureGeneration;
-			}
-			@Override
-			public void setAllowUnstableFeatureGeneration(boolean newAllowUnstableFeatureGeneration)
-			{
-				ConfigGui.editSingleOption.getEntry("client.worldGenerator.allowUnstableFeatureGeneration").value = newAllowUnstableFeatureGeneration;
-				ConfigGui.editSingleOption.saveOption("client.worldGenerator.allowUnstableFeatureGeneration");
-			}*/
-
-
 			@Override
 			public BlocksToAvoid getBlocksToAvoid()
 			{
@@ -361,7 +347,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			@Override
 			public boolean getEnableDistantGeneration()
 			{
-				return Config.Client.WorldGenerator.enableDistantGeneration;
+				return (boolean) ConfigGui.editSingleOption.getEntry("client.worldGenerator.enableDistantGeneration").value;
 			}
 			@Override
 			public void setEnableDistantGeneration(boolean newEnableDistantGeneration)

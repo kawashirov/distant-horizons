@@ -67,7 +67,7 @@ public final class GenerationEvent {
 		try {
 			future.get();
 		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
+			throw new RuntimeException(e.getCause()==null? e : e.getCause());
 		}
 	}
 

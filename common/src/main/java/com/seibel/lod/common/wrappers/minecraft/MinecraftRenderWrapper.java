@@ -2,18 +2,13 @@ package com.seibel.lod.common.wrappers.minecraft;
 
 import java.awt.*;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.math.Vector3d;
 import com.seibel.lod.common.wrappers.WrapperFactory;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.api.ModAccessorApi;
-import com.seibel.lod.core.handlers.IReflectionHandler;
-import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
@@ -24,7 +19,6 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.world.phys.AABB;
 import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
 
 import com.mojang.math.Vector3f;
 import com.seibel.lod.core.objects.math.Mat4f;
@@ -35,13 +29,11 @@ import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
-import com.seibel.lod.common.wrappers.chunk.ChunkPosWrapper;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher.CompiledChunk;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.effect.MobEffects;
@@ -157,6 +149,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
      * is going to render this frame. <br><br>
      * <p>
      */
+    public boolean usingBackupGetVanillaRenderedChunks = false;
     @Override
     public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks()
     {
@@ -172,13 +165,28 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
             if (pos==null) pos = getMaximumRenderedChunks();
             return pos;
         }
-        LevelRenderer levelRenderer = MC.levelRenderer;
-        ObjectList<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunks;
-        return (chunks.stream().map((chunk) -> {
-            AABB chunkBoundingBox = chunk.chunk.bb;
-            return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
-                    Math.floorDiv((int) chunkBoundingBox.minZ, 16));
-        }).collect(Collectors.toCollection(HashSet::new)));
+        if (!usingBackupGetVanillaRenderedChunks) {
+			try {
+		        LevelRenderer levelRenderer = MC.levelRenderer;
+		        ObjectList<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunks;
+		        return (chunks.stream().map((chunk) -> {
+		            AABB chunkBoundingBox = chunk.chunk.bb;
+		            return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
+		                    Math.floorDiv((int) chunkBoundingBox.minZ, 16));
+		        }).collect(Collectors.toCollection(HashSet::new)));
+			} catch (LinkageError e) {
+				try {
+					MinecraftWrapper.INSTANCE.sendChatMessage(
+							"\u00A7e\u00A7l\u00A7uWRANING: Distant Horizons: getVanillaRenderedChunks method failed."
+							+ " Using Backup Method.");
+					MinecraftWrapper.INSTANCE.sendChatMessage(
+							"\u00A7eOverdraw prevention will be worse than normal.");
+				} catch (Exception e2) {}
+				ClientApi.LOGGER.error("getVanillaRenderedChunks Error: {}", e);
+				usingBackupGetVanillaRenderedChunks = true;
+			}
+		}
+		return getMaximumRenderedChunks();
     }
 
     @Override
