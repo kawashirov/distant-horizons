@@ -35,10 +35,6 @@ public final class StepNoise {
 		environment = batchGenerationEnvironment;
 	}
 	
-	private static <T> T joinSync(CompletableFuture<T> f) {
-		if (!f.isDone()) throw new RuntimeException("The future is concurrent!");
-		return f.join();
-	}
 	public final ChunkStatus STATUS = ChunkStatus.NOISE;
 
     private ChunkAccess NoiseBased$fillFromNoise(NoiseBasedChunkGenerator generator, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
@@ -83,7 +79,7 @@ public final class StepNoise {
 				chunk = NoiseBased$fillFromNoise((NoiseBasedChunkGenerator)environment.params.generator,Blender.of(worldGenRegion),
 						tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk);
 			} else {
-				chunk = joinSync(environment.params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion),
+				chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion),
 						tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
 			}
 		}

@@ -38,7 +38,6 @@ public final class GlobalParameters
 	public final ChunkScanAccess chunkScanner;
 	public final ServerLevel level; // TODO: Figure out a way to remove this. Maybe ClientLevel also works?
 	public final DataFixer fixerUpper;
-	private static final IMinecraftWrapper MC = SingletonHandler.get(IMinecraftWrapper.class);
 	
 	public GlobalParameters(ServerLevel level, LodBuilder lodBuilder, LodDimension lodDim)
 	{
@@ -55,12 +54,6 @@ public final class GlobalParameters
 		biomeManager = new BiomeManager(level, BiomeManager.obfuscateSeed(worldSeed));
 		structures = server.getStructureManager();
 		generator = level.getChunkSource().getGenerator();
-		if (!(generator instanceof NoiseBasedChunkGenerator ||
-				generator instanceof DebugLevelSource ||
-				generator instanceof FlatLevelSource)) {
-			MC.sendChatMessage("&4&l&uWARNING: Unknown Chunk Generator Detected! Distant Generation May Fail!");
-			MC.sendChatMessage("&eIf it does crash, set Distant Generation to OFF or Generation Mode to None.");
-		}
 		chunkScanner = level.getChunkSource().chunkScanner();
 		fixerUpper = server.getFixerUpper();
 	}

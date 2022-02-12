@@ -14,6 +14,8 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.levelgen.DebugLevelSource;
+import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.blending.Blender;
 
@@ -33,13 +35,17 @@ public final class StepBiomes {
 
 	public final ChunkStatus STATUS = ChunkStatus.BIOMES;
 
+	//FIXME: Bug with TerraBlender Mod!
+	
     private ChunkAccess createBiomes(ChunkGenerator generator, Registry<Biome> registry, Blender blender, StructureFeatureManager structureFeatureManager, ChunkAccess chunkAccess) {
         if (generator instanceof NoiseBasedChunkGenerator) {
         	((NoiseBasedChunkGenerator) generator).doCreateBiomes(registry, blender, structureFeatureManager, chunkAccess);
         	return chunkAccess;
-        } else {
+        } else if (generator instanceof FlatLevelSource || generator instanceof DebugLevelSource) {
         	chunkAccess.fillBiomesFromNoise(generator.getBiomeSource()::getNoiseBiome, generator.climateSampler());
         	return chunkAccess;
+        } else {
+        	return environment.joinSync(generator.fillFromNoise(Runnable::run, blender, structureFeatureManager, chunkAccess));
         }
     }
     
