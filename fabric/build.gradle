@@ -57,7 +57,7 @@ dependencies {
     addMod("maven.modrinth:iris:${rootProject.iris_version}", rootProject.enable_iris)
 
     // BCLib
-    modImplementation "com.github.paulevsGitch:BCLib:${rootProject.bclib_version}"
+    addMod("com.github.paulevsGitch:BCLib:${rootProject.bclib_version}", rootProject.enable_bclib)
 
     // Immersive Portals
     /*
