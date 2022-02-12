@@ -226,6 +226,10 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	//public boolean safeMode = false;
 	private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 	private static final IMinecraftWrapper MC = SingletonHandler.get(IMinecraftWrapper.class);
+	public static final long EXCEPTION_TIMER_RESET_TIME = TimeUnit.NANOSECONDS.convert(1, TimeUnit.SECONDS);
+	public static final int EXCEPTION_COUNTER_TRIGGER = 20;
+	public int unknownExceptionCount = 0;
+	public long lastExceptionTriggerTime = 0;
 	
 	public static final LodThreadFactory threadFactory = new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY);
 	
@@ -234,14 +238,13 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 
 	public <T> T joinSync(CompletableFuture<T> f) {
 		if (!unsafeThreadingRecorded && !f.isDone()) {
-			MC.sendChatMessage("&4&l&uERROR: Distant Horizons: Unsafe Threading in Chunk Generator Detected!");
-			MC.sendChatMessage("&eTo increase stability, it is recommended to set world generation threads count to 1.");
+			MC.sendChatMessage("\u00A74\u00A7l\u00A7uERROR: Distant Horizons: Unsafe Threading in Chunk Generator Detected!");
+			MC.sendChatMessage("\u00A7eTo increase stability, it is recommended to set world generation threads count to 1.");
 			ClientApi.LOGGER.error("Unsafe Threading in Chunk Generator: ", new RuntimeException("Concurrent future"));
 			unsafeThreadingRecorded = true;
 		}
 		return f.join();
 	}
-	
 	
 	public void resizeThreadPool(int newThreadCount)
 	{
@@ -267,6 +270,12 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	
 	public void updateAllFutures()
 	{
+		if (unknownExceptionCount > 0) {
+			if (System.nanoTime() - lastExceptionTriggerTime >= EXCEPTION_TIMER_RESET_TIME) {
+				unknownExceptionCount = 0;
+			}
+		}
+		
 		// Update all current out standing jobs
 		Iterator<GenerationEvent> iter = events.iterator();
 		while (iter.hasNext())
@@ -280,12 +289,10 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				}
 				catch (Throwable e)
 				{
-					e.printStackTrace();
-					while (e.getCause() != null)
-					{
-						e = e.getCause();
-						e.printStackTrace();
-					}
+					ClientApi.LOGGER.error("Batching World Generator: Event {} gotten an exception", event);
+					ClientApi.LOGGER.error("Exception: ", e);
+					unknownExceptionCount++;
+					lastExceptionTriggerTime = System.nanoTime();
 				}
 				finally
 				{
@@ -307,6 +314,14 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				}
 			}
 		}
+		if (unknownExceptionCount > EXCEPTION_COUNTER_TRIGGER) {
+			try {
+				MC.sendChatMessage("\u00A74\u00A7l\u00A7uERROR: Distant Horizons: Too many exceptions in Batching World Generator! Disabling the generator.");
+			} catch (Exception e) {}
+			ClientApi.LOGGER.error("Too many exceptions in Batching World Generator! Now disabling.");
+			unknownExceptionCount = 0;
+			CONFIG.client().worldGenerator().setEnableDistantGeneration(false);
+		}
 	}
 	
 	public BatchGenerationEnvironment(IWorldWrapper serverlevel, LodBuilder lodBuilder, LodDimension lodDim)
@@ -317,8 +332,9 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		if (!(generator instanceof NoiseBasedChunkGenerator ||
 				generator instanceof DebugLevelSource ||
 				generator instanceof FlatLevelSource)) {
-			MC.sendChatMessage("&4&l&uWARNING: Distant Horizons: Unknown Chunk Generator Detected! Distant Generation May Fail!");
-			MC.sendChatMessage("&eIf it does crash, set Distant Generation to OFF or Generation Mode to None.");
+			MC.sendChatMessage("\u00A74\u00A7l\u00A7uWARNING: Distant Horizons: Unknown Chunk Generator Detected! Distant Generation May Fail!");
+			MC.sendChatMessage("\u00A7eIf it does crash, set Distant Generation to OFF or Generation Mode to None.");
+			ClientApi.LOGGER.warn("Unknown Chunk Generator detected: {}", generator.getClass());
 		}
 		params = new GlobalParameters((ServerLevel) ((WorldWrapper) serverlevel).getWorld(), lodBuilder, lodDim);
 	}
@@ -384,7 +400,6 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				catch (RuntimeException e2)
 				{
 					// Continue...
-					e2.printStackTrace();
 				}
 				if (target == null)
 					target = new ProtoChunk(chunkPos, UpgradeData.EMPTY, params.level,

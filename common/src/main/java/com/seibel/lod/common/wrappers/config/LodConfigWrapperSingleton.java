@@ -361,7 +361,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			@Override
 			public boolean getEnableDistantGeneration()
 			{
-				return Config.Client.WorldGenerator.enableDistantGeneration;
+				return (boolean) ConfigGui.editSingleOption.getEntry("client.worldGenerator.enableDistantGeneration").value;
 			}
 			@Override
 			public void setEnableDistantGeneration(boolean newEnableDistantGeneration)
