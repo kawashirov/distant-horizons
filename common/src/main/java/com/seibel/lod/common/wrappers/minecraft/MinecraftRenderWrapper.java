@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
+import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.api.ModAccessorApi;
 import com.seibel.lod.core.util.LodUtil;
 
@@ -147,7 +148,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
      * is going to render this frame. <br><br>
      * <p>
      */
-
+    public boolean usingBackupGetVanillaRenderedChunks = false;
     @Override
     public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks()
     {
@@ -164,14 +165,29 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
                 pos = getMaximumRenderedChunks();
             return pos;
         }
+		if (!usingBackupGetVanillaRenderedChunks) {
+			try {
+		        LevelRenderer levelRenderer = MC.levelRenderer;
+		        ObjectArrayList<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunks;
+		        return (chunks.stream().map((chunk) -> {
+		            AABB chunkBoundingBox = chunk.chunk.bb;
+		            return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
+		                    Math.floorDiv((int) chunkBoundingBox.minZ, 16));
+		        }).collect(Collectors.toCollection(HashSet::new)));
+			} catch (LinkageError e) {
+				try {
+					MinecraftWrapper.INSTANCE.sendChatMessage(
+							"\u00A7e\u00A7l\u00A7uWRANING: Distant Horizons: getVanillaRenderedChunks method failed."
+							+ " Using Backup Method.");
+					MinecraftWrapper.INSTANCE.sendChatMessage(
+							"\u00A7eOverdraw prevention will be worse than normal.");
+				} catch (Exception e2) {}
+				ClientApi.LOGGER.error("getVanillaRenderedChunks Error: {}", e);
+				usingBackupGetVanillaRenderedChunks = true;
+			}
+		}
+		return getMaximumRenderedChunks();
 
-        LevelRenderer levelRenderer = MC.levelRenderer;
-        ObjectArrayList<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunks;
-        return (chunks.stream().map((chunk) -> {
-            AABB chunkBoundingBox = chunk.chunk.bb;
-            return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
-                    Math.floorDiv((int) chunkBoundingBox.minZ, 16));
-        }).collect(Collectors.toCollection(HashSet::new)));
     }
 
     @Override

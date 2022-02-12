@@ -78,7 +78,7 @@ public final class GenerationEvent
 		}
 		catch (InterruptedException | ExecutionException e)
 		{
-			e.printStackTrace();
+			throw new RuntimeException(e.getCause()==null? e : e.getCause());
 		}
 	}
 	
