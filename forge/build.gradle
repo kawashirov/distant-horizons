@@ -25,10 +25,19 @@ configurations {
     developmentForge.extendsFrom common
 }
 
+def addMod(path, enabled) {
+    if (enabled == "2")
+        dependencies { modImplementation(path) }
+    else if (enabled == "1")
+        dependencies { modCompileOnly(path) }
+}
+
 dependencies {
     // Forge loader
     forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
 
+    addMod("curse.maven:TerraForged-363820:${rootProject.terraforged_version}", rootProject.enable_terraforged)
+    
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 

@@ -1,6 +1,7 @@
 package com.seibel.lod.common.wrappers.worldGeneration.step;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 
 import com.seibel.lod.common.wrappers.worldGeneration.ThreadedParameters;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
@@ -11,6 +12,7 @@ import net.minecraft.ReportedException;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 public final class StepFeatures {
 	/**
@@ -40,6 +42,7 @@ public final class StepFeatures {
 		for (ChunkAccess chunk : chunksToDo) {
 			try {
 				worldGenRegion.setOverrideCenter(chunk.getPos());
+				Heightmap.primeHeightmaps(chunk, STATUS.heightmapsAfter());
 				envionment.params.generator.applyBiomeDecoration(worldGenRegion, tParams.structFeat);
 			} catch (ReportedException e) {
 				e.printStackTrace();
