@@ -33,7 +33,7 @@ import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.I
  * @author coolGi2007
  * @version 12-12-2021
  */
-public class Config extends ConfigGui
+public class OldConfig
 //public class Config extends TinyConfig
 {
 	// CONFIG STRUCTURE
