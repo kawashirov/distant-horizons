@@ -30,7 +30,7 @@ public class MixinTFChunkGenerator {
 					+ "Lnet/minecraft/world/level/WorldGenLevel;"
 					+ "Lnet/minecraft/world/level/chunk/ChunkGenerator;"
 					+ "Ljava/util/Random;Lnet/minecraft/core/BlockPos;)Z"
-		), require = 0)
+		))
 	private boolean wrapDecorate$FeaturePlace(ConfiguredFeature<?, ?> feature, WorldGenLevel arg,
 			ChunkGenerator arg2, Random random, BlockPos arg3) {
 		synchronized((FeatureGenerator)(Object)this) {
