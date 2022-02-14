@@ -24,6 +24,12 @@ repositories {
     maven { url "https://maven.terraformersmc.com/" }
 }
 
+def addMod(path, enabled) {
+    if (enabled == "2")
+        dependencies { modImplementation(path) }
+    else if (enabled == "1")
+        dependencies { modCompileOnly(path) }
+}
 
 dependencies {
     // Fabric loader
@@ -38,14 +44,14 @@ dependencies {
     }
 
     // Sodium
-    modImplementation "curse.maven:sodium-394468:${rootProject.sodium_version}"
+    addMod("curse.maven:sodium-394468:${rootProject.sodium_version}", rootProject.enable_sodium)
     implementation "org.joml:joml:1.10.2"
 
     // Lithium
-//    modImplementation "maven.modrinth:lithium:${rootProject.lithium_version}"
+    addMod("maven.modrinth:lithium:${rootProject.lithium_version}", rootProject.enable_lithium)
 
     // Iris
-//    modImplementation "maven.modrinth:iris:${rootProject.iris_version}"
+    addMod("maven.modrinth:iris:${rootProject.iris_version}", rootProject.enable_iris)
 
     // Immersive Portals
     /*
@@ -105,35 +111,8 @@ runClient {
     finalizedBy(deleteResources)
 }
 
-// Put stuff from gradle.properties into the mod info stuff
-def resourceTargets = ["fabric.mod.json"]
-def intoTargets = ["$buildDir/resources/main/"]
-def replaceProperties = [
-        version: mod_version,
-        mod_name: mod_name,
-        authors: mod_authors,
-        description: mod_description
-]
-
 processResources {
     dependsOn(copyAccessWidener)
-    inputs.properties replaceProperties
-    replaceProperties.put 'project', project
-    filesMatching(resourceTargets) {
-        expand replaceProperties
-    }
-
-    intoTargets.each { target ->
-        if (file(target).exists()) {
-            copy {
-                from(sourceSets.main.resources) {
-                    include resourceTargets
-                    expand replaceProperties
-                }
-                into target
-            }
-        }
-    }
 }
 
 shadowJar {

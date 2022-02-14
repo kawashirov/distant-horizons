@@ -19,6 +19,13 @@ architectury {
     forge()
 }
 
+def addMod(path, enabled) {
+    if (enabled == "2")
+        dependencies { modImplementation(path) }
+    else if (enabled == "1")
+        dependencies { modCompileOnly(path) }
+}
+
 configurations {
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
@@ -33,7 +40,7 @@ dependencies {
     shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
     // Starlight
-//    modImplementation("curse.maven:starlight-forge-526854:${rootProject.starlight_version_forge}")
+    addMod("curse.maven:starlight-forge-526854:${rootProject.starlight_version_forge}", rootProject.enable_starlight_forge)
 
 //    forgeDependencies(project(":core")) { transitive false }
 
@@ -57,36 +64,9 @@ task copyCommonResources(type: Copy) {
     into file("build/resources/main")
 }
 
-// Put stuff from gradle.properties into the mod info stuff
-def resourceTargets = ["META-INF/mods.toml"]
-def intoTargets = ["$buildDir/resources/main/"]
-def replaceProperties = [
-        version: mod_version,
-        mod_name: mod_name,
-        authors: mod_authors,
-        description: mod_description
-]
-
 processResources {
     dependsOn(copyCoreResources)
     dependsOn(copyCommonResources)
-    inputs.properties replaceProperties
-    replaceProperties.put 'project', project
-    filesMatching(resourceTargets) {
-        expand replaceProperties
-    }
-
-    intoTargets.each { target ->
-        if (file(target).exists()) {
-            copy {
-                from(sourceSets.main.resources) {
-                    include resourceTargets
-                    expand replaceProperties
-                }
-                into target
-            }
-        }
-    }
 }
 
 shadowJar {
