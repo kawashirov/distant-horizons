@@ -217,7 +217,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
 
         this.foliageTint = leavesInstance() && toTint;
 
-        this.waterTint = waterIstance() && toTint;
+        this.waterTint = waterIstance();
         
         //hardcoded leaves
         if (block == Blocks.SPRUCE_LEAVES)
