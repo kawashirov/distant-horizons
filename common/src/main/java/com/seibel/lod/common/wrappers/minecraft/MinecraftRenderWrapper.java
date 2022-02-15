@@ -178,7 +178,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 			} catch (LinkageError e) {
 				try {
 					MinecraftWrapper.INSTANCE.sendChatMessage(
-							"\u00A7e\u00A7l\u00A7uWRANING: Distant Horizons: getVanillaRenderedChunks method failed."
+							"\u00A7e\u00A7l\u00A7uWARNING: Distant Horizons: getVanillaRenderedChunks method failed."
 							+ " Using Backup Method.");
 					MinecraftWrapper.INSTANCE.sendChatMessage(
 							"\u00A7eOverdraw prevention will be worse than normal.");
