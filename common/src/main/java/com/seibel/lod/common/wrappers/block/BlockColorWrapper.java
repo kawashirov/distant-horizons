@@ -181,9 +181,9 @@ public class BlockColorWrapper implements IBlockColorWrapper
                     // add to the running averages
                     count += colorMultiplier;
                     alpha += ColorUtil.getAlpha(tempColor) * ColorUtil.getAlpha(tempColor) * colorMultiplier;
-                    red += ColorUtil.getBlue(tempColor) * ColorUtil.getAlpha(tempColor) * colorMultiplier;
-                    green += ColorUtil.getGreen(tempColor) * ColorUtil.getAlpha(tempColor) * colorMultiplier;
-                    blue += ColorUtil.getRed(tempColor) * ColorUtil.getAlpha(tempColor) * colorMultiplier;
+                    red += ColorUtil.getBlue(tempColor) * ColorUtil.getBlue(tempColor) * colorMultiplier;
+                    green += ColorUtil.getGreen(tempColor) * ColorUtil.getGreen(tempColor) * colorMultiplier;
+                    blue += ColorUtil.getRed(tempColor) * ColorUtil.getRed(tempColor) * colorMultiplier;
                 }
             }
         }
