@@ -15,13 +15,7 @@ import com.seibel.lod.core.wrapperInterfaces.block.IBlockColorWrapper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.BushBlock;
-import net.minecraft.world.level.block.FlowerBlock;
-import net.minecraft.world.level.block.GrassBlock;
-import net.minecraft.world.level.block.LeavesBlock;
-import net.minecraft.world.level.block.TallGrassBlock;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 
 
@@ -127,7 +121,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
         for (Direction direction : directions)
         {
             quads = mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random);
-            if (!quads.isEmpty())
+            if (!quads.isEmpty() && !(block instanceof RotatedPillarBlock && direction == Direction.UP))
                 break;
         }
 
@@ -175,7 +169,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
                     {
                         // determine if this pixel is gray
                         int colorMax = Math.max(Math.max(ColorUtil.getBlue(tempColor), ColorUtil.getGreen(tempColor)), ColorUtil.getRed(tempColor));
-                        int colorMin = 4 + Math.min(Math.min(ColorUtil.getBlue(tempColor), ColorUtil.getGreen(tempColor)), ColorUtil.getRed(tempColor));
+                        int colorMin = 16 + Math.min(Math.min(ColorUtil.getBlue(tempColor), ColorUtil.getGreen(tempColor)), ColorUtil.getRed(tempColor));
                         boolean isGray = colorMax < colorMin;
                         if (isGray)
                             numberOfGreyPixel++;
@@ -191,10 +185,10 @@ public class BlockColorWrapper implements IBlockColorWrapper
 
                     // add to the running averages
                     count += colorMultiplier;
-                    alpha += ColorUtil.getAlpha(tempColor) * colorMultiplier;
-                    red += ColorUtil.getBlue(tempColor) * colorMultiplier;
-                    green += ColorUtil.getGreen(tempColor) * colorMultiplier;
-                    blue += ColorUtil.getRed(tempColor) * colorMultiplier;
+                    alpha += ColorUtil.getAlpha(tempColor) * ColorUtil.getAlpha(tempColor) * colorMultiplier;
+                    red += ColorUtil.getBlue(tempColor) * ColorUtil.getBlue(tempColor) * colorMultiplier;
+                    green += ColorUtil.getGreen(tempColor) * ColorUtil.getGreen(tempColor) * colorMultiplier;
+                    blue += ColorUtil.getRed(tempColor) * ColorUtil.getRed(tempColor) * colorMultiplier;
                 }
             }
         }
@@ -206,11 +200,11 @@ public class BlockColorWrapper implements IBlockColorWrapper
         else
         {
             // determine the average color
-            alpha /= count;
-            red /= count;
-            green /= count;
-            blue /= count;
-            tempColor = ColorUtil.rgbToInt(alpha, red, green, blue);
+            tempColor = ColorUtil.rgbToInt(
+                    (int) Math.sqrt(alpha / count),
+                    (int) Math.sqrt(red / count),
+                    (int) Math.sqrt(green / count),
+                    (int) Math.sqrt(blue / count));
         }
 
         // determine if this block should use the biome color tint
@@ -222,7 +216,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
 
         this.foliageTint = leavesInstance() && toTint;
 
-        this.waterTint = waterIstance() && toTint;
+        this.waterTint = waterIstance() ;
 
         //hardcoded leaves
         if (block == Blocks.SPRUCE_LEAVES)
