@@ -146,7 +146,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
 
         // generate the block's color
 //        for (int frameIndex = 0; frameIndex < texture.getFrameCount(); frameIndex++)
-        boolean lookForTint = grassInstance() || leavesInstance() || waterIstance();
+        boolean lookForTint = grassInstance() || leavesInstance() || waterInstance();
     
         int frameIndex = 0; // TODO
         {
@@ -164,7 +164,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
                     {
                         // determine if this pixel is gray
                         int colorMax = Math.max(Math.max(ColorUtil.getBlue(tempColor), ColorUtil.getGreen(tempColor)), ColorUtil.getRed(tempColor));
-                        int colorMin = 4 + Math.min(Math.min(ColorUtil.getBlue(tempColor), ColorUtil.getGreen(tempColor)), ColorUtil.getRed(tempColor));
+                        int colorMin = 16 + Math.min(Math.min(ColorUtil.getBlue(tempColor), ColorUtil.getGreen(tempColor)), ColorUtil.getRed(tempColor));
                         boolean isGray = colorMax < colorMin;
                         if (isGray)
                             numberOfGreyPixel++;
@@ -180,10 +180,10 @@ public class BlockColorWrapper implements IBlockColorWrapper
 
                     // add to the running averages
                     count += colorMultiplier;
-                    alpha += ColorUtil.getAlpha(tempColor) * colorMultiplier;
-                    red += ColorUtil.getBlue(tempColor) * colorMultiplier;
-                    green += ColorUtil.getGreen(tempColor) * colorMultiplier;
-                    blue += ColorUtil.getRed(tempColor) * colorMultiplier;
+                    alpha += ColorUtil.getAlpha(tempColor) * ColorUtil.getAlpha(tempColor) * colorMultiplier;
+                    red += ColorUtil.getBlue(tempColor) * ColorUtil.getAlpha(tempColor) * colorMultiplier;
+                    green += ColorUtil.getGreen(tempColor) * ColorUtil.getAlpha(tempColor) * colorMultiplier;
+                    blue += ColorUtil.getRed(tempColor) * ColorUtil.getAlpha(tempColor) * colorMultiplier;
                 }
             }
         }
@@ -195,11 +195,11 @@ public class BlockColorWrapper implements IBlockColorWrapper
         else
         {
             // determine the average color
-            alpha /= count;
-            red /= count;
-            green /= count;
-            blue /= count;
-            tempColor = ColorUtil.rgbToInt(alpha, red, green, blue);
+            tempColor = ColorUtil.rgbToInt(
+                    (int) Math.sqrt(alpha / count),
+                    (int) Math.sqrt(red / count),
+                    (int) Math.sqrt(green / count),
+                    (int) Math.sqrt(blue / count));
         }
 
         // determine if this block should use the biome color tint
@@ -211,7 +211,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
 
         this.foliageTint = leavesInstance() && toTint;
 
-        this.waterTint = waterIstance();
+        this.waterTint = waterInstance();
         
         //hardcoded leaves
         if (block == Blocks.SPRUCE_LEAVES)
@@ -242,7 +242,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
     }
 
     /** determine if the given block should use the biome's foliage color */
-    private boolean waterIstance()
+    private boolean waterInstance()
     {
         return block == Blocks.WATER;
     }
