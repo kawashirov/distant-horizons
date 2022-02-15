@@ -8,9 +8,9 @@
   "authors": ["${authors}"],
 
   "contact": {
-    "homepage": "https://www.curseforge.com/minecraft/mc-mods/lod-level-of-detail",
-    "sources": "https://gitlab.com/jeseibel/minecraft-lod-mod/",
-    "issues": "https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues"
+    "homepage": "${homepage}",
+    "sources": "${source}",
+    "issues": "${issues}"
   },
 
   "license": "CC0-1.0",

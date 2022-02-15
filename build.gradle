@@ -98,6 +98,39 @@ allprojects {
         }
     }
 
+    // Put stuff from gradle.properties into the mod info
+    processResources {
+        def resourceTargets = ["fabric.mod.json", "META-INF/mods.toml"] // Location of where to put
+        def intoTargets = ["$buildDir/resources/main/"] // Location of the built resources folder
+        def replaceProperties = [
+                version: mod_version,
+                mod_name: mod_name,
+                authors: mod_authors,
+                description: mod_description,
+                homepage: mod_homepage,
+                source: mod_source,
+                issues: mod_issues
+        ]   // The left side is what gets replaced in the mod info and the right side is where to get it from in the gradle.properties
+
+        inputs.properties replaceProperties
+        replaceProperties.put 'project', project
+        filesMatching(resourceTargets) {
+            expand replaceProperties
+        }
+
+        intoTargets.each { target ->
+            if (file(target).exists()) {
+                copy {
+                    from(sourceSets.main.resources) {
+                        include resourceTargets
+                        expand replaceProperties
+                    }
+                    into target
+                }
+            }
+        }
+    }
+
     tasks.withType(JavaCompile) {
         options.encoding = "UTF-8"
 
