@@ -27,7 +27,7 @@ This version has been confirmed to work in Eclipse and Retail Minecraft.\
 (Retail running forge version 1.18.1-39.0.5 and fabric version 1.18-0.12.12 and 1.18.1-0.12.12)
 
 
-## source code installation
+## Source Code Installation
 
 See the Fabric Documentation online for more detailed instructions:\
 https://fabricmc.net/wiki/tutorial:setup
