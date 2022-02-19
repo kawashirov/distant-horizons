@@ -4,5 +4,6 @@ package com.seibel.lod.common.networking;
  * @author Ran
  */
 public interface NetworkInterface {
-    void register();
+    void register_Client();
+    void register_Server();
 }

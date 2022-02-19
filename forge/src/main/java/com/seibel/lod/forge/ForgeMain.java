@@ -73,7 +73,7 @@ public class ForgeMain implements LodForgeMethodCaller
 	{
 		// make sure the dependencies are set up before the mod needs them
 		LodCommonMain.initConfig();
-		LodCommonMain.startup(this, !FMLLoader.getDist().isClient());
+		LodCommonMain.startup(this, !FMLLoader.getDist().isClient(), new NetworkHandler());
 		ForgeDependencySetup.createInitialBindings();
 		ClientApi.LOGGER.info("Distant Horizons initializing...");
 		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
@@ -82,18 +82,12 @@ public class ForgeMain implements LodForgeMethodCaller
 			ModAccessorApi.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
 	}
-
-	private void initServer(final FMLDedicatedServerSetupEvent event) {
-		LodCommonMain.registerNetworking(new NetworkHandler());
-	}
-	
 	
 	public ForgeMain()
 	{
 		// Register the methods for server and other game events we are interested in
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::init);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientStart);
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::initServer);
 	}
 
 	private void onClientStart(final FMLClientSetupEvent event)
