@@ -146,7 +146,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
 
         // generate the block's color
 //        for (int frameIndex = 0; frameIndex < texture.getFrameCount(); frameIndex++)
-        boolean lookForTint = grassInstance() || leavesInstance() || waterInstance();
+        boolean lookForTint = grassInstance() || leavesInstance();
     
         int frameIndex = 0; // TODO
         {
@@ -204,6 +204,8 @@ public class BlockColorWrapper implements IBlockColorWrapper
 
         // determine if this block should use the biome color tint
         if (lookForTint && (float) numberOfGreyPixel / count > 0.75f)
+            this.toTint = true;
+        if (waterInstance())
             this.toTint = true;
 
         // we check which kind of tint we need to apply
