@@ -6,7 +6,6 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
 import com.seibel.lod.core.util.ColorUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
@@ -150,7 +149,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
         // generate the block's color
 //        for (int frameIndex = 0; frameIndex < texture.getFrameCount(); frameIndex++)
         boolean lookForTint = false;
-        if (grassInstance() || leavesInstance() || waterIstance())
+        if (grassInstance() || leavesInstance())
             lookForTint = true;
 
         // generate the block's color
@@ -209,7 +208,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
         }
 
         // determine if this block should use the biome color tint
-        if (lookForTint && (float) numberOfGreyPixel / count > 0.75f)
+        if ((lookForTint && (float) numberOfGreyPixel / count > 0.75f) || waterInstance())
             this.toTint = true;
 
         // we check which kind of tint we need to apply
@@ -217,7 +216,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
 
         this.foliageTint = leavesInstance() && toTint;
 
-        this.waterTint = waterIstance();
+        this.waterTint = waterInstance();
 
         //hardcoded leaves
         if (block == Blocks.SPRUCE_LEAVES)
@@ -248,7 +247,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
     }
 
     /** determine if the given block should use the biome's foliage color */
-    private boolean waterIstance()
+    private boolean waterInstance()
     {
         return block == Blocks.WATER;
     }
