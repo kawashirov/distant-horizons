@@ -148,7 +148,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
 
         // generate the block's color
 //        for (int frameIndex = 0; frameIndex < texture.getFrameCount(); frameIndex++)
-        boolean lookForTint = grassInstance() || leavesInstance() || waterIstance();
+        boolean lookForTint = grassInstance() || leavesInstance();
     
         int frameIndex = 0; // TODO
         {
@@ -210,13 +210,15 @@ public class BlockColorWrapper implements IBlockColorWrapper
         // determine if this block should use the biome color tint
         if (lookForTint && (float) numberOfGreyPixel / count > 0.75f)
             this.toTint = true;
+        if (waterInstance())
+            this.toTint = true;
 
         // we check which kind of tint we need to apply
         this.grassTint = grassInstance() && toTint;
 
         this.foliageTint = leavesInstance() && toTint;
 
-        this.waterTint = waterIstance() ;
+        this.waterTint = waterInstance() ;
 
         //hardcoded leaves
         if (block == Blocks.SPRUCE_LEAVES)
@@ -247,7 +249,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
     }
 
     /** determine if the given block should use the biome's foliage color */
-    private boolean waterIstance()
+    private boolean waterInstance()
     {
         return block == Blocks.WATER;
     }
