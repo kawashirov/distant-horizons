@@ -2,7 +2,6 @@ package com.seibel.lod.forge.wrappers;
 
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.wrappers.config.LodConfigWrapperSingleton;
-import com.seibel.lod.common.wrappers.config.NewLodConfigWrapperSingleton;
 import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 
@@ -20,9 +19,6 @@ public class ForgeDependencySetup
 {
 	public static void createInitialBindings()
 	{
-		if (!LodCommonMain.IsNewConfig)
-			SingletonHandler.bind(ILodConfigWrapperSingleton.class, LodConfigWrapperSingleton.INSTANCE);
-		else
-			SingletonHandler.bind(ILodConfigWrapperSingleton.class, NewLodConfigWrapperSingleton.INSTANCE);
+		SingletonHandler.bind(ILodConfigWrapperSingleton.class, LodConfigWrapperSingleton.INSTANCE);
 	}
 }
