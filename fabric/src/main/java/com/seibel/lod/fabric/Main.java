@@ -28,6 +28,7 @@ import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
+import com.seibel.lod.fabric.networking.NetworkHandler;
 import com.seibel.lod.fabric.wrappers.modAccessor.ModChecker;
 import com.seibel.lod.fabric.wrappers.modAccessor.OptifineAccessor;
 import com.seibel.lod.fabric.wrappers.modAccessor.SodiumAccessor;
@@ -86,6 +87,7 @@ public class Main implements ClientModInitializer
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(null, true);
 		DependencySetup.createInitialBindings();
+		LodCommonMain.registerNetworking(new NetworkHandler());
 		ClientApi.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 	}
 }

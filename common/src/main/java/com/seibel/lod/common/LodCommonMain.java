@@ -32,5 +32,6 @@ public class LodCommonMain {
 
     public static void registerNetworking(NetworkInterface networkInterface) {
         LodCommonMain.networkInterface = networkInterface;
+        networkInterface.register();
     }
 }

@@ -4,12 +4,26 @@
 	"package": "com.seibel.lod.forge.mixins",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"MixinUtilBackgroudThread"
+		"MixinUtilBackgroudThread",
+		"fabric.mixin.networking.ClientConnectionMixin",
+		"fabric.mixin.networking.EntityTrackerEntryMixin",
+		"fabric.mixin.networking.PlayerManagerMixin",
+		"fabric.mixin.networking.ServerLoginNetworkHandlerMixin",
+		"fabric.mixin.networking.ServerPlayNetworkHandlerMixin",
+		"fabric.mixin.networking.accessor.ConnectScreenAccessor",
+		"fabric.mixin.networking.accessor.ServerLoginNetworkHandlerAccessor",
+		"fabric.mixin.networking.accessor.ThreadedAnvilChunkStorageAccessor",
+		"fabric.mixin.networking.accessor.CustomPayloadC2SPacketAccessor",
+		"fabric.mixin.networking.accessor.EntityTrackerAccessor"
 	],
 	"client": [
 		"MixinOptionsScreen",
 		"MixinWorldRenderer",
-		"MixinFogRenderer"
+		"MixinFogRenderer",
+		"fabric.mixin.networking.accessor.ConnectScreenAccessor",
+		"fabric.mixin.networking.accessor.MinecraftClientAccessor",
+		"fabric.mixin.networking.client.ClientLoginNetworkHandlerMixin",
+		"fabric.mixin.networking.client.ClientPlayNetworkHandlerMixin"
 	],
 	"server": []
 }

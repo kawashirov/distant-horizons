@@ -30,6 +30,7 @@ import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
+import com.seibel.lod.forge.networking.NetworkHandler;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
 
 import com.seibel.lod.forge.wrappers.modAccessor.ModChecker;
@@ -47,6 +48,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.forgespi.language.IModInfo;
@@ -80,18 +82,20 @@ public class ForgeMain implements LodForgeMethodCaller
 			ModAccessorApi.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
 	}
+
+	private void initServer(final FMLDedicatedServerSetupEvent event) {
+		LodCommonMain.registerNetworking(new NetworkHandler());
+	}
 	
 	
 	public ForgeMain()
 	{
-		// Register the methods
+		// Register the methods for server and other game events we are interested in
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::init);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientStart);
-		
-		// Register ourselves for server and other game events we are interested in
-		MinecraftForge.EVENT_BUS.register(this);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::initServer);
 	}
-	
+
 	private void onClientStart(final FMLClientSetupEvent event)
 	{
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,

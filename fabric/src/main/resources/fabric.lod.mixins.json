@@ -17,7 +17,9 @@
     "events.MixinMinecraft",
     "events.MixinBlockUpdate"
   ],
-  "server": [],
+  "server": [
+    "MixinDedicatedServer"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
