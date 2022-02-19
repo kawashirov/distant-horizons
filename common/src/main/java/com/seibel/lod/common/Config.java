@@ -19,7 +19,6 @@
 
 package com.seibel.lod.common;
 
-import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.core.config.*;
 import com.seibel.lod.core.enums.config.*;
 import com.seibel.lod.core.enums.rendering.*;
@@ -33,7 +32,7 @@ import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.I
  * @author coolGi2007
  * @version 12-12-2021
  */
-public class OldConfig
+public class Config
 //public class Config extends TinyConfig
 {
 	// CONFIG STRUCTURE

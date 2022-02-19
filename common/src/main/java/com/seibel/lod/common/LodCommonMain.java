@@ -4,8 +4,6 @@ import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.networking.NetworkInterface;
 import com.seibel.lod.common.wrappers.DependencySetup;
 import com.seibel.lod.common.wrappers.config.ConfigGui;
-import com.seibel.lod.core.Config;
-import com.seibel.lod.core.config.ConfigBase;
 
 /**
  * This is the common main class
@@ -16,8 +14,6 @@ public class LodCommonMain {
     public static boolean serverSided;
     public static LodForgeMethodCaller forgeMethodCaller;
     public static NetworkInterface networkInterface;
-
-    public static final boolean IsNewConfig = false;
 
     public static void startup(LodForgeMethodCaller caller, boolean serverSided) {
         LodCommonMain.serverSided = serverSided;
@@ -31,8 +27,7 @@ public class LodCommonMain {
 
 
     public static void initConfig() {
-        if (!IsNewConfig)
-            ConfigGui.init(OldConfig.class);
+        ConfigGui.init(Config.class);
     }
 
     public static void registerNetworking(NetworkInterface networkInterface) {

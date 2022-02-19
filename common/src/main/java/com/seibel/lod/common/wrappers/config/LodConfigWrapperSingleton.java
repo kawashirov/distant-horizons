@@ -3,7 +3,7 @@ package com.seibel.lod.common.wrappers.config;
 import com.seibel.lod.core.enums.config.*;
 import com.seibel.lod.core.enums.rendering.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
-import com.seibel.lod.common.OldConfig;
+import com.seibel.lod.common.Config;
 
 /**
  * This holds the config defaults and setters/getters
@@ -53,7 +53,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 		@Override
 		public boolean getOptionsButton()
 		{
-			return OldConfig.optionsButton;
+			return Config.optionsButton;
 		}
 		@Override
 		public void setOptionsButton(boolean newOptionsButton)
@@ -117,7 +117,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public HorizontalResolution getDrawResolution()
 				{
-					return OldConfig.Client.Graphics.Quality.drawResolution;
+					return Config.Client.Graphics.Quality.drawResolution;
 				}
 				@Override
 				public void setDrawResolution(HorizontalResolution newHorizontalResolution)
@@ -130,7 +130,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public int getLodChunkRenderDistance()
 				{
-					return OldConfig.Client.Graphics.Quality.lodChunkRenderDistance;
+					return Config.Client.Graphics.Quality.lodChunkRenderDistance;
 				}
 				@Override
 				public void setLodChunkRenderDistance(int newLodChunkRenderDistance)
@@ -143,7 +143,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public VerticalQuality getVerticalQuality()
 				{
-					return OldConfig.Client.Graphics.Quality.verticalQuality;
+					return Config.Client.Graphics.Quality.verticalQuality;
 				}
 				@Override
 				public void setVerticalQuality(VerticalQuality newVerticalQuality)
@@ -156,7 +156,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public int getHorizontalScale()
 				{
-					return OldConfig.Client.Graphics.Quality.horizontalScale;
+					return Config.Client.Graphics.Quality.horizontalScale;
 				}
 				@Override
 				public void setHorizontalScale(int newHorizontalScale)
@@ -169,7 +169,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public HorizontalQuality getHorizontalQuality()
 				{
-					return OldConfig.Client.Graphics.Quality.horizontalQuality;
+					return Config.Client.Graphics.Quality.horizontalQuality;
 				}
 				@Override
 				public void setHorizontalQuality(HorizontalQuality newHorizontalQuality)
@@ -180,7 +180,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				
 				@Override
 				public DropoffQuality getDropoffQuality() {
-					return OldConfig.Client.Graphics.Quality.dropoffQuality;
+					return Config.Client.Graphics.Quality.dropoffQuality;
 				}
 				@Override
 				public void setDropoffQuality(DropoffQuality newDropoffQuality) {
@@ -195,7 +195,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public FogDistance getFogDistance()
 				{
-					return OldConfig.Client.Graphics.FogQuality.fogDistance;
+					return Config.Client.Graphics.FogQuality.fogDistance;
 				}
 				@Override
 				public void setFogDistance(FogDistance newFogDistance)
@@ -208,7 +208,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public FogDrawMode getFogDrawMode()
 				{
-					return OldConfig.Client.Graphics.FogQuality.fogDrawMode;
+					return Config.Client.Graphics.FogQuality.fogDrawMode;
 				}
 
 				@Override
@@ -222,7 +222,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public FogColorMode getFogColorMode()
 				{
-					return OldConfig.Client.Graphics.FogQuality.fogColorMode;
+					return Config.Client.Graphics.FogQuality.fogColorMode;
 				}
 
 				@Override
@@ -236,7 +236,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public boolean getDisableVanillaFog()
 				{
-					return OldConfig.Client.Graphics.FogQuality.disableVanillaFog;
+					return Config.Client.Graphics.FogQuality.disableVanillaFog;
 				}
 				@Override
 				public void setDisableVanillaFog(boolean newDisableVanillaFog)
@@ -252,7 +252,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public boolean getDisableDirectionalCulling()
 				{
-					return OldConfig.Client.Graphics.AdvancedGraphics.disableDirectionalCulling;
+					return Config.Client.Graphics.AdvancedGraphics.disableDirectionalCulling;
 				}
 				@Override
 				public void setDisableDirectionalCulling(boolean newDisableDirectionalCulling)
@@ -265,7 +265,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public VanillaOverdraw getVanillaOverdraw()
 				{
-					return OldConfig.Client.Graphics.AdvancedGraphics.vanillaOverdraw;
+					return Config.Client.Graphics.AdvancedGraphics.vanillaOverdraw;
 				}
 				@Override
 				public void setVanillaOverdraw(VanillaOverdraw newVanillaOverdraw)
@@ -277,7 +277,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public int getBacksideCullingRange()
 				{
-					return OldConfig.Client.Graphics.AdvancedGraphics.backsideCullingRange;
+					return Config.Client.Graphics.AdvancedGraphics.backsideCullingRange;
 				}
 				@Override
 				public void setBacksideCullingRange(int newBacksideCullingRange)
@@ -289,7 +289,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public boolean getUseExtendedNearClipPlane()
 				{
-					return OldConfig.Client.Graphics.AdvancedGraphics.useExtendedNearClipPlane;
+					return Config.Client.Graphics.AdvancedGraphics.useExtendedNearClipPlane;
 				}
 				@Override
 				public void setUseExtendedNearClipPlane(boolean newUseExtendedNearClipPlane)
@@ -311,7 +311,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			@Override
 			public GenerationPriority getGenerationPriority()
 			{
-				return OldConfig.Client.WorldGenerator.generationPriority;
+				return Config.Client.WorldGenerator.generationPriority;
 			}
 			@Override
 			public void setGenerationPriority(GenerationPriority newGenerationPriority)
@@ -324,7 +324,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			@Override
 			public DistanceGenerationMode getDistanceGenerationMode()
 			{
-				return OldConfig.Client.WorldGenerator.distanceGenerationMode;
+				return Config.Client.WorldGenerator.distanceGenerationMode;
 			}
 			@Override
 			public void setDistanceGenerationMode(DistanceGenerationMode newDistanceGenerationMode)
@@ -337,7 +337,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			@Override
 			public boolean getAllowUnstableFeatureGeneration()
 			{
-				return OldConfig.Client.WorldGenerator.allowUnstableFeatureGeneration;
+				return Config.Client.WorldGenerator.allowUnstableFeatureGeneration;
 			}
 			@Override
 			public void setAllowUnstableFeatureGeneration(boolean newAllowUnstableFeatureGeneration)
@@ -350,7 +350,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			@Override
 			public BlocksToAvoid getBlocksToAvoid()
 			{
-				return OldConfig.Client.WorldGenerator.blocksToAvoid;
+				return Config.Client.WorldGenerator.blocksToAvoid;
 			}
 			@Override
 			public void setBlockToAvoid(BlocksToAvoid newBlockToAvoid)
@@ -372,7 +372,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			@Override
 			public LightGenerationMode getLightGenerationMode()
 			{
-				return OldConfig.Client.WorldGenerator.lightGenerationMode;
+				return Config.Client.WorldGenerator.lightGenerationMode;
 			}
 			@Override
 			public void setLightGenerationMode(LightGenerationMode newLightGenerationMode)
@@ -428,7 +428,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public int getNumberOfWorldGenerationThreads()
 				{
-					return OldConfig.Client.Advanced.Threading.numberOfWorldGenerationThreads;
+					return Config.Client.Advanced.Threading.numberOfWorldGenerationThreads;
 				}
 				@Override
 				public void setNumberOfWorldGenerationThreads(int newNumberOfWorldGenerationThreads)
@@ -441,7 +441,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public int getNumberOfBufferBuilderThreads()
 				{
-					return OldConfig.Client.Advanced.Threading.numberOfBufferBuilderThreads;
+					return Config.Client.Advanced.Threading.numberOfBufferBuilderThreads;
 				}
 				@Override
 				public void setNumberOfBufferBuilderThreads(int newNumberOfWorldBuilderThreads)
@@ -505,7 +505,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public GpuUploadMethod getGpuUploadMethod()
 				{
-					return OldConfig.Client.Advanced.Buffers.gpuUploadMethod;
+					return Config.Client.Advanced.Buffers.gpuUploadMethod;
 				}
 				@Override
 				public void setGpuUploadMethod(GpuUploadMethod newDisableVanillaFog)
@@ -518,7 +518,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public int getGpuUploadPerMegabyteInMilliseconds()
 				{
-					return OldConfig.Client.Advanced.Buffers.gpuUploadPerMegabyteInMilliseconds;
+					return Config.Client.Advanced.Buffers.gpuUploadPerMegabyteInMilliseconds;
 				}
 				@Override
 				public void setGpuUploadPerMegabyteInMilliseconds(int newMilliseconds) {
@@ -530,7 +530,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public BufferRebuildTimes getRebuildTimes()
 				{
-					return OldConfig.Client.Advanced.Buffers.rebuildTimes;
+					return Config.Client.Advanced.Buffers.rebuildTimes;
 				}
 				@Override
 				public void setRebuildTimes(BufferRebuildTimes newBufferRebuildTimes)
