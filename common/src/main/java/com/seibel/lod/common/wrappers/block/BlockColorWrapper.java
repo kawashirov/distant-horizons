@@ -203,9 +203,7 @@ public class BlockColorWrapper implements IBlockColorWrapper
         }
 
         // determine if this block should use the biome color tint
-        if (lookForTint && (float) numberOfGreyPixel / count > 0.75f)
-            this.toTint = true;
-        if (waterInstance())
+        if ((lookForTint && (float) numberOfGreyPixel / count > 0.75f) || waterInstance())
             this.toTint = true;
 
         // we check which kind of tint we need to apply
