@@ -55,7 +55,7 @@ subprojects { p ->
         manifest {
             attributes 'Implementation-Title': rootProject.archives_base_name,
                     'Implementation-Version': rootProject.mod_version,
-                    'Main-Class': 'com.seibel.lod.core.RunMain'
+                    'Main-Class': 'com.seibel.lod.core.JarMain'
         }
     }
 }
