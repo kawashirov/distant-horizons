@@ -1,6 +1,6 @@
 # <img src="https://gitlab.com/jeseibel/distant-horizons-core/-/raw/main/_logo%20files/LOD%20logo%20flat%20-%20with%20boarder.png" width="32"> Distant Horizons
 
-> A mod adding a Level of Detail System to Minecraft
+> A mod that add a Level of Detail System to Minecraft
 
 
 # What is Distant Horizons?
