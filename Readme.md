@@ -1,4 +1,9 @@
-# Distant Horizons
+# <img src="https://gitlab.com/jeseibel/distant-horizons-core/-/raw/main/_logo%20files/LOD%20logo%20flat%20-%20with%20boarder.png" width="32"> Distant Horizons
+
+> A mod that adds a Level of Detail System to Minecraft
+
+
+# What is Distant Horizons?
 
 This mod adds a Level Of Detail (LOD) system to Minecraft.\
 This implementation renders simplified chunks outside the normal render distance\
@@ -10,12 +15,11 @@ If you want to see a quick demo, check out a video covering the mod here:
 <a href="https://www.youtube.com/watch?v=H2tnvEVbO1c" target="_blank">![Minecraft Level Of Detail (LOD) mod - Alpha 1.5](https://i.ytimg.com/vi_webp/H2tnvEVbO1c/mqdefault.webp)</a>
 
 Architectury version: 3.4-SNAPSHOT\
-Forge version: 36.1.0\
-Fabric version: 0.12.3\
-Fabric API version: 0.34.2+1.16
+Forge version: 36.2.28\
+Fabric version: 0.13.2\
+Fabric API version: 0.42.0+1.16
 
-Modmenu version: 1.16.22\
-Sodium version: mc1.16.5-0.2.0
+Modmenu version: 1.16.22
 
 Notes:\
 This version has been confirmed to work in Eclipse and Retail Minecraft.\
