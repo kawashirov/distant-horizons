@@ -4,6 +4,7 @@ package com.seibel.lod.common.wrappers.worldGeneration.mimicObject;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
+import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.api.ClientApi;
 
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
@@ -49,7 +50,7 @@ import org.apache.logging.log4j.Logger;
 public class ChunkLoader
 {
 	private static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codec(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES, Blocks.AIR.defaultBlockState());
-	private static final Logger LOGGER = ClientApi.LOGGER;
+	private static final Logger LOGGER = ApiShared.LOGGER;
 	private static final String TAG_UPGRADE_DATA = "UpgradeData";
 	private static final String BLOCK_TICKS_TAG = "block_ticks";
 	private static final String FLUID_TICKS_TAG = "fluid_ticks";

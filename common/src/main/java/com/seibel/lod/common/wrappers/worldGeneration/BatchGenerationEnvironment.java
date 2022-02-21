@@ -19,6 +19,7 @@
 
 package com.seibel.lod.common.wrappers.worldGeneration;
 
+import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
@@ -251,7 +252,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		if (!unsafeThreadingRecorded && !f.isDone()) {
 			MC.sendChatMessage("\u00A74\u00A7l\u00A7uERROR: Distant Horizons: Unsafe Threading in Chunk Generator Detected!");
 			MC.sendChatMessage("\u00A7eTo increase stability, it is recommended to set world generation threads count to 1.");
-			ClientApi.LOGGER.error("Unsafe Threading in Chunk Generator: ", new RuntimeException("Concurrent future"));
+			ApiShared.LOGGER.error("Unsafe Threading in Chunk Generator: ", new RuntimeException("Concurrent future"));
 			unsafeThreadingRecorded = true;
 		}
 		return f.join();
@@ -300,8 +301,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				}
 				catch (Throwable e)
 				{
-					ClientApi.LOGGER.error("Batching World Generator: Event {} gotten an exception", event);
-					ClientApi.LOGGER.error("Exception: ", e);
+					ApiShared.LOGGER.error("Batching World Generator: Event {} gotten an exception", event);
+					ApiShared.LOGGER.error("Exception: ", e);
 					unknownExceptionCount++;
 					lastExceptionTriggerTime = System.nanoTime();
 				}
@@ -312,12 +313,12 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			else if (event.hasTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS))
 			{
-				ClientApi.LOGGER.error("Batching World Generator: " + event + " timed out and terminated!");
-				ClientApi.LOGGER.info("Dump PrefEvent: " + event.pEvent);
+				ApiShared.LOGGER.error("Batching World Generator: " + event + " timed out and terminated!");
+				ApiShared.LOGGER.info("Dump PrefEvent: " + event.pEvent);
 				try
 				{
 					if (!event.terminate())
-						ClientApi.LOGGER.error("Failed to terminate the stuck generation event!");
+						ApiShared.LOGGER.error("Failed to terminate the stuck generation event!");
 				}
 				finally
 				{
@@ -329,7 +330,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			try {
 				MC.sendChatMessage("\u00A74\u00A7l\u00A7uERROR: Distant Horizons: Too many exceptions in Batching World Generator! Disabling the generator.");
 			} catch (Exception e) {}
-			ClientApi.LOGGER.error("Too many exceptions in Batching World Generator! Now disabling.");
+			ApiShared.LOGGER.error("Too many exceptions in Batching World Generator! Now disabling.");
 			unknownExceptionCount = 0;
 			CONFIG.client().worldGenerator().setEnableDistantGeneration(false);
 		}
@@ -338,14 +339,14 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	public BatchGenerationEnvironment(IWorldWrapper serverlevel, LodBuilder lodBuilder, LodDimension lodDim)
 	{
 		super(serverlevel, lodBuilder, lodDim);
-		ClientApi.LOGGER.info("================WORLD_GEN_STEP_INITING=============");
+		ApiShared.LOGGER.info("================WORLD_GEN_STEP_INITING=============");
 		ChunkGenerator generator =  ((WorldWrapper) serverlevel).getServerWorld().getChunkSource().getGenerator();
 		if (!(generator instanceof NoiseBasedChunkGenerator ||
 				generator instanceof DebugLevelSource ||
 				generator instanceof FlatLevelSource)) {
 			MC.sendChatMessage("\u00A74\u00A7l\u00A7uWARNING: Distant Horizons: Unknown Chunk Generator Detected! Distant Generation May Fail!");
 			MC.sendChatMessage("\u00A7eIf it does crash, set Distant Generation to OFF or Generation Mode to None.");
-			ClientApi.LOGGER.warn("Unknown Chunk Generator detected: {}", generator.getClass());
+			ApiShared.LOGGER.warn("Unknown Chunk Generator detected: {}", generator.getClass());
 		}
 		params = new GlobalParameters((ServerLevel) ((WorldWrapper) serverlevel).getWorld(), lodBuilder, lodDim);
 	}
@@ -360,7 +361,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 		catch (Exception e)
 		{
-			ClientApi.LOGGER.error("DistantHorizons: Couldn't load chunk {}", chunkPos, e);
+			ApiShared.LOGGER.error("DistantHorizons: Couldn't load chunk {}", chunkPos, e);
 		}
 		if (chunkData == null)
 		{
@@ -371,7 +372,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			try {
 			return ChunkLoader.read(level, lightEngine, chunkPos, chunkData);
 			} catch (Exception e) {
-				ClientApi.LOGGER.error("DistantHorizons: Couldn't load chunk {}", chunkPos, e);
+				ApiShared.LOGGER.error("DistantHorizons: Couldn't load chunk {}", chunkPos, e);
 				return new ProtoChunk(chunkPos, UpgradeData.EMPTY, level, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null);
 			}
 		}
@@ -381,7 +382,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	public void generateLodFromList(GenerationEvent e)
 	{
 		if (ENABLE_EVENT_LOGGING)
-			ClientApi.LOGGER.info("Lod Generate Event: " + e.pos);
+			ApiShared.LOGGER.info("Lod Generate Event: " + e.pos);
 		e.pEvent.beginNano = System.nanoTime();
 		GridList<ChunkAccess> referencedChunks;
 		DistanceGenerationMode generationMode;
@@ -483,14 +484,14 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				if (isFull)
 				{
 					if (ENABLE_LOAD_EVENT_LOGGING)
-						ClientApi.LOGGER.info("Detected full existing chunk at {}", target.getPos());
+						ApiShared.LOGGER.info("Detected full existing chunk at {}", target.getPos());
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
 							new LodBuilderConfig(DistanceGenerationMode.FULL), true, e.genAllDetails);
 				}
 				else if (isPartial)
 				{
 					if (ENABLE_LOAD_EVENT_LOGGING)
-						ClientApi.LOGGER.info("Detected old existing chunk at {}", target.getPos());
+						ApiShared.LOGGER.info("Detected old existing chunk at {}", target.getPos());
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
 							new LodBuilderConfig(generationMode), true, e.genAllDetails);
 				}
@@ -516,7 +517,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		if (ENABLE_PERF_LOGGING)
 		{
 			e.tParam.perf.recordEvent(e.pEvent);
-			ClientApi.LOGGER.info(e.tParam.perf);
+			ApiShared.LOGGER.info(e.tParam.perf);
 		}
 	}
 	
@@ -603,14 +604,14 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 
 	@Override
 	public void stop(boolean blocking) {
-		ClientApi.LOGGER.info("Batch Chunk Generator shutting down...");
+		ApiShared.LOGGER.info("Batch Chunk Generator shutting down...");
 		executors.shutdownNow();
 		if (blocking) try {
 			if (!executors.awaitTermination(10, TimeUnit.SECONDS)) {
-				ClientApi.LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...");
+				ApiShared.LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...");
 			}
 		} catch (InterruptedException e) {
-			ClientApi.LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...", e);
+			ApiShared.LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...", e);
 		}
 	}
 }

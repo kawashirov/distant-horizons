@@ -25,7 +25,7 @@ public class MixinUtilBackgroudThread
 	{
 		if (DependencySetupDoneCheck.isDone && BatchGenerationEnvironment.isCurrentThreadDistantGeneratorThread())
 		{
-			//ClientApi.LOGGER.info("util wrapThreadWithTaskName(Runnable) triggered");
+			//ApiShared.LOGGER.info("util wrapThreadWithTaskName(Runnable) triggered");
 			ci.setReturnValue(r);
 		}
 	}
@@ -35,7 +35,7 @@ public class MixinUtilBackgroudThread
 	{
 		if (DependencySetupDoneCheck.isDone && BatchGenerationEnvironment.isCurrentThreadDistantGeneratorThread())
 		{
-			//ClientApi.LOGGER.info("util wrapThreadWithTaskName(Supplier) triggered");
+			//ApiShared.LOGGER.info("util wrapThreadWithTaskName(Supplier) triggered");
 			ci.setReturnValue(r);
 		}
 	}
@@ -45,7 +45,7 @@ public class MixinUtilBackgroudThread
 	{
 		if (DependencySetupDoneCheck.isDone && BatchGenerationEnvironment.isCurrentThreadDistantGeneratorThread())
 		{
-			//ClientApi.LOGGER.info("util backgroundExecutor triggered");
+			//ApiShared.LOGGER.info("util backgroundExecutor triggered");
 			ci.setReturnValue(new DummyRunExecutorService());
 		}
 	}

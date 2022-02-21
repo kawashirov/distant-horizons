@@ -21,6 +21,7 @@ package com.seibel.lod.fabric;
 
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.api.ModAccessorApi;
 import com.seibel.lod.core.util.SingletonHandler;
@@ -67,7 +68,7 @@ public class Main implements ClientModInitializer
 		LodCommonMain.startup(null, false, new NetworkHandler());
 		DependencySetup.createInitialBindings();
 		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
-		ClientApi.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
+		ApiShared.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 
 		// Check if this works
 		client_proxy = new ClientProxy();
@@ -87,6 +88,6 @@ public class Main implements ClientModInitializer
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(null, true, new NetworkHandler());
 		DependencySetup.createInitialBindings();
-		ClientApi.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
+		ApiShared.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 	}
 }

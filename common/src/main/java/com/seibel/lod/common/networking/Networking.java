@@ -1,5 +1,6 @@
 package com.seibel.lod.common.networking;
 
+import com.seibel.lod.core.ModInfo;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -20,7 +21,9 @@ public class Networking {
 
     public static FriendlyByteBuf createNew() {
         // TODO: Probably replace the Unpooled.buffer()
-        return new FriendlyByteBuf(Unpooled.buffer());
+        FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
+        buf.writeInt(ModInfo.PROTOCOL_VERSION);
+        return buf;
     }
 
     /*
