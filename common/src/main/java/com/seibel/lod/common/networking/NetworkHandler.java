@@ -9,7 +9,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 
 /**
  * This is packet handler for our mod
- * It basically handles the packets sent from the server
+ * It basically handles the packets sent from the server & client
  *
  * @author Ran
  */

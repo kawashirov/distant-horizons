@@ -1,10 +1,11 @@
 package com.seibel.lod.common.networking;
 
-import com.seibel.lod.common.LodCommonMain;
 import io.netty.buffer.Unpooled;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -22,9 +23,8 @@ public class Networking {
         return new FriendlyByteBuf(Unpooled.buffer());
     }
 
-
     /*
-     * All code below is from the fabric api
+     * All code below is from the fabric api and might have been modified to work with Distant Horizons
      * Which is licensed under the Apache License 2.0
      */
 
@@ -32,15 +32,30 @@ public class Networking {
      * Sends a packet to a player.
      *
      * @param player the player to send the packet to
-     * @param channelName the channel of the packet
      * @param buf the payload of the packet.
      */
-    public static void send(ServerPlayer player, ResourceLocation channelName, FriendlyByteBuf buf) {
+    public static void send(ServerPlayer player, FriendlyByteBuf buf) {
         Objects.requireNonNull(player, "Server player entity cannot be null");
-        Objects.requireNonNull(channelName, "Channel name cannot be null");
+        Objects.requireNonNull(resourceLocation_meow, "Channel name cannot be null");
         Objects.requireNonNull(buf, "Packet byte buf cannot be null");
 
-        player.connection.send(createS2CPacket(channelName, buf));
+        player.connection.send(createS2CPacket(resourceLocation_meow, buf));
+    }
+
+    /**
+     * Sends a packet to the connected server.
+     *
+     * @param buf the payload of the packet
+     * @throws IllegalStateException if the client is not connected to a server
+     */
+    public static void send(FriendlyByteBuf buf) throws IllegalStateException {
+        // You cant send without a client player, so this is fine
+        if (Minecraft.getInstance().getConnection() != null) {
+            Minecraft.getInstance().getConnection().send(createC2SPacket(resourceLocation_meow, buf));
+            return;
+        }
+
+        throw new IllegalStateException("Cannot send packets when not in game!");
     }
 
     /**
@@ -54,11 +69,29 @@ public class Networking {
         Objects.requireNonNull(channelName, "Channel cannot be null");
         Objects.requireNonNull(buf, "Buf cannot be null");
 
+        return createPlayS2CPacket(channelName, buf);
+    }
+
+    public static Packet<?> createPlayS2CPacket(ResourceLocation channel, FriendlyByteBuf buf) {
+        return new ClientboundCustomPayloadPacket(channel, buf);
+    }
+
+    /**
+     * Creates a packet which may be sent to a the connected server.
+     *
+     * @param channelName the channel name
+     * @param buf the packet byte buf which represents the payload of the packet
+     * @return a new packet
+     */
+    public static Packet<?> createC2SPacket(ResourceLocation channelName, FriendlyByteBuf buf) {
+        Objects.requireNonNull(channelName, "Channel name cannot be null");
+        Objects.requireNonNull(buf, "Buf cannot be null");
+
         return createPlayC2SPacket(channelName, buf);
     }
 
-    public static Packet<?> createPlayC2SPacket(ResourceLocation channel, FriendlyByteBuf buf) {
-        return new ClientboundCustomPayloadPacket(channel, buf);
+    public static Packet<?> createPlayC2SPacket(ResourceLocation channelName, FriendlyByteBuf buf) {
+        return new ServerboundCustomPayloadPacket(channelName, buf);
     }
 
 }
