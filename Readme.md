@@ -16,15 +16,14 @@ If you want to see a quick demo, check out a video covering the mod here:
 
 Architectury version: 3.4-SNAPSHOT\
 Forge version: 39.0.5 and 38.0.14\
-Fabric version: 0.12.12\
+Fabric version: 0.13.2\
 Fabric API version: 0.44.0+1.18
 
-Modmenu version: 3.0.0\
-Sodium version: mc1.18-0.4.0-alpha5
+Modmenu version: 3.0.1
 
 Notes:\
 This version has been confirmed to work in Eclipse and Retail Minecraft.\
-(Retail running forge version 1.18.1-39.0.5 and fabric version 1.18-0.12.12 and 1.18.1-0.12.12)
+(Retail running forge version 1.18.1-39.0.5 and fabric version 1.18-0.12.12 and 1.18.1-0.13.2)
 
 
 ## Source Code Installation
@@ -52,9 +51,11 @@ It's better to use IntelliJ IDEA since Eclipse is not supported by Architectury,
 ## Compiling
 
 **Using GUI**
-1. Open a command line in the project folder
-2. Run the command: `./gradlew build`
-3. The compiled jar file will be in the folder `fabric/build/libs/` and `forge/build/libs/`
+1. Download the zip of the project and extract it
+2. Download the core from https://gitlab.com/jeseibel/distant-horizons-core and extract into a folder called `core`
+3. Open a command line in the project folder
+4. Run the command: `./gradlew assemble`
+5. The compiled jar file will be in the folder `fabric/build/libs/` and `forge/build/libs/`
 
 **If in terminal:**
 1. `git clone -b 1.18.X --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
