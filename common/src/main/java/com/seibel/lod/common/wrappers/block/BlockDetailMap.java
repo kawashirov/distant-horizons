@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.util.ColorUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.BlockDetail;
@@ -141,7 +142,7 @@ public class BlockDetailMap
 				nonFull = false;
 				canOcclude = false;
 		        BlockDetailCache result = new BlockDetailCache(fs);
-		        ClientApi.LOGGER.info(fs.toString()+" = ["+result+"]");
+		        ApiShared.LOGGER.info(fs.toString()+" = ["+result+"]");
 		        return result;
 			} else {
 				if (bs.getRenderShape() != RenderShape.MODEL) return NULL_BLOCK_DETAIL;
@@ -159,7 +160,7 @@ public class BlockDetailMap
 		        };
 		        if (quads == null || quads.isEmpty()) return NULL_BLOCK_DETAIL;
 		        BlockDetailCache result = new BlockDetailCache(canOcclude, noCol, nonFull, quads.get(0), bs.getBlock() instanceof FlowerBlock);
-		        ClientApi.LOGGER.info(bs.toString()+" = ["+result+"]");
+		        ApiShared.LOGGER.info(bs.toString()+" = ["+result+"]");
 		        return result;
 			}
 		}
