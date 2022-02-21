@@ -1,4 +1,9 @@
-# Distant Horizons
+# <img src="https://gitlab.com/jeseibel/distant-horizons-core/-/raw/main/_logo%20files/LOD%20logo%20flat%20-%20with%20boarder.png" width="32"> Distant Horizons
+
+> A mod that adds a Level of Detail System to Minecraft
+
+
+# What is Distant Horizons?
 
 This mod adds a Level Of Detail (LOD) system to Minecraft.\
 This implementation renders simplified chunks outside the normal render distance\
@@ -11,18 +16,17 @@ If you want to see a quick demo, check out a video covering the mod here:
 
 Architectury version: 3.4-SNAPSHOT\
 Forge version: 37.1.0\
-Fabric version: 0.12.6\
-Fabric API version: 0.37.1+1.17
+Fabric version: 0.13.2\
+Fabric API version: 0.46.1+1.17
 
-Modmenu version: 2.0.14\
-Sodium version: mc1.17.1-0.3.3
+Modmenu version: 2.0.14
 
 Notes:\
 This version has been confirmed to work in Eclipse and Retail Minecraft.\
 (Retail running forge version 1.17.1-37.1.0 and fabric version 1.17.1-0.12.6)
 
 
-## source code installation
+## Source Code Installation
 
 See the Forge Documentation online for more detailed instructions:\
 http://mcforge.readthedocs.io/en/latest/gettingstarted/
@@ -46,14 +50,16 @@ Side note: invalidate caches and restart if required
 ## Compiling
 
 **Using GUI**
-1. Open a command line in the project folder
-2. Run the command: `./gradlew build`
-3. The compiled jar file will be in the folder `fabric/build/libs/` and `forge/build/libs/`
+1. Download the zip of the project and extract it
+2. Download the core from https://gitlab.com/jeseibel/distant-horizons-core and extract into a folder called `core`
+3. Open a command line in the project folder
+4. Run the command: `./gradlew assemble`
+5. The compiled jar file will be in the folder `fabric/build/libs/` and `forge/build/libs/`
 
 **If in terminal:**
 1. `git clone -b 1.17.1 --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
 2. `cd minecraft-lod-mod`
-3. `./gradlew assemble` or `./gradlew build`
+3. `./gradlew assemble` or `./gradlew assemble`
 4. The build should be in `fabric/build/libs/` and `forge/build/libs/`
 
 

@@ -50,6 +50,14 @@ subprojects { p ->
             shadowMe(project(":core")) { transitive false }
         }
     }
+
+    jar {
+        manifest {
+            attributes 'Implementation-Title': rootProject.archives_base_name,
+                    'Implementation-Version': rootProject.mod_version,
+                    'Main-Class': 'com.seibel.lod.core.JarMain'
+        }
+    }
 }
 
 allprojects {
