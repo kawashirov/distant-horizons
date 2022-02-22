@@ -52,13 +52,15 @@ Side note: invalidate caches and restart if required
 **Using GUI**
 1. Open a command line in the project folder
 2. Run the command: `./gradlew build`
-3. The compiled jar file will be in the folder `fabric/build/libs/` and `forge/build/libs/`
+5. Then run command: `./gradlew mergeJars`
+6. The compiled jar file will be in the folder `Merged`
 
 **If in terminal:**
 1. `git clone -b 1.16.5_architectury --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
 2. `cd minecraft-lod-mod`
-3. `./gradlew assemble` or `./gradlew build`
-4. The build should be in `fabric/build/libs/` and `forge/build/libs/`
+3. `./gradlew assemble`
+5. `./gradlew mergeJars`
+6. The compiled jar file will be in the folder `Merged`
 
 
 ## Other commands
