@@ -54,13 +54,16 @@ Side note: invalidate caches and restart if required
 2. Download the core from https://gitlab.com/jeseibel/distant-horizons-core and extract into a folder called `core`
 3. Open a command line in the project folder
 4. Run the command: `./gradlew assemble`
-5. The compiled jar file will be in the folder `fabric/build/libs/` and `forge/build/libs/`
+5. Then run command: `./gradlew mergeJars`
+6. The compiled jar file will be in the folder `Merged`
+
 
 **If in terminal:**
 1. `git clone -b 1.17.1 --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
 2. `cd minecraft-lod-mod`
-3. `./gradlew assemble` or `./gradlew assemble`
-4. The build should be in `fabric/build/libs/` and `forge/build/libs/`
+3. `./gradlew assemble`
+4. `./gradlew mergeJars`
+6. The compiled jar file will be in the folder `Merged`
 
 
 ## Other commands
