@@ -55,7 +55,8 @@ It's better to use IntelliJ IDEA since Eclipse is not supported by Architectury,
 2. Download the core from https://gitlab.com/jeseibel/distant-horizons-core and extract into a folder called `core`
 3. Open a command line in the project folder
 4. Run the command: `./gradlew assemble`
-5. The compiled jar file will be in the folder `fabric/build/libs/` and `forge/build/libs/`
+5. Then run command: `./gradlew mergeJars`
+6. The compiled jar file will be in the folder `Merged`
 
 **If in terminal:**
 1. `git clone -b 1.18.X --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
