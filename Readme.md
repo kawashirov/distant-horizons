@@ -61,8 +61,9 @@ It's better to use IntelliJ IDEA since Eclipse is not supported by Architectury,
 **If in terminal:**
 1. `git clone -b 1.18.X --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
 2. `cd minecraft-lod-mod`
-3. `./gradlew assemble` or `./gradlew build`
-4. The build should be in `fabric/build/libs/` and `forge/build/libs/`
+3. `./gradlew assemble`
+5. `./gradlew mergeJars`
+6. The compiled jar file will be in the folder `Merged`
 
 
 ## Other commands
