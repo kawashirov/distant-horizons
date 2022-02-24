@@ -7,8 +7,8 @@ import java.util.concurrent.TimeUnit;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment.PrefEvent;
 import com.seibel.lod.core.api.ApiShared;
-import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.enums.config.LightGenerationMode;
+import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper.Steps;
@@ -70,9 +70,9 @@ public final class GenerationEvent
 	
 	public boolean terminate()
 	{
-		future.cancel(true);
 		ApiShared.LOGGER.info("======================DUMPING ALL THREADS FOR WORLD GEN=======================");
 		BatchGenerationEnvironment.threadFactory.dumpAllThreadStacks();
+		future.cancel(true);
 		return future.isCancelled();
 	}
 	
@@ -100,6 +100,7 @@ public final class GenerationEvent
 	public void refreshTimeout()
 	{
 		nanotime = System.nanoTime();
+		LodUtil.checkInterruptsUnchecked();
 	}
 	
 	@Override
