@@ -23,12 +23,12 @@ import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftWrapper;
  */
 public class DependencySetup {
     public static void createInitialBindings() {
+        SingletonHandler.bind(IVersionConstants.class, VersionConstants.INSTANCE);
         if (!LodCommonMain.serverSided) {
             SingletonHandler.bind(IMinecraftWrapper.class, MinecraftWrapper.INSTANCE);
             SingletonHandler.bind(IMinecraftRenderWrapper.class, MinecraftRenderWrapper.INSTANCE);
             SingletonHandler.bind(IReflectionHandler.class, ReflectionHandler.createSingleton(MinecraftWrapper.INSTANCE.getOptions().getClass().getDeclaredFields(), MinecraftWrapper.INSTANCE.getOptions()));
         }
-        SingletonHandler.bind(IVersionConstants.class, VersionConstants.INSTANCE);
 
         SingletonHandler.bind(IWrapperFactory.class, WrapperFactory.INSTANCE);
         DependencySetupDoneCheck.isDone = true;
