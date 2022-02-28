@@ -17,7 +17,7 @@ If you want to see a quick demo, check out a video covering the mod here:
 Architectury version: 3.4-SNAPSHOT\
 Forge version: 37.1.0\
 Fabric version: 0.13.2\
-Fabric API version: 0.46.1+1.17
+Fabric API version: 0.46.1+1.17.1
 
 Modmenu version: 2.0.14
 
@@ -59,7 +59,7 @@ Side note: invalidate caches and restart if required
 
 
 **If in terminal:**
-1. `git clone -b 1.17.1 --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
+1. `git clone -b 1.17.X --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
 2. `cd minecraft-lod-mod`
 3. `./gradlew assemble`
 4. `./gradlew mergeJars`
