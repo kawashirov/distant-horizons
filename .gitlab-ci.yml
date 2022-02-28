@@ -109,7 +109,8 @@ merge:
 
 # forth stage
 success_notification:
-  image: eclipse-temurin:17
+  # run a super basic Linux Distro
+  image: alpine:latest
   stage: sendDiscordNotification
   script:
     - apk add --update git curl
@@ -119,7 +120,7 @@ success_notification:
   when: on_success
 
 failure_notification:
-  image: eclipse-temurin:17
+  image: alpine:latest
   stage: sendDiscordNotification
   script:
     - apk add --update git curl
