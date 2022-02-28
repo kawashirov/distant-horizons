@@ -6,7 +6,6 @@ stages:
   - gradleSetup
   - build
   - merge
-  - sendDiscordNotification
 
 variables:
     # Disable the Gradle daemon for Continuous Integration servers as correctness
@@ -106,27 +105,6 @@ merge:
             # relative to the root directory
             - Merged
         expire_in: 1 day
-
-# forth stage
-success_notification:
-  image: eclipse-temurin:17
-  stage: sendDiscordNotification
-  script:
-    - apk add --update git curl
-    - wget https://raw.githubusercontent.com/DiscordHooks/gitlab-ci-discord-webhook/master/send.sh
-    - chmod +x send.sh
-    - /bin/ash ./send.sh success $WEBHOOK_URL
-  when: on_success
-
-failure_notification:
-  image: eclipse-temurin:17
-  stage: sendDiscordNotification
-  script:
-    - apk add --update git curl
-    - wget https://raw.githubusercontent.com/DiscordHooks/gitlab-ci-discord-webhook/master/send.sh
-    - chmod +x send.sh
-    - /bin/ash ./send.sh failure $WEBHOOK_URL
-  when: on_failure
 
 
 ## - stage
