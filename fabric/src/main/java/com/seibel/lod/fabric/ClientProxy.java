@@ -21,12 +21,11 @@ package com.seibel.lod.fabric;
 
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.api.EventApi;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
-
-import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 

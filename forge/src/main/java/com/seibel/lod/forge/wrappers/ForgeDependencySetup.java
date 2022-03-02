@@ -2,7 +2,7 @@ package com.seibel.lod.forge.wrappers;
 
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.wrappers.config.LodConfigWrapperSingleton;
-import com.seibel.lod.core.util.SingletonHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 
 /**

@@ -3,8 +3,8 @@ package com.seibel.lod.common.wrappers.worldGeneration;
 
 import com.mojang.datafixers.DataFixer;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.objects.lod.LodDimension;
-import com.seibel.lod.core.util.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftWrapper;
 
 import net.minecraft.core.Registry;
