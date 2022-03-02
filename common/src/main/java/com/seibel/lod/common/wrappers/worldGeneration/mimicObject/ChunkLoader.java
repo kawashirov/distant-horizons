@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
 import com.seibel.lod.core.api.ApiShared;
-import com.seibel.lod.core.api.ClientApi;
 
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -15,6 +14,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
@@ -39,6 +39,7 @@ import net.minecraft.world.level.chunk.PalettedContainer;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.blending.BlendingData;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
@@ -69,47 +70,48 @@ public class ChunkLoader
 	
 	private static LevelChunkSection[] readSections(LevelAccessor level, LevelLightEngine lightEngine, ChunkPos chunkPos, CompoundTag chunkData)
 	{
-		Registry<Biome> biomes = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
-		Codec<PalettedContainer<Biome>> biomeCodec = PalettedContainer.codec(
-				biomes, biomes.byNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getOrThrow(Biomes.PLAINS));
-		
-		int i = level.getSectionsCount();
-		LevelChunkSection[] chunkSections = new LevelChunkSection[i];
-		
-		boolean isLightOn = chunkData.getBoolean("isLightOn");
-		boolean hasSkyLight = level.dimensionType().hasSkyLight();
-		ListTag tagSections = chunkData.getList("sections", 10);
-		
-		for (int j = 0; j < tagSections.size(); ++j)
-		{
-			CompoundTag tagSection = tagSections.getCompound(j);
-			byte sectionYPos = tagSection.getByte("Y");
-			int sectionId = level.getSectionIndexFromSectionY(sectionYPos);
-			if (sectionId >= 0 && sectionId < chunkSections.length)
-			{
-				PalettedContainer<BlockState> blockStateContainer;
-				PalettedContainer<Biome> biomeContainer;
-				
-				blockStateContainer = tagSection.contains("block_states", 10)
-						? BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, tagSection.getCompound("block_states")).promotePartial(string -> logErrors(chunkPos, sectionYPos, string)).getOrThrow(false, LOGGER::error)
-						: new PalettedContainer<BlockState>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
-				
-				biomeContainer = tagSection.contains("biomes", 10)
-						? biomeCodec.parse(NbtOps.INSTANCE, tagSection.getCompound("biomes")).promotePartial(string -> logErrors(chunkPos, sectionYPos, string)).getOrThrow(false, LOGGER::error)
-						: new PalettedContainer<Biome>(biomes, biomes.getOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
-				
-				chunkSections[sectionId] = new LevelChunkSection(sectionYPos, blockStateContainer, biomeContainer);
-			}
-			
-			if (!isLightOn)
-				continue;
-			
-			if (tagSection.contains("BlockLight", 7))
-				lightEngine.queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, sectionYPos), new DataLayer(tagSection.getByteArray("BlockLight")), true);
-			if (hasSkyLight && tagSection.contains("SkyLight", 7))
-				lightEngine.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, sectionYPos), new DataLayer(tagSection.getByteArray("SkyLight")), true);
-		}
-		return chunkSections;
+//		Registry<Biome> biomes = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+//		Codec<PalettedContainer<Biome>> biomeCodec = PalettedContainer.codec(
+//				biomes, biomes.byNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getOrThrow(Biomes.PLAINS));
+//
+//		int i = level.getSectionsCount();
+//		LevelChunkSection[] chunkSections = new LevelChunkSection[i];
+//
+//		boolean isLightOn = chunkData.getBoolean("isLightOn");
+//		boolean hasSkyLight = level.dimensionType().hasSkyLight();
+//		ListTag tagSections = chunkData.getList("sections", 10);
+//
+//		for (int j = 0; j < tagSections.size(); ++j)
+//		{
+//			CompoundTag tagSection = tagSections.getCompound(j);
+//			byte sectionYPos = tagSection.getByte("Y");
+//			int sectionId = level.getSectionIndexFromSectionY(sectionYPos);
+//			if (sectionId >= 0 && sectionId < chunkSections.length)
+//			{
+//				PalettedContainer<BlockState> blockStateContainer;
+//				PalettedContainer<Holder<Biome>> biomeContainer;
+//
+//				blockStateContainer = tagSection.contains("block_states", 10)
+//						? BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, tagSection.getCompound("block_states")).promotePartial(string -> logErrors(chunkPos, sectionYPos, string)).getOrThrow(false, LOGGER::error)
+//						: new PalettedContainer<BlockState>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
+//
+//				biomeContainer = tagSection.contains("biomes", 10)
+//						? biomeCodec.parse(NbtOps.INSTANCE, tagSection.getCompound("biomes")).promotePartial(string -> logErrors(chunkPos, sectionYPos, string)).getOrThrow(false, LOGGER::error)
+//						: new PalettedContainer<Holder<Biome>>(biomes, biomes.getOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
+//
+//				chunkSections[sectionId] = new LevelChunkSection(sectionYPos, blockStateContainer, biomeContainer);
+//			}
+//
+//			if (!isLightOn)
+//				continue;
+//
+//			if (tagSection.contains("BlockLight", 7))
+//				lightEngine.queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, sectionYPos), new DataLayer(tagSection.getByteArray("BlockLight")), true);
+//			if (hasSkyLight && tagSection.contains("SkyLight", 7))
+//				lightEngine.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, sectionYPos), new DataLayer(tagSection.getByteArray("SkyLight")), true);
+//		}
+//		return chunkSections;
+		return null;
 	}
 	
 	private static void readHeightmaps(LevelChunk chunk, CompoundTag chunkData)
@@ -124,52 +126,55 @@ public class ChunkLoader
 		Heightmap.primeHeightmaps(chunk, ChunkStatus.FULL.heightmapsAfter());
 	}
 	
-	private static Map<StructureFeature<?>, StructureStart<?>> unpackStructureStart(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag, long l)
+	private static Map<ConfiguredStructureFeature<?, ?>, StructureStart> unpackStructureStart(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag, long l)
 	{
-		HashMap<StructureFeature<?>, StructureStart<?>> map = Maps.newHashMap();
-		CompoundTag compoundTag2 = compoundTag.getCompound("starts");
-		for (String string : compoundTag2.getAllKeys())
-		{
-			String string2 = string.toLowerCase(Locale.ROOT);
-			StructureFeature<?> structureFeature = StructureFeature.STRUCTURES_REGISTRY.get(string2);
-			if (structureFeature == null)
-			{
-				LOGGER.error("Unknown structure start: {}", (Object) string2);
-				continue;
-			}
-			StructureStart<?> structureStart = StructureFeature.loadStaticStart(structurePieceSerializationContext, compoundTag2.getCompound(string), l);
-			if (structureStart == null)
-				continue;
-			map.put(structureFeature, structureStart);
-		}
-		return map;
+//		Map<ConfiguredStructureFeature<?, ?>, StructureStart> map = Maps.newHashMap();
+//		CompoundTag compoundTag2 = compoundTag.getCompound("starts");
+//		for (String string : compoundTag2.getAllKeys())
+//		{
+//			String string2 = string.toLowerCase(Locale.ROOT);
+//			ConfiguredStructureFeature<?, ?> structureFeature = StructureFeature.STRUCTURES_REGISTRY.get(string2);
+//			if (structureFeature == null)
+//			{
+//				LOGGER.error("Unknown structure start: {}", (Object) string2);
+//				continue;
+//			}
+//			StructureStart structureStart = StructureFeature.loadStaticStart(structurePieceSerializationContext, compoundTag2.getCompound(string), l);
+//			if (structureStart == null)
+//				continue;
+//			map.put(structureFeature, structureStart);
+//		}
+//		return map;
+		return null;
 	}
 	
-	private static Map<StructureFeature<?>, LongSet> unpackStructureReferences(ChunkPos chunkPos, CompoundTag compoundTag)
+	private static Map<ConfiguredStructureFeature<?, ?>, LongSet> unpackStructureReferences(ChunkPos chunkPos, CompoundTag compoundTag)
 	{
-		HashMap<StructureFeature<?>, LongSet> map = Maps.newHashMap();
-		CompoundTag compoundTag2 = compoundTag.getCompound("References");
-		for (String string : compoundTag2.getAllKeys())
-		{
-			String string2 = string.toLowerCase(Locale.ROOT);
-			StructureFeature<?> structureFeature = StructureFeature.STRUCTURES_REGISTRY.get(string2);
-			if (structureFeature == null)
-			{
-				LOGGER.warn("Found reference to unknown structure '{}' in chunk {}, discarding", (Object) string2, (Object) chunkPos);
-				continue;
-			}
-			map.put(structureFeature, new LongOpenHashSet(Arrays.stream(compoundTag2.getLongArray(string)).filter(l ->
-			{
-				ChunkPos chunkPos2 = new ChunkPos(l);
-				if (chunkPos2.getChessboardDistance(chunkPos) > 8)
-				{
-					LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", (Object) string2, (Object) chunkPos2, (Object) chunkPos);
-					return false;
-				}
-				return true;
-			}).toArray()));
-		}
-		return map;
+//		Map<ConfiguredStructureFeature<?, ?>, LongSet> map = Maps.newHashMap();
+//		CompoundTag compoundTag2 = compoundTag.getCompound("References");
+//		for (String string : compoundTag2.getAllKeys())
+//		{
+//			String string2 = string.toLowerCase(Locale.ROOT);
+//
+//			ConfiguredStructureFeature<?, ?> structureFeature = StructureFeature.STRUCTURES_REGISTRY.get(string2);
+//			if (structureFeature == null)
+//			{
+//				LOGGER.warn("Found reference to unknown structure '{}' in chunk {}, discarding", (Object) string2, (Object) chunkPos);
+//				continue;
+//			}
+//			map.put(structureFeature, new LongOpenHashSet(Arrays.stream(compoundTag2.getLongArray(string)).filter(l ->
+//			{
+//				ChunkPos chunkPos2 = new ChunkPos(l);
+//				if (chunkPos2.getChessboardDistance(chunkPos) > 8)
+//				{
+//					LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", (Object) string2, (Object) chunkPos2, (Object) chunkPos);
+//					return false;
+//				}
+//				return true;
+//			}).toArray()));
+//		}
+//		return map;
+		return null;
 	}
 	
 	private static void readStructures(WorldGenLevel level, LevelChunk chunk, CompoundTag chunkData)

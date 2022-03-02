@@ -51,7 +51,9 @@ public class WorldGenStructFeatManager extends StructureFeatureManager {
 		if (chunk == null) return false;
         return chunk.hasAnyStructureReferences();
     }
-    
+
+	// TODO Check this
+	/*
 	@Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
 	public List<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos,
@@ -76,4 +78,5 @@ public class WorldGenStructFeatManager extends StructureFeatureManager {
 	        }
 	        return builder.build();
 	}
+	 */
 }
