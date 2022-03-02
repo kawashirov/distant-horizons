@@ -172,7 +172,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 			LevelRenderer levelRenderer = MC.levelRenderer;
 			LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
 			return (chunks.stream().map((chunk) -> {
-				AABB chunkBoundingBox = chunk.chunk.getBoundingBox();
+                AABB chunkBoundingBox = chunk.chunk.bb;
 				return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
 						Math.floorDiv((int) chunkBoundingBox.minZ, 16));
 			}).collect(Collectors.toCollection(HashSet::new)));

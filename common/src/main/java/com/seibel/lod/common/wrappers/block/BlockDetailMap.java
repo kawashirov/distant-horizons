@@ -211,7 +211,7 @@ public class BlockDetailMap
 		BlockDetail getResolvedBlockDetail(BlockState bs, int x, int y, int z, LevelReader getter) {
 			if (!requireResolving) return blockDetail;
 			BlockPos pos = new BlockPos(x,y,z);
-			Biome biome = getter.getBiome(pos).value();
+			Biome biome = getter.getBiome(pos);
 			BlockDetail tintDetail = biomeDetailMap.get(biome);
 			if (tintDetail == null) {
 				if (!bs.getFluidState().isEmpty()) bs = bs.getFluidState().createLegacyBlock();

@@ -4,7 +4,6 @@ import com.seibel.lod.fabric.Main;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -22,7 +21,7 @@ import java.util.function.Supplier;
 @Mixin(ClientLevel.class)
 public class MixinClientLevel {
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void loadWorldEvent(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey, Holder holder, int i, int j, Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci) {
+    private void loadWorldEvent(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey, DimensionType dimensionType, int i, int j, Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci) {
         Main.client_proxy.worldLoadEvent((ClientLevel) (Object) this);
     }
     @Inject(method = "setLightReady", at = @At("HEAD"))

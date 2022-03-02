@@ -78,12 +78,11 @@ public class LightedWorldGenRegion extends WorldGenRegion {
         return true;
     }
 
-	// TODO Check this
-//	@Override
-//	public List<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos,
-//			StructureFeature<?> structureFeature) {
-//		return structFeat.startsForFeature(sectionPos, structureFeature);
-//	}
+	@Override
+	public List<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos,
+			StructureFeature<?> structureFeature) {
+		return structFeat.startsForFeature(sectionPos, structureFeature);
+	}
 
 	// Skip updating the related tile entities
 	@Override
