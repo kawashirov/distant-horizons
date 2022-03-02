@@ -8,10 +8,9 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
 import com.seibel.lod.core.api.ClientApi;
-import com.seibel.lod.core.api.ModAccessorApi;
 import com.seibel.lod.core.util.LodUtil;
-
-import com.seibel.lod.core.util.SingletonHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftWrapper;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
@@ -152,12 +151,12 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     @Override
     public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks()
     {
-        ISodiumAccessor sodium = ModAccessorApi.get(ISodiumAccessor.class);
+        ISodiumAccessor sodium = ModAccessorHandler.get(ISodiumAccessor.class);
         if (sodium != null)
         {
             return sodium.getNormalRenderedChunks();
         }
-        IOptifineAccessor optifine = ModAccessorApi.get(IOptifineAccessor.class);
+        IOptifineAccessor optifine = ModAccessorHandler.get(IOptifineAccessor.class);
         if (optifine != null)
         {
             HashSet<AbstractChunkPosWrapper> pos = optifine.getNormalRenderedChunks();

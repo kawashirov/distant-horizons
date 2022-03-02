@@ -1,6 +1,6 @@
 package com.seibel.lod.fabric.wrappers;
 
-import com.seibel.lod.core.util.SingletonHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.common.wrappers.config.LodConfigWrapperSingleton;
 
