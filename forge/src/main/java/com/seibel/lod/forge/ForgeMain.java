@@ -25,9 +25,9 @@ import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.ClientApi;
-import com.seibel.lod.core.api.ModAccessorApi;
+import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
 import com.seibel.lod.core.handlers.ReflectionHandler;
-import com.seibel.lod.core.util.SingletonHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
@@ -74,7 +74,7 @@ public class ForgeMain implements LodForgeMethodCaller
 
 		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
 		if (ReflectionHandler.instance.optifinePresent()) {
-			ModAccessorApi.bind(IOptifineAccessor.class, new OptifineAccessor());
+			ModAccessorHandler.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
 	}
 

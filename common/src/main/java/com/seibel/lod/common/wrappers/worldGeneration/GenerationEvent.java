@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment.PrefEvent;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.enums.config.LightGenerationMode;
-import com.seibel.lod.core.util.SingletonHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper.Steps;
 

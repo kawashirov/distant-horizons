@@ -1,6 +1,6 @@
 package com.seibel.lod.common.wrappers.worldGeneration.mimicObject;
 
-import com.seibel.lod.core.api.ModAccessorApi;
+import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 
 import net.minecraft.world.level.BlockGetter;
@@ -14,7 +14,7 @@ public class LightGetterAdaptor implements LightChunkGetter {
 
 	public LightGetterAdaptor(BlockGetter heightAccessor) {
 		this.heightGetter = heightAccessor;
-		shouldReturnNull = ModAccessorApi.get(IStarlightAccessor.class) != null;
+		shouldReturnNull = ModAccessorHandler.get(IStarlightAccessor.class) != null;
 	}
 
 	public void setRegion(LightedWorldGenRegion region) {

@@ -22,8 +22,8 @@ package com.seibel.lod.fabric;
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.ClientApi;
-import com.seibel.lod.core.api.ModAccessorApi;
-import com.seibel.lod.core.util.SingletonHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
@@ -70,10 +70,10 @@ public class Main implements ClientModInitializer
 		client_proxy = new ClientProxy();
 		client_proxy.registerEvents();
 		if (SingletonHandler.get(IModChecker.class).isModLoaded("sodium")) {
-			ModAccessorApi.bind(ISodiumAccessor.class, new SodiumAccessor());
+			ModAccessorHandler.bind(ISodiumAccessor.class, new SodiumAccessor());
 		}
 		if (SingletonHandler.get(IModChecker.class).isModLoaded("optifine")) {
-			ModAccessorApi.bind(IOptifineAccessor.class, new OptifineAccessor());
+			ModAccessorHandler.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
 	}
 

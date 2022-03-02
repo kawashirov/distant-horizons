@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import com.seibel.lod.core.api.ClientApi;
-import com.seibel.lod.core.util.SingletonHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
