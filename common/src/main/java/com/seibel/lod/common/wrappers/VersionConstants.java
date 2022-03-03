@@ -52,4 +52,9 @@ public class VersionConstants implements IVersionConstants {
 	public boolean hasBatchGenerationImplementation() {
 		return true;
 	}
+
+    @Override
+    public boolean isVanillaRenderedChunkSquare() {
+        return true;
+    }
 }

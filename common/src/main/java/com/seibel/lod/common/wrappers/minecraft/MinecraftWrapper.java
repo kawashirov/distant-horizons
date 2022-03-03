@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.enums.LodDirection;
 import com.seibel.lod.core.util.LodUtil;
@@ -417,7 +418,7 @@ public class MinecraftWrapper implements IMinecraftWrapper
     @Override
     public void crashMinecraft(String errorMessage, Throwable exception)
     {
-        ClientApi.LOGGER.error(ModInfo.READABLE_NAME + " had the following error: [" + errorMessage + "]. Crashing Minecraft...");
+        ApiShared.LOGGER.error(ModInfo.READABLE_NAME + " had the following error: [" + errorMessage + "]. Crashing Minecraft...");
         CrashReport report = new CrashReport(errorMessage, exception);
         Minecraft.crash(report);
     }

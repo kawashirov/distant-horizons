@@ -1,18 +1,18 @@
 package com.seibel.lod.common.wrappers.chunk;
 
+import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
 import com.seibel.lod.core.util.LevelPosUtil;
 import com.seibel.lod.core.util.LodUtil;
-import com.seibel.lod.core.wrapperInterfaces.block.IBlockColorWrapper;
-import com.seibel.lod.core.wrapperInterfaces.block.IBlockShapeWrapper;
+import com.seibel.lod.core.wrapperInterfaces.block.BlockDetail;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 import com.seibel.lod.common.wrappers.WrapperUtil;
-import com.seibel.lod.common.wrappers.block.BlockColorWrapper;
-import com.seibel.lod.common.wrappers.block.BlockShapeWrapper;
+import com.seibel.lod.common.wrappers.block.BlockDetailMap;
 import com.seibel.lod.common.wrappers.world.BiomeWrapper;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LiquidBlockContainer;
@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
@@ -30,7 +31,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 public class ChunkWrapper implements IChunkWrapper
 {
     private ChunkAccess chunk;
-    private BlockAndTintGetter lightSource;
+    private LevelReader lightSource;
 
     @Override
     public int getHeight(){
@@ -62,19 +63,9 @@ public class ChunkWrapper implements IChunkWrapper
     }
 
     @Override
-    public IBlockColorWrapper getBlockColorWrapper(int x, int y, int z)
-    {
-        BlockState blockState = chunk.getBlockState(new BlockPos(x,y,z));
-        Block block = blockState.getBlock();
-        return BlockColorWrapper.getBlockColorWrapper(block);
-    }
-
-    @Override
-    public IBlockShapeWrapper getBlockShapeWrapper(int x, int y, int z)
-    {
-        BlockState blockState = chunk.getBlockState(new BlockPos(x,y,z));
-        Block block = blockState.getBlock();
-        return BlockShapeWrapper.getBlockShapeWrapper(block, this, x, y, z);
+    public BlockDetail getBlockDetail(int x, int y, int z) {
+        BlockState blockState = chunk.getBlockState(new BlockPos(x, y, z));
+        return BlockDetailMap.getBlockDetailWithCompleteTint(blockState, x, y, z, lightSource);
     }
 
     @Deprecated
@@ -83,7 +74,7 @@ public class ChunkWrapper implements IChunkWrapper
         this.chunk = chunk;
         this.lightSource = null;
     }
-    public ChunkWrapper(ChunkAccess chunk, BlockAndTintGetter lightSource) {
+    public ChunkWrapper(ChunkAccess chunk, LevelReader lightSource) {
         this.chunk = chunk;
         this.lightSource = lightSource;
     }
@@ -170,4 +161,17 @@ public class ChunkWrapper implements IChunkWrapper
 	public long getLongChunkPos() {
 		return chunk.getPos().toLong();
 	}
+
+    @Override
+    public boolean doesNearbyChunksExist() {
+        if (lightSource instanceof LightedWorldGenRegion) return true;
+        for (int dx = -1; dx <= 1; dx++) {
+            for (int dz = -1; dz <= 1; dz++) {
+                if (dx == 0 && dz == 0) continue;
+                if (lightSource.getChunk(dx + getChunkPosX(), dz + getChunkPosZ(), ChunkStatus.BIOMES, false) == null)
+                    return false;
+            }
+        }
+        return true;
+    }
 }
