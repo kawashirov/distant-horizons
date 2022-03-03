@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
+import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
@@ -181,40 +182,13 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 					MinecraftWrapper.INSTANCE.sendChatMessage(
 							"\u00A7eOverdraw prevention will be worse than normal.");
 				} catch (Exception e2) {}
-				ClientApi.LOGGER.error("getVanillaRenderedChunks Error: {}", e);
+				ApiShared.LOGGER.error("getVanillaRenderedChunks Error: {}", e);
 				usingBackupGetVanillaRenderedChunks = true;
 			}
 		}
 		return getMaximumRenderedChunks();
 
     }
-
-    @Override
-    public HashSet<AbstractChunkPosWrapper> getMaximumRenderedChunks()
-    {
-        //TODO: Make this a circle
-        IMinecraftWrapper mcWrapper = SingletonHandler.get(IMinecraftWrapper.class);
-        IWrapperFactory factory = SingletonHandler.get(IWrapperFactory.class);
-
-        int chunkRenderDist = this.getRenderDistance();
-
-        AbstractChunkPosWrapper centerChunkPos = mcWrapper.getPlayerChunkPos();
-        int startChunkX = centerChunkPos.getX() - chunkRenderDist;
-        int startChunkZ = centerChunkPos.getZ() - chunkRenderDist;
-
-        // add every position within render distance
-        HashSet<AbstractChunkPosWrapper> renderedPos = new HashSet<AbstractChunkPosWrapper>();
-        for (int chunkX = 0; chunkX < (chunkRenderDist * 2+1); chunkX++)
-        {
-            for(int chunkZ = 0; chunkZ < (chunkRenderDist * 2+1); chunkZ++)
-            {
-                renderedPos.add(factory.createChunkPos(startChunkX + chunkX, startChunkZ + chunkZ));
-            }
-        }
-
-        return renderedPos;
-    }
-
 
 
     @Override

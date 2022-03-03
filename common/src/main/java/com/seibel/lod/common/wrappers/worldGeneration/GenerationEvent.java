@@ -6,6 +6,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment.PrefEvent;
+import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.enums.config.LightGenerationMode;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
@@ -70,7 +71,7 @@ public final class GenerationEvent
 	public boolean terminate()
 	{
 		future.cancel(true);
-		ClientApi.LOGGER.info("======================DUMPING ALL THREADS FOR WORLD GEN=======================");
+		ApiShared.LOGGER.info("======================DUMPING ALL THREADS FOR WORLD GEN=======================");
 		BatchGenerationEnvironment.threadFactory.dumpAllThreadStacks();
 		return future.isCancelled();
 	}

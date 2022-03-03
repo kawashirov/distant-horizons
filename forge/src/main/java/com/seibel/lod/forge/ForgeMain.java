@@ -24,6 +24,7 @@ import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
 import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
 import com.seibel.lod.core.handlers.ReflectionHandler;
@@ -71,7 +72,7 @@ public class ForgeMain implements LodForgeMethodCaller
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(this, !FMLLoader.getDist().isClient());
 		ForgeDependencySetup.createInitialBindings();
-		ClientApi.LOGGER.info("Distant Horizons initializing...");
+		ApiShared.LOGGER.info("Distant Horizons initializing...");
 		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
 
 		if (ReflectionHandler.instance.optifinePresent()) {

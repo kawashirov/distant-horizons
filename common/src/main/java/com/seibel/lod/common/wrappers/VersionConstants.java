@@ -48,8 +48,13 @@ public class VersionConstants implements IVersionConstants {
     }
 
 
-	@Override
-	public boolean hasBatchGenerationImplementation() {
-		return true;
-	}
+    @Override
+    public boolean hasBatchGenerationImplementation() {
+        return true;
+    }
+
+    @Override
+    public boolean isVanillaRenderedChunkSquare() {
+        return true;
+    }
 }
