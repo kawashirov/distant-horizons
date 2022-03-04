@@ -41,6 +41,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.Vec3;
 
 
@@ -115,7 +116,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     @Override
     public Color getSkyColor() {
         if (MC.level.dimensionType().hasSkyLight()) {
-            Vec3 colorValues = MC.level.getSkyColor(MC.gameRenderer.getMainCamera().getBlockPosition(), MC.getFrameTime());
+            Vec3 colorValues = MC.level.getSkyColor(MC.gameRenderer.getMainCamera().getPosition(), MC.getFrameTime());
             return new Color((float) colorValues.x, (float) colorValues.y, (float) colorValues.z);
         } else
             return new Color(0, 0, 0);
@@ -293,12 +294,13 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     @Override
     public boolean isFogStateSpecial() {
     	Camera camera = GAME_RENDERER.getMainCamera();
-		FluidState fluidState = camera.getFluidInCamera();
+		FogType fogType = camera.getFluidInCamera();
 	    Entity entity = camera.getEntity();
-	    boolean isUnderWater = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
-	    isUnderWater |= fluidState.is(FluidTags.WATER);
-	    isUnderWater |= fluidState.is(FluidTags.LAVA);
-        return isUnderWater;
+	    boolean enableFog = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
+	    enableFog |= fogType.equals(FogType.WATER);
+	    enableFog |= fogType.equals(FogType.LAVA);
+	    enableFog |= fogType.equals(FogType.POWDER_SNOW);
+        return enableFog;
     }
 
     @Override

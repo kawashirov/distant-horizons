@@ -31,7 +31,7 @@ public class TexturedButtonWidget extends ImageButton {
 	public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
 
 		Minecraft.getInstance().getTextureManager().bind(WIDGETS_LOCATION);
-		RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.alpha);
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
 		int i = getYImage(isHovered());
 
 		RenderSystem.enableBlend();

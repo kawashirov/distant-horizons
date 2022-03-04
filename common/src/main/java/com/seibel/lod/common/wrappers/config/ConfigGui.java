@@ -44,6 +44,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -752,10 +753,10 @@ public abstract class ConfigGui
 
         // Only for 1.17 and over
         // Remove in 1.16 and below
-//        @Override
-//        public List<? extends NarratableEntry> narratables()
-//        {
-//            return children;
-//        }
+        @Override
+        public List<? extends NarratableEntry> narratables()
+        {
+            return children;
+        }
     }
 }
