@@ -46,9 +46,17 @@ public class McObjectConverter
         return matrix;
     }
 
+    static final Direction[] directions;
+    static {
+        LodDirection[] lodDirs = LodDirection.values();
+        directions = new Direction[lodDirs.length];
+        for (LodDirection lodDir : lodDirs) {
+            directions[lodDir.ordinal()] = Direction.byName(lodDir.name());
+        }
+    }
 
     public static Direction Convert(LodDirection lodDirection)
     {
-        return Direction.byName(lodDirection.name());
+        return directions[lodDirection.ordinal()];
     }
 }

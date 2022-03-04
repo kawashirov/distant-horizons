@@ -190,33 +190,6 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
     }
 
-    @Override
-    public HashSet<AbstractChunkPosWrapper> getMaximumRenderedChunks()
-    {
-        //TODO: Make this a circle
-        IMinecraftWrapper mcWrapper = SingletonHandler.get(IMinecraftWrapper.class);
-        IWrapperFactory factory = SingletonHandler.get(IWrapperFactory.class);
-
-        int chunkRenderDist = this.getRenderDistance();
-
-        AbstractChunkPosWrapper centerChunkPos = mcWrapper.getPlayerChunkPos();
-        int startChunkX = centerChunkPos.getX() - chunkRenderDist;
-        int startChunkZ = centerChunkPos.getZ() - chunkRenderDist;
-
-        // add every position within render distance
-        HashSet<AbstractChunkPosWrapper> renderedPos = new HashSet<AbstractChunkPosWrapper>();
-        for (int chunkX = 0; chunkX < (chunkRenderDist * 2+1); chunkX++)
-        {
-            for(int chunkZ = 0; chunkZ < (chunkRenderDist * 2+1); chunkZ++)
-            {
-                renderedPos.add(factory.createChunkPos(startChunkX + chunkX, startChunkZ + chunkZ));
-            }
-        }
-
-        return renderedPos;
-    }
-
-
 
     @Override
     public int[] getLightmapPixels()

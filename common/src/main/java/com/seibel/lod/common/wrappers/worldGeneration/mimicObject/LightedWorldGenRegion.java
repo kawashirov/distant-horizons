@@ -3,6 +3,7 @@ package com.seibel.lod.common.wrappers.worldGeneration.mimicObject;
 import java.util.List;
 import java.util.stream.Stream;
 
+import com.seibel.lod.core.api.ApiShared;
 import org.jetbrains.annotations.Nullable;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment.EmptyChunkGenerator;
