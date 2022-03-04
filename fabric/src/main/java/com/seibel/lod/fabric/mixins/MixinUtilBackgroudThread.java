@@ -31,7 +31,7 @@ public class MixinUtilBackgroudThread
 	{
 		if (DependencySetupDoneCheck.isDone && doTriggerOverride())
 		{
-			// ClientApi.LOGGER.info("util wrapThreadWithTaskName(Runnable) triggered");
+			// ApiShared.LOGGER.info("util wrapThreadWithTaskName(Runnable) triggered");
 			ci.setReturnValue(r);
 		}
 	}
@@ -41,7 +41,7 @@ public class MixinUtilBackgroudThread
 	{
 		if (DependencySetupDoneCheck.isDone && doTriggerOverride())
 		{
-			// ClientApi.LOGGER.info("util backgroundExecutor triggered");
+			// ApiShared.LOGGER.info("util backgroundExecutor triggered");
 			ci.setReturnValue(Runnable::run);
 		}
 	}

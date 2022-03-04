@@ -1,7 +1,7 @@
 
 package com.seibel.lod.common.wrappers.worldGeneration.mimicObject;
 
-import com.seibel.lod.core.api.ClientApi;
+import com.seibel.lod.core.api.ApiShared;
 
 import java.util.Objects;
 
@@ -30,7 +30,7 @@ import net.minecraft.world.level.material.Fluids;
 import org.apache.logging.log4j.Logger;
 
 public class ChunkLoader {
-	private static final Logger LOGGER = ClientApi.LOGGER;
+	private static final Logger LOGGER = ApiShared.LOGGER;
 
 	private static LevelChunkSection[] readSections(WorldGenLevel level, LevelLightEngine lightEngine,
 			ChunkPos chunkPos, CompoundTag tagLevel) {
@@ -142,7 +142,7 @@ public class ChunkLoader {
 		chunk.setLightCorrect(tagLevel.getBoolean("isLightOn"));
 		readHeightmaps(chunk, tagLevel);
 		readPostPocessings(chunk, tagLevel);
-		// ClientApi.LOGGER.info("Loaded chunk @ "+chunk.getPos());
+		// ApiShared.LOGGER.info("Loaded chunk @ "+chunk.getPos());
 		return chunk;
 	}
 }

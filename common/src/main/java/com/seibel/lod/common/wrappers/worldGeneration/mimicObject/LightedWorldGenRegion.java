@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment.EmptyChunkGenerator;
+import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.enums.config.LightGenerationMode;
 
@@ -183,7 +184,7 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 			}
 		}
 		if (chunkStatus != ChunkStatus.EMPTY && chunkStatus != debugTriggeredForStatus) {
-			ClientApi.LOGGER.info("WorldGen requiring " + chunkStatus
+			ApiShared.LOGGER.info("WorldGen requiring " + chunkStatus
 					+ " outside expected range detected. Force passing EMPTY chunk and seeing if it works.");
 			debugTriggeredForStatus = chunkStatus;
 		}

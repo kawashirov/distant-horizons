@@ -92,7 +92,7 @@ public abstract class ConfigGui
 	// Change these to your own mod
 	private static final String MOD_NAME = ModInfo.NAME;					// For file saving and identifying
 	private static final String MOD_NAME_READABLE = ModInfo.READABLE_NAME;	// For logs
-	//	private static final Logger LOGGER = ClientApi.LOGGER;						// For logs
+	//	private static final Logger LOGGER = ApiShared.LOGGER;						// For logs
 	private static final Logger LOGGER = LogManager.getLogger(ModInfo.NAME);		// For logs (this inits before ClientAPI so this is a temp fix)
 
 

@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
+import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
@@ -181,7 +182,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 					MinecraftWrapper.INSTANCE.sendChatMessage(
 							"\u00A7eOverdraw prevention will be worse than normal.");
 				} catch (Exception e2) {}
-				ClientApi.LOGGER.error("getVanillaRenderedChunks Error: {}", e);
+				ApiShared.LOGGER.error("getVanillaRenderedChunks Error: {}", e);
 				usingBackupGetVanillaRenderedChunks = true;
 			}
 		}

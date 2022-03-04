@@ -5,7 +5,7 @@ import com.seibel.lod.core.wrapperInterfaces.IVersionConstants;
 
 /**
  * @author James Seibel
- * @version 12-11-2021
+ * @version 3-3-2022
  */
 public class VersionConstants implements IVersionConstants {
     public static final VersionConstants INSTANCE = new VersionConstants();
@@ -51,5 +51,12 @@ public class VersionConstants implements IVersionConstants {
 	@Override
 	public boolean hasBatchGenerationImplementation() {
 		return true;
+	}
+
+
+	@Override
+	public boolean isVanillaRenderedChunkSquare()
+	{
+		return false;
 	}
 }
