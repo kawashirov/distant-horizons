@@ -23,6 +23,7 @@ import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.api.ClientApi;
+import com.seibel.lod.core.handlers.dependencyInjection.DependencyHandler;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
@@ -31,7 +32,7 @@ import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.lod.fabric.wrappers.modAccessor.ModChecker;
 import com.seibel.lod.fabric.wrappers.modAccessor.OptifineAccessor;
 import com.seibel.lod.fabric.wrappers.modAccessor.SodiumAccessor;
-import com.seibel.lod.fabric.wrappers.DependencySetup;
+import com.seibel.lod.fabric.wrappers.FabricDependencySetup;
 
 import net.fabricmc.api.ClientModInitializer;
 
@@ -44,7 +45,7 @@ import net.fabricmc.api.ClientModInitializer;
  * @author Ran
  * @version 12-1-2021
  */
-public class Main implements ClientModInitializer
+public class FabricMain implements ClientModInitializer
 {
 	// This is a client mod so it should implement ClientModInitializer and in fabric.mod.json it should have "environment": "client"
 	// Once it works on servers change the implement to ModInitializer and in fabric.mod.json it should be "environment": "*"
@@ -63,25 +64,37 @@ public class Main implements ClientModInitializer
 	public static void init() {
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(null, false);
-		DependencySetup.createInitialBindings();
-		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
+		
 		ApiShared.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
-
-		// Check if this works
-		client_proxy = new ClientProxy();
-		client_proxy.registerEvents();
+		
+		
+		// make sure the dependencies are set up before the mod needs them
+		FabricDependencySetup.createInitialBindings();
+		FabricDependencySetup.finishBinding();
+		
+		// mod dependencies
 		if (SingletonHandler.get(IModChecker.class).isModLoaded("sodium")) {
 			ModAccessorHandler.bind(ISodiumAccessor.class, new SodiumAccessor());
 		}
 		if (SingletonHandler.get(IModChecker.class).isModLoaded("optifine")) {
 			ModAccessorHandler.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
+		
+		ModAccessorHandler.finishBinding();
+		
+		
+		// Check if this works
+		client_proxy = new ClientProxy();
+		client_proxy.registerEvents();
 	}
 
 	public static void initServer() {
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(null, true);
-		DependencySetup.createInitialBindings();
+		
 		ApiShared.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
+		
+		FabricDependencySetup.createInitialBindings();
+		FabricDependencySetup.finishBinding();
 	}
 }

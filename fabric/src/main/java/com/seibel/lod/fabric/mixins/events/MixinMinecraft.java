@@ -1,6 +1,6 @@
 package com.seibel.lod.fabric.mixins.events;
 
-import com.seibel.lod.fabric.Main;
+import com.seibel.lod.fabric.FabricMain;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -23,11 +23,11 @@ public class MixinMinecraft {
 
     @Inject(method = "setLevel", at = @At("HEAD"))
     private void unloadWorldEvent_sL(ClientLevel clientLevel, CallbackInfo ci) {
-        if (level != null) Main.client_proxy.worldUnloadEvent(level);
+        if (level != null) FabricMain.client_proxy.worldUnloadEvent(level);
     }
 
     @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("HEAD"))
     private void unloadWorldEvent_cL(Screen screen, CallbackInfo ci) {
-        if (this.level != null) Main.client_proxy.worldUnloadEvent(this.level);
+        if (this.level != null) FabricMain.client_proxy.worldUnloadEvent(this.level);
     }
 }

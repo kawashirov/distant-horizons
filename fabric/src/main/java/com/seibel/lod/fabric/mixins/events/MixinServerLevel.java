@@ -1,6 +1,6 @@
 package com.seibel.lod.fabric.mixins.events;
 
-import com.seibel.lod.fabric.Main;
+import com.seibel.lod.fabric.FabricMain;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ProgressListener;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,6 +16,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinServerLevel {
     @Inject(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerChunkCache;save(Z)V", shift = At.Shift.AFTER))
     private void saveWorldEvent(ProgressListener progressListener, boolean bl, boolean bl2, CallbackInfo ci) {
-        Main.client_proxy.worldSaveEvent();
+        FabricMain.client_proxy.worldSaveEvent();
     }
 }

@@ -1,6 +1,6 @@
 package com.seibel.lod.fabric.mixins;
 
-import com.seibel.lod.fabric.Main;
+import com.seibel.lod.fabric.FabricMain;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,6 +16,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinMinecraft {
     @Inject(method = "<init>", at = @At("TAIL"))
     private void startMod(GameConfig gameConfig, CallbackInfo ci) {
-        Main.init();
+        FabricMain.init();
     }
 }

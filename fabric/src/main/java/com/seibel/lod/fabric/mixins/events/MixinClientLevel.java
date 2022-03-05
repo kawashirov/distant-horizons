@@ -1,6 +1,6 @@
 package com.seibel.lod.fabric.mixins.events;
 
-import com.seibel.lod.fabric.Main;
+import com.seibel.lod.fabric.FabricMain;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -23,6 +23,6 @@ import java.util.function.Supplier;
 public class MixinClientLevel {
     @Inject(method = "<init>", at = @At("TAIL"))
     private void loadWorldEvent(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey<Level> resourceKey, DimensionType dimensionType, int i, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci) {
-        Main.client_proxy.worldLoadEvent((ClientLevel) (Object) this);
+        FabricMain.client_proxy.worldLoadEvent((ClientLevel) (Object) this);
     }
 }

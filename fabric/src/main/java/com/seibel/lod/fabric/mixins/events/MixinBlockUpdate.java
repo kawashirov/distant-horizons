@@ -1,6 +1,6 @@
 package com.seibel.lod.fabric.mixins.events;
 
-import com.seibel.lod.fabric.Main;
+import com.seibel.lod.fabric.FabricMain;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -23,6 +23,6 @@ public abstract class MixinBlockUpdate {
 
     @Inject(method = "handle(Lnet/minecraft/network/protocol/game/ClientGamePacketListener;)V", at = @At("TAIL"))
     private void onBlockUpdate(ClientGamePacketListener clientGamePacketListener, CallbackInfo ci) {
-        Main.client_proxy.blockChangeEvent(Minecraft.getInstance().player.clientLevel, this.getPos());
+        FabricMain.client_proxy.blockChangeEvent(Minecraft.getInstance().player.clientLevel, this.getPos());
     }
 }

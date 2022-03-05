@@ -67,16 +67,21 @@ public class ForgeMain implements LodForgeMethodCaller
 
 	private void init(final FMLCommonSetupEvent event)
 	{
-		// make sure the dependencies are set up before the mod needs them
+		ApiShared.LOGGER.info("Distant Horizons initializing...");
+		
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(this, !FMLLoader.getDist().isClient());
+		
+		// make sure the dependencies are set up before the mod needs them
 		ForgeDependencySetup.createInitialBindings();
-		ApiShared.LOGGER.info("Distant Horizons initializing...");
-
-		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
+		ForgeDependencySetup.finishBinding();
+		
+		// mod dependencies
 		if (ReflectionHandler.instance.optifinePresent()) {
 			ModAccessorHandler.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
+		
+		ModAccessorHandler.finishBinding();
 	}
 
 
