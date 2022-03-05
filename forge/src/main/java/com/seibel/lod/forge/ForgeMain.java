@@ -27,13 +27,10 @@ import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
-import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
-import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.forge.networking.NetworkHandler;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
 
-import com.seibel.lod.forge.wrappers.modAccessor.ModChecker;
 import com.seibel.lod.forge.wrappers.modAccessor.OptifineAccessor;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
@@ -72,8 +69,8 @@ public class ForgeMain implements LodForgeMethodCaller
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(this, !FMLLoader.getDist().isClient(), new NetworkHandler());
 		ForgeDependencySetup.createInitialBindings();
+		ForgeDependencySetup.finishBinding();
 		ApiShared.LOGGER.info("Distant Horizons initializing...");
-		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
 	}
 	
 	public ForgeMain()
@@ -88,6 +85,9 @@ public class ForgeMain implements LodForgeMethodCaller
 		if (ReflectionHandler.instance.optifinePresent()) {
 			ModAccessorHandler.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
+		
+		ModAccessorHandler.finishBinding();
+		
 
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
 				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> ConfigGui.getScreen(parent, "")));

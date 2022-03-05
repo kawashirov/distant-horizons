@@ -22,15 +22,19 @@ import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftWrapper;
  * @version 12-1-2021
  */
 public class DependencySetup {
-    public static void createInitialBindings() {
+    public static void createInitialBindings()
+    {
         SingletonHandler.bind(IVersionConstants.class, VersionConstants.INSTANCE);
-        if (!LodCommonMain.serverSided) {
+        
+        if (!LodCommonMain.serverSided)
+        {
             SingletonHandler.bind(IMinecraftWrapper.class, MinecraftWrapper.INSTANCE);
             SingletonHandler.bind(IMinecraftRenderWrapper.class, MinecraftRenderWrapper.INSTANCE);
             SingletonHandler.bind(IReflectionHandler.class, ReflectionHandler.createSingleton(MinecraftWrapper.INSTANCE.getOptions().getClass().getDeclaredFields(), MinecraftWrapper.INSTANCE.getOptions()));
         }
 
         SingletonHandler.bind(IWrapperFactory.class, WrapperFactory.INSTANCE);
+        
         DependencySetupDoneCheck.isDone = true;
     }
 }

@@ -34,7 +34,7 @@ import com.seibel.lod.fabric.wrappers.modAccessor.ModChecker;
 import com.seibel.lod.fabric.wrappers.modAccessor.OptifineAccessor;
 import com.seibel.lod.fabric.wrappers.modAccessor.SodiumAccessor;
 import com.seibel.lod.fabric.wrappers.modAccessor.StarlightAccessor;
-import com.seibel.lod.fabric.wrappers.DependencySetup;
+import com.seibel.lod.fabric.wrappers.FabricDependencySetup;
 
 import net.fabricmc.api.ClientModInitializer;
 
@@ -66,8 +66,8 @@ public class Main implements ClientModInitializer
 	public static void init() {
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(null, false, new NetworkHandler());
-		DependencySetup.createInitialBindings();
-		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
+		FabricDependencySetup.createInitialBindings();
+		FabricDependencySetup.finishBinding();
 		ApiShared.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 
 		// Check if this works
@@ -82,12 +82,15 @@ public class Main implements ClientModInitializer
 		if (SingletonHandler.get(IModChecker.class).isModLoaded("optifine")) {
 			ModAccessorHandler.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
+		
+		ModAccessorHandler.finishBinding();
 	}
 
 	public static void initServer() {
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(null, true, new NetworkHandler());
-		DependencySetup.createInitialBindings();
+		FabricDependencySetup.createInitialBindings();
+		FabricDependencySetup.finishBinding();
 		ApiShared.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 	}
 }

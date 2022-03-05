@@ -28,13 +28,21 @@ import net.minecraft.world.level.levelgen.Heightmap;
 /**
  *
  * @author James Seibel
- * @version 11-21-2021
+ * @version 3-5-2022
  */
 public class ChunkWrapper implements IChunkWrapper
 {
     private final ChunkAccess chunk;
     private final LevelReader lightSource;
 
+
+    public ChunkWrapper(ChunkAccess chunk, LevelReader lightSource)
+    {
+        this.chunk = chunk;
+        this.lightSource = lightSource;
+    }
+	    
+    
     @Override
     public int getHeight(){
         return chunk.getHeight();
@@ -69,12 +77,7 @@ public class ChunkWrapper implements IChunkWrapper
         BlockState blockState = chunk.getBlockState(new BlockPos(x,y,z));
         return BlockDetailMap.getBlockDetailWithCompleteTint(blockState, x, y, z, lightSource);
     }
-    
-    public ChunkWrapper(ChunkAccess chunk, LevelReader lightSource)
-    {
-        this.chunk = chunk;
-        this.lightSource = lightSource;
-    }
+        
 
     public ChunkAccess getChunk() {
         return chunk;

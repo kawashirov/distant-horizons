@@ -58,8 +58,9 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static final GameRenderer GAME_RENDERER = MC.gameRenderer;
-    private static final WrapperFactory FACTORY = WrapperFactory.INSTANCE;
+    private static final IWrapperFactory FACTORY = WrapperFactory.INSTANCE;
 
+    
     @Override
     public Vec3f getLookAtVector()
     {
