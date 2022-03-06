@@ -127,13 +127,7 @@ public class WorldWrapper implements IWorldWrapper
     {
         return world.dimensionType().hasSkyLight();
     }
-
-    @Override
-    public boolean isEmpty()
-    {
-        return world == null;
-    }
-
+    
     @Override
     public int getHeight()
     {
