@@ -5,7 +5,7 @@ import com.mojang.datafixers.DataFixer;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.objects.lod.LodDimension;
-import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftWrapper;
+import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
