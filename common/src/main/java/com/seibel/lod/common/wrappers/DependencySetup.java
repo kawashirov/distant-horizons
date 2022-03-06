@@ -2,7 +2,7 @@ package com.seibel.lod.common.wrappers;
 
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftRenderWrapper;
-import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
+import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.core.handlers.IReflectionHandler;
 import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
@@ -25,9 +25,9 @@ public class DependencySetup {
     public static void createInitialBindings() {
         SingletonHandler.bind(IVersionConstants.class, VersionConstants.INSTANCE);
         if (!LodCommonMain.serverSided) {
-            SingletonHandler.bind(IMinecraftWrapper.class, MinecraftWrapper.INSTANCE);
+            SingletonHandler.bind(IMinecraftWrapper.class, MinecraftClientWrapper.INSTANCE);
             SingletonHandler.bind(IMinecraftRenderWrapper.class, MinecraftRenderWrapper.INSTANCE);
-            SingletonHandler.bind(IReflectionHandler.class, ReflectionHandler.createSingleton(MinecraftWrapper.INSTANCE.getOptions().getClass().getDeclaredFields(), MinecraftWrapper.INSTANCE.getOptions()));
+            SingletonHandler.bind(IReflectionHandler.class, ReflectionHandler.createSingleton(MinecraftClientWrapper.INSTANCE.getOptions().getClass().getDeclaredFields(), MinecraftClientWrapper.INSTANCE.getOptions()));
             SingletonHandler.bind(IVersionConstants.class, VersionConstants.INSTANCE);
         }
         SingletonHandler.bind(IWrapperFactory.class, WrapperFactory.INSTANCE);

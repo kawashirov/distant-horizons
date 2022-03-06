@@ -178,10 +178,10 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		        }).collect(Collectors.toCollection(HashSet::new)));
 			} catch (LinkageError e) {
 				try {
-					MinecraftWrapper.INSTANCE.sendChatMessage(
+					MinecraftClientWrapper.INSTANCE.sendChatMessage(
 							"\u00A7e\u00A7l\u00A7uWARNING: Distant Horizons: getVanillaRenderedChunks method failed."
 							+ " Using Backup Method.");
-					MinecraftWrapper.INSTANCE.sendChatMessage(
+					MinecraftClientWrapper.INSTANCE.sendChatMessage(
 							"\u00A7eOverdraw prevention will be worse than normal.");
 				} catch (Exception e2) {}
 				ApiShared.LOGGER.error("getVanillaRenderedChunks Error: {}", e);

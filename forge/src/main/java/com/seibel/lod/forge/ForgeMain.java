@@ -22,7 +22,7 @@ package com.seibel.lod.forge;
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.wrappers.config.ConfigGui;
-import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
+import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.api.ClientApi;
@@ -105,7 +105,7 @@ public class ForgeMain implements LodForgeMethodCaller
 
 	private ModelDataMap dataMap = new ModelDataMap.Builder().build();
 	@Override
-	public List<BakedQuad> getQuads(MinecraftWrapper mc, Block block, BlockState blockState, Direction direction, Random random) {
+	public List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, Random random) {
 		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
 	}
 }
