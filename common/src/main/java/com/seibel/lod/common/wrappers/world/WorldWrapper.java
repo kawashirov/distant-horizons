@@ -130,12 +130,6 @@ public class WorldWrapper implements IWorldWrapper
     }
 
     @Override
-    public boolean isEmpty()
-    {
-        return world == null;
-    }
-
-    @Override
     public int getHeight()
     {
         return world.getHeight();
