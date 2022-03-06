@@ -1,6 +1,6 @@
 package com.seibel.lod.common.forge;
 
-import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
+import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Direction;
@@ -16,6 +16,6 @@ import java.util.Random;
  * @author Ran
  */
 public interface LodForgeMethodCaller {
-    List<BakedQuad> getQuads(MinecraftWrapper mc, Block block, BlockState blockState, Direction direction, Random random);
+    List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, Random random);
     int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y);
 }
