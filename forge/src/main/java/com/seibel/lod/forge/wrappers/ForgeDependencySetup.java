@@ -4,6 +4,8 @@ import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.wrappers.config.LodConfigWrapperSingleton;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
+import com.seibel.lod.forge.wrappers.modAccessor.ModChecker;
 
 /**
  * Binds all necessary dependencies so we
@@ -19,6 +21,13 @@ public class ForgeDependencySetup
 {
 	public static void createInitialBindings()
 	{
+		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
+
 		SingletonHandler.bind(ILodConfigWrapperSingleton.class, LodConfigWrapperSingleton.INSTANCE);
+	}
+
+	public static void finishBinding()
+	{
+		SingletonHandler.finishBinding();
 	}
 }

@@ -22,6 +22,7 @@ package com.seibel.lod.forge;
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.wrappers.config.ConfigGui;
+import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.ApiShared;
@@ -72,8 +73,8 @@ public class ForgeMain implements LodForgeMethodCaller
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(this, !FMLLoader.getDist().isClient(), new NetworkHandler());
 		ForgeDependencySetup.createInitialBindings();
+		ForgeDependencySetup.finishBinding();
 		ApiShared.LOGGER.info("Distant Horizons initializing...");
-		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
 	}
 	
 	public ForgeMain()
@@ -89,6 +90,8 @@ public class ForgeMain implements LodForgeMethodCaller
 			ModAccessorHandler.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
 
+		ModAccessorHandler.finishBinding();
+
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
 				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> ConfigGui.getScreen(parent, "")));
 		forgeClientProxy = new ForgeClientProxy();
@@ -97,7 +100,7 @@ public class ForgeMain implements LodForgeMethodCaller
 
 	private final ModelDataMap dataMap = new ModelDataMap.Builder().build();
 	@Override
-	public List<BakedQuad> getQuads(MinecraftWrapper mc, Block block, BlockState blockState, Direction direction, Random random) {
+	public List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, Random random) {
 		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
 	}
 }

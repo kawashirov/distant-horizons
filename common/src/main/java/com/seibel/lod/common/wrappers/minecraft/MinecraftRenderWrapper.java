@@ -24,7 +24,7 @@ import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
-import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftWrapper;
+import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.lod.common.wrappers.McObjectConverter;
@@ -58,7 +58,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
     private static final Minecraft MC = Minecraft.getInstance();
     private static final GameRenderer GAME_RENDERER = MC.gameRenderer;
-    private static final WrapperFactory FACTORY = WrapperFactory.INSTANCE;
+    private static final IWrapperFactory FACTORY = WrapperFactory.INSTANCE;
 
     @Override
     public Vec3f getLookAtVector()
@@ -178,10 +178,10 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 			}).collect(Collectors.toCollection(HashSet::new)));
 			} catch (LinkageError e) {
 				try {
-					MinecraftWrapper.INSTANCE.sendChatMessage(
+                    MinecraftClientWrapper.INSTANCE.sendChatMessage(
 							"\u00A7e\u00A7l\u00A7uWARNING: Distant Horizons: getVanillaRenderedChunks method failed."
 							+ " Using Backup Method.");
-					MinecraftWrapper.INSTANCE.sendChatMessage(
+                    MinecraftClientWrapper.INSTANCE.sendChatMessage(
 							"\u00A7eOverdraw prevention will be worse than normal.");
 				} catch (Exception e2) {}
 				ApiShared.LOGGER.error("getVanillaRenderedChunks Error: {}", e);

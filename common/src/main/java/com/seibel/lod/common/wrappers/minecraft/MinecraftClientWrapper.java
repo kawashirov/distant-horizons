@@ -27,10 +27,9 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.ApiShared;
-import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.enums.LodDirection;
 import com.seibel.lod.core.util.LodUtil;
-import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftWrapper;
+import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IProfilerWrapper;
 import com.seibel.lod.core.wrapperInterfaces.misc.ILightMapWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IDimensionTypeWrapper;
@@ -68,11 +67,11 @@ import org.jetbrains.annotations.Nullable;
  * to allow for easier movement between Minecraft versions.
  *
  * @author James Seibel
- * @version 9-16-2021
+ * @version 3-5-2022
  */
-public class MinecraftWrapper implements IMinecraftWrapper
+public class MinecraftClientWrapper implements IMinecraftClientWrapper
 {
-    public static final MinecraftWrapper INSTANCE = new MinecraftWrapper();
+    public static final MinecraftClientWrapper INSTANCE = new MinecraftClientWrapper();
 
     public final Minecraft mc = Minecraft.getInstance();
 
@@ -85,7 +84,7 @@ public class MinecraftWrapper implements IMinecraftWrapper
     private ProfilerWrapper profilerWrapper;
 
 
-    private MinecraftWrapper()
+    private MinecraftClientWrapper()
     {
 
     }
