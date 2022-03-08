@@ -25,6 +25,7 @@ import com.seibel.lod.core.enums.rendering.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.*;
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IMultiplayer;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IWorldGenerator;
 
 /**
@@ -70,7 +71,10 @@ public class Config
 
 		@ConfigAnnotations.ScreenEntry
 		public static WorldGenerator worldGenerator;
-
+		
+		@ConfigAnnotations.ScreenEntry
+		public static Multiplayer multiplayer;
+		
 		@ConfigAnnotations.ScreenEntry
 		public static Advanced advanced;
 
@@ -171,7 +175,7 @@ public class Config
 			}
 		}
 
-
+		
 		public static class WorldGenerator
 		{
 			@ConfigAnnotations.FileComment
@@ -207,7 +211,17 @@ public class Config
 			@ConfigAnnotations.Entry
 			public static BlocksToAvoid blocksToAvoid = IWorldGenerator.BLOCKS_TO_AVOID_DEFAULT;
 		}
-
+		
+		
+		public static class Multiplayer
+		{
+			@ConfigAnnotations.FileComment
+			public static String _serverFolderNameMode = IMultiplayer.SERVER_FOLDER_NAME_MODE_DESC;
+			@ConfigAnnotations.Entry
+			public static ServerFolderNameMode serverFolderNameMode = IMultiplayer.SERVER_FOLDER_NAME_MODE_DEFAULT;
+		}
+				
+		
 		public static class Advanced
 		{
 			@ConfigAnnotations.ScreenEntry
