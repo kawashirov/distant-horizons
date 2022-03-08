@@ -22,9 +22,12 @@ package com.seibel.lod.common.wrappers;
 import java.nio.FloatBuffer;
 
 import com.mojang.math.Matrix4f;
+import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
 import com.seibel.lod.core.enums.LodDirection;
 import com.seibel.lod.core.objects.math.Mat4f;
+import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 
 /**
@@ -48,17 +51,29 @@ public class McObjectConverter
 
 
     static final Direction[] directions;
+    static final LodDirection[] lodDirections;
     static {
     	LodDirection[] lodDirs = LodDirection.values();
     	directions = new Direction[lodDirs.length];
+    	lodDirections = new LodDirection[lodDirs.length];
     	for (LodDirection lodDir : lodDirs) {
-    		directions[lodDir.ordinal()] = Direction.byName(lodDir.name());
+    		Direction dir = Direction.byName(lodDir.name());
+    		directions[lodDir.ordinal()] = dir;
+    		lodDirections[dir.ordinal()] = lodDir;
     	}
+    }
+    
+    public static BlockPos Convert(AbstractBlockPosWrapper wrappedPos) {
+    	return new BlockPos(wrappedPos.getX(),wrappedPos.getY(), wrappedPos.getZ());
     }
     
     
     public static Direction Convert(LodDirection lodDirection)
     {
         return directions[lodDirection.ordinal()];
+    }
+    public static LodDirection Convert(Direction direction)
+    {
+        return lodDirections[direction.ordinal()];
     }
 }
