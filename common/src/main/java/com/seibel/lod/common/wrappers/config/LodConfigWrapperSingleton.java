@@ -3,6 +3,7 @@ package com.seibel.lod.common.wrappers.config;
 import com.seibel.lod.core.enums.config.*;
 import com.seibel.lod.core.enums.rendering.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IMultiplayer;
 import com.seibel.lod.common.Config;
 
 /**
@@ -28,6 +29,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 	{
 		public final IGraphics graphics;
 		public final IWorldGenerator worldGenerator;
+		public final IMultiplayer multiplayer;
 		public final IAdvanced advanced;
 
 
@@ -41,6 +43,11 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 		public IWorldGenerator worldGenerator()
 		{
 			return worldGenerator;
+		}
+
+		@Override
+		public IMultiplayer multiplayer() {
+			return multiplayer;
 		}
 
 		@Override
@@ -70,6 +77,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 		{
 			graphics = new Graphics();
 			worldGenerator = new WorldGenerator();
+			multiplayer = new Multiplayer();
 			advanced = new Advanced();
 		}
 
@@ -367,6 +375,27 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			}
 		}
 
+
+
+		//=====================//
+		// Multiplayer Configs //
+		//=====================//
+		public static class Multiplayer implements IMultiplayer
+		{
+			@Override
+			public ServerFolderNameMode getServerFolderNameMode()
+			{
+				return Config.Client.Multiplayer.serverFolderNameMode;
+			}
+			@Override
+			public void setServerFolderNameMode(ServerFolderNameMode newServerFolderNameMode)
+			{
+				ConfigGui.editSingleOption.getEntry("client.multiplayer.serverFolderNameMode").value = newServerFolderNameMode;
+				ConfigGui.editSingleOption.saveOption("client.multiplayer.serverFolderNameMode");
+			}
+
+
+		}
 
 
 
