@@ -23,7 +23,6 @@ import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
-import com.seibel.lod.common.wrappers.minecraft.MinecraftWrapper;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.handlers.ReflectionHandler;
