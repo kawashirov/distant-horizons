@@ -9,6 +9,7 @@ buildscript {
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "0.10.0-SNAPSHOT" apply false
+	id "systems.manifold.manifold-gradle-plugin" version "0.0.2-alpha"
 }
 
 apply plugin: JarMergerPlugin
@@ -34,6 +35,9 @@ subprojects { p ->
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
         // The following line declares the mojmap mappings
         mappings loom.officialMojangMappings()
+		
+		//Manifold
+		annotationProcessor 'systems.manifold:manifold-preprocessor:2022.1.5'
 
         // Toml
         implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
@@ -142,6 +146,10 @@ allprojects { p ->
 
 
     tasks.withType(JavaCompile) {
+	
+		// Add Manifold Preprocessor
+		options.compilerArgs += ['-Xplugin:Manifold']
+		
         if (p != project(":core")) {
             // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
             options.release = 17

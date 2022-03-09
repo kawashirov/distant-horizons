@@ -28,11 +28,17 @@ import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.I
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IMultiplayer;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IWorldGenerator;
 
+
+
+#define CONFIG
+
 /**
  * This handles any configuration the user has access to.
  * @author coolGi2007
  * @version 12-12-2021
  */
+
+#if CONFIG
 public class Config
 //public class Config extends TinyConfig
 {
@@ -52,7 +58,7 @@ public class Config
 	//				|-> Debugging
 
 	// Since the original config system uses forge stuff, that means we have to rewrite the whole config system
-
+	
 	@ConfigAnnotations.ScreenEntry
 	public static Client client;
 
@@ -286,3 +292,4 @@ public class Config
 		}
 	}
 }
+#endif
