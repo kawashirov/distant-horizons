@@ -9,7 +9,6 @@ buildscript {
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "0.10.0-SNAPSHOT" apply false
-	id "systems.manifold.manifold-gradle-plugin" version "0.0.2-alpha"
 }
 
 apply plugin: JarMergerPlugin
@@ -77,6 +76,9 @@ allprojects { p ->
         mavenCentral()
         // used to download and compile dependencies from git repos
         maven { url 'https://jitpack.io' }
+		
+		// For Manifold Preprocessor
+		maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
 
         // Required for importing Modrinth mods
         maven {
