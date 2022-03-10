@@ -427,7 +427,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			e.pEvent.emptyNano = System.nanoTime();
 			e.refreshTimeout();
-			region = new LightedWorldGenRegion(params.level, lightEngine, e.tParam.structFeat, chunks, ChunkStatus.STRUCTURE_STARTS, rangeEmpty, e.lightMode, generator);
+			region = new LightedWorldGenRegion(params.level, lightEngine, chunks, ChunkStatus.STRUCTURE_STARTS, rangeEmpty, e.lightMode, generator);
 			adaptor.setRegion(region);
 			e.tParam.makeStructFeat(region);
 			referencedChunks = chunks.subGrid(e.range);

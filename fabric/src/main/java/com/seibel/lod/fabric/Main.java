@@ -28,10 +28,10 @@ import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
+import com.seibel.lod.fabric.wrappers.FabricDependencySetup;
 import com.seibel.lod.fabric.wrappers.modAccessor.ModChecker;
 import com.seibel.lod.fabric.wrappers.modAccessor.OptifineAccessor;
 import com.seibel.lod.fabric.wrappers.modAccessor.SodiumAccessor;
-import com.seibel.lod.fabric.wrappers.DependencySetup;
 
 import net.fabricmc.api.ClientModInitializer;
 
@@ -63,8 +63,8 @@ public class Main implements ClientModInitializer
 	public static void init() {
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(null, false);
-		DependencySetup.createInitialBindings();
-		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
+		FabricDependencySetup.createInitialBindings();
+		FabricDependencySetup.finishBinding();
 		ApiShared.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 
 		// Check if this works
@@ -76,12 +76,15 @@ public class Main implements ClientModInitializer
 		if (SingletonHandler.get(IModChecker.class).isModLoaded("optifine")) {
 			ModAccessorHandler.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
+
+		ModAccessorHandler.finishBinding();
 	}
 
 	public static void initServer() {
 		LodCommonMain.initConfig();
 		LodCommonMain.startup(null, true);
-		DependencySetup.createInitialBindings();
+		FabricDependencySetup.createInitialBindings();
+		FabricDependencySetup.finishBinding();
 		ApiShared.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 	}
 }

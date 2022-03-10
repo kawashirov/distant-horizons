@@ -1,9 +1,9 @@
 package com.seibel.lod.common.wrappers.chunk;
 
+import com.seibel.lod.common.wrappers.block.BlockDetailWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
 import com.seibel.lod.core.util.LevelPosUtil;
 import com.seibel.lod.core.util.LodUtil;
-import com.seibel.lod.core.wrapperInterfaces.block.BlockDetail;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 import com.seibel.lod.common.wrappers.WrapperUtil;
@@ -66,9 +66,11 @@ public class ChunkWrapper implements IChunkWrapper
     }
 
     @Override
-    public BlockDetail getBlockDetail(int x, int y, int z) {
-        BlockState blockState = chunk.getBlockState(new BlockPos(x,y,z));
-        return BlockDetailMap.getBlockDetailWithCompleteTint(blockState, x, y, z, lightSource);
+    public BlockDetailWrapper getBlockDetail(int x, int y, int z) {
+        BlockPos pos = new BlockPos(x,y,z);
+        BlockState blockState = chunk.getBlockState(pos);
+        BlockDetailWrapper blockDetail = BlockDetailMap.getOrMakeBlockDetailCache(blockState, pos, lightSource);
+        return blockDetail == BlockDetailWrapper.NULL_BLOCK_DETAIL ? null : blockDetail;
     }
 
     @Deprecated
@@ -177,5 +179,10 @@ public class ChunkWrapper implements IChunkWrapper
             }
         }
         return true;
+    }
+
+    public LevelReader getColorResolver()
+    {
+        return lightSource;
     }
 }
