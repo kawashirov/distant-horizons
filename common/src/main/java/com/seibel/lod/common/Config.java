@@ -160,11 +160,21 @@ public class Config
 				public static String _vanillaOverdraw = IAdvancedGraphics.VANILLA_OVERDRAW_DESC;
 				@ConfigAnnotations.Entry
 				public static VanillaOverdraw vanillaOverdraw = IAdvancedGraphics.VANILLA_OVERDRAW_DEFAULT;
-
+				
 				@ConfigAnnotations.FileComment
 				public static String _useExtendedNearClipPlane = IAdvancedGraphics.USE_EXTENDED_NEAR_CLIP_PLANE_DESC;
 				@ConfigAnnotations.Entry
 				public static boolean useExtendedNearClipPlane = IAdvancedGraphics.USE_EXTENDED_NEAR_CLIP_PLANE_DEFAULT;
+				
+				@ConfigAnnotations.FileComment
+				public static String _brightnessMultiplier = IAdvancedGraphics.BRIGHTNESS_MULTIPLIER_DESC;
+				@ConfigAnnotations.Entry
+				public static double brightnessMultiplier = IAdvancedGraphics.BRIGHTNESS_MULTIPLIER_DEFAULT;
+
+				@ConfigAnnotations.FileComment
+				public static String _saturationMultiplier = IAdvancedGraphics.SATURATION_MULTIPLIER_DESC;
+				@ConfigAnnotations.Entry
+				public static double saturationMultiplier = IAdvancedGraphics.SATURATION_MULTIPLIER_DEFAULT;
 
 				/*
 				@ConfigAnnotations.FileComment
