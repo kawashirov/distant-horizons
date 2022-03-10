@@ -66,8 +66,13 @@ public class ChunkWrapper implements IChunkWrapper
     @Override
     public IBiomeWrapper getBiome(int x, int y, int z)
     {
+        #if MC_VERSION_1_18_2
         return BiomeWrapper.getBiomeWrapper(chunk.getNoiseBiome(
         		QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)).value());
+        #elif MC_VERSION_1_18_1
+        return BiomeWrapper.getBiomeWrapper(chunk.getNoiseBiome(
+        		QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)));
+        #endif
     }
     
     @Override

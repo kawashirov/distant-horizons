@@ -1,5 +1,6 @@
 import io.github.ran.jarmerger.JarMergerPlugin
 
+
 buildscript {
     dependencies{
         classpath files('plugins/DHJarMerger-1.0.jar')
@@ -10,6 +11,25 @@ plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "0.10.0-SNAPSHOT" apply false
 }
+
+def loadProperties() {
+    def defaultMcVersion = '1.18.2'
+    if (!project.hasProperty("mcVer")) {
+        println "No mcVer set! Defaulting to ${defaultMcVersion}."
+        println "Tip: Use -PmcVer='${defaultMcVersion}' in cmd arg to set mcVer."
+    }
+	def mcVersion = project.hasProperty("mcVer") ? mcVer : defaultMcVersion
+
+	println "Loading properties file at " + mcVersion + ".properties"
+	def props = new Properties()
+	props.load(new FileInputStream("$rootProject.rootDir/"+"$mcVersion"+".properties"))
+	
+    props.each { prop ->
+      rootProject.ext.set(prop.key, prop.value)
+	  // println "Added prop [key:" + prop.key + ", value:" + prop.value + "]"
+    }
+}
+loadProperties()
 
 apply plugin: JarMergerPlugin
 
@@ -36,7 +56,7 @@ subprojects { p ->
         mappings loom.officialMojangMappings()
 		
 		//Manifold
-		annotationProcessor 'systems.manifold:manifold-preprocessor:2022.1.5'
+		annotationProcessor "systems.manifold:manifold-preprocessor:${rootProject.manifold_version}"
 
         // Toml
         implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
@@ -46,7 +66,6 @@ subprojects { p ->
             // Do NOT use other classes from fabric loader unless working with fabric
             modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
         }
-
 
         if (p != project(":core")) {
             common(project(":core")) { transitive false }
@@ -124,8 +143,11 @@ allprojects { p ->
                 description: mod_description,
                 homepage: mod_homepage,
                 source: mod_source,
-                issues: mod_issues
+                issues: mod_issues,
+                minecraft_version: minecraft_version,
+                java_version: java_version
         ]   // The left side is what gets replaced in the mod info and the right side is where to get it from in the gradle.properties
+        //TODO: Make Forge loader version also be relaced with non hardcoded value instead of "[36,41)"
 
         inputs.properties replaceProperties
         replaceProperties.put 'project', project
@@ -150,11 +172,12 @@ allprojects { p ->
     tasks.withType(JavaCompile) {
 	
 		// Add Manifold Preprocessor
-		options.compilerArgs += ['-Xplugin:Manifold']
+		def excapedMCVersion = rootProject.minecraft_version.replace(".", "_")
+		options.compilerArgs += ['-Xplugin:Manifold', "-AMC_VERSION_${excapedMCVersion}"]
 		
+		// println options.compilerArgs
         if (p != project(":core")) {
-            // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
-            options.release = 17
+            options.release = rootProject.java_version as Integer
         }
     }
 

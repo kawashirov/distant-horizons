@@ -247,12 +247,20 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 		BlockTintCache blockTintCache = (BlockTintCache) this.tintCaches.get(colorResolver);
 		return blockTintCache.getColor(blockPos);
 	}
+
+	private Biome _getBiome(BlockPos pos) {
+		#if MC_VERSION_1_18_2
+		return getBiome(pos).value();
+		#elif MC_VERSION_1_18_1
+		return getBiome(pos);
+		#endif
+	}
 	
 	public int calculateBlockTint(BlockPos blockPos, ColorResolver colorResolver)
 	{
 		int i = (Minecraft.getInstance()).options.biomeBlendRadius;
 		if (i == 0)
-			return colorResolver.getColor((Biome) getBiome(blockPos).value(), blockPos.getX(), blockPos.getZ());
+			return colorResolver.getColor((Biome) _getBiome(blockPos), blockPos.getX(), blockPos.getZ());
 		int j = (i * 2 + 1) * (i * 2 + 1);
 		int k = 0;
 		int l = 0;
@@ -262,7 +270,7 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 		while (cursor3D.advance())
 		{
 			mutableBlockPos.set(cursor3D.nextX(), cursor3D.nextY(), cursor3D.nextZ());
-			int n = colorResolver.getColor((Biome) getBiome((BlockPos) mutableBlockPos).value(), mutableBlockPos.getX(), mutableBlockPos.getZ());
+			int n = colorResolver.getColor((Biome) _getBiome((BlockPos) mutableBlockPos), mutableBlockPos.getX(), mutableBlockPos.getZ());
 			k += (n & 0xFF0000) >> 16;
 			l += (n & 0xFF00) >> 8;
 			m += n & 0xFF;

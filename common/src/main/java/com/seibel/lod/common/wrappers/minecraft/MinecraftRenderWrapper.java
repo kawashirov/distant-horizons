@@ -167,12 +167,17 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 				pos = getMaximumRenderedChunks();
 			return pos;
 		}
+        #define MC_VERSION_1_18_1
 		if (!usingBackupGetVanillaRenderedChunks) {
 			try {
 			LevelRenderer levelRenderer = MC.levelRenderer;
 			LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
 			return (chunks.stream().map((chunk) -> {
+                #if MC_VERSION_1_18_2
 				AABB chunkBoundingBox = chunk.chunk.getBoundingBox();
+                #elif MC_VERSION_1_18_1
+				AABB chunkBoundingBox = chunk.chunk.bb;
+                #endif
 				return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
 						Math.floorDiv((int) chunkBoundingBox.minZ, 16));
 			}).collect(Collectors.toCollection(HashSet::new)));
