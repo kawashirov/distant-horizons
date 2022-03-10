@@ -29,21 +29,12 @@ import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.I
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IWorldGenerator;
 
 
-
-#define CONFIG
-
-#if MC_VERSION_1.18.2
-
-stafdqvsrevasbhyuicwegyhio
-
-#endif
 /**
  * This handles any configuration the user has access to.
  * @author coolGi2007
  * @version 12-12-2021
  */
 
-#if CONFIG
 public class Config
 //public class Config extends TinyConfig
 {
@@ -297,4 +288,3 @@ public class Config
 		}
 	}
 }
-#endif

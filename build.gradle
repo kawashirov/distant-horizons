@@ -12,6 +12,11 @@ plugins {
     id "dev.architectury.loom" version "0.10.0-SNAPSHOT" apply false
 }
 
+def writeBuildGradlePredefine() {
+    def excapedMCVersion = rootProject.minecraft_version.replace(".", "_")
+    new File(projectDir, "build.properties").text = "MC_VERSION_${excapedMCVersion}=\n"
+}
+
 def loadProperties() {
     def defaultMcVersion = '1.18.2'
     if (!project.hasProperty("mcVer")) {
@@ -28,6 +33,7 @@ def loadProperties() {
       rootProject.ext.set(prop.key, prop.value)
 	  // println "Added prop [key:" + prop.key + ", value:" + prop.value + "]"
     }
+    writeBuildGradlePredefine()
 }
 loadProperties()
 
@@ -170,11 +176,12 @@ allprojects { p ->
 
 
     tasks.withType(JavaCompile) {
-	
 		// Add Manifold Preprocessor
-		def excapedMCVersion = rootProject.minecraft_version.replace(".", "_")
-		options.compilerArgs += ['-Xplugin:Manifold', "-AMC_VERSION_${excapedMCVersion}"]
-		
+//		def excapedMCVersion = rootProject.minecraft_version.replace(".", "_")
+//		options.compilerArgs += ['-Xplugin:Manifold', "-AMC_VERSION_${excapedMCVersion}"]
+//
+        options.compilerArgs += ['-Xplugin:Manifold']
+
 		// println options.compilerArgs
         if (p != project(":core")) {
             options.release = rootProject.java_version as Integer
