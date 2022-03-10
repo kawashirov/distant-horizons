@@ -10,16 +10,24 @@ import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.enums.config.LightGenerationMode;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockTintCache;
+import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Cursor3D;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.LevelHeightAccessor;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -40,21 +48,25 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	public final int size;
 	private final ChunkPos firstPos;
 	private final List<ChunkAccess> cache;
-	private final StructureFeatureManager structFeat;
 	Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
 
 	public LightedWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine,
-			StructureFeatureManager structFeat, List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
+			List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
 			LightGenerationMode lightMode, EmptyChunkGenerator generator) {
 		super(serverLevel, list, chunkStatus, i);
 		this.lightMode = lightMode;
 		this.firstPos = list.get(0).getPos();
 		this.generator = generator;
-		this.structFeat = structFeat;
 		light = lightEngine;
 		writeRadius = i;
 		cache = list;
 		size = Mth.floor(Math.sqrt(list.size()));
+
+		this.tintCaches = Util.make(new Object2ObjectArrayMap(3), object2ObjectArrayMap -> {
+			object2ObjectArrayMap.put(BiomeColors.GRASS_COLOR_RESOLVER, new BlockTintCache((pos) -> {return calculateBlockTint(pos, BiomeColors.GRASS_COLOR_RESOLVER);}));
+			object2ObjectArrayMap.put(BiomeColors.FOLIAGE_COLOR_RESOLVER, new BlockTintCache((pos) -> {return calculateBlockTint(pos, BiomeColors.FOLIAGE_COLOR_RESOLVER);}));
+			object2ObjectArrayMap.put(BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache((pos) -> {return calculateBlockTint(pos, BiomeColors.WATER_COLOR_RESOLVER);}));
+		});
 	}
 
 	// Bypass BCLib mixin overrides.
@@ -77,12 +89,6 @@ public class LightedWorldGenRegion extends WorldGenRegion {
         }
         return true;
     }
-
-	@Override
-	public List<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos,
-			StructureFeature<?> structureFeature) {
-		return structFeat.startsForFeature(sectionPos, structureFeature);
-	}
 
 	// Skip updating the related tile entities
 	@Override
@@ -225,4 +231,34 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 		return (getBrightness(LightLayer.SKY, blockPos) >= getMaxLightLevel());
 	}
 
+
+	private final Object2ObjectArrayMap<ColorResolver, BlockTintCache> tintCaches;
+
+	public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver)
+	{
+		BlockTintCache blockTintCache = (BlockTintCache) this.tintCaches.get(colorResolver);
+		return blockTintCache.getColor(blockPos);
+	}
+
+	public int calculateBlockTint(BlockPos blockPos, ColorResolver colorResolver)
+	{
+		int i = (Minecraft.getInstance()).options.biomeBlendRadius;
+		if (i == 0)
+			return colorResolver.getColor((Biome) getBiome(blockPos), blockPos.getX(), blockPos.getZ());
+		int j = (i * 2 + 1) * (i * 2 + 1);
+		int k = 0;
+		int l = 0;
+		int m = 0;
+		Cursor3D cursor3D = new Cursor3D(blockPos.getX() - i, blockPos.getY(), blockPos.getZ() - i, blockPos.getX() + i, blockPos.getY(), blockPos.getZ() + i);
+		BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+		while (cursor3D.advance())
+		{
+			mutableBlockPos.set(cursor3D.nextX(), cursor3D.nextY(), cursor3D.nextZ());
+			int n = colorResolver.getColor((Biome) getBiome((BlockPos) mutableBlockPos), mutableBlockPos.getX(), mutableBlockPos.getZ());
+			k += (n & 0xFF0000) >> 16;
+			l += (n & 0xFF00) >> 8;
+			m += n & 0xFF;
+		}
+		return (k / j & 0xFF) << 16 | (l / j & 0xFF) << 8 | m / j & 0xFF;
+	}
 }
