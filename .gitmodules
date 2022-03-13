@@ -1,6 +1,7 @@
 [submodule "core"]
 	path = core
 	url = https://gitlab.com/jeseibel/distant-horizons-core.git
+	branch = main
 [submodule "Core"]
 	url = https://gitlab.com/jeseibel/distant-horizons-core
 	branch = main
