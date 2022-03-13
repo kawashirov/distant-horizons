@@ -124,6 +124,11 @@ public class Config
 				public static String _dropoffQuality = IQuality.DROPOFF_QUALITY_DESC;
 				@ConfigAnnotations.Entry
 				public static DropoffQuality dropoffQuality = IQuality.DROPOFF_QUALITY_DEFAULT;
+
+				@ConfigAnnotations.FileComment
+				public static String _lodBiomeBlending = IQuality.LOD_BIOME_BLENDING_DESC;
+				@ConfigAnnotations.Entry(minValue = 0, maxValue = 7)
+				public static int lodBiomeBlending = IQuality.LOD_BIOME_BLENDING_MIN_DEFAULT_MAX.defaultValue;
 			}
 
 

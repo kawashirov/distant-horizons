@@ -195,6 +195,17 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.quality.dropoffQuality").value = newDropoffQuality;
 					ConfigGui.editSingleOption.saveOption("client.graphics.quality.dropoffQuality");
 				}
+
+				@Override
+				public int getLodBiomeBlending() {
+					return Config.Client.Graphics.Quality.lodBiomeBlending;
+				}
+
+				@Override
+				public void setLodBiomeBlending(int newLodBiomeBlending) {
+					ConfigGui.editSingleOption.getEntry("client.graphics.quality.lodBiomeBlending").value = newLodBiomeBlending;
+					ConfigGui.editSingleOption.saveOption("client.graphics.quality.lodBiomeBlending");
+				}
 			}
 
 
