@@ -150,7 +150,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
      * <p>
      */
 
-    public boolean usingBackupGetVanillaRenderedChunks = false;
+    public boolean usingBackupGetVanillaRenderedChunks = true;
 	@Override
 	public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks()
 	{
@@ -167,7 +167,6 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 				pos = getMaximumRenderedChunks();
 			return pos;
 		}
-        #define MC_VERSION_1_18_1
 		if (!usingBackupGetVanillaRenderedChunks) {
 			try {
 			LevelRenderer levelRenderer = MC.levelRenderer;
