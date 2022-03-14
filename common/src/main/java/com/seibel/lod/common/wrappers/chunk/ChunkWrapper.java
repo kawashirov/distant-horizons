@@ -1,5 +1,6 @@
 package com.seibel.lod.common.wrappers.chunk;
 
+import com.seibel.lod.core.enums.LodDirection;
 import com.seibel.lod.core.util.LevelPosUtil;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
@@ -79,6 +80,22 @@ public class ChunkWrapper implements IChunkWrapper
     public BlockDetailWrapper getBlockDetail(int x, int y, int z) {
     	BlockPos pos = new BlockPos(x,y,z);
         BlockState blockState = chunk.getBlockState(pos);
+        BlockDetailWrapper blockDetail = BlockDetailMap.getOrMakeBlockDetailCache(blockState, pos, lightSource);
+        return blockDetail == BlockDetailWrapper.NULL_BLOCK_DETAIL ? null : blockDetail;
+    }
+
+    @Override
+    public BlockDetailWrapper getBlockDetailAtFace(int x, int y, int z, LodDirection dir) {
+        int fy = y+dir.getNormal().y;
+        if (fy < getMinBuildHeight() || fy > getMaxBuildHeight()) return null;
+        BlockPos pos = new BlockPos(x+dir.getNormal().x,fy,z+dir.getNormal().z);
+        BlockState blockState;
+        if (blockPosInsideChunk(x,y,z))
+            blockState = chunk.getBlockState(pos);
+        else {
+            blockState = lightSource.getBlockState(pos);
+        }
+        if (blockState == null || blockState.isAir()) return null;
         BlockDetailWrapper blockDetail = BlockDetailMap.getOrMakeBlockDetailCache(blockState, pos, lightSource);
         return blockDetail == BlockDetailWrapper.NULL_BLOCK_DETAIL ? null : blockDetail;
     }
