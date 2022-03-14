@@ -24,7 +24,6 @@ import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
-import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.lod.common.wrappers.McObjectConverter;
@@ -130,7 +129,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     @Override
     public int getRenderDistance()
     {
-        return MC.options.renderDistance;
+        return MC.options.getEffectiveRenderDistance();
     }
 
     @Override
