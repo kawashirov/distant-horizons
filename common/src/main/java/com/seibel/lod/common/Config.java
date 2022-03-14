@@ -25,6 +25,8 @@ import com.seibel.lod.core.enums.rendering.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.*;
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.IFogQuality.IAdvancedFog;
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.IFogQuality.IAdvancedFog.IHeightFog;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IMultiplayer;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IWorldGenerator;
 
@@ -153,6 +155,84 @@ public class Config
 				public static String _disableVanillaFog = IFogQuality.DISABLE_VANILLA_FOG_DESC;
 				@ConfigAnnotations.Entry
 				public static boolean disableVanillaFog = IFogQuality.DISABLE_VANILLA_FOG_DEFAULT;
+				
+				@ConfigAnnotations.ScreenEntry
+				public static AdvancedFog advancedFog;
+				
+				public static class AdvancedFog {
+					static final double SQRT2 = 1.4142135623730951;
+
+					@ConfigAnnotations.FileComment
+					public static String _farFogStart = IAdvancedFog.FAR_FOG_START_DESC;
+					@ConfigAnnotations.Entry(minValue = 0.0, maxValue = SQRT2)
+					public static double farFogStart = IAdvancedFog.FAR_FOG_START_MIN_DEFAULT_MAX.defaultValue;
+
+					@ConfigAnnotations.FileComment
+					public static String _farFogEnd = IAdvancedFog.FAR_FOG_END_DESC;
+					@ConfigAnnotations.Entry(minValue = 0.0, maxValue = SQRT2)
+					public static double farFogEnd = IAdvancedFog.FAR_FOG_END_MIN_DEFAULT_MAX.defaultValue;
+
+					@ConfigAnnotations.FileComment
+					public static String _farFogMin = IAdvancedFog.FAR_FOG_MIN_DESC;
+					@ConfigAnnotations.Entry(minValue = -5.0, maxValue = SQRT2)
+					public static double farFogMin = IAdvancedFog.FAR_FOG_MIN_MIN_DEFAULT_MAX.defaultValue;
+
+					@ConfigAnnotations.FileComment
+					public static String _farFogMax = IAdvancedFog.FAR_FOG_MAX_DESC;
+					@ConfigAnnotations.Entry(minValue = 0.0, maxValue = 5.0)
+					public static double farFogMax = IAdvancedFog.FAR_FOG_MAX_MIN_DEFAULT_MAX.defaultValue;
+
+					@ConfigAnnotations.FileComment
+					public static String _farFogType = IAdvancedFog.FAR_FOG_TYPE_DESC;
+					@ConfigAnnotations.Entry
+					public static FogSetting.Type farFogType = IAdvancedFog.FAR_FOG_TYPE_DEFAULT;
+					
+					@ConfigAnnotations.FileComment
+					public static String _farFogDensity = IAdvancedFog.FAR_FOG_DENSITY_DESC;
+					@ConfigAnnotations.Entry(minValue = 0.01, maxValue = 50.0)
+					public static double farFogDensity = IAdvancedFog.FAR_FOG_DENSITY_MIN_DEFAULT_MAX.defaultValue;
+
+					@ConfigAnnotations.ScreenEntry
+					public static HeightFog HeightFog;
+
+					public static class HeightFog {
+
+						@ConfigAnnotations.FileComment
+						public static String _heightFogTMode = IHeightFog.HEIGHT_FOG_MODE_DESC;
+						@ConfigAnnotations.Entry
+						public static HeightFogMode heightFogMode = IHeightFog.HEIGHT_FOG_MODE_DEFAULT;
+
+						@ConfigAnnotations.FileComment
+						public static String _heightFogStart = IHeightFog.HEIGHT_FOG_START_DESC;
+						@ConfigAnnotations.Entry(minValue = 0.0, maxValue = SQRT2)
+						public static double heightFogStart = IHeightFog.HEIGHT_FOG_START_MIN_DEFAULT_MAX.defaultValue;
+
+						@ConfigAnnotations.FileComment
+						public static String _heightFogEnd = IHeightFog.HEIGHT_FOG_END_DESC;
+						@ConfigAnnotations.Entry(minValue = 0.0, maxValue = SQRT2)
+						public static double heightFogEnd = IHeightFog.HEIGHT_FOG_END_MIN_DEFAULT_MAX.defaultValue;
+
+						@ConfigAnnotations.FileComment
+						public static String _heightFogMin = IHeightFog.HEIGHT_FOG_MIN_DESC;
+						@ConfigAnnotations.Entry(minValue = -5.0, maxValue = SQRT2)
+						public static double heightFogMin = IHeightFog.HEIGHT_FOG_MIN_MIN_DEFAULT_MAX.defaultValue;
+
+						@ConfigAnnotations.FileComment
+						public static String _heightFogMax = IHeightFog.HEIGHT_FOG_MAX_DESC;
+						@ConfigAnnotations.Entry(minValue = 0.0, maxValue = 5.0)
+						public static double heightFogMax = IHeightFog.HEIGHT_FOG_MAX_MIN_DEFAULT_MAX.defaultValue;
+
+						@ConfigAnnotations.FileComment
+						public static String _heightFogType = IHeightFog.HEIGHT_FOG_TYPE_DESC;
+						@ConfigAnnotations.Entry
+						public static FogSetting.Type heightFogType = IHeightFog.HEIGHT_FOG_TYPE_DEFAULT;
+
+						@ConfigAnnotations.FileComment
+						public static String _heightFogDensity = IHeightFog.HEIGHT_FOG_DENSITY_DESC;
+						@ConfigAnnotations.Entry(minValue = 0.01, maxValue = 50.0)
+						public static double heightFogDensity = IHeightFog.HEIGHT_FOG_DENSITY_MIN_DEFAULT_MAX.defaultValue;
+					}
+				}
 			}
 
 			

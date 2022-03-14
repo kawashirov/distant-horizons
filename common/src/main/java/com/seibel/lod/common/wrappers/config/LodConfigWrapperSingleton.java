@@ -3,7 +3,6 @@ package com.seibel.lod.common.wrappers.config;
 import com.seibel.lod.core.enums.config.*;
 import com.seibel.lod.core.enums.rendering.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
-import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IMultiplayer;
 import com.seibel.lod.common.Config;
 
 /**
@@ -211,6 +210,13 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 
 			public static class FogQuality implements IFogQuality
 			{
+				public final IAdvancedFog advancedFog;
+
+				FogQuality()
+				{
+					advancedFog = new AdvancedFog();
+				}
+
 				@Override
 				public FogDistance getFogDistance()
 				{
@@ -263,6 +269,149 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.disableVanillaFog").value = newDisableVanillaFog;
 					ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.disableVanillaFog");
 				}
+
+				@Override
+				public IAdvancedFog advancedFog() {
+					return advancedFog;
+				}
+
+				public static class AdvancedFog implements IAdvancedFog {
+					public final IHeightFog heightFog;
+
+					public AdvancedFog() {
+						heightFog = new HeightFog();
+					}
+
+					@Override
+					public double getFarFogStart() {
+						return Config.Client.Graphics.FogQuality.AdvancedFog.farFogStart;
+					}
+					@Override
+					public double getFarFogEnd() {
+						return Config.Client.Graphics.FogQuality.AdvancedFog.farFogEnd;
+					}
+					@Override
+					public double getFarFogMin() {
+						return Config.Client.Graphics.FogQuality.AdvancedFog.farFogMin;
+					}
+					@Override
+					public double getFarFogMax() {
+						return Config.Client.Graphics.FogQuality.AdvancedFog.farFogMax;
+					}
+					@Override
+					public FogSetting.Type getFarFogType() {
+						return Config.Client.Graphics.FogQuality.AdvancedFog.farFogType;
+					}
+					@Override
+					public double getFarFogDensity() {
+						return Config.Client.Graphics.FogQuality.AdvancedFog.farFogDensity;
+					}
+
+					@Override
+					public void setFarFogStart(double newFarFogStart) {
+						ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.farFogStart").value = newFarFogStart;
+						ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.farFogStart");
+					}
+					@Override
+					public void setFarFogEnd(double newFarFogEnd) {
+						ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.farFogEnd").value = newFarFogEnd;
+						ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.farFogEnd");
+					}
+					@Override
+					public void setFarFogMin(double newFarFogMin) {
+						ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.farFogMin").value = newFarFogMin;
+						ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.farFogMin");
+					}
+					@Override
+					public void setFarFogMax(double newFarFogMax) {
+						ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.farFogMax").value = newFarFogMax;
+						ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.farFogMax");
+					}
+					@Override
+					public void setFarFogType(FogSetting.Type newFarFogType) {
+						ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.farFogType").value = newFarFogType;
+						ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.farFogType");
+					}
+					@Override
+					public void setFarFogDensity(double newFarFogDensity) {
+						ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.farFogDensity").value = newFarFogDensity;
+						ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.farFogDensity");
+					}
+
+					@Override
+					public IHeightFog heightFog() {
+						return heightFog;
+					}
+					
+					public static class HeightFog implements IHeightFog {
+
+						@Override
+						public HeightFogMode getHeightFogMode() {
+							return Config.Client.Graphics.FogQuality.AdvancedFog.HeightFog.heightFogMode;
+						}
+						@Override
+						public double getHeightFogStart() {
+							return Config.Client.Graphics.FogQuality.AdvancedFog.HeightFog.heightFogStart;
+						}
+						@Override
+						public double getHeightFogEnd() {
+							return Config.Client.Graphics.FogQuality.AdvancedFog.HeightFog.heightFogEnd;
+						}
+						@Override
+						public double getHeightFogMin() {
+							return Config.Client.Graphics.FogQuality.AdvancedFog.HeightFog.heightFogMin;
+						}
+						@Override
+						public double getHeightFogMax() {
+							return Config.Client.Graphics.FogQuality.AdvancedFog.HeightFog.heightFogMax;
+						}
+						@Override
+						public FogSetting.Type getHeightFogType() {
+							return Config.Client.Graphics.FogQuality.AdvancedFog.HeightFog.heightFogType;
+						}
+						@Override
+						public double getHeightFogDensity() {
+							return Config.Client.Graphics.FogQuality.AdvancedFog.HeightFog.heightFogDensity;
+						}
+
+						@Override
+						public void setHeightFogType(HeightFogMode newHeightFogMode) {
+							ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.heightFog.heightFogMode").value = newHeightFogMode;
+							ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.heightFog.heightFogMode");
+						}
+						@Override
+						public void setHeightFogStart(double newHeightFogStart) {
+							ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.heightFog.heightFogStart").value = newHeightFogStart;
+							ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.heightFog.heightFogStart");
+						}
+						@Override
+						public void setHeightFogEnd(double newHeightFogEnd) {
+							ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.heightFog.heightFogEnd").value = newHeightFogEnd;
+							ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.heightFog.heightFogEnd");
+						}
+						@Override
+						public void setHeightFogMin(double newHeightFogMin) {
+							ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.heightFog.heightFogMin").value = newHeightFogMin;
+							ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.heightFog.heightFogMin");
+						}
+						@Override
+						public void setHeightFogMax(double newHeightFogMax) {
+							ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.heightFog.heightFogMax").value = newHeightFogMax;
+							ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.heightFog.heightFogMax");
+						}
+						@Override
+						public void setHeightFogType(FogSetting.Type newHeightFogType) {
+							ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.heightFog.heightFogType").value = newHeightFogType;
+							ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.heightFog.heightFogType");
+						}
+						@Override
+						public void setHeightFogDensity(double newHeightFogDensity) {
+							ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.heightFog.heightFogDensity").value = newHeightFogDensity;
+							ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.heightFog.heightFogDensity");
+						}
+					}
+				}
+
 			}
 
 
