@@ -61,6 +61,21 @@ public class MixinWorldRenderer
 	}
 
 	// HEAD or RETURN
+	@Inject(at = @At("RETURN"),
+			method = "renderSky(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/math/Matrix4f;FLjava/lang/Runnable;)V",
+			cancellable = true)
+	private void renderLod(PoseStack modelViewMatrixStack, Matrix4f projectionMatrix, float f, Runnable r, CallbackInfo callback) {
+
+		Mat4f mcModelViewMatrix = McObjectConverter.Convert(modelViewMatrixStack.last().pose());
+		Mat4f mcProjectionMatrix = McObjectConverter.Convert(projectionMatrix);
+
+		ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
+
+	}
+
+	/*
+
+	// HEAD or RETURN
 	@Inject(at = @At("HEAD"),
 			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V",
 			cancellable = true)
@@ -75,5 +90,5 @@ public class MixinWorldRenderer
 			ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
 		}
 		//callback.cancel();
-	}
+	}*/
 }

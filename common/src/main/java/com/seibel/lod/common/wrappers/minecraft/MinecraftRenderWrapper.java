@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
@@ -143,9 +144,24 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
         return MC.getWindow().getHeight();
     }
 
+    private RenderTarget getRenderTarget() {
+        RenderTarget r = null; //MC.levelRenderer.getCloudsTarget();
+        return r!=null ? r : MC.getMainRenderTarget();
+    }
+
     @Override
     public int getTargetFrameBuffer() {
-        return MC.getMainRenderTarget().frameBufferId;
+        return getRenderTarget().frameBufferId;
+    }
+
+    @Override
+    public int getTargetFrameBufferViewportWidth() {
+        return getRenderTarget().viewWidth;
+    }
+
+    @Override
+    public int getTargetFrameBufferViewportHeight() {
+        return getRenderTarget().viewHeight;
     }
 
     /**
