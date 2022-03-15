@@ -6,13 +6,11 @@ stages:
   - gradleSetup
   - build_18-1
   - build_18-2
+  - archive
 
 variables:
-    # Disable the Gradle daemon for Continuous Integration servers as correctness
-    # is usually a priority over speed in CI environments. Using a fresh
-    # runtime for each build is more reliable since the runtime is completely
-    # isolated from any previous builds.
-    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    # Let's see if setting this to true will improve speed any
+    GRADLE_OPTS: "-Dorg.gradle.daemon=true"
     # Pull core when building
     GIT_SUBMODULE_STRATEGY: recursive
 
@@ -67,8 +65,16 @@ build_18-2:
         paths:
             - .gradle
             - cache/
+
+
+# should be done after the builds
+# creates the archive zip containing all the built jars
+archive:
+    stage: archive
+    script:
+        - echo 'Builds finished, creating archive.' # The compiler complains if we don't give it a "script" line
     artifacts:
-        # This should only be done for the last build, otherwise there will be a number of duplicate jars
+        # This should only be done for the last build, otherwise there will be duplicate jars
         name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
         paths:
             # relative to the root directory
