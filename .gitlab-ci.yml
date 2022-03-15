@@ -30,7 +30,7 @@ before_script:
 
 # put artifacts in a zip
 artifacts:
-    stage: build_18-2
+    stage: artifacts
     script: echo 'Building complete. Creating artifact Zip.'
     # build using Java 17
     image: eclipse-temurin:17
