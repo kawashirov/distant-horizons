@@ -72,21 +72,21 @@ build_18-2:
         expire_in: 1 day
 
 
-# put artifacts in a zip
-# This should only be done after all the builds have been completed
-artifacts:
-    stage: artifacts
-    # The complier complains if we don't do something with the script line 
-    script: echo 'Building complete. Creating artifact Zip.'
-    # build using Java 17
-    image: eclipse-temurin:17
-    artifacts:
-        # This should only be done for the last build, otherwise there will be duplicate jars
-        name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
-        paths:
-            # relative to the root directory
-            - Merged
-        expire_in: 1 day
+# # put artifacts in a zip
+# # This should only be done after all the builds have been completed
+# artifacts:
+#     stage: artifacts
+#     # The complier complains if we don't do something with the script line 
+#     script: echo 'Building complete. Creating artifact Zip.'
+#     # build using Java 17
+#     image: eclipse-temurin:17
+#     artifacts:
+#         # This should only be done for the last build, otherwise there will be duplicate jars
+#         name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
+#         paths:
+#             # relative to the root directory
+#             - Merged
+#         expire_in: 1 day
 
 
 
