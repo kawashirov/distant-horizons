@@ -3,9 +3,9 @@ image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
-  #- gradleSetup
-  #- build_18-1
-  #- build_18-2
+#   - gradleSetup
+  - build_18-1
+  - build_18-2
   - artifacts
 
 variables:
@@ -21,22 +21,61 @@ before_script:
     - echo GE_JOB_ID=$CI_JOB_ID >> generate_jars.env
 
 
+# # This prevents us from re-downloading Gradle every stage
+# gradleSetup:
+#     stage: gradleSetup
+#     script: ./gradlew --build-cache --gradle-user-home cache/ check
+#     # build using Java 17
+#     image: eclipse-temurin:17
+#     cache:
+#         key:
+#           files:
+#             - gradle/wrapper/gradle-wrapper.properties 
+#         policy: push
+#         paths:
+#           - cache/
 
 
 
+# 1.18.1 build
+build_18-1:
+    stage: build_18-1
+    script: ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
+    # build using Java 17
+    image: eclipse-temurin:17
+    cache:
+        key: "$CI_COMMIT_REF_NAME_18-1"
+        policy: pull-push
+        paths:
+            - .gradle
+            - cache/
 
 
+# 1.18.2 build
+build_18-2:
+    stage: build_18-2
+    script: ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
+    # build using Java 17
+    image: eclipse-temurin:17
+    cache:
+        key: "$CI_COMMIT_REF_NAME_18-2"
+        policy: pull-push
+        paths:
+            - .gradle
+            - cache/
 
 
 # put artifacts in a zip
+# This should only be done after all the builds have been completed
 artifacts:
     stage: artifacts
+    # The complier complains if we don't do something with the script line 
     script: echo 'Building complete. Creating artifact Zip.'
     # build using Java 17
     image: eclipse-temurin:17
     artifacts:
         # This should only be done for the last build, otherwise there will be duplicate jars
-        name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}_18-2"  
+        name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
         paths:
             # relative to the root directory
             - Merged
