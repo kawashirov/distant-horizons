@@ -3,10 +3,9 @@ image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
-#   - gradleSetup
   - build_18-1
   - build_18-2
-#   - artifacts
+  - zip_artifacts
 
 variables:
     # If we have correctness issues when compiling this can be set to false
@@ -21,22 +20,6 @@ before_script:
     - echo GE_JOB_ID=$CI_JOB_ID >> generate_jars.env
 
 
-# # This prevents us from re-downloading Gradle every stage
-# gradleSetup:
-#     stage: gradleSetup
-#     script: ./gradlew --build-cache --gradle-user-home cache/ check
-#     # build using Java 17
-#     image: eclipse-temurin:17
-#     cache:
-#         key:
-#           files:
-#             - gradle/wrapper/gradle-wrapper.properties 
-#         policy: push
-#         paths:
-#           - cache/
-
-
-
 # 1.18.1 build
 build_18-1:
     stage: build_18-1
@@ -49,12 +32,6 @@ build_18-1:
         paths:
             - .gradle
             - cache/
-    artifacts:
-        name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}_18-1"  
-        paths:
-            # relative to the root directory
-            - Merged
-        expire_in: 1 day
 
 
 # 1.18.2 build
@@ -69,29 +46,23 @@ build_18-2:
         paths:
             - .gradle
             - cache/
+
+
+# put artifacts in a zip
+# This should only be done after all the builds have been completed
+zip_artifacts:
+    stage: zip_artifacts
+    # The complier complains if we don't do something with the script line 
+    script: echo 'Building complete. Creating artifact Zip.'
+    # build using Java 17
+    image: eclipse-temurin:17
     artifacts:
-        name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}_18-2"  
+        # This should only be done after the last build, otherwise there will be duplicate jars
+        name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
         paths:
             # relative to the root directory
             - Merged
         expire_in: 1 day
-
-
-# # put artifacts in a zip
-# # This should only be done after all the builds have been completed
-# artifacts:
-#     stage: artifacts
-#     # The complier complains if we don't do something with the script line 
-#     script: echo 'Building complete. Creating artifact Zip.'
-#     # build using Java 17
-#     image: eclipse-temurin:17
-#     artifacts:
-#         # This should only be done for the last build, otherwise there will be duplicate jars
-#         name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
-#         paths:
-#             # relative to the root directory
-#             - Merged
-#         expire_in: 1 day
 
 
 
