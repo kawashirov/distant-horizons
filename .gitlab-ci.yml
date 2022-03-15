@@ -49,6 +49,12 @@ build_18-1:
         paths:
             - .gradle
             - cache/
+    artifacts:
+        name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}_18-1"  
+        paths:
+            # relative to the root directory
+            - Merged
+        expire_in: 1 day
 
 
 # 1.18.2 build
@@ -64,7 +70,6 @@ build_18-2:
             - .gradle
             - cache/
     artifacts:
-        # This should only be done for the last build, otherwise there will be duplicate jars
         name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}_18-2"  
         paths:
             # relative to the root directory
