@@ -143,6 +143,11 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
         return MC.getWindow().getHeight();
     }
 
+    @Override
+    public int getTargetFrameBuffer() {
+        return MC.getMainRenderTarget().frameBufferId;
+    }
+
     /**
      * This method returns the ChunkPos of all chunks that Minecraft
      * is going to render this frame. <br><br>
