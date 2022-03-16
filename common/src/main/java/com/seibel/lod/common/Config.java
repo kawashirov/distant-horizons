@@ -185,7 +185,7 @@ public class Config
 					@ConfigAnnotations.FileComment
 					public static String _farFogType = IAdvancedFog.FAR_FOG_TYPE_DESC;
 					@ConfigAnnotations.Entry
-					public static FogSetting.Type farFogType = IAdvancedFog.FAR_FOG_TYPE_DEFAULT;
+					public static FogSetting.FogType farFogType = IAdvancedFog.FAR_FOG_TYPE_DEFAULT;
 					
 					@ConfigAnnotations.FileComment
 					public static String _farFogDensity = IAdvancedFog.FAR_FOG_DENSITY_DESC;
@@ -193,14 +193,23 @@ public class Config
 					public static double farFogDensity = IAdvancedFog.FAR_FOG_DENSITY_MIN_DEFAULT_MAX.defaultValue;
 
 					@ConfigAnnotations.ScreenEntry
-					public static HeightFog HeightFog;
+					public static HeightFog heightFog;
 
 					public static class HeightFog {
 
 						@ConfigAnnotations.FileComment
-						public static String _heightFogTMode = IHeightFog.HEIGHT_FOG_MODE_DESC;
+						public static String _heightFogMixMode = IHeightFog.HEIGHT_FOG_MIX_MODE_DESC;
+						@ConfigAnnotations.Entry
+						public static HeightFogMixMode heightFogMixMode = IHeightFog.HEIGHT_FOG_MIX_MODE_DEFAULT;
+						@ConfigAnnotations.FileComment
+						public static String _heightFogMode = IHeightFog.HEIGHT_FOG_MODE_DESC;
 						@ConfigAnnotations.Entry
 						public static HeightFogMode heightFogMode = IHeightFog.HEIGHT_FOG_MODE_DEFAULT;
+
+						@ConfigAnnotations.FileComment
+						public static String _heightFogHeight = IHeightFog.HEIGHT_FOG_HEIGHT_DESC;
+						@ConfigAnnotations.Entry(minValue = -4096.0, maxValue = 4096.0)
+						public static double heightFogHeight = IHeightFog.HEIGHT_FOG_HEIGHT_MIN_DEFAULT_MAX.defaultValue;
 
 						@ConfigAnnotations.FileComment
 						public static String _heightFogStart = IHeightFog.HEIGHT_FOG_START_DESC;
@@ -225,13 +234,14 @@ public class Config
 						@ConfigAnnotations.FileComment
 						public static String _heightFogType = IHeightFog.HEIGHT_FOG_TYPE_DESC;
 						@ConfigAnnotations.Entry
-						public static FogSetting.Type heightFogType = IHeightFog.HEIGHT_FOG_TYPE_DEFAULT;
+						public static FogSetting.FogType heightFogType = IHeightFog.HEIGHT_FOG_TYPE_DEFAULT;
 
 						@ConfigAnnotations.FileComment
 						public static String _heightFogDensity = IHeightFog.HEIGHT_FOG_DENSITY_DESC;
 						@ConfigAnnotations.Entry(minValue = 0.01, maxValue = 50.0)
 						public static double heightFogDensity = IHeightFog.HEIGHT_FOG_DENSITY_MIN_DEFAULT_MAX.defaultValue;
-					}
+
+                    }
 				}
 			}
 

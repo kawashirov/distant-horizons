@@ -299,7 +299,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 						return Config.Client.Graphics.FogQuality.AdvancedFog.farFogMax;
 					}
 					@Override
-					public FogSetting.Type getFarFogType() {
+					public FogSetting.FogType getFarFogType() {
 						return Config.Client.Graphics.FogQuality.AdvancedFog.farFogType;
 					}
 					@Override
@@ -328,7 +328,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 						ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.farFogMax");
 					}
 					@Override
-					public void setFarFogType(FogSetting.Type newFarFogType) {
+					public void setFarFogType(FogSetting.FogType newFarFogType) {
 						ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.farFogType").value = newFarFogType;
 						ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.farFogType");
 					}
@@ -346,38 +346,56 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					public static class HeightFog implements IHeightFog {
 
 						@Override
+						public HeightFogMixMode getHeightFogMixMode() {
+							return Config.Client.Graphics.FogQuality.AdvancedFog.heightFog.heightFogMixMode;
+						}
+						@Override
 						public HeightFogMode getHeightFogMode() {
-							return Config.Client.Graphics.FogQuality.AdvancedFog.HeightFog.heightFogMode;
+							return Config.Client.Graphics.FogQuality.AdvancedFog.heightFog.heightFogMode;
+						}
+						@Override
+						public double getHeightFogHeight() {
+							return Config.Client.Graphics.FogQuality.AdvancedFog.heightFog.heightFogHeight;
 						}
 						@Override
 						public double getHeightFogStart() {
-							return Config.Client.Graphics.FogQuality.AdvancedFog.HeightFog.heightFogStart;
+							return Config.Client.Graphics.FogQuality.AdvancedFog.heightFog.heightFogStart;
 						}
 						@Override
 						public double getHeightFogEnd() {
-							return Config.Client.Graphics.FogQuality.AdvancedFog.HeightFog.heightFogEnd;
+							return Config.Client.Graphics.FogQuality.AdvancedFog.heightFog.heightFogEnd;
 						}
 						@Override
 						public double getHeightFogMin() {
-							return Config.Client.Graphics.FogQuality.AdvancedFog.HeightFog.heightFogMin;
+							return Config.Client.Graphics.FogQuality.AdvancedFog.heightFog.heightFogMin;
 						}
 						@Override
 						public double getHeightFogMax() {
-							return Config.Client.Graphics.FogQuality.AdvancedFog.HeightFog.heightFogMax;
+							return Config.Client.Graphics.FogQuality.AdvancedFog.heightFog.heightFogMax;
 						}
 						@Override
-						public FogSetting.Type getHeightFogType() {
-							return Config.Client.Graphics.FogQuality.AdvancedFog.HeightFog.heightFogType;
+						public FogSetting.FogType getHeightFogType() {
+							return Config.Client.Graphics.FogQuality.AdvancedFog.heightFog.heightFogType;
 						}
 						@Override
 						public double getHeightFogDensity() {
-							return Config.Client.Graphics.FogQuality.AdvancedFog.HeightFog.heightFogDensity;
+							return Config.Client.Graphics.FogQuality.AdvancedFog.heightFog.heightFogDensity;
 						}
 
 						@Override
-						public void setHeightFogType(HeightFogMode newHeightFogMode) {
+						public void setHeightFogMixMode(HeightFogMixMode newHeightFogMixMode) {
+							ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.heightFog.heightFogMixMode").value = newHeightFogMixMode;
+							ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.heightFog.heightFogMixMode");
+						}
+						@Override
+						public void setHeightFogMode(HeightFogMode newHeightFogMode) {
 							ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.heightFog.heightFogMode").value = newHeightFogMode;
 							ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.heightFog.heightFogMode");
+						}
+						@Override
+						public void setHeightFogHeight(double newHeightFogHeight) {
+							ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.heightFog.heightFogHeight").value = newHeightFogHeight;
+							ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.heightFog.heightFogHeight");
 						}
 						@Override
 						public void setHeightFogStart(double newHeightFogStart) {
@@ -400,7 +418,7 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 							ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.heightFog.heightFogMax");
 						}
 						@Override
-						public void setHeightFogType(FogSetting.Type newHeightFogType) {
+						public void setHeightFogType(FogSetting.FogType newHeightFogType) {
 							ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.advancedFog.heightFog.heightFogType").value = newHeightFogType;
 							ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.advancedFog.heightFog.heightFogType");
 						}
