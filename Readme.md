@@ -14,12 +14,23 @@ If you want to see a quick demo, check out a video covering the mod here:
 
 <a href="https://www.youtube.com/watch?v=H2tnvEVbO1c" target="_blank">![Minecraft Level Of Detail (LOD) mod - Alpha 1.5](https://i.ytimg.com/vi_webp/H2tnvEVbO1c/mqdefault.webp)</a>
 
+### Versions
+
 Architectury version: 3.4-SNAPSHOT\
-Forge version: 39.0.5 and 38.0.14\
-Fabric version: 0.13.2\
-Fabric API version: 0.44.0+1.18\
-Modmenu version: 3.0.1\
 Java Compiler plugin: Manifold Preprocessor
+
+#### 1.18.2 mods
+Forge version: 40.0.18\
+Fabric version: 0.13.3\
+Fabric API version: 0.48.0+1.18.2\
+Modmenu version: 3.1.0
+
+#### 1.18.1 mods
+Forge version: 39.1.2\
+Fabric version: 0.13.3\
+Fabric API version: 0.46.6+1.18\
+Modmenu version: 3.0.1
+
 
 Notes:\
 This version has been confirmed to work in IDE and Retail Minecraft.\
@@ -69,7 +80,7 @@ If running on IDE, to ensure IDE pickup the changed versions, you will need to r
 6. The compiled jar file will be in the folder `Merged`
 
 **If in terminal:**
-1. `git clone -b 1.18.X --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
+1. `git clone -b preprocessor_test --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
 2. `cd minecraft-lod-mod`
 3. `./gradlew assemble`
 4. `./gradlew mergeJars`
