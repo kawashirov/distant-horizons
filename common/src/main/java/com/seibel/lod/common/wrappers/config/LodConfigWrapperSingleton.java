@@ -3,7 +3,6 @@ package com.seibel.lod.common.wrappers.config;
 import com.seibel.lod.core.enums.config.*;
 import com.seibel.lod.core.enums.rendering.*;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
-import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IMultiplayer;
 import com.seibel.lod.common.Config;
 
 /**
@@ -432,8 +431,21 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				ConfigGui.editSingleOption.getEntry("client.multiplayer.serverFolderNameMode").value = newServerFolderNameMode;
 				ConfigGui.editSingleOption.saveOption("client.multiplayer.serverFolderNameMode");
 			}
-
-
+			
+			@Override
+			public double getMultiDimensionRequiredSimilarity()
+			{
+				return Config.Client.Multiplayer.multiDimensionRequiredSimilarity;
+			}
+			
+			@Override
+			public void setMultiDimensionRequiredSimilarity(double newMultiDimensionMinimumSimilarityPercent)
+			{
+				ConfigGui.editSingleOption.getEntry("client.multiplayer.multiDimensionMinimumSimilarityPercent").value = newMultiDimensionMinimumSimilarityPercent;
+				ConfigGui.editSingleOption.saveOption("client.multiplayer.multiDimensionMinimumSimilarityPercent");
+			}
+			
+			
 		}
 
 

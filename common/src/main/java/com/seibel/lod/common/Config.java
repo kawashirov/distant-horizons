@@ -223,11 +223,18 @@ public class Config
 		}
 
 
-		public static class Multiplayer {
+		public static class Multiplayer
+		{
 			@ConfigAnnotations.FileComment
 			public static String _serverFolderNameMode = IMultiplayer.SERVER_FOLDER_NAME_MODE_DESC;
 			@ConfigAnnotations.Entry
 			public static ServerFolderNameMode serverFolderNameMode = IMultiplayer.SERVER_FOLDER_NAME_MODE_DEFAULT;
+			
+			@ConfigAnnotations.FileComment
+			public static String _multiDimensionRequiredSimilarity = IMultiplayer.MULTI_DIMENSION_REQUIRED_SIMILARITY_DESC;
+			@ConfigAnnotations.Entry
+			public static double multiDimensionRequiredSimilarity = IMultiplayer.MULTI_DIMENSION_REQUIRED_SIMILARITY_DEFAULT;
+			
 		}
 
 
