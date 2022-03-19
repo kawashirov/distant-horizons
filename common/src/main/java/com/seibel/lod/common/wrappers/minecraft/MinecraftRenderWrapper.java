@@ -208,7 +208,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
                     MinecraftClientWrapper.INSTANCE.sendChatMessage(
 							"\u00A7eOverdraw prevention will be worse than normal.");
 				} catch (Exception e2) {}
-				ApiShared.LOGGER.error("getVanillaRenderedChunks Error: {}", e);
+				ApiShared.LOGGER.error("getVanillaRenderedChunks Error: ", e);
 				usingBackupGetVanillaRenderedChunks = true;
 			}
 		}

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.common.wrappers.worldGeneration.ThreadedParameters;
-import com.seibel.lod.core.util.GridList;
+import com.seibel.lod.core.util.gridList.ArrayGridList;
 
 import net.minecraft.ReportedException;
 import net.minecraft.server.level.WorldGenRegion;
@@ -30,7 +30,7 @@ public final class StepFeatures {
 	public final ChunkStatus STATUS = ChunkStatus.FEATURES;
 
 	public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
-			GridList<ChunkAccess> chunks) {
+			ArrayGridList<ChunkAccess> chunks) {
 		ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
 		
 		for (ChunkAccess chunk : chunks) {
