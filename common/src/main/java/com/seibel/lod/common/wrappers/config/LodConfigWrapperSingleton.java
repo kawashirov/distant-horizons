@@ -483,6 +483,31 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.useExtendedNearClipPlane").value = newUseExtendedNearClipPlane;
 					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.useExtendedNearClipPlane");
 				}
+				
+				@Override
+				public double getBrightnessMultiplier()
+				{
+					return Config.Client.Graphics.AdvancedGraphics.brightnessMultiplier;
+				}
+				@Override
+				public void setBrightnessMultiplier(double newBrightnessMultiplier)
+				{
+					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.brightnessMultiplier").value = newBrightnessMultiplier;
+					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.brightnessMultiplier");
+				}
+				
+				@Override
+				public double getSaturationMultiplier()
+				{
+					return Config.Client.Graphics.AdvancedGraphics.saturationMultiplier;
+				}
+				@Override
+				public void setSaturationMultiplier(double newSaturationMultiplier)
+				{
+					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.saturationMultiplier").value = newSaturationMultiplier;
+					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.saturationMultiplier");
+				}
+				
 			}
 		}
 
@@ -586,8 +611,19 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				ConfigGui.editSingleOption.getEntry("client.multiplayer.serverFolderNameMode").value = newServerFolderNameMode;
 				ConfigGui.editSingleOption.saveOption("client.multiplayer.serverFolderNameMode");
 			}
-
-
+			
+			@Override
+			public double getMultiDimensionRequiredSimilarity()
+			{
+				return Config.Client.Multiplayer.multiDimensionRequiredSimilarity;
+			}
+			
+			@Override
+			public void setMultiDimensionRequiredSimilarity(double newMultiDimensionMinimumSimilarityPercent)
+			{
+				ConfigGui.editSingleOption.getEntry("client.multiplayer.multiDimensionMinimumSimilarityPercent").value = newMultiDimensionMinimumSimilarityPercent;
+				ConfigGui.editSingleOption.saveOption("client.multiplayer.multiDimensionMinimumSimilarityPercent");
+			}
 		}
 
 

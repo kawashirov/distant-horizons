@@ -262,7 +262,18 @@ public class Config
 				public static String _useExtendedNearClipPlane = IAdvancedGraphics.USE_EXTENDED_NEAR_CLIP_PLANE_DESC;
 				@ConfigAnnotations.Entry
 				public static boolean useExtendedNearClipPlane = IAdvancedGraphics.USE_EXTENDED_NEAR_CLIP_PLANE_DEFAULT;
-
+				
+				@ConfigAnnotations.FileComment
+				public static String _brightnessMultiplier = IAdvancedGraphics.BRIGHTNESS_MULTIPLIER_DESC;
+				@ConfigAnnotations.Entry
+				public static double brightnessMultiplier = IAdvancedGraphics.BRIGHTNESS_MULTIPLIER_DEFAULT;
+				
+				@ConfigAnnotations.FileComment
+				public static String _saturationMultiplier = IAdvancedGraphics.SATURATION_MULTIPLIER_DESC;
+				@ConfigAnnotations.Entry
+				public static double saturationMultiplier = IAdvancedGraphics.SATURATION_MULTIPLIER_DEFAULT;
+				
+				
 				/*
 				@ConfigAnnotations.FileComment
 				public static String _backsideCullingRange = IAdvancedGraphics.VANILLA_CULLING_RANGE_DESC;
@@ -315,6 +326,11 @@ public class Config
 			public static String _serverFolderNameMode = IMultiplayer.SERVER_FOLDER_NAME_MODE_DESC;
 			@ConfigAnnotations.Entry
 			public static ServerFolderNameMode serverFolderNameMode = IMultiplayer.SERVER_FOLDER_NAME_MODE_DEFAULT;
+			
+			@ConfigAnnotations.FileComment
+			public static String _multiDimensionRequiredSimilarity = IMultiplayer.MULTI_DIMENSION_REQUIRED_SIMILARITY_DESC;
+			@ConfigAnnotations.Entry
+			public static double multiDimensionRequiredSimilarity = IMultiplayer.MULTI_DIMENSION_REQUIRED_SIMILARITY_DEFAULT;
 		}
 
 
