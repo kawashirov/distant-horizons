@@ -257,7 +257,12 @@ public class Config
 				public static String _vanillaOverdraw = IAdvancedGraphics.VANILLA_OVERDRAW_DESC;
 				@ConfigAnnotations.Entry
 				public static VanillaOverdraw vanillaOverdraw = IAdvancedGraphics.VANILLA_OVERDRAW_DEFAULT;
-				
+
+				@ConfigAnnotations.FileComment
+				public static String _overdrawOffset = IAdvancedGraphics.OVERDRAW_OFFSET_DESC;
+				@ConfigAnnotations.Entry(minValue = -16, maxValue = 16)
+				public static int overdrawOffset = IAdvancedGraphics.OVERDRAW_OFFSET_MIN_DEFAULT_MAX.defaultValue;
+
 				@ConfigAnnotations.FileComment
 				public static String _useExtendedNearClipPlane = IAdvancedGraphics.USE_EXTENDED_NEAR_CLIP_PLANE_DESC;
 				@ConfigAnnotations.Entry

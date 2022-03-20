@@ -459,6 +459,17 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.vanillaOverdraw").value = newVanillaOverdraw;
 					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.vanillaOverdraw");
 				}
+
+				@Override
+				public int getOverdrawOffset() {
+					return Config.Client.Graphics.AdvancedGraphics.overdrawOffset;
+				}
+
+				@Override
+				public void setOverdrawOffset(int newOverdrawOffset) {
+					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.overdrawOffset").value = newOverdrawOffset;
+					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.overdrawOffset");
+				}
 				/*
 				@Override
 				public int getBacksideCullingRange()
