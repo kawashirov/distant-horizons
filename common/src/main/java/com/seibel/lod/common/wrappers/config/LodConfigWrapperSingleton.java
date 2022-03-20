@@ -15,47 +15,47 @@ import com.seibel.lod.common.Config;
 public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 {
 	public static final LodConfigWrapperSingleton INSTANCE = new LodConfigWrapperSingleton();
-
-
+	
+	
 	private static final Client client = new Client();
 	@Override
 	public IClient client()
 	{
 		return client;
 	}
-
+	
 	public static class Client implements IClient
 	{
 		public final IGraphics graphics;
 		public final IWorldGenerator worldGenerator;
 		public final IMultiplayer multiplayer;
 		public final IAdvanced advanced;
-
-
+		
+		
 		@Override
 		public IGraphics graphics()
 		{
 			return graphics;
 		}
-
+		
 		@Override
 		public IWorldGenerator worldGenerator()
 		{
 			return worldGenerator;
 		}
-
+		
 		@Override
 		public IMultiplayer multiplayer() {
 			return multiplayer;
 		}
-
+		
 		@Override
 		public IAdvanced advanced()
 		{
 			return advanced;
 		}
-
-
+		
+		
 		@Override
 		public boolean getOptionsButton()
 		{
@@ -67,8 +67,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			ConfigGui.editSingleOption.getEntry("optionsButton").value = newOptionsButton;
 			ConfigGui.editSingleOption.saveOption("optionsButton");
 		}
-
-
+		
+		
 		//================//
 		// Client Configs //
 		//================//
@@ -79,8 +79,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			multiplayer = new Multiplayer();
 			advanced = new Advanced();
 		}
-
-
+		
+		
 		//==================//
 		// Graphics Configs //
 		//==================//
@@ -89,36 +89,36 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			public final IQuality quality;
 			public final IFogQuality fogQuality;
 			public final IAdvancedGraphics advancedGraphics;
-
-
-
+			
+			
+			
 			@Override
 			public IQuality quality()
 			{
 				return quality;
 			}
-
+			
 			@Override
 			public IFogQuality fogQuality()
 			{
 				return fogQuality;
 			}
-
+			
 			@Override
 			public IAdvancedGraphics advancedGraphics()
 			{
 				return advancedGraphics;
 			}
-
-
+			
+			
 			Graphics()
 			{
 				quality = new Quality();
 				fogQuality = new FogQuality();
 				advancedGraphics = new AdvancedGraphics();
 			}
-
-
+			
+			
 			public static class Quality implements IQuality
 			{
 				@Override
@@ -132,8 +132,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.quality.drawResolution").value = newHorizontalResolution;
 					ConfigGui.editSingleOption.saveOption("client.graphics.quality.drawResolution");
 				}
-
-
+				
+				
 				@Override
 				public int getLodChunkRenderDistance()
 				{
@@ -145,8 +145,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.quality.lodChunkRenderDistance").value = newLodChunkRenderDistance;
 					ConfigGui.editSingleOption.saveOption("client.graphics.quality.lodChunkRenderDistance");
 				}
-
-
+				
+				
 				@Override
 				public VerticalQuality getVerticalQuality()
 				{
@@ -158,8 +158,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.quality.verticalQuality").value = newVerticalQuality;
 					ConfigGui.editSingleOption.saveOption("client.graphics.quality.verticalQuality");
 				}
-
-
+				
+				
 				@Override
 				public int getHorizontalScale()
 				{
@@ -171,8 +171,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.quality.horizontalScale").value = newHorizontalScale;
 					ConfigGui.editSingleOption.saveOption("client.graphics.quality.horizontalScale");
 				}
-
-
+				
+				
 				@Override
 				public HorizontalQuality getHorizontalQuality()
 				{
@@ -206,8 +206,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.saveOption("client.graphics.quality.lodBiomeBlending");
 				}
 			}
-
-
+			
+			
 			public static class FogQuality implements IFogQuality
 			{
 				public final IAdvancedFog advancedFog;
@@ -228,36 +228,36 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.fogDistance").value = newFogDistance;
 					ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.fogDistance");
 				}
-
-
+				
+				
 				@Override
 				public FogDrawMode getFogDrawMode()
 				{
 					return Config.Client.Graphics.FogQuality.fogDrawMode;
 				}
-
+				
 				@Override
 				public void setFogDrawMode(FogDrawMode setFogDrawMode)
 				{
 					ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.fogDrawMode").value = setFogDrawMode;
 					ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.fogDrawMode");
 				}
-
-
+				
+				
 				@Override
 				public FogColorMode getFogColorMode()
 				{
 					return Config.Client.Graphics.FogQuality.fogColorMode;
 				}
-
+				
 				@Override
 				public void setFogColorMode(FogColorMode newFogColorMode)
 				{
 					ConfigGui.editSingleOption.getEntry("client.graphics.fogQuality.fogColorMode").value = newFogColorMode;
 					ConfigGui.editSingleOption.saveOption("client.graphics.fogQuality.fogColorMode");
 				}
-
-
+				
+				
 				@Override
 				public boolean getDisableVanillaFog()
 				{
@@ -431,8 +431,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				}
 
 			}
-
-
+			
+			
 			public static class AdvancedGraphics implements IAdvancedGraphics
 			{
 				@Override
@@ -446,8 +446,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.disableDirectionalCulling").value = newDisableDirectionalCulling;
 					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.disableDirectionalCulling");
 				}
-
-
+				
+				
 				@Override
 				public VanillaOverdraw getVanillaOverdraw()
 				{
@@ -507,13 +507,12 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.saturationMultiplier").value = newSaturationMultiplier;
 					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.saturationMultiplier");
 				}
-				
 			}
 		}
-
-
-
-
+		
+		
+		
+		
 		//========================//
 		// WorldGenerator Configs //
 		//========================//
@@ -530,8 +529,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				ConfigGui.editSingleOption.getEntry("client.worldGenerator.generationPriority").value = newGenerationPriority;
 				ConfigGui.editSingleOption.saveOption("client.worldGenerator.generationPriority");
 			}
-
-
+			
+			
 			@Override
 			public DistanceGenerationMode getDistanceGenerationMode()
 			{
@@ -556,8 +555,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				ConfigGui.editSingleOption.getEntry("client.worldGenerator.allowUnstableFeatureGeneration").value = newAllowUnstableFeatureGeneration;
 				ConfigGui.editSingleOption.saveOption("client.worldGenerator.allowUnstableFeatureGeneration");
 			}*/
-
-
+			
+			
 			@Override
 			public BlocksToAvoid getBlocksToAvoid()
 			{
@@ -592,9 +591,9 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				ConfigGui.editSingleOption.saveOption("client.worldGenerator.lightGenerationMode");
 			}
 		}
-
-
-
+		
+		
+		
 		//=====================//
 		// Multiplayer Configs //
 		//=====================//
@@ -625,9 +624,9 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				ConfigGui.editSingleOption.saveOption("client.multiplayer.multiDimensionMinimumSimilarityPercent");
 			}
 		}
-
-
-
+		
+		
+		
 		//============================//
 		// AdvancedModOptions Configs //
 		//============================//
@@ -636,36 +635,36 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			public final IThreading threading;
 			public final IDebugging debugging;
 			public final IBuffers buffers;
-
-
+			
+			
 			@Override
 			public IThreading threading()
 			{
 				return threading;
 			}
-
-
+			
+			
 			@Override
 			public IDebugging debugging()
 			{
 				return debugging;
 			}
-
-
+			
+			
 			@Override
 			public IBuffers buffers()
 			{
 				return buffers;
 			}
-
-
+			
+			
 			public Advanced()
 			{
 				threading = new Threading();
 				debugging = new Debugging();
 				buffers = new Buffers();
 			}
-
+			
 			public static class Threading implements IThreading
 			{
 				@Override
@@ -679,8 +678,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.advanced.threading.numberOfWorldGenerationThreads").value = newNumberOfWorldGenerationThreads;
 					ConfigGui.editSingleOption.saveOption("client.advanced.threading.numberOfWorldGenerationThreads");
 				}
-
-
+				
+				
 				@Override
 				public int getNumberOfBufferBuilderThreads()
 				{
@@ -693,10 +692,10 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.saveOption("client.advanced.threading.numberOfBufferBuilderThreads");
 				}
 			}
-
-
-
-
+			
+			
+			
+			
 			//===============//
 			// Debug Options //
 			//===============//
@@ -713,8 +712,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.advanced.debugging.drawLods").value = newDrawLods;
 					ConfigGui.editSingleOption.saveOption("client.advanced.debugging.drawLods");
 				}
-
-
+				
+				
 				@Override
 				public DebugMode getDebugMode()
 				{
@@ -726,8 +725,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugMode").value = newDebugMode;
 					ConfigGui.editSingleOption.saveOption("client.advanced.debugging.debugMode");
 				}
-
-
+				
+				
 				@Override
 				public boolean getDebugKeybindingsEnabled()
 				{
@@ -740,11 +739,11 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.saveOption("client.advanced.debugging.enableDebugKeybindings");
 				}
 			}
-
-
+			
+			
 			public static class Buffers implements IBuffers
 			{
-
+				
 				@Override
 				public GpuUploadMethod getGpuUploadMethod()
 				{
@@ -756,8 +755,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.advanced.buffers.gpuUploadMethod").value = newDisableVanillaFog;
 					ConfigGui.editSingleOption.saveOption("client.advanced.buffers.gpuUploadMethod");
 				}
-
-
+				
+				
 				@Override
 				public int getGpuUploadPerMegabyteInMilliseconds()
 				{
@@ -768,8 +767,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.advanced.buffers.gpuUploadPerMegabyteInMilliseconds").value = newMilliseconds;
 					ConfigGui.editSingleOption.saveOption("client.advanced.buffers.gpuUploadPerMegabyteInMilliseconds");
 				}
-
-
+				
+				
 				@Override
 				public BufferRebuildTimes getRebuildTimes()
 				{

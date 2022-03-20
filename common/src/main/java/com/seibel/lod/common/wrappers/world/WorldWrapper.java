@@ -51,12 +51,12 @@ public class WorldWrapper implements IWorldWrapper
     private static final ConcurrentMap<LevelAccessor, WorldWrapper> worldWrapperMap = new ConcurrentHashMap<>();
     private final LevelAccessor world;
     public final WorldType worldType;
-
-
+    
+    
     public WorldWrapper(LevelAccessor newWorld)
     {
         world = newWorld;
-
+        
         if (world.getClass() == ServerLevel.class)
             worldType = WorldType.ServerWorld;
         else if (world.getClass() == ClientLevel.class)
@@ -64,8 +64,8 @@ public class WorldWrapper implements IWorldWrapper
         else
             worldType = WorldType.Unknown;
     }
-
-
+    
+    
     @Nullable
     public static WorldWrapper getWorldWrapper(LevelAccessor world)
     {
@@ -73,68 +73,68 @@ public class WorldWrapper implements IWorldWrapper
         //first we check if the biome has already been wrapped
         if(worldWrapperMap.containsKey(world) && worldWrapperMap.get(world) != null)
             return worldWrapperMap.get(world);
-
-
+        
+        
         //if it hasn't been created yet, we create it and save it in the map
         WorldWrapper worldWrapper = new WorldWrapper(world);
         worldWrapperMap.put(world, worldWrapper);
-
+        
         //we return the newly created wrapper
         return worldWrapper;
     }
-
+    
     public static void clearMap()
     {
         worldWrapperMap.clear();
     }
-
+    
     @Override
     public WorldType getWorldType()
     {
         return worldType;
     }
-
+    
     @Override
     public DimensionTypeWrapper getDimensionType()
     {
         return DimensionTypeWrapper.getDimensionTypeWrapper(world.dimensionType());
     }
-
+    
     @Override
     public int getBlockLight(int x, int y, int z)
     {
         return world.getBrightness(LightLayer.BLOCK, new BlockPos(x,y,z));
     }
-
+    
     @Override
     public int getSkyLight(int x, int y, int z)
     {
         return world.getBrightness(LightLayer.SKY, new BlockPos(x,y,z));
     }
-
+    
     public LevelAccessor getWorld()
     {
         return world;
     }
-
+    
     @Override
     public boolean hasCeiling()
     {
         return world.dimensionType().hasCeiling();
     }
-
+    
     @Override
     public boolean hasSkyLight()
     {
         return world.dimensionType().hasSkyLight();
     }
-
+    
     @Override
     public int getHeight()
     {
         return world.getHeight();
     }
-
+    
     @Override
     public short getMinHeight()
     {
@@ -147,21 +147,21 @@ public class WorldWrapper implements IWorldWrapper
     {
         if (worldType != WorldType.ServerWorld)
             throw new UnsupportedOperationException("getSaveFolder can only be called for ServerWorlds.");
-
+        
         ServerChunkCache chunkSource = ((ServerLevel) world).getChunkSource();
         return chunkSource.getDataStorage().dataFolder;
     }
-
-
+    
+    
     /** @throws UnsupportedOperationException if the WorldWrapper isn't for a ServerWorld */
     public ServerLevel getServerWorld() throws UnsupportedOperationException
     {
         if (worldType != WorldType.ServerWorld)
             throw new UnsupportedOperationException("getSaveFolder can only be called for ServerWorlds.");
-
+        
         return (ServerLevel) world;
     }
-
+    
     @Override
     public int getSeaLevel()
     {
@@ -170,12 +170,12 @@ public class WorldWrapper implements IWorldWrapper
     }
     
     @Override
-	public IChunkWrapper tryGetChunk(AbstractChunkPosWrapper pos) {
-    	ChunkAccess chunk = world.getChunk(pos.getX(), pos.getZ(), ChunkStatus.EMPTY, false);
-    	if (chunk == null) return null;
-    	return new ChunkWrapper(chunk, world);
+    public IChunkWrapper tryGetChunk(AbstractChunkPosWrapper pos) {
+        ChunkAccess chunk = world.getChunk(pos.getX(), pos.getZ(), ChunkStatus.EMPTY, false);
+        if (chunk == null) return null;
+        return new ChunkWrapper(chunk, world);
     }
-
+    
     @Override
     public boolean hasChunkLoaded(int chunkX, int chunkZ) {
         // world.hasChunk(chunkX, chunkZ); THIS DOES NOT WORK FOR CLIENT LEVEL CAUSE MOJANG ALWAYS RETURN TRUE FOR THAT!
@@ -183,5 +183,5 @@ public class WorldWrapper implements IWorldWrapper
         return source.hasChunk(chunkX, chunkZ);
     }
 
-
+    
 }
