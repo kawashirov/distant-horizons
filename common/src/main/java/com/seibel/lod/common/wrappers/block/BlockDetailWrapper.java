@@ -237,13 +237,24 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 	            	!(state.getBlock() instanceof RotatedPillarBlock && direction == Direction.UP))
 	                break;
 	        };
+			if (quads == null || quads.isEmpty()) {
+				quads = Minecraft.getInstance().getModelManager().getBlockModelShaper().
+						getBlockModel(state).getQuads(state, null, random);
+			}
+
 	        if (quads != null && !quads.isEmpty()) {
 	        	needPostTinting = quads.get(0).isTinted();
 	        	needShade = quads.get(0).isShade();
 	        	tintIndex = quads.get(0).getTintIndex();
 	        	baseColor = calculateColorFromTexture(quads.get(0).getSprite(),
 	        		ColorMode.getColorMode(state.getBlock()));
-	        }
+	        } else { // Backup method.
+				needPostTinting = false;
+				needShade = false;
+				tintIndex = 0;
+				baseColor = calculateColorFromTexture(Minecraft.getInstance().getModelManager().getBlockModelShaper().getParticleIcon(state),
+						ColorMode.getColorMode(state.getBlock()));
+			}
 		} else { // Liquid Block
 			
 			needPostTinting = true;
