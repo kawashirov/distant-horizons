@@ -1,15 +1,15 @@
 package com.seibel.lod.common.wrappers;
 
 import com.seibel.lod.common.LodCommonMain;
-import com.seibel.lod.common.wrappers.minecraft.MinecraftRenderWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
+import com.seibel.lod.common.wrappers.minecraft.MinecraftRenderWrapper;
 import com.seibel.lod.core.handlers.IReflectionHandler;
 import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.IVersionConstants;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
-import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
+import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 
 /**
  * Binds all necessary dependencies, so we
@@ -25,7 +25,6 @@ public class DependencySetup {
     public static void createInitialBindings()
     {
         SingletonHandler.bind(IVersionConstants.class, VersionConstants.INSTANCE);
-        
         if (!LodCommonMain.serverSided)
         {
             SingletonHandler.bind(IMinecraftClientWrapper.class, MinecraftClientWrapper.INSTANCE);
@@ -34,7 +33,6 @@ public class DependencySetup {
         }
 
         SingletonHandler.bind(IWrapperFactory.class, WrapperFactory.INSTANCE);
-        
         DependencySetupDoneCheck.isDone = true;
     }
 }

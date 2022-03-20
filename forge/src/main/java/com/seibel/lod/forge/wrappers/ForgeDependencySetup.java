@@ -1,5 +1,6 @@
 package com.seibel.lod.forge.wrappers;
 
+import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.wrappers.config.LodConfigWrapperSingleton;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
@@ -14,16 +15,17 @@ import com.seibel.lod.forge.wrappers.modAccessor.ModChecker;
  * 
  * @author James Seibel
  * @author Ran
- * @version 3-5-2022
+ * @version 12-1-2021
  */
 public class ForgeDependencySetup
 {
 	public static void createInitialBindings()
 	{
 		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
+
 		SingletonHandler.bind(ILodConfigWrapperSingleton.class, LodConfigWrapperSingleton.INSTANCE);
 	}
-	
+
 	public static void finishBinding()
 	{
 		SingletonHandler.finishBinding();

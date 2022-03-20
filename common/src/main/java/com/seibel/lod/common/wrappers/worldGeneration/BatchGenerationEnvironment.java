@@ -20,14 +20,13 @@
 package com.seibel.lod.common.wrappers.worldGeneration;
 
 import com.seibel.lod.core.api.ApiShared;
-import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
 import com.seibel.lod.core.enums.config.LightGenerationMode;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.objects.lod.LodDimension;
-import com.seibel.lod.core.util.GridList;
+import com.seibel.lod.core.util.gridList.ArrayGridList;
 import com.seibel.lod.core.util.LodThreadFactory;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
@@ -191,7 +190,6 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			if (e.endNano != 0)
 			{
 				lodTime.add(e.endNano - preTime);
-				preTime = e.endNano;
 			}
 		}
 		
@@ -215,7 +213,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	
 	//=================Generation Step===================
 	
-	public final LinkedList<GenerationEvent> events = new LinkedList<GenerationEvent>();
+	public final LinkedList<GenerationEvent> events = new LinkedList<>();
 	public final GlobalParameters params;
 	public final StepStructureStart stepStructureStart = new StepStructureStart(this);
 	public final StepStructureReference stepStructureReference = new StepStructureReference(this);
@@ -230,12 +228,13 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	private static final IMinecraftClientWrapper MC = SingletonHandler.get(IMinecraftClientWrapper.class);
 	public static final long EXCEPTION_TIMER_RESET_TIME = TimeUnit.NANOSECONDS.convert(1, TimeUnit.SECONDS);
 	public static final int EXCEPTION_COUNTER_TRIGGER = 20;
+	public static final int RANGE_TO_RANGE_EMPTY_EXTENSION = 1;
 	public int unknownExceptionCount = 0;
 	public long lastExceptionTriggerTime = 0;
 	
 	public static final LodThreadFactory threadFactory = new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY);
 	
-	public static ThreadLocal<Boolean> isDistantGeneratorThread = new ThreadLocal<Boolean>();
+	public static ThreadLocal<Boolean> isDistantGeneratorThread = new ThreadLocal<>();
 	
 	public static boolean isCurrentThreadDistantGeneratorThread() {
 		return (isDistantGeneratorThread.get() != null);
@@ -384,22 +383,20 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		if (ENABLE_EVENT_LOGGING)
 			ApiShared.LOGGER.info("Lod Generate Event: " + e.pos);
 		e.pEvent.beginNano = System.nanoTime();
-		GridList<ChunkAccess> referencedChunks;
+		ArrayGridList<ChunkAccess> referencedChunks;
+		ArrayGridList<ChunkAccess> genChunks;
 		DistanceGenerationMode generationMode;
 		LightedWorldGenRegion region;
 		WorldGenLevelLightEngine lightEngine;
 		LightGetterAdaptor adaptor;
-		
+		int refRange = e.range + RANGE_TO_RANGE_EMPTY_EXTENSION;
+		int refOffsetX = e.pos.x - refRange;
+		int refOffsetZ = e.pos.z - refRange;
 		try
 		{
 			adaptor = new LightGetterAdaptor(params.level);
 			lightEngine = new WorldGenLevelLightEngine(adaptor);
-			
-			int cx = e.pos.x;
-			int cy = e.pos.z;
-			int rangeEmpty = e.range + 1;
-			GridList<ChunkAccess> chunks = new GridList<ChunkAccess>(rangeEmpty);
-			
+
 			@SuppressWarnings("resource")
 			EmptyChunkGenerator generator = (int x, int z) ->
 			{
@@ -418,23 +415,19 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 							params.biomes, null);
 				return target;
 			};
-			
-			for (int oy = -rangeEmpty; oy <= rangeEmpty; oy++)
-			{
-				for (int ox = -rangeEmpty; ox <= rangeEmpty; ox++)
-				{
-					ChunkAccess target = generator.generate(cx + ox, cy + oy);
-					chunks.add(target);
-				}
-			}
+
+			referencedChunks = new ArrayGridList<>(refRange*2+1,
+					(x,z) -> generator.generate(x + refOffsetX,z + refOffsetZ)
+			);
 			e.pEvent.emptyNano = System.nanoTime();
 			e.refreshTimeout();
-			region = new LightedWorldGenRegion(params.level, lightEngine, chunks, ChunkStatus.STRUCTURE_STARTS, rangeEmpty, e.lightMode, generator);
+			region = new LightedWorldGenRegion(params.level, lightEngine, referencedChunks,
+					ChunkStatus.STRUCTURE_STARTS, refRange, e.lightMode, generator);
 			adaptor.setRegion(region);
 			e.tParam.makeStructFeat(region);
-			referencedChunks = chunks.subGrid(e.range);
-			referencedChunks = generateDirect(e, referencedChunks, e.target, region);
-			
+			genChunks = new ArrayGridList<>(referencedChunks, RANGE_TO_RANGE_EMPTY_EXTENSION,
+					referencedChunks.gridSize - RANGE_TO_RANGE_EMPTY_EXTENSION);
+			generateDirect(e, genChunks, e.target, region);
 		}
 		catch (StepStructureStart.StructStartCorruptedException f)
 		{
@@ -466,14 +459,12 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		default:
 			return;
 		}
-		int centreIndex = referencedChunks.size() / 2;
 		
-		for (int oy = -e.range; oy <= e.range; oy++)
+		for (int oy = 0; oy < genChunks.gridSize; oy++)
 		{
-			for (int ox = -e.range; ox <= e.range; ox++)
+			for (int ox = 0; ox < genChunks.gridSize; ox++)
 			{
-				int targetIndex = referencedChunks.offsetOf(centreIndex, ox, oy);
-				ChunkAccess target = referencedChunks.get(targetIndex);
+				ChunkAccess target = genChunks.get(ox, oy);
 				ChunkWrapper wrappedChunk = new ChunkWrapper(target, region);
 				if (!wrappedChunk.isLightCorrect()) {
 					throw new RuntimeException("The generated chunk somehow has isLightCorrect() returning false");
@@ -521,8 +512,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 	}
 	
-	public GridList<ChunkAccess> generateDirect(GenerationEvent e, GridList<ChunkAccess> subRange, Steps step,
-			LightedWorldGenRegion region)
+	public void generateDirect(GenerationEvent e, ArrayGridList<ChunkAccess> subRange, Steps step,
+													 LightedWorldGenRegion region)
 	{
 		try
 		{
@@ -535,38 +526,37 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				}
 			});
 			if (step == Steps.Empty)
-				return subRange;
+				return;
 			stepStructureStart.generateGroup(e.tParam, region, subRange);
 			e.pEvent.structStartNano = System.nanoTime();
 			e.refreshTimeout();
 			if (step == Steps.StructureStart)
-				return subRange;
+				return;
 			stepStructureReference.generateGroup(e.tParam, region, subRange);
 			e.pEvent.structRefNano = System.nanoTime();
 			e.refreshTimeout();
 			if (step == Steps.StructureReference)
-				return subRange;
+				return;
 			stepBiomes.generateGroup(e.tParam, region, subRange);
 			e.pEvent.biomeNano = System.nanoTime();
 			e.refreshTimeout();
 			if (step == Steps.Biomes)
-				return subRange;
+				return;
 			stepNoise.generateGroup(e.tParam, region, subRange);
 			e.pEvent.noiseNano = System.nanoTime();
 			e.refreshTimeout();
 			if (step == Steps.Noise)
-				return subRange;
+				return;
 			stepSurface.generateGroup(e.tParam, region, subRange);
 			e.pEvent.surfaceNano = System.nanoTime();
 			e.refreshTimeout();
 			if (step == Steps.Surface)
-				return subRange;
+				return;
 			if (step == Steps.Carvers)
-				return subRange;
+				return;
 			stepFeatures.generateGroup(e.tParam, region, subRange);
 			e.pEvent.featureNano = System.nanoTime();
 			e.refreshTimeout();
-			return subRange;
 		}
 		finally
 		{

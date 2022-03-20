@@ -82,7 +82,7 @@ public class Main implements ClientModInitializer
 		if (SingletonHandler.get(IModChecker.class).isModLoaded("optifine")) {
 			ModAccessorHandler.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
-		
+
 		ModAccessorHandler.finishBinding();
 	}
 

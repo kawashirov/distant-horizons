@@ -24,26 +24,12 @@ public class VersionConstants implements IVersionConstants
 	{
 		return 0;
 	}
-	
-	@Override
-	public boolean isWorldGeneratorSingleThreaded(DistanceGenerationMode distanceGenerationMode)
-	{
-		return true;
-	}
-	
+
 	@Override
 	public int getWorldGenerationCountPerThread()
 	{
 		return 1;
 	}
-	
-	
-	@Override
-	public boolean hasBatchGenerationImplementation()
-	{
-		return true;
-	}
-
 
 	@Override
 	public boolean isVanillaRenderedChunkSquare()

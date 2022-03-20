@@ -1,13 +1,14 @@
 package com.seibel.lod.common.wrappers.block;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.concurrent.ConcurrentHashMap;
-
 public class BlockDetailMap
 {
+	
 	private static ConcurrentHashMap<BlockState, BlockDetailWrapper> map = new ConcurrentHashMap<BlockState, BlockDetailWrapper>();
 	
 	private BlockDetailMap() {}

@@ -3,16 +3,13 @@ image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
-  - gradleSetup
-  - build
-  - merge
+  - build_18-1
+  - build_18-2
+#   - zip_artifacts
 
 variables:
-    # Disable the Gradle daemon for Continuous Integration servers as correctness
-    # is usually a priority over speed in CI environments. Using a fresh
-    # runtime for each build is more reliable since the runtime is completely
-    # isolated from any previous builds.
-    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    # If we have correctness issues when compiling this can be set to false
+    GRADLE_OPTS: "-Dorg.gradle.daemon=true"
     # Pull core when building
     GIT_SUBMODULE_STRATEGY: recursive
 
@@ -23,91 +20,62 @@ before_script:
     - echo GE_JOB_ID=$CI_JOB_ID >> generate_jars.env
 
 
-
-
-# first stage
-# This prevents us from re-downloading Gradle every stage
-gradleSetup:
-    stage: gradleSetup
-    script: ./gradlew --build-cache --gradle-user-home cache/ check
+# 1.18.1 build
+build_18-1:
+    stage: build_18-1
+    script: ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
     # build using Java 17
     image: eclipse-temurin:17
     cache:
-        key:
-          files:
-            - gradle/wrapper/gradle-wrapper.properties 
-        policy: push
-        paths:
-          - cache/
-
-
-
-# second stage
-build:
-    stage: build
-    script: ./gradlew build --gradle-user-home cache/
-    # build using Java 17
-    image: eclipse-temurin:17
-    cache:
-        key: "$CI_COMMIT_REF_NAME"
+        key: "$CI_COMMIT_REF_NAME_18-1"
         policy: pull-push
         paths:
-            - .architectury-transformer
-            - .gradle
-            - build
-            - common/.gradle
-            - common/build
-            - core/.gradle
-            - core/build
-            - fabric/.gradle
-            - fabric/src/generated
-            - forge/.gradle
-            - forge/src/generated
-            - build
             - .gradle
             - cache/
-    artifacts:
-        name: "NightlyBuild-$CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
-        paths:
-            # relative to the root directory
-            - fabric/build/libs
-            - forge/build/libs
-        exclude:
-            - fabric/build/libs/*-dev.jar
-            - fabric/build/libs/*-dev-shadow.jar
-            - fabric/build/libs/*-sources-dev.jar
-            - fabric/build/libs/*-sources.jar
-            - forge/build/libs/*-dev.jar
-            - forge/build/libs/*-dev-shadow.jar
-            - forge/build/libs/*-sources-dev.jar
-            - forge/build/libs/*-sources.jar
-        reports:
-            # To ensure we've access to these files in the next stage
-            dotenv: generate_jars.env
-        expire_in: 1 day
 
-# third stage
-merge:
-    stage: merge
-    script: ./gradlew merge --gradle-user-home cache/ 
+
+# 1.18.2 build
+build_18-2:
+    stage: build_18-2
+    script: ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
     # build using Java 17
     image: eclipse-temurin:17
     cache:
-        key: "$CI_COMMIT_REF_NAME"
+        key: "$CI_COMMIT_REF_NAME_18-2"
         policy: pull-push
         paths:
-            - build
             - .gradle
             - cache/
+    
+    # TEMPORARY, there should be a way of either generating artifacts per build or in a separate stage
     artifacts:
-        name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"  
+        # This should only be done after the last build, otherwise there will be duplicate jars
+        name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
         paths:
             # relative to the root directory
             - Merged
         expire_in: 1 day
 
 
-## - stage
+# # put artifacts in a zip
+# # This should only be done after all the builds have been completed
+# zip_artifacts:
+#     stage: zip_artifacts
+#     # The complier complains if we don't do something with the script line 
+#     script: echo 'Building complete. Creating artifact Zip.'
+#     # build using Java 17
+#     image: eclipse-temurin:17
+#     artifacts:
+#         # This should only be done after the last build, otherwise there will be duplicate jars
+#         name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+#         paths:
+#             # relative to the root directory
+#             - Merged
+#         expire_in: 1 day
+
+
+
+# unused deployment stage
 #deploy:
 #    stage: deploy
 #    image: registry.gitlab.com/gitlab-org/release-cli:latest

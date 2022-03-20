@@ -3,14 +3,12 @@ package com.seibel.lod.fabric.mixins;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 
+import com.seibel.lod.fabric.ClientProxy;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.seibel.lod.common.wrappers.DependencySetupDoneCheck;
-import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
-import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.util.DummyRunExecutorService;
 
 import net.minecraft.Util;
@@ -23,7 +21,7 @@ public class MixinUtilBackgroudThread
 			at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$wrapThreadWithTaskName(String string, Runnable r, CallbackInfoReturnable<Runnable> ci)
 	{
-		if (DependencySetupDoneCheck.isDone && BatchGenerationEnvironment.isCurrentThreadDistantGeneratorThread())
+		if (ClientProxy.isGenerationThreadChecker != null && ClientProxy.isGenerationThreadChecker.get())
 		{
 			//ApiShared.LOGGER.info("util wrapThreadWithTaskName(Runnable) triggered");
 			ci.setReturnValue(r);
@@ -33,7 +31,7 @@ public class MixinUtilBackgroudThread
 			at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$wrapThreadWithTaskNameForSupplier(String string, Supplier<?> r, CallbackInfoReturnable<Supplier<?>> ci)
 	{
-		if (DependencySetupDoneCheck.isDone && BatchGenerationEnvironment.isCurrentThreadDistantGeneratorThread())
+		if (ClientProxy.isGenerationThreadChecker != null && ClientProxy.isGenerationThreadChecker.get())
 		{
 			//ApiShared.LOGGER.info("util wrapThreadWithTaskName(Supplier) triggered");
 			ci.setReturnValue(r);
@@ -43,7 +41,7 @@ public class MixinUtilBackgroudThread
 	@Inject(method = "backgroundExecutor", at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$backgroundExecutor(CallbackInfoReturnable<ExecutorService> ci)
 	{
-		if (DependencySetupDoneCheck.isDone && BatchGenerationEnvironment.isCurrentThreadDistantGeneratorThread())
+		if (ClientProxy.isGenerationThreadChecker != null && ClientProxy.isGenerationThreadChecker.get())
 		{
 			//ApiShared.LOGGER.info("util backgroundExecutor triggered");
 			ci.setReturnValue(new DummyRunExecutorService());

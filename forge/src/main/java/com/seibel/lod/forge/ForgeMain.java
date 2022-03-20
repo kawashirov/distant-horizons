@@ -89,6 +89,8 @@ public class ForgeMain implements LodForgeMethodCaller
 		ModAccessorHandler.finishBinding();
 		
 
+		ModAccessorHandler.finishBinding();
+
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
 				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> ConfigGui.getScreen(parent, "")));
 		forgeClientProxy = new ForgeClientProxy();

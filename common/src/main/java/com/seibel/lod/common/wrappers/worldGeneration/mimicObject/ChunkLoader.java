@@ -15,6 +15,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
+#if MC_VERSION_1_18_2
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+#endif
+
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
@@ -54,7 +60,7 @@ public class ChunkLoader
 	private static final String TAG_UPGRADE_DATA = "UpgradeData";
 	private static final String BLOCK_TICKS_TAG = "block_ticks";
 	private static final String FLUID_TICKS_TAG = "fluid_ticks";
-
+	
 	private static BlendingData readBlendingData(CompoundTag chunkData)
 	{
 		BlendingData blendingData = null;
@@ -66,12 +72,17 @@ public class ChunkLoader
 		}
 		return blendingData;
 	}
-
+	
 	private static LevelChunkSection[] readSections(LevelAccessor level, LevelLightEngine lightEngine, ChunkPos chunkPos, CompoundTag chunkData)
 	{
 		Registry<Biome> biomes = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+		#if MC_VERSION_1_18_1
 		Codec<PalettedContainer<Biome>> biomeCodec = PalettedContainer.codec(
 				biomes, biomes.byNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getOrThrow(Biomes.PLAINS));
+		#elif MC_VERSION_1_18_2
+		Codec<PalettedContainer<Holder<Biome>>> biomeCodec = PalettedContainer.codec(
+				biomes.asHolderIdMap(), biomes.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getHolderOrThrow(Biomes.PLAINS));
+		#endif
 
 		int i = level.getSectionsCount();
 		LevelChunkSection[] chunkSections = new LevelChunkSection[i];
@@ -88,15 +99,26 @@ public class ChunkLoader
 			if (sectionId >= 0 && sectionId < chunkSections.length)
 			{
 				PalettedContainer<BlockState> blockStateContainer;
+				#if MC_VERSION_1_18_1
 				PalettedContainer<Biome> biomeContainer;
+				#elif MC_VERSION_1_18_2
+				PalettedContainer<Holder<Biome>> biomeContainer;
+				#endif
 
 				blockStateContainer = tagSection.contains("block_states", 10)
 						? BLOCK_STATE_CODEC.parse(NbtOps.INSTANCE, tagSection.getCompound("block_states")).promotePartial(string -> logErrors(chunkPos, sectionYPos, string)).getOrThrow(false, LOGGER::error)
 						: new PalettedContainer<BlockState>(Block.BLOCK_STATE_REGISTRY, Blocks.AIR.defaultBlockState(), PalettedContainer.Strategy.SECTION_STATES);
 
+				#if MC_VERSION_1_18_1
 				biomeContainer = tagSection.contains("biomes", 10)
 						? biomeCodec.parse(NbtOps.INSTANCE, tagSection.getCompound("biomes")).promotePartial(string -> logErrors(chunkPos, sectionYPos, string)).getOrThrow(false, LOGGER::error)
 						: new PalettedContainer<Biome>(biomes, biomes.getOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
+				#elif MC_VERSION_1_18_2
+				biomeContainer = tagSection.contains("biomes", 10)
+						? biomeCodec.parse(NbtOps.INSTANCE, tagSection.getCompound("biomes")).promotePartial(string -> logErrors(chunkPos, i, (String) string)).getOrThrow(false, LOGGER::error)
+						: new PalettedContainer<Holder<Biome>>(biomes.asHolderIdMap(), biomes.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
+				#endif
+
 
 				chunkSections[sectionId] = new LevelChunkSection(sectionYPos, blockStateContainer, biomeContainer);
 			}
@@ -111,7 +133,7 @@ public class ChunkLoader
 		}
 		return chunkSections;
 	}
-
+	
 	private static void readHeightmaps(LevelChunk chunk, CompoundTag chunkData)
 	{
 		CompoundTag tagHeightmaps = chunkData.getCompound("Heightmaps");
@@ -124,6 +146,7 @@ public class ChunkLoader
 		Heightmap.primeHeightmaps(chunk, ChunkStatus.FULL.heightmapsAfter());
 	}
 
+	#if MC_VERSION_1_18_1
 	private static Map<StructureFeature<?>, StructureStart<?>> unpackStructureStart(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag, long l)
 	{
 		HashMap<StructureFeature<?>, StructureStart<?>> map = Maps.newHashMap();
@@ -171,15 +194,67 @@ public class ChunkLoader
 		}
 		return map;
 	}
+	#elif MC_VERSION_1_18_2
+	private static Map<ConfiguredStructureFeature<?, ?>, StructureStart> unpackStructureStart(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag, long l) {
+		Map<ConfiguredStructureFeature<?, ?>, StructureStart> map = Maps.newHashMap();
+		Registry<ConfiguredStructureFeature<?, ?>> structStartRegistry = structurePieceSerializationContext.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
+		CompoundTag compoundTag2 = compoundTag.getCompound("starts");
+		for (String string : compoundTag2.getAllKeys()) {
+			ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
+			ConfiguredStructureFeature<?, ?> structureFeature = structStartRegistry.get(resourceLocation);
+//			String string2 = string.toLowerCase(Locale.ROOT);
+//			ConfiguredStructureFeature<?, ?> structureFeature = StructureFeature.STRUCTURES_REGISTRY.get(string2);
+			if (structureFeature == null) {
+				LOGGER.error("Unknown structure start: {}", resourceLocation);
+				continue;
+			}
+			StructureStart structureStart = StructureFeature.loadStaticStart(structurePieceSerializationContext, compoundTag2.getCompound(string), l);
+			if (structureStart == null)
+				continue;
+			map.put(structureFeature, structureStart);
+		}
+		return map;
+	}
+
+	private static Map<ConfiguredStructureFeature<?, ?>, LongSet> unpackStructureReferences(RegistryAccess registryAccess, ChunkPos chunkPos, CompoundTag compoundTag)
+	{
+		Map<ConfiguredStructureFeature<?, ?>, LongSet> map = Maps.newHashMap();
+		Registry<ConfiguredStructureFeature<?, ?>> structRegistry = registryAccess.registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
+		CompoundTag compoundTag2 = compoundTag.getCompound("References");
+		for (String string : compoundTag2.getAllKeys())
+		{
+		    ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
+			ConfiguredStructureFeature<?, ?> structureFeature = structRegistry.get(resourceLocation);
+//			String string2 = string.toLowerCase(Locale.ROOT);
+//			ConfiguredStructureFeature<?, ?> structureFeature = StructureFeature.STRUCTURES_REGISTRY.get(string2);
+			if (structureFeature == null)
+			{
+				LOGGER.warn("Found reference to unknown structure '{}' in chunk {}, discarding", resourceLocation, chunkPos);
+				continue;
+			}
+			map.put(structureFeature, new LongOpenHashSet(Arrays.stream(compoundTag2.getLongArray(string)).filter(l ->
+			{
+				ChunkPos chunkPos2 = new ChunkPos(l);
+				if (chunkPos2.getChessboardDistance(chunkPos) > 8)
+				{
+					LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", resourceLocation, chunkPos2, chunkPos);
+					return false;
+				}
+				return true;
+			}).toArray()));
+		}
+		return map;
+	}
+	#endif
 
 	private static void readStructures(WorldGenLevel level, LevelChunk chunk, CompoundTag chunkData)
 	{
 		CompoundTag tagStructures = chunkData.getCompound("structures");
 		chunk.setAllStarts(
 				unpackStructureStart(StructurePieceSerializationContext.fromLevel(level.getLevel()), tagStructures, level.getSeed()));
-		chunk.setAllReferences(unpackStructureReferences(chunk.getPos(), tagStructures));
+		chunk.setAllReferences(unpackStructureReferences(#if MC_VERSION_1_18_2 level.registryAccess() ,#endif chunk.getPos(), tagStructures));
 	}
-
+	
 	private static void readPostPocessings(LevelChunk chunk, CompoundTag chunkData)
 	{
 		ListTag tagPostProcessings = chunkData.getList("PostProcessing", 9);
@@ -192,32 +267,32 @@ public class ChunkLoader
 			}
 		}
 	}
-
+	
 	public static ChunkStatus.ChunkType readChunkType(CompoundTag compoundTag)
 	{
 		return ChunkStatus.byName(compoundTag.getString("Status")).getChunkType();
 	}
-
+	
 	public static LevelChunk read(WorldGenLevel level, LevelLightEngine lightEngine, ChunkPos chunkPos, CompoundTag chunkData)
 	{
-
+		
 		ChunkPos actualPos = new ChunkPos(chunkData.getInt("xPos"), chunkData.getInt("zPos"));
 		if (!Objects.equals(chunkPos, actualPos))
 		{
 			LOGGER.error("Distant Horizons: Chunk file at {} is in the wrong location; Ignoring. (Expected {}, got {})", (Object) chunkPos, (Object) chunkPos, (Object) actualPos);
 			return null;
 		}
-
+		
 		ChunkStatus.ChunkType chunkType = readChunkType(chunkData);
 		BlendingData blendingData = readBlendingData(chunkData);
 		if (chunkType == ChunkStatus.ChunkType.PROTOCHUNK && (blendingData == null || !blendingData.oldNoise()))
 			return null;
-
+		
 		// Prepare the light engine
 		boolean isLightOn = chunkData.getBoolean("isLightOn");
 		if (isLightOn)
 			level.getLightEngine().retainData(chunkPos, true);
-
+		
 		// Read params for making the LevelChunk
 		UpgradeData upgradeData = chunkData.contains(TAG_UPGRADE_DATA, 10)
 				? new UpgradeData(chunkData.getCompound(TAG_UPGRADE_DATA), level)
@@ -228,10 +303,10 @@ public class ChunkLoader
 				string -> Registry.FLUID.getOptional(ResourceLocation.tryParse(string)), chunkPos);
 		long inhabitedTime = chunkData.getLong("InhabitedTime");
 		LevelChunkSection[] chunkSections = readSections(level, lightEngine, actualPos, chunkData);
-
+		
 		// Make chunk
 		LevelChunk chunk = new LevelChunk((Level) level, chunkPos, upgradeData, blockTicks, fluidTicks, inhabitedTime, chunkSections, null, blendingData);
-
+		
 		// Set some states after object creation
 		chunk.setLightCorrect(isLightOn);
 		readHeightmaps(chunk, chunkData);
@@ -239,7 +314,7 @@ public class ChunkLoader
 		readPostPocessings(chunk, chunkData);
 		return chunk;
 	}
-
+	
 	private static void logErrors(ChunkPos chunkPos, int i, String string)
 	{
 		LOGGER.error("Distant Horizons: Recoverable errors when loading section [" + chunkPos.x + ", " + i + ", " + chunkPos.z + "]: " + string);

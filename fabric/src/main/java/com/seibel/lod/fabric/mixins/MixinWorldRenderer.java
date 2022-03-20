@@ -24,6 +24,7 @@ import com.mojang.math.Matrix4f;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.objects.math.Mat4f;
+import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -61,7 +62,25 @@ public class MixinWorldRenderer
 	}
 
 	// HEAD or RETURN
-	@Inject(at = @At("HEAD"), method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V")
+	@Inject(at = @At("RETURN"),
+			method = "renderSky",
+			cancellable = true)
+	private void renderLod(PoseStack modelViewMatrixStack, Matrix4f projectionMatrix, float f,
+						   #if MC_VERSION_1_18_2 Camera camera, boolean bl,#endif Runnable r, CallbackInfo callback) {
+
+		Mat4f mcModelViewMatrix = McObjectConverter.Convert(modelViewMatrixStack.last().pose());
+		Mat4f mcProjectionMatrix = McObjectConverter.Convert(projectionMatrix);
+
+		ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
+
+	}
+
+	/*
+
+	// HEAD or RETURN
+	@Inject(at = @At("HEAD"),
+			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V",
+			cancellable = true)
 	private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
 	{
 		// only render before solid blocks
@@ -72,5 +91,6 @@ public class MixinWorldRenderer
 
 			ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
 		}
-	}
+		//callback.cancel();
+	}*/
 }

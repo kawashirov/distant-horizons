@@ -14,15 +14,26 @@ If you want to see a quick demo, check out a video covering the mod here:
 
 <a href="https://www.youtube.com/watch?v=H2tnvEVbO1c" target="_blank">![Minecraft Level Of Detail (LOD) mod - Alpha 1.5](https://i.ytimg.com/vi_webp/H2tnvEVbO1c/mqdefault.webp)</a>
 
-Architectury version: 3.4-SNAPSHOT\
-Forge version: 39.0.5 and 38.0.14\
-Fabric version: 0.13.2\
-Fabric API version: 0.44.0+1.18
+### Versions
 
+Architectury version: 3.4-SNAPSHOT\
+Java Compiler plugin: Manifold Preprocessor
+
+#### 1.18.2 mods
+Forge version: 40.0.18\
+Fabric version: 0.13.3\
+Fabric API version: 0.48.0+1.18.2\
+Modmenu version: 3.1.0
+
+#### 1.18.1 mods
+Forge version: 39.1.2\
+Fabric version: 0.13.3\
+Fabric API version: 0.46.6+1.18\
 Modmenu version: 3.0.1
 
+
 Notes:\
-This version has been confirmed to work in Eclipse and Retail Minecraft.\
+This version has been confirmed to work in IDE and Retail Minecraft.\
 (Retail running forge version 1.18.1-39.0.5 and fabric version 1.18-0.12.12 and 1.18.1-0.13.2)
 
 
@@ -35,19 +46,29 @@ https://fabricmc.net/wiki/tutorial:setup
 
 * A Java Development Kit (JDK) for Java 17 (recommended) or newer. Visit https://www.oracle.com/java/technologies/downloads/ for installers.
 * Git or someway to clone git projects. Visit https://git-scm.com/ for installers.
-* (Not required) Any Java IDE, for example Intellij IDEA and Eclipse. You may also use any other code editors, such as Visual Studio Code. (Optional)
-It's better to use IntelliJ IDEA since Eclipse is not supported by Architectury, but it still works.
+* (Not required) Any Java IDE with plugins that support Manifold, for example Intellij IDEA.
 
 **If using IntelliJ:**
+0. Install Manifold plugin
 1. open IDEA and import the build.gradle
 2. refresh the Gradle project in IDEA if required
 
-**If using Ecplise:**
+**If using Ecplise: (Note that Eclispe currently doesn't support Manifold's preprocessor!)**
 1. run the command: `./gradlew geneclipseruns`
 2. run the command: `./gradlew eclipse`
 3. Make sure eclipse has the JDK 17 installed. (This is needed so that eclipse can run minecraft)
 4. Import the project into eclipse
 
+## Switching Versions
+This branch support 2 built versions:
+ - 1.18.2
+ - 1.18.1 (which also runs on 1.18)
+
+To switch between active versions, change `mcVer=1.18.?` in `gradle.properties` file.
+
+If running on IDE, to ensure IDE pickup the changed versions, you will need to run a gradle command again to allow gradle to update all the libs. (In IntellJ you will also need to do a gradle sync again if it didn't start it automatically.)
+>Note: There may be a `java.nio.file.FileSystemException` thrown on running the command after switching versions. To fix it, either restart your IDE (as your IDE is locking up a file) or use tools like LockHunter to unlock the linked file. (Often a lib file under `common\build\lib` or `forge\build\lib` or `fabric\build\lib`). If anyone knows how to solve this issue please comment to this issue: https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues/233
+ 
 ## Compiling
 
 **Using GUI**
@@ -59,11 +80,12 @@ It's better to use IntelliJ IDEA since Eclipse is not supported by Architectury,
 6. The compiled jar file will be in the folder `Merged`
 
 **If in terminal:**
-1. `git clone -b 1.18.X --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
+1. `git clone -b preprocessor_test --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
 2. `cd minecraft-lod-mod`
 3. `./gradlew assemble`
-5. `./gradlew mergeJars`
-6. The compiled jar file will be in the folder `Merged`
+4. `./gradlew mergeJars`
+5. The compiled jar file will be in the folder `Merged`
+>Note: You can add the arg: `-PmcVer=1.18.?` to tell gradle to build a selected MC version instead of having to manually modify the `gradle.properties` file.
 
 
 ## Other commands
