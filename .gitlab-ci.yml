@@ -33,6 +33,14 @@ build_18-1:
             - .gradle
             - cache/
 
+  # TEMPORARY, there should be a way of either generating artifacts per build or in a separate stage
+    artifacts:
+      # This should only be done after the last build, otherwise there will be duplicate jars
+      name: "Merged_NightlyBuild_1_18_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+      paths:
+        # relative to the root directory
+        - Merged
+      expire_in: 1 day
 
 # 1.18.2 build
 build_18-2:
@@ -50,7 +58,7 @@ build_18-2:
     # TEMPORARY, there should be a way of either generating artifacts per build or in a separate stage
     artifacts:
         # This should only be done after the last build, otherwise there will be duplicate jars
-        name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+        name: "Merged_NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
         paths:
             # relative to the root directory
             - Merged
