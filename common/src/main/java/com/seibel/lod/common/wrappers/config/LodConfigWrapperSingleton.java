@@ -507,6 +507,18 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.saturationMultiplier").value = newSaturationMultiplier;
 					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.saturationMultiplier");
 				}
+
+				@Override
+				public boolean getEnableCaveCulling() {
+					return Config.Client.Graphics.AdvancedGraphics.enableCaveCulling;
+				}
+
+				@Override
+				public void setEnableCaveCulling(boolean newEnableCaveCulling) {
+					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.enableCaveCulling").value = newEnableCaveCulling;
+					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.enableCaveCulling");
+
+				}
 			}
 		}
 		

@@ -272,7 +272,12 @@ public class Config
 				public static String _saturationMultiplier = IAdvancedGraphics.SATURATION_MULTIPLIER_DESC;
 				@ConfigAnnotations.Entry
 				public static double saturationMultiplier = IAdvancedGraphics.SATURATION_MULTIPLIER_DEFAULT;
-				
+
+				@ConfigAnnotations.FileComment
+				public static String _enableCaveCulling = IAdvancedGraphics.ENABLE_CAVE_CULLING_DESC;
+				@ConfigAnnotations.Entry
+				public static boolean enableCaveCulling = IAdvancedGraphics.ENABLE_CAVE_CULLING_DEFAULT;
+
 				/*
 				@ConfigAnnotations.FileComment
 				public static String _backsideCullingRange = IAdvancedGraphics.VANILLA_CULLING_RANGE_DESC;
