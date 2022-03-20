@@ -424,7 +424,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			region = new LightedWorldGenRegion(params.level, lightEngine, referencedChunks,
 					ChunkStatus.STRUCTURE_STARTS, refRange, e.lightMode, generator);
 			adaptor.setRegion(region);
-			e.tParam.makeStructFeat(region);
+			e.tParam.makeStructFeat(region, params);
 			genChunks = new ArrayGridList<>(referencedChunks, RANGE_TO_RANGE_EMPTY_EXTENSION,
 					referencedChunks.gridSize - RANGE_TO_RANGE_EMPTY_EXTENSION);
 			generateDirect(e, genChunks, e.target, region);

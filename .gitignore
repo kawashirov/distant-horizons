@@ -51,3 +51,6 @@ Merged/
 
 # file from notepad++
 *.bak
+
+# file genearated via MC version switching using preprocessor
+build.properties

@@ -65,7 +65,7 @@ public class BiomeWrapper implements IBiomeWrapper
     {
         int colorInt;
 
-        switch (biome.getBiomeCategory())
+        switch (biome.biomeCategory)
         {
 
             case NETHER:

@@ -6,13 +6,14 @@ import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.WorldGenStruct
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.WorldGenLevel;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
 
 public final class ThreadedParameters
 {
 	private static final ThreadLocal<ThreadedParameters> localParam = new ThreadLocal<ThreadedParameters>();
 	final ServerLevel level;
-	public final WorldGenStructFeatManager structFeat;
+	public WorldGenStructFeatManager structFeat = null;
 	public final StructureCheck structCheck;
 	boolean isValid = true;
 	public final PerfCalculator perf = new PerfCalculator();
@@ -38,11 +39,10 @@ public final class ThreadedParameters
 		structCheck = new StructureCheck(param.chunkScanner, param.registry, param.structures,
 				param.level.dimension(), param.generator, level, param.generator.getBiomeSource(), param.worldSeed,
 				param.fixerUpper);
-		structFeat = new WorldGenStructFeatManager(level, param.worldGenSettings, null, structCheck);
 	}
 	
-	public void makeStructFeat(WorldGenLevel genLevel)
+	public void makeStructFeat(WorldGenLevel genLevel, GlobalParameters param)
 	{
-		structFeat.setGenLevel(genLevel);
+		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, genLevel, structCheck);
 	}
 }
