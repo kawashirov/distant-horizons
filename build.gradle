@@ -180,10 +180,17 @@ allprojects { p ->
 //		def excapedMCVersion = rootProject.minecraft_version.replace(".", "_")
 //		options.compilerArgs += ['-Xplugin:Manifold', "-AMC_VERSION_${excapedMCVersion}"]
 //
-        options.compilerArgs += ['-Xplugin:Manifold']
+        //options.compilerArgs += ['-deprecation']
+        //options.compilerArgs += ['-verbose']
+        //options.compilerArgs += ['-Xlint:unchecked']
+        //options.compilerArgs += ['-Xdiags:verbose']
+        //options.compilerArgs += ['-Xprint']
+        //options.compilerArgs += ['-XprintProcessorInfo']
+        //options.compilerArgs += ['-XprintRounds']
 
 		// println options.compilerArgs
         if (p != project(":core")) {
+            options.compilerArgs += ['-Xplugin:Manifold']
             options.release = rootProject.java_version as Integer
         }
     }

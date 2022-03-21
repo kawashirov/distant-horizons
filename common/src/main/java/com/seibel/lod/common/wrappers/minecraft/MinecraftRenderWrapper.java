@@ -235,7 +235,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 				// this could probably be kept as a int, but
 				// it is easier to test and see the colors when debugging this way.
 				// When creating a new release this should be changed to the int version.
-				Color c = LodUtil.intToColor(lightMap.getLightValue(u, v));
+				int col = lightMap.getLightValue(u, v);
 				
 				// these should both create a totally white image
 //					int col =
@@ -245,12 +245,12 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 //							(0b11111111 << 8) + // green
 //							(0b11111111 << 16) + // blue
 //							(0b11111111 << 24); // blue
-				
-				int col =
-						((c.getRed() & 0xFF) << 16) | // blue
-								((c.getGreen() & 0xFF) << 8) | // green
-								((c.getBlue() & 0xFF)) | // red
-								((c.getAlpha() & 0xFF) << 24); // alpha
+
+//				int col =
+//						((c.getRed() & 0xFF) << 16) | // blue
+//								((c.getGreen() & 0xFF) << 8) | // green
+//								((c.getBlue() & 0xFF)) | // red
+//								((c.getAlpha() & 0xFF) << 24); // alpha
 				
 				// 2D array stored in a 1D array.
 				// Thank you Tim from College ;)
