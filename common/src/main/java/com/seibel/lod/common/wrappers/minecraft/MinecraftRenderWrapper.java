@@ -170,7 +170,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	 * <p>
 	 */
 	
-    public boolean usingBackupGetVanillaRenderedChunks = true;
+    public boolean usingBackupGetVanillaRenderedChunks = false;
 	@Override
 	public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks()
 	{
