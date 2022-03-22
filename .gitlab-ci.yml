@@ -6,8 +6,8 @@ stages:
   - build
 
 variables:
-    # If we have correctness issues when compiling this can be set to false
-    GRADLE_OPTS: "-Dorg.gradle.daemon=true"
+    # Disabling the daemon is necessary for correctness
+    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
     # Pull core when building
     GIT_SUBMODULE_STRATEGY: recursive
 
