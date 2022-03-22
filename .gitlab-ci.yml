@@ -18,7 +18,7 @@ before_script:
 
 # 1.18.1 build 
 build compile_18_1 1/2:
-    stage: build_18-1
+    stage: build
     script: ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
     # build using Java 17
     image: eclipse-temurin:17
@@ -40,7 +40,7 @@ build compile_18_1 1/2:
 
 # 1.18.2 build
 build compile_18_2 2/2:
-    stage: build_18-2
+    stage: build
     script: ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
     image: eclipse-temurin:17
     cache:
