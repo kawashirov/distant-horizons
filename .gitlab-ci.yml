@@ -20,8 +20,8 @@ before_script:
 
 
 # 1.18.1 build
-build 1/2:
-    stage: build_18-1
+build compileAndMerge 1/2:
+    stage: build
     script: ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
     # build using Java 17
     image: eclipse-temurin:17
@@ -43,8 +43,8 @@ build 1/2:
       expire_in: 1 day
 
 # 1.18.2 build
-build 2/2:
-    stage: build_18-2
+build compileAndMerge 2/2:
+    stage: build
     script: ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
     # build using Java 17
     image: eclipse-temurin:17
