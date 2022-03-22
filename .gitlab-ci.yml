@@ -25,7 +25,7 @@ build compile_18_1 1/2:
     cache:
         # The cached folders should only be used for this job.
         # This prevents jobs from using the same folder(s) and overwriting each other
-        key: "$CI_JOB_ID_18-1"
+        key: "${CI_JOB_ID}_18-1"
         policy: pull-push
         paths:
             - .gradle
@@ -44,7 +44,7 @@ build compile_18_2 2/2:
     script: ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
     image: eclipse-temurin:17
     cache:
-        key: "$CI_JOB_ID_18-2"
+        key: "${CI_JOB_ID}_18-2"
         policy: pull-push
         paths:
             - .gradle
