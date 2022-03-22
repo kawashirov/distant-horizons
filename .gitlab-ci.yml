@@ -3,8 +3,7 @@ image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
-  - build_18_1
-  - build_18_2
+  - build
 
 variables:
     # If we have correctness issues when compiling this can be set to false
@@ -15,18 +14,20 @@ variables:
 
 before_script:
     - echo $CI_JOB_ID
+    # Writing GE_JOB_ID variable to environment file, will need the value in the next stage.
+    - echo GE_JOB_ID=$CI_JOB_ID >> generate_jars.env
 
 
 # 1.18.1 build 
-build_18_1: #build compile_18_1 1/2:
-    stage: build_18_1
+build compileAndMerge_18_1 1/2:
+    stage: build
     script: ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
     # build using Java 17
     image: eclipse-temurin:17
     cache:
         # The cached folders should only be used for this job.
-        # This prevents jobs from using the same folder(s) and overwriting each other
-        key: "${CI_JOB_ID}_18-1"
+        # This should prevent jobs from using the same folder(s) and overwriting each other
+        key: "${CI_JOB_ID}-18-1"
         policy: pull-push
         paths:
             - .gradle
@@ -40,12 +41,12 @@ build_18_1: #build compile_18_1 1/2:
       expire_in: 1 day
 
 # 1.18.2 build
-build_18_2: #build compile_18_2 2/2:
-    stage: build_18_2
+build compileAndMerge_18_2 2/2:
+    stage: build
     script: ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
     image: eclipse-temurin:17
     cache:
-        key: "${CI_JOB_ID}_18-2"
+        key: "${CI_JOB_ID}-18-2"
         policy: pull-push
         paths:
             - .gradle
