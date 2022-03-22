@@ -3,7 +3,8 @@ image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
-  - build
+  - build_18_1
+  - build_18_2
 
 variables:
     # If we have correctness issues when compiling this can be set to false
@@ -17,8 +18,8 @@ before_script:
 
 
 # 1.18.1 build 
-build compile_18_1 1/2:
-    stage: build
+build_18_1: #build compile_18_1 1/2:
+    stage: build_18_1
     script: ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
     # build using Java 17
     image: eclipse-temurin:17
@@ -39,8 +40,8 @@ build compile_18_1 1/2:
       expire_in: 1 day
 
 # 1.18.2 build
-build compile_18_2 2/2:
-    stage: build
+build_18_2: #build compile_18_2 2/2:
+    stage: build_18_2
     script: ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
     image: eclipse-temurin:17
     cache:
