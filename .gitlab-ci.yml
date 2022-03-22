@@ -3,8 +3,7 @@ image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
-  - build_18-1
-  - build_18-2
+  - build
 #   - zip_artifacts
 
 variables:
@@ -21,7 +20,7 @@ before_script:
 
 
 # 1.18.1 build
-build_18-1:
+build 1/2:
     stage: build_18-1
     script: ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
     # build using Java 17
@@ -32,6 +31,7 @@ build_18-1:
         paths:
             - .gradle
             - cache/
+            - Merged
 
   # TEMPORARY, there should be a way of either generating artifacts per build or in a separate stage
     artifacts:
@@ -43,7 +43,7 @@ build_18-1:
       expire_in: 1 day
 
 # 1.18.2 build
-build_18-2:
+build 2/2:
     stage: build_18-2
     script: ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
     # build using Java 17
@@ -54,6 +54,7 @@ build_18-2:
         paths:
             - .gradle
             - cache/
+            - Merged
     
     # TEMPORARY, there should be a way of either generating artifacts per build or in a separate stage
     artifacts:
