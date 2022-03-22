@@ -29,6 +29,7 @@ import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.I
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IGraphics.IFogQuality.IAdvancedFog.IHeightFog;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IMultiplayer;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IWorldGenerator;
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced;
 
 
 /**
@@ -283,6 +284,11 @@ public class Config
 				@ConfigAnnotations.Entry
 				public static boolean enableCaveCulling = IAdvancedGraphics.ENABLE_CAVE_CULLING_DEFAULT;
 
+				@ConfigAnnotations.FileComment
+				public static String _caveCullingHeight = IAdvancedGraphics.CAVE_CULLING_HEIGHT_DESC;
+				@ConfigAnnotations.Entry(minValue = -4096, maxValue = 4096)
+                public static int caveCullingHeight = IAdvancedGraphics.CAVE_CULLING_HEIGHT_MIN_DEFAULT_MAX.defaultValue;
+
 				/*
 				@ConfigAnnotations.FileComment
 				public static String _backsideCullingRange = IAdvancedGraphics.VANILLA_CULLING_RANGE_DESC;
@@ -355,8 +361,13 @@ public class Config
 			
 			@ConfigAnnotations.ScreenEntry
 			public static Buffers buffers;
-			
-			
+
+			@ConfigAnnotations.FileComment
+			public static String _lodOnlyMode = IAdvanced.LOD_ONLY_MODE_DESC;
+			@ConfigAnnotations.Entry
+			public static boolean lodOnlyMode = IAdvanced.LOD_ONLY_MODE_DEFAULT;
+
+
 			public static class Threading
 			{
 				@ConfigAnnotations.FileComment

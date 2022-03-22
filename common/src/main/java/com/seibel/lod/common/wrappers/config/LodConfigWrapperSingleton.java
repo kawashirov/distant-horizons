@@ -530,6 +530,18 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.enableCaveCulling");
 
 				}
+
+				@Override
+				public int getCaveCullingHeight() {
+					return Config.Client.Graphics.AdvancedGraphics.caveCullingHeight;
+				}
+
+				@Override
+				public void setCaveCullingHeight(int newCaveCullingHeight) {
+					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.caveCullingHeight").value = newCaveCullingHeight;
+					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.caveCullingHeight");
+
+				}
 			}
 		}
 		
@@ -679,8 +691,8 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			{
 				return buffers;
 			}
-			
-			
+
+
 			public Advanced()
 			{
 				threading = new Threading();
@@ -803,6 +815,18 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.getEntry("client.advanced.buffers.newBufferRebuildTimes").value = newBufferRebuildTimes;
 					ConfigGui.editSingleOption.saveOption("client.advanced.buffers.newBufferRebuildTimes");
 				}
+			}
+
+			@Override
+			public boolean getLodOnlyMode() {
+				return Config.Client.Advanced.lodOnlyMode;
+			}
+
+			@Override
+			public void setLodOnlyMode(boolean newLodOnlyMode) {
+				ConfigGui.editSingleOption.getEntry("client.advanced.buffers.lodOnlyMode").value = newLodOnlyMode;
+				ConfigGui.editSingleOption.saveOption("client.advanced.buffers.lodOnlyMode");
+
 			}
 		}
 	}

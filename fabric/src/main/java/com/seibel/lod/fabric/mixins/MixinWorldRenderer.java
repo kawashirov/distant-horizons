@@ -21,6 +21,7 @@ package com.seibel.lod.fabric.mixins;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
+import com.seibel.lod.common.Config;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.objects.math.Mat4f;
@@ -61,6 +62,7 @@ public class MixinWorldRenderer
 		previousPartialTicks = tickDelta;
 	}
 
+	/* Inject rendering at renderSky
 	// HEAD or RETURN
 	@Inject(at = @At("RETURN"),
 			method = "renderSky",
@@ -73,10 +75,9 @@ public class MixinWorldRenderer
 
 		ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
 
-	}
+	}*/
 
-	/*
-
+	// Inject rendering at first call to renderChunkLayer
 	// HEAD or RETURN
 	@Inject(at = @At("HEAD"),
 			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V",
@@ -91,6 +92,8 @@ public class MixinWorldRenderer
 
 			ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
 		}
-		//callback.cancel();
-	}*/
+		if (Config.Client.Advanced.lodOnlyMode) {
+			callback.cancel();
+		}
+	}
 }
