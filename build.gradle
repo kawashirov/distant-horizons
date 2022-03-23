@@ -209,5 +209,5 @@ allprojects { p ->
 // this deletes the merged folder so we don't carry over
 // the previous merges to each new build job in the CI/CD pipeline
 task deleteMerged(type: Delete) {
-   delete files("${buildDir}/Merged")
+   delete files("./Merged")
 }
