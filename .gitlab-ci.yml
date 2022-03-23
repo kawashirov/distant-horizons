@@ -3,7 +3,8 @@ image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
-  - build
+  - build_18_1
+  - build_18_2
 
 variables:
     # Pull core when building
@@ -16,42 +17,32 @@ before_script:
     - echo GE_JOB_ID=$CI_JOB_ID >> generate_jars.env
 
 
-# 1.18.2 build 
-build compileAndMerge_18_2 1/2:
+# 1.18.1 build 
+build_18_1:
     stage: build
-    script: ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache_1/; ./gradlew merge --gradle-user-home cache_1/
+    script:
+        ./gradlew deleteMerged --gradle-user-home cache/; # make sure any previously merged jars are removed before running this job
+        ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache/; 
+        ./gradlew merge --gradle-user-home cache/;
     # build using Java 17
     image: eclipse-temurin:17
-    # cache:
-    #     # The cached folders should only be used for this job.
-    #     # This should prevent jobs from using the same folder(s) and overwriting each other
-    #     key: "${CI_JOB_ID}-18-2"
-    #     policy: pull-push
-    #     paths:
-    #         - .gradle
-    #         - cache/
-    #         - Merged
-    #artifacts:
-    #  name: "Merged_NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
-    #  paths:
-    #    # relative to the root directory
-    #    - Merged
-    #  expire_in: 1 day
-
-# 1.18.1 build
-build compileAndMerge_18_1 2/2:
-    stage: build
-    script: ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache_2/; ./gradlew merge --gradle-user-home cache_2/
-    image: eclipse-temurin:17
-    # cache:
-    #     key: "${CI_JOB_ID}-18-1"
-    #     policy: pull-push
-    #     paths:
-    #         - .gradle
-    #         - cache/
-    #         - Merged
     artifacts:
-        name: "Merged_NightlyBuild_1_18_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+      name: "Merged_NightlyBuild_1_18_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+      paths:
+        # relative to the root directory
+        - Merged
+      expire_in: 1 day
+
+# 1.18.2 build
+build_18_2:
+    stage: build
+    script:
+        ./gradlew deleteMerged --gradle-user-home cache/; 
+        ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache/; 
+        ./gradlew merge --gradle-user-home cache/;
+    image: eclipse-temurin:17
+    artifacts:
+        name: "Merged_NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
         paths:
             - Merged
         expire_in: 1 day
