@@ -19,7 +19,7 @@ before_script:
 # 1.18.2 build 
 build compileAndMerge_18_2 1/2:
     stage: build
-    script: ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
+    script: ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache_1/; ./gradlew merge --gradle-user-home cache_1/
     # build using Java 17
     image: eclipse-temurin:17
     # cache:
@@ -31,17 +31,17 @@ build compileAndMerge_18_2 1/2:
     #         - .gradle
     #         - cache/
     #         - Merged
-    artifacts:
-      name: "Merged_NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
-      paths:
-        # relative to the root directory
-        - Merged
-      expire_in: 1 day
+    #artifacts:
+    #  name: "Merged_NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+    #  paths:
+    #    # relative to the root directory
+    #    - Merged
+    #  expire_in: 1 day
 
 # 1.18.1 build
 build compileAndMerge_18_1 2/2:
     stage: build
-    script: ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache/; ./gradlew merge --gradle-user-home cache/
+    script: ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache_2/; ./gradlew merge --gradle-user-home cache_2/
     image: eclipse-temurin:17
     # cache:
     #     key: "${CI_JOB_ID}-18-1"
