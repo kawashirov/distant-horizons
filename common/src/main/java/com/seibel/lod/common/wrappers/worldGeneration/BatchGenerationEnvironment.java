@@ -20,8 +20,8 @@
 package com.seibel.lod.common.wrappers.worldGeneration;
 
 import com.seibel.lod.core.api.ApiShared;
-import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
-import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
+import com.seibel.lod.core.objects.opengl.builders.lodBuilding.LodBuilder;
+import com.seibel.lod.core.objects.opengl.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.DistanceGenerationMode;
 import com.seibel.lod.core.enums.config.LightGenerationMode;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;

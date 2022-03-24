@@ -23,6 +23,8 @@ import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.api.EventApi;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.entity.player.Player;
 import org.lwjgl.glfw.GLFW;
 
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
