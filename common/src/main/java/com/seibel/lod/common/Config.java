@@ -30,6 +30,7 @@ import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.I
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IMultiplayer;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IWorldGenerator;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced;
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton.IClient.IAdvanced.IDebugging.*;
 
 
 /**
@@ -398,6 +399,67 @@ public class Config
 				public static String _enableDebugKeybindings = IDebugging.DEBUG_KEYBINDINGS_ENABLED_DESC;
 				@ConfigAnnotations.Entry
 				public static boolean enableDebugKeybindings = IDebugging.DEBUG_KEYBINDINGS_ENABLED_DEFAULT;
+
+				@ConfigAnnotations.ScreenEntry
+				public static DebugSwitch debugSwitch;
+
+				public static class DebugSwitch {
+					/* The logging switches available:
+					 * WorldGenEvent
+					 * WorldGenPerformance
+					 * WorldGenLoadEvent
+					 * LodBuilderEvent
+					 * RendererBufferEvent
+					 * RendererGLEvent
+					 * FileReadWriteEvent
+					 * FileSubDimEvent
+					 * NetworkEvent //NOT IMPL YET
+					 */
+					@ConfigAnnotations.FileComment
+					public static String _logWorldGenEvent = IDebugSwitch.LOG_WORLDGEN_EVENT_DESC;
+					@ConfigAnnotations.Entry
+					public static LoggerMode logWorldGenEvent = IDebugSwitch.LOG_WORLDGEN_EVENT_DEFAULT;
+
+					@ConfigAnnotations.FileComment
+					public static String _logWorldGenPerformance = IDebugSwitch.LOG_WORLDGEN_PERFORMANCE_DESC;
+					@ConfigAnnotations.Entry
+					public static LoggerMode logWorldGenPerformance = IDebugSwitch.LOG_WORLDGEN_PERFORMANCE_DEFAULT;
+
+					@ConfigAnnotations.FileComment
+					public static String _logWorldGenLoadEvent = IDebugSwitch.LOG_WORLDGEN_LOAD_EVENT_DESC;
+					@ConfigAnnotations.Entry
+					public static LoggerMode logWorldGenLoadEvent = IDebugSwitch.LOG_WORLDGEN_LOAD_EVENT_DEFAULT;
+
+					@ConfigAnnotations.FileComment
+					public static String _logLodBuilderEvent = IDebugSwitch.LOG_LODBUILDER_EVENT_DESC;
+					@ConfigAnnotations.Entry
+					public static LoggerMode logLodBuilderEvent = IDebugSwitch.LOG_LODBUILDER_EVENT_DEFAULT;
+
+					@ConfigAnnotations.FileComment
+					public static String _logRendererBufferEvent = IDebugSwitch.LOG_RENDERER_BUFFER_EVENT_DESC;
+					@ConfigAnnotations.Entry
+					public static LoggerMode logRendererBufferEvent = IDebugSwitch.LOG_RENDERER_BUFFER_EVENT_DEFAULT;
+
+					@ConfigAnnotations.FileComment
+					public static String _logRendererGLEvent = IDebugSwitch.LOG_RENDERER_GL_EVENT_DESC;
+					@ConfigAnnotations.Entry
+					public static LoggerMode logRendererGLEvent = IDebugSwitch.LOG_RENDERER_GL_EVENT_DEFAULT;
+
+					@ConfigAnnotations.FileComment
+					public static String _logFileReadWriteEvent = IDebugSwitch.LOG_FILE_READWRITE_EVENT_DESC;
+					@ConfigAnnotations.Entry
+					public static LoggerMode logFileReadWriteEvent = IDebugSwitch.LOG_FILE_READWRITE_EVENT_DEFAULT;
+
+					@ConfigAnnotations.FileComment
+					public static String _logFileSubDimEvent = IDebugSwitch.LOG_FILE_SUB_DIM_EVENT_DESC;
+					@ConfigAnnotations.Entry
+					public static LoggerMode logFileSubDimEvent = IDebugSwitch.LOG_FILE_SUB_DIM_EVENT_DEFAULT;
+
+					@ConfigAnnotations.FileComment
+					public static String _logNetworkEvent = IDebugSwitch.LOG_NETWORK_EVENT_DESC;
+					@ConfigAnnotations.Entry
+					public static LoggerMode logNetworkEvent = IDebugSwitch.LOG_NETWORK_EVENT_DEFAULT;
+				}
 			}
 			
 			

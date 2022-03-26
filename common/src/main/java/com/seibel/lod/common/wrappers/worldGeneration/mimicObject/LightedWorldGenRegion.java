@@ -6,7 +6,6 @@ import com.seibel.lod.core.api.ApiShared;
 import org.jetbrains.annotations.Nullable;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment.EmptyChunkGenerator;
-import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.enums.config.LightGenerationMode;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;

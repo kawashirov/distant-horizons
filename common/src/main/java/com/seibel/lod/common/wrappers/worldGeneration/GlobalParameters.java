@@ -2,7 +2,7 @@
 package com.seibel.lod.common.wrappers.worldGeneration;
 
 import com.mojang.datafixers.DataFixer;
-import com.seibel.lod.core.objects.opengl.builders.lodBuilding.LodBuilder;
+import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.objects.lod.LodDimension;
 
 import net.minecraft.core.Registry;

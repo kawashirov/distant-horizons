@@ -736,6 +736,14 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			//===============//
 			public static class Debugging implements IDebugging
 			{
+				public final IDebugSwitch debugSwitch;
+
+				@Override
+				public IDebugSwitch debugSwitch()
+				{
+					return debugSwitch;
+				}
+
 				@Override
 				public boolean getDrawLods()
 				{
@@ -772,6 +780,116 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				{
 					ConfigGui.editSingleOption.getEntry("client.advanced.debugging.enableDebugKeybindings").value = newEnableDebugKeybindings;
 					ConfigGui.editSingleOption.saveOption("client.advanced.debugging.enableDebugKeybindings");
+				}
+
+				public Debugging()
+				{
+					debugSwitch = new DebugSwitch();
+				}
+
+				public static class DebugSwitch implements IDebugSwitch {
+
+					/* The logging switches available:
+					 * WorldGenEvent
+					 * WorldGenPerformance
+					 * WorldGenLoadEvent
+					 * LodBuilderEvent
+					 * RendererBufferEvent
+					 * RendererGLEvent
+					 * FileReadWriteEvent
+					 * FileSubDimEvent
+					 * NetworkEvent //NOT IMPL YET
+					 */
+
+					@Override
+					public LoggerMode getLogWorldGenEvent() {
+						return (LoggerMode) ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logWorldGenEvent").value;
+					}
+					@Override
+					public void setLogWorldGenEvent(LoggerMode newLogWorldGenEvent) {
+						ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logWorldGenEvent").value = newLogWorldGenEvent;
+						ConfigGui.editSingleOption.saveOption("client.advanced.debugging.debugSwitch.logWorldGenEvent");
+					}
+
+					@Override
+					public LoggerMode getLogWorldGenPerformance() {
+						return (LoggerMode) ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logWorldGenPerformance").value;
+					}
+					@Override
+					public void setLogWorldGenPerformance(LoggerMode newLogWorldGenPerformance) {
+						ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logWorldGenPerformance").value = newLogWorldGenPerformance;
+						ConfigGui.editSingleOption.saveOption("client.advanced.debugging.debugSwitch.logWorldGenPerformance");
+					}
+
+					@Override
+					public LoggerMode getLogWorldGenLoadEvent() {
+						return (LoggerMode) ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logWorldGenLoadEvent").value;
+					}
+					@Override
+					public void setLogWorldGenLoadEvent(LoggerMode newLogWorldGenLoadEvent) {
+						ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logWorldGenLoadEvent").value = newLogWorldGenLoadEvent;
+						ConfigGui.editSingleOption.saveOption("client.advanced.debugging.debugSwitch.logWorldGenLoadEvent");
+					}
+
+					@Override
+					public LoggerMode getLogLodBuilderEvent() {
+						return (LoggerMode) ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logLodBuilderEvent").value;
+					}
+					@Override
+					public void setLogLodBuilderEvent(LoggerMode newLogLodBuilderEvent) {
+						ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logLodBuilderEvent").value = newLogLodBuilderEvent;
+						ConfigGui.editSingleOption.saveOption("client.advanced.debugging.debugSwitch.logLodBuilderEvent");
+					}
+
+					@Override
+					public LoggerMode getLogRendererBufferEvent() {
+						return (LoggerMode) ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logRendererBufferEvent").value;
+					}
+					@Override
+					public void setLogRendererBufferEvent(LoggerMode newLogRendererBufferEvent) {
+						ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logRendererBufferEvent").value = newLogRendererBufferEvent;
+						ConfigGui.editSingleOption.saveOption("client.advanced.debugging.debugSwitch.logRendererBufferEvent");
+					}
+
+					@Override
+					public LoggerMode getLogRendererGLEvent() {
+						return (LoggerMode) ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logRendererGLEvent").value;
+					}
+					@Override
+					public void setLogRendererGLEvent(LoggerMode newLogRendererGLEvent) {
+						ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logRendererGLEvent").value = newLogRendererGLEvent;
+						ConfigGui.editSingleOption.saveOption("client.advanced.debugging.debugSwitch.logRendererGLEvent");
+					}
+
+					@Override
+					public LoggerMode getLogFileReadWriteEvent() {
+						return (LoggerMode) ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logFileReadWriteEvent").value;
+					}
+					@Override
+					public void setLogFileReadWriteEvent(LoggerMode newLogFileReadWriteEvent) {
+						ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logFileReadWriteEvent").value = newLogFileReadWriteEvent;
+						ConfigGui.editSingleOption.saveOption("client.advanced.debugging.debugSwitch.logFileReadWriteEvent");
+					}
+
+					@Override
+					public LoggerMode getLogFileSubDimEvent() {
+						return (LoggerMode) ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logFileSubDimEvent").value;
+					}
+					@Override
+					public void setLogFileSubDimEvent(LoggerMode newLogFileSubDimEvent) {
+						ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logFileSubDimEvent").value = newLogFileSubDimEvent;
+						ConfigGui.editSingleOption.saveOption("client.advanced.debugging.debugSwitch.logFileSubDimEvent");
+					}
+
+					@Override
+					public LoggerMode getLogNetworkEvent() {
+						return (LoggerMode) ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logNetworkEvent").value;
+					}
+					@Override
+					public void setLogNetworkEvent(LoggerMode newLogNetworkEvent) {
+						ConfigGui.editSingleOption.getEntry("client.advanced.debugging.debugSwitch.logNetworkEvent").value = newLogNetworkEvent;
+						ConfigGui.editSingleOption.saveOption("client.advanced.debugging.debugSwitch.logNetworkEvent");
+					}
 				}
 			}
 			

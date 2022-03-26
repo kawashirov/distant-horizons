@@ -4,9 +4,10 @@ package com.seibel.lod.common.wrappers.worldGeneration.mimicObject;
 import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
+import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.core.api.ApiShared;
-import com.seibel.lod.core.api.ClientApi;
 
+import com.seibel.lod.core.logging.ConfigBasedLogger;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import java.util.Arrays;
@@ -56,7 +57,7 @@ import org.apache.logging.log4j.Logger;
 public class ChunkLoader
 {
 	private static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codec(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES, Blocks.AIR.defaultBlockState());
-	private static final Logger LOGGER = ApiShared.LOGGER;
+	private static final ConfigBasedLogger LOGGER = BatchGenerationEnvironment.LOAD_LOGGER;
 	private static final String TAG_UPGRADE_DATA = "UpgradeData";
 	private static final String BLOCK_TICKS_TAG = "block_ticks";
 	private static final String FLUID_TICKS_TAG = "fluid_ticks";
@@ -279,7 +280,7 @@ public class ChunkLoader
 		ChunkPos actualPos = new ChunkPos(chunkData.getInt("xPos"), chunkData.getInt("zPos"));
 		if (!Objects.equals(chunkPos, actualPos))
 		{
-			LOGGER.error("Distant Horizons: Chunk file at {} is in the wrong location; Ignoring. (Expected {}, got {})", (Object) chunkPos, (Object) chunkPos, (Object) actualPos);
+			LOGGER.error("Chunk file at {} is in the wrong location; Ignoring. (Expected {}, got {})", (Object) chunkPos, (Object) chunkPos, (Object) actualPos);
 			return null;
 		}
 		
