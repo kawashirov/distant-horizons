@@ -346,8 +346,8 @@ public class Config
 			
 			@ConfigAnnotations.FileComment
 			public static String _multiDimensionRequiredSimilarity = IMultiplayer.MULTI_DIMENSION_REQUIRED_SIMILARITY_DESC;
-			@ConfigAnnotations.Entry
-			public static double multiDimensionRequiredSimilarity = IMultiplayer.MULTI_DIMENSION_REQUIRED_SIMILARITY_DEFAULT;
+			@ConfigAnnotations.Entry(minValue = 0.0, maxValue = 1.0)
+			public static double multiDimensionRequiredSimilarity = IMultiplayer.MULTI_DIMENSION_REQUIRED_SIMILARITY_MIN_DEFAULT_MAX.defaultValue;
 			
 		}
 		
