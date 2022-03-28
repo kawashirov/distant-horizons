@@ -744,18 +744,20 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					return debugSwitch;
 				}
 
+				/* RendererType:
+				 * DEFAULT
+				 * DEBUG
+				 * DISABLED
+				 * */
 				@Override
-				public boolean getDrawLods()
-				{
-					return (boolean) ConfigGui.editSingleOption.getEntry("client.advanced.debugging.drawLods").value;
+				public RendererType getRendererType() {
+					return (RendererType) ConfigGui.editSingleOption.getEntry("client.advanced.debugging.rendererType").value;
 				}
 				@Override
-				public void setDrawLods(boolean newDrawLods)
-				{
-					ConfigGui.editSingleOption.getEntry("client.advanced.debugging.drawLods").value = newDrawLods;
-					ConfigGui.editSingleOption.saveOption("client.advanced.debugging.drawLods");
+				public void setRendererType(RendererType newRenderType) {
+					ConfigGui.editSingleOption.getEntry("client.advanced.debugging.rendererType").value = newRenderType;
+					ConfigGui.editSingleOption.saveOption("client.advanced.debugging.rendererType");
 				}
-				
 				
 				@Override
 				public DebugMode getDebugMode()

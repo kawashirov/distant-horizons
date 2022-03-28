@@ -386,9 +386,9 @@ public class Config
 			public static class Debugging
 			{
 				@ConfigAnnotations.FileComment
-				public static String _drawLods = IDebugging.DRAW_LODS_DESC;
+				public static String _rendererType = IDebugging.RENDERER_TYPE_DESC;
 				@ConfigAnnotations.Entry
-				public static boolean drawLods = IDebugging.DRAW_LODS_DEFAULT;
+				public static RendererType rendererType = IDebugging.RENDERER_TYPE_DEFAULT;
 				
 				@ConfigAnnotations.FileComment
 				public static String _debugMode = IDebugging.DEBUG_MODE_DESC;

@@ -71,6 +71,7 @@ import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.lighting.LevelLightEngine;
+import org.apache.logging.log4j.LogManager;
 
 /*
 Total:                   3.135214124s
@@ -90,11 +91,14 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 {
 	private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 	public static final ConfigBasedSpamLogger PREF_LOGGER =
-			new ConfigBasedSpamLogger(() -> CONFIG.client().advanced().debugging().debugSwitch().getLogWorldGenPerformance(),1);
+			new ConfigBasedSpamLogger(LogManager.getLogger("LodWorldGen"),
+					() -> CONFIG.client().advanced().debugging().debugSwitch().getLogWorldGenPerformance(),1);
 	public static final ConfigBasedLogger EVENT_LOGGER =
-			new ConfigBasedLogger(() -> CONFIG.client().advanced().debugging().debugSwitch().getLogWorldGenEvent());
+			new ConfigBasedLogger(LogManager.getLogger("LodWorldGen"),
+					() -> CONFIG.client().advanced().debugging().debugSwitch().getLogWorldGenEvent());
 	public static final ConfigBasedLogger LOAD_LOGGER =
-			new ConfigBasedLogger(() -> CONFIG.client().advanced().debugging().debugSwitch().getLogWorldGenLoadEvent());
+			new ConfigBasedLogger(LogManager.getLogger("LodWorldGen"),
+					() -> CONFIG.client().advanced().debugging().debugSwitch().getLogWorldGenLoadEvent());
 
 	//TODO: Make actual proper support for StarLight
 	
