@@ -2,34 +2,58 @@ package com.seibel.lod.common.wrappers.block;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
+import com.seibel.lod.common.Config;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
+import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.enums.LodDirection;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.util.ColorUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockDetailWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
+import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockTintCache;
+import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Cursor3D;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.*;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 public class BlockDetailWrapper extends IBlockDetailWrapper
 {
+    private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
+
     public static final int FLOWER_COLOR_SCALE = 5;
 
     public static final Random random = new Random(0);
@@ -195,7 +219,7 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
                 double zWidth = (bbox.maxZ - bbox.minZ);
                 noFullFace = xWidth < 1 && zWidth < 1 && yWidth < 1;
             }
-        } else { // Liquad Block
+        } else { // Liquid Block
             dontOccludeFaces = new boolean[6];
         }
         isShapeResolved = true;
@@ -213,11 +237,22 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
                         !(state.getBlock() instanceof RotatedPillarBlock && direction == Direction.UP))
                     break;
             };
+            if (quads == null || quads.isEmpty()) {
+                quads = Minecraft.getInstance().getModelManager().getBlockModelShaper().
+                        getBlockModel(state).getQuads(state, null, random);
+            }
+
             if (quads != null && !quads.isEmpty()) {
                 needPostTinting = quads.get(0).isTinted();
                 needShade = quads.get(0).isShade();
                 tintIndex = quads.get(0).getTintIndex();
                 baseColor = calculateColorFromTexture(quads.get(0).getSprite(),
+                        ColorMode.getColorMode(state.getBlock()));
+            } else { // Backup method.
+                needPostTinting = false;
+                needShade = false;
+                tintIndex = 0;
+                baseColor = calculateColorFromTexture(Minecraft.getInstance().getModelManager().getBlockModelShaper().getParticleIcon(state),
                         ColorMode.getColorMode(state.getBlock()));
             }
         } else { // Liquid Block
@@ -232,7 +267,14 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
         isColorResolved = true;
     }
 
-
+    private BlockAndTintGetter wrapColorResolver(LevelReader level) {
+        int blendDistance = CONFIG.client().graphics().quality().getLodBiomeBlending();
+        if (blendDistance == 0) {
+            return new TintGetterOverrideFast(level);
+        } else {
+            return new TintGetterOverrideSmooth(level, blendDistance);
+        }
+    }
 
     @Override
     public int getAndResolveFaceColor(LodDirection dir, IChunkWrapper chunk, AbstractBlockPosWrapper blockPos)
@@ -241,7 +283,7 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
         resolveColors();
         if (!needPostTinting) return baseColor;
         int tintColor = Minecraft.getInstance().getBlockColors()
-                .getColor(state, ((ChunkWrapper)chunk).getColorResolver(),
+                .getColor(state, wrapColorResolver(((ChunkWrapper)chunk).getColorResolver()),
                         McObjectConverter.Convert(blockPos), tintIndex);
         if (tintColor == -1) return baseColor;
         return ColorUtil.multiplyARGBwithRGB(baseColor, tintColor);

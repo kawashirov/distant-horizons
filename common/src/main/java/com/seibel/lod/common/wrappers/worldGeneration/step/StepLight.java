@@ -2,8 +2,8 @@ package com.seibel.lod.common.wrappers.worldGeneration.step;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.WorldGenLevelLightEngine;
-import com.seibel.lod.core.util.GridList;
 
+import com.seibel.lod.core.util.gridList.ArrayGridList;
 import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -28,7 +28,7 @@ public final class StepLight {
 	public final ChunkStatus STATUS = ChunkStatus.LIGHT;
 	
 	public void generateGroup(LightEventListener lightEngine,
-			GridList<ChunkAccess> chunks) {
+							  ArrayGridList<ChunkAccess> chunks) {
 		//ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
 		
 		for (ChunkAccess chunk : chunks) {

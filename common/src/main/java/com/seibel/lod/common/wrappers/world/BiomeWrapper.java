@@ -65,7 +65,7 @@ public class BiomeWrapper implements IBiomeWrapper
     {
         int colorInt;
 
-        switch (biome.getBiomeCategory())
+        switch (biome.biomeCategory)
         {
 
             case NETHER:
@@ -110,9 +110,11 @@ public class BiomeWrapper implements IBiomeWrapper
             case SAVANNA:
             case SWAMP:
             default:
-                Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
-                tmp = tmp.darker();
-                colorInt = LodUtil.colorToInt(tmp);
+                colorInt = biome.getGrassColor(x,z);
+                //FIXME: Repair what James did - LeeTom
+//                Color tmp = LodUtil.intToColor(biome.getGrassColor(x, z));
+//                tmp = tmp.darker();
+//                colorInt = LodUtil.colorToInt(tmp);
                 break;
 
         }

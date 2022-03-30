@@ -19,6 +19,7 @@
 
 package com.seibel.lod.fabric;
 
+import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.api.EventApi;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -42,6 +43,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.HashSet;
+import java.util.function.Supplier;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -58,6 +60,7 @@ public class ClientProxy
 	private final EventApi eventApi = EventApi.INSTANCE;
 	private final ClientApi clientApi = ClientApi.INSTANCE;
 
+	public static Supplier<Boolean> isGenerationThreadChecker = null;
 
 	/**
 	 * Registers Fabric Events
@@ -89,6 +92,7 @@ public class ClientProxy
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (client.player != null) onKeyInput();
 		});
+		isGenerationThreadChecker = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
 	}
 
 

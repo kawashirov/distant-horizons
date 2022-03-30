@@ -26,11 +26,9 @@ import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper;
-import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractWorldGeneratorWrapper;
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
 import com.seibel.lod.common.wrappers.chunk.ChunkPosWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
-import com.seibel.lod.common.wrappers.worldGeneration.WorldGeneratorWrapper;
 
 /**
  * This handles creating abstract wrapper objects.
@@ -75,11 +73,6 @@ public class WrapperFactory implements IWrapperFactory {
     @Override
     public AbstractChunkPosWrapper createChunkPos(AbstractBlockPosWrapper blockPos) {
         return new ChunkPosWrapper(blockPos);
-    }
-
-    @Override
-    public AbstractWorldGeneratorWrapper createWorldGenerator(LodBuilder newLodBuilder, LodDimension newLodDimension, IWorldWrapper worldWrapper) {
-        return new WorldGeneratorWrapper(newLodBuilder, newLodDimension, worldWrapper);
     }
     
     @Override

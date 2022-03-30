@@ -189,28 +189,12 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
     {
         if (lightMap == null)
         {
-            sendChatMessage("new");
+            //sendChatMessage("new");
             // make sure the lightMap is up-to-date
             getCurrentLightMap();
         }
 
         return lightMap.getPixelRGBA(blockLight, skyLight);
-    }
-
-    /**
-     * Returns the Color at the given pixel coordinates
-     * from the current lightmap.
-     * @param blockLight x location in texture space
-     * @param skyLight z location in texture space
-     */
-    @Override
-    public Color getColorFromLightMap(int blockLight, int skyLight) {
-        if (lightMap == null) {
-            // make sure the lightMap is up-to-date
-            getCurrentLightMap();
-        }
-
-        return LodUtil.intToColor(lightMap.getPixelRGBA(blockLight, skyLight));
     }
 
 

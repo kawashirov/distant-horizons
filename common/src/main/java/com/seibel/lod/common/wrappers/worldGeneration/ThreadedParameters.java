@@ -12,7 +12,7 @@ public final class ThreadedParameters
 {
 	private static final ThreadLocal<ThreadedParameters> localParam = new ThreadLocal<ThreadedParameters>();
 	final ServerLevel level;
-	public final WorldGenStructFeatManager structFeat;
+	public WorldGenStructFeatManager structFeat = null;
 	boolean isValid = true;
 	public final PerfCalculator perf = new PerfCalculator();
 	
@@ -34,11 +34,9 @@ public final class ThreadedParameters
 	private ThreadedParameters(GlobalParameters param)
 	{
 		level = param.level;
-		structFeat = new WorldGenStructFeatManager(level, param.worldGenSettings, null);
+		structFeat = new WorldGenStructFeatManager(level, param.worldGenSettings);
 	}
-	
-	public void makeStructFeat(WorldGenLevel genLevel)
-	{
-		structFeat.setGenLevel(genLevel);
+	public void makeStructFeat(WorldGenLevel genLevel, GlobalParameters param) {
+		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, genLevel);
 	}
 }

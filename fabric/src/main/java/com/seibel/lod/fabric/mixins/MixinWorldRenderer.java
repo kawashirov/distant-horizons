@@ -21,6 +21,7 @@ package com.seibel.lod.fabric.mixins;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
+import com.seibel.lod.common.Config;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.objects.math.Mat4f;
@@ -60,8 +61,11 @@ public class MixinWorldRenderer
 		previousPartialTicks = tickDelta;
 	}
 
+	// Inject rendering at first call to renderChunkLayer
 	// HEAD or RETURN
-	@Inject(at = @At("HEAD"), method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V")
+	@Inject(at = @At("HEAD"),
+			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V",
+			cancellable = true)
 	private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
 	{
 		// only render before solid blocks
@@ -71,6 +75,9 @@ public class MixinWorldRenderer
 			Mat4f mcProjectionMatrix = McObjectConverter.Convert(projectionMatrix);
 
 			ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
+		}
+		if (Config.Client.Advanced.lodOnlyMode) {
+			callback.cancel();
 		}
 	}
 }

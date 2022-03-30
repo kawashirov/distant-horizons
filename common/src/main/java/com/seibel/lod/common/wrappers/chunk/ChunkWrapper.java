@@ -1,40 +1,47 @@
 package com.seibel.lod.common.wrappers.chunk;
 
 import com.seibel.lod.common.wrappers.block.BlockDetailWrapper;
-import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
+import com.seibel.lod.core.enums.LodDirection;
 import com.seibel.lod.core.util.LevelPosUtil;
 import com.seibel.lod.core.util.LodUtil;
+import com.seibel.lod.core.wrapperInterfaces.block.IBlockDetailWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
+
 import com.seibel.lod.common.wrappers.WrapperUtil;
 import com.seibel.lod.common.wrappers.block.BlockDetailMap;
 import com.seibel.lod.common.wrappers.world.BiomeWrapper;
+import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.QuartPos;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.LiquidBlockContainer;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 /**
  *
  * @author James Seibel
- * @version 11-21-2021
+ * @version 3-5-2022
  */
 public class ChunkWrapper implements IChunkWrapper
 {
-    private ChunkAccess chunk;
-    private LevelReader lightSource;
+    private final ChunkAccess chunk;
+    private final LevelReader lightSource;
+
+
+    public ChunkWrapper(ChunkAccess chunk, LevelReader lightSource)
+    {
+        this.chunk = chunk;
+        this.lightSource = lightSource;
+    }
 
     @Override
     public int getHeight(){
@@ -66,23 +73,27 @@ public class ChunkWrapper implements IChunkWrapper
     }
 
     @Override
-    public BlockDetailWrapper getBlockDetail(int x, int y, int z) {
+    public IBlockDetailWrapper getBlockDetail(int x, int y, int z) {
         BlockPos pos = new BlockPos(x,y,z);
         BlockState blockState = chunk.getBlockState(pos);
-        BlockDetailWrapper blockDetail = BlockDetailMap.getOrMakeBlockDetailCache(blockState, pos, lightSource);
+        IBlockDetailWrapper blockDetail = BlockDetailMap.getOrMakeBlockDetailCache(blockState, pos, lightSource);
         return blockDetail == BlockDetailWrapper.NULL_BLOCK_DETAIL ? null : blockDetail;
     }
 
-    @Deprecated
-    public ChunkWrapper(ChunkAccess chunk)
-    {
-        this.chunk = chunk;
-        this.lightSource = null;
-    }
-    public ChunkWrapper(ChunkAccess chunk, LevelReader lightSource)
-    {
-        this.chunk = chunk;
-        this.lightSource = lightSource;
+    @Override
+    public IBlockDetailWrapper getBlockDetailAtFace(int x, int y, int z, LodDirection dir) {
+        int fy = y+dir.getNormal().y;
+        if (fy < getMinBuildHeight() || fy > getMaxBuildHeight()) return null;
+        BlockPos pos = new BlockPos(x+dir.getNormal().x,fy,z+dir.getNormal().z);
+        BlockState blockState;
+        if (blockPosInsideChunk(x,y,z))
+            blockState = chunk.getBlockState(pos);
+        else {
+            blockState = lightSource.getBlockState(pos);
+        }
+        if (blockState == null || blockState.isAir()) return null;
+        IBlockDetailWrapper blockDetail = BlockDetailMap.getOrMakeBlockDetailCache(blockState, pos, lightSource);
+        return blockDetail == BlockDetailWrapper.NULL_BLOCK_DETAIL ? null : blockDetail;
     }
 
     public ChunkAccess getChunk() {
@@ -101,12 +112,12 @@ public class ChunkWrapper implements IChunkWrapper
 
     @Override
     public int getRegionPosX(){
-    	return LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, getChunkPosX(), LodUtil.REGION_DETAIL_LEVEL);
+        return LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, LodUtil.REGION_DETAIL_LEVEL);
     }
 
     @Override
     public int getRegionPosZ(){
-    	return LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, getChunkPosZ(), LodUtil.REGION_DETAIL_LEVEL);
+        return LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().z, LodUtil.REGION_DETAIL_LEVEL);
     }
 
     @Override
@@ -131,15 +142,19 @@ public class ChunkWrapper implements IChunkWrapper
         return chunk.getPos().getMinBlockZ();
     }
 
-	@Override
-	public long getLongChunkPos() {
-		return chunk.getPos().toLong();
-	}
+    @Override
+    public long getLongChunkPos() {
+        return chunk.getPos().toLong();
+    }
 
     @Override
     public boolean isLightCorrect(){
-    	return true;
-        //return chunk.isLightCorrect();
+        return true;
+        // TODO
+//        if (chunk instanceof LevelChunk) {
+//            return ((LevelChunk) chunk).isClientLightReady();
+//        }
+//        return chunk.isLightCorrect();
     }
 
     public boolean isWaterLogged(int x, int y, int z)
@@ -166,7 +181,7 @@ public class ChunkWrapper implements IChunkWrapper
     @Override
     public int getSkyLight(int x, int y, int z) {
         if (lightSource == null) return -1;
-        return lightSource.getBrightness(LightLayer.SKY, new BlockPos(x, y, z));
+        return lightSource.getBrightness(LightLayer.SKY, new BlockPos(x,y,z));
     }
 
     @Override
@@ -185,4 +200,5 @@ public class ChunkWrapper implements IChunkWrapper
     {
         return lightSource;
     }
+
 }

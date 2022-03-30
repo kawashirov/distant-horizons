@@ -36,6 +36,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 
 import org.jetbrains.annotations.Nullable;
@@ -173,6 +174,13 @@ public class WorldWrapper implements IWorldWrapper
         ChunkAccess chunk = world.getChunk(pos.getX(), pos.getZ(), ChunkStatus.EMPTY, false);
         if (chunk == null) return null;
         return new ChunkWrapper(chunk, world);
+    }
+
+    @Override
+    public boolean hasChunkLoaded(int chunkX, int chunkZ) {
+        // world.hasChunk(chunkX, chunkZ); THIS DOES NOT WORK FOR CLIENT LEVEL CAUSE MOJANG ALWAYS RETURN TRUE FOR THAT!
+        ChunkSource source = world.getChunkSource();
+        return source.hasChunk(chunkX, chunkZ);
     }
 
 

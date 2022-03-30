@@ -70,7 +70,8 @@ public class McObjectConverter
     {
         return directions[lodDirection.ordinal()];
     }
-    public static LodDirection Convert(Direction direction) {
+    public static LodDirection Convert(Direction direction)
+    {
         return lodDirections[direction.ordinal()];
     }
 }

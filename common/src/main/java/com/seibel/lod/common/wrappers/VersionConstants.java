@@ -22,37 +22,9 @@ public class VersionConstants implements IVersionConstants {
     }
 
     @Override
-    public boolean isWorldGeneratorSingleThreaded(DistanceGenerationMode distanceGenerationMode) {
-        // We are always asking the server to generate the chunk,
-        // so no use running this stuff multithreaded.
-        return true;
-        /*
-        switch (distanceGenerationMode) {
-            default:
-            case NONE:
-            case BIOME_ONLY:
-            case BIOME_ONLY_SIMULATE_HEIGHT:
-            case SURFACE:
-            case FEATURES:
-                return false;
-
-            case FULL:
-                return true;
-        }
-         */
-    }
-
-    @Override
     public int getWorldGenerationCountPerThread() {
         return 1;
     }
-
-
-	@Override
-	public boolean hasBatchGenerationImplementation() {
-		return true;
-	}
-
 
 	@Override
 	public boolean isVanillaRenderedChunkSquare()

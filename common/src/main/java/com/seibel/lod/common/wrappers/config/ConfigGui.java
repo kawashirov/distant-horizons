@@ -607,6 +607,7 @@ public abstract class ConfigGui
 					else if (info.screenButton)
 					{
 						Button widget = new Button(this.width / 2 - info.width, this.height - 28, info.width * 2, 20, name, (button -> {
+							saveToFile();
 							Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, info.gotoScreen));
 						}));
 						this.list.addButton(widget, null, null, null);

@@ -1,10 +1,12 @@
 
 package com.seibel.lod.common.wrappers.worldGeneration.mimicObject;
 
+import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.core.api.ApiShared;
 
 import java.util.Objects;
 
+import com.seibel.lod.core.logging.ConfigBasedLogger;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.nbt.CompoundTag;
@@ -30,7 +32,7 @@ import net.minecraft.world.level.material.Fluids;
 import org.apache.logging.log4j.Logger;
 
 public class ChunkLoader {
-	private static final Logger LOGGER = ApiShared.LOGGER;
+	private static final ConfigBasedLogger LOGGER = BatchGenerationEnvironment.LOAD_LOGGER;
 
 	private static LevelChunkSection[] readSections(WorldGenLevel level, LevelLightEngine lightEngine,
 			ChunkPos chunkPos, CompoundTag tagLevel) {
@@ -102,8 +104,7 @@ public class ChunkLoader {
 
 		ChunkPos actualPos = new ChunkPos(tagLevel.getInt("xPos"), tagLevel.getInt("zPos"));
 		if (!Objects.equals(chunkPos, actualPos)) {
-			LOGGER.error("Distant Horizons: Chunk file at {} is in the wrong location; Ignoring. (Expected {}, got {})",
-					(Object) chunkPos, (Object) chunkPos, (Object) actualPos);
+			LOGGER.error("Chunk file at {} is in the wrong location; Ignoring. (Expected {}, got {})", (Object) chunkPos, (Object) chunkPos, (Object) actualPos);
 			return null;
 		}
 

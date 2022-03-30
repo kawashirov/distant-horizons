@@ -15,24 +15,25 @@ import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 
 public class WorldGenStructFeatManager extends StructureFeatureManager {
-	WorldGenLevel genLevel;
+	final WorldGenLevel genLevel;
 	WorldGenSettings worldGenSettings;
-	public WorldGenStructFeatManager(LevelAccessor levelAccessor, WorldGenSettings worldGenSettings,
+	public WorldGenStructFeatManager(WorldGenSettings worldGenSettings,
 			WorldGenLevel genLevel) {
-		super(levelAccessor, worldGenSettings);
+		super(genLevel, worldGenSettings);
 		this.genLevel = genLevel;
 		this.worldGenSettings = worldGenSettings;
-	}
-	
-	public void setGenLevel(WorldGenLevel genLevel) {
-		this.genLevel = genLevel;
 	}
 
 	@Override
 	public WorldGenStructFeatManager forWorldGenRegion(WorldGenRegion worldGenRegion) {
 		if (worldGenRegion == genLevel)
 			return this;
-		return new WorldGenStructFeatManager(worldGenRegion, worldGenSettings, worldGenRegion);
+		return new WorldGenStructFeatManager(worldGenSettings, worldGenRegion);
+	}
+
+	private ChunkAccess _getChunk(int x, int z, ChunkStatus status) {
+		if (genLevel == null) return null;
+		return genLevel.getChunk(x, z, status, false);
 	}
 
 	@Override

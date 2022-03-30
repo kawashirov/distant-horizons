@@ -91,6 +91,13 @@ public class LightedWorldGenRegion extends WorldGenRegion {
         return true;
     }
 
+	// TODO Check this
+//	@Override
+//	public List<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos,
+//			StructureFeature<?> structureFeature) {
+//		return structFeat.startsForFeature(sectionPos, structureFeature);
+//	}
+
 	// Skip updating the related tile entities
 	@Override
 	public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
@@ -238,6 +245,10 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	{
 		BlockTintCache blockTintCache = (BlockTintCache) this.tintCaches.get(colorResolver);
 		return blockTintCache.getColor(blockPos, null); // FIXME[Generator]: Replace this null with something else
+	}
+
+	private Biome _getBiome(BlockPos pos) {
+		return getBiome(pos);
 	}
 
 	public int calculateBlockTint(BlockPos blockPos, ColorResolver colorResolver)
