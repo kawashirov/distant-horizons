@@ -45,9 +45,7 @@ dependencies {
     addModJar(fabricApi.module("fabric-networking-api-v1", rootProject.fabric_api_version))
 
     // Mod Menu
-    modImplementation("com.terraformersmc:modmenu:${rootProject.modmenu_version}") {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
+    modImplementation("com.terraformersmc:modmenu:${rootProject.modmenu_version}")
 
     // Starlight
     addMod("curse.maven:starlight-521783:${rootProject.starlight_version_fabric}", rootProject.enable_starlight)
