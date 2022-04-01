@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.common.wrappers.worldGeneration.ThreadedParameters;
+import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
 import com.seibel.lod.core.util.gridList.ArrayGridList;
 
 import net.minecraft.ReportedException;
@@ -11,7 +12,9 @@ import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ProtoChunk;
+#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 import net.minecraft.world.level.levelgen.blending.Blender;
+#endif
 
 public final class StepFeatures {
 	/**
@@ -29,7 +32,7 @@ public final class StepFeatures {
 
 	public final ChunkStatus STATUS = ChunkStatus.FEATURES;
 
-	public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
+	public void generateGroup(ThreadedParameters tParams, LightedWorldGenRegion worldGenRegion,
 			ArrayGridList<ChunkAccess> chunks) {
 		ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
 		
@@ -41,9 +44,14 @@ public final class StepFeatures {
 		
 		for (ChunkAccess chunk : chunksToDo) {
 			try {
+				#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 				environment.params.generator.applyBiomeDecoration(worldGenRegion, chunk,
 						tParams.structFeat.forWorldGenRegion(worldGenRegion));
 				Blender.generateBorderTicks(worldGenRegion, chunk);
+				#elif MC_VERSION_1_17_1
+				worldGenRegion.setOverrideCenter(chunk.getPos());
+				environment.params.generator.applyBiomeDecoration(worldGenRegion, tParams.structFeat);
+				#endif
 			} catch (ReportedException e) {
 				e.printStackTrace();
 				// FIXME: Features concurrent modification issue. Something about cocobeans just

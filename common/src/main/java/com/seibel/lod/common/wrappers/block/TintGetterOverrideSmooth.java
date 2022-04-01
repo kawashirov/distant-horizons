@@ -44,6 +44,8 @@ public class TintGetterOverrideSmooth implements BlockAndTintGetter {
         return parent.getBiome(pos).value();
 		#elif MC_VERSION_1_18_1
 		return parent.getBiome(pos);
+        #elif MC_VERSION_1_17_1
+        return parent.getBiome(pos);
 		#endif
     }
 
@@ -72,7 +74,11 @@ public class TintGetterOverrideSmooth implements BlockAndTintGetter {
     @Override
     public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
         BlockTintCache blockTintCache = this.tintCaches.get(colorResolver);
+        #if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
         return blockTintCache.getColor(blockPos);
+        #elif MC_VERSION_1_17_1
+        return blockTintCache.getColor(blockPos, null); //FIXME[1.17.1]: Replace this null with something else
+        #endif
     }
 
     @Override

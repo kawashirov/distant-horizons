@@ -192,6 +192,8 @@ allprojects { p ->
         if (p != project(":core")) {
             options.compilerArgs += ['-Xplugin:Manifold']
             options.release = rootProject.java_version as Integer
+//        } else if (p == project(":core")) {
+//            options.release = 8;
         }
     }
 

@@ -16,6 +16,11 @@ If you want to see a quick demo, check out a video covering the mod here:
 
 ### Versions
 
+This branch is for these versions of Minecraft
+- 1.18.2
+- 1.18.1 & 1.18
+- 1.17.1 & 1.17
+
 Architectury version: 3.4-SNAPSHOT\
 Java Compiler plugin: Manifold Preprocessor
 
@@ -30,6 +35,12 @@ Forge version: 39.1.2\
 Fabric version: 0.13.3\
 Fabric API version: 0.46.6+1.18\
 Modmenu version: 3.0.1
+
+#### 1.17.1 mods
+Forge version: 37.1.1\
+Fabric version: 0.13.2\
+Fabric API version: 0.46.1+1.17\
+Modmenu version: 2.0.14
 
 
 Notes:\

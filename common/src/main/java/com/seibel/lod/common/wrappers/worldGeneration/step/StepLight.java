@@ -52,7 +52,9 @@ public final class StepLight {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 			if (chunk instanceof LevelChunk) ((LevelChunk)chunk).setClientLightReady(true);
+			#endif
 			chunk.setLightCorrect(true);
 		}
 		lightEngine.runUpdates(Integer.MAX_VALUE, true, true);

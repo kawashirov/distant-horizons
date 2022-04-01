@@ -48,6 +48,15 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	private final ChunkPos firstPos;
 	private final List<ChunkAccess> cache;
 	Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
+	#if MC_VERSION_1_17_1
+	private ChunkPos overrideCenterPos = null;
+
+	public void setOverrideCenter(ChunkPos pos) {overrideCenterPos = pos;}
+	@Override
+	public ChunkPos getCenter() {
+		return overrideCenterPos==null ? super.getCenter() : overrideCenterPos;
+	}
+	#endif
 
 	public LightedWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine,
 			List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
@@ -80,12 +89,14 @@ public class LightedWorldGenRegion extends WorldGenRegion {
         if (k > this.writeRadius || l > this.writeRadius) {
             return false;
         }
+		#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
         if (center.isUpgrading()) {
             LevelHeightAccessor levelHeightAccessor = center.getHeightAccessorForGeneration();
             if (blockPos.getY() < levelHeightAccessor.getMinBuildHeight() || blockPos.getY() >= levelHeightAccessor.getMaxBuildHeight()) {
                 return false;
             }
         }
+		#endif
         return true;
     }
 
@@ -172,7 +183,7 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
 		ChunkAccess chunk = getChunkAccess(i, j, chunkStatus, bl);
 		if (chunk instanceof LevelChunk) {
-			chunk = new ImposterProtoChunk((LevelChunk) chunk, true);
+			chunk = new ImposterProtoChunk((LevelChunk) chunk #if MC_VERSION_1_18_1 || MC_VERSION_1_18_2, true #endif);
 		}
 		return chunk;
 	}
@@ -244,7 +255,11 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver)
 	{
 		BlockTintCache blockTintCache = (BlockTintCache) this.tintCaches.get(colorResolver);
+		#if MC_VERSION_1_17_1
+		return blockTintCache.getColor(blockPos, null); // FIXME[1.17.1]: Replace this null with something else
+		#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 		return blockTintCache.getColor(blockPos);
+		#endif
 	}
 
 	private Biome _getBiome(BlockPos pos) {

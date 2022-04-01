@@ -17,7 +17,9 @@ import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
+#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 import net.minecraft.world.level.levelgen.blending.Blender;
+#endif
 
 public final class StepBiomes {
 	/**
@@ -48,8 +50,12 @@ public final class StepBiomes {
 		
 		for (ChunkAccess chunk : chunksToDo) {
 			// System.out.println("StepBiomes: "+chunk.getPos());
+			#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 			chunk = environment.joinSync(environment.params.generator.createBiomes(environment.params.biomes, Runnable::run, Blender.of(worldGenRegion),
 					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
+			#elif MC_VERSION_1_17_1
+			environment.params.generator.createBiomes(environment.params.biomes, chunk);
+			#endif
 		}
 	}
 }

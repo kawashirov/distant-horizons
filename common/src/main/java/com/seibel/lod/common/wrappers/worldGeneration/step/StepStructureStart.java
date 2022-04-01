@@ -53,6 +53,8 @@ public final class StepStructureStart {
 				// System.out.println("StepStructureStart: "+chunk.getPos());
 				environment.params.generator.createStructures(environment.params.registry, tParams.structFeat, chunk, environment.params.structures,
 						environment.params.worldSeed);
+
+				#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 				try {
 					tParams.structCheck.onStructureLoad(chunk.getPos(), chunk.getAllStarts());
 				} catch (ArrayIndexOutOfBoundsException e) {
@@ -61,6 +63,7 @@ public final class StepStructureStart {
 					// TODO: Figure out in the future why this happens even though I am using new structFeat
 					throw new StepStructureStart.StructStartCorruptedException(e);
 				}
+				#endif
 			}
 		}
 	}

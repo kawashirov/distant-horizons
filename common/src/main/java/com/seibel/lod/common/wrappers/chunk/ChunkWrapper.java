@@ -74,6 +74,9 @@ public class ChunkWrapper implements IChunkWrapper
         #elif MC_VERSION_1_18_1
         return BiomeWrapper.getBiomeWrapper(chunk.getNoiseBiome(
         		QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)));
+		#elif MC_VERSION_1_17_1
+		return BiomeWrapper.getBiomeWrapper(chunk.getBiomes().getNoiseBiome(
+				QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)));
         #endif
 	}
 	
@@ -154,11 +157,14 @@ public class ChunkWrapper implements IChunkWrapper
 	
 	@Override
 	public boolean isLightCorrect(){
-		//return true;
+		#if MC_VERSION_1_17_1
+		return true;
+		#elif MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 		if (chunk instanceof LevelChunk) {
 			return ((LevelChunk) chunk).isClientLightReady();
 		}
 		return chunk.isLightCorrect();
+		#endif
 	}
 	
 	public boolean isWaterLogged(int x, int y, int z)

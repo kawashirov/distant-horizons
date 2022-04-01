@@ -125,9 +125,16 @@ public class WorldGenLevelLightEngine extends LevelLightEngine {
         LevelChunkSection[] levelChunkSections = chunkAccess.getSections();
         for (int i = 0; i < chunkAccess.getSectionsCount(); ++i) {
             LevelChunkSection levelChunkSection = levelChunkSections[i];
+            #if MC_VERSION_1_17_1
+            if (!LevelChunkSection.isEmpty(levelChunkSection)) {
+                int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
+                updateSectionStatus(SectionPos.of(chunkPos, j), false);
+            }
+            #elif MC_VERSION_1_18_1 || MC_VERSION_1_18_1
             if (levelChunkSection.hasOnlyAir()) continue;
             int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
             updateSectionStatus(SectionPos.of(chunkPos, j), false);
+            #endif
         }
         enableLightSources(chunkPos, true);
         if (needLightBlockUpdate) {

@@ -19,7 +19,9 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseSettings;
+#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 import net.minecraft.world.level.levelgen.blending.Blender;
+#endif
 
 public final class StepNoise {
 	/**
@@ -50,8 +52,13 @@ public final class StepNoise {
 		
 		for (ChunkAccess chunk : chunksToDo) {
 			// System.out.println("StepNoise: "+chunk.getPos());
+			#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 			chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion),
 						tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
+			#elif MC_VERSION_1_17_1
+			chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run,
+					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
+			#endif
 		}
 	}
 }

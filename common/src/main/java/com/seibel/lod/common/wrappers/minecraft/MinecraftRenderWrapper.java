@@ -15,6 +15,7 @@ import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.util.LodUtil;
 
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.renderer.LightTexture;
 
 import com.mojang.math.Vector3f;
@@ -130,7 +131,11 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public int getRenderDistance()
 	{
+		#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
         return MC.options.getEffectiveRenderDistance();
+		#elif MC_VERSION_1_17_1
+		return MC.options.renderDistance;
+		#endif
 	}
 	
 	@Override
@@ -190,15 +195,24 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		if (!usingBackupGetVanillaRenderedChunks) {
 			try {
 				LevelRenderer levelRenderer = MC.levelRenderer;
+				#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 				LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
+				#elif MC_VERSION_1_17_1
+				ObjectArrayList<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunks;
+				#endif
 				return (chunks.stream().map((chunk) -> {
-                #if MC_VERSION_1_18_2
+                	#if MC_VERSION_1_18_2
 					AABB chunkBoundingBox = chunk.chunk.getBoundingBox();
-                #elif MC_VERSION_1_18_1
-				AABB chunkBoundingBox = chunk.chunk.bb;
-                #endif
+                	#elif MC_VERSION_1_17_1 || MC_VERSION_1_18_1
+					AABB chunkBoundingBox = chunk.chunk.bb;
+                	#endif
+					#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 					return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
 							Math.floorDiv((int) chunkBoundingBox.minZ, 16));
+					#elif MC_VERSION_1_17_1
+					return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
+							Math.floorDiv((int) chunkBoundingBox.minZ, 16));
+					#endif
 				}).collect(Collectors.toCollection(HashSet::new)));
 			} catch (LinkageError e) {
 				try {
