@@ -17,6 +17,10 @@ configurations {
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
+
+    addModJar
+    include.extendsFrom addModJar
+    modImplementation.extendsFrom addModJar
 }
 
 repositories {
@@ -36,7 +40,9 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
     // Fabric API
-    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    addModJar(fabricApi.module("fabric-lifecycle-events-v1", rootProject.fabric_api_version))
+    addModJar(fabricApi.module("fabric-key-binding-api-v1", rootProject.fabric_api_version))
+    addModJar(fabricApi.module("fabric-networking-api-v1", rootProject.fabric_api_version))
 
     // Mod Menu
     modImplementation("com.terraformersmc:modmenu:${rootProject.modmenu_version}") {

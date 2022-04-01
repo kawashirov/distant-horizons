@@ -3,16 +3,9 @@ image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
-    - gradleSetup
-    - build
-    - merge
+    - build_17_1
 
 variables:
-    # Disable the Gradle daemon for Continuous Integration servers as correctness
-    # is usually a priority over speed in CI environments. Using a fresh
-    # runtime for each build is more reliable since the runtime is completely
-    # isolated from any previous builds.
-    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
     # Pull core when building
     GIT_SUBMODULE_STRATEGY: recursive
 
@@ -23,91 +16,30 @@ before_script:
     - echo GE_JOB_ID=$CI_JOB_ID >> generate_jars.env
 
 
-
-
-# first stage
-# This prevents us from re-downloading Gradle every stage
-gradleSetup:
-    stage: gradleSetup
-    script: ./gradlew --build-cache --gradle-user-home cache/ check
-    # build using Java 17
-    image: eclipse-temurin:17
-    cache:
-        key:
-            files:
-                - gradle/wrapper/gradle-wrapper.properties
-        policy: push
-        paths:
-            - cache/
-
-
-
-# second stage
-build:
-    stage: build
-    script: ./gradlew build --gradle-user-home cache/
-    # build using Java 17
-    image: eclipse-temurin:17
-    cache:
-        key: "$CI_COMMIT_REF_NAME"
-        policy: pull-push
-        paths:
-            - .architectury-transformer
-            - .gradle
-            - build
-            - common/.gradle
-            - common/build
-            - core/.gradle
-            - core/build
-            - fabric/.gradle
-            - fabric/src/generated
-            - forge/.gradle
-            - forge/src/generated
-            - build
-            - .gradle
-            - cache/
+# 1.17.1 build
+build_17_1:
+    stage: build_17_1
+    script:
+        - ./gradlew deleteMerged --gradle-user-home cache/; # make sure any previously merged jars are removed before running this job
+        - ./gradlew build -PmcVer=1.17.1 --gradle-user-home cache/;
+        - ./gradlew merge --gradle-user-home cache/;
+    # build using Java 16
+    image: eclipse-temurin:16
     artifacts:
-        name: "NightlyBuild-$CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
-        paths:
-            # relative to the root directory
-            - fabric/build/libs
-            - forge/build/libs
-        exclude:
-            - fabric/build/libs/*-dev.jar
-            - fabric/build/libs/*-dev-shadow.jar
-            - fabric/build/libs/*-sources-dev.jar
-            - fabric/build/libs/*-sources.jar
-            - forge/build/libs/*-dev.jar
-            - forge/build/libs/*-dev-shadow.jar
-            - forge/build/libs/*-sources-dev.jar
-            - forge/build/libs/*-sources.jar
-        reports:
-            # To ensure we've access to these files in the next stage
-            dotenv: generate_jars.env
-        expire_in: 1 day
-
-# third stage
-merge:
-    stage: merge
-    script: ./gradlew merge --gradle-user-home cache/
-    # build using Java 17
-    image: eclipse-temurin:17
-    cache:
-        key: "$CI_COMMIT_REF_NAME"
-        policy: pull-push
-        paths:
-            - build
-            - .gradle
-            - cache/
-    artifacts:
-        name: "Merged_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+        name: "Merged_NightlyBuild_1_17_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
         paths:
             # relative to the root directory
             - Merged
         expire_in: 1 day
+    cache:
+        key: "gradleCache"
+        policy: pull-push
+        paths:
+            - .gradle
+            - cache/
 
 
-## forth stage
+# unused deployment stage
 #deploy:
 #    stage: deploy
 #    image: registry.gitlab.com/gitlab-org/release-cli:latest
@@ -130,3 +62,4 @@ merge:
 #                  url: 'https://gitlab.com/jeseibel/minecraft-lod-mod/cw/-/jobs/${GE_JOB_ID}/artifacts/file/fabric/build/libs'
 #                - name: 'Forge Jars'
 #                  url: 'https://gitlab.com/jeseibel/minecraft-lod-mod/cw/-/jobs/${GE_JOB_ID}/artifacts/file/forge/build/libs'
+
