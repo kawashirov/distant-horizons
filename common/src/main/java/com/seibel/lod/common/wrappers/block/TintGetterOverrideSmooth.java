@@ -72,6 +72,10 @@ public class TintGetterOverrideSmooth implements BlockAndTintGetter {
     @Override
     public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
         BlockTintCache blockTintCache = this.tintCaches.get(colorResolver);
+        if (blockTintCache == null) { // This is a compat fix for Colormatic's mixin
+            this.tintCaches.put(colorResolver,
+                    blockTintCache = new BlockTintCache((pos) -> calculateBlockTint(pos, colorResolver)));
+        }
         return blockTintCache.getColor(blockPos);
     }
 

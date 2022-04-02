@@ -49,7 +49,11 @@ public class TintGetterOverrideFast implements BlockAndTintGetter {
     @Override
     public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
         Biome b = _getBiome(blockPos);
-        return tintCaches.get(colorResolver).computeIfAbsent(b, (key) -> colorResolver.getColor(b, blockPos.getX(), blockPos.getZ()));
+        ConcurrentHashMap<Biome, Integer> concurrentHashMap = this.tintCaches.get(colorResolver);
+        if (concurrentHashMap == null) { // This is a compat fix for Colormatic's mixin
+            this.tintCaches.put(colorResolver, concurrentHashMap = new ConcurrentHashMap<>());
+        }
+        return concurrentHashMap.computeIfAbsent(b, (key) -> colorResolver.getColor(b, blockPos.getX(), blockPos.getZ()));
     }
 
     @Override
