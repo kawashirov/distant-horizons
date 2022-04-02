@@ -32,7 +32,7 @@ public class TintGetterOverrideSmooth implements BlockAndTintGetter {
     public TintGetterOverrideSmooth(LevelReader parent, int smoothingRange) {
         this.parent = parent;
         this.smoothingRange = smoothingRange;
-        this.tintCaches = Util.make(new Object2ObjectArrayMap(3), object2ObjectArrayMap -> {
+        this.tintCaches = Util.make(new Object2ObjectArrayMap<>(3), object2ObjectArrayMap -> {
             object2ObjectArrayMap.put(BiomeColors.GRASS_COLOR_RESOLVER, new BlockTintCache((pos) -> calculateBlockTint(pos, BiomeColors.GRASS_COLOR_RESOLVER)));
             object2ObjectArrayMap.put(BiomeColors.FOLIAGE_COLOR_RESOLVER, new BlockTintCache((pos) -> calculateBlockTint(pos, BiomeColors.FOLIAGE_COLOR_RESOLVER)));
             object2ObjectArrayMap.put(BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache((pos) -> calculateBlockTint(pos, BiomeColors.WATER_COLOR_RESOLVER)));
