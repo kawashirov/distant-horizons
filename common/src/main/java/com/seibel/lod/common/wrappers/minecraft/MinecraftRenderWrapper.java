@@ -212,8 +212,9 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		}
 		return getMaximumRenderedChunks();
 	}
-	
+
 	@Override
+	@Deprecated
 	public int[] getLightmapPixels()
 	{
 		LightTexture tex = GAME_RENDERER.lightTexture();
@@ -268,6 +269,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 
 	
 	@Override
+	@Deprecated
 	public int getLightmapTextureHeight()
 	{
 		int height = -1;
@@ -286,6 +288,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	}
 	
 	@Override
+	@Deprecated
 	public int getLightmapTextureWidth()
 	{
 		int width = -1;
@@ -305,6 +308,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	
 	
 	@Override
+	@Deprecated
 	public int getLightmapGLFormat() {
 		int glFormat = -1;
 		
