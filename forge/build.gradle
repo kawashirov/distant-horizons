@@ -5,8 +5,6 @@ plugins {
 version = rootProject.mod_version+"-"+rootProject.minecraft_version+"-"+new Date().format("yyyy_MM_dd_HH_mm")
 
 loom {
-    accessWidenerPath.set(project(":common").file("src/main/resources/lod.accesswidener"))
-
     forge {
         convertAccessWideners.set(true)
         extraAccessWideners.add("lod.accesswidener")

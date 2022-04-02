@@ -4,10 +4,6 @@ plugins {
 
 version = rootProject.mod_version+"-"+rootProject.minecraft_version+"-"+new Date().format("yyyy_MM_dd_HH_mm")
 
-loom {
-    accessWidenerPath.set(project(":common").file("src/main/resources/lod.accesswidener"))
-}
-
 architectury {
     platformSetupLoomIde()
     fabric()
@@ -17,6 +13,10 @@ configurations {
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
+
+    addModJar
+    include.extendsFrom addModJar
+    modImplementation.extendsFrom addModJar
 }
 
 repositories {
@@ -36,12 +36,12 @@ dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
     // Fabric API
-    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    addModJar(fabricApi.module("fabric-lifecycle-events-v1", rootProject.fabric_api_version))
+    addModJar(fabricApi.module("fabric-key-binding-api-v1", rootProject.fabric_api_version))
+    addModJar(fabricApi.module("fabric-networking-api-v1", rootProject.fabric_api_version))
 
     // Mod Menu
-    modImplementation("com.terraformersmc:modmenu:${rootProject.modmenu_version}") {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
+    addMod("com.terraformersmc:modmenu:${rootProject.modmenu_version}", 2)
 
     // Starlight
     addMod("curse.maven:starlight-521783:${rootProject.starlight_version_fabric}", rootProject.enable_starlight)

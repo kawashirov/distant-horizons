@@ -48,6 +48,19 @@ subprojects { p ->
 
     loom {
         silentMojangMappingsLicense()
+
+        def mcVersionToAcsessWidenerVersion = [
+                "1_17_1": "1_17",
+                "1_18_1": "1_18",
+                "1_18_2": "1_18"
+        ]
+
+        def acsessWidenerVersion = mcVersionToAcsessWidenerVersion.get(minecraft_version.replace(".", "_"))
+
+        def acsessWidenerLocation = "${rootDir}/common/src/main/resources/${acsessWidenerVersion}.lod.accesswidener"
+        accessWidenerPath.set(project(":common").file(acsessWidenerLocation))
+        accessWidenerPath.set(project(":fabric").file(acsessWidenerLocation))
+        accessWidenerPath.set(project(":forge").file(acsessWidenerLocation))
     }
 
     configurations {
@@ -96,6 +109,7 @@ allprojects { p ->
     archivesBaseName = rootProject.archives_base_name
     version = rootProject.mod_version
     group = rootProject.maven_group
+
 
     repositories {
         mavenCentral()
@@ -192,9 +206,11 @@ allprojects { p ->
         if (p != project(":core")) {
             options.compilerArgs += ['-Xplugin:Manifold']
             options.release = rootProject.java_version as Integer
-//        } else if (p == project(":core")) {
-//            options.release = 8;
+        } else if (p == project(":core")) {
+            options.release = 8;
         }
+        // TODO: make everything use java 8
+//        options.release = 8 // Use Java 8 for everything so back porting is easier
     }
 
     java {

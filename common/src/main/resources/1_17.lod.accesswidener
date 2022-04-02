@@ -8,23 +8,18 @@ accessible field com/mojang/blaze3d/vertex/VertexBuffer indexCount I
 accessible field com/mojang/blaze3d/vertex/VertexBuffer vertextBufferId I
 accessible method net/minecraft/client/renderer/GameRenderer getFov (Lnet/minecraft/client/Camera;FZ)D
 
-#if MC_VERSION_1_17_1
 # pre-render setup
 accessible field net/minecraft/client/renderer/LevelRenderer renderChunks Lit/unimi/dsi/fastutil/objects/ObjectArrayList;
 accessible class net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo
 accessible field net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo chunk Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk;
-#endif
 
 # used for grabbing vanilla rendered chunks
-#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-accessible field net/minecraft/client/renderer/LevelRenderer renderChunkStorage Ljava/util/concurrent/atomic/AtomicReference;
-accessible class net/minecraft/client/renderer/LevelRenderer$RenderChunkStorage
-#endif
 accessible class net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo
 accessible field net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo chunk Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk;
 
 # lighting
 accessible field net/minecraft/client/renderer/LightTexture lightPixels Lcom/mojang/blaze3d/platform/NativeImage;
+accessible field net/minecraft/client/renderer/LightTexture lightTexture Lnet/minecraft/client/renderer/texture/DynamicTexture;
 accessible field net/minecraft/world/level/lighting/LevelLightEngine blockEngine Lnet/minecraft/world/level/lighting/LayerLightEngine;
 accessible field net/minecraft/world/level/lighting/LevelLightEngine skyEngine Lnet/minecraft/world/level/lighting/LayerLightEngine;
 
@@ -33,7 +28,6 @@ accessible method net/minecraft/world/level/levelgen/Heightmap setHeight (III)V
 accessible field net/minecraft/world/level/biome/Biome generationSettings Lnet/minecraft/world/level/biome/BiomeGenerationSettings;
 accessible field net/minecraft/world/level/biome/Biome biomeCategory Lnet/minecraft/world/level/biome/Biome$BiomeCategory;
 # accessible field net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator settings Lnet/minecraft/core/Holder;
-#accessible method net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator doFill (Lnet/minecraft/world/level/levelgen/blending/Blender;Lnet/minecraft/world/level/StructureFeatureManager;Lnet/minecraft/world/level/chunk/ChunkAccess;II)Lnet/minecraft/world/level/chunk/ChunkAccess;
 #accessible method net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator doCreateBiomes (Lnet/minecraft/core/Registry;Lnet/minecraft/world/level/levelgen/blending/Blender;Lnet/minecraft/world/level/StructureFeatureManager;Lnet/minecraft/world/level/chunk/ChunkAccess;)V
 accessible method net/minecraft/world/level/lighting/LayerLightEngine queueSectionData (JLnet/minecraft/world/level/chunk/DataLayer;Z)V
 
@@ -51,7 +45,3 @@ accessible class net/minecraft/client/renderer/texture/TextureAtlasSprite$Animat
 accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameX (I)I
 accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameY (I)I
 extendable class com/mojang/math/Matrix4f
-
-# hacky stuff
-accessible field net/minecraft/util/ThreadingDetector lock Ljava/util/concurrent/Semaphore;
-mutable field net/minecraft/util/ThreadingDetector lock Ljava/util/concurrent/Semaphore;

@@ -257,7 +257,7 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 		BlockTintCache blockTintCache = (BlockTintCache) this.tintCaches.get(colorResolver);
 		#if MC_VERSION_1_17_1
 		return blockTintCache.getColor(blockPos, null); // FIXME[1.17.1]: Replace this null with something else
-		#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+		#elif MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 		return blockTintCache.getColor(blockPos);
 		#endif
 	}

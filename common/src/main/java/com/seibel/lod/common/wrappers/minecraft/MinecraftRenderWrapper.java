@@ -15,6 +15,7 @@ import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.util.LodUtil;
 
+import com.seibel.lod.core.wrapperInterfaces.misc.ILightMapWrapper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.renderer.LightTexture;
 
@@ -233,8 +234,8 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	public int[] getLightmapPixels()
 	{
 		LightTexture tex = GAME_RENDERER.lightTexture();
-		tex.tick(); // This call makes no sense, but it fixes pause menu flicker bug
-		NativeImage lightMapPixels = tex.lightPixels;
+		//tex.tick(); // This call makes no sense, but it fixes pause menu flicker bug
+		NativeImage lightMapPixels = tex.lightTexture.getPixels();
 		LightMapWrapper lightMap = new LightMapWrapper(lightMapPixels);
 		
 		
@@ -274,8 +275,14 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		
 		return pixels;
 	}
-	
-	
+
+	@Override
+	public ILightMapWrapper getLightmapWrapper() {
+		return new LightMapWrapper(GAME_RENDERER.lightTexture());
+	}
+
+
+
 	@Override
 	public int getLightmapTextureHeight()
 	{

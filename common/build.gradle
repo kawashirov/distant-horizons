@@ -1,7 +1,3 @@
-loom {
-    accessWidenerPath.set(file("src/main/resources/lod.accesswidener"))
-}
-
 architectury {
     common()
 }
