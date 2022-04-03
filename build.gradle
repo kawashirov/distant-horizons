@@ -203,6 +203,18 @@ allprojects { p ->
         runClient.enabled = false
         runServer.enabled = false
     }
+	
+	
+	// this is necessary for running the fabric build
+	if (p == project(":common")) {
+        println "Coping [common/src/main/resources/lod.accesswidner] to [fabric/build/resources/main]."
+		
+		copy {
+            from "$rootProject.rootDir/common/src/main/resources"
+            into "$rootProject.rootDir/fabric/build/resources/main"
+			include "*.accesswidener"
+        }
+    }
 }
 
 
