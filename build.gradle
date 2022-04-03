@@ -43,24 +43,41 @@ architectury {
     minecraft = rootProject.minecraft_version
 }
 
+// Stuff for access wideners
+def mcVersionToAcsessWidenerVersion = [
+        "1_17_1": "1_17",
+        "1_18_1": "1_18",
+        "1_18_2": "1_18"
+] // Use this as sometimes multiple versions use the same access wideners
+def acsessWidenerVersion = mcVersionToAcsessWidenerVersion.get(minecraft_version.replace(".", "_"))
+
 subprojects { p ->
     apply plugin: "dev.architectury.loom"
 
     loom {
         silentMojangMappingsLicense()
 
-        def mcVersionToAcsessWidenerVersion = [
-                "1_17_1": "1_17",
-                "1_18_1": "1_18",
-                "1_18_2": "1_18"
-        ]
-
-        def acsessWidenerVersion = mcVersionToAcsessWidenerVersion.get(minecraft_version.replace(".", "_"))
-
-        def acsessWidenerLocation = "${rootDir}/common/src/main/resources/${acsessWidenerVersion}.lod.accesswidener"
+        // Set what accesswidener to use
+        def acsessWidenerLocation = "src/main/resources/${acsessWidenerVersion}.lod.accesswidener"
         accessWidenerPath.set(project(":common").file(acsessWidenerLocation))
-        accessWidenerPath.set(project(":fabric").file(acsessWidenerLocation))
-        accessWidenerPath.set(project(":forge").file(acsessWidenerLocation))
+    }
+
+    jar {
+        // Copy the correct accesswidener to the jar
+        copy {
+            from(project(":common").file("src/main/resources"))
+            include "${acsessWidenerVersion}.lod.accesswidener"
+            into(file(p.file("build/resources/main")))
+            rename "${acsessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
+//            into(file(p.file("build/resources/main")))
+        }
+
+        // Requred to run the standalone jar
+        manifest {
+            attributes 'Implementation-Title': rootProject.archives_base_name,
+                    'Implementation-Version': rootProject.mod_version,
+                    'Main-Class': 'com.seibel.lod.core.JarMain'
+        }
     }
 
     configurations {
@@ -89,14 +106,6 @@ subprojects { p ->
         if (p != project(":core")) {
             common(project(":core")) { transitive false }
             shadowMe(project(":core")) { transitive false }
-        }
-    }
-
-    jar {
-        manifest {
-            attributes 'Implementation-Title': rootProject.archives_base_name,
-                    'Implementation-Version': rootProject.mod_version,
-                    'Main-Class': 'com.seibel.lod.core.JarMain'
         }
     }
 }
