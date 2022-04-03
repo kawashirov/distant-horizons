@@ -3,8 +3,8 @@ image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
-  - build_18_1
   - build_18_2
+  - build_18_1
   - build_17_1
 
 variables:
@@ -17,6 +17,27 @@ before_script:
     # Writing GE_JOB_ID variable to environment file, will need the value in the next stage.
     - echo GE_JOB_ID=$CI_JOB_ID >> generate_jars.env
 
+
+
+# 1.17.1 build
+build_17_1:
+  stage: build_17_1
+  script:
+    - ./gradlew deleteMerged --gradle-user-home cache/;
+    - ./gradlew build -PmcVer=1.17.1 --gradle-user-home cache/;
+    - ./gradlew merge --gradle-user-home cache/;
+  image: eclipse-temurin:16
+  artifacts:
+    name: "Merged_NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+    paths:
+      - Merged
+    expire_in: 1 day
+  cache:
+    key: "gradleCache"
+    policy: pull-push
+    paths:
+      - .gradle
+      - cache/
 
 # 1.18.1 build 
 build_18_1:
@@ -48,26 +69,6 @@ build_18_2:
     - ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache/;
     - ./gradlew merge --gradle-user-home cache/;
   image: eclipse-temurin:17
-  artifacts:
-    name: "Merged_NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
-    paths:
-      - Merged
-    expire_in: 1 day
-  cache:
-    key: "gradleCache"
-    policy: pull-push
-    paths:
-      - .gradle
-      - cache/
-
-# 1.17.1 build
-build_17_1:
-  stage: build_17_1
-  script:
-    - ./gradlew deleteMerged --gradle-user-home cache/;
-    - ./gradlew build -PmcVer=1.17.1 --gradle-user-home cache/;
-    - ./gradlew merge --gradle-user-home cache/;
-  image: eclipse-temurin:16
   artifacts:
     name: "Merged_NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
     paths:
