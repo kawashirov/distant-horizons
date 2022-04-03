@@ -65,6 +65,7 @@ task copyCommonResources(type: Copy) {
 }
 
 processResources {
+    dependsOn(copyAccessWidener)
     dependsOn(copyCoreResources)
     dependsOn(copyCommonResources)
 }
