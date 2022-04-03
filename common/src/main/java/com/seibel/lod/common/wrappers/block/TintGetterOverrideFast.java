@@ -27,15 +27,9 @@ import java.util.stream.Stream;
 
 public class TintGetterOverrideFast implements BlockAndTintGetter {
     LevelReader parent;
-    private final Object2ObjectArrayMap<ColorResolver, ConcurrentHashMap<Biome, Integer>> tintCaches;
 
     public TintGetterOverrideFast(LevelReader parent) {
         this.parent = parent;
-        this.tintCaches = Util.make(new Object2ObjectArrayMap(3), object2ObjectArrayMap -> {
-            object2ObjectArrayMap.put(BiomeColors.GRASS_COLOR_RESOLVER, new ConcurrentHashMap<Biome, Integer>());
-            object2ObjectArrayMap.put(BiomeColors.FOLIAGE_COLOR_RESOLVER, new ConcurrentHashMap<Biome, Integer>());
-            object2ObjectArrayMap.put(BiomeColors.WATER_COLOR_RESOLVER, new ConcurrentHashMap<Biome, Integer>());
-        });
     }
 
     private Biome _getBiome(BlockPos pos) {
@@ -49,11 +43,7 @@ public class TintGetterOverrideFast implements BlockAndTintGetter {
     @Override
     public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
         Biome b = _getBiome(blockPos);
-        ConcurrentHashMap<Biome, Integer> concurrentHashMap = this.tintCaches.get(colorResolver);
-        if (concurrentHashMap == null) { // This is a compat fix for Colormatic's mixin
-            this.tintCaches.put(colorResolver, concurrentHashMap = new ConcurrentHashMap<>());
-        }
-        return concurrentHashMap.computeIfAbsent(b, (key) -> colorResolver.getColor(b, blockPos.getX(), blockPos.getZ()));
+        return colorResolver.getColor(b, blockPos.getX(), blockPos.getZ());
     }
 
     @Override
