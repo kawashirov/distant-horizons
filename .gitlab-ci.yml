@@ -28,7 +28,7 @@ build_17_1:
     - ./gradlew merge --gradle-user-home cache/;
   image: eclipse-temurin:16
   artifacts:
-    name: "Merged_NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+    name: "Merged_NightlyBuild_1_17_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
     paths:
       - Merged
     expire_in: 1 day
