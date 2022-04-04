@@ -3,9 +3,9 @@ image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
-  - build_18_2
-  - build_18_1
   - build_17_1
+  - build_18_1
+  - build_18_2
 
 variables:
     # Pull core when building
