@@ -18,8 +18,8 @@ public final class ThreadedParameters
 	#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 	public WorldGenStructFeatManager structFeat = null;
 	public final StructureCheck structCheck;
-	#elif MC_VERSION_1_17_1
-	public WorldGenStructFeatManager structFeat = null;
+	#elif MC_VERSION_1_17_1 || MC_VERSION_1_16_5
+	public WorldGenStructFeatManager structFeat;
 	#endif
 	boolean isValid = true;
 	public final PerfCalculator perf = new PerfCalculator();
@@ -46,7 +46,7 @@ public final class ThreadedParameters
 		structCheck = new StructureCheck(param.chunkScanner, param.registry, param.structures,
 				param.level.dimension(), param.generator, level, param.generator.getBiomeSource(), param.worldSeed,
 				param.fixerUpper);
-		#elif MC_VERSION_1_17_1
+		#elif MC_VERSION_1_17_1 || MC_VERSION_1_16_5
 		level = param.level;
 		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, level);
 		#endif

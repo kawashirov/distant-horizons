@@ -5,7 +5,7 @@
 
   "name": "${mod_name}",
   "description": "${description}",
-  "authors": ["${authors}"],
+  "authors": ${authors},
 
   "contact": {
     "homepage": "${homepage}",
@@ -36,11 +36,8 @@
     "fabric-lifecycle-events-v1": "*",
     "fabric-key-binding-api-v1": "*",
     "fabric-networking-api-v1": "*",
-    "minecraft": "${minecraft_version}",
+    "minecraft": ${compatible_minecraft_versions},
     "java": ">=${java_version}"
-  },
-  "suggests": {
-    "another-mod": "*"
   },
 
   "custom": {

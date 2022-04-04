@@ -3,9 +3,10 @@ image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
-  - build_17_1
-  - build_18_1
   - build_18_2
+  - build_18_1
+  - build_17_1
+  - build_16_5
 
 variables:
     # Pull core when building
@@ -18,6 +19,26 @@ before_script:
     - echo GE_JOB_ID=$CI_JOB_ID >> generate_jars.env
 
 
+
+# 1.16.5 build
+build_16_5:
+  stage: build_16_5
+  script:
+    - ./gradlew deleteMerged --gradle-user-home cache/;
+    - ./gradlew build -PmcVer=1.16.5 --gradle-user-home cache/;
+    - ./gradlew merge --gradle-user-home cache/;
+  image: eclipse-temurin:8
+  artifacts:
+    name: "Merged_NightlyBuild_1_16_5-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+    paths:
+      - Merged
+    expire_in: 1 day
+  cache:
+    key: "gradleCache"
+    policy: pull-push
+    paths:
+      - .gradle
+      - cache/
 
 # 1.17.1 build
 build_17_1:

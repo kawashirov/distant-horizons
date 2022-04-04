@@ -14,7 +14,9 @@ import com.seibel.lod.common.wrappers.world.BiomeWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
 
 import net.minecraft.core.BlockPos;
+#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 import net.minecraft.core.QuartPos;
+#endif
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.LiquidBlockContainer;
@@ -45,13 +47,21 @@ public class ChunkWrapper implements IChunkWrapper
 	
 	@Override
 	public int getHeight(){
+		#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 		return chunk.getHeight();
+		#elif MC_VERSION_1_16_5
+		return 255;
+		#endif
 	}
 	
 	@Override
 	public int getMinBuildHeight()
 	{
+		#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 		return chunk.getMinBuildHeight();
+		#elif MC_VERSION_1_16_5
+		return 0;
+		#endif
 	}
 	@Override
 	public int getMaxBuildHeight()
@@ -77,6 +87,9 @@ public class ChunkWrapper implements IChunkWrapper
 		#elif MC_VERSION_1_17_1
 		return BiomeWrapper.getBiomeWrapper(chunk.getBiomes().getNoiseBiome(
 				QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)));
+		#elif MC_VERSION_1_16_5
+		return BiomeWrapper.getBiomeWrapper(chunk.getBiomes().getNoiseBiome(
+				x >> 2, y >> 2, z >> 2));
         #endif
 	}
 	
@@ -157,7 +170,7 @@ public class ChunkWrapper implements IChunkWrapper
 	
 	@Override
 	public boolean isLightCorrect(){
-		#if MC_VERSION_1_17_1
+		#if MC_VERSION_1_16_5 || MC_VERSION_1_17_1
 		return true;
 		#elif MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 		if (chunk instanceof LevelChunk) {

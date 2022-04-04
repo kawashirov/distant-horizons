@@ -42,9 +42,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 import net.minecraft.world.level.material.FogType;
+#elif MC_VERSION_1_16_5
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.level.material.FluidState;
+#endif
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import org.lwjgl.opengl.GL15;
 
 
 /**
@@ -96,7 +102,11 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public Mat4f getDefaultProjectionMatrix(float partialTicks)
 	{
+		#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 		return McObjectConverter.Convert(GAME_RENDERER.getProjectionMatrix(GAME_RENDERER.getFov(GAME_RENDERER.getMainCamera(), partialTicks, true)));
+		#elif MC_VERSION_1_16_5
+		return McObjectConverter.Convert(GAME_RENDERER.getProjectionMatrix(GAME_RENDERER.getMainCamera(), partialTicks, true));
+		#endif
 	}
 	
 	@Override
@@ -107,8 +117,13 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	
 	@Override
 	public Color getFogColor(float partialTicks) {
+		#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 		FogRenderer.setupColor(GAME_RENDERER.getMainCamera(), partialTicks, MC.level, 1, GAME_RENDERER.getDarkenWorldAmount(partialTicks));
 		float[] colorValues = RenderSystem.getShaderFogColor();
+		#elif MC_VERSION_1_16_5
+		float[] colorValues = new float[4];
+		GL15.glGetFloatv(GL15.GL_FOG_COLOR, colorValues);
+		#endif
 		return new Color(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
 	}
 	// getSpecialFogColor() is the same as getFogColor()
@@ -116,7 +131,11 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public Color getSkyColor() {
 		if (MC.level.dimensionType().hasSkyLight()) {
+			#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 			Vec3 colorValues = MC.level.getSkyColor(MC.gameRenderer.getMainCamera().getPosition(), MC.getFrameTime());
+			#elif MC_VERSION_1_16_5
+			Vec3 colorValues = MC.level.getSkyColor(MC.gameRenderer.getMainCamera().getBlockPosition(), MC.getFrameTime());
+			#endif
 			return new Color((float) colorValues.x, (float) colorValues.y, (float) colorValues.z);
 		} else
 			return new Color(0, 0, 0);
@@ -134,7 +153,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	{
 		#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
         return MC.options.getEffectiveRenderDistance();
-		#elif MC_VERSION_1_17_1
+		#elif MC_VERSION_1_16_5 || MC_VERSION_1_17_1
 		return MC.options.renderDistance;
 		#endif
 	}
@@ -198,19 +217,19 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 				LevelRenderer levelRenderer = MC.levelRenderer;
 				#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 				LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
-				#elif MC_VERSION_1_17_1
+				#elif MC_VERSION_1_16_5 || MC_VERSION_1_17_1
 				ObjectArrayList<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunks;
 				#endif
 				return (chunks.stream().map((chunk) -> {
                 	#if MC_VERSION_1_18_2
 					AABB chunkBoundingBox = chunk.chunk.getBoundingBox();
-                	#elif MC_VERSION_1_17_1 || MC_VERSION_1_18_1
+                	#elif MC_VERSION_1_16_5 || MC_VERSION_1_17_1 || MC_VERSION_1_18_1
 					AABB chunkBoundingBox = chunk.chunk.bb;
                 	#endif
 					#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 					return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
 							Math.floorDiv((int) chunkBoundingBox.minZ, 16));
-					#elif MC_VERSION_1_17_1
+					#elif MC_VERSION_1_16_5 || MC_VERSION_1_17_1
 					return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
 							Math.floorDiv((int) chunkBoundingBox.minZ, 16));
 					#endif
@@ -337,9 +356,19 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	
 	@Override
 	public boolean isFogStateSpecial() {
+		#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 		Entity entity = GAME_RENDERER.getMainCamera().getEntity();
 		boolean isBlind = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
 		return GAME_RENDERER.getMainCamera().getFluidInCamera() != FogType.NONE || isBlind;
+		#elif MC_VERSION_1_16_5
+		Camera camera = GAME_RENDERER.getMainCamera();
+		FluidState fluidState = camera.getFluidInCamera();
+		Entity entity = camera.getEntity();
+		boolean isUnderWater = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
+			isUnderWater |= fluidState.is(FluidTags.WATER);
+			isUnderWater |= fluidState.is(FluidTags.LAVA);
+		return isUnderWater;
+		#endif
 	}
 	
 	@Override

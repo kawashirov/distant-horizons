@@ -36,6 +36,7 @@ def loadProperties() {
     writeBuildGradlePredefine()
 
     def mcVersionToAcsessWidenerVersion = [
+            "1_16_5": "1_16",
             "1.17.1": "1_17",
             "1.18.1": "1_18",
             "1.18.2": "1_18"
@@ -51,6 +52,15 @@ architectury {
     minecraft = rootProject.minecraft_version
 }
 
+// Stuff for access wideners
+def mcVersionToAcsessWidenerVersion = [
+        "1_16_5": "1_16",
+        "1_17_1": "1_17",
+        "1_18_1": "1_18",
+        "1_18_2": "1_18"
+] // Use this as sometimes multiple versions use the same access wideners
+def acsessWidenerVersion = mcVersionToAcsessWidenerVersion.get(minecraft_version.replace(".", "_"))
+
 subprojects { p ->
     apply plugin: "dev.architectury.loom"
 
@@ -58,7 +68,7 @@ subprojects { p ->
         silentMojangMappingsLicense()
 
         if (p != project(":core")) {
-            accessWidenerPath.set(project(":common").file("/src/main/resources/${acsessWidenerVersion}.lod.accesswidener"))
+            accessWidenerPath.set(project(":common").file("src/main/resources/${acsessWidenerVersion}.lod.accesswidener"))
         }
     }
 
@@ -164,6 +174,7 @@ allprojects { p ->
                 source: mod_source,
                 issues: mod_issues,
                 minecraft_version: minecraft_version,
+                compatible_minecraft_versions: compatible_minecraft_versions,
                 java_version: java_version
         ]   // The left side is what gets replaced in the mod info and the right side is where to get it from in the gradle.properties
         //TODO: Make Forge loader version also be relaced with non hardcoded value instead of "[36,41)"
@@ -227,18 +238,6 @@ allprojects { p ->
     if (p == project(":core") || p == project(":common")) {
         runClient.enabled = false
         runServer.enabled = false
-    }
-
-
-	// this is necessary for running the fabric build
-	if (p == project(":common")) {
-        println "Copying [common/src/main/resources/${acsessWidenerVersion}.lod.accesswidner] to [fabric/build/resources/main]."
-
-		copy {
-            from project(":common").file("src/main/resources/${acsessWidenerVersion}.lod.accesswidener")
-            into "$rootProject.rootDir/fabric/build/resources/main"
-            rename "${acsessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
-        }
     }
 }
 

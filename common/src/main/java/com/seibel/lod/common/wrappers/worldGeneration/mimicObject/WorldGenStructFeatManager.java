@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
@@ -41,7 +42,7 @@ public class WorldGenStructFeatManager extends StructureFeatureManager {
 		this.genLevel = genLevel;
 		this.worldGenSettings = worldGenSettings;
 	}
-	#elif MC_VERSION_1_17_1
+	#elif MC_VERSION_1_17_1 || MC_VERSION_1_16_5
 	public WorldGenStructFeatManager(WorldGenSettings worldGenSettings,
 			WorldGenLevel genLevel) {
 
@@ -99,7 +100,7 @@ public class WorldGenStructFeatManager extends StructureFeatureManager {
 															  StructureFeature<?> structureFeature) {
 
 		ChunkAccess chunk = _getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES);
-		if (chunk == null) return List.of();
+		if (chunk == null) return (List<StructureStart>) Stream.empty();
 
 		// Copied from StructureFeatureManager::startsForFeature(...) with slight tweaks
 		LongSet longSet = chunk.getReferencesForFeature(structureFeature);
@@ -121,7 +122,7 @@ public class WorldGenStructFeatManager extends StructureFeatureManager {
 	@Override
 	public List<StructureStart> startsForFeature(SectionPos sectionPos, Predicate<ConfiguredStructureFeature<?, ?>> predicate) {
 		ChunkAccess chunk = _getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES);
-		if (chunk == null) return List.of();
+		if (chunk == null) return (List<StructureStart>) Stream.empty();
 
 		// Copied from StructureFeatureManager::startsForFeature(...)
 		Map<ConfiguredStructureFeature<?, ?>, LongSet> map = chunk.getAllReferences();
@@ -145,7 +146,7 @@ public class WorldGenStructFeatManager extends StructureFeatureManager {
 	@Override
 	public List<StructureStart> startsForFeature(SectionPos sectionPos, ConfiguredStructureFeature<?, ?> configuredStructureFeature) {
 		ChunkAccess chunk = _getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES);
-		if (chunk == null) return List.of();
+		if (chunk == null) return (List<StructureStart>) Stream.empty();
 
 		// Copied from StructureFeatureManager::startsForFeature(...)
 		LongSet longSet = chunk.getReferencesForFeature(configuredStructureFeature);
@@ -159,7 +160,7 @@ public class WorldGenStructFeatManager extends StructureFeatureManager {
 	public Map<ConfiguredStructureFeature<?, ?>, LongSet> getAllStructuresAt(BlockPos blockPos) {
 		SectionPos sectionPos = SectionPos.of(blockPos);
 		ChunkAccess chunk = _getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES);
-		if (chunk == null) return Map.of();
+		if (chunk == null) return (Map<ConfiguredStructureFeature<?, ?>, LongSet>) Stream.empty();
 		return chunk.getAllReferences();
 	}
 	#endif

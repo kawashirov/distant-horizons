@@ -23,7 +23,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ColorResolver;
+#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 import net.minecraft.world.level.LevelHeightAccessor;
+#endif
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
@@ -61,7 +63,11 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	public LightedWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine,
 			List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
 			LightGenerationMode lightMode, EmptyChunkGenerator generator) {
+		#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 		super(serverLevel, list, chunkStatus, i);
+		#elif MC_VERSION_1_16_5
+		super(serverLevel, list);
+		#endif
 		this.lightMode = lightMode;
 		this.firstPos = list.get(0).getPos();
 		this.generator = generator;
@@ -71,6 +77,7 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 		size = Mth.floor(Math.sqrt(list.size()));
 	}
 
+	#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 	// Bypass BCLib mixin overrides.
     @Override
     public boolean ensureCanWrite(BlockPos blockPos) {
@@ -93,6 +100,7 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 		#endif
         return true;
     }
+	#endif
 
 	// TODO Check this
 //	@Override

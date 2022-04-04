@@ -4,7 +4,9 @@ import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 
 import net.minecraft.world.level.BlockGetter;
+#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 import net.minecraft.world.level.LevelHeightAccessor;
+#endif
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LightChunkGetter;
 
@@ -34,7 +36,10 @@ public class LightGetterAdaptor implements LightChunkGetter {
 	public BlockGetter getLevel() {
 		return shouldReturnNull ? null : (genRegion != null ? genRegion : heightGetter);
 	}
+
+	#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 	public LevelHeightAccessor getLevelHeightAccessor() {
 		return heightGetter;
 	}
+	#endif
 }

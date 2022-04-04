@@ -5,7 +5,9 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
+#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 import net.minecraft.world.level.LevelHeightAccessor;
+#endif
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.DataLayer;
@@ -18,7 +20,9 @@ import net.minecraft.world.level.lighting.SkyLightEngine;
 public class WorldGenLevelLightEngine extends LevelLightEngine {
 	public static final int MAX_SOURCE_LEVEL = 15;
     public static final int LIGHT_SECTION_PADDING = 1;
+    #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
     protected final LevelHeightAccessor levelHeightAccessor;
+    #endif
     @Nullable
     public final BlockLightEngine blockEngine;
     @Nullable
@@ -26,7 +30,9 @@ public class WorldGenLevelLightEngine extends LevelLightEngine {
 
     public WorldGenLevelLightEngine(LightGetterAdaptor genRegion) {
     	super(genRegion, false, false);
+        #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
         this.levelHeightAccessor = genRegion.getLevelHeightAccessor();
+        #endif
         this.blockEngine = new BlockLightEngine(genRegion);
         this.skyEngine = new SkyLightEngine(genRegion);
     }
@@ -123,9 +129,19 @@ public class WorldGenLevelLightEngine extends LevelLightEngine {
         chunkAccess.setLightCorrect(false);
         
         LevelChunkSection[] levelChunkSections = chunkAccess.getSections();
-        for (int i = 0; i < chunkAccess.getSectionsCount(); ++i) {
+        for (int i = 0; i <
+        #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+            chunkAccess.getSectionsCount()
+        #elif MC_VERSION_1_16_5
+            16
+        #endif
+        ; ++i) {
             LevelChunkSection levelChunkSection = levelChunkSections[i];
-            #if MC_VERSION_1_17_1
+            #if MC_VERSION_1_16_5
+            if (!LevelChunkSection.isEmpty(levelChunkSection)) {
+                updateSectionStatus(SectionPos.of(chunkPos, i), false);
+            }
+            #elif MC_VERSION_1_17_1
             if (!LevelChunkSection.isEmpty(levelChunkSection)) {
                 int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
                 updateSectionStatus(SectionPos.of(chunkPos, j), false);
@@ -139,9 +155,9 @@ public class WorldGenLevelLightEngine extends LevelLightEngine {
         enableLightSources(chunkPos, true);
         if (needLightBlockUpdate) {
             chunkAccess.getLights().forEach(blockPos ->
-            onBlockEmissionIncrease(blockPos, chunkAccess.getLightEmission(blockPos)));
+                    onBlockEmissionIncrease(blockPos, chunkAccess.getLightEmission(blockPos)));
         }
-        
+
         chunkAccess.setLightCorrect(true);
     }
 
@@ -168,6 +184,8 @@ public class WorldGenLevelLightEngine extends LevelLightEngine {
             this.skyEngine.retainData(chunkPos, bl);
         }
     }
+
+    #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
     @Override
     public int getLightSectionCount() {
     	throw new UnsupportedOperationException("This should never be used!");
@@ -180,4 +198,5 @@ public class WorldGenLevelLightEngine extends LevelLightEngine {
     public int getMaxLightSection() {
     	throw new UnsupportedOperationException("This should never be used!");
     }
+    #endif
 }
