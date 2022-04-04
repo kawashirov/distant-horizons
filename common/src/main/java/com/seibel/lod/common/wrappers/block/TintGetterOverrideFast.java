@@ -1,5 +1,6 @@
 package com.seibel.lod.common.wrappers.block;
 
+import com.seibel.lod.common.LodCommonMain;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.minecraft.Util;
 import net.minecraft.client.color.block.BlockTintCache;
@@ -42,8 +43,12 @@ public class TintGetterOverrideFast implements BlockAndTintGetter {
 
     @Override
     public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver) {
-        Biome b = _getBiome(blockPos);
-        return colorResolver.getColor(b, blockPos.getX(), blockPos.getZ());
+        if (LodCommonMain.forgeMethodCaller != null) {
+            return LodCommonMain.forgeMethodCaller.colorResolverGetColor(colorResolver, _getBiome(blockPos),
+                    blockPos.getX(), blockPos.getZ());
+        } else {
+            return colorResolver.getColor(_getBiome(blockPos), blockPos.getX(), blockPos.getZ());
+        }
     }
 
     @Override

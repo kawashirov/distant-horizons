@@ -35,10 +35,11 @@ import com.seibel.lod.forge.wrappers.modAccessor.OptifineAccessor;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.ColorResolver;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelDataMap;
-import net.minecraftforge.client.ConfigGuiHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -46,6 +47,8 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fmlclient.ConfigGuiHandler;
+//import net.minecraftforge.client.ConfigGuiHandler;
 
 import java.util.List;
 import java.util.Random;
@@ -101,5 +104,10 @@ public class ForgeMain implements LodForgeMethodCaller
 	@Override
 	public List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, Random random) {
 		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
+	}
+
+	@Override
+	public int colorResolverGetColor(ColorResolver resolver, Biome biome, double x, double z) {
+		return resolver.m_130045_(biome, x, z);
 	}
 }

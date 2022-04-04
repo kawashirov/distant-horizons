@@ -3,6 +3,8 @@ package com.seibel.lod.common.forge;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.ColorResolver;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -16,4 +18,6 @@ import java.util.Random;
  */
 public interface LodForgeMethodCaller {
     List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, Random random);
+
+    int colorResolverGetColor(ColorResolver resolver, Biome biome, double x, double z);
 }
