@@ -3,6 +3,7 @@ package com.seibel.lod.common.wrappers.misc;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.seibel.lod.core.wrapperInterfaces.misc.ILightMapWrapper;
 import net.minecraft.client.renderer.LightTexture;
+import org.lwjgl.opengl.GL32;
 
 /**
  * @author James Seibel
@@ -35,13 +36,12 @@ public class LightMapWrapper implements ILightMapWrapper
     }
 
     @Override
-    public int bind() {
-        tex.turnOnLightLayer();
-        return 3553; //GL.GL_TEXTURE_2D
+    public void bind() {
+        GL32.glBindTexture(GL32.GL_TEXTURE_2D, tex.lightTexture.getId());
     }
 
     @Override
     public void unbind() {
-        tex.turnOffLightLayer();
+        GL32.glBindTexture(GL32.GL_TEXTURE_2D, 0);
     }
 }

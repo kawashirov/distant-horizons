@@ -82,17 +82,13 @@ public class WorldGenStructFeatManager extends StructureFeatureManager {
 	@Override
 	public Stream<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos2,
 																StructureFeature<?> structureFeature) {
-		if (genLevel == null)
-			return Stream.empty();
-		ChunkAccess chunk = genLevel.getChunk(sectionPos2.x(), sectionPos2.z(), ChunkStatus.STRUCTURE_REFERENCES,
-				false);
-		if (chunk == null)
-			return Stream.empty();
+		ChunkAccess chunk = _getChunk(sectionPos2.x(), sectionPos2.z(), ChunkStatus.STRUCTURE_REFERENCES);
+		if (chunk == null) return Stream.empty();
+
 		return chunk.getReferencesForFeature(structureFeature).stream().map(pos -> {
 			SectionPos sectPos = SectionPos.of(ChunkPos.getX(pos), 0, ChunkPos.getZ(pos));
-			ChunkAccess startChunk = genLevel.getChunk(sectPos.x(), sectPos.z(), ChunkStatus.STRUCTURE_STARTS, false);
-			if (startChunk == null)
-				return null;
+			ChunkAccess startChunk = _getChunk(sectPos.x(), sectPos.z(), ChunkStatus.STRUCTURE_STARTS);
+			if (startChunk == null) return null;
 			return this.getStartForFeature(sectPos, structureFeature, startChunk);
 		}).filter(structureStart -> structureStart != null && structureStart.isValid());
 	}

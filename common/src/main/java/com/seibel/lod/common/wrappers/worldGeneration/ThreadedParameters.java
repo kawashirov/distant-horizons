@@ -48,7 +48,7 @@ public final class ThreadedParameters
 				param.fixerUpper);
 		#elif MC_VERSION_1_17_1
 		level = param.level;
-		structFeat = new WorldGenStructFeatManager(level, param.worldGenSettings);
+		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, level);
 		#endif
 	}
 	

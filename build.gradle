@@ -34,6 +34,14 @@ def loadProperties() {
 	  // println "Added prop [key:" + prop.key + ", value:" + prop.value + "]"
     }
     writeBuildGradlePredefine()
+
+    def mcVersionToAcsessWidenerVersion = [
+            "1.17.1": "1_17",
+            "1.18.1": "1_18",
+            "1.18.2": "1_18"
+    ]
+    rootProject.ext.set("acsessWidenerVersion", mcVersionToAcsessWidenerVersion.get(mcVersion))
+
 }
 loadProperties()
 
@@ -43,33 +51,14 @@ architectury {
     minecraft = rootProject.minecraft_version
 }
 
-// Stuff for access wideners
-def mcVersionToAcsessWidenerVersion = [
-        "1_17_1": "1_17",
-        "1_18_1": "1_18",
-        "1_18_2": "1_18"
-] // Use this as sometimes multiple versions use the same access wideners
-def acsessWidenerVersion = mcVersionToAcsessWidenerVersion.get(minecraft_version.replace(".", "_"))
-
 subprojects { p ->
     apply plugin: "dev.architectury.loom"
 
     loom {
         silentMojangMappingsLicense()
 
-        // Set what accesswidener to use
         if (p != project(":core")) {
-            def acsessWidenerLocation = "src/main/resources/${acsessWidenerVersion}.lod.accesswidener"
-            accessWidenerPath.set(project(":common").file(acsessWidenerLocation))
-        }
-    }
-
-    jar {
-        // Requred to run the standalone jar
-        manifest {
-            attributes 'Implementation-Title': rootProject.archives_base_name,
-                    'Implementation-Version': rootProject.mod_version,
-                    'Main-Class': 'com.seibel.lod.core.JarMain'
+            accessWidenerPath.set(project(":common").file("/src/main/resources/${acsessWidenerVersion}.lod.accesswidener"))
         }
     }
 
@@ -99,6 +88,14 @@ subprojects { p ->
         if (p != project(":core")) {
             common(project(":core")) { transitive false }
             shadowMe(project(":core")) { transitive false }
+        }
+    }
+
+    jar {
+        manifest {
+            attributes 'Implementation-Title': rootProject.archives_base_name,
+                    'Implementation-Version': rootProject.mod_version,
+                    'Main-Class': 'com.seibel.lod.core.JarMain'
         }
     }
 }
@@ -230,6 +227,21 @@ allprojects { p ->
     if (p == project(":core") || p == project(":common")) {
         runClient.enabled = false
         runServer.enabled = false
+    }
+
+
+	// this is necessary for running the fabric build
+	if (p == project(":common")) {
+        println "Coping [common/src/main/resources/lod.accesswidner] to [fabric/build/resources/main]."
+
+		copy {
+            from "$rootProject.rootDir/common/src/main/resources"
+            into "$rootProject.rootDir/fabric/build/resources/main"
+			include "*.accesswidener"
+            rename { fileName ->
+                fileName.replace("${rootProject.acsessWidenerVersion}.", "")
+            }
+        }
     }
 }
 

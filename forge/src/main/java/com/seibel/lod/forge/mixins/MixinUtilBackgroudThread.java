@@ -32,6 +32,7 @@ public class MixinUtilBackgroudThread
 			ci.setReturnValue(r);
 		}
 	}
+	#if MC_VERSION_1_18_1 | MC_VERSION_1_18_2
 	@Inject(method = "wrapThreadWithTaskName(Ljava/lang/String;Ljava/util/function/Supplier;)Ljava/util/function/Supplier;",
 			at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$wrapThreadWithTaskNameForSupplier(String string, Supplier<?> r, CallbackInfoReturnable<Supplier<?>> ci)
@@ -42,6 +43,7 @@ public class MixinUtilBackgroudThread
 			ci.setReturnValue(r);
 		}
 	}
+	#endif
 	
 	@Inject(method = "backgroundExecutor", at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$backgroundExecutor(CallbackInfoReturnable<ExecutorService> ci)

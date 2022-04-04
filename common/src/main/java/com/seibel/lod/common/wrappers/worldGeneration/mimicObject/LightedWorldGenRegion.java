@@ -69,12 +69,6 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 		writeRadius = i;
 		cache = list;
 		size = Mth.floor(Math.sqrt(list.size()));
-		
-	    this.tintCaches = Util.make(new Object2ObjectArrayMap(3), object2ObjectArrayMap -> {
-	          object2ObjectArrayMap.put(BiomeColors.GRASS_COLOR_RESOLVER, new BlockTintCache((pos) -> {return calculateBlockTint(pos, BiomeColors.GRASS_COLOR_RESOLVER);}));
-	          object2ObjectArrayMap.put(BiomeColors.FOLIAGE_COLOR_RESOLVER, new BlockTintCache((pos) -> {return calculateBlockTint(pos, BiomeColors.FOLIAGE_COLOR_RESOLVER);}));
-	          object2ObjectArrayMap.put(BiomeColors.WATER_COLOR_RESOLVER, new BlockTintCache((pos) -> {return calculateBlockTint(pos, BiomeColors.WATER_COLOR_RESOLVER);}));
-	        });
 	}
 
 	// Bypass BCLib mixin overrides.
@@ -247,25 +241,16 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	public boolean canSeeSky(BlockPos blockPos) {
 		return (getBrightness(LightLayer.SKY, blockPos) >= getMaxLightLevel());
 	}
-
-	
-	
-	private final Object2ObjectArrayMap<ColorResolver, BlockTintCache> tintCaches;
 	
 	public int getBlockTint(BlockPos blockPos, ColorResolver colorResolver)
 	{
-		BlockTintCache blockTintCache = (BlockTintCache) this.tintCaches.get(colorResolver);
-		#if MC_VERSION_1_17_1
-		return blockTintCache.getColor(blockPos, null); // FIXME[1.17.1]: Replace this null with something else
-		#elif MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-		return blockTintCache.getColor(blockPos);
-		#endif
+		return calculateBlockTint(blockPos, colorResolver);
 	}
 
 	private Biome _getBiome(BlockPos pos) {
 		#if MC_VERSION_1_18_2
 		return getBiome(pos).value();
-		#elif MC_VERSION_1_18_1
+		#else
 		return getBiome(pos);
 		#endif
 	}
