@@ -43,7 +43,7 @@ def loadProperties() {
             "1.18.2": "1_18",
     ]
     // Use this as sometimes multiple versions use the same access wideners
-    rootProject.ext.set("acsessWidenerVersion", mcVersionToAcsessWidenerVersion.get(mcVersion))
+    rootProject.ext.set("acsessWidenerVersion", mcVersionToAcsessWidenerVersion.get(minecraft_version.replace(".", "_")))
 }
 loadProperties()
 
