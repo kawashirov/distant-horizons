@@ -35,14 +35,6 @@ def loadProperties() {
     }
     writeBuildGradlePredefine()
 
-    def mcVersionToAcsessWidenerVersion = [
-            "1_16_5": "1_16",
-            "1.17.1": "1_17",
-            "1.18.1": "1_18",
-            "1.18.2": "1_18"
-    ]
-    rootProject.ext.set("acsessWidenerVersion", mcVersionToAcsessWidenerVersion.get(mcVersion))
-
 }
 loadProperties()
 

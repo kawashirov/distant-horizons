@@ -89,7 +89,7 @@ public final class PlayerLookup {
 	public static Collection<ServerPlayer> tracking(ServerLevel world, ChunkPos pos) {
 		Objects.requireNonNull(world, "The world cannot be null");
 		Objects.requireNonNull(pos, "The chunk pos cannot be null");
-		#if MC_VERSION_1_18_1 | MC_VERSION_1_18_2
+		#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 		return world.getChunkSource().chunkMap.getPlayers(pos, false);
 		#else
 		return world.getChunkSource().chunkMap.getPlayers(pos, false).toList();

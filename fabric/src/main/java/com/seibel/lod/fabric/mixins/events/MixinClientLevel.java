@@ -43,7 +43,7 @@ public class MixinClientLevel {
 	}
     #endif
 
-	#if MC_VERSION_1_18_1 | MC_VERSION_1_18_2
+	#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
     @Inject(method = "setLightReady", at = @At("RETURN"))
     private void onChunkLightReady(int x, int z, CallbackInfo ci) {
     	ClientLevel l = (ClientLevel) (Object) this;

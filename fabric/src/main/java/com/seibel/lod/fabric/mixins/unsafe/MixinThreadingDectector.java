@@ -3,7 +3,7 @@ package com.seibel.lod.fabric.mixins.unsafe;
 import net.minecraft.util.ThreadingDetector;
 import org.spongepowered.asm.mixin.Mixin;
 
-#if MC_VERSION_1_18_1 | MC_VERSION_1_18_2
+#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
