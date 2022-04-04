@@ -232,15 +232,12 @@ allprojects { p ->
 
 	// this is necessary for running the fabric build
 	if (p == project(":common")) {
-        println "Coping [common/src/main/resources/lod.accesswidner] to [fabric/build/resources/main]."
+        println "Copying [common/src/main/resources/${acsessWidenerVersion}.lod.accesswidner] to [fabric/build/resources/main]."
 
 		copy {
-            from "$rootProject.rootDir/common/src/main/resources"
+            from project(":common").file("src/main/resources/${acsessWidenerVersion}.lod.accesswidener")
             into "$rootProject.rootDir/fabric/build/resources/main"
-			include "*.accesswidener"
-            rename { fileName ->
-                fileName.replace("${rootProject.acsessWidenerVersion}.", "")
-            }
+            rename "${acsessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
         }
     }
 }
