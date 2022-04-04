@@ -31,6 +31,7 @@ import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 
 import com.seibel.lod.fabric.mixins.MixinUtilBackgroudThread;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -77,7 +78,9 @@ public class ClientProxy
 
 		/* World Events */
 		//ServerChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
-		//ClientChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
+		#if MC_VERSION_1_17_1
+		ClientChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
+		#endif
 
 		/* World Events */
 		ServerWorldEvents.LOAD.register((server, level) -> this.worldLoadEvent(level));
@@ -155,8 +158,8 @@ public class ClientProxy
 		// recreate the LOD where the blocks were changed
 		eventApi.blockChangeEvent(chunk, dimType);
 	}
-	
-	private static final List<Integer> KEY_TO_CHECK_FOR = List.of(GLFW.GLFW_KEY_F6, GLFW.GLFW_KEY_F8);
+
+	private static final int[] KEY_TO_CHECK_FOR = {GLFW.GLFW_KEY_F6, GLFW.GLFW_KEY_F8};
 	
 	HashSet<Integer> previousKeyDown = new HashSet<Integer>();
 	
@@ -169,7 +172,7 @@ public class ClientProxy
 			// Note: Minecraft's InputConstants is same as GLFW Key values
 			//TODO: Use mixin to hook directly into the GLFW Keyboard event in minecraft KeyboardHandler
 			// Check all keys we need
-			for (int i = InputConstants.KEY_A; i <= InputConstants.KEY_Z; i++) {
+			for (int i = GLFW.GLFW_KEY_A; i <= GLFW.GLFW_KEY_Z; i++) {
 				if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), i)) {
 					currectKeyDown.add(i);
 				}
