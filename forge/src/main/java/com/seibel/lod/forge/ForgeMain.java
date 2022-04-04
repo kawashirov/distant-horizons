@@ -41,6 +41,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -49,7 +50,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 #if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 import net.minecraftforge.client.ConfigGuiHandler;
-#elif MC_VERSION_1_16_5 || MC_VERSION_1_17_1
+#elif MC_VERSION_1_17_1
 import net.minecraftforge.fmlclient.ConfigGuiHandler;
 #endif
 
@@ -93,12 +94,14 @@ public class ForgeMain implements LodForgeMethodCaller
 		}
 		
 		ModAccessorHandler.finishBinding();
-		
 
-		ModAccessorHandler.finishBinding();
-
+		#if MC_VERSION_1_16_5
+		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY,
+				() -> (client, parent) -> ConfigGui.getScreen(parent, ""));
+		#else
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
 				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> ConfigGui.getScreen(parent, "")));
+		#endif
 		forgeClientProxy = new ForgeClientProxy();
 		MinecraftForge.EVENT_BUS.register(forgeClientProxy);
 	}
@@ -111,10 +114,11 @@ public class ForgeMain implements LodForgeMethodCaller
 
 	@Override
 	public int colorResolverGetColor(ColorResolver resolver, Biome biome, double x, double z) {
-		#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-		return resolver.getColor(biome, x, z);
-		#elif MC_VERSION_1_17_1
+		#if MC_VERSION_1_17_1
 		return resolver.m_130045_(biome, x, z);
+		#else
+		return resolver.getColor(biome, x, z);
 		#endif
+
 	}
 }
