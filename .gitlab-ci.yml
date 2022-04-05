@@ -47,7 +47,7 @@ build_17_1:
     - ./gradlew deleteMerged --gradle-user-home cache/;
     - ./gradlew build -PmcVer=1.17.1 --gradle-user-home cache/;
     - ./gradlew merge --gradle-user-home cache/;
-  image: eclipse-temurin:17
+  image: eclipse-temurin:16
   artifacts:
     name: "Merged_NightlyBuild_1_17_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
     paths:
