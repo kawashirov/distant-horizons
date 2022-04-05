@@ -231,17 +231,6 @@ allprojects { p ->
         runClient.enabled = false
         runServer.enabled = false
     }
-
-    // this is necessary for running the fabric build
-	if (p == project(":common")) {
-        println "Copying [common/src/main/resources/${acsessWidenerVersion}.lod.accesswidner] to [fabric/build/resources/main]."
-
-		copy {
-            from project(":common").file("src/main/resources/${acsessWidenerVersion}.lod.accesswidener")
-            into project(":fabric").file("build/resources/main")
-            rename "${acsessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
-        }
-    }
 }
 
 
