@@ -16,7 +16,8 @@ import net.minecraft.Util;
 @Mixin(Util.class)
 public class MixinUtilBackgroudThread
 {
-	
+
+	#if !MC_VERSION_1_16_5
 	@Inject(method = "wrapThreadWithTaskName(Ljava/lang/String;Ljava/lang/Runnable;)Ljava/lang/Runnable;",
 			at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$wrapThreadWithTaskName(String string, Runnable r, CallbackInfoReturnable<Runnable> ci)
@@ -27,6 +28,7 @@ public class MixinUtilBackgroudThread
 			ci.setReturnValue(r);
 		}
 	}
+	#endif
 	#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 	@Inject(method = "wrapThreadWithTaskName(Ljava/lang/String;Ljava/util/function/Supplier;)Ljava/util/function/Supplier;",
 			at = @At("HEAD"), cancellable = true)

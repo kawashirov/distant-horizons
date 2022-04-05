@@ -78,7 +78,7 @@ public class ClientProxy
 
 		/* World Events */
 		//ServerChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
-		#if MC_VERSION_1_17_1
+		#if MC_VERSION_1_16_5 || MC_VERSION_1_17_1
 		ClientChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
 		#endif
 

@@ -87,7 +87,7 @@ public class ChunkLoader
 					biomes.asHolderIdMap(), biomes.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getHolderOrThrow(Biomes.PLAINS));
 			#endif
 		#endif
-		int i = level.getSectionsCount();
+		int i = #if MC_VERSION_1_16_5 16; #else level.getSectionsCount(); #endif
 		LevelChunkSection[] chunkSections = new LevelChunkSection[i];
 
 		boolean isLightOn = chunkData.getBoolean("isLightOn");
@@ -125,14 +125,15 @@ public class ChunkLoader
 				#endif
 				chunkSections[sectionId] = new LevelChunkSection(sectionYPos, blockStateContainer, biomeContainer);
 			}
-			#elif MC_VERSION_1_17_1
+			#elif MC_VERSION_1_16_5 || MC_VERSION_1_17_1
 			if (tagSection.contains("Palette", 9) && tagSection.contains("BlockStates", 12)) {
 				LevelChunkSection levelChunkSection = new LevelChunkSection(sectionYPos << 4);
 				levelChunkSection.getStates().read(tagSection.getList("Palette", 10),
 						tagSection.getLongArray("BlockStates"));
 				levelChunkSection.recalcBlockCounts();
 				if (!levelChunkSection.isEmpty())
-					chunkSections[level.getSectionIndexFromSectionY(sectionYPos)] = levelChunkSection;
+					chunkSections[#if MC_VERSION_1_16_5 sectionYPos #else level.getSectionIndexFromSectionY(sectionYPos) #endif]
+							 = levelChunkSection;
 			}
 			#endif
 			if (!isLightOn) continue;
@@ -158,119 +159,6 @@ public class ChunkLoader
 		Heightmap.primeHeightmaps(chunk, ChunkStatus.FULL.heightmapsAfter());
 	}
 
-	// Structures reading is disabled since... I don't think its actually useful???
-	/*
-	#if MC_VERSION_1_18_1
-	private static Map<StructureFeature<?>, StructureStart<?>> unpackStructureStart(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag, long l)
-	{
-		HashMap<StructureFeature<?>, StructureStart<?>> map = Maps.newHashMap();
-		CompoundTag compoundTag2 = compoundTag.getCompound("starts");
-		for (String string : compoundTag2.getAllKeys())
-		{
-			String string2 = string.toLowerCase(Locale.ROOT);
-			StructureFeature<?> structureFeature = StructureFeature.STRUCTURES_REGISTRY.get(string2);
-			if (structureFeature == null)
-			{
-				LOGGER.error("Unknown structure start: {}", (Object) string2);
-				continue;
-			}
-			StructureStart<?> structureStart = StructureFeature.loadStaticStart(structurePieceSerializationContext, compoundTag2.getCompound(string), l);
-			if (structureStart == null)
-				continue;
-			map.put(structureFeature, structureStart);
-		}
-		return map;
-	}
-
-	private static Map<StructureFeature<?>, LongSet> unpackStructureReferences(ChunkPos chunkPos, CompoundTag compoundTag)
-	{
-		HashMap<StructureFeature<?>, LongSet> map = Maps.newHashMap();
-		CompoundTag compoundTag2 = compoundTag.getCompound("References");
-		for (String string : compoundTag2.getAllKeys())
-		{
-			String string2 = string.toLowerCase(Locale.ROOT);
-			StructureFeature<?> structureFeature = StructureFeature.STRUCTURES_REGISTRY.get(string2);
-			if (structureFeature == null)
-			{
-				LOGGER.warn("Found reference to unknown structure '{}' in chunk {}, discarding", (Object) string2, (Object) chunkPos);
-				continue;
-			}
-			map.put(structureFeature, new LongOpenHashSet(Arrays.stream(compoundTag2.getLongArray(string)).filter(l ->
-			{
-				ChunkPos chunkPos2 = new ChunkPos(l);
-				if (chunkPos2.getChessboardDistance(chunkPos) > 8)
-				{
-					LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", (Object) string2, (Object) chunkPos2, (Object) chunkPos);
-					return false;
-				}
-				return true;
-			}).toArray()));
-		}
-		return map;
-	}
-	#elif MC_VERSION_1_18_2
-	private static Map<ConfiguredStructureFeature<?, ?>, StructureStart> unpackStructureStart(StructurePieceSerializationContext structurePieceSerializationContext, CompoundTag compoundTag, long l) {
-		Map<ConfiguredStructureFeature<?, ?>, StructureStart> map = Maps.newHashMap();
-		Registry<ConfiguredStructureFeature<?, ?>> structStartRegistry = structurePieceSerializationContext.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
-		CompoundTag compoundTag2 = compoundTag.getCompound("starts");
-		for (String string : compoundTag2.getAllKeys()) {
-			ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
-			ConfiguredStructureFeature<?, ?> structureFeature = structStartRegistry.get(resourceLocation);
-//			String string2 = string.toLowerCase(Locale.ROOT);
-//			ConfiguredStructureFeature<?, ?> structureFeature = StructureFeature.STRUCTURES_REGISTRY.get(string2);
-			if (structureFeature == null) {
-				LOGGER.error("Unknown structure start: {}", resourceLocation);
-				continue;
-			}
-			StructureStart structureStart = StructureFeature.loadStaticStart(structurePieceSerializationContext, compoundTag2.getCompound(string), l);
-			if (structureStart == null)
-				continue;
-			map.put(structureFeature, structureStart);
-		}
-		return map;
-	}
-
-	private static Map<ConfiguredStructureFeature<?, ?>, LongSet> unpackStructureReferences(RegistryAccess registryAccess, ChunkPos chunkPos, CompoundTag compoundTag)
-	{
-		Map<ConfiguredStructureFeature<?, ?>, LongSet> map = Maps.newHashMap();
-		Registry<ConfiguredStructureFeature<?, ?>> structRegistry = registryAccess.registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
-		CompoundTag compoundTag2 = compoundTag.getCompound("References");
-		for (String string : compoundTag2.getAllKeys())
-		{
-		    ResourceLocation resourceLocation = ResourceLocation.tryParse(string);
-			ConfiguredStructureFeature<?, ?> structureFeature = structRegistry.get(resourceLocation);
-//			String string2 = string.toLowerCase(Locale.ROOT);
-//			ConfiguredStructureFeature<?, ?> structureFeature = StructureFeature.STRUCTURES_REGISTRY.get(string2);
-			if (structureFeature == null)
-			{
-				LOGGER.warn("Found reference to unknown structure '{}' in chunk {}, discarding", resourceLocation, chunkPos);
-				continue;
-			}
-			map.put(structureFeature, new LongOpenHashSet(Arrays.stream(compoundTag2.getLongArray(string)).filter(l ->
-			{
-				ChunkPos chunkPos2 = new ChunkPos(l);
-				if (chunkPos2.getChessboardDistance(chunkPos) > 8)
-				{
-					LOGGER.warn("Found invalid structure reference [ {} @ {} ] for chunk {}.", resourceLocation, chunkPos2, chunkPos);
-					return false;
-				}
-				return true;
-			}).toArray()));
-		}
-		return map;
-	}
-	#endif
-
-	#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
-	private static void readStructures(WorldGenLevel level, LevelChunk chunk, CompoundTag chunkData)
-	{
-		CompoundTag tagStructures = chunkData.getCompound("structures");
-		chunk.setAllStarts(
-				unpackStructureStart(StructurePieceSerializationContext.fromLevel(level.getLevel()), tagStructures, level.getSeed()));
-		chunk.setAllReferences(unpackStructureReferences(#if MC_VERSION_1_18_2 level.registryAccess() ,#endif chunk.getPos(), tagStructures));
-	}
-	#endif*/
-
 	private static void readPostPocessings(LevelChunk chunk, CompoundTag chunkData)
 	{
 		ListTag tagPostProcessings = chunkData.getList("PostProcessing", 9);
@@ -295,7 +183,7 @@ public class ChunkLoader
 	
 	public static LevelChunk read(WorldGenLevel level, LevelLightEngine lightEngine, ChunkPos chunkPos, CompoundTag chunkData)
 	{
-		#if MC_VERSION_1_17_1
+		#if MC_VERSION_1_16_5 || MC_VERSION_1_17_1
 		CompoundTag tagLevel = chunkData.getCompound("Level");
 		#else
 		CompoundTag tagLevel = chunkData;
@@ -321,7 +209,7 @@ public class ChunkLoader
 
 		//================== Read params for making the LevelChunk ==================
 		UpgradeData upgradeData = tagLevel.contains(TAG_UPGRADE_DATA, 10)
-				? new UpgradeData(tagLevel.getCompound(TAG_UPGRADE_DATA), level)
+				? new UpgradeData(tagLevel.getCompound(TAG_UPGRADE_DATA)#if !MC_VERSION_1_16_5, level #endif)
 				: UpgradeData.EMPTY;
 
 		boolean isLightOn = tagLevel.getBoolean("isLightOn");
@@ -333,21 +221,21 @@ public class ChunkLoader
 		LevelChunkTicks<Fluid> fluidTicks = LevelChunkTicks.load(tagLevel.getList(FLUID_TICKS_TAG_18, 10),
 				string -> Registry.FLUID.getOptional(ResourceLocation.tryParse(string)), chunkPos);
 
-		#elif MC_VERSION_1_17_1
+		#elif MC_VERSION_1_16_5 || MC_VERSION_1_17_1
 		ChunkBiomeContainer chunkBiomeContainer = new ChunkBiomeContainer(
-				level.getLevel().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), level, chunkPos,
-				level.getLevel().getChunkSource().getGenerator().getBiomeSource(),
+				level.getLevel().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY)#if !MC_VERSION_1_16_5, level #endif,
+				chunkPos, level.getLevel().getChunkSource().getGenerator().getBiomeSource(),
 				tagLevel.contains("Biomes", 11) ? tagLevel.getIntArray("Biomes") : null);
 
 		TickList<Block> blockTicks = tagLevel.contains(BLOCK_TICKS_TAG_PRE18, 9)
 				? ChunkTickList.create(tagLevel.getList(BLOCK_TICKS_TAG_PRE18, 10), Registry.BLOCK::getKey, Registry.BLOCK::get)
 				: new ProtoTickList<Block>(block -> (block == null || block.defaultBlockState().isAir()), chunkPos,
-				tagLevel.getList("ToBeTicked", 9), level);
+				tagLevel.getList("ToBeTicked", 9)#if !MC_VERSION_1_16_5, level #endif);
 
 		TickList<Fluid> fluidTicks = tagLevel.contains(FLUID_TICKS_TAG_PRE18, 9)
 				? ChunkTickList.create(tagLevel.getList(FLUID_TICKS_TAG_PRE18, 10), Registry.FLUID::getKey, Registry.FLUID::get)
 				: new ProtoTickList<Fluid>(fluid -> (fluid == null || fluid == Fluids.EMPTY), chunkPos,
-				tagLevel.getList("LiquidsToBeTicked", 9), level);
+				tagLevel.getList("LiquidsToBeTicked", 9)#if !MC_VERSION_1_16_5, level #endif);
 		#endif
 
 		LevelChunkSection[] levelChunkSections = readSections(level, lightEngine, chunkPos, tagLevel);
@@ -363,9 +251,6 @@ public class ChunkLoader
 		#endif
 
 		// Set some states after object creation
-		//#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-		//readStructures(level, chunk, chunkData);
-		//#endif
 		chunk.setLightCorrect(isLightOn);
 		readHeightmaps(chunk, chunkData);
 		readPostPocessings(chunk, chunkData);

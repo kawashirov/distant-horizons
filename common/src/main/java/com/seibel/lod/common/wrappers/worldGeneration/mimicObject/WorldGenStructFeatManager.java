@@ -58,7 +58,7 @@ public class WorldGenStructFeatManager extends StructureFeatureManager {
 			return this;
 		#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 		return new WorldGenStructFeatManager(worldGenSettings, worldGenRegion, structureCheck);
-		#elif MC_VERSION_1_17_1
+		#elif MC_VERSION_1_16_5 || MC_VERSION_1_17_1
 		return new WorldGenStructFeatManager(worldGenSettings, worldGenRegion);
 		#endif
 	}
@@ -79,7 +79,7 @@ public class WorldGenStructFeatManager extends StructureFeatureManager {
 	#endif
 
 
-	#if MC_VERSION_1_17_1
+	#if MC_VERSION_1_16_5 || MC_VERSION_1_17_1
 	@Override
 	public Stream<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos2,
 																StructureFeature<?> structureFeature) {

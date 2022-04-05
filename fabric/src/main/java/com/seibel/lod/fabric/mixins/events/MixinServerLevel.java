@@ -14,6 +14,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(ServerLevel.class)
 public class MixinServerLevel {
+    #if MC_VERSION_1_16_5
+
+    @Inject(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerChunkCache;save(Z)V", shift = At.Shift.AFTER))
+    private void saveWorldEvent(ProgressListener progressListener, boolean bl, boolean bl2, CallbackInfo ci) {
+        Main.client_proxy.worldSaveEvent();
+    }
+
+    #else
     @Inject(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/entity/PersistentEntitySectionManager;saveAll()V", shift = At.Shift.AFTER))
     private void saveWorldEvent_sA(ProgressListener progressListener, boolean bl, boolean bl2, CallbackInfo ci) {
         Main.client_proxy.worldSaveEvent();
@@ -23,4 +31,5 @@ public class MixinServerLevel {
     private void saveWorldEvent_aS(ProgressListener progressListener, boolean bl, boolean bl2, CallbackInfo ci) {
         Main.client_proxy.worldSaveEvent();
     }
+    #endif
 }

@@ -12,7 +12,16 @@ import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import net.minecraft.client.Minecraft;
+#if MC_VERSION_1_16_5
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.phys.AABB;
+#else
 import net.minecraft.world.level.LevelHeightAccessor;
+#endif
 
 public class SodiumAccessor implements ISodiumAccessor {
 	private final IWrapperFactory factory = SingletonHandler.get(IWrapperFactory.class);
@@ -23,6 +32,7 @@ public class SodiumAccessor implements ISodiumAccessor {
 		return "Sodium-Fabric";
 	}
 
+	#if !MC_VERSION_1_16_5
 	@Override
 	public HashSet<AbstractChunkPosWrapper> getNormalRenderedChunks() {
 		SodiumWorldRenderer renderer = SodiumWorldRenderer.instance();
@@ -45,4 +55,44 @@ public class SodiumAccessor implements ISodiumAccessor {
 		}).collect(Collectors.toCollection(HashSet::new));
 		#endif
 	}
+	#else
+	@Override
+	public HashSet<AbstractChunkPosWrapper> getNormalRenderedChunks() {
+		SodiumWorldRenderer renderer = SodiumWorldRenderer.getInstance();
+		LevelAccessor height = Minecraft.getInstance().level;
+		// TODO: Maybe use a mixin to make this more efficient
+		return MC_RENDER.getMaximumRenderedChunks().stream().filter((AbstractChunkPosWrapper chunk) -> {
+			FakeChunkEntity AABB = new FakeChunkEntity(chunk.getX(), chunk.getZ(), height.getMaxBuildHeight());
+			return (renderer.isEntityVisible(AABB));
+		}).collect(Collectors.toCollection(HashSet::new));
+	}
+
+	private static class FakeChunkEntity extends Entity {
+		public int cx;
+		public int cz;
+		public int my;
+		public FakeChunkEntity(int chunkX, int chunkZ, int maxHeight) {
+			super(EntityType.AREA_EFFECT_CLOUD, null);
+			cx = chunkX;
+			cz = chunkZ;
+			my = maxHeight;
+		}
+		@Override
+		public AABB getBoundingBoxForCulling() {
+			return new AABB(cx*16+1, 1, cz*16+1,
+					cx*16+15, my-1, cz*16+15);
+		}
+		@Override
+		protected void defineSynchedData() {}
+		@Override
+		protected void readAdditionalSaveData(CompoundTag paramCompoundTag) {}
+		@Override
+		protected void addAdditionalSaveData(CompoundTag paramCompoundTag) {}
+		@Override
+		public Packet<?> getAddEntityPacket() {
+			throw new UnsupportedOperationException("This is a FAKE CHUNK ENTITY... For tricking the Sodium to check a AABB.");
+		}
+	}
+	#endif
+
 }

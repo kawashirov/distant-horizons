@@ -368,7 +368,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 		if (chunkData == null)
 		{
-			return new ProtoChunk(chunkPos, UpgradeData.EMPTY, level
+			return new ProtoChunk(chunkPos, UpgradeData.EMPTY
+							#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2, level #endif
 							#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null #endif
 			);
 		}
@@ -378,7 +379,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			return ChunkLoader.read(level, lightEngine, chunkPos, chunkData);
 			} catch (Exception e) {
 				LOAD_LOGGER.error("DistantHorizons: Couldn't load chunk {}", chunkPos, e);
-				return new ProtoChunk(chunkPos, UpgradeData.EMPTY, level
+				return new ProtoChunk(chunkPos, UpgradeData.EMPTY
+							#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2, level #endif
 							#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null #endif
 				);
 			}
@@ -418,7 +420,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 					// Continue...
 				}
 				if (target == null)
-					target = new ProtoChunk(chunkPos, UpgradeData.EMPTY, params.level
+					target = new ProtoChunk(chunkPos, UpgradeData.EMPTY
+							#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2, params.level #endif
 							#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2, params.biomes, null #endif
 					);
 				return target;

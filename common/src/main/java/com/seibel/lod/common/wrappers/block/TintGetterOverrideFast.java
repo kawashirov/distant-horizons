@@ -82,10 +82,6 @@ public class TintGetterOverrideFast implements BlockAndTintGetter {
         return parent.getBlockEntity(blockPos);
     }
 
-    @Override
-    public <T extends BlockEntity> Optional<T> getBlockEntity(BlockPos blockPos, BlockEntityType<T> blockEntityType) {
-        return parent.getBlockEntity(blockPos, blockEntityType);
-    }
 
     @Override
     public BlockState getBlockState(BlockPos blockPos) {
@@ -112,13 +108,6 @@ public class TintGetterOverrideFast implements BlockAndTintGetter {
         return parent.getBlockStates(aABB);
     }
 
-    #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-    @Override
-    public BlockHitResult isBlockInLine(ClipBlockStateContext clipBlockStateContext) {
-        return parent.isBlockInLine(clipBlockStateContext);
-    }
-    #endif
-
     @Override
     public BlockHitResult clip(ClipContext clipContext) {
         return parent.clip(clipContext);
@@ -141,6 +130,22 @@ public class TintGetterOverrideFast implements BlockAndTintGetter {
     }
 
     @Override
+    public int getMaxBuildHeight() {
+        return parent.getMaxBuildHeight();
+    }
+
+    #if !MC_VERSION_1_16_5
+    @Override
+    public <T extends BlockEntity> Optional<T> getBlockEntity(BlockPos blockPos, BlockEntityType<T> blockEntityType) {
+        return parent.getBlockEntity(blockPos, blockEntityType);
+    }
+
+    @Override
+    public BlockHitResult isBlockInLine(ClipBlockStateContext clipBlockStateContext) {
+        return parent.isBlockInLine(clipBlockStateContext);
+    }
+
+    @Override
     public int getHeight() {
         return parent.getHeight();
     }
@@ -148,11 +153,6 @@ public class TintGetterOverrideFast implements BlockAndTintGetter {
     @Override
     public int getMinBuildHeight() {
         return parent.getMinBuildHeight();
-    }
-
-    @Override
-    public int getMaxBuildHeight() {
-        return parent.getMaxBuildHeight();
     }
 
     @Override
@@ -194,4 +194,5 @@ public class TintGetterOverrideFast implements BlockAndTintGetter {
     public int getSectionYFromSectionIndex(int i) {
         return parent.getSectionYFromSectionIndex(i);
     }
+    #endif
 }

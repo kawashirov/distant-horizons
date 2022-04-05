@@ -1,10 +1,11 @@
 package com.seibel.lod.fabric.mixins.unsafe;
 
-import net.minecraft.util.ThreadingDetector;
+import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.asm.mixin.Mixin;
 
 #if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 
+import net.minecraft.util.ThreadingDetector;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,6 +29,6 @@ public class MixinThreadingDectector {
     }
 }
 #else
-@Mixin(ThreadingDetector.class)
+@Mixin(ServerLevel.class)
     public class MixinThreadingDectector {} //FIXME: Is there some way to make this file just not be added?
 #endif

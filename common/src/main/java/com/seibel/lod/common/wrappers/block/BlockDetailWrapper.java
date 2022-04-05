@@ -246,7 +246,9 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 	        	needPostTinting = quads.get(0).isTinted();
 	        	needShade = quads.get(0).isShade();
 	        	tintIndex = quads.get(0).getTintIndex();
-	        	baseColor = calculateColorFromTexture(quads.get(0).getSprite(),
+	        	baseColor = calculateColorFromTexture(
+						#if MC_VERSION_1_16_5 quads.get(0).sprite,
+						#else quads.get(0).getSprite(), #endif
 	        		ColorMode.getColorMode(state.getBlock()));
 	        } else { // Backup method.
 				needPostTinting = false;

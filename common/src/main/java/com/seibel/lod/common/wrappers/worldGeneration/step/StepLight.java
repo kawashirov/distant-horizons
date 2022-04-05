@@ -9,6 +9,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.lighting.LightEventListener;
 
 public final class StepLight {
@@ -27,9 +28,10 @@ public final class StepLight {
 
 	public final ChunkStatus STATUS = ChunkStatus.LIGHT;
 	
-	public void generateGroup(LightEventListener lightEngine,
+	public void generateGroup(
+			#if MC_VERSION_1_16_5 LevelLightEngine lightEngine,
+			#else LightEventListener lightEngine, #endif
 			ArrayGridList<ChunkAccess> chunks) {
-		//ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
 		
 		for (ChunkAccess chunk : chunks) {
 			if (chunk.getStatus().isOrAfter(STATUS)) continue;

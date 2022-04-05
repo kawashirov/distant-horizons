@@ -146,7 +146,7 @@ public class WorldGenLevelLightEngine extends LevelLightEngine {
                 int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
                 updateSectionStatus(SectionPos.of(chunkPos, j), false);
             }
-            #elif MC_VERSION_1_18_1 || MC_VERSION_1_18_1
+            #elif MC_VERSION_1_18_1 || MC_VERSION_1_18_2
             if (levelChunkSection.hasOnlyAir()) continue;
             int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
             updateSectionStatus(SectionPos.of(chunkPos, j), false);

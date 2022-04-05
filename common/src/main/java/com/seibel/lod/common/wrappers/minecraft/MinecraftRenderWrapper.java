@@ -1,6 +1,7 @@
 package com.seibel.lod.common.wrappers.minecraft;
 
-import java.awt.*;
+import java.awt.Color;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
@@ -16,7 +17,6 @@ import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.util.LodUtil;
 
 import com.seibel.lod.core.wrapperInterfaces.misc.ILightMapWrapper;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.client.renderer.LightTexture;
 
 import com.mojang.math.Vector3f;
@@ -218,7 +218,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 				#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 				LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
 				#elif MC_VERSION_1_16_5 || MC_VERSION_1_17_1
-				ObjectArrayList<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunks;
+				Collection<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunks;
 				#endif
 				return (chunks.stream().map((chunk) -> {
                 	#if MC_VERSION_1_18_2

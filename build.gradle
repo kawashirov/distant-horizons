@@ -35,6 +35,16 @@ def loadProperties() {
 	  // println "Added prop [key:" + prop.key + ", value:" + prop.value + "]"
     }
     writeBuildGradlePredefine()
+
+    // Stuff for access wideners
+    def mcVersionToAcsessWidenerVersion = [
+            "1.16.5": "1_16",
+            "1.17.1": "1_17",
+            "1.18.1": "1_18",
+            "1.18.2": "1_18",
+    ]
+    // Use this as sometimes multiple versions use the same access wideners
+    rootProject.ext.set("acsessWidenerVersion", mcVersionToAcsessWidenerVersion.get(mcVersion))
 }
 loadProperties()
 
@@ -44,14 +54,6 @@ architectury {
     minecraft = rootProject.minecraft_version
 }
 
-// Stuff for access wideners
-def mcVersionToAcsessWidenerVersion = [
-        "1_16_5": "1_16",
-        "1_17_1": "1_17",
-        "1_18_1": "1_18",
-        "1_18_2": "1_18"
-] // Use this as sometimes multiple versions use the same access wideners
-def acsessWidenerVersion = mcVersionToAcsessWidenerVersion.get(minecraft_version.replace(".", "_"))
 
 subprojects { p ->
     apply plugin: "dev.architectury.loom"
@@ -195,9 +197,9 @@ allprojects { p ->
 
     // Copies the correct accesswidener and renames it
     task copyAccessWidener(type: Copy) {
-        from project(":common").file("src/main/resources/${acsessWidenerVersion}.lod.accesswidener")
+        from project(":common").file("src/main/resources/${rootProject.acsessWidenerVersion}.lod.accesswidener")
         into(file(p.file("build/resources/main")))
-        rename "${acsessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
+        rename "${rootProject.acsessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
     }
 
     task copyCoreResources(type: Copy) {

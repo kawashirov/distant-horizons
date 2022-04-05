@@ -28,7 +28,7 @@ accessible field net/minecraft/world/level/lighting/LevelLightEngine skyEngine L
 accessible method net/minecraft/world/level/levelgen/Heightmap setHeight (III)V
 accessible field net/minecraft/world/level/biome/Biome generationSettings Lnet/minecraft/world/level/biome/BiomeGenerationSettings;
 accessible field net/minecraft/world/level/biome/Biome biomeCategory Lnet/minecraft/world/level/biome/Biome$BiomeCategory;
-# accessible field net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator settings Lnet/minecraft/core/Holder;
+#accessible field net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator settings Lnet/minecraft/core/Holder;
 #accessible method net/minecraft/world/level/levelgen/NoiseBasedChunkGenerator doCreateBiomes (Lnet/minecraft/core/Registry;Lnet/minecraft/world/level/levelgen/blending/Blender;Lnet/minecraft/world/level/StructureFeatureManager;Lnet/minecraft/world/level/chunk/ChunkAccess;)V
 accessible method net/minecraft/world/level/lighting/LayerLightEngine queueSectionData (JLnet/minecraft/world/level/chunk/DataLayer;Z)V
 
@@ -36,13 +36,10 @@ accessible method net/minecraft/world/level/lighting/LayerLightEngine queueSecti
 accessible field net/minecraft/server/level/ChunkMap mainThreadExecutor Lnet/minecraft/util/thread/BlockableEventLoop;
 accessible method net/minecraft/server/level/ChunkMap readChunk (Lnet/minecraft/world/level/ChunkPos;)Lnet/minecraft/nbt/CompoundTag;
 
-
 # grabbing textures
-accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite animatedTexture Lnet/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture;
-accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite width I
-accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite height I
+accessible field net/minecraft/client/renderer/block/model/BakedQuad sprite Lnet/minecraft/client/renderer/texture/TextureAtlasSprite;
+accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite framesX [I
+accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite framesY [I
 accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite mainImage [Lcom/mojang/blaze3d/platform/NativeImage;
-accessible class net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture
-accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameX (I)I
-accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameY (I)I
+
 extendable class com/mojang/math/Matrix4f
