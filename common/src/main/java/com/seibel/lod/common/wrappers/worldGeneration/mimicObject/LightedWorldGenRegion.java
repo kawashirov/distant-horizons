@@ -52,11 +52,21 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
 	#if MC_VERSION_1_17_1
 	private ChunkPos overrideCenterPos = null;
-
 	public void setOverrideCenter(ChunkPos pos) {overrideCenterPos = pos;}
 	@Override
 	public ChunkPos getCenter() {
 		return overrideCenterPos==null ? super.getCenter() : overrideCenterPos;
+	}
+	#elif MC_VERSION_1_16_5
+	private ChunkPos overrideCenterPos = null;
+	public void setOverrideCenter(ChunkPos pos) {overrideCenterPos = pos;}
+	@Override
+	public int getCenterX() {
+		return overrideCenterPos==null ? super.getCenterX() : overrideCenterPos.x;
+	}
+	@Override
+	public int getCenterZ() {
+		return overrideCenterPos==null ? super.getCenterX() : overrideCenterPos.z;
 	}
 	#endif
 

@@ -53,7 +53,7 @@ public final class StepBiomes {
 			#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 			chunk = environment.joinSync(environment.params.generator.createBiomes(environment.params.biomes, Runnable::run, Blender.of(worldGenRegion),
 					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
-			#elif MC_VERSION_1_17_1
+			#elif MC_VERSION_1_17_1 || MC_VERSION_1_16_5
 			environment.params.generator.createBiomes(environment.params.biomes, chunk);
 			#endif
 		}

@@ -39,7 +39,7 @@ public final class StepSurface {
 		
 		for (ChunkAccess chunk : chunksToDo) {
 			// System.out.println("StepSurface: "+chunk.getPos());
-			#if MC_VERSION_1_17_1
+			#if MC_VERSION_1_17_1 || MC_VERSION_1_16_5
 			environment.params.generator.buildSurfaceAndBedrock(worldGenRegion, chunk);
 			#elif MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 			environment.params.generator.buildSurface(worldGenRegion, tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk);

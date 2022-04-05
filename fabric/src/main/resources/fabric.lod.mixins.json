@@ -13,6 +13,7 @@
     "MixinOptionsScreen",
     "MixinWorldRenderer",
     "MixinFogRenderer",
+    "MixinChunkGenerator",
     "events.MixinClientLevel",
     "events.MixinMinecraft",
     "events.MixinBlockUpdate"
