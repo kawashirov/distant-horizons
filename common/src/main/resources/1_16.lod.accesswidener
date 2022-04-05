@@ -9,13 +9,14 @@ accessible field com/mojang/blaze3d/vertex/VertexBuffer vertextBufferId I
 accessible method net/minecraft/client/renderer/GameRenderer getFov (Lnet/minecraft/client/Camera;FZ)D
 
 # pre-render setup
-accessible field net/minecraft/client/renderer/LevelRenderer renderChunks Lit/unimi/dsi/fastutil/objects/ObjectArrayList;
+accessible field net/minecraft/client/renderer/LevelRenderer renderChunks Lit/unimi/dsi/fastutil/objects/ObjectList;
 accessible class net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo
 accessible field net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo chunk Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk;
 
 # used for grabbing vanilla rendered chunks
 accessible class net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo
 accessible field net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo chunk Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk;
+#accessible field net/minecraft/world/entity/Entity blockPosition Lnet/minecraft/core/BlockPos;
 
 # lighting
 accessible field net/minecraft/client/renderer/LightTexture lightPixels Lcom/mojang/blaze3d/platform/NativeImage;

@@ -112,10 +112,12 @@ public class TintGetterOverrideFast implements BlockAndTintGetter {
         return parent.getBlockStates(aABB);
     }
 
+    #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
     @Override
     public BlockHitResult isBlockInLine(ClipBlockStateContext clipBlockStateContext) {
         return parent.isBlockInLine(clipBlockStateContext);
     }
+    #endif
 
     @Override
     public BlockHitResult clip(ClipContext clipContext) {

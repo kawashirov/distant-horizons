@@ -138,7 +138,11 @@ public class WorldWrapper implements IWorldWrapper
     @Override
     public short getMinHeight()
     {
+        #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
         return (short) world.getMinBuildHeight();
+        #elif MC_VERSION_1_16_5
+        return (short) 0;
+        #endif
     }
     
     /** @throws UnsupportedOperationException if the WorldWrapper isn't for a ServerWorld */
