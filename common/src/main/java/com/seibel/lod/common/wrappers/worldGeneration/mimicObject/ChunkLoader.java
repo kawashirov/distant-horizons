@@ -92,7 +92,8 @@ public class ChunkLoader
 
 		boolean isLightOn = chunkData.getBoolean("isLightOn");
 		boolean hasSkyLight = level.dimensionType().hasSkyLight();
-		ListTag tagSections = chunkData.getList("sections", 10);
+		ListTag tagSections = chunkData.getList("Sections", 10);
+		if (tagSections.isEmpty()) tagSections = chunkData.getList("sections", 10);
 
 		for (int j = 0; j < tagSections.size(); ++j)
 		{
@@ -246,7 +247,7 @@ public class ChunkLoader
 		LevelChunk chunk = new LevelChunk((Level) level, chunkPos, upgradeData, blockTicks,
 		 		fluidTicks, inhabitedTime, levelChunkSections, null, blendingData);
 		#else
-		LevelChunk chunk = new LevelChunk((Level) level, chunkPos, chunkBiomeContainer, upgradeData, blockTicks,
+		LevelChunk chunk = new LevelChunk((Level) level.getLevel(), chunkPos, chunkBiomeContainer, upgradeData, blockTicks,
 				fluidTicks, inhabitedTime, levelChunkSections, null);
 		#endif
 
