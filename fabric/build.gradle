@@ -95,29 +95,22 @@ dependencies {
     shadowMe 'org.apache.commons:commons-compress:1.21'
 }
 
-task copyCoreResources(type: Copy) {
-    from fileTree(project(":core").file("src/main/resources"))
-    into file("build/resources/main")
-}
-
 task deleteResources(type: Delete) {
     delete file("build/resources/main")
 }
 
-task copyCommonResources(type: Copy) {
-    from fileTree(project(":common").file("src/main/resources"))
-    into file("build/resources/main")
+processResources {
+    dependsOn(copyCoreResources)
+    dependsOn(copyCommonResources)
+    dependsOn(copyAccessWidener)
 }
 
 runClient {
     dependsOn(copyCoreResources)
     dependsOn(copyCommonResources)
+    dependsOn(copyAccessWidener)
     jvmArgs "-XX:-OmitStackTraceInFastThrow"
     finalizedBy(deleteResources)
-}
-
-processResources {
-    dependsOn(copyAccessWidener)
 }
 
 shadowJar {
