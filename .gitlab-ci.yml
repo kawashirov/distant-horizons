@@ -1,4 +1,5 @@
-image: alpine
+# use Eclipse's JDK
+image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
