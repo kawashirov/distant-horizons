@@ -70,7 +70,7 @@ before_script:
 
 # 1.18.1 build 
 build compile_18_1 1/2:
-    stage: build_18_1
+    stage: build
     script: 
         - ./gradlew deleteMerged --gradle-user-home cache_1/; # make sure any previously merged jars are removed before running this job
         - ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache_1/; 
@@ -95,7 +95,7 @@ build compile_18_1 1/2:
 
 # 1.18.2 build
 build compile_18_2 2/2::
-    stage: build_18_2
+    stage: build
     script:
         - ./gradlew deleteMerged --gradle-user-home cache_2/;
         - ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache_2/;
