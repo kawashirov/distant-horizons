@@ -33,12 +33,14 @@ build_16_5:
     paths:
       - Merged
     expire_in: 1 day
+    when: always
   cache:
     key: "gradleCache"
     policy: pull-push
     paths:
       - .gradle
       - cache/
+  allow_failure: true
 
 # 1.17.1 build
 build_17_1:
@@ -53,34 +55,39 @@ build_17_1:
     paths:
       - Merged
     expire_in: 1 day
+    # even if one build fails, upload the successful jars
+    when: always
   cache:
     key: "gradleCache"
     policy: pull-push
     paths:
       - .gradle
       - cache/
+  allow_failure: true
 
 # 1.18.1 build 
 build_18_1:
-    stage: build_18_1
-    script: 
-        - ./gradlew deleteMerged --gradle-user-home cache/; # make sure any previously merged jars are removed before running this job
-        - ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache/; 
-        - ./gradlew merge --gradle-user-home cache/;
-    # build using Java 17
-    image: eclipse-temurin:17
-    artifacts:
-        name: "Merged_NightlyBuild_1_18_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
-        paths:
-        # relative to the root directory
-        - Merged
-        expire_in: 1 day
-    cache:
-        key: "gradleCache"
-        policy: pull-push
-        paths:
-            - .gradle
-            - cache/
+  stage: build_18_1
+  script: 
+    - ./gradlew deleteMerged --gradle-user-home cache/; # make sure any previously merged jars are removed before running this job
+    - ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache/; 
+    - ./gradlew merge --gradle-user-home cache/;
+  # build using Java 17
+  image: eclipse-temurin:17
+  artifacts:
+    name: "Merged_NightlyBuild_1_18_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+    paths:
+    # relative to the root directory
+    - Merged
+    expire_in: 1 day
+    when: always
+  cache:
+    key: "gradleCache"
+    policy: pull-push
+    paths:
+      - .gradle
+      - cache/
+  allow_failure: true
 
 # 1.18.2 build
 build_18_2:
@@ -95,12 +102,14 @@ build_18_2:
     paths:
       - Merged
     expire_in: 1 day
+    when: always
   cache:
     key: "gradleCache"
     policy: pull-push
     paths:
       - .gradle
       - cache/
+  allow_failure: true
 
 
 # unused deployment stage
