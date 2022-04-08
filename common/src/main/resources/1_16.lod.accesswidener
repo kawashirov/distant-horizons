@@ -4,7 +4,7 @@ accessWidener v1 named
 accessible field net/minecraft/world/level/storage/DimensionDataStorage dataFolder Ljava/io/File;
 
 # used when rendering
-accessible field com/mojang/blaze3d/vertex/VertexBuffer indexCount I
+accessible field com/mojang/blaze3d/vertex/VertexBuffer vertexCount I
 accessible field com/mojang/blaze3d/vertex/VertexBuffer vertextBufferId I
 accessible method net/minecraft/client/renderer/GameRenderer getFov (Lnet/minecraft/client/Camera;FZ)D
 
