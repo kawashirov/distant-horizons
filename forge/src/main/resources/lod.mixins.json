@@ -9,10 +9,6 @@
 		"MixinOptionsScreen",
 		"MixinWorldRenderer",
 		"MixinFogRenderer",
-		"fabric.mixin.networking.accessor.ConnectScreenAccessor",
-		"fabric.mixin.networking.accessor.MinecraftClientAccessor",
-		"fabric.mixin.networking.client.ClientLoginNetworkHandlerMixin",
-		"fabric.mixin.networking.client.ClientPlayNetworkHandlerMixin"
 	],
 	"server": []
 }
