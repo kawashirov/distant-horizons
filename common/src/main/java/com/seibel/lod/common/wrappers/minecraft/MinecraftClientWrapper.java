@@ -163,40 +163,6 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
         return LodUtil.getDimensionIDFromWorld(WorldWrapper.getWorldWrapper(mc.level));
     }
 
-    /** This texture changes every frame */
-    @Override
-    public ILightMapWrapper getCurrentLightMap()
-    {
-        // get the current lightMap if the cache is empty
-        if (lightMap == null)
-        {
-            LightTexture tex = mc.gameRenderer.lightTexture();
-            lightMap = tex.lightPixels;
-        }
-        return new LightMapWrapper(lightMap);
-    }
-
-    /**
-     * Returns the color int at the given pixel coordinates
-     * from the current lightmap.
-     * @param blockLight x location in texture space
-     * @param skyLight z location in texture space
-     */
-    @Override
-    public int getColorIntFromLightMap(int blockLight, int skyLight)
-    {
-        if (lightMap == null)
-        {
-            //sendChatMessage("new");
-            // make sure the lightMap is up-to-date
-            getCurrentLightMap();
-        }
-
-        return lightMap.getPixelRGBA(blockLight, skyLight);
-    }
-
-
-
     //=============//
     // Simple gets //
     //=============//

@@ -9,7 +9,8 @@
 		"MixinOptionsScreen",
 		"MixinWorldRenderer",
 		"MixinFogRenderer",
-		"MixinChunkGenerator"
+		"MixinChunkGenerator",
+		"MixinLightmap"
 	],
 	"server": []
 }

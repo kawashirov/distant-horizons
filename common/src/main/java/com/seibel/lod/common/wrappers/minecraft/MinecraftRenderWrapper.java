@@ -86,7 +86,9 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	private static final Minecraft MC = Minecraft.getInstance();
 	private static final GameRenderer GAME_RENDERER = MC.gameRenderer;
 	private static final IWrapperFactory FACTORY = WrapperFactory.INSTANCE;
-	
+
+	public LightMapWrapper lightmap = null;
+
 	@Override
 	public Vec3f getLookAtVector()
 	{
@@ -216,16 +218,13 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	
     public boolean usingBackupGetVanillaRenderedChunks = false;
 	@Override
-	public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks()
-	{
+	public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks() {
 		ISodiumAccessor sodium = ModAccessorHandler.get(ISodiumAccessor.class);
-		if (sodium != null)
-		{
+		if (sodium != null) {
 			return sodium.getNormalRenderedChunks();
 		}
 		IOptifineAccessor optifine = ModAccessorHandler.get(IOptifineAccessor.class);
-		if (optifine != null)
-		{
+		if (optifine != null) {
 			HashSet<AbstractChunkPosWrapper> pos = optifine.getNormalRenderedChunks();
 			if (pos == null)
 				pos = getMaximumRenderedChunks();
@@ -260,117 +259,18 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 									+ " Using Backup Method.");
 					MinecraftClientWrapper.INSTANCE.sendChatMessage(
 							"\u00A7eOverdraw prevention will be worse than normal.");
-				} catch (Exception e2) {}
+				} catch (Exception e2) {
+				}
 				ApiShared.LOGGER.error("getVanillaRenderedChunks Error: ", e);
 				usingBackupGetVanillaRenderedChunks = true;
 			}
 		}
 		return getMaximumRenderedChunks();
 	}
-	
-	@Override
-	public int[] getLightmapPixels()
-	{
-		LightTexture tex = GAME_RENDERER.lightTexture();
-		//tex.tick(); // This call makes no sense, but it fixes pause menu flicker bug
-		NativeImage lightMapPixels = tex.lightTexture.getPixels();
-		LightMapWrapper lightMap = new LightMapWrapper(lightMapPixels);
-		
-		
-		int lightMapHeight = getLightmapTextureHeight();
-		int lightMapWidth = getLightmapTextureWidth();
-		
-		int[] pixels = new int[lightMapWidth * lightMapHeight];
-		for (int u = 0; u < lightMapWidth; u++)
-		{
-			for (int v = 0; v < lightMapWidth; v++)
-			{
-				// this could probably be kept as a int, but
-				// it is easier to test and see the colors when debugging this way.
-				// When creating a new release this should be changed to the int version.
-				int col = lightMap.getLightValue(u, v);
-				
-				// these should both create a totally white image
-//					int col =
-//							Integer.MAX_VALUE;
-//					int col =
-//							0b11111111 + // red
-//							(0b11111111 << 8) + // green
-//							(0b11111111 << 16) + // blue
-//							(0b11111111 << 24); // blue
-
-//				int col =
-//						((c.getRed() & 0xFF) << 16) | // blue
-//								((c.getGreen() & 0xFF) << 8) | // green
-//								((c.getBlue() & 0xFF)) | // red
-//								((c.getAlpha() & 0xFF) << 24); // alpha
-				
-				// 2D array stored in a 1D array.
-				// Thank you Tim from College ;)
-				pixels[u * lightMapWidth + v] = col;
-			}
-		}
-		
-		return pixels;
-	}
 
 	@Override
 	public ILightMapWrapper getLightmapWrapper() {
-		return new LightMapWrapper(GAME_RENDERER.lightTexture());
-	}
-
-
-
-	@Override
-	public int getLightmapTextureHeight()
-	{
-		int height = -1;
-		
-		LightTexture lightTexture = GAME_RENDERER.lightTexture();
-		if (lightTexture != null)
-		{
-			NativeImage tex = lightTexture.lightPixels;
-			if (tex != null)
-			{
-				height = tex.getHeight();
-			}
-		}
-		
-		return height;
-	}
-	
-	@Override
-	public int getLightmapTextureWidth()
-	{
-		int width = -1;
-		
-		LightTexture lightTexture = GAME_RENDERER.lightTexture();
-		if (lightTexture != null)
-		{
-			NativeImage tex = lightTexture.lightPixels;
-			if (tex != null)
-			{
-				width = tex.getWidth();
-			}
-		}
-		
-		return width;
-	}
-	
-	
-	@Override
-	public int getLightmapGLFormat() {
-		int glFormat = -1;
-		
-		LightTexture lightTexture = GAME_RENDERER.lightTexture();
-		if (lightTexture != null) {
-			NativeImage tex = lightTexture.lightPixels;
-			if (tex != null) {
-				glFormat = tex.format().glFormat();
-			}
-		}
-		
-		return glFormat;
+		return lightmap;
 	}
 	
 	@Override
@@ -394,4 +294,11 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	public boolean tryDisableVanillaFog() {
 		return true; // Handled via MixinFogRenderer in both forge and fabric
 	}
+
+    public void updateLightmap(NativeImage lightPixels) {
+		if (lightmap== null) {
+			lightmap = new LightMapWrapper();
+		}
+		lightmap.uploadLightmap(lightPixels);
+    }
 }

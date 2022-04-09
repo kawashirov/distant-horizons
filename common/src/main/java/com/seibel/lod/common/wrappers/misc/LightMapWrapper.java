@@ -22,7 +22,10 @@ package com.seibel.lod.common.wrappers.misc;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.seibel.lod.core.wrapperInterfaces.misc.ILightMapWrapper;
 import net.minecraft.client.renderer.LightTexture;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL32;
+
+import java.nio.ByteBuffer;
 
 /**
  * @author James Seibel
@@ -30,33 +33,35 @@ import org.lwjgl.opengl.GL32;
  */
 public class LightMapWrapper implements ILightMapWrapper
 {
-    static NativeImage lightMap = null;
+    private int textureId = 0;
 
-    private LightTexture tex;
-
-    public LightMapWrapper(NativeImage newLightMap)
+    public LightMapWrapper()
     {
-        lightMap = newLightMap;
     }
 
-    public LightMapWrapper(LightTexture lightTexture) {
-        tex = lightTexture;
+    private void createLightmap(NativeImage image)
+    {
+        textureId = GL32.glGenTextures();
+        GL32.glBindTexture(GL32.GL_TEXTURE_2D, textureId);
+        GL32.glTexImage2D(GL32.GL_TEXTURE_2D, 0, image.format().glFormat(), image.getWidth(), image.getHeight(),
+                0, image.format().glFormat(), GL32.GL_UNSIGNED_BYTE, (ByteBuffer) null);
     }
 
-    public static void setLightMap(NativeImage newLightMap)
+    public void uploadLightmap(NativeImage image)
     {
-        lightMap = newLightMap;
-    }
-
-    @Override
-    public int getLightValue(int skyLight, int blockLight)
-    {
-        return lightMap.getPixelRGBA(skyLight, blockLight);
+        int currentBind = GL32.glGetInteger(GL32.GL_TEXTURE_BINDING_2D);
+        GL32.glBindTexture(GL32.GL_TEXTURE_2D, textureId);
+        if (textureId == 0) {
+            createLightmap(image);
+        }
+        // NativeImage::upload(int levelOfDetail, int xOffset, int yOffset, bool shouldCleanup?)
+        image.upload(0, 0, 0, false);
+        GL32.glBindTexture(GL32.GL_TEXTURE_2D, currentBind);
     }
 
     @Override
     public void bind() {
-        GL32.glBindTexture(GL32.GL_TEXTURE_2D, tex.lightTexture.getId());
+        GL32.glBindTexture(GL32.GL_TEXTURE_2D, textureId);
     }
 
     @Override

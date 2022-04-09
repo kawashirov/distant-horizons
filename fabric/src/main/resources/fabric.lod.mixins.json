@@ -15,7 +15,8 @@
     "MixinChunkGenerator",
     "events.MixinClientLevel",
     "events.MixinMinecraft",
-    "events.MixinBlockUpdate"
+    "events.MixinBlockUpdate",
+    "events.MixinLightmap"
   ],
   "server": [
     "MixinDedicatedServer"

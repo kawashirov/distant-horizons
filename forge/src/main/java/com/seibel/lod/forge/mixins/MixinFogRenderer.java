@@ -47,8 +47,8 @@ public class MixinFogRenderer
 {
 	
 	// Using this instead of Float.MAX_VALUE because Sodium don't like it. (and copy paste in case someone in forge don't like it)
-	private static final float A_REALLY_REALLY_BIG_VALUE = 4206942069.F;
-	private static final float A_EVEN_LARGER_VALUE = 420694206942069.F;
+	private static final float A_REALLY_REALLY_BIG_VALUE = 420694206942069.F;
+	private static final float A_EVEN_LARGER_VALUE = 42069420694206942069.F;
 	
 	@Inject(at = @At("RETURN"),
 			method = "setupFog(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/FogRenderer$FogMode;FZF)V",
