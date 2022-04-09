@@ -4,7 +4,6 @@
 	"package": "com.seibel.lod.forge.mixins",
 	"mixins": [
 		"MixinUtilBackgroudThread",
-		"fabric.mixin.networking.ClientConnectionMixin",
 		"fabric.mixin.networking.EntityTrackerEntryMixin",
 		"fabric.mixin.networking.PlayerManagerMixin",
 		"fabric.mixin.networking.ServerLoginNetworkHandlerMixin",
