@@ -1,5 +1,6 @@
 package com.seibel.lod.forge.mixins;
 
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 
 #if MC_VERSION_1_16_5
@@ -49,6 +50,7 @@ public class MixinTFChunkGenerator {
 }
 
 #else
+@Mixin(ChunkGenerator.class)
 class MixinTFChunkGenerator {
 }
 #endif
