@@ -350,8 +350,13 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		if (!(generator instanceof NoiseBasedChunkGenerator ||
 				generator instanceof DebugLevelSource ||
 				generator instanceof FlatLevelSource)) {
-			EVENT_LOGGER.warn("Unknown Chunk Generator detected: [{}], Distant Generation May Fail!", generator.getClass());
-			EVENT_LOGGER.warn("If it does crash, set Distant Generation to OFF or Generation Mode to None.");
+			if (generator.getClass().toString().equals("class com.terraforged.mod.chunk.TFChunkGenerator")) {
+				EVENT_LOGGER.info("TerraForge Chunk Generator detected: [{}], Distant Generation will try its best to support it.", generator.getClass());
+				EVENT_LOGGER.info("If it does crash, set Distant Generation to OFF or Generation Mode to None.");
+			} else {
+				EVENT_LOGGER.warn("Unknown Chunk Generator detected: [{}], Distant Generation May Fail!", generator.getClass());
+				EVENT_LOGGER.warn("If it does crash, set Distant Generation to OFF or Generation Mode to None.");
+			}
 		}
 		params = new GlobalParameters((ServerLevel) ((WorldWrapper) serverlevel).getWorld(), lodBuilder, lodDim);
 	}

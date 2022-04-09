@@ -22,7 +22,7 @@ public class MixinLightmap {
             value="INVOKE",
             target="Lnet/minecraft/client/renderer/texture/DynamicTexture;upload()V"))
     public void updateLightTexture(float f, CallbackInfo ci) {
-        ApiShared.LOGGER.info("Lightmap update");
+        //ApiShared.LOGGER.info("Lightmap update");
         MinecraftRenderWrapper.INSTANCE.updateLightmap(lightPixels);
     }
 }

@@ -10,7 +10,8 @@
 		"MixinWorldRenderer",
 		"MixinFogRenderer",
 		"MixinChunkGenerator",
-		"MixinLightmap"
+		"MixinLightmap",
+		"MixinTFChunkGenerator"
 	],
 	"server": []
 }
