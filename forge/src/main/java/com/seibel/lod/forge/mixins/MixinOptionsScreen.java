@@ -52,27 +52,21 @@ public class MixinOptionsScreen extends Screen {
 
     @Inject(at = @At("HEAD"),method = "init")
     private void lodconfig$init(CallbackInfo ci) {
-        if (SingletonHandler.get(ILodConfigWrapperSingleton.class).client().getOptionsButton()) {
-            TexturedButtonWidget widget = new TexturedButtonWidget(
-                    // Where the button is on the screen
-                    this.width / 2 - 180, this.height / 6 - 12,
-                    // Width and height of the button
-                    20, 20,
-                    // Offset
-                    0, 0,
-                    // Some textuary stuff
-                    20, ICON_TEXTURE, 20, 40,
-                    // Create the button and tell it where to go
-                    // For now it goes to the client option by default
-                    (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, "client")),
-                    // Add a title to the screen
-                    new TranslatableComponent("text.autoconfig." + ModInfo.ID + ".title"));
-            
-            #if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-            this.addRenderableWidget(widget);
-            #else
-            this.addWidget(widget);
-            #endif
-        }
+        if (SingletonHandler.get(ILodConfigWrapperSingleton.class).client().getOptionsButton())
+            this. #if MC_VERSION_1_16_5 addButton #else addRenderableWidget #endif
+                    (new TexturedButtonWidget(
+                            // Where the button is on the screen
+                            this.width / 2 - 180, this.height / 6 - 12,
+                            // Width and height of the button
+                            20, 20,
+                            // Offset
+                            0, 0,
+                            // Some textuary stuff
+                            20, ICON_TEXTURE, 20, 40,
+                            // Create the button and tell it where to go
+                            // For now it goes to the client option by default
+                            (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, "client")),
+                            // Add a title to the screen
+                            new TranslatableComponent("text.autoconfig." + ModInfo.ID + ".title")));
     }
 }
