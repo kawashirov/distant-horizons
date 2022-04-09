@@ -52,8 +52,8 @@ public class MixinOptionsScreen extends Screen {
 
     @Inject(at = @At("HEAD"),method = "init")
     private void lodconfig$init(CallbackInfo ci) {
-        if (SingletonHandler.get(ILodConfigWrapperSingleton.class).client().getOptionsButton())
-            this.addRenderableWidget(new TexturedButtonWidget(
+        if (SingletonHandler.get(ILodConfigWrapperSingleton.class).client().getOptionsButton()) {
+            TexturedButtonWidget widget = new TexturedButtonWidget(
                     // Where the button is on the screen
                     this.width / 2 - 180, this.height / 6 - 12,
                     // Width and height of the button
@@ -66,6 +66,13 @@ public class MixinOptionsScreen extends Screen {
                     // For now it goes to the client option by default
                     (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, "client")),
                     // Add a title to the screen
-                    new TranslatableComponent("text.autoconfig." + ModInfo.ID + ".title")));
+                    new TranslatableComponent("text.autoconfig." + ModInfo.ID + ".title"));
+            
+            #if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+            this.addRenderableWidget(widget);
+            #else
+            this.addWidget(widget);
+            #endif
+        }
     }
 }

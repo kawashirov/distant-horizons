@@ -51,6 +51,8 @@ import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.client.ConfigGuiHandler;
 #elif MC_VERSION_1_17_1
 import net.minecraftforge.fmlclient.ConfigGuiHandler;
+#elif MC_VERSION_1_16_5
+import net.minecraftforge.fml.ExtensionPoint;
 #endif
 
 import java.util.List;
