@@ -23,7 +23,7 @@ import com.seibel.lod.fabric.Main;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.renderer.LevelRenderer;
-#if MC_VERSION_1_18_2
+#if POST_MC_1_18_2
 import net.minecraft.core.Holder;
 #endif
 import net.minecraft.resources.ResourceKey;
@@ -41,28 +41,20 @@ import java.util.function.Supplier;
 /**
  * This class is used for world loading events
  * @author Ran
+ *
+ * FIXME: Why does forge not have the 1.18+ onChunkLightReady mixin?
  */
 
 @Mixin(ClientLevel.class)
 public class MixinClientLevel {
-    #if MC_VERSION_1_18_2
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void loadWorldEvent(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey, Holder holder, int i, int j, Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci) {
+    private void loadWorldEvent(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey,
+            #if POST_MC_1_18_2 Holder holder, #else DimensionType dimensionType, #endif int i,
+            #if POST_MC_1_18_1 int j, #endif Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci) {
         Main.client_proxy.worldLoadEvent((ClientLevel) (Object) this);
     }
-    #elif MC_VERSION_1_18_1
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void loadWorldEvent(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey, DimensionType dimensionType, int i, int j, Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci) {
-        Main.client_proxy.worldLoadEvent((ClientLevel) (Object) this);
-    }
-	#elif MC_VERSION_1_17_1
-	@Inject(method = "<init>", at = @At("TAIL"))
-	private void loadWorldEvent(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey<Level> resourceKey, DimensionType dimensionType, int i, Supplier<ProfilerFiller> supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci) {
-		Main.client_proxy.worldLoadEvent((ClientLevel) (Object) this);
-	}
-    #endif
 
-	#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+	#if POST_MC_1_18_1
     @Inject(method = "setLightReady", at = @At("HEAD"))
     private void onChunkLightReady(int x, int z, CallbackInfo ci) {
     	ClientLevel l = (ClientLevel) (Object) this;

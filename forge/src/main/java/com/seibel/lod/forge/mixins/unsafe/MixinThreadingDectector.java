@@ -18,10 +18,10 @@
  */
  
 package com.seibel.lod.forge.mixins.unsafe;
-
-#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-
 import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+#if POST_MC_1_18_1
+
 import net.minecraft.util.ThreadingDetector;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,6 +33,7 @@ import java.util.concurrent.Semaphore;
 
 /**
  * Why does this exist? But okay! (Will be probably removed when the experimental generator is done)
+ * FIXME: Recheck this
  */
 @Mixin(ThreadingDetector.class)
 public class MixinThreadingDectector {
@@ -47,7 +48,6 @@ public class MixinThreadingDectector {
 }
 
 #else
-
+@Mixin(ChunkGenerator.class)
 public class MixinThreadingDectector {}
-
 #endif

@@ -47,12 +47,12 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
-#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-import net.minecraftforge.client.ConfigGuiHandler;
-#elif MC_VERSION_1_17_1
-import net.minecraftforge.fmlclient.ConfigGuiHandler;
-#elif MC_VERSION_1_16_5
+#if PRE_MC_1_17_1
 import net.minecraftforge.fml.ExtensionPoint;
+#elif MC_1_17_1
+import net.minecraftforge.fmlclient.ConfigGuiHandler;
+#else // 1.18+
+import net.minecraftforge.client.ConfigGuiHandler;
 #endif
 
 import java.util.List;
@@ -96,7 +96,7 @@ public class ForgeMain implements LodForgeMethodCaller
 		
 		ModAccessorHandler.finishBinding();
 
-		#if MC_VERSION_1_16_5
+		#if PRE_MC_1_17_1
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY,
 				() -> (client, parent) -> ConfigGui.getScreen(parent, ""));
 		#else
@@ -115,7 +115,7 @@ public class ForgeMain implements LodForgeMethodCaller
 
 	@Override
 	public int colorResolverGetColor(ColorResolver resolver, Biome biome, double x, double z) {
-		#if MC_VERSION_1_17_1
+		#if MC_1_17_1
 		return resolver.m_130045_(biome, x, z);
 		#else
 		return resolver.getColor(biome, x, z);

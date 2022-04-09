@@ -376,8 +376,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		if (chunkData == null)
 		{
 			return new ProtoChunk(chunkPos, UpgradeData.EMPTY
-							#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2, level #endif
-							#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null #endif
+							#if POST_MC_1_17_1, level #endif
+							#if POST_MC_1_18_1, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null #endif
 			);
 		}
 		else
@@ -387,8 +387,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			} catch (Exception e) {
 				LOAD_LOGGER.error("DistantHorizons: Couldn't load chunk {}", chunkPos, e);
 				return new ProtoChunk(chunkPos, UpgradeData.EMPTY
-							#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2, level #endif
-							#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null #endif
+							#if POST_MC_1_17_1, level #endif
+							#if POST_MC_1_18_1, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null #endif
 				);
 			}
 		}
@@ -428,8 +428,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				}
 				if (target == null)
 					target = new ProtoChunk(chunkPos, UpgradeData.EMPTY
-							#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2, params.level #endif
-							#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2, params.biomes, null #endif
+							#if POST_MC_1_17_1, params.level #endif
+							#if POST_MC_1_18_1, params.biomes, null #endif
 					);
 				return target;
 			};
@@ -489,7 +489,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				}
 				
 				boolean isFull = target.getStatus() == ChunkStatus.FULL || target instanceof LevelChunk;
-				#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
+				#if POST_MC_1_18_1
 				boolean isPartial = target.isOldNoiseGeneration();
 				#endif
 				if (isFull)
@@ -498,7 +498,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
 							new LodBuilderConfig(DistanceGenerationMode.FULL), true, e.genAllDetails);
 				}
-				#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
+				#if POST_MC_1_18_1
 				else if (isPartial)
 				{
 					LOAD_LOGGER.info("Detected old existing chunk at {}", target.getPos());
@@ -590,7 +590,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				{
 					if (p instanceof ProtoChunk)
 						((ProtoChunk) p).setLightCorrect(true);
-					#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+					#if POST_MC_1_18_1
 					if (p instanceof LevelChunk) {
 						((LevelChunk) p).setLightCorrect(true);
 						((LevelChunk) p).setClientLightReady(true);

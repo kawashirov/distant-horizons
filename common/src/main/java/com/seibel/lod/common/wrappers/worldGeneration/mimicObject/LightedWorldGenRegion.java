@@ -42,7 +42,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.ColorResolver;
-#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+#if POST_MC_1_17_1
 import net.minecraft.world.level.LevelHeightAccessor;
 #endif
 import net.minecraft.world.level.LightLayer;
@@ -69,34 +69,30 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	private final ChunkPos firstPos;
 	private final List<ChunkAccess> cache;
 	Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
-	#if MC_VERSION_1_17_1
+	#if PRE_MC_1_18_1
 	private ChunkPos overrideCenterPos = null;
 	public void setOverrideCenter(ChunkPos pos) {overrideCenterPos = pos;}
-	@Override
-	public ChunkPos getCenter() {
-		return overrideCenterPos==null ? super.getCenter() : overrideCenterPos;
-	}
-	#elif MC_VERSION_1_16_5
-	private ChunkPos overrideCenterPos = null;
-	public void setOverrideCenter(ChunkPos pos) {overrideCenterPos = pos;}
-	@Override
-	public int getCenterX() {
-		return overrideCenterPos==null ? super.getCenterX() : overrideCenterPos.x;
-	}
-	@Override
-	public int getCenterZ() {
-		return overrideCenterPos==null ? super.getCenterX() : overrideCenterPos.z;
-	}
+		#if PRE_MC_1_17_1
+		@Override
+		public int getCenterX() {
+			return overrideCenterPos==null ? super.getCenterX() : overrideCenterPos.x;
+		}
+		@Override
+		public int getCenterZ() {
+			return overrideCenterPos==null ? super.getCenterX() : overrideCenterPos.z;
+		}
+		#else
+		@Override
+		public ChunkPos getCenter() {
+			return overrideCenterPos==null ? super.getCenter() : overrideCenterPos;
+		}
+		#endif
 	#endif
 
 	public LightedWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine,
 			List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
 			LightGenerationMode lightMode, EmptyChunkGenerator generator) {
-		#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-		super(serverLevel, list, chunkStatus, i);
-		#elif MC_VERSION_1_16_5
-		super(serverLevel, list);
-		#endif
+		super(serverLevel, list #if POST_MC_1_17_1, chunkStatus, i #endif);
 		this.lightMode = lightMode;
 		this.firstPos = list.get(0).getPos();
 		this.generator = generator;
@@ -106,7 +102,7 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 		size = Mth.floor(Math.sqrt(list.size()));
 	}
 
-	#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+	#if POST_MC_1_17_1
 	// Bypass BCLib mixin overrides.
     @Override
     public boolean ensureCanWrite(BlockPos blockPos) {
@@ -119,7 +115,7 @@ public class LightedWorldGenRegion extends WorldGenRegion {
         if (k > this.writeRadius || l > this.writeRadius) {
             return false;
         }
-		#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+		#if POST_MC_1_18_1
         if (center.isUpgrading()) {
             LevelHeightAccessor levelHeightAccessor = center.getHeightAccessorForGeneration();
             if (blockPos.getY() < levelHeightAccessor.getMinBuildHeight() || blockPos.getY() >= levelHeightAccessor.getMaxBuildHeight()) {
@@ -214,7 +210,7 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
 		ChunkAccess chunk = getChunkAccess(i, j, chunkStatus, bl);
 		if (chunk instanceof LevelChunk) {
-			chunk = new ImposterProtoChunk((LevelChunk) chunk #if MC_VERSION_1_18_1 || MC_VERSION_1_18_2, true #endif);
+			chunk = new ImposterProtoChunk((LevelChunk) chunk #if POST_MC_1_18_1, true #endif);
 		}
 		return chunk;
 	}
@@ -285,7 +281,7 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	}
 
 	private Biome _getBiome(BlockPos pos) {
-		#if MC_VERSION_1_18_2
+		#if POST_MC_1_18_2
 		return getBiome(pos).value();
 		#else
 		return getBiome(pos);

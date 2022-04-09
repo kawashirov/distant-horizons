@@ -34,7 +34,7 @@ import net.minecraft.client.renderer.FogRenderer.FogMode;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-#if MC_VERSION_1_16_5
+#if PRE_MC_1_17_1
 import net.minecraft.world.level.material.FluidState;
 #else
 import net.minecraft.world.level.material.FogType;
@@ -52,7 +52,7 @@ public class MixinFogRenderer
 	
 	@Inject(at = @At("RETURN"),
 			method = "setupFog(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/FogRenderer$FogMode;FZF)V",
-			remap = #if MC_VERSION_1_16_5 true #else false #endif) // Remap = false messiness due to this being added by forge.
+			remap = #if MC_1_16_5 true #else false #endif) // Remap messiness due to this being added by forge.
 	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, float partTick, CallbackInfo callback)
 	{
 		ILodConfigWrapperSingleton CONFIG;
@@ -65,7 +65,7 @@ public class MixinFogRenderer
 			return; // May happen due to forge for some reason haven't inited out thingy yet.
 		}
 
-		#if MC_VERSION_1_16_5
+		#if PRE_MC_1_17_1
 		FluidState fluidState = camera.getFluidInCamera();
 		boolean cameraNotInFluid = fluidState.isEmpty();
 		#else
@@ -78,7 +78,7 @@ public class MixinFogRenderer
 		if (!isSpecialFog && cameraNotInFluid && fogMode == FogMode.FOG_TERRAIN
 				&& CONFIG.client().graphics().fogQuality().getDisableVanillaFog())
 		{
-			#if MC_VERSION_1_16_5
+			#if PRE_MC_1_17_1
 			RenderSystem.fogStart(A_REALLY_REALLY_BIG_VALUE);
 			RenderSystem.fogEnd(A_EVEN_LARGER_VALUE);
 			#else

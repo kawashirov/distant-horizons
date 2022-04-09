@@ -73,7 +73,7 @@ public final class StepStructureStart {
 				environment.params.generator.createStructures(environment.params.registry, tParams.structFeat, chunk, environment.params.structures,
 						environment.params.worldSeed);
 
-				#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+				#if POST_MC_1_18_1
 				try {
 					tParams.structCheck.onStructureLoad(chunk.getPos(), chunk.getAllStarts());
 				} catch (ArrayIndexOutOfBoundsException e) {

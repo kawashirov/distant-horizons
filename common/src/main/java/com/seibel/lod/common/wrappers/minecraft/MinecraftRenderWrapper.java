@@ -61,11 +61,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-import net.minecraft.world.level.material.FogType;
-#elif MC_VERSION_1_16_5
+#if PRE_MC_1_17_1
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.material.FluidState;
+#else
+import net.minecraft.world.level.material.FogType;
 #endif
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -123,10 +123,10 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public Mat4f getDefaultProjectionMatrix(float partialTicks)
 	{
-		#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-		return McObjectConverter.Convert(GAME_RENDERER.getProjectionMatrix(GAME_RENDERER.getFov(GAME_RENDERER.getMainCamera(), partialTicks, true)));
-		#elif MC_VERSION_1_16_5
+		#if PRE_MC_1_17_1
 		return McObjectConverter.Convert(GAME_RENDERER.getProjectionMatrix(GAME_RENDERER.getMainCamera(), partialTicks, true));
+		#else
+		return McObjectConverter.Convert(GAME_RENDERER.getProjectionMatrix(GAME_RENDERER.getFov(GAME_RENDERER.getMainCamera(), partialTicks, true)));
 		#endif
 	}
 	
@@ -138,12 +138,13 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	
 	@Override
 	public Color getFogColor(float partialTicks) {
-		#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-		FogRenderer.setupColor(GAME_RENDERER.getMainCamera(), partialTicks, MC.level, 1, GAME_RENDERER.getDarkenWorldAmount(partialTicks));
-		float[] colorValues = RenderSystem.getShaderFogColor();
-		#elif MC_VERSION_1_16_5
+
+		#if PRE_MC_1_17_1
 		float[] colorValues = new float[4];
 		GL15.glGetFloatv(GL15.GL_FOG_COLOR, colorValues);
+		#else
+		FogRenderer.setupColor(GAME_RENDERER.getMainCamera(), partialTicks, MC.level, 1, GAME_RENDERER.getDarkenWorldAmount(partialTicks));
+		float[] colorValues = RenderSystem.getShaderFogColor();
 		#endif
 		return new Color(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
 	}
@@ -152,10 +153,10 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public Color getSkyColor() {
 		if (MC.level.dimensionType().hasSkyLight()) {
-			#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-			Vec3 colorValues = MC.level.getSkyColor(MC.gameRenderer.getMainCamera().getPosition(), MC.getFrameTime());
-			#elif MC_VERSION_1_16_5
+			#if PRE_MC_1_17_1
 			Vec3 colorValues = MC.level.getSkyColor(MC.gameRenderer.getMainCamera().getBlockPosition(), MC.getFrameTime());
+			#else
+			Vec3 colorValues = MC.level.getSkyColor(MC.gameRenderer.getMainCamera().getPosition(), MC.getFrameTime());
 			#endif
 			return new Color((float) colorValues.x, (float) colorValues.y, (float) colorValues.z);
 		} else
@@ -172,10 +173,11 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public int getRenderDistance()
 	{
-		#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
-        return MC.options.getEffectiveRenderDistance();
-		#elif MC_VERSION_1_16_5 || MC_VERSION_1_17_1
+		#if PRE_MC_1_18_1
+		//FIXME: How to resolve this?
 		return MC.options.renderDistance;
+		#else
+		return MC.options.getEffectiveRenderDistance();
 		#endif
 	}
 	
@@ -233,24 +235,16 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		if (!usingBackupGetVanillaRenderedChunks) {
 			try {
 				LevelRenderer levelRenderer = MC.levelRenderer;
-				#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
-				LinkedHashSet<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunkStorage.get().renderChunks;
-				#elif MC_VERSION_1_16_5 || MC_VERSION_1_17_1
-				Collection<LevelRenderer.RenderChunkInfo> chunks = levelRenderer.renderChunks;
-				#endif
+				Collection<LevelRenderer.RenderChunkInfo> chunks =
+					#if PRE_MC_1_18_1 levelRenderer.renderChunks;
+					#else levelRenderer.renderChunkStorage.get().renderChunks; #endif
+
 				return (chunks.stream().map((chunk) -> {
-                	#if MC_VERSION_1_18_2
-					AABB chunkBoundingBox = chunk.chunk.getBoundingBox();
-                	#elif MC_VERSION_1_16_5 || MC_VERSION_1_17_1 || MC_VERSION_1_18_1
-					AABB chunkBoundingBox = chunk.chunk.bb;
-                	#endif
-					#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
+					AABB chunkBoundingBox =
+						#if PRE_MC_1_18_2 chunk.chunk.bb;
+						#else chunk.chunk.getBoundingBox(); #endif
 					return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
 							Math.floorDiv((int) chunkBoundingBox.minZ, 16));
-					#elif MC_VERSION_1_16_5 || MC_VERSION_1_17_1
-					return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
-							Math.floorDiv((int) chunkBoundingBox.minZ, 16));
-					#endif
 				}).collect(Collectors.toCollection(HashSet::new)));
 			} catch (LinkageError e) {
 				try {
@@ -275,11 +269,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	
 	@Override
 	public boolean isFogStateSpecial() {
-		#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-		Entity entity = GAME_RENDERER.getMainCamera().getEntity();
-		boolean isBlind = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
-		return GAME_RENDERER.getMainCamera().getFluidInCamera() != FogType.NONE || isBlind;
-		#elif MC_VERSION_1_16_5
+		#if PRE_MC_1_17_1
 		Camera camera = GAME_RENDERER.getMainCamera();
 		FluidState fluidState = camera.getFluidInCamera();
 		Entity entity = camera.getEntity();
@@ -287,6 +277,10 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 			isUnderWater |= fluidState.is(FluidTags.WATER);
 			isUnderWater |= fluidState.is(FluidTags.LAVA);
 		return isUnderWater;
+		#else
+		Entity entity = GAME_RENDERER.getMainCamera().getEntity();
+		boolean isBlind = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
+		return GAME_RENDERER.getMainCamera().getFluidInCamera() != FogType.NONE || isBlind;
 		#endif
 	}
 	

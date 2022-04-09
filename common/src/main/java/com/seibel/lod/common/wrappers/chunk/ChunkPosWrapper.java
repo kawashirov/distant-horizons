@@ -148,10 +148,10 @@ public class ChunkPosWrapper extends AbstractChunkPosWrapper
     public AbstractBlockPosWrapper getWorldPosition()
     {
         // the parameter here is the y position
-        #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-        BlockPos blockPos = chunkPos.getMiddleBlockPosition(0);
-        #elif MC_VERSION_1_16_5
+        #if PRE_MC_1_17_1
         BlockPos blockPos = chunkPos.getWorldPosition();
+        #else
+        BlockPos blockPos = chunkPos.getMiddleBlockPosition(0);
         #endif
         return new BlockPosWrapper(blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }

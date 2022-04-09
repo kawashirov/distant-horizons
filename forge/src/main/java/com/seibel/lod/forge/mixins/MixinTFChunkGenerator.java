@@ -3,7 +3,7 @@ package com.seibel.lod.forge.mixins;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 
-#if MC_VERSION_1_16_5
+#if PRE_MC_1_17_1
 
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;

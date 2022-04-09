@@ -26,7 +26,7 @@ import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.WorldGenStruct
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
-#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
+#if POST_MC_1_18_1
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
 #endif
 
@@ -34,11 +34,9 @@ public final class ThreadedParameters
 {
 	private static final ThreadLocal<ThreadedParameters> localParam = new ThreadLocal<ThreadedParameters>();
 	final ServerLevel level;
-	#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 	public WorldGenStructFeatManager structFeat = null;
+	#if POST_MC_1_18_1
 	public final StructureCheck structCheck;
-	#elif MC_VERSION_1_17_1 || MC_VERSION_1_16_5
-	public WorldGenStructFeatManager structFeat;
 	#endif
 	boolean isValid = true;
 	public final PerfCalculator perf = new PerfCalculator();
@@ -60,23 +58,18 @@ public final class ThreadedParameters
 	
 	private ThreadedParameters(GlobalParameters param)
 	{
-		#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
 		level = param.level;
+		#if PRE_MC_1_18_1
+		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, level);
+		#else
 		structCheck = new StructureCheck(param.chunkScanner, param.registry, param.structures,
 				param.level.dimension(), param.generator, level, param.generator.getBiomeSource(), param.worldSeed,
 				param.fixerUpper);
-		#elif MC_VERSION_1_17_1 || MC_VERSION_1_16_5
-		level = param.level;
-		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, level);
 		#endif
 	}
 	
 	public void makeStructFeat(WorldGenLevel genLevel, GlobalParameters param)
 	{
-		#if MC_VERSION_1_18_2 || MC_VERSION_1_18_1
-		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, genLevel, structCheck);
-		#elif MC_VERSION_1_17_1
-		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, genLevel);
-		#endif
+		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, genLevel #if POST_MC_1_18_1, structCheck #endif);
 	}
 }

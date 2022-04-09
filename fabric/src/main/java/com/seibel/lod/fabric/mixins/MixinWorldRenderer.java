@@ -59,7 +59,7 @@ public class MixinWorldRenderer
 
 	// Inject rendering at first call to renderChunkLayer
 	// HEAD or RETURN
-	#if MC_VERSION_1_16_5
+	#if PRE_MC_1_17_1
 	@Inject(at = @At("RETURN"), method = "renderSky(Lcom/mojang/blaze3d/vertex/PoseStack;F)V")
 	private void renderSky(PoseStack matrixStackIn, float partialTicks, CallbackInfo callback)
 	{

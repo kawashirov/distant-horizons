@@ -53,7 +53,7 @@ public class TintGetterOverrideFast implements BlockAndTintGetter {
     }
 
     private Biome _getBiome(BlockPos pos) {
-		#if MC_VERSION_1_18_2
+		#if POST_MC_1_18_2
         return parent.getBiome(pos).value();
 		#else
 		return parent.getBiome(pos);
@@ -153,7 +153,7 @@ public class TintGetterOverrideFast implements BlockAndTintGetter {
         return parent.getMaxBuildHeight();
     }
 
-    #if !MC_VERSION_1_16_5
+    #if POST_MC_1_17_1
     @Override
     public <T extends BlockEntity> Optional<T> getBlockEntity(BlockPos blockPos, BlockEntityType<T> blockEntityType) {
         return parent.getBlockEntity(blockPos, blockEntityType);

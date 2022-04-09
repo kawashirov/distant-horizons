@@ -23,7 +23,7 @@ import com.seibel.lod.core.api.ApiShared;
 import org.spongepowered.asm.mixin.Mixin;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 
-#if MC_VERSION_1_16_5 || MC_VERSION_1_17_1
+#if PRE_MC_1_18_1
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 

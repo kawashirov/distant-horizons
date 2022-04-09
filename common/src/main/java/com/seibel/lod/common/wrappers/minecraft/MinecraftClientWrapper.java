@@ -188,10 +188,10 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
     @Override
     public ChunkPosWrapper getPlayerChunkPos()
     {
-        #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-        ChunkPos playerPos = getPlayer().chunkPosition();
-        #elif MC_VERSION_1_16_5
+        #if PRE_MC_1_17_1
         ChunkPos playerPos = new ChunkPos(getPlayer().blockPosition());
+        #else
+        ChunkPos playerPos = getPlayer().chunkPosition();
         #endif
         return new ChunkPosWrapper(playerPos.x, playerPos.z);
     }

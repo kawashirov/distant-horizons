@@ -53,7 +53,7 @@ public class MixinOptionsScreen extends Screen {
     @Inject(at = @At("HEAD"),method = "init")
     private void lodconfig$init(CallbackInfo ci) {
         if (SingletonHandler.get(ILodConfigWrapperSingleton.class).client().getOptionsButton())
-            this. #if MC_VERSION_1_16_5 addButton #else addRenderableWidget #endif
+            this. #if PRE_MC_1_17_1 addButton #else addRenderableWidget #endif
                 (new TexturedButtonWidget(
                 // Where the button is on the screen
                 this.width / 2 - 180, this.height / 6 - 12,

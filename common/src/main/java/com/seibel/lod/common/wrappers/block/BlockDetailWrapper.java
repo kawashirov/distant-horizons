@@ -266,7 +266,7 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 	        	needShade = quads.get(0).isShade();
 	        	tintIndex = quads.get(0).getTintIndex();
 	        	baseColor = calculateColorFromTexture(
-						#if MC_VERSION_1_16_5 quads.get(0).sprite,
+						#if PRE_MC_1_17_1 quads.get(0).sprite,
 						#else quads.get(0).getSprite(), #endif
 	        		ColorMode.getColorMode(state.getBlock()));
 	        } else { // Backup method.

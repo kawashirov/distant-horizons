@@ -12,19 +12,46 @@ plugins {
     id "dev.architectury.loom" version "0.10.0-SNAPSHOT" apply false
 }
 
-def writeBuildGradlePredefine() {
-    def excapedMCVersion = rootProject.minecraft_version.replace(".", "_")
-    new File(projectDir, "build.properties").text = "MC_VERSION_${excapedMCVersion}=\n"
+def writeBuildGradlePredefine(List<String> mcVers, int mcIndex) {
+    ArrayList<String> redefineList = new ArrayList<String>()
+    for (int i=0; i<mcVers.size(); i++) {
+        String mcStr = mcVers.get(i).replace(".", "_")
+        if (mcIndex<i) {
+            redefineList.add("PRE_MC_"+mcStr)
+        }
+        if (mcIndex==i) {
+            redefineList.add("MC_"+mcStr)
+        }
+        if (mcIndex>=i) {
+            redefineList.add("POST_MC_"+mcStr)
+        }
+    }
+    StringBuilder sb = new StringBuilder()
+    for (String s : redefineList) {
+        sb.append(s)
+        sb.append("=\n")
+    }
+    new File(projectDir, "build.properties").text = sb.toString()
 }
 
 // Sets up the variables for Manifold in the code
 def loadProperties() {
-    def defaultMcVersion = '1.18.2'
-    if (!project.hasProperty("mcVer")) {
-        println "No mcVer set! Defaulting to ${defaultMcVersion}."
-        println "Tip: Use -PmcVer='${defaultMcVersion}' in cmd arg to set mcVer."
+    def defaultMcVersion = "1.18.2"
+    def mcVersion = ""
+    def mcVers = mcVersions.split(",")
+    int mcIndex = -1
+    println "Avalible MC versions: ${mcVersions}"
+    if (project.hasProperty("mcVer")) {
+        mcVersion = mcVer
+        mcIndex = Arrays.asList(mcVers).indexOf(mcVer)
     }
-	def mcVersion = project.hasProperty("mcVer") ? mcVer : defaultMcVersion
+    if (mcIndex == -1) {
+        println "No mcVer set or the set mcVer is invalid! Defaulting to ${defaultMcVersion}."
+        println "Tip: Use -PmcVer='${defaultMcVersion}' in cmd arg to set mcVer."
+        mcVersion = defaultMcVersion
+        mcIndex = Arrays.asList(mcVers).indexOf(defaultMcVersion)
+        assert mcIndex != -1
+    }
 
 	println "Loading properties file at " + mcVersion + ".properties"
 	def props = new Properties()
@@ -34,7 +61,7 @@ def loadProperties() {
       rootProject.ext.set(prop.key, prop.value)
 	  // println "Added prop [key:" + prop.key + ", value:" + prop.value + "]"
     }
-    writeBuildGradlePredefine()
+    writeBuildGradlePredefine(Arrays.asList(mcVers), mcIndex)
 
     // Stuff for access wideners
     def mcVersionToAcsessWidenerVersion = [

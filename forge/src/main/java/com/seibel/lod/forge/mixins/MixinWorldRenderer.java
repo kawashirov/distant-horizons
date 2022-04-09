@@ -55,7 +55,7 @@ public class MixinWorldRenderer
 		throw new NullPointerException("Null cannot be cast to non-null type.");
 	}
 
-	#if MC_VERSION_1_16_5
+	#if PRE_MC_1_17_1
 	@Inject(at = @At("RETURN"), method = "renderSky(Lcom/mojang/blaze3d/vertex/PoseStack;F)V")
 	private void renderSky(PoseStack matrixStackIn, float partialTicks, CallbackInfo callback)
 	{

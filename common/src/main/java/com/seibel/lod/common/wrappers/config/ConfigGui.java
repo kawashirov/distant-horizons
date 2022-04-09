@@ -50,7 +50,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.client.resources.language.I18n;	// translation
-#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+#if POST_MC_1_17_1
 import net.minecraft.client.gui.narration.NarratableEntry;
 #endif
 
@@ -530,6 +530,17 @@ public abstract class ConfigGui
 			Objects.requireNonNull(minecraft).setScreen(this.parent);
 		}
 
+		// addRenderableWidget in 1.17 and over
+		// addButton in 1.16 and below
+		private Button addBtn(Button button) {
+			#if PRE_MC_1_17_1
+			this.addButton(button);
+			#else
+			this.addRenderableWidget(button);
+			#endif
+			return button;
+		}
+
 		@Override
 		protected void init()
 		{
@@ -537,31 +548,14 @@ public abstract class ConfigGui
 			if (!reload)
 				loadFromFile();
 
-			// addRenderableWidget in 1.17 and over
-			// addButton in 1.16 and below
-			#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-			this.addRenderableWidget(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
+			addBtn(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
 				loadFromFile();
 				Objects.requireNonNull(minecraft).setScreen(parent);
 			}));
-			#elif MC_VERSION_1_16_5
-			this.addButton(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
-				loadFromFile();
-				Objects.requireNonNull(minecraft).setScreen(parent);
-			}));
-			#endif
-
-			#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-			Button done = this.addRenderableWidget(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
+			Button done = addBtn(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
 				saveToFile();
 				Objects.requireNonNull(minecraft).setScreen(parent);
 			}));
-			#elif MC_VERSION_1_16_5
-			Button done = this.addButton(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
-				saveToFile();
-				Objects.requireNonNull(minecraft).setScreen(parent);
-			}));
-			#endif
 
 			this.list = new ConfigListWidget(this.minecraft, this.width * 2, this.height, 32, this.height - 32, 25);
 			if (this.minecraft != null && this.minecraft.level != null)
@@ -769,7 +763,7 @@ public abstract class ConfigGui
 
 		// Only for 1.17 and over
 		// Remove in 1.16 and below
-		#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+		#if POST_MC_1_17_1
         @Override
         public List<? extends NarratableEntry> narratables()
         {

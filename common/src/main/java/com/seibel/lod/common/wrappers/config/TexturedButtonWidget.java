@@ -31,7 +31,7 @@ import net.minecraft.resources.ResourceLocation;
  * Creates a button with a texture on it
  */
 public class TexturedButtonWidget extends ImageButton {
-    #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+    #if POST_MC_1_17_1
     public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, ResourceLocation texture, OnPress pressAction) {
         super(x, y, width, height, u, v, texture, pressAction);
     }
@@ -51,13 +51,13 @@ public class TexturedButtonWidget extends ImageButton {
 
     @Override
     public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+        #if PRE_MC_1_17_1
+        Minecraft.getInstance().getTextureManager().bind(WIDGETS_LOCATION);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.alpha);
+        #else
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
-        #elif MC_VERSION_1_16_5
-        Minecraft.getInstance().getTextureManager().bind(WIDGETS_LOCATION);
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.alpha);
         #endif
 
         int i = this.getYImage(this.isHovered);

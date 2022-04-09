@@ -31,7 +31,7 @@ import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import net.minecraft.client.Minecraft;
-#if MC_VERSION_1_16_5
+#if PRE_MC_1_17_1
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.world.entity.Entity;
@@ -51,13 +51,13 @@ public class SodiumAccessor implements ISodiumAccessor {
 		return "Sodium-Fabric";
 	}
 
-	#if !MC_VERSION_1_16_5
+	#if POST_MC_1_17_1
 	@Override
 	public HashSet<AbstractChunkPosWrapper> getNormalRenderedChunks() {
 		SodiumWorldRenderer renderer = SodiumWorldRenderer.instance();
 		LevelHeightAccessor height =  Minecraft.getInstance().level;
 
-		#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+		#if POST_MC_1_18_1
 		// 0b11 = Lighted chunk & loaded chunk
 		return renderer.getChunkTracker().getChunks(0b00).filter(
 			(long l) -> {

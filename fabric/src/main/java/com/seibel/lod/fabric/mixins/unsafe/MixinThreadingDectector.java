@@ -22,7 +22,7 @@ package com.seibel.lod.fabric.mixins.unsafe;
 import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.asm.mixin.Mixin;
 
-#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+#if POST_MC_1_18_1
 
 import net.minecraft.util.ThreadingDetector;
 import org.spongepowered.asm.mixin.Mutable;

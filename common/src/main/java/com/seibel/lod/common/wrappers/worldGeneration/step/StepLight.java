@@ -48,7 +48,7 @@ public final class StepLight {
 	public final ChunkStatus STATUS = ChunkStatus.LIGHT;
 	
 	public void generateGroup(
-			#if MC_VERSION_1_16_5 LevelLightEngine lightEngine,
+			#if PRE_MC_1_17_1 LevelLightEngine lightEngine,
 			#else LightEventListener lightEngine, #endif
 			ArrayGridList<ChunkAccess> chunks) {
 		
@@ -73,7 +73,7 @@ public final class StepLight {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+			#if POST_MC_1_18_1
 			if (chunk instanceof LevelChunk) ((LevelChunk)chunk).setClientLightReady(true);
 			#endif
 			chunk.setLightCorrect(true);

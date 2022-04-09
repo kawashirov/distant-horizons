@@ -37,7 +37,7 @@ public class TextureAtlasSpriteWrapper {
      * The code has been modified to use TextureAtlasSprite
      */
     public static int getPixelRGBA(TextureAtlasSprite sprite, int frameIndex, int x, int y) {
-        #if MC_VERSION_1_16_5
+        #if PRE_MC_1_17_1
         return sprite.mainImage[0].getPixelRGBA(
                 x + sprite.framesX[frameIndex] * sprite.getWidth(),
                 y + sprite.framesY[frameIndex] * sprite.getHeight());

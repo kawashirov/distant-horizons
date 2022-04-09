@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
-#if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+#if POST_MC_1_17_1
 import net.minecraft.world.level.LevelHeightAccessor;
 #endif
 import net.minecraft.world.level.LightLayer;
@@ -39,7 +39,7 @@ import net.minecraft.world.level.lighting.SkyLightEngine;
 public class WorldGenLevelLightEngine extends LevelLightEngine {
 	public static final int MAX_SOURCE_LEVEL = 15;
     public static final int LIGHT_SECTION_PADDING = 1;
-    #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+    #if POST_MC_1_17_1
     protected final LevelHeightAccessor levelHeightAccessor;
     #endif
     @Nullable
@@ -49,7 +49,7 @@ public class WorldGenLevelLightEngine extends LevelLightEngine {
 
     public WorldGenLevelLightEngine(LightGetterAdaptor genRegion) {
     	super(genRegion, false, false);
-        #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+        #if POST_MC_1_17_1
         this.levelHeightAccessor = genRegion.getLevelHeightAccessor();
         #endif
         this.blockEngine = new BlockLightEngine(genRegion);
@@ -149,23 +149,23 @@ public class WorldGenLevelLightEngine extends LevelLightEngine {
         
         LevelChunkSection[] levelChunkSections = chunkAccess.getSections();
         for (int i = 0; i <
-        #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+        #if POST_MC_1_17_1
             chunkAccess.getSectionsCount()
-        #elif MC_VERSION_1_16_5
+        #else
             16
         #endif
         ; ++i) {
             LevelChunkSection levelChunkSection = levelChunkSections[i];
-            #if MC_VERSION_1_16_5
+            #if PRE_MC_1_17_1
             if (!LevelChunkSection.isEmpty(levelChunkSection)) {
                 updateSectionStatus(SectionPos.of(chunkPos, i), false);
             }
-            #elif MC_VERSION_1_17_1
+            #elif PRE_MC_1_18_1
             if (!LevelChunkSection.isEmpty(levelChunkSection)) {
                 int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
                 updateSectionStatus(SectionPos.of(chunkPos, j), false);
             }
-            #elif MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+            #else
             if (levelChunkSection.hasOnlyAir()) continue;
             int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
             updateSectionStatus(SectionPos.of(chunkPos, j), false);
@@ -204,7 +204,7 @@ public class WorldGenLevelLightEngine extends LevelLightEngine {
         }
     }
 
-    #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+    #if POST_MC_1_17_1
     @Override
     public int getLightSectionCount() {
     	throw new UnsupportedOperationException("This should never be used!");

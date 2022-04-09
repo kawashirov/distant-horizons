@@ -35,8 +35,17 @@ import net.minecraft.Util;
 @Mixin(Util.class)
 public class MixinUtilBackgroudThread
 {
+	@Inject(method = "backgroundExecutor", at = @At("HEAD"), cancellable = true)
+	private static void overrideUtil$backgroundExecutor(CallbackInfoReturnable<ExecutorService> ci)
+	{
+		if (ClientProxy.isGenerationThreadChecker != null && ClientProxy.isGenerationThreadChecker.get())
+		{
+			//ApiShared.LOGGER.info("util backgroundExecutor triggered");
+			ci.setReturnValue(new DummyRunExecutorService());
+		}
+	}
 
-	#if !MC_VERSION_1_16_5
+	#if POST_MC_1_17_1
 	@Inject(method = "wrapThreadWithTaskName(Ljava/lang/String;Ljava/lang/Runnable;)Ljava/lang/Runnable;",
 			at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$wrapThreadWithTaskName(String string, Runnable r, CallbackInfoReturnable<Runnable> ci)
@@ -48,7 +57,7 @@ public class MixinUtilBackgroudThread
 		}
 	}
 	#endif
-	#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
+	#if POST_MC_1_18_1
 	@Inject(method = "wrapThreadWithTaskName(Ljava/lang/String;Ljava/util/function/Supplier;)Ljava/util/function/Supplier;",
 			at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$wrapThreadWithTaskNameForSupplier(String string, Supplier<?> r, CallbackInfoReturnable<Supplier<?>> ci)
@@ -60,14 +69,5 @@ public class MixinUtilBackgroudThread
 		}
 	}
 	#endif
-	
-	@Inject(method = "backgroundExecutor", at = @At("HEAD"), cancellable = true)
-	private static void overrideUtil$backgroundExecutor(CallbackInfoReturnable<ExecutorService> ci)
-	{
-		if (ClientProxy.isGenerationThreadChecker != null && ClientProxy.isGenerationThreadChecker.get())
-		{
-			//ApiShared.LOGGER.info("util backgroundExecutor triggered");
-			ci.setReturnValue(new DummyRunExecutorService());
-		}
-	}
+
 }

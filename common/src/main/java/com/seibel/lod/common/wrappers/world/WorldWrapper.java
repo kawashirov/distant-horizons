@@ -138,10 +138,10 @@ public class WorldWrapper implements IWorldWrapper
     @Override
     public short getMinHeight()
     {
-        #if MC_VERSION_1_17_1 || MC_VERSION_1_18_1 || MC_VERSION_1_18_2
-        return (short) world.getMinBuildHeight();
-        #elif MC_VERSION_1_16_5
+        #if PRE_MC_1_17_1
         return (short) 0;
+        #else
+        return (short) world.getMinBuildHeight();
         #endif
     }
     
@@ -186,6 +186,4 @@ public class WorldWrapper implements IWorldWrapper
         ChunkSource source = world.getChunkSource();
         return source.hasChunk(chunkX, chunkZ);
     }
-
-    
 }
