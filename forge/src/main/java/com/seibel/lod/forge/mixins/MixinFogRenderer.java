@@ -19,7 +19,6 @@
 
 package com.seibel.lod.forge.mixins;
 
-import net.minecraft.world.level.material.FluidState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -35,10 +34,12 @@ import net.minecraft.client.renderer.FogRenderer.FogMode;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-
-#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2 || MC_VERSION_1_17_1
+#if MC_VERSION_1_16_5
+import net.minecraft.world.level.material.FluidState;
+#else
 import net.minecraft.world.level.material.FogType;
 #endif
+
 
 
 @Mixin(FogRenderer.class)
@@ -46,12 +47,12 @@ public class MixinFogRenderer
 {
 	
 	// Using this instead of Float.MAX_VALUE because Sodium don't like it. (and copy paste in case someone in forge don't like it)
-	private static final float A_REALLY_REALLY_BIG_VALUE = 420694206942069.F;
-	private static final float A_EVEN_LARGER_VALUE = 42069420694206942069.F;
+	private static final float A_REALLY_REALLY_BIG_VALUE = 4206942069.F;
+	private static final float A_EVEN_LARGER_VALUE = 420694206942069.F;
 	
 	@Inject(at = @At("RETURN"),
 			method = "setupFog(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/FogRenderer$FogMode;FZF)V",
-			remap = false) // Remap = false due to this being added by forge.
+			remap = #if MC_VERSION_1_16_5 true #else false #endif) // Remap = false messiness due to this being added by forge.
 	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, float partTick, CallbackInfo callback)
 	{
 		ILodConfigWrapperSingleton CONFIG;
@@ -63,31 +64,27 @@ public class MixinFogRenderer
 		{
 			return; // May happen due to forge for some reason haven't inited out thingy yet.
 		}
-		
-		
-		
-		#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2 || MC_VERSION_1_17_1
+
+		#if MC_VERSION_1_16_5
+		FluidState fluidState = camera.getFluidInCamera();
+		boolean cameraNotInFluid = fluidState.isEmpty();
+		#else
 		FogType fogTypes = camera.getFluidInCamera();
 		boolean cameraNotInFluid = fogTypes == FogType.NONE;
-		#else
-		FluidState fluidState = camera.getFluidInCamera();
-		boolean cameraNotInFluid = !fluidState.isEmpty();
 		#endif
 		
 		Entity entity = camera.getEntity();
-		boolean isUnderWater = (entity instanceof LivingEntity) && ((LivingEntity) entity).hasEffect(MobEffects.BLINDNESS);
-		if (!isUnderWater)
+		boolean isSpecialFog = (entity instanceof LivingEntity) && ((LivingEntity) entity).hasEffect(MobEffects.BLINDNESS);
+		if (!isSpecialFog && cameraNotInFluid && fogMode == FogMode.FOG_TERRAIN
+				&& CONFIG.client().graphics().fogQuality().getDisableVanillaFog())
 		{
-			if (fogMode == FogMode.FOG_TERRAIN && cameraNotInFluid && CONFIG.client().graphics().fogQuality().getDisableVanillaFog())
-			{
-				#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2 || MC_VERSION_1_17_1
-				RenderSystem.setShaderFogStart(A_REALLY_REALLY_BIG_VALUE);
-				RenderSystem.setShaderFogEnd(A_EVEN_LARGER_VALUE);
-				#else
-				RenderSystem.fogStart(A_REALLY_REALLY_BIG_VALUE);
-				RenderSystem.fogEnd(A_EVEN_LARGER_VALUE);
-				#endif
-			}
+			#if MC_VERSION_1_16_5
+			RenderSystem.fogStart(A_REALLY_REALLY_BIG_VALUE);
+			RenderSystem.fogEnd(A_EVEN_LARGER_VALUE);
+			#else
+			RenderSystem.setShaderFogStart(A_REALLY_REALLY_BIG_VALUE);
+			RenderSystem.setShaderFogEnd(A_EVEN_LARGER_VALUE);
+			#endif
 		}
 	}
 }

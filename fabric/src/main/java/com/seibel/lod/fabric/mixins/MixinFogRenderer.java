@@ -35,7 +35,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 #if MC_VERSION_1_16_5
-import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.material.FluidState;
 #else
 import net.minecraft.world.level.material.FogType;
@@ -49,37 +48,29 @@ public class MixinFogRenderer {
 	private static final float A_REALLY_REALLY_BIG_VALUE = 420694206942069.F;
 	private static final float A_EVEN_LARGER_VALUE = 42069420694206942069.F;
 
-	#if MC_VERSION_1_16_5
-
 	@Inject(at = @At("RETURN"), method = "setupFog(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/FogRenderer$FogMode;FZ)V")
 	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, CallbackInfo callback) {
+		#if MC_VERSION_1_16_5
 		FluidState fluidState = camera.getFluidInCamera();
-		Entity entity = camera.getEntity();
-		boolean isUnderWater = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
-		isUnderWater |= fluidState.is(FluidTags.WATER);
-		isUnderWater |= fluidState.is(FluidTags.LAVA);
+		boolean cameraNotInFluid = fluidState.isEmpty();
+		#else
+		FogType fogTypes = camera.getFluidInCamera();
+		boolean cameraNotInFluid = fogTypes == FogType.NONE;
+		#endif
 
-		if (!isUnderWater) {
-			if (fogMode == FogMode.FOG_TERRAIN && CONFIG.client().graphics().fogQuality().getDisableVanillaFog()) {
-				RenderSystem.fogStart(A_REALLY_REALLY_BIG_VALUE);
-				RenderSystem.fogEnd(A_EVEN_LARGER_VALUE);
-			}
+		Entity entity = camera.getEntity();
+		boolean isSpecialFog = (entity instanceof LivingEntity) && ((LivingEntity) entity).hasEffect(MobEffects.BLINDNESS);
+		if (!isSpecialFog && cameraNotInFluid && fogMode == FogMode.FOG_TERRAIN
+				&& CONFIG.client().graphics().fogQuality().getDisableVanillaFog())
+		{
+			#if MC_VERSION_1_16_5
+			RenderSystem.fogStart(A_REALLY_REALLY_BIG_VALUE);
+			RenderSystem.fogEnd(A_EVEN_LARGER_VALUE);
+			#else
+			RenderSystem.setShaderFogStart(A_REALLY_REALLY_BIG_VALUE);
+			RenderSystem.setShaderFogEnd(A_EVEN_LARGER_VALUE);
+			#endif
 		}
 	}
-
-	#else
-	@Inject(at = @At("RETURN"), method = "setupFog(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/FogRenderer$FogMode;FZ)V")
-	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, CallbackInfo callback) {
-	    FogType fogTypes = camera.getFluidInCamera();
-	    Entity entity = camera.getEntity();
-	    boolean isUnderWater = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
-	    if (!isUnderWater) {
-			if (fogMode == FogMode.FOG_TERRAIN && fogTypes == FogType.NONE && CONFIG.client().graphics().fogQuality().getDisableVanillaFog()) {
-			    RenderSystem.setShaderFogStart(A_REALLY_REALLY_BIG_VALUE);
-			    RenderSystem.setShaderFogEnd(A_EVEN_LARGER_VALUE);
-			}
-	    }
-	}
-	#endif
 
 }

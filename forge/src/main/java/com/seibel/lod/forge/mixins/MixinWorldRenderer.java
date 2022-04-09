@@ -27,6 +27,7 @@ import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.objects.math.Mat4f;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
+import org.lwjgl.opengl.GL15;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -54,6 +55,37 @@ public class MixinWorldRenderer
 		throw new NullPointerException("Null cannot be cast to non-null type.");
 	}
 
+	#if MC_VERSION_1_16_5
+	@Inject(at = @At("RETURN"), method = "renderSky(Lcom/mojang/blaze3d/vertex/PoseStack;F)V")
+	private void renderSky(PoseStack matrixStackIn, float partialTicks, CallbackInfo callback)
+	{
+		// get the partial ticks since renderBlockLayer doesn't
+		// have access to them
+		previousPartialTicks = partialTicks;
+	}
+
+	@Inject(at = @At("HEAD"),
+			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDD)V",
+			cancellable = true)
+	private void renderChunkLayer(RenderType renderType, PoseStack matrixStackIn, double xIn, double yIn, double zIn, CallbackInfo callback)
+	{
+		// only render before solid blocks
+		if (renderType.equals(RenderType.solid()))
+		{
+			// get MC's current projection matrix
+			float[] mcProjMatrixRaw = new float[16];
+			GL15.glGetFloatv(GL15.GL_PROJECTION_MATRIX, mcProjMatrixRaw);
+			Mat4f mcProjectionMatrix = new Mat4f(mcProjMatrixRaw);
+			mcProjectionMatrix.transpose();
+			Mat4f mcModelViewMatrix = McObjectConverter.Convert(matrixStackIn.last().pose());
+
+			ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
+		}
+		if (Config.Client.Advanced.lodOnlyMode) {
+			callback.cancel();
+		}
+	}
+	#else
 	@Inject(method = "renderClouds", at = @At("HEAD"), cancellable = true)
 	public void renderClouds(PoseStack poseStack, Matrix4f projectionMatrix, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
 		// get the partial ticks since renderChunkLayer doesn't
@@ -61,7 +93,6 @@ public class MixinWorldRenderer
 		previousPartialTicks = tickDelta;
 	}
 
-	// HEAD or RETURN
 	@Inject(at = @At("HEAD"),
 			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V",
 			cancellable = true)
@@ -79,4 +110,5 @@ public class MixinWorldRenderer
 			callback.cancel();
 		}
 	}
+	#endif
 }

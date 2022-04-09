@@ -39,8 +39,8 @@ public class MixinUtilBackgroudThread
 	private static boolean shouldApplyOverride() {
 		return DependencySetupDoneCheck.getIsCurrentThreadDistantGeneratorThread.get();
 	}
-	
-	
+
+	#if !MC_VERSION_1_16_5
 	@Inject(method = "wrapThreadWithTaskName(Ljava/lang/String;Ljava/lang/Runnable;)Ljava/lang/Runnable;",
 			at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$wrapThreadWithTaskName(String string, Runnable r, CallbackInfoReturnable<Runnable> ci)
@@ -51,6 +51,7 @@ public class MixinUtilBackgroudThread
 			ci.setReturnValue(r);
 		}
 	}
+	#endif
 	#if MC_VERSION_1_18_1 || MC_VERSION_1_18_2
 	@Inject(method = "wrapThreadWithTaskName(Ljava/lang/String;Ljava/util/function/Supplier;)Ljava/util/function/Supplier;",
 			at = @At("HEAD"), cancellable = true)
@@ -63,7 +64,7 @@ public class MixinUtilBackgroudThread
 		}
 	}
 	#endif
-	
+
 	@Inject(method = "backgroundExecutor", at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$backgroundExecutor(CallbackInfoReturnable<ExecutorService> ci)
 	{
