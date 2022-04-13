@@ -21,8 +21,8 @@ import java.util.Collection;
 import java.util.List;
 
 import net.minecraft.network.FriendlyByteBuf;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import com.seibel.lod.forge.fabric.api.networking.v1.PacketByteBufs;
 import com.seibel.lod.forge.fabric.api.networking.v1.ServerLoginConnectionEvents;
 import com.seibel.lod.forge.fabric.api.networking.v1.ServerLoginNetworking;
@@ -31,7 +31,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public final class NetworkingImpl {
 	public static final String MOD_ID = "fabric-networking-api-v1";
-	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+	public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 	/**
 	 * Id of packet used to register supported channels.
 	 */
