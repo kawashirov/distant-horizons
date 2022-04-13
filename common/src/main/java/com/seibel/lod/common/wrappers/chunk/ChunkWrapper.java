@@ -77,7 +77,7 @@ public class ChunkWrapper implements IChunkWrapper
 	public int getMinBuildHeight()
 	{
 		#if PRE_MC_1_17_1
-		return 255;
+		return 0;
 		#else
 		return chunk.getMinBuildHeight();
 		#endif
@@ -241,6 +241,11 @@ public class ChunkWrapper implements IChunkWrapper
 	public LevelReader getColorResolver()
 	{
 		return lightSource;
+	}
+
+	@Override
+	public String toString() {
+		return chunk.getClass().getSimpleName() + chunk.getPos();
 	}
 	
 }

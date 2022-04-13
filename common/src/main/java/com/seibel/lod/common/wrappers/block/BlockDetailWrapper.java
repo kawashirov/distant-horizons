@@ -193,6 +193,7 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 		this.state = state;
 		this.samplePos = pos;
 		this.sampleGetter = getter;
+		//ApiShared.LOGGER.info("Created BlockDetailWrapper for blockstate {} at {}", state, pos);
 	}
 	
 	private BlockDetailWrapper() {
@@ -343,5 +344,8 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 	{
 		return ((BlockDetailWrapper)iBlockDetail).state.getBlock().equals(state.getBlock());
 	}
-	
+
+	public String toString() {
+		return "BlockDetail{" + state + "}";
+	}
 }

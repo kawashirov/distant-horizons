@@ -21,6 +21,7 @@ package com.seibel.lod.common.wrappers.block;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.seibel.lod.core.api.ApiShared;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
@@ -33,13 +34,13 @@ public class BlockDetailMap
 	private BlockDetailMap() {}
 	
 	public static BlockDetailWrapper getOrMakeBlockDetailCache(BlockState bs, BlockPos pos, LevelReader getter) {
+		if (!bs.getFluidState().isEmpty()) {
+			bs = bs.getFluidState().createLegacyBlock();
+		}
 		BlockDetailWrapper cache = map.get(bs);
 		if (cache != null) return cache;
-		if (bs.getFluidState().isEmpty()) {
-			cache = BlockDetailWrapper.make(bs, pos, getter);
-		} else {
-			cache = BlockDetailWrapper.make(bs.getFluidState().createLegacyBlock(), pos, getter);
-		}
+		cache = BlockDetailWrapper.make(bs, pos, getter);
+		//ApiShared.LOGGER.info("New blockDetail cache for {} to {} ", bs, cache);
 		BlockDetailWrapper cacheCAS = map.putIfAbsent(bs, cache);
 		return cacheCAS==null ? cache : cacheCAS;
 	}
