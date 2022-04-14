@@ -38,6 +38,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
@@ -119,6 +120,7 @@ public class ClientProxy
 	/** This is also called when a new dimension loads */
 	public void worldLoadEvent(Level level)
 	{
+		if (Minecraft.getInstance().screen instanceof TitleScreen) return;
 		if (level != null) {
 			eventApi.worldLoadEvent(WorldWrapper.getWorldWrapper(level));
 		}

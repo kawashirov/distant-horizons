@@ -23,6 +23,7 @@ import com.seibel.lod.core.api.ClientApi;
 import com.seibel.lod.core.api.EventApi;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.player.Player;
 import org.lwjgl.glfw.GLFW;
@@ -76,6 +77,7 @@ public class ForgeClientProxy
 	@SubscribeEvent
 	public void worldLoadEvent(WorldEvent.Load event)
 	{
+		if (Minecraft.getInstance().screen instanceof TitleScreen) return;
 		if (event.getWorld() != null) {
 			eventApi.worldLoadEvent(WorldWrapper.getWorldWrapper(event.getWorld()));
 		}
