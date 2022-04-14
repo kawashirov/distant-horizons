@@ -162,7 +162,7 @@ public class ChunkWrapper implements IChunkWrapper
 	
 	@Override
 	public int getMaxY(int x, int z) {
-		return chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, Math.floorMod(x, 16), Math.floorMod(z, 16));
+		return chunk.getHeight(Heightmap.Types.WORLD_SURFACE, Math.floorMod(x, 16), Math.floorMod(z, 16));
 	}
 	
 	@Override
