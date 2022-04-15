@@ -542,6 +542,18 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.caveCullingHeight");
 
 				}
+
+				@Override
+				public int getEarthCurveRatio()
+				{
+					return Config.Client.Graphics.AdvancedGraphics.earthCurveRatio;
+				}
+				@Override
+				public void setEarthCurveRatio(int newEarthCurveRatio)
+				{
+					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.earthCurveRatio").value = newEarthCurveRatio;
+					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.earthCurveRatio");
+				}
 			}
 		}
 		

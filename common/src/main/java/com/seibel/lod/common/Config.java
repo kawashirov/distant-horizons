@@ -290,6 +290,11 @@ public class Config
 				@ConfigAnnotations.Entry(minValue = -4096, maxValue = 4096)
                 public static int caveCullingHeight = IAdvancedGraphics.CAVE_CULLING_HEIGHT_MIN_DEFAULT_MAX.defaultValue;
 
+				@ConfigAnnotations.FileComment
+				public static String _earthCurveRatio = IAdvancedGraphics.EARTH_CURVE_RATIO_DESC;
+				@ConfigAnnotations.Entry(minValue = 0, maxValue = 10000)
+				public static int earthCurveRatio = IAdvancedGraphics.EARTH_CURVE_RATIO_MIN_DEFAULT_MAX.defaultValue;
+
 				/*
 				@ConfigAnnotations.FileComment
 				public static String _backsideCullingRange = IAdvancedGraphics.VANILLA_CULLING_RANGE_DESC;
