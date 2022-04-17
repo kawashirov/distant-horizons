@@ -43,16 +43,19 @@ public final class GenerationEvent
 	final ChunkPos pos;
 	final int range;
 	final Future<?> future;
-	long nanotime;
+	long creationNanotime;
 	final int id;
 	final Steps target;
 	final LightGenerationMode lightMode;
 	final PrefEvent pEvent = new PrefEvent();
 	final boolean genAllDetails;
+
+	final double runTimeRatio;
 	
-	public GenerationEvent(ChunkPos pos, int range, BatchGenerationEnvironment generationGroup, Steps target, boolean genAllDetails)
+	public GenerationEvent(ChunkPos pos, int range, BatchGenerationEnvironment generationGroup,
+						   Steps target, boolean genAllDetails, double runTimeRatio)
 	{
-		nanotime = System.nanoTime();
+		creationNanotime = System.nanoTime();
 		this.pos = pos;
 		this.range = range;
 		id = generationFutureDebugIDs++;
@@ -62,14 +65,24 @@ public final class GenerationEvent
 		
 		this.lightMode = mode;
 		this.genAllDetails = genAllDetails;
+		this.runTimeRatio = runTimeRatio;
 		
 		future = generationGroup.executors.submit(() ->
 		{
+			long startTime = System.nanoTime();
 			BatchGenerationEnvironment.isDistantGeneratorThread.set(true);
 			try {
 				generationGroup.generateLodFromList(this);
 			} finally {
 				BatchGenerationEnvironment.isDistantGeneratorThread.remove();
+				if (!Thread.interrupted() && runTimeRatio < 1.0) {
+					long endTime = System.nanoTime();
+					try {
+						long deltaMs = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
+						Thread.sleep((long) (deltaMs/runTimeRatio - deltaMs));
+					} catch (InterruptedException ignored) {
+					}
+				}
 			}
 		});
 	}
@@ -82,7 +95,7 @@ public final class GenerationEvent
 	public boolean hasTimeout(int duration, TimeUnit unit)
 	{
 		long currentTime = System.nanoTime();
-		long delta = currentTime - nanotime;
+		long delta = currentTime - creationNanotime;
 		return (delta > TimeUnit.NANOSECONDS.convert(duration, unit));
 	}
 	
@@ -117,7 +130,7 @@ public final class GenerationEvent
 	
 	public void refreshTimeout()
 	{
-		nanotime = System.nanoTime();
+		creationNanotime = System.nanoTime();
 		LodUtil.checkInterruptsUnchecked();
 	}
 	

@@ -292,7 +292,7 @@ public class Config
 
 				@ConfigAnnotations.FileComment
 				public static String _earthCurveRatio = IAdvancedGraphics.EARTH_CURVE_RATIO_DESC;
-				@ConfigAnnotations.Entry(minValue = 0, maxValue = 10000)
+				@ConfigAnnotations.Entry(minValue = 0, maxValue = 5000)
 				public static int earthCurveRatio = IAdvancedGraphics.EARTH_CURVE_RATIO_MIN_DEFAULT_MAX.defaultValue;
 
 				/*
@@ -378,8 +378,8 @@ public class Config
 			{
 				@ConfigAnnotations.FileComment
 				public static String _numberOfWorldGenerationThreads = IThreading.NUMBER_OF_WORLD_GENERATION_THREADS_DESC;
-				@ConfigAnnotations.Entry(minValue = 1, maxValue = 50)
-				public static int numberOfWorldGenerationThreads = IThreading.NUMBER_OF_WORLD_GENERATION_THREADS_DEFAULT.defaultValue;
+				@ConfigAnnotations.Entry(minValue = 0.1, maxValue = 50.0)
+				public static double numberOfWorldGenerationThreads = IThreading.NUMBER_OF_WORLD_GENERATION_THREADS_DEFAULT.defaultValue;
 				
 				@ConfigAnnotations.FileComment
 				public static String _numberOfBufferBuilderThreads = IThreading.NUMBER_OF_BUFFER_BUILDER_THREADS_DESC;

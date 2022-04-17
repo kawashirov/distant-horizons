@@ -28,6 +28,7 @@ import com.google.common.collect.Sets;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.common.wrappers.worldGeneration.ThreadedParameters;
 
+import com.seibel.lod.core.util.LodUtil;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
 #if POST_MC_1_17_1
@@ -82,6 +83,7 @@ public final class StepNoise {
 			chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion),
 					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
 			#endif
+			LodUtil.checkInterruptsUnchecked(); // Speed up termination responsiveness
 		}
 	}
 }

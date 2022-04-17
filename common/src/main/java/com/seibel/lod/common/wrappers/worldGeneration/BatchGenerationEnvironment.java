@@ -256,7 +256,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	}
 	
 	public ExecutorService executors = Executors.newFixedThreadPool(
-			CONFIG.client().advanced().threading().getNumberOfWorldGenerationThreads(), threadFactory);
+			CONFIG.client().advanced().threading()._getWorldGenerationThreadPoolSize(), threadFactory);
 
 	public <T> T joinSync(CompletableFuture<T> f) {
 		if (!unsafeThreadingRecorded && !f.isDone()) {
@@ -273,7 +273,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY));
 	}
 	
-	public boolean tryAddPoint(int px, int pz, int range, Steps target, boolean genAllDetails)
+	public boolean tryAddPoint(int px, int pz, int range, Steps target, boolean genAllDetails, double runTimeRatio)
 	{
 		int boxSize = range * 2 + 1;
 		int x = Math.floorDiv(px, boxSize) * boxSize + range;
@@ -285,7 +285,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				return false;
 		}
 		// System.out.println(x + ", "+z);
-		events.add(new GenerationEvent(new ChunkPos(x, z), range, this, target, genAllDetails));
+		events.add(new GenerationEvent(new ChunkPos(x, z), range, this, target, genAllDetails, runTimeRatio));
 		return true;
 	}
 	

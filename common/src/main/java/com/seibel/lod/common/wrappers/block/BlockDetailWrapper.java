@@ -69,6 +69,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
+/*-- WARN: This class should NEVER hold reference to anything large,
+ as this is never dealloc until the end of runtime!! --*/
 public class BlockDetailWrapper extends IBlockDetailWrapper
 {
 	private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
@@ -158,10 +160,6 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 		return tempColor;
 	}
 
-
-	
-	
-	
 	private static final Block[] BLOCK_TO_AVOID = {Blocks.AIR, Blocks.CAVE_AIR, Blocks.BARRIER};
 
 	private static final Direction[] DIRECTION_ORDER = {Direction.UP, Direction.NORTH, Direction.EAST, Direction.WEST, Direction.SOUTH, Direction.DOWN};
@@ -173,10 +171,11 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 	}
 	
 	final BlockState state;
-	final BlockPos samplePos;
-	final LevelReader sampleGetter;
 	
-	boolean isShapeResolved = false;
+	//boolean isShapeResolved = false;
+	//^ Shapes no longer lazy resolved due to memory leaks from needing
+	// to keep a reference to the block getter
+
 	boolean[] dontOccludeFaces = null;
 	boolean noCollision = false;
 	boolean noFullFace = false;
@@ -191,15 +190,12 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 	
 	public BlockDetailWrapper(BlockState state, BlockPos pos, LevelReader getter) {
 		this.state = state;
-		this.samplePos = pos;
-		this.sampleGetter = getter;
+		resolveShapes(getter, pos);
 		//ApiShared.LOGGER.info("Created BlockDetailWrapper for blockstate {} at {}", state, pos);
 	}
 	
 	private BlockDetailWrapper() {
 		this.state = null;
-		this.samplePos = null;
-		this.sampleGetter = null;
 	}
 
 	static BlockDetailWrapper make(BlockState bs, BlockPos pos, LevelReader getter) {
@@ -214,8 +210,8 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 		}
 	}
 	
-	private void resolveShapes() {
-		if (isShapeResolved) return;
+	private void resolveShapes(LevelReader sampleGetter, BlockPos samplePos) {
+		//if (isShapeResolved) return;
 		if (state.getFluidState().isEmpty()) {
 			noCollision = state.getCollisionShape(sampleGetter, samplePos).isEmpty();
 			dontOccludeFaces = new boolean[6];
@@ -242,7 +238,6 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 		} else { // Liquid Block
 			dontOccludeFaces = new boolean[6];
 		}
-		isShapeResolved = true;
 	}
 	
 	private void resolveColors() {
@@ -261,7 +256,6 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 				quads = Minecraft.getInstance().getModelManager().getBlockModelShaper().
 						getBlockModel(state).getQuads(state, null, random);
 			}
-
 	        if (quads != null && !quads.isEmpty()) {
 	        	needPostTinting = quads.get(0).isTinted();
 	        	needShade = quads.get(0).isShade();
@@ -278,13 +272,11 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 						ColorMode.getColorMode(state.getBlock()));
 			}
 		} else { // Liquid Block
-			
 			needPostTinting = true;
 			needShade = false;
 			tintIndex = 0;
 			baseColor = calculateColorFromTexture(Minecraft.getInstance().getModelManager().getBlockModelShaper().getParticleIcon(state),
 					ColorMode.getColorMode(state.getBlock()));
-			
 		}
 		isColorResolved = true;
 	}
@@ -314,21 +306,21 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 	@Override
 	public boolean hasFaceCullingFor(LodDirection dir)
 	{
-		resolveShapes();
+		//resolveShapes();
 		return !dontOccludeFaces[dir.ordinal()];
 	}
 
 	@Override
 	public boolean hasNoCollision()
 	{
-		resolveShapes();
+		//resolveShapes();
 		return noCollision;
 	}
 
 	@Override
 	public boolean noFaceIsFullFace()
 	{
-		resolveShapes();
+		//resolveShapes();
 		return noFullFace;
 	}
 

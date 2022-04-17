@@ -546,11 +546,12 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 				@Override
 				public int getEarthCurveRatio()
 				{
-					return Config.Client.Graphics.AdvancedGraphics.earthCurveRatio;
+					return (int) ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.earthCurveRatio").value;
 				}
 				@Override
 				public void setEarthCurveRatio(int newEarthCurveRatio)
 				{
+					if (newEarthCurveRatio < 50) newEarthCurveRatio = 0;
 					ConfigGui.editSingleOption.getEntry("client.graphics.advancedGraphics.earthCurveRatio").value = newEarthCurveRatio;
 					ConfigGui.editSingleOption.saveOption("client.graphics.advancedGraphics.earthCurveRatio");
 				}
@@ -715,12 +716,12 @@ public class LodConfigWrapperSingleton implements ILodConfigWrapperSingleton
 			public static class Threading implements IThreading
 			{
 				@Override
-				public int getNumberOfWorldGenerationThreads()
+				public double getNumberOfWorldGenerationThreads()
 				{
 					return Config.Client.Advanced.Threading.numberOfWorldGenerationThreads;
 				}
 				@Override
-				public void setNumberOfWorldGenerationThreads(int newNumberOfWorldGenerationThreads)
+				public void setNumberOfWorldGenerationThreads(double newNumberOfWorldGenerationThreads)
 				{
 					ConfigGui.editSingleOption.getEntry("client.advanced.threading.numberOfWorldGenerationThreads").value = newNumberOfWorldGenerationThreads;
 					ConfigGui.editSingleOption.saveOption("client.advanced.threading.numberOfWorldGenerationThreads");
