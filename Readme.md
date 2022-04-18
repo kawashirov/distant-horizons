@@ -107,7 +107,7 @@ If running on IDE, to ensure IDE pickup the changed versions, you will need to r
 6. The compiled jar file will be in the folder `Merged`
 
 **If in terminal:**
-1. `git clone -b preprocessor_test --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
+1. `git clone --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
 2. `cd minecraft-lod-mod`
 3. `./gradlew assemble`
 4. `./gradlew mergeJars`
