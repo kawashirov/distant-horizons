@@ -126,7 +126,12 @@ If running on IDE, to ensure IDE pickup the changed versions, you will need to r
 
 The Minecraft source code is NOT added to your workspace in an editable way. Minecraft is treated like a normal Library. Sources are there for documentation and research purposes only.
 
-Source code uses Mojang mappings & Parchment mappings.
+Source code uses Mojang mappings & [Parchment](https://parchmentmc.org/) mappings.
+
+To generate the source code run `./gradlew genSources`\
+If your IDE fails to auto-detect the sources JAR when browsing Minecraft classes manually select the JAR file ending with -sources.jar when prompted by your IDE
+
+In IntelliJ it's at the top where it says choose sources when browsing Minecraft classes
 
 ## Useful commands
 
