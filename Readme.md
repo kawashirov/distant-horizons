@@ -45,18 +45,24 @@ Modmenu version: 2.0.14
 
 #### 1.16.5 mods
 Forge version: 36.2.28\
-Fabric vetsion: 0.13.12\
+Fabric vetsion: 0.13.2\
 Fabric API version: 0.42.0+1.16\
 Modmenu version: 1.16.22
 
 
 
 Notes:\
-This version has been confirmed to work in IDE and Retail Minecraft.\
-(Retail running forge version 1.18.1-39.0.5 and fabric version 1.18-0.12.12 and 1.18.1-0.13.2)
+This version has been confirmed to work in IDE and Retail Minecraft with ether the Fabric or Forge mod-loader.
 
 
 ## Source Code Installation
+
+#### Nightlly builds
+This mod has an autobuild system to automatically build the mod on each commit
+- 1.18.2: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_18_2
+- 1.18.1: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_18_1
+- 1.17.1: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_17_1
+- 1.16.5: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_16_5
 
 See the Fabric Documentation online for more detailed instructions:\
 https://fabricmc.net/wiki/tutorial:setup
@@ -106,7 +112,7 @@ If running on IDE, to ensure IDE pickup the changed versions, you will need to r
 3. `./gradlew assemble`
 4. `./gradlew mergeJars`
 5. The compiled jar file will be in the folder `Merged`
->Note: You can add the arg: `-PmcVer=1.18.?` to tell gradle to build a selected MC version instead of having to manually modify the `gradle.properties` file.
+>Note: You can add the arg: `-PmcVer=1.?` to tell gradle to build a selected MC version instead of having to manually modify the `gradle.properties` file.
 
 
 ## Other commands
