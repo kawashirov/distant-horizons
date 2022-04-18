@@ -101,8 +101,13 @@ subprojects { p ->
 
     dependencies {
         minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        // The following line declares the mojmap mappings
-        mappings loom.officialMojangMappings()
+        // The following line declares the mojmap mappings & parchment mappings
+        mappings loom.layered() {
+            // Mojmap mappings
+            officialMojangMappings()
+            // Parchment mappings (it adds parameter mappings & javadoc)
+            parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+        }
 
 		//Manifold
 		annotationProcessor "systems.manifold:manifold-preprocessor:${rootProject.manifold_version}"
@@ -144,6 +149,10 @@ allprojects { p ->
 
     repositories {
         mavenCentral()
+
+        // For parchment mappings
+        maven { url "https://maven.parchmentmc.org" }
+
         // used to download and compile dependencies from git repos
         maven { url 'https://jitpack.io' }
 

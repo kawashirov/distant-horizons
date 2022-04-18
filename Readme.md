@@ -126,7 +126,7 @@ If running on IDE, to ensure IDE pickup the changed versions, you will need to r
 
 The Minecraft source code is NOT added to your workspace in an editable way. Minecraft is treated like a normal Library. Sources are there for documentation and research purposes only.
 
-Source code uses Mojang mappings.
+Source code uses Mojang mappings & Parchment mappings.
 
 ## Useful commands
 
