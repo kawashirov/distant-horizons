@@ -79,11 +79,13 @@ https://fabricmc.net/wiki/tutorial:setup
 4. Import the project into eclipse
 
 ## Switching Versions
-This branch support 2 built versions:
+This branch support 4 built versions:
  - 1.18.2
  - 1.18.1 (which also runs on 1.18)
+ - 1.17.1 (which also runs on 1.17)
+ - 1.16.5 (which also runs 1.16.5)
 
-To switch between active versions, change `mcVer=1.18.?` in `gradle.properties` file.
+To switch between active versions, change `mcVer=1.?` in `gradle.properties` file.
 
 If running on IDE, to ensure IDE pickup the changed versions, you will need to run a gradle command again to allow gradle to update all the libs. (In IntellJ you will also need to do a gradle sync again if it didn't start it automatically.)
 >Note: There may be a `java.nio.file.FileSystemException` thrown on running the command after switching versions. To fix it, either restart your IDE (as your IDE is locking up a file) or use tools like LockHunter to unlock the linked file. (Often a lib file under `common\build\lib` or `forge\build\lib` or `fabric\build\lib`). If anyone knows how to solve this issue please comment to this issue: https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues/233
