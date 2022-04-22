@@ -106,7 +106,7 @@ public class Config
 				
 				@ConfigAnnotations.FileComment
 				public static String _lodChunkRenderDistance = IQuality.LOD_CHUNK_RENDER_DISTANCE_DESC;
-				@ConfigAnnotations.Entry(minValue = 16, maxValue = 2048)
+				@ConfigAnnotations.Entry(minValue = 32, maxValue = 2048)
 				public static int lodChunkRenderDistance = IQuality.LOD_CHUNK_RENDER_DISTANCE_MIN_DEFAULT_MAX.defaultValue;
 				
 				@ConfigAnnotations.FileComment
@@ -116,7 +116,7 @@ public class Config
 				
 				@ConfigAnnotations.FileComment
 				public static String _horizontalScale = IQuality.HORIZONTAL_SCALE_DESC;
-				@ConfigAnnotations.Entry(minValue = 2, maxValue = 32)
+				@ConfigAnnotations.Entry(minValue = 2, maxValue = 64)
 				public static int horizontalScale = IQuality.HORIZONTAL_SCALE_MIN_DEFAULT_MAX.defaultValue;
 				
 				@ConfigAnnotations.FileComment
@@ -326,14 +326,6 @@ public class Config
 			public static String _generationPriority = IWorldGenerator.GENERATION_PRIORITY_DESC;
 			@ConfigAnnotations.Entry
 			public static GenerationPriority generationPriority = IWorldGenerator.GENERATION_PRIORITY_DEFAULT;
-
-			/*
-			@ConfigAnnotations.FileComment
-			public static String _allowUnstableFeatureGeneration = IWorldGenerator.ALLOW_UNSTABLE_FEATURE_GENERATION_DESC;
-			// FIXME: Temperary override. In 1.18, the newer Unstable gnerator is more usable
-			@ConfigAnnotations.Entry
-			public static boolean allowUnstableFeatureGeneration = true;//IWorldGenerator.ALLOW_UNSTABLE_FEATURE_GENERATION_DEFAULT;
-			*/
 			
 			@ConfigAnnotations.FileComment
 			public static String _blocksToAvoid = IWorldGenerator.BLOCKS_TO_AVOID_DESC;
