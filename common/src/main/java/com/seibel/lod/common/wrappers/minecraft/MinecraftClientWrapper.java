@@ -59,6 +59,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
@@ -324,6 +325,14 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
     public boolean connectedToServer()
     {
         return mc.getCurrentServer() != null;
+    }
+
+    @Override
+    public int getPlayerSkylight() {
+        if (mc.level == null) return -1;
+        if (mc.player == null) return -1;
+        if (mc.player.blockPosition() == null) return -1;
+        return mc.level.getBrightness(LightLayer.SKY, mc.player.blockPosition());
     }
 
     public ServerData getCurrentServer()
