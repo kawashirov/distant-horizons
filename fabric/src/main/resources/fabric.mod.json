@@ -33,6 +33,7 @@
   "accessWidener" : "lod.accesswidener",
   "depends": {
     "fabricloader": "*",
+    "fabric-api-base": "*",
     "fabric-lifecycle-events-v1": "*",
     "fabric-key-binding-api-v1": "*",
     "fabric-networking-api-v1": "*",
