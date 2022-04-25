@@ -3,7 +3,6 @@ package com.seibel.lod.forge.mixins;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftRenderWrapper;
-import com.seibel.lod.core.api.ApiShared;
 import net.minecraft.client.renderer.LightTexture;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

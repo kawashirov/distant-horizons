@@ -19,25 +19,24 @@
 
 package com.seibel.lod.common.wrappers.minecraft;
 
-import java.awt.Color;
 import java.io.File;
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.seibel.lod.core.ModInfo;
-import com.seibel.lod.core.api.ApiShared;
+import com.seibel.lod.core.api.internal.InternalApiShared;
 import com.seibel.lod.core.enums.LodDirection;
+import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IProfilerWrapper;
-import com.seibel.lod.core.wrapperInterfaces.misc.ILightMapWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IDimensionTypeWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
 import com.seibel.lod.common.wrappers.chunk.ChunkPosWrapper;
-import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
 import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
 
@@ -50,7 +49,6 @@ import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
@@ -61,6 +59,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.dimension.DimensionType;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -71,6 +70,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public class MinecraftClientWrapper implements IMinecraftClientWrapper
 {
+    private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
+    
     public static final MinecraftClientWrapper INSTANCE = new MinecraftClientWrapper();
 
     public final Minecraft mc = Minecraft.getInstance();
@@ -379,7 +380,7 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
     @Override
     public void crashMinecraft(String errorMessage, Throwable exception)
     {
-        ApiShared.LOGGER.error(ModInfo.READABLE_NAME + " had the following error: [" + errorMessage + "]. Crashing Minecraft...");
+        LOGGER.error(ModInfo.READABLE_NAME + " had the following error: [" + errorMessage + "]. Crashing Minecraft...");
         CrashReport report = new CrashReport(errorMessage, exception);
         Minecraft.crash(report);
     }

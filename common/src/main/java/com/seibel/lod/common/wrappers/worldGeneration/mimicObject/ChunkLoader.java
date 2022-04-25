@@ -19,19 +19,12 @@
  
 package com.seibel.lod.common.wrappers.worldGeneration.mimicObject;
 
-import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
-import com.seibel.lod.core.api.ApiShared;
 
 import com.seibel.lod.core.logging.ConfigBasedLogger;
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
-import it.unimi.dsi.fastutil.longs.LongSet;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+
 import java.util.Objects;
 
 
@@ -48,25 +41,17 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.*;
-import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import net.minecraft.world.level.levelgen.Heightmap;
 #if POST_MC_1_18_1
 import net.minecraft.world.level.levelgen.blending.BlendingData;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
-import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.ticks.LevelChunkTicks;
 #endif
 #if POST_MC_1_18_2
 import net.minecraft.core.Holder;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 #endif
 
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Fluids;
-import org.apache.logging.log4j.Logger;
 
 public class ChunkLoader
 {

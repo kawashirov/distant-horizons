@@ -19,20 +19,19 @@
  
 package com.seibel.lod.common.wrappers.worldGeneration.mimicObject;
 
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 
-import com.seibel.lod.core.api.ApiShared;
+import com.seibel.lod.core.api.internal.InternalApiShared;
+import com.seibel.lod.core.logging.DhLoggerBuilder;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment.EmptyChunkGenerator;
 import com.seibel.lod.core.enums.config.LightGenerationMode;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.color.block.BlockTintCache;
-import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Cursor3D;
 import net.minecraft.core.SectionPos;
@@ -46,7 +45,6 @@ import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.LevelHeightAccessor;
 #endif
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -56,11 +54,12 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
-public class LightedWorldGenRegion extends WorldGenRegion {
+public class LightedWorldGenRegion extends WorldGenRegion
+{
+	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
+	
 	public final WorldGenLevelLightEngine light;
 	public final LightGenerationMode lightMode;
 	public final EmptyChunkGenerator generator;
@@ -69,8 +68,10 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	private final ChunkPos firstPos;
 	private final List<ChunkAccess> cache;
 	Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
+	
 	#if PRE_MC_1_18_1
 	private ChunkPos overrideCenterPos = null;
+	
 	public void setOverrideCenter(ChunkPos pos) {overrideCenterPos = pos;}
 		#if PRE_MC_1_17_1
 		@Override
@@ -91,7 +92,8 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 
 	public LightedWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine,
 			List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
-			LightGenerationMode lightMode, EmptyChunkGenerator generator) {
+			LightGenerationMode lightMode, EmptyChunkGenerator generator)
+	{
 		super(serverLevel, list #if POST_MC_1_17_1, chunkStatus, i #endif);
 		this.lightMode = lightMode;
 		this.firstPos = list.get(0).getPos();
@@ -105,7 +107,8 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	#if POST_MC_1_17_1
 	// Bypass BCLib mixin overrides.
     @Override
-    public boolean ensureCanWrite(BlockPos blockPos) {
+    public boolean ensureCanWrite(BlockPos blockPos)
+	{
         int i = SectionPos.blockToSectionCoord(blockPos.getX());
         int j = SectionPos.blockToSectionCoord(blockPos.getZ());
         ChunkPos chunkPos = this.getCenter();
@@ -234,7 +237,7 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 			}
 		}
 		if (chunkStatus != ChunkStatus.EMPTY && chunkStatus != debugTriggeredForStatus) {
-			ApiShared.LOGGER.info("WorldGen requiring " + chunkStatus
+			LOGGER.info("WorldGen requiring " + chunkStatus
 					+ " outside expected range detected. Force passing EMPTY chunk and seeing if it works.");
 			debugTriggeredForStatus = chunkStatus;
 		}

@@ -24,9 +24,10 @@ import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.wrappers.config.ConfigGui;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.core.ModInfo;
-import com.seibel.lod.core.api.ApiShared;
+import com.seibel.lod.core.api.internal.InternalApiShared;
 import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
+import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.forge.networking.NetworkHandler;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
@@ -53,8 +54,10 @@ import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fmlclient.ConfigGuiHandler;
 #else // 1.18+
 import net.minecraftforge.client.ConfigGuiHandler;
+import org.apache.logging.log4j.Logger;
 #endif
 
+import java.lang.invoke.MethodHandles;
 import java.util.List;
 import java.util.Random;
 
@@ -69,7 +72,10 @@ import java.util.Random;
 @Mod(ModInfo.ID)
 public class ForgeMain implements LodForgeMethodCaller
 {
+	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
+	
 	public static ForgeClientProxy forgeClientProxy;
+	
 	
 	private void init(final FMLCommonSetupEvent event)
 	{
@@ -78,7 +84,7 @@ public class ForgeMain implements LodForgeMethodCaller
 		LodCommonMain.startup(this, !FMLLoader.getDist().isClient(), new NetworkHandler());
 		ForgeDependencySetup.createInitialBindings();
 		ForgeDependencySetup.finishBinding();
-		ApiShared.LOGGER.info("Distant Horizons initializing...");
+		LOGGER.info("Distant Horizons initializing...");
 	}
 	
 	public ForgeMain()

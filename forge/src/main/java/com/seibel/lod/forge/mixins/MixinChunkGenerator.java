@@ -19,7 +19,6 @@
  
 package com.seibel.lod.forge.mixins;
 
-import com.seibel.lod.core.api.ApiShared;
 import org.spongepowered.asm.mixin.Mixin;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 

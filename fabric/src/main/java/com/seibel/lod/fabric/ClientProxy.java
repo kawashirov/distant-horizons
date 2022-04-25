@@ -20,8 +20,8 @@
 package com.seibel.lod.fabric;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
-import com.seibel.lod.core.api.ClientApi;
-import com.seibel.lod.core.api.EventApi;
+import com.seibel.lod.core.api.internal.ClientApi;
+import com.seibel.lod.core.api.internal.EventApi;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
@@ -30,13 +30,9 @@ import com.seibel.lod.common.wrappers.world.WorldWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 
-import com.seibel.lod.fabric.mixins.MixinUtilBackgroudThread;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.core.BlockPos;
@@ -46,7 +42,6 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.function.Supplier;
 
 import org.lwjgl.glfw.GLFW;

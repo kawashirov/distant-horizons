@@ -20,23 +20,20 @@
 package com.seibel.lod.common.wrappers.minecraft;
 
 import java.awt.Color;
+import java.lang.invoke.MethodHandles;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
-import com.seibel.lod.core.api.ApiShared;
-import com.seibel.lod.core.api.ClientApi;
+import com.seibel.lod.core.api.internal.InternalApiShared;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
-import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
-import com.seibel.lod.core.util.LodUtil;
 
+import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.misc.ILightMapWrapper;
-import net.minecraft.client.renderer.LightTexture;
 
 import com.mojang.math.Vector3f;
 import com.seibel.lod.core.objects.math.Mat4f;
@@ -69,7 +66,7 @@ import net.minecraft.world.level.material.FogType;
 #endif
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.lwjgl.opengl.GL15;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -83,6 +80,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 {
 	public static final MinecraftRenderWrapper INSTANCE = new MinecraftRenderWrapper();
 	
+	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 	private static final Minecraft MC = Minecraft.getInstance();
 	private static final GameRenderer GAME_RENDERER = MC.gameRenderer;
 	private static final IWrapperFactory FACTORY = WrapperFactory.INSTANCE;
@@ -255,7 +253,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 							"\u00A7eOverdraw prevention will be worse than normal.");
 				} catch (Exception e2) {
 				}
-				ApiShared.LOGGER.error("getVanillaRenderedChunks Error: ", e);
+				LOGGER.error("getVanillaRenderedChunks Error: ", e);
 				usingBackupGetVanillaRenderedChunks = true;
 			}
 		}

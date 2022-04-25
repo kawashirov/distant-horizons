@@ -21,22 +21,24 @@ package com.seibel.lod.fabric;
 
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
-import com.seibel.lod.core.api.ApiShared;
-import com.seibel.lod.core.api.ClientApi;
+import com.seibel.lod.core.api.internal.InternalApiShared;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
+import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 import com.seibel.lod.fabric.networking.NetworkHandler;
-import com.seibel.lod.fabric.wrappers.modAccessor.ModChecker;
 import com.seibel.lod.fabric.wrappers.modAccessor.OptifineAccessor;
 import com.seibel.lod.fabric.wrappers.modAccessor.SodiumAccessor;
 import com.seibel.lod.fabric.wrappers.modAccessor.StarlightAccessor;
 import com.seibel.lod.fabric.wrappers.FabricDependencySetup;
 
 import net.fabricmc.api.ClientModInitializer;
+import org.apache.logging.log4j.Logger;
+
+import java.lang.invoke.MethodHandles;
 
 /**
  * Initialize and setup the Mod. <br>
@@ -51,7 +53,9 @@ public class Main implements ClientModInitializer
 {
 	// This is a client mod so it should implement ClientModInitializer and in fabric.mod.json it should have "environment": "client"
 	// Once it works on servers change the implement to ModInitializer and in fabric.mod.json it should be "environment": "*"
-
+	
+	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
+	
 	public static ClientProxy client_proxy;
 
 
@@ -68,7 +72,7 @@ public class Main implements ClientModInitializer
 		LodCommonMain.startup(null, false, new NetworkHandler());
 		FabricDependencySetup.createInitialBindings();
 		FabricDependencySetup.finishBinding();
-		ApiShared.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
+		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 
 		// Check if this works
 		client_proxy = new ClientProxy();
@@ -91,6 +95,6 @@ public class Main implements ClientModInitializer
 		LodCommonMain.startup(null, true, new NetworkHandler());
 		FabricDependencySetup.createInitialBindings();
 		FabricDependencySetup.finishBinding();
-		ApiShared.LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
+		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 	}
 }

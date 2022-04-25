@@ -21,7 +21,6 @@ package com.seibel.lod.common.wrappers.block;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.seibel.lod.core.api.ApiShared;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
