@@ -296,11 +296,13 @@ allprojects { p ->
 
         // Set the java version
         if (p != project(":core")) {
-            options.compilerArgs += ['-Xplugin:Manifold']
             options.release = rootProject.java_version as Integer
-        } else if (p == project(":core")) {
+        } else {
             options.release = 8; // Core should use Java 8 no matter what
         }
+        options.compilerArgs += ['-Xplugin:Manifold'] // Apply manifold to all projects
+        options.encoding = "UTF-8" // Not requred but better to have
+
         // TODO: make everything use java 8
 //        options.release = 8 // Use Java 8 for everything so back porting is easier
     }
