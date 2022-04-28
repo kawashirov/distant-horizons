@@ -61,6 +61,7 @@ import net.minecraft.world.entity.LivingEntity;
 #if PRE_MC_1_17_1
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.material.FluidState;
+import org.lwjgl.opengl.GL15;
 #else
 import net.minecraft.world.level.material.FogType;
 #endif

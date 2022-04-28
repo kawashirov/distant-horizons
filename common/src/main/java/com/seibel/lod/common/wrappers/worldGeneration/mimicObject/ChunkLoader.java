@@ -52,6 +52,7 @@ import net.minecraft.core.Holder;
 
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 
 public class ChunkLoader
 {
