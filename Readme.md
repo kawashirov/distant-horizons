@@ -147,3 +147,9 @@ https://tukaani.org/xz/java.html
 
 DHJarMerger (To merge multiple mod versions into one jar)\
 https://github.com/Ran-helo/DHJarMerger
+
+Toml for Java (config handling)\
+https://github.com/TheElectronWill/night-config
+
+Json for Java (config handling)\
+https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple

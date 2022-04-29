@@ -46,9 +46,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.client.resources.language.I18n;	// translation
-//#if POST_MC_1_17_1
+#if POST_MC_1_17_1
 import net.minecraft.client.gui.narration.NarratableEntry;
-//#endif
+#endif
 
 /**
  * Based upon TinyConfig but is highly modified
@@ -225,11 +225,11 @@ public abstract class ClassicConfigGUI {
         // addRenderableWidget in 1.17 and over
         // addButton in 1.16 and below
         private Button addBtn(Button button) {
-//			#if PRE_MC_1_17_1
-//            this.addButton(button);
-//			#else
+			#if PRE_MC_1_17_1
+            this.addButton(button);
+			#else
             this.addRenderableWidget(button);
-//			#endif
+			#endif
             return button;
         }
 
@@ -408,11 +408,11 @@ public abstract class ClassicConfigGUI {
 
         // Only for 1.17 and over
         // Remove in 1.16 and below
-//		#if POST_MC_1_17_1
+		#if POST_MC_1_17_1
         @Override
         public List<? extends NarratableEntry> narratables() {
             return children;
         }
-//		#endif
+		#endif
     }
 }
