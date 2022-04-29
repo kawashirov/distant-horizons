@@ -21,8 +21,8 @@ package com.seibel.lod.fabric.mixins;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
-import com.seibel.lod.common.Config;
 import com.seibel.lod.common.wrappers.McObjectConverter;
+import com.seibel.lod.core.Config;
 import com.seibel.lod.core.api.internal.ClientApi;
 import com.seibel.lod.core.objects.math.Mat4f;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -84,7 +84,7 @@ public class MixinWorldRenderer
 
 			ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
 		}
-		if (Config.Client.Advanced.lodOnlyMode) {
+		if (Config.Client.Advanced.lodOnlyMode.get()) {
 			callback.cancel();
 		}
 	}
@@ -109,7 +109,7 @@ public class MixinWorldRenderer
 
 			ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
 		}
-		if (Config.Client.Advanced.lodOnlyMode) {
+		if (Config.Client.Advanced.lodOnlyMode.get()) {
 			callback.cancel();
 		}
 	}

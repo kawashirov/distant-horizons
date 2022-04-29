@@ -21,7 +21,7 @@ package com.seibel.lod.forge;
 
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
-import com.seibel.lod.common.wrappers.config.ConfigGui;
+import com.seibel.lod.common.wrappers.config.GetConfigScreen;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.internal.InternalApiShared;
@@ -81,10 +81,10 @@ public class ForgeMain implements LodForgeMethodCaller
 	private void init(final FMLCommonSetupEvent event)
 	{
 		// make sure the dependencies are set up before the mod needs them
-		LodCommonMain.initConfig();
 		LodCommonMain.startup(this, !FMLLoader.getDist().isClient(), new NetworkHandler());
 		ForgeDependencySetup.createInitialBindings();
 		ForgeDependencySetup.finishBinding();
+		LodCommonMain.initConfig();
 		LOGGER.info("Distant Horizons initializing...");
 	}
 	
@@ -105,10 +105,10 @@ public class ForgeMain implements LodForgeMethodCaller
 
 		#if PRE_MC_1_17_1
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY,
-				() -> (client, parent) -> ConfigGui.getScreen(parent, ""));
+				() -> (client, parent) -> GetConfigScreen.getScreen(parent));
 		#else
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
-				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> ConfigGui.getScreen(parent, "")));
+				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> GetConfigScreen.getScreen(parent)));
 		#endif
 		forgeClientProxy = new ForgeClientProxy();
 		MinecraftForge.EVENT_BUS.register(forgeClientProxy);

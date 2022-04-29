@@ -19,7 +19,8 @@
  
 package com.seibel.lod.fabric.wrappers.config;
 
-import com.seibel.lod.common.wrappers.config.ConfigGui;
+import com.seibel.lod.common.wrappers.config.ConfigScreenMC;
+import com.seibel.lod.common.wrappers.config.GetConfigScreen;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 import net.fabricmc.api.EnvType;
@@ -33,6 +34,6 @@ public class ModMenuIntegration implements ModMenuApi {
     // For the custom config code
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return parent -> ConfigGui.getScreen(parent, "");
+        return parent -> GetConfigScreen.getScreen(parent);
     }
 }

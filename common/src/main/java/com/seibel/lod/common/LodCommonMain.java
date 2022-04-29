@@ -22,7 +22,8 @@ package com.seibel.lod.common;
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.networking.NetworkInterface;
 import com.seibel.lod.common.wrappers.DependencySetup;
-import com.seibel.lod.common.wrappers.config.ConfigGui;
+import com.seibel.lod.core.Config;
+import com.seibel.lod.core.config.ConfigBase;
 
 /**
  * This is the common main class
@@ -53,6 +54,6 @@ public class LodCommonMain {
 
 
     public static void initConfig() {
-        ConfigGui.init(Config.class);
+        ConfigBase.init(Config.class);
     }
 }

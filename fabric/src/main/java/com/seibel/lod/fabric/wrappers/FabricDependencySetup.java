@@ -21,7 +21,7 @@ package com.seibel.lod.fabric.wrappers;
 
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
-import com.seibel.lod.common.wrappers.config.LodConfigWrapperSingleton;
+import com.seibel.lod.core.wrapperInterfaces.config.LodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.fabric.wrappers.modAccessor.ModChecker;
 

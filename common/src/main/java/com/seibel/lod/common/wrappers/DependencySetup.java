@@ -20,6 +20,8 @@
 package com.seibel.lod.common.wrappers;
 
 import com.seibel.lod.common.LodCommonMain;
+import com.seibel.lod.common.wrappers.config.ConfigWrapper;
+import com.seibel.lod.core.wrapperInterfaces.config.IConfigWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftRenderWrapper;
 import com.seibel.lod.core.handlers.IReflectionHandler;
@@ -43,6 +45,7 @@ import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 public class DependencySetup {
     public static void createInitialBindings()
     {
+        SingletonHandler.bind(IConfigWrapper.class, ConfigWrapper.INSTANCE);
         SingletonHandler.bind(IVersionConstants.class, VersionConstants.INSTANCE);
         if (!LodCommonMain.serverSided)
         {

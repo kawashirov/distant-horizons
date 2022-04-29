@@ -46,8 +46,9 @@ dependencies {
 //    forgeDependencies(project(":core")) { transitive false }
 
 
-    // Toml
+    // Toml & Json for config
     shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {}
+    shadowMe("com.googlecode.json-simple:json-simple:1.1.1") {}
 
     // Compression
     forgeDependencies('org.tukaani:xz:1.9')
@@ -63,15 +64,20 @@ processResources {
 }
 
 shadowJar {
+    // Remove the fabric stuff from forge
     dependencies {
         exclude(dependency("net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"))
     }
     exclude "fabric.mod.json"
     configurations = [project.configurations.shadowMe]
+    // Compression
     relocate 'org.tukaani', 'shaded.tukaani'
     relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
-    relocate 'com.electronwill.nightconfig', 'shaded.electronwill.nightconfig'    // This is already included with forge
+    // Toml & Json for config
+    relocate 'com.electronwill.nightconfig', 'shaded.electronwill.nightconfig'
+    relocate 'com.googlecode.json-simple', 'shaded.googlecode.json-simple'
 
+    // Our own code
     relocate 'com.seibel.lod.common', 'forge.com.seibel.lod.common'
 
     classifier "dev-shadow"

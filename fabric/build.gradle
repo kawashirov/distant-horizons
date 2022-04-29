@@ -83,8 +83,9 @@ dependencies {
 
 
 
-    // Toml
+    // Toml & Json for config
     shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {}
+    shadowMe("com.googlecode.json-simple:json-simple:1.1.1") {}
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
@@ -116,10 +117,14 @@ runClient {
 
 shadowJar {
     configurations = [project.configurations.shadowMe]
+    // Compression
     relocate 'org.tukaani', 'shaded.tukaani'
     relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
+    // Toml & Json for config
     relocate 'com.electronwill.nightconfig', 'shaded.electronwill.nightconfig'
+    relocate 'com.googlecode.json-simple', 'shaded.googlecode.json-simple'
 
+    // Our own code
     relocate 'com.seibel.lod.common', 'fabric.com.seibel.lod.common'
 
     classifier "dev-shadow"
