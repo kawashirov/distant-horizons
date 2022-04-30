@@ -48,7 +48,7 @@ dependencies {
 
     // Toml & Json for config
     shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {}
-    shadowMe("com.googlecode.json-simple:json-simple:1.1.1") {}
+    shadowMe("com.googlecode.json-simple:json-simple:${rootProject.json_version}") {}
 
     // Compression
     forgeDependencies('org.tukaani:xz:1.9')

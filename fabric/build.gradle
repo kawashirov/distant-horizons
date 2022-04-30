@@ -52,9 +52,11 @@ dependencies {
 
     // Sodium
     addMod("curse.maven:sodium-394468:${rootProject.sodium_version}", rootProject.enable_sodium)
-    implementation "org.joml:joml:1.10.2"
-    modImplementation(fabricApi.module("fabric-rendering-data-attachment-v1", rootProject.fabric_api_version))
-    modImplementation(fabricApi.module("fabric-rendering-fluids-v1", rootProject.fabric_api_version))
+    if (rootProject.enable_sodium != "0") {
+        implementation "org.joml:joml:1.10.2"
+        modImplementation(fabricApi.module("fabric-rendering-data-attachment-v1", rootProject.fabric_api_version))
+        modImplementation(fabricApi.module("fabric-rendering-fluids-v1", rootProject.fabric_api_version))
+    }
 
 	// Lithium
     addMod("maven.modrinth:lithium:${rootProject.lithium_version}", rootProject.enable_lithium)
@@ -85,7 +87,7 @@ dependencies {
 
     // Toml & Json for config
     shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {}
-    shadowMe("com.googlecode.json-simple:json-simple:1.1.1") {}
+    shadowMe("com.googlecode.json-simple:json-simple:${rootProject.json_version}") {}
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }

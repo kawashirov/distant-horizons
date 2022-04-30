@@ -89,7 +89,7 @@ This branch support 4 built versions:
  - 1.18.2
  - 1.18.1 (which also runs on 1.18)
  - 1.17.1 (which also runs on 1.17)
- - 1.16.5 (which also runs 1.16.5)
+ - 1.16.5 (which also runs 1.16.4)
 
 To switch between active versions, change `mcVer=1.?` in `gradle.properties` file.
 

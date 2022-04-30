@@ -133,7 +133,7 @@ subprojects { p ->
 
         // Toml & Json for config
         implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
-        implementation("com.googlecode.json-simple:json-simple:1.1.1")
+        implementation("com.googlecode.json-simple:json-simple:${rootProject.json_version}")
 
         if (p != project(":forge")) {
             // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
