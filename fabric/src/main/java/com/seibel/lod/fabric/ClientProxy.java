@@ -67,7 +67,7 @@ public class ClientProxy
 	 * @author Ran
 	 */
 	public void registerEvents() {
-		/* Registor the mod accessor*/
+		/* Register the mod accessor*/
 
 		/* World Events */
 		//ServerTickEvents.START_SERVER_TICK.register(this::serverTickEvent);
@@ -165,31 +165,31 @@ public class ClientProxy
 		ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 		if (CONFIG.client().advanced().debugging().getDebugKeybindingsEnabled())
 		{
-			HashSet<Integer> currectKeyDown = new HashSet<Integer>();
+			HashSet<Integer> currentKeyDown = new HashSet<Integer>();
 			
 			// Note: Minecraft's InputConstants is same as GLFW Key values
 			//TODO: Use mixin to hook directly into the GLFW Keyboard event in minecraft KeyboardHandler
 			// Check all keys we need
 			for (int i = GLFW.GLFW_KEY_A; i <= GLFW.GLFW_KEY_Z; i++) {
 				if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), i)) {
-					currectKeyDown.add(i);
+					currentKeyDown.add(i);
 				}
 			}
 			for (int i : KEY_TO_CHECK_FOR) {
 				if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), i)) {
-					currectKeyDown.add(i);
+					currentKeyDown.add(i);
 				}
 			}
 			
 			// Diff and trigger events
-			for (int c : currectKeyDown) {
+			for (int c : currentKeyDown) {
 				if (!previousKeyDown.contains(c)) {
 					ClientApi.INSTANCE.keyPressedEvent(c);
 				}
 			}
 			
 			// Update the set
-			previousKeyDown = currectKeyDown;
+			previousKeyDown = currentKeyDown;
 		}
 	}
 }
