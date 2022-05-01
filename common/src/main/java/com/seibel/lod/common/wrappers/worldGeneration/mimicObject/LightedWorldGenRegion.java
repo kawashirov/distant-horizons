@@ -24,6 +24,9 @@ import java.util.List;
 
 import com.seibel.lod.core.api.internal.InternalApiShared;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.SpawnerBlock;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -164,7 +167,12 @@ public class LightedWorldGenRegion extends WorldGenRegion
 	// Skip BlockEntity stuff. It aren't really needed
 	@Override
 	public BlockEntity getBlockEntity(BlockPos blockPos) {
-		return null;
+		BlockState blockState = this.getBlockState(blockPos);
+		if (!blockState.hasBlockEntity()) return null;
+		if (blockState.getBlock() instanceof SpawnerBlock) {
+			// This is a bypass for the spawner block since MC complains about not having it
+			return ((EntityBlock) blockState.getBlock()).newBlockEntity(blockPos, blockState);
+		} else return null;
 	}
 
 	// Skip BlockEntity stuff. It aren't really needed
