@@ -168,11 +168,17 @@ public class LightedWorldGenRegion extends WorldGenRegion
 	@Override
 	public BlockEntity getBlockEntity(BlockPos blockPos) {
 		BlockState blockState = this.getBlockState(blockPos);
-		if (!blockState.hasBlockEntity()) return null;
+
+		// This is a bypass for the spawner block since MC complains about not having it
+		#if POST_MC_1_17_1
 		if (blockState.getBlock() instanceof SpawnerBlock) {
-			// This is a bypass for the spawner block since MC complains about not having it
 			return ((EntityBlock) blockState.getBlock()).newBlockEntity(blockPos, blockState);
 		} else return null;
+		#else
+		if (blockState.getBlock() instanceof SpawnerBlock) {
+			return ((EntityBlock) blockState.getBlock()).newBlockEntity(this);
+		} else return null;
+		#endif
 	}
 
 	// Skip BlockEntity stuff. It aren't really needed
