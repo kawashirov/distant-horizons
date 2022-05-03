@@ -26,7 +26,6 @@ import java.util.ArrayList;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.seibel.lod.core.ModInfo;
-import com.seibel.lod.core.api.internal.InternalApiShared;
 import com.seibel.lod.core.enums.LodDirection;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.util.LodUtil;
@@ -35,8 +34,8 @@ import com.seibel.lod.core.wrapperInterfaces.minecraft.IProfilerWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IDimensionTypeWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
 import com.seibel.lod.common.wrappers.McObjectConverter;
-import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
-import com.seibel.lod.common.wrappers.chunk.ChunkPosWrapper;
+import com.seibel.lod.core.objects.DHBlockPos;
+import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
 
@@ -181,21 +180,21 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
     }
 
     @Override
-    public BlockPosWrapper getPlayerBlockPos()
+    public DHBlockPos getPlayerBlockPos()
     {
         BlockPos playerPos = getPlayer().blockPosition();
-        return new BlockPosWrapper(playerPos.getX(), playerPos.getY(), playerPos.getZ());
+        return new DHBlockPos(playerPos.getX(), playerPos.getY(), playerPos.getZ());
     }
 
     @Override
-    public ChunkPosWrapper getPlayerChunkPos()
+    public DHChunkPos getPlayerChunkPos()
     {
         #if PRE_MC_1_17_1
         ChunkPos playerPos = new ChunkPos(getPlayer().blockPosition());
         #else
         ChunkPos playerPos = getPlayer().chunkPosition();
         #endif
-        return new ChunkPosWrapper(playerPos.x, playerPos.z);
+        return new DHChunkPos(playerPos.x, playerPos.z);
     }
 
     public Options getOptions()

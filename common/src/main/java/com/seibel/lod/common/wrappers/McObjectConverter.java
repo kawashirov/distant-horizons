@@ -20,15 +20,18 @@
 package com.seibel.lod.common.wrappers;
 
 import java.nio.FloatBuffer;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import com.mojang.math.Matrix4f;
-import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
 import com.seibel.lod.core.enums.LodDirection;
+import com.seibel.lod.core.objects.DHBlockPos;
+import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.core.objects.math.Mat4f;
-import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.ChunkPos;
 
 /**
  * This class converts to and from Minecraft objects (Ex: Matrix4f)
@@ -63,11 +66,13 @@ public class McObjectConverter
     	}
     }
     
-    public static BlockPos Convert(AbstractBlockPosWrapper wrappedPos) {
-    	return new BlockPos(wrappedPos.getX(),wrappedPos.getY(), wrappedPos.getZ());
+    public static BlockPos Convert(DHBlockPos wrappedPos) {
+    	return new BlockPos(wrappedPos.x, wrappedPos.y, wrappedPos.z);
     }
-    
-    
+    public static ChunkPos Convert(DHChunkPos wrappedPos) {
+        return new ChunkPos(wrappedPos.x, wrappedPos.z);
+    }
+
     public static Direction Convert(LodDirection lodDirection)
     {
         return directions[lodDirection.ordinal()];
@@ -75,5 +80,23 @@ public class McObjectConverter
     public static LodDirection Convert(Direction direction)
     {
         return lodDirections[direction.ordinal()];
+    }
+    public static void DebugCheckAllPackers() {
+        BiConsumer<Integer, Integer> func = (x, z) -> DHChunkPos._DebugCheckPacker(x,z,ChunkPos.asLong(x,z));
+        func.accept(0,0);
+        func.accept(12345,134);
+        func.accept(-12345,-134);
+        func.accept(-30000000/16,30000000/16);
+        func.accept(30000000/16,-30000000/16);
+        func.accept(30000000/16,30000000/16);
+        func.accept(-30000000/16,-30000000/16);
+        Consumer<BlockPos> func2 = (p) -> DHBlockPos._DebugCheckPacker(p.getX(),p.getY(),p.getZ(),p.asLong());
+        func2.accept(new BlockPos(0,0,0));
+        func2.accept(new BlockPos(12345,134,123));
+        func2.accept(new BlockPos(-12345,-134,-80));
+        func2.accept(new BlockPos(-30000000, 2047, 30000000));
+        func2.accept(new BlockPos(30000000, -2048, -30000000));
+        func2.accept(new BlockPos(30000000, 2047, 30000000));
+        func2.accept(new BlockPos(-30000000, -2048, -30000000));
     }
 }

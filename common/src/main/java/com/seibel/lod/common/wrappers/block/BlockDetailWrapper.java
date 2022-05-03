@@ -27,8 +27,8 @@ import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.core.enums.LodDirection;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
+import com.seibel.lod.core.objects.DHBlockPos;
 import com.seibel.lod.core.util.ColorUtil;
-import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockDetailWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 
@@ -271,7 +271,7 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 	}
 	
 	@Override
-	public int getAndResolveFaceColor(LodDirection dir, IChunkWrapper chunk, AbstractBlockPosWrapper blockPos)
+	public int getAndResolveFaceColor(LodDirection dir, IChunkWrapper chunk, DHBlockPos blockPos)
 	{
 		// FIXME: impl per-face colors
 		resolveColors();

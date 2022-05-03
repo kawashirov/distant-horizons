@@ -28,8 +28,8 @@ import java.util.stream.Collectors;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
-import com.seibel.lod.core.api.internal.InternalApiShared;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
 
 import com.seibel.lod.core.logging.DhLoggerBuilder;
@@ -40,14 +40,12 @@ import com.seibel.lod.core.objects.math.Mat4f;
 import com.seibel.lod.core.objects.math.Vec3d;
 import com.seibel.lod.core.objects.math.Vec3f;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
-import com.seibel.lod.core.wrapperInterfaces.block.AbstractBlockPosWrapper;
-import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.WrapperFactory;
-import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
+import com.seibel.lod.core.objects.DHBlockPos;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -97,11 +95,11 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	}
 	
 	@Override
-	public AbstractBlockPosWrapper getCameraBlockPosition()
+	public DHBlockPos getCameraBlockPosition()
 	{
 		Camera camera = GAME_RENDERER.getMainCamera();
 		BlockPos blockPos = camera.getBlockPosition();
-		return new BlockPosWrapper(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+		return new DHBlockPos(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 	}
 	
 	@Override
@@ -219,14 +217,14 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	
     public boolean usingBackupGetVanillaRenderedChunks = false;
 	@Override
-	public HashSet<AbstractChunkPosWrapper> getVanillaRenderedChunks() {
+	public HashSet<DHChunkPos> getVanillaRenderedChunks() {
 		ISodiumAccessor sodium = ModAccessorHandler.get(ISodiumAccessor.class);
 		if (sodium != null) {
 			return sodium.getNormalRenderedChunks();
 		}
 		IOptifineAccessor optifine = ModAccessorHandler.get(IOptifineAccessor.class);
 		if (optifine != null) {
-			HashSet<AbstractChunkPosWrapper> pos = optifine.getNormalRenderedChunks();
+			HashSet<DHChunkPos> pos = optifine.getNormalRenderedChunks();
 			if (pos == null)
 				pos = getMaximumRenderedChunks();
 			return pos;
@@ -242,7 +240,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 					AABB chunkBoundingBox =
 						#if PRE_MC_1_18_2 chunk.chunk.bb;
 						#else chunk.chunk.getBoundingBox(); #endif
-					return FACTORY.createChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
+					return new DHChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
 							Math.floorDiv((int) chunkBoundingBox.minZ, 16));
 				}).collect(Collectors.toCollection(HashSet::new)));
 			} catch (LinkageError e) {

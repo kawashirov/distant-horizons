@@ -23,8 +23,8 @@ import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.core.enums.WorldType;
-import com.seibel.lod.core.wrapperInterfaces.chunk.AbstractChunkPosWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
@@ -174,7 +174,7 @@ public class WorldWrapper implements IWorldWrapper
     }
     
     @Override
-    public IChunkWrapper tryGetChunk(AbstractChunkPosWrapper pos) {
+    public IChunkWrapper tryGetChunk(DHChunkPos pos) {
         ChunkAccess chunk = world.getChunk(pos.getX(), pos.getZ(), ChunkStatus.EMPTY, false);
         if (chunk == null) return null;
         return new ChunkWrapper(chunk, world);
