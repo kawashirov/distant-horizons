@@ -56,7 +56,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
  *
  * Credits to Motschen
  *
- * @author coolGi2007
+ * @author coolGi
  * @version 4-28-2022
  */
 @SuppressWarnings("unchecked")

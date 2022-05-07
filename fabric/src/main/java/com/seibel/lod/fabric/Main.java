@@ -45,7 +45,7 @@ import java.lang.invoke.MethodHandles;
  * If you are looking for the real start of the mod
  * check out the ClientProxy.
  * 
- * @author coolGi2007
+ * @author coolGi
  * @author Ran
  * @version 12-1-2021
  */
