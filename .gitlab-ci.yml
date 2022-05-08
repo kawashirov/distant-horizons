@@ -24,7 +24,7 @@ before_script:
 build_16_5:
   stage: build_16_5
   script:
-    - ./gradlew deleteMerged --gradle-user-home cache/;
+    - rm -R Merged;
     - ./gradlew build -PmcVer=1.16.5 --gradle-user-home cache/;
     - ./gradlew merge --gradle-user-home cache/;
   image: eclipse-temurin:16
@@ -46,7 +46,7 @@ build_16_5:
 build_17_1:
   stage: build_17_1
   script:
-    - ./gradlew deleteMerged --gradle-user-home cache/;
+    - rm -R Merged;
     - ./gradlew build -PmcVer=1.17.1 --gradle-user-home cache/;
     - ./gradlew merge --gradle-user-home cache/;
   image: eclipse-temurin:16
@@ -69,7 +69,7 @@ build_17_1:
 build_18_1:
   stage: build_18_1
   script: 
-    - ./gradlew deleteMerged --gradle-user-home cache/; # make sure any previously merged jars are removed before running this job
+    - rm -R Merged; # make sure any previously merged jars are removed before running this job
     - ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache/; 
     - ./gradlew merge --gradle-user-home cache/;
   # build using Java 17
@@ -93,7 +93,7 @@ build_18_1:
 build_18_2:
   stage: build_18_2
   script:
-    - ./gradlew deleteMerged --gradle-user-home cache/;
+    - rm -R Merged;
     - ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache/;
     - ./gradlew merge --gradle-user-home cache/;
   image: eclipse-temurin:17
