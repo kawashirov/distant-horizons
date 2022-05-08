@@ -24,15 +24,21 @@ before_script:
 build_16_5:
   stage: build_16_5
   script:
-    - rm -R Merged || true;
+    # make sure any previously merged jars are removed before running this job.
+    # note: if the merged folder doesn't exist "rm -R Merged" will throw an error, which can be ignored
+    #       the "|| true" makes that step always succeed.
+    - rm -R Merged || true; 
     - ./gradlew build -PmcVer=1.16.5 --gradle-user-home cache/;
     - ./gradlew merge --gradle-user-home cache/;
+  # build using Java 16
   image: eclipse-temurin:16
   artifacts:
     name: "Merged_NightlyBuild_1_16_5-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
     paths:
+      # relative to the root directory
       - Merged
     expire_in: 1 day
+    # even if one build fails, upload the successful jars
     when: always
   cache:
     key: "gradleCache"
@@ -55,7 +61,6 @@ build_17_1:
     paths:
       - Merged
     expire_in: 1 day
-    # even if one build fails, upload the successful jars
     when: always
   cache:
     key: "gradleCache"
@@ -69,7 +74,7 @@ build_17_1:
 build_18_1:
   stage: build_18_1
   script: 
-    - rm -R Merged || true; # make sure any previously merged jars are removed before running this job
+    - rm -R Merged || true;
     - ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache/; 
     - ./gradlew merge --gradle-user-home cache/;
   # build using Java 17
@@ -77,7 +82,6 @@ build_18_1:
   artifacts:
     name: "Merged_NightlyBuild_1_18_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
     paths:
-    # relative to the root directory
     - Merged
     expire_in: 1 day
     when: always
