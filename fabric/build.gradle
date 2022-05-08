@@ -1,7 +1,3 @@
-plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.0"
-}
-
 version = rootProject.mod_version+"-"+rootProject.minecraft_version+"-"+new Date().format("yyyy_MM_dd_HH_mm")
 
 architectury {
@@ -85,18 +81,8 @@ dependencies {
 
 
 
-    // Toml & Json for config
-    shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {}
-    shadowMe("com.googlecode.json-simple:json-simple:${rootProject.json_version}") {}
-
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
-
-    // Compression
-    common 'org.tukaani:xz:1.9'
-    common 'org.apache.commons:commons-compress:1.21'
-    shadowMe 'org.tukaani:xz:1.9'
-    shadowMe 'org.apache.commons:commons-compress:1.21'
 }
 
 task deleteResources(type: Delete) {
@@ -119,12 +105,6 @@ runClient {
 
 shadowJar {
     configurations = [project.configurations.shadowMe]
-    // Compression
-    relocate 'org.tukaani', 'shaded.tukaani'
-    relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
-    // Toml & Json for config
-    relocate 'com.electronwill.nightconfig', 'shaded.electronwill.nightconfig'
-    relocate 'com.googlecode.json-simple', 'shaded.googlecode.json-simple'
 
     // Our own code
     relocate 'com.seibel.lod.common', 'fabric.com.seibel.lod.common'

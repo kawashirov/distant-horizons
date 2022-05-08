@@ -2,8 +2,16 @@ import io.github.ran.jarmerger.JarMergerPlugin
 
 
 buildscript {
-    dependencies{
+    dependencies {
         classpath files('plugins/DHJarMerger-1.0.jar')
+    }
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.com.github.johnrengelman:shadow:7.1.2"
     }
 }
 
@@ -102,6 +110,7 @@ architectury {
 
 
 subprojects { p ->
+    apply plugin: "com.github.johnrengelman.shadow"
     apply plugin: "dev.architectury.loom"
 
     loom {
@@ -135,6 +144,23 @@ subprojects { p ->
         implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
         implementation("com.googlecode.json-simple:json-simple:${rootProject.json_version}")
 
+        // Theming
+        implementation("com.formdev:flatlaf:1.6.1")
+
+
+        if (p == project(":fabric") || p == project(":forge")) {
+            // Compression
+            common 'org.tukaani:xz:1.9'
+            common 'org.apache.commons:commons-compress:1.21'
+            shadowMe 'org.tukaani:xz:1.9'
+            shadowMe 'org.apache.commons:commons-compress:1.21'
+            // Toml & Json for config
+            shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {}
+            shadowMe("com.googlecode.json-simple:json-simple:${rootProject.json_version}") {}
+            // Theming
+            shadowMe("com.formdev:flatlaf:1.6.1")
+        }
+
         if (p != project(":forge")) {
             // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
             // Do NOT use other classes from fabric loader unless working with fabric
@@ -144,6 +170,26 @@ subprojects { p ->
         if (p != project(":core")) {
             common(project(":core")) { transitive false }
             shadowMe(project(":core")) { transitive false }
+        }
+    }
+
+    if (p == project(":fabric") || p == project(":forge")) {
+        shadowJar {
+            configurations = [project.configurations.shadowMe]
+
+            // Compression
+            relocate 'org.tukaani', 'shaded.tukaani'
+            relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
+            // Toml & Json for config
+            relocate 'com.electronwill.nightconfig', 'shaded.electronwill.nightconfig'
+            relocate 'com.googlecode.json-simple', 'shaded.googlecode.json-simple'
+            // Theming
+            relocate 'com.formdev.flatlaf', 'shaded.formdev.flatlaf'
+        }
+
+        remapJar {
+            input.set shadowJar.archiveFile
+            dependsOn shadowJar
         }
     }
 
