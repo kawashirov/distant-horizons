@@ -15,10 +15,10 @@ issueTrackerURL="${issues}"
 	description= "${description}" #//mandatory. The description text for the mod
 	logoFile="logo.png"
 	catalogueImageIcon="icon.png"
-	credits="Massive thanks to: Leonardo, Cola, Ran, and CoolGi. For their hard work to bring Distant Horizons to where it is today. - James"
+	credits="Massive thanks to: Leonardo, Cola, Ran, CoolGi, and Leetom. For their hard work to bring Distant Horizons to where it is today. - James"
 	#// if not set defaults to "false"
 	clientSideOnly="true"
-	#// if not set defaults to "BOTH"
+	#// if not set side defaults to "BOTH"
 	#// TODO change to "BOTH" when we add server support
 	side="CLIENT"
 	#// Allow any version to be present (or not) on the server
