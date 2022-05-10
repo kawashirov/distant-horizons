@@ -10,6 +10,6 @@ pluginManagement {
 include("common")
 include("fabric")
 include("forge")
-include("core")
+include("core") // FIXME: There is a problem with the core module that stops us from upgrading architectury
 
 rootProject.name = "DistantHorizons"

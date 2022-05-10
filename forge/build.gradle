@@ -14,6 +14,9 @@ architectury {
 }
 
 configurations {
+    // TODO: Add the commented things once we update architectury to 11 or higher
+//    common
+//    shadowCommon
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common

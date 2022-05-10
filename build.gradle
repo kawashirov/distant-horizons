@@ -18,6 +18,7 @@ buildscript {
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "0.10.0-SNAPSHOT" apply false
+//    id "dev.architectury.loom" version "0.11.0-SNAPSHOT" apply false // TODO: Move to this as it adds alot of stuff that are useful
 }
 
 /**
@@ -145,7 +146,7 @@ subprojects { p ->
         implementation("com.googlecode.json-simple:json-simple:${rootProject.json_version}")
 
         // Theming
-        implementation("com.formdev:flatlaf:1.6.1")
+        implementation("com.formdev:flatlaf:2.2")
 
 
         if (p == project(":fabric") || p == project(":forge")) {
@@ -158,7 +159,7 @@ subprojects { p ->
             shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {}
             shadowMe("com.googlecode.json-simple:json-simple:${rootProject.json_version}") {}
             // Theming
-            shadowMe("com.formdev:flatlaf:1.6.1")
+            shadowMe("com.formdev:flatlaf:2.2")
         }
 
         if (p != project(":forge")) {

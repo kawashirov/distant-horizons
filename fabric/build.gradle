@@ -6,6 +6,9 @@ architectury {
 }
 
 configurations {
+    // TODO: Add the commented things once we update architectury to 11 or higher
+//    common
+//    shadowCommon
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
@@ -90,15 +93,15 @@ task deleteResources(type: Delete) {
 }
 
 processResources {
+    dependsOn(copyAccessWidener)
     dependsOn(copyCoreResources)
     dependsOn(copyCommonResources)
-    dependsOn(copyAccessWidener)
 }
 
 runClient {
+    dependsOn(copyAccessWidener)
     dependsOn(copyCoreResources)
     dependsOn(copyCommonResources)
-    dependsOn(copyAccessWidener)
     jvmArgs "-XX:-OmitStackTraceInFastThrow"
     finalizedBy(deleteResources)
 }
