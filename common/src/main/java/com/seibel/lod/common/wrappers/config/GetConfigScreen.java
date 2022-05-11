@@ -7,20 +7,15 @@ public class GetConfigScreen {
     public static type useScreen = type.Classic;
     public static enum type {
         Classic,
-        OpenGL,
-        New;
+        OpenGL;
     }
 
     public static Screen getScreen(Screen parent) {
         if (useScreen == type.Classic) {
-            return ClassicConfigGUI.getScreen(parent, "");
+            return ClassicConfigGUI.getScreen(parent, "client");
         } else if (useScreen == type.OpenGL) {
             return ConfigScreenMC.getScreen(parent, new ConfigScreen());
-        } else if (useScreen == type.New) {
-            System.out.println("This is not made yet");
-            return null;
         }
-
         return null;
     }
 }
