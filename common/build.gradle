@@ -11,6 +11,14 @@ afterEvaluate {
     }
 }
 
+dependencies {
+    if (minecraft_version == "1.16.5") {
+        modApi("me.shedaniel:architectury:${rootProject.architectury_version}")
+    } else {
+        modApi("dev.architectury:architectury:${rootProject.architectury_version}")
+    }
+}
+
 publishing {
     publications {
         mavenCommon(MavenPublication) {

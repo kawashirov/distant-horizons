@@ -29,7 +29,6 @@ import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
-import com.seibel.lod.fabric.networking.NetworkHandler;
 import com.seibel.lod.fabric.wrappers.modAccessor.OptifineAccessor;
 import com.seibel.lod.fabric.wrappers.modAccessor.SodiumAccessor;
 import com.seibel.lod.fabric.wrappers.modAccessor.StarlightAccessor;
@@ -57,6 +56,7 @@ public class Main implements ClientModInitializer
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 	
 	public static ClientProxy client_proxy;
+	public static FabricServerProxy server_proxy;
 
 
 	// Do if implements ClientModInitializer
@@ -68,7 +68,7 @@ public class Main implements ClientModInitializer
 
 	// This loads the mod after minecraft loads which doesn't causes a lot of issues
 	public static void init() {
-		LodCommonMain.startup(null, false, new NetworkHandler());
+		LodCommonMain.startup(null, false);
 		FabricDependencySetup.createInitialBindings();
 		FabricDependencySetup.finishBinding();
 		LodCommonMain.initConfig();
@@ -91,9 +91,11 @@ public class Main implements ClientModInitializer
 	}
 
 	public static void initServer() {
-		LodCommonMain.startup(null, true, new NetworkHandler());
+		LodCommonMain.startup(null, true);
 		FabricDependencySetup.createInitialBindings();
 		FabricDependencySetup.finishBinding();
+		server_proxy = new FabricServerProxy();
+		server_proxy.registerEvents();
 		LodCommonMain.initConfig();
 		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 	}

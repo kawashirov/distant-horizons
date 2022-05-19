@@ -138,7 +138,7 @@ subprojects { p ->
             parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
         }
 
-		//Manifold
+		// Manifold
 		annotationProcessor "systems.manifold:manifold-preprocessor:${rootProject.manifold_version}"
 
         // Toml & Json for config
@@ -219,6 +219,9 @@ allprojects { p ->
 
         // For parchment mappings
         maven { url "https://maven.parchmentmc.org" }
+
+        // For Architectury API
+        maven { url "https://maven.architectury.dev" }
 
         // used to download and compile dependencies from git repos
         maven { url 'https://jitpack.io' }

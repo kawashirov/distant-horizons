@@ -20,7 +20,7 @@
 package com.seibel.lod.common;
 
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
-import com.seibel.lod.common.networking.NetworkInterface;
+import com.seibel.lod.common.networking.NetworkReceiver;
 import com.seibel.lod.common.wrappers.DependencySetup;
 import com.seibel.lod.core.Config;
 import com.seibel.lod.core.config.ConfigBase;
@@ -33,9 +33,8 @@ public class LodCommonMain {
     public static boolean forge = false;
     public static boolean serverSided;
     public static LodForgeMethodCaller forgeMethodCaller;
-    public static NetworkInterface networkInterface;
 
-    public static void startup(LodForgeMethodCaller caller, boolean serverSided, NetworkInterface networkInterface) {
+    public static void startup(LodForgeMethodCaller caller, boolean serverSided) {
         LodCommonMain.serverSided = serverSided;
         if (caller != null) {
             LodCommonMain.forge = true;
@@ -44,11 +43,10 @@ public class LodCommonMain {
 
         DependencySetup.createInitialBindings();
 
-        LodCommonMain.networkInterface = networkInterface;
         if (!serverSided) {
-            networkInterface.register_Client();
+            new NetworkReceiver().register_Client();
         } else {
-            networkInterface.register_Server();
+            new NetworkReceiver().register_Server();
         }
     }
 

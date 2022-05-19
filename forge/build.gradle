@@ -33,6 +33,13 @@ dependencies {
     // Forge loader
     forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
 
+    // Architectury API
+    if (minecraft_version == "1.16.5") {
+        modImplementation("me.shedaniel:architectury-forge:${rootProject.architectury_version}")
+    } else {
+        modImplementation("dev.architectury:architectury-forge:${rootProject.architectury_version}")
+    }
+
     // Starlight
     addMod("curse.maven:starlight-forge-526854:${rootProject.starlight_version_forge}", rootProject.enable_starlight_forge)
     annotationProcessor "org.spongepowered:mixin:0.8.4:processor"

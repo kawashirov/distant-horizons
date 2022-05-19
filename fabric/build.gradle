@@ -34,10 +34,16 @@ dependencies {
     // Fabric loader
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
+    // Architectury API
+    if (minecraft_version == "1.16.5") {
+        addModJar("me.shedaniel:architectury-fabric:${rootProject.architectury_version}")
+    } else {
+        addModJar("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
+    }
+
     // Fabric API
     addModJar(fabricApi.module("fabric-lifecycle-events-v1", rootProject.fabric_api_version))
     addModJar(fabricApi.module("fabric-key-binding-api-v1", rootProject.fabric_api_version))
-    addModJar(fabricApi.module("fabric-networking-api-v1", rootProject.fabric_api_version))
     addModJar(fabricApi.module("fabric-api-base", rootProject.fabric_api_version))
 
     // Mod Menu

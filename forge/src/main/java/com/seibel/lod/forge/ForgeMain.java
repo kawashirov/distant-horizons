@@ -29,7 +29,6 @@ import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
-import com.seibel.lod.forge.networking.NetworkHandler;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
 
 import com.seibel.lod.forge.wrappers.modAccessor.OptifineAccessor;
@@ -81,7 +80,7 @@ public class ForgeMain implements LodForgeMethodCaller
 	private void init(final FMLCommonSetupEvent event)
 	{
 		// make sure the dependencies are set up before the mod needs them
-		LodCommonMain.startup(this, !FMLLoader.getDist().isClient(), new NetworkHandler());
+		LodCommonMain.startup(this, !FMLLoader.getDist().isClient());
 		ForgeDependencySetup.createInitialBindings();
 		ForgeDependencySetup.finishBinding();
 		LodCommonMain.initConfig();
