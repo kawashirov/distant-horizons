@@ -13,6 +13,7 @@
     "MixinWorldRenderer",
     "MixinFogRenderer",
     "MixinChunkGenerator",
+    "MixinDebugScreenOverlay",
     "events.MixinClientLevel",
     "events.MixinMinecraft",
     "events.MixinBlockUpdate",

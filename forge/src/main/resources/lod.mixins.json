@@ -11,7 +11,8 @@
 		"MixinFogRenderer",
 		"MixinChunkGenerator",
 		"MixinLightmap",
-		"MixinTFChunkGenerator"
+		"MixinTFChunkGenerator",
+		"MixinDebugScreenOverlay"
 	],
 	"server": []
 }
