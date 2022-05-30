@@ -22,7 +22,7 @@ package com.seibel.lod.common;
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.networking.NetworkReceiver;
 import com.seibel.lod.common.wrappers.DependencySetup;
-import com.seibel.lod.core.Config;
+import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.config.ConfigBase;
 
 /**
