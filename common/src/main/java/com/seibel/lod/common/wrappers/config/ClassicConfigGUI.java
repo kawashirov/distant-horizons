@@ -109,7 +109,7 @@ public abstract class ClassicConfigGUI {
                 // For boolean
                 Function<Object, Component> func = value -> new TextComponent((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
                 ((EntryInfo) info.guiValue).widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
-                    ((ConfigEntry) info).setWTSave(!(Boolean) info.get());
+                    ((ConfigEntry) info).setWithoutSaving(!(Boolean) info.get());
                     button.setMessage(func.apply(info.get()));
                 }, func);
             }
@@ -159,9 +159,9 @@ public abstract class ClassicConfigGUI {
 
             if (((ConfigEntry) info).isValid(value) == 0 && info.getType() != List.class) {
                 if (!cast)
-                    ((ConfigEntry) info).setWTSave(value);
+                    ((ConfigEntry) info).setWithoutSaving(value);
                 else
-                    ((ConfigEntry) info).setWTSave(value.intValue());
+                    ((ConfigEntry) info).setWithoutSaving(value.intValue());
             }
 //            else if (((ConfigEntry) info).isValid() == 0)
 //            {
@@ -258,7 +258,7 @@ public abstract class ClassicConfigGUI {
                     TranslatableComponent name = new TranslatableComponent(translationPrefix + info.getNameWCategory());
                     if (ConfigEntry.class.isAssignableFrom(info.getClass())) {
                         Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - 150 - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, new TextComponent("Reset").withStyle(ChatFormatting.RED), (button -> {
-                            ((ConfigEntry) info).setWTSave(((ConfigEntry) info).getDefaultValue());
+                            ((ConfigEntry) info).setWithoutSaving(((ConfigEntry) info).getDefaultValue());
                             ((EntryInfo) info.guiValue).index = 0;
                             this.reload = true;
                             Objects.requireNonNull(minecraft).setScreen(this);
