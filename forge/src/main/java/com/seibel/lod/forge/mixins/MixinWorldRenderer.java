@@ -22,7 +22,7 @@ package com.seibel.lod.forge.mixins;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.seibel.lod.common.wrappers.McObjectConverter;
-import com.seibel.lod.core.Config;
+import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.api.internal.ClientApi;
 import com.seibel.lod.core.objects.math.Mat4f;
 import net.minecraft.client.renderer.LevelRenderer;

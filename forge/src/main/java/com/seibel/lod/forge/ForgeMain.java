@@ -49,13 +49,12 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
 #if PRE_MC_1_17_1
 import net.minecraftforge.fml.ExtensionPoint;
-import org.apache.logging.log4j.Logger;
 #elif MC_1_17_1
 import net.minecraftforge.fmlclient.ConfigGuiHandler;
 #else // 1.18+
 import net.minecraftforge.client.ConfigGuiHandler;
-import org.apache.logging.log4j.Logger;
 #endif
+import org.apache.logging.log4j.Logger;
 
 import java.lang.invoke.MethodHandles;
 import java.util.List;
