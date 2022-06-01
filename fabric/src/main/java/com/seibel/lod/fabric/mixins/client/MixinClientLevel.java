@@ -17,8 +17,13 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-package com.seibel.lod.fabric.mixins.events;
+package com.seibel.lod.fabric.mixins.client;
 
+import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
+import com.seibel.lod.common.wrappers.world.WorldWrapper;
+import com.seibel.lod.core.api.internal.a7.ClientApi;
+import com.seibel.lod.core.api.internal.a7.SharedApi;
+import com.seibel.lod.core.config.Config;
 import com.seibel.lod.fabric.Main;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -51,7 +56,8 @@ public class MixinClientLevel {
     private void loadWorldEvent(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey,
             #if POST_MC_1_18_2 Holder holder, #else DimensionType dimensionType, #endif int i,
             #if POST_MC_1_18_1 int j, #endif Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci) {
-        Main.client_proxy.worldLoadEvent((ClientLevel) (Object) this);
+        SharedApi.LOGGER.info("Loading level: " + WorldWrapper.getWorldWrapper((ClientLevel)(Object)this));
+        ClientApi.INSTANCE.clientLevelLoadEvent(WorldWrapper.getWorldWrapper((ClientLevel)(Object)this));
     }
 
 	#if POST_MC_1_18_1
@@ -60,7 +66,7 @@ public class MixinClientLevel {
     	ClientLevel l = (ClientLevel) (Object) this;
     	LevelChunk chunk = l.getChunkSource().getChunk(x, z, false);
     	if (chunk!=null&& !chunk.isClientLightReady())
-    		Main.client_proxy.chunkLoadEvent(l, chunk);
+            ClientApi.INSTANCE.clientChunkLoadEvent(new ChunkWrapper(chunk, l), WorldWrapper.getWorldWrapper(l));
     }
 	#endif
 }

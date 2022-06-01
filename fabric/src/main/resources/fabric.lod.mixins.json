@@ -17,7 +17,8 @@
     "events.MixinClientLevel",
     "events.MixinMinecraft",
     "events.MixinBlockUpdate",
-    "events.MixinLightmap"
+    "events.MixinLightmap",
+    "client.MixinGameRenderer"
   ],
   "server": [
     "MixinDedicatedServer"

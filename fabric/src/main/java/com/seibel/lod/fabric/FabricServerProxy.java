@@ -1,12 +1,22 @@
 package com.seibel.lod.fabric;
 
 import com.seibel.lod.common.networking.Networking;
-import com.seibel.lod.core.api.internal.EventApi;
+import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
+import com.seibel.lod.common.wrappers.world.WorldWrapper;
+import com.seibel.lod.core.api.internal.a7.ServerApi;
+import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
+import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 /**
  * This handles all events sent to the server,
@@ -18,20 +28,55 @@ import net.minecraft.world.entity.player.Player;
 
 // TODO
 public class FabricServerProxy {
-    private final EventApi eventApi = EventApi.INSTANCE;
+    private final ServerApi serverApi = ServerApi.INSTANCE;
 
+    private boolean isValidTime() {
+        //FIXME: return true immediately if this is a dedicated server
+        return !(Minecraft.getInstance().screen instanceof TitleScreen);
+    }
+    private WorldWrapper getLevelWrapper(Level level) {
+        return WorldWrapper.getWorldWrapper(level);
+    }
     /**
      * Registers Fabric Events
      * @author Ran
      */
     public void registerEvents() {
-        ServerTickEvents.END_SERVER_TICK.register(this::serverTickEvent);
+        ServerTickEvents.END_SERVER_TICK.register(this::tester);
+        /* World Events */
+        ServerTickEvents.END_SERVER_TICK.register((server) -> serverApi.serverTickEvent());
+
+        /* Server World Events */
+        ServerWorldEvents.LOAD.register((server, level)
+                -> {
+            if (isValidTime()) ServerApi.INSTANCE.serverLevelLoadEvent(getLevelWrapper(level));
+        });
+        ServerWorldEvents.UNLOAD.register((server, level)
+                -> {
+            if (isValidTime()) ServerApi.INSTANCE.serverLevelUnloadEvent(getLevelWrapper(level));
+        });
+
+        ServerChunkEvents.CHUNK_LOAD.register((server, chunk)
+                -> {
+            IWorldWrapper level = getLevelWrapper(chunk.getLevel());
+            if (isValidTime()) ServerApi.INSTANCE.serverChunkLoadEvent(
+                    new ChunkWrapper(chunk, chunk.getLevel()),
+                    level);
+                }
+        );
+        //TODO: ServerChunkSaveEvent
+
+        //TODO: Check if both of this use the correct timed events. (i.e. is it 'ed' or 'ing' one?)
+        ServerLifecycleEvents.SERVER_STARTED.register((server) -> {
+            if (isValidTime()) ServerApi.INSTANCE.serverWorldLoadEvent();
+        });
+        ServerLifecycleEvents.SERVER_STOPPING.register((server) -> {
+            if (isValidTime()) ServerApi.INSTANCE.serverWorldUnloadEvent();
+        });
     }
 
-    public void serverTickEvent(MinecraftServer server) {
-//        eventApi.serverTickEvent();
-
-        // This just exists here for testing purposes, it'll be removed in the future
+    // This just exists here for testing purposes, it'll be removed in the future
+    public void tester(MinecraftServer server) {
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             FriendlyByteBuf payload = Networking.createNew();
             payload.writeInt(1);

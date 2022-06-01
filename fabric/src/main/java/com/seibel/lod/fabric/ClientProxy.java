@@ -19,9 +19,11 @@
 
 package com.seibel.lod.fabric;
 
+import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
-import com.seibel.lod.core.api.internal.ClientApi;
-import com.seibel.lod.core.api.internal.EventApi;
+import com.seibel.lod.core.api.internal.a7.ClientApi;
+import com.seibel.lod.core.api.internal.a7.ServerApi;
+import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
@@ -30,8 +32,10 @@ import com.seibel.lod.common.wrappers.world.WorldWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
+import dev.architectury.init.fabric.ArchitecturyClient;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.client.Minecraft;
@@ -57,7 +61,7 @@ import org.lwjgl.glfw.GLFW;
  */
 public class ClientProxy
 {
-	private final EventApi eventApi = EventApi.INSTANCE;
+	private final ServerApi serverApi = ServerApi.INSTANCE;
 	private final ClientApi clientApi = ClientApi.INSTANCE;
 
 	public static Supplier<Boolean> isGenerationThreadChecker = null;
@@ -69,92 +73,50 @@ public class ClientProxy
 	public void registerEvents() {
 		/* Register the mod accessor*/
 
-		/* World Events */
-		//ServerTickEvents.START_SERVER_TICK.register(this::serverTickEvent);
-		ServerTickEvents.END_SERVER_TICK.register(this::serverTickEvent);
-
-		/* World Events */
-		//ServerChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
+		//TODO: ClientChunkLoadEvent
 		#if PRE_MC_1_18_1 // in 1.18+, we use mixin hook in setClientLightReady(true)
 		ClientChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
 		#endif
+		//TODO: ClientChunkSaveEvent
 
-		/* World Events */
-		ServerWorldEvents.LOAD.register((server, level) -> this.worldLoadEvent(level));
-		ServerWorldEvents.UNLOAD.register((server, level) -> this.worldUnloadEvent(level));
-		
-		/* The Client World Events are in the mixins
+		/* The Client Level Events are in the mixins
 		Client world load event is in MixinClientLevel
-		Client world unload event is in MixinMinecraft */
-		/* The save events are in MixinServerLevel */
+		Client world unload event is in ??? */
+		//TODO: ClientLevelLoadEvent
+		//TODO: ClientLevelUnloadEvent
+
+		//TODO: ClientRenderInitEvent
+		//TODO: ClientRenderFreeEvent
+		//TODO: ClientRenderStartEvent
+		//TODO: ClientRenderLevelTerrainEvent
+		WorldRenderEvents.AFTER_SETUP.register((renderContext) -> {
+			clientApi.renderLods(getLevelWrapper(renderContext.world()),
+					McObjectConverter.Convert(renderContext.projectionMatrix()),
+					McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
+					renderContext.tickDelta());
+		});
 
 		/* Keyboard Events */
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			if (client.player != null) onKeyInput();
+			if (client.player != null && isValidTime()) onKeyInput();
 		});
 		isGenerationThreadChecker = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
-
 	}
 
-
-	public void serverTickEvent(MinecraftServer server)
-	{
-		eventApi.serverTickEvent();
+	private boolean isValidTime() {
+		return !(Minecraft.getInstance().screen instanceof TitleScreen);
+	}
+	private WorldWrapper getLevelWrapper(Level level) {
+		return WorldWrapper.getWorldWrapper(level);
 	}
 
-	public void chunkLoadEvent(LevelAccessor level, LevelChunk chunk)
-	{
-		clientApi.clientChunkLoadEvent(new ChunkWrapper(chunk, level),
-				WorldWrapper.getWorldWrapper(level));
-	}
-
-	public void worldSaveEvent()
-	{
-		eventApi.worldSaveEvent();
-	}
-	
-	/** This is also called when a new dimension loads */
-	public void worldLoadEvent(Level level)
-	{
-		if (Minecraft.getInstance().screen instanceof TitleScreen) return;
-		if (level != null) {
-			eventApi.worldLoadEvent(WorldWrapper.getWorldWrapper(level));
-		}
-	}
-
-	public void worldUnloadEvent(Level level)
-	{
-		if (level != null) {
-			eventApi.worldUnloadEvent(WorldWrapper.getWorldWrapper(level));
-		}
-	}
-
-	/**
-	 * Can someone tell me how to make this better
-	 * @author Ran
-	 *
-	 * public void blockChangeEvent(BlockEventData event) {
-	 * 		// we only care about certain block events
-	 * 		if (event.getClass() == BlockEventData.BreakEvent.class ||
-	 * 				event.getClass() == BlockEventData.EntityPlaceEvent.class ||
-	 * 				event.getClass() == BlockEventData.EntityMultiPlaceEvent.class ||
-	 * 				event.getClass() == BlockEventData.FluidPlaceBlockEvent.class ||
-	 * 				event.getClass() == BlockEventData.PortalSpawnEvent.class)
-	 *        {
-	 * 			IChunkWrapper chunk = new ChunkWrapper(event.getWorld().getChunk(event.getPos()));
-	 * 			DimensionTypeWrapper dimType = DimensionTypeWrapper.getDimensionTypeWrapper(event.getWorld().dimensionType());
-	 *
-	 * 			// recreate the LOD where the blocks were changed
-	 * 			eventApi.blockChangeEvent(chunk, dimType);
-	 *        }
-	 * }
-	 */
 	public void blockChangeEvent(LevelAccessor world, BlockPos pos) {
+		if (!isValidTime()) return;
 		IChunkWrapper chunk = new ChunkWrapper(world.getChunk(pos), world);
 		DimensionTypeWrapper dimType = DimensionTypeWrapper.getDimensionTypeWrapper(world.dimensionType());
 
 		// recreate the LOD where the blocks were changed
-		eventApi.blockChangeEvent(chunk, dimType);
+		// TODO: serverApi.blockChangeEvent(chunk, dimType);
 	}
 
 	private static final int[] KEY_TO_CHECK_FOR = {GLFW.GLFW_KEY_F6, GLFW.GLFW_KEY_F8};
@@ -162,8 +124,7 @@ public class ClientProxy
 	HashSet<Integer> previousKeyDown = new HashSet<Integer>();
 	
 	public void onKeyInput() {
-		ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
-		if (CONFIG.client().advanced().debugging().getDebugKeybindingsEnabled())
+		if (Config.Client.Advanced.Debugging.enableDebugKeybindings.get())
 		{
 			HashSet<Integer> currentKeyDown = new HashSet<Integer>();
 			
@@ -180,14 +141,12 @@ public class ClientProxy
 					currentKeyDown.add(i);
 				}
 			}
-			
 			// Diff and trigger events
 			for (int c : currentKeyDown) {
 				if (!previousKeyDown.contains(c)) {
 					ClientApi.INSTANCE.keyPressedEvent(c);
 				}
 			}
-			
 			// Update the set
 			previousKeyDown = currentKeyDown;
 		}
