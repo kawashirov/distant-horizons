@@ -81,7 +81,6 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 	private static final Minecraft MC = Minecraft.getInstance();
-	private static final GameRenderer GAME_RENDERER = MC.gameRenderer;
 	private static final IWrapperFactory FACTORY = WrapperFactory.INSTANCE;
 
 	public LightMapWrapper lightmap = null;
@@ -89,7 +88,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public Vec3f getLookAtVector()
 	{
-		Camera camera = GAME_RENDERER.getMainCamera();
+		Camera camera = MC.gameRenderer.getMainCamera();
 		Vector3f cameraDir = camera.getLookVector();
 		return new Vec3f(cameraDir.x(), cameraDir.y(), cameraDir.z());
 	}
@@ -97,7 +96,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public DHBlockPos getCameraBlockPosition()
 	{
-		Camera camera = GAME_RENDERER.getMainCamera();
+		Camera camera = MC.gameRenderer.getMainCamera();
 		BlockPos blockPos = camera.getBlockPosition();
 		return new DHBlockPos(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 	}
@@ -111,7 +110,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public Vec3d getCameraExactPosition()
 	{
-		Camera camera = GAME_RENDERER.getMainCamera();
+		Camera camera = MC.gameRenderer.getMainCamera();
 		Vec3 projectedView = camera.getPosition();
 		
 		return new Vec3d(projectedView.x, projectedView.y, projectedView.z);
@@ -123,7 +122,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		#if PRE_MC_1_17_1
 		return McObjectConverter.Convert(GAME_RENDERER.getProjectionMatrix(GAME_RENDERER.getMainCamera(), partialTicks, true));
 		#else
-		return McObjectConverter.Convert(GAME_RENDERER.getProjectionMatrix(GAME_RENDERER.getFov(GAME_RENDERER.getMainCamera(), partialTicks, true)));
+		return McObjectConverter.Convert(MC.gameRenderer.getProjectionMatrix(MC.gameRenderer.getFov(MC.gameRenderer.getMainCamera(), partialTicks, true)));
 		#endif
 	}
 	
@@ -140,7 +139,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		float[] colorValues = new float[4];
 		GL15.glGetFloatv(GL15.GL_FOG_COLOR, colorValues);
 		#else
-		FogRenderer.setupColor(GAME_RENDERER.getMainCamera(), partialTicks, MC.level, 1, GAME_RENDERER.getDarkenWorldAmount(partialTicks));
+		FogRenderer.setupColor(MC.gameRenderer.getMainCamera(), partialTicks, MC.level, 1, MC.gameRenderer.getDarkenWorldAmount(partialTicks));
 		float[] colorValues = RenderSystem.getShaderFogColor();
 		#endif
 		return new Color(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
@@ -163,7 +162,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public double getFov(float partialTicks)
 	{
-		return GAME_RENDERER.getFov(GAME_RENDERER.getMainCamera(), partialTicks, true);
+		return MC.gameRenderer.getFov(MC.gameRenderer.getMainCamera(), partialTicks, true);
 	}
 	
 	/** Measured in chunks */
@@ -275,9 +274,9 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 			isUnderWater |= fluidState.is(FluidTags.LAVA);
 		return isUnderWater;
 		#else
-		Entity entity = GAME_RENDERER.getMainCamera().getEntity();
+		Entity entity = MC.gameRenderer.getMainCamera().getEntity();
 		boolean isBlind = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
-		return GAME_RENDERER.getMainCamera().getFluidInCamera() != FogType.NONE || isBlind;
+		return MC.gameRenderer.getMainCamera().getFluidInCamera() != FogType.NONE || isBlind;
 		#endif
 	}
 	

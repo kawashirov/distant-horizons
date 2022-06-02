@@ -51,7 +51,7 @@ public class FabricServerProxy {
         /* Register the mod needed event callbacks */
 
         // TEST EVENT
-        ServerTickEvents.END_SERVER_TICK.register(this::tester);
+        //ServerTickEvents.END_SERVER_TICK.register(this::tester);
 
         // ServerTickEvent
         ServerTickEvents.END_SERVER_TICK.register((server) -> serverApi.serverTickEvent());
