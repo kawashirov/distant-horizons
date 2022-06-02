@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPacketListener.class)
 public class MixinClientPacketListener {
@@ -21,30 +22,26 @@ public class MixinClientPacketListener {
      * Also anyone can send another GameJoinPacket at any time, so we need to watch out.
      */
     @Inject(method = "handleLogin", at = @At("HEAD"))
-    void onHandleLoginStart() {
+    void onHandleLoginStart(CallbackInfo ci) {
         if (level != null) ClientApi.INSTANCE.clientLevelUnloadEvent(WorldWrapper.getWorldWrapper(level));
     }
 
     @Inject(method = "handleLogin", at = @At("RETURN"))
-    void onHandleLoginEnd() {
+    void onHandleLoginEnd(CallbackInfo ci) {
         ClientApi.INSTANCE.clientLevelLoadEvent(WorldWrapper.getWorldWrapper(level));
     }
 
     @Inject(method = "handleRespawn", at = @At("HEAD"))
-    void onHandleRespawnStart() {
+    void onHandleRespawnStart(CallbackInfo ci) {
         ClientApi.INSTANCE.clientLevelUnloadEvent(WorldWrapper.getWorldWrapper(level));
     }
     @Inject(method = "handleRespawn", at = @At("RETURN"))
-    void onHandleRespawnEnd() {
+    void onHandleRespawnEnd(CallbackInfo ci) {
         ClientApi.INSTANCE.clientLevelLoadEvent(WorldWrapper.getWorldWrapper(level));
     }
 
     @Inject(method = "cleanup", at = @At("HEAD"))
-    void onCleanupStart() {
+    void onCleanupStart(CallbackInfo ci) {
         if (level != null) ClientApi.INSTANCE.clientLevelUnloadEvent(WorldWrapper.getWorldWrapper(level));
     }
-
-
-
-
 }

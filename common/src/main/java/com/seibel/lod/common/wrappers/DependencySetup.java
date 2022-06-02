@@ -21,6 +21,7 @@ package com.seibel.lod.common.wrappers;
 
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.wrappers.config.ConfigWrapper;
+import com.seibel.lod.core.api.internal.a7.SharedApi;
 import com.seibel.lod.core.wrapperInterfaces.config.IConfigWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftRenderWrapper;
@@ -47,11 +48,11 @@ public class DependencySetup {
     {
         SingletonHandler.bind(IConfigWrapper.class, ConfigWrapper.INSTANCE);
         SingletonHandler.bind(IVersionConstants.class, VersionConstants.INSTANCE);
-        if (!LodCommonMain.serverSided)
+        if (!SharedApi.inDedicatedEnvironment)
         {
             SingletonHandler.bind(IMinecraftClientWrapper.class, MinecraftClientWrapper.INSTANCE);
             SingletonHandler.bind(IMinecraftRenderWrapper.class, MinecraftRenderWrapper.INSTANCE);
-            SingletonHandler.bind(IReflectionHandler.class, ReflectionHandler.createSingleton(MinecraftClientWrapper.INSTANCE.getOptions().getClass().getDeclaredFields(), MinecraftClientWrapper.INSTANCE.getOptions()));
+            SingletonHandler.bind(IReflectionHandler.class, ReflectionHandler.createSingleton());
         }
 
         SingletonHandler.bind(IWrapperFactory.class, WrapperFactory.INSTANCE);

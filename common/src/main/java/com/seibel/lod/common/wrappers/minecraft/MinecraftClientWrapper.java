@@ -197,11 +197,6 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
         return new DHChunkPos(playerPos.x, playerPos.z);
     }
 
-    public Options getOptions()
-    {
-        return mc.options;
-    }
-
     public ModelManager getModelManager()
     {
         return mc.getModelManager();
@@ -382,6 +377,17 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
         LOGGER.error(ModInfo.READABLE_NAME + " had the following error: [" + errorMessage + "]. Crashing Minecraft...");
         CrashReport report = new CrashReport(errorMessage, exception);
         Minecraft.crash(report);
+    }
+
+    @Override
+    public Object getOptionsObject()
+    {
+        return mc.options;
+    }
+
+    @Override
+    public File getSinglePlayerServerFolder() {
+        return mc.getSingleplayerServer().getServerDirectory();
     }
 
 

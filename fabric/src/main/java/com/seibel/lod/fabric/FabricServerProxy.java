@@ -4,6 +4,8 @@ import com.seibel.lod.common.networking.Networking;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
 import com.seibel.lod.core.api.internal.a7.ServerApi;
+import com.seibel.lod.core.logging.DhLoggerBuilder;
+import com.seibel.lod.core.objects.a7.Server;
 import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
@@ -17,6 +19,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This handles all events sent to the server,
@@ -29,6 +32,7 @@ import net.minecraft.world.level.Level;
 // TODO
 public class FabricServerProxy {
     private final ServerApi serverApi = ServerApi.INSTANCE;
+    private static final Logger LOGGER = DhLoggerBuilder.getLogger("FabricServerProxy");
 
     private boolean isValidTime() {
         //FIXME: return true immediately if this is a dedicated server
@@ -42,6 +46,7 @@ public class FabricServerProxy {
      * @author Ran, Tom
      */
     public void registerEvents() {
+        LOGGER.info("Registering Fabric Server Events");
 
         /* Register the mod needed event callbacks */
 
@@ -53,11 +58,11 @@ public class FabricServerProxy {
 
         // ServerWorldLoadEvent
         //TODO: Check if both of this use the correct timed events. (i.e. is it 'ed' or 'ing' one?)
-        ServerLifecycleEvents.SERVER_STARTED.register((server) -> {
+        ServerLifecycleEvents.SERVER_STARTING.register((server) -> {
             if (isValidTime()) ServerApi.INSTANCE.serverWorldLoadEvent();
         });
         // ServerWorldUnloadEvent
-        ServerLifecycleEvents.SERVER_STOPPING.register((server) -> {
+        ServerLifecycleEvents.SERVER_STOPPED.register((server) -> {
             if (isValidTime()) ServerApi.INSTANCE.serverWorldUnloadEvent();
         });
 

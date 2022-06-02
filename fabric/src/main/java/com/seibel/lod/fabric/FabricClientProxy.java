@@ -27,6 +27,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
 
+import com.seibel.lod.core.logging.DhLoggerBuilder;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
@@ -37,6 +38,7 @@ import net.minecraft.world.level.Level;
 import java.util.HashSet;
 import java.util.function.Supplier;
 
+import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -50,6 +52,7 @@ import org.lwjgl.glfw.GLFW;
 public class FabricClientProxy
 {
 	private final ClientApi clientApi = ClientApi.INSTANCE;
+	private static final Logger LOGGER = DhLoggerBuilder.getLogger("FabricClientProxy");
 
 	public static Supplier<Boolean> isGenerationThreadChecker = null;
 
@@ -58,6 +61,8 @@ public class FabricClientProxy
 	 * @author Ran
 	 */
 	public void registerEvents() {
+		LOGGER.info("Registering Fabric Client Events");
+
 		isGenerationThreadChecker = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
 
 		/* Register the mod needed event callbacks */

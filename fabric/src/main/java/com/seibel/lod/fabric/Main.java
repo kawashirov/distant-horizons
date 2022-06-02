@@ -67,17 +67,28 @@ public class Main implements ClientModInitializer, DedicatedServerModInitializer
 	@Override
 	public void onInitializeClient() {
 		SharedApi.inDedicatedEnvironment = false;
-		ClientLifecycleEvents.CLIENT_STARTED.register(Main::init);
+		init();
+		ClientLifecycleEvents.CLIENT_STARTED.register(Main::postInit);
 	}
 
 	@Override
 	public void onInitializeServer() {
 		SharedApi.inDedicatedEnvironment = true;
-		init(null); // TODO: Check if init in here is ok
+		init();
+		postInit(null); // TODO: Check if init in here is ok
 	}
 
+	public static void postInit(Minecraft minecraft) {
+		LOGGER.info("Post-Initializing Mod");
+		FabricDependencySetup.runDelayedSetup();
+		LOGGER.info("Mod Post-Initialized");
+	}
+
+
+
 	// This loads the mod after minecraft loads which doesn't causes a lot of issues
-	public static void init(Minecraft minecraft) {
+	public static void init() {
+		LOGGER.info("Initializing Mod");
 		LodCommonMain.startup(null);
 		FabricDependencySetup.createInitialBindings();
 		FabricDependencySetup.finishBinding();
@@ -100,5 +111,6 @@ public class Main implements ClientModInitializer, DedicatedServerModInitializer
 			ModAccessorHandler.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
 		ModAccessorHandler.finishBinding();
+		LOGGER.info("Mod Initialized");
 	}
 }

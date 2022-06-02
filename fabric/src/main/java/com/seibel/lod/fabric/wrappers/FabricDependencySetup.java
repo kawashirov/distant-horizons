@@ -47,4 +47,8 @@ public class FabricDependencySetup
 	public static void finishBinding() {
 		SingletonHandler.finishBinding();
 	}
+
+	public static void runDelayedSetup() {
+		SingletonHandler.runDelayedSetup();
+	}
 }
