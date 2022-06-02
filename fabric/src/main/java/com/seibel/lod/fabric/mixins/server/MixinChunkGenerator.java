@@ -17,7 +17,7 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-package com.seibel.lod.fabric.mixins;
+package com.seibel.lod.fabric.mixins.server;
 
 import org.spongepowered.asm.mixin.Mixin;
 import net.minecraft.world.level.chunk.ChunkGenerator;

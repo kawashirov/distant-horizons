@@ -17,11 +17,12 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.seibel.lod.fabric.mixins;
+package com.seibel.lod.fabric.mixins.client;
 
 import com.seibel.lod.common.wrappers.config.GetConfigScreen;
 import com.seibel.lod.common.wrappers.config.TexturedButtonWidget;
 import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import net.minecraft.client.gui.screens.OptionsScreen;
@@ -52,7 +53,7 @@ public class MixinOptionsScreen extends Screen {
 
     @Inject(at = @At("HEAD"),method = "init")
     private void lodconfig$init(CallbackInfo ci) {
-        if (SingletonHandler.get(ILodConfigWrapperSingleton.class).client().getOptionsButton())
+        if (Config.Client.optionsButton.get())
             this. #if PRE_MC_1_17_1 addButton #else addRenderableWidget #endif
                 (new TexturedButtonWidget(
                 // Where the button is on the screen

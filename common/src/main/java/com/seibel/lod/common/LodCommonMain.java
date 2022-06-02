@@ -31,11 +31,8 @@ import com.seibel.lod.core.config.ConfigBase;
  */
 public class LodCommonMain {
     public static boolean forge = false;
-    public static boolean serverSided;
     public static LodForgeMethodCaller forgeMethodCaller;
-
-    public static void startup(LodForgeMethodCaller caller, boolean serverSided) {
-        LodCommonMain.serverSided = serverSided;
+    public static void startup(LodForgeMethodCaller caller) {
         if (caller != null) {
             LodCommonMain.forge = true;
             forgeMethodCaller = caller;
@@ -43,13 +40,12 @@ public class LodCommonMain {
 
         DependencySetup.createInitialBindings();
 
-        if (!serverSided) {
-            new NetworkReceiver().register_Client();
-        } else {
-            new NetworkReceiver().register_Server();
-        }
+//        if (!serverSided) {
+//            new NetworkReceiver().register_Client();
+//        } else {
+//            new NetworkReceiver().register_Server();
+//        }
     }
-
 
     public static void initConfig() {
         ConfigBase.init(Config.class);

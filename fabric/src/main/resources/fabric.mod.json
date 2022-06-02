@@ -16,11 +16,15 @@
   "license": "LGPL",
   "icon": "icon.png",
 
-  "environment": "client",
+  "environment": "*",
   "entrypoints": {
     "client": [
       "com.seibel.lod.fabric.Main"
     ],
+    "server": [
+      "com.seibel.lod.fabric.Main"
+    ],
+
     "modmenu": [
       "com.seibel.lod.fabric.wrappers.config.ModMenuIntegration"
     ]

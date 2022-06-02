@@ -27,9 +27,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(DedicatedServer.class)
+@Deprecated // Please use the OnServerLoadEvent in core instead, or
+            // the ServerLifecycleEvents in Fabric
 public class MixinDedicatedServer {
-    @Inject(method = "initServer", at = @At("TAIL"))
-    public void initServer(CallbackInfoReturnable<Boolean> cir) {
-        Main.initServer();
-    }
+//    @Inject(method = "initServer", at = @At("TAIL"))
+//    public void initServer(CallbackInfoReturnable<Boolean> cir) {
+//        Main.initServer();
+//    }
 }

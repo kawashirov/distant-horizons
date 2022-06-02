@@ -3,25 +3,19 @@
   "minVersion": "0.8",
   "package": "com.seibel.lod.fabric.mixins",
   "mixins": [
-    "unsafe.MixinThreadingDectector",
-    "MixinUtilBackgroudThread",
-    "events.MixinServerLevel"
+    "server.unsafe.MixinThreadingDectector",
+    "server.MixinChunkGenerator",
+    "server.MixinChunkMap",
+    "server.MixinUtilBackgroudThread"
   ],
   "client": [
-    "MixinMinecraft",
-    "MixinOptionsScreen",
-    "MixinWorldRenderer",
-    "MixinFogRenderer",
-    "MixinChunkGenerator",
-    "MixinDebugScreenOverlay",
-    "events.MixinClientLevel",
-    "events.MixinMinecraft",
-    "events.MixinBlockUpdate",
-    "events.MixinLightmap",
-    "client.MixinGameRenderer"
-  ],
-  "server": [
-    "MixinDedicatedServer"
+    "client.MixinClientLevel",
+    "client.MixinClientPacketListener",
+    "client.MixinDebugScreenOverlay",
+    "client.MixinFogRenderer",
+    "client.MixinGameRenderer",
+    "client.MixinLightmap",
+    "client.MixinOptionsScreen"
   ],
   "injectors": {
     "defaultRequire": 1

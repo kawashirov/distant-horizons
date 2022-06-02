@@ -39,23 +39,40 @@ public class FabricServerProxy {
     }
     /**
      * Registers Fabric Events
-     * @author Ran
+     * @author Ran, Tom
      */
     public void registerEvents() {
+
+        /* Register the mod needed event callbacks */
+
+        // TEST EVENT
         ServerTickEvents.END_SERVER_TICK.register(this::tester);
-        /* World Events */
+
+        // ServerTickEvent
         ServerTickEvents.END_SERVER_TICK.register((server) -> serverApi.serverTickEvent());
 
-        /* Server World Events */
+        // ServerWorldLoadEvent
+        //TODO: Check if both of this use the correct timed events. (i.e. is it 'ed' or 'ing' one?)
+        ServerLifecycleEvents.SERVER_STARTED.register((server) -> {
+            if (isValidTime()) ServerApi.INSTANCE.serverWorldLoadEvent();
+        });
+        // ServerWorldUnloadEvent
+        ServerLifecycleEvents.SERVER_STOPPING.register((server) -> {
+            if (isValidTime()) ServerApi.INSTANCE.serverWorldUnloadEvent();
+        });
+
+        // ServerLevelLoadEvent
         ServerWorldEvents.LOAD.register((server, level)
                 -> {
             if (isValidTime()) ServerApi.INSTANCE.serverLevelLoadEvent(getLevelWrapper(level));
         });
+        // ServerLevelUnloadEvent
         ServerWorldEvents.UNLOAD.register((server, level)
                 -> {
             if (isValidTime()) ServerApi.INSTANCE.serverLevelUnloadEvent(getLevelWrapper(level));
         });
 
+        // ServerChunkLoadEvent
         ServerChunkEvents.CHUNK_LOAD.register((server, chunk)
                 -> {
             IWorldWrapper level = getLevelWrapper(chunk.getLevel());
@@ -64,15 +81,7 @@ public class FabricServerProxy {
                     level);
                 }
         );
-        //TODO: ServerChunkSaveEvent
-
-        //TODO: Check if both of this use the correct timed events. (i.e. is it 'ed' or 'ing' one?)
-        ServerLifecycleEvents.SERVER_STARTED.register((server) -> {
-            if (isValidTime()) ServerApi.INSTANCE.serverWorldLoadEvent();
-        });
-        ServerLifecycleEvents.SERVER_STOPPING.register((server) -> {
-            if (isValidTime()) ServerApi.INSTANCE.serverWorldUnloadEvent();
-        });
+        // ServerChunkSaveEvent - Done in MixinChunkMap
     }
 
     // This just exists here for testing purposes, it'll be removed in the future

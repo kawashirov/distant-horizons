@@ -22,29 +22,17 @@ package com.seibel.lod.fabric;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.core.api.internal.a7.ClientApi;
-import com.seibel.lod.core.api.internal.a7.ServerApi;
 import com.seibel.lod.core.config.Config;
-import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
-import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
-import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
-import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 
-import dev.architectury.init.fabric.ArchitecturyClient;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.util.HashSet;
 import java.util.function.Supplier;
@@ -59,9 +47,8 @@ import org.lwjgl.glfw.GLFW;
  * @author Ran
  * @version 11-23-2021
  */
-public class ClientProxy
+public class FabricClientProxy
 {
-	private final ServerApi serverApi = ServerApi.INSTANCE;
 	private final ClientApi clientApi = ClientApi.INSTANCE;
 
 	public static Supplier<Boolean> isGenerationThreadChecker = null;
@@ -71,36 +58,51 @@ public class ClientProxy
 	 * @author Ran
 	 */
 	public void registerEvents() {
-		/* Register the mod accessor*/
+		isGenerationThreadChecker = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
 
-		//TODO: ClientChunkLoadEvent
-		#if PRE_MC_1_18_1 // in 1.18+, we use mixin hook in setClientLightReady(true)
-		ClientChunkEvents.CHUNK_LOAD.register(this::chunkLoadEvent);
-		#endif
-		//TODO: ClientChunkSaveEvent
+		/* Register the mod needed event callbacks */
 
-		/* The Client Level Events are in the mixins
-		Client world load event is in MixinClientLevel
-		Client world unload event is in ??? */
-		//TODO: ClientLevelLoadEvent
-		//TODO: ClientLevelUnloadEvent
-
-		//TODO: ClientRenderInitEvent
-		//TODO: ClientRenderFreeEvent
-		//TODO: ClientRenderStartEvent
-		//TODO: ClientRenderLevelTerrainEvent
-		WorldRenderEvents.AFTER_SETUP.register((renderContext) -> {
-			clientApi.renderLods(getLevelWrapper(renderContext.world()),
-					McObjectConverter.Convert(renderContext.projectionMatrix()),
-					McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
-					renderContext.tickDelta());
+		// ClientTickEvent
+		ClientTickEvents.START_CLIENT_TICK.register((client) -> {
+			ClientApi.INSTANCE.clientTickEvent();
 		});
 
-		/* Keyboard Events */
+		// ClientLevelLoadEvent - Done in MixinClientPacketListener
+		// ClientLevelUnloadEvent - Done in MixinClientPacketListener
+
+		// ClientChunkLoadEvent
+		// TODO: Is using setClientLightReady one still better?
+		//#if PRE_MC_1_18_1 // in 1.18+, we use mixin hook in setClientLightReady(true)
+		ClientChunkEvents.CHUNK_LOAD.register((level, chunk) ->
+				ClientApi.INSTANCE.clientChunkLoadEvent(
+						new ChunkWrapper(chunk, level),
+						WorldWrapper.getWorldWrapper(level)
+				));
+		//#endif
+		// ClientChunkSaveEvent
+		ClientChunkEvents.CHUNK_UNLOAD.register((level, chunk)->
+				ClientApi.INSTANCE.clientChunkSaveEvent(
+						new ChunkWrapper(chunk, level),
+						WorldWrapper.getWorldWrapper(level)
+				));
+
+		// RendererStartupEvent - Done in MixinGameRenderer
+		// RendererShutdownEvent - Done in MixinGameRenderer
+
+
+		// ClientRenderLevelTerrainEvent
+		WorldRenderEvents.AFTER_SETUP.register((renderContext) ->
+				clientApi.renderLods(getLevelWrapper(renderContext.world()),
+				McObjectConverter.Convert(renderContext.projectionMatrix()),
+				McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
+				renderContext.tickDelta())
+		);
+
+		// Debug keyboard event
+		// FIXME: Use better hooks so it doesn't trigger even in text boxes
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (client.player != null && isValidTime()) onKeyInput();
 		});
-		isGenerationThreadChecker = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
 	}
 
 	private boolean isValidTime() {
@@ -110,14 +112,14 @@ public class ClientProxy
 		return WorldWrapper.getWorldWrapper(level);
 	}
 
-	public void blockChangeEvent(LevelAccessor world, BlockPos pos) {
-		if (!isValidTime()) return;
-		IChunkWrapper chunk = new ChunkWrapper(world.getChunk(pos), world);
-		DimensionTypeWrapper dimType = DimensionTypeWrapper.getDimensionTypeWrapper(world.dimensionType());
-
-		// recreate the LOD where the blocks were changed
-		// TODO: serverApi.blockChangeEvent(chunk, dimType);
-	}
+//	public void blockChangeEvent(LevelAccessor world, BlockPos pos) {
+//		if (!isValidTime()) return;
+//		IChunkWrapper chunk = new ChunkWrapper(world.getChunk(pos), world);
+//		DimensionTypeWrapper dimType = DimensionTypeWrapper.getDimensionTypeWrapper(world.dimensionType());
+//
+//		// recreate the LOD where the blocks were changed
+//		// TODO: serverApi.blockChangeEvent(chunk, dimType);
+//	}
 
 	private static final int[] KEY_TO_CHECK_FOR = {GLFW.GLFW_KEY_F6, GLFW.GLFW_KEY_F8};
 	

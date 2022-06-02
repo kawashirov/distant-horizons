@@ -36,11 +36,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * @author Ran
  */
 @Mixin(ClientboundBlockUpdatePacket.class)
+@Deprecated
 public abstract class MixinBlockUpdate {
     @Shadow public abstract BlockPos getPos();
 
-    @Inject(method = "handle(Lnet/minecraft/network/protocol/game/ClientGamePacketListener;)V", at = @At("TAIL"))
-    private void onBlockUpdate(ClientGamePacketListener clientGamePacketListener, CallbackInfo ci) {
-        Main.client_proxy.blockChangeEvent(Minecraft.getInstance().player.clientLevel, this.getPos());
-    }
+    //TODO: Check if this event will be needed in new reworked system
+//    @Inject(method = "handle(Lnet/minecraft/network/protocol/game/ClientGamePacketListener;)V", at = @At("TAIL"))
+//    private void onBlockUpdate(ClientGamePacketListener clientGamePacketListener, CallbackInfo ci) {
+//        Main.client_proxy.blockChangeEvent(Minecraft.getInstance().player.clientLevel, this.getPos());
+//    }
 }

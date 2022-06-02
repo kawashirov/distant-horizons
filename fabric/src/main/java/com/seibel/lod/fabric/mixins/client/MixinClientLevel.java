@@ -47,20 +47,20 @@ import java.util.function.Supplier;
  * This class is used for world loading events
  * @author Ran
  *
- * FIXME: Why does forge not have the 1.18+ onChunkLightReady mixin?
  */
 
 @Mixin(ClientLevel.class)
 public class MixinClientLevel {
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void loadWorldEvent(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey,
-            #if POST_MC_1_18_2 Holder holder, #else DimensionType dimensionType, #endif int i,
-            #if POST_MC_1_18_1 int j, #endif Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci) {
-        SharedApi.LOGGER.info("Loading level: " + WorldWrapper.getWorldWrapper((ClientLevel)(Object)this));
-        ClientApi.INSTANCE.clientLevelLoadEvent(WorldWrapper.getWorldWrapper((ClientLevel)(Object)this));
-    }
+    //Moved to MixinClientPacketListener
+//    @Inject(method = "<init>", at = @At("TAIL"))
+//    private void loadWorldEvent(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey,
+//            #if POST_MC_1_18_2 Holder holder, #else DimensionType dimensionType, #endif int i,
+//            #if POST_MC_1_18_1 int j, #endif Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci) {
+//        SharedApi.LOGGER.info("Loading level: " + WorldWrapper.getWorldWrapper((ClientLevel)(Object)this));
+//        ClientApi.INSTANCE.clientLevelLoadEvent(WorldWrapper.getWorldWrapper((ClientLevel)(Object)this));
+//    }
 
-	#if POST_MC_1_18_1
+	#if POST_MC_1_18_1 // Only the setLightReady is only available after 1.18. This ensure light data is ready.
     @Inject(method = "setLightReady", at = @At("HEAD"))
     private void onChunkLightReady(int x, int z, CallbackInfo ci) {
     	ClientLevel l = (ClientLevel) (Object) this;

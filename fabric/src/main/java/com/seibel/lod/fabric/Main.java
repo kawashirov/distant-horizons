@@ -21,7 +21,7 @@ package com.seibel.lod.fabric;
 
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
-import com.seibel.lod.core.api.internal.InternalApiShared;
+import com.seibel.lod.core.api.internal.a7.SharedApi;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
@@ -35,6 +35,9 @@ import com.seibel.lod.fabric.wrappers.modAccessor.StarlightAccessor;
 import com.seibel.lod.fabric.wrappers.FabricDependencySetup;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.DedicatedServerModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.minecraft.client.Minecraft;
 import org.apache.logging.log4j.Logger;
 
 import java.lang.invoke.MethodHandles;
@@ -48,14 +51,14 @@ import java.lang.invoke.MethodHandles;
  * @author Ran
  * @version 12-1-2021
  */
-public class Main implements ClientModInitializer
+public class Main implements ClientModInitializer, DedicatedServerModInitializer
 {
 	// This is a client mod so it should implement ClientModInitializer and in fabric.mod.json it should have "environment": "client"
 	// Once it works on servers change the implement to ModInitializer and in fabric.mod.json it should be "environment": "*"
 	
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 	
-	public static ClientProxy client_proxy;
+	public static FabricClientProxy client_proxy;
 	public static FabricServerProxy server_proxy;
 
 
@@ -63,20 +66,30 @@ public class Main implements ClientModInitializer
 	// This loads the mod before minecraft loads which causes a lot of issues
 	@Override
 	public void onInitializeClient() {
-		// no.
+		SharedApi.inDedicatedEnvironment = false;
+		ClientLifecycleEvents.CLIENT_STARTED.register(Main::init);
+	}
+
+	@Override
+	public void onInitializeServer() {
+		SharedApi.inDedicatedEnvironment = true;
+		init(null); // TODO: Check if init in here is ok
 	}
 
 	// This loads the mod after minecraft loads which doesn't causes a lot of issues
-	public static void init() {
-		LodCommonMain.startup(null, false);
+	public static void init(Minecraft minecraft) {
+		LodCommonMain.startup(null);
 		FabricDependencySetup.createInitialBindings();
 		FabricDependencySetup.finishBinding();
 		LodCommonMain.initConfig();
 		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
+		if (!SharedApi.inDedicatedEnvironment) {
+			client_proxy = new FabricClientProxy();
+			client_proxy.registerEvents();
+		}
+		server_proxy = new FabricServerProxy();
+		server_proxy.registerEvents();
 
-		// Check if this works
-		client_proxy = new ClientProxy();
-		client_proxy.registerEvents();
 		if (SingletonHandler.get(IModChecker.class).isModLoaded("sodium")) {
 			ModAccessorHandler.bind(ISodiumAccessor.class, new SodiumAccessor());
 		}
@@ -86,17 +99,6 @@ public class Main implements ClientModInitializer
 		if (SingletonHandler.get(IModChecker.class).isModLoaded("optifine")) {
 			ModAccessorHandler.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
-
 		ModAccessorHandler.finishBinding();
-	}
-
-	public static void initServer() {
-		LodCommonMain.startup(null, true);
-		FabricDependencySetup.createInitialBindings();
-		FabricDependencySetup.finishBinding();
-		server_proxy = new FabricServerProxy();
-		server_proxy.registerEvents();
-		LodCommonMain.initConfig();
-		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 	}
 }

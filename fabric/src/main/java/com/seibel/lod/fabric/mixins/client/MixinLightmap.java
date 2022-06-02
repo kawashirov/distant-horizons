@@ -1,4 +1,4 @@
-package com.seibel.lod.fabric.mixins.events;
+package com.seibel.lod.fabric.mixins.client;
 
 
 import com.mojang.blaze3d.platform.NativeImage;

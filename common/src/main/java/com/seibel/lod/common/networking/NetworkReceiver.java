@@ -30,6 +30,8 @@ import net.minecraft.network.FriendlyByteBuf;
 /**
  * @author Ran
  */
+// Comment: What does the 'server' side mean? Dedicated server? Or does it include the internal server?
+// (I removed the hookup that calls the register method, since I'm not sure what it is doing yet)
 public class NetworkReceiver {
     public void register_Client() {
         NetworkManager.registerReceiver(NetworkManager.serverToClient(), Networking.RESOURCE_LOCATION, new ClientReceiver());

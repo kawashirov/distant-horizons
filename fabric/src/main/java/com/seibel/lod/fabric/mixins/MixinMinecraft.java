@@ -32,9 +32,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * @author Ran
  */
 @Mixin(value = Minecraft.class)
+@Deprecated // Moved to using fabric lifecycle events
 public class MixinMinecraft {
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void startMod(GameConfig gameConfig, CallbackInfo ci) {
-        Main.init();
-    }
+//    @Inject(method = "<init>", at = @At("TAIL"))
+//    private void startMod(GameConfig gameConfig, CallbackInfo ci) {
+//        Main.init();
+//    }
 }

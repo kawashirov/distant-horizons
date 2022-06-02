@@ -17,8 +17,9 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-package com.seibel.lod.fabric.mixins;
+package com.seibel.lod.fabric.mixins.client;
 
+import com.seibel.lod.core.config.Config;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -42,7 +43,6 @@ import net.minecraft.world.level.material.FogType;
 
 @Mixin(FogRenderer.class)
 public class MixinFogRenderer {
-	private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 	
 	// Using this instead of Float.MAX_VALUE because Sodium don't like it.
 	private static final float A_REALLY_REALLY_BIG_VALUE = 420694206942069.F;
@@ -61,7 +61,7 @@ public class MixinFogRenderer {
 		Entity entity = camera.getEntity();
 		boolean isSpecialFog = (entity instanceof LivingEntity) && ((LivingEntity) entity).hasEffect(MobEffects.BLINDNESS);
 		if (!isSpecialFog && cameraNotInFluid && fogMode == FogMode.FOG_TERRAIN
-				&& CONFIG.client().graphics().fogQuality().getDisableVanillaFog())
+				&& Config.Client.Graphics.FogQuality.disableVanillaFog.get())
 		{
 			#if PRE_MC_1_17_1
 			RenderSystem.fogStart(A_REALLY_REALLY_BIG_VALUE);
