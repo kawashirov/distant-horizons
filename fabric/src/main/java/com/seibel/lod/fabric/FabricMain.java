@@ -51,7 +51,7 @@ import java.lang.invoke.MethodHandles;
  * @author Ran
  * @version 12-1-2021
  */
-public class Main implements ClientModInitializer, DedicatedServerModInitializer
+public class FabricMain implements ClientModInitializer, DedicatedServerModInitializer
 {
 	// This is a client mod so it should implement ClientModInitializer and in fabric.mod.json it should have "environment": "client"
 	// Once it works on servers change the implement to ModInitializer and in fabric.mod.json it should be "environment": "*"
@@ -68,7 +68,7 @@ public class Main implements ClientModInitializer, DedicatedServerModInitializer
 	public void onInitializeClient() {
 		SharedApi.inDedicatedEnvironment = false;
 		init();
-		ClientLifecycleEvents.CLIENT_STARTED.register(Main::postInit);
+		ClientLifecycleEvents.CLIENT_STARTED.register(FabricMain::postInit);
 	}
 
 	@Override
@@ -94,6 +94,7 @@ public class Main implements ClientModInitializer, DedicatedServerModInitializer
 		FabricDependencySetup.finishBinding();
 		LodCommonMain.initConfig();
 		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
+
 		if (!SharedApi.inDedicatedEnvironment) {
 			client_proxy = new FabricClientProxy();
 			client_proxy.registerEvents();
@@ -111,6 +112,6 @@ public class Main implements ClientModInitializer, DedicatedServerModInitializer
 			ModAccessorHandler.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
 		ModAccessorHandler.finishBinding();
-		LOGGER.info("Mod Initialized");
+		LOGGER.info(ModInfo.READABLE_NAME + " Initialized");
 	}
 }

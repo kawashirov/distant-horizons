@@ -79,11 +79,12 @@ public class ForgeMain implements LodForgeMethodCaller
 	private void init(final FMLCommonSetupEvent event)
 	{
 		// make sure the dependencies are set up before the mod needs them
-		LodCommonMain.startup(this, !FMLLoader.getDist().isClient());
+//		LodCommonMain.startup(this, !FMLLoader.getDist().isClient());
+		LodCommonMain.startup(this);
 		ForgeDependencySetup.createInitialBindings();
 		ForgeDependencySetup.finishBinding();
 		LodCommonMain.initConfig();
-		LOGGER.info("Distant Horizons initializing...");
+		LOGGER.info(ModInfo.READABLE_NAME + " initializing...");
 	}
 	
 	public ForgeMain()

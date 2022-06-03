@@ -19,13 +19,8 @@
  
 package com.seibel.lod.fabric.mixins.events;
 
-import com.seibel.lod.fabric.Main;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.ProgressListener;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * This class is used for world saving events

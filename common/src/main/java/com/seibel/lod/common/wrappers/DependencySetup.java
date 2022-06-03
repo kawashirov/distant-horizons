@@ -30,6 +30,8 @@ import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.wrapperInterfaces.IVersionConstants;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
+import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
+import com.seibel.lod.core.wrapperInterfaces.config.LodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 
@@ -46,6 +48,8 @@ import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 public class DependencySetup {
     public static void createInitialBindings()
     {
+        SingletonHandler.bind(ILodConfigWrapperSingleton.class, LodConfigWrapperSingleton.INSTANCE); // TODO: Remove
+
         SingletonHandler.bind(IConfigWrapper.class, ConfigWrapper.INSTANCE);
         SingletonHandler.bind(IVersionConstants.class, VersionConstants.INSTANCE);
         if (!SharedApi.inDedicatedEnvironment)

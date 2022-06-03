@@ -40,8 +40,6 @@ public class FabricDependencySetup
 	public static void createInitialBindings()
 	{
 		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
-
-		SingletonHandler.bind(ILodConfigWrapperSingleton.class, LodConfigWrapperSingleton.INSTANCE);
 	}
 
 	public static void finishBinding() {
