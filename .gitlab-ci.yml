@@ -30,6 +30,7 @@ build_16_5:
     - rm -R Merged || true; 
     - ./gradlew build -PmcVer=1.16.5 --gradle-user-home cache/;
     - ./gradlew merge --gradle-user-home cache/;
+    - ./gradlew test --gradle-user-home cache/;
   # build using Java 16
   image: eclipse-temurin:16
   artifacts:
@@ -55,6 +56,7 @@ build_17_1:
     - rm -R Merged || true;
     - ./gradlew build -PmcVer=1.17.1 --gradle-user-home cache/;
     - ./gradlew merge --gradle-user-home cache/;
+    - ./gradlew test --gradle-user-home cache/;
   image: eclipse-temurin:16
   artifacts:
     name: "Merged_NightlyBuild_1_17_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
@@ -77,6 +79,7 @@ build_18_1:
     - rm -R Merged || true;
     - ./gradlew build -PmcVer=1.18.1 --gradle-user-home cache/; 
     - ./gradlew merge --gradle-user-home cache/;
+    - ./gradlew test --gradle-user-home cache/;
   # build using Java 17
   image: eclipse-temurin:17
   artifacts:
@@ -100,6 +103,7 @@ build_18_2:
     - rm -R Merged || true;
     - ./gradlew build -PmcVer=1.18.2 --gradle-user-home cache/;
     - ./gradlew merge --gradle-user-home cache/;
+    - ./gradlew test --gradle-user-home cache/;
   image: eclipse-temurin:17
   artifacts:
     name: "Merged_NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"

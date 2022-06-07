@@ -148,6 +148,10 @@ subprojects { p ->
         // Theming
         implementation("com.formdev:flatlaf:2.2")
 
+        // JUnit tests
+        implementation("org.junit.jupiter:junit-jupiter:5.8.2")
+        implementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+
 
         if (p == project(":fabric") || p == project(":forge")) {
             // Compression
