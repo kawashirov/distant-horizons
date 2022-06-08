@@ -47,8 +47,10 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+#if PRE_MC_1_19
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+#endif
 import net.minecraft.client.resources.language.I18n;	// translation
 #if POST_MC_1_17_1
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -123,7 +125,11 @@ public abstract class ConfigGui
 		Object value;
 		String tempValue;
 		boolean inLimits = true;
+		#if PRE_MC_1_19
 		TranslatableComponent name;
+		#else
+		Component name;
+		#endif
 		int index;
 		/** Hides the button */
 		boolean hideOption = false;
@@ -220,8 +226,11 @@ public abstract class ConfigGui
 		if (entry != null)
 		{
 			if (!entry.name().equals(""))
+				#if PRE_MC_1_19
 				info.name = new TranslatableComponent(entry.name());
-
+				#else
+				info.name = Component.literal(entry.name());
+				#endif
 
 			if (fieldClass == int.class)
 			{
@@ -242,7 +251,11 @@ public abstract class ConfigGui
 			else if (fieldClass == boolean.class)
 			{
 				// For boolean
+				#if PRE_MC_1_19
 				Function<Object, Component> func = value -> new TextComponent((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
+				#else
+				Function<Object, Component> func = value -> Component.literal((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
+				#endif
 				info.widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
 					info.value = !(Boolean) info.value;
 					button.setMessage(func.apply(info.value));
@@ -252,7 +265,11 @@ public abstract class ConfigGui
 			{
 				// For enum
 				List<?> values = Arrays.asList(field.getType().getEnumConstants());
+				#if PRE_MC_1_19
 				Function<Object, Component> func = value -> new TranslatableComponent(MOD_NAME + ".config." + "enum." + fieldClass.getSimpleName() + "." + info.value.toString());
+				#else
+				Function<Object, Component> func = value -> Component.literal(MOD_NAME + ".config." + "enum." + fieldClass.getSimpleName() + "." + info.value.toString());
+				#endif
 				info.widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
 					int index = values.indexOf(info.value) + 1;
 					info.value = values.get(index >= values.size() ? 0 : index);
@@ -263,7 +280,12 @@ public abstract class ConfigGui
 		else if (screenEntry != null)
 		{
 			if (!screenEntry.name().equals(""))
+				#if PRE_MC_1_19
 				info.name = new TranslatableComponent(screenEntry.name());
+				#else
+				info.name = Component.literal(screenEntry.name());
+				#endif
+
 
 			info.screenButton = true;
 			info.gotoScreen = (!info.category.isEmpty() ? info.category + "." : "") + field.getName();
@@ -291,7 +313,11 @@ public abstract class ConfigGui
 			{
 				value = func.apply(stringValue);
 				inLimits = value.doubleValue() >= minValue && value.doubleValue() <= maxValue;
+				#if PRE_MC_1_19
 				info.error = inLimits ? null : new AbstractMap.SimpleEntry<>(editBox, new TextComponent(value.doubleValue() < minValue ?
+				#else
+				info.error = inLimits ? null : new AbstractMap.SimpleEntry<>(editBox, Component.literal(value.doubleValue() < minValue ?
+				#endif
 						"§cMinimum " + "length" + (cast ? " is " + (int) minValue : " is " + minValue) :
 						"§cMaximum " + "length" + (cast ? " is " + (int) maxValue : " is " + maxValue)));
 			}
@@ -498,7 +524,11 @@ public abstract class ConfigGui
 	{
 		protected ConfigScreen(Screen parent, String category)
 		{
+			#if PRE_MC_1_19
 			super(new TranslatableComponent(
+			#else
+			super(Component.literal(
+			#endif
 					I18n.exists(MOD_NAME + ".config" + (category.isEmpty()? "." + category : "") + ".title") ?
 							MOD_NAME + ".config.title" :
 							MOD_NAME + ".config" + (category.isEmpty() ? "" : "." + category) + ".title")
@@ -565,8 +595,13 @@ public abstract class ConfigGui
 			{
 				if (info.category.matches(category) && !info.hideOption)
 				{
+					#if PRE_MC_1_19
 					TranslatableComponent name = (info.name == null ? new TranslatableComponent(translationPrefix + (!info.category.isEmpty() ? info.category + "." : "") + info.field.getName()) : info.name);
 					Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - info.width - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, new TextComponent("Reset").withStyle(ChatFormatting.RED), (button -> {
+					#else
+					Component name = (info.name == null ? Component.literal(translationPrefix + (!info.category.isEmpty() ? info.category + "." : "") + info.field.getName()) : info.name);
+					Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - info.width - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, Component.literal("Reset").withStyle(ChatFormatting.RED), (button -> {
+					#endif
 						info.value = info.defaultValue;
 						info.tempValue = info.defaultValue.toString();
 						info.index = 0;
@@ -578,7 +613,11 @@ public abstract class ConfigGui
 					{
 						Map.Entry<Button.OnPress, Function<Object, Component>> widget = (Map.Entry<Button.OnPress, Function<Object, Component>>) info.widget;
 						if (info.field.getType().isEnum())
+							#if PRE_MC_1_19
 							widget.setValue(value -> new TranslatableComponent(translationPrefix + "enum." + info.field.getType().getSimpleName() + "." + info.value.toString()));
+							#else
+							widget.setValue(value -> Component.literal(translationPrefix + "enum." + info.field.getType().getSimpleName() + "." + info.value.toString()));
+							#endif
 						this.list.addButton(new Button(this.width - info.width - ConfigScreenConfigs.SpaceFromRightScreen, 0, info.width, 20, widget.getValue().apply(info.value), widget.getKey()), resetButton, null, name);
 					}
 					else if (info.field.getType() == List.class)
@@ -594,8 +633,13 @@ public abstract class ConfigGui
 						Predicate<String> processor = ((BiFunction<EditBox, Button, Predicate<String>>) info.widget).apply(widget, done);
 						widget.setFilter(processor);
 						resetButton.setWidth(20);
-						resetButton.setMessage(new TextComponent("R").withStyle(ChatFormatting.RED));
-						Button cycleButton = new Button(this.width - 185, 0, 20, 20, new TextComponent(String.valueOf(info.index)).withStyle(ChatFormatting.GOLD), (button -> {
+                        #if PRE_MC_1_19
+                        resetButton.setMessage(new TextComponent("R").withStyle(ChatFormatting.RED));
+                        Button cycleButton = new Button(this.width - 185, 0, 20, 20, new TextComponent(String.valueOf(info.index)).withStyle(ChatFormatting.GOLD), (button -> {
+                        #else
+                        resetButton.setMessage(Component.literal("R").withStyle(ChatFormatting.RED));
+                        Button cycleButton = new Button(this.width - 185, 0, 20, 20, Component.literal(String.valueOf(info.index)).withStyle(ChatFormatting.GOLD), (button -> {
+                        #endif
 							((List<String>) info.value).remove("");
 							this.reload = true;
 							info.index = info.index + 1;
@@ -644,14 +688,22 @@ public abstract class ConfigGui
 					if (list.getHoveredButton(mouseX,mouseY).isPresent()) {
 						AbstractWidget buttonWidget = list.getHoveredButton(mouseX,mouseY).get();
 						Component text = ButtonEntry.buttonsWithText.get(buttonWidget);
+						#if PRE_MC_1_19
 						TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName());
+						#else
+						Component name = Component.literal(this.translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName());
+						#endif
 						String key = translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName() + ".@tooltip";
 
 						if (info.error != null && text.equals(name)) renderTooltip(matrices, (Component) info.error.getValue(), mouseX, mouseY);
 						else if (I18n.exists(key) && (text != null && text.equals(name))) {
 							List<Component> list = new ArrayList<>();
 							for (String str : I18n.get(key).split("\n"))
+								#if PRE_MC_1_19
 								list.add(new TextComponent(str));
+								#else
+								list.add(Component.literal(str));
+								#endif
 							renderComponentTooltip(matrices, list, mouseX, mouseY);
 						}
 					}

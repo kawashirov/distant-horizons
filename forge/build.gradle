@@ -58,7 +58,7 @@ dependencies {
 
 processResources {
     dependsOn(copyAccessWidener)
-    dependsOn(copyCoreResources)
+//    dependsOn(copyCoreResources)
     dependsOn(copyCommonResources)
 }
 

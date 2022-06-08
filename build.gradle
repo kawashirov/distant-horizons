@@ -9,7 +9,7 @@ buildscript {
 
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "0.10.0-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "0.11.0-SNAPSHOT" apply false
 }
 
 def writeBuildGradlePredefine(List<String> mcVers, int mcIndex) {
@@ -69,6 +69,7 @@ def loadProperties() {
             "1.17.1": "1_17",
             "1.18.1": "1_18",
             "1.18.2": "1_18",
+            "1.19"  : "1_19"
     ]
     // Use this as sometimes multiple versions use the same access wideners
     rootProject.ext.set("acsessWidenerVersion", mcVersionToAcsessWidenerVersion.get(mcVersion))
@@ -88,9 +89,9 @@ subprojects { p ->
     loom {
         silentMojangMappingsLicense()
 
-        if (p != project(":core")) {
-            accessWidenerPath.set(project(":common").file("src/main/resources/${acsessWidenerVersion}.lod.accesswidener"))
-        }
+//        if (p != project(":core")) {
+//            accessWidenerPath.set(project(":common").file("src/main/resources/${acsessWidenerVersion}.lod.accesswidener"))
+//        }
     }
 
     configurations {
@@ -106,7 +107,7 @@ subprojects { p ->
             // Mojmap mappings
             officialMojangMappings()
             // Parchment mappings (it adds parameter mappings & javadoc)
-            parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+//            parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
         }
 
 		//Manifold
@@ -121,10 +122,10 @@ subprojects { p ->
             modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
         }
 
-        if (p != project(":core")) {
-            common(project(":core")) { transitive false }
-            shadowMe(project(":core")) { transitive false }
-        }
+//        if (p != project(":core")) {
+//            common(project(":core")) { transitive false }
+//            shadowMe(project(":core")) { transitive false }
+//        }
     }
 
     // Allows the jar to run standalone
@@ -238,10 +239,10 @@ allprojects { p ->
         rename "${rootProject.acsessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
     }
 
-    task copyCoreResources(type: Copy) {
-        from fileTree(project(":core").file("src/main/resources"))
-        into p.file("build/resources/main")
-    }
+//    task copyCoreResources(type: Copy) {
+//        from fileTree(project(":core").file("src/main/resources"))
+//        into p.file("build/resources/main")
+//    }
 
     task copyCommonResources(type: Copy) {
         from fileTree(project(":common").file("src/main/resources"))
@@ -276,12 +277,12 @@ allprojects { p ->
         // println options.compilerArgs
 
         // Set the java version
-        if (p != project(":core")) {
+//        if (p != project(":core")) {
             options.compilerArgs += ['-Xplugin:Manifold']
             options.release = rootProject.java_version as Integer
-        } else if (p == project(":core")) {
-            options.release = 8; // Core should use Java 8 no matter what
-        }
+//        } else if (p == project(":core")) {
+//            options.release = 8; // Core should use Java 8 no matter what
+//        }
         // TODO: make everything use java 8
 //        options.release = 8 // Use Java 8 for everything so back porting is easier
     }
@@ -291,7 +292,8 @@ allprojects { p ->
     }
 
     // Disable running the core and common
-    if (p == project(":core") || p == project(":common")) {
+//    if (p == project(":core") || p == project(":common")) {
+    if (p == project(":common")) {
         runClient.enabled = false
         runServer.enabled = false
     }

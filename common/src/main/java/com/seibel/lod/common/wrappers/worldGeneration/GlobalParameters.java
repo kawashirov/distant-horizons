@@ -35,13 +35,21 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
 #endif
 import net.minecraft.world.level.levelgen.WorldGenSettings;
+#if PRE_MC_1_19
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
+#else
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
+#endif
 import net.minecraft.world.level.storage.WorldData;
 
 public final class GlobalParameters
 {
 	public final ChunkGenerator generator;
+	#if PRE_MC_1_19
 	public final StructureManager structures;
+	#else
+	public final StructureTemplateManager structures;
+	#endif
 	public final WorldGenSettings worldGenSettings;
 	public final ThreadedLevelLightEngine lightEngine;
 	public final LodBuilder lodBuilder;

@@ -1,13 +1,5 @@
 architectury {
-    common()
-}
-
-afterEvaluate {
-    tasks {
-        remapJar {
-            remapAccessWidener.set(false)
-        }
-    }
+    common(rootProject.enabled_platforms.split(","))
 }
 
 publishing {

@@ -2,6 +2,7 @@
 
 > A mod that adds a Level of Detail System to Minecraft
 
+# This branch is a temporary 1.19 branch and will be deleted soon
 
 # What is Distant Horizons?
 
@@ -17,6 +18,7 @@ If you want to see a quick demo, check out a video covering the mod here:
 ### Versions
 
 This branch is for these versions of Minecraft
+- 1.19
 - 1.18.2
 - 1.18.1 & 1.18
 - 1.17.1 & 1.17
@@ -59,6 +61,7 @@ This version has been confirmed to work in IDE and Retail Minecraft with ether t
 
 #### Nightlly builds
 This mod has an autobuild system to automatically build the mod on each commit
+- 1.19:   https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_19
 - 1.18.2: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_18_2
 - 1.18.1: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_18_1
 - 1.17.1: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_17_1
@@ -86,6 +89,7 @@ https://fabricmc.net/wiki/tutorial:setup
 
 ## Switching Versions
 This branch support 4 built versions:
+ - 1.19
  - 1.18.2
  - 1.18.1 (which also runs on 1.18)
  - 1.17.1 (which also runs on 1.17)
