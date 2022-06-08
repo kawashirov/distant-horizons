@@ -100,13 +100,13 @@ task deleteResources(type: Delete) {
 }
 
 processResources {
-//    dependsOn(copyCoreResources)
+    dependsOn(copyCoreResources)
     dependsOn(copyCommonResources)
     dependsOn(copyAccessWidener)
 }
 
 runClient {
-//    dependsOn(copyCoreResources)
+    dependsOn(copyCoreResources)
     dependsOn(copyCommonResources)
     dependsOn(copyAccessWidener)
     jvmArgs "-XX:-OmitStackTraceInFastThrow"

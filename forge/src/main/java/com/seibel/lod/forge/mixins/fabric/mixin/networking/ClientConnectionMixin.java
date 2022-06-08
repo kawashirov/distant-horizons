@@ -37,7 +37,9 @@ import com.seibel.lod.forge.fabric.impl.networking.PacketCallbackListener;
 import net.minecraft.network.Connection;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.chat.Component;
+#if PRE_MC_1_19
 import net.minecraft.network.chat.TranslatableComponent;
+#endif
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.ResourceLocation;
@@ -67,11 +69,19 @@ abstract class ClientConnectionMixin implements ChannelInfoHolder {
 	private void resendOnExceptionCaught(Connection self, Packet<?> packet, GenericFutureListener<? extends Future<? super Void>> listener) {
 		PacketListener handler = this.packetListener;
 
+		#if PRE_MC_1_19
 		if (handler instanceof DisconnectPacketSource) {
 			this.send(((DisconnectPacketSource) handler).createDisconnectPacket(new TranslatableComponent("disconnect.genericReason")), listener);
 		} else {
 			this.disconnect(new TranslatableComponent("disconnect.genericReason")); // Don't send packet if we cannot send proper packets
 		}
+		#else
+		if (handler instanceof DisconnectPacketSource) {
+			this.send(((DisconnectPacketSource) handler).createDisconnectPacket(Component.literal("disconnect.genericReason")), listener);
+		} else {
+			this.disconnect(Component.literal("disconnect.genericReason")); // Don't send packet if we cannot send proper packets
+		}
+		#endif
 	}
 
 	@Inject(method = "sendPacket", at = @At(value = "FIELD", target = "Lnet/minecraft/network/Connection;sentPackets:I"))

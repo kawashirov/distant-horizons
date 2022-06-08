@@ -50,6 +50,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Cursor3D;
 import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -77,7 +78,11 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 
 	public static final int FLOWER_COLOR_SCALE = 5;
 
+	#if PRE_MC_1_19
 	public static final Random random = new Random(0);
+	#else
+	public static final RandomSource random = RandomSource.create();
+	#endif
 
 	enum ColorMode {
 		Default,

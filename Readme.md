@@ -27,6 +27,12 @@ This branch is for these versions of Minecraft
 Architectury version: 3.4-SNAPSHOT\
 Java Compiler plugin: Manifold Preprocessor
 
+#### 1.19 mods
+Forge version: 41.0.1\
+Fabric version: 0.14.6\
+Fabric API version: 0.55.1+1.19\
+Modmenu version: 4.0.0
+
 #### 1.18.2 mods
 Forge version: 40.0.18\
 Fabric version: 0.13.3\
