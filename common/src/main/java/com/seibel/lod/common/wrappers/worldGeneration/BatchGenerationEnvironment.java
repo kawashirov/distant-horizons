@@ -25,8 +25,8 @@ import com.seibel.lod.core.logging.ConfigBasedLogger;
 import com.seibel.lod.core.logging.ConfigBasedSpamLogger;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
-import com.seibel.lod.core.enums.config.DistanceGenerationMode;
-import com.seibel.lod.core.enums.config.LightGenerationMode;
+import com.seibel.lod.core.enums.config.EDistanceGenerationMode;
+import com.seibel.lod.core.enums.config.ELightGenerationMode;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.objects.lod.LodDimension;
 import com.seibel.lod.core.util.gridList.ArrayGridList;
@@ -401,7 +401,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		e.pEvent.beginNano = System.nanoTime();
 		ArrayGridList<ChunkAccess> referencedChunks;
 		ArrayGridList<ChunkAccess> genChunks;
-		DistanceGenerationMode generationMode;
+		EDistanceGenerationMode generationMode;
 		LightedWorldGenRegion region;
 		WorldGenLevelLightEngine lightEngine;
 		LightGetterAdaptor adaptor;
@@ -458,19 +458,19 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		case Empty:
 		case StructureStart:
 		case StructureReference:
-			generationMode = DistanceGenerationMode.NONE;
+			generationMode = EDistanceGenerationMode.NONE;
 			break;
 		case Biomes:
-			generationMode = DistanceGenerationMode.BIOME_ONLY;
+			generationMode = EDistanceGenerationMode.BIOME_ONLY;
 		case Noise:
-			generationMode = DistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
+			generationMode = EDistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
 			break;
 		case Surface:
 		case Carvers:
-			generationMode = DistanceGenerationMode.SURFACE;
+			generationMode = EDistanceGenerationMode.SURFACE;
 			break;
 		case Features:
-			generationMode = DistanceGenerationMode.FEATURES;
+			generationMode = EDistanceGenerationMode.FEATURES;
 			break;
 		case Light:
 		case LiquidCarvers:
@@ -496,7 +496,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				{
 					LOAD_LOGGER.info("Detected full existing chunk at {}", target.getPos());
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
-							new LodBuilderConfig(DistanceGenerationMode.FULL), true, e.genAllDetails);
+							new LodBuilderConfig(EDistanceGenerationMode.FULL), true, e.genAllDetails);
 				}
 				#if POST_MC_1_18_1
 				else if (isPartial)
@@ -506,7 +506,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 							new LodBuilderConfig(generationMode), true, e.genAllDetails);
 				}
 				#endif
-				else if (target.getStatus() == ChunkStatus.EMPTY && generationMode == DistanceGenerationMode.NONE)
+				else if (target.getStatus() == ChunkStatus.EMPTY && generationMode == EDistanceGenerationMode.NONE)
 				{
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim,wrappedChunk,
 							LodBuilderConfig.getFillVoidConfig(), true, e.genAllDetails);
@@ -516,7 +516,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
 							new LodBuilderConfig(generationMode), true, e.genAllDetails);
 				}
-				if (e.lightMode == LightGenerationMode.FANCY || isFull)
+				if (e.lightMode == ELightGenerationMode.FANCY || isFull)
 				{
 					lightEngine.retainData(target.getPos(), false);
 				}

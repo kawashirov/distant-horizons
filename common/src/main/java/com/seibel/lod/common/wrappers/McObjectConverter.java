@@ -24,7 +24,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import com.mojang.math.Matrix4f;
-import com.seibel.lod.core.enums.LodDirection;
+import com.seibel.lod.core.enums.ELodDirection;
 import com.seibel.lod.core.objects.DHBlockPos;
 import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.core.objects.math.Mat4f;
@@ -54,12 +54,12 @@ public class McObjectConverter
 
 
     static final Direction[] directions;
-    static final LodDirection[] lodDirections;
+    static final ELodDirection[] lodDirections;
     static {
-    	LodDirection[] lodDirs = LodDirection.values();
+    	ELodDirection[] lodDirs = ELodDirection.values();
     	directions = new Direction[lodDirs.length];
-    	lodDirections = new LodDirection[lodDirs.length];
-    	for (LodDirection lodDir : lodDirs) {
+    	lodDirections = new ELodDirection[lodDirs.length];
+    	for (ELodDirection lodDir : lodDirs) {
     		Direction dir = Direction.byName(lodDir.name());
     		directions[lodDir.ordinal()] = dir;
     		lodDirections[dir.ordinal()] = lodDir;
@@ -73,11 +73,11 @@ public class McObjectConverter
         return new ChunkPos(wrappedPos.x, wrappedPos.z);
     }
 
-    public static Direction Convert(LodDirection lodDirection)
+    public static Direction Convert(ELodDirection lodDirection)
     {
         return directions[lodDirection.ordinal()];
     }
-    public static LodDirection Convert(Direction direction)
+    public static ELodDirection Convert(Direction direction)
     {
         return lodDirections[direction.ordinal()];
     }

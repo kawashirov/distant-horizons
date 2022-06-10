@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
 import com.seibel.lod.core.ModInfo;
-import com.seibel.lod.core.enums.LodDirection;
+import com.seibel.lod.core.enums.ELodDirection;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
@@ -41,7 +41,6 @@ import com.seibel.lod.common.wrappers.world.WorldWrapper;
 
 import net.minecraft.CrashReport;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Options;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.client.multiplayer.ServerData;
@@ -116,7 +115,7 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
     //=================//
 
     @Override
-    public float getShade(LodDirection lodDirection) {
+    public float getShade(ELodDirection lodDirection) {
         if (mc.level != null)
         {
             Direction mcDir = McObjectConverter.Convert(lodDirection);

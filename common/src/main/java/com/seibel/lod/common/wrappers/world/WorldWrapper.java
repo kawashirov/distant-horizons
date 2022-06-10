@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.seibel.lod.core.objects.DHChunkPos;
-import com.seibel.lod.core.enums.WorldType;
+import com.seibel.lod.core.enums.EWorldType;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
@@ -50,7 +50,7 @@ public class WorldWrapper implements IWorldWrapper
 {
     private static final ConcurrentMap<LevelAccessor, WorldWrapper> worldWrapperMap = new ConcurrentHashMap<>();
     private final LevelAccessor world;
-    public final WorldType worldType;
+    public final EWorldType worldType;
     
     
     public WorldWrapper(LevelAccessor newWorld)
@@ -58,11 +58,11 @@ public class WorldWrapper implements IWorldWrapper
         world = newWorld;
         
         if (world.getClass() == ServerLevel.class)
-            worldType = WorldType.ServerWorld;
+            worldType = EWorldType.ServerWorld;
         else if (world.getClass() == ClientLevel.class)
-            worldType = WorldType.ClientWorld;
+            worldType = EWorldType.ClientWorld;
         else
-            worldType = WorldType.Unknown;
+            worldType = EWorldType.Unknown;
     }
     
     
@@ -89,7 +89,7 @@ public class WorldWrapper implements IWorldWrapper
     }
     
     @Override
-    public WorldType getWorldType()
+    public EWorldType getWorldType()
     {
         return worldType;
     }
@@ -149,7 +149,7 @@ public class WorldWrapper implements IWorldWrapper
     @Override
     public File getSaveFolder() throws UnsupportedOperationException
     {
-        if (worldType != WorldType.ServerWorld)
+        if (worldType != EWorldType.ServerWorld)
             throw new UnsupportedOperationException("getSaveFolder can only be called for ServerWorlds.");
         
         ServerChunkCache chunkSource = ((ServerLevel) world).getChunkSource();
@@ -160,7 +160,7 @@ public class WorldWrapper implements IWorldWrapper
     /** @throws UnsupportedOperationException if the WorldWrapper isn't for a ServerWorld */
     public ServerLevel getServerWorld() throws UnsupportedOperationException
     {
-        if (worldType != WorldType.ServerWorld)
+        if (worldType != EWorldType.ServerWorld)
             throw new UnsupportedOperationException("getSaveFolder can only be called for ServerWorlds.");
         
         return (ServerLevel) world;

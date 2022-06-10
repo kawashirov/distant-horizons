@@ -20,7 +20,7 @@
 package com.seibel.lod.common.wrappers.chunk;
 
 import com.seibel.lod.common.wrappers.block.BlockDetailWrapper;
-import com.seibel.lod.core.enums.LodDirection;
+import com.seibel.lod.core.enums.ELodDirection;
 import com.seibel.lod.core.util.LevelPosUtil;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockDetailWrapper;
@@ -121,7 +121,7 @@ public class ChunkWrapper implements IChunkWrapper
 	}
 
     @Override
-    public IBlockDetailWrapper getBlockDetailAtFace(int x, int y, int z, LodDirection dir) {
+    public IBlockDetailWrapper getBlockDetailAtFace(int x, int y, int z, ELodDirection dir) {
         int fy = y+dir.getNormal().y;
         if (fy < getMinBuildHeight() || fy > getMaxBuildHeight()) return null;
         BlockPos pos = new BlockPos(x+dir.getNormal().x,fy,z+dir.getNormal().z);

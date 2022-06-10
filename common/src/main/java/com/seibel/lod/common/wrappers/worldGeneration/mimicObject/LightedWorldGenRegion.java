@@ -22,16 +22,14 @@ package com.seibel.lod.common.wrappers.worldGeneration.mimicObject;
 import java.lang.invoke.MethodHandles;
 import java.util.List;
 
-import com.seibel.lod.core.api.internal.InternalApiShared;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SpawnerBlock;
-import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment.EmptyChunkGenerator;
-import com.seibel.lod.core.enums.config.LightGenerationMode;
+import com.seibel.lod.core.enums.config.ELightGenerationMode;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
@@ -64,7 +62,7 @@ public class LightedWorldGenRegion extends WorldGenRegion
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 	
 	public final WorldGenLevelLightEngine light;
-	public final LightGenerationMode lightMode;
+	public final ELightGenerationMode lightMode;
 	public final EmptyChunkGenerator generator;
 	public final int writeRadius;
 	public final int size;
@@ -95,7 +93,7 @@ public class LightedWorldGenRegion extends WorldGenRegion
 
 	public LightedWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine,
 			List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
-			LightGenerationMode lightMode, EmptyChunkGenerator generator)
+			ELightGenerationMode lightMode, EmptyChunkGenerator generator)
 	{
 		super(serverLevel, list #if POST_MC_1_17_1, chunkStatus, i #endif);
 		this.lightMode = lightMode;
@@ -267,7 +265,7 @@ public class LightedWorldGenRegion extends WorldGenRegion
 	// Override force use of my own light engine
 	@Override
 	public int getBrightness(LightLayer lightLayer, BlockPos blockPos) {
-		if (lightMode != LightGenerationMode.FAST) {
+		if (lightMode != ELightGenerationMode.FAST) {
 			return light.getLayerListener(lightLayer).getLightValue(blockPos);
 		}
 		if (lightLayer == LightLayer.BLOCK)
@@ -279,7 +277,7 @@ public class LightedWorldGenRegion extends WorldGenRegion
 	// Override force use of my own light engine
 	@Override
 	public int getRawBrightness(BlockPos blockPos, int i) {
-		if (lightMode != LightGenerationMode.FAST) {
+		if (lightMode != ELightGenerationMode.FAST) {
 			return light.getRawBrightness(blockPos, i);
 		}
 		BlockPos p = super.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);

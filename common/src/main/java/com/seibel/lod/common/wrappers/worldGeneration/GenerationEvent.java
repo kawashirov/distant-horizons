@@ -25,8 +25,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment.PrefEvent;
-import com.seibel.lod.core.api.internal.InternalApiShared;
-import com.seibel.lod.core.enums.config.LightGenerationMode;
+import com.seibel.lod.core.enums.config.ELightGenerationMode;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.util.LodUtil;
@@ -50,7 +49,7 @@ public final class GenerationEvent
 	long creationNanotime;
 	final int id;
 	final Steps target;
-	final LightGenerationMode lightMode;
+	final ELightGenerationMode lightMode;
 	final PrefEvent pEvent = new PrefEvent();
 	final boolean genAllDetails;
 
@@ -65,7 +64,7 @@ public final class GenerationEvent
 		id = generationFutureDebugIDs++;
 		this.target = target;
 		this.tParam = ThreadedParameters.getOrMake(generationGroup.params);
-		LightGenerationMode mode = CONFIG.client().worldGenerator().getLightGenerationMode();
+		ELightGenerationMode mode = CONFIG.client().worldGenerator().getLightGenerationMode();
 		
 		this.lightMode = mode;
 		this.genAllDetails = genAllDetails;

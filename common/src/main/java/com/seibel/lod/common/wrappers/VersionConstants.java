@@ -19,7 +19,6 @@
  
 package com.seibel.lod.common.wrappers;
 
-import com.seibel.lod.core.enums.config.DistanceGenerationMode;
 import com.seibel.lod.core.wrapperInterfaces.IVersionConstants;
 
 /**

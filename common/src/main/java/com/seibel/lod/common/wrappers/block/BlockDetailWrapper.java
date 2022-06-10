@@ -25,7 +25,7 @@ import java.util.Random;
 
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
-import com.seibel.lod.core.enums.LodDirection;
+import com.seibel.lod.core.enums.ELodDirection;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.objects.DHBlockPos;
 import com.seibel.lod.core.util.ColorUtil;
@@ -271,7 +271,7 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 	}
 	
 	@Override
-	public int getAndResolveFaceColor(LodDirection dir, IChunkWrapper chunk, DHBlockPos blockPos)
+	public int getAndResolveFaceColor(ELodDirection dir, IChunkWrapper chunk, DHBlockPos blockPos)
 	{
 		// FIXME: impl per-face colors
 		resolveColors();
@@ -284,7 +284,7 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 	}
 
 	@Override
-	public boolean hasFaceCullingFor(LodDirection dir)
+	public boolean hasFaceCullingFor(ELodDirection dir)
 	{
 		//resolveShapes();
 		return !dontOccludeFaces[dir.ordinal()];
