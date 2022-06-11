@@ -22,7 +22,7 @@ package com.seibel.lod.common.forge;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;
-#if MC_1_19
+#if POST_MC_1_19
 import net.minecraft.util.RandomSource;
 #endif
 import net.minecraft.world.level.ColorResolver;

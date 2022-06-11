@@ -65,7 +65,11 @@ public class BiomeWrapper implements IBiomeWrapper
     {
         int colorInt;
 
+        #if PRE_MC_1_19
         switch (biome.biomeCategory)
+        #else
+        switch (biome.biomeCategory) // FIXME[1.19]
+        #endif
         {
 
             case NETHER:

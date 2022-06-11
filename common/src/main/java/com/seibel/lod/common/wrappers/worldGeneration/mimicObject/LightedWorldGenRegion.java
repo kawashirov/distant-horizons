@@ -46,7 +46,10 @@ import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.LevelHeightAccessor;
 #endif
 import net.minecraft.world.level.LightLayer;
+#if PRE_MC_1_19
 import net.minecraft.world.level.StructureFeatureManager;
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
+#endif
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -56,7 +59,6 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
@@ -290,7 +292,11 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	
 	public int calculateBlockTint(BlockPos blockPos, ColorResolver colorResolver)
 	{
+		#if PRE_MC_1_19
 		int i = (Minecraft.getInstance()).options.biomeBlendRadius;
+		#else
+		int i = (Minecraft.getInstance()).options.biomeBlendRadius().get();
+		#endif
 		if (i == 0)
 			return colorResolver.getColor((Biome) _getBiome(blockPos), blockPos.getX(), blockPos.getZ());
 		int j = (i * 2 + 1) * (i * 2 + 1);

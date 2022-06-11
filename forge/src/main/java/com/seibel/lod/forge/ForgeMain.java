@@ -35,7 +35,7 @@ import com.seibel.lod.forge.wrappers.modAccessor.OptifineAccessor;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;
-#if MC_1_19
+#if POST_MC_1_19
 import net.minecraft.util.RandomSource;
 #endif
 import net.minecraft.world.level.ColorResolver;

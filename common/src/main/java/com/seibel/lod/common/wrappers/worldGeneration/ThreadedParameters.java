@@ -25,7 +25,6 @@ import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.WorldGenStruct
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 #if POST_MC_1_18_1
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
 #endif
@@ -63,7 +62,7 @@ public final class ThreadedParameters
 		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, level);
 		#else
 		structCheck = new StructureCheck(param.chunkScanner, param.registry, param.structures,
-				param.level.dimension(), param.generator, level, param.generator.getBiomeSource(), param.worldSeed,
+				param.level.dimension(), param.generator, /*FIXME[1.19]*/, level, param.generator.getBiomeSource(), param.worldSeed,
 				param.fixerUpper);
 		#endif
 	}
