@@ -19,14 +19,13 @@
 
 package com.seibel.lod.forge.mixins;
 
+import com.seibel.lod.core.config.Config;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
-import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.FogRenderer;
@@ -55,16 +54,6 @@ public class MixinFogRenderer
 			remap = #if MC_1_16_5 true #else false #endif) // Remap messiness due to this being added by forge.
 	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, float partTick, CallbackInfo callback)
 	{
-		ILodConfigWrapperSingleton CONFIG;
-		try
-		{
-			CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
-		}
-		catch (NullPointerException e)
-		{
-			return; // May happen due to forge for some reason haven't inited out thingy yet.
-		}
-
 		#if PRE_MC_1_17_1
 		FluidState fluidState = camera.getFluidInCamera();
 		boolean cameraNotInFluid = fluidState.isEmpty();
@@ -76,7 +65,7 @@ public class MixinFogRenderer
 		Entity entity = camera.getEntity();
 		boolean isSpecialFog = (entity instanceof LivingEntity) && ((LivingEntity) entity).hasEffect(MobEffects.BLINDNESS);
 		if (!isSpecialFog && cameraNotInFluid && fogMode == FogMode.FOG_TERRAIN
-				&& CONFIG.client().graphics().fogQuality().getDisableVanillaFog())
+				&& Config.Client.Graphics.FogQuality.disableVanillaFog.get())
 		{
 			#if PRE_MC_1_17_1
 			RenderSystem.fogStart(A_REALLY_REALLY_BIG_VALUE);

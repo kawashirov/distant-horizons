@@ -21,6 +21,7 @@
 
 package com.seibel.lod.common.wrappers.worldGeneration;
 
+import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.logging.ConfigBasedLogger;
 import com.seibel.lod.core.logging.ConfigBasedSpamLogger;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
@@ -31,7 +32,6 @@ import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.objects.lod.LodDimension;
 import com.seibel.lod.core.util.gridList.ArrayGridList;
 import com.seibel.lod.core.util.LodThreadFactory;
-import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper;
@@ -91,16 +91,15 @@ Lod Generation:          0.269023348s
 
 public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnvionmentWrapper
 {
-	private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 	public static final ConfigBasedSpamLogger PREF_LOGGER =
 			new ConfigBasedSpamLogger(LogManager.getLogger("LodWorldGen"),
-					() -> CONFIG.client().advanced().debugging().debugSwitch().getLogWorldGenPerformance(),1);
+					() -> Config.Client.Advanced.Debugging.DebugSwitch.logWorldGenPerformance.get(),1);
 	public static final ConfigBasedLogger EVENT_LOGGER =
 			new ConfigBasedLogger(LogManager.getLogger("LodWorldGen"),
-					() -> CONFIG.client().advanced().debugging().debugSwitch().getLogWorldGenEvent());
+					() -> Config.Client.Advanced.Debugging.DebugSwitch.logWorldGenEvent.get());
 	public static final ConfigBasedLogger LOAD_LOGGER =
 			new ConfigBasedLogger(LogManager.getLogger("LodWorldGen"),
-					() -> CONFIG.client().advanced().debugging().debugSwitch().getLogWorldGenLoadEvent());
+					() -> Config.Client.Advanced.Debugging.DebugSwitch.logWorldGenLoadEvent.get());
 
 	//TODO: Make actual proper support for StarLight
 	
@@ -256,7 +255,9 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	}
 	
 	public ExecutorService executors = Executors.newFixedThreadPool(
-			CONFIG.client().advanced().threading()._getWorldGenerationThreadPoolSize(), threadFactory);
+			Config.Client.Advanced.Threading.numberOfWorldGenerationThreads.get()<1 ? 1 :
+					(int) Math.ceil(Config.Client.Advanced.Threading.numberOfWorldGenerationThreads.get()),
+			threadFactory);
 
 	public <T> T joinSync(CompletableFuture<T> f) {
 		if (!unsafeThreadingRecorded && !f.isDone()) {
@@ -338,7 +339,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		if (unknownExceptionCount > EXCEPTION_COUNTER_TRIGGER) {
 			EVENT_LOGGER.error("Too many exceptions in Batching World Generator! Disabling the generator.");
 			unknownExceptionCount = 0;
-			CONFIG.client().worldGenerator().setEnableDistantGeneration(false);
+			Config.Client.WorldGenerator.enableDistantGeneration.set(false);
 		}
 	}
 	

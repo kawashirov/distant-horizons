@@ -25,6 +25,7 @@ import java.util.Random;
 
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
+import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.enums.ELodDirection;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.objects.DHBlockPos;
@@ -32,7 +33,6 @@ import com.seibel.lod.core.util.ColorUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockDetailWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 
-import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
@@ -53,8 +53,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  as this is never dealloc until the end of runtime!! --*/
 public class BlockDetailWrapper extends IBlockDetailWrapper
 {
-	private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
-
 	public static final int FLOWER_COLOR_SCALE = 5;
 
 	public static final Random random = new Random(0);
@@ -262,7 +260,7 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 	}
 	
 	private BlockAndTintGetter wrapColorResolver(LevelReader level) {
-		int blendDistance = CONFIG.client().graphics().quality().getLodBiomeBlending();
+		int blendDistance = Config.Client.Graphics.Quality.lodBiomeBlending.get();
 		if (blendDistance == 0) {
 			return new TintGetterOverrideFast(level);
 		} else {

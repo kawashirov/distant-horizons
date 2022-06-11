@@ -26,8 +26,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
-import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.renderer.FogRenderer;

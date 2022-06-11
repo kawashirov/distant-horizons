@@ -25,11 +25,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment.PrefEvent;
+import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.enums.config.ELightGenerationMode;
-import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.util.LodUtil;
-import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper.Steps;
 
 import net.minecraft.world.level.ChunkPos;
@@ -39,7 +38,6 @@ import org.apache.logging.log4j.Logger;
 public final class GenerationEvent
 {
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
-	private static final ILodConfigWrapperSingleton CONFIG = SingletonHandler.get(ILodConfigWrapperSingleton.class);
 	
 	private static int generationFutureDebugIDs = 0;
 	final ThreadedParameters tParam;
@@ -64,7 +62,7 @@ public final class GenerationEvent
 		id = generationFutureDebugIDs++;
 		this.target = target;
 		this.tParam = ThreadedParameters.getOrMake(generationGroup.params);
-		ELightGenerationMode mode = CONFIG.client().worldGenerator().getLightGenerationMode();
+		ELightGenerationMode mode = Config.Client.WorldGenerator.lightGenerationMode.get();
 		
 		this.lightMode = mode;
 		this.genAllDetails = genAllDetails;

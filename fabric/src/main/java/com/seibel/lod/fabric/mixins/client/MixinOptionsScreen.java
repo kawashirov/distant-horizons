@@ -23,8 +23,6 @@ import com.seibel.lod.common.wrappers.config.GetConfigScreen;
 import com.seibel.lod.common.wrappers.config.TexturedButtonWidget;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.config.Config;
-import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
-import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;

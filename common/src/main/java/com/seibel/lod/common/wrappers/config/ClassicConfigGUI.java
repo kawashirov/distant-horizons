@@ -59,6 +59,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
  * @author coolGi
  * @version 4-28-2022
  */
+// FLOATS DONT WORK WITH THIS
 @SuppressWarnings("unchecked")
 public abstract class ClassicConfigGUI {
 	/*
