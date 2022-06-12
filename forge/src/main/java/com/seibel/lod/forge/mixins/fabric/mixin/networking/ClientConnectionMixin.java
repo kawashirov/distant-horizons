@@ -91,12 +91,16 @@ abstract class ClientConnectionMixin implements ChannelInfoHolder {
 		}
 	}
 
+	#if PRE_MC_1_19
 	@Inject(method = "channelInactive", at = @At("HEAD"))
 	private void handleDisconnect(ChannelHandlerContext channelHandlerContext, CallbackInfo ci) throws Exception {
 		if (packetListener instanceof NetworkHandlerExtensions) { // not the case for client/server query
 			((NetworkHandlerExtensions) packetListener).getAddon().handleDisconnect();
 		}
 	}
+	#else
+		//FIXME: error: No obfuscation mapping for @Inject target channelInactive
+	#endif
 
 	@Override
 	public Collection<ResourceLocation> getPendingChannelsNames() {
