@@ -57,7 +57,10 @@ public class McObjectConverter
     	directions = new Direction[lodDirs.length];
     	lodDirections = new LodDirection[lodDirs.length];
     	for (LodDirection lodDir : lodDirs) {
-    		Direction dir = Direction.byName(lodDir.name());
+    		Direction dir = Enum.valueOf(Direction.class, lodDir.name());
+            if (dir == null) {
+                throw new IllegalArgumentException("Invalid direction on init mapping: " + lodDir);
+            }
     		directions[lodDir.ordinal()] = dir;
     		lodDirections[dir.ordinal()] = lodDir;
     	}
