@@ -122,7 +122,7 @@ subprojects { p ->
             modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
         }
 
-        if (p != project(":core")) {
+        if (p == project(":common")) {
             common(project(":core")) { transitive false }
             shadowMe(project(":core")) { transitive false }
         }
