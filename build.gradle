@@ -107,7 +107,10 @@ subprojects { p ->
             // Mojmap mappings
             officialMojangMappings()
             // Parchment mappings (it adds parameter mappings & javadoc)
-//            parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+            if (rootProject.minecraft_version != "1.19")
+                parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+            else
+                parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip")
         }
 
 		//Manifold
@@ -115,7 +118,6 @@ subprojects { p ->
 
         // Toml
         implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
-        implementation("com.googlecode.json-simple:json-simple:1.1.1")
 
         if (p != project(":forge")) {
             // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
@@ -125,9 +127,8 @@ subprojects { p ->
 
         if (p != project(":core"))
             common(project(":core")) { transitive false }
-        if (p == project(":common")) {
+        if (p == project(":common"))
             shadowMe(project(":core")) { transitive false }
-        }
     }
 
     // Allows the jar to run standalone
