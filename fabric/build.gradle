@@ -87,6 +87,7 @@ dependencies {
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+    shadowMe files(project(":core").file("build/libs/DistantHorizons-${rootProject.mod_version}.jar"))
 
     // Compression
     common 'org.tukaani:xz:1.9'
@@ -104,7 +105,8 @@ processResources {
     dependsOn(copyCommonResources)
     dependsOn(copyAccessWidener)
 }
-
+jar.dependsOn(project(":core").remapJar)
+remapSourcesJar.dependsOn(project(":core").remapJar)
 runClient {
     dependsOn(copyCoreResources)
     dependsOn(copyCommonResources)

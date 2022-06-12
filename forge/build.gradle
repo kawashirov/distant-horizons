@@ -42,6 +42,7 @@ dependencies {
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+    shadowMe files(project(":core").file("build/libs/DistantHorizons-${rootProject.mod_version}.jar"))
 
 //    forgeDependencies(project(":core")) { transitive false }
 
@@ -61,7 +62,8 @@ processResources {
     dependsOn(copyCoreResources)
     dependsOn(copyCommonResources)
 }
-
+jar.dependsOn(project(":core").remapJar)
+remapSourcesJar.dependsOn(project(":core").remapJar)
 shadowJar {
     dependencies {
         exclude(dependency("net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"))
