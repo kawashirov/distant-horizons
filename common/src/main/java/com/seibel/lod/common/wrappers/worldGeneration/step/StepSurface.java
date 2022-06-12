@@ -63,7 +63,7 @@ public final class StepSurface {
 			#elif PRE_MC_1_19
 			environment.params.generator.buildSurface(worldGenRegion, tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk);
 			#else
-			environment.params.generator.buildSurface(worldGenRegion, tParams.structFeat.forWorldGenRegion(worldGenRegion), /*FIXME[1.19]*/, chunk);
+			environment.params.generator.buildSurface(worldGenRegion, tParams.structFeat.forWorldGenRegion(worldGenRegion), environment.params.randomState, chunk);
 			#endif
 		}
 	}

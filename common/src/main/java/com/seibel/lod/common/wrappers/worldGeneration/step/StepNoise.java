@@ -85,7 +85,7 @@ public final class StepNoise {
 			chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion),
 					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
 			#else
-			chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion), /*FIXME[1.19]*/,
+			chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion), environment.params.randomState,
 					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
 			#endif
 			LodUtil.checkInterruptsUnchecked(); // Speed up termination responsiveness

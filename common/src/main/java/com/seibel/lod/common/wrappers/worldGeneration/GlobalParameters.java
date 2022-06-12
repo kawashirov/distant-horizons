@@ -34,6 +34,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 #if POST_MC_1_18_1
 import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
 #endif
+import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 #if PRE_MC_1_19
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
@@ -49,6 +50,7 @@ public final class GlobalParameters
 	public final StructureManager structures;
 	#else
 	public final StructureTemplateManager structures;
+	public final RandomState randomState;
 	#endif
 	public final WorldGenSettings worldGenSettings;
 	public final ThreadedLevelLightEngine lightEngine;
@@ -83,5 +85,8 @@ public final class GlobalParameters
 		structures = server.getStructureManager();
 		generator = level.getChunkSource().getGenerator();
 		fixerUpper = server.getFixerUpper();
+		#if POST_MC_1_19
+		randomState = level.getChunkSource().randomState();
+		#endif
 	}
 }

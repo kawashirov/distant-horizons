@@ -9,7 +9,7 @@ buildscript {
 
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "0.11.0-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "0.12.0-SNAPSHOT" apply false
 }
 
 def writeBuildGradlePredefine(List<String> mcVers, int mcIndex) {
@@ -115,6 +115,7 @@ subprojects { p ->
 
         // Toml
         implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
+        implementation("com.googlecode.json-simple:json-simple:1.1.1")
 
         if (p != project(":forge")) {
             // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
@@ -122,10 +123,11 @@ subprojects { p ->
             modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
         }
 
-        if (p != project(":core"))
+        //if (p != project(":core"))
+        if (p == project(":common")) {
             common(project(":core")) { transitive false }
-        if (p == project(":common"))
             shadowMe(project(":core")) { transitive false }
+        }
     }
 
     // Allows the jar to run standalone
