@@ -28,7 +28,6 @@ import com.seibel.lod.core.api.ApiShared;
 import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
-import com.seibel.lod.forge.networking.NetworkHandler;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
 
 import com.seibel.lod.forge.wrappers.modAccessor.OptifineAccessor;
@@ -78,7 +77,7 @@ public class ForgeMain implements LodForgeMethodCaller
 	{
 		// make sure the dependencies are set up before the mod needs them
 		LodCommonMain.initConfig();
-		LodCommonMain.startup(this, !FMLLoader.getDist().isClient(), new NetworkHandler());
+		LodCommonMain.startup(this, !FMLLoader.getDist().isClient());
 		ForgeDependencySetup.createInitialBindings();
 		ForgeDependencySetup.finishBinding();
 		ApiShared.LOGGER.info("Distant Horizons initializing...");
@@ -124,7 +123,7 @@ public class ForgeMain implements LodForgeMethodCaller
 
 	@Override
 	public int colorResolverGetColor(ColorResolver resolver, Biome biome, double x, double z) {
-		#if MC_1_17_1
+		#if MC_1_17_1_I_THINK_ITS_FIXED?
 		return resolver.m_130045_(biome, x, z);
 		#else
 		return resolver.getColor(biome, x, z);

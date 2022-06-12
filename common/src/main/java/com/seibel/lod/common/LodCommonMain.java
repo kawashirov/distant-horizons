@@ -32,9 +32,8 @@ public class LodCommonMain {
     public static boolean forge = false;
     public static boolean serverSided;
     public static LodForgeMethodCaller forgeMethodCaller;
-    public static NetworkInterface networkInterface;
 
-    public static void startup(LodForgeMethodCaller caller, boolean serverSided, NetworkInterface networkInterface) {
+    public static void startup(LodForgeMethodCaller caller, boolean serverSided) {
         LodCommonMain.serverSided = serverSided;
         if (caller != null) {
             LodCommonMain.forge = true;
@@ -42,13 +41,6 @@ public class LodCommonMain {
         }
 
         DependencySetup.createInitialBindings();
-
-        LodCommonMain.networkInterface = networkInterface;
-        if (!serverSided) {
-            networkInterface.register_Client();
-        } else {
-            networkInterface.register_Server();
-        }
     }
 
 
