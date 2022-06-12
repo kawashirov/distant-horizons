@@ -371,7 +371,7 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
         #if PRE_MC_1_19
         getPlayer().sendMessage(new TextComponent(string), getPlayer().getUUID());
         #else
-        getPlayer().sendSystemMessage(Component.literal(string));
+        getPlayer().sendSystemMessage(Component.translatable(string));
         #endif
     }
 

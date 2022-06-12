@@ -77,9 +77,9 @@ abstract class ClientConnectionMixin implements ChannelInfoHolder {
 		}
 		#else
 		if (handler instanceof DisconnectPacketSource) {
-			this.send(((DisconnectPacketSource) handler).createDisconnectPacket(Component.literal("disconnect.genericReason")), listener);
+			this.send(((DisconnectPacketSource) handler).createDisconnectPacket(Component.translatable("disconnect.genericReason")), listener);
 		} else {
-			this.disconnect(Component.literal("disconnect.genericReason")); // Don't send packet if we cannot send proper packets
+			this.disconnect(Component.translatable("disconnect.genericReason")); // Don't send packet if we cannot send proper packets
 		}
 		#endif
 	}

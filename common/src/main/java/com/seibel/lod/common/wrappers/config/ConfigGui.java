@@ -229,7 +229,7 @@ public abstract class ConfigGui
 				#if PRE_MC_1_19
 				info.name = new TranslatableComponent(entry.name());
 				#else
-				info.name = Component.literal(entry.name());
+				info.name = Component.translatable(entry.name());
 				#endif
 
 			if (fieldClass == int.class)
@@ -254,7 +254,7 @@ public abstract class ConfigGui
 				#if PRE_MC_1_19
 				Function<Object, Component> func = value -> new TextComponent((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
 				#else
-				Function<Object, Component> func = value -> Component.literal((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
+				Function<Object, Component> func = value -> Component.translatable((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
 				#endif
 				info.widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
 					info.value = !(Boolean) info.value;
@@ -268,7 +268,7 @@ public abstract class ConfigGui
 				#if PRE_MC_1_19
 				Function<Object, Component> func = value -> new TranslatableComponent(MOD_NAME + ".config." + "enum." + fieldClass.getSimpleName() + "." + info.value.toString());
 				#else
-				Function<Object, Component> func = value -> Component.literal(MOD_NAME + ".config." + "enum." + fieldClass.getSimpleName() + "." + info.value.toString());
+				Function<Object, Component> func = value -> Component.translatable(MOD_NAME + ".config." + "enum." + fieldClass.getSimpleName() + "." + info.value.toString());
 				#endif
 				info.widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
 					int index = values.indexOf(info.value) + 1;
@@ -283,7 +283,7 @@ public abstract class ConfigGui
 				#if PRE_MC_1_19
 				info.name = new TranslatableComponent(screenEntry.name());
 				#else
-				info.name = Component.literal(screenEntry.name());
+				info.name = Component.translatable(screenEntry.name());
 				#endif
 
 
@@ -316,7 +316,7 @@ public abstract class ConfigGui
 				#if PRE_MC_1_19
 				info.error = inLimits ? null : new AbstractMap.SimpleEntry<>(editBox, new TextComponent(value.doubleValue() < minValue ?
 				#else
-				info.error = inLimits ? null : new AbstractMap.SimpleEntry<>(editBox, Component.literal(value.doubleValue() < minValue ?
+				info.error = inLimits ? null : new AbstractMap.SimpleEntry<>(editBox, Component.translatable(value.doubleValue() < minValue ?
 				#endif
 						"§cMinimum " + "length" + (cast ? " is " + (int) minValue : " is " + minValue) :
 						"§cMaximum " + "length" + (cast ? " is " + (int) maxValue : " is " + maxValue)));
@@ -527,7 +527,7 @@ public abstract class ConfigGui
 			#if PRE_MC_1_19
 			super(new TranslatableComponent(
 			#else
-			super(Component.literal(
+			super(Component.translatable(
 			#endif
 					I18n.exists(MOD_NAME + ".config" + (category.isEmpty()? "." + category : "") + ".title") ?
 							MOD_NAME + ".config.title" :
@@ -599,8 +599,8 @@ public abstract class ConfigGui
 					TranslatableComponent name = (info.name == null ? new TranslatableComponent(translationPrefix + (!info.category.isEmpty() ? info.category + "." : "") + info.field.getName()) : info.name);
 					Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - info.width - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, new TextComponent("Reset").withStyle(ChatFormatting.RED), (button -> {
 					#else
-					Component name = (info.name == null ? Component.literal(translationPrefix + (!info.category.isEmpty() ? info.category + "." : "") + info.field.getName()) : info.name);
-					Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - info.width - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, Component.literal("Reset").withStyle(ChatFormatting.RED), (button -> {
+					Component name = (info.name == null ? Component.translatable(translationPrefix + (!info.category.isEmpty() ? info.category + "." : "") + info.field.getName()) : info.name);
+					Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - info.width - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, Component.translatable("Reset").withStyle(ChatFormatting.RED), (button -> {
 					#endif
 						info.value = info.defaultValue;
 						info.tempValue = info.defaultValue.toString();
@@ -616,7 +616,7 @@ public abstract class ConfigGui
 							#if PRE_MC_1_19
 							widget.setValue(value -> new TranslatableComponent(translationPrefix + "enum." + info.field.getType().getSimpleName() + "." + info.value.toString()));
 							#else
-							widget.setValue(value -> Component.literal(translationPrefix + "enum." + info.field.getType().getSimpleName() + "." + info.value.toString()));
+							widget.setValue(value -> Component.translatable(translationPrefix + "enum." + info.field.getType().getSimpleName() + "." + info.value.toString()));
 							#endif
 						this.list.addButton(new Button(this.width - info.width - ConfigScreenConfigs.SpaceFromRightScreen, 0, info.width, 20, widget.getValue().apply(info.value), widget.getKey()), resetButton, null, name);
 					}
@@ -637,8 +637,8 @@ public abstract class ConfigGui
                         resetButton.setMessage(new TextComponent("R").withStyle(ChatFormatting.RED));
                         Button cycleButton = new Button(this.width - 185, 0, 20, 20, new TextComponent(String.valueOf(info.index)).withStyle(ChatFormatting.GOLD), (button -> {
                         #else
-                        resetButton.setMessage(Component.literal("R").withStyle(ChatFormatting.RED));
-                        Button cycleButton = new Button(this.width - 185, 0, 20, 20, Component.literal(String.valueOf(info.index)).withStyle(ChatFormatting.GOLD), (button -> {
+                        resetButton.setMessage(Component.translatable("R").withStyle(ChatFormatting.RED));
+                        Button cycleButton = new Button(this.width - 185, 0, 20, 20, Component.translatable(String.valueOf(info.index)).withStyle(ChatFormatting.GOLD), (button -> {
                         #endif
 							((List<String>) info.value).remove("");
 							this.reload = true;
@@ -691,7 +691,7 @@ public abstract class ConfigGui
 						#if PRE_MC_1_19
 						TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName());
 						#else
-						Component name = Component.literal(this.translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName());
+						Component name = Component.translatable(this.translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName());
 						#endif
 						String key = translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName() + ".@tooltip";
 
@@ -702,7 +702,7 @@ public abstract class ConfigGui
 								#if PRE_MC_1_19
 								list.add(new TextComponent(str));
 								#else
-								list.add(Component.literal(str));
+								list.add(Component.translatable(str));
 								#endif
 							renderComponentTooltip(matrices, list, mouseX, mouseY);
 						}

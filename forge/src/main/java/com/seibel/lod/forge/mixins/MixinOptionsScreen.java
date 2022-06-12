@@ -72,7 +72,7 @@ public class MixinOptionsScreen extends Screen {
                             #if PRE_MC_1_19
                             new TranslatableComponent("text.autoconfig." + ModInfo.ID + ".title")));
                             #else
-                            Component.literal("text.autoconfig." + ModInfo.ID + ".title")));
+                            Component.translatable("text.autoconfig." + ModInfo.ID + ".title")));
                             #endif
     }
 }
