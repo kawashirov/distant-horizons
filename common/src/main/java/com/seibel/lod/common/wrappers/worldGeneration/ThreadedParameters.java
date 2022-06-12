@@ -60,10 +60,14 @@ public final class ThreadedParameters
 		level = param.level;
 		#if PRE_MC_1_18_1
 		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, level);
+		#elif PRE_MC_1_19
+		structCheck = new StructureCheck(param.chunkScanner, param.registry, param.structures,
+				param.level.dimension(), param.generator, level, param.generator.getBiomeSource(), param.worldSeed,
+				param.fixerUpper);
 		#else
 		structCheck = new StructureCheck(param.chunkScanner, param.registry, param.structures,
-				param.level.dimension(), param.generator, /*FIXME[1.19]*/, level, param.generator.getBiomeSource(), param.worldSeed,
-				param.fixerUpper);
+			param.level.dimension(), param.generator, /*FIXME[1.19]*/, level, param.generator.getBiomeSource(), param.worldSeed,
+			param.fixerUpper);
 		#endif
 	}
 	

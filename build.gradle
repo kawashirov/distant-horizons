@@ -122,10 +122,10 @@ subprojects { p ->
             modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
         }
 
-        if (p == project(":common")) {
+        if (p != project(":core"))
             common(project(":core")) { transitive false }
+        if (p == project(":common"))
             shadowMe(project(":core")) { transitive false }
-        }
     }
 
     // Allows the jar to run standalone

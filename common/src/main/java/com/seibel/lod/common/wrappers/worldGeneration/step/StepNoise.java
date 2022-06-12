@@ -81,6 +81,9 @@ public final class StepNoise {
 			#elif PRE_MC_1_18_1
 			chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run,
 					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
+			#elif PRE_MC_1_19
+			chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion),
+					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
 			#else
 			chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion), /*FIXME[1.19]*/,
 					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
