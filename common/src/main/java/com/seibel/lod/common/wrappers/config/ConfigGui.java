@@ -477,8 +477,13 @@ public abstract class ConfigGui
 		{
 			String itemPath = (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName();
 			if (config.contains(itemPath)) {
-				if (info.field.getType().isEnum())
-					info.value = config.getEnum(itemPath, info.varClass);
+				if (info.field.getType().isEnum()) {
+					try {
+						info.value = config.getEnum(itemPath, info.varClass);
+					} catch (IllegalArgumentException ignored) {
+						return;
+					}
+				}
 				else
 					info.value = config.get(itemPath);
 			} else
