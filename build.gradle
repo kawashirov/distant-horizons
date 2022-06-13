@@ -17,8 +17,7 @@ buildscript {
 
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "0.10.0-SNAPSHOT" apply false
-//    id "dev.architectury.loom" version "0.11.0-SNAPSHOT" apply false // TODO: Move to this as it adds alot of stuff that are useful
+    id "dev.architectury.loom" version "0.12.0-SNAPSHOT" apply false
 }
 
 /**
@@ -97,6 +96,7 @@ def loadProperties() {
             "1.17.1": "1_17",
             "1.18.1": "1_18",
             "1.18.2": "1_18",
+            "1.19": "1_19"
     ]
     // Use this as sometimes multiple versions use the same access wideners
     rootProject.ext.set("acsessWidenerVersion", mcVersionToAcsessWidenerVersion.get(mcVersion))
@@ -135,7 +135,10 @@ subprojects { p ->
             // Mojmap mappings
             officialMojangMappings()
             // Parchment mappings (it adds parameter mappings & javadoc)
-            parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+            if (rootProject.minecraft_version != "1.19")
+                parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+            else // As 1.19 dosnt have parchment mappings yet, we use 1.18.2 mapping
+                parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip")
         }
 
 		// Manifold
@@ -172,10 +175,11 @@ subprojects { p ->
             modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
         }
 
-        if (p != project(":core")) {
+
+        if (p != project(":core"))
             common(project(":core")) { transitive false }
+        if (p == project(":common"))
             shadowMe(project(":core")) { transitive false }
-        }
     }
 
     if (p == project(":fabric") || p == project(":forge")) {
@@ -371,4 +375,11 @@ allprojects { p ->
         runClient.enabled = false
         runServer.enabled = false
     }
+}
+
+
+// this deletes the merged folder so we don't carry over
+// the previous merges to each new build job in the CI/CD pipeline
+task deleteMerged(type: Delete) {
+   delete files("./Merged")
 }

@@ -92,6 +92,9 @@ dependencies {
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowMe(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+
+    // Ran's scuffed 1.19 stuff
+    shadowMe files(project(":core").file("build/libs/DistantHorizons-${rootProject.mod_version}.jar"))
 }
 
 task deleteResources(type: Delete) {
@@ -103,6 +106,10 @@ processResources {
     dependsOn(copyCoreResources)
     dependsOn(copyCommonResources)
 }
+
+// Ran's scuffed 1.19 stuff
+jar.dependsOn(project(":core").remapJar)
+remapSourcesJar.dependsOn(project(":core").remapJar)
 
 runClient {
     dependsOn(copyAccessWidener)
