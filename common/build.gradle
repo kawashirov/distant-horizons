@@ -1,14 +1,5 @@
 architectury {
-    common()
-}
-
-// TODO: Remove "afterEvaluate {}" once we update architectury to 11 or higher
-afterEvaluate {
-    tasks {
-        remapJar {
-            remapAccessWidener.set(false)
-        }
-    }
+    common(rootProject.enabled_platforms.split(","))
 }
 
 dependencies {

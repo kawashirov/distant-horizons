@@ -64,6 +64,7 @@ def writeBuildGradlePredefine(List<String> mcVers, int mcIndex) {
 // Sets up the variables for Manifold in the code
 def loadProperties() {
     def defaultMcVersion = "1.18.2"
+//    def defaultMcVersion = "1.19" // For now use 1.18.2 as default until 1.19 is done
     def mcVersion = ""
     def mcVers = mcVersions.split(",")
     int mcIndex = -1
@@ -287,7 +288,7 @@ allprojects { p ->
                 java_version                 : java_version
         ]
         // The left side is what gets replaced in the mod info and the right side is where to get it from in the gradle.properties
-        //TODO: Make Forge loader version also be relaced with non hardcoded value instead of "[36,41)"
+        //TODO: Make Forge loader version also be relaced with non hardcoded value instead of "[36,42)"
 
         inputs.properties replaceProperties
         replaceProperties.put 'project', project

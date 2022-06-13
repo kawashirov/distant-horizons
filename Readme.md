@@ -12,18 +12,25 @@ allowing for an increased view distance without harming performance.
 Or in other words: this mod lets you see farther without turning your game into a slide show.\
 If you want to see a quick demo, check out a video covering the mod here:
 
-<a href="https://www.youtube.com/watch?v=H2tnvEVbO1c" target="_blank">![Minecraft Level Of Detail (LOD) mod - Alpha 1.5](https://i.ytimg.com/vi_webp/H2tnvEVbO1c/mqdefault.webp)</a>
-
+<a href="https://youtu.be/_04BZ8W2bDM" target="_blank">![Minecraft Level Of Detail (LOD) mod - Alpha 1.6.3](https://cdn.ko-fi.com/cdn/useruploads/png_ef4d209d-50d9-462f-b31f-92e42ec3e260cover.jpg?v=c1097a5b-029c-4484-bec3-80ff58c5d239)</a>
 ### Versions
 
 This branch is for these versions of Minecraft
+- 1.19 (WIP)
 - 1.18.2
 - 1.18.1 & 1.18
 - 1.17.1 & 1.17
 - 1.16.5 & 1.16.4
 
 Architectury version: 3.4-SNAPSHOT\
+Architectury loom version: 0.12.0-SNAPSHOT\
 Java Compiler plugin: Manifold Preprocessor
+
+#### 1.19 mods (WIP)
+Forge version: 41.0.19\
+Fabric version: 0.14.7\
+Fabric API version: 0.55.3+1.19\
+Modmenu version: 4.0.0
 
 #### 1.18.2 mods
 Forge version: 40.0.18\
@@ -59,6 +66,7 @@ This version has been confirmed to work in IDE and Retail Minecraft with ether t
 
 #### Nightlly builds
 This mod has an autobuild system to automatically build the mod on each commit
+- 1.19: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_19 (WIP)
 - 1.18.2: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_18_2
 - 1.18.1: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_18_1
 - 1.17.1: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_17_1
@@ -85,7 +93,8 @@ https://fabricmc.net/wiki/tutorial:setup
 4. Import the project into eclipse
 
 ## Switching Versions
-This branch support 4 built versions:
+This branch support 5 built versions:
+ - 1.19 (WIP)
  - 1.18.2
  - 1.18.1 (which also runs on 1.18)
  - 1.17.1 (which also runs on 1.17)
