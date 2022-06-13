@@ -298,8 +298,6 @@ allprojects { p ->
     if (p == project(":core") || p == project(":common")) {
         runClient.enabled = false
         runServer.enabled = false
-        remapJar.enabled = false
-        remapSourcesJar.enabled = false
     }
 }
 
