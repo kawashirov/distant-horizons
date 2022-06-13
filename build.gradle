@@ -294,10 +294,12 @@ allprojects { p ->
         withSourcesJar()
     }
 
-    // Disable running the core and common
+    // Disable running & remapping in core and common
     if (p == project(":core") || p == project(":common")) {
         runClient.enabled = false
         runServer.enabled = false
+        remapJar.enabled = false
+        remapSourcesJar.enabled = false
     }
 }
 
