@@ -36,7 +36,7 @@ def writeBuildGradlePredefine(List<String> mcVers, int mcIndex) {
 
 // Sets up the variables for Manifold in the code
 def loadProperties() {
-    def defaultMcVersion = "1.18.2"
+    def defaultMcVersion = "1.19"
     def mcVersion = ""
     def mcVers = mcVersions.split(",")
     int mcIndex = -1
@@ -110,7 +110,7 @@ subprojects { p ->
             if (rootProject.minecraft_version != "1.19")
                 parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
             else
-                parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip")
+                parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip") // As 1.19 dosnt have parchment mappings yet, we use 1.18.2 mapping
         }
 
 		//Manifold

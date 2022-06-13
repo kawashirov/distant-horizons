@@ -55,7 +55,7 @@ import org.lwjgl.glfw.GLFW;
  * This handles all events sent to the client,
  * and is the starting point for most of the mod.
  * 
- * @author coolGi2007
+ * @author coolGi
  * @author Ran
  * @version 11-23-2021
  */

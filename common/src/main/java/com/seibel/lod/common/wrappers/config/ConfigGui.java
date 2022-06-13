@@ -64,29 +64,15 @@ import net.minecraft.client.gui.narration.NarratableEntry;
  *
  * Credits to Motschen
  *
- * @author coolGi2007
+ * REMOVED IN a1.7
+ *
+ * @author coolGi
  * @version 1-14-2022
  */
+@Deprecated
 @SuppressWarnings("unchecked")
 public abstract class ConfigGui
 {
-	/*
-	        TODO list
-
-		Fix floats not working
-        Make a wiki
-        Make it so you can enable and disable buttons from showing
-        Make min and max not final
-        Move the ConfigScreenConfigs class to the config class that extends this
-     */
-	/*
-		List of hacky things that are done that should be done properly
-
-		The buttons that don't show are still loaded but just not rendered
-		The screen with is set to double so the scroll bar doesn't show
-	 */
-
-
 	private static final Pattern INTEGER_ONLY_REGEX = Pattern.compile("(-?[0-9]*)");
 	private static final Pattern DECIMAL_ONLY_REGEX = Pattern.compile("-?([\\d]+\\.?[\\d]*|[\\d]*\\.?[\\d]+|\\.)");
 
@@ -369,8 +355,7 @@ public abstract class ConfigGui
 
 
 		// Just put this here for the future
-		config.setComment("_Version", " DONT TOUCH THIS, IF YOU DO THEN CONFIG FILE WOULD BREAK");
-		config.set("_Versions", ModInfo.VERSION);
+		config.set("_version", 1);
 
 
 		for (EntryInfo info : entries) {
@@ -405,8 +390,7 @@ public abstract class ConfigGui
 
 
 		// Just put this here for the future
-		config.setComment("_Version", " DONT TOUCH THIS, IF YOU DO THEN CONFIG FILE WOULD BREAK");
-		config.set("_Versions", ModInfo.VERSION);
+		config.set("_version", 1);
 
 
 		// Puts everything into its variable

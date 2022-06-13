@@ -2,8 +2,6 @@
 
 > A mod that adds a Level of Detail System to Minecraft
 
-# This branch is a temporary 1.19 branch and will be deleted soon
-
 # What is Distant Horizons?
 
 This mod adds a Level Of Detail (LOD) system to Minecraft.\
@@ -13,7 +11,7 @@ allowing for an increased view distance without harming performance.
 Or in other words: this mod lets you see farther without turning your game into a slide show.\
 If you want to see a quick demo, check out a video covering the mod here:
 
-<a href="https://www.youtube.com/watch?v=H2tnvEVbO1c" target="_blank">![Minecraft Level Of Detail (LOD) mod - Alpha 1.5](https://i.ytimg.com/vi_webp/H2tnvEVbO1c/mqdefault.webp)</a>
+<a href="https://youtu.be/_04BZ8W2bDM" target="_blank">![Minecraft Level Of Detail (LOD) mod - Alpha 1.6.3](https://cdn.ko-fi.com/cdn/useruploads/png_ef4d209d-50d9-462f-b31f-92e42ec3e260cover.jpg?v=c1097a5b-029c-4484-bec3-80ff58c5d239)</a>
 
 ### Versions
 
@@ -67,11 +65,11 @@ This version has been confirmed to work in IDE and Retail Minecraft with ether t
 
 #### Nightlly builds
 This mod has an autobuild system to automatically build the mod on each commit
-- 1.19:   https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_19
-- 1.18.2: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_18_2
-- 1.18.1: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_18_1
-- 1.17.1: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_17_1
-- 1.16.5: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/main/download?job=build_16_5
+- 1.19:   https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/1.6.4a_dev/download?job=build_19
+- 1.18.2: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/1.6.4a_dev/download?job=build_18_2
+- 1.18.1: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/1.6.4a_dev/download?job=build_18_1
+- 1.17.1: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/1.6.4a_dev/download?job=build_17_1
+- 1.16.5: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/1.6.4a_dev/download?job=build_16_5
 
 See the Fabric Documentation online for more detailed instructions:\
 https://fabricmc.net/wiki/tutorial:setup
@@ -94,7 +92,7 @@ https://fabricmc.net/wiki/tutorial:setup
 4. Import the project into eclipse
 
 ## Switching Versions
-This branch support 4 built versions:
+This branch support 5 built versions:
  - 1.19
  - 1.18.2
  - 1.18.1 (which also runs on 1.18)

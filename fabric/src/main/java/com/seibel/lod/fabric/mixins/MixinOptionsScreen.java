@@ -41,7 +41,7 @@ import java.util.Objects;
 /**
  * Adds a button to the menu to goto the config
  *
- * @author coolGi2007
+ * @author coolGi
  * @version 12-02-2021
 */
 @Mixin(OptionsScreen.class)

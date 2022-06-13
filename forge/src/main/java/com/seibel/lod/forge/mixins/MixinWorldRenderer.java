@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  *
  * This is also the mixin for rendering the clouds
  *
- * @author coolGi2007
+ * @author coolGi
  * @author James Seibel
  * @version 12-31-2021
  */
