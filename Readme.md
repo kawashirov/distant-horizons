@@ -23,6 +23,7 @@ This branch is for these versions of Minecraft
 - 1.16.5 & 1.16.4
 
 Architectury version: 3.4-SNAPSHOT\
+Architectury loom version: 0.12.0-SNAPSHOT\
 Java Compiler plugin: Manifold Preprocessor
 
 #### 1.19 mods
@@ -97,7 +98,7 @@ This branch support 5 built versions:
  - 1.18.2
  - 1.18.1 (which also runs on 1.18)
  - 1.17.1 (which also runs on 1.17)
- - 1.16.5 (which also runs 1.16.5)
+ - 1.16.5 (which also runs 1.16.4)
 
 To switch between active versions, change `mcVer=1.?` in `gradle.properties` file.
 
@@ -115,7 +116,7 @@ If running on IDE, to ensure IDE pickup the changed versions, you will need to r
 6. The compiled jar file will be in the folder `Merged`
 
 **If in terminal:**
-1. `git clone --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
+1. `git clone -b 1.6.4a_dev --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
 2. `cd minecraft-lod-mod`
 3. `./gradlew assemble`
 4. `./gradlew mergeJars`
