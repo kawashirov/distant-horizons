@@ -26,7 +26,9 @@ import com.seibel.lod.core.config.Config;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+#if PRE_MC_1_19
 import net.minecraft.network.chat.TranslatableComponent;
+#endif
 import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -66,6 +68,10 @@ public class MixinOptionsScreen extends Screen {
                             // For now it goes to the client option by default
                             (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(GetConfigScreen.getScreen(this)),
                             // Add a title to the screen
-                            new TranslatableComponent("text.autoconfig." + ModInfo.ID + ".title")));
+                            #if PRE_MC_1_19
+                            new TranslatableComponent(ModInfo.ID + ".title")));
+                            #else
+                            Component.translatable(ModInfo.ID + ".title")));
+                            #endif
     }
 }

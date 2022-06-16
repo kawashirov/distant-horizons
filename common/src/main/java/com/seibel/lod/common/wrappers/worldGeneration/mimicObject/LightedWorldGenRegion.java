@@ -305,7 +305,11 @@ public class LightedWorldGenRegion extends WorldGenRegion
 	
 	public int calculateBlockTint(BlockPos blockPos, ColorResolver colorResolver)
 	{
+		#if PRE_MC_1_19
 		int i = (Minecraft.getInstance()).options.biomeBlendRadius;
+		#else
+		int i = (Minecraft.getInstance()).options.biomeBlendRadius().get();
+		#endif
 		if (i == 0)
 			return colorResolver.getColor((Biome) _getBiome(blockPos), blockPos.getX(), blockPos.getZ());
 		int j = (i * 2 + 1) * (i * 2 + 1);

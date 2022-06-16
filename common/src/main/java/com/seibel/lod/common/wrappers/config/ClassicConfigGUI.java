@@ -43,11 +43,13 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.client.resources.language.I18n;	// translation
 #if POST_MC_1_17_1
 import net.minecraft.client.gui.narration.NarratableEntry;
+#endif
+#if PRE_MC_1_19
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 #endif
 
 /**
@@ -108,7 +110,11 @@ public abstract class ClassicConfigGUI {
                 textField(info, String::length, null, true);
             } else if (fieldClass == Boolean.class) {
                 // For boolean
+                #if PRE_MC_1_19
                 Function<Object, Component> func = value -> new TextComponent((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
+                #else
+                Function<Object, Component> func = value -> Component.translatable((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
+                #endif
                 ((EntryInfo) info.guiValue).widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
                     ((ConfigEntry) info).setWithoutSaving(!(Boolean) info.get());
                     button.setMessage(func.apply(info.get()));
@@ -118,7 +124,11 @@ public abstract class ClassicConfigGUI {
             {
                 // For enum
                 List<?> values = Arrays.asList(info.getType().getEnumConstants());
+                #if PRE_MC_1_19
                 Function<Object, Component> func = value -> new TranslatableComponent(ModInfo.ID + ".config." + "enum." + fieldClass.getSimpleName() + "." + info.get().toString());
+                #else
+                Function<Object, Component> func = value -> Component.translatable(ModInfo.ID + ".config." + "enum." + fieldClass.getSimpleName() + "." + info.get().toString());
+                #endif
                 ((EntryInfo) info.guiValue).widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
                     int index = values.indexOf(info.get()) + 1;
                     info.set(values.get(index >= values.size() ? 0 : index));
@@ -148,7 +158,11 @@ public abstract class ClassicConfigGUI {
             ((EntryInfo) info.guiValue).error = null;
             if (isNumber && !stringValue.isEmpty() && !stringValue.equals("-") && !stringValue.equals(".")) {
                 value = func.apply(stringValue);
+                #if PRE_MC_1_19
                 ((EntryInfo) info.guiValue).error = ((ConfigEntry) info).isValid(value) == 0 ? null : new AbstractMap.SimpleEntry<>(editBox, new TextComponent(((ConfigEntry) info).isValid(value) == -1 ?
+                #else
+                ((EntryInfo) info.guiValue).error = ((ConfigEntry) info).isValid(value) == 0 ? null : new AbstractMap.SimpleEntry<>(editBox, Component.translatable(((ConfigEntry) info).isValid(value) == -1 ?
+                #endif
                         "§cMinimum " + "length" + (cast ? " is " + (int) ((ConfigEntry) info).getMin() : " is " + ((ConfigEntry) info).getMin()) :
                         "§cMaximum " + "length" + (cast ? " is " + (int) ((ConfigEntry) info).getMax() : " is " + ((ConfigEntry) info).getMax())));
             }
@@ -191,7 +205,11 @@ public abstract class ClassicConfigGUI {
      */
     private static class ConfigScreen extends Screen {
         protected ConfigScreen(Screen parent, String category) {
+            #if PRE_MC_1_19
             super(new TranslatableComponent(
+            #else
+            super(Component.translatable(
+            #endif
                     I18n.exists(ModInfo.ID + ".config" + (category.isEmpty() ? "." + category : "") + ".title") ?
                             ModInfo.ID + ".config.title" :
                             ModInfo.ID + ".config" + (category.isEmpty() ? "" : "." + category) + ".title")
@@ -256,9 +274,17 @@ public abstract class ClassicConfigGUI {
             for (AbstractConfigType info : ConfigBase.entries) {
                 if (info.getCategory().matches(category) && info.getAppearance().showInGui) {
                     initEntry(info);
+                    #if PRE_MC_1_19
                     TranslatableComponent name = new TranslatableComponent(translationPrefix + info.getNameWCategory());
+                    #else
+                    Component name = Component.translatable(translationPrefix + info.getNameWCategory());
+                    #endif
                     if (ConfigEntry.class.isAssignableFrom(info.getClass())) {
+                        #if PRE_MC_1_19
                         Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - 150 - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, new TextComponent("Reset").withStyle(ChatFormatting.RED), (button -> {
+                        #else
+                        Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - 150 - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, Component.translatable("Reset").withStyle(ChatFormatting.RED), (button -> {
+                        #endif
                             ((ConfigEntry) info).setWithoutSaving(((ConfigEntry) info).getDefaultValue());
                             ((EntryInfo) info.guiValue).index = 0;
                             this.reload = true;
@@ -268,7 +294,11 @@ public abstract class ClassicConfigGUI {
                         if (((EntryInfo) info.guiValue).widget instanceof Map.Entry) {
                             Map.Entry<Button.OnPress, Function<Object, Component>> widget = (Map.Entry<Button.OnPress, Function<Object, Component>>) ((EntryInfo) info.guiValue).widget;
                             if (info.getType().isEnum())
+                                #if PRE_MC_1_19
                                 widget.setValue(value -> new TranslatableComponent(translationPrefix + "enum." + info.getType().getSimpleName() + "." + info.get().toString()));
+                                #else
+                                widget.setValue(value -> Component.translatable(translationPrefix + "enum." + info.getType().getSimpleName() + "." + info.get().toString()));
+                                #endif
                             this.list.addButton(new Button(this.width - 150 - ConfigScreenConfigs.SpaceFromRightScreen, 0, 150, 20, widget.getValue().apply(info.get()), widget.getKey()), resetButton, null, name);
                         } else if (((EntryInfo) info.guiValue).widget != null) {
                             EditBox widget = new EditBox(font, this.width - 150 - ConfigScreenConfigs.SpaceFromRightScreen + 2, 0, 150 - 4, 20, null);
@@ -302,7 +332,11 @@ public abstract class ClassicConfigGUI {
                     if (list.getHoveredButton(mouseX, mouseY).isPresent()) {
                         AbstractWidget buttonWidget = list.getHoveredButton(mouseX, mouseY).get();
                         Component text = ButtonEntry.buttonsWithText.get(buttonWidget);
+                        #if PRE_MC_1_19
                         TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.getName());
+                        #else
+                        Component name = Component.translatable(this.translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.getName());
+                        #endif
                         String key = translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.getName() + ".@tooltip";
 
                         if (((EntryInfo) info.guiValue).error != null && text.equals(name))
@@ -310,7 +344,11 @@ public abstract class ClassicConfigGUI {
                         else if (I18n.exists(key) && (text != null && text.equals(name))) {
                             List<Component> list = new ArrayList<>();
                             for (String str : I18n.get(key).split("\n"))
+                                #if PRE_MC_1_19
                                 list.add(new TextComponent(str));
+                                #else
+                                list.add(Component.translatable(str));
+                                #endif
                             renderComponentTooltip(matrices, list, mouseX, mouseY);
                         }
                     }

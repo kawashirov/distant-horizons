@@ -35,6 +35,9 @@ import com.seibel.lod.forge.wrappers.modAccessor.OptifineAccessor;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;
+#if POST_MC_1_19
+import net.minecraft.util.RandomSource;
+#endif
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -115,13 +118,19 @@ public class ForgeMain implements LodForgeMethodCaller
 
 	private final ModelDataMap dataMap = new ModelDataMap.Builder().build();
 	@Override
+	#if PRE_MC_1_19
 	public List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, Random random) {
 		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
 	}
+	#else
+	public List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, RandomSource random) {
+		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
+	}
+	#endif
 
 	@Override
 	public int colorResolverGetColor(ColorResolver resolver, Biome biome, double x, double z) {
-		#if MC_1_17_1
+		#if MC_1_17_1______Still_needed
 		return resolver.m_130045_(biome, x, z);
 		#else
 		return resolver.getColor(biome, x, z);

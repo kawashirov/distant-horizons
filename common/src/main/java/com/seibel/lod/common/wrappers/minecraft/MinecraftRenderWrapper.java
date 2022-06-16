@@ -120,7 +120,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	public Mat4f getDefaultProjectionMatrix(float partialTicks)
 	{
 		#if PRE_MC_1_17_1
-		return McObjectConverter.Convert(GAME_RENDERER.getProjectionMatrix(GAME_RENDERER.getMainCamera(), partialTicks, true));
+		return McObjectConverter.Convert(Minecraft.getInstance().gameRenderer.getProjectionMatrix(Minecraft.getInstance().gameRenderer.getMainCamera(), partialTicks, true));
 		#else
 		return McObjectConverter.Convert(MC.gameRenderer.getProjectionMatrix(MC.gameRenderer.getFov(MC.gameRenderer.getMainCamera(), partialTicks, true)));
 		#endif
@@ -129,7 +129,11 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public double getGamma()
 	{
+		#if PRE_MC_1_19
 		return MC.options.gamma;
+		#else
+		return MC.options.gamma().get();
+		#endif
 	}
 	
 	@Override
@@ -266,7 +270,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public boolean isFogStateSpecial() {
 		#if PRE_MC_1_17_1
-		Camera camera = GAME_RENDERER.getMainCamera();
+		Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
 		FluidState fluidState = camera.getFluidInCamera();
 		Entity entity = camera.getEntity();
 		boolean isUnderWater = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);

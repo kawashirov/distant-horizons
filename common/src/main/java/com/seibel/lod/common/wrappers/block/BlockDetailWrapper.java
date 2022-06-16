@@ -48,6 +48,9 @@ import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
+#if POST_MC_1_19
+import net.minecraft.util.RandomSource;
+#endif
 
 /*-- WARN: This class should NEVER hold reference to anything large,
  as this is never dealloc until the end of runtime!! --*/
@@ -55,7 +58,11 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 {
 	public static final int FLOWER_COLOR_SCALE = 5;
 
+	#if PRE_MC_1_19
 	public static final Random random = new Random(0);
+	#else
+	public static final RandomSource random = RandomSource.create();
+	#endif
 
 	enum ColorMode {
 		Default,

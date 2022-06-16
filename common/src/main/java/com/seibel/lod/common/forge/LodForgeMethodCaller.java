@@ -22,6 +22,9 @@ package com.seibel.lod.common.forge;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;
+#if POST_MC_1_19
+import net.minecraft.util.RandomSource;
+#endif
 import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
@@ -36,7 +39,11 @@ import java.util.Random;
  * @author Ran
  */
 public interface LodForgeMethodCaller {
-    List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, Random random);
+    #if PRE_MC_1_19
+    List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, Random random); // FIXME: For 1.19
+    #else
+    List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, RandomSource random); // FIXME: For 1.19
+    #endif
 
     int colorResolverGetColor(ColorResolver resolver, Biome biome, double x, double z);
 }

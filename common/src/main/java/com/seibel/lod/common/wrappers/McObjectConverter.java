@@ -61,11 +61,14 @@ public class McObjectConverter
     	lodDirections = new ELodDirection[lodDirs.length];
     	for (ELodDirection lodDir : lodDirs) {
     		Direction dir = Direction.byName(lodDir.name());
-    		directions[lodDir.ordinal()] = dir;
+            if (dir == null) {
+                throw new IllegalArgumentException("Invalid direction on init mapping: " + lodDir);
+            }
+            directions[lodDir.ordinal()] = dir;
     		lodDirections[dir.ordinal()] = lodDir;
     	}
     }
-    
+
     public static BlockPos Convert(DHBlockPos wrappedPos) {
     	return new BlockPos(wrappedPos.x, wrappedPos.y, wrappedPos.z);
     }

@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+
+buildVersion()
+{
+    ./gradlew -PmcVer=$1 build
+    ./gradlew mergeJars -PmcVer=$1
+    rm -R build/libs common/build/libs fabric/build/libs forge/build/libs
+}
+
+buildVersion 1.19
+buildVersion 1.18.2
+buildVersion 1.18.1
+buildVersion 1.17.1
+buildVersion 1.16.5

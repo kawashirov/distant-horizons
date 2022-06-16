@@ -56,7 +56,9 @@ import net.minecraft.world.level.material.Fluids;
 
 public class ChunkLoader
 {
-	#if POST_MC_1_18_1
+	#if POST_MC_1_19
+	private static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codecRW(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES, Blocks.AIR.defaultBlockState());
+	#elif POST_MC_1_18_1
 	private static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codec(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES, Blocks.AIR.defaultBlockState());
 	#endif
 	private static final String TAG_UPGRADE_DATA = "UpgradeData";
@@ -87,8 +89,11 @@ public class ChunkLoader
 			#if PRE_MC_1_18_2
 			Codec<PalettedContainer<Biome>> biomeCodec = PalettedContainer.codec(
 					biomes, biomes.byNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getOrThrow(Biomes.PLAINS));
-			#else
+			#elif PRE_MC_1_19
 			Codec<PalettedContainer<Holder<Biome>>> biomeCodec = PalettedContainer.codec(
+					biomes.asHolderIdMap(), biomes.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getHolderOrThrow(Biomes.PLAINS));
+			#else
+			Codec<PalettedContainer<Holder<Biome>>> biomeCodec = PalettedContainer.codecRW(
 					biomes.asHolderIdMap(), biomes.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getHolderOrThrow(Biomes.PLAINS));
 			#endif
 		#endif
@@ -208,8 +213,13 @@ public class ChunkLoader
 			return null;
 		#else
 		BlendingData blendingData = readBlendingData(tagLevel);
+		#if PRE_MC_1_19
 		if (chunkType == ChunkStatus.ChunkType.PROTOCHUNK && (blendingData == null || !blendingData.oldNoise()))
 			return null;
+		#else
+		if (chunkType == ChunkStatus.ChunkType.PROTOCHUNK && (blendingData == null || level.getChunk(chunkPos.getMiddleBlockX(),chunkPos.getMiddleBlockZ()).isOldNoiseGeneration()))
+			return null;
+		#endif
 		#endif
 
 		long inhabitedTime = tagLevel.getLong("InhabitedTime");

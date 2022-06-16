@@ -46,8 +46,12 @@ public class MixinFogRenderer {
 	private static final float A_REALLY_REALLY_BIG_VALUE = 420694206942069.F;
 	private static final float A_EVEN_LARGER_VALUE = 42069420694206942069.F;
 
-	@Inject(at = @At("RETURN"), method = "setupFog(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/FogRenderer$FogMode;FZ)V")
+	@Inject(at = @At("RETURN"), method = "setupFog")
+	#if PRE_MC_1_19
 	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, CallbackInfo callback) {
+	#else
+	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, float g, CallbackInfo callback) {
+	#endif
 		#if PRE_MC_1_17_1
 		FluidState fluidState = camera.getFluidInCamera();
 		boolean cameraNotInFluid = fluidState.isEmpty();
