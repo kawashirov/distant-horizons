@@ -1,5 +1,65 @@
+apply plugin: "java"
+apply plugin: "architectury-plugin"
+apply plugin: "maven-publish"
+apply plugin: "dev.architectury.loom"
+
+archivesBaseName = rootProject.archives_base_name
+version = rootProject.mod_version
+group = rootProject.maven_group
+
 architectury {
     common(rootProject.enabled_platforms.split(","))
+}
+
+loom {
+    silentMojangMappingsLicense()
+    accessWidenerPath.set(project(":common").file("src/main/resources/${acsessWidenerVersion}.lod.accesswidener"))
+}
+
+configurations {
+    common
+    shadowMe
+    implementation.extendsFrom shadowMe
+}
+java {
+    withSourcesJar()
+}
+
+
+dependencies {
+    minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+    // The following line declares the mojmap mappings & parchment mappings
+    mappings loom.layered() {
+        // Mojmap mappings
+        officialMojangMappings()
+        // Parchment mappings (it adds parameter mappings & javadoc)
+        if (rootProject.minecraft_version != "1.19")
+            parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+        else
+            parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip") // As 1.19 dosnt have parchment mappings yet, we use 1.18.2 mapping
+    }
+
+    //Manifold
+    annotationProcessor "systems.manifold:manifold-preprocessor:${rootProject.manifold_version}"
+
+    // Toml
+    implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
+
+    // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
+    // Do NOT use other classes from fabric loader unless working with fabric
+    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"\
+
+    common(project(":core")) { transitive false }
+    shadowMe(project(":core")) { transitive false }
+}
+
+// Allows the jar to run standalone
+jar {
+    manifest {
+        attributes 'Implementation-Title': rootProject.archives_base_name,
+                'Implementation-Version': rootProject.mod_version,
+                'Main-Class': 'com.seibel.lod.core.JarMain' // When changing the main of the jar change this line
+    }
 }
 
 publishing {
@@ -15,3 +75,144 @@ publishing {
         // Add repositories to publish to here.
     }
 }
+
+task printConfigurations {
+    doLast {task ->
+        println "Project Name: $name configurations:"
+        configurations.each {
+            println "    $it.name"
+        }
+    }
+}
+repositories {
+    mavenCentral()
+
+    // For parchment mappings
+    maven { url "https://maven.parchmentmc.org" }
+
+    // used to download and compile dependencies from git repos
+    maven { url 'https://jitpack.io' }
+
+    // For Manifold Preprocessor
+    maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+
+    // Required for importing Modrinth mods
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
+
+    // Required for importing CursedForge mods
+    maven {
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
+
+    // These 2 are for importing mods that arnt on CursedForge, Modrinth, GitHub, GitLab or anywhere opensource
+    flatDir {
+        dirs "${rootDir}/mods/fabric"
+        content {
+            includeGroup "fabric-mod"
+        }
+    }
+    flatDir {
+        dirs "${rootDir}/mods/forge"
+        content {
+            includeGroup "forge-mod"
+        }
+    }
+}
+
+// Copies the correct accesswidener and renames it
+task copyAccessWidener(type: Copy) {
+    from project(":common").file("src/main/resources/${rootProject.acsessWidenerVersion}.lod.accesswidener")
+    into(file("build/resources/main"))
+    rename "${rootProject.acsessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
+}
+
+task copyCoreResources(type: Copy) {
+    from fileTree(project(":core").file("src/main/resources"))
+    into file("build/resources/main")
+}
+
+task copyCommonResources(type: Copy) {
+    from fileTree(project(":common").file("src/main/resources"))
+    into file("build/resources/main")
+}
+
+processResources {
+    def resourceTargets = ["fabric.mod.json", "META-INF/mods.toml"] // Location of where to put
+    def intoTargets = ["$buildDir/resources/main/"] // Location of the built resources folder
+    def replaceProperties = [
+            version                      : mod_version,
+            mod_name                     : mod_name,
+            authors                      : mod_authors,
+            description                  : mod_description,
+            homepage                     : mod_homepage,
+            source                       : mod_source,
+            issues                       : mod_issues,
+            minecraft_version            : minecraft_version,
+            compatible_minecraft_versions: compatible_minecraft_versions,
+            java_version                 : java_version
+    ]
+    // The left side is what gets replaced in the mod info and the right side is where to get it from in the gradle.properties
+    //TODO: Make Forge loader version also be relaced with non hardcoded value instead of "[36,42)"
+
+    inputs.properties replaceProperties
+    replaceProperties.put 'project', project
+    filesMatching(resourceTargets) {
+        expand replaceProperties
+    }
+
+    intoTargets.each { target ->
+        if (file(target).exists()) {
+            copy {
+                from(sourceSets.main.resources) {
+                    include resourceTargets
+                    expand replaceProperties
+                }
+                into target
+            }
+        }
+    }
+}
+
+println "Copying [common/src/main/resources/${acsessWidenerVersion}.lod.accesswidner] to [fabric/build/resources/main]."
+copy {
+    from project(":common").file("src/main/resources/${acsessWidenerVersion}.lod.accesswidener")
+    into project(":fabric").file("build/resources/main")
+    rename "${acsessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
+}
+
+tasks.withType(JavaCompile) {
+    // Add Manifold Preprocessor
+//		def excapedMCVersion = rootProject.minecraft_version.replace(".", "_")
+//		options.compilerArgs += ['-Xplugin:Manifold', "-AMC_VERSION_${excapedMCVersion}"]
+//
+    //options.compilerArgs += ['-deprecation']
+    //options.compilerArgs += ['-verbose']
+    //options.compilerArgs += ['-Xlint:unchecked']
+    //options.compilerArgs += ['-Xdiags:verbose']
+    //options.compilerArgs += ['-Xprint']
+    //options.compilerArgs += ['-XprintProcessorInfo']
+    //options.compilerArgs += ['-XprintRounds']
+
+    // println options.compilerArgs
+
+    // Set the java version
+    options.compilerArgs += ['-Xplugin:Manifold']
+    options.release = rootProject.java_version as Integer
+    // TODO: make everything use java 8
+//        options.release = 8 // Use Java 8 for everything so back porting is easier
+}
+
+sourcesJar {
+}
+
+runClient.enabled = false
+runServer.enabled = false
