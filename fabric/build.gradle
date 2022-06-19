@@ -37,8 +37,10 @@ dependencies {
 
     // Fabric API
     addModJar(fabricApi.module("fabric-lifecycle-events-v1", rootProject.fabric_api_version))
+    addModJar(fabricApi.module("fabric-resource-loader-v0", rootProject.fabric_api_version))
     addModJar(fabricApi.module("fabric-key-binding-api-v1", rootProject.fabric_api_version))
     addModJar(fabricApi.module("fabric-networking-api-v1", rootProject.fabric_api_version))
+    addModJar(fabricApi.module("fabric-api-base", rootProject.fabric_api_version))
 
     // Mod Menu
     modImplementation("com.terraformersmc:modmenu:${rootProject.modmenu_version}")

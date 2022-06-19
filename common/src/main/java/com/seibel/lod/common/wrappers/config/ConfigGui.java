@@ -343,6 +343,8 @@ public abstract class ConfigGui
 
 		// First try to create a config file
 		try {
+			if (!configFilePath.getParent().toFile().exists())
+				Files.createDirectory(ConfigPath.getParent());
 			if (!Files.exists(configFilePath))
 				Files.createFile(configFilePath);
 		}
