@@ -5,9 +5,7 @@ import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.WorldWrapper;
 import com.seibel.lod.core.api.internal.a7.ServerApi;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
-import com.seibel.lod.core.objects.a7.Server;
 import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
-import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -17,7 +15,6 @@ import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.Logger;
 
