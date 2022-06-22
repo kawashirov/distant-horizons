@@ -22,10 +22,8 @@ package com.seibel.lod.common.wrappers;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.objects.lod.LodDimension;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
-import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
+import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper;
-import com.seibel.lod.core.objects.DHBlockPos;
-import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 
 /**
@@ -39,7 +37,7 @@ public class WrapperFactory implements IWrapperFactory
 	public static final WrapperFactory INSTANCE = new WrapperFactory();
 
 	public AbstractBatchGenerationEnvionmentWrapper createBatchGenerator(LodBuilder newLodBuilder,
-			LodDimension newLodDimension, IWorldWrapper worldWrapper)
+			LodDimension newLodDimension, ILevelWrapper worldWrapper)
 	{
 		return new BatchGenerationEnvironment(worldWrapper, newLodBuilder, newLodDimension);
 	}

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
+import com.seibel.lod.common.wrappers.world.LevelWrapper;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.enums.ELodDirection;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
@@ -32,12 +33,11 @@ import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IProfilerWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IDimensionTypeWrapper;
-import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
+import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.core.objects.DHBlockPos;
 import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
-import com.seibel.lod.common.wrappers.world.WorldWrapper;
 
 import net.minecraft.CrashReport;
 import net.minecraft.client.Minecraft;
@@ -54,7 +54,6 @@ import net.minecraft.core.Direction;
 #if PRE_MC_1_19
 import net.minecraft.network.chat.TextComponent;
 #endif
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
@@ -163,7 +162,7 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
     @Override
     public String getCurrentDimensionId()
     {
-        return LodUtil.getDimensionIDFromWorld(WorldWrapper.getWorldWrapper(mc.level));
+        return LodUtil.getDimensionIDFromWorld(LevelWrapper.getWorldWrapper(mc.level));
     }
 
     //=============//
@@ -210,7 +209,7 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
     }
 
     @Override
-    public IWorldWrapper getWrappedServerWorld()
+    public ILevelWrapper getWrappedServerWorld()
     {
         if (mc.level == null)
             return null;
@@ -231,15 +230,15 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
                 break;
             }
         }
-        return WorldWrapper.getWorldWrapper(serverWorld);
+        return LevelWrapper.getWorldWrapper(serverWorld);
     }
 
-    public WorldWrapper getWrappedClientLevel()
+    public LevelWrapper getWrappedClientLevel()
     {
-        return WorldWrapper.getWorldWrapper(mc.level);
+        return LevelWrapper.getWorldWrapper(mc.level);
     }
 
-    public WorldWrapper getWrappedServerLevel()
+    public LevelWrapper getWrappedServerLevel()
     {
 
         if (mc.level == null)
@@ -261,14 +260,14 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
             }
         }
 
-        return WorldWrapper.getWorldWrapper(returnWorld);
+        return LevelWrapper.getWorldWrapper(returnWorld);
     }
 
     @Nullable
     @Override
-    public IWorldWrapper getWrappedClientWorld()
+    public ILevelWrapper getWrappedClientWorld()
     {
-        return WorldWrapper.getWorldWrapper(mc.level);
+        return LevelWrapper.getWorldWrapper(mc.level);
     }
 
     @Override
@@ -344,14 +343,14 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
 
     /** Returns all worlds available to the server */
     @Override
-    public ArrayList<IWorldWrapper> getAllServerWorlds()
+    public ArrayList<ILevelWrapper> getAllServerWorlds()
     {
-        ArrayList<IWorldWrapper> worlds = new ArrayList<IWorldWrapper>();
+        ArrayList<ILevelWrapper> worlds = new ArrayList<ILevelWrapper>();
 
         Iterable<ServerLevel> serverWorlds = mc.getSingleplayerServer().getAllLevels();
         for (ServerLevel world : serverWorlds)
         {
-            worlds.add(WorldWrapper.getWorldWrapper(world));
+            worlds.add(LevelWrapper.getWorldWrapper(world));
         }
 
         return worlds;

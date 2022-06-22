@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentMap;
 import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.core.enums.EWorldType;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
-import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
+import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -46,14 +46,14 @@ import org.jetbrains.annotations.Nullable;
  * @author ??
  * @version 11-21-2021
  */
-public class WorldWrapper implements IWorldWrapper
+public class LevelWrapper implements ILevelWrapper
 {
-    private static final ConcurrentMap<LevelAccessor, WorldWrapper> worldWrapperMap = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<LevelAccessor, LevelWrapper> worldWrapperMap = new ConcurrentHashMap<>();
     private final LevelAccessor world;
     public final EWorldType worldType;
     
     
-    public WorldWrapper(LevelAccessor newWorld)
+    public LevelWrapper(LevelAccessor newWorld)
     {
         world = newWorld;
         
@@ -67,7 +67,7 @@ public class WorldWrapper implements IWorldWrapper
     
     
     @Nullable
-    public static WorldWrapper getWorldWrapper(LevelAccessor world)
+    public static LevelWrapper getWorldWrapper(LevelAccessor world)
     {
         if (world == null) return null;
         //first we check if the biome has already been wrapped
@@ -76,7 +76,7 @@ public class WorldWrapper implements IWorldWrapper
         
         
         //if it hasn't been created yet, we create it and save it in the map
-        WorldWrapper worldWrapper = new WorldWrapper(world);
+        LevelWrapper worldWrapper = new LevelWrapper(world);
         worldWrapperMap.put(world, worldWrapper);
         
         //we return the newly created wrapper

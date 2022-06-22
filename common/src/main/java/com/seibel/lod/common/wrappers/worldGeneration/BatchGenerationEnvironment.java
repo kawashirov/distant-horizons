@@ -33,7 +33,7 @@ import com.seibel.lod.core.objects.lod.LodDimension;
 import com.seibel.lod.core.util.gridList.ArrayGridList;
 import com.seibel.lod.core.util.LodThreadFactory;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
-import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
+import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper;
 
 import java.time.Duration;
@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.seibel.lod.common.wrappers.DependencySetupDoneCheck;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
-import com.seibel.lod.common.wrappers.world.WorldWrapper;
+import com.seibel.lod.common.wrappers.world.LevelWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.ChunkLoader;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightGetterAdaptor;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
@@ -343,11 +343,11 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 	}
 	
-	public BatchGenerationEnvironment(IWorldWrapper serverlevel, LodBuilder lodBuilder, LodDimension lodDim)
+	public BatchGenerationEnvironment(ILevelWrapper serverlevel, LodBuilder lodBuilder, LodDimension lodDim)
 	{
 		super(serverlevel, lodBuilder, lodDim);
 		EVENT_LOGGER.info("================WORLD_GEN_STEP_INITING=============");
-		ChunkGenerator generator =  ((WorldWrapper) serverlevel).getServerWorld().getChunkSource().getGenerator();
+		ChunkGenerator generator =  ((LevelWrapper) serverlevel).getServerWorld().getChunkSource().getGenerator();
 		if (!(generator instanceof NoiseBasedChunkGenerator ||
 				generator instanceof DebugLevelSource ||
 				generator instanceof FlatLevelSource)) {
@@ -359,7 +359,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				EVENT_LOGGER.warn("If it does crash, set Distant Generation to OFF or Generation Mode to None.");
 			}
 		}
-		params = new GlobalParameters((ServerLevel) ((WorldWrapper) serverlevel).getWorld(), lodBuilder, lodDim);
+		params = new GlobalParameters((ServerLevel) ((LevelWrapper) serverlevel).getWorld(), lodBuilder, lodDim);
 	}
 	
 	@SuppressWarnings("resource")

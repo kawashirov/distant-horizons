@@ -19,6 +19,7 @@
 
 package com.seibel.lod.forge;
 
+import com.seibel.lod.common.wrappers.world.LevelWrapper;
 import com.seibel.lod.core.api.internal.ClientApi;
 import com.seibel.lod.core.api.internal.EventApi;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
@@ -28,7 +29,6 @@ import org.lwjgl.glfw.GLFW;
 
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
-import com.seibel.lod.common.wrappers.world.WorldWrapper;
 
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.InputEvent;
@@ -62,7 +62,7 @@ public class ForgeClientProxy
 	@SubscribeEvent
 	public void chunkLoadEvent(ChunkEvent.Load event)
 	{
-		clientApi.clientChunkLoadEvent(new ChunkWrapper(event.getChunk(), event.getWorld()), WorldWrapper.getWorldWrapper(event.getWorld()));
+		clientApi.clientChunkLoadEvent(new ChunkWrapper(event.getChunk(), event.getWorld()), LevelWrapper.getWorldWrapper(event.getWorld()));
 	}
 	
 	@SubscribeEvent
@@ -77,14 +77,14 @@ public class ForgeClientProxy
 	{
 		if (Minecraft.getInstance().screen instanceof TitleScreen) return;
 		if (event.getWorld() != null) {
-			eventApi.worldLoadEvent(WorldWrapper.getWorldWrapper(event.getWorld()));
+			eventApi.worldLoadEvent(LevelWrapper.getWorldWrapper(event.getWorld()));
 		}
 	}
 	
 	@SubscribeEvent
 	public void worldUnloadEvent(WorldEvent.Unload event)
 	{
-		eventApi.worldUnloadEvent(WorldWrapper.getWorldWrapper(event.getWorld()));
+		eventApi.worldUnloadEvent(LevelWrapper.getWorldWrapper(event.getWorld()));
 	}
 	
 	@SubscribeEvent

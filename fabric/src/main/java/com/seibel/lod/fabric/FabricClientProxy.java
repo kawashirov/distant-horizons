@@ -20,12 +20,12 @@
 package com.seibel.lod.fabric;
 
 import com.seibel.lod.common.wrappers.McObjectConverter;
+import com.seibel.lod.common.wrappers.world.LevelWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.core.api.internal.a7.ClientApi;
 import com.seibel.lod.core.config.Config;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
-import com.seibel.lod.common.wrappers.world.WorldWrapper;
 
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
@@ -81,14 +81,14 @@ public class FabricClientProxy
 		ClientChunkEvents.CHUNK_LOAD.register((level, chunk) ->
 				ClientApi.INSTANCE.clientChunkLoadEvent(
 						new ChunkWrapper(chunk, level),
-						WorldWrapper.getWorldWrapper(level)
+						LevelWrapper.getWorldWrapper(level)
 				));
 		//#endif
 		// ClientChunkSaveEvent
 		ClientChunkEvents.CHUNK_UNLOAD.register((level, chunk)->
 				ClientApi.INSTANCE.clientChunkSaveEvent(
 						new ChunkWrapper(chunk, level),
-						WorldWrapper.getWorldWrapper(level)
+						LevelWrapper.getWorldWrapper(level)
 				));
 
 		// RendererStartupEvent - Done in MixinGameRenderer
@@ -113,8 +113,8 @@ public class FabricClientProxy
 	private boolean isValidTime() {
 		return !(Minecraft.getInstance().screen instanceof TitleScreen);
 	}
-	private WorldWrapper getLevelWrapper(Level level) {
-		return WorldWrapper.getWorldWrapper(level);
+	private LevelWrapper getLevelWrapper(Level level) {
+		return LevelWrapper.getWorldWrapper(level);
 	}
 
 //	public void blockChangeEvent(LevelAccessor world, BlockPos pos) {

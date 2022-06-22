@@ -2,10 +2,10 @@ package com.seibel.lod.fabric;
 
 import com.seibel.lod.common.networking.Networking;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
-import com.seibel.lod.common.wrappers.world.WorldWrapper;
+import com.seibel.lod.common.wrappers.world.LevelWrapper;
 import com.seibel.lod.core.api.internal.a7.ServerApi;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
-import com.seibel.lod.core.wrapperInterfaces.world.IWorldWrapper;
+import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -35,8 +35,8 @@ public class FabricServerProxy {
         //FIXME: return true immediately if this is a dedicated server
         return !(Minecraft.getInstance().screen instanceof TitleScreen);
     }
-    private WorldWrapper getLevelWrapper(Level level) {
-        return WorldWrapper.getWorldWrapper(level);
+    private LevelWrapper getLevelWrapper(Level level) {
+        return LevelWrapper.getWorldWrapper(level);
     }
     /**
      * Registers Fabric Events
@@ -77,7 +77,7 @@ public class FabricServerProxy {
         // ServerChunkLoadEvent
         ServerChunkEvents.CHUNK_LOAD.register((server, chunk)
                 -> {
-            IWorldWrapper level = getLevelWrapper(chunk.getLevel());
+            ILevelWrapper level = getLevelWrapper(chunk.getLevel());
             if (isValidTime()) ServerApi.INSTANCE.serverChunkLoadEvent(
                     new ChunkWrapper(chunk, chunk.getLevel()),
                     level);
