@@ -20,10 +20,12 @@
 package com.seibel.lod.common.wrappers.chunk;
 
 import com.seibel.lod.common.wrappers.block.BlockDetailWrapper;
+import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
 import com.seibel.lod.core.enums.ELodDirection;
 import com.seibel.lod.core.util.LevelPosUtil;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockDetailWrapper;
+import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 
@@ -106,13 +108,14 @@ public class ChunkWrapper implements IChunkWrapper
 		#elif PRE_MC_1_18_2
 		return BiomeWrapper.getBiomeWrapper(chunk.getNoiseBiome(
 				QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)));
-		#else
+		#else //Now returns a Holder<Biome> instead of Biome
 		return BiomeWrapper.getBiomeWrapper(chunk.getNoiseBiome(
-				QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)).value());
+				QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)));
 		#endif
 	}
 	
 	@Override
+	@Deprecated
 	public IBlockDetailWrapper getBlockDetail(int x, int y, int z) {
 		BlockPos pos = new BlockPos(x,y,z);
 		BlockState blockState = chunk.getBlockState(pos);
@@ -121,6 +124,7 @@ public class ChunkWrapper implements IChunkWrapper
 	}
 
     @Override
+	@Deprecated
     public IBlockDetailWrapper getBlockDetailAtFace(int x, int y, int z, ELodDirection dir) {
         int fy = y+dir.getNormal().y;
         if (fy < getMinBuildHeight() || fy > getMaxBuildHeight()) return null;
@@ -247,5 +251,9 @@ public class ChunkWrapper implements IChunkWrapper
 	public String toString() {
 		return chunk.getClass().getSimpleName() + chunk.getPos();
 	}
-	
+
+	@Override
+	public BlockStateWrapper getBlockState(int x, int y, int z) {
+		return new BlockStateWrapper(chunk.getBlockState(new BlockPos(x,y,z)));
+	}
 }

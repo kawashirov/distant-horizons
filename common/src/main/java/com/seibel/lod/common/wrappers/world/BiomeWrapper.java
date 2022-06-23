@@ -29,9 +29,12 @@ import java.util.function.Supplier;
 
 import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 
+import net.minecraft.core.Holder;
 import net.minecraft.data.BuiltinRegistries;
 #if POST_MC_1_19
 import net.minecraft.data.worldgen.biome.EndBiomes;
@@ -47,21 +50,24 @@ import net.minecraft.world.level.material.MaterialColor;
 //This class wraps the minecraft BlockPos.Mutable (and BlockPos) class
 public class BiomeWrapper implements IBiomeWrapper
 {
-
+    #if PRE_MC_1_18_2
     public static final ConcurrentMap<Biome, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
     private final Biome biome;
+    #else
+    public static final ConcurrentMap<Holder<Biome>, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
+    private final Holder<Biome> biome;
+    #endif
 
-    public BiomeWrapper(Biome biome)
+    public BiomeWrapper(#if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif biome)
     {
         this.biome = biome;
     }
 
-    static public IBiomeWrapper getBiomeWrapper(Biome biome)
+    static public IBiomeWrapper getBiomeWrapper(#if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif biome)
     {
         //first we check if the biome has already been wrapped
         if(biomeWrapperMap.containsKey(biome) && biomeWrapperMap.get(biome) != null)
             return biomeWrapperMap.get(biome);
-
 
         //if it hasn't been created yet, we create it and save it in the map
         BiomeWrapper biomeWrapper = new BiomeWrapper(biome);
@@ -71,9 +77,12 @@ public class BiomeWrapper implements IBiomeWrapper
         return biomeWrapper;
     }
 
+    private Biome _biome() {
+        return #if PRE_MC_1_18_2 biome #else biome.value() #endif;
+    }
 
     /** Returns a color int for the given biome. */
-    #if PRE_MC_1_19
+    #if PRE_MC_1_18_2
     @Override
     public int getColorForBiome(int x, int z)
     {
@@ -157,9 +166,6 @@ public class BiomeWrapper implements IBiomeWrapper
     private static int _colorMoss(Biome b) {
         return Blocks.MOSS_BLOCK.defaultMaterialColor().col;
     }
-    private static int _colorSculk(Biome b) {
-        return Blocks.SCULK.defaultMaterialColor().col;
-    }
     private static int _colorMushoom(Biome b) {
         return Blocks.MYCELIUM.defaultMaterialColor().col;
     }
@@ -187,6 +193,11 @@ public class BiomeWrapper implements IBiomeWrapper
     private static int _colorFoliage(Biome b) {
         return b.getFoliageColor();
     }
+    #if POST_MC_1_19
+    private static int _colorSculk(Biome b) {
+        return Blocks.SCULK.defaultMaterialColor().col;
+    }
+    #endif
 
     private static Biome _get(ResourceKey<Biome> r) {
         return BuiltinRegistries.BIOME.getOrThrow(r);
@@ -199,7 +210,6 @@ public class BiomeWrapper implements IBiomeWrapper
                     .put(_get(Biomes.ICE_SPIKES), BiomeWrapper::_colorIce)
                     .put(_get(Biomes.DESERT), BiomeWrapper::_colorSand)
                     .put(_get(Biomes.SWAMP), BiomeWrapper::_colorWater)
-                    .put(_get(Biomes.MANGROVE_SWAMP), BiomeWrapper::_colorWater)
                     .put(_get(Biomes.FOREST), BiomeWrapper::_colorFoliage)
                     .put(_get(Biomes.FLOWER_FOREST), BiomeWrapper::_colorFoliage)
                     .put(_get(Biomes.BIRCH_FOREST), BiomeWrapper::_colorFoliage)
@@ -238,7 +248,6 @@ public class BiomeWrapper implements IBiomeWrapper
                     .put(_get(Biomes.MUSHROOM_FIELDS), BiomeWrapper::_colorMushoom)
                     .put(_get(Biomes.DRIPSTONE_CAVES), BiomeWrapper::_colorDripStone)
                     .put(_get(Biomes.LUSH_CAVES), BiomeWrapper::_colorMoss)
-                    .put(_get(Biomes.DEEP_DARK), BiomeWrapper::_colorSculk)
                     .put(_get(Biomes.NETHER_WASTES), BiomeWrapper::_colorNether)
                     .put(_get(Biomes.WARPED_FOREST), BiomeWrapper::_colorNether)
                     .put(_get(Biomes.CRIMSON_FOREST), BiomeWrapper::_colorNether)
@@ -249,62 +258,78 @@ public class BiomeWrapper implements IBiomeWrapper
                     .put(_get(Biomes.END_MIDLANDS), BiomeWrapper::_colorEnd)
                     .put(_get(Biomes.SMALL_END_ISLANDS), BiomeWrapper::_colorEnd)
                     .put(_get(Biomes.END_BARRENS), BiomeWrapper::_colorEnd)
+                    #if MC_1_19
+                    .put(_get(Biomes.MANGROVE_SWAMP), BiomeWrapper::_colorWater)
+                    .put(_get(Biomes.DEEP_DARK), BiomeWrapper::_colorSculk)
+                    #endif
                     .build();
 
     @Override
     public int getColorForBiome(int x, int z)
     {
         int colorInt;
-        Function<Biome, Integer> colorFunction = BIOME_COLOR_MAP.get(biome);
+        Function<Biome, Integer> colorFunction = BIOME_COLOR_MAP.get(biome.value());
         if (colorFunction != null)
         {
-            colorInt = colorFunction.apply(biome);
+            colorInt = colorFunction.apply(biome.value());
         }
         else
         {
-            colorInt = biome.getGrassColor(x, z);
+            colorInt = biome.value().getGrassColor(x, z);
         }
         return colorInt;
     }
     #endif
 
-    @Override public String getName()
+    @Override
+    public String getName()
     {
+        #if PRE_MC_1_18_2
         return biome.toString();
+        #else
+        return biome.unwrapKey().orElse(Biomes.THE_VOID).registry().toString();
+        #endif
     }
     
     @Override
     public int getGrassTint(int x, int z)
     {
-        return biome.getGrassColor(x, z);
+        return _biome().getGrassColor(x, z);
     }
 
     @Override
     public int getFolliageTint()
     {
-        return biome.getFoliageColor();
+        return _biome().getFoliageColor();
     }
 
     @Override
     public int getWaterTint()
     {
-        return biome.getWaterColor();
+        return _biome().getWaterColor();
     }
 
+    @Override
+    public String serialize() {
+        return Biome.CODEC.encodeStart(JsonOps.COMPRESSED, biome).get().orThrow().toString();
+    }
 
-    @Override public boolean equals(Object obj)
-    {
-        if (this == obj)
-            return true;
-        if (!(obj instanceof BiomeWrapper))
-            return false;
-        BiomeWrapper that = (BiomeWrapper) obj;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BiomeWrapper that = (BiomeWrapper) o;
         return Objects.equals(biome, that.biome);
     }
 
-    @Override public int hashCode()
-    {
+    @Override
+    public int hashCode() {
         return Objects.hash(biome);
     }
 
+    public static IBiomeWrapper deserialize(String str) {
+         #if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif
+                biome = Biome.CODEC.decode(JsonOps.COMPRESSED, JsonParser.parseString(str)).get().orThrow().getFirst();
+        return getBiomeWrapper(biome);
+    }
 }

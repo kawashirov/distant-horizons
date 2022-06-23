@@ -19,9 +19,13 @@
 
 package com.seibel.lod.common.wrappers;
 
+import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
+import com.seibel.lod.common.wrappers.world.BiomeWrapper;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.objects.lod.LodDimension;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
+import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
+import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
@@ -40,5 +44,15 @@ public class WrapperFactory implements IWrapperFactory
 			LodDimension newLodDimension, ILevelWrapper worldWrapper)
 	{
 		return new BatchGenerationEnvironment(worldWrapper, newLodBuilder, newLodDimension);
+	}
+
+	@Override
+	public IBiomeWrapper deserializeBiomeWrapper(String str) {
+		return BiomeWrapper.deserialize(str);
+	}
+
+	@Override
+	public IBlockStateWrapper deserializeBlockStateWrapper(String str) {
+		return BlockStateWrapper.deserialize(str);
 	}
 }
