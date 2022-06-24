@@ -130,6 +130,7 @@ If your IDE fails to auto-detect the source jars when browsing Minecraft classes
 
 ## Useful commands
 
+Run the standalone jar: `./gradlew run`\
 Only build Fabric: `./gradlew fabric:assemble` or `./gradlew fabric:build`\
 Only build Forge: `./gradlew fabric:assemble` or `./gradlew forge:build`\
 Run the Fabric client (for debugging): `./gradlew fabric:runClient`\
