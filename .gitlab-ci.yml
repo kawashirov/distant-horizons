@@ -3,9 +3,9 @@ image: gradle:eclipse-temurin
 # The ci should always use an unix/unix-like OS to work
 
 # all stages need to be defined here
-stages:
   #Dont build the standalone yet cus it isnt done
   # - build_standalone
+stages:
   - build_19
   - build_18_2
   - build_18_1
@@ -24,33 +24,33 @@ before_script:
 
 
 # The standalone build
-build_standalone:
-  stage: build_standalone
-  script:
-    # make sure any previously merged jars are removed before running this job.
-    # note: if the merged folder doesn't exist "rm -R Merged" will throw an error, which can be ignored
-    #       the "|| true" makes that step always succeed.
-    - ./gradlew core:build --gradle-user-home cache/;
-
-    # Copy the file with the shortest name to the root DistantHorizons.jar so it can be sent off
-    - cp $(find core/build/libs/ | awk 'function base(f){sub(".*/", "", f); return f;} {print length(base($0)), $0}'| sort -n | head -2 | grep -P "[0-9][0-9] core/build/libs/*" | sed -r "s/([0-9][0-9] )//g") DistantHorizons.jar
-  # build using Java 16
-  image: eclipse-temurin:16
-  artifacts:
-    name: "NightlyBuild_standalone-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
-    paths:
-      # Get the standalone jar
-      - DistantHorizons.jar
-    expire_in: 1 day
-    # even if one build fails, upload the successful jars
-    when: always
-  cache:
-    key: "gradleCache"
-    policy: pull-push
-    paths:
-      - .gradle
-      - cache/
-  allow_failure: true
+#build_standalone:
+#  stage: build_standalone
+#  script:
+#    # make sure any previously merged jars are removed before running this job.
+#    # note: if the merged folder doesn't exist "rm -R Merged" will throw an error, which can be ignored
+#    #       the "|| true" makes that step always succeed.
+#    - ./gradlew core:build --gradle-user-home cache/;
+#
+#    # Copy the file with the shortest name to the root DistantHorizons.jar so it can be sent off
+#    - cp $(find core/build/libs/ | awk 'function base(f){sub(".*/", "", f); return f;} {print length(base($0)), $0}'| sort -n | head -2 | grep -P "[0-9][0-9] core/build/libs/*" | #sed -r "s/([0-9][0-9] )//g") DistantHorizons.jar
+#  # build using Java 16
+#  image: eclipse-temurin:16
+#  artifacts:
+#    name: "NightlyBuild_standalone-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+#    paths:
+#      # Get the standalone jar
+#      - DistantHorizons.jar
+#    expire_in: 1 day
+#    # even if one build fails, upload the successful jars
+#    when: always
+#  cache:
+#    key: "gradleCache"
+#    policy: pull-push
+#    paths:
+#      - .gradle
+#      - cache/
+#  allow_failure: true
 
 
 # 1.16.5 build
