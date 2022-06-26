@@ -21,30 +21,35 @@ If you want to see a quick demo, check out a video covering the mod here:
 This branch supports the following versions of Minecraft:
 
 #### 1.19 (WIP)
+Supported MC versions: [1.19]\
 Forge version: 41.0.19\
 Fabric version: 0.14.7\
 Fabric API version: 0.55.3+1.19\
 Modmenu version: 4.0.0
 
 #### 1.18.2
+Supported MC versions: [1.18.2]\
 Forge version: 40.0.18\
 Fabric version: 0.13.3\
 Fabric API version: 0.48.0+1.18.2\
 Modmenu version: 3.1.0
 
 #### 1.18.1
+Supported MC versions: [1.18.1, 1.18]\
 Forge version: 39.1.2\
 Fabric version: 0.13.3\
 Fabric API version: 0.42.6+1.18\
 Modmenu version: 3.0.1
 
 #### 1.17.1
+Supported MC versions: [1.17.1, 1.17]\
 Forge version: 37.1.1\
 Fabric version: 0.13.2\
 Fabric API version: 0.46.1+1.17\
 Modmenu version: 2.0.14
 
 #### 1.16.5
+Supported MC versions: [1.16.5, 1.16.4]\
 Forge version: 36.2.28\
 Fabric vetsion: 0.13.2\
 Fabric API version: 0.42.0+1.16\
@@ -131,6 +136,7 @@ If your IDE fails to auto-detect the source jars when browsing Minecraft classes
 ## Useful commands
 
 Run the standalone jar: `./gradlew run`\
+Build the standalone jar: `./gradlew core:build`\
 Only build Fabric: `./gradlew fabric:assemble` or `./gradlew fabric:build`\
 Only build Forge: `./gradlew fabric:assemble` or `./gradlew forge:build`\
 Run the Fabric client (for debugging): `./gradlew fabric:runClient`\
