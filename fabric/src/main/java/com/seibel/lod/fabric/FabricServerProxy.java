@@ -4,6 +4,7 @@ import com.seibel.lod.common.networking.Networking;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.LevelWrapper;
 import com.seibel.lod.core.api.internal.a7.ServerApi;
+import com.seibel.lod.core.api.internal.a7.SharedApi;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
@@ -56,7 +57,7 @@ public class FabricServerProxy {
         // ServerWorldLoadEvent
         //TODO: Check if both of this use the correct timed events. (i.e. is it 'ed' or 'ing' one?)
         ServerLifecycleEvents.SERVER_STARTING.register((server) -> {
-            if (isValidTime()) ServerApi.INSTANCE.serverWorldLoadEvent();
+            if (isValidTime()) ServerApi.INSTANCE.serverWorldLoadEvent(SharedApi.inDedicatedEnvironment);
         });
         // ServerWorldUnloadEvent
         ServerLifecycleEvents.SERVER_STOPPED.register((server) -> {
