@@ -22,6 +22,7 @@ package com.seibel.lod.common;
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.networking.NetworkReceiver;
 import com.seibel.lod.common.wrappers.DependencySetup;
+import com.seibel.lod.core.api.internal.a7.SharedApi;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.config.ConfigBase;
 
@@ -38,8 +39,8 @@ public class LodCommonMain {
             forgeMethodCaller = caller;
         }
 
-        DependencySetup.createInitialBindings();
-
+        DependencySetup.createSharedBindings();
+        SharedApi.init();
 //        if (!serverSided) {
 //            new NetworkReceiver().register_Client();
 //        } else {

@@ -23,9 +23,15 @@ import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
+import com.seibel.lod.core.a7.world.IServerWorld;
+import com.seibel.lod.core.a7.world.WorldEnvironment;
+import com.seibel.lod.core.api.internal.a7.SharedApi;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.objects.DHChunkPos;
-import com.seibel.lod.core.enums.EWorldType;
+import com.seibel.lod.core.enums.ELevelType;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
+import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftSharedWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 
@@ -33,6 +39,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -48,91 +55,104 @@ import org.jetbrains.annotations.Nullable;
  */
 public class LevelWrapper implements ILevelWrapper
 {
-    private static final ConcurrentMap<LevelAccessor, LevelWrapper> worldWrapperMap = new ConcurrentHashMap<>();
-    private final LevelAccessor world;
-    public final EWorldType worldType;
+    private static final ConcurrentMap<LevelAccessor, LevelWrapper> levelWrapperMap = new ConcurrentHashMap<>();
+    private final LevelAccessor level;
+    public final ELevelType levelType;
+    private static final IMinecraftSharedWrapper MC = SingletonHandler.get(IMinecraftSharedWrapper.class);
     
     
     public LevelWrapper(LevelAccessor newWorld)
     {
-        world = newWorld;
+        level = newWorld;
         
-        if (world.getClass() == ServerLevel.class)
-            worldType = EWorldType.ServerWorld;
-        else if (world.getClass() == ClientLevel.class)
-            worldType = EWorldType.ClientWorld;
+        if (level.getClass() == ServerLevel.class)
+            levelType = ELevelType.ServerLevel;
+        else if (level.getClass() == ClientLevel.class)
+            levelType = ELevelType.ClientLevel;
         else
-            worldType = EWorldType.Unknown;
+            levelType = ELevelType.Unknown;
+    }
+
+    private static LevelAccessor getSinglePlayerServerLevel() {
+        MinecraftClientWrapper client = MinecraftClientWrapper.INSTANCE;
+        return client.mc.getSingleplayerServer().getPlayerList()
+                .getPlayer(client.mc.player.getUUID()).getLevel();
     }
     
     
     @Nullable
-    public static LevelWrapper getWorldWrapper(LevelAccessor world)
+    public static LevelWrapper getWorldWrapper(LevelAccessor level)
     {
-        if (world == null) return null;
-        //first we check if the biome has already been wrapped
-        if(worldWrapperMap.containsKey(world) && worldWrapperMap.get(world) != null)
-            return worldWrapperMap.get(world);
+        if (level == null) return null;
+
+        if (level.isClientSide() && SharedApi.getEnvironment()
+                == WorldEnvironment.Client_Server) {
+            level = getSinglePlayerServerLevel();
+        }
+
+        //first we check if the level has already been wrapped
+        if(levelWrapperMap.containsKey(level) && levelWrapperMap.get(level) != null)
+            return levelWrapperMap.get(level);
         
         
         //if it hasn't been created yet, we create it and save it in the map
-        LevelWrapper worldWrapper = new LevelWrapper(world);
-        worldWrapperMap.put(world, worldWrapper);
+        LevelWrapper levelWrapper = new LevelWrapper(level);
+        levelWrapperMap.put(level, levelWrapper);
         
         //we return the newly created wrapper
-        return worldWrapper;
+        return levelWrapper;
     }
     
     public static void clearMap()
     {
-        worldWrapperMap.clear();
+        levelWrapperMap.clear();
     }
     
     @Override
-    public EWorldType getWorldType()
+    public ELevelType getLevelType()
     {
-        return worldType;
+        return levelType;
     }
     
     @Override
     public DimensionTypeWrapper getDimensionType()
     {
-        return DimensionTypeWrapper.getDimensionTypeWrapper(world.dimensionType());
+        return DimensionTypeWrapper.getDimensionTypeWrapper(level.dimensionType());
     }
     
     @Override
     public int getBlockLight(int x, int y, int z)
     {
-        return world.getBrightness(LightLayer.BLOCK, new BlockPos(x,y,z));
+        return level.getBrightness(LightLayer.BLOCK, new BlockPos(x,y,z));
     }
     
     @Override
     public int getSkyLight(int x, int y, int z)
     {
-        return world.getBrightness(LightLayer.SKY, new BlockPos(x,y,z));
+        return level.getBrightness(LightLayer.SKY, new BlockPos(x,y,z));
     }
     
-    public LevelAccessor getWorld()
+    public LevelAccessor getLevel()
     {
-        return world;
+        return level;
     }
     
     @Override
     public boolean hasCeiling()
     {
-        return world.dimensionType().hasCeiling();
+        return level.dimensionType().hasCeiling();
     }
     
     @Override
     public boolean hasSkyLight()
     {
-        return world.dimensionType().hasSkyLight();
+        return level.dimensionType().hasSkyLight();
     }
     
     @Override
     public int getHeight()
     {
-        return world.getHeight();
+        return level.getHeight();
     }
     
     @Override
@@ -141,7 +161,7 @@ public class LevelWrapper implements ILevelWrapper
         #if PRE_MC_1_17_1
         return (short) 0;
         #else
-        return (short) world.getMinBuildHeight();
+        return (short) level.getMinBuildHeight();
         #endif
     }
     
@@ -149,10 +169,10 @@ public class LevelWrapper implements ILevelWrapper
     @Override
     public File getSaveFolder() throws UnsupportedOperationException
     {
-        if (worldType != EWorldType.ServerWorld)
+        if (levelType != ELevelType.ServerLevel)
             throw new UnsupportedOperationException("getSaveFolder can only be called for ServerWorlds.");
         
-        ServerChunkCache chunkSource = ((ServerLevel) world).getChunkSource();
+        ServerChunkCache chunkSource = ((ServerLevel) level).getChunkSource();
         return chunkSource.getDataStorage().dataFolder;
     }
     
@@ -160,30 +180,30 @@ public class LevelWrapper implements ILevelWrapper
     /** @throws UnsupportedOperationException if the WorldWrapper isn't for a ServerWorld */
     public ServerLevel getServerWorld() throws UnsupportedOperationException
     {
-        if (worldType != EWorldType.ServerWorld)
+        if (levelType != ELevelType.ServerLevel)
             throw new UnsupportedOperationException("getSaveFolder can only be called for ServerWorlds.");
         
-        return (ServerLevel) world;
+        return (ServerLevel) level;
     }
     
     @Override
     public int getSeaLevel()
     {
         // TODO this is depreciated, what should we use instead?
-        return world.getSeaLevel();
+        return level.getSeaLevel();
     }
     
     @Override
     public IChunkWrapper tryGetChunk(DHChunkPos pos) {
-        ChunkAccess chunk = world.getChunk(pos.getX(), pos.getZ(), ChunkStatus.EMPTY, false);
+        ChunkAccess chunk = level.getChunk(pos.getX(), pos.getZ(), ChunkStatus.EMPTY, false);
         if (chunk == null) return null;
-        return new ChunkWrapper(chunk, world);
+        return new ChunkWrapper(chunk, level);
     }
     
     @Override
     public boolean hasChunkLoaded(int chunkX, int chunkZ) {
         // world.hasChunk(chunkX, chunkZ); THIS DOES NOT WORK FOR CLIENT LEVEL CAUSE MOJANG ALWAYS RETURN TRUE FOR THAT!
-        ChunkSource source = world.getChunkSource();
+        ChunkSource source = level.getChunkSource();
         return source.hasChunk(chunkX, chunkZ);
     }
 }

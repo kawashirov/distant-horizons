@@ -19,10 +19,10 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "com.seibel.lod.fabric.FabricMain"
+      "com.seibel.lod.fabric.FabricClientMain"
     ],
     "server": [
-      "com.seibel.lod.fabric.FabricMain"
+      "com.seibel.lod.fabric.FabricDedicatedServerMain"
     ],
 
     "modmenu": [

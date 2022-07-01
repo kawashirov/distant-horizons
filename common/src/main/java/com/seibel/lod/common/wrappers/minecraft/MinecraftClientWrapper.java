@@ -22,6 +22,7 @@ package com.seibel.lod.common.wrappers.minecraft;
 import java.io.File;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.Objects;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
@@ -31,6 +32,7 @@ import com.seibel.lod.core.enums.ELodDirection;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
+import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftSharedWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IProfilerWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IDimensionTypeWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
@@ -68,7 +70,7 @@ import org.jetbrains.annotations.Nullable;
  * @author James Seibel
  * @version 3-5-2022
  */
-public class MinecraftClientWrapper implements IMinecraftClientWrapper
+public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecraftSharedWrapper
 {
     private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
     
@@ -392,11 +394,16 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
 
     @Override
     public File getSinglePlayerServerFolder() {
-        return mc.getSingleplayerServer().getServerDirectory();
+        return Objects.requireNonNull(mc.getSingleplayerServer()).getServerDirectory();
     }
 
+    @Override
+    public boolean isDedicatedServer() {
+        return false;
+    }
 
-
-
-
+    @Override
+    public File getInstallationDirectory() {
+        return mc.gameDirectory;
+    }
 }

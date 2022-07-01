@@ -16,12 +16,11 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.lod.common.wrappers;
 
-import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.wrappers.config.ConfigWrapper;
-import com.seibel.lod.core.api.internal.a7.SharedApi;
+import com.seibel.lod.common.wrappers.minecraft.MinecraftDedicatedServerWrapper;
 import com.seibel.lod.core.wrapperInterfaces.config.IConfigWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftRenderWrapper;
@@ -34,6 +33,10 @@ import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.config.LodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
+import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftSharedWrapper;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.server.dedicated.DedicatedServer;
 
 /**
  * Binds all necessary dependencies, so we
@@ -46,20 +49,25 @@ import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
  * @version 12-1-2021
  */
 public class DependencySetup {
-    public static void createInitialBindings()
+    public static void createSharedBindings()
     {
         SingletonHandler.bind(ILodConfigWrapperSingleton.class, LodConfigWrapperSingleton.INSTANCE); // TODO: Remove
-
         SingletonHandler.bind(IConfigWrapper.class, ConfigWrapper.INSTANCE);
         SingletonHandler.bind(IVersionConstants.class, VersionConstants.INSTANCE);
-        if (!SharedApi.inDedicatedEnvironment)
-        {
-            SingletonHandler.bind(IMinecraftClientWrapper.class, MinecraftClientWrapper.INSTANCE);
-            SingletonHandler.bind(IMinecraftRenderWrapper.class, MinecraftRenderWrapper.INSTANCE);
-            SingletonHandler.bind(IReflectionHandler.class, ReflectionHandler.createSingleton());
-        }
-
         SingletonHandler.bind(IWrapperFactory.class, WrapperFactory.INSTANCE);
         DependencySetupDoneCheck.isDone = true;
+    }
+
+    @Environment(EnvType.SERVER)
+    public static void createServerBindings() {
+        SingletonHandler.bind(IMinecraftSharedWrapper.class, MinecraftDedicatedServerWrapper.INSTANCE);
+    }
+
+    @Environment(EnvType.CLIENT)
+    public static void createClientBindings() {
+        SingletonHandler.bind(IMinecraftClientWrapper.class, MinecraftClientWrapper.INSTANCE);
+        SingletonHandler.bind(IMinecraftSharedWrapper.class, MinecraftClientWrapper.INSTANCE);
+        SingletonHandler.bind(IMinecraftRenderWrapper.class, MinecraftRenderWrapper.INSTANCE);
+        SingletonHandler.bind(IReflectionHandler.class, ReflectionHandler.createSingleton());
     }
 }

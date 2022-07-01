@@ -359,7 +359,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				EVENT_LOGGER.warn("If it does crash, set Distant Generation to OFF or Generation Mode to None.");
 			}
 		}
-		params = new GlobalParameters((ServerLevel) ((LevelWrapper) serverlevel).getWorld(), lodBuilder, lodDim);
+		params = new GlobalParameters((ServerLevel) ((LevelWrapper) serverlevel).getLevel(), lodBuilder, lodDim);
 	}
 	
 	@SuppressWarnings("resource")

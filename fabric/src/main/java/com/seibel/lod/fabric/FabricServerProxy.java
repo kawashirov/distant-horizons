@@ -31,6 +31,11 @@ import org.apache.logging.log4j.Logger;
 public class FabricServerProxy {
     private final ServerApi serverApi = ServerApi.INSTANCE;
     private static final Logger LOGGER = DhLoggerBuilder.getLogger("FabricServerProxy");
+    private final boolean isDedicated;
+
+    public FabricServerProxy(boolean isDedicated) {
+        this.isDedicated = isDedicated;
+    }
 
     private boolean isValidTime() {
         //FIXME: return true immediately if this is a dedicated server
@@ -57,7 +62,7 @@ public class FabricServerProxy {
         // ServerWorldLoadEvent
         //TODO: Check if both of this use the correct timed events. (i.e. is it 'ed' or 'ing' one?)
         ServerLifecycleEvents.SERVER_STARTING.register((server) -> {
-            if (isValidTime()) ServerApi.INSTANCE.serverWorldLoadEvent(SharedApi.inDedicatedEnvironment);
+            if (isValidTime()) ServerApi.INSTANCE.serverWorldLoadEvent(isDedicated);
         });
         // ServerWorldUnloadEvent
         ServerLifecycleEvents.SERVER_STOPPED.register((server) -> {

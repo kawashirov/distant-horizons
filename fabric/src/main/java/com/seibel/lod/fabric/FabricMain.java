@@ -20,6 +20,7 @@
 package com.seibel.lod.fabric;
 
 import com.seibel.lod.common.LodCommonMain;
+import com.seibel.lod.common.wrappers.DependencySetup;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.internal.a7.SharedApi;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
@@ -51,39 +52,15 @@ import java.lang.invoke.MethodHandles;
  * @author Ran
  * @version 12-1-2021
  */
-public class FabricMain implements ClientModInitializer, DedicatedServerModInitializer
+public class FabricMain
 {
-	// This is a client mod so it should implement ClientModInitializer and in fabric.mod.json it should have "environment": "client"
-	// Once it works on servers change the implement to ModInitializer and in fabric.mod.json it should be "environment": "*"
-	
-	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
-	
-	public static FabricClientProxy client_proxy;
-	public static FabricServerProxy server_proxy;
+	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 
-
-	// Do if implements ClientModInitializer
-	// This loads the mod before minecraft loads which causes a lot of issues
-	@Override
-	public void onInitializeClient() {
-		SharedApi.inDedicatedEnvironment = false;
-		init();
-		ClientLifecycleEvents.CLIENT_STARTED.register(FabricMain::postInit);
-	}
-
-	@Override
-	public void onInitializeServer() {
-		SharedApi.inDedicatedEnvironment = true;
-		init();
-		postInit(null); // TODO: Check if init in here is ok
-	}
-
-	public static void postInit(Minecraft minecraft) {
+	public static void postInit() {
 		LOGGER.info("Post-Initializing Mod");
 		FabricDependencySetup.runDelayedSetup();
 		LOGGER.info("Mod Post-Initialized");
 	}
-
 
 
 	// This loads the mod after minecraft loads which doesn't causes a lot of issues
@@ -94,13 +71,6 @@ public class FabricMain implements ClientModInitializer, DedicatedServerModIniti
 		FabricDependencySetup.finishBinding();
 		LodCommonMain.initConfig();
 		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
-
-		if (!SharedApi.inDedicatedEnvironment) {
-			client_proxy = new FabricClientProxy();
-			client_proxy.registerEvents();
-		}
-		server_proxy = new FabricServerProxy();
-		server_proxy.registerEvents();
 
 		if (SingletonHandler.get(IModChecker.class).isModLoaded("sodium")) {
 			ModAccessorHandler.bind(ISodiumAccessor.class, new SodiumAccessor());
