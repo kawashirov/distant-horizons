@@ -41,6 +41,8 @@ import com.seibel.lod.core.objects.DHBlockPos;
 import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -70,6 +72,7 @@ import org.jetbrains.annotations.Nullable;
  * @author James Seibel
  * @version 3-5-2022
  */
+@Environment(EnvType.CLIENT)
 public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecraftSharedWrapper
 {
     private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());

@@ -59,6 +59,7 @@ public class FabricMain
 	public static void postInit() {
 		LOGGER.info("Post-Initializing Mod");
 		FabricDependencySetup.runDelayedSetup();
+		LodCommonMain.initConfig();
 		LOGGER.info("Mod Post-Initialized");
 	}
 
@@ -69,7 +70,6 @@ public class FabricMain
 		LodCommonMain.startup(null);
 		FabricDependencySetup.createInitialBindings();
 		FabricDependencySetup.finishBinding();
-		LodCommonMain.initConfig();
 		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 
 		if (SingletonHandler.get(IModChecker.class).isModLoaded("sodium")) {

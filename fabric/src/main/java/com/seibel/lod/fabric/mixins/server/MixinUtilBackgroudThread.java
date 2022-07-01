@@ -23,6 +23,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 
 import com.seibel.lod.fabric.FabricClientProxy;
+import com.seibel.lod.fabric.FabricDedicatedServerMain;
+import com.seibel.lod.fabric.FabricServerProxy;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -38,7 +40,7 @@ public class MixinUtilBackgroudThread
 	@Inject(method = "backgroundExecutor", at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$backgroundExecutor(CallbackInfoReturnable<ExecutorService> ci)
 	{
-		if (FabricClientProxy.isGenerationThreadChecker != null && FabricClientProxy.isGenerationThreadChecker.get())
+		if (FabricServerProxy.isGenerationThreadChecker != null && FabricServerProxy.isGenerationThreadChecker.get())
 		{
 			//ApiShared.LOGGER.info("util backgroundExecutor triggered");
 			ci.setReturnValue(new DummyRunExecutorService());
@@ -50,7 +52,7 @@ public class MixinUtilBackgroudThread
 			at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$wrapThreadWithTaskName(String string, Runnable r, CallbackInfoReturnable<Runnable> ci)
 	{
-		if (FabricClientProxy.isGenerationThreadChecker != null && FabricClientProxy.isGenerationThreadChecker.get())
+		if (FabricServerProxy.isGenerationThreadChecker != null && FabricServerProxy.isGenerationThreadChecker.get())
 		{
 			//ApiShared.LOGGER.info("util wrapThreadWithTaskName(Runnable) triggered");
 			ci.setReturnValue(r);
@@ -62,7 +64,7 @@ public class MixinUtilBackgroudThread
 			at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$wrapThreadWithTaskNameForSupplier(String string, Supplier<?> r, CallbackInfoReturnable<Supplier<?>> ci)
 	{
-		if (FabricClientProxy.isGenerationThreadChecker != null && FabricClientProxy.isGenerationThreadChecker.get())
+		if (FabricServerProxy.isGenerationThreadChecker != null && FabricServerProxy.isGenerationThreadChecker.get())
 		{
 			//ApiShared.LOGGER.info("util wrapThreadWithTaskName(Supplier) triggered");
 			ci.setReturnValue(r);

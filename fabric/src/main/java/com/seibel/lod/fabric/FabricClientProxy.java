@@ -28,6 +28,8 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 
 import com.seibel.lod.core.logging.DhLoggerBuilder;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
@@ -49,12 +51,11 @@ import org.lwjgl.glfw.GLFW;
  * @author Ran
  * @version 11-23-2021
  */
+@Environment(EnvType.CLIENT)
 public class FabricClientProxy
 {
 	private final ClientApi clientApi = ClientApi.INSTANCE;
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger("FabricClientProxy");
-
-	public static Supplier<Boolean> isGenerationThreadChecker = null;
 
 	/**
 	 * Registers Fabric Events
@@ -63,7 +64,6 @@ public class FabricClientProxy
 	public void registerEvents() {
 		LOGGER.info("Registering Fabric Client Events");
 
-		isGenerationThreadChecker = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
 
 		/* Register the mod needed event callbacks */
 

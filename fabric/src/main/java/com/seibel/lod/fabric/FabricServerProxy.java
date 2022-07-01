@@ -3,6 +3,7 @@ package com.seibel.lod.fabric;
 import com.seibel.lod.common.networking.Networking;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.LevelWrapper;
+import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.core.api.internal.a7.ServerApi;
 import com.seibel.lod.core.api.internal.a7.SharedApi;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
@@ -19,6 +20,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.Logger;
 
+import java.util.function.Supplier;
+
 /**
  * This handles all events sent to the server,
  * and is the starting point for most of the mod.
@@ -27,18 +30,20 @@ import org.apache.logging.log4j.Logger;
  * @version 5-11-2022
  */
 
-// TODO
 public class FabricServerProxy {
     private final ServerApi serverApi = ServerApi.INSTANCE;
     private static final Logger LOGGER = DhLoggerBuilder.getLogger("FabricServerProxy");
     private final boolean isDedicated;
+    public static Supplier<Boolean> isGenerationThreadChecker = null;
 
     public FabricServerProxy(boolean isDedicated) {
         this.isDedicated = isDedicated;
     }
 
     private boolean isValidTime() {
-        //FIXME: return true immediately if this is a dedicated server
+        if (isDedicated) return true;
+
+        //FIXME: This may cause init issue...
         return !(Minecraft.getInstance().screen instanceof TitleScreen);
     }
     private LevelWrapper getLevelWrapper(Level level) {
@@ -46,10 +51,11 @@ public class FabricServerProxy {
     }
     /**
      * Registers Fabric Events
-     * @author Ran, Tom
+     * @author Ran, Tomlee
      */
     public void registerEvents() {
         LOGGER.info("Registering Fabric Server Events");
+        isGenerationThreadChecker = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
 
         /* Register the mod needed event callbacks */
 

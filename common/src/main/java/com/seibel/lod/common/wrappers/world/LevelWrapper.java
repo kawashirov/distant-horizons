@@ -35,6 +35,8 @@ import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftSharedWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerChunkCache;
@@ -73,6 +75,7 @@ public class LevelWrapper implements ILevelWrapper
             levelType = ELevelType.Unknown;
     }
 
+    @Environment(EnvType.CLIENT)
     private static LevelAccessor getSinglePlayerServerLevel() {
         MinecraftClientWrapper client = MinecraftClientWrapper.INSTANCE;
         return client.mc.getSingleplayerServer().getPlayerList()

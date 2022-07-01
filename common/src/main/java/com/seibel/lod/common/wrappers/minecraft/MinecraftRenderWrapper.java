@@ -47,6 +47,8 @@ import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.WrapperFactory;
 import com.seibel.lod.core.objects.DHBlockPos;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.FogRenderer;
@@ -75,6 +77,7 @@ import org.apache.logging.log4j.Logger;
  * @author James Seibel
  * @version 12-12-2021
  */
+@Environment(EnvType.CLIENT)
 public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 {
 	public static final MinecraftRenderWrapper INSTANCE = new MinecraftRenderWrapper();

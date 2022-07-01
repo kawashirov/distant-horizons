@@ -235,7 +235,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	public final StepLight stepLight = new StepLight(this);
 	public boolean unsafeThreadingRecorded = false;
 	//public boolean safeMode = false;
-	private static final IMinecraftClientWrapper MC = SingletonHandler.get(IMinecraftClientWrapper.class);
+	//private static final IMinecraftClientWrapper MC = SingletonHandler.get(IMinecraftClientWrapper.class);
 	public static final long EXCEPTION_TIMER_RESET_TIME = TimeUnit.NANOSECONDS.convert(1, TimeUnit.SECONDS);
 	public static final int EXCEPTION_COUNTER_TRIGGER = 20;
 	public static final int RANGE_TO_RANGE_EMPTY_EXTENSION = 1;

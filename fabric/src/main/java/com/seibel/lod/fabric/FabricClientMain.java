@@ -2,8 +2,11 @@ package com.seibel.lod.fabric;
 
 import com.seibel.lod.common.wrappers.DependencySetup;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 
+@Environment(EnvType.CLIENT)
 public class FabricClientMain implements ClientModInitializer {
     public static FabricClientProxy client_proxy;
     public static FabricServerProxy server_proxy;
