@@ -3,7 +3,7 @@ image: gradle:eclipse-temurin
 # The ci should always use an unix/unix-like OS to work
 
 # all stages need to be defined here
-  #Dont build the standalone yet cus it isnt done
+  # Don't build the standalone jar yet because it isn't done yet
   # - build_standalone
 stages:
   - build_19
