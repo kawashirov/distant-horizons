@@ -55,7 +55,7 @@ public class MixinFogRenderer
 			remap = // Remap messiness due to this being added by forge.
 					#if MC_1_16_5 true
 					#elif PRE_MC_1_19 false
-					#else false #endif
+					#else true #endif
 	)
 	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, float partTick, CallbackInfo callback)
 	{
