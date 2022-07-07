@@ -29,7 +29,7 @@ build_16_5:
     - ./gradlew deleteMerged -PmcVer="1.16.5" --gradle-user-home cache/;
     - ./gradlew clean -PmcVer="1.16.5"
     - ./gradlew build -PmcVer="1.16.5" --gradle-user-home cache/;
-    - ./gradlew merge -PmcVer="1.16.5" --gradle-user-home cache/;
+    - ./gradlew mergeJars -PmcVer="1.16.5" --gradle-user-home cache/;
   image: eclipse-temurin:17
   artifacts:
     name: "Merged_NightlyBuild_1_16_5-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
@@ -53,7 +53,7 @@ build_17_1:
     - ./gradlew deleteMerged -PmcVer="1.17.1" --gradle-user-home cache/;
     - ./gradlew clean -PmcVer="1.17.1"
     - ./gradlew build -PmcVer="1.17.1" --gradle-user-home cache/;
-    - ./gradlew merge -PmcVer="1.17.1" --gradle-user-home cache/;
+    - ./gradlew mergeJars -PmcVer="1.17.1" --gradle-user-home cache/;
   image: eclipse-temurin:17
   artifacts:
     name: "Merged_NightlyBuild_1_17_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
@@ -78,7 +78,7 @@ build_18_1:
     - ./gradlew deleteMerged -PmcVer="1.18.1" --gradle-user-home cache/; # make sure any previously merged jars are removed before running this job
     - ./gradlew clean -PmcVer="1.18.1"
     - ./gradlew build -PmcVer="1.18.1" --gradle-user-home cache/;
-    - ./gradlew merge -PmcVer="1.18.1" --gradle-user-home cache/;
+    - ./gradlew mergeJars -PmcVer="1.18.1" --gradle-user-home cache/;
   # build using Java 17
   image: eclipse-temurin:17
   artifacts:
@@ -104,7 +104,7 @@ build_18_2:
     - ./gradlew deleteMerged -PmcVer="1.18.2" --gradle-user-home cache/;
     - ./gradlew clean -PmcVer="1.18.2"
     - ./gradlew build -PmcVer="1.18.2" --gradle-user-home cache/;
-    - ./gradlew merge -PmcVer="1.18.2" --gradle-user-home cache/;
+    - ./gradlew mergeJars -PmcVer="1.18.2" --gradle-user-home cache/;
   image: eclipse-temurin:17
   artifacts:
     name: "Merged_NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
@@ -128,7 +128,7 @@ build_19:
     - ./gradlew deleteMerged -PmcVer="1.19" --gradle-user-home cache/;
     - ./gradlew clean -PmcVer="1.19"
     - ./gradlew build -PmcVer="1.19" --gradle-user-home cache/;
-    - ./gradlew merge -PmcVer="1.19" --gradle-user-home cache/;
+    - ./gradlew mergeJars -PmcVer="1.19" --gradle-user-home cache/;
   image: eclipse-temurin:17
   artifacts:
     name: "Merged_NightlyBuild_1_19-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
