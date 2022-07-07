@@ -2,9 +2,9 @@
 
 buildVersion()
 {
-    ./gradlew -PmcVer=$1 build
-    ./gradlew mergeJars -PmcVer=$1
-    rm -R build/libs common/build/libs fabric/build/libs forge/build/libs
+    ./gradlew clean -PmcVer=$1 --no-daemon
+    ./gradlew build -PmcVer=$1 --no-daemon
+    ./gradlew mergeJars -PmcVer=$1 --no-daemon
 }
 
 buildVersion 1.19
