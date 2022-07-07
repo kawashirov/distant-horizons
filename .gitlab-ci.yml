@@ -30,7 +30,7 @@ build_16_5:
     - ./gradlew clean -PmcVer="1.16.5"
     - ./gradlew build -PmcVer="1.16.5" --gradle-user-home cache/;
     - ./gradlew merge -PmcVer="1.16.5" --gradle-user-home cache/;
-  image: eclipse-temurin:16
+  image: eclipse-temurin:17
   artifacts:
     name: "Merged_NightlyBuild_1_16_5-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
     paths:
@@ -54,7 +54,7 @@ build_17_1:
     - ./gradlew clean -PmcVer="1.17.1"
     - ./gradlew build -PmcVer="1.17.1" --gradle-user-home cache/;
     - ./gradlew merge -PmcVer="1.17.1" --gradle-user-home cache/;
-  image: eclipse-temurin:16
+  image: eclipse-temurin:17
   artifacts:
     name: "Merged_NightlyBuild_1_17_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
     paths:
