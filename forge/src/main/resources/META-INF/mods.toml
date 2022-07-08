@@ -15,7 +15,7 @@ issueTrackerURL="${issues}"
 	description= "${description}" #//mandatory. The description text for the mod
 	logoFile="logo.png"
 	catalogueImageIcon="icon.png"
-	credits="Massive thanks to: Leonardo, Cola, Ran, and CoolGi. For their hard work to bring Distant Horizons to where it is today. - James"
+	credits="Leonardo, Cola, Ran, CoolGi, and Leetom. Without their hard work, Distant Horizons wouldn't be the mod it is today."
 	#// if not set defaults to "false"
 	clientSideOnly="true"
 	#// if not set defaults to "BOTH"
