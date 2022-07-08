@@ -11,6 +11,7 @@ EXIT /B %ERRORLEVEL%
 :buildVersion
 @echo on
 call ./gradlew.bat clean -PmcVer="%~1" --no-daemon
+call ./gradlew.bat core:build -PmcVer="%~1" --no-daemon
 call ./gradlew.bat build -PmcVer="%~1" --no-daemon
 call ./gradlew.bat mergeJars -PmcVer="%~1" --no-daemon
 @echo off
