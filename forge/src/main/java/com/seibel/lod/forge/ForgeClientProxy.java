@@ -108,13 +108,12 @@ public class ForgeClientProxy
 	}
 	
 	@SubscribeEvent
-	public void onKeyInput(InputEvent.KeyInputEvent event)
+	public void onKeyInput(#if PRE_MC_1_19 InputEvent.KeyInputEvent event #else InputEvent.Key event #endif)
 	{
 		if (Minecraft.getInstance().player == null) return;
 		if (event.getAction() != GLFW.GLFW_PRESS) return;
 		clientApi.keyPressedEvent(event.getKey());
 	}
-	
 	
 	
 }

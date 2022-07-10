@@ -24,3 +24,9 @@ issueTrackerURL="${issues}"
 	#// Allow any version to be present (or not) on the server
 	acceptableRemoteVersions="*"
 
+[[dependencies.lod]]
+	modId="forge"
+	mandatory=true
+	versionRange="[41.0.85,)"
+	ordering="NONE"
+	side="BOTH"
