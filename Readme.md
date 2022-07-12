@@ -27,9 +27,9 @@ Architectury loom version: 0.12.0-SNAPSHOT\
 Java Compiler plugin: Manifold Preprocessor
 
 #### 1.19 mods
-Forge version: 41.0.10\
-Fabric version: 0.14.7\
-Fabric API version: 0.55.3+1.19\
+Forge version: 41.0.94\
+Fabric version: 0.14.8\
+Fabric API version: 0.57.0+1.19\
 Modmenu version: 4.0.0
 
 #### 1.18.2 mods
