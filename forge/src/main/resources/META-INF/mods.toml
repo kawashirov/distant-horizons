@@ -27,6 +27,6 @@ issueTrackerURL="${issues}"
 [[dependencies.lod]]
 	modId="forge"
 	mandatory=true
-	versionRange="[41.0.94,)" #// NOTE: this will cause issues for anything using MC 1.18 and lower, this is only here for MC 1.19
+	versionRange="[41.0.95,)" #// NOTE: this will cause issues for anything using MC 1.18 and lower, this is only here for MC 1.19
 	ordering="NONE"
 	side="BOTH"
