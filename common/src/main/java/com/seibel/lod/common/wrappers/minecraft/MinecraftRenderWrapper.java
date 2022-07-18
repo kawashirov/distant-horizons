@@ -30,7 +30,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
-import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorInjector;
 
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.misc.ILightMapWrapper;
@@ -52,7 +52,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.FogRenderer;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffects;
@@ -224,11 +223,11 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
     public boolean usingBackupGetVanillaRenderedChunks = false;
 	@Override
 	public HashSet<DHChunkPos> getVanillaRenderedChunks() {
-		ISodiumAccessor sodium = ModAccessorHandler.get(ISodiumAccessor.class);
+		ISodiumAccessor sodium = ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class);
 		if (sodium != null) {
 			return sodium.getNormalRenderedChunks();
 		}
-		IOptifineAccessor optifine = ModAccessorHandler.get(IOptifineAccessor.class);
+		IOptifineAccessor optifine = ModAccessorInjector.INSTANCE.get(IOptifineAccessor.class);
 		if (optifine != null) {
 			HashSet<DHChunkPos> pos = optifine.getNormalRenderedChunks();
 			if (pos == null)

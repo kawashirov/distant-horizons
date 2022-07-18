@@ -27,7 +27,6 @@ import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.enums.ELodDirection;
-import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 import com.seibel.lod.core.objects.DHBlockPos;
 import com.seibel.lod.core.util.ColorUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockDetailWrapper;

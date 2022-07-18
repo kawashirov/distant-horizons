@@ -19,7 +19,7 @@
  
 package com.seibel.lod.fabric.wrappers;
 
-import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.fabric.wrappers.modAccessor.ModChecker;
 
@@ -37,14 +37,10 @@ public class FabricDependencySetup
 {
 	public static void createInitialBindings()
 	{
-		SingletonHandler.bind(IModChecker.class, ModChecker.INSTANCE);
+		SingletonInjector.INSTANCE.bind(IModChecker.class, ModChecker.INSTANCE);
 	}
-
-	public static void finishBinding() {
-		SingletonHandler.finishBinding();
-	}
-
+	
 	public static void runDelayedSetup() {
-		SingletonHandler.runDelayedSetup();
+		SingletonInjector.INSTANCE.runDelayedSetup();
 	}
 }

@@ -23,7 +23,7 @@ import java.util.HashSet;
 import java.util.stream.Collectors;
 
 import com.seibel.lod.core.objects.DHChunkPos;
-import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
@@ -43,8 +43,8 @@ import net.minecraft.world.level.LevelHeightAccessor;
 #endif
 
 public class SodiumAccessor implements ISodiumAccessor {
-	private final IWrapperFactory factory = SingletonHandler.get(IWrapperFactory.class);
-	private final IMinecraftRenderWrapper MC_RENDER = SingletonHandler.get(IMinecraftRenderWrapper.class);
+	private final IWrapperFactory factory = SingletonInjector.INSTANCE.get(IWrapperFactory.class);
+	private final IMinecraftRenderWrapper MC_RENDER = SingletonInjector.INSTANCE.get(IMinecraftRenderWrapper.class);
 
 	@Override
 	public String getModName() {

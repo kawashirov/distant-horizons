@@ -26,7 +26,7 @@ import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftRenderWrapper;
 import com.seibel.lod.core.handlers.IReflectionHandler;
 import com.seibel.lod.core.handlers.ReflectionHandler;
-import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.wrapperInterfaces.IVersionConstants;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
@@ -36,7 +36,6 @@ import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftSharedWrapper;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.server.dedicated.DedicatedServer;
 
 /**
  * Binds all necessary dependencies, so we
@@ -51,23 +50,23 @@ import net.minecraft.server.dedicated.DedicatedServer;
 public class DependencySetup {
     public static void createSharedBindings()
     {
-        SingletonHandler.bind(ILodConfigWrapperSingleton.class, LodConfigWrapperSingleton.INSTANCE); // TODO: Remove
-        SingletonHandler.bind(IConfigWrapper.class, ConfigWrapper.INSTANCE);
-        SingletonHandler.bind(IVersionConstants.class, VersionConstants.INSTANCE);
-        SingletonHandler.bind(IWrapperFactory.class, WrapperFactory.INSTANCE);
+        SingletonInjector.INSTANCE.bind(ILodConfigWrapperSingleton.class, LodConfigWrapperSingleton.INSTANCE); // TODO: Remove
+        SingletonInjector.INSTANCE.bind(IConfigWrapper.class, ConfigWrapper.INSTANCE);
+        SingletonInjector.INSTANCE.bind(IVersionConstants.class, VersionConstants.INSTANCE);
+        SingletonInjector.INSTANCE.bind(IWrapperFactory.class, WrapperFactory.INSTANCE);
         DependencySetupDoneCheck.isDone = true;
     }
 
     @Environment(EnvType.SERVER)
     public static void createServerBindings() {
-        SingletonHandler.bind(IMinecraftSharedWrapper.class, MinecraftDedicatedServerWrapper.INSTANCE);
+        SingletonInjector.INSTANCE.bind(IMinecraftSharedWrapper.class, MinecraftDedicatedServerWrapper.INSTANCE);
     }
 
     @Environment(EnvType.CLIENT)
     public static void createClientBindings() {
-        SingletonHandler.bind(IMinecraftClientWrapper.class, MinecraftClientWrapper.INSTANCE);
-        SingletonHandler.bind(IMinecraftSharedWrapper.class, MinecraftClientWrapper.INSTANCE);
-        SingletonHandler.bind(IMinecraftRenderWrapper.class, MinecraftRenderWrapper.INSTANCE);
-        SingletonHandler.bind(IReflectionHandler.class, ReflectionHandler.createSingleton());
+        SingletonInjector.INSTANCE.bind(IMinecraftClientWrapper.class, MinecraftClientWrapper.INSTANCE);
+        SingletonInjector.INSTANCE.bind(IMinecraftSharedWrapper.class, MinecraftClientWrapper.INSTANCE);
+        SingletonInjector.INSTANCE.bind(IMinecraftRenderWrapper.class, MinecraftRenderWrapper.INSTANCE);
+        SingletonInjector.INSTANCE.bind(IReflectionHandler.class, ReflectionHandler.createSingleton());
     }
 }

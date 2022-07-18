@@ -26,7 +26,7 @@ import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.internal.InternalApiShared;
 import com.seibel.lod.core.handlers.ReflectionHandler;
-import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorInjector;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
@@ -49,7 +49,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLLoader;
 #if PRE_MC_1_17_1
 import net.minecraftforge.fml.ExtensionPoint;
 #elif MC_1_17_1
@@ -85,7 +84,6 @@ public class ForgeMain implements LodForgeMethodCaller
 //		LodCommonMain.startup(this, !FMLLoader.getDist().isClient());
 		LodCommonMain.startup(this);
 		ForgeDependencySetup.createInitialBindings();
-		ForgeDependencySetup.finishBinding();
 		LodCommonMain.initConfig();
 		LOGGER.info(ModInfo.READABLE_NAME + " initializing...");
 	}
@@ -100,11 +98,9 @@ public class ForgeMain implements LodForgeMethodCaller
 	private void onClientStart(final FMLClientSetupEvent event)
 	{
 		if (ReflectionHandler.instance.optifinePresent()) {
-			ModAccessorHandler.bind(IOptifineAccessor.class, new OptifineAccessor());
+			ModAccessorInjector.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
 		
-		ModAccessorHandler.finishBinding();
-
 		#if PRE_MC_1_17_1
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY,
 				() -> (client, parent) -> GetConfigScreen.getScreen(parent));

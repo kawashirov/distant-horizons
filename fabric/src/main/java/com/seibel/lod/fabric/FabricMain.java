@@ -20,11 +20,9 @@
 package com.seibel.lod.fabric;
 
 import com.seibel.lod.common.LodCommonMain;
-import com.seibel.lod.common.wrappers.DependencySetup;
 import com.seibel.lod.core.ModInfo;
-import com.seibel.lod.core.api.internal.a7.SharedApi;
-import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorHandler;
-import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorInjector;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
@@ -35,13 +33,7 @@ import com.seibel.lod.fabric.wrappers.modAccessor.SodiumAccessor;
 import com.seibel.lod.fabric.wrappers.modAccessor.StarlightAccessor;
 import com.seibel.lod.fabric.wrappers.FabricDependencySetup;
 
-import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.api.DedicatedServerModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.minecraft.client.Minecraft;
 import org.apache.logging.log4j.Logger;
-
-import java.lang.invoke.MethodHandles;
 
 /**
  * Initialize and setup the Mod. <br>
@@ -69,19 +61,17 @@ public class FabricMain
 		LOGGER.info("Initializing Mod");
 		LodCommonMain.startup(null);
 		FabricDependencySetup.createInitialBindings();
-		FabricDependencySetup.finishBinding();
 		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 
-		if (SingletonHandler.get(IModChecker.class).isModLoaded("sodium")) {
-			ModAccessorHandler.bind(ISodiumAccessor.class, new SodiumAccessor());
+		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("sodium")) {
+			ModAccessorInjector.INSTANCE.bind(ISodiumAccessor.class, new SodiumAccessor());
 		}
-		if (SingletonHandler.get(IModChecker.class).isModLoaded("starlight")) {
-			ModAccessorHandler.bind(IStarlightAccessor.class, new StarlightAccessor());
+		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("starlight")) {
+			ModAccessorInjector.INSTANCE.bind(IStarlightAccessor.class, new StarlightAccessor());
 		}
-		if (SingletonHandler.get(IModChecker.class).isModLoaded("optifine")) {
-			ModAccessorHandler.bind(IOptifineAccessor.class, new OptifineAccessor());
+		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("optifine")) {
+			ModAccessorInjector.INSTANCE.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
-		ModAccessorHandler.finishBinding();
 		LOGGER.info(ModInfo.READABLE_NAME + " Initialized");
 	}
 }

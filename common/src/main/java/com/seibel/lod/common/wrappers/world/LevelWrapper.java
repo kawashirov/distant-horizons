@@ -24,10 +24,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
-import com.seibel.lod.core.a7.world.IServerWorld;
 import com.seibel.lod.core.a7.world.WorldEnvironment;
 import com.seibel.lod.core.api.internal.a7.SharedApi;
-import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.core.enums.ELevelType;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
@@ -41,7 +40,6 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -60,7 +58,7 @@ public class LevelWrapper implements ILevelWrapper
     private static final ConcurrentMap<LevelAccessor, LevelWrapper> levelWrapperMap = new ConcurrentHashMap<>();
     private final LevelAccessor level;
     public final ELevelType levelType;
-    private static final IMinecraftSharedWrapper MC = SingletonHandler.get(IMinecraftSharedWrapper.class);
+    private static final IMinecraftSharedWrapper MC = SingletonInjector.INSTANCE.get(IMinecraftSharedWrapper.class);
     
     
     public LevelWrapper(LevelAccessor newWorld)
@@ -68,11 +66,11 @@ public class LevelWrapper implements ILevelWrapper
         level = newWorld;
         
         if (level.getClass() == ServerLevel.class)
-            levelType = ELevelType.ServerLevel;
+            levelType = ELevelType.SERVER_LEVEL;
         else if (level.getClass() == ClientLevel.class)
-            levelType = ELevelType.ClientLevel;
+            levelType = ELevelType.CLIENT_LEVEL;
         else
-            levelType = ELevelType.Unknown;
+            levelType = ELevelType.UNKNOWN;
     }
 
     @Environment(EnvType.CLIENT)
@@ -172,7 +170,7 @@ public class LevelWrapper implements ILevelWrapper
     @Override
     public File getSaveFolder() throws UnsupportedOperationException
     {
-        if (levelType != ELevelType.ServerLevel)
+        if (levelType != ELevelType.SERVER_LEVEL)
             throw new UnsupportedOperationException("getSaveFolder can only be called for ServerWorlds.");
         
         ServerChunkCache chunkSource = ((ServerLevel) level).getChunkSource();
@@ -183,7 +181,7 @@ public class LevelWrapper implements ILevelWrapper
     /** @throws UnsupportedOperationException if the WorldWrapper isn't for a ServerWorld */
     public ServerLevel getServerWorld() throws UnsupportedOperationException
     {
-        if (levelType != ELevelType.ServerLevel)
+        if (levelType != ELevelType.SERVER_LEVEL)
             throw new UnsupportedOperationException("getSaveFolder can only be called for ServerWorlds.");
         
         return (ServerLevel) level;
