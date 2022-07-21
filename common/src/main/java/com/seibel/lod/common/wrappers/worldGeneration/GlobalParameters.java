@@ -20,8 +20,8 @@
 package com.seibel.lod.common.wrappers.worldGeneration;
 
 import com.mojang.datafixers.DataFixer;
-import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
-import com.seibel.lod.core.objects.lod.LodDimension;
+import com.seibel.lod.common.wrappers.world.LevelWrapper;
+import com.seibel.lod.core.a7.level.IServerLevel;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -54,23 +54,22 @@ public final class GlobalParameters
 	#endif
 	public final WorldGenSettings worldGenSettings;
 	public final ThreadedLevelLightEngine lightEngine;
-	public final LodBuilder lodBuilder;
-	public final LodDimension lodDim;
+	public final IServerLevel lodLevel;
+	public final ServerLevel level;
 	public final Registry<Biome> biomes;
 	public final RegistryAccess registry;
 	public final long worldSeed;
-	public final ServerLevel level; // TODO: Figure out a way to remove this. Maybe ClientLevel also works?
 	public final DataFixer fixerUpper;
 	#if POST_MC_1_18_1
 	public final BiomeManager biomeManager;
 	public final ChunkScanAccess chunkScanner; // FIXME: Figure out if this is actually needed
 	#endif
 	
-	public GlobalParameters(ServerLevel level, LodBuilder lodBuilder, LodDimension lodDim)
+	public GlobalParameters(IServerLevel lodLevel)
 	{
-		this.lodBuilder = lodBuilder;
-		this.lodDim = lodDim;
-		this.level = level;
+		this.lodLevel = lodLevel;
+
+		level = ((LevelWrapper)lodLevel.getLevelWrapper()).getServerWorld();
 		lightEngine = (ThreadedLevelLightEngine) level.getLightEngine();
 		MinecraftServer server = level.getServer();
 		WorldData worldData = server.getWorldData();

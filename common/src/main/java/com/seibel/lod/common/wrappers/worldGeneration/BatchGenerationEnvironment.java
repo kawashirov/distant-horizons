@@ -21,14 +21,15 @@
 
 package com.seibel.lod.common.wrappers.worldGeneration;
 
+import com.seibel.lod.core.a7.datatype.full.ChunkSizedData;
+import com.seibel.lod.core.a7.datatype.transform.LodDataBuilder;
+import com.seibel.lod.core.a7.level.IServerLevel;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.logging.ConfigBasedLogger;
 import com.seibel.lod.core.logging.ConfigBasedSpamLogger;
-import com.seibel.lod.core.builders.lodBuilding.LodBuilder;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.EDistanceGenerationMode;
 import com.seibel.lod.core.enums.config.ELightGenerationMode;
-import com.seibel.lod.core.objects.lod.LodDimension;
 import com.seibel.lod.core.util.gridList.ArrayGridList;
 import com.seibel.lod.core.util.LodThreadFactory;
 import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
@@ -341,9 +342,9 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 	}
 	
-	public BatchGenerationEnvironment(ILevelWrapper serverlevel, LodBuilder lodBuilder, LodDimension lodDim)
+	public BatchGenerationEnvironment(IServerLevel serverlevel)
 	{
-		super(serverlevel, lodBuilder, lodDim);
+		super(serverlevel);
 		EVENT_LOGGER.info("================WORLD_GEN_STEP_INITING=============");
 		ChunkGenerator generator =  ((LevelWrapper) serverlevel).getServerWorld().getChunkSource().getGenerator();
 		if (!(generator instanceof NoiseBasedChunkGenerator ||
@@ -357,7 +358,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				EVENT_LOGGER.warn("If it does crash, set Distant Generation to OFF or Generation Mode to None.");
 			}
 		}
-		params = new GlobalParameters((ServerLevel) ((LevelWrapper) serverlevel).getLevel(), lodBuilder, lodDim);
+		params = new GlobalParameters(serverlevel);
 	}
 	
 	@SuppressWarnings("resource")
@@ -498,6 +499,13 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				if (isFull)
 				{
 					LOAD_LOGGER.info("Detected full existing chunk at {}", target.getPos());
+					ChunkSizedData data = LodDataBuilder.createChunkData(wrappedChunk);
+					if (data != null)
+					{
+						params.lodLevel.submitChunkData(data);
+					}
+
+					params.lodLevel
 					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
 							new LodBuilderConfig(EDistanceGenerationMode.FULL), true, e.genAllDetails);
 				}
