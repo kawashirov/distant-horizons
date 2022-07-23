@@ -32,6 +32,7 @@ import com.seibel.lod.core.enums.config.EDistanceGenerationMode;
 import com.seibel.lod.core.enums.config.ELightGenerationMode;
 import com.seibel.lod.core.util.gridList.ArrayGridList;
 import com.seibel.lod.core.util.LodThreadFactory;
+import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper;
 
@@ -502,30 +503,30 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 					ChunkSizedData data = LodDataBuilder.createChunkData(wrappedChunk);
 					if (data != null)
 					{
-						params.lodLevel.submitChunkData(data);
+						//params.lodLevel.submitChunkData(data);
 					}
 
-					params.lodLevel
-					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
-							new LodBuilderConfig(EDistanceGenerationMode.FULL), true, e.genAllDetails);
+					//FIXME: Fix this
+					//params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
+					//		new LodBuilderConfig(EDistanceGenerationMode.FULL), true, e.genAllDetails);
 				}
 				#if POST_MC_1_18_1
 				else if (isPartial)
 				{
 					LOAD_LOGGER.info("Detected old existing chunk at {}", target.getPos());
-					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
-							new LodBuilderConfig(generationMode), true, e.genAllDetails);
+					//params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
+					//		new LodBuilderConfig(generationMode), true, e.genAllDetails);
 				}
 				#endif
 				else if (target.getStatus() == ChunkStatus.EMPTY && generationMode == EDistanceGenerationMode.NONE)
 				{
-					params.lodBuilder.generateLodNodeFromChunk(params.lodDim,wrappedChunk,
-							LodBuilderConfig.getFillVoidConfig(), true, e.genAllDetails);
+					//params.lodBuilder.generateLodNodeFromChunk(params.lodDim,wrappedChunk,
+					//		LodBuilderConfig.getFillVoidConfig(), true, e.genAllDetails);
 				}
 				else
 				{
-					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
-							new LodBuilderConfig(generationMode), true, e.genAllDetails);
+					//params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
+					//		new LodBuilderConfig(generationMode), true, e.genAllDetails);
 				}
 				if (e.lightMode == ELightGenerationMode.FANCY || isFull)
 				{
@@ -636,5 +637,10 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		} catch (InterruptedException e) {
 			EVENT_LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...", e);
 		}
+	}
+
+	@Override
+	public CompletableFuture<ArrayGridList<IChunkWrapper>> generateChunks(int minX, int minZ, int genSize, Steps targetStep, double runTimeRatio) {
+		return null; // TODO: Implement generateChunks
 	}
 }
