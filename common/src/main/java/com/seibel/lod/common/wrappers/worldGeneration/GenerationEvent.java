@@ -20,86 +20,92 @@
 package com.seibel.lod.common.wrappers.worldGeneration;
 
 import java.lang.invoke.MethodHandles;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment.PrefEvent;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.enums.config.ELightGenerationMode;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
+import com.seibel.lod.core.objects.DHChunkPos;
+import com.seibel.lod.core.util.EventTimer;
 import com.seibel.lod.core.util.LodUtil;
+import com.seibel.lod.core.util.gridList.ArrayGridList;
+import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper.Steps;
 
-import net.minecraft.world.level.ChunkPos;
 import org.apache.logging.log4j.Logger;
 
 //======================= Main Event class======================
 public final class GenerationEvent
 {
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
-	
 	private static int generationFutureDebugIDs = 0;
-	final ThreadedParameters tParam;
-	final ChunkPos pos;
-	final int range;
-	final Future<?> future;
-	long creationNanotime;
 	final int id;
+	final ThreadedParameters tParam;
+	final DHChunkPos minPos;
+	final int size;
 	final Steps target;
 	final ELightGenerationMode lightMode;
-	final PrefEvent pEvent = new PrefEvent();
-	final boolean genAllDetails;
-
 	final double runTimeRatio;
-	
-	public GenerationEvent(ChunkPos pos, int range, BatchGenerationEnvironment generationGroup,
-						   Steps target, boolean genAllDetails, double runTimeRatio)
+	EventTimer timer = null;
+	long inQueueTime;
+	long timeoutTime = -1;
+	public CompletableFuture<ArrayGridList<IChunkWrapper>> future = null;
+
+	public GenerationEvent(DHChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
+						   Steps target, double runTimeRatio)
 	{
-		creationNanotime = System.nanoTime();
-		this.pos = pos;
-		this.range = range;
-		id = generationFutureDebugIDs++;
+		inQueueTime = System.nanoTime();
+		this.id = generationFutureDebugIDs++;
+		this.minPos = minPos;
+		this.size = size;
 		this.target = target;
 		this.tParam = ThreadedParameters.getOrMake(generationGroup.params);
-		ELightGenerationMode mode = Config.Client.WorldGenerator.lightGenerationMode.get();
-		
-		this.lightMode = mode;
-		this.genAllDetails = genAllDetails;
+		this.lightMode = Config.Client.WorldGenerator.lightGenerationMode.get();
 		this.runTimeRatio = runTimeRatio;
-		
-		future = generationGroup.executors.submit(() ->
-		{
-			long startTime = System.nanoTime();
-			BatchGenerationEnvironment.isDistantGeneratorThread.set(true);
-			try {
-				generationGroup.generateLodFromList(this);
-			} finally {
-				BatchGenerationEnvironment.isDistantGeneratorThread.remove();
-				if (!Thread.interrupted() && runTimeRatio < 1.0) {
-					long endTime = System.nanoTime();
-					try {
-						long deltaMs = TimeUnit.NANOSECONDS.toMillis(endTime - startTime);
-						Thread.sleep((long) (deltaMs/runTimeRatio - deltaMs));
-					} catch (InterruptedException ignored) {
-					}
-				}
-			}
-		});
+
 	}
-	
-	public boolean isCompleted()
+
+	public static GenerationEvent startEvent(DHChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
+																			 Steps target, double runTimeRatio)
+	{
+		if (size % 2 == 0) size += 1; // size must be odd for vanilla world gen region to work
+		GenerationEvent event = new GenerationEvent(minPos, size, generationGroup, target, runTimeRatio);
+		event.future = CompletableFuture.supplyAsync(() ->
+				{
+					long runStartTime = System.nanoTime();
+					event.timeoutTime = runStartTime;
+					event.inQueueTime = runStartTime - event.inQueueTime;
+					event.timer = new EventTimer("setup");
+					BatchGenerationEnvironment.isDistantGeneratorThread.set(true);
+					try {
+						return generationGroup.generateLodFromList(event);
+					} finally {
+						BatchGenerationEnvironment.isDistantGeneratorThread.remove();
+						if (!Thread.interrupted() && runTimeRatio < 1.0) {
+							long endTime = System.nanoTime();
+							try {
+								long deltaMs = TimeUnit.NANOSECONDS.toMillis(endTime - runStartTime);
+								Thread.sleep((long) (deltaMs/runTimeRatio - deltaMs));
+							} catch (InterruptedException ignored) {}
+						}
+					}
+				}, generationGroup.executors);
+		return event;
+	}
+
+	public boolean isComplete()
 	{
 		return future.isDone();
 	}
-	
+
 	public boolean hasTimeout(int duration, TimeUnit unit)
 	{
 		long currentTime = System.nanoTime();
-		long delta = currentTime - creationNanotime;
+		long delta = currentTime - timeoutTime;
 		return (delta > TimeUnit.NANOSECONDS.convert(duration, unit));
 	}
-	
+
 	public boolean terminate()
 	{
 		LOGGER.info("======================DUMPING ALL THREADS FOR WORLD GEN=======================");
@@ -108,36 +114,30 @@ public final class GenerationEvent
 		return future.isCancelled();
 	}
 	
-	public void join()
+	public boolean tooClose(int minX, int minZ, int w)
 	{
-		try
-		{
-			future.get();
-		}
-		catch (InterruptedException | ExecutionException e)
-		{
-			throw new RuntimeException(e.getCause()==null? e : e.getCause());
-		}
-	}
-	
-	public boolean tooClose(int cx, int cz, int cr)
-	{
-		int distX = Math.abs(cx - pos.x);
-		int distZ = Math.abs(cz - pos.z);
-		int minRange = cr + range + 1; // Need one to account for the center
-		minRange += 1 + 1; // Account for required empty chunks
-		return distX < minRange && distZ < minRange;
+		int aMinX = minPos.x;
+		int aMinZ = minPos.z;
+		int aSize = size;
+		// Account for required empty chunks in the border
+		aSize += 1;
+		w+= 1;
+		// Do a AABB to AABB intersection test
+		return (aMinX + aSize >= minX &&
+				aMinX <= minX + w &&
+				aMinZ + aSize >= minZ &&
+				aMinZ <= minZ + w);
 	}
 	
 	public void refreshTimeout()
 	{
-		creationNanotime = System.nanoTime();
+		timeoutTime = System.nanoTime();
 		LodUtil.checkInterruptsUnchecked();
 	}
 	
 	@Override
 	public String toString()
 	{
-		return id + ":" + range + "@" + pos + "(" + target + ")";
+		return id + ":" + size + "@" + minPos + "(" + target + ")";
 	}
 }

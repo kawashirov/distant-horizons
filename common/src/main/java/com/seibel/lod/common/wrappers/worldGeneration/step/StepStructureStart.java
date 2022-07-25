@@ -87,7 +87,8 @@ public final class StepStructureStart {
 				} catch (ArrayIndexOutOfBoundsException e) {
 					// There's a rare issue with StructStart where it throws ArrayIndexOutOfBounds
 					// This means the structFeat is corrupted (For some reason) and I need to reset it.
-					// TODO: Figure out in the future why this happens even though I am using new structFeat
+					// TODO: Figure out in the future why this happens even though I am using new structFeat - OLD
+					// TODO: Is this still a problem?
 					throw new StepStructureStart.StructStartCorruptedException(e);
 				}
 				#endif

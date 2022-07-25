@@ -30,6 +30,9 @@ import com.seibel.lod.core.logging.ConfigBasedSpamLogger;
 import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.EDistanceGenerationMode;
 import com.seibel.lod.core.enums.config.ELightGenerationMode;
+import com.seibel.lod.core.objects.DHChunkPos;
+import com.seibel.lod.core.util.EventTimer;
+import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.util.gridList.ArrayGridList;
 import com.seibel.lod.core.util.LodThreadFactory;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
@@ -37,6 +40,8 @@ import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.concurrent.CompletableFuture;
@@ -74,6 +79,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import org.apache.logging.log4j.LogManager;
+import org.checkerframework.checker.units.qual.C;
 
 /*
 Total:                   3.135214124s
@@ -102,121 +108,56 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 					() -> Config.Client.Advanced.Debugging.DebugSwitch.logWorldGenLoadEvent.get());
 
 	//TODO: Make actual proper support for StarLight
-	
-	public static class PrefEvent
-	{
-		long beginNano = 0;
-		long emptyNano = 0;
-		long structStartNano = 0;
-		long structRefNano = 0;
-		long biomeNano = 0;
-		long noiseNano = 0;
-		long surfaceNano = 0;
-		long carverNano = 0;
-		long featureNano = 0;
-		long lightNano = 0;
-		long endNano = 0;
-		
-		@Override
-		public String toString()
-		{
-			return "beginNano: " + beginNano + ",\n" +
-					"emptyNano: " + emptyNano + ",\n" +
-					"structStartNano: " + structStartNano + ",\n" +
-					"structRefNano: " + structRefNano + ",\n" +
-					"biomeNano: " + biomeNano + ",\n" +
-					"noiseNano: " + noiseNano + ",\n" +
-					"surfaceNano: " + surfaceNano + ",\n" +
-					"carverNano: " + carverNano + ",\n" +
-					"featureNano: " + featureNano + ",\n" +
-					"lightNano: " + lightNano + ",\n" +
-					"endNano: " + endNano + "\n";
-		}
-	}
-	
+
 	public static class PerfCalculator
 	{
+		private static final String[] TIME_NAMES = {
+				"total",
+				"setup",
+				"structStart",
+				"structRef",
+				"biome",
+				"noise",
+				"surface",
+				"carver",
+				"feature",
+				"light",
+				"cleanup",
+				//"lodCreation" (No longer used)
+		};
+
 		public static final int SIZE = 50;
-		Rolling totalTime = new Rolling(SIZE);
-		Rolling emptyTime = new Rolling(SIZE);
-		Rolling structStartTime = new Rolling(SIZE);
-		Rolling structRefTime = new Rolling(SIZE);
-		Rolling biomeTime = new Rolling(SIZE);
-		Rolling noiseTime = new Rolling(SIZE);
-		Rolling surfaceTime = new Rolling(SIZE);
-		Rolling carverTime = new Rolling(SIZE);
-		Rolling featureTime = new Rolling(SIZE);
-		Rolling lightTime = new Rolling(SIZE);
-		Rolling lodTime = new Rolling(SIZE);
-		
-		public void recordEvent(PrefEvent e)
+		ArrayList<Rolling> times = new ArrayList<>();
+
+		public PerfCalculator()
 		{
-			long preTime = e.beginNano;
-			totalTime.add(e.endNano - preTime);
-			if (e.emptyNano != 0)
+			for(int i = 0; i < 11; i++)
 			{
-				emptyTime.add(e.emptyNano - preTime);
-				preTime = e.emptyNano;
+				times.add(new Rolling(SIZE));
 			}
-			if (e.structStartNano != 0)
+		}
+		
+		public void recordEvent(EventTimer event)
+		{
+			for (EventTimer.Event e : event.events)
 			{
-				structStartTime.add(e.structStartNano - preTime);
-				preTime = e.structStartNano;
+				String name = e.name;
+				int index = Arrays.asList(TIME_NAMES).indexOf(name);
+				if(index == -1) continue;
+				times.get(index).add(e.timeNs);
 			}
-			if (e.structRefNano != 0)
-			{
-				structRefTime.add(e.structRefNano - preTime);
-				preTime = e.structRefNano;
-			}
-			if (e.biomeNano != 0)
-			{
-				biomeTime.add(e.biomeNano - preTime);
-				preTime = e.biomeNano;
-			}
-			if (e.noiseNano != 0)
-			{
-				noiseTime.add(e.noiseNano - preTime);
-				preTime = e.noiseNano;
-			}
-			if (e.surfaceNano != 0)
-			{
-				surfaceTime.add(e.surfaceNano - preTime);
-				preTime = e.surfaceNano;
-			}
-			if (e.carverNano != 0)
-			{
-				carverTime.add(e.carverNano - preTime);
-				preTime = e.carverNano;
-			}
-			if (e.featureNano != 0)
-			{
-				featureTime.add(e.featureNano - preTime);
-				preTime = e.featureNano;
-			}
-			if (e.lightNano != 0)
-			{
-				lightTime.add(e.lightNano - preTime);
-				preTime = e.lightNano;
-			}
-			if (e.endNano != 0)
-			{
-				lodTime.add(e.endNano - preTime);
-			}
+			times.get(0).add(event.getTotalTimeNs());
 		}
 		
 		public String toString()
 		{
-			return "Total: " + Duration.ofNanos((long) totalTime.getAverage()) + ", Empty/LoadChunk: "
-					+ Duration.ofNanos((long) emptyTime.getAverage()) + ", StructStart: "
-					+ Duration.ofNanos((long) structStartTime.getAverage()) + ", StructRef: "
-					+ Duration.ofNanos((long) structRefTime.getAverage()) + ", Biome: "
-					+ Duration.ofNanos((long) biomeTime.getAverage()) + ", Noise: "
-					+ Duration.ofNanos((long) noiseTime.getAverage()) + ", Surface: "
-					+ Duration.ofNanos((long) surfaceTime.getAverage()) + ", Carver: "
-					+ Duration.ofNanos((long) carverTime.getAverage()) + ", Feature: "
-					+ Duration.ofNanos((long) featureTime.getAverage()) + ", Light: "
-					+ Duration.ofNanos((long) lightTime.getAverage()) + ", Lod: "
-					+ Duration.ofNanos((long) lodTime.getAverage());
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < times.size(); i++)
+			{
+				if (times.get(i).getAverage() == 0) continue;
+				sb.append(TIME_NAMES[i]).append(": ").append(times.get(i).getAverage()).append("\n");
+			}
+			return sb.toString();
 		}
 	}
 	
@@ -273,23 +214,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		executors = Executors.newFixedThreadPool(newThreadCount,
 				new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY));
 	}
-	
-	public boolean tryAddPoint(int px, int pz, int range, Steps target, boolean genAllDetails, double runTimeRatio)
-	{
-		int boxSize = range * 2 + 1;
-		int x = Math.floorDiv(px, boxSize) * boxSize + range;
-		int z = Math.floorDiv(pz, boxSize) * boxSize + range;
-		
-		for (GenerationEvent event : events)
-		{
-			if (event.tooClose(x, z, range))
-				return false;
-		}
-		// System.out.println(x + ", "+z);
-		events.add(new GenerationEvent(new ChunkPos(x, z), range, this, target, genAllDetails, runTimeRatio));
-		return true;
-	}
-	
+
 	public void updateAllFutures()
 	{
 		if (unknownExceptionCount > 0) {
@@ -297,36 +222,32 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				unknownExceptionCount = 0;
 			}
 		}
-		
+
 		// Update all current out standing jobs
 		Iterator<GenerationEvent> iter = events.iterator();
 		while (iter.hasNext())
 		{
 			GenerationEvent event = iter.next();
-			if (event.isCompleted())
+			if (event.future.isDone())
 			{
-				try
-				{
-					event.join();
+				if (event.future.isCompletedExceptionally() && !event.future.isCancelled()) {
+					try {
+						event.future.get(); // Should throw exception
+						LodUtil.assertNotReach();
+					} catch (Exception e) {
+						unknownExceptionCount++;
+						lastExceptionTriggerTime = System.nanoTime();
+						EVENT_LOGGER.error("Batching World Generator: Event {} gotten an exception", event);
+						EVENT_LOGGER.error("Exception: ", e);
+					}
 				}
-				catch (Throwable e)
-				{
-					EVENT_LOGGER.error("Batching World Generator: Event {} gotten an exception", event);
-					EVENT_LOGGER.error("Exception: ", e);
-					unknownExceptionCount++;
-					lastExceptionTriggerTime = System.nanoTime();
-				}
-				finally
-				{
-					iter.remove();
-				}
+				iter.remove();
 			}
 			else if (event.hasTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS))
 			{
 				EVENT_LOGGER.error("Batching World Generator: " + event + " timed out and terminated!");
-				EVENT_LOGGER.info("Dump PrefEvent: " + event.pEvent);
-				try
-				{
+				EVENT_LOGGER.info("Dump PrefEvent: " + event.timer);
+				try {
 					if (!event.terminate())
 						EVENT_LOGGER.error("Failed to terminate the stuck generation event!");
 				}
@@ -336,13 +257,14 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				}
 			}
 		}
+
 		if (unknownExceptionCount > EXCEPTION_COUNTER_TRIGGER) {
 			EVENT_LOGGER.error("Too many exceptions in Batching World Generator! Disabling the generator.");
 			unknownExceptionCount = 0;
 			Config.Client.WorldGenerator.enableDistantGeneration.set(false);
 		}
 	}
-	
+
 	public BatchGenerationEnvironment(IServerLevel serverlevel)
 	{
 		super(serverlevel);
@@ -400,19 +322,19 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		
 	}
 	
-	public void generateLodFromList(GenerationEvent e)
+	public ArrayGridList<IChunkWrapper> generateLodFromList(GenerationEvent e)
 	{
-		EVENT_LOGGER.debug("Lod Generate Event: " + e.pos);
-		e.pEvent.beginNano = System.nanoTime();
+		EVENT_LOGGER.debug("Lod Generate Event: " + e.minPos);
 		ArrayGridList<ChunkAccess> referencedChunks;
 		ArrayGridList<ChunkAccess> genChunks;
 		EDistanceGenerationMode generationMode;
 		LightedWorldGenRegion region;
 		WorldGenLevelLightEngine lightEngine;
 		LightGetterAdaptor adaptor;
-		int refRange = e.range + RANGE_TO_RANGE_EMPTY_EXTENSION;
-		int refOffsetX = e.pos.x - refRange;
-		int refOffsetZ = e.pos.z - refRange;
+		int refSize = e.size+2; // +2 for the border referenced chunks
+		int refPosX = e.minPos.x - 1; // -1 for the border referenced chunks
+		int refPosZ = e.minPos.z - 1; // -1 for the border referenced chunks
+
 		try
 		{
 			adaptor = new LightGetterAdaptor(params.level);
@@ -439,109 +361,118 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				return target;
 			};
 
-			referencedChunks = new ArrayGridList<>(refRange*2+1,
-					(x,z) -> generator.generate(x + refOffsetX,z + refOffsetZ)
+			referencedChunks = new ArrayGridList<>(refSize,
+					(x,z) -> generator.generate(x + refPosX,z + refPosZ)
 			);
-			e.pEvent.emptyNano = System.nanoTime();
 			e.refreshTimeout();
 			region = new LightedWorldGenRegion(params.level, lightEngine, referencedChunks,
-					ChunkStatus.STRUCTURE_STARTS, refRange, e.lightMode, generator);
+					ChunkStatus.STRUCTURE_STARTS, refSize/2, e.lightMode, generator);
 			adaptor.setRegion(region);
 			e.tParam.makeStructFeat(region, params);
 			genChunks = new ArrayGridList<>(referencedChunks, RANGE_TO_RANGE_EMPTY_EXTENSION,
 					referencedChunks.gridSize - RANGE_TO_RANGE_EMPTY_EXTENSION);
 			generateDirect(e, genChunks, e.target, region);
+			e.timer.nextEvent("cleanup");
 		}
 		catch (StepStructureStart.StructStartCorruptedException f)
 		{
 			e.tParam.markAsInvalid();
-			return;
+			throw (RuntimeException)f.getCause();
 		}
 		
-		switch (e.target)
-		{
-		case Empty:
-		case StructureStart:
-		case StructureReference:
-			generationMode = EDistanceGenerationMode.NONE;
-			break;
-		case Biomes:
-			generationMode = EDistanceGenerationMode.BIOME_ONLY;
-		case Noise:
-			generationMode = EDistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
-			break;
-		case Surface:
-		case Carvers:
-			generationMode = EDistanceGenerationMode.SURFACE;
-			break;
-		case Features:
-			generationMode = EDistanceGenerationMode.FEATURES;
-			break;
-		case Light:
-		case LiquidCarvers:
-		default:
-			return;
-		}
-		
-		for (int oy = 0; oy < genChunks.gridSize; oy++)
-		{
-			for (int ox = 0; ox < genChunks.gridSize; ox++)
-			{
-				ChunkAccess target = genChunks.get(ox, oy);
-				ChunkWrapper wrappedChunk = new ChunkWrapper(target, region);
-				if (!wrappedChunk.isLightCorrect()) {
-					throw new RuntimeException("The generated chunk somehow has isLightCorrect() returning false");
-				}
-				
-				boolean isFull = target.getStatus() == ChunkStatus.FULL || target instanceof LevelChunk;
-				#if POST_MC_1_18_1
-				boolean isPartial = target.isOldNoiseGeneration();
-				#endif
-				if (isFull)
-				{
-					LOAD_LOGGER.info("Detected full existing chunk at {}", target.getPos());
-					ChunkSizedData data = LodDataBuilder.createChunkData(wrappedChunk);
-					if (data != null)
-					{
-						//params.lodLevel.submitChunkData(data);
-					}
+//		switch (e.target)
+//		{
+//		case Empty:
+//		case StructureStart:
+//		case StructureReference:
+//			generationMode = EDistanceGenerationMode.NONE;
+//			break;
+//		case Biomes:
+//			generationMode = EDistanceGenerationMode.BIOME_ONLY;
+//		case Noise:
+//			generationMode = EDistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
+//			break;
+//		case Surface:
+//		case Carvers:
+//			generationMode = EDistanceGenerationMode.SURFACE;
+//			break;
+//		case Features:
+//			generationMode = EDistanceGenerationMode.FEATURES;
+//			break;
+//		case Light:
+//		case LiquidCarvers:
+//		default:
+//			throw new IllegalArgumentException("Unknown/Unsupported target: " + e.target);
+//		}
+//		for (int oy = 0; oy < genChunks.gridSize; oy++)
+//		{
+//			for (int ox = 0; ox < genChunks.gridSize; ox++)
+//			{
+//				ChunkAccess target = genChunks.get(ox, oy);
+//				ChunkWrapper wrappedChunk = new ChunkWrapper(target, region);
+//				if (!wrappedChunk.isLightCorrect()) {
+//					throw new RuntimeException("The generated chunk somehow has isLightCorrect() returning false");
+//				}
+//
+//				boolean isFull = target.getStatus() == ChunkStatus.FULL || target instanceof LevelChunk;
+//				#if POST_MC_1_18_1
+//				boolean isPartial = target.isOldNoiseGeneration();
+//				#endif
+//				if (isFull)
+//				{
+//					LOAD_LOGGER.info("Detected full existing chunk at {}", target.getPos());
+//					ChunkSizedData data = LodDataBuilder.createChunkData(wrappedChunk);
+//					if (data != null)
+//					{
+//						params.lodLevel.submitChunkData(data);
+//					}
+//
+//					//FIXME: Fix this
+//					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
+//							new LodBuilderConfig(EDistanceGenerationMode.FULL), true, e.genAllDetails);
+//				}
+//				#if POST_MC_1_18_1
+//				else if (isPartial)
+//				{
+//					LOAD_LOGGER.info("Detected old existing chunk at {}", target.getPos());
+//					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
+//							new LodBuilderConfig(generationMode), true, e.genAllDetails);
+//				}
+//				#endif
+//				else if (target.getStatus() == ChunkStatus.EMPTY && generationMode == EDistanceGenerationMode.NONE)
+//				{
+//					params.lodBuilder.generateLodNodeFromChunk(params.lodDim,wrappedChunk,
+//							LodBuilderConfig.getFillVoidConfig(), true, e.genAllDetails);
+//				}
+//				else
+//				{
+//					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
+//							new LodBuilderConfig(generationMode), true, e.genAllDetails);
+//				}
+//				if (e.lightMode == ELightGenerationMode.FANCY || isFull)
+//				{
+//					lightEngine.retainData(target.getPos(), false);
+//				}
+//
+//			}
+//		}
 
-					//FIXME: Fix this
-					//params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
-					//		new LodBuilderConfig(EDistanceGenerationMode.FULL), true, e.genAllDetails);
-				}
-				#if POST_MC_1_18_1
-				else if (isPartial)
-				{
-					LOAD_LOGGER.info("Detected old existing chunk at {}", target.getPos());
-					//params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
-					//		new LodBuilderConfig(generationMode), true, e.genAllDetails);
-				}
-				#endif
-				else if (target.getStatus() == ChunkStatus.EMPTY && generationMode == EDistanceGenerationMode.NONE)
-				{
-					//params.lodBuilder.generateLodNodeFromChunk(params.lodDim,wrappedChunk,
-					//		LodBuilderConfig.getFillVoidConfig(), true, e.genAllDetails);
-				}
-				else
-				{
-					//params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
-					//		new LodBuilderConfig(generationMode), true, e.genAllDetails);
-				}
-				if (e.lightMode == ELightGenerationMode.FANCY || isFull)
-				{
-					lightEngine.retainData(target.getPos(), false);
-				}
-				
+		ArrayGridList<IChunkWrapper> result = new ArrayGridList<>(e.size);
+		for (int oy = 0; oy < e.size; oy++)
+		{
+			for (int ox = 0; ox < e.size; ox++)
+			{
+				result.set(ox, oy, new ChunkWrapper(genChunks.get(ox, oy), region));
 			}
 		}
-		e.pEvent.endNano = System.nanoTime();
+		e.timer.complete();
 		e.refreshTimeout();
 		if (PREF_LOGGER.canMaybeLog())
 		{
-			e.tParam.perf.recordEvent(e.pEvent);
-			PREF_LOGGER.infoInc("{}", e.tParam.perf);
+			e.tParam.perf.recordEvent(e.timer);
+			PREF_LOGGER.infoInc("{}", e.timer);
 		}
+		return result;
 	}
 	
 	public void generateDirect(GenerationEvent e, ArrayGridList<ChunkAccess> subRange, Steps step,
@@ -559,39 +490,41 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			});
 			if (step == Steps.Empty)
 				return;
+			e.timer.nextEvent("structStart");
 			stepStructureStart.generateGroup(e.tParam, region, subRange);
-			e.pEvent.structStartNano = System.nanoTime();
 			e.refreshTimeout();
 			if (step == Steps.StructureStart)
 				return;
+			e.timer.nextEvent("structRef");
 			stepStructureReference.generateGroup(e.tParam, region, subRange);
-			e.pEvent.structRefNano = System.nanoTime();
 			e.refreshTimeout();
 			if (step == Steps.StructureReference)
 				return;
+			e.timer.nextEvent("biome");
 			stepBiomes.generateGroup(e.tParam, region, subRange);
-			e.pEvent.biomeNano = System.nanoTime();
 			e.refreshTimeout();
 			if (step == Steps.Biomes)
 				return;
+			e.timer.nextEvent("noise");
 			stepNoise.generateGroup(e.tParam, region, subRange);
-			e.pEvent.noiseNano = System.nanoTime();
 			e.refreshTimeout();
 			if (step == Steps.Noise)
 				return;
+			e.timer.nextEvent("surface");
 			stepSurface.generateGroup(e.tParam, region, subRange);
-			e.pEvent.surfaceNano = System.nanoTime();
 			e.refreshTimeout();
 			if (step == Steps.Surface)
 				return;
+			e.timer.nextEvent("carver");
 			if (step == Steps.Carvers)
 				return;
+			e.timer.nextEvent("feature");
 			stepFeatures.generateGroup(e.tParam, region, subRange);
-			e.pEvent.featureNano = System.nanoTime();
 			e.refreshTimeout();
 		}
 		finally
 		{
+			e.timer.nextEvent("light");
 			switch (region.lightMode)
 			{
 			case FANCY:
@@ -611,7 +544,6 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				});
 				break;
 			}
-			e.pEvent.lightNano = System.nanoTime();
 			e.refreshTimeout();
 		}
 	}
@@ -641,6 +573,9 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 
 	@Override
 	public CompletableFuture<ArrayGridList<IChunkWrapper>> generateChunks(int minX, int minZ, int genSize, Steps targetStep, double runTimeRatio) {
-		return null; // TODO: Implement generateChunks
+		// TODO: Check event overlap via e.tooClose()
+		GenerationEvent e = GenerationEvent.startEvent(new DHChunkPos(minX, minZ), genSize, this, targetStep, runTimeRatio);
+		events.add(e);
+		return e.future;
 	}
 }
