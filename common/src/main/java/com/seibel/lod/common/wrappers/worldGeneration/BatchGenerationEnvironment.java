@@ -195,9 +195,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		DependencySetupDoneCheck.getIsCurrentThreadDistantGeneratorThread = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
 	}
 	
-	public ExecutorService executors = Executors.newFixedThreadPool(
-			Config.Client.Advanced.Threading.numberOfWorldGenerationThreads.get()<1 ? 1 :
-					(int) Math.ceil(Config.Client.Advanced.Threading.numberOfWorldGenerationThreads.get()),
+	public ExecutorService executors = Executors.newFixedThreadPool(Config.Client.Advanced.Threading.getWorldGenerationThreadPoolSize(),
 			threadFactory);
 
 	public <T> T joinSync(CompletableFuture<T> f) {
@@ -269,7 +267,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	{
 		super(serverlevel);
 		EVENT_LOGGER.info("================WORLD_GEN_STEP_INITING=============");
-		ChunkGenerator generator =  ((LevelWrapper) serverlevel).getServerWorld().getChunkSource().getGenerator();
+		ChunkGenerator generator =  ((LevelWrapper) serverlevel.getLevelWrapper()).getServerWorld().getChunkSource().getGenerator();
 		if (!(generator instanceof NoiseBasedChunkGenerator ||
 				generator instanceof DebugLevelSource ||
 				generator instanceof FlatLevelSource)) {
