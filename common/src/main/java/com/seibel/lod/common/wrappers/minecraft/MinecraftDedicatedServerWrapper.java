@@ -8,7 +8,7 @@ import net.minecraft.server.dedicated.DedicatedServer;
 
 import java.io.File;
 
-@Environment(EnvType.SERVER)
+//@Environment(EnvType.SERVER)
 public class MinecraftDedicatedServerWrapper implements IMinecraftSharedWrapper {
     public static final MinecraftDedicatedServerWrapper INSTANCE = new MinecraftDedicatedServerWrapper();
     private MinecraftDedicatedServerWrapper() {}

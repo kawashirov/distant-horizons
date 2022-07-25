@@ -57,12 +57,12 @@ public class DependencySetup {
         DependencySetupDoneCheck.isDone = true;
     }
 
-    @Environment(EnvType.SERVER)
+    //@Environment(EnvType.SERVER)
     public static void createServerBindings() {
         SingletonInjector.INSTANCE.bind(IMinecraftSharedWrapper.class, MinecraftDedicatedServerWrapper.INSTANCE);
     }
 
-    @Environment(EnvType.CLIENT)
+    //@Environment(EnvType.CLIENT)
     public static void createClientBindings() {
         SingletonInjector.INSTANCE.bind(IMinecraftClientWrapper.class, MinecraftClientWrapper.INSTANCE);
         SingletonInjector.INSTANCE.bind(IMinecraftSharedWrapper.class, MinecraftClientWrapper.INSTANCE);

@@ -1,4 +1,4 @@
-package com.seibel.lod.forge.mixins;
+package com.seibel.lod.forge.mixins.server;
 
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import org.spongepowered.asm.mixin.Mixin;

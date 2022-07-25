@@ -1,4 +1,4 @@
-package com.seibel.lod.fabric.mixins.client;
+package com.seibel.lod.forge.mixins.client;
 
 import com.seibel.lod.core.api.internal.a7.ClientApi;
 import com.seibel.lod.core.api.internal.a7.SharedApi;
@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+// TODO: Check if this port from fabric works
 @Mixin(GameRenderer.class)
 public class MixinGameRenderer {
     #if POST_MC_1_17_1
@@ -39,4 +40,5 @@ public class MixinGameRenderer {
         ClientApi.INSTANCE.rendererStartupEvent();
     }
     #endif
+
 }

@@ -17,7 +17,7 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-package com.seibel.lod.forge.mixins;
+package com.seibel.lod.forge.mixins.client;
 
 import com.seibel.lod.common.wrappers.config.GetConfigScreen;
 import com.seibel.lod.common.wrappers.config.TexturedButtonWidget;

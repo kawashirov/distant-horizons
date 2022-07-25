@@ -1,4 +1,4 @@
-package com.seibel.lod.forge.mixins;
+package com.seibel.lod.forge.mixins.client;
 
 import com.seibel.lod.core.render.F3Screen;
 import net.minecraft.client.gui.components.DebugScreenOverlay;

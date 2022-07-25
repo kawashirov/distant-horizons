@@ -17,7 +17,7 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-package com.seibel.lod.forge.mixins;
+package com.seibel.lod.forge.mixins.server;
 
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
@@ -33,7 +33,7 @@ import com.seibel.lod.core.util.DummyRunExecutorService;
 import net.minecraft.Util;
 
 @Mixin(Util.class)
-public class MixinUtilBackgroudThread
+public class MixinUtilBackgroundThread
 {
 	
 	private static boolean shouldApplyOverride() {

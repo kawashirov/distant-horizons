@@ -17,21 +17,26 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.seibel.lod.forge.mixins;
+package com.seibel.lod.forge.mixins.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.seibel.lod.common.wrappers.McObjectConverter;
+import com.seibel.lod.common.wrappers.world.LevelWrapper;
 import com.seibel.lod.core.config.Config;
-import com.seibel.lod.core.api.internal.ClientApi;
+import com.seibel.lod.core.api.internal.a7.ClientApi;
 import com.seibel.lod.core.objects.math.Mat4f;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
-import org.lwjgl.opengl.GL15;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.logging.Level;
 
 /**
  * This class is used to mix in my rendering code
@@ -47,11 +52,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * @version 12-31-2021
  */
 @Mixin(LevelRenderer.class)
-public class MixinWorldRenderer
+public class MixinLevelRenderer
 {
+	@Shadow
+	private ClientLevel level;
+
+	@Unique
 	private static float previousPartialTicks = 0;
 
-	public MixinWorldRenderer() {
+	public MixinLevelRenderer() {
 		throw new NullPointerException("Null cannot be cast to non-null type.");
 	}
 
@@ -79,7 +88,7 @@ public class MixinWorldRenderer
 			mcProjectionMatrix.transpose();
 			Mat4f mcModelViewMatrix = McObjectConverter.Convert(matrixStackIn.last().pose());
 
-			ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
+			ClientApi.INSTANCE.renderLods(LevelWrapper.getWorldWrapper(level), mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
 		}
 		if (Config.Client.Advanced.lodOnlyMode.get()) {
 			callback.cancel();
@@ -104,7 +113,7 @@ public class MixinWorldRenderer
 			Mat4f mcModelViewMatrix = McObjectConverter.Convert(modelViewMatrixStack.last().pose());
 			Mat4f mcProjectionMatrix = McObjectConverter.Convert(projectionMatrix);
 
-			ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
+			ClientApi.INSTANCE.renderLods(LevelWrapper.getWorldWrapper(level), mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
 		}
 		if (Config.Client.Advanced.lodOnlyMode.get()) {
 			callback.cancel();

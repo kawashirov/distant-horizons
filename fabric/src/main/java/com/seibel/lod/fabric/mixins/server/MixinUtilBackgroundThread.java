@@ -22,8 +22,6 @@ package com.seibel.lod.fabric.mixins.server;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 
-import com.seibel.lod.fabric.FabricClientProxy;
-import com.seibel.lod.fabric.FabricDedicatedServerMain;
 import com.seibel.lod.fabric.FabricServerProxy;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,7 +33,7 @@ import com.seibel.lod.core.util.DummyRunExecutorService;
 import net.minecraft.Util;
 
 @Mixin(Util.class)
-public class MixinUtilBackgroudThread
+public class MixinUtilBackgroundThread
 {
 	@Inject(method = "backgroundExecutor", at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$backgroundExecutor(CallbackInfoReturnable<ExecutorService> ci)

@@ -5,7 +5,6 @@ import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.LevelWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.core.api.internal.a7.ServerApi;
-import com.seibel.lod.core.api.internal.a7.SharedApi;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
@@ -27,6 +26,7 @@ import java.util.function.Supplier;
  * and is the starting point for most of the mod.
  *
  * @author Ran
+ * @author Tomlee
  * @version 5-11-2022
  */
 

@@ -17,9 +17,8 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-package com.seibel.lod.forge.mixins.unsafe;
+package com.seibel.lod.forge.mixins.server.unsafe;
 import org.spongepowered.asm.mixin.Mixin;
-import net.minecraft.world.level.chunk.ChunkGenerator;
 #if POST_MC_1_18_1
 
 import net.minecraft.util.ThreadingDetector;
@@ -36,7 +35,7 @@ import java.util.concurrent.Semaphore;
  * FIXME: Recheck this
  */
 @Mixin(ThreadingDetector.class)
-public class MixinThreadingDectector {
+public class MixinThreadingDetector {
     @Mutable
     @Shadow
     private Semaphore lock;

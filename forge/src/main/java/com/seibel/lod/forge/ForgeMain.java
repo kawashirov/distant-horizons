@@ -21,12 +21,13 @@ package com.seibel.lod.forge;
 
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
+import com.seibel.lod.common.wrappers.DependencySetup;
 import com.seibel.lod.common.wrappers.config.GetConfigScreen;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.core.ModInfo;
-import com.seibel.lod.core.api.internal.InternalApiShared;
 import com.seibel.lod.core.handlers.ReflectionHandler;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorInjector;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
@@ -46,8 +47,7 @@ import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.*;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 #if PRE_MC_1_17_1
 import net.minecraftforge.fml.ExtensionPoint;
@@ -74,33 +74,48 @@ import java.util.Random;
 public class ForgeMain implements LodForgeMethodCaller
 {
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
-	
-	public static ForgeClientProxy forgeClientProxy;
-	
-	
-	private void init(final FMLCommonSetupEvent event)
-	{
-		// make sure the dependencies are set up before the mod needs them
-//		LodCommonMain.startup(this, !FMLLoader.getDist().isClient());
-		LodCommonMain.startup(this);
-		ForgeDependencySetup.createInitialBindings();
-		LodCommonMain.initConfig();
-		LOGGER.info(ModInfo.READABLE_NAME + " initializing...");
-	}
-	
+	public static ForgeClientProxy client_proxy = null;
+	public static ForgeServerProxy server_proxy = null;
+
 	public ForgeMain()
 	{
-		// Register the methods for server and other game events we are interested in
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::init);
-		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onClientStart);
+		// Register the mod initializer (Actual event registration is done in the different proxies)
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::initClient);
+		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::initDedicated);
 	}
 
-	private void onClientStart(final FMLClientSetupEvent event)
+	private void initClient(final FMLClientSetupEvent event)
 	{
+		DependencySetup.createClientBindings();
+		initCommon();
+
+		client_proxy = new ForgeClientProxy();
+		MinecraftForge.EVENT_BUS.register(client_proxy);
+		server_proxy = new ForgeServerProxy(false);
+		MinecraftForge.EVENT_BUS.register(server_proxy);
+
+		postInitCommon();
+	}
+
+	private void initDedicated(final FMLDedicatedServerSetupEvent event)
+	{
+		DependencySetup.createServerBindings();
+		initCommon();
+
+		server_proxy = new ForgeServerProxy(true);
+		MinecraftForge.EVENT_BUS.register(server_proxy);
+
+		postInitCommon();
+	}
+
+	private void initCommon() {
+		LodCommonMain.startup(this);
+		ForgeDependencySetup.createInitialBindings();
+		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
+
 		if (ReflectionHandler.instance.optifinePresent()) {
-			ModAccessorInjector.bind(IOptifineAccessor.class, new OptifineAccessor());
+			ModAccessorInjector.INSTANCE.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
-		
 		#if PRE_MC_1_17_1
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY,
 				() -> (client, parent) -> GetConfigScreen.getScreen(parent));
@@ -108,8 +123,13 @@ public class ForgeMain implements LodForgeMethodCaller
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
 				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> GetConfigScreen.getScreen(parent)));
 		#endif
-		forgeClientProxy = new ForgeClientProxy();
-		MinecraftForge.EVENT_BUS.register(forgeClientProxy);
+	}
+
+	private void postInitCommon() {
+		LOGGER.info("Post-Initializing Mod");
+		SingletonInjector.INSTANCE.runDelayedSetup();
+		LodCommonMain.initConfig();
+		LOGGER.info("Mod Post-Initialized");
 	}
 
 	private final ModelDataMap dataMap = new ModelDataMap.Builder().build();
@@ -124,7 +144,7 @@ public class ForgeMain implements LodForgeMethodCaller
 	}
 	#endif
 
-	@Override
+	@Override //TODO: Check this if its still needed
 	public int colorResolverGetColor(ColorResolver resolver, Biome biome, double x, double z) {
 		#if MC_1_17_1______Still_needed
 		return resolver.m_130045_(biome, x, z);

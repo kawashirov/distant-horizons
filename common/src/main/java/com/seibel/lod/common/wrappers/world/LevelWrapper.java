@@ -73,7 +73,7 @@ public class LevelWrapper implements ILevelWrapper
             levelType = ELevelType.UNKNOWN;
     }
 
-    @Environment(EnvType.CLIENT)
+    //@Environment(EnvType.CLIENT)
     private static LevelAccessor getSinglePlayerServerLevel() {
         MinecraftClientWrapper client = MinecraftClientWrapper.INSTANCE;
         return client.mc.getSingleplayerServer().getPlayerList()

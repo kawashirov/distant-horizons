@@ -72,7 +72,7 @@ import org.jetbrains.annotations.Nullable;
  * @author James Seibel
  * @version 3-5-2022
  */
-@Environment(EnvType.CLIENT)
+//@Environment(EnvType.CLIENT)
 public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecraftSharedWrapper
 {
     private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());

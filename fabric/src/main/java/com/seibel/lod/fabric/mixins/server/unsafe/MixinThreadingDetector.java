@@ -19,7 +19,6 @@
  
 package com.seibel.lod.fabric.mixins.server.unsafe;
 
-import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.asm.mixin.Mixin;
 
 //FIXME: Is this still needed?
@@ -38,7 +37,7 @@ import java.util.concurrent.Semaphore;
  * Why does this exist? But okay! (Will be probably removed when the experimental generator is done)
  */
 @Mixin(ThreadingDetector.class)
-public class MixinThreadingDectector {
+public class MixinThreadingDetector {
     @Mutable
     @Shadow
     private Semaphore lock;

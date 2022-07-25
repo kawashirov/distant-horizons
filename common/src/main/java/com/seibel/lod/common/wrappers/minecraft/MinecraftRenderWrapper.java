@@ -76,7 +76,7 @@ import org.apache.logging.log4j.Logger;
  * @author James Seibel
  * @version 12-12-2021
  */
-@Environment(EnvType.CLIENT)
+//@Environment(EnvType.CLIENT)
 public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 {
 	public static final MinecraftRenderWrapper INSTANCE = new MinecraftRenderWrapper();
