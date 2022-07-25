@@ -69,6 +69,7 @@ public class FabricClientProxy
 
 		// ClientTickEvent
 		ClientTickEvents.START_CLIENT_TICK.register((client) -> {
+			//LOGGER.info("ClientTickEvent.START_CLIENT_TICK");
 			ClientApi.INSTANCE.clientTickEvent();
 		});
 
