@@ -195,7 +195,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		DependencySetupDoneCheck.getIsCurrentThreadDistantGeneratorThread = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
 	}
 	
-	public ExecutorService executors = Executors.newFixedThreadPool(Config.Client.Advanced.Threading.getWorldGenerationThreadPoolSize(),
+	public ExecutorService executors = Executors.newFixedThreadPool(
+			Math.max(Config.Client.Advanced.Threading.numberOfWorldGenerationThreads.get().intValue(), 1),
 			threadFactory);
 
 	public <T> T joinSync(CompletableFuture<T> f) {
