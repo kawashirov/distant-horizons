@@ -187,12 +187,13 @@ subprojects { p ->
         annotationProcessor "systems.manifold:manifold-preprocessor:${rootProject.manifold_version}"
 
         // JUnit tests
-        implementation("org.junit.jupiter:junit-jupiter:5.8.2")
-        implementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+        implementation "org.junit.jupiter:junit-jupiter:5.8.2"
+        implementation "org.junit.jupiter:junit-jupiter-engine:5.8.2"
+        implementation "junit:junit:4.13"
 
         // Compression
-        shadowMe 'org.tukaani:xz:1.9'
-        shadowMe 'org.apache.commons:commons-compress:1.21'
+        shadowMe "org.tukaani:xz:1.9"
+        shadowMe "org.apache.commons:commons-compress:1.21"
 
         // Toml & Json for config
         shadowMe "com.electronwill.night-config:toml:${rootProject.toml_version}"
@@ -214,6 +215,7 @@ subprojects { p ->
                 // Remove Junit test libraries
                 exclude group: "org.junit.jupiter", module: "junit-jupiter"
                 exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
+                exclude group: "junit", module: "junit"
             }
         }
     }
