@@ -8,6 +8,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import java.util.Objects;
 
 public class BlockStateWrapper implements IBlockStateWrapper {
+    public static final BlockStateWrapper AIR = new BlockStateWrapper(null);
     public final BlockState blockState;
     public BlockStateWrapper(BlockState blockState) {
         this.blockState = blockState;
@@ -15,10 +16,16 @@ public class BlockStateWrapper implements IBlockStateWrapper {
 
     @Override
     public String serialize() {
+        if (blockState == null) {
+            return "AIR";
+        }
         return BlockState.CODEC.encodeStart(JsonOps.COMPRESSED, blockState).get().orThrow().toString();
     }
 
     public static BlockStateWrapper deserialize(String str) {
+        if (str.equals("AIR")) {
+            return AIR;
+        }
         return new BlockStateWrapper(
                 BlockState.CODEC.decode(JsonOps.COMPRESSED, JsonParser.parseString(str)).get().orThrow().getFirst()
         );

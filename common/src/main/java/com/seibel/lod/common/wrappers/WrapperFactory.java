@@ -61,4 +61,9 @@ public class WrapperFactory implements IWrapperFactory
 	public IBlockStateWrapper deserializeBlockStateWrapper(String str) {
 		return BlockStateWrapper.deserialize(str);
 	}
+
+	@Override
+	public IBlockStateWrapper getAirBlockStateWrapper() {
+		return BlockStateWrapper.AIR;
+	}
 }
