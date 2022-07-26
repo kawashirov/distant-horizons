@@ -1,22 +1,31 @@
-version = rootProject.mod_version+"-"+rootProject.minecraft_version+"-"+new Date().format("yyyy_MM_dd_HH_mm")
+version = rootProject.versionStr
 
 loom {
     forge {
         convertAccessWideners.set(true)
         extraAccessWideners.add("lod.accesswidener")
-        mixinConfigs("lod.mixins.json")
+        mixinConfigs("DistantHorizons.mixins.json")
     }
 }
+
 
 architectury {
     platformSetupLoomIde()
     forge()
 }
 
+loom {
+    accessWidenerPath = project(":common").loom.accessWidenerPath
+
+    forge {
+        convertAccessWideners = true
+        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
+    }
+}
+
 configurations {
-    // TODO: Add the commented things once we update architectury to 11 or higher
-//    common
-//    shadowCommon
+    common
+    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentForge.extendsFrom common
@@ -47,34 +56,37 @@ dependencies {
     addMod("curse.maven:TerraForged-363820:${rootProject.terraforged_version}", rootProject.enable_terraforged)
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowMe(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
-    
-    // Ran's scuffed 1.19 stuff
-    shadowMe files(project(":core").file("build/libs/DistantHorizons-${rootProject.mod_version}.jar"))
+    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }
 }
 
 processResources {
-    dependsOn(copyAccessWidener)
     dependsOn(copyCoreResources)
-    dependsOn(copyCommonResources)
 }
 
-// Ran's scuffed 1.19 stuff
-jar.dependsOn(project(":core").remapJar)
-remapSourcesJar.dependsOn(project(":core").remapJar)
-
 shadowJar {
-    // Remove the fabric stuff from forge
-    dependencies {
-        exclude(dependency("net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"))
-    }
-    exclude "fabric.mod.json"
-    configurations = [project.configurations.shadowMe]
+    exclude "architectury.common.json"
 
-    // Our own code
-    relocate 'com.seibel.lod.common', 'forge.com.seibel.lod.common'
+    configurations = [project.configurations.shadowCommon, project.configurations.shadowMe]
+
+    // Compression
+    relocate 'org.tukaani', 'distanthorizons.libraries.tukaani'
+    relocate 'org.apache.commons.compress', 'distanthorizons.libraries.apache.commons.compress'
+
+    // Toml & Json for config
+    relocate 'com.electronwill.nightconfig', 'distanthorizons.libraries.electronwill.nightconfig'
+
+    // FIXME: This is a massive library that is located in lots of different spots
+    relocate 'com.googlecode.json-simple', 'distanthorizons.libraries.googlecode.json-simple'
+    relocate 'org.json.simple', 'distanthorizons.libraries.json.simple'
+
+    // Theming
+    relocate 'com.formdev.flatlaf', 'distanthorizons.libraries.formdev.flatlaf'
+
+    // svg
+    relocate 'com.kitfox.svg', 'distanthorizons.libraries.kitfox.svg'
 
     classifier "dev-shadow"
+    mergeServiceFiles()
 }
 
 remapJar {

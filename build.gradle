@@ -1,23 +1,16 @@
-import io.github.ran.jarmerger.JarMergerPlugin
-
-
-buildscript {
-    dependencies {
-        classpath files('plugins/DHJarMerger-1.0.jar')
-    }
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "gradle.plugin.com.github.johnrengelman:shadow:7.1.2"
-    }
-}
-
 plugins {
+    // Plugin to help in developing multi-loader mods
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "0.12.0-SNAPSHOT" apply false
+
+    // Plugin to handle dependencies
+    id 'com.github.johnrengelman.shadow' version '7.0.0' apply false
+
+    // Plugin to create merged jars
+    id "io.github.pacifistmc.forgix" version "1.2.2"
+
+    // Provides mc libraries to core
+    id 'org.spongepowered.gradle.vanilla' version '0.2.1-SNAPSHOT' apply false
 }
 
 /**
@@ -100,116 +93,128 @@ def loadProperties() {
             "1.19": "1_19"
     ]
     // Use this as sometimes multiple versions use the same access wideners
-    rootProject.ext.set("acsessWidenerVersion", mcVersionToAcsessWidenerVersion.get(mcVersion))
+    rootProject.ext.set("accessWidenerVersion", mcVersionToAcsessWidenerVersion.get(mcVersion))
 }
 loadProperties()
 
-apply plugin: JarMergerPlugin
+// Sets up the accesswideners
+def makeAccessWidener() {
+    def accessWidenerFile = project(":common").file("src/main/resources/lod.accesswidener")
+    if (accessWidenerFile.exists()) {
+        delete accessWidenerFile
+    }
+
+    copy {
+        from project(":common").file("src/main/resources/${rootProject.accessWidenerVersion}.lod.accesswidener")
+        into project(":common").file("src/main/resources/")
+        rename "${rootProject.accessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
+    }
+}
+makeAccessWidener()
+
+
+
+
+// Sets up the version string
+rootProject.versionStr = rootProject.mod_version + "-" + rootProject.minecraft_version + "-" + new Date().format("yyyy_MM_dd_HH_mm")
+
+// Merged jar settings
+forgix {
+    group = "com.seibel.lod"
+    mergedJarName = "DistantHorizons-${rootProject.versionStr}.jar"
+    
+    forge {
+        jarLocation = "build/libs/DistantHorizons-${rootProject.versionStr}.jar"
+    }
+
+    fabric {
+        jarLocation = "build/libs/DistantHorizons-${rootProject.versionStr}.jar"
+    }
+}
 
 architectury {
     minecraft = rootProject.minecraft_version
 }
 
-
 subprojects { p ->
-    apply plugin: "com.github.johnrengelman.shadow"
-    apply plugin: "dev.architectury.loom"
-    if (p == project(":core"))
+    if (p == project(":core")) {
         apply plugin: "application"
+        apply plugin: "org.spongepowered.gradle.vanilla" // Provides minecraft libraries
+        apply plugin: "com.github.johnrengelman.shadow"
+    } else {
+        apply plugin: "dev.architectury.loom"
+        apply plugin: "com.github.johnrengelman.shadow"
 
-    loom {
-        silentMojangMappingsLicense()
-
-        if (p != project(":core")) {
-            accessWidenerPath.set(project(":common").file("src/main/resources/${acsessWidenerVersion}.lod.accesswidener"))
+        loom {
+            silentMojangMappingsLicense()
         }
     }
 
     configurations {
-        common
         shadowMe
         implementation.extendsFrom shadowMe
     }
 
-    dependencies {
-        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        // The following line declares the mojmap mappings & parchment mappings
-        mappings loom.layered() {
-            // Mojmap mappings
-            officialMojangMappings()
-            // Parchment mappings (it adds parameter mappings & javadoc)
-            if (rootProject.minecraft_version != "1.19")
-                parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
-            else // As 1.19 dosnt have parchment mappings yet, we use 1.18.2 mapping
-                parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip")
+    if (p == project(":core")) {
+        // Sets up minecraft for core
+        minecraft {
+            version("${rootProject.minecraft_version}")
         }
 
-		// Manifold
-		annotationProcessor "systems.manifold:manifold-preprocessor:${rootProject.manifold_version}"
+        // Sets the main standalone jar entrypoint
+        application {
+            mainClass.set('com.seibel.lod.core.JarMain')
+        }
+    }
 
-        // Toml & Json for config
-        implementation("com.electronwill.night-config:toml:${rootProject.toml_version}")
-        implementation("com.googlecode.json-simple:json-simple:${rootProject.json_version}")
+    dependencies {
+        // Sets up minecraft for projects other than core
+        if (p != project(":core")) {
+            minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+            // The following line declares the mojmap mappings & parchment mappings
+            mappings loom.layered() {
+                // Mojmap mappings
+                officialMojangMappings()
+                // Parchment mappings (it adds parameter mappings & javadoc)
+                if (rootProject.minecraft_version != "1.19")
+                    parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+                else // As 1.19 dosnt have parchment mappings yet, we use 1.18.2 mapping
+                    parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip")
+            }
+        }
 
-        // Theming
-        implementation("com.formdev:flatlaf:${rootProject.flatlaf_version}")
-        // svg
-        implementation("com.formdev:flatlaf-extras:${rootProject.flatlaf_version}")
-        implementation("com.formdev:svgSalamander:${rootProject.svgSalamander_version}")
+        // Manifold
+        annotationProcessor "systems.manifold:manifold-preprocessor:${rootProject.manifold_version}"
 
         // JUnit tests
         implementation("org.junit.jupiter:junit-jupiter:5.8.2")
         implementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 
+        // Compression
+        shadowMe 'org.tukaani:xz:1.9'
+        shadowMe 'org.apache.commons:commons-compress:1.21'
 
-        if (p == project(":core") || p == project(":fabric") || p == project(":forge")) {
-            // Compression
-            common 'org.tukaani:xz:1.9'
-            common 'org.apache.commons:commons-compress:1.21'
-            shadowMe 'org.tukaani:xz:1.9'
-            shadowMe 'org.apache.commons:commons-compress:1.21'
-            // Toml & Json for config
-            shadowMe("com.electronwill.night-config:toml:${rootProject.toml_version}") {}
-            shadowMe("com.googlecode.json-simple:json-simple:${rootProject.json_version}") {}
-            // Theming
-            shadowMe("com.formdev:flatlaf:${rootProject.flatlaf_version}")
-            // svg
-            shadowMe("com.formdev:flatlaf-extras:${rootProject.flatlaf_version}")
-            shadowMe("com.formdev:svgSalamander:${rootProject.svgSalamander_version}")
+        // Toml & Json for config
+        shadowMe "com.electronwill.night-config:toml:${rootProject.toml_version}"
+        shadowMe("com.googlecode.json-simple:json-simple:${rootProject.json_version}") {
+            // Remove Junit test libraries
+            exclude group: "junit", module: "junit"
         }
 
-        if (p != project(":forge")) {
-            // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
-            // Do NOT use other classes from fabric loader unless working with fabric
-            modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-        }
+        // Theming
+        shadowMe "com.formdev:flatlaf:${rootProject.flatlaf_version}"
 
+        // SVG
+        shadowMe "com.formdev:flatlaf-extras:${rootProject.flatlaf_version}"
+        shadowMe "com.formdev:svgSalamander:${rootProject.svgSalamander_version}"
 
-        if (p != project(":core"))
-            common(project(":core")) { transitive false }
-        if (p == project(":common"))
-            shadowMe(project(":core")) { transitive false }
-    }
-
-    if (p == project(":core") || p == project(":fabric") || p == project(":forge")) {
-        shadowJar {
-            configurations = [project.configurations.shadowMe]
-
-            // Compression
-            relocate 'org.tukaani', 'shaded.tukaani'
-            relocate 'org.apache.commons.compress', 'shaded.apache.commons.compress'
-            // Toml & Json for config
-            relocate 'com.electronwill.nightconfig', 'shaded.electronwill.nightconfig'
-            relocate 'com.googlecode.json-simple', 'shaded.googlecode.json-simple' // FIXME: This is a massive library that is located in lots of different spots
-            // Theming
-            relocate 'com.formdev.flatlaf', 'shaded.formdev.flatlaf'
-            // svg
-            relocate 'com.kitfox.svg', 'shared.kitfox.svg'
-        }
-
-        remapJar {
-            input.set shadowJar.archiveFile
-            dependsOn shadowJar
+        // Add the core project as a dependency
+        if (p != project(":core")) {
+            shadowMe(project(":core")) {
+                // Remove Junit test libraries
+                exclude group: "org.junit.jupiter", module: "junit-jupiter"
+                exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
+            }
         }
     }
 
@@ -221,11 +226,10 @@ subprojects { p ->
                     'Main-Class': 'com.seibel.lod.core.JarMain' // When changing the main of the jar change this line
         }
     }
-    if (p == project(":core")) {
-        application {
-            mainClass.set('com.seibel.lod.core.JarMain')
-        }
-    }
+
+    // Run mergeJars when running build
+    build.finalizedBy(mergeJars)
+    assemble.finalizedBy(mergeJars)
 }
 
 allprojects { p ->
@@ -236,7 +240,6 @@ allprojects { p ->
     archivesBaseName = rootProject.archives_base_name
     version = rootProject.mod_version
     group = rootProject.maven_group
-
 
     repositories {
         mavenCentral()
@@ -270,6 +273,12 @@ allprojects { p ->
             }
         }
 
+        // Required for ModMenu
+        maven { url "https://maven.terraformersmc.com/" }
+
+        // Required for Mixins & VanillaGradle
+        maven { url "https://repo.spongepowered.org/maven/" }
+
         // These 2 are for importing mods that arnt on CursedForge, Modrinth, GitHub, GitLab or anywhere opensource
         flatDir {
             dirs "${rootDir}/mods/fabric"
@@ -284,7 +293,6 @@ allprojects { p ->
             }
         }
     }
-
 
     // Put stuff from gradle.properties into the mod info
     processResources {
@@ -324,71 +332,39 @@ allprojects { p ->
         }
     }
 
-
-    // Copies the correct accesswidener and renames it
-    task copyAccessWidener(type: Copy) {
-        from project(":common").file("src/main/resources/${rootProject.acsessWidenerVersion}.lod.accesswidener")
-        into(file(p.file("build/resources/main")))
-        rename "${rootProject.acsessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
-    }
-
     task copyCoreResources(type: Copy) {
         from fileTree(project(":core").file("src/main/resources"))
         into p.file("build/resources/main")
     }
 
-    task copyCommonResources(type: Copy) {
-        from fileTree(project(":common").file("src/main/resources"))
-        into p.file("build/resources/main")
-    }
-
-
-    // Is this necessary for running the fabric build
-    if (p == project(":common")) {
-        println "Copying [common/src/main/resources/${acsessWidenerVersion}.lod.accesswidner] to [fabric/build/resources/main]."
-
-        copy {
-            from project(":common").file("src/main/resources/${acsessWidenerVersion}.lod.accesswidener")
-            into project(":fabric").file("build/resources/main")
-            rename "${acsessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
-        }
-    }
-
     tasks.withType(JavaCompile) {
-        // Add Manifold Preprocessor
-//		def excapedMCVersion = rootProject.minecraft_version.replace(".", "_")
-//		options.compilerArgs += ['-Xplugin:Manifold', "-AMC_VERSION_${excapedMCVersion}"]
-//
-        //options.compilerArgs += ['-deprecation']
-        //options.compilerArgs += ['-verbose']
-        //options.compilerArgs += ['-Xlint:unchecked']
-        //options.compilerArgs += ['-Xdiags:verbose']
-        //options.compilerArgs += ['-Xprint']
-        //options.compilerArgs += ['-XprintProcessorInfo']
-        //options.compilerArgs += ['-XprintRounds']
-
-        // println options.compilerArgs
-
-        // Set the java version
         if (p != project(":core")) {
             options.release = rootProject.java_version as Integer
             options.compilerArgs += ['-Xplugin:Manifold']
         } else {
-            options.release = 8; // Core should use Java 8 no matter what
+//             options.release = 8; // Core should use Java 8 no matter what
+            // No it shouldn't cause it fails to find minecraft if it uses Java 8
+            options.release = rootProject.java_version as Integer
         }
-        options.encoding = "UTF-8" // Not requred but better to have
-
-        // TODO: make everything use java 8
-//        options.release = 8 // Use Java 8 for everything so back porting is easier
+        options.encoding = "UTF-8"
     }
 
     java {
         withSourcesJar()
     }
 
-    // Disable running the core and common
-    if (p == project(":core") || p == project(":common")) {
+    // Disable running common
+    if (p == project(":common")) {
         runClient.enabled = false
         runServer.enabled = false
     }
 }
+
+// Delete the merged folder when running clean
+task cleanMergedJars() {
+    def mergedFolder = file("Merged")
+    if (mergedFolder.exists()) {
+        delete mergedFolder
+    }
+}
+tasks.getByName("clean").finalizedBy(cleanMergedJars)

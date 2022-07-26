@@ -3,6 +3,7 @@ pluginManagement {
         maven { url "https://maven.fabricmc.net/" }
         maven { url "https://maven.architectury.dev/" }
         maven { url "https://maven.minecraftforge.net/" }
+        maven { url "https://repo.spongepowered.org/repository/maven-public/"}
         gradlePluginPortal()
     }
 }
@@ -10,6 +11,6 @@ pluginManagement {
 include("common")
 include("fabric")
 include("forge")
-include("core") // FIXME: There is a problem with the core module that stops us from upgrading architectury
+include("core")
 
 rootProject.name = "DistantHorizons"

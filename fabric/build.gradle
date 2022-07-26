@@ -1,26 +1,25 @@
-version = rootProject.mod_version+"-"+rootProject.minecraft_version+"-"+new Date().format("yyyy_MM_dd_HH_mm")
+version = rootProject.versionStr
 
 architectury {
     platformSetupLoomIde()
     fabric()
 }
 
+loom {
+    accessWidenerPath = project(":common").loom.accessWidenerPath
+}
+
 configurations {
-    // TODO: Add the commented things once we update architectury to 11 or higher
-//    common
-//    shadowCommon
+    common
+    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
     compileClasspath.extendsFrom common
     runtimeClasspath.extendsFrom common
     developmentFabric.extendsFrom common
 
+    // The addModJar basically embeds the mod to the built jar
     addModJar
     include.extendsFrom addModJar
     modImplementation.extendsFrom addModJar
-}
-
-repositories {
-    // Required for ModMenu
-    maven { url "https://maven.terraformersmc.com/" }
 }
 
 def addMod(path, enabled) {
@@ -90,13 +89,41 @@ dependencies {
     }
     */
 
-
-
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowMe(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+}
 
-    // Ran's scuffed 1.19 stuff
-    shadowMe files(project(":core").file("build/libs/DistantHorizons-${rootProject.mod_version}.jar"))
+shadowJar {
+    exclude "architectury.common.json"
+
+    configurations = [project.configurations.shadowCommon, project.configurations.shadowMe]
+
+    // Compression
+    relocate 'org.tukaani', 'distanthorizons.libraries.tukaani'
+    relocate 'org.apache.commons.compress', 'distanthorizons.libraries.apache.commons.compress'
+
+    // Toml & Json for config
+    relocate 'com.electronwill.nightconfig', 'distanthorizons.libraries.electronwill.nightconfig'
+
+    // FIXME: This is a massive library that is located in lots of different spots
+    relocate 'com.googlecode.json-simple', 'distanthorizons.libraries.googlecode.json-simple'
+    relocate 'org.json.simple', 'distanthorizons.libraries.json.simple'
+
+    // Theming
+    relocate 'com.formdev.flatlaf', 'distanthorizons.libraries.formdev.flatlaf'
+
+    // SVG
+    relocate 'com.kitfox.svg', 'distanthorizons.libraries.kitfox.svg'
+
+    classifier "dev-shadow"
+    mergeServiceFiles()
+}
+
+remapJar {
+    injectAccessWidener = true
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+    classifier null
 }
 
 task deleteResources(type: Delete) {
@@ -104,36 +131,13 @@ task deleteResources(type: Delete) {
 }
 
 processResources {
-    dependsOn(copyAccessWidener)
     dependsOn(copyCoreResources)
-    dependsOn(copyCommonResources)
 }
-
-// Ran's scuffed 1.19 stuff
-jar.dependsOn(project(":core").remapJar)
-remapSourcesJar.dependsOn(project(":core").remapJar)
 
 runClient {
-    dependsOn(copyAccessWidener)
     dependsOn(copyCoreResources)
-    dependsOn(copyCommonResources)
     jvmArgs "-XX:-OmitStackTraceInFastThrow"
     finalizedBy(deleteResources)
-}
-
-shadowJar {
-    configurations = [project.configurations.shadowMe]
-
-    // Our own code
-    relocate 'com.seibel.lod.common', 'fabric.com.seibel.lod.common'
-
-    classifier "dev-shadow"
-}
-
-remapJar {
-    input.set shadowJar.archiveFile
-    dependsOn shadowJar
-    classifier null
 }
 
 jar {

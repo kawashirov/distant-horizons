@@ -100,15 +100,14 @@ If running in an IDE, to ensure the IDE noticed the version change, run a gradle
 1. Download and extract the zip of the project
 2. Download the core from https://gitlab.com/jeseibel/distant-horizons-core and extract into a folder called `core`
 3. Open a command line in the project folder
-4. Run the commands: `./gradlew assemble` and `./gradlew mergeJars`
+4. Run the commands: `./gradlew assemble`
 6. The compiled jar file will be in the folder `Merged`
 
 **If in terminal:**
 1. `git clone --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
 2. `cd minecraft-lod-mod`
 3. `./gradlew assemble`
-4. `./gradlew mergeJars`
-5. The compiled jar file will be in the folder `Merged`
+4. The compiled jar file will be in the folder `Merged`
 
 >Note: You can add the arg: `-PmcVer=1.?` to tell gradle to build a selected MC version instead of having to manually modify the `gradle.properties` file.
 
@@ -151,8 +150,8 @@ To build all versions: `./buildAll` (all builds will end up in the `Merged` fold
 XZ for Java (data compression)\
 https://tukaani.org/xz/java.html
 
-DHJarMerger (To merge multiple mod versions into one jar)\
-https://github.com/Ran-helo/DHJarMerger
+Forgix (To merge multiple mod versions into one jar) [_Used to be_ [_DHJarMerger_](https://github.com/Ran-helo/DHJarMerger)]\
+https://github.com/PacifistMC/Forgix
 
 Toml for Java (config handling)\
 https://github.com/TheElectronWill/night-config

@@ -4,7 +4,6 @@ buildVersion()
 {
     ./gradlew clean -PmcVer=$1 --no-daemon
     ./gradlew build -PmcVer=$1 --no-daemon
-    ./gradlew mergeJars -PmcVer=$1 --no-daemon
 }
 
 buildVersion 1.19
