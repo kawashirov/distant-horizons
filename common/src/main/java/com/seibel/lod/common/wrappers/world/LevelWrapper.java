@@ -207,4 +207,9 @@ public class LevelWrapper implements ILevelWrapper
         ChunkSource source = level.getChunkSource();
         return source.hasChunk(chunkX, chunkZ);
     }
+
+    @Override
+    public String toString() {
+        return "Wrapped{" + level.toString() + "@" + getDimensionType().getDimensionName() + "}";
+    }
 }
