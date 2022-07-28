@@ -32,7 +32,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.ChunkPos;
-#if PRE_MC_1_19_1
+#if PRE_MC_1_19
 import net.minecraft.world.level.StructureFeatureManager;
 #endif
 import net.minecraft.world.level.chunk.ChunkAccess;

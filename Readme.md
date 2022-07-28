@@ -16,6 +16,7 @@ If you want to see a quick demo, check out a video covering the mod here:
 ### Versions
 
 This branch is for these versions of Minecraft
+- 1.19.1
 - 1.19
 - 1.18.2
 - 1.18.1 & 1.18
@@ -25,6 +26,12 @@ This branch is for these versions of Minecraft
 Architectury version: 3.4-SNAPSHOT\
 Architectury loom version: 0.12.0-SNAPSHOT\
 Java Compiler plugin: Manifold Preprocessor
+
+#### 1.19.1 mods
+Forge version: 42.0.0\
+Fabric version: 0.14.8\
+Fabric API version: 0.58.5+1.19.1\
+Modmenu version: 4.0.0
 
 #### 1.19 mods
 Forge version: 41.0.94\
@@ -66,6 +73,7 @@ This version has been confirmed to work in IDE and Retail Minecraft with ether t
 
 #### Nightlly builds
 This mod has an autobuild system to automatically build the mod on each commit
+- 1.19.1:   https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/1.6.4a_dev/download?job=build_19_1
 - 1.19:   https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/1.6.4a_dev/download?job=build_19
 - 1.18.2: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/1.6.4a_dev/download?job=build_18_2
 - 1.18.1: https://gitlab.com/jeseibel/minecraft-lod-mod/-/jobs/artifacts/1.6.4a_dev/download?job=build_18_1
@@ -93,7 +101,8 @@ https://fabricmc.net/wiki/tutorial:setup
 4. Import the project into eclipse
 
 ## Switching Versions
-This branch support 5 built versions:
+This branch support 6 built versions:
+ - 1.19.1
  - 1.19
  - 1.18.2
  - 1.18.1 (which also runs on 1.18)

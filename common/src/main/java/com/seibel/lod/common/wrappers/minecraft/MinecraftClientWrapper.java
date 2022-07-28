@@ -55,7 +55,7 @@ import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-#if PRE_MC_1_19_1
+#if PRE_MC_1_19
 import net.minecraft.network.chat.TextComponent;
 #endif
 import net.minecraft.network.chat.Component;
@@ -368,7 +368,7 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper
     @Override
     public void sendChatMessage(String string)
     {
-        #if PRE_MC_1_19_1
+        #if PRE_MC_1_19
         getPlayer().sendMessage(new TextComponent(string), getPlayer().getUUID());
         #else
         getPlayer().sendSystemMessage(Component.translatable(string));

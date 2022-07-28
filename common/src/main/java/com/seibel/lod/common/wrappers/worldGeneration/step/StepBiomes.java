@@ -27,7 +27,7 @@ import com.seibel.lod.common.wrappers.worldGeneration.ThreadedParameters;
 
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.WorldGenRegion;
-#if PRE_MC_1_19_1
+#if PRE_MC_1_19
 import net.minecraft.world.level.StructureFeatureManager;
 #endif
 import net.minecraft.world.level.biome.Biome;
@@ -73,7 +73,7 @@ public final class StepBiomes {
 			// System.out.println("StepBiomes: "+chunk.getPos());
 			#if PRE_MC_1_18_1
 			environment.params.generator.createBiomes(environment.params.biomes, chunk);
-			#elif PRE_MC_1_19_1
+			#elif PRE_MC_1_19
 			chunk = environment.joinSync(environment.params.generator.createBiomes(environment.params.biomes, Runnable::run, Blender.of(worldGenRegion),
 					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
 			#else

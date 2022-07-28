@@ -367,7 +367,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		CompoundTag chunkData = null;
 		try
 		{
-			#if POST_MC_1_19_1
+			#if POST_MC_1_19
 			chunkData = level.getChunkSource().chunkMap.readChunk(chunkPos).get().orElse(null);
 			#else
 			chunkData = level.getChunkSource().chunkMap.readChunk(chunkPos);

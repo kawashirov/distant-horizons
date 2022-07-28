@@ -68,7 +68,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
-#if POST_MC_1_19_1
+#if POST_MC_1_19
 import net.minecraft.util.RandomSource;
 #endif
 
@@ -80,7 +80,7 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 
 	public static final int FLOWER_COLOR_SCALE = 5;
 
-	#if PRE_MC_1_19_1
+	#if PRE_MC_1_19
 	public static final Random random = new Random(0);
 	#else
 	public static final RandomSource random = RandomSource.create();

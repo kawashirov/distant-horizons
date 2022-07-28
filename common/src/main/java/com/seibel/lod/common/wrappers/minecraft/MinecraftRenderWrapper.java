@@ -133,7 +133,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public double getGamma()
 	{
-		#if PRE_MC_1_19_1
+		#if PRE_MC_1_19
 		return MC.options.gamma;
 		#else
 		return MC.options.gamma().get();

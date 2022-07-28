@@ -46,7 +46,7 @@ import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.LevelHeightAccessor;
 #endif
 import net.minecraft.world.level.LightLayer;
-#if PRE_MC_1_19_1
+#if PRE_MC_1_19
 import net.minecraft.world.level.StructureFeatureManager;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 #endif
@@ -292,7 +292,7 @@ public class LightedWorldGenRegion extends WorldGenRegion {
 	
 	public int calculateBlockTint(BlockPos blockPos, ColorResolver colorResolver)
 	{
-		#if PRE_MC_1_19_1
+		#if PRE_MC_1_19
 		int i = (Minecraft.getInstance()).options.biomeBlendRadius;
 		#else
 		int i = (Minecraft.getInstance()).options.biomeBlendRadius().get();

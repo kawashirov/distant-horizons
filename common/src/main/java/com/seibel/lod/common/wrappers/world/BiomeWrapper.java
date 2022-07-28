@@ -33,7 +33,7 @@ import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 
 import net.minecraft.data.BuiltinRegistries;
-#if POST_MC_1_19_1
+#if POST_MC_1_19
 import net.minecraft.data.worldgen.biome.EndBiomes;
 import net.minecraft.data.worldgen.biome.NetherBiomes;
 #endif
@@ -71,7 +71,7 @@ public class BiomeWrapper implements IBiomeWrapper
     }
 
     /** Returns a color int for the given biome. */
-    #if PRE_MC_1_19_1
+    #if PRE_MC_1_19
     @Override
     public int getColorForBiome(int x, int z)
     {

@@ -107,7 +107,7 @@ dependencies {
         // Mojmap mappings
         officialMojangMappings()
         // Parchment mappings (it adds parameter mappings & javadoc)
-        if (rootProject.minecraft_version != "1.19.1")
+        if (rootProject.minecraft_version != "1.19" && rootProject.minecraft_version != "1.19.1")
             parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
         else
             parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip") // As 1.19 dosnt have parchment mappings yet, we use 1.18.2 mapping
