@@ -49,14 +49,14 @@ import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.ExtensionPoint;
 #elif MC_1_17_1
 import net.minecraftforge.fmlclient.ConfigGuiHandler;
-#elif POST_MC_1_19
+#elif POST_MC_1_19_1
 import net.minecraftforge.client.ConfigScreenHandler;
 #else // 1.18+ untill 1.19
 import net.minecraftforge.client.ConfigGuiHandler;
 #endif
 
 // these imports change due to forge refactoring classes in 1.19
-#if POST_MC_1_19
+#if POST_MC_1_19_1
 import net.minecraft.util.RandomSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraftforge.client.model.data.ModelData;
@@ -109,7 +109,7 @@ public class ForgeMain implements LodForgeMethodCaller
 		#if PRE_MC_1_17_1
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY,
 				() -> (client, parent) -> ConfigGui.getScreen(parent, ""));
-		#elif POST_MC_1_19
+		#elif POST_MC_1_19_1
 		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
 				() -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> ConfigGui.getScreen(parent, "")));
 		#else
@@ -120,21 +120,21 @@ public class ForgeMain implements LodForgeMethodCaller
 		MinecraftForge.EVENT_BUS.register(forgeClientProxy);
 	}
 
-	#if PRE_MC_1_19
+	#if PRE_MC_1_19_1
 	private final ModelDataMap modelData = new ModelDataMap.Builder().build();
 	#else
 	private final ModelData modelData = ModelData.EMPTY;
 	#endif
 	
 	@Override
-	#if PRE_MC_1_19
+	#if PRE_MC_1_19_1
 	public List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, Random random) {
 		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, modelData);
 	}
 	#else
 	public List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, RandomSource random)
 	{
-		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, modelData #if POST_MC_1_19, RenderType.solid() #endif);
+		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, modelData #if POST_MC_1_19_1, RenderType.solid() #endif);
 	}
 	#endif
 

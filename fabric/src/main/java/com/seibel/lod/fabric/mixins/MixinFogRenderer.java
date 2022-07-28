@@ -49,7 +49,7 @@ public class MixinFogRenderer {
 	private static final float A_EVEN_LARGER_VALUE = 42069420694206942069.F;
 
 	@Inject(at = @At("RETURN"), method = "setupFog")
-	#if PRE_MC_1_19
+	#if PRE_MC_1_19_1
 	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, CallbackInfo callback) {
 	#else
 	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, float g, CallbackInfo callback) {

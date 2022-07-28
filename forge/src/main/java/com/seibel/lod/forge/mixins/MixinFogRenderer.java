@@ -54,7 +54,7 @@ public class MixinFogRenderer
 			method = "setupFog(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/FogRenderer$FogMode;FZF)V",
 			remap = // Remap messiness due to this being added by forge.
 					#if MC_1_16_5 true
-					#elif PRE_MC_1_19 false
+					#elif PRE_MC_1_19_1 false
 					#else true #endif
 	)
 	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, float partTick, CallbackInfo callback)

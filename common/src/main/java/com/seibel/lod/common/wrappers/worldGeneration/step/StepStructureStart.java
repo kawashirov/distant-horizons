@@ -67,17 +67,17 @@ public final class StepStructureStart {
 			chunksToDo.add(chunk);
 		}
 
-		#if PRE_MC_1_19
+		#if PRE_MC_1_19_1
 		if (environment.params.worldGenSettings.generateFeatures()) {
-		#elif POST_MC_1_19
+		#elif POST_MC_1_19_1
 		if (environment.params.worldGenSettings.generateStructures()) {
 		#endif
 			for (ChunkAccess chunk : chunksToDo) {
 				// System.out.println("StepStructureStart: "+chunk.getPos());
-				#if PRE_MC_1_19
+				#if PRE_MC_1_19_1
 				environment.params.generator.createStructures(environment.params.registry, tParams.structFeat, chunk, environment.params.structures,
 						environment.params.worldSeed);
-				#elif POST_MC_1_19
+				#elif POST_MC_1_19_1
 				environment.params.generator.createStructures(environment.params.registry, environment.params.randomState, tParams.structFeat, chunk, environment.params.structures,
 						environment.params.worldSeed);
 				#endif

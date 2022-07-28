@@ -47,7 +47,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-#if PRE_MC_1_19
+#if PRE_MC_1_19_1
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 #endif
@@ -111,7 +111,7 @@ public abstract class ConfigGui
 		Object value;
 		String tempValue;
 		boolean inLimits = true;
-		#if PRE_MC_1_19
+		#if PRE_MC_1_19_1
 		TranslatableComponent name;
 		#else
 		Component name;
@@ -212,7 +212,7 @@ public abstract class ConfigGui
 		if (entry != null)
 		{
 			if (!entry.name().equals(""))
-				#if PRE_MC_1_19
+				#if PRE_MC_1_19_1
 				info.name = new TranslatableComponent(entry.name());
 				#else
 				info.name = Component.translatable(entry.name());
@@ -237,7 +237,7 @@ public abstract class ConfigGui
 			else if (fieldClass == boolean.class)
 			{
 				// For boolean
-				#if PRE_MC_1_19
+				#if PRE_MC_1_19_1
 				Function<Object, Component> func = value -> new TextComponent((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
 				#else
 				Function<Object, Component> func = value -> Component.translatable((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
@@ -251,7 +251,7 @@ public abstract class ConfigGui
 			{
 				// For enum
 				List<?> values = Arrays.asList(field.getType().getEnumConstants());
-				#if PRE_MC_1_19
+				#if PRE_MC_1_19_1
 				Function<Object, Component> func = value -> new TranslatableComponent(MOD_NAME + ".config." + "enum." + fieldClass.getSimpleName() + "." + info.value.toString());
 				#else
 				Function<Object, Component> func = value -> Component.translatable(MOD_NAME + ".config." + "enum." + fieldClass.getSimpleName() + "." + info.value.toString());
@@ -266,7 +266,7 @@ public abstract class ConfigGui
 		else if (screenEntry != null)
 		{
 			if (!screenEntry.name().equals(""))
-				#if PRE_MC_1_19
+				#if PRE_MC_1_19_1
 				info.name = new TranslatableComponent(screenEntry.name());
 				#else
 				info.name = Component.translatable(screenEntry.name());
@@ -299,7 +299,7 @@ public abstract class ConfigGui
 			{
 				value = func.apply(stringValue);
 				inLimits = value.doubleValue() >= minValue && value.doubleValue() <= maxValue;
-				#if PRE_MC_1_19
+				#if PRE_MC_1_19_1
 				info.error = inLimits ? null : new AbstractMap.SimpleEntry<>(editBox, new TextComponent(value.doubleValue() < minValue ?
 				#else
 				info.error = inLimits ? null : new AbstractMap.SimpleEntry<>(editBox, Component.translatable(value.doubleValue() < minValue ?
@@ -515,7 +515,7 @@ public abstract class ConfigGui
 	{
 		protected ConfigScreen(Screen parent, String category)
 		{
-			#if PRE_MC_1_19
+			#if PRE_MC_1_19_1
 			super(new TranslatableComponent(
 			#else
 			super(Component.translatable(
@@ -586,7 +586,7 @@ public abstract class ConfigGui
 			{
 				if (info.category.matches(category) && !info.hideOption)
 				{
-					#if PRE_MC_1_19
+					#if PRE_MC_1_19_1
 					TranslatableComponent name = (info.name == null ? new TranslatableComponent(translationPrefix + (!info.category.isEmpty() ? info.category + "." : "") + info.field.getName()) : info.name);
 					Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - info.width - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, new TextComponent("Reset").withStyle(ChatFormatting.RED), (button -> {
 					#else
@@ -604,7 +604,7 @@ public abstract class ConfigGui
 					{
 						Map.Entry<Button.OnPress, Function<Object, Component>> widget = (Map.Entry<Button.OnPress, Function<Object, Component>>) info.widget;
 						if (info.field.getType().isEnum())
-							#if PRE_MC_1_19
+							#if PRE_MC_1_19_1
 							widget.setValue(value -> new TranslatableComponent(translationPrefix + "enum." + info.field.getType().getSimpleName() + "." + info.value.toString()));
 							#else
 							widget.setValue(value -> Component.translatable(translationPrefix + "enum." + info.field.getType().getSimpleName() + "." + info.value.toString()));
@@ -624,7 +624,7 @@ public abstract class ConfigGui
 						Predicate<String> processor = ((BiFunction<EditBox, Button, Predicate<String>>) info.widget).apply(widget, done);
 						widget.setFilter(processor);
 						resetButton.setWidth(20);
-                        #if PRE_MC_1_19
+                        #if PRE_MC_1_19_1
                         resetButton.setMessage(new TextComponent("R").withStyle(ChatFormatting.RED));
                         Button cycleButton = new Button(this.width - 185, 0, 20, 20, new TextComponent(String.valueOf(info.index)).withStyle(ChatFormatting.GOLD), (button -> {
                         #else
@@ -679,7 +679,7 @@ public abstract class ConfigGui
 					if (list.getHoveredButton(mouseX,mouseY).isPresent()) {
 						AbstractWidget buttonWidget = list.getHoveredButton(mouseX,mouseY).get();
 						Component text = ButtonEntry.buttonsWithText.get(buttonWidget);
-						#if PRE_MC_1_19
+						#if PRE_MC_1_19_1
 						TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName());
 						#else
 						Component name = Component.translatable(this.translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.field.getName());
@@ -690,7 +690,7 @@ public abstract class ConfigGui
 						else if (I18n.exists(key) && (text != null && text.equals(name))) {
 							List<Component> list = new ArrayList<>();
 							for (String str : I18n.get(key).split("\n"))
-								#if PRE_MC_1_19
+								#if PRE_MC_1_19_1
 								list.add(new TextComponent(str));
 								#else
 								list.add(Component.translatable(str));

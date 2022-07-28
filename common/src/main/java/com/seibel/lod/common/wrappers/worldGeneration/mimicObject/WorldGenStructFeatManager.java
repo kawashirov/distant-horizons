@@ -41,7 +41,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
-#if PRE_MC_1_19
+#if PRE_MC_1_19_1
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.StructureFeatureManager;
@@ -55,7 +55,7 @@ import net.minecraft.world.level.levelgen.structure.StructureCheck;
 #endif
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 
-#if PRE_MC_1_19
+#if PRE_MC_1_19_1
 public class WorldGenStructFeatManager extends StructureFeatureManager {
 #else
 public class WorldGenStructFeatManager extends StructureManager {
@@ -132,7 +132,7 @@ public class WorldGenStructFeatManager extends StructureManager {
 			return builder.build();
 		}
 		#else
-		#if PRE_MC_1_19
+		#if PRE_MC_1_19_1
 		@Override
 		public List<StructureStart> startsForFeature(SectionPos sectionPos, Predicate<ConfiguredStructureFeature<?, ?>> predicate) {
 			ChunkAccess chunk = _getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES);

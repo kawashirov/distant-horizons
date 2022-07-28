@@ -1,6 +1,6 @@
 
 modLoader="javafml" #//mandatory
-loaderVersion="[36,42)" # // mandatory. This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+loaderVersion="[40,43)" # // mandatory. This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
 license="GNU GPLv3"
 issueTrackerURL="${issues}"
 
@@ -15,7 +15,7 @@ issueTrackerURL="${issues}"
 	description= "${description}" #//mandatory. The description text for the mod
 	logoFile="logo.png"
 	catalogueImageIcon="icon.png"
-	credits="Leonardo, Cola, Ran, CoolGi, and Leetom. Without their hard work, Distant Horizons wouldn't be the mod it is today."
+	credits="Leonardo, Cola, Ran, coolGi, and Leetom. Without their hard work, Distant Horizons wouldn't be the mod it is today."
 	#// if not set defaults to "false"
 	clientSideOnly="true"
 	#// if not set defaults to "BOTH"

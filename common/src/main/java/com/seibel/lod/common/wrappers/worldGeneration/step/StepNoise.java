@@ -34,7 +34,7 @@ import net.minecraft.util.Mth;
 #if POST_MC_1_17_1
 import net.minecraft.world.level.LevelHeightAccessor;
 #endif
-#if PRE_MC_1_19
+#if PRE_MC_1_19_1
 import net.minecraft.world.level.StructureFeatureManager;
 #endif
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -81,7 +81,7 @@ public final class StepNoise {
 			#elif PRE_MC_1_18_1
 			chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run,
 					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
-			#elif PRE_MC_1_19
+			#elif PRE_MC_1_19_1
 			chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion),
 					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
 			#else

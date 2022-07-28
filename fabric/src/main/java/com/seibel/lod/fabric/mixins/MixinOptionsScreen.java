@@ -27,7 +27,7 @@ import com.seibel.lod.core.wrapperInterfaces.config.ILodConfigWrapperSingleton;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-#if PRE_MC_1_19
+#if PRE_MC_1_19_1
 import net.minecraft.network.chat.TranslatableComponent;
 #endif
 import net.minecraft.resources.ResourceLocation;
@@ -69,7 +69,7 @@ public class MixinOptionsScreen extends Screen {
                 // For now it goes to the client option by default
                 (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, "client")),
                 // Add a title to the screen
-                #if PRE_MC_1_19
+                #if PRE_MC_1_19_1
                 new TranslatableComponent("text.autoconfig." + ModInfo.ID + ".title")));
                 #else
                 Component.translatable("text.autoconfig." + ModInfo.ID + ".title")));

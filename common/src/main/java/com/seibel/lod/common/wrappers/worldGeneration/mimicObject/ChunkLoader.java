@@ -52,7 +52,7 @@ import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import net.minecraft.world.level.levelgen.Heightmap;
 #if POST_MC_1_18_1
 import net.minecraft.world.level.levelgen.blending.BlendingData;
-#if PRE_MC_1_19
+#if PRE_MC_1_19_1
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 #endif
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -62,7 +62,7 @@ import net.minecraft.world.ticks.LevelChunkTicks;
 #if POST_MC_1_18_2
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
-#if PRE_MC_1_19
+#if PRE_MC_1_19_1
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 #endif
 #endif
@@ -74,7 +74,7 @@ import org.apache.logging.log4j.Logger;
 
 public class ChunkLoader
 {
-	#if POST_MC_1_19
+	#if POST_MC_1_19_1
 	private static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codecRW(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES, Blocks.AIR.defaultBlockState());
 	#elif POST_MC_1_18_1
 	private static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codec(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES, Blocks.AIR.defaultBlockState());
@@ -107,7 +107,7 @@ public class ChunkLoader
 			#if PRE_MC_1_18_2
 			Codec<PalettedContainer<Biome>> biomeCodec = PalettedContainer.codec(
 					biomes, biomes.byNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getOrThrow(Biomes.PLAINS));
-			#elif PRE_MC_1_19
+			#elif PRE_MC_1_19_1
 			Codec<PalettedContainer<Holder<Biome>>> biomeCodec = PalettedContainer.codec(
 					biomes.asHolderIdMap(), biomes.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getHolderOrThrow(Biomes.PLAINS));
 			#else
@@ -231,7 +231,7 @@ public class ChunkLoader
 			return null;
 		#else
 		BlendingData blendingData = readBlendingData(tagLevel);
-		#if PRE_MC_1_19
+		#if PRE_MC_1_19_1
 		if (chunkType == ChunkStatus.ChunkType.PROTOCHUNK && (blendingData == null || !blendingData.oldNoise()))
 			return null;
 		#else
