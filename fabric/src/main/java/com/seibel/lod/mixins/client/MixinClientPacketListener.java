@@ -1,6 +1,6 @@
 package com.seibel.lod.mixins.client;
 
-import com.seibel.lod.common.wrappers.world.LevelWrapper;
+import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.lod.core.api.internal.a7.ClientApi;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
@@ -23,25 +23,25 @@ public class MixinClientPacketListener {
      */
     @Inject(method = "handleLogin", at = @At("HEAD"))
     void onHandleLoginStart(CallbackInfo ci) {
-        if (level != null) ClientApi.INSTANCE.clientLevelUnloadEvent(LevelWrapper.getWorldWrapper(level));
+        if (level != null) ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper(level));
     }
 
     @Inject(method = "handleLogin", at = @At("RETURN"))
     void onHandleLoginEnd(CallbackInfo ci) {
-        ClientApi.INSTANCE.clientLevelLoadEvent(LevelWrapper.getWorldWrapper(level));
+        ClientApi.INSTANCE.clientLevelLoadEvent(ClientLevelWrapper.getWrapper(level));
     }
 
     @Inject(method = "handleRespawn", at = @At("HEAD"))
     void onHandleRespawnStart(CallbackInfo ci) {
-        ClientApi.INSTANCE.clientLevelUnloadEvent(LevelWrapper.getWorldWrapper(level));
+        ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper(level));
     }
     @Inject(method = "handleRespawn", at = @At("RETURN"))
     void onHandleRespawnEnd(CallbackInfo ci) {
-        ClientApi.INSTANCE.clientLevelLoadEvent(LevelWrapper.getWorldWrapper(level));
+        ClientApi.INSTANCE.clientLevelLoadEvent(ClientLevelWrapper.getWrapper(level));
     }
 
     @Inject(method = "cleanup", at = @At("HEAD"))
     void onCleanupStart(CallbackInfo ci) {
-        if (level != null) ClientApi.INSTANCE.clientLevelUnloadEvent(LevelWrapper.getWorldWrapper(level));
+        if (level != null) ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper(level));
     }
 }

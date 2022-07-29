@@ -1,0 +1,177 @@
+/*
+ *    This file is part of the Distant Horizons mod (formerly the LOD Mod),
+ *    licensed under the GNU LGPL v3 License.
+ *
+ *    Copyright (C) 2020-2022  James Seibel
+ *
+ *    This program is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU Lesser General Public License as published by
+ *    the Free Software Foundation, version 3.
+ *
+ *    This program is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU Lesser General Public License for more details.
+ *
+ *    You should have received a copy of the GNU Lesser General Public License
+ *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.seibel.lod.common.wrappers.world;
+
+import java.io.File;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
+import com.seibel.lod.core.api.internal.a7.ServerApi;
+import com.seibel.lod.core.objects.DHBlockPos;
+import com.seibel.lod.core.objects.DHChunkPos;
+import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
+import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
+import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
+import com.seibel.lod.core.wrapperInterfaces.world.IClientLevelWrapper;
+import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
+
+import com.seibel.lod.core.wrapperInterfaces.world.IServerLevelWrapper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkSource;
+import net.minecraft.world.level.chunk.ChunkStatus;
+
+import org.jetbrains.annotations.Nullable;
+
+/**
+ * @author James Seibel
+ * @author ??
+ * @version 11-21-2021
+ */
+public class ServerLevelWrapper implements IServerLevelWrapper
+{
+    private static final ConcurrentHashMap<ServerLevel, ServerLevelWrapper>
+            levelWrapperMap = new ConcurrentHashMap<>();
+
+    public static ServerLevelWrapper getWrapper(ServerLevel level)
+    {
+        return levelWrapperMap.computeIfAbsent(level, ServerLevelWrapper::new);
+    }
+    public static void closeWrapper(ServerLevel level)
+    {
+        levelWrapperMap.remove(level);
+    }
+    public static void cleanCheck() {
+        if (!levelWrapperMap.isEmpty()) {
+            ServerApi.LOGGER.warn("{} server levels havn't been freed!", levelWrapperMap.size());
+            levelWrapperMap.clear();
+        }
+    }
+
+    public ServerLevelWrapper(ServerLevel level)
+    {
+        this.level = level;
+    }
+    final ServerLevel level;
+    @Nullable
+    @Override
+    public IClientLevelWrapper tryGetClientSideWrapper() {
+        try {
+            MinecraftClientWrapper client = MinecraftClientWrapper.INSTANCE;
+            return ClientLevelWrapper.getWrapper(client.mc.level);
+        } catch (Exception e) {
+            ServerApi.LOGGER.error("Failed to get client side wrapper for server level {}.", level);
+            return null;
+        }
+    }
+
+    @Override
+    public File getSaveFolder()
+    {
+        return level.getChunkSource().getDataStorage().dataFolder;
+    }
+
+    @Override
+    public DimensionTypeWrapper getDimensionType()
+    {
+        return DimensionTypeWrapper.getDimensionTypeWrapper(level.dimensionType());
+    }
+    
+    @Override
+    public int getBlockLight(int x, int y, int z)
+    {
+        return level.getBrightness(LightLayer.BLOCK, new BlockPos(x,y,z));
+    }
+    
+    @Override
+    public int getSkyLight(int x, int y, int z)
+    {
+        return level.getBrightness(LightLayer.SKY, new BlockPos(x,y,z));
+    }
+    
+    public ServerLevel getLevel()
+    {
+        return level;
+    }
+    
+    @Override
+    public boolean hasCeiling()
+    {
+        return level.dimensionType().hasCeiling();
+    }
+    
+    @Override
+    public boolean hasSkyLight()
+    {
+        return level.dimensionType().hasSkyLight();
+    }
+    
+    @Override
+    public int getHeight()
+    {
+        return level.getHeight();
+    }
+    
+    @Override
+    public short getMinHeight()
+    {
+        #if PRE_MC_1_17_1
+        return (short) 0;
+        #else
+        return (short) level.getMinBuildHeight();
+        #endif
+    }
+    @Override
+    public IChunkWrapper tryGetChunk(DHChunkPos pos) {
+        ChunkAccess chunk = level.getChunk(pos.getX(), pos.getZ(), ChunkStatus.EMPTY, false);
+        if (chunk == null) return null;
+        return new ChunkWrapper(chunk, level);
+    }
+
+    @Override
+    public boolean hasChunkLoaded(int chunkX, int chunkZ) {
+        // world.hasChunk(chunkX, chunkZ); THIS DOES NOT WORK FOR CLIENT LEVEL CAUSE MOJANG ALWAYS RETURN TRUE FOR THAT!
+        ChunkSource source = level.getChunkSource();
+        return source.hasChunk(chunkX, chunkZ);
+    }
+
+    @Override
+    public IBlockStateWrapper getBlockState(DHBlockPos pos) {
+        return null;
+    }
+
+    @Override
+    public IBiomeWrapper getBiome(DHBlockPos pos) {
+        return null;
+    }
+
+    @Override
+    public ServerLevel unwrapLevel()
+    {
+        return level;
+    }
+
+    @Override
+    public String toString() {
+        return "Wrapped{" + level.toString() + "@" + getDimensionType().getDimensionName() + "}";
+    }
+}

@@ -2,9 +2,11 @@ package com.seibel.lod;
 
 import com.seibel.lod.common.networking.Networking;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
-import com.seibel.lod.common.wrappers.world.LevelWrapper;
+import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
+import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.core.api.internal.a7.ServerApi;
+import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
@@ -13,8 +15,10 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.Logger;
@@ -46,8 +50,11 @@ public class FabricServerProxy {
         //FIXME: This may cause init issue...
         return !(Minecraft.getInstance().screen instanceof TitleScreen);
     }
-    private LevelWrapper getLevelWrapper(Level level) {
-        return LevelWrapper.getWorldWrapper(level);
+    private ClientLevelWrapper getLevelWrapper(ClientLevel level) {
+        return ClientLevelWrapper.getWrapper(level);
+    }
+    private ServerLevelWrapper getLevelWrapper(ServerLevel level) {
+        return ServerLevelWrapper.getWrapper(level);
     }
     /**
      * Registers Fabric Events
@@ -89,7 +96,7 @@ public class FabricServerProxy {
         // ServerChunkLoadEvent
         ServerChunkEvents.CHUNK_LOAD.register((server, chunk)
                 -> {
-            ILevelWrapper level = getLevelWrapper(chunk.getLevel());
+            ILevelWrapper level = getLevelWrapper((ServerLevel) chunk.getLevel());
             if (isValidTime()) ServerApi.INSTANCE.serverChunkLoadEvent(
                     new ChunkWrapper(chunk, chunk.getLevel()),
                     level);

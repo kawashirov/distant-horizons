@@ -20,7 +20,8 @@
 package com.seibel.lod.mixins.client;
 
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
-import com.seibel.lod.common.wrappers.world.LevelWrapper;
+import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
+import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.lod.core.api.internal.a7.ClientApi;
 import net.minecraft.client.multiplayer.ClientLevel;
 #if POST_MC_1_18_2
@@ -54,7 +55,7 @@ public class MixinClientLevel {
     	ClientLevel l = (ClientLevel) (Object) this;
     	LevelChunk chunk = l.getChunkSource().getChunk(x, z, false);
     	if (chunk!=null&& !chunk.isClientLightReady())
-            ClientApi.INSTANCE.clientChunkLoadEvent(new ChunkWrapper(chunk, l), LevelWrapper.getWorldWrapper(l));
+            ClientApi.INSTANCE.clientChunkLoadEvent(new ChunkWrapper(chunk, l), ClientLevelWrapper.getWrapper(l));
     }
 	#endif
 }

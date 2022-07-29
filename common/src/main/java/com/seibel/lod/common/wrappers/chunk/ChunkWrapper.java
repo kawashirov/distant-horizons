@@ -25,13 +25,12 @@ import com.seibel.lod.core.enums.ELodDirection;
 import com.seibel.lod.core.util.LevelPosUtil;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockDetailWrapper;
-import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 
 import com.seibel.lod.common.wrappers.WrapperUtil;
 import com.seibel.lod.common.wrappers.block.BlockDetailMap;
-import com.seibel.lod.common.wrappers.world.BiomeWrapper;
+import com.seibel.lod.common.wrappers.block.BiomeWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
 
 import net.minecraft.core.BlockPos;
@@ -254,6 +253,6 @@ public class ChunkWrapper implements IChunkWrapper
 
 	@Override
 	public BlockStateWrapper getBlockState(int x, int y, int z) {
-		return new BlockStateWrapper(chunk.getBlockState(new BlockPos(x,y,z)));
+		return BlockStateWrapper.fromBlockState(chunk.getBlockState(new BlockPos(x,y,z)));
 	}
 }

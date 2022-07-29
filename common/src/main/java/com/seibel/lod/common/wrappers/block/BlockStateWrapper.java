@@ -5,12 +5,24 @@ import com.mojang.serialization.JsonOps;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class BlockStateWrapper implements IBlockStateWrapper {
     public static final BlockStateWrapper AIR = new BlockStateWrapper(null);
+
+    public static ConcurrentHashMap<BlockState, BlockStateWrapper> cache = new ConcurrentHashMap<>();
+
+    public static BlockStateWrapper fromBlockState(BlockState blockState) {
+        if (blockState == null || blockState.isAir()) return AIR;
+        if (blockState.getFluidState() != null)
+            return cache.computeIfAbsent(blockState.getFluidState().createLegacyBlock(), BlockStateWrapper::new);
+        return cache.computeIfAbsent(blockState, BlockStateWrapper::new);
+    }
+
     public final BlockState blockState;
-    public BlockStateWrapper(BlockState blockState) {
+    private BlockStateWrapper(BlockState blockState) {
         this.blockState = blockState;
     }
 
@@ -43,4 +55,12 @@ public class BlockStateWrapper implements IBlockStateWrapper {
     public int hashCode() {
         return Objects.hash(blockState);
     }
+
+
+
+
+
+
+
+
 }

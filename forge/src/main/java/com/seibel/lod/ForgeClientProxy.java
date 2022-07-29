@@ -19,7 +19,8 @@
 
 package com.seibel.lod;
 
-import com.seibel.lod.common.wrappers.world.LevelWrapper;
+import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
+import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.lod.core.api.internal.a7.ClientApi;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
@@ -62,8 +63,7 @@ public class ForgeClientProxy
 	{
 		if (event.getWorld() instanceof ClientLevel)
 		{
-			LevelWrapper level = new LevelWrapper(event.getWorld());
-			ClientApi.INSTANCE.clientLevelLoadEvent(level);
+			ClientApi.INSTANCE.clientLevelLoadEvent(ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld()));
 		}
 	}
 	@SubscribeEvent
@@ -71,8 +71,7 @@ public class ForgeClientProxy
 	{
 		if (event.getWorld() instanceof ClientLevel)
 		{
-			LevelWrapper level = new LevelWrapper(event.getWorld());
-			ClientApi.INSTANCE.clientLevelUnloadEvent(level);
+			ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld()));
 		}
 	}
 
@@ -82,8 +81,7 @@ public class ForgeClientProxy
 		if (event.getWorld() instanceof ClientLevel)
 		{
 			IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld());
-			LevelWrapper level = new LevelWrapper(event.getWorld());
-			ClientApi.INSTANCE.clientChunkLoadEvent(chunk, level);
+			ClientApi.INSTANCE.clientChunkLoadEvent(chunk, ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld()));
 		}
 	}
 	@SubscribeEvent
@@ -92,8 +90,7 @@ public class ForgeClientProxy
 		if (event.getWorld() instanceof ClientLevel)
 		{
 			IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld());
-			LevelWrapper level = new LevelWrapper(event.getWorld());
-			ClientApi.INSTANCE.clientChunkSaveEvent(chunk, level);
+			ClientApi.INSTANCE.clientChunkSaveEvent(chunk, ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld()));
 		}
 	}
 

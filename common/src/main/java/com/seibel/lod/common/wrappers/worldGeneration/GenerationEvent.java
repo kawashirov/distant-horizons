@@ -23,6 +23,7 @@ import java.lang.invoke.MethodHandles;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.seibel.lod.core.a7.util.UncheckedInterruptedException;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.enums.config.ELightGenerationMode;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
@@ -101,6 +102,7 @@ public final class GenerationEvent
 
 	public boolean hasTimeout(int duration, TimeUnit unit)
 	{
+		if (timeoutTime == -1) return false;
 		long currentTime = System.nanoTime();
 		long delta = currentTime - timeoutTime;
 		return (delta > TimeUnit.NANOSECONDS.convert(duration, unit));
@@ -132,7 +134,7 @@ public final class GenerationEvent
 	public void refreshTimeout()
 	{
 		timeoutTime = System.nanoTime();
-		LodUtil.checkInterruptsUnchecked();
+		UncheckedInterruptedException.throwIfInterrupted();
 	}
 	
 	@Override

@@ -20,7 +20,7 @@
 package com.seibel.lod.common.wrappers.worldGeneration;
 
 import com.mojang.datafixers.DataFixer;
-import com.seibel.lod.common.wrappers.world.LevelWrapper;
+import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.lod.core.a7.level.IServerLevel;
 
 import net.minecraft.core.Registry;
@@ -69,7 +69,7 @@ public final class GlobalParameters
 	{
 		this.lodLevel = lodLevel;
 
-		level = ((LevelWrapper)lodLevel.getLevelWrapper()).getServerWorld();
+		level = ((ServerLevelWrapper)lodLevel.getServerLevelWrapper()).unwrapLevel();
 		lightEngine = (ThreadedLevelLightEngine) level.getLightEngine();
 		MinecraftServer server = level.getServer();
 		WorldData worldData = server.getWorldData();

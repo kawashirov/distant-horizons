@@ -20,8 +20,7 @@
 package com.seibel.lod;
 
 import com.seibel.lod.common.wrappers.McObjectConverter;
-import com.seibel.lod.common.wrappers.world.LevelWrapper;
-import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
+import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.lod.core.api.internal.a7.ClientApi;
 import com.seibel.lod.core.config.Config;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -35,10 +34,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.world.level.Level;
 
 import java.util.HashSet;
-import java.util.function.Supplier;
 
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -82,14 +79,14 @@ public class FabricClientProxy
 		ClientChunkEvents.CHUNK_LOAD.register((level, chunk) ->
 				ClientApi.INSTANCE.clientChunkLoadEvent(
 						new ChunkWrapper(chunk, level),
-						LevelWrapper.getWorldWrapper(level)
+						ClientLevelWrapper.getWrapper(level)
 				));
 		//#endif
 		// ClientChunkSaveEvent
 		ClientChunkEvents.CHUNK_UNLOAD.register((level, chunk)->
 				ClientApi.INSTANCE.clientChunkSaveEvent(
 						new ChunkWrapper(chunk, level),
-						LevelWrapper.getWorldWrapper(level)
+						ClientLevelWrapper.getWrapper(level)
 				));
 
 		// RendererStartupEvent - Done in MixinGameRenderer
@@ -98,7 +95,7 @@ public class FabricClientProxy
 
 		// ClientRenderLevelTerrainEvent
 		WorldRenderEvents.AFTER_SETUP.register((renderContext) ->
-				clientApi.renderLods(getLevelWrapper(renderContext.world()),
+				clientApi.renderLods(ClientLevelWrapper.getWrapper(renderContext.world()),
 				McObjectConverter.Convert(renderContext.projectionMatrix()),
 				McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
 				renderContext.tickDelta())
@@ -114,9 +111,6 @@ public class FabricClientProxy
 	private boolean isValidTime() {
 		return !(Minecraft.getInstance().screen instanceof TitleScreen);
 	}
-	private LevelWrapper getLevelWrapper(Level level) {
-		return LevelWrapper.getWorldWrapper(level);
-	}
 
 //	public void blockChangeEvent(LevelAccessor world, BlockPos pos) {
 //		if (!isValidTime()) return;
@@ -129,7 +123,7 @@ public class FabricClientProxy
 
 	private static final int[] KEY_TO_CHECK_FOR = {GLFW.GLFW_KEY_F6, GLFW.GLFW_KEY_F8};
 	
-	HashSet<Integer> previousKeyDown = new HashSet<Integer>();
+	HashSet<Integer> previousKeyDown = new HashSet<>();
 	
 	public void onKeyInput() {
 		if (Config.Client.Advanced.Debugging.enableDebugKeybindings.get())

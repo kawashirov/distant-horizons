@@ -22,7 +22,8 @@ package com.seibel.lod.mixins.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.seibel.lod.common.wrappers.McObjectConverter;
-import com.seibel.lod.common.wrappers.world.LevelWrapper;
+import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
+import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.api.internal.a7.ClientApi;
 import com.seibel.lod.core.objects.math.Mat4f;
@@ -35,8 +36,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.logging.Level;
 
 /**
  * This class is used to mix in my rendering code
@@ -113,7 +112,7 @@ public class MixinLevelRenderer
 			Mat4f mcModelViewMatrix = McObjectConverter.Convert(modelViewMatrixStack.last().pose());
 			Mat4f mcProjectionMatrix = McObjectConverter.Convert(projectionMatrix);
 
-			ClientApi.INSTANCE.renderLods(LevelWrapper.getWorldWrapper(level), mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
+			ClientApi.INSTANCE.renderLods(ClientLevelWrapper.getWrapper(level), mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
 		}
 		if (Config.Client.Advanced.lodOnlyMode.get()) {
 			callback.cancel();

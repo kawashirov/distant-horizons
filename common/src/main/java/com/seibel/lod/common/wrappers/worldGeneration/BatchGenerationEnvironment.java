@@ -21,25 +21,20 @@
 
 package com.seibel.lod.common.wrappers.worldGeneration;
 
-import com.seibel.lod.core.a7.datatype.full.ChunkSizedData;
-import com.seibel.lod.core.a7.datatype.transform.LodDataBuilder;
+import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.lod.core.a7.level.IServerLevel;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.logging.ConfigBasedLogger;
 import com.seibel.lod.core.logging.ConfigBasedSpamLogger;
-import com.seibel.lod.core.builders.lodBuilding.LodBuilderConfig;
 import com.seibel.lod.core.enums.config.EDistanceGenerationMode;
-import com.seibel.lod.core.enums.config.ELightGenerationMode;
 import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.core.util.EventTimer;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.util.gridList.ArrayGridList;
 import com.seibel.lod.core.util.LodThreadFactory;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
-import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -51,7 +46,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.seibel.lod.common.wrappers.DependencySetupDoneCheck;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
-import com.seibel.lod.common.wrappers.world.LevelWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.ChunkLoader;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightGetterAdaptor;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
@@ -79,7 +73,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import org.apache.logging.log4j.LogManager;
-import org.checkerframework.checker.units.qual.C;
 
 /*
 Total:                   3.135214124s
@@ -268,7 +261,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	{
 		super(serverlevel);
 		EVENT_LOGGER.info("================WORLD_GEN_STEP_INITING=============");
-		ChunkGenerator generator =  ((LevelWrapper) serverlevel.getLevelWrapper()).getServerWorld().getChunkSource().getGenerator();
+		ChunkGenerator generator =  ((ServerLevelWrapper) (serverlevel.getServerLevelWrapper())).getLevel().getChunkSource().getGenerator();
 		if (!(generator instanceof NoiseBasedChunkGenerator ||
 				generator instanceof DebugLevelSource ||
 				generator instanceof FlatLevelSource)) {

@@ -26,7 +26,8 @@ import java.util.Objects;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.platform.Window;
-import com.seibel.lod.common.wrappers.world.LevelWrapper;
+import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
+import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.enums.ELodDirection;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
@@ -41,8 +42,6 @@ import com.seibel.lod.core.objects.DHBlockPos;
 import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.CrashReport;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -155,21 +154,6 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
         return mc.getCurrentServer().version.getString();
     }
 
-    /** Returns the dimension the player is currently in */
-    @Override
-    public IDimensionTypeWrapper getCurrentDimension()
-    {
-        if (mc.player != null)
-            return DimensionTypeWrapper.getDimensionTypeWrapper(mc.player.level.dimensionType());
-        else return null;
-    }
-
-    @Override
-    public String getCurrentDimensionId()
-    {
-        return LodUtil.getDimensionIDFromWorld(LevelWrapper.getWorldWrapper(mc.level));
-    }
-
     //=============//
     // Simple gets //
     //=============//
@@ -208,71 +192,11 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
         return mc.getModelManager();
     }
 
-    public ClientLevel getClientLevel()
-    {
-        return mc.level;
-    }
-
-    @Override
-    public ILevelWrapper getWrappedServerWorld()
-    {
-        if (mc.level == null)
-            return null;
-
-        DimensionType dimension = mc.level.dimensionType();
-        IntegratedServer server = mc.getSingleplayerServer();
-
-        if (server == null)
-            return null;
-
-        ServerLevel serverWorld = null;
-        Iterable<ServerLevel> worlds = server.getAllLevels();
-        for (ServerLevel world : worlds)
-        {
-            if (world.dimensionType() == dimension)
-            {
-                serverWorld = world;
-                break;
-            }
-        }
-        return LevelWrapper.getWorldWrapper(serverWorld);
-    }
-
-    public LevelWrapper getWrappedClientLevel()
-    {
-        return LevelWrapper.getWorldWrapper(mc.level);
-    }
-
-    public LevelWrapper getWrappedServerLevel()
-    {
-
-        if (mc.level == null)
-            return null;
-        DimensionType dimension = mc.level.dimensionType();
-        IntegratedServer server = mc.getSingleplayerServer();
-        if (server == null)
-            return null;
-
-        Iterable<ServerLevel> worlds = server.getAllLevels();
-        ServerLevel returnWorld = null;
-
-        for (ServerLevel world : worlds)
-        {
-            if (world.dimensionType() == dimension)
-            {
-                returnWorld = world;
-                break;
-            }
-        }
-
-        return LevelWrapper.getWorldWrapper(returnWorld);
-    }
-
     @Nullable
     @Override
     public ILevelWrapper getWrappedClientWorld()
     {
-        return LevelWrapper.getWorldWrapper(mc.level);
+        return ClientLevelWrapper.getWrapper(mc.level);
     }
 
     @Override
@@ -288,62 +212,7 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
             profilerWrapper = new ProfilerWrapper(mc.getProfiler());
         else if (mc.getProfiler() != profilerWrapper.profiler)
             profilerWrapper.profiler = mc.getProfiler();
-
-        return profilerWrapper;	}
-
-    public ClientPacketListener getConnection()
-    {
-        return mc.getConnection();
-    }
-
-    public GameRenderer getGameRenderer()
-    {
-        return mc.gameRenderer;
-    }
-
-    public Entity getCameraEntity()
-    {
-        return mc.cameraEntity;
-    }
-
-    public Window getWindow()
-    {
-        return mc.getWindow();
-    }
-
-    @Override
-    public float getSkyDarken(float partialTicks)
-    {
-        return mc.level.getSkyDarken(partialTicks);
-    }
-
-    public IntegratedServer getSinglePlayerServer()
-    {
-        return mc.getSingleplayerServer();
-    }
-
-    @Override
-    public boolean connectedToServer()
-    {
-        return mc.getCurrentServer() != null;
-    }
-
-    @Override
-    public int getPlayerSkylight() {
-        if (mc.level == null) return -1;
-        if (mc.player == null) return -1;
-        if (mc.player.blockPosition() == null) return -1;
-        return mc.level.getBrightness(LightLayer.SKY, mc.player.blockPosition());
-    }
-
-    public ServerData getCurrentServer()
-    {
-        return mc.getCurrentServer();
-    }
-
-    public LevelRenderer getLevelRenderer()
-    {
-        return mc.levelRenderer;
+        return profilerWrapper;
     }
 
     /** Returns all worlds available to the server */
@@ -355,7 +224,7 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
         Iterable<ServerLevel> serverWorlds = mc.getSingleplayerServer().getAllLevels();
         for (ServerLevel world : serverWorlds)
         {
-            worlds.add(LevelWrapper.getWorldWrapper(world));
+            worlds.add(ServerLevelWrapper.getWrapper(world));
         }
 
         return worlds;
@@ -393,11 +262,6 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
     public Object getOptionsObject()
     {
         return mc.options;
-    }
-
-    @Override
-    public File getSinglePlayerServerFolder() {
-        return Objects.requireNonNull(mc.getSingleplayerServer()).getServerDirectory();
     }
 
     @Override

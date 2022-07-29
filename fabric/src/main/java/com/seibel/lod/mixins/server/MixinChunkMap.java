@@ -1,7 +1,7 @@
 package com.seibel.lod.mixins.server;
 
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
-import com.seibel.lod.common.wrappers.world.LevelWrapper;
+import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.lod.core.api.internal.a7.ServerApi;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
@@ -31,7 +31,7 @@ public class MixinChunkMap {
     private void onChunkSave(ChunkAccess chunk, CallbackInfoReturnable<Boolean> ci) {
         ServerApi.INSTANCE.serverChunkSaveEvent(
                 new ChunkWrapper(chunk, level),
-                LevelWrapper.getWorldWrapper(level)
+                ServerLevelWrapper.getWrapper(level)
         );
     }
 

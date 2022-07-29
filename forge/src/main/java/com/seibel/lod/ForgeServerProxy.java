@@ -2,7 +2,7 @@ package com.seibel.lod;
 
 import com.seibel.lod.common.networking.Networking;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
-import com.seibel.lod.common.wrappers.world.LevelWrapper;
+import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.core.api.internal.a7.ClientApi;
 import com.seibel.lod.core.api.internal.a7.ServerApi;
@@ -41,8 +41,8 @@ public class ForgeServerProxy {
         //FIXME: This may cause init issue...
         return !(Minecraft.getInstance().screen instanceof TitleScreen);
     }
-    private LevelWrapper getLevelWrapper(Level level) {
-        return LevelWrapper.getWorldWrapper(level);
+    private ServerLevelWrapper getLevelWrapper(ServerLevel level) {
+        return ServerLevelWrapper.getWrapper(level);
     }
 
 
@@ -71,7 +71,7 @@ public class ForgeServerProxy {
     private void serverLevelLoadEvent(WorldEvent.Load event) {
         if (isValidTime()) {
             if (event.getWorld() instanceof ServerLevel) {
-                serverApi.serverLevelLoadEvent(getLevelWrapper((Level) event.getWorld()));
+                serverApi.serverLevelLoadEvent(getLevelWrapper((ServerLevel) event.getWorld()));
             }
         }
     }
@@ -81,7 +81,7 @@ public class ForgeServerProxy {
     private void serverLevelUnloadEvent(WorldEvent.Unload event) {
         if (isValidTime()) {
             if (event.getWorld() instanceof ServerLevel) {
-                serverApi.serverLevelUnloadEvent(getLevelWrapper((Level) event.getWorld()));
+                serverApi.serverLevelUnloadEvent(getLevelWrapper((ServerLevel) event.getWorld()));
             }
         }
     }
@@ -92,8 +92,7 @@ public class ForgeServerProxy {
         if (isValidTime()) {
             if (event.getWorld() instanceof ServerLevel) {
                 IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld());
-                LevelWrapper level = new LevelWrapper(event.getWorld());
-                ClientApi.INSTANCE.clientChunkLoadEvent(chunk, level);
+                serverApi.serverChunkLoadEvent(chunk, getLevelWrapper((ServerLevel) event.getWorld()));
             }
         }
     }
@@ -103,8 +102,7 @@ public class ForgeServerProxy {
         if (isValidTime()) {
             if (event.getWorld() instanceof ServerLevel) {
                 IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld());
-                LevelWrapper level = new LevelWrapper(event.getWorld());
-                ClientApi.INSTANCE.clientChunkSaveEvent(chunk, level);
+                serverApi.serverChunkSaveEvent(chunk, getLevelWrapper((ServerLevel) event.getWorld()));
             }
         }
     }
