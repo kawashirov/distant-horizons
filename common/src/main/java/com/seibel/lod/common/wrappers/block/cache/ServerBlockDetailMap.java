@@ -17,30 +17,25 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-package com.seibel.lod.common.wrappers.block;
+package com.seibel.lod.common.wrappers.block.cache;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelReader;
+import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
+import com.seibel.lod.core.objects.DHBlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class BlockDetailMap
+
+public class ServerBlockDetailMap
 {
-	
-	private static ConcurrentHashMap<BlockState, BlockDetailWrapper> map = new ConcurrentHashMap<BlockState, BlockDetailWrapper>();
-	
-	private BlockDetailMap() {}
-	
-	public static BlockDetailWrapper getOrMakeBlockDetailCache(BlockState bs, BlockPos pos, LevelReader getter) {
-		if (!bs.getFluidState().isEmpty()) {
-			bs = bs.getFluidState().createLegacyBlock();
-		}
-		BlockDetailWrapper cache = map.get(bs);
-		if (cache != null) return cache;
-		cache = BlockDetailWrapper.make(bs, pos, getter);
-		//ApiShared.LOGGER.info("New blockDetail cache for {} to {} ", bs, cache);
-		BlockDetailWrapper cacheCAS = map.putIfAbsent(bs, cache);
-		return cacheCAS==null ? cache : cacheCAS;
+	private final ConcurrentHashMap<BlockState, ServerBlockStateCache> blockCache = new ConcurrentHashMap<>();
+	//private final ConcurrentHashMap<#if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif, Biome> biomeMap = new ConcurrentHashMap<>();
+	private final ServerLevelWrapper level;
+	public ServerBlockDetailMap(ServerLevelWrapper level) { this.level = level; }
+
+	public ServerBlockStateCache getBlockStateData(BlockState state, DHBlockPos pos) { //TODO: Allow a per pos unique setting
+		return blockCache.computeIfAbsent(state, (s) -> new ServerBlockStateCache(s, level, new DHBlockPos(0,0,0)));
 	}
+
+	public void clear() { blockCache.clear(); }
 }

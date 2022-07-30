@@ -98,7 +98,7 @@ public class FabricServerProxy {
                 -> {
             ILevelWrapper level = getLevelWrapper((ServerLevel) chunk.getLevel());
             if (isValidTime()) ServerApi.INSTANCE.serverChunkLoadEvent(
-                    new ChunkWrapper(chunk, chunk.getLevel()),
+                    new ChunkWrapper(chunk, chunk.getLevel(), level),
                     level);
                 }
         );

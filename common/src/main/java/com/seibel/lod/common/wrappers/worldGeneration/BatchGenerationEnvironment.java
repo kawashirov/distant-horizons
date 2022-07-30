@@ -454,7 +454,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		{
 			for (int ox = 0; ox < e.size; ox++)
 			{
-				result.set(ox, oy, new ChunkWrapper(genChunks.get(ox, oy), region));
+				result.set(ox, oy, new ChunkWrapper(genChunks.get(ox, oy), region, null));
 			}
 		}
 		e.timer.complete();

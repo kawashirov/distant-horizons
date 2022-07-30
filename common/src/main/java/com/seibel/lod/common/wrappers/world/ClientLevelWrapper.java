@@ -1,5 +1,9 @@
 package com.seibel.lod.common.wrappers.world;
 
+import com.seibel.lod.common.wrappers.McObjectConverter;
+import com.seibel.lod.common.wrappers.block.BiomeWrapper;
+import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
+import com.seibel.lod.common.wrappers.block.cache.ClientBlockDetailMap;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.core.api.internal.a7.ClientApi;
@@ -40,6 +44,7 @@ public class ClientLevelWrapper implements IClientLevelWrapper
         this.level = level;
     }
     final ClientLevel level;
+    ClientBlockDetailMap blockMap = new ClientBlockDetailMap(this);
     @Nullable
     @Override
     public IServerLevelWrapper tryGetServerSideWrapper() {
@@ -60,7 +65,8 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 
     @Override
     public int computeBaseColor(DHBlockPos pos, IBiomeWrapper biome, IBlockStateWrapper blockState) {
-        return 0;
+        return blockMap.getColor(((BlockStateWrapper)blockState).blockState,
+                (BiomeWrapper)biome, pos);
     }
 
     @Override
@@ -115,7 +121,7 @@ public class ClientLevelWrapper implements IClientLevelWrapper
     public IChunkWrapper tryGetChunk(DHChunkPos pos) {
         ChunkAccess chunk = level.getChunk(pos.getX(), pos.getZ(), ChunkStatus.EMPTY, false);
         if (chunk == null) return null;
-        return new ChunkWrapper(chunk, level);
+        return new ChunkWrapper(chunk, level, this);
     }
 
     @Override
@@ -126,12 +132,12 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 
     @Override
     public IBlockStateWrapper getBlockState(DHBlockPos pos) {
-        return null;
+        return BlockStateWrapper.fromBlockState(level.getBlockState(McObjectConverter.Convert(pos)));
     }
 
     @Override
     public IBiomeWrapper getBiome(DHBlockPos pos) {
-        return null;
+        return BiomeWrapper.getBiomeWrapper(level.getBiome(McObjectConverter.Convert(pos)));
     }
 
     @Override

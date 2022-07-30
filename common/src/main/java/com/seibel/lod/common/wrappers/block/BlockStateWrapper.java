@@ -22,7 +22,7 @@ public class BlockStateWrapper implements IBlockStateWrapper {
     }
 
     public final BlockState blockState;
-    private BlockStateWrapper(BlockState blockState) {
+    BlockStateWrapper(BlockState blockState) {
         this.blockState = blockState;
     }
 

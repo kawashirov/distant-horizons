@@ -77,17 +77,23 @@ public class FabricClientProxy
 		// TODO: Is using setClientLightReady one still better?
 		//#if PRE_MC_1_18_1 // in 1.18+, we use mixin hook in setClientLightReady(true)
 		ClientChunkEvents.CHUNK_LOAD.register((level, chunk) ->
-				ClientApi.INSTANCE.clientChunkLoadEvent(
-						new ChunkWrapper(chunk, level),
-						ClientLevelWrapper.getWrapper(level)
-				));
+		{
+			ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);
+			ClientApi.INSTANCE.clientChunkLoadEvent(
+					new ChunkWrapper(chunk, level, wrappedLevel),
+					wrappedLevel
+			);
+		});
 		//#endif
 		// ClientChunkSaveEvent
-		ClientChunkEvents.CHUNK_UNLOAD.register((level, chunk)->
-				ClientApi.INSTANCE.clientChunkSaveEvent(
-						new ChunkWrapper(chunk, level),
-						ClientLevelWrapper.getWrapper(level)
-				));
+		ClientChunkEvents.CHUNK_UNLOAD.register((level, chunk) ->
+		{
+			ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);
+			ClientApi.INSTANCE.clientChunkSaveEvent(
+					new ChunkWrapper(chunk, level, wrappedLevel),
+					wrappedLevel
+			);
+		});
 
 		// RendererStartupEvent - Done in MixinGameRenderer
 		// RendererShutdownEvent - Done in MixinGameRenderer

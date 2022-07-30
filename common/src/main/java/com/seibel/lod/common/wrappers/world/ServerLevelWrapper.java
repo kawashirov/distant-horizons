@@ -22,7 +22,12 @@ package com.seibel.lod.common.wrappers.world;
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.seibel.lod.common.wrappers.McObjectConverter;
+import com.seibel.lod.common.wrappers.block.BiomeWrapper;
+import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
+import com.seibel.lod.common.wrappers.block.cache.ServerBlockDetailMap;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
+import com.seibel.lod.core.a7.world.WorldEnvironment;
 import com.seibel.lod.core.api.internal.a7.ServerApi;
 import com.seibel.lod.core.objects.DHBlockPos;
 import com.seibel.lod.core.objects.DHChunkPos;
@@ -67,11 +72,13 @@ public class ServerLevelWrapper implements IServerLevelWrapper
         }
     }
 
+    final ServerLevel level;
+    ServerBlockDetailMap blockMap = new ServerBlockDetailMap(this);
+
     public ServerLevelWrapper(ServerLevel level)
     {
         this.level = level;
     }
-    final ServerLevel level;
     @Nullable
     @Override
     public IClientLevelWrapper tryGetClientSideWrapper() {
@@ -144,7 +151,7 @@ public class ServerLevelWrapper implements IServerLevelWrapper
     public IChunkWrapper tryGetChunk(DHChunkPos pos) {
         ChunkAccess chunk = level.getChunk(pos.getX(), pos.getZ(), ChunkStatus.EMPTY, false);
         if (chunk == null) return null;
-        return new ChunkWrapper(chunk, level);
+        return new ChunkWrapper(chunk, level, this);
     }
 
     @Override
@@ -156,12 +163,12 @@ public class ServerLevelWrapper implements IServerLevelWrapper
 
     @Override
     public IBlockStateWrapper getBlockState(DHBlockPos pos) {
-        return null;
+        return BlockStateWrapper.fromBlockState(level.getBlockState(McObjectConverter.Convert(pos)));
     }
 
     @Override
     public IBiomeWrapper getBiome(DHBlockPos pos) {
-        return null;
+        return BiomeWrapper.getBiomeWrapper(level.getBiome(McObjectConverter.Convert(pos)));
     }
 
     @Override

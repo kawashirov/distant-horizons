@@ -19,20 +19,22 @@
  
 package com.seibel.lod.common.wrappers.chunk;
 
-import com.seibel.lod.common.wrappers.block.BlockDetailWrapper;
 import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
 import com.seibel.lod.core.enums.ELodDirection;
+import com.seibel.lod.core.objects.DHBlockPos;
 import com.seibel.lod.core.util.LevelPosUtil;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockDetailWrapper;
+import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 
 import com.seibel.lod.common.wrappers.WrapperUtil;
-import com.seibel.lod.common.wrappers.block.BlockDetailMap;
+import com.seibel.lod.common.wrappers.block.cache.ServerBlockDetailMap;
 import com.seibel.lod.common.wrappers.block.BiomeWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
 
+import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import net.minecraft.core.BlockPos;
 #if POST_MC_1_17_1
 import net.minecraft.core.QuartPos;
@@ -48,6 +50,8 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 
+import javax.annotation.Nullable;
+
 /**
  *
  * @author James Seibel
@@ -57,12 +61,14 @@ public class ChunkWrapper implements IChunkWrapper
 {
 	private final ChunkAccess chunk;
 	private final LevelReader lightSource;
+	private final ILevelWrapper wrappedLevel;
 	
 	
-	public ChunkWrapper(ChunkAccess chunk, LevelReader lightSource)
+	public ChunkWrapper(ChunkAccess chunk, LevelReader lightSource, @Nullable ILevelWrapper wrappedLevel)
 	{
 		this.chunk = chunk;
 		this.lightSource = lightSource;
+		this.wrappedLevel = wrappedLevel;
 	}
 	
 	@Override
@@ -98,6 +104,8 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public IBiomeWrapper getBiome(int x, int y, int z)
 	{
+		if (wrappedLevel != null) return wrappedLevel.getBiome(new DHBlockPos(x + getMinX(), y, z + getMinZ()));
+
 		#if PRE_MC_1_17_1
 		return BiomeWrapper.getBiomeWrapper(chunk.getBiomes().getNoiseBiome(
 				x >> 2, y >> 2, z >> 2));
@@ -112,32 +120,6 @@ public class ChunkWrapper implements IChunkWrapper
 				QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)));
 		#endif
 	}
-	
-	@Override
-	@Deprecated
-	public IBlockDetailWrapper getBlockDetail(int x, int y, int z) {
-		BlockPos pos = new BlockPos(x,y,z);
-		BlockState blockState = chunk.getBlockState(pos);
-		IBlockDetailWrapper blockDetail = BlockDetailMap.getOrMakeBlockDetailCache(blockState, pos, lightSource);
-		return blockDetail == BlockDetailWrapper.NULL_BLOCK_DETAIL ? null : blockDetail;
-	}
-
-    @Override
-	@Deprecated
-    public IBlockDetailWrapper getBlockDetailAtFace(int x, int y, int z, ELodDirection dir) {
-        int fy = y+dir.getNormal().y;
-        if (fy < getMinBuildHeight() || fy > getMaxBuildHeight()) return null;
-        BlockPos pos = new BlockPos(x+dir.getNormal().x,fy,z+dir.getNormal().z);
-        BlockState blockState;
-        if (blockPosInsideChunk(x,y,z))
-            blockState = chunk.getBlockState(pos);
-        else {
-            blockState = lightSource.getBlockState(pos);
-        }
-        if (blockState == null || blockState.isAir()) return null;
-		IBlockDetailWrapper blockDetail = BlockDetailMap.getOrMakeBlockDetailCache(blockState, pos, lightSource);
-        return blockDetail == BlockDetailWrapper.NULL_BLOCK_DETAIL ? null : blockDetail;
-    }
 	
 	public ChunkAccess getChunk() {
 		return chunk;
@@ -252,7 +234,8 @@ public class ChunkWrapper implements IChunkWrapper
 	}
 
 	@Override
-	public BlockStateWrapper getBlockState(int x, int y, int z) {
+	public IBlockStateWrapper getBlockState(int x, int y, int z) {
+		if (wrappedLevel != null) return wrappedLevel.getBlockState(new DHBlockPos(x + getMinX(), y, z + getMinZ()));
 		return BlockStateWrapper.fromBlockState(chunk.getBlockState(new BlockPos(x,y,z)));
 	}
 }

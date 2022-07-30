@@ -30,7 +30,7 @@ public class MixinChunkMap {
     @Inject(method = "save", at = @At(value = "INVOKE", target = CHUNK_SERIALIZER_WRITE))
     private void onChunkSave(ChunkAccess chunk, CallbackInfoReturnable<Boolean> ci) {
         ServerApi.INSTANCE.serverChunkSaveEvent(
-                new ChunkWrapper(chunk, level),
+                new ChunkWrapper(chunk, level, ServerLevelWrapper.getWrapper(level)),
                 ServerLevelWrapper.getWrapper(level)
         );
     }
