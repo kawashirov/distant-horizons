@@ -2,28 +2,33 @@ package com.seibel.lod.common.wrappers.block;
 
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
+import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
 import net.minecraft.world.level.block.state.BlockState;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class BlockStateWrapper implements IBlockStateWrapper {
+    private static final Logger LOGGER = DhLoggerBuilder.getLogger();
     public static final BlockStateWrapper AIR = new BlockStateWrapper(null);
 
     public static ConcurrentHashMap<BlockState, BlockStateWrapper> cache = new ConcurrentHashMap<>();
 
     public static BlockStateWrapper fromBlockState(BlockState blockState) {
         if (blockState == null || blockState.isAir()) return AIR;
-        if (blockState.getFluidState() != null)
+        if (blockState.getFluidState().isEmpty())
+            return cache.computeIfAbsent(blockState, BlockStateWrapper::new);
+        else
             return cache.computeIfAbsent(blockState.getFluidState().createLegacyBlock(), BlockStateWrapper::new);
-        return cache.computeIfAbsent(blockState, BlockStateWrapper::new);
     }
 
     public final BlockState blockState;
     BlockStateWrapper(BlockState blockState) {
         this.blockState = blockState;
+        LOGGER.info("Created BlockStateWrapper for {}", blockState);
     }
 
     @Override

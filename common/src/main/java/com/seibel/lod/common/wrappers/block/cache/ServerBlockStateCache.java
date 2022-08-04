@@ -1,6 +1,7 @@
 package com.seibel.lod.common.wrappers.block.cache;
 
 import com.seibel.lod.common.wrappers.McObjectConverter;
+import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.objects.DHBlockPos;
 import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import net.minecraft.core.BlockPos;
@@ -9,10 +10,13 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 
 public class ServerBlockStateCache {
+    private static final Logger LOGGER = DhLoggerBuilder.getLogger();
+
     public final BlockState state;
     public final LevelReader level;
     public final BlockPos pos;
@@ -22,6 +26,7 @@ public class ServerBlockStateCache {
         level = (LevelReader) samplingLevel.unwrapLevel();
         pos = McObjectConverter.Convert(samplingPos);
         resolveShapes();
+        LOGGER.info("ServerBlockState created for {}", blockState);
     }
 
     boolean noCollision = false;

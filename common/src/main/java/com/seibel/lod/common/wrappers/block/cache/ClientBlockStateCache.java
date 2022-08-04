@@ -3,6 +3,7 @@ package com.seibel.lod.common.wrappers.block.cache;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.block.*;
 import com.seibel.lod.core.config.Config;
+import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.objects.DHBlockPos;
 import com.seibel.lod.core.util.ColorUtil;
 import com.seibel.lod.core.wrapperInterfaces.world.IClientLevelWrapper;
@@ -21,11 +22,14 @@ import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.util.RandomSource;
 #endif
 import net.minecraft.world.level.block.state.BlockState;
+import org.apache.logging.log4j.Logger;
 
 import java.util.List;
 import java.util.Random;
 
 public class ClientBlockStateCache {
+
+    private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 
 	#if PRE_MC_1_19
     public static final Random random = new Random(0);
@@ -41,6 +45,7 @@ public class ClientBlockStateCache {
         level = (LevelReader) samplingLevel.unwrapLevel();
         pos = McObjectConverter.Convert(samplingPos);
         resolveColors();
+        LOGGER.info("ClientBlocKCache created for {}", blockState);
     }
 
     boolean isColorResolved = false;
