@@ -467,8 +467,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		return result;
 	}
 	
-	public void generateDirect(GenerationEvent e, ArrayGridList<ChunkAccess> subRange, Steps step,
-													 LightedWorldGenRegion region)
+	public void generateDirect(GenerationEvent e, ArrayGridList<ChunkAccess> subRange,
+							   Steps step, LightedWorldGenRegion region)
 	{
 		try
 		{
