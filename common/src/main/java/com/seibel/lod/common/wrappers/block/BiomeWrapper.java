@@ -19,6 +19,7 @@
 
 package com.seibel.lod.common.wrappers.block;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -27,18 +28,19 @@ import java.util.function.Function;
 import com.google.common.collect.ImmutableBiMap;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.Lifecycle;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
-import net.minecraft.data.BuiltinRegistries;
 #if POST_MC_1_19
 import net.minecraft.data.worldgen.biome.EndBiomes;
 import net.minecraft.data.worldgen.biome.NetherBiomes;
 #endif
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.RegistryFixedCodec;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
-import net.minecraft.world.level.block.Blocks;
 
 
 //This class wraps the minecraft BlockPos.Mutable (and BlockPos) class
@@ -74,7 +76,10 @@ public class BiomeWrapper implements IBiomeWrapper
 
     @Override
     public String serialize() {
-        return Biome.CODEC.encodeStart(JsonOps.COMPRESSED, biome).get().orThrow().toString();
+        //FIXME: Pass in a level obj
+        String data = Biome.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, Minecraft.getInstance().level.registryAccess()),
+                biome).get().orThrow().toString();
+        return data;
     }
 
     @Override
@@ -90,9 +95,14 @@ public class BiomeWrapper implements IBiomeWrapper
         return Objects.hash(biome);
     }
 
-    public static IBiomeWrapper deserialize(String str) {
-         #if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif
-                biome = Biome.CODEC.decode(JsonOps.COMPRESSED, JsonParser.parseString(str)).get().orThrow().getFirst();
-        return getBiomeWrapper(biome);
+    public static IBiomeWrapper deserialize(String str) throws IOException {
+        try {
+         #if PRE_MC_1_18_2 Biome #else
+            Holder<Biome> #endif
+                    biome = Biome.CODEC.decode(JsonOps.INSTANCE, JsonParser.parseString(str)).get().orThrow().getFirst();
+            return getBiomeWrapper(biome);
+        } catch (Exception e) {
+            throw new IOException("Failed to deserialize biome wrapper", e);
+        }
     }
 }

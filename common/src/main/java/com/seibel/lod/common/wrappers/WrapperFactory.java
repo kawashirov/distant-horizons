@@ -29,6 +29,8 @@ import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 
+import java.io.IOException;
+
 /**
  * This handles creating abstract wrapper objects.
  *
@@ -52,12 +54,12 @@ public class WrapperFactory implements IWrapperFactory
 	}
 
 	@Override
-	public IBiomeWrapper deserializeBiomeWrapper(String str) {
+	public IBiomeWrapper deserializeBiomeWrapper(String str) throws IOException {
 		return BiomeWrapper.deserialize(str);
 	}
 
 	@Override
-	public IBlockStateWrapper deserializeBlockStateWrapper(String str) {
+	public IBlockStateWrapper deserializeBlockStateWrapper(String str) throws IOException {
 		return BlockStateWrapper.deserialize(str);
 	}
 

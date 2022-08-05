@@ -7,6 +7,7 @@ import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,13 +40,17 @@ public class BlockStateWrapper implements IBlockStateWrapper {
         return BlockState.CODEC.encodeStart(JsonOps.COMPRESSED, blockState).get().orThrow().toString();
     }
 
-    public static BlockStateWrapper deserialize(String str) {
+    public static BlockStateWrapper deserialize(String str) throws IOException {
         if (str.equals("AIR")) {
             return AIR;
         }
-        return new BlockStateWrapper(
-                BlockState.CODEC.decode(JsonOps.COMPRESSED, JsonParser.parseString(str)).get().orThrow().getFirst()
-        );
+        try {
+            return new BlockStateWrapper(
+                    BlockState.CODEC.decode(JsonOps.COMPRESSED, JsonParser.parseString(str)).get().orThrow().getFirst()
+            );
+        } catch (Exception e) {
+            throw new IOException("Failed to deserialize BlockStateWrapper", e);
+        }
     }
 
     @Override
