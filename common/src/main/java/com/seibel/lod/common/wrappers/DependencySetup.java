@@ -19,7 +19,7 @@
 
 package com.seibel.lod.common.wrappers;
 
-import com.seibel.lod.common.wrappers.config.ConfigWrapper;
+import com.seibel.lod.common.wrappers.gui.ConfigWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftDedicatedServerWrapper;
 import com.seibel.lod.core.wrapperInterfaces.config.IConfigWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
@@ -34,8 +34,6 @@ import com.seibel.lod.core.wrapperInterfaces.config.LodConfigWrapperSingleton;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftSharedWrapper;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 /**
  * Binds all necessary dependencies, so we

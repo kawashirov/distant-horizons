@@ -17,11 +17,10 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-package com.seibel.lod.common.wrappers.config;
+package com.seibel.lod.common.wrappers.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;

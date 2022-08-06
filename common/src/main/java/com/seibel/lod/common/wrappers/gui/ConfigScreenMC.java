@@ -1,4 +1,4 @@
-package com.seibel.lod.common.wrappers.config;
+package com.seibel.lod.common.wrappers.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.seibel.lod.core.ModInfo;
@@ -6,7 +6,6 @@ import com.seibel.lod.core.config.gui.AbstractScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
 #if PRE_MC_1_19
 import net.minecraft.network.chat.TranslatableComponent;
 #endif

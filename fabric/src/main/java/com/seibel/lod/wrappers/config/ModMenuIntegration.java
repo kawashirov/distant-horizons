@@ -19,8 +19,7 @@
  
 package com.seibel.lod.wrappers.config;
 
-import com.seibel.lod.common.wrappers.config.ConfigScreenMC;
-import com.seibel.lod.common.wrappers.config.GetConfigScreen;
+import com.seibel.lod.common.wrappers.gui.GetConfigScreen;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
 import net.fabricmc.api.EnvType;

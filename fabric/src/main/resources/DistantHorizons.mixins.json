@@ -16,7 +16,8 @@
     "client.MixinGameRenderer",
     "client.MixinLevelRenderer",
     "client.MixinLightmap",
-    "client.MixinOptionsScreen"
+    "client.MixinOptionsScreen",
+    "client.MixinMinecraft"
   ],
   "injectors": {
     "defaultRequire": 1

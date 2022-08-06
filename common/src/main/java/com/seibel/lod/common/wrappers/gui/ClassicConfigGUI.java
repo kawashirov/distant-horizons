@@ -1,4 +1,4 @@
-package com.seibel.lod.common.wrappers.config;
+package com.seibel.lod.common.wrappers.gui;
 
 import java.util.AbstractMap;
 import java.util.ArrayList;
@@ -12,7 +12,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 // Logger (for debug stuff)
 

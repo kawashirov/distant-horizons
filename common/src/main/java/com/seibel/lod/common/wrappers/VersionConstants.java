@@ -20,6 +20,7 @@
 package com.seibel.lod.common.wrappers;
 
 import com.seibel.lod.core.wrapperInterfaces.IVersionConstants;
+import net.minecraft.client.Minecraft;
 
 /**
  * @author James Seibel
@@ -52,5 +53,10 @@ public class VersionConstants implements IVersionConstants
 	public boolean isVanillaRenderedChunkSquare()
 	{
 		return false;
+	}
+
+	@Override
+	public String getMinecraftVersion() {
+		return Minecraft.getInstance().getGame().getVersion().getId();
 	}
 }

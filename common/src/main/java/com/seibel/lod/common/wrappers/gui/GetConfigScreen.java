@@ -1,4 +1,4 @@
-package com.seibel.lod.common.wrappers.config;
+package com.seibel.lod.common.wrappers.gui;
 
 import com.seibel.lod.core.config.gui.ConfigScreen;
 import net.minecraft.client.gui.screens.Screen;

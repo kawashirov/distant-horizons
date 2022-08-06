@@ -1,4 +1,4 @@
-package com.seibel.lod.common.wrappers.config;
+package com.seibel.lod.common.wrappers.gui;
 
 import com.seibel.lod.core.wrapperInterfaces.config.IConfigWrapper;
 import net.minecraft.client.resources.language.I18n;
