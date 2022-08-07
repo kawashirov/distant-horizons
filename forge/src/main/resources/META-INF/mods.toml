@@ -1,6 +1,6 @@
 
 modLoader="javafml" #//mandatory
-loaderVersion="[40,43)" # // mandatory. This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+loaderVersion="[40,44)" # // mandatory. This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
 license="GNU GPLv3"
 issueTrackerURL="${issues}"
 
