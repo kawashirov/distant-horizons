@@ -29,7 +29,7 @@ public class BlockStateWrapper implements IBlockStateWrapper {
     public final BlockState blockState;
     BlockStateWrapper(BlockState blockState) {
         this.blockState = blockState;
-        LOGGER.info("Created BlockStateWrapper for {}", blockState);
+        //LOGGER.info("Created BlockStateWrapper for {}", blockState);
     }
 
     @Override

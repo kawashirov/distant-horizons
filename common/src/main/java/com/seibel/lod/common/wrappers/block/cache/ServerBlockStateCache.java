@@ -26,7 +26,7 @@ public class ServerBlockStateCache {
         level = (LevelReader) samplingLevel.unwrapLevel();
         pos = McObjectConverter.Convert(samplingPos);
         resolveShapes();
-        LOGGER.info("ServerBlockState created for {}", blockState);
+        //LOGGER.info("ServerBlockState created for {}", blockState);
     }
 
     boolean noCollision = false;

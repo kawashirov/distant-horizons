@@ -45,7 +45,7 @@ public class ClientBlockStateCache {
         level = (LevelReader) samplingLevel.unwrapLevel();
         pos = McObjectConverter.Convert(samplingPos);
         resolveColors();
-        LOGGER.info("ClientBlocKCache created for {}", blockState);
+        //LOGGER.info("ClientBlocKCache created for {}", blockState);
     }
 
     boolean isColorResolved = false;
