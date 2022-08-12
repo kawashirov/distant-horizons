@@ -229,6 +229,20 @@ subprojects { p ->
         }
     }
 
+    // Tells gradle where to look for other modules
+    // Why isn't the classpath added to the modules path by default?
+    if (p == project(":core")) {
+        compileJava {
+            inputs.property('moduleName', 'dhApi')
+            doFirst {
+                options.compilerArgs = [
+                        '--module-path', classpath.asPath
+                ]
+                classpath = files()
+            }
+        }
+    }
+
     // Run mergeJars when running build
     build.finalizedBy(mergeJars)
     assemble.finalizedBy(mergeJars)
