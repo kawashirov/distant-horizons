@@ -21,6 +21,9 @@ package com.seibel.lod;
 
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.core.api.external.methods.events.abstractEvents.DhApiAfterDhInitEvent;
+import com.seibel.lod.core.api.external.methods.events.abstractEvents.DhApiBeforeDhInitEvent;
+import com.seibel.lod.core.handlers.dependencyInjection.DhApiEventInjector;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorInjector;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
@@ -42,7 +45,7 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author coolGi
  * @author Ran
- * @version 12-1-2021
+ * @version 8-15-2022
  */
 public class FabricMain
 {
@@ -57,7 +60,10 @@ public class FabricMain
 
 
 	// This loads the mod after minecraft loads which doesn't causes a lot of issues
-	public static void init() {
+	public static void init()
+	{
+		DhApiEventInjector.INSTANCE.fireAllEvents(DhApiBeforeDhInitEvent.class, null);
+		
 		LOGGER.info("Initializing Mod");
 		LodCommonMain.startup(null);
 		FabricDependencySetup.createInitialBindings();
@@ -73,5 +79,7 @@ public class FabricMain
 			ModAccessorInjector.INSTANCE.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
 		LOGGER.info(ModInfo.READABLE_NAME + " Initialized");
+		
+		DhApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);
 	}
 }

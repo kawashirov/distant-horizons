@@ -25,7 +25,10 @@ import com.seibel.lod.common.wrappers.DependencySetup;
 import com.seibel.lod.common.wrappers.config.GetConfigScreen;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.core.api.external.methods.events.abstractEvents.DhApiAfterDhInitEvent;
+import com.seibel.lod.core.api.external.methods.events.abstractEvents.DhApiBeforeDhInitEvent;
 import com.seibel.lod.core.handlers.ReflectionHandler;
+import com.seibel.lod.core.handlers.dependencyInjection.DhApiEventInjector;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorInjector;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
@@ -66,9 +69,11 @@ import java.util.Random;
  * Initialize and setup the Mod. <br>
  * If you are looking for the real start of the mod
  * check out the ClientProxy.
- * 
+ *
+ * @author coolGi
+ * @author Ran
  * @author James Seibel
- * @version 11-21-2021
+ * @version 8-15-2022
  */
 @Mod(ModInfo.ID)
 public class ForgeMain implements LodForgeMethodCaller
@@ -108,7 +113,10 @@ public class ForgeMain implements LodForgeMethodCaller
 		postInitCommon();
 	}
 
-	private void initCommon() {
+	private void initCommon()
+	{
+		DhApiEventInjector.INSTANCE.fireAllEvents(DhApiBeforeDhInitEvent.class, null);
+		
 		LodCommonMain.startup(this);
 		ForgeDependencySetup.createInitialBindings();
 		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
@@ -125,11 +133,14 @@ public class ForgeMain implements LodForgeMethodCaller
 		#endif
 	}
 
-	private void postInitCommon() {
+	private void postInitCommon()
+	{
 		LOGGER.info("Post-Initializing Mod");
 		SingletonInjector.INSTANCE.runDelayedSetup();
 		LodCommonMain.initConfig();
 		LOGGER.info("Mod Post-Initialized");
+		
+		DhApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);
 	}
 
 	private final ModelDataMap dataMap = new ModelDataMap.Builder().build();
