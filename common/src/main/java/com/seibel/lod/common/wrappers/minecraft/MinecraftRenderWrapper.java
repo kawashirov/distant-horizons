@@ -85,8 +85,12 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	private static final Minecraft MC = Minecraft.getInstance();
 	private static final IWrapperFactory FACTORY = WrapperFactory.INSTANCE;
 
+	private static final IOptifineAccessor OPTIFINE_ACCESSOR = ModAccessorInjector.INSTANCE.get(IOptifineAccessor.class);
+	
 	public LightMapWrapper lightmap = null;
 
+	
+	
 	@Override
 	public Vec3f getLookAtVector()
 	{
@@ -186,12 +190,24 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public int getScreenWidth()
 	{
-		return MC.getWindow().getWidth();
+		int width = MC.getWindow().getWidth();
+		if (OPTIFINE_ACCESSOR != null)
+		{
+			// TODO remove comment after testing:
+			// this should fix the issue where different optifine render resolutions screw up the LOD rendering
+			width *= OPTIFINE_ACCESSOR.getRenderResolutionMultiplier();
+		}
+		return width;
 	}
 	@Override
 	public int getScreenHeight()
 	{
-		return MC.getWindow().getHeight();
+		int height = MC.getWindow().getHeight();
+		if (OPTIFINE_ACCESSOR != null)
+		{
+			height *= OPTIFINE_ACCESSOR.getRenderResolutionMultiplier();
+		}
+		return height;
 	}
 	
     private RenderTarget getRenderTarget() {
