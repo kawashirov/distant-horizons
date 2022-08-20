@@ -554,6 +554,13 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	public void stop(boolean blocking) {
 		EVENT_LOGGER.info("Batch Chunk Generator shutting down...");
 		executors.shutdownNow();
+		Iterator<GenerationEvent> iter = events.iterator();
+		while (iter.hasNext())
+		{
+			GenerationEvent event = iter.next();
+			event.future.cancel(true);
+			iter.remove();
+		}
 		if (blocking) try {
 			if (!executors.awaitTermination(10, TimeUnit.SECONDS)) {
 				EVENT_LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...");
