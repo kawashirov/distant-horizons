@@ -2,6 +2,7 @@ package com.seibel.lod;
 
 import com.seibel.lod.common.networking.Networking;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
+import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.core.api.internal.a7.ClientApi;
@@ -10,6 +11,7 @@ import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -91,7 +93,8 @@ public class ForgeServerProxy {
     {
         if (isValidTime()) {
             if (event.getWorld() instanceof ServerLevel) {
-                IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld());
+                ServerLevelWrapper wrappedLevel = ServerLevelWrapper.getWrapper((ServerLevel) event.getWorld());
+                IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld(), wrappedLevel);
                 serverApi.serverChunkLoadEvent(chunk, getLevelWrapper((ServerLevel) event.getWorld()));
             }
         }
@@ -101,7 +104,8 @@ public class ForgeServerProxy {
     {
         if (isValidTime()) {
             if (event.getWorld() instanceof ServerLevel) {
-                IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld());
+                ServerLevelWrapper wrappedLevel = ServerLevelWrapper.getWrapper((ServerLevel) event.getWorld());
+                IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld(), wrappedLevel);
                 serverApi.serverChunkSaveEvent(chunk, getLevelWrapper((ServerLevel) event.getWorld()));
             }
         }

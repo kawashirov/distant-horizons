@@ -22,7 +22,7 @@ package com.seibel.lod;
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.wrappers.DependencySetup;
-import com.seibel.lod.common.wrappers.config.GetConfigScreen;
+import com.seibel.lod.common.wrappers.gui.GetConfigScreen;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.external.methods.events.abstractEvents.DhApiAfterDhInitEvent;

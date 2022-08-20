@@ -80,7 +80,8 @@ public class ForgeClientProxy
 	{
 		if (event.getWorld() instanceof ClientLevel)
 		{
-			IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld());
+			ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld());
+			IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld(), wrappedLevel);
 			ClientApi.INSTANCE.clientChunkLoadEvent(chunk, ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld()));
 		}
 	}
@@ -89,7 +90,8 @@ public class ForgeClientProxy
 	{
 		if (event.getWorld() instanceof ClientLevel)
 		{
-			IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld());
+			ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld());
+			IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld(), wrappedLevel);
 			ClientApi.INSTANCE.clientChunkSaveEvent(chunk, ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld()));
 		}
 	}
