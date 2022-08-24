@@ -126,13 +126,13 @@ public class ClientBlockStateCache {
                     (int) (Math.sqrt(blue / count)*255.));
         }
         // TODO: Remove this when transparency is added!
-        double colorAlpha = ColorUtil.getAlpha(tempColor)/255.;
+        /*double colorAlpha = ColorUtil.getAlpha(tempColor)/255.;
         tempColor = ColorUtil.rgbToInt(
                 ColorUtil.getAlpha(tempColor),
                 (int)(ColorUtil.getRed(tempColor) * colorAlpha),
                 (int)(ColorUtil.getGreen(tempColor) * colorAlpha),
                 (int)(ColorUtil.getBlue(tempColor) * colorAlpha)
-        );
+        );*/
         return tempColor;
     }
     private static final Direction[] DIRECTION_ORDER = {Direction.UP, Direction.NORTH, Direction.EAST, Direction.WEST, Direction.SOUTH, Direction.DOWN};
