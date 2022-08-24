@@ -115,7 +115,7 @@ public class ClientBlockStateCache {
 
         if (count == 0)
             // this block is entirely transparent
-            tempColor = ColorUtil.rgbToInt(255,255,0,255);
+            tempColor = ColorUtil.rgbToInt(0,255,255,255);
         else
         {
             // determine the average color
