@@ -130,6 +130,9 @@ forgix {
     fabric {
         jarLocation = "build/libs/DistantHorizons-${rootProject.versionStr}.jar"
     }
+
+    removeDuplicate "com.seibel.lod.core"
+    removeDuplicate "com.seibel.lod.api"
 }
 
 architectury {
@@ -142,17 +145,24 @@ subprojects { p ->
         apply plugin: "org.spongepowered.gradle.vanilla" // Provides minecraft libraries
         apply plugin: "com.github.johnrengelman.shadow"
     } else {
-        apply plugin: "dev.architectury.loom"
         apply plugin: "com.github.johnrengelman.shadow"
+        if (p != project(":api")) { // Don't add loom to the api project
+            apply plugin: "dev.architectury.loom"
 
-        loom {
-            silentMojangMappingsLicense()
+            loom {
+                silentMojangMappingsLicense()
+            }
+        } else {
+            apply plugin: "java" // Apply the java plugin early to the api project
         }
     }
 
     configurations {
         shadowMe
         implementation.extendsFrom shadowMe
+
+        customModule
+        implementation.extendsFrom customModule
     }
 
     if (p == project(":core")) {
@@ -169,7 +179,7 @@ subprojects { p ->
 
     dependencies {
         // Sets up minecraft for projects other than core
-        if (p != project(":core")) {
+        if (p != project(":core") && p != project(":api")) {
             minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
             // The following line declares the mojmap mappings & parchment mappings
             mappings loom.layered() {
@@ -209,9 +219,19 @@ subprojects { p ->
         shadowMe "com.formdev:flatlaf-extras:${rootProject.flatlaf_version}"
         shadowMe "com.formdev:svgSalamander:${rootProject.svgSalamander_version}"
 
-        // Add the core project as a dependency
+        // Add the core as a dependency
         if (p != project(":core")) {
-            shadowMe(project(":core")) {
+            customModule(project(":core")) {
+                // Remove Junit test libraries
+                exclude group: "org.junit.jupiter", module: "junit-jupiter"
+                exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
+                exclude group: "junit", module: "junit"
+            }
+        }
+
+        // Add the api as a dependency
+        if (p != project(":api") && p != project(":core")) {
+            customModule(project(":api")) {
                 // Remove Junit test libraries
                 exclude group: "org.junit.jupiter", module: "junit-jupiter"
                 exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
@@ -245,8 +265,10 @@ subprojects { p ->
 //    }
 
     // Run mergeJars when running build
-    build.finalizedBy(mergeJars)
-    assemble.finalizedBy(mergeJars)
+    if (p != project(":api") && p != project(":api")) {
+        build.finalizedBy(mergeJars)
+        assemble.finalizedBy(mergeJars)
+    }
 }
 
 allprojects { p ->

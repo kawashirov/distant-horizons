@@ -66,7 +66,7 @@ processResources {
 shadowJar {
     exclude "architectury.common.json"
 
-    configurations = [project.configurations.shadowCommon, project.configurations.shadowMe]
+    configurations = [project.configurations.shadowCommon, project.configurations.shadowMe, project.configurations.customModule]
 
     // Compression
     relocate 'org.tukaani', 'distanthorizons.libraries.tukaani'

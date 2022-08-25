@@ -12,5 +12,6 @@ include("common")
 include("fabric")
 include("forge")
 include("core")
+include("api")
 
 rootProject.name = "DistantHorizons"
