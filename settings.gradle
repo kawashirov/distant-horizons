@@ -15,5 +15,6 @@ include("forge")
 include("core")
 project(":core").projectDir = file('coreSubProjects/core')
 include("api")
+project(":api").projectDir = file('coreSubProjects/api')
 
 rootProject.name = "DistantHorizons"
