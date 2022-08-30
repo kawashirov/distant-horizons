@@ -11,7 +11,9 @@ pluginManagement {
 include("common")
 include("fabric")
 include("forge")
+
 include("core")
+project(":core").projectDir = file('coreSubProjects/core')
 include("api")
 
 rootProject.name = "DistantHorizons"
