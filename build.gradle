@@ -140,20 +140,21 @@ architectury {
 }
 
 subprojects { p ->
-    if (p == project(":core")) {
+    
+    // setup Architectury
+    if (p == project(":core") || p == project(":api") || p == project(":apiInterface") || p == project(":coreShared"))
+    {
         apply plugin: "application"
         apply plugin: "org.spongepowered.gradle.vanilla" // Provides minecraft libraries
         apply plugin: "com.github.johnrengelman.shadow"
-    } else {
+    }
+    else
+    {
         apply plugin: "com.github.johnrengelman.shadow"
-        if (p != project(":api")) { // Don't add loom to the api project
-            apply plugin: "dev.architectury.loom"
-
-            loom {
-                silentMojangMappingsLicense()
-            }
-        } else {
-            apply plugin: "java" // Apply the java plugin early to the api project
+        apply plugin: "dev.architectury.loom"
+        
+        loom {
+            silentMojangMappingsLicense()
         }
     }
 
@@ -164,34 +165,27 @@ subprojects { p ->
         customModule
         implementation.extendsFrom customModule
     }
-
-    if (p == project(":core")) {
-        // Sets up minecraft for core
+    
+    // Set up the minecraft non-dependency for core sub-projects
+    if (p == project(":core") || p == project(":api") || p == project(":apiInterface") || p == project(":coreShared"))
+    {
         minecraft {
             version("${rootProject.minecraft_version}")
         }
-
-        // Sets the main standalone jar entrypoint
+        
+        // Set the standalone jar entrypoint
+        // (This will point to a non-existent class in all sub-projects except "Core")
         application {
             mainClass.set('com.seibel.lod.core.JarMain')
         }
     }
 
     dependencies {
-        // Sets up minecraft for projects other than core
-        if (p != project(":core") && p != project(":api")) {
-            minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-            // The following line declares the mojmap mappings & parchment mappings
-            mappings loom.layered() {
-                // Mojmap mappings
-                officialMojangMappings()
-                // Parchment mappings (it adds parameter mappings & javadoc)
-                if (rootProject.minecraft_version != "1.19")
-                    parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
-                else // As 1.19 dosnt have parchment mappings yet, we use 1.18.2 mapping
-                    parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip")
-            }
-        }
+        
+        //=====================//
+        // shared dependencies //
+        //=====================//
+        
 
         // Manifold
         annotationProcessor "systems.manifold:manifold-preprocessor:${rootProject.manifold_version}"
@@ -218,9 +212,30 @@ subprojects { p ->
         // SVG
         shadowMe "com.formdev:flatlaf-extras:${rootProject.flatlaf_version}"
         shadowMe "com.formdev:svgSalamander:${rootProject.svgSalamander_version}"
+        
+        
+        
+        //==========================//
+        // conditional dependencies //
+        //==========================//
 
-        // Add the core as a dependency
-        if (p != project(":core")) {
+        // Minecraft dependent sub-projects
+        if (p == project(":common") || p == project(":forge") || p == project(":fabric"))
+        {
+            // Add Minecraft
+            minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+            // The following line declares the mojmap mappings & parchment mappings
+            mappings loom.layered() {
+                // Mojmap mappings
+                officialMojangMappings()
+                // Parchment mappings (it adds parameter mappings & javadoc)
+                if (rootProject.minecraft_version != "1.19")
+                    parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+                else // As 1.19 doesn't have parchment mappings yet, we use 1.18.2 mapping
+                    parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip")
+            }
+            
+            // Add core
             customModule(project(":core")) {
                 // Remove Junit test libraries
                 exclude group: "org.junit.jupiter", module: "junit-jupiter"
@@ -228,16 +243,28 @@ subprojects { p ->
                 exclude group: "junit", module: "junit"
             }
         }
-
-        // Add the api as a dependency
-        if (p != project(":api") && p != project(":core")) {
-            customModule(project(":api")) {
+        
+        
+        // Add coreShared to sub-projects that need core objects
+        if (p == project(":core") || p == project(":apiInterface") || p == project(":api")) {
+            customModule(project(":coreShared")) {
                 // Remove Junit test libraries
                 exclude group: "org.junit.jupiter", module: "junit-jupiter"
                 exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
                 exclude group: "junit", module: "junit"
             }
         }
+        
+        // Add apiInterface to core and the API
+        if (p == project(":core") || p == project(":api")) {
+            customModule(project(":apiInterface")) {
+                // Remove Junit test libraries
+                exclude group: "org.junit.jupiter", module: "junit-jupiter"
+                exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
+                exclude group: "junit", module: "junit"
+            }
+        }
+        
     }
 
     // Allows the jar to run standalone
