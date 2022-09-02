@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorInjector;
@@ -41,6 +42,8 @@ import com.seibel.lod.core.objects.math.Vec3d;
 import com.seibel.lod.core.objects.math.Vec3f;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IBCLibAccessor;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.lod.common.wrappers.McObjectConverter;
@@ -144,6 +147,8 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	
 	@Override
 	public Color getFogColor(float partialTicks) {
+		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("bclib"))
+			return ModAccessorInjector.INSTANCE.get(IBCLibAccessor.class).getFogColor(); // BCLib uses a different fog method so we need to use that instead if they are loaded
 
 		#if PRE_MC_1_17_1
 		float[] colorValues = new float[4];

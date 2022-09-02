@@ -23,20 +23,20 @@ import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.external.methods.events.abstractEvents.DhApiAfterDhInitEvent;
 import com.seibel.lod.core.api.external.methods.events.abstractEvents.DhApiBeforeDhInitEvent;
+import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.handlers.dependencyInjection.DhApiEventInjector;
 import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorInjector;
 import com.seibel.lod.core.handlers.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
-import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
-import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
-import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
-import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.*;
+import com.seibel.lod.wrappers.modAccessor.BCLibAccessor;
 import com.seibel.lod.wrappers.modAccessor.OptifineAccessor;
 import com.seibel.lod.wrappers.modAccessor.SodiumAccessor;
 import com.seibel.lod.wrappers.modAccessor.StarlightAccessor;
 import com.seibel.lod.wrappers.FabricDependencySetup;
 
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.mixin.Mixins;
 
 /**
  * Initialize and setup the Mod. <br>
@@ -45,7 +45,7 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author coolGi
  * @author Ran
- * @version 8-15-2022
+ * @version 9-2-2022
  */
 public class FabricMain
 {
@@ -55,6 +55,10 @@ public class FabricMain
 		LOGGER.info("Post-Initializing Mod");
 		FabricDependencySetup.runDelayedSetup();
 		LodCommonMain.initConfig();
+
+		if (Config.Client.Graphics.FogQuality.disableVanillaFog.get() && SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("bclib"))
+			ModAccessorInjector.INSTANCE.get(IBCLibAccessor.class).setRenderCustomFog(false); // Remove BCLib's fog
+
 		LOGGER.info("Mod Post-Initialized");
 	}
 
@@ -77,6 +81,9 @@ public class FabricMain
 		}
 		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("optifine")) {
 			ModAccessorInjector.INSTANCE.bind(IOptifineAccessor.class, new OptifineAccessor());
+		}
+		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("bclib")) {
+			ModAccessorInjector.INSTANCE.bind(IBCLibAccessor.class, new BCLibAccessor());
 		}
 		LOGGER.info(ModInfo.READABLE_NAME + " Initialized");
 		
