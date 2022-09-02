@@ -38,8 +38,10 @@ public class MixinMinecraft {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
     )
     public void onOpenScreen(Minecraft instance, Screen guiScreen) {
-        if (!Config.Client.AutoUpdater.enableAutoUpdater.get()) // Don't do anything if the user doesn't want it
+        if (!Config.Client.AutoUpdater.enableAutoUpdater.get()) { // Don't do anything if the user doesn't want it
+            instance.setScreen(guiScreen);
             return;
+        }
 
         // Some init stuff
         // We use sha1 to check the version as our versioning system is diffrent to the one on modrinth
