@@ -2,10 +2,12 @@ package com.seibel.lod.common.wrappers.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.core.config.Config;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -18,13 +20,17 @@ import java.util.*;
 public class UpdateModScreen extends Screen {
     public static boolean modUpdated = false;
     private ConfigListWidget list;
+    private Screen parent;
+    private String newVersion;
 
-    public UpdateModScreen() {
+    public UpdateModScreen(Screen parent, String newVersion) {
         #if PRE_MC_1_19
-        super(new TranslatableComponent(ModInfo.ID + ".updateScreen"));
+        super(new TranslatableComponent(ModInfo.ID + ".updater.title"));
         #else
-        super(Component.translatable(ModInfo.ID + ".updateScreen"));
+        super(Component.translatable(ModInfo.ID + ".updater.title"));
         #endif
+        this.parent = parent;
+        this.newVersion = newVersion;
     }
 
     @Override
@@ -32,9 +38,33 @@ public class UpdateModScreen extends Screen {
         super.init();
 
         this.list = new ConfigListWidget(this.minecraft, this.width, this.height, 0, this.height, 25); // Select the area to tint
-        if (this.minecraft != null && this.minecraft.level != null) // Check if in game
-            this.list.setRenderBackground(false); // Disable from rendering
         this.addWidget(this.list); // Add the tint to the things to be rendered
+
+
+        this.addBtn(
+                new Button(this.width / 2 - 100, this.height / 2 - 20, 150, 20, new TranslatableComponent(ModInfo.ID + ".updater.update"), (btn) -> {
+                    this.onClose();
+                    modUpdated = true;
+                })
+        );
+        this.addBtn(
+                new Button(this.width / 2 - 100, this.height / 2 + 5, 150, 20, new TranslatableComponent(ModInfo.ID + ".updater.later"), (btn) -> {
+                    this.onClose();
+                })
+        );
+        this.addBtn(
+                new Button(this.width / 2 - 100, this.height / 2 + 30, 150, 20, new TranslatableComponent(ModInfo.ID + ".updater.never"), (btn) -> {
+                    this.onClose();
+                    Config.Client.AutoUpdater.enableAutoUpdater.set(false);
+                })
+        );
+        this.addBtn(
+                new Button(this.width / 2 - 100, this.height / 2 + 55, 150, 20, new TranslatableComponent(ModInfo.ID + ".updater.silentUpdate"), (btn) -> {
+                    this.onClose();
+                    Config.Client.AutoUpdater.promptForUpdate.set(false);
+                })
+        );
+
     }
 
     @Override
@@ -43,13 +73,28 @@ public class UpdateModScreen extends Screen {
         this.list.render(matrices, mouseX, mouseY, delta); // Renders the items in the render list (currently only used to tint background darker)
 
         super.render(matrices, mouseX, mouseY, delta); // Render the vanilla stuff (currently only used for the background and tint)
+
+        drawCenteredString(matrices, this.font, new TranslatableComponent(ModInfo.ID + ".updater.text1"), this.width / 2, this.height / 2 - 60, 0xFFFFFF);
+        drawCenteredString(matrices, this.font, new TranslatableComponent(ModInfo.ID + ".updater.text2", ModInfo.VERSION, this.newVersion), this.width / 2, this.height / 2 - 45, 0xFFFFFF);
+    }
+
+    @Override
+    public void onClose() {
+        Objects.requireNonNull(minecraft).setScreen(this.parent); // Goto the parent screen
     }
 
 
 
 
-
-
+    // addRenderableWidget in 1.17 and over
+    // addButton in 1.16 and below
+    private void addBtn(Button button) {
+		#if PRE_MC_1_17_1
+        this.addButton(button);
+		#else
+        this.addRenderableWidget(button);
+		#endif
+    }
 
 
     public static class ConfigListWidget extends ContainerObjectSelectionList<ButtonEntry> {
