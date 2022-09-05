@@ -22,6 +22,7 @@ package com.seibel.lod.common.wrappers.worldGeneration;
 import java.lang.invoke.MethodHandles;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import com.seibel.lod.core.a7.util.UncheckedInterruptedException;
 import com.seibel.lod.core.config.Config;
@@ -29,7 +30,6 @@ import com.seibel.lod.core.enums.config.ELightGenerationMode;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.core.util.EventTimer;
-import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.util.gridList.ArrayGridList;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper.Steps;
@@ -51,11 +51,11 @@ public final class GenerationEvent
 	EventTimer timer = null;
 	long inQueueTime;
 	long timeoutTime = -1;
-	public CompletableFuture<ArrayGridList<IChunkWrapper>> future = null;
+	public CompletableFuture<Void> future = null;
+	final Consumer<IChunkWrapper> resultConsumer;
 
 	public GenerationEvent(DHChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
-						   Steps target, double runTimeRatio)
-	{
+						   Steps target, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer) {
 		inQueueTime = System.nanoTime();
 		this.id = generationFutureDebugIDs++;
 		this.minPos = minPos;
@@ -64,15 +64,15 @@ public final class GenerationEvent
 		this.tParam = ThreadedParameters.getOrMake(generationGroup.params);
 		this.lightMode = Config.Client.WorldGenerator.lightGenerationMode.get();
 		this.runTimeRatio = runTimeRatio;
-
+		this.resultConsumer = resultConsumer;
 	}
 
 	public static GenerationEvent startEvent(DHChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
-																			 Steps target, double runTimeRatio)
+                                             Steps target, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
 	{
 		if (size % 2 == 0) size += 1; // size must be odd for vanilla world gen region to work
-		GenerationEvent event = new GenerationEvent(minPos, size, generationGroup, target, runTimeRatio);
-		event.future = CompletableFuture.supplyAsync(() ->
+		GenerationEvent event = new GenerationEvent(minPos, size, generationGroup, target, runTimeRatio, resultConsumer);
+		event.future = CompletableFuture.runAsync(() ->
 				{
 					long runStartTime = System.nanoTime();
 					event.timeoutTime = runStartTime;
@@ -80,7 +80,7 @@ public final class GenerationEvent
 					event.timer = new EventTimer("setup");
 					BatchGenerationEnvironment.isDistantGeneratorThread.set(true);
 					try {
-						return generationGroup.generateLodFromList(event);
+						generationGroup.generateLodFromList(event);
 					} finally {
 						BatchGenerationEnvironment.isDistantGeneratorThread.remove();
 						if (!Thread.interrupted() && runTimeRatio < 1.0) {

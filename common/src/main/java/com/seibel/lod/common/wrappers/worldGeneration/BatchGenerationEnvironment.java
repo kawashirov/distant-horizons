@@ -24,6 +24,7 @@ package com.seibel.lod.common.wrappers.worldGeneration;
 import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.lod.core.a7.level.IServerLevel;
 import com.seibel.lod.core.config.Config;
+import com.seibel.lod.core.enums.config.ELightGenerationMode;
 import com.seibel.lod.core.logging.ConfigBasedLogger;
 import com.seibel.lod.core.logging.ConfigBasedSpamLogger;
 import com.seibel.lod.core.enums.config.EDistanceGenerationMode;
@@ -43,6 +44,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import com.seibel.lod.common.wrappers.DependencySetupDoneCheck;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
@@ -314,7 +316,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		
 	}
 	
-	public ArrayGridList<IChunkWrapper> generateLodFromList(GenerationEvent e)
+	public void generateLodFromList(GenerationEvent e)
 	{
 		EVENT_LOGGER.debug("Lod Generate Event: " + e.minPos);
 		ArrayGridList<ChunkAccess> referencedChunks;
@@ -371,90 +373,45 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			e.tParam.markAsInvalid();
 			throw (RuntimeException)f.getCause();
 		}
-		
-//		switch (e.target)
-//		{
-//		case Empty:
-//		case StructureStart:
-//		case StructureReference:
-//			generationMode = EDistanceGenerationMode.NONE;
-//			break;
-//		case Biomes:
-//			generationMode = EDistanceGenerationMode.BIOME_ONLY;
-//		case Noise:
-//			generationMode = EDistanceGenerationMode.BIOME_ONLY_SIMULATE_HEIGHT;
-//			break;
-//		case Surface:
-//		case Carvers:
-//			generationMode = EDistanceGenerationMode.SURFACE;
-//			break;
-//		case Features:
-//			generationMode = EDistanceGenerationMode.FEATURES;
-//			break;
-//		case Light:
-//		case LiquidCarvers:
-//		default:
-//			throw new IllegalArgumentException("Unknown/Unsupported target: " + e.target);
-//		}
-//		for (int oy = 0; oy < genChunks.gridSize; oy++)
-//		{
-//			for (int ox = 0; ox < genChunks.gridSize; ox++)
-//			{
-//				ChunkAccess target = genChunks.get(ox, oy);
-//				ChunkWrapper wrappedChunk = new ChunkWrapper(target, region);
-//				if (!wrappedChunk.isLightCorrect()) {
-//					throw new RuntimeException("The generated chunk somehow has isLightCorrect() returning false");
-//				}
-//
-//				boolean isFull = target.getStatus() == ChunkStatus.FULL || target instanceof LevelChunk;
-//				#if POST_MC_1_18_1
-//				boolean isPartial = target.isOldNoiseGeneration();
-//				#endif
-//				if (isFull)
-//				{
-//					LOAD_LOGGER.info("Detected full existing chunk at {}", target.getPos());
-//					ChunkSizedData data = LodDataBuilder.createChunkData(wrappedChunk);
-//					if (data != null)
-//					{
-//						params.lodLevel.submitChunkData(data);
-//					}
-//
-//					//FIXME: Fix this
-//					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
-//							new LodBuilderConfig(EDistanceGenerationMode.FULL), true, e.genAllDetails);
-//				}
-//				#if POST_MC_1_18_1
-//				else if (isPartial)
-//				{
-//					LOAD_LOGGER.info("Detected old existing chunk at {}", target.getPos());
-//					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
-//							new LodBuilderConfig(generationMode), true, e.genAllDetails);
-//				}
-//				#endif
-//				else if (target.getStatus() == ChunkStatus.EMPTY && generationMode == EDistanceGenerationMode.NONE)
-//				{
-//					params.lodBuilder.generateLodNodeFromChunk(params.lodDim,wrappedChunk,
-//							LodBuilderConfig.getFillVoidConfig(), true, e.genAllDetails);
-//				}
-//				else
-//				{
-//					params.lodBuilder.generateLodNodeFromChunk(params.lodDim, wrappedChunk,
-//							new LodBuilderConfig(generationMode), true, e.genAllDetails);
-//				}
-//				if (e.lightMode == ELightGenerationMode.FANCY || isFull)
-//				{
-//					lightEngine.retainData(target.getPos(), false);
-//				}
-//
-//			}
-//		}
 
-		ArrayGridList<IChunkWrapper> result = new ArrayGridList<>(e.size);
-		for (int oy = 0; oy < e.size; oy++)
+		for (int oy = 0; oy < genChunks.gridSize; oy++)
 		{
-			for (int ox = 0; ox < e.size; ox++)
+			for (int ox = 0; ox < genChunks.gridSize; ox++)
 			{
-				result.set(ox, oy, new ChunkWrapper(genChunks.get(ox, oy), region, null));
+				ChunkAccess target = genChunks.get(ox, oy);
+				ChunkWrapper wrappedChunk = new ChunkWrapper(target, region, null);
+				if (!wrappedChunk.isLightCorrect()) {
+					throw new RuntimeException("The generated chunk somehow has isLightCorrect() returning false");
+				}
+
+				boolean isFull = target.getStatus() == ChunkStatus.FULL || target instanceof LevelChunk;
+				#if POST_MC_1_18_1
+				boolean isPartial = target.isOldNoiseGeneration();
+				#endif
+				if (isFull)
+				{
+					LOAD_LOGGER.info("Detected full existing chunk at {}", target.getPos());
+					e.resultConsumer.accept(wrappedChunk);
+				}
+				#if POST_MC_1_18_1
+				else if (isPartial)
+				{
+					LOAD_LOGGER.info("Detected old existing chunk at {}", target.getPos());
+					e.resultConsumer.accept(wrappedChunk);
+				}
+				#endif
+				else if (target.getStatus() == ChunkStatus.EMPTY)
+				{
+					e.resultConsumer.accept(wrappedChunk);
+				}
+				else
+				{
+					e.resultConsumer.accept(wrappedChunk);
+				}
+				if (e.lightMode == ELightGenerationMode.FANCY || isFull)
+				{
+					lightEngine.retainData(target.getPos(), false);
+				}
 			}
 		}
 		e.timer.complete();
@@ -464,7 +421,6 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			e.tParam.perf.recordEvent(e.timer);
 			PREF_LOGGER.infoInc("{}", e.timer);
 		}
-		return result;
 	}
 	
 	public void generateDirect(GenerationEvent e, ArrayGridList<ChunkAccess> subRange,
@@ -571,9 +527,9 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	}
 
 	@Override
-	public CompletableFuture<ArrayGridList<IChunkWrapper>> generateChunks(int minX, int minZ, int genSize, Steps targetStep, double runTimeRatio) {
+	public CompletableFuture<Void> generateChunks(int minX, int minZ, int genSize, Steps targetStep, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer) {
 		// TODO: Check event overlap via e.tooClose()
-		GenerationEvent e = GenerationEvent.startEvent(new DHChunkPos(minX, minZ), genSize, this, targetStep, runTimeRatio);
+		GenerationEvent e = GenerationEvent.startEvent(new DHChunkPos(minX, minZ), genSize, this, targetStep, runTimeRatio, resultConsumer);
 		events.add(e);
 		return e.future;
 	}
