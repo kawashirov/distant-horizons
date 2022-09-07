@@ -142,7 +142,7 @@ architectury {
 subprojects { p ->
     
     // setup Architectury
-    if (p == project(":core") || p == project(":api") || p == project(":apiInterface") || p == project(":coreShared"))
+    if (p == project(":core") || p == project(":api") || p == project(":commonInterface"))
     {
         apply plugin: "application"
         apply plugin: "org.spongepowered.gradle.vanilla" // Provides minecraft libraries
@@ -167,7 +167,7 @@ subprojects { p ->
     }
     
     // Set up the minecraft non-dependency for core sub-projects
-    if (p == project(":core") || p == project(":api") || p == project(":apiInterface") || p == project(":coreShared"))
+    if (p == project(":core") || p == project(":api") || p == project(":commonInterface"))
     {
         minecraft {
             version("${rootProject.minecraft_version}")
@@ -220,19 +220,22 @@ subprojects { p ->
         //==========================//
 
         // Minecraft dependent sub-projects
-        if (p == project(":common") || p == project(":forge") || p == project(":fabric"))
+        if (p == project(":common") || p == project(":forge") || p == project(":fabric") || p == project(":commonInterface") || p == project(":api"))
         {
-            // Add Minecraft
-            minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-            // The following line declares the mojmap mappings & parchment mappings
-            mappings loom.layered() {
-                // Mojmap mappings
-                officialMojangMappings()
-                // Parchment mappings (it adds parameter mappings & javadoc)
-                if (rootProject.minecraft_version != "1.19")
-                    parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
-                else // As 1.19 doesn't have parchment mappings yet, we use 1.18.2 mapping
-                    parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip")
+            if (p != project(":commonInterface") && p != project(":api"))
+            {
+                // Add Minecraft
+                minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+                // The following line declares the mojmap mappings & parchment mappings
+                mappings loom.layered() {
+                    // Mojmap mappings
+                    officialMojangMappings()
+                    // Parchment mappings (it adds parameter mappings & javadoc)
+                    if (rootProject.minecraft_version != "1.19")
+                        parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+                    else // As 1.19 doesn't have parchment mappings yet, we use 1.18.2 mapping
+                        parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip")
+                }
             }
             
             // Add core
@@ -245,19 +248,9 @@ subprojects { p ->
         }
         
         
-        // Add coreShared to sub-projects that need core objects
-        if (p == project(":core") || p == project(":apiInterface") || p == project(":api")) {
-            customModule(project(":coreShared")) {
-                // Remove Junit test libraries
-                exclude group: "org.junit.jupiter", module: "junit-jupiter"
-                exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
-                exclude group: "junit", module: "junit"
-            }
-        }
         
-        // Add apiInterface to core and the API
-        if (p == project(":core") || p == project(":api")) {
-            customModule(project(":apiInterface")) {
+        if (p == project(":fabric") || p == project(":forge") || p == project(":common")) {
+            customModule(project(":commonInterface")) {
                 // Remove Junit test libraries
                 exclude group: "org.junit.jupiter", module: "junit-jupiter"
                 exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
