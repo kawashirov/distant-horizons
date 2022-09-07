@@ -27,8 +27,7 @@ import com.seibel.lod.common.wrappers.block.BiomeWrapper;
 import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
 import com.seibel.lod.common.wrappers.block.cache.ServerBlockDetailMap;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
-import com.seibel.lod.core.a7.world.WorldEnvironment;
-import com.seibel.lod.core.api.internal.a7.ServerApi;
+import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.objects.DHBlockPos;
 import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
@@ -45,6 +44,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -54,6 +54,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public class ServerLevelWrapper implements IServerLevelWrapper
 {
+	private static final Logger LOGGER = DhLoggerBuilder.getLogger(ServerLevelWrapper.class.getSimpleName());
     private static final ConcurrentHashMap<ServerLevel, ServerLevelWrapper>
             levelWrapperMap = new ConcurrentHashMap<>();
 
@@ -67,7 +68,7 @@ public class ServerLevelWrapper implements IServerLevelWrapper
     }
     public static void cleanCheck() {
         if (!levelWrapperMap.isEmpty()) {
-            ServerApi.LOGGER.warn("{} server levels havn't been freed!", levelWrapperMap.size());
+            LOGGER.warn("{} server levels havn't been freed!", levelWrapperMap.size());
             levelWrapperMap.clear();
         }
     }
@@ -86,7 +87,7 @@ public class ServerLevelWrapper implements IServerLevelWrapper
             MinecraftClientWrapper client = MinecraftClientWrapper.INSTANCE;
             return ClientLevelWrapper.getWrapper(client.mc.level);
         } catch (Exception e) {
-            ServerApi.LOGGER.error("Failed to get client side wrapper for server level {}.", level);
+            LOGGER.error("Failed to get client side wrapper for server level {}.", level);
             return null;
         }
     }

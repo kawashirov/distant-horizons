@@ -6,16 +6,13 @@ import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
 import com.seibel.lod.common.wrappers.block.cache.ClientBlockDetailMap;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
-import com.seibel.lod.core.api.internal.a7.ClientApi;
-import com.seibel.lod.core.api.internal.a7.ServerApi;
-import com.seibel.lod.core.enums.ELevelType;
+import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.objects.DHBlockPos;
 import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IClientLevelWrapper;
-import com.seibel.lod.core.wrapperInterfaces.world.IDimensionTypeWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IServerLevelWrapper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -23,12 +20,14 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ClientLevelWrapper implements IClientLevelWrapper
 {
+	private static final Logger LOGGER = DhLoggerBuilder.getLogger(ClientLevelWrapper.class.getSimpleName());
     private static final ConcurrentHashMap<ClientLevel, ClientLevelWrapper>
             levelWrapperMap = new ConcurrentHashMap<>();
 
@@ -52,13 +51,13 @@ public class ClientLevelWrapper implements IClientLevelWrapper
             return ServerLevelWrapper.getWrapper(MinecraftClientWrapper.INSTANCE.mc.getSingleplayerServer().getPlayerList()
                     .getPlayer(MinecraftClientWrapper.INSTANCE.mc.player.getUUID()).getLevel());
         } catch (Exception e) {
-            ClientApi.LOGGER.error("Failed to get server side wrapper for client level {}.", level);
+            LOGGER.error("Failed to get server side wrapper for client level {}.", level);
             return null;
         }
     }
     public static void cleanCheck() {
         if (!levelWrapperMap.isEmpty()) {
-            ServerApi.LOGGER.warn("{} client levels havn't been freed!", levelWrapperMap.size());
+            LOGGER.warn("{} client levels havn't been freed!", levelWrapperMap.size());
             levelWrapperMap.clear();
         }
     }
