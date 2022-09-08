@@ -99,7 +99,8 @@ public class BiomeWrapper implements IBiomeWrapper
         try {
          #if PRE_MC_1_18_2 Biome #else
             Holder<Biome> #endif
-                    biome = Biome.CODEC.decode(JsonOps.INSTANCE, JsonParser.parseString(str)).get().orThrow().getFirst();
+                    biome = Biome.CODEC.decode(RegistryOps.create(JsonOps.INSTANCE, Minecraft.getInstance().level.registryAccess()),
+                    JsonParser.parseString(str)).get().orThrow().getFirst();
             return getBiomeWrapper(biome);
         } catch (Exception e) {
             throw new IOException("Failed to deserialize biome wrapper", e);
