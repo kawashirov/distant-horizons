@@ -145,7 +145,7 @@ public class ClientBlockStateCache {
             {
                 quads = Minecraft.getInstance().getModelManager().getBlockModelShaper().
                         getBlockModel(state).getQuads(state, direction, random);
-                if (!quads.isEmpty() &&
+                if (quads != null && !quads.isEmpty() &&
                         !(state.getBlock() instanceof RotatedPillarBlock && direction == Direction.UP))
                     break;
             };
@@ -178,23 +178,12 @@ public class ClientBlockStateCache {
         isColorResolved = true;
     }
 
-
-
-    private BlockAndTintGetter wrapColorResolver(LevelReader level) {
-        int blendDistance = Config.Client.Graphics.Quality.lodBiomeBlending.get();
-        if (blendDistance == 0) {
-            return new TintGetterOverrideFast(level);
-        } else {
-            return new TintGetterOverrideSmooth(level, blendDistance);
-        }
-    }
-
     public int getAndResolveFaceColor(BiomeWrapper biome)
     {
         // FIXME: impl per-face colors
         if (!needPostTinting) return baseColor;
         int tintColor = Minecraft.getInstance().getBlockColors()
-                .getColor(state, wrapColorResolver(level), pos, tintIndex); //FIXME: Use biome? Hack the ColorResolver?
+                .getColor(state, new TintWithoutLevelOverrider(biome), pos, tintIndex);
         if (tintColor == -1) return baseColor;
         return ColorUtil.multiplyARGBwithRGB(baseColor, tintColor);
     }

@@ -48,10 +48,10 @@ public class BiomeWrapper implements IBiomeWrapper
 {
     #if PRE_MC_1_18_2
     public static final ConcurrentMap<Biome, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
-    private final Biome biome;
+    public final Biome biome;
     #else
     public static final ConcurrentMap<Holder<Biome>, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
-    private final Holder<Biome> biome;
+    public final Holder<Biome> biome;
     #endif
 
     static public IBiomeWrapper getBiomeWrapper(#if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif biome)
