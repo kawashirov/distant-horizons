@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 // Logger (for debug stuff)
 
+import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.config.file.ConfigFileHandling;
 import com.seibel.lod.core.config.types.AbstractConfigType;
 import com.seibel.lod.core.config.types.ConfigCategory;
@@ -24,7 +25,6 @@ import com.seibel.lod.core.config.types.ConfigEntry;
 
 // Gets info from our own mod
 
-import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.config.*;
 
 // Minecraft imports
@@ -93,53 +93,6 @@ public abstract class ClassicConfigGUI {
         int index;
     }
 
-    private static void initEntry(AbstractConfigType info) {
-        info.guiValue = new EntryInfo();
-        Class<?> fieldClass = info.getType();
-
-        if (ConfigEntry.class.isAssignableFrom(info.getClass())) {
-            if (fieldClass == Integer.class) {
-                // For int
-                textField(info, Integer::parseInt, INTEGER_ONLY_REGEX, true);
-            } else if (fieldClass == Double.class) {
-                // For double
-                textField(info, Double::parseDouble, DECIMAL_ONLY_REGEX, false);
-            } else if (fieldClass == String.class || fieldClass == List.class) {
-                // For string or list
-                textField(info, String::length, null, true);
-            } else if (fieldClass == Boolean.class) {
-                // For boolean
-                #if PRE_MC_1_19
-                Function<Object, Component> func = value -> new TextComponent((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
-                #else
-                Function<Object, Component> func = value -> Component.translatable((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
-                #endif
-                ((EntryInfo) info.guiValue).widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
-                    ((ConfigEntry) info).setWithoutSaving(!(Boolean) info.get());
-                    button.setMessage(func.apply(info.get()));
-                }, func);
-            }
-            else if (fieldClass.isEnum())
-            {
-                // For enum
-                List<?> values = Arrays.asList(info.getType().getEnumConstants());
-                #if PRE_MC_1_19
-                Function<Object, Component> func = value -> new TranslatableComponent(ModInfo.ID + ".config." + "enum." + fieldClass.getSimpleName() + "." + info.get().toString());
-                #else
-                Function<Object, Component> func = value -> Component.translatable(ModInfo.ID + ".config." + "enum." + fieldClass.getSimpleName() + "." + info.get().toString());
-                #endif
-                ((EntryInfo) info.guiValue).widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
-                    int index = values.indexOf(info.get()) + 1;
-                    info.set(values.get(index >= values.size() ? 0 : index));
-                    button.setMessage(func.apply(info.get()));
-                }, func);
-            }
-        } else if (ConfigCategory.class.isAssignableFrom(info.getClass())) {
-//            if (!info.info.getName().equals(""))
-//                info.name = new TranslatableComponent(info.info.getName());
-        }
-//        return info;
-    }
 
 
     /**
@@ -195,28 +148,30 @@ public abstract class ClassicConfigGUI {
     /**
      * if you want to get this config gui's screen call this
      */
-    public static Screen getScreen(Screen parent, String category) {
-        return new ConfigScreen(parent, category);
+    public static Screen getScreen(ConfigBase configBase, Screen parent, String category) {
+        return new ConfigScreen(configBase, parent, category);
     }
 
     /**
      * Pain
      */
     private static class ConfigScreen extends Screen {
-        protected ConfigScreen(Screen parent, String category) {
+        protected ConfigScreen(ConfigBase configBase, Screen parent, String category) {
             #if PRE_MC_1_19
             super(new TranslatableComponent(
             #else
             super(Component.translatable(
             #endif
-                    I18n.exists(ModInfo.ID + ".config" + (category.isEmpty() ? "." + category : "") + ".title") ?
-                            ModInfo.ID + ".config.title" :
-                            ModInfo.ID + ".config" + (category.isEmpty() ? "" : "." + category) + ".title")
+                    I18n.exists(configBase.modID + ".config" + (category.isEmpty() ? "." + category : "") + ".title") ?
+                            configBase.modID + ".config.title" :
+                            configBase.modID + ".config" + (category.isEmpty() ? "" : "." + category) + ".title")
             );
+            this.configBase = configBase;
             this.parent = parent;
             this.category = category;
-            this.translationPrefix = ModInfo.ID + ".config.";
+            this.translationPrefix = configBase.modID + ".config.";
         }
+        private final ConfigBase configBase;
 
         private final String translationPrefix;
         private final Screen parent;
@@ -236,7 +191,7 @@ public abstract class ClassicConfigGUI {
          */
         @Override
         public void onClose() {
-            ConfigFileHandling.saveToFile();
+            ConfigBase.INSTANCE.configFileINSTANCE.saveToFile();
             Objects.requireNonNull(minecraft).setScreen(this.parent);
         }
 
@@ -255,14 +210,14 @@ public abstract class ClassicConfigGUI {
         protected void init() {
             super.init();
             if (!reload)
-                ConfigFileHandling.loadFromFile();
+                ConfigBase.INSTANCE.configFileINSTANCE.loadFromFile();
 
             addBtn(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
-                ConfigFileHandling.loadFromFile();
+                ConfigBase.INSTANCE.configFileINSTANCE.loadFromFile();
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }));
             Button done = addBtn(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
-                ConfigFileHandling.saveToFile();
+                ConfigBase.INSTANCE.configFileINSTANCE.saveToFile();
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }));
 
@@ -270,9 +225,9 @@ public abstract class ClassicConfigGUI {
             if (this.minecraft != null && this.minecraft.level != null)
                 this.list.setRenderBackground(false);
             this.addWidget(this.list);
-            for (AbstractConfigType info : ConfigBase.entries) {
+            for (AbstractConfigType info : ConfigBase.INSTANCE.entries) {
                 if (info.getCategory().matches(category) && info.getAppearance().showInGui) {
-                    initEntry(info);
+                    initEntry(info, this.translationPrefix);
                     #if PRE_MC_1_19
                     TranslatableComponent name = new TranslatableComponent(translationPrefix + info.getNameWCategory());
                     #else
@@ -309,8 +264,8 @@ public abstract class ClassicConfigGUI {
                         }
                     } else if (ConfigCategory.class.isAssignableFrom(info.getClass())) {
                         Button widget = new Button(this.width / 2 - 100, this.height - 28, 100 * 2, 20, name, (button -> {
-                            ConfigFileHandling.saveToFile();
-                            Objects.requireNonNull(minecraft).setScreen(ClassicConfigGUI.getScreen(this, ((ConfigCategory) info).getDestination()));
+                            ConfigBase.INSTANCE.configFileINSTANCE.saveToFile();
+                            Objects.requireNonNull(minecraft).setScreen(ClassicConfigGUI.getScreen(this.configBase, this, ((ConfigCategory) info).getDestination()));
                         }));
                         this.list.addButton(widget, null, null, null);
                     }
@@ -326,7 +281,7 @@ public abstract class ClassicConfigGUI {
             drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title
 
             // Render the tooltip only if it can find a tooltip in the language file
-            for (AbstractConfigType info : ConfigBase.entries) { // idk why this is using the normal entries but as long as it works, it works
+            for (AbstractConfigType info : ConfigBase.INSTANCE.entries) { // idk why this is using the normal entries but as long as it works, it works
                 if (info.getCategory().matches(category) && info.getAppearance().showInGui) {
                     if (list.getHoveredButton(mouseX, mouseY).isPresent()) {
                         AbstractWidget buttonWidget = list.getHoveredButton(mouseX, mouseY).get();
@@ -361,6 +316,53 @@ public abstract class ClassicConfigGUI {
 
 
 
+    private static void initEntry(AbstractConfigType info, String translationPrefix) {
+        info.guiValue = new EntryInfo();
+        Class<?> fieldClass = info.getType();
+
+        if (ConfigEntry.class.isAssignableFrom(info.getClass())) {
+            if (fieldClass == Integer.class) {
+                // For int
+                textField(info, Integer::parseInt, INTEGER_ONLY_REGEX, true);
+            } else if (fieldClass == Double.class) {
+                // For double
+                textField(info, Double::parseDouble, DECIMAL_ONLY_REGEX, false);
+            } else if (fieldClass == String.class || fieldClass == List.class) {
+                // For string or list
+                textField(info, String::length, null, true);
+            } else if (fieldClass == Boolean.class) {
+                // For boolean
+                #if PRE_MC_1_19
+                Function<Object, Component> func = value -> new TextComponent((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
+                #else
+                Function<Object, Component> func = value -> Component.translatable((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
+                #endif
+                ((EntryInfo) info.guiValue).widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
+                    ((ConfigEntry) info).setWithoutSaving(!(Boolean) info.get());
+                    button.setMessage(func.apply(info.get()));
+                }, func);
+            }
+            else if (fieldClass.isEnum())
+            {
+                // For enum
+                List<?> values = Arrays.asList(info.getType().getEnumConstants());
+                #if PRE_MC_1_19
+                Function<Object, Component> func = value -> new TranslatableComponent(translationPrefix + "enum." + fieldClass.getSimpleName() + "." + info.get().toString());
+                #else
+                Function<Object, Component> func = value -> Component.translatable(translationPrefix + "enum." + fieldClass.getSimpleName() + "." + info.get().toString());
+                #endif
+                ((EntryInfo) info.guiValue).widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
+                    int index = values.indexOf(info.get()) + 1;
+                    info.set(values.get(index >= values.size() ? 0 : index));
+                    button.setMessage(func.apply(info.get()));
+                }, func);
+            }
+        } else if (ConfigCategory.class.isAssignableFrom(info.getClass())) {
+//            if (!info.info.getName().equals(""))
+//                info.name = new TranslatableComponent(info.info.getName());
+        }
+//        return info;
+    }
 
 
 

@@ -1,5 +1,6 @@
 package com.seibel.lod.common.wrappers.gui;
 
+import com.seibel.lod.core.config.ConfigBase;
 import com.seibel.lod.core.config.gui.ConfigScreen;
 import net.minecraft.client.gui.screens.Screen;
 
@@ -12,7 +13,7 @@ public class GetConfigScreen {
 
     public static Screen getScreen(Screen parent) {
         if (useScreen == type.Classic) {
-            return ClassicConfigGUI.getScreen(parent, "client");
+            return ClassicConfigGUI.getScreen(ConfigBase.INSTANCE, parent, "client");
         } else if (useScreen == type.OpenGL) {
             return ConfigScreenMC.getScreen(parent, new ConfigScreen());
         }

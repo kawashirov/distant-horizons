@@ -22,6 +22,7 @@ package com.seibel.lod.common;
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.networking.NetworkReceiver;
 import com.seibel.lod.common.wrappers.DependencySetup;
+import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.api.internal.a7.SharedApi;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.config.ConfigBase;
@@ -49,6 +50,6 @@ public class LodCommonMain {
     }
 
     public static void initConfig() {
-        ConfigBase.init(Config.class);
+        ConfigBase.INSTANCE = new ConfigBase(ModInfo.ID, ModInfo.NAME, Config.class,1);
     }
 }
