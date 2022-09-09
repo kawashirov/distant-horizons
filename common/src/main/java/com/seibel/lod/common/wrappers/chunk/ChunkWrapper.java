@@ -22,6 +22,7 @@ package com.seibel.lod.common.wrappers.chunk;
 import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
 import com.seibel.lod.core.enums.ELodDirection;
 import com.seibel.lod.core.objects.DHBlockPos;
+import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.core.util.LevelPosUtil;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockDetailWrapper;
@@ -60,6 +61,7 @@ import javax.annotation.Nullable;
 public class ChunkWrapper implements IChunkWrapper
 {
 	private final ChunkAccess chunk;
+	private final DHChunkPos chunkPos;
 	private final LevelReader lightSource;
 	private final ILevelWrapper wrappedLevel;
 	
@@ -69,6 +71,7 @@ public class ChunkWrapper implements IChunkWrapper
 		this.chunk = chunk;
 		this.lightSource = lightSource;
 		this.wrappedLevel = wrappedLevel;
+		chunkPos = new DHChunkPos(chunk.getPos().x, chunk.getPos().z);
 	}
 	
 	@Override
@@ -120,7 +123,12 @@ public class ChunkWrapper implements IChunkWrapper
 				QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)));
 		#endif
 	}
-	
+
+	@Override
+	public DHChunkPos getChunkPos() {
+		return chunkPos;
+	}
+
 	public ChunkAccess getChunk() {
 		return chunk;
 	}
@@ -184,31 +192,16 @@ public class ChunkWrapper implements IChunkWrapper
 		#endif
 	}
 	
-	public boolean isWaterLogged(int x, int y, int z)
-	{
-		BlockState blockState = chunk.getBlockState(new BlockPos(x,y,z));
-		
-		//This type of block is always in water
-		return (!(blockState.getBlock() instanceof LiquidBlockContainer) && (blockState.getBlock() instanceof SimpleWaterloggedBlock))
-				&& (blockState.hasProperty(BlockStateProperties.WATERLOGGED) && blockState.getValue(BlockStateProperties.WATERLOGGED));
-	}
-	
-	@Override
-	public int getEmittedBrightness(int x, int y, int z)
-	{
-		return chunk.getLightEmission(new BlockPos(x,y,z));
-	}
-	
 	@Override
 	public int getBlockLight(int x, int y, int z) {
 		if (lightSource == null) return -1;
-		return lightSource.getBrightness(LightLayer.BLOCK, new BlockPos(x,y,z));
+		return lightSource.getBrightness(LightLayer.BLOCK, new BlockPos(x + getMinX(),y,z + getMinZ()));
 	}
 	
 	@Override
 	public int getSkyLight(int x, int y, int z) {
 		if (lightSource == null) return -1;
-		return lightSource.getBrightness(LightLayer.SKY, new BlockPos(x,y,z));
+		return lightSource.getBrightness(LightLayer.SKY, new BlockPos(x + getMinX(),y,z + getMinZ()));
 	}
 	
 	@Override
@@ -217,7 +210,7 @@ public class ChunkWrapper implements IChunkWrapper
 		for (int dx = -1; dx <= 1; dx++) {
 			for (int dz = -1; dz <= 1; dz++) {
 				if (dx==0 && dz==0) continue;
-				if (lightSource.getChunk(dx+getChunkPosX(), dz+getChunkPosZ(), ChunkStatus.BIOMES, false) == null) return false;
+				if (lightSource.getChunk(dx+chunk.getPos().x, dz+chunk.getPos().z, ChunkStatus.BIOMES, false) == null) return false;
 			}
 		}
 		return true;
