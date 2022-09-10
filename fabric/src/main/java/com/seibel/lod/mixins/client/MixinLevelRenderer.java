@@ -74,18 +74,18 @@ public class MixinLevelRenderer
 			cancellable = true)
 	private void renderChunkLayer(RenderType renderType, PoseStack matrixStackIn, double xIn, double yIn, double zIn, CallbackInfo callback)
 	{
-		// only render before solid blocks
-		if (renderType.equals(RenderType.solid()))
-		{
-			// get MC's current projection matrix
-			float[] mcProjMatrixRaw = new float[16];
-			GL15.glGetFloatv(GL15.GL_PROJECTION_MATRIX, mcProjMatrixRaw);
-			Mat4f mcProjectionMatrix = new Mat4f(mcProjMatrixRaw);
-			mcProjectionMatrix.transpose();
-			Mat4f mcModelViewMatrix = McObjectConverter.Convert(matrixStackIn.last().pose());
-
-			ClientApi.INSTANCE.renderLods(LevelWrapper.getWorldWrapper(level), mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
-		}
+//		// only render before solid blocks
+//		if (renderType.equals(RenderType.solid()))
+//		{
+//			// get MC's current projection matrix
+//			float[] mcProjMatrixRaw = new float[16];
+//			GL15.glGetFloatv(GL15.GL_PROJECTION_MATRIX, mcProjMatrixRaw);
+//			Mat4f mcProjectionMatrix = new Mat4f(mcProjMatrixRaw);
+//			mcProjectionMatrix.transpose();
+//			Mat4f mcModelViewMatrix = McObjectConverter.Convert(matrixStackIn.last().pose());
+//
+//			ClientApi.INSTANCE.renderLods(LevelWrapper.getWorldWrapper(level), mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
+//		}
 		if (Config.Client.Advanced.lodOnlyMode.get()) {
 			callback.cancel();
 		}
@@ -103,14 +103,14 @@ public class MixinLevelRenderer
             cancellable = true)
     private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
     {
-        // only render before solid blocks
-        if (renderType.equals(RenderType.solid()))
-        {
-            Mat4f mcModelViewMatrix = McObjectConverter.Convert(modelViewMatrixStack.last().pose());
-            Mat4f mcProjectionMatrix = McObjectConverter.Convert(projectionMatrix);
-
-            ClientApi.INSTANCE.renderLods(ClientLevelWrapper.getWrapper(level), mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
-        }
+//        // only render before solid blocks
+//        if (renderType.equals(RenderType.solid()))
+//        {
+//            Mat4f mcModelViewMatrix = McObjectConverter.Convert(modelViewMatrixStack.last().pose());
+//            Mat4f mcProjectionMatrix = McObjectConverter.Convert(projectionMatrix);
+//
+//            ClientApi.INSTANCE.renderLods(ClientLevelWrapper.getWrapper(level), mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
+//        }
         if (Config.Client.Advanced.lodOnlyMode.get()) {
             callback.cancel();
         }

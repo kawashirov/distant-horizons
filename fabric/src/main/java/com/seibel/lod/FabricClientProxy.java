@@ -102,8 +102,8 @@ public class FabricClientProxy
 		// ClientRenderLevelTerrainEvent
 		WorldRenderEvents.AFTER_SETUP.register((renderContext) ->
 				clientApi.renderLods(ClientLevelWrapper.getWrapper(renderContext.world()),
-				McObjectConverter.Convert(renderContext.projectionMatrix()),
-				McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
+						McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
+						McObjectConverter.Convert(renderContext.projectionMatrix()),
 				renderContext.tickDelta())
 		);
 
