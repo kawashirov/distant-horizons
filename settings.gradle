@@ -18,7 +18,5 @@ include("core")
 project(":core").projectDir = file('coreSubProjects/core')
 include("api")
 project(":api").projectDir = file('coreSubProjects/api')
-include("commonInterface")
-project(":commonInterface").projectDir = file('coreSubProjects/commonInterface')
 
 rootProject.name = "DistantHorizons"

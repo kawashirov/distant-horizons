@@ -132,7 +132,6 @@ forgix {
     }
 
     removeDuplicate "com.seibel.lod.core"
-    removeDuplicate "com.seibel.lod.api"
 }
 
 architectury {
@@ -142,7 +141,7 @@ architectury {
 subprojects { p ->
     
     // setup Architectury
-    if (p == project(":core") || p == project(":api") || p == project(":commonInterface"))
+    if (p == project(":core") || p == project(":api"))
     {
         apply plugin: "application"
         apply plugin: "org.spongepowered.gradle.vanilla" // Provides minecraft libraries
@@ -167,7 +166,7 @@ subprojects { p ->
     }
     
     // Set up the minecraft non-dependency for core sub-projects
-    if (p == project(":core") || p == project(":api") || p == project(":commonInterface"))
+    if (p == project(":core") || p == project(":api"))
     {
         minecraft {
             version("${rootProject.minecraft_version}")
@@ -220,9 +219,9 @@ subprojects { p ->
         //==========================//
 
         // Minecraft dependent sub-projects
-        if (p == project(":common") || p == project(":forge") || p == project(":fabric") || p == project(":commonInterface") || p == project(":api"))
+        if (p == project(":common") || p == project(":forge") || p == project(":fabric") || p == project(":api"))
         {
-            if (p != project(":commonInterface") && p != project(":api"))
+            if (p != project(":api"))
             {
                 // Add Minecraft
                 minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
@@ -240,17 +239,6 @@ subprojects { p ->
             
             // Add core
             customModule(project(":core")) {
-                // Remove Junit test libraries
-                exclude group: "org.junit.jupiter", module: "junit-jupiter"
-                exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
-                exclude group: "junit", module: "junit"
-            }
-        }
-        
-        
-        
-        if (p == project(":fabric") || p == project(":forge") || p == project(":common")) {
-            customModule(project(":commonInterface")) {
                 // Remove Junit test libraries
                 exclude group: "org.junit.jupiter", module: "junit-jupiter"
                 exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
