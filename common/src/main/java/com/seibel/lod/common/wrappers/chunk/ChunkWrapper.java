@@ -20,18 +20,15 @@
 package com.seibel.lod.common.wrappers.chunk;
 
 import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
-import com.seibel.lod.core.enums.ELodDirection;
 import com.seibel.lod.core.objects.DHBlockPos;
 import com.seibel.lod.core.objects.DHChunkPos;
 import com.seibel.lod.core.util.LevelPosUtil;
 import com.seibel.lod.core.util.LodUtil;
-import com.seibel.lod.core.wrapperInterfaces.block.IBlockDetailWrapper;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 
 import com.seibel.lod.common.wrappers.WrapperUtil;
-import com.seibel.lod.common.wrappers.block.cache.ServerBlockDetailMap;
 import com.seibel.lod.common.wrappers.block.BiomeWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
 
@@ -42,10 +39,6 @@ import net.minecraft.core.QuartPos;
 #endif
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.LiquidBlockContainer;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
