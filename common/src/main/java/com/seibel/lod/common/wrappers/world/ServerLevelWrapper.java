@@ -28,8 +28,8 @@ import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
 import com.seibel.lod.common.wrappers.block.cache.ServerBlockDetailMap;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
-import com.seibel.lod.core.objects.DHBlockPos;
-import com.seibel.lod.core.objects.DHChunkPos;
+import com.seibel.lod.core.pos.DhBlockPos;
+import com.seibel.lod.core.pos.DhChunkPos;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
@@ -149,7 +149,7 @@ public class ServerLevelWrapper implements IServerLevelWrapper
         #endif
     }
     @Override
-    public IChunkWrapper tryGetChunk(DHChunkPos pos) {
+    public IChunkWrapper tryGetChunk(DhChunkPos pos) {
         ChunkAccess chunk = level.getChunk(pos.getX(), pos.getZ(), ChunkStatus.EMPTY, false);
         if (chunk == null) return null;
         return new ChunkWrapper(chunk, level, this);
@@ -163,12 +163,12 @@ public class ServerLevelWrapper implements IServerLevelWrapper
     }
 
     @Override
-    public IBlockStateWrapper getBlockState(DHBlockPos pos) {
+    public IBlockStateWrapper getBlockState(DhBlockPos pos) {
         return BlockStateWrapper.fromBlockState(level.getBlockState(McObjectConverter.Convert(pos)));
     }
 
     @Override
-    public IBiomeWrapper getBiome(DHBlockPos pos) {
+    public IBiomeWrapper getBiome(DhBlockPos pos) {
         return BiomeWrapper.getBiomeWrapper(level.getBiome(McObjectConverter.Convert(pos)));
     }
 

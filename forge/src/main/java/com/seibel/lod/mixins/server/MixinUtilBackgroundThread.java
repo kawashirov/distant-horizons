@@ -28,7 +28,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.seibel.lod.common.wrappers.DependencySetupDoneCheck;
-import com.seibel.lod.core.util.DummyRunExecutorService;
+import com.seibel.lod.core.util.objects.DummyRunExecutorService;
 
 import net.minecraft.Util;
 

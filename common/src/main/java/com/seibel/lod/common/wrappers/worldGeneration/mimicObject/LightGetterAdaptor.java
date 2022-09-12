@@ -19,7 +19,7 @@
  
 package com.seibel.lod.common.wrappers.worldGeneration.mimicObject;
 
-import com.seibel.lod.core.handlers.dependencyInjection.ModAccessorInjector;
+import com.seibel.lod.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 
 import net.minecraft.world.level.BlockGetter;

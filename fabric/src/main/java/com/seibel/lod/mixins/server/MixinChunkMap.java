@@ -2,7 +2,7 @@ package com.seibel.lod.mixins.server;
 
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
-import com.seibel.lod.core.api.internal.a7.ServerApi;
+import com.seibel.lod.core.api.internal.ServerApi;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.ChunkAccess;

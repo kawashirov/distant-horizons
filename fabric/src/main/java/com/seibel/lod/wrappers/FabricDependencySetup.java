@@ -19,7 +19,7 @@
  
 package com.seibel.lod.wrappers;
 
-import com.seibel.lod.core.handlers.dependencyInjection.SingletonInjector;
+import com.seibel.lod.core.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.wrappers.modAccessor.ModChecker;
 

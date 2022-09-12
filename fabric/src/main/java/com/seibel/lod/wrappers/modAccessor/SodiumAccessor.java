@@ -22,8 +22,8 @@ package com.seibel.lod.wrappers.modAccessor;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
-import com.seibel.lod.core.objects.DHChunkPos;
-import com.seibel.lod.core.handlers.dependencyInjection.SingletonInjector;
+import com.seibel.lod.core.pos.DhChunkPos;
+import com.seibel.lod.core.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
@@ -53,7 +53,7 @@ public class SodiumAccessor implements ISodiumAccessor {
 
 	#if POST_MC_1_17_1
 	@Override
-	public HashSet<DHChunkPos> getNormalRenderedChunks() {
+	public HashSet<DhChunkPos> getNormalRenderedChunks() {
 		SodiumWorldRenderer renderer = SodiumWorldRenderer.instance();
 		LevelHeightAccessor height =  Minecraft.getInstance().level;
 
@@ -62,7 +62,7 @@ public class SodiumAccessor implements ISodiumAccessor {
 		return renderer.getChunkTracker().getChunks(0b00).filter(
 			(long l) -> {
 				return true;
-			}).mapToObj(DHChunkPos::new).collect(Collectors.toCollection(HashSet::new));
+			}).mapToObj(DhChunkPos::new).collect(Collectors.toCollection(HashSet::new));
 		#else
 		// TODO: Maybe use a mixin to make this more efficient, and maybe ignore changes behind the camera
 		return MC_RENDER.getMaximumRenderedChunks().stream().filter((DHChunkPos chunk) -> {

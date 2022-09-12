@@ -21,8 +21,8 @@ package com.seibel.lod.common.wrappers;
 
 import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
 import com.seibel.lod.common.wrappers.block.BiomeWrapper;
-import com.seibel.lod.core.a7.level.ILevel;
-import com.seibel.lod.core.a7.level.IServerLevel;
+import com.seibel.lod.core.level.ILevel;
+import com.seibel.lod.core.level.IServerLevel;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;

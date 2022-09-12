@@ -24,13 +24,12 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-import com.seibel.lod.core.a7.util.UncheckedInterruptedException;
+import com.seibel.lod.core.util.objects.UncheckedInterruptedException;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.enums.config.ELightGenerationMode;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
-import com.seibel.lod.core.objects.DHChunkPos;
-import com.seibel.lod.core.util.EventTimer;
-import com.seibel.lod.core.util.gridList.ArrayGridList;
+import com.seibel.lod.core.pos.DhChunkPos;
+import com.seibel.lod.core.util.objects.EventTimer;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper.Steps;
 
@@ -43,7 +42,7 @@ public final class GenerationEvent
 	private static int generationFutureDebugIDs = 0;
 	final int id;
 	final ThreadedParameters tParam;
-	final DHChunkPos minPos;
+	final DhChunkPos minPos;
 	final int size;
 	final Steps target;
 	final ELightGenerationMode lightMode;
@@ -54,8 +53,8 @@ public final class GenerationEvent
 	public CompletableFuture<Void> future = null;
 	final Consumer<IChunkWrapper> resultConsumer;
 
-	public GenerationEvent(DHChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
-						   Steps target, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer) {
+	public GenerationEvent(DhChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
+                           Steps target, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer) {
 		inQueueTime = System.nanoTime();
 		this.id = generationFutureDebugIDs++;
 		this.minPos = minPos;
@@ -67,7 +66,7 @@ public final class GenerationEvent
 		this.resultConsumer = resultConsumer;
 	}
 
-	public static GenerationEvent startEvent(DHChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
+	public static GenerationEvent startEvent(DhChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
                                              Steps target, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
 	{
 		if (size % 2 == 0) size += 1; // size must be odd for vanilla world gen region to work

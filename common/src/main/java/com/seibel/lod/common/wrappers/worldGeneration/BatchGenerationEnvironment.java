@@ -22,17 +22,17 @@
 package com.seibel.lod.common.wrappers.worldGeneration;
 
 import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
-import com.seibel.lod.core.a7.level.IServerLevel;
+import com.seibel.lod.core.level.IServerLevel;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.enums.config.ELightGenerationMode;
 import com.seibel.lod.core.logging.ConfigBasedLogger;
 import com.seibel.lod.core.logging.ConfigBasedSpamLogger;
 import com.seibel.lod.core.enums.config.EDistanceGenerationMode;
-import com.seibel.lod.core.objects.DHChunkPos;
-import com.seibel.lod.core.util.EventTimer;
+import com.seibel.lod.core.pos.DhChunkPos;
+import com.seibel.lod.core.util.objects.EventTimer;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.util.gridList.ArrayGridList;
-import com.seibel.lod.core.util.LodThreadFactory;
+import com.seibel.lod.core.util.objects.LodThreadFactory;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper;
 
@@ -529,7 +529,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	@Override
 	public CompletableFuture<Void> generateChunks(int minX, int minZ, int genSize, Steps targetStep, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer) {
 		// TODO: Check event overlap via e.tooClose()
-		GenerationEvent e = GenerationEvent.startEvent(new DHChunkPos(minX, minZ), genSize, this, targetStep, runTimeRatio, resultConsumer);
+		GenerationEvent e = GenerationEvent.startEvent(new DhChunkPos(minX, minZ), genSize, this, targetStep, runTimeRatio, resultConsumer);
 		events.add(e);
 		return e.future;
 	}

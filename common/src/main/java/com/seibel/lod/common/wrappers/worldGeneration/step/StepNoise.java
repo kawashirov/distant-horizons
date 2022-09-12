@@ -20,30 +20,20 @@
 package com.seibel.lod.common.wrappers.worldGeneration.step;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
-import com.google.common.collect.Sets;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.common.wrappers.worldGeneration.ThreadedParameters;
 
-import com.seibel.lod.core.a7.util.UncheckedInterruptedException;
-import com.seibel.lod.core.util.LodUtil;
+import com.seibel.lod.core.util.objects.UncheckedInterruptedException;
 import net.minecraft.server.level.WorldGenRegion;
-import net.minecraft.util.Mth;
 #if POST_MC_1_17_1
-import net.minecraft.world.level.LevelHeightAccessor;
 #endif
 #if PRE_MC_1_19
-import net.minecraft.world.level.StructureFeatureManager;
 #endif
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.ProtoChunk;
-import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
-import net.minecraft.world.level.levelgen.NoiseSettings;
 #if POST_MC_1_18_1
 import net.minecraft.world.level.levelgen.blending.Blender;
 #endif

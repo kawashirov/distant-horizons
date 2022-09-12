@@ -1,7 +1,7 @@
 package com.seibel.lod.mixins.client;
 
 import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
-import com.seibel.lod.core.api.internal.a7.ClientApi;
+import com.seibel.lod.core.api.internal.ClientApi;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import org.spongepowered.asm.mixin.Mixin;

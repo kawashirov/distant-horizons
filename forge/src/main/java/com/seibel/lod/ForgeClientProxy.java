@@ -20,8 +20,7 @@
 package com.seibel.lod;
 
 import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
-import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
-import com.seibel.lod.core.api.internal.a7.ClientApi;
+import com.seibel.lod.core.api.internal.ClientApi;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 

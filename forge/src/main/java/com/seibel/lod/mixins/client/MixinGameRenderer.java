@@ -1,7 +1,6 @@
 package com.seibel.lod.mixins.client;
 
-import com.seibel.lod.core.api.internal.a7.ClientApi;
-import com.seibel.lod.core.api.internal.a7.SharedApi;
+import com.seibel.lod.core.api.internal.ClientApi;
 import net.minecraft.client.renderer.GameRenderer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

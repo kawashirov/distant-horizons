@@ -21,7 +21,7 @@ package com.seibel.lod;
 
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
-import com.seibel.lod.core.api.internal.a7.ClientApi;
+import com.seibel.lod.core.api.internal.ClientApi;
 import com.seibel.lod.core.config.Config;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;

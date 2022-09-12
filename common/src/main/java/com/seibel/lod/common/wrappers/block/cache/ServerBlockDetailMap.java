@@ -22,7 +22,7 @@ package com.seibel.lod.common.wrappers.block.cache;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
-import com.seibel.lod.core.objects.DHBlockPos;
+import com.seibel.lod.core.pos.DhBlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 
 
@@ -33,8 +33,8 @@ public class ServerBlockDetailMap
 	private final ServerLevelWrapper level;
 	public ServerBlockDetailMap(ServerLevelWrapper level) { this.level = level; }
 
-	public ServerBlockStateCache getBlockStateData(BlockState state, DHBlockPos pos) { //TODO: Allow a per pos unique setting
-		return blockCache.computeIfAbsent(state, (s) -> new ServerBlockStateCache(s, level, new DHBlockPos(0,0,0)));
+	public ServerBlockStateCache getBlockStateData(BlockState state, DhBlockPos pos) { //TODO: Allow a per pos unique setting
+		return blockCache.computeIfAbsent(state, (s) -> new ServerBlockStateCache(s, level, new DhBlockPos(0,0,0)));
 	}
 
 	public void clear() { blockCache.clear(); }

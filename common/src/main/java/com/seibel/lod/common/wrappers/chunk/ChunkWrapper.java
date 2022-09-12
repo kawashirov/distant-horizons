@@ -20,8 +20,8 @@
 package com.seibel.lod.common.wrappers.chunk;
 
 import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
-import com.seibel.lod.core.objects.DHBlockPos;
-import com.seibel.lod.core.objects.DHChunkPos;
+import com.seibel.lod.core.pos.DhBlockPos;
+import com.seibel.lod.core.pos.DhChunkPos;
 import com.seibel.lod.core.util.LevelPosUtil;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
@@ -54,7 +54,7 @@ import javax.annotation.Nullable;
 public class ChunkWrapper implements IChunkWrapper
 {
 	private final ChunkAccess chunk;
-	private final DHChunkPos chunkPos;
+	private final DhChunkPos chunkPos;
 	private final LevelReader lightSource;
 	private final ILevelWrapper wrappedLevel;
 	
@@ -64,7 +64,7 @@ public class ChunkWrapper implements IChunkWrapper
 		this.chunk = chunk;
 		this.lightSource = lightSource;
 		this.wrappedLevel = wrappedLevel;
-		chunkPos = new DHChunkPos(chunk.getPos().x, chunk.getPos().z);
+		chunkPos = new DhChunkPos(chunk.getPos().x, chunk.getPos().z);
 	}
 	
 	@Override
@@ -100,7 +100,7 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public IBiomeWrapper getBiome(int x, int y, int z)
 	{
-		if (wrappedLevel != null) return wrappedLevel.getBiome(new DHBlockPos(x + getMinX(), y, z + getMinZ()));
+		if (wrappedLevel != null) return wrappedLevel.getBiome(new DhBlockPos(x + getMinX(), y, z + getMinZ()));
 
 		#if PRE_MC_1_17_1
 		return BiomeWrapper.getBiomeWrapper(chunk.getBiomes().getNoiseBiome(
@@ -118,7 +118,7 @@ public class ChunkWrapper implements IChunkWrapper
 	}
 
 	@Override
-	public DHChunkPos getChunkPos() {
+	public DhChunkPos getChunkPos() {
 		return chunkPos;
 	}
 
@@ -221,7 +221,7 @@ public class ChunkWrapper implements IChunkWrapper
 
 	@Override
 	public IBlockStateWrapper getBlockState(int x, int y, int z) {
-		if (wrappedLevel != null) return wrappedLevel.getBlockState(new DHBlockPos(x + getMinX(), y, z + getMinZ()));
+		if (wrappedLevel != null) return wrappedLevel.getBlockState(new DhBlockPos(x + getMinX(), y, z + getMinZ()));
 		return BlockStateWrapper.fromBlockState(chunk.getBlockState(new BlockPos(x,y,z)));
 	}
 }

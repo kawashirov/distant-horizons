@@ -25,9 +25,9 @@ import java.util.function.Consumer;
 
 import com.mojang.math.Matrix4f;
 import com.seibel.lod.core.enums.ELodDirection;
-import com.seibel.lod.core.objects.DHBlockPos;
-import com.seibel.lod.core.objects.DHChunkPos;
-import com.seibel.lod.core.objects.math.Mat4f;
+import com.seibel.lod.core.pos.DhBlockPos;
+import com.seibel.lod.core.pos.DhChunkPos;
+import com.seibel.lod.core.util.math.Mat4f;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -69,10 +69,10 @@ public class McObjectConverter
     	}
     }
 
-    public static BlockPos Convert(DHBlockPos wrappedPos) {
+    public static BlockPos Convert(DhBlockPos wrappedPos) {
     	return new BlockPos(wrappedPos.x, wrappedPos.y, wrappedPos.z);
     }
-    public static ChunkPos Convert(DHChunkPos wrappedPos) {
+    public static ChunkPos Convert(DhChunkPos wrappedPos) {
         return new ChunkPos(wrappedPos.x, wrappedPos.z);
     }
 
@@ -85,7 +85,7 @@ public class McObjectConverter
         return lodDirections[direction.ordinal()];
     }
     public static void DebugCheckAllPackers() {
-        BiConsumer<Integer, Integer> func = (x, z) -> DHChunkPos._DebugCheckPacker(x,z,ChunkPos.asLong(x,z));
+        BiConsumer<Integer, Integer> func = (x, z) -> DhChunkPos._DebugCheckPacker(x,z,ChunkPos.asLong(x,z));
         func.accept(0,0);
         func.accept(12345,134);
         func.accept(-12345,-134);
@@ -93,7 +93,7 @@ public class McObjectConverter
         func.accept(30000000/16,-30000000/16);
         func.accept(30000000/16,30000000/16);
         func.accept(-30000000/16,-30000000/16);
-        Consumer<BlockPos> func2 = (p) -> DHBlockPos._DebugCheckPacker(p.getX(),p.getY(),p.getZ(),p.asLong());
+        Consumer<BlockPos> func2 = (p) -> DhBlockPos._DebugCheckPacker(p.getX(),p.getY(),p.getZ(),p.asLong());
         func2.accept(new BlockPos(0,0,0));
         func2.accept(new BlockPos(12345,134,123));
         func2.accept(new BlockPos(-12345,-134,-80));

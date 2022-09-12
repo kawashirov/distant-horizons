@@ -2,7 +2,7 @@ package com.seibel.lod.common.wrappers.block.cache;
 
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
-import com.seibel.lod.core.objects.DHBlockPos;
+import com.seibel.lod.core.pos.DhBlockPos;
 import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,7 +21,7 @@ public class ServerBlockStateCache {
     public final LevelReader level;
     public final BlockPos pos;
 
-    public ServerBlockStateCache(BlockState blockState, ILevelWrapper samplingLevel, DHBlockPos samplingPos) {
+    public ServerBlockStateCache(BlockState blockState, ILevelWrapper samplingLevel, DhBlockPos samplingPos) {
         state = blockState;
         level = (LevelReader) samplingLevel.unwrapLevel();
         pos = McObjectConverter.Convert(samplingPos);

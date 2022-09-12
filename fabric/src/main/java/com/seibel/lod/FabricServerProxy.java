@@ -5,8 +5,7 @@ import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
-import com.seibel.lod.core.api.internal.a7.ServerApi;
-import com.seibel.lod.core.config.Config;
+import com.seibel.lod.core.api.internal.ServerApi;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
@@ -20,7 +19,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.Supplier;

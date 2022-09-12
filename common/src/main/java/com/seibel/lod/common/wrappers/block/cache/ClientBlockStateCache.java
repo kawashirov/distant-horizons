@@ -2,9 +2,8 @@ package com.seibel.lod.common.wrappers.block.cache;
 
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.block.*;
-import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
-import com.seibel.lod.core.objects.DHBlockPos;
+import com.seibel.lod.core.pos.DhBlockPos;
 import com.seibel.lod.core.util.ColorUtil;
 import com.seibel.lod.core.wrapperInterfaces.world.IClientLevelWrapper;
 import net.minecraft.client.Minecraft;
@@ -12,7 +11,6 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FlowerBlock;
@@ -40,7 +38,7 @@ public class ClientBlockStateCache {
     public final BlockState state;
     public final LevelReader level;
     public final BlockPos pos;
-    public ClientBlockStateCache(BlockState blockState, IClientLevelWrapper samplingLevel, DHBlockPos samplingPos) {
+    public ClientBlockStateCache(BlockState blockState, IClientLevelWrapper samplingLevel, DhBlockPos samplingPos) {
         state = blockState;
         level = (LevelReader) samplingLevel.unwrapLevel();
         pos = McObjectConverter.Convert(samplingPos);

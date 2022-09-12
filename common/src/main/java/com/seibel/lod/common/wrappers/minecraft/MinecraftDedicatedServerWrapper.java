@@ -1,9 +1,6 @@
 package com.seibel.lod.common.wrappers.minecraft;
 
-import com.seibel.lod.core.api.internal.a7.SharedApi;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftSharedWrapper;
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.server.dedicated.DedicatedServer;
 
 import java.io.File;

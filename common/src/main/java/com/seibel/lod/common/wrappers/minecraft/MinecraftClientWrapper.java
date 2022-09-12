@@ -22,46 +22,32 @@ package com.seibel.lod.common.wrappers.minecraft;
 import java.io.File;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
-import java.util.Objects;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.platform.Window;
 import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.enums.ELodDirection;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
-import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftSharedWrapper;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IProfilerWrapper;
-import com.seibel.lod.core.wrapperInterfaces.world.IDimensionTypeWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.lod.common.wrappers.McObjectConverter;
-import com.seibel.lod.core.objects.DHBlockPos;
-import com.seibel.lod.core.objects.DHChunkPos;
-import com.seibel.lod.common.wrappers.world.DimensionTypeWrapper;
+import com.seibel.lod.core.pos.DhBlockPos;
+import com.seibel.lod.core.pos.DhChunkPos;
 
 import net.minecraft.CrashReport;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.resources.model.ModelManager;
-import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 #if PRE_MC_1_19
 import net.minecraft.network.chat.TextComponent;
 #endif
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.dimension.DimensionType;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
@@ -170,21 +156,21 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
     }
 
     @Override
-    public DHBlockPos getPlayerBlockPos()
+    public DhBlockPos getPlayerBlockPos()
     {
         BlockPos playerPos = getPlayer().blockPosition();
-        return new DHBlockPos(playerPos.getX(), playerPos.getY(), playerPos.getZ());
+        return new DhBlockPos(playerPos.getX(), playerPos.getY(), playerPos.getZ());
     }
 
     @Override
-    public DHChunkPos getPlayerChunkPos()
+    public DhChunkPos getPlayerChunkPos()
     {
         #if PRE_MC_1_17_1
         ChunkPos playerPos = new ChunkPos(getPlayer().blockPosition());
         #else
         ChunkPos playerPos = getPlayer().chunkPosition();
         #endif
-        return new DHChunkPos(playerPos.x, playerPos.z);
+        return new DhChunkPos(playerPos.x, playerPos.z);
     }
 
     public ModelManager getModelManager()

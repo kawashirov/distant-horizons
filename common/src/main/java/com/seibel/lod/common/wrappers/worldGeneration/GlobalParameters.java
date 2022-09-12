@@ -21,7 +21,7 @@ package com.seibel.lod.common.wrappers.worldGeneration;
 
 import com.mojang.datafixers.DataFixer;
 import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
-import com.seibel.lod.core.a7.level.IServerLevel;
+import com.seibel.lod.core.level.IServerLevel;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
