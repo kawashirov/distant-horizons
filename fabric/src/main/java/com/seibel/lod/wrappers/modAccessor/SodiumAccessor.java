@@ -24,11 +24,13 @@ import java.util.stream.Collectors;
 
 import com.seibel.lod.core.pos.DhChunkPos;
 import com.seibel.lod.core.dependencyInjection.SingletonInjector;
+import com.seibel.lod.core.util.math.Mat4f;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 
 
+import com.seibel.lod.core.wrapperInterfaces.world.IClientLevelWrapper;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
 import net.minecraft.client.Minecraft;
 #if PRE_MC_1_17_1
@@ -45,6 +47,11 @@ import net.minecraft.world.level.LevelHeightAccessor;
 public class SodiumAccessor implements ISodiumAccessor {
 	private final IWrapperFactory factory = SingletonInjector.INSTANCE.get(IWrapperFactory.class);
 	private final IMinecraftRenderWrapper MC_RENDER = SingletonInjector.INSTANCE.get(IMinecraftRenderWrapper.class);
+
+	public IClientLevelWrapper levelWrapper;
+	public Mat4f mcModelViewMatrix;
+	public Mat4f mcProjectionMatrix;
+	public float partialTicks;
 
 	@Override
 	public String getModName() {
