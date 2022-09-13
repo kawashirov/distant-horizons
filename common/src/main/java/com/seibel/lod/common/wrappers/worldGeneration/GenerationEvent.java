@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 
 import com.seibel.lod.core.util.objects.UncheckedInterruptedException;
 import com.seibel.lod.core.config.Config;
-import com.seibel.lod.core.enums.config.ELightGenerationMode;
+import com.seibel.lod.api.items.enums.config.ELightGenerationMode;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.pos.DhChunkPos;
 import com.seibel.lod.core.util.objects.EventTimer;

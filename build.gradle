@@ -237,7 +237,7 @@ subprojects { p ->
         }
 
         // Add core
-        if (p != project(":core")) {
+        if (p != project(":api") && p != project(":core")) {
             customModule(project(":core")) {
                 // Remove Junit test libraries
                 exclude group: "org.junit.jupiter", module: "junit-jupiter"
@@ -247,7 +247,7 @@ subprojects { p ->
         }
 
         // Add the api
-        if (p != project(":api") && p != project(":core")) {
+        if (p != project(":api")) {
             implementation(project(":api")) {
                 // Remove Junit test libraries
                 exclude group: "org.junit.jupiter", module: "junit-jupiter"
