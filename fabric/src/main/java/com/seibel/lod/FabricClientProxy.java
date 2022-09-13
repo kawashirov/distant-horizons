@@ -26,7 +26,10 @@ import com.seibel.lod.core.config.Config;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 
+import com.seibel.lod.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
+import com.seibel.lod.wrappers.modAccessor.SodiumAccessor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
@@ -98,13 +101,22 @@ public class FabricClientProxy
 		// RendererStartupEvent - Done in MixinGameRenderer
 		// RendererShutdownEvent - Done in MixinGameRenderer
 
+		SodiumAccessor sodiumAccessor = (SodiumAccessor) ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class);
 
 		// ClientRenderLevelTerrainEvent
-		WorldRenderEvents.AFTER_SETUP.register((renderContext) ->
-				clientApi.renderLods(ClientLevelWrapper.getWrapper(renderContext.world()),
-						McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
-						McObjectConverter.Convert(renderContext.projectionMatrix()),
-				renderContext.tickDelta())
+		WorldRenderEvents.AFTER_SETUP.register((renderContext) -> {
+				if (sodiumAccessor != null) {
+					sodiumAccessor.levelWrapper = ClientLevelWrapper.getWrapper(renderContext.world());
+					sodiumAccessor.mcModelViewMatrix = McObjectConverter.Convert(renderContext.matrixStack().last().pose());
+					sodiumAccessor.mcProjectionMatrix = McObjectConverter.Convert(renderContext.projectionMatrix());
+					sodiumAccessor.partialTicks = renderContext.tickDelta();
+				} else {
+					clientApi.renderLods(ClientLevelWrapper.getWrapper(renderContext.world()),
+							McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
+							McObjectConverter.Convert(renderContext.projectionMatrix()),
+							renderContext.tickDelta());
+				}
+			}
 		);
 
 		// Debug keyboard event
