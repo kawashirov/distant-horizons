@@ -19,11 +19,14 @@
 
 package com.seibel.lod;
 
+import com.seibel.lod.api.methods.events.abstractEvents.DhApiAfterDhInitEvent;
+import com.seibel.lod.api.methods.events.abstractEvents.DhApiBeforeDhInitEvent;
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.wrappers.DependencySetup;
 import com.seibel.lod.common.wrappers.gui.GetConfigScreen;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
+import com.seibel.lod.core.DependencyInjection.DhApiEventInjector;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.ReflectionHandler;
 import com.seibel.lod.core.dependencyInjection.ModAccessorInjector;
@@ -112,7 +115,7 @@ public class ForgeMain implements LodForgeMethodCaller
 
 	private void initCommon()
 	{
-//		DhApiEventInjector.INSTANCE.fireAllEvents(DhApiBeforeDhInitEvent.class, null);
+		DhApiEventInjector.INSTANCE.fireAllEvents(DhApiBeforeDhInitEvent.class, null);
 		
 		LodCommonMain.startup(this);
 		ForgeDependencySetup.createInitialBindings();
@@ -137,7 +140,7 @@ public class ForgeMain implements LodForgeMethodCaller
 		LodCommonMain.initConfig();
 		LOGGER.info("Mod Post-Initialized");
 		
-//		DhApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);
+		DhApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);
 	}
 
 	private final ModelDataMap dataMap = new ModelDataMap.Builder().build();
