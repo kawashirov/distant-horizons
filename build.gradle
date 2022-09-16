@@ -131,11 +131,6 @@ forgix {
         jarLocation = "build/libs/DistantHorizons-${rootProject.versionStr}.jar"
     }
 
-    custom {
-        projectName = "api"
-        jarLocation = "build/libs/DistantHorizons-API-${rootProject.versionStr}.jar"
-    }
-
     removeDuplicate "com.seibel.lod.api"
     removeDuplicate "com.seibel.lod.core"
 }
@@ -248,7 +243,7 @@ subprojects { p ->
 
         // Add the api
         if (p != project(":api")) {
-            implementation(project(":api")) {
+            customModule(project(":api")) {
                 // Remove Junit test libraries
                 exclude group: "org.junit.jupiter", module: "junit-jupiter"
                 exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
