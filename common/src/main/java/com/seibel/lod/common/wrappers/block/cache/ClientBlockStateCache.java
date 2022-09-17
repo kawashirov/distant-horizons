@@ -25,7 +25,12 @@ import org.apache.logging.log4j.Logger;
 import java.util.List;
 import java.util.Random;
 
-public class ClientBlockStateCache {
+/**
+ * 
+ * @version 2022-9-16
+ */
+public class ClientBlockStateCache
+{
 
     private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 
@@ -40,7 +45,7 @@ public class ClientBlockStateCache {
     public final BlockPos pos;
     public ClientBlockStateCache(BlockState blockState, IClientLevelWrapper samplingLevel, DhBlockPos samplingPos) {
         state = blockState;
-        level = (LevelReader) samplingLevel.unwrapLevel();
+        level = (LevelReader) samplingLevel.getWrappedMcObject_UNSAFE();
         pos = McObjectConverter.Convert(samplingPos);
         resolveColors();
         //LOGGER.info("ClientBlocKCache created for {}", blockState);

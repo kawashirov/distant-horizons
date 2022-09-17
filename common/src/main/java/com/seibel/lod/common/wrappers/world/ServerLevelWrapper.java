@@ -22,6 +22,7 @@ package com.seibel.lod.common.wrappers.world;
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.seibel.lod.api.items.enums.worldGeneration.EDhApiLevelType;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.block.BiomeWrapper;
 import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
@@ -48,9 +49,8 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * @author James Seibel
- * @author ??
- * @version 11-21-2021
+ * 
+ * @version 2022-9-16
  */
 public class ServerLevelWrapper implements IServerLevelWrapper
 {
@@ -103,8 +103,11 @@ public class ServerLevelWrapper implements IServerLevelWrapper
     {
         return DimensionTypeWrapper.getDimensionTypeWrapper(level.dimensionType());
     }
-    
-    @Override
+	
+	@Override 
+	public EDhApiLevelType getLevelType() { return EDhApiLevelType.CLIENT_LEVEL; }
+	
+	@Override
     public int getBlockLight(int x, int y, int z)
     {
         return level.getBrightness(LightLayer.BLOCK, new BlockPos(x,y,z));
@@ -140,12 +143,12 @@ public class ServerLevelWrapper implements IServerLevelWrapper
     }
     
     @Override
-    public short getMinHeight()
+    public int getMinHeight()
     {
         #if PRE_MC_1_17_1
-        return (short) 0;
+        return 0;
         #else
-        return (short) level.getMinBuildHeight();
+        return level.getMinBuildHeight();
         #endif
     }
     @Override
@@ -173,7 +176,7 @@ public class ServerLevelWrapper implements IServerLevelWrapper
     }
 
     @Override
-    public ServerLevel unwrapLevel()
+    public ServerLevel getWrappedMcObject_UNSAFE()
     {
         return level;
     }

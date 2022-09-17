@@ -28,7 +28,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 
 /**
  * @author James Seibel
- * @version 2022-8-23
+ * @version 2022-9-16
  */
 public class DimensionTypeWrapper implements IDimensionTypeWrapper
 {
@@ -78,9 +78,9 @@ public class DimensionTypeWrapper implements IDimensionTypeWrapper
     {
         return dimensionType.hasSkyLight();
     }
-    
-    @Override
-    public Object getWrappedMcObject()
+	
+	@Override
+    public Object getWrappedMcObject_UNSAFE()
     {
         return this.dimensionType;
     }

@@ -14,7 +14,12 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 
-public class ServerBlockStateCache {
+/**
+ * 
+ * @version 2022-9-16
+ */
+public class ServerBlockStateCache
+{
     private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 
     public final BlockState state;
@@ -23,7 +28,7 @@ public class ServerBlockStateCache {
 
     public ServerBlockStateCache(BlockState blockState, ILevelWrapper samplingLevel, DhBlockPos samplingPos) {
         state = blockState;
-        level = (LevelReader) samplingLevel.unwrapLevel();
+        level = (LevelReader) samplingLevel.getWrappedMcObject_UNSAFE();
         pos = McObjectConverter.Convert(samplingPos);
         resolveShapes();
         //LOGGER.info("ServerBlockState created for {}", blockState);

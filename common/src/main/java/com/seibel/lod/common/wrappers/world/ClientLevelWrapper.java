@@ -1,5 +1,7 @@
 package com.seibel.lod.common.wrappers.world;
 
+import com.seibel.lod.api.items.enums.worldGeneration.EDhApiLevelType;
+import com.seibel.lod.api.items.interfaces.world.IDhApiDimensionTypeWrapper;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.block.BiomeWrapper;
 import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
@@ -25,6 +27,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 
+ * @version 2022-9-16
+ */
 public class ClientLevelWrapper implements IClientLevelWrapper
 {
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(ClientLevelWrapper.class.getSimpleName());
@@ -69,12 +75,15 @@ public class ClientLevelWrapper implements IClientLevelWrapper
     }
 
     @Override
-    public DimensionTypeWrapper getDimensionType()
+    public IDhApiDimensionTypeWrapper getDimensionType()
     {
         return DimensionTypeWrapper.getDimensionTypeWrapper(level.dimensionType());
     }
-
-    @Override
+	
+	@Override 
+	public EDhApiLevelType getLevelType() { return EDhApiLevelType.CLIENT_LEVEL; }
+	
+	@Override
     public int getBlockLight(int x, int y, int z)
     {
         return level.getBrightness(LightLayer.BLOCK, new BlockPos(x,y,z));
@@ -107,12 +116,12 @@ public class ClientLevelWrapper implements IClientLevelWrapper
     }
 
     @Override
-    public short getMinHeight()
+    public int getMinHeight()
     {
         #if PRE_MC_1_17_1
-        return (short) 0;
+        return 0;
         #else
-        return (short) level.getMinBuildHeight();
+        return level.getMinBuildHeight();
         #endif
     }
 
@@ -140,7 +149,7 @@ public class ClientLevelWrapper implements IClientLevelWrapper
     }
 
     @Override
-    public ClientLevel unwrapLevel()
+    public ClientLevel getWrappedMcObject_UNSAFE()
     {
         return level;
     }
