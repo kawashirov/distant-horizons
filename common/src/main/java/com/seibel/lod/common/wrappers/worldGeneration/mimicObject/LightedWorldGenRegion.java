@@ -29,7 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.Nullable;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment.EmptyChunkGenerator;
-import com.seibel.lod.api.items.enums.config.ELightGenerationMode;
+import com.seibel.lod.api.enums.config.ELightGenerationMode;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;

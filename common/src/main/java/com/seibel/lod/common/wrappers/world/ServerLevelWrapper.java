@@ -22,7 +22,7 @@ package com.seibel.lod.common.wrappers.world;
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.seibel.lod.api.items.enums.worldGeneration.EDhApiLevelType;
+import com.seibel.lod.api.enums.worldGeneration.EDhApiLevelType;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.block.BiomeWrapper;
 import com.seibel.lod.common.wrappers.block.BlockStateWrapper;

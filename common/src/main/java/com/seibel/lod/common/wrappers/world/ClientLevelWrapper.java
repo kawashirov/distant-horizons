@@ -1,7 +1,7 @@
 package com.seibel.lod.common.wrappers.world;
 
-import com.seibel.lod.api.items.enums.worldGeneration.EDhApiLevelType;
-import com.seibel.lod.api.items.interfaces.world.IDhApiDimensionTypeWrapper;
+import com.seibel.lod.api.enums.worldGeneration.EDhApiLevelType;
+import com.seibel.lod.api.interfaces.world.IDhApiDimensionTypeWrapper;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.block.BiomeWrapper;
 import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
