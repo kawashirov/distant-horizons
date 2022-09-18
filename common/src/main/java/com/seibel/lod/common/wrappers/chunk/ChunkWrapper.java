@@ -100,7 +100,7 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public IBiomeWrapper getBiome(int x, int y, int z)
 	{
-		if (wrappedLevel != null) return wrappedLevel.getBiome(new DhBlockPos(x + getMinX(), y, z + getMinZ()));
+		//if (wrappedLevel != null) return wrappedLevel.getBiome(new DhBlockPos(x + getMinX(), y, z + getMinZ()));
 
 		#if PRE_MC_1_17_1
 		return BiomeWrapper.getBiomeWrapper(chunk.getBiomes().getNoiseBiome(
@@ -178,9 +178,9 @@ public class ChunkWrapper implements IChunkWrapper
 		#if PRE_MC_1_18_1
 		return true;
 		#else
-		if (chunk instanceof LevelChunk) {
-			return ((LevelChunk) chunk).isClientLightReady();
-		}
+		//if (chunk instanceof LevelChunk) {
+		//	return ((LevelChunk) chunk).isClientLightReady();
+		//}
 		return chunk.isLightCorrect();
 		#endif
 	}
@@ -221,7 +221,7 @@ public class ChunkWrapper implements IChunkWrapper
 
 	@Override
 	public IBlockStateWrapper getBlockState(int x, int y, int z) {
-		if (wrappedLevel != null) return wrappedLevel.getBlockState(new DhBlockPos(x + getMinX(), y, z + getMinZ()));
+		//if (wrappedLevel != null) return wrappedLevel.getBlockState(new DhBlockPos(x + getMinX(), y, z + getMinZ()));
 		return BlockStateWrapper.fromBlockState(chunk.getBlockState(new BlockPos(x,y,z)));
 	}
 }
