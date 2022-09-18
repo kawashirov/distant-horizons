@@ -168,11 +168,11 @@ subprojects { p ->
         minecraft {
             version("${rootProject.minecraft_version}")
         }
-        
+
         // Set the standalone jar entrypoint
         // (This will point to a non-existent class in all sub-projects except "Core")
         application {
-            mainClass.set('com.seibel.lod.core.JarMain')
+            mainClass.set('com.seibel.lod.core.jar.JarMain')
         }
     }
 
@@ -257,7 +257,7 @@ subprojects { p ->
         manifest {
             attributes 'Implementation-Title': rootProject.archives_base_name,
                     'Implementation-Version': rootProject.mod_version,
-                    'Main-Class': 'com.seibel.lod.core.JarMain' // When changing the main of the jar change this line
+                    'Main-Class': 'com.seibel.lod.core.jar.JarMain' // When changing the main of the jar change this line
         }
     }
 
