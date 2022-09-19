@@ -224,4 +224,9 @@ public class ChunkWrapper implements IChunkWrapper
 		//if (wrappedLevel != null) return wrappedLevel.getBlockState(new DhBlockPos(x + getMinX(), y, z + getMinZ()));
 		return BlockStateWrapper.fromBlockState(chunk.getBlockState(new BlockPos(x,y,z)));
 	}
+
+	@Override
+	public boolean isStillValid() {
+		return wrappedLevel == null || wrappedLevel.tryGetChunk(chunkPos) == this;
+	}
 }

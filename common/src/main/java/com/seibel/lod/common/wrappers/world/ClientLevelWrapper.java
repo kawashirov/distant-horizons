@@ -127,6 +127,7 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 
     @Override
     public IChunkWrapper tryGetChunk(DhChunkPos pos) {
+        if (!level.hasChunk(pos.x, pos.z)) return null;
         ChunkAccess chunk = level.getChunk(pos.getX(), pos.getZ(), ChunkStatus.EMPTY, false);
         if (chunk == null) return null;
         return new ChunkWrapper(chunk, level, this);
