@@ -73,6 +73,9 @@ dependencies {
     // BCLib
     addMod("com.github.paulevsGitch:BCLib:${rootProject.bclib_version}", rootProject.enable_bclib)
 
+    // Canvas
+    addMod("io.vram:canvas-fabric-${project.canvas_version}", rootProject.enable_canvas)
+
     // Immersive Portals
     /*
     modImplementation("com.github.qouteall.ImmersivePortalsMod:build:${rootProject.immersive_portals_version}") {
@@ -87,7 +90,8 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
         transitive(false)
     }
-    */
+     */
+
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }

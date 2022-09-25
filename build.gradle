@@ -330,6 +330,9 @@ allprojects { p ->
         // Required for Mixins & VanillaGradle
         maven { url "https://repo.spongepowered.org/maven/" }
 
+        // Required for canvas
+        maven { url "https://maven.vram.io/" }
+
         // These 2 are for importing mods that arnt on CursedForge, Modrinth, GitHub, GitLab or anywhere opensource
         flatDir {
             dirs "${rootDir}/mods/fabric"
