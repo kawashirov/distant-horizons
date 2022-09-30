@@ -21,8 +21,8 @@ package com.seibel.lod.common.wrappers;
 
 import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
 import com.seibel.lod.common.wrappers.block.BiomeWrapper;
-import com.seibel.lod.core.level.ILevel;
-import com.seibel.lod.core.level.IServerLevel;
+import com.seibel.lod.core.level.IDhLevel;
+import com.seibel.lod.core.level.IDhServerLevel;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
@@ -42,10 +42,10 @@ public class WrapperFactory implements IWrapperFactory
 	public static final WrapperFactory INSTANCE = new WrapperFactory();
 
 	@Override
-	public AbstractBatchGenerationEnvionmentWrapper createBatchGenerator(ILevel targetLevel) {
-		if (targetLevel instanceof IServerLevel)
+	public AbstractBatchGenerationEnvionmentWrapper createBatchGenerator(IDhLevel targetLevel) {
+		if (targetLevel instanceof IDhServerLevel)
 		{
-			return new BatchGenerationEnvironment((IServerLevel) targetLevel);
+			return new BatchGenerationEnvironment((IDhServerLevel) targetLevel);
 		}
 		else
 		{

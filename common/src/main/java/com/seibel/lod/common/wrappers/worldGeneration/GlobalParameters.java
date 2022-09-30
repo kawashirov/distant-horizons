@@ -21,7 +21,7 @@ package com.seibel.lod.common.wrappers.worldGeneration;
 
 import com.mojang.datafixers.DataFixer;
 import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
-import com.seibel.lod.core.level.IServerLevel;
+import com.seibel.lod.core.level.IDhServerLevel;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -54,7 +54,7 @@ public final class GlobalParameters
 	#endif
 	public final WorldGenSettings worldGenSettings;
 	public final ThreadedLevelLightEngine lightEngine;
-	public final IServerLevel lodLevel;
+	public final IDhServerLevel lodLevel;
 	public final ServerLevel level;
 	public final Registry<Biome> biomes;
 	public final RegistryAccess registry;
@@ -65,7 +65,7 @@ public final class GlobalParameters
 	public final ChunkScanAccess chunkScanner; // FIXME: Figure out if this is actually needed
 	#endif
 	
-	public GlobalParameters(IServerLevel lodLevel)
+	public GlobalParameters(IDhServerLevel lodLevel)
 	{
 		this.lodLevel = lodLevel;
 

@@ -22,7 +22,7 @@
 package com.seibel.lod.common.wrappers.worldGeneration;
 
 import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
-import com.seibel.lod.core.level.IServerLevel;
+import com.seibel.lod.core.level.IDhServerLevel;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.api.enums.config.ELightGenerationMode;
 import com.seibel.lod.core.logging.ConfigBasedLogger;
@@ -259,7 +259,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 	}
 
-	public BatchGenerationEnvironment(IServerLevel serverlevel)
+	public BatchGenerationEnvironment(IDhServerLevel serverlevel)
 	{
 		super(serverlevel);
 		EVENT_LOGGER.info("================WORLD_GEN_STEP_INITING=============");
