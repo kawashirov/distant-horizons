@@ -195,12 +195,9 @@ subprojects { p ->
         shadowMe "org.tukaani:xz:1.9"
         shadowMe "org.apache.commons:commons-compress:1.21"
 
-        // Toml & Json for config
-        shadowMe "com.electronwill.night-config:toml:${rootProject.toml_version}"
-        shadowMe("com.googlecode.json-simple:json-simple:${rootProject.json_version}") {
-            // Remove Junit test libraries
-            exclude group: "junit", module: "junit"
-        }
+        // NightConfig (includes Toml & Json)
+        shadowMe "com.electronwill.night-config:toml:${rootProject.nightconfig_version}"
+        shadowMe "com.electronwill.night-config:json:${rootProject.nightconfig_version}"
 
         // Theming
         shadowMe "com.formdev:flatlaf:${rootProject.flatlaf_version}"

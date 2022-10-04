@@ -72,12 +72,8 @@ shadowJar {
     relocate 'org.tukaani', 'distanthorizons.libraries.tukaani'
     relocate 'org.apache.commons.compress', 'distanthorizons.libraries.apache.commons.compress'
 
-    // Toml & Json for config
+    // NightConfig (includes Toml & Json)
     relocate 'com.electronwill.nightconfig', 'distanthorizons.libraries.electronwill.nightconfig'
-
-    // FIXME: This is a massive library that is located in lots of different spots
-    relocate 'com.googlecode.json-simple', 'distanthorizons.libraries.googlecode.json-simple'
-    relocate 'org.json.simple', 'distanthorizons.libraries.json.simple'
 
     // Theming
     relocate 'com.formdev.flatlaf', 'distanthorizons.libraries.formdev.flatlaf'
