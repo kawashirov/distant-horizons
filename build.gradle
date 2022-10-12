@@ -56,7 +56,7 @@ def writeBuildGradlePredefine(List<String> mcVers, int mcIndex) {
 
 // Sets up the variables for Manifold in the code
 def loadProperties() {
-    def defaultMcVersion = "1.18.2"
+    def defaultMcVersion = "1.19.2"
 //    def defaultMcVersion = "1.19" // For now use 1.18.2 as default until 1.19 is done
     def mcVersion = ""
     def mcVers = mcVersions.split(",")
@@ -90,7 +90,9 @@ def loadProperties() {
             "1.17.1": "1_17",
             "1.18.1": "1_18",
             "1.18.2": "1_18",
-            "1.19": "1_19"
+            "1.19": "1_19",
+            "1.19.1": "1_19",
+            "1.19.2": "1_19"
     ]
     // Use this as sometimes multiple versions use the same access wideners
     rootProject.ext.set("accessWidenerVersion", mcVersionToAcsessWidenerVersion.get(mcVersion))
@@ -116,7 +118,7 @@ makeAccessWidener()
 
 
 // Sets up the version string
-rootProject.versionStr = rootProject.mod_version + "-" + rootProject.minecraft_version + "-" + new Date().format("yyyy_MM_dd_HH_mm")
+rootProject.versionStr = rootProject.mod_version + "-" + rootProject.minecraft_version // + "-" + new Date().format("yyyy_MM_dd_HH_mm")
 
 // Merged jar settings
 forgix {
@@ -212,8 +214,18 @@ subprojects { p ->
         // conditional dependencies //
         //==========================//
 
+        // The logic for buildForge can be made more succinct, but the readability goes way down.
+        def buildForge = true
+        if (gradle.startParameter.taskRequests.size() > 0) {
+            if (gradle.startParameter.taskRequests[0].args.size() > 0) {
+                if (gradle.startParameter.taskRequests[0].args[0].startsWith("fabric:")) {
+                    buildForge = false
+                }
+            }
+        }
+
         // Minecraft dependent sub-projects
-        if (p == project(":common") || p == project(":forge") || p == project(":fabric")) {
+        if (p == project(":common") || (buildForge && p == project(":forge")) || p == project(":fabric")) {
             // Add Minecraft
             minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
             // The following line declares the mojmap mappings & parchment mappings
@@ -221,10 +233,7 @@ subprojects { p ->
                 // Mojmap mappings
                 officialMojangMappings()
                 // Parchment mappings (it adds parameter mappings & javadoc)
-                if (rootProject.minecraft_version != "1.19")
-                    parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
-                else // As 1.19 doesn't have parchment mappings yet, we use 1.18.2 mapping
-                    parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip")
+                parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
             }
         }
 

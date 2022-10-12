@@ -6,9 +6,6 @@ import com.seibel.lod.core.config.gui.AbstractScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
-#if PRE_MC_1_19
-import net.minecraft.network.chat.TranslatableComponent;
-#endif
 
 import java.util.*;
 
@@ -22,12 +19,20 @@ public class ConfigScreenMC {
         private final Screen parent;
         private ConfigListWidget list;
         private AbstractScreen screen;
+
+
+    #if PRE_MC_1_19
+        public static net.minecraft.network.chat.TranslatableComponent translate (String str, Object... args) {
+            return new net.minecraft.network.chat.TranslatableComponent(str, args);
+        }
+    #else
+        public static net.minecraft.network.chat.MutableComponent translate (String str, Object... args) {
+            return net.minecraft.network.chat.Component.translatable(str, args);
+        }
+    #endif
+
         protected ConfigScreenRenderer(Screen parent, AbstractScreen screen) {
-            #if PRE_MC_1_19
-            super(new TranslatableComponent(ModInfo.ID + ".config.title"));
-            #else
-            super(Component.translatable(ModInfo.ID + ".config.title"));
-            #endif
+            super(translate(ModInfo.ID + ".config.title"));
             this.parent = parent;
             this.screen = screen;
         }

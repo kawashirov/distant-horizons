@@ -60,7 +60,15 @@ public class McObjectConverter
     	directions = new Direction[lodDirs.length];
     	lodDirections = new ELodDirection[lodDirs.length];
     	for (ELodDirection lodDir : lodDirs) {
-    		Direction dir = Direction.byName(lodDir.name());
+            Direction dir = switch (lodDir.name().toUpperCase()) {
+                case "DOWN" -> Direction.DOWN;
+                case "UP" -> Direction.UP;
+                case "NORTH" -> Direction.NORTH;
+                case "SOUTH" -> Direction.SOUTH;
+                case "WEST" -> Direction.WEST;
+                case "EAST" -> Direction.EAST;
+                default -> null;
+            };
             if (dir == null) {
                 throw new IllegalArgumentException("Invalid direction on init mapping: " + lodDir);
             }
