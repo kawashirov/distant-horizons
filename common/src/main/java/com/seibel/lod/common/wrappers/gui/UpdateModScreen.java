@@ -13,7 +13,6 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 
 import java.util.*;
 
@@ -23,12 +22,18 @@ public class UpdateModScreen extends Screen {
     private Screen parent;
     private String newVersion;
 
+    #if PRE_MC_1_19
+    public static net.minecraft.network.chat.TranslatableComponent translate (String str, Object... args) {
+        return new net.minecraft.network.chat.TranslatableComponent(str, args);
+    }
+    #else
+    public static net.minecraft.network.chat.MutableComponent translate (String str, Object... args) {
+            return net.minecraft.network.chat.Component.translatable(str, args);
+    }
+    #endif
+
     public UpdateModScreen(Screen parent, String newVersion) {
-        #if PRE_MC_1_19
-        super(new TranslatableComponent(ModInfo.ID + ".updater.title"));
-        #else
-        super(Component.translatable(ModInfo.ID + ".updater.title"));
-        #endif
+        super(translate(ModInfo.ID + ".updater.title"));
         this.parent = parent;
         this.newVersion = newVersion;
     }
@@ -42,24 +47,24 @@ public class UpdateModScreen extends Screen {
 
 
         this.addBtn(
-                new Button(this.width / 2 - 100, this.height / 2 - 20, 150, 20, new TranslatableComponent(ModInfo.ID + ".updater.update"), (btn) -> {
+                new Button(this.width / 2 - 100, this.height / 2 - 20, 150, 20, translate(ModInfo.ID + ".updater.update"), (btn) -> {
                     this.onClose();
                     modUpdated = true;
                 })
         );
         this.addBtn(
-                new Button(this.width / 2 - 100, this.height / 2 + 5, 150, 20, new TranslatableComponent(ModInfo.ID + ".updater.later"), (btn) -> {
+                new Button(this.width / 2 - 100, this.height / 2 + 5, 150, 20, translate(ModInfo.ID + ".updater.later"), (btn) -> {
                     this.onClose();
                 })
         );
         this.addBtn(
-                new Button(this.width / 2 - 100, this.height / 2 + 30, 150, 20, new TranslatableComponent(ModInfo.ID + ".updater.never"), (btn) -> {
+                new Button(this.width / 2 - 100, this.height / 2 + 30, 150, 20, translate(ModInfo.ID + ".updater.never"), (btn) -> {
                     this.onClose();
                     Config.Client.AutoUpdater.enableAutoUpdater.set(false);
                 })
         );
         this.addBtn(
-                new Button(this.width / 2 - 100, this.height / 2 + 55, 150, 20, new TranslatableComponent(ModInfo.ID + ".updater.silentUpdate"), (btn) -> {
+                new Button(this.width / 2 - 100, this.height / 2 + 55, 150, 20, translate(ModInfo.ID + ".updater.silentUpdate"), (btn) -> {
                     this.onClose();
                     Config.Client.AutoUpdater.promptForUpdate.set(false);
                 })
@@ -74,8 +79,8 @@ public class UpdateModScreen extends Screen {
 
         super.render(matrices, mouseX, mouseY, delta); // Render the vanilla stuff (currently only used for the background and tint)
 
-        drawCenteredString(matrices, this.font, new TranslatableComponent(ModInfo.ID + ".updater.text1"), this.width / 2, this.height / 2 - 60, 0xFFFFFF);
-        drawCenteredString(matrices, this.font, new TranslatableComponent(ModInfo.ID + ".updater.text2", ModInfo.VERSION, this.newVersion), this.width / 2, this.height / 2 - 45, 0xFFFFFF);
+        drawCenteredString(matrices, this.font, translate(ModInfo.ID + ".updater.text1"), this.width / 2, this.height / 2 - 60, 0xFFFFFF);
+        drawCenteredString(matrices, this.font, translate(ModInfo.ID + ".updater.text2", ModInfo.VERSION, this.newVersion), this.width / 2, this.height / 2 - 45, 0xFFFFFF);
     }
 
     @Override

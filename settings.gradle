@@ -11,7 +11,20 @@ pluginManagement {
 // Minecraft dependent sub-projects
 include("common")
 include("fabric")
-include("forge")
+
+// The logic for buildForge can be made more succinct, but the readability goes way down.
+def buildForge = true
+if (gradle.startParameter.taskRequests.size() > 0) {
+    if (gradle.startParameter.taskRequests[0].args.size() > 0) {
+        if (gradle.startParameter.taskRequests[0].args[0].startsWith("fabric:")) {
+            buildForge = false
+        }
+    }
+}
+
+if (buildForge) {
+    include("forge")
+}
 
 // Minecraft independent sub-projects
 include("core")

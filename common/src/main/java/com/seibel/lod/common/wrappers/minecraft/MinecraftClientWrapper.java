@@ -224,7 +224,7 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
         #if PRE_MC_1_19
         getPlayer().sendMessage(new TextComponent(string), getPlayer().getUUID());
         #else
-        getPlayer().sendSystemMessage(Component.translatable(string));
+        getPlayer().sendSystemMessage(net.minecraft.network.chat.Component.translatable(string));
         #endif
     }
 
