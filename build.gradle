@@ -157,12 +157,15 @@ subprojects { p ->
         }
     }
 
+    // set up custom configurations (configurations are a way to handle dependencies) 
     configurations {
+        // extends the shadowJar configuration 
         shadowMe
-        implementation.extendsFrom shadowMe
-
+        // have implemented dependencies automatically embedded in the final jar
+        implementation.extendsFrom(shadowMe)
+        
         customModule
-        implementation.extendsFrom customModule
+        implementation.extendsFrom(customModule)
     }
     
     // Set up the minecraft non-dependency for core sub-projects
@@ -186,27 +189,27 @@ subprojects { p ->
         
 
         // Manifold
-        annotationProcessor "systems.manifold:manifold-preprocessor:${rootProject.manifold_version}"
+        annotationProcessor("systems.manifold:manifold-preprocessor:${rootProject.manifold_version}")
 
         // JUnit tests
-        implementation "org.junit.jupiter:junit-jupiter:5.8.2"
-        implementation "org.junit.jupiter:junit-jupiter-engine:5.8.2"
-        implementation "junit:junit:4.13"
-
+        implementation("org.junit.jupiter:junit-jupiter:5.8.2")
+        implementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
+        implementation("junit:junit:4.13")
+        
         // Compression
-        shadowMe "org.tukaani:xz:1.9"
-        shadowMe "org.apache.commons:commons-compress:1.21"
+        shadowMe("org.tukaani:xz:1.9")
+        shadowMe("org.apache.commons:commons-compress:1.21")
 
         // NightConfig (includes Toml & Json)
-        shadowMe "com.electronwill.night-config:toml:${rootProject.nightconfig_version}"
-        shadowMe "com.electronwill.night-config:json:${rootProject.nightconfig_version}"
+        shadowMe("com.electronwill.night-config:toml:${rootProject.nightconfig_version}")
+        shadowMe("com.electronwill.night-config:json:${rootProject.nightconfig_version}")
 
         // Theming
-        shadowMe "com.formdev:flatlaf:${rootProject.flatlaf_version}"
+        shadowMe("com.formdev:flatlaf:${rootProject.flatlaf_version}")
 
         // SVG
-        shadowMe "com.formdev:flatlaf-extras:${rootProject.flatlaf_version}"
-        shadowMe "com.formdev:svgSalamander:${rootProject.svgSalamander_version}"
+        shadowMe("com.formdev:flatlaf-extras:${rootProject.flatlaf_version}")
+        shadowMe("com.formdev:svgSalamander:${rootProject.svgSalamander_version}")
         
         
         
@@ -450,7 +453,8 @@ allprojects { p ->
 task cleanMergedJars() {
     def mergedFolder = file("Merged")
     if (mergedFolder.exists()) {
-        delete mergedFolder
+        delete(mergedFolder)
     }
 }
-tasks.getByName("clean").finalizedBy(cleanMergedJars)
+// add cleanMergedJars to the end of the "clean" task
+tasks["clean"].finalizedBy(cleanMergedJars)
