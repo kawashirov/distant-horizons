@@ -3,6 +3,7 @@ package com.seibel.lod.common.wrappers.gui;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.config.Config;
+import com.seibel.lod.core.jar.updater.SelfUpdater;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
@@ -17,7 +18,6 @@ import net.minecraft.network.chat.Component;
 import java.util.*;
 
 public class UpdateModScreen extends Screen {
-    public static boolean modUpdated = false;
     private ConfigListWidget list;
     private Screen parent;
     private String newVersion;
@@ -49,7 +49,7 @@ public class UpdateModScreen extends Screen {
         this.addBtn(
                 new Button(this.width / 2 - 100, this.height / 2 - 20, 150, 20, translate(ModInfo.ID + ".updater.update"), (btn) -> {
                     this.onClose();
-                    modUpdated = true;
+                    SelfUpdater.deleteOldOnClose = true;
                 })
         );
         this.addBtn(
