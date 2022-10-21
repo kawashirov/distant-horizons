@@ -41,7 +41,7 @@ public class MixinMinecraft
         }
     }
 
-    @Inject(at = @At("HEAD"), method = "close()V")
+    @Inject(at = @At("HEAD"), method = "close()V", remap = false)
     public void close(CallbackInfo ci) {
         SelfUpdater.onClose();
     }

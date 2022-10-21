@@ -53,7 +53,6 @@ public class FabricMain
 	public static void postInit() {
 		LOGGER.info("Post-Initializing Mod");
 		FabricDependencySetup.runDelayedSetup();
-		LodCommonMain.initConfig();
 
 		if (Config.Client.Graphics.FogQuality.disableVanillaFog.get() && SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("bclib"))
 			ModAccessorInjector.INSTANCE.get(IBCLibAccessor.class).setRenderCustomFog(false); // Remove BCLib's fog
@@ -87,5 +86,9 @@ public class FabricMain
 		LOGGER.info(ModInfo.READABLE_NAME + " Initialized");
 		
 		DhApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);
+
+		// Init config
+		// The reason im initialising in this rather than the post init process is cus im using this for the auto updater
+		LodCommonMain.initConfig();
 	}
 }
