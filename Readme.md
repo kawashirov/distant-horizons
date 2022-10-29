@@ -99,7 +99,7 @@ If running in an IDE, to ensure the IDE noticed the version change, run a gradle
 **From the File Explorer:**
 1. Download and extract the zip of the project
 2. Download the core from https://gitlab.com/jeseibel/distant-horizons-core and extract into a folder called `core`
-3. Open a command line in the project folder
+3. Open a terminal emulator in the project folder (On Windows you can type `cmd` in the title bar)
 4. Run the commands: `./gradlew assemble`
 6. The compiled jar file will be in the folder `Merged`
 
@@ -153,8 +153,11 @@ https://tukaani.org/xz/java.html
 Forgix (To merge multiple mod versions into one jar) [_Used to be_ [_DHJarMerger_](https://github.com/Ran-helo/DHJarMerger)]\
 https://github.com/PacifistMC/Forgix
 
-Toml for Java (config handling)\
+Json & Toml for Java (config handling)\
 https://github.com/TheElectronWill/night-config
 
-Json for Java (config handling)\
-https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple
+SVG Salamander for SVG's\
+https://github.com/blackears/svgSalamander
+
+FlatLaf for theming (Tempory to test stuff)\
+https://www.formdev.com/flatlaf/
