@@ -81,12 +81,12 @@ public class UpdateModScreen extends Screen {
                 })
         );
         this.addBtn(
-                new Button(this.width / 2 + 5, this.height / 2 + 65, 150, 20, translate(ModInfo.ID + ".updater.later"), (btn) -> {
+                new Button(this.width / 2 - 155, this.height / 2 + 65, 150, 20, translate(ModInfo.ID + ".updater.later"), (btn) -> {
                     this.onClose();
                 })
         );
         this.addBtn(
-                new Button(this.width / 2 - 155, this.height / 2 + 65, 150, 20, translate(ModInfo.ID + ".updater.never"), (btn) -> {
+                new Button(this.width / 2 + 5, this.height / 2 + 65, 150, 20, translate(ModInfo.ID + ".updater.never"), (btn) -> {
                     Config.Client.AutoUpdater.enableAutoUpdater.set(false);
                     this.onClose();
                 })
