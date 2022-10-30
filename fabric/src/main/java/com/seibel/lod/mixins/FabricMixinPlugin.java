@@ -1,7 +1,8 @@
-package com.seibel.lod;
+package com.seibel.lod.mixins;
 
 import com.seibel.lod.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
+import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -9,12 +10,22 @@ import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * @author coolGi
+ * @author cortex
+ */
 public class FabricMixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.startsWith("mods.sodium")) {
-            return ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class) != null;
+        if (mixinClassName.contains(".mods.")) { // If the mixin wants to go into a mod then we check if that mod is loaded or not
+            return FabricLoader.getInstance().isModLoaded(
+                    mixinClassName
+                            // What these 2 regex's do is get the mod name that we are checking out of the mixinClassName
+                            // Eg. "com.seibel.lod.mixins.mods.sodium.MixinSodiumChunkRenderer" turns into "sodium"
+                            .replaceAll("^.*.mods.", "") // Replaces everything before the mods
+                            .replaceAll("\\..*$", "") // Replaces everything after the mod name
+            );
         }
         return true;
     }

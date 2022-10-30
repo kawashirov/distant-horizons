@@ -23,5 +23,5 @@
   "injectors": {
     "defaultRequire": 1
   },
-  "plugin": "com.seibel.lod.FabricMixinPlugin"
+  "plugin": "com.seibel.lod.mixins.FabricMixinPlugin"
 }
