@@ -1,10 +1,10 @@
 package com.seibel.lod.common.wrappers.gui;
 
-import com.seibel.lod.core.wrapperInterfaces.config.IConfigWrapper;
+import com.seibel.lod.core.wrapperInterfaces.config.ILangWrapper;
 import net.minecraft.client.resources.language.I18n;
 
-public class ConfigWrapper implements IConfigWrapper {
-    public static final ConfigWrapper INSTANCE = new ConfigWrapper();
+public class LangWrapper implements ILangWrapper {
+    public static final LangWrapper INSTANCE = new LangWrapper();
     @Override
     public boolean langExists(String str) {
         return I18n.exists(str);
