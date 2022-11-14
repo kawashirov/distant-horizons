@@ -1,16 +1,17 @@
 plugins {
-    // Plugin to help in developing multi-loader mods
-    id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "0.12.0-SNAPSHOT" apply false
+    id "java"
 
     // Plugin to handle dependencies
-    id 'com.github.johnrengelman.shadow' version '7.0.0' apply false
+    id "com.github.johnrengelman.shadow" version '7.0.0' apply false
 
     // Plugin to create merged jars
     id "io.github.pacifistmc.forgix" version "1.2.6"
 
+    // Manifold preprocessor
+    id 'systems.manifold.manifold-gradle-plugin' version '0.0.2-alpha'
+
     // Provides mc libraries to core
-    id 'org.spongepowered.gradle.vanilla' version '0.2.1-SNAPSHOT' apply false
+//    id "org.spongepowered.gradle.vanilla" version '0.2.1-SNAPSHOT' apply false
 }
 
 /**
@@ -20,10 +21,10 @@ plugins {
  * @param mcIndex array index of the currently active MC version
  */
 def writeBuildGradlePredefine(List<String> mcVers, int mcIndex) {
-
     ArrayList<String> redefineList = new ArrayList<String>()
+
     for (int i=0; i<mcVers.size(); i++) {
-        String mcStr = mcVers.get(i).replace(".", "_")
+        String mcStr = mcVers[i].replace(".", "_")
         if (mcIndex<i) {
             redefineList.add("PRE_MC_"+mcStr)
         }
@@ -35,10 +36,12 @@ def writeBuildGradlePredefine(List<String> mcVers, int mcIndex) {
         }
     }
 
-    // build the list of preprocessors to use
+    // Build the list of preprocessors to use
     StringBuilder sb = new StringBuilder()
 
-    // check if this is a development build
+    sb.append("# DON'T TOUCH THIS FILE, This is handled by the build script\n")
+
+    // Check if this is a development build
     if (mod_version.toLowerCase().contains("dev")) {
         // WARNING: only use this for logging, we don't want to have confusion
         // when a method doesn't work correctly in the release build.
@@ -46,7 +49,7 @@ def writeBuildGradlePredefine(List<String> mcVers, int mcIndex) {
         sb.append("=\n")
     }
 
-    // build the MC version preprocessors
+    // Build the MC version preprocessors
     for (String redefinedVersion : redefineList) {
         sb.append(redefinedVersion)
         sb.append("=\n")
@@ -56,71 +59,46 @@ def writeBuildGradlePredefine(List<String> mcVers, int mcIndex) {
 
 // Sets up the variables for Manifold in the code
 def loadProperties() {
-    def defaultMcVersion = "1.19.2"
-//    def defaultMcVersion = "1.19" // For now use 1.18.2 as default until 1.19 is done
+    def defaultMcVersion = "1.18.2" // 1.18.2 is our current most stable version so we use that if no version was defined
+
     def mcVersion = ""
-    def mcVers = mcVersions.split(",")
+    def mcVers = fileTree("versionProperties").files.name // Get all the files in "versionProperties"
+    for (int i = 0; i < mcVers.size(); i++) {
+        mcVers[i] = mcVers[i].replaceAll(".properties", "") // As we are getting the file names, we should remove the ".properties" at the end to get the versions
+    }
     int mcIndex = -1
-    println "Avalible MC versions: ${mcVersions}"
+    println "Avalible MC versions: ${mcVers}"
     if (project.hasProperty("mcVer")) {
         mcVersion = mcVer
-        mcIndex = Arrays.asList(mcVers).indexOf(mcVer)
+        mcIndex = mcVers.indexOf(mcVer)
     }
     if (mcIndex == -1) {
         println "No mcVer set or the set mcVer is invalid! Defaulting to ${defaultMcVersion}."
-        println "Tip: Use -PmcVer='${defaultMcVersion}' in cmd arg to set mcVer."
+        println "Tip: Use -PmcVer=\"${defaultMcVersion}\" in cmd arg to set mcVer."
         mcVersion = defaultMcVersion
-        mcIndex = Arrays.asList(mcVers).indexOf(defaultMcVersion)
+        mcIndex = mcVers.indexOf(defaultMcVersion)
         assert mcIndex != -1
     }
 
 	println "Loading properties file at " + mcVersion + ".properties"
 	def props = new Properties()
-	props.load(new FileInputStream("$rootProject.rootDir/"+"$mcVersion"+".properties"))
+	props.load(new FileInputStream("$rootProject.rootDir/versionProperties/"+"$mcVersion"+".properties"))
 
     props.each { prop ->
       rootProject.ext.set(prop.key, prop.value)
 	  // println "Added prop [key:" + prop.key + ", value:" + prop.value + "]"
     }
-    writeBuildGradlePredefine(Arrays.asList(mcVers), mcIndex)
-
-    // Stuff for access wideners
-    def mcVersionToAcsessWidenerVersion = [
-            "1.16.5": "1_16",
-            "1.17.1": "1_17",
-            "1.18.1": "1_18",
-            "1.18.2": "1_18",
-            "1.19": "1_19",
-            "1.19.1": "1_19",
-            "1.19.2": "1_19"
-    ]
-    // Use this as sometimes multiple versions use the same access wideners
-    rootProject.ext.set("accessWidenerVersion", mcVersionToAcsessWidenerVersion.get(mcVersion))
+    writeBuildGradlePredefine(mcVers, mcIndex)
 }
+
 loadProperties()
 
-// Sets up the accesswideners
-def makeAccessWidener() {
-    def accessWidenerFile = project(":common").file("src/main/resources/lod.accesswidener")
-    if (accessWidenerFile.exists()) {
-        delete accessWidenerFile
-    }
-
-    copy {
-        from project(":common").file("src/main/resources/${rootProject.accessWidenerVersion}.lod.accesswidener")
-        into project(":common").file("src/main/resources/")
-        rename "${rootProject.accessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
-    }
-}
-makeAccessWidener()
 
 
 
-
-// Sets up the version string
+// Sets up the version string (the name we use for our jar)
 rootProject.versionStr = rootProject.mod_version + "-" + rootProject.minecraft_version // + "-" + new Date().format("yyyy_MM_dd_HH_mm")
-
-// Merged jar settings
+// Forgix settings (used for merging jars)
 forgix {
     group = "com.seibel.lod"
     mergedJarName = "DistantHorizons-${rootProject.versionStr}.jar"
@@ -137,25 +115,16 @@ forgix {
     removeDuplicate "com.seibel.lod.core"
 }
 
-architectury {
-    minecraft = rootProject.minecraft_version
-}
 
 subprojects { p ->
-    
-    // setup Architectury
-    if (p == project(":core") || p == project(":api")) {
+    // Apply plugins
+    apply plugin: "java"
+    apply plugin: "com.github.johnrengelman.shadow"
+//    apply plugin: "org.spongepowered.gradle.vanilla" // Provides minecraft libraries
+    if (p == project(":core")) {
         apply plugin: "application"
-        apply plugin: "org.spongepowered.gradle.vanilla" // Provides minecraft libraries
-        apply plugin: "com.github.johnrengelman.shadow"
-    } else {
-        apply plugin: "com.github.johnrengelman.shadow"
-        apply plugin: "dev.architectury.loom"
-        
-        loom {
-            silentMojangMappingsLicense()
-        }
     }
+
 
     // set up custom configurations (configurations are a way to handle dependencies) 
     configurations {
@@ -166,23 +135,27 @@ subprojects { p ->
         
         customModule
         implementation.extendsFrom(customModule)
-    }
-    
-    // Set up the minecraft non-dependency for core sub-projects
-    if (p == project(":core") || p == project(":api")) {
-        minecraft {
-            version("${rootProject.minecraft_version}")
-        }
 
-        // Set the standalone jar entrypoint
-        // (This will point to a non-existent class in all sub-projects except "Core")
+        if (p == project(":fabric") /* || p == project(":quilt") */ || p == project(":forge")) {
+            // Shadow common
+            common
+            shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
+            compileClasspath.extendsFrom common
+            runtimeClasspath.extendsFrom common
+            developmentForge.extendsFrom common
+        }
+    }
+
+
+    // Set the standalone jar entrypoint
+    // (This will point to a non-existent class in all sub-projects except "Core")
+    if (p == project(":core")) {
         application {
             mainClass.set('com.seibel.lod.core.jar.JarMain')
         }
     }
 
     dependencies {
-        
         //=====================//
         // shared dependencies //
         //=====================//
@@ -217,29 +190,6 @@ subprojects { p ->
         // conditional dependencies //
         //==========================//
 
-        // The logic for buildForge can be made more succinct, but the readability goes way down.
-        def buildForge = true
-        if (gradle.startParameter.taskRequests.size() > 0) {
-            if (gradle.startParameter.taskRequests[0].args.size() > 0) {
-                if (gradle.startParameter.taskRequests[0].args[0].startsWith("fabric:")) {
-                    buildForge = false
-                }
-            }
-        }
-
-        // Minecraft dependent sub-projects
-        if (p == project(":common") || (buildForge && p == project(":forge")) || p == project(":fabric")) {
-            // Add Minecraft
-            minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-            // The following line declares the mojmap mappings & parchment mappings
-            mappings loom.layered() {
-                // Mojmap mappings
-                officialMojangMappings()
-                // Parchment mappings (it adds parameter mappings & javadoc)
-                parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
-            }
-        }
-
         // Add core
         if (p != project(":api") && p != project(":core")) {
             implementation(project(":core")) {
@@ -261,10 +211,10 @@ subprojects { p ->
         }
     }
 
-    // Allows the jar to run standalone
+    // Adds the standalone jar's entrypoint
     jar {
         manifest {
-            attributes 'Implementation-Title': rootProject.archives_base_name,
+            attributes 'Implementation-Title': rootProject.mod_name,
                     'Implementation-Version': rootProject.mod_version,
                     'Main-Class': 'com.seibel.lod.core.jar.JarMain' // When changing the main of the jar change this line
         }
@@ -286,7 +236,7 @@ subprojects { p ->
 //    }
 
     // Run mergeJars when running build
-    if (p != project(":api") && p != project(":api")) {
+    if (p != project(":api") && p != project(":core")) {
         build.finalizedBy(mergeJars)
         assemble.finalizedBy(mergeJars)
     }
@@ -294,10 +244,9 @@ subprojects { p ->
 
 allprojects { p ->
     apply plugin: "java"
-    apply plugin: "architectury-plugin"
     apply plugin: "maven-publish"
 
-    archivesBaseName = rootProject.archives_base_name
+    archivesBaseName = rootProject.mod_name
     version = rootProject.mod_version
     group = rootProject.maven_group
 
@@ -308,13 +257,13 @@ allprojects { p ->
         maven { url "https://maven.parchmentmc.org" }
 
         // For Architectury API
-        maven { url "https://maven.architectury.dev" }
+//        maven { url "https://maven.architectury.dev" }
 
-        // used to download and compile dependencies from git repos
-        maven { url 'https://jitpack.io' }
+        // For Git repositories
+        maven { url "https://jitpack.io" }
 
         // For Manifold Preprocessor
-        maven { url 'https://oss.sonatype.org/content/repositories/snapshots/' }
+        maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
 
         // Required for importing Modrinth mods
         maven {
@@ -339,7 +288,7 @@ allprojects { p ->
         // Required for Mixins & VanillaGradle
         maven { url "https://repo.spongepowered.org/maven/" }
 
-        // Required for canvas
+        // Required for Canvas (mod)
         maven { url "https://maven.vram.io/" }
 
         // These 2 are for importing mods that arnt on CursedForge, Modrinth, GitHub, GitLab or anywhere opensource
@@ -359,48 +308,51 @@ allprojects { p ->
 
 
     // Only uncomment this when testing stuff with lwjgl in the core jar
-//    if (p == project(":core")) {
-//        dependencies {
-//            project.ext.lwjglNatives = "natives-linux"
-//
-//            implementation platform("org.lwjgl:lwjgl-bom:3.3.0")
-//
-//            implementation "org.lwjgl:lwjgl"
-//            implementation "org.lwjgl:lwjgl-assimp"
-//            implementation "org.lwjgl:lwjgl-glfw"
-//            implementation "org.lwjgl:lwjgl-openal"
-//            implementation "org.lwjgl:lwjgl-opengl"
-//            implementation "org.lwjgl:lwjgl-stb"
-//            implementation "org.lwjgl:lwjgl-tinyfd"
-//            runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
-//            runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
-//            runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
-//            runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
-//            runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
-//            runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
-//            runtimeOnly "org.lwjgl:lwjgl-tinyfd::$lwjglNatives"
-//            implementation "org.joml:joml:1.10.2"
-//        }
-//    }
+    /*
+    if (p == project(":core")) {
+        dependencies {
+            project.ext.lwjglNatives = "natives-linux"
+
+            implementation platform("org.lwjgl:lwjgl-bom:3.3.0")
+
+            implementation "org.lwjgl:lwjgl"
+            implementation "org.lwjgl:lwjgl-assimp"
+            implementation "org.lwjgl:lwjgl-glfw"
+            implementation "org.lwjgl:lwjgl-openal"
+            implementation "org.lwjgl:lwjgl-opengl"
+            implementation "org.lwjgl:lwjgl-stb"
+            implementation "org.lwjgl:lwjgl-tinyfd"
+            runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+            runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
+            runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+            runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
+            runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+            runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+            runtimeOnly "org.lwjgl:lwjgl-tinyfd::$lwjglNatives"
+            implementation "org.joml:joml:1.10.2"
+        }
+    }
+     */
 
     // Put stuff from gradle.properties into the mod info
     processResources {
-        def resourceTargets = ["fabric.mod.json", "META-INF/mods.toml"] // Location of where to put
+        def resourceTargets = ["fabric.mod.json", "quilt.mod.json", "META-INF/mods.toml"] // Location of where to inject the properties
         def intoTargets = ["$buildDir/resources/main/"] // Location of the built resources folder
         def replaceProperties = [
                 version                      : mod_version,
-                mod_name                     : mod_name,
+                mod_name                     : mod_readable_name,
                 authors                      : mod_authors,
                 description                  : mod_description,
                 homepage                     : mod_homepage,
                 source                       : mod_source,
                 issues                       : mod_issues,
+                discord                      : mod_discord,
                 minecraft_version            : minecraft_version,
                 compatible_minecraft_versions: compatible_minecraft_versions,
                 java_version                 : java_version
         ]
         // The left side is what gets replaced in the mod info and the right side is where to get it from in the gradle.properties
-        //TODO: Make Forge loader version also be relaced with non hardcoded value instead of "[36,42)"
+        //TODO: Make Forge loader version also be replaced with non hardcoded value instead of "[36,42)"
 
         inputs.properties replaceProperties
         replaceProperties.put 'project', project
@@ -419,6 +371,12 @@ allprojects { p ->
                 }
             }
         }
+    }
+
+    task copyAccessWidener(type: Copy) {
+        from project(":common").file("src/main/resources/${accessWidenerVersion}.lod.accesswidener")
+        into(file(p.file("build/resources/main")))
+        rename "${accessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
     }
 
     task copyCoreResources(type: Copy) {
@@ -440,12 +398,6 @@ allprojects { p ->
 
     java {
         withSourcesJar()
-    }
-
-    // Disable running common
-    if (p == project(":common")) {
-        runClient.enabled = false
-        runServer.enabled = false
     }
 }
 

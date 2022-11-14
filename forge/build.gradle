@@ -1,52 +1,92 @@
-version = rootProject.versionStr
+buildscript {
+    repositories {
+        maven { url = "https://maven.minecraftforge.net" }
+        maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+    }
+}
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.spongepowered.mixin'
 
-loom {
-    forge {
-        convertAccessWideners.set(true)
-        extraAccessWideners.add("lod.accesswidener")
-        mixinConfigs("DistantHorizons.mixins.json")
+mixin {
+    add sourceSets.main, "DistantHorizons.refmap.json"
+
+    config "DistantHorizons.mixins.json"
+}
+
+minecraft {
+    mappings channel: 'official', version: minecraft_version
+//    mappings loom.layered() {
+//        // Mojmap mappings
+//        officialMojangMappings()
+//        // Parchment mappings (it adds parameter mappings & javadoc)
+//        parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+//    }
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            ideaModule "${rootProject.name}.${project.name}.main"
+            taskName 'Client'
+            args "-mixins.config=DistantHorizons.mixins.json"
+        }
+
+        server {
+            workingDirectory project.file('run')
+            ideaModule "${rootProject.name}.${project.name}.main"
+            taskName 'Server'
+            args "-mixins.config=DistantHorizons.mixins.json"
+        }
+
+        data {
+            workingDirectory project.file("run")
+            ideaModule "${rootProject.name}.${project.name}.main"
+            args '--mod', "lod", '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            taskName 'Data'
+            args "-mixins.config=DistantHorizons.mixins.json"
+        }
     }
 }
 
+//loom {
+//    forge {
+//        convertAccessWideners.set(true)
+//        extraAccessWideners.add("lod.accesswidener")
+//        mixinConfigs("DistantHorizons.mixins.json")
+//    }
+//}
 
-architectury {
-    platformSetupLoomIde()
-    forge()
-}
 
-loom {
-    accessWidenerPath = project(":common").loom.accessWidenerPath
+//loom {
+//    accessWidenerPath = project(":common").loom.accessWidenerPath
+//
+//    forge {
+//        convertAccessWideners = true
+//        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
+//    }
+//}
 
-    forge {
-        convertAccessWideners = true
-        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
-    }
-}
-
-configurations {
-    common
-    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
-    compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
-    developmentForge.extendsFrom common
-}
 
 def addMod(path, enabled) {
     if (enabled == "2")
-        dependencies { modImplementation(path) }
+        dependencies { implementation(path) }
     else if (enabled == "1")
         dependencies { modCompileOnly(path) }
 }
 
 dependencies {
     // Forge loader
-    forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
+    minecraft "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
 
     // Architectury API
     if (minecraft_version == "1.16.5") {
-        modImplementation("me.shedaniel:architectury-forge:${rootProject.architectury_version}")
+        implementation("me.shedaniel:architectury-forge:${rootProject.architectury_version}")
     } else {
-        modImplementation("dev.architectury:architectury-forge:${rootProject.architectury_version}")
+        implementation("dev.architectury:architectury-forge:${rootProject.architectury_version}")
     }
 
     // Starlight
@@ -61,6 +101,7 @@ dependencies {
 
 processResources {
     dependsOn(copyCoreResources)
+    dependsOn(copyAccessWidener)
 }
 
 shadowJar {
@@ -85,11 +126,11 @@ shadowJar {
     mergeServiceFiles()
 }
 
-remapJar {
-    input.set shadowJar.archiveFile
-    dependsOn shadowJar
-    classifier null
-}
+//remapJar {
+//    input.set shadowJar.archiveFile
+//    dependsOn shadowJar
+//    classifier null
+//}
 
 jar {
     classifier "dev"

@@ -1,16 +1,25 @@
 @echo off
 
-SETLOCAL
-CALL :buildVersion "1.19"
-CALL :buildVersion "1.18.2"
-CALL :buildVersion "1.18.1"
-CALL :buildVersion "1.17.1"
-CALL :buildVersion "1.16.5"
-EXIT /B %ERRORLEVEL%
+echo Windows build all script needs to be rewritten
+echo I dont use Windows so I cant really make this
+echo So if someone does use Windows and knows how to script stuff then can you please port the "buildall" script I made for Unix
 
-:buildVersion
-@echo on
-call ./gradlew.bat clean -PmcVer="%~1" --no-daemon
-call ./gradlew.bat build -PmcVer="%~1" --no-daemon
-@echo off
-EXIT /B 0
+
+
+
+@REM Old BAT script if you need some help with this task
+
+@REM SETLOCAL
+@REM CALL :buildVersion "1.19"
+@REM CALL :buildVersion "1.18.2"
+@REM CALL :buildVersion "1.18.1"
+@REM CALL :buildVersion "1.17.1"
+@REM CALL :buildVersion "1.16.5"
+@REM EXIT /B %ERRORLEVEL%
+@REM
+@REM :buildVersion
+@REM @echo on
+@REM call ./gradlew.bat clean -PmcVer="%~1" --no-daemon
+@REM call ./gradlew.bat build -PmcVer="%~1" --no-daemon
+@REM @echo off
+@REM EXIT /B 0
