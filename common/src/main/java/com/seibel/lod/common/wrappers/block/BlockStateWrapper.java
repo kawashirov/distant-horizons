@@ -12,7 +12,8 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class BlockStateWrapper implements IBlockStateWrapper {
+public class BlockStateWrapper implements IBlockStateWrapper
+{
     private static final Logger LOGGER = DhLoggerBuilder.getLogger();
     public static final BlockStateWrapper AIR = new BlockStateWrapper(null);
 
@@ -65,12 +66,15 @@ public class BlockStateWrapper implements IBlockStateWrapper {
     public int hashCode() {
         return Objects.hash(blockState);
     }
-
-
-
-
-
-
-
-
+	
+	
+	@Override
+	public Object getWrappedMcObject_UNSAFE() { return this.blockState; }
+	
+	
+	
+	
+	
+	
+	
 }
