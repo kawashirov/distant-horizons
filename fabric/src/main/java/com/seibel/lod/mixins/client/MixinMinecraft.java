@@ -1,6 +1,6 @@
 package com.seibel.lod.mixins.client;
 
-import com.seibel.lod.common.wrappers.gui.UpdateModScreen;
+import com.seibel.lod.common.wrappers.gui.updater.UpdateModScreen;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.jar.installer.ModrinthGetter;
