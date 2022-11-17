@@ -132,7 +132,7 @@ subprojects { p ->
     }
 
     // Does the same as "p == project(":common") || p == project(":fabric") || p == project(":quilt")  || p == project(":forge")"
-    // Usefull later on so we dont have duplicated code
+    // Useful later on so we dont have duplicated code
     def isMinecraftSubProject = p != project(":core") && p != project(":api")
 
 
@@ -261,6 +261,11 @@ allprojects { p ->
     archivesBaseName = rootProject.mod_name
     version = rootProject.mod_version
     group = rootProject.maven_group
+
+
+    // Does the same as "p == project(":common") || p == project(":fabric") || p == project(":quilt")  || p == project(":forge")"
+    // Useful later on so we dont have duplicated code
+    def isMinecraftSubProject = p != project(":core") && p != project(":api")
 
     repositories {
         mavenCentral()
