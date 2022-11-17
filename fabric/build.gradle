@@ -1,9 +1,10 @@
 plugins {
-    id "fabric-loom" version "0.12-SNAPSHOT"
+    id "fabric-loom" version "1.0-SNAPSHOT"
 }
 
 loom {
-    accessWidenerPath = project(":common").file("src/main/resources/${rootProject.accessWidenerVersion}.lod.accesswidener")
+    // FIXME: AccessWidener
+//    accessWidenerPath = project(":common").file("src/main/resources/${rootProject.accessWidenerVersion}.lod.accesswidener")
     runs {
         client {
             client()
@@ -49,11 +50,11 @@ dependencies {
     implementation project(":common")
 
     // Architectury API
-    if (minecraft_version == "1.16.5") {
-        addModJar("me.shedaniel:architectury-fabric:${rootProject.architectury_version}")
-    } else {
-        addModJar("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
-    }
+//    if (minecraft_version == "1.16.5") {
+//        addModJar("me.shedaniel:architectury-fabric:${rootProject.architectury_version}")
+//    } else {
+//        addModJar("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
+//    }
 
     // Fabric API
     addModJar(fabricApi.module("fabric-lifecycle-events-v1", rootProject.fabric_api_version))
@@ -133,7 +134,8 @@ shadowJar {
 }
 
 remapJar {
-    injectAccessWidener = true
+    // FIXME: AccessWidener
+//    injectAccessWidener = true
     input.set shadowJar.archiveFile
     dependsOn shadowJar
     classifier null
@@ -174,7 +176,7 @@ components.java {
 publishing {
     publications {
         mavenFabric(MavenPublication) {
-            artifactId = rootProject.archives_base_name + "-" + project.name
+            artifactId = rootProject.mod_name + "-" + project.name
             from components.java
         }
     }

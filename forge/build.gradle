@@ -1,16 +1,19 @@
 buildscript {
     repositories {
         maven { url = "https://maven.minecraftforge.net" }
+        maven { url = 'https://maven.parchmentmc.org' }
         maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath 'org.parchmentmc:librarian:1.+'
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.spongepowered.mixin'
+apply plugin: "net.minecraftforge.gradle"
+apply plugin: "org.parchmentmc.librarian.forgegradle"
+apply plugin: "org.spongepowered.mixin"
 
 mixin {
     add sourceSets.main, "DistantHorizons.refmap.json"
@@ -19,13 +22,8 @@ mixin {
 }
 
 minecraft {
-    mappings channel: 'official', version: minecraft_version
-//    mappings loom.layered() {
-//        // Mojmap mappings
-//        officialMojangMappings()
-//        // Parchment mappings (it adds parameter mappings & javadoc)
-//        parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
-//    }
+//    mappings channel: 'official', version: minecraft_version // Vanilla mappings
+    mappings channel: "parchment", version: "${rootProject.parchment_version}-${rootProject.minecraft_version}" // Parchment mappings
 
     runs {
         client {
@@ -47,8 +45,23 @@ minecraft {
             ideaModule "${rootProject.name}.${project.name}.main"
             args '--mod', "lod", '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
             taskName 'Data'
-            args "-mixins.config=DistantHorizons.mixins.json"
+            args "-mixins.config=DistantHorizons.mixins.json" // To add more mixins, you can just add a comma for another arg
+            // These may be needed altough im not sure
+//            mods {
+//                modDataRun {
+//                    source sourceSets.main
+//                    source project(":common").sourceSets.main
+//                }
+//            }
         }
+    }
+}
+// TODO: Check if the next 7 lines are necessary
+sourceSets.main.resources.srcDir "src/generated/resources"
+minecraft.runs.all {
+    lazyToken('minecraft_classpath') {
+        configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
+        configurations.runtimeLibrary.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
     }
 }
 
@@ -83,17 +96,21 @@ dependencies {
     minecraft "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
 
     // Architectury API
-    if (minecraft_version == "1.16.5") {
-        implementation("me.shedaniel:architectury-forge:${rootProject.architectury_version}")
-    } else {
-        implementation("dev.architectury:architectury-forge:${rootProject.architectury_version}")
-    }
+//    if (minecraft_version == "1.16.5") {
+//        implementation("me.shedaniel:architectury-forge:${rootProject.architectury_version}")
+//    } else {
+//        implementation("dev.architectury:architectury-forge:${rootProject.architectury_version}")
+//    }
 
     // Starlight
     addMod("curse.maven:starlight-forge-526854:${rootProject.starlight_version_forge}", rootProject.enable_starlight_forge)
     annotationProcessor "org.spongepowered:mixin:0.8.4:processor"
 
     addMod("curse.maven:TerraForged-363820:${rootProject.terraforged_version}", rootProject.enable_terraforged)
+
+    if (System.getProperty('idea.sync.active') != 'true') {
+        annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
+    }
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }
@@ -151,7 +168,7 @@ components.java {
 publishing {
     publications {
         mavenForge(MavenPublication) {
-            artifactId = rootProject.archives_base_name + "-" + project.name
+            artifactId = rootProject.mod_name + "-" + project.name
             from components.java
         }
     }

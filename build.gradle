@@ -8,7 +8,7 @@ plugins {
     id "io.github.pacifistmc.forgix" version "1.2.6"
 
     // Manifold preprocessor
-    id 'systems.manifold.manifold-gradle-plugin' version '0.0.2-alpha'
+    id "systems.manifold.manifold-gradle-plugin" version "0.0.2-alpha"
 
     // Provides mc libraries to core
 //    id "org.spongepowered.gradle.vanilla" version '0.2.1-SNAPSHOT' apply false
@@ -119,11 +119,21 @@ forgix {
 subprojects { p ->
     // Apply plugins
     apply plugin: "java"
+    apply plugin: "systems.manifold.manifold-gradle-plugin"
     apply plugin: "com.github.johnrengelman.shadow"
 //    apply plugin: "org.spongepowered.gradle.vanilla" // Provides minecraft libraries
     if (p == project(":core")) {
         apply plugin: "application"
     }
+
+    // Set the manifold version (may not be required tough)
+    manifold {
+        manifoldVersion = rootProject.manifold_version
+    }
+
+    // Does the same as "p == project(":common") || p == project(":fabric") || p == project(":quilt")  || p == project(":forge")"
+    // Usefull later on so we dont have duplicated code
+    def isMinecraftSubProject = p != project(":core") && p != project(":api")
 
 
     // set up custom configurations (configurations are a way to handle dependencies) 
@@ -136,7 +146,7 @@ subprojects { p ->
         customModule
         implementation.extendsFrom(customModule)
 
-        if (p == project(":fabric") /* || p == project(":quilt") */ || p == project(":forge")) {
+        if (p != project(":api") && p != project(":core")) {
             // Shadow common
             common
             shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
@@ -147,7 +157,7 @@ subprojects { p ->
     }
 
 
-    // Set the standalone jar entrypoint
+    // Let the application plugin know where the main class is
     // (This will point to a non-existent class in all sub-projects except "Core")
     if (p == project(":core")) {
         application {
@@ -191,7 +201,7 @@ subprojects { p ->
         //==========================//
 
         // Add core
-        if (p != project(":api") && p != project(":core")) {
+        if (isMinecraftSubProject) {
             implementation(project(":core")) {
                 // Remove Junit test libraries
                 exclude group: "org.junit.jupiter", module: "junit-jupiter"
@@ -221,22 +231,24 @@ subprojects { p ->
     }
 
     // this can be un-commented if we ever wanted to make DH modular (AKA use a module-info.java file) again
-//    // Tells gradle where to look for other modules
-//    // Why isn't the classpath added to the modules path by default?
-//    if (p == project(":core")) {
-//        compileJava {
-//            inputs.property('moduleName', 'dhApi')
-//            doFirst {
-//                options.compilerArgs = [
-//                        '--module-path', classpath.asPath
-//                ]
-//                classpath = files()
-//            }
-//        }
-//    }
+    /*
+    // Tells gradle where to look for other modules
+    // Why isn't the classpath added to the modules path by default?
+    if (p == project(":core")) {
+        compileJava {
+            inputs.property('moduleName', 'dhApi')
+            doFirst {
+                options.compilerArgs = [
+                        '--module-path', classpath.asPath
+                ]
+                classpath = files()
+            }
+        }
+    }
+    */
 
     // Run mergeJars when running build
-    if (p != project(":api") && p != project(":core")) {
+    if (isMinecraftSubProject) {
         build.finalizedBy(mergeJars)
         assemble.finalizedBy(mergeJars)
     }
@@ -385,13 +397,14 @@ allprojects { p ->
     }
 
     tasks.withType(JavaCompile) {
-        if (p != project(":core")) {
+        if (isMinecraftSubProject) {
             options.release = rootProject.java_version as Integer
             options.compilerArgs += ['-Xplugin:Manifold']
         } else {
-//             options.release = 8; // Core should use Java 8 no matter what
+//             options.release = 8; // Core & Api should use Java 8 no matter what
             // No it shouldn't cause it fails to find minecraft if it uses Java 8
             options.release = rootProject.java_version as Integer
+            // TODO: Once the new build system is done, check if there is a way to make core/api only use java 8 again
         }
         options.encoding = "UTF-8"
     }

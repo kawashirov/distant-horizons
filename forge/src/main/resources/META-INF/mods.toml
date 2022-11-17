@@ -1,6 +1,6 @@
 
 modLoader="javafml" #//mandatory
-loaderVersion="[36,42)" # // mandatory. This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
+loaderVersion="*" # // mandatory. Allow all forge versions as we are definding what Minecraft versions we requre later on
 license="LGPL"
 issueTrackerURL="${issues}"
 
@@ -24,3 +24,10 @@ issueTrackerURL="${issues}"
 	#// Allow any version to be present (or not) on the server
 	acceptableRemoteVersions="*"
 
+# TODO: Add this for versioning in the build script
+#[[dependencies.lod]]
+#	modId="minecraft"
+#	mandatory=true
+#	versionRange="[1.18.2,)"
+#	ordering="NONE"
+#	side="BOTH"
