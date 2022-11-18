@@ -1,21 +1,35 @@
 package com.seibel.lod.common.wrappers.gui.updater;
 
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.seibel.lod.common.wrappers.gui.TexturedButtonWidget;
+import com.seibel.lod.common.wrappers.gui.ClassicConfigGUI;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.jar.JarUtils;
+import com.seibel.lod.core.jar.installer.MarkdownFormatter;
+import com.seibel.lod.core.jar.installer.ModrinthGetter;
 import com.seibel.lod.core.jar.updater.SelfUpdater;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.StringSplitter;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 
-import java.util.Objects;
+import java.util.*;
 
 /**
  * The screen that pops up if the mod has an update.
@@ -26,13 +40,30 @@ import java.util.Objects;
 // TODO: Make this
 public class ChangelogScreen extends Screen {
     private Screen parent;
-    private String version;
+    private String versionID;
+    private List<String> changelog;
+    private TextArea changelogArea;
 
 
-    public ChangelogScreen(Screen parent, String version) {
+    public ChangelogScreen(Screen parent, String versionID) {
         super(translate(ModInfo.ID + ".updater.title"));
         this.parent = parent;
-        this.version = version;
+        this.versionID = versionID;
+
+        this.changelog = new ArrayList<>();
+        // Get the release changelog and split it by the new lines
+        List<String> unwrappedChangelog =
+                List.of(new MarkdownFormatter.MinecraftFormat().convertTo( // This formats markdown to minecraft's "§" characters
+                        ModrinthGetter.changeLogs.get(versionID)
+                ).split("\\n"));
+        // Makes the words wrap around to not go off the screen
+        for (String str: unwrappedChangelog) {
+            this.changelog.addAll(
+                    MarkdownFormatter.splitString(str, 75)
+            );
+        }
+        // Debugging
+//        System.out.println(this.changelog);
     }
 
     @Override
@@ -46,25 +77,35 @@ public class ChangelogScreen extends Screen {
                 })
         );
 
+
+        this.changelogArea = new TextArea(this.minecraft, this.width*2, this.height, 32, this.height - 32, 10);
+        for (int i = 0; i < changelog.size(); i++) {
+            this.changelogArea.addButton(new TextComponent(changelog.get(i)));
+//            drawString(matrices, this.font, changelog.get(i), this.width / 2 - 175, this.height / 2 - 100 + i*10, 0xFFFFFF);
+        }
+
     }
 
     @Override
     public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
         this.renderBackground(matrices); // Render background
 
+        // Set the scroll position to the mouse height relative to the screen
+        this.changelogArea.setScrollAmount(
+                ((double) mouseY)/((double) this.height) * this.changelogArea.getMaxScroll()
+        );
 
-        // Render the text
-        drawCenteredString(matrices, this.font, new TextComponent("Some changelog thing\nIsn't done yet so pls wait"), this.width / 2, this.height / 2 - 35, 0xFFFFFF);
+        this.changelogArea.render(matrices, mouseX, mouseY, delta); // Render the changelog
 
         super.render(matrices, mouseX, mouseY, delta); // Render the buttons
+
+        drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title
     }
 
     @Override
     public void onClose() {
         Objects.requireNonNull(minecraft).setScreen(this.parent); // Goto the parent screen
     }
-
-
 
 
     // addRenderableWidget in 1.17 and over
@@ -86,4 +127,62 @@ public class ChangelogScreen extends Screen {
             return net.minecraft.network.chat.Component.translatable(str, args);
     }
     #endif
+
+
+
+
+
+
+
+
+
+
+    public static class TextArea extends ContainerObjectSelectionList<ButtonEntry> {
+        Font textRenderer;
+
+        public TextArea(Minecraft minecraftClient, int i, int j, int k, int l, int m) {
+            super(minecraftClient, i, j, k, l, m);
+            this.centerListVertically = false;
+            textRenderer = minecraftClient.font;
+        }
+
+        public void addButton(Component text) {
+            this.addEntry(ButtonEntry.create(text));
+        }
+
+        @Override
+        public int getRowWidth() {
+            return 10000;
+        }
+    }
+
+    public static class ButtonEntry extends ContainerObjectSelectionList.Entry<ButtonEntry> {
+        private static final Font textRenderer = Minecraft.getInstance().font;
+        private final Component text;
+        private final List<AbstractWidget> children = new ArrayList<>();
+
+        private ButtonEntry(Component text) {
+            this.text = text;
+        }
+
+        public static ButtonEntry create(Component text) {
+            return new ButtonEntry(text);
+        }
+
+        @Override
+        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+            GuiComponent.drawString(matrices, textRenderer, text, 12, y + 5, 0xFFFFFF);
+        }
+
+        @Override
+        public List<? extends GuiEventListener> children() {
+            return children;
+        }
+		#if POST_MC_1_17_1
+        @Override
+        public List<? extends NarratableEntry> narratables() {
+            return children;
+        }
+		#endif
+    }
 }

@@ -281,7 +281,7 @@ public abstract class ClassicConfigGUI {
             drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title
 
             // Render the tooltip only if it can find a tooltip in the language file
-            for (AbstractConfigType info : ConfigBase.INSTANCE.entries) { // idk why this is using the normal entries but as long as it works, it works
+            for (AbstractConfigType info : ConfigBase.INSTANCE.entries) {
                 if (info.getCategory().matches(category) && info.getAppearance().showInGui) {
                     if (list.getHoveredButton(mouseX, mouseY).isPresent()) {
                         AbstractWidget buttonWidget = list.getHoveredButton(mouseX, mouseY).get();

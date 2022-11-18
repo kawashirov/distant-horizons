@@ -34,7 +34,7 @@ public class MixinMinecraft
         if (SelfUpdater.onStart()) {
             instance.setScreen(new UpdateModScreen(
                     new TitleScreen(false), // We don't want to use the vanilla title screen as it would fade the buttons
-                    ModrinthGetter.getLatestNameForVersion(SingletonInjector.INSTANCE.get(IVersionConstants.class).getMinecraftVersion())
+                    ModrinthGetter.getLatestIDForVersion(SingletonInjector.INSTANCE.get(IVersionConstants.class).getMinecraftVersion())
             ));
         } else {
             instance.setScreen(guiScreen); // Sets the screen back to the vanilla screen as if nothing ever happened

@@ -6,6 +6,7 @@ import com.seibel.lod.common.wrappers.gui.TexturedButtonWidget;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.jar.JarUtils;
+import com.seibel.lod.core.jar.installer.ModrinthGetter;
 import com.seibel.lod.core.jar.updater.SelfUpdater;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -25,13 +26,13 @@ import java.util.*;
 // and also maybe add this suggestion https://discord.com/channels/881614130614767666/1035863487110467625/1035949054485594192
 public class UpdateModScreen extends Screen {
     private Screen parent;
-    private String newVersion;
+    private String newVersionID;
 
 
-    public UpdateModScreen(Screen parent, String newVersion) {
+    public UpdateModScreen(Screen parent, String newVersionID) {
         super(translate(ModInfo.ID + ".updater.title"));
         this.parent = parent;
-        this.newVersion = newVersion;
+        this.newVersionID = newVersionID;
     }
 
     @Override
@@ -79,7 +80,7 @@ public class UpdateModScreen extends Screen {
                 0, new ResourceLocation(ModInfo.ID, "textures/gui/changelog.png"), 20, 20,
                 // Create the button and tell it where to go
                 // For now it goes to the client option by default
-                (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(new ChangelogScreen(this, this.newVersion)), // TODO: Add a proper easter egg to pressing the logo (maybe with confetti)
+                (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(new ChangelogScreen(this, this.newVersionID)), // TODO: Add a proper easter egg to pressing the logo (maybe with confetti)
                 // Add a title to the button
                 translate(ModInfo.ID + ".updater.title")
         ));
@@ -120,7 +121,7 @@ public class UpdateModScreen extends Screen {
 
         // Render the text's
         drawCenteredString(matrices, this.font, translate(ModInfo.ID + ".updater.text1"), this.width / 2, this.height / 2 - 35, 0xFFFFFF);
-        drawCenteredString(matrices, this.font, translate(ModInfo.ID + ".updater.text2", ModInfo.VERSION, this.newVersion), this.width / 2, this.height / 2 -20, 0x52FD52);
+        drawCenteredString(matrices, this.font, translate(ModInfo.ID + ".updater.text2", ModInfo.VERSION, ModrinthGetter.releaseNames.get(this.newVersionID)), this.width / 2, this.height / 2 -20, 0x52FD52);
 
         // TODO: add the tooltips for the buttons
         super.render(matrices, mouseX, mouseY, delta); // Render the buttons
