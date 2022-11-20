@@ -19,8 +19,11 @@ public class BlockStateWrapper implements IBlockStateWrapper
 
     public static ConcurrentHashMap<BlockState, BlockStateWrapper> cache = new ConcurrentHashMap<>();
 
-    public static BlockStateWrapper fromBlockState(BlockState blockState) {
-        if (blockState == null || blockState.isAir()) return AIR;
+    public static BlockStateWrapper fromBlockState(BlockState blockState)
+	{
+        if (blockState == null || blockState.isAir())
+			return AIR;
+		
         if (blockState.getFluidState().isEmpty())
             return cache.computeIfAbsent(blockState, BlockStateWrapper::new);
         else
@@ -70,6 +73,10 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	
 	@Override
 	public Object getWrappedMcObject_UNSAFE() { return this.blockState; }
+	
+	@Override
+	public boolean isAir() { return this.isAir(this.blockState); }
+	public boolean isAir(BlockState blockState) { return blockState == null || blockState.isAir(); }
 	
 	
 	
