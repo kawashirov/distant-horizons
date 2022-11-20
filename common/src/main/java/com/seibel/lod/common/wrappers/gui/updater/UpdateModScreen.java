@@ -1,10 +1,12 @@
-package com.seibel.lod.common.wrappers.gui;
+package com.seibel.lod.common.wrappers.gui.updater;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.seibel.lod.common.wrappers.gui.TexturedButtonWidget;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.jar.JarUtils;
+import com.seibel.lod.core.jar.installer.ModrinthGetter;
 import com.seibel.lod.core.jar.updater.SelfUpdater;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -24,13 +26,13 @@ import java.util.*;
 // and also maybe add this suggestion https://discord.com/channels/881614130614767666/1035863487110467625/1035949054485594192
 public class UpdateModScreen extends Screen {
     private Screen parent;
-    private String newVersion;
+    private String newVersionID;
 
 
-    public UpdateModScreen(Screen parent, String newVersion) {
+    public UpdateModScreen(Screen parent, String newVersionID) {
         super(translate(ModInfo.ID + ".updater.title"));
         this.parent = parent;
-        this.newVersion = newVersion;
+        this.newVersionID = newVersionID;
     }
 
     @Override
@@ -48,15 +50,16 @@ public class UpdateModScreen extends Screen {
             );
 
 
+            // Logo image
             this.addBtn(new ImageButton(
                     // Where the button is on the screen
-                    this.width / 2 - 100, this.height / 2 - 110,
+                    this.width / 2 - 65, this.height / 2 - 110,
                     // Width and height of the button
-                    200, 100,
+                    130, 65,
                     // Offset
                     0, 0,
                     // Some textuary stuff
-                    0, logoLocation, 200, 100,
+                    0, logoLocation, 130, 65,
                     // Create the button and tell it where to go
                     // For now it goes to the client option by default
                     (buttonWidget) -> System.out.println("Nice, you found an easter egg :)"), // TODO: Add a proper easter egg to pressing the logo (maybe with confetti)
@@ -66,27 +69,44 @@ public class UpdateModScreen extends Screen {
         } catch (Exception e) { e.printStackTrace(); }
 
 
-        this.addBtn(
-                new Button(this.width / 2 - 155, this.height / 2 + 40, 150, 20, translate(ModInfo.ID + ".updater.update"), (btn) -> {
+        this.addBtn(new TexturedButtonWidget(
+                // Where the button is on the screen
+                this.width / 2 - 97, this.height / 2 + 8,
+                // Width and height of the button
+                20, 20,
+                // Offset
+                0, 0,
+                // Some textuary stuff
+                0, new ResourceLocation(ModInfo.ID, "textures/gui/changelog.png"), 20, 20,
+                // Create the button and tell it where to go
+                // For now it goes to the client option by default
+                (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(new ChangelogScreen(this, this.newVersionID)), // TODO: Add a proper easter egg to pressing the logo (maybe with confetti)
+                // Add a title to the button
+                translate(ModInfo.ID + ".updater.title")
+        ));
+
+
+        this.addBtn( // Update
+                new Button(this.width / 2 - 75, this.height / 2 + 8, 150, 20, translate(ModInfo.ID + ".updater.update"), (btn) -> {
                     SelfUpdater.deleteOldOnClose = true;
                     SelfUpdater.updateMod();
                     this.onClose();
                 })
         );
-        this.addBtn(
-                new Button(this.width / 2 + 5, this.height / 2 + 40, 150, 20, translate(ModInfo.ID + ".updater.silent"), (btn) -> {
+        this.addBtn( // Silent update
+                new Button(this.width / 2 - 75, this.height / 2 + 30, 150, 20, translate(ModInfo.ID + ".updater.silent"), (btn) -> {
                     Config.Client.AutoUpdater.promptForUpdate.set(false);
                     SelfUpdater.updateMod();
                     this.onClose();
                 })
         );
-        this.addBtn(
-                new Button(this.width / 2 - 155, this.height / 2 + 65, 150, 20, translate(ModInfo.ID + ".updater.later"), (btn) -> {
+        this.addBtn( // Later (not now)
+                new Button(this.width / 2 + 2, this.height / 2 + 70, 100, 20, translate(ModInfo.ID + ".updater.later"), (btn) -> {
                     this.onClose();
                 })
         );
-        this.addBtn(
-                new Button(this.width / 2 + 5, this.height / 2 + 65, 150, 20, translate(ModInfo.ID + ".updater.never"), (btn) -> {
+        this.addBtn( // Never
+                new Button(this.width / 2 - 102, this.height / 2 + 70, 100, 20, translate(ModInfo.ID + ".updater.never"), (btn) -> {
                     Config.Client.AutoUpdater.enableAutoUpdater.set(false);
                     this.onClose();
                 })
@@ -100,8 +120,8 @@ public class UpdateModScreen extends Screen {
 
 
         // Render the text's
-        drawCenteredString(matrices, this.font, translate(ModInfo.ID + ".updater.text1"), this.width / 2, this.height / 2, 0xFFFFFF);
-        drawCenteredString(matrices, this.font, translate(ModInfo.ID + ".updater.text2", ModInfo.VERSION, this.newVersion), this.width / 2, this.height / 2 + 15, 0x52FD52);
+        drawCenteredString(matrices, this.font, translate(ModInfo.ID + ".updater.text1"), this.width / 2, this.height / 2 - 35, 0xFFFFFF);
+        drawCenteredString(matrices, this.font, translate(ModInfo.ID + ".updater.text2", ModInfo.VERSION, ModrinthGetter.releaseNames.get(this.newVersionID)), this.width / 2, this.height / 2 -20, 0x52FD52);
 
         // TODO: add the tooltips for the buttons
         super.render(matrices, mouseX, mouseY, delta); // Render the buttons
