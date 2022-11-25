@@ -121,7 +121,7 @@ public class ForgeMain implements LodForgeMethodCaller
 		ForgeDependencySetup.createInitialBindings();
 		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 
-		if (ReflectionHandler.instance.optifinePresent()) {
+		if (ReflectionHandler.INSTANCE.optifinePresent()) {
 			ModAccessorInjector.INSTANCE.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
 		#if PRE_MC_1_17_1

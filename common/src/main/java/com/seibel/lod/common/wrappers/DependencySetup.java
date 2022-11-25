@@ -65,6 +65,6 @@ public class DependencySetup {
         SingletonInjector.INSTANCE.bind(IMinecraftClientWrapper.class, MinecraftClientWrapper.INSTANCE);
         SingletonInjector.INSTANCE.bind(IMinecraftSharedWrapper.class, MinecraftClientWrapper.INSTANCE);
         SingletonInjector.INSTANCE.bind(IMinecraftRenderWrapper.class, MinecraftRenderWrapper.INSTANCE);
-        SingletonInjector.INSTANCE.bind(IReflectionHandler.class, ReflectionHandler.createSingleton());
+        SingletonInjector.INSTANCE.bind(IReflectionHandler.class, ReflectionHandler.INSTANCE);
     }
 }
