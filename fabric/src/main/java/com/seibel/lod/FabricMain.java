@@ -24,7 +24,7 @@ import com.seibel.lod.api.methods.events.abstractEvents.DhApiBeforeDhInitEvent;
 import com.seibel.lod.common.LodCommonMain;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.config.Config;
-import com.seibel.lod.core.DependencyInjection.DhApiEventInjector;
+import com.seibel.lod.core.DependencyInjection.ApiEventInjector;
 import com.seibel.lod.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.lod.core.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
@@ -64,7 +64,7 @@ public class FabricMain
 	// This loads the mod after minecraft loads which doesn't causes a lot of issues
 	public static void init()
 	{
-		DhApiEventInjector.INSTANCE.fireAllEvents(DhApiBeforeDhInitEvent.class, null);
+		ApiEventInjector.INSTANCE.fireAllEvents(DhApiBeforeDhInitEvent.class, null);
 		
 		LOGGER.info("Initializing Mod");
 		LodCommonMain.startup(null);
@@ -85,7 +85,7 @@ public class FabricMain
 		}
 		LOGGER.info(ModInfo.READABLE_NAME + " Initialized");
 		
-		DhApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);
+		ApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);
 
 		// Init config
 		// The reason im initialising in this rather than the post init process is cus im using this for the auto updater
