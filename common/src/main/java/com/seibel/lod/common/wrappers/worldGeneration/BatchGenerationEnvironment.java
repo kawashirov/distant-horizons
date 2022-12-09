@@ -527,7 +527,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	}
 
 	@Override
-	public CompletableFuture<Void> generateChunks(int minX, int minZ, int genSize, Steps targetStep, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer) {
+	public CompletableFuture<Void> generateChunks(int minX, int minZ, int genSize, Steps targetStep, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
+	{
 		// TODO: Check event overlap via e.tooClose()
 		GenerationEvent e = GenerationEvent.startEvent(new DhChunkPos(minX, minZ), genSize, this, targetStep, runTimeRatio, resultConsumer);
 		events.add(e);
