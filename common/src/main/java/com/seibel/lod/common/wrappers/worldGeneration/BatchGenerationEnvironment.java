@@ -21,13 +21,13 @@
 
 package com.seibel.lod.common.wrappers.worldGeneration;
 
+import com.seibel.lod.api.enums.worldGeneration.EDhApiDistantGeneratorMode;
 import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.lod.core.level.IDhServerLevel;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.api.enums.config.ELightGenerationMode;
 import com.seibel.lod.core.logging.ConfigBasedLogger;
 import com.seibel.lod.core.logging.ConfigBasedSpamLogger;
-import com.seibel.lod.api.enums.config.EDistanceGenerationMode;
 import com.seibel.lod.core.pos.DhChunkPos;
 import com.seibel.lod.core.util.objects.EventTimer;
 import com.seibel.lod.core.util.LodUtil;
@@ -321,7 +321,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		EVENT_LOGGER.debug("Lod Generate Event: " + e.minPos);
 		ArrayGridList<ChunkAccess> referencedChunks;
 		ArrayGridList<ChunkAccess> genChunks;
-		EDistanceGenerationMode generationMode;
+		EDhApiDistantGeneratorMode generatorDetail;
 		LightedWorldGenRegion region;
 		WorldGenLevelLightEngine lightEngine;
 		LightGetterAdaptor adaptor;
