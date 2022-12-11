@@ -107,10 +107,15 @@ dependencies {
         // Mojmap mappings
         officialMojangMappings()
         // Parchment mappings (it adds parameter mappings & javadoc)
-        if (rootProject.minecraft_version != "1.19" && rootProject.minecraft_version != "1.19.1" && rootProject.minecraft_version != "1.19.2")
+        if (
+                rootProject.minecraft_version != "1.19"
+                        && rootProject.minecraft_version != "1.19.1"
+                        && rootProject.minecraft_version != "1.19.2"
+                        && rootProject.minecraft_version != "1.19.3"
+        ) // We are not gonna use this build script anymore so dont bother fixing this
             parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
         else
-            parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip") // As 1.19 dosnt have parchment mappings yet, we use 1.18.2 mapping
+            parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip") // As 1.19.x or higher doesnt have parchment mappings yet, we use 1.18.2 mapping
     }
 
     //Manifold

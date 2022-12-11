@@ -37,8 +37,11 @@ import com.seibel.lod.core.util.LodUtil;
 
 import com.seibel.lod.core.wrapperInterfaces.misc.ILightMapWrapper;
 import net.minecraft.client.renderer.LightTexture;
-
+#if PRE_MC_1_19_3
 import com.mojang.math.Vector3f;
+#else
+import org.joml.Vector3f;
+#endif
 import com.seibel.lod.core.objects.math.Mat4f;
 import com.seibel.lod.core.objects.math.Vec3d;
 import com.seibel.lod.core.objects.math.Vec3f;

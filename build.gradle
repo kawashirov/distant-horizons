@@ -87,7 +87,8 @@ def loadProperties() {
             "1.18.1": "1_18",
             "1.18.2": "1_18",
             "1.19.1"  : "1_19",
-			"1.19.2"  : "1_19"
+			"1.19.2"  : "1_19",
+            "1.19.3"  : "1_19"
     ]
     // Use this as sometimes multiple versions use the same access wideners
     rootProject.ext.set("acsessWidenerVersion", mcVersionToAcsessWidenerVersion.get(mcVersion))
@@ -240,7 +241,12 @@ subprojects { p ->
                 // Mojmap mappings
                 officialMojangMappings()
                 // Parchment mappings (it adds parameter mappings & javadoc)
-                if (rootProject.minecraft_version != "1.19" && rootProject.minecraft_version != "1.19.1" && rootProject.minecraft_version != "1.19.2")
+                if (
+                        rootProject.minecraft_version != "1.19"
+                        && rootProject.minecraft_version != "1.19.1"
+                        && rootProject.minecraft_version != "1.19.2"
+                        && rootProject.minecraft_version != "1.19.3"
+                ) // We are not gonna use this build script anymore so dont bother fixing this
                     parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
                 else
                     parchment("org.parchmentmc.data:parchment-1.18.2:${rootProject.parchment_version}@zip") // As 1.19.x or higher doesnt have parchment mappings yet, we use 1.18.2 mapping

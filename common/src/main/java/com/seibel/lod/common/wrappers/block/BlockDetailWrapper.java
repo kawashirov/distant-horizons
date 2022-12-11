@@ -108,9 +108,21 @@ public class BlockDetailWrapper extends IBlockDetailWrapper
 	    
 	    {
 	        // textures normally use u and v instead of x and y
-	        for (int u = 0; u < texture.getWidth(); u++)
+	        for (int u = 0; u <
+					#if PRE_MC_1_19_3
+					texture.getWidth();
+					#else
+					texture.contents().width();
+					#endif
+				 u++)
 	        {
-	            for (int v = 0; v < texture.getHeight(); v++)
+	            for (int v = 0; v <
+						#if PRE_MC_1_19_3
+						texture.getHeight();
+						#else
+						texture.contents().height();
+						#endif
+					v++)
 	            {
 	            	//note: Minecraft color format is: 0xAA BB GG RR
 	            	//________ DH mod color format is: 0xAA RR GG BB

@@ -16,8 +16,9 @@ If you want to see a quick demo, check out a video covering the mod here:
 ### Versions
 
 This branch is for these versions of Minecraft
-- 1.19.1
-- 1.19
+- 1.19.3
+- 1.19.2
+- 1.19.1 & 1.19
 - 1.18.2
 - 1.18.1 & 1.18
 - 1.17.1 & 1.17
@@ -27,16 +28,23 @@ Architectury version: 3.4-SNAPSHOT\
 Architectury loom version: 0.12.0-SNAPSHOT\
 Java Compiler plugin: Manifold Preprocessor
 
-#### 1.19.1 mods
-Forge version: 42.0.0\
+
+#### 1.19.3 mods
+Forge version: 44.0.6\
+Fabric version: 0.14.11\
+Fabric API version: 0.68.1+1.19.3\
+Modmenu version: 5.0.2
+
+#### 1.19.2 mods
+Forge version: 43.0.0\
 Fabric version: 0.14.8\
 Fabric API version: 0.58.5+1.19.1\
 Modmenu version: 4.0.0
 
-#### 1.19 mods
-Forge version: 41.0.94\
+#### 1.19.1 mods
+Forge version: 42.0.0\
 Fabric version: 0.14.8\
-Fabric API version: 0.57.0+1.19\
+Fabric API version: 0.58.5+1.19.1\
 Modmenu version: 4.0.0
 
 #### 1.18.2 mods

@@ -32,7 +32,12 @@ import com.google.common.collect.ImmutableList;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 
+#if PRE_MC_1_19_3
 import net.minecraft.data.BuiltinRegistries;
+#else
+import net.minecraft.core.registries.BuiltInRegistries;
+#endif
+
 #if POST_MC_1_19
 import net.minecraft.data.worldgen.biome.EndBiomes;
 import net.minecraft.data.worldgen.biome.NetherBiomes;
@@ -188,7 +193,11 @@ public class BiomeWrapper implements IBiomeWrapper
     }
 
     private static Biome _get(ResourceKey<Biome> r) {
+        #if PRE_MC_1_19_3
         return BuiltinRegistries.BIOME.getOrThrow(r);
+        #else
+        return BuiltInRegistries.BIOME.getOrThrow(r);
+        #endif
     }
 
     //FIXME: THIS IS HELL!

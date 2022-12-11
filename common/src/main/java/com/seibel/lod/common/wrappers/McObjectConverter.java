@@ -21,7 +21,11 @@ package com.seibel.lod.common.wrappers;
 
 import java.nio.FloatBuffer;
 
+#if PRE_MC_1_19_3
 import com.mojang.math.Matrix4f;
+#else
+import org.joml.Matrix4f;
+#endif
 import com.seibel.lod.common.wrappers.block.BlockPosWrapper;
 import com.seibel.lod.core.enums.LodDirection;
 import com.seibel.lod.core.objects.math.Mat4f;
@@ -43,7 +47,11 @@ public class McObjectConverter
     public static Mat4f Convert(Matrix4f mcMatrix)
     {
         FloatBuffer buffer = FloatBuffer.allocate(16);
+        #if PRE_MC_1_19_3
         mcMatrix.store(buffer);
+        #else
+        mcMatrix.add(buffer);
+        #endif
         Mat4f matrix = new Mat4f(buffer);
         matrix.transpose();
         return matrix;

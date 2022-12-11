@@ -781,17 +781,29 @@ public abstract class ConfigGui
 		{
 			if (button != null)
 			{
-				button.y = y;
+				#if PRE_MC_1_19_3
+				resetButton.y = y;
+				#else
+				resetButton.setY(y);
+				#endif
 				button.render(matrices, mouseX, mouseY, tickDelta);
 			}
 			if (resetButton != null)
 			{
+				#if PRE_MC_1_19_3
 				resetButton.y = y;
+				#else
+				resetButton.setY(y);
+				#endif
 				resetButton.render(matrices, mouseX, mouseY, tickDelta);
 			}
 			if (indexButton != null)
 			{
-				indexButton.y = y;
+				#if PRE_MC_1_19_3
+				resetButton.y = y;
+				#else
+				resetButton.setY(y);
+				#endif
 				indexButton.render(matrices, mouseX, mouseY, tickDelta);
 			}
 			if (text != null && (!text.getString().contains("spacer") || button != null))

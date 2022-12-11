@@ -68,7 +68,10 @@ public class WorldGenStructFeatManager extends StructureManager {
 	public WorldGenStructFeatManager(WorldGenSettings worldGenSettings,
 			WorldGenLevel genLevel #if POST_MC_1_18_1, StructureCheck structureCheck #endif) {
 
-		super(genLevel, worldGenSettings #if POST_MC_1_18_1, structureCheck #endif);
+		super(genLevel,
+				worldGenSettings #if POST_MC_1_19_3 .options() #endif
+				#if POST_MC_1_18_1, structureCheck #endif
+		);
 		this.genLevel = genLevel;
 		this.worldGenSettings = worldGenSettings;
 	}
