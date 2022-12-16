@@ -50,7 +50,7 @@ public class McObjectConverter
         #if PRE_MC_1_19_3
         mcMatrix.store(buffer);
         #else
-        mcMatrix.add(buffer);
+        mcMatrix.store(buffer);
         #endif
         Mat4f matrix = new Mat4f(buffer);
         matrix.transpose();

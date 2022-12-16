@@ -46,6 +46,9 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraft.world.level.StructureFeatureManager;
 #else
+#if POST_MC_1_19_3
+import net.minecraft.world.level.levelgen.WorldOptions;
+#endif
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.StructureManager;
 #endif
@@ -61,10 +64,15 @@ public class WorldGenStructFeatManager extends StructureFeatureManager {
 public class WorldGenStructFeatManager extends StructureManager {
 #endif
 	final WorldGenLevel genLevel;
+	#if PRE_MC_1_19_3
 	WorldGenSettings worldGenSettings;
+	#else
+	WorldOptions worldOptions;
+	#endif
 	#if POST_MC_1_18_1
 	StructureCheck structureCheck;
 	#endif
+	#if PRE_MC_1_19_3
 	public WorldGenStructFeatManager(WorldGenSettings worldGenSettings,
 			WorldGenLevel genLevel #if POST_MC_1_18_1, StructureCheck structureCheck #endif) {
 
@@ -72,15 +80,24 @@ public class WorldGenStructFeatManager extends StructureManager {
 				worldGenSettings #if POST_MC_1_19_3 .options() #endif
 				#if POST_MC_1_18_1, structureCheck #endif
 		);
-		this.genLevel = genLevel;
 		this.worldGenSettings = worldGenSettings;
+	#else
+	public WorldGenStructFeatManager(WorldOptions worldOptions,
+			WorldGenLevel genLevel #if POST_MC_1_18_1, StructureCheck structureCheck #endif) {
+
+		super(genLevel, worldOptions, structureCheck);
+		this.worldOptions = worldOptions;
+	#endif
+		this.genLevel = genLevel;
 	}
 
 	@Override
 	public WorldGenStructFeatManager forWorldGenRegion(WorldGenRegion worldGenRegion) {
 		if (worldGenRegion == genLevel)
 			return this;
-		return new WorldGenStructFeatManager(worldGenSettings, worldGenRegion #if POST_MC_1_18_1, structureCheck #endif);
+		return new WorldGenStructFeatManager(
+				#if PRE_MC_1_19_3 worldGenSettings #else worldOptions #endif
+				, worldGenRegion #if POST_MC_1_18_1, structureCheck #endif);
 	}
 
 	private ChunkAccess _getChunk(int x, int z, ChunkStatus status) {

@@ -69,17 +69,25 @@ public final class StepStructureStart {
 
 		#if PRE_MC_1_19
 		if (environment.params.worldGenSettings.generateFeatures()) {
-		#elif POST_MC_1_19
+		#elif PRE_MC_1_19_3
 		if (environment.params.worldGenSettings.generateStructures()) {
+		#else
+		if (environment.params.worldOptions.generateStructures()) {
 		#endif
 			for (ChunkAccess chunk : chunksToDo) {
 				// System.out.println("StepStructureStart: "+chunk.getPos());
 				#if PRE_MC_1_19
 				environment.params.generator.createStructures(environment.params.registry, tParams.structFeat, chunk, environment.params.structures,
 						environment.params.worldSeed);
-				#elif POST_MC_1_19
+				#elif PRE_MC_1_19_3
 				environment.params.generator.createStructures(environment.params.registry, environment.params.randomState, tParams.structFeat, chunk, environment.params.structures,
 						environment.params.worldSeed);
+				#else
+					// FIXME[1.19.3]: This is the furthest I got with porting this to 1.19.3
+				environment.params.generator.createStructures(environment.params.registry,
+						environment.params.generator.createState(
+								environment.params.level.holderLookup(), environment.params.randomState, environment.params.worldSeed),
+						tParams.structFeat, chunk, environment.params.structures);
 				#endif
 				#if POST_MC_1_18_1
 				try {

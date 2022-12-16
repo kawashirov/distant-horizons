@@ -88,7 +88,7 @@ def loadProperties() {
             "1.18.2": "1_18",
             "1.19.1"  : "1_19",
 			"1.19.2"  : "1_19",
-            "1.19.3"  : "1_19"
+            "1.19.3"  : "1_19_3"
     ]
     // Use this as sometimes multiple versions use the same access wideners
     rootProject.ext.set("acsessWidenerVersion", mcVersionToAcsessWidenerVersion.get(mcVersion))

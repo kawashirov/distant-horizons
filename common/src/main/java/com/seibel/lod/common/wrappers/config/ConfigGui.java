@@ -569,11 +569,11 @@ public abstract class ConfigGui
 			if (!reload)
 				loadFromFile();
 
-			addBtn(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
+			addBtn(createButton(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
 				loadFromFile();
 				Objects.requireNonNull(minecraft).setScreen(parent);
 			}));
-			Button done = addBtn(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
+			Button done = addBtn(createButton(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
 				saveToFile();
 				Objects.requireNonNull(minecraft).setScreen(parent);
 			}));
@@ -591,7 +591,7 @@ public abstract class ConfigGui
 					Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - info.width - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, new TextComponent("Reset").withStyle(ChatFormatting.RED), (button -> {
 					#else
 					Component name = (info.name == null ? Component.translatable(translationPrefix + (!info.category.isEmpty() ? info.category + "." : "") + info.field.getName()) : info.name);
-					Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - info.width - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, Component.translatable("Reset").withStyle(ChatFormatting.RED), (button -> {
+					Button resetButton = createButton(this.width - ConfigScreenConfigs.SpaceFromRightScreen - info.width - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, Component.translatable("Reset").withStyle(ChatFormatting.RED), (button -> {
 					#endif
 						info.value = info.defaultValue;
 						info.tempValue = info.defaultValue.toString();
@@ -609,7 +609,7 @@ public abstract class ConfigGui
 							#else
 							widget.setValue(value -> Component.translatable(translationPrefix + "enum." + info.field.getType().getSimpleName() + "." + info.value.toString()));
 							#endif
-						this.list.addButton(new Button(this.width - info.width - ConfigScreenConfigs.SpaceFromRightScreen, 0, info.width, 20, widget.getValue().apply(info.value), widget.getKey()), resetButton, null, name);
+						this.list.addButton(createButton(this.width - info.width - ConfigScreenConfigs.SpaceFromRightScreen, 0, info.width, 20, widget.getValue().apply(info.value), widget.getKey()), resetButton, null, name);
 					}
 					else if (info.field.getType() == List.class)
 					{
@@ -629,7 +629,7 @@ public abstract class ConfigGui
                         Button cycleButton = new Button(this.width - 185, 0, 20, 20, new TextComponent(String.valueOf(info.index)).withStyle(ChatFormatting.GOLD), (button -> {
                         #else
                         resetButton.setMessage(Component.translatable("R").withStyle(ChatFormatting.RED));
-                        Button cycleButton = new Button(this.width - 185, 0, 20, 20, Component.translatable(String.valueOf(info.index)).withStyle(ChatFormatting.GOLD), (button -> {
+                        Button cycleButton = createButton(this.width - 185, 0, 20, 20, Component.translatable(String.valueOf(info.index)).withStyle(ChatFormatting.GOLD), (button -> {
                         #endif
 							((List<String>) info.value).remove("");
 							this.reload = true;
@@ -651,7 +651,7 @@ public abstract class ConfigGui
 					}
 					else if (info.screenButton)
 					{
-						Button widget = new Button(this.width / 2 - info.width, this.height - 28, info.width * 2, 20, name, (button -> {
+						Button widget = createButton(this.width / 2 - info.width, this.height - 28, info.width * 2, 20, name, (button -> {
 							saveToFile();
 							Objects.requireNonNull(minecraft).setScreen(ConfigGui.getScreen(this, info.gotoScreen));
 						}));
@@ -824,6 +824,18 @@ public abstract class ConfigGui
         {
             return children;
         }
+		#endif
+	}
+
+
+
+	public static Button createButton(int x, int y, int width, int height, Component component, Button.OnPress onPress) {
+		#if PRE_MC_1_19_3
+		return new Button(x, y, width, height, component, onPress);
+		#else
+		return Button.builder(component, onPress)
+				.bounds(x, y, width, height)
+				.build();
 		#endif
 	}
 }
