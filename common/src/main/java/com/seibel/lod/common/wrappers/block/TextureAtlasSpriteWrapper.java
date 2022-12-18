@@ -48,12 +48,11 @@ public class TextureAtlasSpriteWrapper {
         }
         return sprite.mainImage[0].getPixelRGBA(x, y);
         #else
-        // FIXME[1.19.3]: Furthest I could get was this
-        if (sprite.contents().getUniqueFrames().sum() > 1) {
-            x += sprite.contents().getFrameX(frameIndex) * sprite.contents().width();
-            y += sprite.contents().getFrameY(frameIndex) * sprite.contents().width();
+        if (sprite.contents().animatedTexture != null) {
+            x += sprite.contents().animatedTexture.getFrameX(frameIndex) * sprite.contents().width();
+            y += sprite.contents().animatedTexture.getFrameY(frameIndex) * sprite.contents().width();
         }
-        return sprite.mainImage[0].getPixelRGBA(x, y);
+        return sprite.contents().originalImage.getPixelRGBA(x, y);
         #endif
     }
 }

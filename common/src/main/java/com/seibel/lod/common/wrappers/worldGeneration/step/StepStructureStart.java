@@ -83,7 +83,6 @@ public final class StepStructureStart {
 				environment.params.generator.createStructures(environment.params.registry, environment.params.randomState, tParams.structFeat, chunk, environment.params.structures,
 						environment.params.worldSeed);
 				#else
-					// FIXME[1.19.3]: This is the furthest I got with porting this to 1.19.3
 				environment.params.generator.createStructures(environment.params.registry,
 						environment.params.generator.createState(
 								environment.params.level.holderLookup(), environment.params.randomState, environment.params.worldSeed),

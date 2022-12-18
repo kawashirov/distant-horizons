@@ -37,9 +37,13 @@ import java.util.Objects;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+#if POST_MC_1_19_3
+import net.minecraft.core.registries.Registries;
+#endif
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.biome.Biome;
@@ -103,7 +107,11 @@ public class ChunkLoader
 	private static LevelChunkSection[] readSections(LevelAccessor level, LevelLightEngine lightEngine, ChunkPos chunkPos, CompoundTag chunkData)
 	{
 		#if POST_MC_1_18_1
+		#if PRE_MC_1_19_3
 		Registry<Biome> biomes = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+		#else
+		Registry<Biome> biomes = level.registryAccess().registryOrThrow(Registries.BIOME);
+		#endif
 			#if PRE_MC_1_18_2
 			Codec<PalettedContainer<Biome>> biomeCodec = PalettedContainer.codec(
 					biomes, biomes.byNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getOrThrow(Biomes.PLAINS));
@@ -265,10 +273,17 @@ public class ChunkLoader
 				: new ProtoTickList<Fluid>(fluid -> (fluid == null || fluid == Fluids.EMPTY), chunkPos,
 				tagLevel.getList("LiquidsToBeTicked", 9)#if POST_MC_1_17_1, level #endif);
 		#else
+		#if PRE_MC_1_19_3
 		LevelChunkTicks<Block> blockTicks = LevelChunkTicks.load(tagLevel.getList(BLOCK_TICKS_TAG_18, 10),
 				string -> Registry.BLOCK.getOptional(ResourceLocation.tryParse(string)), chunkPos);
 		LevelChunkTicks<Fluid> fluidTicks = LevelChunkTicks.load(tagLevel.getList(FLUID_TICKS_TAG_18, 10),
 				string -> Registry.FLUID.getOptional(ResourceLocation.tryParse(string)), chunkPos);
+		#else
+		LevelChunkTicks<Block> blockTicks = LevelChunkTicks.load(tagLevel.getList(BLOCK_TICKS_TAG_18, 10),
+				string -> Registries.BLOCK.cast(ResourceLocation.tryParse(string)), chunkPos);
+		LevelChunkTicks<Fluid> fluidTicks = LevelChunkTicks.load(tagLevel.getList(FLUID_TICKS_TAG_18, 10),
+				string -> Registries.FLUID.cast(ResourceLocation.tryParse(string)), chunkPos);
+		#endif
 		#endif
 
 		LevelChunkSection[] levelChunkSections = readSections(level, lightEngine, chunkPos, tagLevel);
