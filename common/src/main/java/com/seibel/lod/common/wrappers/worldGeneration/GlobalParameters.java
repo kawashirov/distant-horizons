@@ -86,11 +86,12 @@ public final class GlobalParameters
 		#if PRE_MC_1_19_3
 		worldGenSettings = worldData.worldGenSettings();
 		biomes = registry.registryOrThrow(Registry.BIOME_REGISTRY);
+		worldSeed = worldGenSettings.seed();
 		#else
 		worldOptions = worldData.worldGenOptions();
 		biomes = registry.registryOrThrow(Registries.BIOME);
-		#endif
 		worldSeed = worldOptions.seed();
+		#endif
 		#if POST_MC_1_18_1
 		biomeManager = new BiomeManager(level, BiomeManager.obfuscateSeed(worldSeed));
 		chunkScanner = level.getChunkSource().chunkScanner();

@@ -41,7 +41,7 @@ public class TextureAtlasSpriteWrapper {
         return sprite.mainImage[0].getPixelRGBA(
                 x + sprite.framesX[frameIndex] * sprite.getWidth(),
                 y + sprite.framesY[frameIndex] * sprite.getHeight());
-        #elif PRE_MC_19_3
+        #elif PRE_MC_1_19_3
         if (sprite.animatedTexture != null) {
             x += sprite.animatedTexture.getFrameX(frameIndex) * sprite.width;
             y += sprite.animatedTexture.getFrameY(frameIndex) * sprite.height;
