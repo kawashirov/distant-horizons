@@ -138,6 +138,14 @@ If running on IDE, to ensure IDE pickup the changed versions, you will need to r
 3. `./gradlew assemble`
 4. `./gradlew mergeJars`
 5. The compiled jar file will be in the folder `Merged`
+> ### **WARNING:** Due to a bug at the moment, the merged jar does not contain the core.
+> To add the core follow the steps below
+> 1. Go into `core/build/libs` and extract the jar with the smallest name
+> 2. In that extracted folder, copy the folder called `com`
+> 3. Go into the `Merged` folder and extract the jar in that
+> 4. Paste in the folder which you copied from step 2 into the newly extracted jar
+> 5. Zip all the files that were extracted and make sure the file extension is .jar
+
 >Note: You can add the arg: `-PmcVer=1.?` to tell gradle to build a selected MC version instead of having to manually modify the `gradle.properties` file.
 
 
