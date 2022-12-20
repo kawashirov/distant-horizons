@@ -121,6 +121,7 @@ public class ClientProxy
 	public void worldLoadEvent(Level level)
 	{
 		if (Minecraft.getInstance().screen instanceof TitleScreen) return;
+		if (Minecraft.getInstance().getConnection() == null) return; // In 1.19.3, the multiplayer world load is called twice. The first time is before it actually connects to the multiplayer server (so stuff like ip and name arent sent out yet)
 		if (level != null) {
 			eventApi.worldLoadEvent(WorldWrapper.getWorldWrapper(level));
 		}

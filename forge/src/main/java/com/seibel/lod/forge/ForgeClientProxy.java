@@ -96,6 +96,7 @@ public class ForgeClientProxy
 	#endif
 	{
 		if (Minecraft.getInstance().screen instanceof TitleScreen) return;
+		if (Minecraft.getInstance().getConnection() == null) return; // In 1.19.3, the multiplayer world load is called twice. The first time is before it actually connects to the multiplayer server (so stuff like ip and name arent sent out yet)
 		#if PRE_MC_1_19_1
 		if (event.getWorld() != null) {
 			eventApi.worldLoadEvent(WorldWrapper.getWorldWrapper(event.getWorld()));
