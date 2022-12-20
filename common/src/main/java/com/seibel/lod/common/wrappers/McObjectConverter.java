@@ -43,15 +43,36 @@ import net.minecraft.core.Direction;
  */
 public class McObjectConverter
 {
+    private static int bufferIndex(int x, int y) {
+        return y * 4 + x;
+    }
+    /** Taken from Minecraft's com.mojang.math.Matrix4f class from 1.18.2 */
+    public static void storeMatrix(Matrix4f matrix, FloatBuffer buffer) {
+        buffer.put(bufferIndex(0, 0), matrix.m00());
+        buffer.put(bufferIndex(0, 1), matrix.m01());
+        buffer.put(bufferIndex(0, 2), matrix.m02());
+        buffer.put(bufferIndex(0, 3), matrix.m03());
+        buffer.put(bufferIndex(1, 0), matrix.m10());
+        buffer.put(bufferIndex(1, 1), matrix.m11());
+        buffer.put(bufferIndex(1, 2), matrix.m12());
+        buffer.put(bufferIndex(1, 3), matrix.m13());
+        buffer.put(bufferIndex(2, 0), matrix.m20());
+        buffer.put(bufferIndex(2, 1), matrix.m21());
+        buffer.put(bufferIndex(2, 2), matrix.m22());
+        buffer.put(bufferIndex(2, 3), matrix.m23());
+        buffer.put(bufferIndex(3, 0), matrix.m30());
+        buffer.put(bufferIndex(3, 1), matrix.m31());
+        buffer.put(bufferIndex(3, 2), matrix.m32());
+        buffer.put(bufferIndex(3, 3), matrix.m33());
+    }
+
+
+
     /** 4x4 float matrix converter */
     public static Mat4f Convert(Matrix4f mcMatrix)
     {
         FloatBuffer buffer = FloatBuffer.allocate(16);
-        #if PRE_MC_1_19_3
-        mcMatrix.store(buffer);
-        #else
-        mcMatrix.store(buffer);
-        #endif
+        storeMatrix(mcMatrix, buffer);
         Mat4f matrix = new Mat4f(buffer);
         matrix.transpose();
         return matrix;

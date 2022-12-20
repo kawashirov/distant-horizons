@@ -42,6 +42,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.level.levelgen.RandomState;
 #if POST_MC_1_19_3
 import net.minecraft.world.level.levelgen.WorldOptions;
+import net.minecraft.core.registries.Registries;
 #endif
 #endif
 import net.minecraft.world.level.storage.WorldData;
@@ -81,13 +82,14 @@ public final class GlobalParameters
 		lightEngine = (ThreadedLevelLightEngine) level.getLightEngine();
 		MinecraftServer server = level.getServer();
 		WorldData worldData = server.getWorldData();
+		registry = server.registryAccess();
 		#if PRE_MC_1_19_3
 		worldGenSettings = worldData.worldGenSettings();
+		biomes = registry.registryOrThrow(Registry.BIOME_REGISTRY);
 		#else
 		worldOptions = worldData.worldGenOptions();
+		biomes = registry.registryOrThrow(Registries.BIOME);
 		#endif
-		registry = server.registryAccess();
-		biomes = registry.registryOrThrow(Registry.BIOME_REGISTRY);
 		worldSeed = worldOptions.seed();
 		#if POST_MC_1_18_1
 		biomeManager = new BiomeManager(level, BiomeManager.obfuscateSeed(worldSeed));

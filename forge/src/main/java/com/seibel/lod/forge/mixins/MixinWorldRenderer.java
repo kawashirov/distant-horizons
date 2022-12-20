@@ -20,7 +20,11 @@
 package com.seibel.lod.forge.mixins;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+#if PRE_MC_1_19_3
 import com.mojang.math.Matrix4f;
+#else
+import org.joml.Matrix4f;
+#endif
 import com.seibel.lod.common.Config;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.core.api.ClientApi;
@@ -85,7 +89,7 @@ public class MixinWorldRenderer
 			callback.cancel();
 		}
 	}
-	#else
+	#elif PRE_MC_1_19_3
 	@Inject(method = "renderClouds", at = @At("HEAD"), cancellable = true)
 	public void renderClouds(PoseStack poseStack, Matrix4f projectionMatrix, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
 		// get the partial ticks since renderChunkLayer doesn't
@@ -95,6 +99,31 @@ public class MixinWorldRenderer
 
 	@Inject(at = @At("HEAD"),
 			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V",
+			cancellable = true)
+	private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
+	{
+		// only render before solid blocks
+		if (renderType.equals(RenderType.solid()))
+		{
+			Mat4f mcModelViewMatrix = McObjectConverter.Convert(modelViewMatrixStack.last().pose());
+			Mat4f mcProjectionMatrix = McObjectConverter.Convert(projectionMatrix);
+
+			ClientApi.INSTANCE.renderLods(mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
+		}
+		if (Config.Client.Advanced.lodOnlyMode) {
+			callback.cancel();
+		}
+	}
+	#else
+	@Inject(method = "renderClouds", at = @At("HEAD"), cancellable = true)
+	public void renderClouds(PoseStack poseStack, Matrix4f projectionMatrix, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
+		// get the partial ticks since renderChunkLayer doesn't
+		// have access to them
+		previousPartialTicks = tickDelta;
+	}
+
+	@Inject(at = @At("HEAD"),
+			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLorg/joml/Matrix4f;)V",
 			cancellable = true)
 	private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
 	{

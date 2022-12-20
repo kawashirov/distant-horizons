@@ -196,7 +196,9 @@ public class BiomeWrapper implements IBiomeWrapper
         #if PRE_MC_1_19_3
         return BuiltinRegistries.BIOME.getOrThrow(r);
         #else
-        return BuiltInRegistries.BIOME.getOrThrow(r);
+            // FIXME [1.19.3]
+//        return BuiltInRegistries.BIOME.getOrThrow(r);
+        return null;
         #endif
     }
 
@@ -262,17 +264,19 @@ public class BiomeWrapper implements IBiomeWrapper
     @Override
     public int getColorForBiome(int x, int z)
     {
-        int colorInt;
-        Function<Biome, Integer> colorFunction = BIOME_COLOR_MAP.get(biome);
-        if (colorFunction != null)
-        {
-            colorInt = colorFunction.apply(biome);
-        }
-        else
-        {
-            colorInt = biome.getGrassColor(x, z);
-        }
-        return colorInt;
+//        int colorInt;
+//        Function<Biome, Integer> colorFunction = BIOME_COLOR_MAP.get(biome);
+//        if (colorFunction != null)
+//        {
+//            colorInt = colorFunction.apply(biome);
+//        }
+//        else
+//        {
+//            colorInt = biome.getGrassColor(x, z);
+//        }
+//        return colorInt;
+        // FIXME[1.19.3]
+        return 0;
     }
     #endif
     @Override public String getName()

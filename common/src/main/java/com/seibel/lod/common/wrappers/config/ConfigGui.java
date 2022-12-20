@@ -782,9 +782,9 @@ public abstract class ConfigGui
 			if (button != null)
 			{
 				#if PRE_MC_1_19_3
-				resetButton.y = y;
+				button.y = y;
 				#else
-				resetButton.setY(y);
+				button.setY(y);
 				#endif
 				button.render(matrices, mouseX, mouseY, tickDelta);
 			}
@@ -800,9 +800,9 @@ public abstract class ConfigGui
 			if (indexButton != null)
 			{
 				#if PRE_MC_1_19_3
-				resetButton.y = y;
+				indexButton.y = y;
 				#else
-				resetButton.setY(y);
+				indexButton.setY(y);
 				#endif
 				indexButton.render(matrices, mouseX, mouseY, tickDelta);
 			}

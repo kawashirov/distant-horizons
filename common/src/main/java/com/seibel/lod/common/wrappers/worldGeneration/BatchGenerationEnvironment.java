@@ -59,6 +59,9 @@ import com.seibel.lod.common.wrappers.worldGeneration.step.StepStructureReferenc
 import com.seibel.lod.common.wrappers.worldGeneration.step.StepStructureStart;
 import com.seibel.lod.common.wrappers.worldGeneration.step.StepSurface;
 
+#if POST_MC_1_19_3
+import net.minecraft.core.registries.Registries;
+#endif
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -380,8 +383,14 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		if (chunkData == null)
 		{
 			return new ProtoChunk(chunkPos, UpgradeData.EMPTY
-							#if POST_MC_1_17_1, level #endif
-							#if POST_MC_1_18_1, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null #endif
+					#if POST_MC_1_17_1, level #endif
+					#if POST_MC_1_18_1, level.registryAccess().registryOrThrow(
+						#if PRE_MC_1_19_3
+						Registry.BIOME_REGISTRY
+						#else
+						Registries.BIOME
+						#endif
+					), null #endif
 			);
 		}
 		else
@@ -391,8 +400,14 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			} catch (Exception e) {
 				LOAD_LOGGER.error("DistantHorizons: Couldn't load chunk {}", chunkPos, e);
 				return new ProtoChunk(chunkPos, UpgradeData.EMPTY
-							#if POST_MC_1_17_1, level #endif
-							#if POST_MC_1_18_1, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null #endif
+					#if POST_MC_1_17_1, level #endif
+					#if POST_MC_1_18_1, level.registryAccess().registryOrThrow(
+						#if PRE_MC_1_19_3
+						Registry.BIOME_REGISTRY
+						#else
+						Registries.BIOME
+						#endif
+					), null #endif
 				);
 			}
 		}

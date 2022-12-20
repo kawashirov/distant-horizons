@@ -83,10 +83,11 @@ public final class StepStructureStart {
 				environment.params.generator.createStructures(environment.params.registry, environment.params.randomState, tParams.structFeat, chunk, environment.params.structures,
 						environment.params.worldSeed);
 				#else
-				environment.params.generator.createStructures(environment.params.registry,
-						environment.params.generator.createState(
-								environment.params.level.holderLookup(), environment.params.randomState, environment.params.worldSeed),
-						tParams.structFeat, chunk, environment.params.structures);
+					// FIXME[1.19.3]
+//				environment.params.generator.createStructures(environment.params.registry,
+//						environment.params.generator.createState(
+//								environment.params.level.holderLookup(), environment.params.randomState, environment.params.worldSeed),
+//						tParams.structFeat, chunk, environment.params.structures);
 				#endif
 				#if POST_MC_1_18_1
 				try {
