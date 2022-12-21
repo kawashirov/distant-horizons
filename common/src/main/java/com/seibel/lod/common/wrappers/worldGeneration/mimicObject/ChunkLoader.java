@@ -38,6 +38,7 @@ import java.util.Objects;
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
 #if POST_MC_1_19_3
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 #endif
 import net.minecraft.nbt.CompoundTag;
@@ -279,11 +280,10 @@ public class ChunkLoader
 		LevelChunkTicks<Fluid> fluidTicks = LevelChunkTicks.load(tagLevel.getList(FLUID_TICKS_TAG_18, 10),
 				string -> Registry.FLUID.getOptional(ResourceLocation.tryParse(string)), chunkPos);
 		#else
-		// FIXME[1.19.3]
-//		LevelChunkTicks<Block> blockTicks = LevelChunkTicks.load(tagLevel.getList(BLOCK_TICKS_TAG_18, 10),
-//				string -> Registries.BLOCK.cast(ResourceKey.createRegistryKey(ResourceLocation.tryParse(string))), chunkPos);
-//		LevelChunkTicks<Fluid> fluidTicks = LevelChunkTicks.load(tagLevel.getList(FLUID_TICKS_TAG_18, 10),
-//				string -> Registries.FLUID.cast(ResourceLocation.tryParse(string)), chunkPos);
+		LevelChunkTicks<Block> blockTicks = LevelChunkTicks.load(tagLevel.getList(BLOCK_TICKS_TAG_18, 10),
+				(string -> BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(string))), chunkPos);
+		LevelChunkTicks<Fluid> fluidTicks = LevelChunkTicks.load(tagLevel.getList(FLUID_TICKS_TAG_18, 10),
+				string -> BuiltInRegistries.FLUID.getOptional(ResourceLocation.tryParse(string)), chunkPos);
 		#endif
 		#endif
 
@@ -294,11 +294,9 @@ public class ChunkLoader
 		LevelChunk chunk = new LevelChunk((Level) level.getLevel(), chunkPos, chunkBiomeContainer, upgradeData, blockTicks,
 				fluidTicks, inhabitedTime, levelChunkSections, null);
 		#else
-		// FIXME[1.19.3]
-//		LevelChunk chunk = new LevelChunk((Level) level, chunkPos, upgradeData, blockTicks,
-//				fluidTicks, inhabitedTime, levelChunkSections, null, blendingData);
-		LevelChunk chunk = new LevelChunk((Level) level, chunkPos, upgradeData, new LevelChunkTicks(),
-				new LevelChunkTicks(), inhabitedTime, levelChunkSections, null, blendingData);
+		
+		LevelChunk chunk = new LevelChunk((Level) level, chunkPos, upgradeData, blockTicks,
+				fluidTicks, inhabitedTime, levelChunkSections, null, blendingData);
 		#endif
 		// Set some states after object creation
 		chunk.setLightCorrect(isLightOn);
