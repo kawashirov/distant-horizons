@@ -35,7 +35,11 @@ import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 #if PRE_MC_1_19_3
 import net.minecraft.data.BuiltinRegistries;
 #else
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.server.level.ServerLevel;
+import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
+import com.seibel.lod.core.api.ApiShared;
+import com.seibel.lod.core.handlers.dependencyInjection.SingletonHandler;
 #endif
 
 #if POST_MC_1_19
@@ -196,9 +200,10 @@ public class BiomeWrapper implements IBiomeWrapper
         #if PRE_MC_1_19_3
         return BuiltinRegistries.BIOME.getOrThrow(r);
         #else
-            // FIXME [1.19.3]
-//        return BuiltInRegistries.BIOME.getOrThrow(r);
-        return null;
+        // The fix below is a hacky and convoluted way of doing the thing above so...
+        // TODO[1.19.3]: Find a less convoluted method to get the Minecraft's registryAccess
+        return (((ServerLevel) ((WorldWrapper) LodUtil.getServerWorldFromDimension(ApiShared.lodWorld.getLodDimension(SingletonHandler.get(IMinecraftClientWrapper.class).getCurrentDimension()).dimension)).getWorld()).getServer().registryAccess()) // This entire mess is just to get Minecraft's registryAccess (FIND A BETTER WAY LATER)
+                .registryOrThrow(Registries.BIOME).getOrThrow(r); // Once youve gotten the registryAccess, the rest is easy
         #endif
     }
 
@@ -264,19 +269,17 @@ public class BiomeWrapper implements IBiomeWrapper
     @Override
     public int getColorForBiome(int x, int z)
     {
-//        int colorInt;
-//        Function<Biome, Integer> colorFunction = BIOME_COLOR_MAP.get(biome);
-//        if (colorFunction != null)
-//        {
-//            colorInt = colorFunction.apply(biome);
-//        }
-//        else
-//        {
-//            colorInt = biome.getGrassColor(x, z);
-//        }
-//        return colorInt;
-        // FIXME[1.19.3]
-        return 0;
+        int colorInt;
+        Function<Biome, Integer> colorFunction = BIOME_COLOR_MAP.get(biome);
+        if (colorFunction != null)
+        {
+            colorInt = colorFunction.apply(biome);
+        }
+        else
+        {
+            colorInt = biome.getGrassColor(x, z);
+        }
+        return colorInt;
     }
     #endif
     @Override public String getName()
