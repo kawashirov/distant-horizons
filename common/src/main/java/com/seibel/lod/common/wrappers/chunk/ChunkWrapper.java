@@ -20,10 +20,7 @@
 package com.seibel.lod.common.wrappers.chunk;
 
 import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
-import com.seibel.lod.core.pos.DhBlockPos;
 import com.seibel.lod.core.pos.DhChunkPos;
-import com.seibel.lod.core.util.LevelPosUtil;
-import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
@@ -41,7 +38,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 import javax.annotation.Nullable;
@@ -124,26 +120,6 @@ public class ChunkWrapper implements IChunkWrapper
 
 	public ChunkAccess getChunk() {
 		return chunk;
-	}
-	
-	@Override
-	public int getChunkPosX(){
-		return chunk.getPos().x;
-	}
-	
-	@Override
-	public int getChunkPosZ(){
-		return chunk.getPos().z;
-	}
-	
-	@Override
-	public int getRegionPosX(){
-		return LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().x, LodUtil.REGION_DETAIL_LEVEL);
-	}
-	
-	@Override
-	public int getRegionPosZ(){
-		return LevelPosUtil.convert(LodUtil.CHUNK_DETAIL_LEVEL, chunk.getPos().z, LodUtil.REGION_DETAIL_LEVEL);
 	}
 	
 	@Override
