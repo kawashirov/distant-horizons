@@ -95,20 +95,27 @@ If running in an IDE, to ensure the IDE noticed the version change, run any grad
 
 ## Compiling
 
-**From the File Explorer:**
+Prerequisites:
+- JDK 17 or newer
+
+From the File Explorer:
 1. Download and extract the project zip
 2. Download the core from https://gitlab.com/jeseibel/distant-horizons-core and extract into a folder called `core`
 3. Open a terminal emulator in the project folder (On Windows you can type `cmd` in the title bar)
 4. Run the commands: `./gradlew assemble`
-6. The compiled jar file will be in the folder `Merged`
+5. The compiled jar file will be in the folder `Merged`
 
-**From the command line:**
+From the command line:
 1. `git clone --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
 2. `cd minecraft-lod-mod`
 3. `./gradlew assemble`
 4. The compiled jar file will be in the folder `Merged`
 
->Note: You can add the arg: `-PmcVer=1.?` to tell gradle to build a selected MC version instead of having to modify the `gradle.properties` file.
+Run tests with: `./gradlew test`
+
+>Note: You can add the arg: `-PmcVer=?` to tell gradle to build a selected MC version instead of having to modify the `gradle.properties` file. \
+> Example: `./gradlew assemble -PmcVer=1.18.2`
+
 
 <Br>
 
