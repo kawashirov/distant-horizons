@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.lod.common.wrappers.worldGeneration;
 
 import java.lang.invoke.MethodHandles;
@@ -41,7 +41,7 @@ public final class GenerationEvent
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 	private static int generationFutureDebugIDs = 0;
 	final int id;
-	final ThreadedParameters tParam;
+	final ThreadedParameters threadedParam;
 	final DhChunkPos minPos;
 	final int size;
 	final Steps target;
@@ -52,93 +52,113 @@ public final class GenerationEvent
 	long timeoutTime = -1;
 	public CompletableFuture<Void> future = null;
 	final Consumer<IChunkWrapper> resultConsumer;
-
+	
+	
+	
 	public GenerationEvent(DhChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
-                           Steps target, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer) {
-		inQueueTime = System.nanoTime();
+			Steps target, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
+	{
+		this.inQueueTime = System.nanoTime();
 		this.id = generationFutureDebugIDs++;
 		this.minPos = minPos;
 		this.size = size;
 		this.target = target;
-		this.tParam = ThreadedParameters.getOrMake(generationGroup.params);
+		this.threadedParam = ThreadedParameters.getOrMake(generationGroup.params);
 		this.lightMode = Config.Client.WorldGenerator.lightGenerationMode.get();
 		this.runTimeRatio = runTimeRatio;
 		this.resultConsumer = resultConsumer;
 	}
-
+	
+	
+	
 	public static GenerationEvent startEvent(DhChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
-                                             Steps target, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
+			Steps target, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
 	{
-		if (size % 2 == 0) size += 1; // size must be odd for vanilla world gen region to work
+		if (size % 2 == 0)
+		{
+			size += 1; // size must be odd for vanilla world gen regions to work
+		}
+		
 		GenerationEvent event = new GenerationEvent(minPos, size, generationGroup, target, runTimeRatio, resultConsumer);
 		event.future = CompletableFuture.runAsync(() ->
+		{
+			long runStartTime = System.nanoTime();
+			event.timeoutTime = runStartTime;
+			event.inQueueTime = runStartTime - event.inQueueTime;
+			event.timer = new EventTimer("setup");
+			BatchGenerationEnvironment.isDistantGeneratorThread.set(true);
+			try
+			{
+				LOGGER.info("generating [{}]", event.minPos);
+				generationGroup.generateLodFromList(event);
+			}
+			finally
+			{
+				BatchGenerationEnvironment.isDistantGeneratorThread.remove();
+				if (!Thread.interrupted() && runTimeRatio < 1.0)
 				{
-					long runStartTime = System.nanoTime();
-					event.timeoutTime = runStartTime;
-					event.inQueueTime = runStartTime - event.inQueueTime;
-					event.timer = new EventTimer("setup");
-					BatchGenerationEnvironment.isDistantGeneratorThread.set(true);
-					try {
-						generationGroup.generateLodFromList(event);
-					} finally {
-						BatchGenerationEnvironment.isDistantGeneratorThread.remove();
-						if (!Thread.interrupted() && runTimeRatio < 1.0) {
-							long endTime = System.nanoTime();
-							try {
-								long deltaMs = TimeUnit.NANOSECONDS.toMillis(endTime - runStartTime);
-								Thread.sleep((long) (deltaMs/runTimeRatio - deltaMs));
-							} catch (InterruptedException ignored) {}
-						}
+					long endTime = System.nanoTime();
+					try
+					{
+						long deltaMs = TimeUnit.NANOSECONDS.toMillis(endTime - runStartTime);
+						Thread.sleep((long) (deltaMs / runTimeRatio - deltaMs));
 					}
-				}, generationGroup.executors);
+					catch (InterruptedException ignored)
+					{
+					}
+				}
+			}
+		}, generationGroup.executors);
 		return event;
 	}
-
-	public boolean isComplete()
-	{
-		return future.isDone();
-	}
-
+	
+	public boolean isComplete() { return this.future.isDone(); }
+	
 	public boolean hasTimeout(int duration, TimeUnit unit)
 	{
-		if (timeoutTime == -1) return false;
+		if (this.timeoutTime == -1)
+		{
+			return false;
+		}
+		
 		long currentTime = System.nanoTime();
-		long delta = currentTime - timeoutTime;
+		long delta = currentTime - this.timeoutTime;
 		return (delta > TimeUnit.NANOSECONDS.convert(duration, unit));
 	}
-
+	
 	public boolean terminate()
 	{
 		LOGGER.info("======================DUMPING ALL THREADS FOR WORLD GEN=======================");
 		BatchGenerationEnvironment.threadFactory.dumpAllThreadStacks();
-		future.cancel(true);
-		return future.isCancelled();
+		this.future.cancel(true);
+		return this.future.isCancelled();
 	}
 	
-	public boolean tooClose(int minX, int minZ, int w)
+	public boolean tooClose(int minX, int minZ, int width)
 	{
-		int aMinX = minPos.x;
-		int aMinZ = minPos.z;
-		int aSize = size;
+		int aMinX = this.minPos.x;
+		int aMinZ = this.minPos.z;
+		int aSize = this.size;
 		// Account for required empty chunks in the border
 		aSize += 1;
-		w+= 1;
+		width += 1;
 		// Do a AABB to AABB intersection test
 		return (aMinX + aSize >= minX &&
-				aMinX <= minX + w &&
+				aMinX <= minX + width &&
 				aMinZ + aSize >= minZ &&
-				aMinZ <= minZ + w);
+				aMinZ <= minZ + width);
 	}
 	
 	public void refreshTimeout()
 	{
-		timeoutTime = System.nanoTime();
+		this.timeoutTime = System.nanoTime();
 		UncheckedInterruptedException.throwIfInterrupted();
 	}
 	
 	@Override
 	public String toString()
 	{
-		return id + ":" + size + "@" + minPos + "(" + target + ")";
+		return this.id + ":" + this.size + "@" + this.minPos + "(" + this.target + ")";
 	}
+	
 }
