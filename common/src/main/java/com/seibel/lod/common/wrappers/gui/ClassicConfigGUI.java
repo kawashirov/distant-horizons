@@ -113,7 +113,7 @@ public abstract class ClassicConfigGUI {
                 #if PRE_MC_1_19
                 ((EntryInfo) info.guiValue).error = ((ConfigEntry) info).isValid(value) == 0 ? null : new AbstractMap.SimpleEntry<>(editBox, new TextComponent(((ConfigEntry) info).isValid(value) == -1 ?
                 #else
-                ((EntryInfo) info.guiValue).error = ((ConfigEntry) info).isValid(value) == 0 ? null : new AbstractMap.SimpleEntry<>(editBox, Component.translatable(((ConfigEntry) info).isValid(value) == -1 ?
+                ((EntryInfo) info.guiValue).error = ((ConfigEntry) info).isValidMemoryAddress(value) == 0 ? null : new AbstractMap.SimpleEntry<>(editBox, Component.translatable(((ConfigEntry) info).isValidMemoryAddress(value) == -1 ?
                 #endif
                         "§cMinimum " + "length" + (cast ? " is " + (int) ((ConfigEntry) info).getMin() : " is " + ((ConfigEntry) info).getMin()) :
                         "§cMaximum " + "length" + (cast ? " is " + (int) ((ConfigEntry) info).getMax() : " is " + ((ConfigEntry) info).getMax())));
@@ -130,7 +130,7 @@ public abstract class ClassicConfigGUI {
                 else
                     ((ConfigEntry) info).setWithoutSaving(value.intValue());
             }
-//            else if (((ConfigEntry) info).isValid() == 0)
+//            else if (((ConfigEntry) info).isValidMemoryAddress() == 0)
 //            {
 //                if (((List<String>) info.get()).size() == ((EntryInfo) info.guiValue).index)
 //                    info.set(((List<String>) info.get()).add(""));
