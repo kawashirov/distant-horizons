@@ -351,6 +351,10 @@ allprojects { p ->
     }
      */
 
+    // Fix forge version numbering system as it is weird
+    def compatible_forgemc_versions = "${compatible_minecraft_versions}".replaceAll("\"", "").replaceAll("]", ",)")
+//    System.out.println(compatible_forgemc_versions)
+
     // Put stuff from gradle.properties into the mod info
     processResources {
         def resourceTargets = ["fabric.mod.json", "quilt.mod.json", "META-INF/mods.toml"] // Location of where to inject the properties
@@ -366,6 +370,7 @@ allprojects { p ->
                 discord                      : mod_discord,
                 minecraft_version            : minecraft_version,
                 compatible_minecraft_versions: compatible_minecraft_versions,
+                compatible_forgemc_versions  : compatible_forgemc_versions,
                 java_version                 : java_version
         ]
         // The left side is what gets replaced in the mod info and the right side is where to get it from in the gradle.properties

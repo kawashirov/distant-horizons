@@ -24,10 +24,10 @@ issueTrackerURL="${issues}"
 	#// Allow any version to be present (or not) on the server
 	acceptableRemoteVersions="*"
 
-# TODO: Add this for versioning in the build script
-#[[dependencies.lod]]
-#	modId="minecraft"
-#	mandatory=true
-#	versionRange="[1.18.2,)"
-#	ordering="NONE"
-#	side="BOTH"
+
+[[dependencies.lod]]
+	modId="minecraft"
+	mandatory=true
+	versionRange="${compatible_forgemc_versions}" # Where we set what version of mc it is avalible for
+	ordering="NONE"
+	side="BOTH"
