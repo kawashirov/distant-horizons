@@ -20,11 +20,11 @@
 package com.seibel.lod.common.networking;
 
 import com.seibel.lod.core.ModInfo;
-#if MC_1_16_5
-import me.shedaniel.architectury.networking.NetworkManager;
-#else
-import dev.architectury.networking.NetworkManager;
-#endif
+//#if MC_1_16_5
+//import me.shedaniel.architectury.networking.NetworkManager;
+//#else
+//import dev.architectury.networking.NetworkManager;
+//#endif
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -57,7 +57,7 @@ public class Networking {
      * @param buf the payload of the packet.
      */
     public static void send(ServerPlayer player, FriendlyByteBuf buf) {
-        NetworkManager.sendToPlayer(player, RESOURCE_LOCATION, buf);
+//        NetworkManager.sendToPlayer(player, RESOURCE_LOCATION, buf);
     }
 
     /**
@@ -67,7 +67,7 @@ public class Networking {
      * @throws IllegalStateException if the client is not connected to a server
      */
     public static void send(FriendlyByteBuf buf) throws IllegalStateException {
-        NetworkManager.sendToServer(RESOURCE_LOCATION, buf);
+//        NetworkManager.sendToServer(RESOURCE_LOCATION, buf);
     }
 
 }
