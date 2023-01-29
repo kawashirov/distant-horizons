@@ -174,6 +174,13 @@ subprojects { p ->
         // Manifold
         annotationProcessor("systems.manifold:manifold-preprocessor:${rootProject.manifold_version}")
 
+        // Log4j
+        implementation("org.apache.logging.log4j:log4j-api:${rootProject.log4j_version}")
+        implementation("org.apache.logging.log4j:log4j-core:${rootProject.log4j_version}")
+
+        // JOML
+        implementation("org.joml:joml:${rootProject.joml_version}")
+
         // JUnit tests
         implementation("org.junit.jupiter:junit-jupiter:5.8.2")
         implementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
@@ -268,13 +275,17 @@ allprojects { p ->
     def isMinecraftSubProject = p != project(":core") && p != project(":api")
 
     repositories {
+        // The central repo
         mavenCentral()
+
+        // Used for Google's Collect library // TODO: Attempt to remove this library
+        maven { url "https://repo.enonic.com/public/" }
 
         // For parchment mappings
         maven { url "https://maven.parchmentmc.org" }
 
         // For Architectury API
-//        maven { url "https://maven.architectury.dev" }
+        maven { url "https://maven.architectury.dev" }
 
         // For Git repositories
         maven { url "https://jitpack.io" }
@@ -323,14 +334,16 @@ allprojects { p ->
         }
     }
 
-
-    // Only uncomment this when testing stuff with lwjgl in the core jar
-    /*
+    // Adds some dependencies that are in vanilla but not in core
     if (p == project(":core")) {
-        dependencies {
-            project.ext.lwjglNatives = "natives-linux"
+        OperatingSystem os = org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.currentOperatingSystem;
 
-            implementation platform("org.lwjgl:lwjgl-bom:3.3.0")
+        // Set the OS lwjgl is using to the current os
+        project.ext.lwjglNatives = "natives-" + os.toFamilyName()
+
+        dependencies {
+            // Imports most of lwjgl's libraries (well, only the ones that we need)
+            implementation platform("org.lwjgl:lwjgl-bom:${rootProject.lwjgl_version}")
 
             implementation "org.lwjgl:lwjgl"
             implementation "org.lwjgl:lwjgl-assimp"
@@ -346,10 +359,18 @@ allprojects { p ->
             runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
             runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
             runtimeOnly "org.lwjgl:lwjgl-tinyfd::$lwjglNatives"
-            implementation "org.joml:joml:1.10.2"
+            implementation "org.joml:joml:${rootProject.joml_version}"
+
+
+            // Some other dependencies
+            // TODO: Attempt to remove some of these dependencies from the core
+            implementation("org.jetbrains:annotations:16.0.2")
+            implementation("com.google.code.findbugs:jsr305:3.0.2")
+            implementation("com.google.common:google-collect:0.5")
+            implementation("com.google.guava:guava:11.0.2")
+            implementation("it.unimi.dsi:fastutil:8.5.11")
         }
     }
-     */
 
     // Fix forge version numbering system as it is weird
     def compatible_forgemc_versions = "${compatible_minecraft_versions}".replaceAll("\"", "").replaceAll("]", ",)")

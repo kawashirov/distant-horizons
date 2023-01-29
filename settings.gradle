@@ -31,7 +31,7 @@ project(":api").projectDir = file('coreSubProjects/api')
 include("common")
 include("fabric")
 //include("quilt") // Just put this here for once we need it
-include("forge")
+//include("forge") // FIXME: Fix forge, its just annoying
 
 
 rootProject.name = "DistantHorizons"
