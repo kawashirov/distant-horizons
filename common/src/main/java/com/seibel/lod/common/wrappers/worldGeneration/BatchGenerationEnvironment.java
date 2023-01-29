@@ -21,13 +21,13 @@
 
 package com.seibel.lod.common.wrappers.worldGeneration;
 
+import com.seibel.lod.api.enums.worldGeneration.EDhApiDistantGeneratorMode;
 import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.lod.core.level.IDhServerLevel;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.api.enums.config.ELightGenerationMode;
 import com.seibel.lod.core.logging.ConfigBasedLogger;
 import com.seibel.lod.core.logging.ConfigBasedSpamLogger;
-import com.seibel.lod.api.enums.config.EDistanceGenerationMode;
 import com.seibel.lod.core.pos.DhChunkPos;
 import com.seibel.lod.core.util.objects.EventTimer;
 import com.seibel.lod.core.util.LodUtil;
@@ -321,7 +321,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		EVENT_LOGGER.debug("Lod Generate Event: " + e.minPos);
 		ArrayGridList<ChunkAccess> referencedChunks;
 		ArrayGridList<ChunkAccess> genChunks;
-		EDistanceGenerationMode generationMode;
+		EDhApiDistantGeneratorMode generatorDetail;
 		LightedWorldGenRegion region;
 		WorldGenLevelLightEngine lightEngine;
 		LightGetterAdaptor adaptor;
@@ -362,7 +362,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			region = new LightedWorldGenRegion(params.level, lightEngine, referencedChunks,
 					ChunkStatus.STRUCTURE_STARTS, refSize/2, e.lightMode, generator);
 			adaptor.setRegion(region);
-			e.tParam.makeStructFeat(region, params);
+			e.threadedParam.makeStructFeat(region, params);
 			genChunks = new ArrayGridList<>(referencedChunks, RANGE_TO_RANGE_EMPTY_EXTENSION,
 					referencedChunks.gridSize - RANGE_TO_RANGE_EMPTY_EXTENSION);
 			generateDirect(e, genChunks, e.target, region);
@@ -370,7 +370,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 		catch (StepStructureStart.StructStartCorruptedException f)
 		{
-			e.tParam.markAsInvalid();
+			e.threadedParam.markAsInvalid();
 			throw (RuntimeException)f.getCause();
 		}
 
@@ -418,7 +418,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		e.refreshTimeout();
 		if (PREF_LOGGER.canMaybeLog())
 		{
-			e.tParam.perf.recordEvent(e.timer);
+			e.threadedParam.perf.recordEvent(e.timer);
 			PREF_LOGGER.infoInc("{}", e.timer);
 		}
 	}
@@ -439,27 +439,27 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			if (step == Steps.Empty)
 				return;
 			e.timer.nextEvent("structStart");
-			stepStructureStart.generateGroup(e.tParam, region, subRange);
+			stepStructureStart.generateGroup(e.threadedParam, region, subRange);
 			e.refreshTimeout();
 			if (step == Steps.StructureStart)
 				return;
 			e.timer.nextEvent("structRef");
-			stepStructureReference.generateGroup(e.tParam, region, subRange);
+			stepStructureReference.generateGroup(e.threadedParam, region, subRange);
 			e.refreshTimeout();
 			if (step == Steps.StructureReference)
 				return;
 			e.timer.nextEvent("biome");
-			stepBiomes.generateGroup(e.tParam, region, subRange);
+			stepBiomes.generateGroup(e.threadedParam, region, subRange);
 			e.refreshTimeout();
 			if (step == Steps.Biomes)
 				return;
 			e.timer.nextEvent("noise");
-			stepNoise.generateGroup(e.tParam, region, subRange);
+			stepNoise.generateGroup(e.threadedParam, region, subRange);
 			e.refreshTimeout();
 			if (step == Steps.Noise)
 				return;
 			e.timer.nextEvent("surface");
-			stepSurface.generateGroup(e.tParam, region, subRange);
+			stepSurface.generateGroup(e.threadedParam, region, subRange);
 			e.refreshTimeout();
 			if (step == Steps.Surface)
 				return;
@@ -467,7 +467,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			if (step == Steps.Carvers)
 				return;
 			e.timer.nextEvent("feature");
-			stepFeatures.generateGroup(e.tParam, region, subRange);
+			stepFeatures.generateGroup(e.threadedParam, region, subRange);
 			e.refreshTimeout();
 		}
 		finally
@@ -527,7 +527,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	}
 
 	@Override
-	public CompletableFuture<Void> generateChunks(int minX, int minZ, int genSize, Steps targetStep, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer) {
+	public CompletableFuture<Void> generateChunks(int minX, int minZ, int genSize, Steps targetStep, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
+	{
 		// TODO: Check event overlap via e.tooClose()
 		GenerationEvent e = GenerationEvent.startEvent(new DhChunkPos(minX, minZ), genSize, this, targetStep, runTimeRatio, resultConsumer);
 		events.add(e);

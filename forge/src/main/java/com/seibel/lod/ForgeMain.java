@@ -26,7 +26,7 @@ import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.wrappers.DependencySetup;
 import com.seibel.lod.common.wrappers.gui.GetConfigScreen;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
-import com.seibel.lod.core.DependencyInjection.DhApiEventInjector;
+import com.seibel.lod.core.DependencyInjection.ApiEventInjector;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.ReflectionHandler;
 import com.seibel.lod.core.dependencyInjection.ModAccessorInjector;
@@ -115,13 +115,13 @@ public class ForgeMain implements LodForgeMethodCaller
 
 	private void initCommon()
 	{
-		DhApiEventInjector.INSTANCE.fireAllEvents(DhApiBeforeDhInitEvent.class, null);
+		ApiEventInjector.INSTANCE.fireAllEvents(DhApiBeforeDhInitEvent.class, null);
 		
 		LodCommonMain.startup(this);
 		ForgeDependencySetup.createInitialBindings();
 		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 
-		if (ReflectionHandler.instance.optifinePresent()) {
+		if (ReflectionHandler.INSTANCE.optifinePresent()) {
 			ModAccessorInjector.INSTANCE.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
 		#if PRE_MC_1_17_1
@@ -140,7 +140,7 @@ public class ForgeMain implements LodForgeMethodCaller
 		LodCommonMain.initConfig();
 		LOGGER.info("Mod Post-Initialized");
 		
-		DhApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);
+		ApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);
 	}
 
 	private final ModelDataMap dataMap = new ModelDataMap.Builder().build();

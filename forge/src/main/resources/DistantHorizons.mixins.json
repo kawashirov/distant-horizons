@@ -16,5 +16,6 @@
 		"client.MixinLightmap",
 		"client.MixinOptionsScreen"
 	],
-	"server": []
+	"server": [],
+	"plugin": "com.seibel.lod.mixins.ForgeMixinPlugin"
 }

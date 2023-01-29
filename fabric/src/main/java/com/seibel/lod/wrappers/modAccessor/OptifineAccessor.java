@@ -22,9 +22,10 @@ package com.seibel.lod.wrappers.modAccessor;
 import java.util.HashSet;
 
 import com.seibel.lod.core.pos.DhChunkPos;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.AbstractOptifineAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 
-public class OptifineAccessor implements IOptifineAccessor
+public class OptifineAccessor extends AbstractOptifineAccessor
 {
 
 	@Override

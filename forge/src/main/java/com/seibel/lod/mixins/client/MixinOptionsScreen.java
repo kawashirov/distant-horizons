@@ -67,7 +67,7 @@ public class MixinOptionsScreen extends Screen {
                             // Create the button and tell it where to go
                             // For now it goes to the client option by default
                             (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(GetConfigScreen.getScreen(this)),
-                            // Add a title to the screen
+                            // Add a title to the button
                             #if PRE_MC_1_19
                             new TranslatableComponent(ModInfo.ID + ".title")));
                             #else

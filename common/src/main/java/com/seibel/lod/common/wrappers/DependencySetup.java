@@ -19,9 +19,9 @@
 
 package com.seibel.lod.common.wrappers;
 
-import com.seibel.lod.common.wrappers.gui.ConfigWrapper;
+import com.seibel.lod.common.wrappers.gui.LangWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftDedicatedServerWrapper;
-import com.seibel.lod.core.wrapperInterfaces.config.IConfigWrapper;
+import com.seibel.lod.core.wrapperInterfaces.config.ILangWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftRenderWrapper;
 import com.seibel.lod.core.IReflectionHandler;
@@ -49,7 +49,7 @@ public class DependencySetup {
     public static void createSharedBindings()
     {
         SingletonInjector.INSTANCE.bind(ILodConfigWrapperSingleton.class, LodConfigWrapperSingleton.INSTANCE); // TODO: Remove
-        SingletonInjector.INSTANCE.bind(IConfigWrapper.class, ConfigWrapper.INSTANCE);
+        SingletonInjector.INSTANCE.bind(ILangWrapper.class, LangWrapper.INSTANCE);
         SingletonInjector.INSTANCE.bind(IVersionConstants.class, VersionConstants.INSTANCE);
         SingletonInjector.INSTANCE.bind(IWrapperFactory.class, WrapperFactory.INSTANCE);
         DependencySetupDoneCheck.isDone = true;
@@ -65,6 +65,6 @@ public class DependencySetup {
         SingletonInjector.INSTANCE.bind(IMinecraftClientWrapper.class, MinecraftClientWrapper.INSTANCE);
         SingletonInjector.INSTANCE.bind(IMinecraftSharedWrapper.class, MinecraftClientWrapper.INSTANCE);
         SingletonInjector.INSTANCE.bind(IMinecraftRenderWrapper.class, MinecraftRenderWrapper.INSTANCE);
-        SingletonInjector.INSTANCE.bind(IReflectionHandler.class, ReflectionHandler.createSingleton());
+        SingletonInjector.INSTANCE.bind(IReflectionHandler.class, ReflectionHandler.INSTANCE);
     }
 }

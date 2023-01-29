@@ -22,8 +22,10 @@ package com.seibel.lod.common.wrappers.world;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.seibel.lod.api.interfaces.world.IDhApiDimensionTypeWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IDimensionTypeWrapper;
 
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
 
 /**
@@ -84,6 +86,22 @@ public class DimensionTypeWrapper implements IDimensionTypeWrapper
     {
         return this.dimensionType;
     }
-    
-    
+	
+	
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (obj.getClass() != DimensionTypeWrapper.class)
+		{
+			return false;
+		}
+		else
+		{
+			DimensionTypeWrapper other = (DimensionTypeWrapper) obj;
+			return other.getDimensionName().equals(this.getDimensionName());
+		}
+	}
+	
+	
 }

@@ -43,7 +43,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 
 
-//This class wraps the minecraft BlockPos.Mutable (and BlockPos) class
+/** This class wraps the minecraft BlockPos.Mutable (and BlockPos) class */
 public class BiomeWrapper implements IBiomeWrapper
 {
     #if PRE_MC_1_18_2
@@ -106,4 +106,9 @@ public class BiomeWrapper implements IBiomeWrapper
             throw new IOException("Failed to deserialize biome wrapper", e);
         }
     }
+	
+	
+	@Override 
+	public Object getWrappedMcObject_UNSAFE() { return this.biome; }
+	
 }
