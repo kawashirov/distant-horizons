@@ -1,13 +1,15 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
-buildVersion()
-{
-    ./gradlew clean -PmcVer=$1 --no-daemon
-    ./gradlew build -PmcVer=$1 --no-daemon
-}
+# Loop trough everything in the version properties folder
+for d in versionProperties/*; do
+  # Get the name of the version that is going to be compiled
+  version=$(echo "$d" | sed "s/versionProperties\///" | sed "s/.properties//")
 
-buildVersion 1.19
-buildVersion 1.18.2
-buildVersion 1.18.1
-buildVersion 1.17.1
-buildVersion 1.16.5
+  # Clean out the folders and build it
+  # (We could use "./" to run gradlew, but as it is a shell script im going to be running it with the "sh" command)
+  echo "Cleaning workspace to build $version"
+  sh gradlew clean -PmcVer=$version --no-daemon | true
+  echo "Building $version"
+  sh gradlew build -PmcVer=$version --no-daemon | true
+  # The "| true" at the end of those 2 are just to make sure the script continues even if a build fails
+done

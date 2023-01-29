@@ -1,21 +1,27 @@
-version = rootProject.versionStr
-
-architectury {
-    platformSetupLoomIde()
-    fabric()
+plugins {
+    id "fabric-loom" version "1.0-SNAPSHOT"
 }
 
 loom {
-    accessWidenerPath = project(":common").loom.accessWidenerPath
+    // FIXME: AccessWidener
+//    accessWidenerPath = project(":common").file("src/main/resources/${rootProject.accessWidenerVersion}.lod.accesswidener")
+    runs {
+        client {
+            client()
+            setConfigName("Fabric Client")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+        server {
+            server()
+            setConfigName("Fabric Server")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+    }
 }
 
 configurations {
-    common
-    shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
-    compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
-    developmentFabric.extendsFrom common
-
     // The addModJar basically embeds the mod to the built jar
     addModJar
     include.extendsFrom addModJar
@@ -30,15 +36,25 @@ def addMod(path, enabled) {
 }
 
 dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    mappings loom.layered() {
+        // Mojmap mappings
+        officialMojangMappings()
+        // Parchment mappings (it adds parameter mappings & javadoc)
+        parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+    }
     // Fabric loader
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
+    // Common
+    implementation project(":common")
+
     // Architectury API
-    if (minecraft_version == "1.16.5") {
-        addModJar("me.shedaniel:architectury-fabric:${rootProject.architectury_version}")
-    } else {
-        addModJar("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
-    }
+//    if (minecraft_version == "1.16.5") {
+//        addModJar("me.shedaniel:architectury-fabric:${rootProject.architectury_version}")
+//    } else {
+//        addModJar("dev.architectury:architectury-fabric:${rootProject.architectury_version}")
+//    }
 
     // Fabric API
     addModJar(fabricApi.module("fabric-lifecycle-events-v1", rootProject.fabric_api_version))
@@ -93,13 +109,11 @@ dependencies {
      */
 
 
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+    common(project(path: ":common")) { transitive false }
+    shadowCommon(project(path: ":common")) { transitive false }
 }
 
 shadowJar {
-    exclude "architectury.common.json"
-
     configurations = [project.configurations.shadowCommon, project.configurations.shadowMe, project.configurations.customModule]
 
     // Compression
@@ -120,7 +134,8 @@ shadowJar {
 }
 
 remapJar {
-    injectAccessWidener = true
+    // FIXME: AccessWidener
+//    injectAccessWidener = true
     input.set shadowJar.archiveFile
     dependsOn shadowJar
     classifier null
@@ -132,10 +147,12 @@ task deleteResources(type: Delete) {
 
 processResources {
     dependsOn(copyCoreResources)
+    dependsOn(copyAccessWidener)
 }
 
 runClient {
     dependsOn(copyCoreResources)
+    dependsOn(copyAccessWidener)
     jvmArgs "-XX:-OmitStackTraceInFastThrow"
     finalizedBy(deleteResources)
 }
@@ -159,7 +176,7 @@ components.java {
 publishing {
     publications {
         mavenFabric(MavenPublication) {
-            artifactId = rootProject.archives_base_name + "-" + project.name
+            artifactId = rootProject.mod_name + "-" + project.name
             from components.java
         }
     }

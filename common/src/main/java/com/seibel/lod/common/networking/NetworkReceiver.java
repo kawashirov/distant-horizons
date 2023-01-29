@@ -19,6 +19,7 @@
 
 package com.seibel.lod.common.networking;
 
+/*
 #if MC_1_16_5
 import me.shedaniel.architectury.networking.NetworkManager;
 #else
@@ -26,6 +27,7 @@ import dev.architectury.networking.NetworkManager;
 #endif
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+*/
 
 /**
  * @author Ran
@@ -33,6 +35,7 @@ import net.minecraft.network.FriendlyByteBuf;
 // Comment: What does the 'server' side mean? Dedicated server? Or does it include the internal server?
 // (I removed the hookup that calls the register method, since I'm not sure what it is doing yet)
 public class NetworkReceiver {
+    /*
     public void register_Client() {
         NetworkManager.registerReceiver(NetworkManager.serverToClient(), Networking.RESOURCE_LOCATION, new ClientReceiver());
     }
@@ -54,4 +57,5 @@ public class NetworkReceiver {
             com.seibel.lod.common.networking.NetworkHandler.receivePacketClient(Minecraft.getInstance(), buf, context.getPlayer());
         }
     }
+     */
 }
