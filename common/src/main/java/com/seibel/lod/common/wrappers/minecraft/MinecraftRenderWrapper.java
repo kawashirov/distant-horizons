@@ -34,6 +34,7 @@ import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
 import com.seibel.lod.core.dependencyInjection.ModAccessorInjector;
 
 import com.seibel.lod.core.logging.DhLoggerBuilder;
+import com.seibel.lod.core.render.glObject.GLProxy;
 import com.seibel.lod.core.wrapperInterfaces.misc.ILightMapWrapper;
 
 import com.mojang.math.Vector3f;
@@ -68,6 +69,7 @@ import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.Logger;
+import org.lwjgl.glfw.GLFW;
 
 
 /**
@@ -193,6 +195,18 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public int getScreenWidth()
 	{
+		// alternate ways of getting the window's resolution,
+		// using one of these methods may fix the optifine render resolution bug
+		// TODO: test these once we can run with Optifine again
+//		int[] heightArray = new int[1];
+//		int[] widthArray = new int[1];
+//		
+//		long window = GLProxy.getInstance().minecraftGlContext;
+//		GLFW.glfwGetWindowSize(window, widthArray, heightArray); // option 1
+//		GLFW.glfwGetFramebufferSize(window, widthArray, heightArray); // option 2
+		
+		
+		
 		int width = MC.getWindow().getWidth();
 		if (OPTIFINE_ACCESSOR != null)
 		{
