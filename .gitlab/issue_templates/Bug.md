@@ -31,4 +31,4 @@
  * Steps to reproduce the bug:
 
 
-/labels ~Bug ~Not-reviewed
+/labels ~Bug ~"Not-Reviewed"

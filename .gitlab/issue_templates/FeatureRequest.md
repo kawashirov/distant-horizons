@@ -5,4 +5,4 @@
  2. Describe why this feature should be added:
 
 
-/labels ~Feature ~Not-reviewed
+/labels ~Feature ~"Not-Reviewed"
