@@ -5,6 +5,8 @@ plugins {
 loom {
     // FIXME: AccessWidener
     accessWidenerPath = project(":common").file("src/main/resources/${accessWidenerVersion}.lod.accesswidener")
+
+    // "runs" isn't required, but when we do need it then it can be useful
     runs {
         client {
             client()

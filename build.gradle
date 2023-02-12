@@ -235,6 +235,7 @@ subprojects { p ->
 
     // Adds the standalone jar's entrypoint
     jar {
+        from "LICENSE.txt"
         manifest {
             attributes 'Implementation-Title': rootProject.mod_name,
                     'Implementation-Version': rootProject.mod_version,

@@ -3,7 +3,7 @@ plugins {
 }
 
 minecraft {
-    accessWideners(project(":common").file("src/main/resources/${rootProject.accessWidenerVersion}.lod.accesswidener"))
+    accessWideners(project(":common").file("src/main/resources/${accessWidenerVersion}.lod.accesswidener"))
     version(rootProject.minecraft_version)
 }
 
