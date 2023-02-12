@@ -1,4 +1,4 @@
-package com.seibel.lod;
+package com.seibel.lod.forge;
 
 import com.seibel.lod.common.networking.Networking;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;

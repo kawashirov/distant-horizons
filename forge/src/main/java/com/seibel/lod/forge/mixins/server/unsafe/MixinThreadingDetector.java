@@ -17,7 +17,7 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-package com.seibel.lod.mixins.server.unsafe;
+package com.seibel.lod.forge.mixins.server.unsafe;
 import org.spongepowered.asm.mixin.Mixin;
 #if POST_MC_1_18_1
 

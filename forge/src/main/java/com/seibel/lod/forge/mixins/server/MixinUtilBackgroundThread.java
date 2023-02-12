@@ -17,7 +17,7 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-package com.seibel.lod.mixins.server;
+package com.seibel.lod.forge.mixins.server;
 
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;

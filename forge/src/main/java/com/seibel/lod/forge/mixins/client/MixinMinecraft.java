@@ -1,4 +1,4 @@
-package com.seibel.lod.mixins.client;
+package com.seibel.lod.forge.mixins.client;
 
 import com.seibel.lod.common.wrappers.gui.updater.UpdateModScreen;
 import com.seibel.lod.core.config.Config;

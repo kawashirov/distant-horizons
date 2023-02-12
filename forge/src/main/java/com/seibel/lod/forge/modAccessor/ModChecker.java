@@ -17,28 +17,16 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-package com.seibel.lod.wrappers.modAccessor;
+package com.seibel.lod.forge.modAccessor;
 
-import java.util.HashSet;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
+import net.minecraftforge.fml.ModList;
 
-import com.seibel.lod.core.pos.DhChunkPos;
-import com.seibel.lod.core.wrapperInterfaces.modAccessor.AbstractOptifineAccessor;
-import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
+public class ModChecker implements IModChecker {
+    public static final ModChecker INSTANCE = new ModChecker();
 
-public class OptifineAccessor extends AbstractOptifineAccessor
-{
-
-	@Override
-	public String getModName()
-	{
-		return "Optifine-Forge-1.18.X";
-	}
-
-	@Override
-	public HashSet<DhChunkPos> getNormalRenderedChunks()
-	{
-		// TODO: Impl proper methods here
-		return null;
-	}
-	
+    @Override
+    public boolean isModLoaded(String modid) {
+        return ModList.get().isLoaded(modid);
+    }
 }

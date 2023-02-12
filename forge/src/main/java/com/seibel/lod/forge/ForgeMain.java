@@ -17,7 +17,7 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.seibel.lod;
+package com.seibel.lod.forge;
 
 import com.seibel.lod.api.methods.events.abstractEvents.DhApiAfterDhInitEvent;
 import com.seibel.lod.api.methods.events.abstractEvents.DhApiBeforeDhInitEvent;
@@ -33,9 +33,9 @@ import com.seibel.lod.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.lod.core.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
-import com.seibel.lod.wrappers.ForgeDependencySetup;
+import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
 
-import com.seibel.lod.wrappers.modAccessor.OptifineAccessor;
+import com.seibel.lod.forge.modAccessor.OptifineAccessor;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;

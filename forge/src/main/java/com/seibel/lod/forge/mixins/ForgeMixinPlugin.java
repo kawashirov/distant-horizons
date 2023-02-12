@@ -1,4 +1,4 @@
-package com.seibel.lod.mixins;
+package com.seibel.lod.forge.mixins;
 
 import net.minecraftforge.fml.ModList;
 import org.objectweb.asm.tree.ClassNode;

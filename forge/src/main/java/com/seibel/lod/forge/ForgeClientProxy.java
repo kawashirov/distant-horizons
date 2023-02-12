@@ -17,7 +17,7 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.seibel.lod;
+package com.seibel.lod.forge;
 
 import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.lod.core.api.internal.ClientApi;

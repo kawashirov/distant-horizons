@@ -1,21 +1,21 @@
 {
 	"required": true,
 	"minVersion": "0.8",
-	"package": "com.seibel.lod.mixins",
+	"package": "com.seibel.lod.forge.mixins",
 	"mixins": [
-		"server.unsafe.MixinThreadingDetector",
-		"server.MixinUtilBackgroundThread",
-		"server.MixinChunkGenerator",
+      "com.seibel.lod.forge.mixins.server.unsafe.MixinThreadingDetector",
+      "com.seibel.lod.forge.mixins.server.MixinUtilBackgroundThread",
+      "com.seibel.lod.forge.mixins.server.MixinChunkGenerator",
 		"server.MixinTFChunkGenerator"
 	],
 	"client": [
-		"client.MixinDebugScreenOverlay",
-		"client.MixinFogRenderer",
-		"client.MixinGameRenderer",
-		"client.MixinLevelRenderer",
-		"client.MixinLightmap",
-		"client.MixinOptionsScreen"
+      "com.seibel.lod.forge.mixins.client.MixinDebugScreenOverlay",
+      "com.seibel.lod.forge.mixins.client.MixinFogRenderer",
+      "com.seibel.lod.forge.mixins.client.MixinGameRenderer",
+      "com.seibel.lod.forge.mixins.client.MixinLevelRenderer",
+      "com.seibel.lod.forge.mixins.client.MixinLightmap",
+      "com.seibel.lod.forge.mixins.client.MixinOptionsScreen"
 	],
 	"server": [],
-	"plugin": "com.seibel.lod.mixins.ForgeMixinPlugin"
+	"plugin": "com.seibel.lod.forge.mixins.ForgeMixinPlugin"
 }

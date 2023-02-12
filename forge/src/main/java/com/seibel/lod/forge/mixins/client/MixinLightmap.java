@@ -1,4 +1,4 @@
-package com.seibel.lod.mixins.client;
+package com.seibel.lod.forge.mixins.client;
 
 
 import com.mojang.blaze3d.platform.NativeImage;

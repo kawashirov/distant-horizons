@@ -17,27 +17,28 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-package com.seibel.lod.wrappers;
+package com.seibel.lod.forge.modAccessor;
 
-import com.seibel.lod.core.dependencyInjection.SingletonInjector;
-import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
-import com.seibel.lod.wrappers.modAccessor.ModChecker;
+import java.util.HashSet;
 
-/**
- * Binds all necessary dependencies so we
- * can access them in Core. <br>
- * This needs to be called before any Core classes
- * are loaded.
- * 
- * @author James Seibel
- * @author Ran
- * @version 12-1-2021
- */
-public class ForgeDependencySetup
+import com.seibel.lod.core.pos.DhChunkPos;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.AbstractOptifineAccessor;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
+
+public class OptifineAccessor extends AbstractOptifineAccessor
 {
-	public static void createInitialBindings()
+
+	@Override
+	public String getModName()
 	{
-		SingletonInjector.INSTANCE.bind(IModChecker.class, ModChecker.INSTANCE);
+		return "Optifine-Forge-1.18.X";
 	}
 
+	@Override
+	public HashSet<DhChunkPos> getNormalRenderedChunks()
+	{
+		// TODO: Impl proper methods here
+		return null;
+	}
+	
 }

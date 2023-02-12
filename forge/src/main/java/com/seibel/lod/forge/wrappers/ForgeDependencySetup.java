@@ -17,16 +17,27 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-package com.seibel.lod.wrappers.modAccessor;
+package com.seibel.lod.forge.wrappers;
 
+import com.seibel.lod.core.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
-import net.minecraftforge.fml.ModList;
+import com.seibel.lod.forge.modAccessor.ModChecker;
 
-public class ModChecker implements IModChecker {
-    public static final ModChecker INSTANCE = new ModChecker();
+/**
+ * Binds all necessary dependencies so we
+ * can access them in Core. <br>
+ * This needs to be called before any Core classes
+ * are loaded.
+ * 
+ * @author James Seibel
+ * @author Ran
+ * @version 12-1-2021
+ */
+public class ForgeDependencySetup
+{
+	public static void createInitialBindings()
+	{
+		SingletonInjector.INSTANCE.bind(IModChecker.class, ModChecker.INSTANCE);
+	}
 
-    @Override
-    public boolean isModLoaded(String modid) {
-        return ModList.get().isLoaded(modid);
-    }
 }
