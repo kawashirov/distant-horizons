@@ -19,14 +19,14 @@
   "environment": "*",
   "entrypoints": {
     "client": [
-      "com.seibel.lod.FabricClientMain"
+      "com.seibel.lod.fabric.FabricClientMain"
     ],
     "server": [
-      "com.seibel.lod.FabricDedicatedServerMain"
+      "com.seibel.lod.fabric.FabricDedicatedServerMain"
     ],
 
     "modmenu": [
-      "com.seibel.lod.wrappers.config.ModMenuIntegration"
+      "com.seibel.lod.fabric.wrappers.config.ModMenuIntegration"
     ]
   },
 
