@@ -1,0 +1,34 @@
+## Please complete before submitting:
+
+1. [ ] Check the FAQ to see if your issue has already been reported and has a solution:
+    [Problems-and-solutions](https://gitlab.com/jeseibel/minecraft-lod-mod/-/wikis/2-frequently-asked-questions/2-problems-and-solutions/Problems-and-Solutions)
+
+2. [ ] Make sure you are not using any mods on the incompatible list:
+    [Mod support FAQ](https://gitlab.com/jeseibel/minecraft-lod-mod/-/wikis/2-frequently-asked-questions/4-mod-support/Mod-Support)
+
+3. [ ] Check the existing issues to verify that your bug hasn't already been submitted: 
+    [Issues](https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues/)
+
+4. [ ] Upload Minecraft's crash report and/or log.
+
+   Minecraft crash reports are located in: `.minecraft/crash-reports`
+
+   Minecraft logs are located in: `.minecraft/logs`
+
+5. [ ] Upload your Distant Horizons Config.
+
+     The config is found in: `.minecraft/configs/DistantHorizons.toml`
+
+ 6. [ ] Fill out the information below:
+
+================================================================
+
+ * minecraft version:
+ * Distant Horizons version:
+ * Mod loader:
+ * List of installed mods (list the smallest number of mods that you can use to re-create the bug):
+ * Describe the bug:
+ * Steps to reproduce the bug:
+
+
+/labels ~Bug ~"Not-Reviewed"
