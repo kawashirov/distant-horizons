@@ -1,10 +1,10 @@
 plugins {
-    id "fabric-loom" version "1.0-SNAPSHOT"
+    id "fabric-loom" version "1.1-SNAPSHOT"
 }
 
 loom {
     // FIXME: AccessWidener
-//    accessWidenerPath = project(":common").file("src/main/resources/${rootProject.accessWidenerVersion}.lod.accesswidener")
+    accessWidenerPath = project(":common").file("src/main/resources/${accessWidenerVersion}.lod.accesswidener")
     runs {
         client {
             client()
@@ -111,10 +111,14 @@ dependencies {
 
     common(project(path: ":common")) { transitive false }
     shadowCommon(project(path: ":common")) { transitive false }
+//    shadowCommon(project(path: ":common"), configuration: "transformProductionFabric") { transitive false } // FIXME
+    shadowMe(project(path: ":core")) { transitive false }
+    shadowMe(project(path: ":api")) { transitive false }
 }
 
 shadowJar {
     configurations = [project.configurations.shadowCommon, project.configurations.shadowMe, project.configurations.customModule]
+    relocate 'com.seibel.lod.common', 'loaderCommon.fabric.com.seibel.lod.common'
 
     // Compression
     relocate 'org.tukaani', 'distanthorizons.libraries.tukaani'

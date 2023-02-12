@@ -16,6 +16,8 @@
   "license": "LGPL-3",
   "icon": "icon.png",
 
+  "accessWidener": "lod.accesswidener",
+
   "environment": "*",
   "entrypoints": {
     "client": [

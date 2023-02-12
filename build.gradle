@@ -117,23 +117,26 @@ forgix {
 
 
 subprojects { p ->
+    // Does the same as "p == project(":common") || p == project(":fabric") || p == project(":quilt")  || p == project(":forge")"
+    // Useful later on so we dont have duplicated code
+    def isMinecraftSubProject = p != project(":core") && p != project(":api")
+
+
     // Apply plugins
     apply plugin: "java"
-    apply plugin: "systems.manifold.manifold-gradle-plugin"
+    if (isMinecraftSubProject)
+        apply plugin: "systems.manifold.manifold-gradle-plugin"
     apply plugin: "com.github.johnrengelman.shadow"
 //    apply plugin: "org.spongepowered.gradle.vanilla" // Provides minecraft libraries
     if (p == project(":core")) {
         apply plugin: "application"
     }
 
+
     // Set the manifold version (may not be required tough)
     manifold {
         manifoldVersion = rootProject.manifold_version
     }
-
-    // Does the same as "p == project(":common") || p == project(":fabric") || p == project(":quilt")  || p == project(":forge")"
-    // Useful later on so we dont have duplicated code
-    def isMinecraftSubProject = p != project(":core") && p != project(":api")
 
 
     // set up custom configurations (configurations are a way to handle dependencies) 
@@ -146,7 +149,7 @@ subprojects { p ->
         customModule
         implementation.extendsFrom(customModule)
 
-        if (p != project(":api") && p != project(":core")) {
+        if (isMinecraftSubProject) {
             // Shadow common
             common
             shadowCommon // Don't use shadow from the shadow plugin because we don't want IDEA to index this.
@@ -172,7 +175,8 @@ subprojects { p ->
         
 
         // Manifold
-        annotationProcessor("systems.manifold:manifold-preprocessor:${rootProject.manifold_version}")
+        if (isMinecraftSubProject)
+            annotationProcessor("systems.manifold:manifold-preprocessor:${rootProject.manifold_version}")
 
         // Log4j
         implementation("org.apache.logging.log4j:log4j-api:${rootProject.log4j_version}")
@@ -206,6 +210,7 @@ subprojects { p ->
         //==========================//
         // conditional dependencies //
         //==========================//
+
 
         // Add core
         if (isMinecraftSubProject) {
@@ -262,17 +267,18 @@ subprojects { p ->
 }
 
 allprojects { p ->
+    // Does the same as "p == project(":common") || p == project(":fabric") || p == project(":quilt")  || p == project(":forge")"
+    // Useful later on so we dont have duplicated code
+    def isMinecraftSubProject = p != project(":core") && p != project(":api")
+
+
     apply plugin: "java"
     apply plugin: "maven-publish"
 
     archivesBaseName = rootProject.mod_name
-    version = rootProject.mod_version
+    version = project.name + "-" + rootProject.mod_version
     group = rootProject.maven_group
 
-
-    // Does the same as "p == project(":common") || p == project(":fabric") || p == project(":quilt")  || p == project(":forge")"
-    // Useful later on so we dont have duplicated code
-    def isMinecraftSubProject = p != project(":core") && p != project(":api")
 
     repositories {
         // The central repo
@@ -367,7 +373,7 @@ allprojects { p ->
             implementation("org.jetbrains:annotations:16.0.2")
             implementation("com.google.code.findbugs:jsr305:3.0.2")
             implementation("com.google.common:google-collect:0.5")
-            implementation("com.google.guava:guava:11.0.2")
+            implementation("com.google.guava:guava:31.1-jre")
             implementation("it.unimi.dsi:fastutil:8.5.11")
         }
     }
