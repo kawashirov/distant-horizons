@@ -7,7 +7,7 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '7.0.0' apply false
 
     // Plugin to create merged jars
-    id "io.github.pacifistmc.forgix" version "1.2.6"
+//    id "io.github.pacifistmc.forgix" version "1.2.6"
 
     // Provides mc libraries to core
     id 'org.spongepowered.gradle.vanilla' version '0.2.1-SNAPSHOT' apply false
@@ -121,21 +121,21 @@ makeAccessWidener()
 rootProject.versionStr = rootProject.mod_version + "-" + rootProject.minecraft_version // + "-" + new Date().format("yyyy_MM_dd_HH_mm")
 
 // Merged jar settings
-forgix {
-    group = "com.seibel.lod"
-    mergedJarName = "DistantHorizons-${rootProject.versionStr}.jar"
-    
-    forge {
-        jarLocation = "build/libs/DistantHorizons-${rootProject.versionStr}.jar"
-    }
-
-    fabric {
-        jarLocation = "build/libs/DistantHorizons-${rootProject.versionStr}.jar"
-    }
-
-    removeDuplicate "com.seibel.lod.api"
-    removeDuplicate "com.seibel.lod.core"
-}
+//forgix {
+//    group = "com.seibel.lod"
+//    mergedJarName = "DistantHorizons-${rootProject.versionStr}.jar"
+//
+//    forge {
+//        jarLocation = "build/libs/DistantHorizons-${rootProject.versionStr}.jar"
+//    }
+//
+//    fabric {
+//        jarLocation = "build/libs/DistantHorizons-${rootProject.versionStr}.jar"
+//    }
+//
+//    removeDuplicate "com.seibel.lod.api"
+//    removeDuplicate "com.seibel.lod.core"
+//}
 
 architectury {
     minecraft = rootProject.minecraft_version
@@ -286,10 +286,10 @@ subprojects { p ->
 //    }
 
     // Run mergeJars when running build
-    if (p != project(":api") && p != project(":api")) {
-        build.finalizedBy(mergeJars)
-        assemble.finalizedBy(mergeJars)
-    }
+//    if (p != project(":api") && p != project(":api")) {
+//        build.finalizedBy(mergeJars)
+//        assemble.finalizedBy(mergeJars)
+//    }
 }
 
 allprojects { p ->
