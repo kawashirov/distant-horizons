@@ -6,9 +6,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.parchmentmc:librarian:1.+'
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+        classpath group: "".minecraftforge.gradle"" name: ""orgeGradle"" version: "".1.+"" changing: true
+        classpath ""rg.parchmentmc:librarian:1.+""classpath ""rg.spongepowered:mixingradle:0.7-SNAPSHOT"
     }
 }
 apply plugin: "net.minecraftforge.gradle"
@@ -24,21 +23,21 @@ mixin {
 }
 
 minecraft {
-//    mappings channel: 'official', version: minecraft_version // Vanilla mappings
-    mappings channel: "parchment", version: "${rootProject.parchment_version}-${rootProject.minecraft_version}" // Parchment mappings
+//    mappings channel: "official", version: minecraft_version // Vanilla mappings
+    mappings channel: "parchment", version: "${parchment_version}-${minecraft_version}" // Parchment mappings
 
     runs {
         client {
-            workingDirectory project.file('run')
+            workingDirectory project.file("run")
             ideaModule "${rootProject.name}.${project.name}.main"
-            taskName 'Client'
+            taskName "Client"
             args "-mixins.config=DistantHorizons.mixins.json"
         }
 
         server {
-            workingDirectory project.file('run')
+            workingDirectory project.file("run")
             ideaModule "${rootProject.name}.${project.name}.main"
-            taskName 'Server'
+            taskName "Server"
             args "-mixins.config=DistantHorizons.mixins.json"
         }
 
@@ -110,12 +109,12 @@ dependencies {
 
     addMod("curse.maven:TerraForged-363820:${rootProject.terraforged_version}", rootProject.enable_terraforged)
 
-    if (System.getProperty('idea.sync.active') != 'true') {
-        annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
+    if (System.getProperty("idea.sync.active") != "true") {
+        annotationProcessor "org.spongepowered:mixin:0.8.4:processor"
     }
 
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive false }
+    common(project(path: ":common")) { transitive false }
+    shadowCommon(project(path: ":common")) { transitive false }
     shadowMe(project(path: ":core")) { transitive false }
     shadowMe(project(path: ":api")) { transitive false }
 }
@@ -129,20 +128,19 @@ shadowJar {
     exclude "architectury.common.json"
 
     configurations = [project.configurations.shadowCommon, project.configurations.shadowMe, project.configurations.customModule]
-    relocate 'com.seibel.lod.common', 'loaderCommon.forge.com.seibel.lod.common'
+    relocate "om.seibel.lod.common", "loaderCommon.forge.com.seibel.lod.common"
 
     // Compression
-    relocate 'org.tukaani', 'distanthorizons.libraries.tukaani'
-    relocate 'org.apache.commons.compress', 'distanthorizons.libraries.apache.commons.compress'
+    relocate "org.tukaani", "distanthorizons.libraries.tukaani"
 
     // NightConfig (includes Toml & Json)
-    relocate 'com.electronwill.nightconfig', 'distanthorizons.libraries.electronwill.nightconfig'
+    relocate "com.electronwill.nightconfig", "distanthorizons.libraries.electronwill.nightconfig"
 
     // Theming
-    relocate 'com.formdev.flatlaf', 'distanthorizons.libraries.formdev.flatlaf'
+    relocate "com.formdev.flatlaf", "distanthorizons.libraries.formdev.flatlaf"
 
     // svg
-    relocate 'com.kitfox.svg', 'distanthorizons.libraries.kitfox.svg'
+    relocate "com.kitfox.svg", "distanthorizons.libraries.kitfox.svg"
 
     classifier "dev-shadow"
     mergeServiceFiles()

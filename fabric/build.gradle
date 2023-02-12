@@ -124,7 +124,6 @@ shadowJar {
 
     // Compression
     relocate 'org.tukaani', 'distanthorizons.libraries.tukaani'
-    relocate 'org.apache.commons.compress', 'distanthorizons.libraries.apache.commons.compress'
 
     // NightConfig (includes Toml & Json)
     relocate 'com.electronwill.nightconfig', 'distanthorizons.libraries.electronwill.nightconfig'

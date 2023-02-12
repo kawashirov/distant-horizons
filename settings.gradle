@@ -30,7 +30,7 @@ project(":api").projectDir = file('coreSubProjects/api')
 // Minecraft dependent sub-projects
 include("common")
 include("fabric")
-//include("quilt") // Just put this here for once we need it
+//include("quilt") // Just put this here for once we need it ;)
 //include("forge") // FIXME: Fix forge, its just annoying
 
 
