@@ -40,4 +40,7 @@ public class ForgeDependencySetup
 		SingletonInjector.INSTANCE.bind(IModChecker.class, ModChecker.INSTANCE);
 	}
 
+	public static void runDelayedSetup() {
+		SingletonInjector.INSTANCE.runDelayedSetup();
+	}
 }

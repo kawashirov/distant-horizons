@@ -1,7 +1,7 @@
 plugins {
     // Plugin to help in developing multi-loader mods
     id "architectury-plugin" version "3.4-SNAPSHOT"
-    id "dev.architectury.loom" version "0.12.0-SNAPSHOT" apply false
+    id "dev.architectury.loom" version "1.0-SNAPSHOT" apply false
 
     // Plugin to handle dependencies
     id 'com.github.johnrengelman.shadow' version '7.0.0' apply false
@@ -195,7 +195,7 @@ subprojects { p ->
         implementation("org.junit.jupiter:junit-jupiter:5.8.2")
         implementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
         implementation("junit:junit:4.13")
-        
+
         // Compression
         shadowMe("org.tukaani:xz:1.9")
         shadowMe("org.apache.commons:commons-compress:1.21")
@@ -204,13 +204,15 @@ subprojects { p ->
         shadowMe("com.electronwill.night-config:toml:${rootProject.nightconfig_version}")
         shadowMe("com.electronwill.night-config:json:${rootProject.nightconfig_version}")
 
-        // Theming
-        shadowMe("com.formdev:flatlaf:${rootProject.flatlaf_version}")
+        if (p == project(":core")) {
+            // Theming
+            shadowMe("com.formdev:flatlaf:${rootProject.flatlaf_version}")
 
-        // SVG
-        shadowMe("com.formdev:flatlaf-extras:${rootProject.flatlaf_version}")
-        shadowMe("com.formdev:svgSalamander:${rootProject.svgSalamander_version}")
-        
+            // SVG
+            shadowMe("com.formdev:flatlaf-extras:${rootProject.flatlaf_version}")
+            shadowMe("com.formdev:svgSalamander:${rootProject.svgSalamander_version}")
+        }
+
         
         
         //==========================//
