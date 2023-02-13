@@ -29,9 +29,13 @@ import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.lod.core.DependencyInjection.ApiEventInjector;
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.ReflectionHandler;
+import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.lod.core.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
+import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IBCLibAccessor;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
 
@@ -84,6 +88,10 @@ public class ForgeMain implements LodForgeMethodCaller
 
 	public ForgeMain()
 	{
+		DependencySetup.createClientBindings();
+
+//		initDedicated(null);
+//		initDedicated(null);
 		// Register the mod initializer (Actual event registration is done in the different proxies)
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::initClient);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::initDedicated);
@@ -91,35 +99,17 @@ public class ForgeMain implements LodForgeMethodCaller
 
 	private void initClient(final FMLClientSetupEvent event)
 	{
-		DependencySetup.createClientBindings();
-		initCommon();
+		ApiEventInjector.INSTANCE.fireAllEvents(DhApiBeforeDhInitEvent.class, null);
+
+		LOGGER.info("Initializing Mod");
+		LodCommonMain.startup(this);
+		ForgeDependencySetup.createInitialBindings();
+		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 
 		client_proxy = new ForgeClientProxy();
 		MinecraftForge.EVENT_BUS.register(client_proxy);
 		server_proxy = new ForgeServerProxy(false);
 		MinecraftForge.EVENT_BUS.register(server_proxy);
-
-		postInitCommon();
-	}
-
-	private void initDedicated(final FMLDedicatedServerSetupEvent event)
-	{
-		DependencySetup.createServerBindings();
-		initCommon();
-
-		server_proxy = new ForgeServerProxy(true);
-		MinecraftForge.EVENT_BUS.register(server_proxy);
-
-		postInitCommon();
-	}
-
-	private void initCommon()
-	{
-		ApiEventInjector.INSTANCE.fireAllEvents(DhApiBeforeDhInitEvent.class, null);
-		
-		LodCommonMain.startup(this);
-		ForgeDependencySetup.createInitialBindings();
-		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 
 		if (ReflectionHandler.INSTANCE.optifinePresent()) {
 			ModAccessorInjector.INSTANCE.bind(IOptifineAccessor.class, new OptifineAccessor());
@@ -131,16 +121,33 @@ public class ForgeMain implements LodForgeMethodCaller
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
 				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> GetConfigScreen.getScreen(parent)));
 		#endif
+
+		LOGGER.info(ModInfo.READABLE_NAME + " Initialized");
+
+		ApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);
+
+		// Init config
+		// The reason im initialising in this rather than the post init process is cus im using this for the auto updater
+		LodCommonMain.initConfig();
+	}
+
+	private void initDedicated(final FMLDedicatedServerSetupEvent event)
+	{
+//		DependencySetup.createServerBindings();
+//		initCommon();
+
+//		server_proxy = new ForgeServerProxy(true);
+//		MinecraftForge.EVENT_BUS.register(server_proxy);
+//
+		postInitCommon();
 	}
 
 	private void postInitCommon()
 	{
 		LOGGER.info("Post-Initializing Mod");
-		SingletonInjector.INSTANCE.runDelayedSetup();
-		LodCommonMain.initConfig();
+		ForgeDependencySetup.runDelayedSetup();
+
 		LOGGER.info("Mod Post-Initialized");
-		
-		ApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);
 	}
 
 	private final ModelDataMap dataMap = new ModelDataMap.Builder().build();
