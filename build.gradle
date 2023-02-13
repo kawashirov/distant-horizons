@@ -66,6 +66,9 @@ def loadProperties() {
     for (int i = 0; i < mcVers.size(); i++) {
         mcVers[i] = mcVers[i].replaceAll(".properties", "") // As we are getting the file names, we should remove the ".properties" at the end to get the versions
     }
+
+    mcVers.sort() // Sort so it always goes from oldest to newest
+
     int mcIndex = -1
     println "Avalible MC versions: ${mcVers}"
     if (project.hasProperty("mcVer")) {

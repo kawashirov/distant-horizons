@@ -27,7 +27,7 @@ minecraft {
 //    mappings channel: "official", version: minecraft_version // Vanilla mappings
     mappings channel: "parchment", version: "${parchment_version}-${minecraft_version}" // Parchment mappings
 
-    accessTransformer = project(":forge").file("src/main/resources/accesstransformer.cfg") // FIXME: Find a libary to use fabric's accessWidener instead of forge's own accesstransformer format
+    accessTransformer = project(":forge").file("src/main/resources/META-INF/accesstransformer.cfg") // FIXME: Find a libary to use fabric's accessWidener instead of forge's own accesstransformer format
 
     runs {
         client {
@@ -35,14 +35,25 @@ minecraft {
             ideaModule "${rootProject.name}.${project.name}.main"
             taskName "Client"
             args "-mixins.config=DistantHorizons.mixins.json"
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            mods {
+                modClientRun {
+                    source sourceSets.main
+                    source project(":common").sourceSets.main
+                    source project(":core").sourceSets.main
+                    source project(":api").sourceSets.main
+                }
+            }
         }
 
-        server {
-            workingDirectory project.file("run")
-            ideaModule "${rootProject.name}.${project.name}.main"
-            taskName "Server"
-            args "-mixins.config=DistantHorizons.mixins.json"
-        }
+        // TODO: Do this once client works
+//        server {
+//            workingDirectory project.file("run")
+//            ideaModule "${rootProject.name}.${project.name}.main"
+//            taskName "Server"
+//            args "-mixins.config=DistantHorizons.mixins.json"
+//        }
 
         data {
             workingDirectory project.file("run")
@@ -50,13 +61,16 @@ minecraft {
             args '--mod', "lod", '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
             taskName 'Data'
             args "-mixins.config=DistantHorizons.mixins.json" // To add more mixins, you can just add a comma for another arg
-            // These may be needed altough im not sure
-//            mods {
-//                modDataRun {
-//                    source sourceSets.main
-//                    source project(":common").sourceSets.main
-//                }
-//            }
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+            mods {
+                modClientRun {
+                    source sourceSets.main
+                    source project(":common").sourceSets.main
+                    source project(":core").sourceSets.main
+                    source project(":api").sourceSets.main
+                }
+            }
         }
     }
 }
