@@ -5,19 +5,23 @@ image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
-  - build_fabric
+  - build_1_18_2
 
-# Fabric build
-build_fabric:
-  stage: build_fabric
+# 1.18.2 build
+build_1_18_2:
+  stage: build_1_18_2
   script:
-    - ./gradlew fabric:test  -PmcVer="1.18.2" --gradle-user-home cache/;
-    - ./gradlew fabric:build -PmcVer="1.18.2" --gradle-user-home cache/;
+    - ./gradlew test  -PmcVer="1.18.2" --gradle-user-home cache/;
+    - ./gradlew build -PmcVer="1.18.2" --gradle-user-home cache/;
   image: eclipse-temurin:17
   artifacts:
-    name: "NightlyBuild_1_18_2-Fabric-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+    name: "NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
     paths:
-      - fabric/build/libs/*1.18.2.jar
+      - fabric/build/libs/*.jar
+      - forge/build/libs/*.jar
+    exclude:
+      - *dev-shadow.jar
+      - *sources.jar
     expire_in: 1 day
     when: always
   cache:
