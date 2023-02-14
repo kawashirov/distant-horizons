@@ -2,45 +2,109 @@
 image: gradle:eclipse-temurin
 # The ci should always use an unix/unix-like OS to work
 
+
 # all stages need to be defined here
-  # Don't build the standalone jar yet because it isn't done yet
-  # - build_standalone
 stages:
-  - build_19
-  - build_18_2
-  - build_18_1
-  - build_17_1
-  - build_16_5
+  - build_fabric
 
-variables:
-    # Pull core when building
-    GIT_SUBMODULE_STRATEGY: recursive
+# Fabric build
+build_fabric:
+  stage: build_fabric
+  script:
+    - ./gradlew fabric:test  -PmcVer="1.18.2" --gradle-user-home cache/;
+    - ./gradlew fabric:build -PmcVer="1.18.2" --gradle-user-home cache/;
+  image: eclipse-temurin:17
+  artifacts:
+    name: "NightlyBuild_1_18_2-Fabric-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+    paths:
+      - fabric/build/libs/*1.18.2.jar
+    expire_in: 1 day
+    when: always
+  cache:
+    key: "gradleCache"
+    policy: pull-push
+    paths:
+      - .gradle
+      - cache/
+  allow_failure: true
 
 
-before_script:
-    - echo $CI_JOB_ID
-    # Writing GE_JOB_ID variable to environment file, will need the value in the next stage.
-    - echo GE_JOB_ID=$CI_JOB_ID >> generate_jars.env
 
 
-# The standalone build
-#build_standalone:
-#  stage: build_standalone
+
+
+
+
+
+
+# ============================== Previos CI for future reference ============================== #
+## all stages need to be defined here
+#  # Don't build the standalone jar yet because it isn't done yet
+#  # - build_standalone
+#stages:
+#  - build_19
+#  - build_18_2
+#  - build_18_1
+#  - build_17_1
+#  - build_16_5
+#
+#variables:
+#    # Pull core when building
+#    GIT_SUBMODULE_STRATEGY: recursive
+#
+#
+#before_script:
+#    - echo $CI_JOB_ID
+#    # Writing GE_JOB_ID variable to environment file, will need the value in the next stage.
+#    - echo GE_JOB_ID=$CI_JOB_ID >> generate_jars.env
+#
+#
+## The standalone build
+##build_standalone:
+##  stage: build_standalone
+##  script:
+##    # make sure any previously merged jars are removed before running this job.
+##    # note: if the merged folder doesn't exist "rm -R Merged" will throw an error, which can be ignored
+##    #       the "|| true" makes that step always succeed.
+##    - ./gradlew core:build --gradle-user-home cache/;
+##
+##    # Copy the file with the shortest name to the root DistantHorizons.jar so it can be sent off
+##    - cp $(find core/build/libs/ | awk 'function base(f){sub(".*/", "", f); return f;} {print length(base($0)), $0}'| sort -n | head -2 | grep -P "[0-9][0-9] core/build/libs/*" | #sed -r "s/([0-9][0-9] )//g") DistantHorizons.jar
+##  # build using Java 16
+##  image: eclipse-temurin:16
+##  artifacts:
+##    name: "NightlyBuild_standalone-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+##    paths:
+##      # Get the standalone jar
+##      - DistantHorizons.jar
+##    expire_in: 1 day
+##    # even if one build fails, upload the successful jars
+##    when: always
+##  cache:
+##    key: "gradleCache"
+##    policy: pull-push
+##    paths:
+##      - .gradle
+##      - cache/
+##  allow_failure: true
+#
+#
+## 1.16.5 build
+#build_16_5:
+#  stage: build_16_5
 #  script:
 #    # make sure any previously merged jars are removed before running this job.
 #    # note: if the merged folder doesn't exist "rm -R Merged" will throw an error, which can be ignored
 #    #       the "|| true" makes that step always succeed.
-#    - ./gradlew core:build --gradle-user-home cache/;
-#
-#    # Copy the file with the shortest name to the root DistantHorizons.jar so it can be sent off
-#    - cp $(find core/build/libs/ | awk 'function base(f){sub(".*/", "", f); return f;} {print length(base($0)), $0}'| sort -n | head -2 | grep -P "[0-9][0-9] core/build/libs/*" | #sed -r "s/([0-9][0-9] )//g") DistantHorizons.jar
+#    - ./gradlew test --gradle-user-home cache/;
+#    - ./gradlew build -PmcVer="1.16.5" --gradle-user-home cache/;
 #  # build using Java 16
 #  image: eclipse-temurin:16
 #  artifacts:
-#    name: "NightlyBuild_standalone-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+#    name: "Merged_NightlyBuild_1_16_5-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
 #    paths:
-#      # Get the standalone jar
-#      - DistantHorizons.jar
+#      # relative to the root directory
+#      - Merged
 #    expire_in: 1 day
 #    # even if one build fails, upload the successful jars
 #    when: always
@@ -51,119 +115,94 @@ before_script:
 #      - .gradle
 #      - cache/
 #  allow_failure: true
+#
+## 1.17.1 build
+#build_17_1:
+#  stage: build_17_1
+#  script:
+#    - ./gradlew test --gradle-user-home cache/;
+#    - ./gradlew build -PmcVer="1.17.1" --gradle-user-home cache/;
+#  image: eclipse-temurin:16
+#  artifacts:
+#    name: "Merged_NightlyBuild_1_17_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+#    paths:
+#      - Merged
+#    expire_in: 1 day
+#    when: always
+#  cache:
+#    key: "gradleCache"
+#    policy: pull-push
+#    paths:
+#      - .gradle
+#      - cache/
+#  allow_failure: true
+#
+## 1.18.1 build
+#build_18_1:
+#  stage: build_18_1
+#  script:
+#    - ./gradlew test --gradle-user-home cache/;
+#    - ./gradlew build -PmcVer="1.18.1" --gradle-user-home cache/;
+#  # build using Java 17
+#  image: eclipse-temurin:17
+#  artifacts:
+#    name: "Merged_NightlyBuild_1_18_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+#    paths:
+#    - Merged
+#    expire_in: 1 day
+#    when: always
+#  cache:
+#    key: "gradleCache"
+#    policy: pull-push
+#    paths:
+#      - .gradle
+#      - cache/
+#  allow_failure: true
+#
+## 1.18.2 build
+#build_18_2:
+#  stage: build_18_2
+#  script:
+#    - ./gradlew test --gradle-user-home cache/;
+#    - ./gradlew build -PmcVer="1.18.2" --gradle-user-home cache/;
+#  image: eclipse-temurin:17
+#  artifacts:
+#    name: "Merged_NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+#    paths:
+#      - Merged
+#    expire_in: 1 day
+#    when: always
+#  cache:
+#    key: "gradleCache"
+#    policy: pull-push
+#    paths:
+#      - .gradle
+#      - cache/
+#  allow_failure: true
+#
+## 1.19 build
+#build_19:
+#  stage: build_19
+#  script:
+#    - ./gradlew test --gradle-user-home cache/;
+#    - ./gradlew build -PmcVer="1.19" --gradle-user-home cache/;
+#  image: eclipse-temurin:17
+#  artifacts:
+#    name: "Merged_NightlyBuild_1_19-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+#    paths:
+#      - Merged
+#    expire_in: 1 day
+#    when: always
+#  cache:
+#    key: "gradleCache"
+#    policy: pull-push
+#    paths:
+#      - .gradle
+#      - cache/
+#  allow_failure: true
 
 
-# 1.16.5 build
-build_16_5:
-  stage: build_16_5
-  script:
-    # make sure any previously merged jars are removed before running this job.
-    # note: if the merged folder doesn't exist "rm -R Merged" will throw an error, which can be ignored
-    #       the "|| true" makes that step always succeed.
-    - ./gradlew test --gradle-user-home cache/;
-    - ./gradlew build -PmcVer="1.16.5" --gradle-user-home cache/;
-  # build using Java 16
-  image: eclipse-temurin:16
-  artifacts:
-    name: "Merged_NightlyBuild_1_16_5-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
-    paths:
-      # relative to the root directory
-      - Merged
-    expire_in: 1 day
-    # even if one build fails, upload the successful jars
-    when: always
-  cache:
-    key: "gradleCache"
-    policy: pull-push
-    paths:
-      - .gradle
-      - cache/
-  allow_failure: true
 
-# 1.17.1 build
-build_17_1:
-  stage: build_17_1
-  script:
-    - ./gradlew test --gradle-user-home cache/;
-    - ./gradlew build -PmcVer="1.17.1" --gradle-user-home cache/;
-  image: eclipse-temurin:16
-  artifacts:
-    name: "Merged_NightlyBuild_1_17_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
-    paths:
-      - Merged
-    expire_in: 1 day
-    when: always
-  cache:
-    key: "gradleCache"
-    policy: pull-push
-    paths:
-      - .gradle
-      - cache/
-  allow_failure: true
-
-# 1.18.1 build 
-build_18_1:
-  stage: build_18_1
-  script:
-    - ./gradlew test --gradle-user-home cache/;
-    - ./gradlew build -PmcVer="1.18.1" --gradle-user-home cache/;
-  # build using Java 17
-  image: eclipse-temurin:17
-  artifacts:
-    name: "Merged_NightlyBuild_1_18_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
-    paths:
-    - Merged
-    expire_in: 1 day
-    when: always
-  cache:
-    key: "gradleCache"
-    policy: pull-push
-    paths:
-      - .gradle
-      - cache/
-  allow_failure: true
-
-# 1.18.2 build
-build_18_2:
-  stage: build_18_2
-  script:
-    - ./gradlew test --gradle-user-home cache/;
-    - ./gradlew build -PmcVer="1.18.2" --gradle-user-home cache/;
-  image: eclipse-temurin:17
-  artifacts:
-    name: "Merged_NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
-    paths:
-      - Merged
-    expire_in: 1 day
-    when: always
-  cache:
-    key: "gradleCache"
-    policy: pull-push
-    paths:
-      - .gradle
-      - cache/
-  allow_failure: true
-
-# 1.19 build
-build_19:
-  stage: build_19
-  script:
-    - ./gradlew test --gradle-user-home cache/;
-    - ./gradlew build -PmcVer="1.19" --gradle-user-home cache/;
-  image: eclipse-temurin:17
-  artifacts:
-    name: "Merged_NightlyBuild_1_19-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
-    paths:
-      - Merged
-    expire_in: 1 day
-    when: always
-  cache:
-    key: "gradleCache"
-    policy: pull-push
-    paths:
-      - .gradle
-      - cache/
-  allow_failure: true
 
 
 # unused deployment stage
