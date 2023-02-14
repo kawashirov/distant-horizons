@@ -20,8 +20,11 @@ build_1_18_2:
       - fabric/build/libs/*.jar
       - forge/build/libs/*.jar
     exclude:
-      - *dev-shadow.jar
-      - *sources.jar
+      # TODO: There is a lot of duplicate stuff here, fix it later
+      - fabric/build/libs/*dev-shadow.jar
+      - forge/build/libs/*dev-shadow.jar
+      - fabric/build/libs/*sources.jar
+      - forge/build/libs/*sources.jar
     expire_in: 1 day
     when: always
   cache:
