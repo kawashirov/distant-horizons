@@ -37,12 +37,15 @@ public class BlockStateWrapper implements IBlockStateWrapper
     }
 
     @Override
-    public String serialize() {
-        if (blockState == null) {
-            return "AIR";
-        }
-        return BlockState.CODEC.encodeStart(JsonOps.COMPRESSED, blockState).get().orThrow().toString();
-    }
+    public String serialize()
+	{
+		if (this.blockState == null)
+		{
+			return "AIR";
+		}
+	
+		return BlockState.CODEC.encodeStart(JsonOps.COMPRESSED, this.blockState).get().orThrow().toString();
+	}
 
     public static BlockStateWrapper deserialize(String str) throws IOException {
         if (str.equals("AIR")) {
