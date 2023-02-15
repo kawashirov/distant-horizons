@@ -16,6 +16,8 @@
   "license": "LGPL-3",
   "icon": "icon.png",
 
+  "accessWidener": "lod.accesswidener",
+
   "environment": "*",
   "entrypoints": {
     "client": [
@@ -48,7 +50,7 @@
   "custom": {
     "modmenu": {
       "links": {
-        "modmenu.discord": "https://discord.gg/xAB8G4cENx"
+        "modmenu.discord": "${discord}"
       }
     }
   }

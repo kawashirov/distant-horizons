@@ -28,6 +28,3 @@ Merged/
 
 # file genearated via MC version switching using preprocessor
 build.properties
-
-# This accesswidener is generated at runtime ant not needed
-common/src/main/resources/lod.accesswidener

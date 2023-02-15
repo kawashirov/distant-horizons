@@ -104,7 +104,7 @@ public class FabricServerProxy {
     }
 
     // This just exists here for testing purposes, it'll be removed in the future
-    public void tester(MinecraftServer server) {
+    public void tester(MinecraftServer server) { // I disabled the Networking functions for now so this will not work atm - coolGi
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             FriendlyByteBuf payload = Networking.createNew();
             payload.writeInt(1);
