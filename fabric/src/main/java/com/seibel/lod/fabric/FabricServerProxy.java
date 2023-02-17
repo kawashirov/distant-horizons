@@ -73,11 +73,11 @@ public class FabricServerProxy {
         // ServerWorldLoadEvent
         //TODO: Check if both of this use the correct timed events. (i.e. is it 'ed' or 'ing' one?)
         ServerLifecycleEvents.SERVER_STARTING.register((server) -> {
-            if (isValidTime()) ServerApi.INSTANCE.serverWorldLoadEvent(isDedicated);
+            if (isValidTime()) ServerApi.INSTANCE.serverLoadEvent(isDedicated);
         });
         // ServerWorldUnloadEvent
         ServerLifecycleEvents.SERVER_STOPPED.register((server) -> {
-            if (isValidTime()) ServerApi.INSTANCE.serverWorldUnloadEvent();
+            if (isValidTime()) ServerApi.INSTANCE.serverUnloadEvent();
         });
 
         // ServerLevelLoadEvent

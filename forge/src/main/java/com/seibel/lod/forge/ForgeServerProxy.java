@@ -55,13 +55,13 @@ public class ForgeServerProxy {
     // ServerWorldLoadEvent
     @SubscribeEvent
     private void dedicatedWorldLoadEvent(ServerStartedEvent event) {
-        if (isValidTime()) serverApi.serverWorldLoadEvent(isDedicated);
+        if (isValidTime()) serverApi.serverLoadEvent(isDedicated);
     }
 
     // ServerWorldUnloadEvent
     @SubscribeEvent
     private void serverWorldUnloadEvent(ServerStoppingEvent event) {
-        if (isValidTime()) serverApi.serverWorldUnloadEvent();
+        if (isValidTime()) serverApi.serverUnloadEvent();
     }
 
     // ServerLevelLoadEvent
