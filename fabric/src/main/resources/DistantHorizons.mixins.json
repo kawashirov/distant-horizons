@@ -18,6 +18,7 @@
     "client.MixinLightmap",
     "client.MixinOptionsScreen",
     "client.MixinMinecraft",
+    "client.MixinTextureUtil",
     "mods.sodium.MixinSodiumChunkRenderer"
   ],
   "injectors": {
