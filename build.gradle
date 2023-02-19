@@ -23,16 +23,16 @@ plugins {
 def writeBuildGradlePredefine(List<String> mcVers, int mcIndex) {
     ArrayList<String> redefineList = new ArrayList<String>()
 
-    for (int i=0; i<mcVers.size(); i++) {
+    for (int i = 0; i < mcVers.size(); i++) {
         String mcStr = mcVers[i].replace(".", "_")
-        if (mcIndex<i) {
-            redefineList.add("PRE_MC_"+mcStr)
+        if (mcIndex < i) {
+            redefineList.add("PRE_MC_" + mcStr)
         }
-        if (mcIndex==i) {
-            redefineList.add("MC_"+mcStr)
+        if (mcIndex == i) {
+            redefineList.add("MC_" + mcStr)
         }
-        if (mcIndex>=i) {
-            redefineList.add("POST_MC_"+mcStr)
+        if (mcIndex >= i) {
+            redefineList.add("POST_MC_" + mcStr)
         }
     }
 
@@ -57,44 +57,14 @@ def writeBuildGradlePredefine(List<String> mcVers, int mcIndex) {
     new File(projectDir, "build.properties").text = sb.toString()
 }
 
-// Sets up the variables for Manifold in the code
-def loadProperties() {
-    def defaultMcVersion = "1.18.2" // 1.18.2 is our current most stable version so we use that if no version was defined
 
-    def mcVersion = ""
-    def mcVers = fileTree("versionProperties").files.name // Get all the files in "versionProperties"
-    for (int i = 0; i < mcVers.size(); i++) {
-        mcVers[i] = mcVers[i].replaceAll(".properties", "") // As we are getting the file names, we should remove the ".properties" at the end to get the versions
-    }
-
-    mcVers.sort() // Sort so it always goes from oldest to newest
-
-    int mcIndex = -1
-    println "Avalible MC versions: ${mcVers}"
-    if (project.hasProperty("mcVer")) {
-        mcVersion = mcVer
-        mcIndex = mcVers.indexOf(mcVer)
-    }
-    if (mcIndex == -1) {
-        println "No mcVer set or the set mcVer is invalid! Defaulting to ${defaultMcVersion}."
-        println "Tip: Use -PmcVer=\"${defaultMcVersion}\" in cmd arg to set mcVer."
-        mcVersion = defaultMcVersion
-        mcIndex = mcVers.indexOf(defaultMcVersion)
-        assert mcIndex != -1
-    }
-
-	println "Loading properties file at " + mcVersion + ".properties"
-	def props = new Properties()
-	props.load(new FileInputStream("$rootProject.rootDir/versionProperties/"+"$mcVersion"+".properties"))
-
-    props.each { prop ->
-      rootProject.ext.set(prop.key, prop.value)
-	  // println "Added prop [key:" + prop.key + ", value:" + prop.value + "]"
-    }
-    writeBuildGradlePredefine(mcVers, mcIndex)
+// Transfers the values set in settings.gradle to the rest of the project
+project.gradle.ext.getProperties().each { prop ->
+    rootProject.ext.set(prop.key, prop.value)
+//    println "Added prop [key:" + prop.key + ", value:" + prop.value + "]"
 }
-
-loadProperties()
+// Sets up manifold stuff
+writeBuildGradlePredefine(rootProject.mcVers, rootProject.mcIndex)
 
 
 
