@@ -5,6 +5,7 @@ image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
+  # TODO: Make stages depending on what is in versionProperties
   - build_1_18_2
 
 # 1.18.2 build
@@ -19,12 +20,15 @@ build_1_18_2:
     paths:
       - fabric/build/libs/*.jar
       - forge/build/libs/*.jar
+      - quilt/build/libs/*.jar
     exclude:
       # TODO: There is a lot of duplicate stuff here, fix it later
       - fabric/build/libs/*dev-shadow.jar
-      - forge/build/libs/*dev-shadow.jar
       - fabric/build/libs/*sources.jar
+      - forge/build/libs/*dev-shadow.jar
       - forge/build/libs/*sources.jar
+      - quilt/build/libs/*dev-shadow.jar
+      - quilt/build/libs/*sources.jar
     expire_in: 1 day
     when: always
   cache:
