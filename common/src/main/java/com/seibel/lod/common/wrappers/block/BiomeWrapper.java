@@ -23,23 +23,25 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Function;
 
-import com.google.gson.JsonElement;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.Lifecycle;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.Holder;
 #if POST_MC_1_19
 import net.minecraft.data.worldgen.biome.EndBiomes;
 import net.minecraft.data.worldgen.biome.NetherBiomes;
 #endif
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.RegistryFixedCodec;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
+
 
 /** This class wraps the minecraft BlockPos.Mutable (and BlockPos) class */
 public class BiomeWrapper implements IBiomeWrapper
@@ -48,55 +50,20 @@ public class BiomeWrapper implements IBiomeWrapper
     public static final ConcurrentMap<Biome, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
     public final Biome biome;
     #else
-	public static ConcurrentMap<Holder<Biome>, BiomeWrapper> WRAPPER_BY_BIOME = new ConcurrentHashMap<>();
-	public static ConcurrentHashMap<Holder<Biome>, String> SERIAL_BY_BIOME = new ConcurrentHashMap<>();
-	
+    public static final ConcurrentMap<Holder<Biome>, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
     public final Holder<Biome> biome;
     #endif
-	
-	private static boolean registryOpsOutdated = false;
-	private static RegistryOps<JsonElement> registryOps = null;
-	private static RegistryOps<JsonElement> getRegistryOps() 
-	{
-		ClientLevel level = Minecraft.getInstance().level;
-		if (registryOps != null && level == null)
-		{
-			// request a new registryOps the next time a world is loaded,
-			// if the world is reset the old registryOps will throw exceptions
-			registryOpsOutdated = true;
-		}
-		
-		if (registryOps == null || (registryOpsOutdated && level != null))
-		{
-			registryOps = RegistryOps.create(JsonOps.INSTANCE, level.registryAccess());
-		}
-		return registryOps;
-	}
-	
-	
-	
-	//==============//
-	// constructors //
-	//==============//
-	
+
+    static public IBiomeWrapper getBiomeWrapper(#if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif biome)
+    {
+        return biomeWrapperMap.computeIfAbsent(biome, BiomeWrapper::new);
+    }
+
     private BiomeWrapper(#if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif biome)
     {
         this.biome = biome;
-	
-		SERIAL_BY_BIOME.put(this.biome, this.serialize());
     }
-	
-	static public IBiomeWrapper getBiomeWrapper(#if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif biome)
-	{
-		return WRAPPER_BY_BIOME.computeIfAbsent(biome, BiomeWrapper::new);
-	}
-	
-	
-	
-	//=========//
-	// methods //
-	//=========//
-	
+
     @Override
     public String getName()
     {
@@ -106,53 +73,40 @@ public class BiomeWrapper implements IBiomeWrapper
         return biome.unwrapKey().orElse(Biomes.THE_VOID).registry().toString();
         #endif
     }
-	
-    @Override
-    public String serialize()
-	{
-		if (!SERIAL_BY_BIOME.containsKey(this.biome))
-		{
-			String newSerial = Biome.CODEC.encodeStart(getRegistryOps(), biome).get().orThrow().toString();
-			SERIAL_BY_BIOME.put(this.biome, newSerial);
-		}
-		String serial = SERIAL_BY_BIOME.get(this.biome);
-		return serial;
-	}
-	
-	
-    @Override 
-	public boolean equals(Object obj)
-	{
-		if (this == obj)
-		{
-			return true;
-		}
-		else if (obj == null || getClass() != obj.getClass())
-		{
-			return false;
-		}
-		
-		BiomeWrapper that = (BiomeWrapper) obj;
-		return Objects.equals(biome, that.biome);
-	}
 
     @Override
-    public int hashCode() { return Objects.hash(biome); }
-	
-	public static IBiomeWrapper deserialize(String serial) throws IOException
-	{
-		try
-		{
+    public String serialize() {
+        //FIXME: Pass in a level obj
+        String data = Biome.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, Minecraft.getInstance().level.registryAccess()),
+                biome).get().orThrow().toString();
+        return data;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BiomeWrapper that = (BiomeWrapper) o;
+        return Objects.equals(biome, that.biome);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(biome);
+    }
+
+    public static IBiomeWrapper deserialize(String str) throws IOException {
+        try {
          #if PRE_MC_1_18_2 Biome #else
-			Holder<Biome> #endif
-					biome = Biome.CODEC.decode(getRegistryOps(), JsonParser.parseString(serial)).get().orThrow().getFirst();
-			return getBiomeWrapper(biome);
-		}
-		catch (Exception e)
-		{
-			throw new IOException("Failed to deserialize biome wrapper", e);
-		}
-	}
+            Holder<Biome> #endif
+                    biome = Biome.CODEC.decode(RegistryOps.create(JsonOps.INSTANCE, Minecraft.getInstance().level.registryAccess()),
+                    JsonParser.parseString(str)).get().orThrow().getFirst();
+            return getBiomeWrapper(biome);
+        } catch (Exception e) {
+            throw new IOException("Failed to deserialize biome wrapper", e);
+        }
+    }
+	
 	
 	@Override 
 	public Object getWrappedMcObject_UNSAFE() { return this.biome; }
