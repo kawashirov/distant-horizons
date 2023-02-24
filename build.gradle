@@ -2,7 +2,7 @@ plugins {
     id "java"
 
     // Plugin to handle dependencies
-    id "com.github.johnrengelman.shadow" version '7.0.0' apply false
+    id "com.github.johnrengelman.shadow" version '7.1.2' apply false
 
     // Plugin to create merged jars
     id "io.github.pacifistmc.forgix" version "1.2.6"
@@ -352,6 +352,7 @@ allprojects { p ->
     }
 
     // Fix forge version numbering system as it is weird
+    // For whatever reason forge uses [1.18, 1.18.1, 1.18.2) instead of the standard ["1.18", "1.18.1", "1.18.2"] which make more sense
     def compatible_forgemc_versions = "${compatible_minecraft_versions}".replaceAll("\"", "").replaceAll("]", ",)")
 //    System.out.println(compatible_forgemc_versions)
 
@@ -374,7 +375,6 @@ allprojects { p ->
                 java_version                 : java_version
         ]
         // The left side is what gets replaced in the mod info and the right side is where to get it from in the gradle.properties
-        //TODO: Make Forge loader version also be replaced with non hardcoded value instead of "[36,42)"
 
         inputs.properties replaceProperties
         replaceProperties.put 'project', project
@@ -423,6 +423,7 @@ allprojects { p ->
         withSourcesJar()
     }
 }
+
 
 // Delete the merged folder when running clean
 task cleanMergedJars() {
