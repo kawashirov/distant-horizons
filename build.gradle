@@ -411,9 +411,9 @@ allprojects { p ->
             options.release = rootProject.java_version as Integer
             options.compilerArgs += ['-Xplugin:Manifold']
         } else {
-//             options.release = 8; // Core & Api should use Java 8 no matter what
+            options.release = 8; // Core & Api should use Java 8 no matter what
             // No it shouldn't cause it fails to find minecraft if it uses Java 8
-            options.release = rootProject.java_version as Integer
+            //options.release = rootProject.java_version as Integer
             // TODO: Once the new build system is done, check if there is a way to make core/api only use java 8 again
         }
         options.encoding = "UTF-8"
