@@ -97,7 +97,7 @@ subprojects { p ->
 
     // Apply plugins
     apply plugin: "java"
-    if (isMinecraftSubProject && p != project(":forge"))
+    if (isMinecraftSubProject)
         apply plugin: "systems.manifold.manifold-gradle-plugin"
     apply plugin: "com.github.johnrengelman.shadow"
 //    apply plugin: "org.spongepowered.gradle.vanilla" // Provides minecraft libraries
@@ -107,10 +107,9 @@ subprojects { p ->
 
 
     // Set the manifold version (may not be required tough)
-    if (p != project(":forge"))
-        manifold {
-            manifoldVersion = rootProject.manifold_version
-        }
+    manifold {
+        manifoldVersion = rootProject.manifold_version
+    }
 
 
     // set up custom configurations (configurations are a way to handle dependencies) 
@@ -149,7 +148,7 @@ subprojects { p ->
         
 
         // Manifold
-        if (isMinecraftSubProject && p != project(":forge"))
+        if (isMinecraftSubProject)
             annotationProcessor("systems.manifold:manifold-preprocessor:${rootProject.manifold_version}")
 
         // Log4j
@@ -234,10 +233,11 @@ subprojects { p ->
     */
 
     // Run mergeJars when running build
-    if (isMinecraftSubProject) {
-        build.finalizedBy(mergeJars)
-        assemble.finalizedBy(mergeJars)
-    }
+    // TODO: Fix later
+//    if (isMinecraftSubProject) {
+//        build.finalizedBy(mergeJars)
+//        assemble.finalizedBy(mergeJars)
+//    }
 }
 
 allprojects { p ->
@@ -410,13 +410,11 @@ allprojects { p ->
     tasks.withType(JavaCompile) {
         if (isMinecraftSubProject) {
             options.release = rootProject.java_version as Integer
-            if (p != project(":forge"))
+            if (p != project(":forge")) // FIXME
                 options.compilerArgs += ['-Xplugin:Manifold']
         } else {
             options.release = 8; // Core & Api should use Java 8 no matter what
-            // No it shouldn't cause it fails to find minecraft if it uses Java 8
-            //options.release = rootProject.java_version as Integer
-            // TODO: Once the new build system is done, check if there is a way to make core/api only use java 8 again
+            //options.release = rootProject.java_version as Integer // But if minecraft
         }
         options.encoding = "UTF-8"
     }
