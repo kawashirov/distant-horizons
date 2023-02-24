@@ -134,17 +134,9 @@ shadowJar {
     // SVG
     relocate 'com.kitfox.svg', 'distanthorizons.libraries.kitfox.svg'
 
-    classifier "dev-shadow"
     mergeServiceFiles()
 }
 
-remapJar {
-    // FIXME: AccessWidener
-//    injectAccessWidener = true
-    input.set shadowJar.archiveFile
-    dependsOn shadowJar
-    classifier null
-}
 
 task deleteResources(type: Delete) {
     delete file("build/resources/main")
@@ -162,9 +154,9 @@ runClient {
     finalizedBy(deleteResources)
 }
 
-jar {
-    classifier "dev"
-}
+//jar {
+//    classifier "dev"
+//}
 
 sourcesJar {
     def commonSources = project(":common").sourcesJar

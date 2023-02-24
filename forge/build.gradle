@@ -159,7 +159,6 @@ shadowJar {
     // svg
     relocate "com.kitfox.svg", "distanthorizons.libraries.kitfox.svg"
 
-    classifier "dev-shadow"
     mergeServiceFiles()
 }
 
@@ -169,9 +168,6 @@ shadowJar {
 //    classifier null
 //}
 
-jar {
-    classifier "dev"
-}
 
 sourcesJar {
     def commonSources = project(":common").sourcesJar
