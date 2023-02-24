@@ -97,16 +97,18 @@ public class WrapperFactory implements IWrapperFactory
 		else if (objectArray.length == 2)
 		{
 			// chunk
-			if (!(objectArray[0] instanceof ChunkAccess chunk))
+			if (!(objectArray[0] instanceof ChunkAccess))
 			{
 				throw new ClassCastException(createChunkWrapperErrorMessage(objectArray));
 			}
+			ChunkAccess chunk = (ChunkAccess) objectArray[0];
 			
 			// light source
-			if (!(objectArray[1] instanceof LevelReader lightSource))
+			if (!(objectArray[1] instanceof LevelReader))
 			{
 				throw new ClassCastException(createChunkWrapperErrorMessage(objectArray));
 			}
+			LevelReader lightSource = (LevelReader) objectArray[1];
 			
 			
 			return new ChunkWrapper(chunk, lightSource, /*A DH wrapped level isn't necessary*/null);
