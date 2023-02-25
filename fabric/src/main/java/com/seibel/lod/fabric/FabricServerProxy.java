@@ -31,85 +31,108 @@ import java.util.function.Supplier;
  * @author Tomlee
  * @version 5-11-2022
  */
-
-public class FabricServerProxy {
-    private final ServerApi serverApi = ServerApi.INSTANCE;
-    private static final Logger LOGGER = DhLoggerBuilder.getLogger("FabricServerProxy");
-    private final boolean isDedicated;
-    public static Supplier<Boolean> isGenerationThreadChecker = null;
-
-    public FabricServerProxy(boolean isDedicated) {
-        this.isDedicated = isDedicated;
-    }
-
-    private boolean isValidTime() {
-        if (isDedicated) return true;
-
-        //FIXME: This may cause init issue...
-        return !(Minecraft.getInstance().screen instanceof TitleScreen);
-    }
-    private ClientLevelWrapper getLevelWrapper(ClientLevel level) {
-        return ClientLevelWrapper.getWrapper(level);
-    }
-    private ServerLevelWrapper getLevelWrapper(ServerLevel level) {
-        return ServerLevelWrapper.getWrapper(level);
-    }
-    /**
-     * Registers Fabric Events
-     * @author Ran, Tomlee
-     */
-    public void registerEvents() {
-        LOGGER.info("Registering Fabric Server Events");
-        isGenerationThreadChecker = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
-
-        /* Register the mod needed event callbacks */
-
-        // TEST EVENT
-        //ServerTickEvents.END_SERVER_TICK.register(this::tester);
-
-        // ServerTickEvent
-        ServerTickEvents.END_SERVER_TICK.register((server) -> serverApi.serverTickEvent());
-
-        // ServerWorldLoadEvent
-        //TODO: Check if both of this use the correct timed events. (i.e. is it 'ed' or 'ing' one?)
-        ServerLifecycleEvents.SERVER_STARTING.register((server) -> {
-            if (isValidTime()) ServerApi.INSTANCE.serverLoadEvent(isDedicated);
-        });
-        // ServerWorldUnloadEvent
-        ServerLifecycleEvents.SERVER_STOPPED.register((server) -> {
-            if (isValidTime()) ServerApi.INSTANCE.serverUnloadEvent();
-        });
-
-        // ServerLevelLoadEvent
-        ServerWorldEvents.LOAD.register((server, level)
-                -> {
-            if (isValidTime()) ServerApi.INSTANCE.serverLevelLoadEvent(getLevelWrapper(level));
-        });
-        // ServerLevelUnloadEvent
-        ServerWorldEvents.UNLOAD.register((server, level)
-                -> {
-            if (isValidTime()) ServerApi.INSTANCE.serverLevelUnloadEvent(getLevelWrapper(level));
-        });
-
-        // ServerChunkLoadEvent
-        ServerChunkEvents.CHUNK_LOAD.register((server, chunk)
-                -> {
-            ILevelWrapper level = getLevelWrapper((ServerLevel) chunk.getLevel());
-            if (isValidTime()) ServerApi.INSTANCE.serverChunkLoadEvent(
-                    new ChunkWrapper(chunk, chunk.getLevel(), level),
-                    level);
-                }
-        );
-        // ServerChunkSaveEvent - Done in MixinChunkMap
-    }
-
-    // This just exists here for testing purposes, it'll be removed in the future
-    public void tester(MinecraftServer server) { // I disabled the Networking functions for now so this will not work atm - coolGi
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            FriendlyByteBuf payload = Networking.createNew();
-            payload.writeInt(1);
-            System.out.println("Sending int 1");
-            Networking.send(player, payload);
-        }
-    }
+public class FabricServerProxy
+{
+	private static final ServerApi SERVER_API = ServerApi.INSTANCE;
+	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
+	
+	private final boolean isDedicated;
+	public static Supplier<Boolean> isGenerationThreadChecker = null;
+	
+	
+	
+	public FabricServerProxy(boolean isDedicated)
+	{
+		this.isDedicated = isDedicated;
+	}
+	
+	
+	
+	private boolean isValidTime()
+	{
+		if (isDedicated)
+		{
+			return true;
+		}
+		
+		//FIXME: This may cause init issue...
+		return !(Minecraft.getInstance().screen instanceof TitleScreen);
+	}
+	
+	private ClientLevelWrapper getClientLevelWrapper(ClientLevel level) { return ClientLevelWrapper.getWrapper(level); }
+	private ServerLevelWrapper getServerLevelWrapper(ServerLevel level) { return ServerLevelWrapper.getWrapper(level); }
+	
+	/** Registers Fabric Events */
+	public void registerEvents()
+	{
+		LOGGER.info("Registering Fabric Server Events");
+		isGenerationThreadChecker = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
+		
+		/* Register the mod needed event callbacks */
+		
+		// TEST EVENT
+		//ServerTickEvents.END_SERVER_TICK.register(this::tester);
+		
+		// ServerTickEvent
+		ServerTickEvents.END_SERVER_TICK.register((server) -> SERVER_API.serverTickEvent());
+		
+		// ServerWorldLoadEvent
+		//TODO: Check if both of these use the correct timed events. (i.e. is it 'ed' or 'ing' one?)
+		ServerLifecycleEvents.SERVER_STARTING.register((server) -> 
+		{
+			if (isValidTime())
+			{
+				ServerApi.INSTANCE.serverLoadEvent(isDedicated);
+			}
+		});
+		// ServerWorldUnloadEvent
+		ServerLifecycleEvents.SERVER_STOPPED.register((server) -> 
+		{
+			if (isValidTime())
+			{
+				ServerApi.INSTANCE.serverUnloadEvent();
+			}
+		});
+		
+		// ServerLevelLoadEvent
+		ServerWorldEvents.LOAD.register((server, level) -> 
+		{
+			if (isValidTime())
+			{
+				ServerApi.INSTANCE.serverLevelLoadEvent(getServerLevelWrapper(level));
+			}
+		});
+		// ServerLevelUnloadEvent
+		ServerWorldEvents.UNLOAD.register((server, level) -> 
+		{
+			if (isValidTime())
+			{
+				ServerApi.INSTANCE.serverLevelUnloadEvent(getServerLevelWrapper(level));
+			}
+		});
+		
+		// ServerChunkLoadEvent
+		ServerChunkEvents.CHUNK_LOAD.register((server, chunk) -> 
+		{
+			ILevelWrapper level = getServerLevelWrapper((ServerLevel) chunk.getLevel());
+			if (isValidTime())
+				ServerApi.INSTANCE.serverChunkLoadEvent(
+						new ChunkWrapper(chunk, chunk.getLevel(), level),
+						level);
+		});
+		// ServerChunkSaveEvent - Done in MixinChunkMap
+	}
+	
+	// This just exists here for testing purposes, it'll be removed in the future
+	public void tester(MinecraftServer server)
+	{ // I disabled the Networking functions for now so this will not work atm - coolGi
+		for (ServerPlayer player : server.getPlayerList().getPlayers())
+		{
+			FriendlyByteBuf payload = Networking.createNew();
+			payload.writeInt(1);
+			System.out.println("Sending int 1");
+			Networking.send(player, payload);
+		}
+	}
+	
 }

@@ -94,18 +94,22 @@ public class BiomeWrapper implements IBiomeWrapper
     public int hashCode() {
         return Objects.hash(biome);
     }
-
-    public static IBiomeWrapper deserialize(String str) throws IOException {
-        try {
+	
+	public static IBiomeWrapper deserialize(String str) throws IOException
+	{
+		try
+		{
          #if PRE_MC_1_18_2 Biome #else
-            Holder<Biome> #endif
-                    biome = Biome.CODEC.decode(RegistryOps.create(JsonOps.INSTANCE, Minecraft.getInstance().level.registryAccess()),
-                    JsonParser.parseString(str)).get().orThrow().getFirst();
-            return getBiomeWrapper(biome);
-        } catch (Exception e) {
-            throw new IOException("Failed to deserialize biome wrapper", e);
-        }
-    }
+			Holder<Biome> #endif
+					biome = Biome.CODEC.decode(RegistryOps.create(JsonOps.INSTANCE, Minecraft.getInstance().level.registryAccess()),
+					JsonParser.parseString(str)).get().orThrow().getFirst();
+			return getBiomeWrapper(biome);
+		}
+		catch (Exception e)
+		{
+			throw new IOException("Failed to deserialize biome wrapper", e);
+		}
+	}
 	
 	
 	@Override 

@@ -22,7 +22,6 @@ package com.seibel.lod.fabric;
 import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.lod.core.api.internal.ClientApi;
-import com.seibel.lod.core.config.Config;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 
@@ -35,11 +34,14 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
 
 import java.util.HashSet;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
@@ -55,27 +57,36 @@ import org.lwjgl.glfw.GLFW;
 public class FabricClientProxy
 {
 	private final ClientApi clientApi = ClientApi.INSTANCE;
-	private static final Logger LOGGER = DhLoggerBuilder.getLogger("FabricClientProxy");
-
+	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
+	
+	// TODO we shouldn't be filtering keys on the Forge/Fabric side, only in ClientApi
+	private static final int[] KEY_TO_CHECK_FOR = { GLFW.GLFW_KEY_F6, GLFW.GLFW_KEY_F8, GLFW.GLFW_KEY_P};
+	
+	HashSet<Integer> previouslyPressKeyCodes = new HashSet<>();
+	
+	
+	
 	/**
 	 * Registers Fabric Events
 	 * @author Ran
 	 */
-	public void registerEvents() {
+	public void registerEvents()
+	{
 		LOGGER.info("Registering Fabric Client Events");
-
-
+		
+		
 		/* Register the mod needed event callbacks */
-
+		
 		// ClientTickEvent
-		ClientTickEvents.START_CLIENT_TICK.register((client) -> {
+		ClientTickEvents.START_CLIENT_TICK.register((client) -> 
+		{
 			//LOGGER.info("ClientTickEvent.START_CLIENT_TICK");
 			ClientApi.INSTANCE.clientTickEvent();
 		});
-
+		
 		// ClientLevelLoadEvent - Done in MixinClientPacketListener
 		// ClientLevelUnloadEvent - Done in MixinClientPacketListener
-
+		
 		// ClientChunkLoadEvent
 		// TODO: Is using setClientLightReady one still better?
 		//#if PRE_MC_1_18_1 // in 1.18+, we use mixin hook in setClientLightReady(true)
@@ -97,38 +108,43 @@ public class FabricClientProxy
 					wrappedLevel
 			);
 		});
-
+		
 		// RendererStartupEvent - Done in MixinGameRenderer
 		// RendererShutdownEvent - Done in MixinGameRenderer
-
+		
 		SodiumAccessor sodiumAccessor = (SodiumAccessor) ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class);
-
+		
 		// ClientRenderLevelTerrainEvent
-		WorldRenderEvents.AFTER_SETUP.register((renderContext) -> {
-				if (sodiumAccessor != null) {
-					sodiumAccessor.levelWrapper = ClientLevelWrapper.getWrapper(renderContext.world());
-					sodiumAccessor.mcModelViewMatrix = McObjectConverter.Convert(renderContext.matrixStack().last().pose());
-					sodiumAccessor.mcProjectionMatrix = McObjectConverter.Convert(renderContext.projectionMatrix());
-					sodiumAccessor.partialTicks = renderContext.tickDelta();
-				} else {
-					clientApi.renderLods(ClientLevelWrapper.getWrapper(renderContext.world()),
-							McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
-							McObjectConverter.Convert(renderContext.projectionMatrix()),
-							renderContext.tickDelta());
-				}
+		WorldRenderEvents.AFTER_SETUP.register((renderContext) ->
+		{
+			if (sodiumAccessor != null)
+			{
+				sodiumAccessor.levelWrapper = ClientLevelWrapper.getWrapper(renderContext.world());
+				sodiumAccessor.mcModelViewMatrix = McObjectConverter.Convert(renderContext.matrixStack().last().pose());
+				sodiumAccessor.mcProjectionMatrix = McObjectConverter.Convert(renderContext.projectionMatrix());
+				sodiumAccessor.partialTicks = renderContext.tickDelta();
 			}
-		);
+			else
+			{
+				clientApi.renderLods(ClientLevelWrapper.getWrapper(renderContext.world()),
+						McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
+						McObjectConverter.Convert(renderContext.projectionMatrix()),
+						renderContext.tickDelta());
+			}
+		});
 
 		// Debug keyboard event
 		// FIXME: Use better hooks so it doesn't trigger even in text boxes
-		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			if (client.player != null && isValidTime()) onKeyInput();
+		ClientTickEvents.END_CLIENT_TICK.register(client -> 
+		{
+			if (client.player != null && isValidTime())
+			{
+				onKeyInput();
+			}
 		});
 	}
-
-	private boolean isValidTime() {
-		return !(Minecraft.getInstance().screen instanceof TitleScreen);
-	}
+	
+	private boolean isValidTime() { return !(Minecraft.getInstance().screen instanceof TitleScreen); }
 
 //	public void blockChangeEvent(LevelAccessor world, BlockPos pos) {
 //		if (!isValidTime()) return;
@@ -138,37 +154,41 @@ public class FabricClientProxy
 //		// recreate the LOD where the blocks were changed
 //		// TODO: serverApi.blockChangeEvent(chunk, dimType);
 //	}
-
-	private static final int[] KEY_TO_CHECK_FOR = {GLFW.GLFW_KEY_F6, GLFW.GLFW_KEY_F8};
 	
-	HashSet<Integer> previousKeyDown = new HashSet<>();
-	
-	public void onKeyInput() {
-		if (Config.Client.Advanced.Debugging.enableDebugKeybindings.get())
+	public void onKeyInput()
+	{
+		HashSet<Integer> currentKeyDown = new HashSet<>();
+		
+		// Note: Minecraft's InputConstants is same as GLFW Key values
+		//TODO: Use mixin to hook directly into the GLFW Keyboard event in minecraft KeyboardHandler
+		// Check all keys we need
+		for (int keyCode = GLFW.GLFW_KEY_A; keyCode <= GLFW.GLFW_KEY_Z; keyCode++)
 		{
-			HashSet<Integer> currentKeyDown = new HashSet<Integer>();
-			
-			// Note: Minecraft's InputConstants is same as GLFW Key values
-			//TODO: Use mixin to hook directly into the GLFW Keyboard event in minecraft KeyboardHandler
-			// Check all keys we need
-			for (int i = GLFW.GLFW_KEY_A; i <= GLFW.GLFW_KEY_Z; i++) {
-				if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), i)) {
-					currentKeyDown.add(i);
-				}
+			if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), keyCode))
+			{
+				currentKeyDown.add(keyCode);
 			}
-			for (int i : KEY_TO_CHECK_FOR) {
-				if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), i)) {
-					currentKeyDown.add(i);
-				}
-			}
-			// Diff and trigger events
-			for (int c : currentKeyDown) {
-				if (!previousKeyDown.contains(c)) {
-					ClientApi.INSTANCE.keyPressedEvent(c);
-				}
-			}
-			// Update the set
-			previousKeyDown = currentKeyDown;
 		}
+		
+		for (int keyCode : KEY_TO_CHECK_FOR)
+		{
+			if (InputConstants.isKeyDown(Minecraft.getInstance().getWindow().getWindow(), keyCode))
+			{
+				currentKeyDown.add(keyCode);
+			}
+		}
+		
+		// Diff and trigger events
+		for (int keyCode : currentKeyDown)
+		{
+			if (!previouslyPressKeyCodes.contains(keyCode))
+			{
+				ClientApi.INSTANCE.keyPressedEvent(keyCode);
+			}
+		}
+		
+		// Update the set
+		previouslyPressKeyCodes = currentKeyDown;
 	}
+	
 }
