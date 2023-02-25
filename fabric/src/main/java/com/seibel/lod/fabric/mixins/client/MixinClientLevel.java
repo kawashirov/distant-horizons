@@ -38,23 +38,29 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 
 @Mixin(ClientLevel.class)
-public class MixinClientLevel {
-    //Moved to MixinClientPacketListener
+public class MixinClientLevel
+{
+//    //Moved to MixinClientPacketListener
 //    @Inject(method = "<init>", at = @At("TAIL"))
 //    private void loadWorldEvent(ClientPacketListener clientPacketListener, ClientLevel.ClientLevelData clientLevelData, ResourceKey resourceKey,
 //            #if POST_MC_1_18_2 Holder holder, #else DimensionType dimensionType, #endif int i,
-//            #if POST_MC_1_18_1 int j, #endif Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci) {
-//        SharedApi.LOGGER.info("Loading level: " + WorldWrapper.getWorldWrapper((ClientLevel)(Object)this));
+//            #if POST_MC_1_18_1 int j, #endif Supplier supplier, LevelRenderer levelRenderer, boolean bl, long l, CallbackInfo ci)
+//	{
 //        ClientApi.INSTANCE.clientLevelLoadEvent(WorldWrapper.getWorldWrapper((ClientLevel)(Object)this));
 //    }
-
-	#if POST_MC_1_18_1 // Only the setLightReady is only available after 1.18. This ensure light data is ready.
+	
+	#if POST_MC_1_18_1 // Only the setLightReady is only available after 1.18. This ensures the light data is ready.
     @Inject(method = "setLightReady", at = @At("HEAD"))
-    private void onChunkLightReady(int x, int z, CallbackInfo ci) {
-    	ClientLevel l = (ClientLevel) (Object) this;
-    	LevelChunk chunk = l.getChunkSource().getChunk(x, z, false);
-    	if (chunk!=null&& !chunk.isClientLightReady())
-            ClientApi.INSTANCE.clientChunkLoadEvent(new ChunkWrapper(chunk, l, ClientLevelWrapper.getWrapper(l)), ClientLevelWrapper.getWrapper(l));
-    }
+	private void onChunkLightReady(int x, int z, CallbackInfo ci)
+	{
+		ClientLevel clientLevel = (ClientLevel) (Object) this;
+		LevelChunk chunk = clientLevel.getChunkSource().getChunk(x, z, false);
+		
+		if (chunk != null && !chunk.isClientLightReady())
+		{
+			ClientApi.INSTANCE.clientChunkLoadEvent(new ChunkWrapper(chunk, clientLevel, ClientLevelWrapper.getWrapper(clientLevel)), ClientLevelWrapper.getWrapper(clientLevel));
+		}
+	}
 	#endif
+	
 }

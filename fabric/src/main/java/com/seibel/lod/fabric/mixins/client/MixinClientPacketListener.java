@@ -27,33 +27,21 @@ public class MixinClientPacketListener
     @Inject(method = "handleLogin", at = @At("HEAD"))
 	void onHandleLoginStart(CallbackInfo ci)
 	{
-		if (level != null)
-		{
-			ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper(level));
-		}
+		// not the best way to notify Core that we are no longer in the previous world, but it will have to do for now
+		ClientApi.INSTANCE.onClientOnlyDisconnected();
 	}
-	
 	@Inject(method = "handleLogin", at = @At("RETURN"))
-	void onHandleLoginEnd(CallbackInfo ci)
-	{
-		ClientApi.INSTANCE.clientLevelLoadEvent(ClientLevelWrapper.getWrapper(level));
-	}
+	void onHandleLoginEnd(CallbackInfo ci) { ClientApi.INSTANCE.onClientOnlyConnected(); }
 	
 	@Inject(method = "handleRespawn", at = @At("HEAD"))
-	void onHandleRespawnStart(CallbackInfo ci)
-	{
-		ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper(level));
-	}
-	
+	void onHandleRespawnStart(CallbackInfo ci) { ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper(level)); }
 	@Inject(method = "handleRespawn", at = @At("RETURN"))
-	void onHandleRespawnEnd(CallbackInfo ci)
-	{
-		ClientApi.INSTANCE.clientLevelLoadEvent(ClientLevelWrapper.getWrapper(level));
-	}
+	void onHandleRespawnEnd(CallbackInfo ci) { ClientApi.INSTANCE.clientLevelLoadEvent(ClientLevelWrapper.getWrapper(level)); }
 	
 	@Inject(method = "cleanup", at = @At("HEAD"))
 	void onCleanupStart(CallbackInfo ci)
 	{
+		// TODO which unload method should be used? do we need both?
 		if (level != null)
 		{
 			ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper(level));
