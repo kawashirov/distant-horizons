@@ -88,29 +88,32 @@ forgix {
     removeDuplicate "com.seibel.lod.core"
 }
 
+def useManifold(p) {
+//    def enableManifold = true
+//    // Only add manifold to forge when this is disabled
+//    // if manifold is enabled when forge is running runtimeClasspathCopy
+//    println gradle.taskGraph.allTasks
+//    gradle.taskGraph.whenReady { taskGraph ->
+//        println taskGraph.allTasks
+//        taskGraph.allTasks.each { task ->
+//            println task.path
+//            if (task.path.contains("Srg") || task.path.contains("runtimeClasspathCopy") || task.path.contains(":forge"))
+//                enableManifold = false
+//        }
+//    }
+//    return enableManifold
+    return p != project(":forge")
+}
 
 subprojects { p ->
     // Does the same as "p == project(":common") || p == project(":fabric") || p == project(":quilt")  || p == project(":forge")"
     // Useful later on so we dont have duplicated code
     def isMinecraftSubProject = p != project(":core") && p != project(":api")
-    // You can not enable manifold when forge is updating its mappings, so this is a hacky fix for it
-    def enableForgeManifold = false
-    gradle.taskGraph.whenReady { taskGraph ->
-        // Only add manifold to forge when this is disabled
-        // runtimeClasspathCopy runs when forge is attempting to compile the mappings
-        // but if manifold is enabled at that time then it would fail
-        // FIXME: This hack dosent work :/
-//        println taskGraph.allTasks
-        if (!taskGraph.hasTask(":forge:runtimeClasspathCopy")) {
-            println "Enabling forge manifold"
-            enableForgeManifold = true
-        }
-    }
 
 
     // Apply plugins
     apply plugin: "java"
-    if (isMinecraftSubProject && enableForgeManifold)
+    if (isMinecraftSubProject && useManifold(p))
         apply plugin: "systems.manifold.manifold-gradle-plugin"
     apply plugin: "com.github.johnrengelman.shadow"
 //    apply plugin: "org.spongepowered.gradle.vanilla" // Provides minecraft libraries
@@ -120,7 +123,7 @@ subprojects { p ->
 
 
     // Set the manifold version (may not be required tough)
-    if (enableForgeManifold)
+    if (useManifold(p))
         manifold {
             manifoldVersion = rootProject.manifold_version
         }
@@ -162,7 +165,7 @@ subprojects { p ->
         
 
         // Manifold
-        if (isMinecraftSubProject && enableForgeManifold)
+        if (isMinecraftSubProject && useManifold(p))
             annotationProcessor("systems.manifold:manifold-preprocessor:${rootProject.manifold_version}")
 
         // Log4j
@@ -258,18 +261,6 @@ allprojects { p ->
     // Does the same as "p == project(":common") || p == project(":fabric") || p == project(":quilt")  || p == project(":forge")"
     // Useful later on so we dont have duplicated code
     def isMinecraftSubProject = p != project(":core") && p != project(":api")
-    // You can not enable manifold when forge is updating its mappings, so this is a hacky fix for it
-    def enableForgeManifold = false
-    gradle.taskGraph.whenReady { taskGraph ->
-        // Only add manifold to forge when this is disabled
-        // runtimeClasspathCopy runs when forge is attempting to compile the mappings
-        // but if manifold is enabled at that time then it would fail
-        println taskGraph.allTasks
-        if (!taskGraph.hasTask(":forge:runtimeClasspathCopy")) {
-            println "Enabling forge manifold"
-            enableForgeManifold = true
-        }
-    }
 
 
     apply plugin: "java"
@@ -436,7 +427,17 @@ allprojects { p ->
     tasks.withType(JavaCompile) {
         if (isMinecraftSubProject) {
             options.release = rootProject.java_version as Integer
-            if (enableForgeManifold)
+
+//            def enableManifold = false
+//            // Only add manifold to forge when this is disabled
+//            // if manifold is enabled when forge is running runtimeClasspathCopy
+//            gradle.taskGraph.whenReady { taskGraph ->
+//                taskGraph.allTasks.each { task ->
+//                    if (task.path.contains("compileJava"))
+//                        enableManifold = true
+//                }
+//            }
+            if (useManifold(p))
                 options.compilerArgs += ['-Xplugin:Manifold']
         } else {
             options.release = 8; // Core & Api should use Java 8 no matter what
