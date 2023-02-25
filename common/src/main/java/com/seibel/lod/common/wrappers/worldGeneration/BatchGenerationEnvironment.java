@@ -505,10 +505,13 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	public int getEventCount() {
 		return events.size();
 	}
-
+	
 	@Override
-	public void stop(boolean blocking) {
-		EVENT_LOGGER.info("Batch Chunk Generator shutting down...");
+	public void stop(boolean blocking)
+	{
+		EVENT_LOGGER.info(BatchGenerationEnvironment.class.getSimpleName()+" shutting down...");
+		
+		EVENT_LOGGER.info("Canceling futures...");
 		executors.shutdownNow();
 		Iterator<GenerationEvent> iter = events.iterator();
 		while (iter.hasNext())
@@ -517,13 +520,24 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			event.future.cancel(true);
 			iter.remove();
 		}
-		if (blocking) try {
-			if (!executors.awaitTermination(10, TimeUnit.SECONDS)) {
-				EVENT_LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...");
+		
+		EVENT_LOGGER.info("Awaiting termination...");
+		if (blocking)
+		{
+			try
+			{
+				if (!executors.awaitTermination(3, TimeUnit.SECONDS))
+				{
+					EVENT_LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...");
+				}
 			}
-		} catch (InterruptedException e) {
-			EVENT_LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...", e);
+			catch (InterruptedException e)
+			{
+				EVENT_LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...", e);
+			}
 		}
+		
+		EVENT_LOGGER.info(BatchGenerationEnvironment.class.getSimpleName()+" shutdown complete.");
 	}
 
 	@Override
