@@ -116,9 +116,11 @@ public class FabricServerProxy
 		{
 			ILevelWrapper level = getServerLevelWrapper((ServerLevel) chunk.getLevel());
 			if (isValidTime())
+			{
 				ServerApi.INSTANCE.serverChunkLoadEvent(
 						new ChunkWrapper(chunk, chunk.getLevel(), level),
 						level);
+			}
 		});
 		// ServerChunkSaveEvent - Done in MixinChunkMap
 	}

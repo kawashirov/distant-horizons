@@ -54,10 +54,10 @@ import org.jetbrains.annotations.Nullable;
  */
 public class ServerLevelWrapper implements IServerLevelWrapper
 {
-	private static final Logger LOGGER = DhLoggerBuilder.getLogger(ServerLevelWrapper.class.getSimpleName());
+	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
     private static final ConcurrentHashMap<ServerLevel, ServerLevelWrapper>
             levelWrapperMap = new ConcurrentHashMap<>();
-
+	
     public static ServerLevelWrapper getWrapper(ServerLevel level)
     {
         return levelWrapperMap.computeIfAbsent(level, ServerLevelWrapper::new);
@@ -66,12 +66,14 @@ public class ServerLevelWrapper implements IServerLevelWrapper
     {
         levelWrapperMap.remove(level);
     }
-    public static void cleanCheck() {
-        if (!levelWrapperMap.isEmpty()) {
-            LOGGER.warn("{} server levels havn't been freed!", levelWrapperMap.size());
-            levelWrapperMap.clear();
-        }
-    }
+    public static void cleanCheck()
+	{
+		if (!levelWrapperMap.isEmpty())
+		{
+			LOGGER.warn(levelWrapperMap.size()+" server levels haven't been freed!");
+			levelWrapperMap.clear();
+		}
+	}
 
     final ServerLevel level;
     ServerBlockDetailMap blockMap = new ServerBlockDetailMap(this);
@@ -82,15 +84,19 @@ public class ServerLevelWrapper implements IServerLevelWrapper
     }
     @Nullable
     @Override
-    public IClientLevelWrapper tryGetClientSideWrapper() {
-        try {
-            MinecraftClientWrapper client = MinecraftClientWrapper.INSTANCE;
-            return ClientLevelWrapper.getWrapper(client.mc.level);
-        } catch (Exception e) {
-            LOGGER.error("Failed to get client side wrapper for server level {}.", level);
-            return null;
-        }
-    }
+	public IClientLevelWrapper tryGetClientLevelWrapper()
+	{
+		try
+		{
+			MinecraftClientWrapper client = MinecraftClientWrapper.INSTANCE;
+			return ClientLevelWrapper.getWrapper(client.mc.level);
+		}
+		catch (Exception e)
+		{
+			LOGGER.error("Failed to get client side wrapper for server level "+level+".");
+			return null;
+		}
+	}
 
     @Override
     public File getSaveFolder()
