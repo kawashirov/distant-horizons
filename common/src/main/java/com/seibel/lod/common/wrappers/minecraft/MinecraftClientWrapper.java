@@ -118,6 +118,8 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
 
     @Override
     public boolean hasSinglePlayerServer() { return mc.hasSingleplayerServer(); }
+    @Override
+    public boolean clientConnectedToDedicatedServer() { return mc.getCurrentServer() != null && !this.hasSinglePlayerServer(); }
 
     @Override
     public String getCurrentServerName() { return mc.getCurrentServer().name; }
