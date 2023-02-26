@@ -26,7 +26,9 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
 
 import com.seibel.lod.core.dependencyInjection.ModAccessorInjector;
+import com.seibel.lod.core.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
+import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.lod.fabric.wrappers.modAccessor.SodiumAccessor;
 import net.fabricmc.api.EnvType;
@@ -34,14 +36,17 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
 
 import java.util.HashSet;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.phys.HitResult;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
@@ -57,6 +62,7 @@ import org.lwjgl.glfw.GLFW;
 public class FabricClientProxy
 {
 	private final ClientApi clientApi = ClientApi.INSTANCE;
+	private static final IMinecraftClientWrapper MC = SingletonInjector.INSTANCE.get(IMinecraftClientWrapper.class);
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 	
 	// TODO we shouldn't be filtering keys on the Forge/Fabric side, only in ClientApi
@@ -98,6 +104,59 @@ public class FabricClientProxy
 					wrappedLevel
 			);
 		});
+		
+		// (kinda) block break event
+		AttackBlockCallback.EVENT.register((player, level, interactionHand, blockPos, direction) ->
+		{
+			// if we have access to the server, use the chunk save event instead 
+			if (MC.clientConnectedToDedicatedServer())
+			{
+				// Since fabric doesn't have a client-side break-block API event, this is the next best thing
+				ChunkAccess chunk = level.getChunk(blockPos);
+				if (chunk != null)
+				{
+//					LOGGER.info("attack block at blockpos: " + blockPos);
+					
+					ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
+					ClientApi.INSTANCE.clientChunkLoadEvent(
+							new ChunkWrapper(chunk, level, wrappedLevel),
+							wrappedLevel
+					);
+				}
+			}
+			
+			// don't stop the callback
+			return InteractionResult.PASS;
+		});
+		
+		// (kinda) block place event
+		UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> 
+		{
+			// if we have access to the server, use the chunk save event instead 
+			if (MC.clientConnectedToDedicatedServer())
+			{
+				// Since fabric doesn't have a client-side place-block API event, this is the next best thing
+				if (hitResult.getType() == HitResult.Type.BLOCK
+						&& !hitResult.isInside())
+				{
+					ChunkAccess chunk = level.getChunk(hitResult.getBlockPos());
+					if (chunk != null)
+					{
+//						LOGGER.info("use block at blockpos: " + hitResult.getBlockPos());
+						
+						ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
+						ClientApi.INSTANCE.clientChunkLoadEvent(
+								new ChunkWrapper(chunk, level, wrappedLevel),
+								wrappedLevel
+						);
+					}
+				}
+			}
+			
+			// don't stop the callback
+			return InteractionResult.PASS;
+		});
+		
 		//#endif
 		// ClientChunkSaveEvent
 		ClientChunkEvents.CHUNK_UNLOAD.register((level, chunk) ->
