@@ -20,31 +20,34 @@ If you want to see a quick demo, check out a video covering the mod here:
 
 This branch supports the following versions of Minecraft:
 
-#### 1.19 (WIP)
+> **NOTE: At the moment only 1.18.2 fabric works/build/runs**
+
+#### 1.19 (BROKE)
 Forge: 41.0.19\
 Fabric: 0.14.7\
 Fabric API: 0.55.3+1.19\
 Modmenu: 4.0.0
 
-#### 1.18.2
-Forge: 40.0.18\
-Fabric: 0.13.3\
-Fabric API: 0.48.0+1.18.2\
-Modmenu: 3.1.0
+#### 1.18.2 (ONLY FABRIC WORKS)
+Fabric: 0.14.14\
+Fabric API: 0.67.1+1.18.2\
+Forge: 40.0.32\
+Parchment=2022.11.06\
+Modmenu: 3.2.5
 
-#### 1.18.1, 1.18
+#### 1.18.1, 1.18 (CEASING DEVELOPMENT SOON)
 Forge: 39.1.2\
 Fabric: 0.13.3\
 Fabric API: 0.42.6+1.18\
 Modmenu: 3.0.1
 
-#### 1.17.1, 1.17
+#### 1.17.1, 1.17 (BROKE)
 Forge: 37.1.1\
 Fabric: 0.13.2\
 Fabric API: 0.46.1+1.17\
 Modmenu: 2.0.14
 
-#### 1.16.5, 1.16.5
+#### 1.16.5, 1.16.5 (BROKE)
 Forge: 36.2.28\
 Fabric: 0.13.2\
 Fabric API: 0.42.0+1.16\
@@ -53,8 +56,10 @@ Modmenu: 1.16.22
 
 ### Plugin and Library versions
 
-Architectury version: 3.4-SNAPSHOT\
-Architectury loom version: 0.12.0-SNAPSHOT\
+Fabric loom: 1.1-snapshot\
+Forge gradle: 5.1.67\
+Sponge vanilla gradle: 0.2.1-SNAPSHOT\
+Sponge mixin gradle: 0.7-SNAPSHOT\
 Java Compiler plugin: Manifold Preprocessor
 
 <br>
@@ -153,16 +158,16 @@ To build all versions: `./buildAll` (all builds will end up in the `Merged` fold
 
 ## Open Source Acknowledgements
 
-XZ for Java (data compression)\
-https://tukaani.org/xz/java.html
-
 Forgix (To merge multiple mod versions into one jar) [_Used to be_ [_DHJarMerger_](https://github.com/Ran-helo/DHJarMerger)]\
 https://github.com/PacifistMC/Forgix
+
+XZ for Java (data compression)\
+https://tukaani.org/xz/java.html
 
 Json & Toml for Java (config handling)\
 https://github.com/TheElectronWill/night-config
 
-SVG Salamander for SVG's\
+SVG Salamander for SVG support\
 https://github.com/blackears/svgSalamander
 
 FlatLaf for theming (for development testing)\
