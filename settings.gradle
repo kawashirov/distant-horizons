@@ -30,7 +30,7 @@ def loadProperties() {
     def mcVersion = ""
     def mcVers = fileTree("versionProperties").files.name // Get all the files in "versionProperties"
     for (int i = 0; i < mcVers.size(); i++) {
-        mcVers[i] = mcVers[i].replaceAll(".properties", "") // As we are getting the file names, we should remove the ".properties" at the end to get the versions
+        mcVers[i] = mcVers[i].replaceAll("\\.properties", "") // As we are getting the file names, we should remove the ".properties" at the end to get the versions
     }
 
     mcVers.sort() // Sort so it always goes from oldest to newest
@@ -79,8 +79,8 @@ if (gradle.builds_for.contains("fabric"))
     include("fabric")
 if (gradle.builds_for.contains("quilt"))
     include("quilt") // Just put this here for once we need it ;)
-if (gradle.builds_for.contains("forge"))
-    include("forge")
+//if (gradle.builds_for.contains("forge"))
+//    include("forge")
 
 
 rootProject.name = "DistantHorizons"

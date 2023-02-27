@@ -115,6 +115,7 @@ dependencies {
     common(project(path: ":common")) { transitive false }
     shadowCommon(project(path: ":common")) { transitive false }
 //    shadowCommon(project(path: ":common"), configuration: "transformProductionFabric") { transitive false } // FIXME
+    // TODO: These exist in the main build.gradle so fix shadow there
     shadowMe(project(path: ":core")) { transitive false }
     shadowMe(project(path: ":api")) { transitive false }
 }
