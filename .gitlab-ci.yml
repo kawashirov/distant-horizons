@@ -17,7 +17,7 @@ variables:
 build_1_18_2:
   stage: build_1_18_2
   script:
-    - ./gradlew test  -PmcVer="1.18.2" --gradle-user-home cache/;
+    # this both runs the unit tests and assembles the code
     - ./gradlew build -PmcVer="1.18.2" --gradle-user-home cache/;
   image: eclipse-temurin:17
   artifacts:
