@@ -77,8 +77,8 @@ include("common")
 // Enables or disables the subprojects depending on whats in the version.properties
 if (gradle.builds_for.contains("fabric"))
     include("fabric")
-if (gradle.builds_for.contains("quilt"))
-    include("quilt") // Just put this here for once we need it ;)
+//if (gradle.builds_for.contains("quilt"))
+//    include("quilt") // Just put this here for once we need it ;)
 //if (gradle.builds_for.contains("forge"))
 //    include("forge")
 

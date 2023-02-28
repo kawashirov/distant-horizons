@@ -120,24 +120,24 @@ dependencies {
     shadowMe(project(path: ":api")) { transitive false }
 }
 
-shadowJar {
-    configurations = [project.configurations.shadowCommon, project.configurations.shadowMe, project.configurations.customModule]
-    relocate 'com.seibel.lod.common', 'loaderCommon.fabric.com.seibel.lod.common'
-
-    // Compression
-    relocate 'org.tukaani', 'distanthorizons.libraries.tukaani'
-
-    // NightConfig (includes Toml & Json)
-    relocate 'com.electronwill.nightconfig', 'distanthorizons.libraries.electronwill.nightconfig'
-
-    // Theming
-    relocate 'com.formdev.flatlaf', 'distanthorizons.libraries.formdev.flatlaf'
-
-    // SVG
-    relocate 'com.kitfox.svg', 'distanthorizons.libraries.kitfox.svg'
-
-    mergeServiceFiles()
-}
+//shadowJar {
+//    configurations = [project.configurations.shadowCommon, project.configurations.shadowMe, project.configurations.customModule]
+//    relocate 'com.seibel.lod.common', 'loaderCommon.fabric.com.seibel.lod.common'
+//
+//    // Compression
+//    relocate 'org.tukaani', 'distanthorizons.libraries.tukaani'
+//
+//    // NightConfig (includes Toml & Json)
+//    relocate 'com.electronwill.nightconfig', 'distanthorizons.libraries.electronwill.nightconfig'
+//
+//    // Theming
+//    relocate 'com.formdev.flatlaf', 'distanthorizons.libraries.formdev.flatlaf'
+//
+//    // SVG
+//    relocate 'com.kitfox.svg', 'distanthorizons.libraries.kitfox.svg'
+//
+//    mergeServiceFiles()
+//}
 
 
 task deleteResources(type: Delete) {
@@ -166,11 +166,11 @@ sourcesJar {
     from commonSources.archiveFile.map { zipTree(it) }
 }
 
-components.java {
-    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
-        skip()
-    }
-}
+//components.java {
+//    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+//        skip()
+//    }
+//}
 
 publishing {
     publications {
