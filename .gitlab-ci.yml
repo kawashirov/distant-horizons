@@ -8,6 +8,11 @@ stages:
   # TODO: Make stages depending on what is in versionProperties
   - build_1_18_2
 
+variables:
+    # Pull core when building
+    GIT_SUBMODULE_STRATEGY: recursive
+
+
 # 1.18.2 build
 build_1_18_2:
   stage: build_1_18_2
