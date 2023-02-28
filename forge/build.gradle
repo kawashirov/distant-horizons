@@ -130,37 +130,11 @@ dependencies {
 //    if (System.getProperty("idea.sync.active") != "true") {
 //        annotationProcessor "org.spongepowered:mixin:0.8.4:processor"
 //    }
-
-    common(project(path: ":common")) { transitive false }
-    shadowCommon(project(path: ":common")) { transitive false }
-    shadowMe(project(path: ":core")) { transitive false }
-    shadowMe(project(path: ":api")) { transitive false }
 }
 
 processResources {
     dependsOn(copyCoreResources)
     dependsOn(copyAccessWidener)
-}
-
-shadowJar {
-    exclude "architectury.common.json"
-
-    configurations = [project.configurations.shadowCommon, project.configurations.shadowMe, project.configurations.customModule]
-    relocate "om.seibel.lod.common", "loaderCommon.forge.com.seibel.lod.common"
-
-    // Compression
-    relocate "org.tukaani", "distanthorizons.libraries.tukaani"
-
-    // NightConfig (includes Toml & Json)
-    relocate "com.electronwill.nightconfig", "distanthorizons.libraries.electronwill.nightconfig"
-
-    // Theming
-    relocate "com.formdev.flatlaf", "distanthorizons.libraries.formdev.flatlaf"
-
-    // svg
-    relocate "com.kitfox.svg", "distanthorizons.libraries.kitfox.svg"
-
-    mergeServiceFiles()
 }
 
 //remapJar {

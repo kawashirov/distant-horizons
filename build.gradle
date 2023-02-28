@@ -117,9 +117,6 @@ subprojects { p ->
         shadowMe
         // have implemented dependencies automatically embedded in the final jar
         implementation.extendsFrom(shadowMe)
-        
-        customModule
-        implementation.extendsFrom(customModule)
 
         if (isMinecraftSubProject) {
             // Shadow common
@@ -185,24 +182,64 @@ subprojects { p ->
 
         // Add core
         if (isMinecraftSubProject) {
-            implementation(project(":core")) {
+            shadowMe(project(":core")) {
                 // Remove Junit test libraries
                 exclude group: "org.junit.jupiter", module: "junit-jupiter"
                 exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
                 exclude group: "junit", module: "junit"
+                // Removed dependencies
+                transitive false
             }
         }
 
         // Add the api
         if (p != project(":api")) {
-            implementation(project(":api")) {
+            shadowMe(project(":api")) {
                 // Remove Junit test libraries
                 exclude group: "org.junit.jupiter", module: "junit-jupiter"
                 exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
                 exclude group: "junit", module: "junit"
+                // Removed dependencies
+                transitive false
             }
         }
+
+        // Add common
+        if (isMinecraftSubProject && p != project(":common")) {
+            // Common
+//            implementation project(":common")
+
+            common(project(path: ":common")) { transitive false }
+            shadowCommon(project(path: ":common")) { transitive false }
+        }
     }
+
+
+    shadowJar {
+        configurations = [project.configurations.shadowMe]
+        if (isMinecraftSubProject && p != project(":common")) {
+            configurations.push(project.configurations.shadowCommon) // Shadow the common subproject
+
+            relocate "com.seibel.lod.common", "loaderCommon.${p.name}.com.seibel.lod.common" // Move the loader files to a different location
+        }
+
+        // Compression
+        relocate 'org.tukaani', 'distanthorizons.libraries.tukaani'
+
+        // NightConfig (includes Toml & Json)
+        relocate 'com.electronwill.nightconfig', 'distanthorizons.libraries.electronwill.nightconfig'
+
+        // Theming
+        relocate 'com.formdev.flatlaf', 'distanthorizons.libraries.formdev.flatlaf'
+
+        // SVG
+        relocate 'com.kitfox.svg', 'distanthorizons.libraries.kitfox.svg'
+
+        mergeServiceFiles()
+    }
+    // Using jar.finalizedBy(shadowJar) causes issues so we do this scuffed bypass
+    jar.dependsOn(shadowJar)
+
 
     // Adds the standalone jar's entrypoint
     jar {
@@ -351,15 +388,17 @@ allprojects { p ->
         }
     }
 
-    // Fix forge version numbering system as it is weird
-    // For whatever reason forge uses [1.18, 1.18.1, 1.18.2) instead of the standard ["1.18", "1.18.1", "1.18.2"] which make more sense
-    def compatible_forgemc_versions = "${compatible_minecraft_versions}".replaceAll("\"", "").replaceAll("]", ",)")
-//    System.out.println(compatible_forgemc_versions)
 
     // Put stuff from gradle.properties into the mod info
     processResources {
         def resourceTargets = ["fabric.mod.json", "quilt.mod.json", "META-INF/mods.toml"] // Location of where to inject the properties
         def intoTargets = ["$buildDir/resources/main/"] // Location of the built resources folder
+
+        // Fix forge version numbering system as it is weird
+        // For whatever reason forge uses [1.18, 1.18.1, 1.18.2) instead of the standard ["1.18", "1.18.1", "1.18.2"] which make more sense
+        def compatible_forgemc_versions = "${compatible_minecraft_versions}".replaceAll("\"", "").replaceAll("]", ",)")
+//        println compatible_forgemc_versions
+
         def replaceProperties = [
                 version                      : mod_version,
                 mod_name                     : mod_readable_name,
@@ -377,7 +416,7 @@ allprojects { p ->
         // The left side is what gets replaced in the mod info and the right side is where to get it from in the gradle.properties
 
         inputs.properties replaceProperties
-        replaceProperties.put 'project', project
+        replaceProperties.put "project", project
         filesMatching(resourceTargets) {
             expand replaceProperties
         }
@@ -412,7 +451,7 @@ allprojects { p ->
             options.compilerArgs += ['-Xplugin:Manifold']
         } else {
             options.release = 8; // Core & Api should use Java 8 no matter what
-            //options.release = rootProject.java_version as Integer // But if minecraft
+            //options.release = rootProject.java_version as Integer // But if you want to test some stuff, then this can be enabled
         }
         options.encoding = "UTF-8"
     }
