@@ -23,17 +23,17 @@ build_1_18_2:
   artifacts:
     name: "NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
     paths:
-      - fabric/build/libs/*.jar
-      - forge/build/libs/*.jar
-      - quilt/build/libs/*.jar
-    exclude:
-      # TODO: There is a lot of duplicate stuff here, fix it later
-      - fabric/build/libs/*dev-shadow.jar
-      - fabric/build/libs/*sources.jar
-      - forge/build/libs/*dev-shadow.jar
-      - forge/build/libs/*sources.jar
-      - quilt/build/libs/*dev-shadow.jar
-      - quilt/build/libs/*sources.jar
+      - fabric/build/libs/*-all.jar
+      - forge/build/libs/*-all.jar
+      - quilt/build/libs/*-all.jar
+    #exclude:
+    #  # TODO: There is a lot of duplicate stuff here, fix it later
+    #  - fabric/build/libs/*dev-shadow.jar
+    #  - fabric/build/libs/*sources.jar
+    #  - forge/build/libs/*dev-shadow.jar
+    #  - forge/build/libs/*sources.jar
+    #  - quilt/build/libs/*dev-shadow.jar
+    #  - quilt/build/libs/*sources.jar
     expire_in: 1 day
     when: always
   cache:
