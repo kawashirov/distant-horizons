@@ -48,9 +48,6 @@ dependencies {
     // Fabric loader
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
 
-    // Common
-    implementation project(":common")
-
     // Architectury API
 //    if (minecraft_version == "1.16.5") {
 //        addModJar("me.shedaniel:architectury-fabric:${rootProject.architectury_version}")
@@ -110,34 +107,7 @@ dependencies {
         transitive(false)
     }
      */
-
-
-    common(project(path: ":common")) { transitive false }
-    shadowCommon(project(path: ":common")) { transitive false }
-//    shadowCommon(project(path: ":common"), configuration: "transformProductionFabric") { transitive false } // FIXME
-    // TODO: These exist in the main build.gradle so fix shadow there
-    shadowMe(project(path: ":core")) { transitive false }
-    shadowMe(project(path: ":api")) { transitive false }
 }
-
-//shadowJar {
-//    configurations = [project.configurations.shadowCommon, project.configurations.shadowMe, project.configurations.customModule]
-//    relocate 'com.seibel.lod.common', 'loaderCommon.fabric.com.seibel.lod.common'
-//
-//    // Compression
-//    relocate 'org.tukaani', 'distanthorizons.libraries.tukaani'
-//
-//    // NightConfig (includes Toml & Json)
-//    relocate 'com.electronwill.nightconfig', 'distanthorizons.libraries.electronwill.nightconfig'
-//
-//    // Theming
-//    relocate 'com.formdev.flatlaf', 'distanthorizons.libraries.formdev.flatlaf'
-//
-//    // SVG
-//    relocate 'com.kitfox.svg', 'distanthorizons.libraries.kitfox.svg'
-//
-//    mergeServiceFiles()
-//}
 
 
 task deleteResources(type: Delete) {

@@ -105,7 +105,7 @@ Prerequisites:
 
 From the File Explorer:
 1. Download and extract the project zip
-2. Download the core from https://gitlab.com/jeseibel/distant-horizons-core and extract into a folder called `core`
+2. Download the core from https://gitlab.com/jeseibel/distant-horizons-core and extract into a folder called `coreSubProjects`
 3. Open a terminal emulator in the project folder (On Windows you can type `cmd` in the title bar)
 4. Run the commands: `./gradlew assemble`
 5. The compiled jar file will be in the folder `Merged`
