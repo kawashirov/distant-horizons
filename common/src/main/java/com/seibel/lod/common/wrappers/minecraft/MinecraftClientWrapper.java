@@ -175,6 +175,11 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
     @Override
     public ILevelWrapper getWrappedClientWorld()
     {
+		if (mc.level == null)
+		{
+			return null;
+		}
+		
         return ClientLevelWrapper.getWrapper(mc.level);
     }
 
