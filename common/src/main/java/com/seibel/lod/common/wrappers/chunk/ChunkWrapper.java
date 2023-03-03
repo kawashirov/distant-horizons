@@ -38,6 +38,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 // Which nullable should be used???
@@ -156,10 +157,16 @@ public class ChunkWrapper implements IChunkWrapper
 		#if PRE_MC_1_18_1
 		return true;
 		#else
-		//if (chunk instanceof LevelChunk) {
-		//	return ((LevelChunk) chunk).isClientLightReady();
-		//}
-		return chunk.isLightCorrect();
+		if (chunk instanceof LevelChunk)
+		{
+			// called when connected to a server
+			return ((LevelChunk) chunk).isClientLightReady();
+		}
+		else
+		{
+			// called when in a single player world
+			return chunk.isLightCorrect();	
+		}
 		#endif
 	}
 	
