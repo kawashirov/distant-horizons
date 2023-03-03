@@ -18,6 +18,9 @@ import com.seibel.lod.core.wrapperInterfaces.world.IClientLevelWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IServerLevelWrapper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
@@ -52,15 +55,44 @@ public class ClientLevelWrapper implements IClientLevelWrapper
     ClientBlockDetailMap blockMap = new ClientBlockDetailMap(this);
     @Nullable
     @Override
-    public IServerLevelWrapper tryGetServerSideWrapper() {
-        try {
-            return ServerLevelWrapper.getWrapper(MinecraftClientWrapper.INSTANCE.mc.getSingleplayerServer().getPlayerList()
-                    .getPlayer(MinecraftClientWrapper.INSTANCE.mc.player.getUUID()).getLevel());
-        } catch (Exception e) {
-            LOGGER.error("Failed to get server side wrapper for client level {}.", level);
-            return null;
-        }
-    }
+	public IServerLevelWrapper tryGetServerSideWrapper()
+	{
+		try
+		{
+			// commented out because this breaks when traveling between dimensions,
+			// serverPlayer.getLevel() will return the previously loaded level, which causes issues 
+//			PlayerList serverPlayerList = MinecraftClientWrapper.INSTANCE.mc.getSingleplayerServer().getPlayerList();
+//			ServerPlayer serverPlayer = serverPlayerList.getPlayer(MinecraftClientWrapper.INSTANCE.mc.player.getUUID());
+//			return ServerLevelWrapper.getWrapper(serverPlayer.getLevel());
+			
+			
+			Iterable<ServerLevel> serverLevels = MinecraftClientWrapper.INSTANCE.mc.getSingleplayerServer().getAllLevels();
+			
+			// attempt to find the server level with the same dimension type
+			// TODO this assumes only one level per dimension type, the SubDimensionLevelMatcher will need to be added for supporting multiple levels per dimension
+			ServerLevelWrapper foundLevelWrapper = null;
+			for (ServerLevel serverLevel : serverLevels)
+			{
+				if (foundLevelWrapper != null)
+				{
+					LOGGER.warn("More than 1 level exists for a given dimension. Defaulting to the first level.");
+					break;
+				}
+				
+				if (serverLevel.dimensionType() == this.level.dimensionType())
+				{
+					foundLevelWrapper = ServerLevelWrapper.getWrapper(serverLevel);
+				}
+			}
+			
+			return foundLevelWrapper;
+		}
+		catch (Exception e)
+		{
+			LOGGER.error("Failed to get server side wrapper for client level: "+level);
+			return null;
+		}
+	}
     public static void cleanCheck() {
         if (!levelWrapperMap.isEmpty()) {
             LOGGER.warn("{} client levels havn't been freed!", levelWrapperMap.size());
