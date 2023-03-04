@@ -26,8 +26,8 @@ build_1_18_2:
       - fabric/build/libs/*.jar
       - forge/build/libs/*.jar
       - quilt/build/libs/*.jar
-    #exclude:
-    #  # TODO: There is a lot of duplicate stuff here, fix it later
+    exclude:
+      # TODO: There is a lot of duplicate stuff here, fix it later
       - fabric/build/libs/*-all.jar
       - fabric/build/libs/*-sources.jar
       - forge/build/libs/*-all.jar
