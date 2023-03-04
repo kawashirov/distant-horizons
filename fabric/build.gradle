@@ -23,6 +23,11 @@ loom {
     }
 }
 
+remapJar {
+    // Set the input jar for the task, also valid for remapSourcesJar
+    inputFile = project(":fabric").file("build/libs/DistantHorizons-fabric-${rootProject.versionStr}-all.jar")
+}
+
 configurations {
     // The addModJar basically embeds the mod to the built jar
     addModJar
