@@ -77,11 +77,11 @@ forgix {
     mergedJarName = "DistantHorizons-${rootProject.versionStr}.jar"
     
     forge {
-        jarLocation = "build/libs/DistantHorizons-${rootProject.versionStr}.jar"
+        jarLocation = "build/libs/DistantHorizons-forge-${rootProject.versionStr}.jar"
     }
 
     fabric {
-        jarLocation = "build/libs/DistantHorizons-${rootProject.versionStr}.jar"
+        jarLocation = "build/libs/DistantHorizons-fabric-${rootProject.versionStr}.jar"
     }
 
     removeDuplicate "com.seibel.lod.api"
@@ -286,7 +286,7 @@ allprojects { p ->
     apply plugin: "maven-publish"
 
     archivesBaseName = rootProject.mod_name
-    version = project.name + "-" + rootProject.mod_version
+    version = project.name + "-" + rootProject.versionStr
     group = rootProject.maven_group
 
 
