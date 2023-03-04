@@ -159,8 +159,8 @@ public class ChunkWrapper implements IChunkWrapper
 		#else
 		if (chunk instanceof LevelChunk)
 		{
-			// called when connected to a server
-			return ((LevelChunk) chunk).isClientLightReady();
+			// called when connected to a server (and sometimes when in a singleplayer world)
+			return ((LevelChunk) chunk).isClientLightReady() || chunk.isLightCorrect();
 		}
 		else
 		{
