@@ -30,6 +30,7 @@ import com.seibel.lod.core.config.*;
 // Minecraft imports
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.seibel.lod.core.jar.updater.SelfUpdater;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -271,7 +272,6 @@ public abstract class ClassicConfigGUI {
                     }
                 }
             }
-
         }
 
         @Override
@@ -279,6 +279,8 @@ public abstract class ClassicConfigGUI {
             this.renderBackground(matrices); // Renders background
             this.list.render(matrices, mouseX, mouseY, delta); // Render buttons
             drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title
+            if (SelfUpdater.deleteOldOnClose)
+                drawString(matrices, font, new TranslatableComponent("lod.updater.waitingForClose"), 4, height-38, 0xFFFFFF);
 
             // Render the tooltip only if it can find a tooltip in the language file
             for (AbstractConfigType info : ConfigBase.INSTANCE.entries) {
