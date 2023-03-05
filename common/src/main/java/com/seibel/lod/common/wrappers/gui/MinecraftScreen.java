@@ -1,7 +1,6 @@
 package com.seibel.lod.common.wrappers.gui;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.config.gui.AbstractScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
@@ -9,10 +8,9 @@ import net.minecraft.client.gui.screens.Screen;
 
 import java.util.*;
 
-public class ConfigScreenMC {
-    public static Screen getScreen(Screen parent, AbstractScreen screen) {
-
-        return new ConfigScreenRenderer(parent, screen);
+public class MinecraftScreen {
+    public static Screen getScreen(Screen parent, AbstractScreen screen, String translationName) {
+        return new ConfigScreenRenderer(parent, screen, translationName);
     }
 
     private static class ConfigScreenRenderer extends Screen {
@@ -31,8 +29,8 @@ public class ConfigScreenMC {
         }
     #endif
 
-        protected ConfigScreenRenderer(Screen parent, AbstractScreen screen) {
-            super(translate(ModInfo.ID + ".config.title"));
+        protected ConfigScreenRenderer(Screen parent, AbstractScreen screen, String translationName) {
+            super(translate(translationName));
             this.parent = parent;
             this.screen = screen;
         }
