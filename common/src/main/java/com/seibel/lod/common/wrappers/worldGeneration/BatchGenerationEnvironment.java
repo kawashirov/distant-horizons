@@ -365,7 +365,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			e.threadedParam.makeStructFeat(region, params);
 			genChunks = new ArrayGridList<>(referencedChunks, RANGE_TO_RANGE_EMPTY_EXTENSION,
 					referencedChunks.gridSize - RANGE_TO_RANGE_EMPTY_EXTENSION);
-			generateDirect(e, genChunks, e.target, region);
+			generateDirect(e, genChunks, e.targetGenerationStep, region);
 			e.timer.nextEvent("cleanup");
 		}
 		catch (StepStructureStart.StructStartCorruptedException f)

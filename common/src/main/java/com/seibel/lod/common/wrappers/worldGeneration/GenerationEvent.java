@@ -35,16 +35,16 @@ import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenera
 
 import org.apache.logging.log4j.Logger;
 
-//======================= Main Event class======================
 public final class GenerationEvent
 {
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 	private static int generationFutureDebugIDs = 0;
+	
 	final int id;
 	final ThreadedParameters threadedParam;
 	final DhChunkPos minPos;
 	final int size;
-	final Steps target;
+	final Steps targetGenerationStep;
 	final ELightGenerationMode lightMode;
 	final double runTimeRatio;
 	EventTimer timer = null;
@@ -56,13 +56,13 @@ public final class GenerationEvent
 	
 	
 	public GenerationEvent(DhChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
-			Steps target, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
+			Steps targetGenerationStep, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
 	{
 		this.inQueueTime = System.nanoTime();
 		this.id = generationFutureDebugIDs++;
 		this.minPos = minPos;
 		this.size = size;
-		this.target = target;
+		this.targetGenerationStep = targetGenerationStep;
 		this.threadedParam = ThreadedParameters.getOrMake(generationGroup.params);
 		this.lightMode = Config.Client.WorldGenerator.lightGenerationMode.get();
 		this.runTimeRatio = runTimeRatio;
@@ -79,18 +79,18 @@ public final class GenerationEvent
 			size += 1; // size must be odd for vanilla world gen regions to work
 		}
 		
-		GenerationEvent event = new GenerationEvent(minPos, size, generationGroup, target, runTimeRatio, resultConsumer);
-		event.future = CompletableFuture.runAsync(() ->
+		GenerationEvent generationEvent = new GenerationEvent(minPos, size, generationGroup, target, runTimeRatio, resultConsumer);
+		generationEvent.future = CompletableFuture.runAsync(() ->
 		{
 			long runStartTime = System.nanoTime();
-			event.timeoutTime = runStartTime;
-			event.inQueueTime = runStartTime - event.inQueueTime;
-			event.timer = new EventTimer("setup");
+			generationEvent.timeoutTime = runStartTime;
+			generationEvent.inQueueTime = runStartTime - generationEvent.inQueueTime;
+			generationEvent.timer = new EventTimer("setup");
 			BatchGenerationEnvironment.isDistantGeneratorThread.set(true);
 			try
 			{
-				LOGGER.info("generating [{}]", event.minPos);
-				generationGroup.generateLodFromList(event);
+				//LOGGER.info("generating [{}]", event.minPos);
+				generationGroup.generateLodFromList(generationEvent);
 			}
 			finally
 			{
@@ -109,7 +109,7 @@ public final class GenerationEvent
 				}
 			}
 		}, generationGroup.executors);
-		return event;
+		return generationEvent;
 	}
 	
 	public boolean isComplete() { return this.future.isDone(); }
@@ -156,9 +156,6 @@ public final class GenerationEvent
 	}
 	
 	@Override
-	public String toString()
-	{
-		return this.id + ":" + this.size + "@" + this.minPos + "(" + this.target + ")";
-	}
+	public String toString() { return this.id+":"+this.size+"@"+this.minPos+"("+this.targetGenerationStep +")"; }
 	
 }
