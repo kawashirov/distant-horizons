@@ -31,7 +31,7 @@ import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.pos.DhChunkPos;
 import com.seibel.lod.core.util.objects.EventTimer;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
-import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper.Steps;
+import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper.EGenerationStep;
 
 import org.apache.logging.log4j.Logger;
 
@@ -44,7 +44,7 @@ public final class GenerationEvent
 	final ThreadedParameters threadedParam;
 	final DhChunkPos minPos;
 	final int size;
-	final Steps targetGenerationStep;
+	final EGenerationStep targetGenerationStep;
 	final ELightGenerationMode lightMode;
 	final double runTimeRatio;
 	EventTimer timer = null;
@@ -56,7 +56,7 @@ public final class GenerationEvent
 	
 	
 	public GenerationEvent(DhChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
-			Steps targetGenerationStep, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
+			EGenerationStep targetGenerationStep, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
 	{
 		this.inQueueTime = System.nanoTime();
 		this.id = generationFutureDebugIDs++;
@@ -72,7 +72,7 @@ public final class GenerationEvent
 	
 	
 	public static GenerationEvent startEvent(DhChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
-			Steps target, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
+			EGenerationStep target, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
 	{
 		if (size % 2 == 0)
 		{
