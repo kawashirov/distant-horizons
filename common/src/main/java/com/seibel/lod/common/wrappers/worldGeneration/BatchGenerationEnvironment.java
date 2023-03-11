@@ -176,7 +176,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	public int unknownExceptionCount = 0;
 	public long lastExceptionTriggerTime = 0;
 	
-	public static final LodThreadFactory threadFactory = new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY);
+	public static final LodThreadFactory threadFactory = new LodThreadFactory("DH-Gen-Worker-Thread", Thread.MIN_PRIORITY);
 	
 	public static ThreadLocal<Boolean> isDistantGeneratorThread = new ThreadLocal<>();
 	
@@ -237,7 +237,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		return future.join();
 	}
 	
-	public void resizeThreadPool(int newThreadCount) { executors = Executors.newFixedThreadPool(newThreadCount, new LodThreadFactory("Gen-Worker-Thread", Thread.MIN_PRIORITY)); }
+	public void resizeThreadPool(int newThreadCount) { executors = Executors.newFixedThreadPool(newThreadCount, new LodThreadFactory("DH-Gen-Worker-Thread", Thread.MIN_PRIORITY)); }
 	
 	public void updateAllFutures()
 	{
