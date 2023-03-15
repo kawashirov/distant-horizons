@@ -48,7 +48,8 @@ public class TexturedButtonWidget extends ImageButton {
 //    public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction, OnTooltip tooltipSupplier, Component text) {
 //        super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, tooltipSupplier, text);
 //    }
-
+	
+	/*
     @Override
     public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
         #if PRE_MC_1_17_1
@@ -73,5 +74,5 @@ public class TexturedButtonWidget extends ImageButton {
         #endif
 
         super.renderButton(matrices, mouseX, mouseY, delta);
-    }
+    }*/
 }
