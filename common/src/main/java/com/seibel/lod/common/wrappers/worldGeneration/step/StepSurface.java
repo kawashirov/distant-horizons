@@ -48,7 +48,7 @@ public final class StepSurface {
 
 	public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 			List<ChunkAccess> chunks) {
-		ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
+		ArrayList<ChunkAccess> chunksToDo = new ArrayList<>();
 		
 		for (ChunkAccess chunk : chunks) {
 			if (chunk.getStatus().isOrAfter(STATUS)) continue;

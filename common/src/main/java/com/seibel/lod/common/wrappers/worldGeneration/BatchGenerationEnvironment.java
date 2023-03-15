@@ -450,12 +450,12 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 	}
 	
-	public void generateDirect(GenerationEvent genEvent, ArrayGridList<ChunkAccess> subRange,
+	public void generateDirect(GenerationEvent genEvent, ArrayGridList<ChunkAccess> chunksToGenerate,
 							   EGenerationStep step, LightedWorldGenRegion region)
 	{
 		try
 		{
-			subRange.forEach((chunk) ->
+			chunksToGenerate.forEach((chunk) ->
 			{
 				if (chunk instanceof ProtoChunk)
 				{
@@ -472,7 +472,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			
 			genEvent.timer.nextEvent("structStart");
-			stepStructureStart.generateGroup(genEvent.threadedParam, region, subRange);
+			stepStructureStart.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
 			if (step == EGenerationStep.StructureStart)
 			{
@@ -480,7 +480,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			
 			genEvent.timer.nextEvent("structRef");
-			stepStructureReference.generateGroup(genEvent.threadedParam, region, subRange);
+			stepStructureReference.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
 			if (step == EGenerationStep.StructureReference)
 			{
@@ -488,7 +488,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			
 			genEvent.timer.nextEvent("biome");
-			stepBiomes.generateGroup(genEvent.threadedParam, region, subRange);
+			stepBiomes.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
 			if (step == EGenerationStep.Biomes)
 			{
@@ -496,7 +496,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			
 			genEvent.timer.nextEvent("noise");
-			stepNoise.generateGroup(genEvent.threadedParam, region, subRange);
+			stepNoise.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
 			if (step == EGenerationStep.Noise)
 			{
@@ -504,7 +504,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			
 			genEvent.timer.nextEvent("surface");
-			stepSurface.generateGroup(genEvent.threadedParam, region, subRange);
+			stepSurface.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
 			if (step == EGenerationStep.Surface)
 			{
@@ -518,7 +518,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			
 			genEvent.timer.nextEvent("feature");
-			stepFeatures.generateGroup(genEvent.threadedParam, region, subRange);
+			stepFeatures.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
 		}
 		finally
@@ -527,10 +527,10 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			switch (region.lightMode)
 			{
 			case FANCY:
-				stepLight.generateGroup(region.getLightEngine(), subRange);
+				stepLight.generateGroup(region.getLightEngine(), chunksToGenerate);
 				break;
 			case FAST:
-				subRange.forEach((chunk) ->
+				chunksToGenerate.forEach((chunk) ->
 				{
 					if (chunk instanceof ProtoChunk)
 					{

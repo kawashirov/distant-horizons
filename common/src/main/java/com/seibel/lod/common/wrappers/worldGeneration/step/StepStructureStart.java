@@ -19,21 +19,24 @@
  
 package com.seibel.lod.common.wrappers.worldGeneration.step;
 
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.lod.common.wrappers.worldGeneration.ThreadedParameters;
 
+import com.seibel.lod.core.logging.DhLoggerBuilder;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import org.apache.logging.log4j.Logger;
 
-public final class StepStructureStart {
-	/**
-	 * 
-	 */
+public final class StepStructureStart
+{
+	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
+	
 	private final BatchGenerationEnvironment environment;
 
 	/**
@@ -57,14 +60,17 @@ public final class StepStructureStart {
 	}
 
 	public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
-			List<ChunkAccess> chunks) {
-
-		ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
+			List<ChunkAccess> chunks)
+	{
+		ArrayList<ChunkAccess> chunksToDo = new ArrayList<>();
 		
-		for (ChunkAccess chunk : chunks) {
-			if (chunk.getStatus().isOrAfter(STATUS)) continue;
-			((ProtoChunk) chunk).setStatus(STATUS);
-			chunksToDo.add(chunk);
+		for (ChunkAccess chunk : chunks)
+		{
+			if (!chunk.getStatus().isOrAfter(STATUS))
+			{
+				((ProtoChunk) chunk).setStatus(STATUS);
+				chunksToDo.add(chunk);
+			}
 		}
 		
 		#if PRE_MC_1_19
@@ -72,7 +78,8 @@ public final class StepStructureStart {
 		#elif POST_MC_1_19
 		if (environment.params.worldGenSettings.generateStructures()) {
 		#endif
-			for (ChunkAccess chunk : chunksToDo) {
+			for (ChunkAccess chunk : chunksToDo)
+			{
 				// System.out.println("StepStructureStart: "+chunk.getPos());
 				#if PRE_MC_1_19
 				environment.params.generator.createStructures(environment.params.registry, tParams.structFeat, chunk, environment.params.structures,
@@ -82,9 +89,12 @@ public final class StepStructureStart {
 						environment.params.worldSeed);
 				#endif
 				#if POST_MC_1_18_1
-				try {
+				try
+				{
 					tParams.structCheck.onStructureLoad(chunk.getPos(), chunk.getAllStarts());
-				} catch (ArrayIndexOutOfBoundsException e) {
+				}
+				catch (ArrayIndexOutOfBoundsException firstEx)
+				{
 					// There's a rare issue with StructStart where it throws ArrayIndexOutOfBounds
 					// This means the structFeat is corrupted (For some reason) and I need to reset it.
 					// TODO: Figure out in the future why this happens even though I am using new structFeat - OLD
