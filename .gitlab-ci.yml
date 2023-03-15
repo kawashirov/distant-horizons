@@ -3,6 +3,7 @@ image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
+  - build_19_4
   - build_19_3
   - build_19_2
   - build_19_1
