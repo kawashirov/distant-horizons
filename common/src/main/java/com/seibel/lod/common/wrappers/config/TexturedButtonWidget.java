@@ -48,8 +48,8 @@ public class TexturedButtonWidget extends ImageButton {
 //    public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction, OnTooltip tooltipSupplier, Component text) {
 //        super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, tooltipSupplier, text);
 //    }
-	
-	/*
+
+    #if PRE_MC_1_19_4
     @Override
     public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
         #if PRE_MC_1_17_1
@@ -74,5 +74,26 @@ public class TexturedButtonWidget extends ImageButton {
         #endif
 
         super.renderButton(matrices, mouseX, mouseY, delta);
-    }*/
+    }
+    #else
+    @Override
+    public void renderWidget(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
+
+        int i = 1;
+        if (!this.active)
+            i = 0;
+        else if (this.isHovered)
+            i = 2;
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.enableDepthTest();
+        this.blit(matrices, this.getX(), this.getY(), 0, 46 + i * 20, this.getWidth() / 2, this.getHeight());
+        this.blit(matrices, this.getX() + this.getWidth() / 2, this.getY(), 200 - this.width / 2, 46 + i * 20, this.getWidth() / 2, this.getHeight());
+
+        super.renderWidget(matrices, mouseX, mouseY, delta);
+    }
+    #endif
 }
