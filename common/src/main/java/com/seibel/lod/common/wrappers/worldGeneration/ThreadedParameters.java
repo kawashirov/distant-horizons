@@ -25,55 +25,81 @@ import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.WorldGenStruct
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 #if POST_MC_1_18_1
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
 #endif
 
 public final class ThreadedParameters
 {
-	private static final ThreadLocal<ThreadedParameters> localParam = new ThreadLocal<ThreadedParameters>();
+	private static final ThreadLocal<ThreadedParameters> LOCAL_PARAM = new ThreadLocal<>();
+	
 	final ServerLevel level;
 	public WorldGenStructFeatManager structFeat = null;
 	#if POST_MC_1_18_1
-	public final StructureCheck structCheck;
+	public StructureCheck structCheck;
 	#endif
 	boolean isValid = true;
 	public final PerfCalculator perf = new PerfCalculator();
 	
+	private static GlobalParameters previousGlobalParameters = null;
+	
+	
+	
 	public static ThreadedParameters getOrMake(GlobalParameters param)
 	{
-		ThreadedParameters tParam = localParam.get();
+		ThreadedParameters tParam = LOCAL_PARAM.get();
 		if (tParam != null && tParam.isValid && tParam.level == param.level)
+		{
 			return tParam;
+		}
+		
 		tParam = new ThreadedParameters(param);
-		localParam.set(tParam);
+		LOCAL_PARAM.set(tParam);
 		return tParam;
-	}
-	
-	public void markAsInvalid()
-	{
-		isValid = false;
 	}
 	
 	private ThreadedParameters(GlobalParameters param)
 	{
-		level = param.level;
+		previousGlobalParameters = param;
+		
+		this.level = param.level;
 		#if PRE_MC_1_18_1
-		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, level);
+		this.structFeat = new WorldGenStructFeatManager(param.worldGenSettings, level);
 		#elif PRE_MC_1_19
-		structCheck = new StructureCheck(param.chunkScanner, param.registry, param.structures,
-				param.level.dimension(), param.generator, level, param.generator.getBiomeSource(), param.worldSeed,
-				param.fixerUpper);
+		this.structCheck = this.createStructureCheck(param);
 		#else
-		structCheck = new StructureCheck(param.chunkScanner, param.registry, param.structures,
+		this.structCheck = new StructureCheck(param.chunkScanner, param.registry, param.structures,
 				param.level.dimension(), param.generator, param.randomState, level, param.generator.getBiomeSource(), param.worldSeed,
 				param.fixerUpper);
 		#endif
 	}
 	
+	
+	
+	public void markAsInvalid() { isValid = false; }
+	
 	public void makeStructFeat(WorldGenLevel genLevel, GlobalParameters param)
 	{
 		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, genLevel #if POST_MC_1_18_1, structCheck #endif);
 	}
+	
+	
+	#if PRE_MC_1_19
+	public void recreateStructureCheck()
+	{
+		if (previousGlobalParameters != null)
+		{
+			this.structCheck = createStructureCheck(previousGlobalParameters);
+		}
+	}
+	private StructureCheck createStructureCheck(GlobalParameters param)
+	{
+		return new StructureCheck(param.chunkScanner, param.registry, param.structures,
+				param.level.dimension(), param.generator, this.level, param.generator.getBiomeSource(), param.worldSeed,
+				param.fixerUpper);
+	}
+	#else
+	public void recreateStructureCheck() { /* do nothing */ }	
+	#endif
+	
 }

@@ -98,8 +98,22 @@ public final class StepStructureStart
 					// There's a rare issue with StructStart where it throws ArrayIndexOutOfBounds
 					// This means the structFeat is corrupted (For some reason) and I need to reset it.
 					// TODO: Figure out in the future why this happens even though I am using new structFeat - OLD
-					// TODO: Is this still a problem?
-					throw new StepStructureStart.StructStartCorruptedException(e);
+					
+					// reset the structureStart
+					tParams.recreateStructureCheck();
+					
+					try
+					{
+						// try running the structure logic again
+						tParams.structCheck.onStructureLoad(chunk.getPos(), chunk.getAllStarts());
+					}
+					catch (ArrayIndexOutOfBoundsException secondEx)
+					{
+						// the structure logic failed again, log it and move on
+						LOGGER.error("Unable to create structure starts for "+chunk.getPos()+". This is an error with MC's world generation. Ignoring and continuing generation. Error: "+secondEx.getMessage()); // don't log the full stack trace since it is long and will generally end up in MC's code
+						
+						//throw new StepStructureStart.StructStartCorruptedException(secondEx);
+					}
 				}
 				#endif
 			}
