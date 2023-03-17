@@ -170,5 +170,5 @@ https://github.com/TheElectronWill/night-config
 SVG Salamander for SVG support\
 https://github.com/blackears/svgSalamander
 
-FlatLaf for theming (for development testing)\
-https://www.formdev.com/flatlaf/
+JavaFX for standalone jar and config ui\
+https://openjfx.io/
