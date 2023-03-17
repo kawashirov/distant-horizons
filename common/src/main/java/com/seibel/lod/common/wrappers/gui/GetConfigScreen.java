@@ -2,22 +2,25 @@ package com.seibel.lod.common.wrappers.gui;
 
 import com.seibel.lod.core.ModInfo;
 import com.seibel.lod.core.config.ConfigBase;
-import com.seibel.lod.core.config.gui.ConfigScreen;
+import com.seibel.lod.core.config.gui.JavaFXConfigScreen;
+import com.seibel.lod.core.config.gui.OpenGLConfigScreen;
 import net.minecraft.client.gui.screens.Screen;
 
 public class GetConfigScreen {
     public static type useScreen = type.Classic;
     public static enum type {
         Classic,
-        OpenGL;
+        @Deprecated
+        OpenGL, // This was jsut an attempt, it didnt work out and we are going to change to javafx soon
+        JavaFX;
     }
 
     public static Screen getScreen(Screen parent) {
-        if (useScreen == type.Classic) {
-            return ClassicConfigGUI.getScreen(ConfigBase.INSTANCE, parent, "client");
-        } else if (useScreen == type.OpenGL) {
-            return MinecraftScreen.getScreen(parent, new ConfigScreen(), ModInfo.ID + ".title");
-        }
-        return null;
+        return switch (useScreen) {
+            case Classic -> ClassicConfigGUI.getScreen(ConfigBase.INSTANCE, parent, "client");
+            case OpenGL -> MinecraftScreen.getScreen(parent, new OpenGLConfigScreen(), ModInfo.ID + ".title");
+            case JavaFX -> MinecraftScreen.getScreen(parent, new JavaFXConfigScreen(), ModInfo.ID + ".title");
+            default -> null;
+        };
     }
 }

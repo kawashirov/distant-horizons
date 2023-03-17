@@ -99,14 +99,13 @@ subprojects { p ->
 
     // Apply plugins
     apply plugin: "java"
+    apply plugin: "com.github.johnrengelman.shadow"
+    apply plugin: "org.openjfx.javafxplugin"
     if (isMinecraftSubProject)
         apply plugin: "systems.manifold.manifold-gradle-plugin"
-    apply plugin: "com.github.johnrengelman.shadow"
-//    apply plugin: "org.spongepowered.gradle.vanilla" // Provides minecraft libraries
-    if (p == project(":core")) {
+    if (p == project(":core"))
         apply plugin: "application"
-        apply plugin: "org.openjfx.javafxplugin"
-    }
+//    apply plugin: "org.spongepowered.gradle.vanilla" // Provides minecraft libraries
 
 
     // Set the manifold version (may not be required tough)
@@ -139,11 +138,11 @@ subprojects { p ->
         application {
             mainClass.set("com.seibel.lod.core.jar.JarMain")
         }
-
-        javafx {
-            version = "19"
-            modules = ["javafx.controls"]
-        }
+    }
+    // Remember, to shadow it you need to add it in the dependency part
+    javafx {
+        version = "${rootProject.javafx_version}"
+        modules = ["javafx.swing", "javafx.controls", "javafx.graphics"]
     }
 
     dependencies {
@@ -177,6 +176,16 @@ subprojects { p ->
 
         // SVG
         shadowMe("com.formdev:svgSalamander:${rootProject.svgSalamander_version}")
+
+        // JavaFX/OpenJFX
+        // Remember, you also need to define jfx modules in its own jfx thing
+        // This part of the code is just to shadow the libraries
+        // FIXME: This doesnt work, find a workaround
+        shadowMe("org.openjfx:javafx:${rootProject.javafx_version}")
+        shadowMe("org.openjfx:javafx-base:${rootProject.javafx_version}")
+        shadowMe("org.openjfx:javafx-swing:${rootProject.javafx_version}")
+        shadowMe("org.openjfx:javafx-controls:${rootProject.javafx_version}")
+        shadowMe("org.openjfx:javafx-graphics:${rootProject.javafx_version}")
         
         
         

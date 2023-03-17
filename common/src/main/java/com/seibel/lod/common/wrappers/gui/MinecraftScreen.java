@@ -5,7 +5,9 @@ import com.seibel.lod.core.config.gui.AbstractScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
+import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
 import java.util.*;
 
 public class MinecraftScreen {
@@ -53,13 +55,17 @@ public class MinecraftScreen {
             this.renderBackground(matrices); // Render background
             this.list.render(matrices, mouseX, mouseY, delta); // Renders the items in the render list (currently only used to tint background darker)
 
-            screen.width = this.width;      // Is there a way to only call this when the window changes the size
-            screen.height = this.height;    // Is there a way to only call this when the window changes the size
             screen.mouseX = mouseX;
             screen.mouseY = mouseY;
             screen.render(delta); // Render everything on the main screen
 
             super.render(matrices, mouseX, mouseY, delta); // Render the vanilla stuff (currently only used for the background and tint)
+        }
+
+        @Override
+        public void resize(Minecraft mc, int width, int height) {
+            screen.width = this.width;
+            screen.height = this.height;
         }
 
         @Override
@@ -73,6 +79,11 @@ public class MinecraftScreen {
         public void onClose() {
             screen.onClose();
             Objects.requireNonNull(minecraft).setScreen(this.parent); // Goto the parent screen
+        }
+
+        @Override
+        public void onFilesDrop(@NotNull List<Path> files) {
+            screen.onFilesDrop(files);
         }
 
         // For checking if it should close when you press the escape key
