@@ -21,7 +21,7 @@ public class ForgeMixinPlugin implements IMixinConfigPlugin {
                     mixinClassName
                             // What these 2 regex's do is get the mod name that we are checking out of the mixinClassName
                             // Eg. "com.seibel.lod.mixins.mods.sodium.MixinSodiumChunkRenderer" turns into "sodium"
-                            .replaceAll("^.*.mods.", "") // Replaces everything before the mods
+                            .replaceAll("^.*mods.", "") // Replaces everything before the mods
                             .replaceAll("\\..*$", "") // Replaces everything after the mod name
             );
         }

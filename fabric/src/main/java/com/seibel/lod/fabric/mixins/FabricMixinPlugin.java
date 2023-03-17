@@ -14,6 +14,7 @@ import java.util.Set;
  * @author coolGi
  * @author cortex
  */
+// TODO: Move to common if possible
 public class FabricMixinPlugin implements IMixinConfigPlugin {
 
     @Override
@@ -23,7 +24,7 @@ public class FabricMixinPlugin implements IMixinConfigPlugin {
                     mixinClassName
                             // What these 2 regex's do is get the mod name that we are checking out of the mixinClassName
                             // Eg. "com.seibel.lod.mixins.mods.sodium.MixinSodiumChunkRenderer" turns into "sodium"
-                            .replaceAll("^.*.mods.", "") // Replaces everything before the mods
+                            .replaceAll("^.*mods.", "") // Replaces everything before the mods
                             .replaceAll("\\..*$", "") // Replaces everything after the mod name
             );
         }
