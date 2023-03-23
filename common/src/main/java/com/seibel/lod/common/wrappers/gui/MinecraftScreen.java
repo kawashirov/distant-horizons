@@ -33,6 +33,7 @@ public class MinecraftScreen {
 
         protected ConfigScreenRenderer(Screen parent, AbstractScreen screen, String translationName) {
             super(translate(translationName));
+            screen.minecraftWindow = Minecraft.getInstance().getWindow().getWindow();
             this.parent = parent;
             this.screen = screen;
         }
