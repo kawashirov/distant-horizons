@@ -189,7 +189,7 @@ subprojects { p ->
 
 
         shadowMe("org.lwjgl:lwjgl-jawt:3.2.2") {
-            exclude group: "org.lwjgl", module: "lwjgl"
+            exclude group: "org.lwjgl", module: "lwjgl" // This module is imported by Minecraft
         }
         
         
@@ -241,15 +241,19 @@ subprojects { p ->
 
             relocate "com.seibel.lod.common", "loaderCommon.${p.name}.com.seibel.lod.common" // Move the loader files to a different location
         }
+        def librariesLocation = "distanthorizons.libraries"
+
+        // LWJGL
+        relocate "org.lwjgl", "${librariesLocation}.lwjgl"
 
         // Compression
-        relocate 'org.tukaani', 'distanthorizons.libraries.tukaani'
+        relocate "org.tukaani", "${librariesLocation}.tukaani"
 
         // NightConfig (includes Toml & Json)
-        relocate 'com.electronwill.nightconfig', 'distanthorizons.libraries.electronwill.nightconfig'
+        relocate "com.electronwill.nightconfig", "${librariesLocation}.electronwill.nightconfig"
 
         // SVG
-        relocate 'com.kitfox.svg', 'distanthorizons.libraries.kitfox.svg'
+        relocate "com.kitfox.svg", "${librariesLocation}.kitfox.svg"
 
         mergeServiceFiles()
     }
@@ -310,7 +314,7 @@ allprojects { p ->
         // The central repo
         mavenCentral()
 
-        // Used for Google's Collect library // TODO: Attempt to remove this library
+        // Used for Google's Collect library
         maven { url "https://repo.enonic.com/public/" }
 
         // For parchment mappings
@@ -351,11 +355,17 @@ allprojects { p ->
         // Required for Canvas (mod)
         maven { url "https://maven.vram.io/" }
 
-        // These 2 are for importing mods that arnt on CursedForge, Modrinth, GitHub, GitLab or anywhere opensource
+        // These 3 are for importing mods that arnt on CursedForge, Modrinth, GitHub, GitLab or anywhere opensource
         flatDir {
             dirs "${rootDir}/mods/fabric"
             content {
                 includeGroup "fabric-mod"
+            }
+        }
+        flatDir {
+            dirs "${rootDir}/mods/quilt"
+            content {
+                includeGroup "quilt-mod"
             }
         }
         flatDir {
@@ -373,7 +383,7 @@ allprojects { p ->
         // Set the OS lwjgl is using to the current os
         project.ext.lwjglNatives = "natives-" + os.toFamilyName()
 
-        dependencies {
+        dependencies { // All of these dependancies are in Vanilla Minecraft, but we need to depend on it as we arent importing Minecraft in the core
             // Imports most of lwjgl's libraries (well, only the ones that we need)
             implementation platform("org.lwjgl:lwjgl-bom:${rootProject.lwjgl_version}")
 
@@ -395,7 +405,6 @@ allprojects { p ->
 
 
             // Some other dependencies
-            // TODO: Attempt to remove some of these dependencies from the core
             implementation("org.jetbrains:annotations:16.0.2")
             implementation("com.google.code.findbugs:jsr305:3.0.2")
             implementation("com.google.common:google-collect:0.5")
