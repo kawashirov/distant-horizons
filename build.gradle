@@ -188,7 +188,7 @@ subprojects { p ->
         shadowMe("org.openjfx:javafx-graphics:${rootProject.javafx_version}")
 
 
-        shadowMe("org.lwjgl:lwjgl-jawt:3.3.1") {
+        shadowMe("org.lwjgl:lwjgl-jawt:3.2.2") {
             exclude group: "org.lwjgl", module: "lwjgl"
         }
         
