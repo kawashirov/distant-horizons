@@ -7,7 +7,7 @@ import com.seibel.lod.core.config.gui.OpenGLConfigScreen;
 import net.minecraft.client.gui.screens.Screen;
 
 public class GetConfigScreen {
-    public static type useScreen = type.Classic;
+    public static type useScreen = type.JavaFX;
     public static enum type {
         Classic,
         @Deprecated
