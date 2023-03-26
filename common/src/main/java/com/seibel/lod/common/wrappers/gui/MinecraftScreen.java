@@ -1,5 +1,6 @@
 package com.seibel.lod.common.wrappers.gui;
 
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.seibel.lod.core.config.gui.AbstractScreen;
 import net.minecraft.client.Minecraft;
@@ -40,9 +41,12 @@ public class MinecraftScreen {
 
         @Override
         protected void init() {
-//            super.init();
-            screen.width = this.width;
-            screen.height = this.height;
+            super.init(); // Init Minecraft's screen
+            Window mcWindow = this.minecraft.getWindow();
+            screen.width = mcWindow.getWidth();
+            screen.height = mcWindow.getHeight();
+            screen.scaledWidth = this.width;
+            screen.scaledHeight = this.height;
             screen.init(); // Init our own config screen
 
             this.list = new ConfigListWidget(this.minecraft, this.width, this.height, 0, this.height, 25); // Select the area to tint
@@ -65,20 +69,26 @@ public class MinecraftScreen {
 
         @Override
         public void resize(Minecraft mc, int width, int height) {
-            screen.width = this.width;
-            screen.height = this.height;
+            super.resize(mc, width, height); // Resize Minecraft's screen
+            Window mcWindow = this.minecraft.getWindow();
+            screen.width = mcWindow.getWidth();
+            screen.height = mcWindow.getHeight();
+            screen.scaledWidth = this.width;
+            screen.scaledHeight = this.height;
+            screen.onResize(); // Resize our screen
         }
 
         @Override
         public void tick() {
-            screen.tick();
-            if (screen.close)
+            super.tick(); // Tick Minecraft's screen
+            screen.tick(); // Tick our screen
+            if (screen.close) // If we decide to close the screen, then actually close the screen
                 onClose();
         }
 
         @Override
         public void onClose() {
-            screen.onClose();
+            screen.onClose(); // Close our screen
             Objects.requireNonNull(minecraft).setScreen(this.parent); // Goto the parent screen
         }
 
