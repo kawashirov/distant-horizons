@@ -188,8 +188,9 @@ subprojects { p ->
         shadowMe("org.openjfx:javafx-graphics:${rootProject.javafx_version}")
 
 
+        // Remember, for lwjgl dependancies that arent included in Minecraft, you need to also need to add it to the ShadowJar thing
         shadowMe("org.lwjgl:lwjgl-jawt:3.2.2") {
-            exclude group: "org.lwjgl", module: "lwjgl" // This module is imported by Minecraft
+            exclude group: "org.lwjgl", module: "lwjgl" // This module is imported by Minecraft so exclude it
         }
         
         
@@ -244,7 +245,8 @@ subprojects { p ->
         def librariesLocation = "distanthorizons.libraries"
 
         // LWJGL
-        relocate "org.lwjgl", "${librariesLocation}.lwjgl"
+        // Only ever shadow the dependencies we use otherwise some stuff would break when running on an external client
+        relocate "org.lwjgl.system.jawt", "${librariesLocation}.lwjgl.system.jawt"
 
         // Compression
         relocate "org.tukaani", "${librariesLocation}.tukaani"
@@ -385,7 +387,7 @@ allprojects { p ->
 
         dependencies { // All of these dependancies are in Vanilla Minecraft, but we need to depend on it as we arent importing Minecraft in the core
             // Imports most of lwjgl's libraries (well, only the ones that we need)
-            implementation platform("org.lwjgl:lwjgl-bom:${rootProject.lwjgl_version}")
+            implementation platform("org.lwjgl:lwjgl-bom:${rootProject.lwjgl_version}") // TODO: Use Minecraft's version for lwjgl_version (which changes each version) instead of a hard defined version for all versions
 
             implementation "org.lwjgl:lwjgl"
             implementation "org.lwjgl:lwjgl-assimp"
