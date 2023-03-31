@@ -10,9 +10,6 @@ plugins {
     // Manifold preprocessor
     id "systems.manifold.manifold-gradle-plugin" version "0.0.2-alpha"
 
-    // JavaFX library (useful for ui stuff)
-    id "org.openjfx.javafxplugin" version "0.0.13"
-
     // Provides mc libraries to core
 //    id "org.spongepowered.gradle.vanilla" version '0.2.1-SNAPSHOT' apply false
 }
@@ -100,7 +97,6 @@ subprojects { p ->
     // Apply plugins
     apply plugin: "java"
     apply plugin: "com.github.johnrengelman.shadow"
-    apply plugin: "org.openjfx.javafxplugin"
     if (isMinecraftSubProject)
         apply plugin: "systems.manifold.manifold-gradle-plugin"
     if (p == project(":core"))
@@ -139,11 +135,6 @@ subprojects { p ->
             mainClass.set("com.seibel.lod.core.jar.JarMain")
         }
     }
-    // Remember, to shadow it you need to add it in the dependency part
-    javafx {
-        version = "${rootProject.javafx_version}"
-        modules = ["javafx.swing", "javafx.controls", "javafx.graphics"]
-    }
 
     dependencies {
         //=====================//
@@ -156,8 +147,8 @@ subprojects { p ->
             annotationProcessor("systems.manifold:manifold-preprocessor:${rootProject.manifold_version}")
 
         // Log4j
-        implementation("org.apache.logging.log4j:log4j-api:${rootProject.log4j_version}")
-        implementation("org.apache.logging.log4j:log4j-core:${rootProject.log4j_version}")
+        shadowMe("org.apache.logging.log4j:log4j-api:${rootProject.log4j_version}")
+        shadowMe("org.apache.logging.log4j:log4j-core:${rootProject.log4j_version}")
 
         // JOML
         implementation("org.joml:joml:${rootProject.joml_version}")
@@ -174,18 +165,12 @@ subprojects { p ->
         shadowMe("com.electronwill.night-config:toml:${rootProject.nightconfig_version}")
         shadowMe("com.electronwill.night-config:json:${rootProject.nightconfig_version}")
 
+        // Theming
+        shadowMe("com.formdev:flatlaf:${rootProject.flatlaf_version}")
+
         // SVG
         shadowMe("com.formdev:svgSalamander:${rootProject.svgSalamander_version}")
-
-        // JavaFX/OpenJFX
-        // Remember, you also need to define jfx modules in its own jfx thing
-        // This part of the code is just to shadow the libraries
-        // FIXME: This doesnt work, find a workaround
-        shadowMe("org.openjfx:javafx:${rootProject.javafx_version}")
-        shadowMe("org.openjfx:javafx-base:${rootProject.javafx_version}")
-        shadowMe("org.openjfx:javafx-swing:${rootProject.javafx_version}")
-        shadowMe("org.openjfx:javafx-controls:${rootProject.javafx_version}")
-        shadowMe("org.openjfx:javafx-graphics:${rootProject.javafx_version}")
+        shadowMe("com.formdev:flatlaf-extras:${rootProject.flatlaf_version}")
 
 
         // Remember, for lwjgl dependancies that arent included in Minecraft, you need to also need to add it to the ShadowJar thing
@@ -253,6 +238,9 @@ subprojects { p ->
 
         // NightConfig (includes Toml & Json)
         relocate "com.electronwill.nightconfig", "${librariesLocation}.electronwill.nightconfig"
+
+        // Theming
+        relocate 'com.formdev.flatlaf', 'distanthorizons.libraries.formdev.flatlaf'
 
         // SVG
         relocate "com.kitfox.svg", "${librariesLocation}.kitfox.svg"
