@@ -33,7 +33,8 @@
   },
 
   "mixins": [
-    "DistantHorizons.mixins.json"
+    "DistantHorizons.fabricLike.mixins.json",
+    "DistantHorizons.fabric.mixins.json"
   ],
 
   "depends": {

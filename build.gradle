@@ -124,6 +124,15 @@ subprojects { p ->
             compileClasspath.extendsFrom common
             runtimeClasspath.extendsFrom common
             developmentForge.extendsFrom common
+
+            if (findProject(":fabricLike") && p != project(":fabricLike")) {
+                // Shadow fabricLike
+                fabricLike
+                shadowFabricLike
+                compileClasspath.extendsFrom fabricLike
+                runtimeClasspath.extendsFrom fabricLike
+                developmentForge.extendsFrom fabricLike
+            }
         }
     }
 
@@ -212,10 +221,14 @@ subprojects { p ->
         // Add common
         if (isMinecraftSubProject && p != project(":common")) {
             // Common
-//            implementation project(":common")
-
             common(project(path: ":common")) { transitive false }
             shadowCommon(project(path: ":common")) { transitive false }
+
+            // FabricLike
+            if (findProject(":fabricLike") && p != project(":fabricLike")) {
+                fabricLike(project(path: ":fabricLike")) { transitive false }
+                shadowFabricLike(project(path: ":fabricLike")) { transitive false }
+            }
         }
     }
 
@@ -224,8 +237,12 @@ subprojects { p ->
         configurations = [project.configurations.shadowMe]
         if (isMinecraftSubProject && p != project(":common")) {
             configurations.push(project.configurations.shadowCommon) // Shadow the common subproject
-
             relocate "com.seibel.lod.common", "loaderCommon.${p.name}.com.seibel.lod.common" // Move the loader files to a different location
+
+            if (findProject(":fabricLike") && p != project(":fabricLike")) {
+                configurations.push(project.configurations.shadowFabricLike) // Shadow the fabricLike subproject
+                relocate "com.seibel.lod.fabriclike", "loaderCommon.${p.name}.com.seibel.lod.fabriclike" // Move the loader files to a different location
+            }
         }
         def librariesLocation = "distanthorizons.libraries"
 

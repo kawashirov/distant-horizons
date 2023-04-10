@@ -1,12 +1,11 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.seibel.lod.fabric.mixins",
+  "package": "com.seibel.lod.fabriclike.mixins",
   "mixins": [
     "server.unsafe.MixinThreadingDetector",
     "server.MixinChunkGenerator",
-    "server.MixinChunkMap",
-    "server.MixinUtilBackgroundThread"
+    "server.MixinChunkMap"
   ],
   "client": [
     "client.MixinClientLevel",
@@ -18,11 +17,9 @@
     "client.MixinLightmap",
     "client.MixinOptionsScreen",
     "client.MixinMinecraft",
-    "client.MixinTextureUtil",
-    "mods.sodium.MixinSodiumChunkRenderer"
+    "client.MixinTextureUtil"
   ],
   "injectors": {
     "defaultRequire": 1
-  },
-  "plugin": "com.seibel.lod.fabric.mixins.FabricMixinPlugin"
+  }
 }

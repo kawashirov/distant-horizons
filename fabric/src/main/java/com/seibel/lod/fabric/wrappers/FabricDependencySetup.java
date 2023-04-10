@@ -22,6 +22,7 @@ package com.seibel.lod.fabric.wrappers;
 import com.seibel.lod.core.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.fabric.wrappers.modAccessor.ModChecker;
+import com.seibel.lod.fabriclike.wrappers.FabricLikeDependencySetup;
 
 /**
  * Binds all necessary dependencies, so we
@@ -35,12 +36,13 @@ import com.seibel.lod.fabric.wrappers.modAccessor.ModChecker;
  */
 public class FabricDependencySetup
 {
-	public static void createInitialBindings()
-	{
+	public static void createInitialBindings() {
 		SingletonInjector.INSTANCE.bind(IModChecker.class, ModChecker.INSTANCE);
+		FabricLikeDependencySetup.createInitialBindings();
 	}
 	
 	public static void runDelayedSetup() {
+		FabricLikeDependencySetup.runDelayedSetup();
 		SingletonInjector.INSTANCE.runDelayedSetup();
 	}
 }
