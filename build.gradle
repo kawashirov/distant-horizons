@@ -431,9 +431,21 @@ allprojects { p ->
         def compatible_forgemc_versions = "${compatible_minecraft_versions}".replaceAll("\"", "").replaceAll("]", ",)")
 //        println compatible_forgemc_versions
 
+        // Quilt's custom contributors system
+        // This has to be like
+        // "Person": "Developer", "Another person": "Developer"
+        def quilt_contributors = []
+        def mod_author_list = mod_authors.replaceAll("\"", "").replace("[", "").replace("]", "").split(",")
+        for (dev in mod_author_list) {
+            quilt_contributors.push("\"${dev.strip()}\": \"Developer\"")
+        }
+        quilt_contributors.reverse()
+//        println quilt_contributors.join(", ")
+
         def replaceProperties = [
                 version                      : mod_version,
                 mod_name                     : mod_readable_name,
+                group                        : maven_group,
                 authors                      : mod_authors,
                 description                  : mod_description,
                 homepage                     : mod_homepage,
@@ -443,7 +455,8 @@ allprojects { p ->
                 minecraft_version            : minecraft_version,
                 compatible_minecraft_versions: compatible_minecraft_versions,
                 compatible_forgemc_versions  : compatible_forgemc_versions,
-                java_version                 : java_version
+                java_version                 : java_version,
+                quilt_contributors           : "{"+quilt_contributors.join(", ")+"}"
         ]
         // The left side is what gets replaced in the mod info and the right side is where to get it from in the gradle.properties
 

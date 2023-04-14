@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.seibel.lod.quilt.mixins",
+  "mixins": [
+    "server.MixinUtilBackgroundThread"
+  ],
+  "client": [
+    "mods.sodium.MixinSodiumChunkRenderer"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "plugin": "com.seibel.lod.quilt.mixins.FabricMixinPlugin"
+}
