@@ -183,10 +183,12 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
         return ClientLevelWrapper.getWrapper(mc.level);
     }
 
+    /** Please move over to getInstallationDirectory() */
+    @Deprecated
     @Override
     public File getGameDirectory()
     {
-        return mc.gameDirectory;
+        return getInstallationDirectory();
     }
 
     @Override
