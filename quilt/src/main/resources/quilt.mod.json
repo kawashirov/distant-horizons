@@ -56,7 +56,7 @@
   },
   "access_widener": "lod.accesswidener",
 
-  "mixins": [
+  "mixin": [
     "DistantHorizons.fabricLike.mixins.json",
     "DistantHorizons.quilt.mixins.json"
   ],

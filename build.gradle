@@ -89,7 +89,7 @@ forgix {
 }
 
 subprojects { p ->
-    // Does the same as "p == project(":common") || p == project(":fabric") || p == project(":quilt")  || p == project(":forge")"
+    // Does the same as "p == project(":common") || p == project(":fabric") || p == project(":quilt")  || p == project(":forge") || p == project("WhateverWeAddLaterOn")"
     // Useful later on so we dont have duplicated code
     def isMinecraftSubProject = p != project(":core") && p != project(":api")
 
@@ -112,7 +112,7 @@ subprojects { p ->
 
     // set up custom configurations (configurations are a way to handle dependencies) 
     configurations {
-        // extends the shadowJar configuration 
+        // extends the shadowJar configuration
         shadowMe
         // have implemented dependencies automatically embedded in the final jar
         implementation.extendsFrom(shadowMe)
@@ -156,8 +156,9 @@ subprojects { p ->
             annotationProcessor("systems.manifold:manifold-preprocessor:${rootProject.manifold_version}")
 
         // Log4j
-        shadowMe("org.apache.logging.log4j:log4j-api:${rootProject.log4j_version}")
-        shadowMe("org.apache.logging.log4j:log4j-core:${rootProject.log4j_version}")
+        // TODO: Change to shadowMe later to work in the standalone jar
+        implementation("org.apache.logging.log4j:log4j-api:${rootProject.log4j_version}")
+        implementation("org.apache.logging.log4j:log4j-core:${rootProject.log4j_version}")
 
         // JOML
         implementation("org.joml:joml:${rootProject.joml_version}")
