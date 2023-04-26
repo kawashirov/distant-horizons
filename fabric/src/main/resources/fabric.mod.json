@@ -33,7 +33,7 @@
   },
 
   "mixins": [
-    "DistantHorizons.fabricLike.mixins.json",
+    "DistantHorizons.fabric.fabricLike.mixins.json",
     "DistantHorizons.fabric.mixins.json"
   ],
 

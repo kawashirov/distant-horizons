@@ -134,7 +134,8 @@ dependencies {
 
 processResources {
     dependsOn(copyCoreResources)
-    dependsOn(copyAccessWidener)
+    dependsOn(copyCommonLoaderResources)
+    dependsOn(deleteDuplicatedCommonLoaderResources)
 }
 
 //remapJar {
