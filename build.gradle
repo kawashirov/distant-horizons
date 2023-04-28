@@ -89,7 +89,7 @@ forgix {
 }
 
 subprojects { p ->
-    // Does the same as "p == project(":common") || p == project(":fabric") || p == project(":quilt")  || p == project(":forge")"
+    // Does the same as "p == project(":common") || p == project(":fabric") || p == project(":quilt")  || p == project(":forge") || p == project("WhateverWeAddLaterOn")"
     // Useful later on so we dont have duplicated code
     def isMinecraftSubProject = p != project(":core") && p != project(":api")
 
@@ -112,7 +112,7 @@ subprojects { p ->
 
     // set up custom configurations (configurations are a way to handle dependencies) 
     configurations {
-        // extends the shadowJar configuration 
+        // extends the shadowJar configuration
         shadowMe
         // have implemented dependencies automatically embedded in the final jar
         implementation.extendsFrom(shadowMe)
@@ -156,8 +156,9 @@ subprojects { p ->
             annotationProcessor("systems.manifold:manifold-preprocessor:${rootProject.manifold_version}")
 
         // Log4j
-        shadowMe("org.apache.logging.log4j:log4j-api:${rootProject.log4j_version}")
-        shadowMe("org.apache.logging.log4j:log4j-core:${rootProject.log4j_version}")
+        // TODO: Change to shadowMe later to work in the standalone jar
+        implementation("org.apache.logging.log4j:log4j-api:${rootProject.log4j_version}")
+        implementation("org.apache.logging.log4j:log4j-core:${rootProject.log4j_version}")
 
         // JOML
         implementation("org.joml:joml:${rootProject.joml_version}")
@@ -266,6 +267,77 @@ subprojects { p ->
     }
     // Using jar.finalizedBy(shadowJar) causes issues so we do this scuffed bypass
     jar.dependsOn(shadowJar)
+
+
+    // Put stuff from gradle.properties into the mod info
+    processResources {
+        def resourceTargets = [ // Location of where to inject the properties
+                                // Properties for each of the loaders
+                                "fabric.mod.json",
+                                "quilt.mod.json",
+                                "META-INF/mods.toml",
+
+                                // The mixins for each of the loaders
+                                "DistantHorizons."+ p.name +".fabricLike.mixins.json"
+        ]
+        def intoTargets = ["$buildDir/resources/main/"] // Location of the built resources folder
+
+        // Fix forge version numbering system as it is weird
+        // For whatever reason forge uses [1.18, 1.18.1, 1.18.2) instead of the standard ["1.18", "1.18.1", "1.18.2"] which make more sense
+        def compatible_forgemc_versions = "${compatible_minecraft_versions}".replaceAll("\"", "").replaceAll("]", ",)")
+//        println compatible_forgemc_versions
+
+        // Quilt's custom contributors system
+        // This has to be like
+        // "Person": "Developer", "Another person": "Developer"
+        def quilt_contributors = []
+        def mod_author_list = mod_authors.replaceAll("\"", "").replace("[", "").replace("]", "").split(",")
+        for (dev in mod_author_list) {
+            quilt_contributors.push("\"${dev.strip()}\": \"Developer\"")
+        }
+        quilt_contributors.reverse()
+//        println quilt_contributors.join(", ")
+
+        // TODOI: Find something we can use so we can basically re-map only when the jar is shadowed and relocated
+//        println p.tasks.findByName('shadowJar')
+
+
+        def replaceProperties = [
+                version                      : mod_version,
+                mod_name                     : mod_readable_name,
+                group                        : maven_group,
+                authors                      : mod_authors,
+                description                  : mod_description,
+                homepage                     : mod_homepage,
+                source                       : mod_source,
+                issues                       : mod_issues,
+                discord                      : mod_discord,
+                minecraft_version            : minecraft_version,
+                compatible_minecraft_versions: compatible_minecraft_versions,
+                compatible_forgemc_versions  : compatible_forgemc_versions,
+                java_version                 : java_version,
+                quilt_contributors           : "{"+quilt_contributors.join(", ")+"}"
+        ]
+        // The left side is what gets replaced in the mod info and the right side is where to get it from in the gradle.properties
+
+        inputs.properties replaceProperties
+        replaceProperties.put "project", project
+        filesMatching(resourceTargets) {
+            expand replaceProperties
+        }
+
+        intoTargets.each { target ->
+            if (file(target).exists()) {
+                copy {
+                    from(sourceSets.main.resources) {
+                        include resourceTargets
+                        expand replaceProperties
+                    }
+                    into target
+                }
+            }
+        }
+    }
 
 
     // Adds the standalone jar's entrypoint
@@ -421,73 +493,33 @@ allprojects { p ->
     }
 
 
-    // Put stuff from gradle.properties into the mod info
-    processResources {
-        def resourceTargets = ["fabric.mod.json", "quilt.mod.json", "META-INF/mods.toml"] // Location of where to inject the properties
-        def intoTargets = ["$buildDir/resources/main/"] // Location of the built resources folder
-
-        // Fix forge version numbering system as it is weird
-        // For whatever reason forge uses [1.18, 1.18.1, 1.18.2) instead of the standard ["1.18", "1.18.1", "1.18.2"] which make more sense
-        def compatible_forgemc_versions = "${compatible_minecraft_versions}".replaceAll("\"", "").replaceAll("]", ",)")
-//        println compatible_forgemc_versions
-
-        // Quilt's custom contributors system
-        // This has to be like
-        // "Person": "Developer", "Another person": "Developer"
-        def quilt_contributors = []
-        def mod_author_list = mod_authors.replaceAll("\"", "").replace("[", "").replace("]", "").split(",")
-        for (dev in mod_author_list) {
-            quilt_contributors.push("\"${dev.strip()}\": \"Developer\"")
-        }
-        quilt_contributors.reverse()
-//        println quilt_contributors.join(", ")
-
-        def replaceProperties = [
-                version                      : mod_version,
-                mod_name                     : mod_readable_name,
-                group                        : maven_group,
-                authors                      : mod_authors,
-                description                  : mod_description,
-                homepage                     : mod_homepage,
-                source                       : mod_source,
-                issues                       : mod_issues,
-                discord                      : mod_discord,
-                minecraft_version            : minecraft_version,
-                compatible_minecraft_versions: compatible_minecraft_versions,
-                compatible_forgemc_versions  : compatible_forgemc_versions,
-                java_version                 : java_version,
-                quilt_contributors           : "{"+quilt_contributors.join(", ")+"}"
-        ]
-        // The left side is what gets replaced in the mod info and the right side is where to get it from in the gradle.properties
-
-        inputs.properties replaceProperties
-        replaceProperties.put "project", project
-        filesMatching(resourceTargets) {
-            expand replaceProperties
-        }
-
-        intoTargets.each { target ->
-            if (file(target).exists()) {
-                copy {
-                    from(sourceSets.main.resources) {
-                        include resourceTargets
-                        expand replaceProperties
-                    }
-                    into target
-                }
-            }
-        }
-    }
-
-    task copyAccessWidener(type: Copy) {
+    task copyCommonLoaderResources(type: Copy) {
         from project(":common").file("src/main/resources/${accessWidenerVersion}.lod.accesswidener")
         into(file(p.file("build/resources/main")))
         rename "${accessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
+
+        // Move the fabricLike mixin to its different places for each subproject
+        if (findProject(":fabricLike")) {
+            from project(":fabricLike").file("src/main/resources/DistantHorizons.fabricLike.mixins.json")
+            into(file(p.file("build/resources/main")))
+            rename "DistantHorizons.fabricLike.mixins.json", "DistantHorizons." + p.name + ".fabricLike.mixins.json"
+        }
     }
 
     task copyCoreResources(type: Copy) {
         from fileTree(project(":core").file("src/main/resources"))
         into p.file("build/resources/main")
+    }
+
+    // TODO: This method doesnt seem to actually remove it from the jar, probably called at incorrect spots
+    task deleteDuplicatedCommonLoaderResources(type: Delete) {
+        // Delete the duplicated fabricLike.mixins.json
+        delete p.file("build/resources/main/DistantHorizons.fabricLike.mixins.json")
+
+        // Delete all the duplicated accesswideners
+        delete fileTree(p.file("build/resources/main")) {
+            include "*.lod.accesswidener"
+        }
     }
 
     tasks.withType(JavaCompile) {

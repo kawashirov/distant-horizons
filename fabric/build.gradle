@@ -115,12 +115,14 @@ task deleteResources(type: Delete) {
 
 processResources {
     dependsOn(copyCoreResources)
-    dependsOn(copyAccessWidener)
+    dependsOn(copyCommonLoaderResources)
+    dependsOn(deleteDuplicatedCommonLoaderResources)
 }
 
 runClient {
     dependsOn(copyCoreResources)
-    dependsOn(copyAccessWidener)
+    dependsOn(copyCommonLoaderResources)
+    dependsOn(deleteDuplicatedCommonLoaderResources)
     jvmArgs "-XX:-OmitStackTraceInFastThrow"
     finalizedBy(deleteResources)
 }

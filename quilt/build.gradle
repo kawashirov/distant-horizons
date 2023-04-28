@@ -1,5 +1,5 @@
 plugins {
-    id "org.quiltmc.loom" version "0.12.+"
+    id "org.quiltmc.loom" version "1.1.+"
 }
 
 loom {
@@ -54,7 +54,7 @@ dependencies {
 
     // Quilted Fabric API
     modImplementation "org.quiltmc.quilted-fabric-api:quilted-fabric-api:${rootProject.quilted_api_version}" // For now until quilt has a better way of doing this, just use quilt's qfapi
-//    addModJar(fabricApi.module("fabric-events-interaction-v0", rootProject.quilted_api_version))
+//    addModJar(fabricApi.module("fabric-events-interaction-v0" , rootProject.quilted_api_version))
 //    addModJar(fabricApi.module("fabric-lifecycle-events-v1", rootProject.quilted_api_version))
 //    addModJar(fabricApi.module("fabric-key-binding-api-v1", rootProject.quilted_api_version))
 //    addModJar(fabricApi.module("fabric-resource-loader-v0", rootProject.quilted_api_version))
@@ -92,12 +92,14 @@ task deleteResources(type: Delete) {
 
 processResources {
     dependsOn(copyCoreResources)
-    dependsOn(copyAccessWidener)
+    dependsOn(copyCommonLoaderResources)
+    dependsOn(deleteDuplicatedCommonLoaderResources)
 }
 
 runClient {
     dependsOn(copyCoreResources)
-    dependsOn(copyAccessWidener)
+    dependsOn(copyCommonLoaderResources)
+    dependsOn(deleteDuplicatedCommonLoaderResources)
     jvmArgs "-XX:-OmitStackTraceInFastThrow"
     finalizedBy(deleteResources)
 }
