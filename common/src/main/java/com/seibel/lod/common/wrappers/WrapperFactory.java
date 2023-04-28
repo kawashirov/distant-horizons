@@ -29,7 +29,7 @@ import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.block.IBlockStateWrapper;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.world.IBiomeWrapper;
-import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper;
+import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvironmentWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -49,7 +49,7 @@ public class WrapperFactory implements IWrapperFactory
 	
 	
 	@Override
-	public AbstractBatchGenerationEnvionmentWrapper createBatchGenerator(IDhLevel targetLevel)
+	public AbstractBatchGenerationEnvironmentWrapper createBatchGenerator(IDhLevel targetLevel)
 	{
 		if (targetLevel instanceof IDhServerLevel)
 		{

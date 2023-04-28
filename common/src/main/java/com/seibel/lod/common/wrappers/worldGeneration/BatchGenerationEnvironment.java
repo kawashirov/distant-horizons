@@ -33,7 +33,7 @@ import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.util.gridList.ArrayGridList;
 import com.seibel.lod.core.util.objects.LodThreadFactory;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
-import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper;
+import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvironmentWrapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,7 +88,7 @@ Carver Step:             0.000009923s
 Feature Step:            0.389072425s
 Lod Generation:          0.269023348s
 */
-public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnvionmentWrapper
+public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnvironmentWrapper
 {
 	public static final ConfigBasedSpamLogger PREF_LOGGER =
 			new ConfigBasedSpamLogger(LogManager.getLogger("LodWorldGen"),
@@ -451,7 +451,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	}
 	
 	public void generateDirect(GenerationEvent genEvent, ArrayGridList<ChunkAccess> chunksToGenerate,
-							   EGenerationStep step, LightedWorldGenRegion region)
+								EDhApiWorldGenerationStep step, LightedWorldGenRegion region)
 	{
 		try
 		{
@@ -466,7 +466,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				}
 			});
 			
-			if (step == EGenerationStep.Empty)
+			if (step == EDhApiWorldGenerationStep.EMPTY)
 			{
 				return;
 			}
@@ -474,7 +474,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			genEvent.timer.nextEvent("structStart");
 			stepStructureStart.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
-			if (step == EGenerationStep.StructureStart)
+			if (step == EDhApiWorldGenerationStep.STRUCTURE_START)
 			{
 				return;
 			}
@@ -482,7 +482,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			genEvent.timer.nextEvent("structRef");
 			stepStructureReference.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
-			if (step == EGenerationStep.StructureReference)
+			if (step == EDhApiWorldGenerationStep.STRUCTURE_REFERENCE)
 			{
 				return;
 			}
@@ -490,7 +490,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			genEvent.timer.nextEvent("biome");
 			stepBiomes.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
-			if (step == EGenerationStep.Biomes)
+			if (step == EDhApiWorldGenerationStep.BIOMES)
 			{
 				return;
 			}
@@ -498,7 +498,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			genEvent.timer.nextEvent("noise");
 			stepNoise.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
-			if (step == EGenerationStep.Noise)
+			if (step == EDhApiWorldGenerationStep.NOISE)
 			{
 				return;
 			}
@@ -506,13 +506,13 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			genEvent.timer.nextEvent("surface");
 			stepSurface.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
-			if (step == EGenerationStep.Surface)
+			if (step == EDhApiWorldGenerationStep.SURFACE)
 			{
 				return;
 			}
 			
 			genEvent.timer.nextEvent("carver");
-			if (step == EGenerationStep.Carvers)
+			if (step == EDhApiWorldGenerationStep.CARVERS)
 			{
 				return;
 			}
@@ -592,7 +592,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	}
 	
 	@Override
-	public CompletableFuture<Void> generateChunks(int minX, int minZ, int genSize, EGenerationStep targetStep, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
+	public CompletableFuture<Void> generateChunks(int minX, int minZ, int genSize, EDhApiWorldGenerationStep targetStep, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
 	{
 		//System.out.println("GenerationEvent: "+genSize+"@"+minX+","+minZ+" "+targetStep);
 		

@@ -24,6 +24,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import com.seibel.lod.api.enums.worldGeneration.EDhApiWorldGenerationStep;
 import com.seibel.lod.core.util.objects.UncheckedInterruptedException;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.api.enums.config.ELightGenerationMode;
@@ -31,7 +32,6 @@ import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.pos.DhChunkPos;
 import com.seibel.lod.core.util.objects.EventTimer;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
-import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvionmentWrapper.EGenerationStep;
 
 import org.apache.logging.log4j.Logger;
 
@@ -44,7 +44,7 @@ public final class GenerationEvent
 	final ThreadedParameters threadedParam;
 	final DhChunkPos minPos;
 	final int size;
-	final EGenerationStep targetGenerationStep;
+	final EDhApiWorldGenerationStep targetGenerationStep;
 	final ELightGenerationMode lightMode;
 	final double runTimeRatio;
 	EventTimer timer = null;
@@ -56,7 +56,7 @@ public final class GenerationEvent
 	
 	
 	public GenerationEvent(DhChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
-			EGenerationStep targetGenerationStep, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
+							EDhApiWorldGenerationStep targetGenerationStep, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
 	{
 		this.inQueueTime = System.nanoTime();
 		this.id = generationFutureDebugIDs++;
@@ -72,7 +72,7 @@ public final class GenerationEvent
 	
 	
 	public static GenerationEvent startEvent(DhChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
-			EGenerationStep target, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
+											EDhApiWorldGenerationStep target, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
 	{
 		if (size % 2 == 0)
 		{
