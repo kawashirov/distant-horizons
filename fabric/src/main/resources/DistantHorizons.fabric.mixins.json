@@ -3,9 +3,22 @@
   "minVersion": "0.8",
   "package": "com.seibel.lod.fabric.mixins",
   "mixins": [
+    "server.unsafe.MixinThreadingDetector",
+    "server.MixinChunkGenerator",
+    "server.MixinChunkMap",
     "server.MixinUtilBackgroundThread"
   ],
   "client": [
+    "client.MixinClientLevel",
+    "client.MixinClientPacketListener",
+    "client.MixinDebugScreenOverlay",
+    "client.MixinFogRenderer",
+    "client.MixinGameRenderer",
+    "client.MixinLevelRenderer",
+    "client.MixinLightmap",
+    "client.MixinOptionsScreen",
+    "client.MixinMinecraft",
+    "client.MixinTextureUtil",
     "mods.sodium.MixinSodiumChunkRenderer"
   ],
   "injectors": {

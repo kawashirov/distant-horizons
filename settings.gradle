@@ -75,8 +75,8 @@ project(":api").projectDir = file('coreSubProjects/api')
 // Minecraft dependent sub-projects
 include("common")
 // Enables or disables the subprojects depending on whats in the version.properties
-if (gradle.builds_for.contains("fabric") || gradle.builds_for.contains("quilt"))
-    include("fabricLike")
+//if (gradle.builds_for.contains("fabric") || gradle.builds_for.contains("quilt"))
+//    include("fabricLike")
 if (gradle.builds_for.contains("fabric"))
     include("fabric")
 if (gradle.builds_for.contains("quilt"))

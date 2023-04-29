@@ -136,9 +136,9 @@ sourcesJar {
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
 
-    def fabricLikeSources = project(":fabricLike").sourcesJar
-    dependsOn fabricLikeSources
-    from fabricLikeSources.archiveFile.map { zipTree(it) }
+//    def fabricLikeSources = project(":fabricLike").sourcesJar
+//    dependsOn fabricLikeSources
+//    from fabricLikeSources.archiveFile.map { zipTree(it) }
 }
 
 //components.java {
