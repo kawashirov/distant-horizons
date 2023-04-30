@@ -108,9 +108,9 @@ subprojects { p ->
 //    apply plugin: "org.spongepowered.gradle.vanilla" // Provides minecraft libraries
 
     // Apply loader plugins
-    if (p == project(":forge")) {
+    if (findProject(":forge") && p == project(":forge")) {
         apply plugin: "dev.architectury.loom"
-    } else if (p == project(":fabric")) {
+    } else if (findProject(":fabric") && p == project(":fabric")) {
         apply plugin: "fabric-loom"
     }
 
@@ -128,6 +128,10 @@ subprojects { p ->
         // have implemented dependencies automatically embedded in the final jar
         implementation.extendsFrom(shadowMe)
 
+        // Configuration fpr core & api
+        coreProjects
+        shadowMe.extendsFrom coreProjects
+
         if (isMinecraftSubProject && p != project(":common")) {
             // Shadow common
             common
@@ -136,6 +140,7 @@ subprojects { p ->
             runtimeClasspath.extendsFrom common
             developmentForge.extendsFrom common
             forgeRuntimeLibrary.extendsFrom common
+            forgeRuntimeLibrary.extendsFrom coreProjects
 
             if (findProject(":fabricLike") && p != project(":fabricLike")) {
                 // Shadow fabricLike
@@ -209,7 +214,7 @@ subprojects { p ->
 
         // Add core
         if (isMinecraftSubProject) {
-            shadowMe(project(":core")) {
+            coreProjects(project(":core")) {
                 // Remove Junit test libraries
                 exclude group: "org.junit.jupiter", module: "junit-jupiter"
                 exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
@@ -221,7 +226,7 @@ subprojects { p ->
 
         // Add the api
         if (p != project(":api")) {
-            shadowMe(project(":api")) {
+            coreProjects(project(":api")) {
                 // Remove Junit test libraries
                 exclude group: "org.junit.jupiter", module: "junit-jupiter"
                 exclude group: "org.junit.jupiter", module: "junit-jupiter-engine"
