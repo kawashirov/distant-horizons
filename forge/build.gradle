@@ -14,8 +14,11 @@ loom {
 
     forge {
         convertAccessWideners = true
-        mixinConfigs("DistantHorizons.mixins.json")
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
+
+        mixinConfigs = [
+                "DistantHorizons.mixins.json"
+        ]
     }
 
     // "runs" isn't required, but when we do need it then it can be useful
@@ -41,6 +44,7 @@ remapJar {
     dependsOn shadowJar
     classifier null
 }
+
 
 def addMod(path, enabled) {
     if (enabled == "2")
