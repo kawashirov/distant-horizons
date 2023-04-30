@@ -15,7 +15,6 @@ plugins {
 
     // Loom (provides stuff to add mod loaders to minecraft)
     id "dev.architectury.loom" version "1.1.+" apply false
-    id "fabric-loom" version "1.1.+" apply false
 }
 
 /**
@@ -110,8 +109,6 @@ subprojects { p ->
     // Apply loader plugins
     if (findProject(":forge") && p == project(":forge")) {
         apply plugin: "dev.architectury.loom"
-    } else if (findProject(":fabric") && p == project(":fabric")) {
-        apply plugin: "fabric-loom"
     }
 
 
