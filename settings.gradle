@@ -9,6 +9,10 @@ pluginManagement {
             url "https://maven.minecraftforge.net/"
         }
         maven {
+            name "Architectury (Better Forge because regular Forge hates us)"
+            url "https://maven.architectury.dev/"
+        }
+        maven {
             name "Quilt"
             url "https://maven.quiltmc.org/repository/release"
         }
@@ -75,14 +79,14 @@ project(":api").projectDir = file('coreSubProjects/api')
 // Minecraft dependent sub-projects
 include("common")
 // Enables or disables the subprojects depending on whats in the version.properties
+if (gradle.builds_for.contains("forge"))
+    include("forge")
 //if (gradle.builds_for.contains("fabric") || gradle.builds_for.contains("quilt"))
 //    include("fabricLike")
 if (gradle.builds_for.contains("fabric"))
     include("fabric")
 if (gradle.builds_for.contains("quilt"))
     include("quilt") // Just put this here for once we need it ;)
-//if (gradle.builds_for.contains("forge"))
-//    include("forge") // FIXME: Find some time to fix forge
 
 
 rootProject.name = "DistantHorizons"

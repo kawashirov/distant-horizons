@@ -1,7 +1,3 @@
-plugins {
-    id "fabric-loom" version "1.1-SNAPSHOT"
-}
-
 loom {
     accessWidenerPath = project(":common").file("src/main/resources/${accessWidenerVersion}.lod.accesswidener")
 
@@ -23,8 +19,9 @@ loom {
 }
 
 remapJar {
-    // Set the input jar for the task, also valid for remapSourcesJar
-    inputFile = project(":fabric").file("build/libs/DistantHorizons-fabric-${rootProject.versionStr}-all.jar")
+    inputFile = shadowJar.archiveFile
+    dependsOn shadowJar
+    classifier null
 }
 
 configurations {
@@ -146,17 +143,3 @@ sourcesJar {
 //        skip()
 //    }
 //}
-
-publishing {
-    publications {
-        mavenFabric(MavenPublication) {
-            artifactId = rootProject.mod_name + "-" + project.name
-            from components.java
-        }
-    }
-
-    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
-    repositories {
-        // Add repositories to publish to here.
-    }
-}

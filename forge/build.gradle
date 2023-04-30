@@ -1,87 +1,4 @@
-buildscript {
-    repositories {
-        maven { url = "https://maven.minecraftforge.net" }
-        maven { url = "https://maven.parchmentmc.org" }
-        maven { url = "https://repo.spongepowered.org/repository/maven-public/" }
-        mavenCentral()
-    }
-    dependencies {
-//        classpath group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "5.1.61", changing: true
-        classpath group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "5.1.67", changing: true
-        classpath "org.parchmentmc:librarian:1.+"
-        classpath "org.spongepowered:mixingradle:0.7-SNAPSHOT"
-    }
-}
-apply plugin: "net.minecraftforge.gradle"
-apply plugin: "org.parchmentmc.librarian.forgegradle"
-apply plugin: "org.spongepowered.mixin"
-
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-mixin {
-    add sourceSets.main, "DistantHorizons.refmap.json" // TODO: Create an accessWidener to refmap
-
-    config "DistantHorizons.mixins.json"
-}
-
-minecraft {
-//    mappings channel: "official", version: minecraft_version // Vanilla mappings
-    mappings channel: "parchment", version: "${parchment_version}-${minecraft_version}" // Parchment mappings
-
-    accessTransformer = project(":forge").file("src/main/resources/META-INF/accesstransformer.cfg") // FIXME: Find a libary to use fabric's accessWidener instead of forge's own accesstransformer format
-
-    runs {
-        client {
-            workingDirectory project.file("run")
-            ideaModule "${rootProject.name}.${project.name}.main"
-            taskName "runClient"
-            args "-mixins.config=DistantHorizons.mixins.json"
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            mods {
-                modClientRun {
-                    source sourceSets.main
-                    source project(":common").sourceSets.main
-                    source project(":core").sourceSets.main
-                    source project(":api").sourceSets.main
-                }
-            }
-        }
-
-        // TODO: Do this once client works
-//        server {
-//            workingDirectory project.file("run")
-//            ideaModule "${rootProject.name}.${project.name}.main"
-//            taskName "runServer"
-//            args "-mixins.config=DistantHorizons.mixins.json"
-//        }
-
-        data {
-            workingDirectory project.file("run")
-            ideaModule "${rootProject.name}.${project.name}.main"
-            args '--mod', "lod", '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-            taskName 'Data'
-            args "-mixins.config=DistantHorizons.mixins.json" // To add more mixins, you can just add a comma for another arg
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            mods {
-                modClientRun {
-                    source sourceSets.main
-                    source project(":common").sourceSets.main
-                    source project(":core").sourceSets.main
-                    source project(":api").sourceSets.main
-                }
-            }
-        }
-    }
-}
-// TODO: Check if the next 7 lines are necessary
-//sourceSets.main.resources.srcDir "src/generated/resources"
-//minecraft.runs.all {
-//    lazyToken('minecraft_classpath') {
-//        configurations.library.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
-//        configurations.runtimeLibrary.copyRecursive().resolve().collect { it.absolutePath }.join(File.pathSeparator)
-//    }
-//}
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
 
 
 //loom {
@@ -92,17 +9,38 @@ minecraft {
 //    }
 //}
 
+loom {
+    accessWidenerPath = project(":common").file("src/main/resources/${accessWidenerVersion}.lod.accesswidener")
 
-//loom {
-//    accessWidenerPath = project(":common").loom.accessWidenerPath
-//
-//    forge {
-//        convertAccessWideners = true
-//        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
-//    }
-//}
+    forge {
+        convertAccessWideners = true
+        mixinConfigs("DistantHorizons.mixins.json")
+        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
+    }
 
+    // "runs" isn't required, but when we do need it then it can be useful
+    runs {
+        client {
+            client()
+            setConfigName("Forge Client")
+            ideConfigGenerated(true)
+            runDir("run")
+            vmArg("-XX:-OmitStackTraceInFastThrow")
+        }
+        server {
+            server()
+            setConfigName("Forge Server")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+    }
+}
 
+remapJar {
+    inputFile = shadowJar.archiveFile
+    dependsOn shadowJar
+    classifier null
+}
 
 def addMod(path, enabled) {
     if (enabled == "2")
@@ -111,8 +49,16 @@ def addMod(path, enabled) {
         dependencies { modCompileOnly(path) }
 }
 dependencies {
-    // Forge loader
-    minecraft "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
+    minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+    mappings loom.layered() {
+        // Mojmap mappings
+        officialMojangMappings()
+        // Parchment mappings (it adds parameter mappings & javadoc)
+        parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+    }
+
+    // Forge
+    forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${project.forge_version}"
 
     // Architectury API
 //    if (minecraft_version == "1.16.5") {
@@ -132,17 +78,24 @@ dependencies {
 //    }
 }
 
-processResources {
+task deleteResources(type: Delete) {
+    delete file("build/resources/main")
+}
+
+tasks.register('copyAllResources') {
     dependsOn(copyCoreResources)
     dependsOn(copyCommonLoaderResources)
     dependsOn(deleteDuplicatedCommonLoaderResources)
 }
 
-//remapJar {
-//    input.set shadowJar.archiveFile
-//    dependsOn shadowJar
-//    classifier null
-//}
+processResources {
+    dependsOn(tasks.named('copyAllResources'))
+}
+
+tasks.named('runClient') {
+    dependsOn(tasks.named('copyAllResources'))
+    finalizedBy(deleteResources)
+}
 
 
 sourcesJar {
