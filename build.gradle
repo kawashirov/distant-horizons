@@ -13,7 +13,7 @@ plugins {
     // Provides mc libraries to core
 //    id "org.spongepowered.gradle.vanilla" version '0.2.1-SNAPSHOT' apply false
 
-    // Loom (provides stuff to add mod loaders to minecraft)
+    // Architectury is used here only as a replacement for forge's own loom
     id "dev.architectury.loom" version "1.1.+" apply false
 }
 
@@ -106,10 +106,10 @@ subprojects { p ->
         apply plugin: "application"
 //    apply plugin: "org.spongepowered.gradle.vanilla" // Provides minecraft libraries
 
-    // Apply loader plugins
-    if (findProject(":forge") && p == project(":forge")) {
+    // Apply forge's loom
+    if (findProject(":forge") && p == project(":forge"))
         apply plugin: "dev.architectury.loom"
-    }
+
 
 
     // Set the manifold version (may not be required tough)
