@@ -25,7 +25,7 @@ import com.seibel.lod.common.wrappers.McObjectConverter;
 import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.api.internal.ClientApi;
-import com.seibel.lod.core.util.math.Mat4f;
+import com.seibel.lod.coreapi.util.math.Mat4f;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;

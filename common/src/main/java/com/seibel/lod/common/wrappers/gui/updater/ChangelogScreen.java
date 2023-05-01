@@ -1,33 +1,20 @@
 package com.seibel.lod.common.wrappers.gui.updater;
 
-import com.google.common.collect.Lists;
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.seibel.lod.common.wrappers.gui.ClassicConfigGUI;
-import com.seibel.lod.core.ModInfo;
-import com.seibel.lod.core.config.Config;
-import com.seibel.lod.core.jar.JarUtils;
+import com.seibel.lod.coreapi.ModInfo;
 import com.seibel.lod.core.jar.installer.MarkdownFormatter;
 import com.seibel.lod.core.jar.installer.ModrinthGetter;
-import com.seibel.lod.core.jar.updater.SelfUpdater;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.StringSplitter;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
-import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.FormattedText;
-import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FormattedCharSequence;
 
 import java.util.*;
 

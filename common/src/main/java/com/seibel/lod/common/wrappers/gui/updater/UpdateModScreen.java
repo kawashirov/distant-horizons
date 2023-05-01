@@ -3,7 +3,7 @@ package com.seibel.lod.common.wrappers.gui.updater;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.seibel.lod.common.wrappers.gui.TexturedButtonWidget;
-import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.coreapi.ModInfo;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.jar.JarUtils;
 import com.seibel.lod.core.jar.installer.ModrinthGetter;

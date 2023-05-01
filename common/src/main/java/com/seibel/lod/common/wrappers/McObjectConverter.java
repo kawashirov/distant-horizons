@@ -27,7 +27,7 @@ import com.mojang.math.Matrix4f;
 import com.seibel.lod.core.enums.ELodDirection;
 import com.seibel.lod.core.pos.DhBlockPos;
 import com.seibel.lod.core.pos.DhChunkPos;
-import com.seibel.lod.core.util.math.Mat4f;
+import com.seibel.lod.coreapi.util.math.Mat4f;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

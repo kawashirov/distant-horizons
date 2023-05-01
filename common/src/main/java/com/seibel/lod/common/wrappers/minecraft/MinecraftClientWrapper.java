@@ -26,7 +26,7 @@ import java.util.ArrayList;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.seibel.lod.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
-import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.coreapi.ModInfo;
 import com.seibel.lod.core.enums.ELodDirection;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
