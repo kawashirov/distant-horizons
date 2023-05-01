@@ -9,7 +9,7 @@ pluginManagement {
             url "https://maven.minecraftforge.net/"
         }
         maven {
-            name "Architectury (Better Forge because regular Forge hates us)"
+            name "Architectury (Better Forge because regular Forge is annoying)"
             url "https://maven.architectury.dev/"
         }
         maven {
