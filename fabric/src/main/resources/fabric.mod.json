@@ -5,7 +5,7 @@
 
   "name": "${mod_name}",
   "description": "${description}",
-  "authors": $authors,
+  "authors": ["authors"],
 
   "contact": {
     "homepage": "${homepage}",
