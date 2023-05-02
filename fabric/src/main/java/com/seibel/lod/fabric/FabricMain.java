@@ -29,10 +29,7 @@ import com.seibel.lod.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.lod.core.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.*;
-import com.seibel.lod.fabric.wrappers.modAccessor.BCLibAccessor;
-import com.seibel.lod.fabric.wrappers.modAccessor.OptifineAccessor;
-import com.seibel.lod.fabric.wrappers.modAccessor.SodiumAccessor;
-import com.seibel.lod.fabric.wrappers.modAccessor.StarlightAccessor;
+import com.seibel.lod.fabric.wrappers.modAccessor.*;
 import com.seibel.lod.fabric.wrappers.FabricDependencySetup;
 
 import org.apache.logging.log4j.Logger;
@@ -73,6 +70,9 @@ public class FabricMain
 
 		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("sodium")) {
 			ModAccessorInjector.INSTANCE.bind(ISodiumAccessor.class, new SodiumAccessor());
+		}
+		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("imm_ptl_core")) {
+			ModAccessorInjector.INSTANCE.bind(IImmersivePortalsAccessor.class, new ImmersivePortalsAccessor());
 		}
 		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("starlight")) {
 			ModAccessorInjector.INSTANCE.bind(IStarlightAccessor.class, new StarlightAccessor());

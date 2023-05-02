@@ -93,20 +93,23 @@ dependencies {
     addMod("io.vram:canvas-fabric-${project.canvas_version}", rootProject.enable_canvas)
 
     // Immersive Portals
-    /*
-    modImplementation("com.github.qouteall.ImmersivePortalsMod:build:${rootProject.immersive_portals_version}") {
-        exclude(group: "net.fabricmc.fabric-api")
-        transitive(false)
+    if (rootProject.enable_immersive_portals == "2") {
+        modImplementation ("com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:${project.immersive_portals_version}"){
+            exclude(group: "net.fabricmc.fabric-api")
+            transitive(false)
+        }
+        modImplementation ("com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:${project.immersive_portals_version}"){
+            exclude(group: "net.fabricmc.fabric-api")
+            transitive(false)
+        }
+        modImplementation ("com.github.iPortalTeam.ImmersivePortalsMod:build:${project.immersive_portals_version}"){
+            exclude(group: "net.fabricmc.fabric-api")
+            transitive(false)
+        }
+        modImplementation("net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}")
+        api("com.github.LlamaLad7:MixinExtras:0.2.0-beta.4")
+        annotationProcessor("com.github.LlamaLad7:MixinExtras:0.2.0-beta.4")
     }
-    modImplementation("com.github.qouteall.ImmersivePortalsMod:imm_ptl_core:${rootProject.immersive_portals_version}") {
-        exclude(group: "net.fabricmc.fabric-api")
-        transitive(false)
-    }
-    modImplementation("com.github.qouteall.ImmersivePortalsMod:q_misc_util:${rootProject.immersive_portals_version}") {
-        exclude(group: "net.fabricmc.fabric-api")
-        transitive(false)
-    }
-     */
 }
 
 

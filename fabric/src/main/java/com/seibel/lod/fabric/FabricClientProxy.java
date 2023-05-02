@@ -29,7 +29,9 @@ import com.seibel.lod.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.lod.core.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
+import com.seibel.lod.core.wrapperInterfaces.modAccessor.IImmersivePortalsAccessor;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
+import com.seibel.lod.fabric.wrappers.modAccessor.ImmersivePortalsAccessor;
 import com.seibel.lod.fabric.wrappers.modAccessor.SodiumAccessor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -170,9 +172,10 @@ public class FabricClientProxy
 		
 		// RendererStartupEvent - Done in MixinGameRenderer
 		// RendererShutdownEvent - Done in MixinGameRenderer
-		
+
 		SodiumAccessor sodiumAccessor = (SodiumAccessor) ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class);
-		
+		ImmersivePortalsAccessor immersiveAccessor = (ImmersivePortalsAccessor) ModAccessorInjector.INSTANCE.get(IImmersivePortalsAccessor.class);
+
 		// ClientRenderLevelTerrainEvent
 		WorldRenderEvents.AFTER_SETUP.register((renderContext) ->
 		{
@@ -189,6 +192,11 @@ public class FabricClientProxy
 						McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
 						McObjectConverter.Convert(renderContext.projectionMatrix()),
 						renderContext.tickDelta());
+			}
+
+			if (immersiveAccessor != null)
+			{
+				immersiveAccessor.partialTicks = renderContext.tickDelta();
 			}
 		});
 

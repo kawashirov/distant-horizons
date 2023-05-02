@@ -19,7 +19,8 @@
     "client.MixinOptionsScreen",
     "client.MixinMinecraft",
     "client.MixinTextureUtil",
-    "mods.sodium.MixinSodiumChunkRenderer"
+    "mods.sodium.MixinSodiumChunkRenderer",
+    "mods.imm_ptl_core.MixinImmersivePortalsGameRenderer"
   ],
   "injectors": {
     "defaultRequire": 1
