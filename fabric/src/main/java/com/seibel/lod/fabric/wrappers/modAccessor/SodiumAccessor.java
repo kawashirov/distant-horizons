@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 import com.seibel.lod.core.pos.DhChunkPos;
 import com.seibel.lod.core.dependencyInjection.SingletonInjector;
-import com.seibel.lod.core.util.math.Mat4f;
+import com.seibel.lod.coreapi.util.math.Mat4f;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.ISodiumAccessor;

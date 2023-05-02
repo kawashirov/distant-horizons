@@ -34,13 +34,12 @@ import com.seibel.lod.common.wrappers.misc.LightMapWrapper;
 import com.seibel.lod.core.dependencyInjection.ModAccessorInjector;
 
 import com.seibel.lod.core.logging.DhLoggerBuilder;
-import com.seibel.lod.core.render.glObject.GLProxy;
 import com.seibel.lod.core.wrapperInterfaces.misc.ILightMapWrapper;
 
 import com.mojang.math.Vector3f;
-import com.seibel.lod.core.util.math.Mat4f;
-import com.seibel.lod.core.util.math.Vec3d;
-import com.seibel.lod.core.util.math.Vec3f;
+import com.seibel.lod.coreapi.util.math.Mat4f;
+import com.seibel.lod.coreapi.util.math.Vec3d;
+import com.seibel.lod.coreapi.util.math.Vec3f;
 import com.seibel.lod.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IBCLibAccessor;
@@ -69,7 +68,6 @@ import net.minecraft.world.level.material.FogType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.glfw.GLFW;
 
 
 /**

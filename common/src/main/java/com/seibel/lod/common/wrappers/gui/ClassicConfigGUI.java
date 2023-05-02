@@ -15,8 +15,6 @@ import java.util.regex.Pattern;
 
 // Logger (for debug stuff)
 
-import com.seibel.lod.core.ModInfo;
-import com.seibel.lod.core.config.file.ConfigFileHandling;
 import com.seibel.lod.core.config.types.AbstractConfigType;
 import com.seibel.lod.core.config.types.ConfigCategory;
 import com.seibel.lod.core.config.types.ConfigEntry;

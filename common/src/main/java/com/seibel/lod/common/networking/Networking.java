@@ -19,22 +19,16 @@
  
 package com.seibel.lod.common.networking;
 
-import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.coreapi.ModInfo;
 //#if MC_1_16_5
 //import me.shedaniel.architectury.networking.NetworkManager;
 //#else
 //import dev.architectury.networking.NetworkManager;
 //#endif
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-
-import java.util.Objects;
 
 /**
  * This class holds most of the networking code for the mod.

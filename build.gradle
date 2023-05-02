@@ -136,8 +136,9 @@ subprojects { p ->
             compileClasspath.extendsFrom common
             runtimeClasspath.extendsFrom common
             developmentForge.extendsFrom common
-            forgeRuntimeLibrary.extendsFrom common
-            forgeRuntimeLibrary.extendsFrom coreProjects
+            compileClasspath.extendsFrom coreProjects
+            runtimeClasspath.extendsFrom coreProjects
+            developmentForge.extendsFrom coreProjects
 
             if (findProject(":fabricLike") && p != project(":fabricLike")) {
                 // Shadow fabricLike

@@ -26,16 +26,11 @@ import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.wrappers.DependencySetup;
 import com.seibel.lod.common.wrappers.gui.GetConfigScreen;
 import com.seibel.lod.common.wrappers.minecraft.MinecraftClientWrapper;
-import com.seibel.lod.core.DependencyInjection.ApiEventInjector;
-import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.coreapi.DependencyInjection.ApiEventInjector;
+import com.seibel.lod.coreapi.ModInfo;
 import com.seibel.lod.core.ReflectionHandler;
-import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.dependencyInjection.ModAccessorInjector;
-import com.seibel.lod.core.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.logging.DhLoggerBuilder;
-import com.seibel.lod.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
-import com.seibel.lod.core.wrapperInterfaces.modAccessor.IBCLibAccessor;
-import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
 

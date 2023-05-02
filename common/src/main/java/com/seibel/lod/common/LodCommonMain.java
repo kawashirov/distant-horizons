@@ -21,7 +21,7 @@ package com.seibel.lod.common;
 
 import com.seibel.lod.common.forge.LodForgeMethodCaller;
 import com.seibel.lod.common.wrappers.DependencySetup;
-import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.coreapi.ModInfo;
 import com.seibel.lod.core.api.internal.SharedApi;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.config.ConfigBase;

@@ -21,7 +21,7 @@ package com.seibel.lod.forge.mixins.client;
 
 import com.seibel.lod.common.wrappers.gui.GetConfigScreen;
 import com.seibel.lod.common.wrappers.gui.TexturedButtonWidget;
-import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.coreapi.ModInfo;
 import com.seibel.lod.core.config.Config;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;

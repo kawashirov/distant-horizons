@@ -1,6 +1,6 @@
 package com.seibel.lod.common.wrappers.gui;
 
-import com.seibel.lod.core.ModInfo;
+import com.seibel.lod.coreapi.ModInfo;
 import com.seibel.lod.core.config.ConfigBase;
 import com.seibel.lod.core.config.gui.ConfigScreen;
 import com.seibel.lod.core.config.gui.JavaScreenHandlerScreen;
