@@ -93,16 +93,18 @@ dependencies {
     addMod("io.vram:canvas-fabric-${project.canvas_version}", rootProject.enable_canvas)
 
     // Immersive Portals
-    if (rootProject.enable_immersive_portals == "2") {
-        modImplementation ("com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:${project.immersive_portals_version}"){
+    if (rootProject.enable_immersive_portals == "1")
+        modCompileOnly ("com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:${project.immersive_portals_version}")
+    else if (rootProject.enable_immersive_portals == "2") {
+        modImplementation ("com.github.iPortalTeam.ImmersivePortalsMod:imm_ptl_core:${project.immersive_portals_version}") {
             exclude(group: "net.fabricmc.fabric-api")
             transitive(false)
         }
-        modImplementation ("com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:${project.immersive_portals_version}"){
+        modImplementation ("com.github.iPortalTeam.ImmersivePortalsMod:q_misc_util:${project.immersive_portals_version}") {
             exclude(group: "net.fabricmc.fabric-api")
             transitive(false)
         }
-        modImplementation ("com.github.iPortalTeam.ImmersivePortalsMod:build:${project.immersive_portals_version}"){
+        modImplementation ("com.github.iPortalTeam.ImmersivePortalsMod:build:${project.immersive_portals_version}") {
             exclude(group: "net.fabricmc.fabric-api")
             transitive(false)
         }
