@@ -155,7 +155,12 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		FogRenderer.setupColor(MC.gameRenderer.getMainCamera(), partialTicks, MC.level, 1, MC.gameRenderer.getDarkenWorldAmount(partialTicks));
 		float[] colorValues = RenderSystem.getShaderFogColor();
 		#endif
-		return new Color(colorValues[0], colorValues[1], colorValues[2], colorValues[3]);
+		return new Color(
+				Math.max(0f, Math.min(colorValues[0], 1f)),
+				Math.max(0f, Math.min(colorValues[1], 1f)),
+				Math.max(0f, Math.min(colorValues[2], 1f)),
+				Math.max(0f, Math.min(colorValues[3], 1f))
+		);
 	}
 	// getSpecialFogColor() is the same as getFogColor()
 	
