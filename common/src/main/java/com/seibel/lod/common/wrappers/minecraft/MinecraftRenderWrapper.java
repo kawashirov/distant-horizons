@@ -145,9 +145,6 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	
 	@Override
 	public Color getFogColor(float partialTicks) {
-		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("bclib"))
-			return ModAccessorInjector.INSTANCE.get(IBCLibAccessor.class).getFogColor(); // BCLib uses a different fog method so we need to use that instead if they are loaded
-
 		#if PRE_MC_1_17_1
 		float[] colorValues = new float[4];
 		GL15.glGetFloatv(GL15.GL_FOG_COLOR, colorValues);
