@@ -35,15 +35,14 @@ import net.minecraft.Util;
 @Mixin(Util.class)
 public class MixinUtilBackgroundThread
 {
-	
 	private static boolean shouldApplyOverride() {
-		return DependencySetupDoneCheck.getIsCurrentThreadDistantGeneratorThread.get();
+		return DependencySetupDoneCheck.isDone && DependencySetupDoneCheck.getIsCurrentThreadDistantGeneratorThread.get();
 	}
 
 	@Inject(method = "backgroundExecutor", at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$backgroundExecutor(CallbackInfoReturnable<ExecutorService> ci)
 	{
-		if (DependencySetupDoneCheck.isDone && shouldApplyOverride())
+		if (shouldApplyOverride())
 		{
 			//ApiShared.LOGGER.info("util backgroundExecutor triggered");
 			ci.setReturnValue(new DummyRunExecutorService());
@@ -55,7 +54,7 @@ public class MixinUtilBackgroundThread
 			at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$wrapThreadWithTaskName(String string, Runnable r, CallbackInfoReturnable<Runnable> ci)
 	{
-		if (DependencySetupDoneCheck.isDone && shouldApplyOverride())
+		if (shouldApplyOverride())
 		{
 			//ApiShared.LOGGER.info("util wrapThreadWithTaskName(Runnable) triggered");
 			ci.setReturnValue(r);
@@ -67,7 +66,7 @@ public class MixinUtilBackgroundThread
 			at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$wrapThreadWithTaskNameForSupplier(String string, Supplier<?> r, CallbackInfoReturnable<Supplier<?>> ci)
 	{
-		if (DependencySetupDoneCheck.isDone && shouldApplyOverride())
+		if (shouldApplyOverride())
 		{
 			//ApiShared.LOGGER.info("util wrapThreadWithTaskName(Supplier) triggered");
 			ci.setReturnValue(r);
