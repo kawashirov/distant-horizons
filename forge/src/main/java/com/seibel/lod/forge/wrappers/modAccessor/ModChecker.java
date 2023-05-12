@@ -17,7 +17,7 @@
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
  
-package com.seibel.lod.forge.modAccessor;
+package com.seibel.lod.forge.wrappers.modAccessor;
 
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
 import net.minecraftforge.fml.ModList;

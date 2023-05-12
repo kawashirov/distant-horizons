@@ -21,7 +21,7 @@ package com.seibel.lod.forge.wrappers;
 
 import com.seibel.lod.core.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IModChecker;
-import com.seibel.lod.forge.modAccessor.ModChecker;
+import com.seibel.lod.forge.wrappers.modAccessor.ModChecker;
 
 /**
  * Binds all necessary dependencies so we
