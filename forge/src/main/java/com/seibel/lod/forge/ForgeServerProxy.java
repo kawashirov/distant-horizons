@@ -46,7 +46,7 @@ public class ForgeServerProxy {
 
     // ServerTickEvent (at end)
     @SubscribeEvent
-    private void serverTickEvent(TickEvent.ServerTickEvent event) {
+    public void serverTickEvent(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             if (isValidTime()) serverApi.serverTickEvent();
         }
@@ -54,19 +54,19 @@ public class ForgeServerProxy {
 
     // ServerWorldLoadEvent
     @SubscribeEvent
-    private void dedicatedWorldLoadEvent(ServerStartedEvent event) {
+    public void dedicatedWorldLoadEvent(ServerStartedEvent event) {
         if (isValidTime()) serverApi.serverLoadEvent(isDedicated);
     }
 
     // ServerWorldUnloadEvent
     @SubscribeEvent
-    private void serverWorldUnloadEvent(ServerStoppingEvent event) {
+    public void serverWorldUnloadEvent(ServerStoppingEvent event) {
         if (isValidTime()) serverApi.serverUnloadEvent();
     }
 
     // ServerLevelLoadEvent
     @SubscribeEvent
-    private void serverLevelLoadEvent(WorldEvent.Load event) {
+    public void serverLevelLoadEvent(WorldEvent.Load event) {
         if (isValidTime()) {
             if (event.getWorld() instanceof ServerLevel) {
                 serverApi.serverLevelLoadEvent(getLevelWrapper((ServerLevel) event.getWorld()));
@@ -76,7 +76,7 @@ public class ForgeServerProxy {
 
     // ServerLevelUnloadEvent
     @SubscribeEvent
-    private void serverLevelUnloadEvent(WorldEvent.Unload event) {
+    public void serverLevelUnloadEvent(WorldEvent.Unload event) {
         if (isValidTime()) {
             if (event.getWorld() instanceof ServerLevel) {
                 serverApi.serverLevelUnloadEvent(getLevelWrapper((ServerLevel) event.getWorld()));
