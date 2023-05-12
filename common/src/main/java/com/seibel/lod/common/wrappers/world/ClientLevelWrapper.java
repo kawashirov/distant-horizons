@@ -73,6 +73,8 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 			ServerLevelWrapper foundLevelWrapper = null;
 			for (ServerLevel serverLevel : serverLevels)
 			{
+                // FIXME: This check is incorrect, even if there are more not "More than 1 level exists for a given dimension", it would still say it is
+                // This happens when both the overworld and end gets passed
 				if (foundLevelWrapper != null)
 				{
 					LOGGER.warn("More than 1 level exists for a given dimension. Defaulting to the first level.");
