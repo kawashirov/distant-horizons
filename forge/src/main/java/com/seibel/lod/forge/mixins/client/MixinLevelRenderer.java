@@ -54,10 +54,10 @@ public class MixinLevelRenderer
 {
 	@Shadow
 	private ClientLevel level;
-
 	@Unique
 	private static float previousPartialTicks = 0;
 
+	// TODO: Is there any reason why this is here? Can it be deleted?
 	public MixinLevelRenderer() {
 		throw new NullPointerException("Null cannot be cast to non-null type.");
 	}
@@ -100,6 +100,7 @@ public class MixinLevelRenderer
 		previousPartialTicks = tickDelta;
 	}
 
+	// TODO: Can we move this o forge's client proxy simmilar to how fabric does it
 	@Inject(at = @At("HEAD"),
 			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V",
 			cancellable = true)
