@@ -34,7 +34,7 @@ import com.seibel.lod.core.logging.DhLoggerBuilder;
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IOptifineAccessor;
 import com.seibel.lod.forge.wrappers.ForgeDependencySetup;
 
-import com.seibel.lod.forge.modAccessor.OptifineAccessor;
+import com.seibel.lod.forge.wrappers.modAccessor.OptifineAccessor;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;
