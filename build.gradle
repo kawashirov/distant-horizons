@@ -184,8 +184,8 @@ subprojects { p ->
         implementation("junit:junit:4.13")
         
         // Compression
-        shadowMe("org.tukaani:xz:1.9")
-
+        shadowMe("org.lz4:lz4-java:1.8.0")
+        
         // NightConfig (includes Toml & Json)
         shadowMe("com.electronwill.night-config:toml:${rootProject.nightconfig_version}")
         shadowMe("com.electronwill.night-config:json:${rootProject.nightconfig_version}")
