@@ -23,46 +23,63 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.function.Supplier;
 
-public class ForgeServerProxy {
+public class ForgeServerProxy
+{
     private final ServerApi serverApi = ServerApi.INSTANCE;
     private static final Logger LOGGER = DhLoggerBuilder.getLogger();
     private final boolean isDedicated;
     public static Supplier<Boolean> isGenerationThreadChecker = null;
 
-    public ForgeServerProxy(boolean isDedicated) {
-        this.isDedicated = isDedicated;
-        isGenerationThreadChecker = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
-    }
-    private boolean isValidTime() {
-        if (isDedicated) return true;
-
-        //FIXME: This may cause init issue...
-        return !(Minecraft.getInstance().screen instanceof TitleScreen);
-    }
-    private ServerLevelWrapper getLevelWrapper(ServerLevel level) {
-        return ServerLevelWrapper.getWrapper(level);
-    }
+    public ForgeServerProxy(boolean isDedicated)
+	{
+		this.isDedicated = isDedicated;
+		isGenerationThreadChecker = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
+	}
+    private boolean isValidTime()
+	{
+		if (this.isDedicated)
+		{
+			return true;
+		}
+	
+		//FIXME: This may cause init issue...
+		return !(Minecraft.getInstance().screen instanceof TitleScreen);
+	}
+    private ServerLevelWrapper getLevelWrapper(ServerLevel level) { return ServerLevelWrapper.getWrapper(level); }
 
 
     // ServerTickEvent (at end)
     @SubscribeEvent
-    public void serverTickEvent(TickEvent.ServerTickEvent event) {
-        if (event.phase == TickEvent.Phase.END) {
-            if (isValidTime()) serverApi.serverTickEvent();
-        }
-    }
+    public void serverTickEvent(TickEvent.ServerTickEvent event)
+	{
+		if (event.phase == TickEvent.Phase.END)
+		{
+			if (this.isValidTime())
+			{
+				this.serverApi.serverTickEvent();
+			}
+		}
+	}
 
     // ServerWorldLoadEvent
     @SubscribeEvent
-    public void dedicatedWorldLoadEvent(ServerStartedEvent event) {
-        if (isValidTime()) serverApi.serverLoadEvent(isDedicated);
-    }
+    public void dedicatedWorldLoadEvent(ServerStartedEvent event)
+	{
+		if (this.isValidTime())
+		{
+			this.serverApi.serverLoadEvent(this.isDedicated);
+		}
+	}
 
     // ServerWorldUnloadEvent
     @SubscribeEvent
-    public void serverWorldUnloadEvent(ServerStoppingEvent event) {
-        if (isValidTime()) serverApi.serverUnloadEvent();
-    }
+    public void serverWorldUnloadEvent(ServerStoppingEvent event)
+	{
+		if (this.isValidTime())
+		{
+			this.serverApi.serverUnloadEvent();
+		}
+	}
 
     // ServerLevelLoadEvent
     @SubscribeEvent
