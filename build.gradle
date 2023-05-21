@@ -267,7 +267,7 @@ subprojects { p ->
         relocate "org.lwjgl.system.jawt", "${librariesLocation}.lwjgl.system.jawt"
 
         // Compression
-        relocate "org.tukaani", "${librariesLocation}.tukaani"
+        relocate "net.jpountz", "${librariesLocation}.jpountz"
 
         // NightConfig (includes Toml & Json)
         relocate "com.electronwill.nightconfig", "${librariesLocation}.electronwill.nightconfig"
