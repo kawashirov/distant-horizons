@@ -48,3 +48,4 @@ extendable class com/mojang/math/Matrix4f
 # hacky stuff
 accessible field net/minecraft/util/ThreadingDetector lock Ljava/util/concurrent/Semaphore;
 mutable field net/minecraft/util/ThreadingDetector lock Ljava/util/concurrent/Semaphore;
+accessible field net/minecraft/client/gui/components/AbstractSelectionList scrollAmount D # Hack to bypass vanilla's setScrollAmount's clamp

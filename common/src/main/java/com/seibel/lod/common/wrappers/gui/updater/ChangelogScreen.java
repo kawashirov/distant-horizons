@@ -38,6 +38,12 @@ public class ChangelogScreen extends Screen {
         this.versionID = versionID;
 
         this.changelog = new ArrayList<>();
+
+        // Put the new version name at the very top of the change log
+        this.changelog.add("§lChangelog for " + ModrinthGetter.releaseNames.get(versionID) + "§r");
+        this.changelog.add("");
+        this.changelog.add("");
+
         // Get the release changelog and split it by the new lines
         List<String> unwrappedChangelog =
                 List.of(new MarkdownFormatter.MinecraftFormat().convertTo( // This formats markdown to minecraft's "§" characters
@@ -78,9 +84,8 @@ public class ChangelogScreen extends Screen {
         this.renderBackground(matrices); // Render background
 
         // Set the scroll position to the mouse height relative to the screen
-        this.changelogArea.setScrollAmount(
-                ((double) mouseY)/((double) this.height) * this.changelogArea.getMaxScroll()
-        );
+        // This is a bit of a hack as we cannot scroll on this area
+        this.changelogArea.scrollAmount = ((double) mouseY)/((double) this.height) * 1.1 * this.changelogArea.getMaxScroll();
 
         this.changelogArea.render(matrices, mouseX, mouseY, delta); // Render the changelog
 
