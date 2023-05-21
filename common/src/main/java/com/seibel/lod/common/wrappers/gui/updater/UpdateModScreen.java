@@ -79,7 +79,6 @@ public class UpdateModScreen extends Screen {
                 // Some textuary stuff
                 0, new ResourceLocation(ModInfo.ID, "textures/gui/changelog.png"), 20, 20,
                 // Create the button and tell it where to go
-                // For now it goes to the client option by default
                 (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(new ChangelogScreen(this, this.newVersionID)), // TODO: Add a proper easter egg to pressing the logo (maybe with confetti)
                 // Add a title to the button
                 translate(ModInfo.ID + ".updater.title")

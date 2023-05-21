@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 // Logger (for debug stuff)
 
+import com.seibel.lod.common.wrappers.gui.updater.ChangelogScreen;
 import com.seibel.lod.core.config.types.AbstractConfigType;
 import com.seibel.lod.core.config.types.ConfigCategory;
 import com.seibel.lod.core.config.types.ConfigEntry;
@@ -28,7 +29,11 @@ import com.seibel.lod.core.config.*;
 // Minecraft imports
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.seibel.lod.core.dependencyInjection.SingletonInjector;
+import com.seibel.lod.core.jar.installer.ModrinthGetter;
 import com.seibel.lod.core.jar.updater.SelfUpdater;
+import com.seibel.lod.core.wrapperInterfaces.IVersionConstants;
+import com.seibel.lod.coreapi.ModInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -48,6 +53,7 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 #if PRE_MC_1_19
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 #endif
 
 /**
@@ -57,13 +63,13 @@ import net.minecraft.network.chat.TranslatableComponent;
  * Credits to Motschen
  *
  * @author coolGi
- * @version 4-28-2022
+ * @version 5-21-2022
  */
 // FLOATS DONT WORK WITH THIS
 @SuppressWarnings("unchecked")
 public abstract class ClassicConfigGUI {
 	/*
-	    This would be removed later on
+	    This would be removed later on as it is going to be re-written in java swing
 	 */
 
 
@@ -211,6 +217,32 @@ public abstract class ClassicConfigGUI {
             if (!reload)
                 ConfigBase.INSTANCE.configFileINSTANCE.loadFromFile();
 
+            // Changelog button
+            if (Config.Client.AutoUpdater.enableAutoUpdater.get()) {
+                if (!ModrinthGetter.initted)
+                    ModrinthGetter.init();
+                this.addBtn(new TexturedButtonWidget(
+                        // Where the button is on the screen
+                        this.width - 28, this.height - 28,
+                        // Width and height of the button
+                        20, 20,
+                        // Offset
+                        0, 0,
+                        // Some textuary stuff
+                        0, new ResourceLocation(ModInfo.ID, "textures/gui/changelog.png"), 20, 20,
+                        // Create the button and tell it where to go
+                        (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(new ChangelogScreen(this,
+                                ModrinthGetter.getLatestIDForVersion(SingletonInjector.INSTANCE.get(IVersionConstants.class).getMinecraftVersion())
+                        )),
+                        // Add a title to the button
+                        #if PRE_MC_1_19
+                        new TranslatableComponent(ModInfo.ID + ".updater.title")
+                        #else
+                        Component.translatable(ModInfo.ID + ".updater.title")
+                        #endif
+                ));
+            }
+
             addBtn(new Button(this.width / 2 - 154, this.height - 28, 150, 20, CommonComponents.GUI_CANCEL, button -> {
                 ConfigBase.INSTANCE.configFileINSTANCE.loadFromFile();
                 Objects.requireNonNull(minecraft).setScreen(parent);
@@ -277,8 +309,11 @@ public abstract class ClassicConfigGUI {
             this.renderBackground(matrices); // Renders background
             this.list.render(matrices, mouseX, mouseY, delta); // Render buttons
             drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title
+
+            // If the update is pending, display this message to inform the user that it will apply when the game restarts
             if (SelfUpdater.deleteOldOnClose)
                 drawString(matrices, font, new TranslatableComponent("lod.updater.waitingForClose"), 4, height-38, 0xFFFFFF);
+
 
             // Render the tooltip only if it can find a tooltip in the language file
             for (AbstractConfigType info : ConfigBase.INSTANCE.entries) {
