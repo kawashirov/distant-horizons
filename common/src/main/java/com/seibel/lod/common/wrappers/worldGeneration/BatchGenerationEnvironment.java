@@ -312,7 +312,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 		catch (Exception e)
 		{
-			LOAD_LOGGER.error("DistantHorizons: Couldn't load chunk {}", chunkPos, e);
+			LOAD_LOGGER.error("DistantHorizons: Couldn't load or make chunk "+chunkPos+". Error: "+e.getMessage(), e);
 		}
 		
 		if (chunkData == null)
@@ -330,7 +330,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			catch (Exception e)
 			{
-				LOAD_LOGGER.error("DistantHorizons: Couldn't load chunk {}", chunkPos, e);
+				LOAD_LOGGER.error("DistantHorizons: Couldn't load or make chunk "+chunkPos+". Returning an empty chunk. Error: "+e.getMessage(), e);
 				return new ProtoChunk(chunkPos, UpgradeData.EMPTY
 							#if POST_MC_1_17_1 , level #endif
 							#if POST_MC_1_18_1 , level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null #endif
