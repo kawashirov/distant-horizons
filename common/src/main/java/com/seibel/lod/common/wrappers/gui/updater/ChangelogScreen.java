@@ -1,6 +1,8 @@
 package com.seibel.lod.common.wrappers.gui.updater;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.seibel.lod.core.dependencyInjection.SingletonInjector;
+import com.seibel.lod.core.wrapperInterfaces.IVersionConstants;
 import com.seibel.lod.coreapi.ModInfo;
 import com.seibel.lod.core.jar.installer.MarkdownFormatter;
 import com.seibel.lod.core.jar.installer.ModrinthGetter;
@@ -31,12 +33,27 @@ public class ChangelogScreen extends Screen {
     private List<String> changelog;
     private TextArea changelogArea;
 
+    public ChangelogScreen(Screen parent) {
+        this(parent, null);
+
+        if (!ModrinthGetter.initted) // Make sure the modrinth stuff is initted
+            ModrinthGetter.init();
+        if (!ModrinthGetter.initted) // If its not initted the just close the screen
+            onClose();
+
+        setupChangelog(ModrinthGetter.getLatestIDForVersion(SingletonInjector.INSTANCE.get(IVersionConstants.class).getMinecraftVersion()));
+    }
 
     public ChangelogScreen(Screen parent, String versionID) {
         super(translate(ModInfo.ID + ".updater.title"));
         this.parent = parent;
         this.versionID = versionID;
 
+        if (versionID != null)
+            setupChangelog(versionID);
+    }
+
+    private void setupChangelog(String versionID) {
         this.changelog = new ArrayList<>();
 
         // Put the new version name at the very top of the change log
@@ -58,6 +75,8 @@ public class ChangelogScreen extends Screen {
         // Debugging
 //        System.out.println(this.changelog);
     }
+
+
 
     @Override
     protected void init() {

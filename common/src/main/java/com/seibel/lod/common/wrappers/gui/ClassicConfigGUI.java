@@ -219,8 +219,6 @@ public abstract class ClassicConfigGUI {
 
             // Changelog button
             if (Config.Client.AutoUpdater.enableAutoUpdater.get()) {
-                if (!ModrinthGetter.initted)
-                    ModrinthGetter.init();
                 this.addBtn(new TexturedButtonWidget(
                         // Where the button is on the screen
                         this.width - 28, this.height - 28,
@@ -231,9 +229,7 @@ public abstract class ClassicConfigGUI {
                         // Some textuary stuff
                         0, new ResourceLocation(ModInfo.ID, "textures/gui/changelog.png"), 20, 20,
                         // Create the button and tell it where to go
-                        (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(new ChangelogScreen(this,
-                                ModrinthGetter.getLatestIDForVersion(SingletonInjector.INSTANCE.get(IVersionConstants.class).getMinecraftVersion())
-                        )),
+                        (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(new ChangelogScreen(this)),
                         // Add a title to the button
                         #if PRE_MC_1_19
                         new TranslatableComponent(ModInfo.ID + ".updater.title")
