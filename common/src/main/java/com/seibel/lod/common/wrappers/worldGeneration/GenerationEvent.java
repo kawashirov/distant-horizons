@@ -92,6 +92,7 @@ public final class GenerationEvent
 				//LOGGER.info("generating [{}]", event.minPos);
 				generationGroup.generateLodFromList(generationEvent);
 			}
+			catch (InterruptedException ignored) { }
 			finally
 			{
 				BatchGenerationEnvironment.isDistantGeneratorThread.remove();
@@ -108,7 +109,7 @@ public final class GenerationEvent
 					}
 				}
 			}
-		}, generationGroup.executors);
+		}, generationGroup.executorService);
 		return generationEvent;
 	}
 	

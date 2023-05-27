@@ -22,6 +22,7 @@ package com.seibel.lod.common.wrappers.worldGeneration;
 
 import com.seibel.lod.api.enums.worldGeneration.EDhApiWorldGenerationStep;
 import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
+import com.seibel.lod.core.dataObjects.transformers.FullDataToRenderDataTransformer;
 import com.seibel.lod.core.level.IDhServerLevel;
 import com.seibel.lod.core.config.Config;
 import com.seibel.lod.api.enums.config.ELightGenerationMode;
@@ -182,7 +183,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	
 	public static boolean isCurrentThreadDistantGeneratorThread() { return (isDistantGeneratorThread.get() != null); }
 	
-	public ExecutorService executors = Executors.newFixedThreadPool(
+	public ExecutorService executorService = Executors.newFixedThreadPool(
 			Math.max(Config.Client.Advanced.Threading.numberOfWorldGenerationThreads.get().intValue(), 1),
 			threadFactory);
 	
@@ -237,7 +238,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		return future.join();
 	}
 	
-	public void resizeThreadPool(int newThreadCount) { executors = Executors.newFixedThreadPool(newThreadCount, new LodThreadFactory("DH-Gen-Worker-Thread", Thread.MIN_PRIORITY)); }
+	public void resizeThreadPool(int newThreadCount) { executorService = Executors.newFixedThreadPool(newThreadCount, new LodThreadFactory("DH-Gen-Worker-Thread", Thread.MIN_PRIORITY)); }
 	
 	public void updateAllFutures()
 	{
@@ -339,7 +340,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 	}
 	
-	public void generateLodFromList(GenerationEvent genEvent)
+	public void generateLodFromList(GenerationEvent genEvent) throws InterruptedException
 	{
 		EVENT_LOGGER.debug("Lod Generate Event: "+genEvent.minPos);
 		
@@ -390,7 +391,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			genEvent.threadedParam.makeStructFeat(region, params);
 			genChunks = new ArrayGridList<>(referencedChunks, RANGE_TO_RANGE_EMPTY_EXTENSION,
 					referencedChunks.gridSize - RANGE_TO_RANGE_EMPTY_EXTENSION);
-			generateDirect(genEvent, genChunks, genEvent.targetGenerationStep, region);
+			this.generateDirect(genEvent, genChunks, genEvent.targetGenerationStep, region);
 			genEvent.timer.nextEvent("cleanup");
 		}
 		catch (StepStructureStart.StructStartCorruptedException f)
@@ -451,8 +452,13 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	}
 	
 	public void generateDirect(GenerationEvent genEvent, ArrayGridList<ChunkAccess> chunksToGenerate,
-								EDhApiWorldGenerationStep step, LightedWorldGenRegion region)
+								EDhApiWorldGenerationStep step, LightedWorldGenRegion region) throws InterruptedException
 	{
+		if (Thread.interrupted())
+		{
+			return;	
+		}
+		
 		try
 		{
 			chunksToGenerate.forEach((chunk) ->
@@ -472,6 +478,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			
 			genEvent.timer.nextEvent("structStart");
+			throwIfThreadInterrupted();
 			stepStructureStart.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
 			if (step == EDhApiWorldGenerationStep.STRUCTURE_START)
@@ -480,6 +487,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			
 			genEvent.timer.nextEvent("structRef");
+			throwIfThreadInterrupted();
 			stepStructureReference.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
 			if (step == EDhApiWorldGenerationStep.STRUCTURE_REFERENCE)
@@ -488,6 +496,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			
 			genEvent.timer.nextEvent("biome");
+			throwIfThreadInterrupted();
 			stepBiomes.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
 			if (step == EDhApiWorldGenerationStep.BIOMES)
@@ -496,6 +505,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			
 			genEvent.timer.nextEvent("noise");
+			throwIfThreadInterrupted();
 			stepNoise.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
 			if (step == EDhApiWorldGenerationStep.NOISE)
@@ -504,6 +514,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			
 			genEvent.timer.nextEvent("surface");
+			throwIfThreadInterrupted();
 			stepSurface.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
 			if (step == EDhApiWorldGenerationStep.SURFACE)
@@ -512,12 +523,14 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			
 			genEvent.timer.nextEvent("carver");
+			throwIfThreadInterrupted();
 			if (step == EDhApiWorldGenerationStep.CARVERS)
 			{
 				return;
 			}
 			
 			genEvent.timer.nextEvent("feature");
+			throwIfThreadInterrupted();
 			stepFeatures.generateGroup(genEvent.threadedParam, region, chunksToGenerate);
 			genEvent.refreshTimeout();
 		}
@@ -527,7 +540,10 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			switch (region.lightMode)
 			{
 			case FANCY:
-				stepLight.generateGroup(region.getLightEngine(), chunksToGenerate);
+				if (!Thread.interrupted())
+				{
+					stepLight.generateGroup(region.getLightEngine(), chunksToGenerate);
+				}
 				break;
 			case FAST:
 				chunksToGenerate.forEach((chunk) ->
@@ -548,6 +564,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				});
 				break;
 			}
+			
 			genEvent.refreshTimeout();
 		}
 	}
@@ -563,7 +580,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		EVENT_LOGGER.info(BatchGenerationEnvironment.class.getSimpleName()+" shutting down...");
 		
 		EVENT_LOGGER.info("Canceling futures...");
-		executors.shutdownNow();
+		this.executorService.shutdownNow();
 		Iterator<GenerationEvent> iter = this.generationEventList.iterator();
 		while (iter.hasNext())
 		{
@@ -577,14 +594,15 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		{
 			try
 			{
-				if (!executors.awaitTermination(3, TimeUnit.SECONDS))
+				int waitTimeInSeconds = 3;
+				if (!this.executorService.awaitTermination(waitTimeInSeconds, TimeUnit.SECONDS))
 				{
-					EVENT_LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...");
+					EVENT_LOGGER.error("Batch Chunk Generator shutdown didn't complete after ["+waitTimeInSeconds+"] seconds! Ignoring child threads...");
 				}
 			}
 			catch (InterruptedException e)
 			{
-				EVENT_LOGGER.error("Batch Chunk Generator shutdown failed! Ignoring child threads...", e);
+				EVENT_LOGGER.error("Batch Chunk Generator shutdown interrupted! Ignoring child threads...", e);
 			}
 		}
 		
@@ -600,6 +618,19 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		GenerationEvent genEvent = GenerationEvent.startEvent(new DhChunkPos(minX, minZ), genSize, this, targetStep, runTimeRatio, resultConsumer);
 		generationEventList.add(genEvent);
 		return genEvent.future;
+	}
+	
+	/**
+	 * Called before code that may run for an extended period of time. <br>
+	 * This is necessary to allow canceling world gen since waiting
+	 * for them to cancel when leaving a world can take a while.
+	 */
+	private static void throwIfThreadInterrupted() throws InterruptedException
+	{
+		if (Thread.interrupted())
+		{
+			throw new InterruptedException(FullDataToRenderDataTransformer.class.getSimpleName()+" task interrupted.");
+		}
 	}
 	
 }
