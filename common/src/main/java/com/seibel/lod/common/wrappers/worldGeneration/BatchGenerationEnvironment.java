@@ -308,6 +308,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			#if POST_MC_1_19
 			chunkData = level.getChunkSource().chunkMap.readChunk(chunkPos).get().orElse(null);
 			#else
+			// Warning: if multiple threads attempt to access this method at the same time,
+			// it can throw EOFExceptions that are caught and logged by Minecraft
 			chunkData = level.getChunkSource().chunkMap.readChunk(chunkPos);
 			#endif
 		}
