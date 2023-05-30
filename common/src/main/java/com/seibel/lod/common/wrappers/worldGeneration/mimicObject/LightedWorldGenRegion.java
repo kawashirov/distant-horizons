@@ -255,36 +255,57 @@ public class LightedWorldGenRegion extends WorldGenRegion
 		}
 		return chunk;
 	}
-
-	// Override force use of my own light engine
+	
+	/** Overriding allows us to use our own lighting engine */
 	@Override
 	public LevelLightEngine getLightEngine() {
 		return light;
 	}
 
-	// Override force use of my own light engine
+	/** Overriding allows us to use our own lighting engine */
 	@Override
-	public int getBrightness(LightLayer lightLayer, BlockPos blockPos) {
-		if (lightMode != ELightGenerationMode.FAST) {
-			return light.getLayerListener(lightLayer).getLightValue(blockPos);
+	public int getBrightness(LightLayer lightLayer, BlockPos blockPos)
+	{
+		if (this.lightMode != ELightGenerationMode.FAST)
+		{
+			// MC lighting method
+			return this.light.getLayerListener(lightLayer).getLightValue(blockPos);
 		}
-		if (lightLayer == LightLayer.BLOCK)
-			return 0;
-		BlockPos p = super.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
-		return (p.getY() <= blockPos.getY()) ? getMaxLightLevel() : 0;
+		else
+		{
+			// Fallback DH lighting methods
+			
+			if (lightLayer == LightLayer.BLOCK)
+			{
+				return 0;
+			}
+			else
+			{
+				BlockPos heightmapPos = super.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
+				return (heightmapPos.getY() <= blockPos.getY()) ? this.getMaxLightLevel() : 0;
+			}
+		}
 	}
-
-	// Override force use of my own light engine
+	
+	/** Overriding allows us to use our own lighting engine */
 	@Override
-	public int getRawBrightness(BlockPos blockPos, int i) {
-		if (lightMode != ELightGenerationMode.FAST) {
-			return light.getRawBrightness(blockPos, i);
+	public int getRawBrightness(BlockPos blockPos, int i)
+	{
+		if (this.lightMode != ELightGenerationMode.FAST)
+		{
+			// MC lighting method
+			return this.light.getRawBrightness(blockPos, i);
 		}
-		BlockPos p = super.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
-		return (p.getY() <= blockPos.getY()) ? getMaxLightLevel() : 0;
+		else
+		{
+			// Fallback DH lighting methods
+			
+			BlockPos heightmapPos = super.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
+			return (heightmapPos.getY() <= blockPos.getY()) ? this.getMaxLightLevel() : 0;
+		}
 	}
-
-	// Override force use of my own light engine
+	
+	/** Overriding allows us to use our own lighting engine */
 	@Override
 	public boolean canSeeSky(BlockPos blockPos) {
 		return (getBrightness(LightLayer.SKY, blockPos) >= getMaxLightLevel());
