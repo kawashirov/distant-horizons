@@ -57,22 +57,24 @@ public class ForgeClientProxy
 		}
 	}
 
-	@SubscribeEvent
-	public void clientLevelLoadEvent(WorldEvent.Load event)
-	{
-		if (event.getWorld() instanceof ClientLevel)
-		{
-			ClientApi.INSTANCE.clientLevelLoadEvent(ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld()));
-		}
-	}
-	@SubscribeEvent
-	public void clientLevelUnloadEvent(WorldEvent.Unload event)
-	{
-		if (event.getWorld() instanceof ClientLevel)
-		{
-			ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld()));
-		}
-	}
+	// ClientLevelLoadEvent - Done in MixinClientPacketListener
+//	@SubscribeEvent
+//	public void clientLevelLoadEvent(WorldEvent.Load event)
+//	{
+//		if (event.getWorld() instanceof ClientLevel)
+//		{
+//			ClientApi.INSTANCE.clientLevelLoadEvent(ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld()));
+//		}
+//	}
+	// ClientLevelUnloadEvent - Done in MixinClientPacketListener
+//	@SubscribeEvent
+//	public void clientLevelUnloadEvent(WorldEvent.Unload event)
+//	{
+//		if (event.getWorld() instanceof ClientLevel)
+//		{
+//			ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld()));
+//		}
+//	}
 
 	@SubscribeEvent
 	public void clientChunkLoadEvent(ChunkDataEvent.Load event)

@@ -14,6 +14,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.event.world.ChunkDataEvent;
@@ -63,7 +64,7 @@ public class ForgeServerProxy
 
     // ServerWorldLoadEvent
     @SubscribeEvent
-    public void dedicatedWorldLoadEvent(ServerStartedEvent event)
+    public void dedicatedWorldLoadEvent(ServerAboutToStartEvent event)
 	{
 		if (this.isValidTime())
 		{
