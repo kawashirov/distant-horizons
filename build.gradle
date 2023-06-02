@@ -184,7 +184,7 @@ subprojects { p ->
         implementation("junit:junit:4.13")
         
         // Compression
-        shadowMe("org.lz4:lz4-java:1.8.0")
+        shadowMe("org.lz4:lz4-java:${rootProject.lz4_version}")
         
         // NightConfig (includes Toml & Json)
         shadowMe("com.electronwill.night-config:toml:${rootProject.nightconfig_version}")
@@ -266,14 +266,14 @@ subprojects { p ->
         // Only ever shadow the dependencies we use otherwise some stuff would break when running on an external client
         relocate "org.lwjgl.system.jawt", "${librariesLocation}.lwjgl.system.jawt"
 
-        // Compression
+        // Compression (LZ4)
         relocate "net.jpountz", "${librariesLocation}.jpountz"
 
         // NightConfig (includes Toml & Json)
         relocate "com.electronwill.nightconfig", "${librariesLocation}.electronwill.nightconfig"
 
         // Theming
-        relocate 'com.formdev.flatlaf', 'distanthorizons.libraries.formdev.flatlaf'
+        relocate "com.formdev.flatlaf", "${librariesLocation}.formdev.flatlaf"
 
         // SVG
         relocate "com.kitfox.svg", "${librariesLocation}.kitfox.svg"
