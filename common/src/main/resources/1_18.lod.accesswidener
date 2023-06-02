@@ -33,7 +33,10 @@ accessible method net/minecraft/world/level/lighting/LayerLightEngine queueSecti
 # lod generation from save file
 accessible field net/minecraft/server/level/ChunkMap mainThreadExecutor Lnet/minecraft/util/thread/BlockableEventLoop;
 accessible method net/minecraft/server/level/ChunkMap readChunk (Lnet/minecraft/world/level/ChunkPos;)Lnet/minecraft/nbt/CompoundTag;
-
+accessible field net/minecraft/world/level/chunk/storage/ChunkStorage worker Lnet/minecraft/world/level/chunk/storage/IOWorker;
+accessible field net/minecraft/world/level/chunk/storage/IOWorker storage Lnet/minecraft/world/level/chunk/storage/RegionFileStorage;
+accessible field net/minecraft/world/level/chunk/storage/RegionFileStorage regionCache Lit/unimi/dsi/fastutil/longs/Long2ObjectLinkedOpenHashMap;
+accessible field net/minecraft/world/level/chunk/storage/RegionFileStorage folder Ljava/nio/file/Path;
 
 # grabbing textures
 accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite animatedTexture Lnet/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture;

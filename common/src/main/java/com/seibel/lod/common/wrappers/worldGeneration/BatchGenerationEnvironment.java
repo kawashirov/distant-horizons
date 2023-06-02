@@ -22,6 +22,7 @@ package com.seibel.lod.common.wrappers.worldGeneration;
 
 import com.seibel.lod.api.enums.worldGeneration.EDhApiWorldGenerationStep;
 import com.seibel.lod.common.wrappers.world.ServerLevelWrapper;
+import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.*;
 import com.seibel.lod.core.dataObjects.transformers.FullDataToRenderDataTransformer;
 import com.seibel.lod.core.level.IDhServerLevel;
 import com.seibel.lod.core.config.Config;
@@ -36,6 +37,7 @@ import com.seibel.lod.core.util.objects.LodThreadFactory;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvironmentWrapper;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -44,14 +46,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import com.seibel.lod.common.wrappers.DependencySetupDoneCheck;
 import com.seibel.lod.common.wrappers.chunk.ChunkWrapper;
-import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.ChunkLoader;
-import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightGetterAdaptor;
-import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
-import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.WorldGenLevelLightEngine;
 import com.seibel.lod.common.wrappers.worldGeneration.step.StepBiomes;
 import com.seibel.lod.common.wrappers.worldGeneration.step.StepFeatures;
 import com.seibel.lod.common.wrappers.worldGeneration.step.StepLight;
@@ -68,6 +67,8 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.UpgradeData;
+import net.minecraft.world.level.chunk.storage.RegionFile;
+import net.minecraft.world.level.chunk.storage.RegionFileStorage;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
@@ -75,6 +76,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import org.apache.logging.log4j.LogManager;
+
+import javax.annotation.Nullable;
 
 /*
 Total:                   3.135214124s
@@ -176,6 +179,19 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	public static final int RANGE_TO_RANGE_EMPTY_EXTENSION = 1;
 	public int unknownExceptionCount = 0;
 	public long lastExceptionTriggerTime = 0;
+
+	private AtomicReference<RegionFileStorageExternalCache> regionFileStorageCache = new AtomicReference<>();
+
+	public RegionFileStorageExternalCache getOrCreateRegionFileCache(RegionFileStorage storage) {
+		RegionFileStorageExternalCache cache = regionFileStorageCache.get();
+		if (cache == null) {
+			cache = new RegionFileStorageExternalCache(storage);
+			if (!regionFileStorageCache.compareAndSet(null, cache)) {
+				cache = regionFileStorageCache.get();
+			}
+		}
+		return cache;
+	}
 	
 	public static final LodThreadFactory threadFactory = new LodThreadFactory("DH-Gen-Worker-Thread", Thread.MIN_PRIORITY);
 	
@@ -299,9 +315,11 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			Config.Client.WorldGenerator.enableDistantGeneration.set(false);
 		}
 	}
-	
-	public static ChunkAccess loadOrMakeChunk(ChunkPos chunkPos, ServerLevel level, LevelLightEngine lightEngine)
+
+	public ChunkAccess loadOrMakeChunk(ChunkPos chunkPos, WorldGenLevelLightEngine lightEngine)
 	{
+		ServerLevel level = params.level;
+
 		CompoundTag chunkData = null;
 		try
 		{
@@ -310,7 +328,10 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			#else
 			// Warning: if multiple threads attempt to access this method at the same time,
 			// it can throw EOFExceptions that are caught and logged by Minecraft
-			chunkData = level.getChunkSource().chunkMap.readChunk(chunkPos);
+			//chunkData = level.getChunkSource().chunkMap.readChunk(chunkPos);
+			RegionFileStorage storage = params.level.getChunkSource().chunkMap.worker.storage;
+			RegionFileStorageExternalCache cache = getOrCreateRegionFileCache(storage);
+			chunkData = cache.read(chunkPos);
 			#endif
 		}
 		catch (Exception e)
@@ -329,6 +350,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		{
 			try
 			{
+				LOAD_LOGGER.info("DistantHorizons: Loading chunk "+chunkPos+" from disk.");
 				return ChunkLoader.read(level, lightEngine, chunkPos, chunkData);
 			}
 			catch (Exception e)
@@ -367,7 +389,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				ChunkAccess target = null;
 				try
 				{
-					target = loadOrMakeChunk(chunkPos, params.level, lightEngine);
+					target = loadOrMakeChunk(chunkPos, lightEngine);
 				}
 				catch (RuntimeException e2)
 				{
@@ -607,7 +629,18 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				EVENT_LOGGER.error("Batch Chunk Generator shutdown interrupted! Ignoring child threads...", e);
 			}
 		}
-		
+		var r = regionFileStorageCache.get();
+		if (r != null)
+		{
+			try
+			{
+				r.close();
+			}
+			catch (IOException e)
+			{
+				EVENT_LOGGER.error("Failed to close region file storage cache!", e);
+			}
+		}
 		EVENT_LOGGER.info(BatchGenerationEnvironment.class.getSimpleName()+" shutdown complete.");
 	}
 	
