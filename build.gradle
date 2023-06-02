@@ -78,17 +78,23 @@ rootProject.versionStr = rootProject.mod_version + "-" + rootProject.minecraft_v
 forgix {
     group = "com.seibel.lod"
     mergedJarName = "DistantHorizons-${rootProject.versionStr}.jar"
-    
-    forge {
-        jarLocation = "build/libs/DistantHorizons-forge-${rootProject.versionStr}.jar"
-    }
 
-    fabric {
-        jarLocation = "build/libs/DistantHorizons-fabric-${rootProject.versionStr}.jar"
-    }
+    if (findProject(":forge"))
+        forge {
+            jarLocation = "build/libs/DistantHorizons-forge-${rootProject.versionStr}.jar"
+        }
 
-    removeDuplicate "com.seibel.lod.api"
-    removeDuplicate "com.seibel.lod.core"
+    findProject(":fabric")
+        fabric {
+            jarLocation = "build/libs/DistantHorizons-fabric-${rootProject.versionStr}.jar"
+        }
+
+    findProject(":quilt")
+        quilt {
+            jarLocation = "build/libs/DistantHorizons-quilt-${rootProject.versionStr}.jar"
+        }
+
+    removeDuplicate "com.seibel.lod"
 }
 
 subprojects { p ->

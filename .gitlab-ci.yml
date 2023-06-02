@@ -19,15 +19,17 @@ build_1_18_2:
   script:
     # this both runs the unit tests and assembles the code
     - ./gradlew build -PmcVer="1.18.2" --gradle-user-home cache/;
+    - ./gradlew mergeJars -PmcVer="1.18.2" --gradle-user-home cache/;
   image: eclipse-temurin:17
   artifacts:
     name: "NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
     paths:
+      - Merged/*.jar
       - fabric/build/libs/*.jar
       - forge/build/libs/*.jar
       - quilt/build/libs/*.jar
     exclude:
-      # TODO: There is a lot of duplicate stuff here, fix it later
+      # TODO: There is a lot of duplicate stuff here, fix it later to be smaller
       - fabric/build/libs/*-all.jar
       - fabric/build/libs/*-sources.jar
       - forge/build/libs/*-all.jar
