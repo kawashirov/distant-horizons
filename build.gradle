@@ -178,6 +178,7 @@ subprojects { p ->
 
         // Log4j
         // TODO: Change to shadowMe later to work in the standalone jar
+        // We cannot do this now as it would break Quilt
         implementation("org.apache.logging.log4j:log4j-api:${rootProject.log4j_version}")
         implementation("org.apache.logging.log4j:log4j-core:${rootProject.log4j_version}")
 
