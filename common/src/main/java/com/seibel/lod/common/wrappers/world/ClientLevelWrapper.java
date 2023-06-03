@@ -71,19 +71,14 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 			// attempt to find the server level with the same dimension type
 			// TODO this assumes only one level per dimension type, the SubDimensionLevelMatcher will need to be added for supporting multiple levels per dimension
 			ServerLevelWrapper foundLevelWrapper = null;
+
+            // TODO: Surely there is a more efficient way to write this code
 			for (ServerLevel serverLevel : serverLevels)
 			{
-                // FIXME: This check is incorrect, even if there are more not "More than 1 level exists for a given dimension", it would still say it is
-                // This happens when both the overworld and end gets passed
-				if (foundLevelWrapper != null)
-				{
-					LOGGER.warn("More than 1 level exists for a given dimension. Defaulting to the first level.");
-					break;
-				}
-				
-				if (serverLevel.dimensionType() == this.level.dimensionType())
+				if (serverLevel.dimension() == this.level.dimension())
 				{
 					foundLevelWrapper = ServerLevelWrapper.getWrapper(serverLevel);
+                    break;
 				}
 			}
 			
