@@ -43,50 +43,80 @@ public class RegionFileStorageExternalCache implements AutoCloseable {
     }
 
     @Nullable
-    public RegionFile getRegionFile(ChunkPos pos) throws IOException {
-        long posLong = ChunkPos.asLong(pos.getRegionX(), pos.getRegionZ());
-        RegionFile rFile;
-        // First check our custom cache
-        for (RegionFileCache cache : this.regionFileCache) {
-            if (cache.pos == posLong) return cache.file;
-        }
-
-        // Then check vanilla cache
-        while (true) {
-            try {
-                rFile = this.storage.regionCache.getOrDefault(posLong, null);
-                break;
-            } catch (ArrayIndexOutOfBoundsException e) {
-                BatchGenerationEnvironment.LOAD_LOGGER.warn("Concurrency issue detected when getting region file for chunk at " + pos + ". Retrying...");
-            }
-        }
-        if (rFile != null) return rFile;
-
-        // Otherwise, check if file exist, and if so, add it to the cache
-        Path p = storage.folder;
-        if (!Files.exists(p)) return null;
-        Path rFilePath = p.resolve("r." + pos.getRegionX() + "." + pos.getRegionZ() + ".mca");
-        rFile = new RegionFile(rFilePath, p, false);
-        regionFileCache.add(new RegionFileCache(ChunkPos.asLong(pos.getRegionX(), pos.getRegionZ()), rFile));
-        while (regionFileCache.size() > MAX_CACHE_SIZE) {
-            regionFileCache.poll().file.close();
-        }
-        return rFile;
-    }
-
-
+    public RegionFile getRegionFile(ChunkPos pos) throws IOException
+	{
+		long posLong = ChunkPos.asLong(pos.getRegionX(), pos.getRegionZ());
+		RegionFile rFile;
+		// First check our custom cache
+		for (RegionFileCache cache : this.regionFileCache)
+		{
+			if (cache.pos == posLong)
+			{
+				return cache.file;
+			}
+		}
+		
+		// Then check vanilla cache
+		while (true)
+		{
+			try
+			{
+				rFile = this.storage.regionCache.getOrDefault(posLong, null);
+				break;
+			}
+			catch (ArrayIndexOutOfBoundsException e)
+			{
+				BatchGenerationEnvironment.LOAD_LOGGER.warn("Concurrency issue detected when getting region file for chunk at " + pos + ". Retrying...");
+			}
+		}
+		
+		if (rFile != null)
+		{
+			return rFile;
+		}
+		
+		// Otherwise, check if file exist, and if so, add it to the cache
+		Path p = storage.folder;
+		if (!Files.exists(p))
+		{
+			return null;
+		}
+		
+		Path rFilePath = p.resolve("r." + pos.getRegionX() + "." + pos.getRegionZ() + ".mca");
+		rFile = new RegionFile(rFilePath, p, false);
+		regionFileCache.add(new RegionFileCache(ChunkPos.asLong(pos.getRegionX(), pos.getRegionZ()), rFile));
+		while (regionFileCache.size() > MAX_CACHE_SIZE)
+		{
+			regionFileCache.poll().file.close();
+		}
+		
+		return rFile;
+	}
+	
+	
     @Nullable
-    public CompoundTag read(ChunkPos pos) throws IOException {
-        RegionFile file = getRegionFile(pos);
-        if (file == null) return null;
-
-        try (DataInputStream stream = file.getChunkDataInputStream(pos)) {
-            if (stream == null) return null;
-            return NbtIo.read(stream);
-        }
-        catch (Throwable e) {
-            return null;
-        }
-    }
+    public CompoundTag read(ChunkPos pos) throws IOException
+	{
+		RegionFile file = getRegionFile(pos);
+		if (file == null)
+		{
+			return null;
+		}
+		
+		
+		try (DataInputStream stream = file.getChunkDataInputStream(pos))
+		{
+			if (stream == null)
+			{
+				return null;
+			}
+			
+			return NbtIo.read(stream);
+		}
+		catch (Throwable e)
+		{
+			return null;
+		}
+	}
 
 }

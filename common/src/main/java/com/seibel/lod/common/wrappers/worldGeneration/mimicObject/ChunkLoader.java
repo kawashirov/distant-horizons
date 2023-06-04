@@ -200,13 +200,14 @@ public class ChunkLoader
 		#else
 		CompoundTag tagLevel = chunkData;
 		#endif
-
+		
 		ChunkPos actualPos = new ChunkPos(tagLevel.getInt("xPos"), tagLevel.getInt("zPos"));
-		if (!Objects.equals(chunkPos, actualPos)) {
-			LOGGER.error("Chunk file at {} is in the wrong location; Ignoring. (Expected {}, got {})", chunkPos, chunkPos, actualPos);
+		if (!Objects.equals(chunkPos, actualPos))
+		{
+			LOGGER.error("Chunk file at "+chunkPos+" is in the wrong location; Ignoring. (Expected "+chunkPos+", got "+actualPos+")");
 			return null;
 		}
-
+		
 		ChunkStatus.ChunkType chunkType = readChunkType(tagLevel);
 		#if PRE_MC_1_18_1
 		if (chunkType != ChunkStatus.ChunkType.LEVELCHUNK)

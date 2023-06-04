@@ -38,10 +38,7 @@ import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvironmentWrapper;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -182,11 +179,14 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 
 	private AtomicReference<RegionFileStorageExternalCache> regionFileStorageCache = new AtomicReference<>();
 
-	public RegionFileStorageExternalCache getOrCreateRegionFileCache(RegionFileStorage storage) {
+	public RegionFileStorageExternalCache getOrCreateRegionFileCache(RegionFileStorage storage)
+	{
 		RegionFileStorageExternalCache cache = regionFileStorageCache.get();
-		if (cache == null) {
+		if (cache == null)
+		{
 			cache = new RegionFileStorageExternalCache(storage);
-			if (!regionFileStorageCache.compareAndSet(null, cache)) {
+			if (!regionFileStorageCache.compareAndSet(null, cache))
+			{
 				cache = regionFileStorageCache.get();
 			}
 		}
