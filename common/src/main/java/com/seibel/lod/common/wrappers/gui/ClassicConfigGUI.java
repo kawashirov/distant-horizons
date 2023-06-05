@@ -131,9 +131,9 @@ public abstract class ClassicConfigGUI {
 
             if (((ConfigEntry) info).isValid(value) == 0 && info.getType() != List.class) {
                 if (!cast)
-                    ((ConfigEntry) info).setWithoutSaving(value);
+                    ((ConfigEntry) info).set(value);
                 else
-                    ((ConfigEntry) info).setWithoutSaving(value.intValue());
+                    ((ConfigEntry) info).set(value.intValue());
             }
 //            else if (((ConfigEntry) info).isValidMemoryAddress() == 0)
 //            {
@@ -266,7 +266,7 @@ public abstract class ClassicConfigGUI {
                         #else
                         Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - 150 - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, Component.translatable("Reset").withStyle(ChatFormatting.RED), (button -> {
                         #endif
-                            ((ConfigEntry) info).setWithoutSaving(((ConfigEntry) info).getDefaultValue());
+                            ((ConfigEntry) info).set(((ConfigEntry) info).getDefaultValue());
                             ((EntryInfo) info.guiValue).index = 0;
                             this.reload = true;
                             Objects.requireNonNull(minecraft).setScreen(this);
@@ -369,7 +369,7 @@ public abstract class ClassicConfigGUI {
                 Function<Object, Component> func = value -> Component.translatable((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
                 #endif
                 ((EntryInfo) info.guiValue).widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
-                    ((ConfigEntry) info).setWithoutSaving(!(Boolean) info.get());
+                    ((ConfigEntry) info).set(!(Boolean) info.get());
                     button.setMessage(func.apply(info.get()));
                 }, func);
             }
