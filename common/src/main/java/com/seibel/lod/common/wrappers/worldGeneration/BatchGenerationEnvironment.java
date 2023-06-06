@@ -33,7 +33,7 @@ import com.seibel.lod.core.pos.DhChunkPos;
 import com.seibel.lod.core.util.objects.EventTimer;
 import com.seibel.lod.core.util.LodUtil;
 import com.seibel.lod.core.util.gridList.ArrayGridList;
-import com.seibel.lod.core.util.objects.LodThreadFactory;
+import com.seibel.lod.core.util.objects.DhThreadFactory;
 import com.seibel.lod.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.lod.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvironmentWrapper;
 
@@ -189,7 +189,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	public static ThreadLocal<Boolean> isDistantGeneratorThread = new ThreadLocal<>();
 	public static boolean isCurrentThreadDistantGeneratorThread() { return (isDistantGeneratorThread.get() != null); }
 	
-	public static final LodThreadFactory threadFactory = new LodThreadFactory("DH-Gen-Worker-Thread", Thread.MIN_PRIORITY);
+	public static final DhThreadFactory threadFactory = new DhThreadFactory("DH-Gen-Worker-Thread", Thread.MIN_PRIORITY);
 	
 	
 	
