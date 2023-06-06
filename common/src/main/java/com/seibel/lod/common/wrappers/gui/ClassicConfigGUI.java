@@ -16,9 +16,7 @@ import java.util.regex.Pattern;
 // Logger (for debug stuff)
 
 import com.seibel.lod.common.wrappers.gui.updater.ChangelogScreen;
-import com.seibel.lod.core.config.types.AbstractConfigType;
-import com.seibel.lod.core.config.types.ConfigCategory;
-import com.seibel.lod.core.config.types.ConfigEntry;
+import com.seibel.lod.core.config.types.*;
 
 // Uses https://github.com/TheElectronWill/night-config for toml (only for Fabric since Forge already includes this)
 
@@ -29,7 +27,6 @@ import com.seibel.lod.core.config.*;
 // Minecraft imports
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.seibel.lod.core.config.types.ConfigUIComment;
 import com.seibel.lod.core.dependencyInjection.SingletonInjector;
 import com.seibel.lod.core.jar.installer.ModrinthGetter;
 import com.seibel.lod.core.jar.updater.SelfUpdater;
@@ -186,6 +183,8 @@ public class ClassicConfigGUI {
         private ConfigListWidget list;
         private boolean reload = false;
 
+        private Button doneButton;
+
         // Real Time config update //
         @Override
         public void tick() {
@@ -245,7 +244,7 @@ public class ClassicConfigGUI {
                 ConfigBase.INSTANCE.configFileINSTANCE.loadFromFile();
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }));
-            Button done = addBtn(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
+            doneButton = addBtn(new Button(this.width / 2 + 4, this.height - 28, 150, 20, CommonComponents.GUI_DONE, (button) -> {
                 ConfigBase.INSTANCE.configFileINSTANCE.saveToFile();
                 Objects.requireNonNull(minecraft).setScreen(parent);
             }));
@@ -256,58 +255,63 @@ public class ClassicConfigGUI {
             this.addWidget(this.list);
             for (AbstractConfigType info : ConfigBase.INSTANCE.entries) {
                 try {
-                    if (info.getCategory().matches(category) && info.getAppearance().showInGui) {
-                        initEntry(info, this.translationPrefix);
-                        #if PRE_MC_1_19
-                        TranslatableComponent name = new TranslatableComponent(translationPrefix + info.getNameWCategory());
-                        #else
-                        Component name = Component.translatable(translationPrefix + info.getNameWCategory());
-                        #endif
-                        if (ConfigEntry.class.isAssignableFrom(info.getClass())) {
-                            #if PRE_MC_1_19
-                            Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - 150 - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, new TextComponent("Reset").withStyle(ChatFormatting.RED), (button -> {
-                            #else
-                            Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - 150 - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, Component.translatable("Reset").withStyle(ChatFormatting.RED), (button -> {
-                            #endif
-                                ((ConfigEntry) info).setWithoutSaving(((ConfigEntry) info).getDefaultValue());
-                                ((EntryInfo) info.guiValue).index = 0;
-                                this.reload = true;
-                                Objects.requireNonNull(minecraft).setScreen(this);
-                            }));
-
-                            if (((EntryInfo) info.guiValue).widget instanceof Map.Entry) {
-                                Map.Entry<Button.OnPress, Function<Object, Component>> widget = (Map.Entry<Button.OnPress, Function<Object, Component>>) ((EntryInfo) info.guiValue).widget;
-                                if (info.getType().isEnum())
-                                    #if PRE_MC_1_19
-                                    widget.setValue(value -> new TranslatableComponent(translationPrefix + "enum." + info.getType().getSimpleName() + "." + info.get().toString()));
-                                    #else
-                                    widget.setValue(value -> Component.translatable(translationPrefix + "enum." + info.getType().getSimpleName() + "." + info.get().toString()));
-                                    #endif
-                                this.list.addButton(new Button(this.width - 150 - ConfigScreenConfigs.SpaceFromRightScreen, 0, 150, 20, widget.getValue().apply(info.get()), widget.getKey()), resetButton, null, name);
-                            } else if (((EntryInfo) info.guiValue).widget != null) {
-                                EditBox widget = new EditBox(font, this.width - 150 - ConfigScreenConfigs.SpaceFromRightScreen + 2, 0, 150 - 4, 20, null);
-                                widget.setMaxLength(150);
-                                widget.insertText(String.valueOf(info.get()));
-                                Predicate<String> processor = ((BiFunction<EditBox, Button, Predicate<String>>) ((EntryInfo) info.guiValue).widget).apply(widget, done);
-                                widget.setFilter(processor);
-                                this.list.addButton(widget, resetButton, null, name);
-                            }
-                        } else if (ConfigCategory.class.isAssignableFrom(info.getClass())) {
-                            Button widget = new Button(this.width / 2 - 100, this.height - 28, 100 * 2, 20, name, (button -> {
-                                ConfigBase.INSTANCE.configFileINSTANCE.saveToFile();
-                                Objects.requireNonNull(minecraft).setScreen(ClassicConfigGUI.getScreen(this.configBase, this, ((ConfigCategory) info).getDestination()));
-                            }));
-                            this.list.addButton(widget, null, null, null);
-                        } else if (ConfigUIComment.class.isAssignableFrom(info.getClass())) {
-                            this.list.addButton(null, null, null, name);
-                        }
-                    }
+                    if (info.getCategory().matches(category) && info.getAppearance().showInGui)
+                        addMenuItem(info);
                 } catch (Exception e) {
                     System.out.println("ERROR: Failed to show ["+info.getNameWCategory()+"]");
                     if (info.get() != null)
                         System.out.print(" with the value ["+info.get()+"] with type ["+info.getType()+"]");
                     e.printStackTrace();
                 }
+            }
+        }
+
+        private void addMenuItem(AbstractConfigType info) {
+            initEntry(info, this.translationPrefix);
+                    #if PRE_MC_1_19
+            TranslatableComponent name = new TranslatableComponent(translationPrefix + info.getNameWCategory());
+                    #else
+                    Component name = Component.translatable(translationPrefix + info.getNameWCategory());
+                    #endif
+            if (ConfigEntry.class.isAssignableFrom(info.getClass())) {
+                        #if PRE_MC_1_19
+                Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - 150 - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, new TextComponent("Reset").withStyle(ChatFormatting.RED), (button -> {
+                        #else
+                        Button resetButton = new Button(this.width - ConfigScreenConfigs.SpaceFromRightScreen - 150 - ConfigScreenConfigs.ButtonWidthSpacing - ConfigScreenConfigs.ResetButtonWidth, 0, ConfigScreenConfigs.ResetButtonWidth, 20, Component.translatable("Reset").withStyle(ChatFormatting.RED), (button -> {
+                        #endif
+                    ((ConfigEntry) info).setWithoutSaving(((ConfigEntry) info).getDefaultValue());
+                    ((EntryInfo) info.guiValue).index = 0;
+                    this.reload = true;
+                    Objects.requireNonNull(minecraft).setScreen(this);
+                }));
+
+                if (((EntryInfo) info.guiValue).widget instanceof Map.Entry) {
+                    Map.Entry<Button.OnPress, Function<Object, Component>> widget = (Map.Entry<Button.OnPress, Function<Object, Component>>) ((EntryInfo) info.guiValue).widget;
+                    if (info.getType().isEnum())
+                                #if PRE_MC_1_19
+                        widget.setValue(value -> new TranslatableComponent(translationPrefix + "enum." + info.getType().getSimpleName() + "." + info.get().toString()));
+                                #else
+                                widget.setValue(value -> Component.translatable(translationPrefix + "enum." + info.getType().getSimpleName() + "." + info.get().toString()));
+                                #endif
+                    this.list.addButton(new Button(this.width - 150 - ConfigScreenConfigs.SpaceFromRightScreen, 0, 150, 20, widget.getValue().apply(info.get()), widget.getKey()), resetButton, null, name);
+                } else if (((EntryInfo) info.guiValue).widget != null) {
+                    EditBox widget = new EditBox(font, this.width - 150 - ConfigScreenConfigs.SpaceFromRightScreen + 2, 0, 150 - 4, 20, null);
+                    widget.setMaxLength(150);
+                    widget.insertText(String.valueOf(info.get()));
+                    Predicate<String> processor = ((BiFunction<EditBox, Button, Predicate<String>>) ((EntryInfo) info.guiValue).widget).apply(widget, doneButton);
+                    widget.setFilter(processor);
+                    this.list.addButton(widget, resetButton, null, name);
+                }
+            } else if (ConfigCategory.class.isAssignableFrom(info.getClass())) {
+                Button widget = new Button(this.width / 2 - 100, this.height - 28, 100 * 2, 20, name, (button -> {
+                    ConfigBase.INSTANCE.configFileINSTANCE.saveToFile();
+                    Objects.requireNonNull(minecraft).setScreen(ClassicConfigGUI.getScreen(this.configBase, this, ((ConfigCategory) info).getDestination()));
+                }));
+                this.list.addButton(widget, null, null, null);
+            } else if (ConfigUIComment.class.isAssignableFrom(info.getClass())) {
+                this.list.addButton(null, null, null, name);
+            } else if (ConfigLinkedEntry.class.isAssignableFrom(info.getClass())) {
+                this.addMenuItem(((ConfigLinkedEntry) info).get());
             }
         }
 
