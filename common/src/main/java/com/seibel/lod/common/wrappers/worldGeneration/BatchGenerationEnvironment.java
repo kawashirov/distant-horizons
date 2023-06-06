@@ -41,7 +41,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -64,17 +63,13 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.chunk.UpgradeData;
-import net.minecraft.world.level.chunk.storage.RegionFile;
 import net.minecraft.world.level.chunk.storage.RegionFileStorage;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.lighting.LevelLightEngine;
 import org.apache.logging.log4j.LogManager;
-
-import javax.annotation.Nullable;
 
 /*
 Total:                   3.135214124s
@@ -169,39 +164,32 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	public final StepFeatures stepFeatures = new StepFeatures(this);
 	public final StepLight stepLight = new StepLight(this);
 	public boolean unsafeThreadingRecorded = false;
-	//public boolean safeMode = false;
-	//private static final IMinecraftClientWrapper MC = SingletonHandler.get(IMinecraftClientWrapper.class);
 	public static final long EXCEPTION_TIMER_RESET_TIME = TimeUnit.NANOSECONDS.convert(1, TimeUnit.SECONDS);
 	public static final int EXCEPTION_COUNTER_TRIGGER = 20;
 	public static final int RANGE_TO_RANGE_EMPTY_EXTENSION = 1;
 	public int unknownExceptionCount = 0;
 	public long lastExceptionTriggerTime = 0;
 
-	private AtomicReference<RegionFileStorageExternalCache> regionFileStorageCache = new AtomicReference<>();
+	private AtomicReference<RegionFileStorageExternalCache> regionFileStorageCacheRef = new AtomicReference<>();
 
 	public RegionFileStorageExternalCache getOrCreateRegionFileCache(RegionFileStorage storage)
 	{
-		RegionFileStorageExternalCache cache = regionFileStorageCache.get();
+		RegionFileStorageExternalCache cache = regionFileStorageCacheRef.get();
 		if (cache == null)
 		{
 			cache = new RegionFileStorageExternalCache(storage);
-			if (!regionFileStorageCache.compareAndSet(null, cache))
+			if (!regionFileStorageCacheRef.compareAndSet(null, cache))
 			{
-				cache = regionFileStorageCache.get();
+				cache = regionFileStorageCacheRef.get();
 			}
 		}
 		return cache;
 	}
 	
-	public static final LodThreadFactory threadFactory = new LodThreadFactory("DH-Gen-Worker-Thread", Thread.MIN_PRIORITY);
-	
 	public static ThreadLocal<Boolean> isDistantGeneratorThread = new ThreadLocal<>();
-	
 	public static boolean isCurrentThreadDistantGeneratorThread() { return (isDistantGeneratorThread.get() != null); }
 	
-	public ExecutorService executorService = Executors.newFixedThreadPool(
-			Math.max(Config.Client.Advanced.Threading.numberOfWorldGenerationThreads.get().intValue(), 1),
-			threadFactory);
+	public static final LodThreadFactory threadFactory = new LodThreadFactory("DH-Gen-Worker-Thread", Thread.MIN_PRIORITY);
 	
 	
 	
@@ -227,16 +215,16 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			if (generator.getClass().toString().equals("class com.terraforged.mod.chunk.TFChunkGenerator"))
 			{
 				EVENT_LOGGER.info("TerraForge Chunk Generator detected: ["+generator.getClass()+"], Distant Generation will try its best to support it.");
-				EVENT_LOGGER.info("If it does crash, turn Distant Generation off or set it to to "+EDhApiWorldGenerationStep.EMPTY+".");
+				EVENT_LOGGER.info("If it does crash, turn Distant Generation off or set it to to ["+EDhApiWorldGenerationStep.EMPTY+"].");
 			}
 			else
 			{
 				EVENT_LOGGER.warn("Unknown Chunk Generator detected: ["+generator.getClass()+"], Distant Generation May Fail!");
-				EVENT_LOGGER.warn("If it does crash, set Distant Generation to OFF or Generation Mode to None.");
+				EVENT_LOGGER.warn("If it does crash, disable Distant Generation or set the Generation Mode to ["+EDhApiWorldGenerationStep.EMPTY+"].");
 			}
 		}
 		
-		params = new GlobalParameters(serverlevel);
+		this.params = new GlobalParameters(serverlevel);
 	}
 	
 	
@@ -253,8 +241,6 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		
 		return future.join();
 	}
-	
-	public void resizeThreadPool(int newThreadCount) { executorService = Executors.newFixedThreadPool(newThreadCount, new LodThreadFactory("DH-Gen-Worker-Thread", Thread.MIN_PRIORITY)); }
 	
 	public void updateAllFutures()
 	{
@@ -599,12 +585,11 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	public int getEventCount() { return this.generationEventList.size(); }
 	
 	@Override
-	public void stop(boolean blocking)
+	public void stop()
 	{
 		EVENT_LOGGER.info(BatchGenerationEnvironment.class.getSimpleName()+" shutting down...");
 		
-		EVENT_LOGGER.info("Canceling futures...");
-		this.executorService.shutdownNow();
+		EVENT_LOGGER.info("Canceling in progress generation event futures...");
 		Iterator<GenerationEvent> iter = this.generationEventList.iterator();
 		while (iter.hasNext())
 		{
@@ -613,52 +598,40 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			iter.remove();
 		}
 		
-		EVENT_LOGGER.info("Awaiting termination...");
-		if (blocking)
+		// clear the chunk cache
+		var regionStorage = this.regionFileStorageCacheRef.get();
+		if (regionStorage != null)
 		{
 			try
 			{
-				int waitTimeInSeconds = 3;
-				if (!this.executorService.awaitTermination(waitTimeInSeconds, TimeUnit.SECONDS))
-				{
-					EVENT_LOGGER.error("Batch Chunk Generator shutdown didn't complete after ["+waitTimeInSeconds+"] seconds! Ignoring child threads...");
-				}
-			}
-			catch (InterruptedException e)
-			{
-				EVENT_LOGGER.error("Batch Chunk Generator shutdown interrupted! Ignoring child threads...", e);
-			}
-		}
-		var r = regionFileStorageCache.get();
-		if (r != null)
-		{
-			try
-			{
-				r.close();
+				regionStorage.close();
 			}
 			catch (IOException e)
 			{
 				EVENT_LOGGER.error("Failed to close region file storage cache!", e);
 			}
 		}
+		
 		EVENT_LOGGER.info(BatchGenerationEnvironment.class.getSimpleName()+" shutdown complete.");
 	}
 	
 	@Override
-	public CompletableFuture<Void> generateChunks(int minX, int minZ, int genSize, EDhApiWorldGenerationStep targetStep, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
+	public CompletableFuture<Void> generateChunks(
+			int minX, int minZ, int genSize, EDhApiWorldGenerationStep targetStep,
+			ExecutorService worldGeneratorThreadPool, Consumer<IChunkWrapper> resultConsumer)
 	{
 		//System.out.println("GenerationEvent: "+genSize+"@"+minX+","+minZ+" "+targetStep);
 		
 		// TODO: Check event overlap via e.tooClose()
-		GenerationEvent genEvent = GenerationEvent.startEvent(new DhChunkPos(minX, minZ), genSize, this, targetStep, runTimeRatio, resultConsumer);
-		generationEventList.add(genEvent);
+		GenerationEvent genEvent = GenerationEvent.startEvent(new DhChunkPos(minX, minZ), genSize, this, targetStep, resultConsumer, worldGeneratorThreadPool);
+		this.generationEventList.add(genEvent);
 		return genEvent.future;
 	}
 	
 	/**
 	 * Called before code that may run for an extended period of time. <br>
 	 * This is necessary to allow canceling world gen since waiting
-	 * for them to cancel when leaving a world can take a while.
+	 * for some world gen requests to finish can take a while.
 	 */
 	private static void throwIfThreadInterrupted() throws InterruptedException
 	{

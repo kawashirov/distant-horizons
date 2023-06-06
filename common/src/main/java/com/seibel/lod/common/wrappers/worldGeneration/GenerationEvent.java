@@ -21,6 +21,7 @@ package com.seibel.lod.common.wrappers.worldGeneration;
 
 import java.lang.invoke.MethodHandles;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -40,23 +41,22 @@ public final class GenerationEvent
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 	private static int generationFutureDebugIDs = 0;
 	
-	final int id;
-	final ThreadedParameters threadedParam;
-	final DhChunkPos minPos;
-	final int size;
-	final EDhApiWorldGenerationStep targetGenerationStep;
-	final ELightGenerationMode lightMode;
-	final double runTimeRatio;
-	EventTimer timer = null;
-	long inQueueTime;
-	long timeoutTime = -1;
+	public final int id;
+	public final ThreadedParameters threadedParam;
+	public final DhChunkPos minPos;
+	public final int size;
+	public final EDhApiWorldGenerationStep targetGenerationStep;
+	public final ELightGenerationMode lightMode;
+	public EventTimer timer = null;
+	public long inQueueTime;
+	public long timeoutTime = -1;
 	public CompletableFuture<Void> future = null;
-	final Consumer<IChunkWrapper> resultConsumer;
+	public final Consumer<IChunkWrapper> resultConsumer;
 	
 	
 	
 	public GenerationEvent(DhChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
-							EDhApiWorldGenerationStep targetGenerationStep, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
+							EDhApiWorldGenerationStep targetGenerationStep, Consumer<IChunkWrapper> resultConsumer)
 	{
 		this.inQueueTime = System.nanoTime();
 		this.id = generationFutureDebugIDs++;
@@ -65,51 +65,42 @@ public final class GenerationEvent
 		this.targetGenerationStep = targetGenerationStep;
 		this.threadedParam = ThreadedParameters.getOrMake(generationGroup.params);
 		this.lightMode = Config.Client.WorldGenerator.lightGenerationMode.get();
-		this.runTimeRatio = runTimeRatio;
 		this.resultConsumer = resultConsumer;
 	}
 	
 	
 	
-	public static GenerationEvent startEvent(DhChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
-											EDhApiWorldGenerationStep target, double runTimeRatio, Consumer<IChunkWrapper> resultConsumer)
+	public static GenerationEvent startEvent(
+			DhChunkPos minPos, int size, BatchGenerationEnvironment genEnvironment,
+			EDhApiWorldGenerationStep target, Consumer<IChunkWrapper> resultConsumer,
+			ExecutorService worldGeneratorThreadPool)
 	{
 		if (size % 2 == 0)
 		{
 			size += 1; // size must be odd for vanilla world gen regions to work
 		}
 		
-		GenerationEvent generationEvent = new GenerationEvent(minPos, size, generationGroup, target, runTimeRatio, resultConsumer);
+		
+		GenerationEvent generationEvent = new GenerationEvent(minPos, size, genEnvironment, target, resultConsumer);
 		generationEvent.future = CompletableFuture.runAsync(() ->
 		{
 			long runStartTime = System.nanoTime();
 			generationEvent.timeoutTime = runStartTime;
 			generationEvent.inQueueTime = runStartTime - generationEvent.inQueueTime;
 			generationEvent.timer = new EventTimer("setup");
+			
 			BatchGenerationEnvironment.isDistantGeneratorThread.set(true);
 			try
 			{
 				//LOGGER.info("generating [{}]", event.minPos);
-				generationGroup.generateLodFromList(generationEvent);
+				genEnvironment.generateLodFromList(generationEvent);
 			}
 			catch (InterruptedException ignored) { }
 			finally
 			{
 				BatchGenerationEnvironment.isDistantGeneratorThread.remove();
-				if (!Thread.interrupted() && runTimeRatio < 1.0)
-				{
-					long endTime = System.nanoTime();
-					try
-					{
-						long deltaMs = TimeUnit.NANOSECONDS.toMillis(endTime - runStartTime);
-						Thread.sleep((long) (deltaMs / runTimeRatio - deltaMs));
-					}
-					catch (InterruptedException ignored)
-					{
-					}
-				}
 			}
-		}, generationGroup.executorService);
+		}, worldGeneratorThreadPool);
 		return generationEvent;
 	}
 	
