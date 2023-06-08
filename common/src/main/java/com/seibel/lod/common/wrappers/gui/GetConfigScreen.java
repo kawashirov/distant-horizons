@@ -17,6 +17,11 @@ public class GetConfigScreen {
     }
 
     public static Screen getScreen(Screen parent) {
+        // Generate the language
+        // This shouldnt be here, but I need a way to test it after Minecraft inits its assets
+//        System.out.println(ConfigBase.INSTANCE.generateLang(false, true));
+
+
         return switch (useScreen) {
             case Classic -> ClassicConfigGUI.getScreen(ConfigBase.INSTANCE, parent, "client");
             case OpenGL -> MinecraftScreen.getScreen(parent, new OpenGLConfigScreen(), ModInfo.ID + ".title");
