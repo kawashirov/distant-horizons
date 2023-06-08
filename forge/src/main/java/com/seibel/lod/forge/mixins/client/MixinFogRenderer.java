@@ -64,7 +64,7 @@ public class MixinFogRenderer {
 		Entity entity = camera.getEntity();
 		boolean isSpecialFog = (entity instanceof LivingEntity) && ((LivingEntity) entity).hasEffect(MobEffects.BLINDNESS);
 		if (!isSpecialFog && cameraNotInFluid && fogMode == FogMode.FOG_TERRAIN
-				&& Config.Client.Graphics.FogQuality.disableVanillaFog.get())
+				&& Config.Client.Advanced.Graphics.Fog.disableVanillaFog.get())
 		{
 			#if PRE_MC_1_17_1
 			RenderSystem.fogStart(A_REALLY_REALLY_BIG_VALUE);

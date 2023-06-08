@@ -51,7 +51,7 @@ public class FabricMain
 		LOGGER.info("Post-Initializing Mod");
 		FabricDependencySetup.runDelayedSetup();
 
-		if (Config.Client.Graphics.FogQuality.disableVanillaFog.get() && SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("bclib"))
+		if (Config.Client.Advanced.Graphics.Fog.disableVanillaFog.get() && SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("bclib"))
 			ModAccessorInjector.INSTANCE.get(IBCLibAccessor.class).setRenderCustomFog(false); // Remove BCLib's fog
 
 		LOGGER.info("Mod Post-Initialized");

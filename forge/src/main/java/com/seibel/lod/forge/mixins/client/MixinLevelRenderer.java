@@ -114,7 +114,9 @@ public class MixinLevelRenderer
 
 			ClientApi.INSTANCE.renderLods(ClientLevelWrapper.getWrapper(level), mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
 		}
-		if (Config.Client.Advanced.lodOnlyMode.get()) {
+		
+		if (Config.Client.Advanced.Debugging.lodOnlyMode.get()) 
+		{
 			callback.cancel();
 		}
 	}

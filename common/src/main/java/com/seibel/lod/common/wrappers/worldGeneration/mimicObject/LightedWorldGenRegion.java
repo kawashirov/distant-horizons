@@ -62,7 +62,6 @@ public class LightedWorldGenRegion extends WorldGenRegion
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 	
 	public final WorldGenLevelLightEngine light;
-	public final ELightGenerationMode lightMode;
 	public final EmptyChunkGenerator generator;
 	public final int writeRadius;
 	public final int size;
@@ -92,17 +91,16 @@ public class LightedWorldGenRegion extends WorldGenRegion
 	#endif
 
 	public LightedWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine,
-			List<ChunkAccess> list, ChunkStatus chunkStatus, int i,
-			ELightGenerationMode lightMode, EmptyChunkGenerator generator)
+			List<ChunkAccess> chunkList, ChunkStatus chunkStatus, int writeRadius,
+			EmptyChunkGenerator generator)
 	{
-		super(serverLevel, list #if POST_MC_1_17_1, chunkStatus, i #endif);
-		this.lightMode = lightMode;
-		this.firstPos = list.get(0).getPos();
+		super(serverLevel, chunkList #if POST_MC_1_17_1, chunkStatus, writeRadius #endif);
+		this.firstPos = chunkList.get(0).getPos();
 		this.generator = generator;
-		light = lightEngine;
-		writeRadius = i;
-		cache = list;
-		size = Mth.floor(Math.sqrt(list.size()));
+		this.light = lightEngine;
+		this.writeRadius = writeRadius;
+		this.cache = chunkList;
+		this.size = Mth.floor(Math.sqrt(chunkList.size()));
 	}
 
 	#if POST_MC_1_17_1
@@ -258,52 +256,15 @@ public class LightedWorldGenRegion extends WorldGenRegion
 	
 	/** Overriding allows us to use our own lighting engine */
 	@Override
-	public LevelLightEngine getLightEngine() {
-		return light;
-	}
-
-	/** Overriding allows us to use our own lighting engine */
-	@Override
-	public int getBrightness(LightLayer lightLayer, BlockPos blockPos)
-	{
-		if (this.lightMode != ELightGenerationMode.FAST)
-		{
-			// MC lighting method
-			return this.light.getLayerListener(lightLayer).getLightValue(blockPos);
-		}
-		else
-		{
-			// Fallback DH lighting methods
-			
-			if (lightLayer == LightLayer.BLOCK)
-			{
-				return 0;
-			}
-			else
-			{
-				BlockPos heightmapPos = super.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
-				return (heightmapPos.getY() <= blockPos.getY()) ? this.getMaxLightLevel() : 0;
-			}
-		}
-	}
+	public LevelLightEngine getLightEngine() { return this.light; }
 	
 	/** Overriding allows us to use our own lighting engine */
 	@Override
-	public int getRawBrightness(BlockPos blockPos, int i)
-	{
-		if (this.lightMode != ELightGenerationMode.FAST)
-		{
-			// MC lighting method
-			return this.light.getRawBrightness(blockPos, i);
-		}
-		else
-		{
-			// Fallback DH lighting methods
-			
-			BlockPos heightmapPos = super.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, blockPos);
-			return (heightmapPos.getY() <= blockPos.getY()) ? this.getMaxLightLevel() : 0;
-		}
-	}
+	public int getBrightness(LightLayer lightLayer, BlockPos blockPos) { return this.light.getLayerListener(lightLayer).getLightValue(blockPos); }
+	
+	/** Overriding allows us to use our own lighting engine */
+	@Override
+	public int getRawBrightness(BlockPos blockPos, int i) { return this.light.getRawBrightness(blockPos, i); }
 	
 	/** Overriding allows us to use our own lighting engine */
 	@Override

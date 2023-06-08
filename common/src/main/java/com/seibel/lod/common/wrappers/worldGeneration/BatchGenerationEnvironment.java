@@ -88,13 +88,13 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 {
 	public static final ConfigBasedSpamLogger PREF_LOGGER =
 			new ConfigBasedSpamLogger(LogManager.getLogger("LodWorldGen"),
-					() -> Config.Client.Advanced.Debugging.DebugSwitch.logWorldGenPerformance.get(),1);
+					() -> Config.Client.Advanced.Logging.logWorldGenPerformance.get(),1);
 	public static final ConfigBasedLogger EVENT_LOGGER =
 			new ConfigBasedLogger(LogManager.getLogger("LodWorldGen"),
-					() -> Config.Client.Advanced.Debugging.DebugSwitch.logWorldGenEvent.get());
+					() -> Config.Client.Advanced.Logging.logWorldGenEvent.get());
 	public static final ConfigBasedLogger LOAD_LOGGER =
 			new ConfigBasedLogger(LogManager.getLogger("LodWorldGen"),
-					() -> Config.Client.Advanced.Debugging.DebugSwitch.logWorldGenLoadEvent.get());
+					() -> Config.Client.Advanced.Logging.logWorldGenLoadEvent.get());
 	
 	//TODO: Make actual proper support for StarLight
 	
@@ -234,7 +234,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	{
 		if (!unsafeThreadingRecorded && !future.isDone())
 		{
-			EVENT_LOGGER.error("Unsafe Threading in Chunk Generator: ", new RuntimeException("Concurrent future"));
+			EVENT_LOGGER.error("Unsafe MultiThreading in Chunk Generator: ", new RuntimeException("Concurrent future"));
 			EVENT_LOGGER.error("To increase stability, it is recommended to set world generation threads count to 1.");
 			unsafeThreadingRecorded = true;
 		}
@@ -298,7 +298,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		if (unknownExceptionCount > EXCEPTION_COUNTER_TRIGGER) {
 			EVENT_LOGGER.error("Too many exceptions in Batching World Generator! Disabling the generator.");
 			unknownExceptionCount = 0;
-			Config.Client.WorldGenerator.enableDistantGeneration.set(false);
+			Config.Client.Advanced.WorldGenerator.enableDistantGeneration.set(false);
 		}
 	}
 
@@ -396,7 +396,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			
 			genEvent.refreshTimeout();
 			region = new LightedWorldGenRegion(params.level, lightEngine, referencedChunks,
-					ChunkStatus.STRUCTURE_STARTS, refSize/2, genEvent.lightMode, generator);
+					ChunkStatus.STRUCTURE_STARTS, refSize/2, generator);
 			adaptor.setRegion(region);
 			genEvent.threadedParam.makeStructFeat(region, params);
 			genChunks = new ArrayGridList<>(referencedChunks, RANGE_TO_RANGE_EMPTY_EXTENSION,
@@ -445,7 +445,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				{
 					genEvent.resultConsumer.accept(wrappedChunk);
 				}
-				if (genEvent.lightMode == ELightGenerationMode.FANCY || isFull)
+				if (isFull)
 				{
 					lightEngine.retainData(target.getPos(), false);
 				}
@@ -547,32 +547,37 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		finally
 		{
 			genEvent.timer.nextEvent("light");
-			switch (region.lightMode)
+			
+			boolean useMinecraftLightingEngine = Config.Client.Advanced.WorldGenerator.lightingEngine.get() == ELightGenerationMode.MINECRAFT;
+			if (useMinecraftLightingEngine)
 			{
-			case FANCY:
+				// generates chunk lighting using MC's methods
+				
 				if (!Thread.interrupted())
 				{
-					stepLight.generateGroup(region.getLightEngine(), chunksToGenerate);
+					this.stepLight.generateGroup(region.getLightEngine(), chunksToGenerate);
 				}
-				break;
-			case FAST:
+			}
+			else
+			{
+				// ignores lighting
+				
 				chunksToGenerate.forEach((chunk) ->
 				{
 					if (chunk instanceof ProtoChunk)
 					{
 						chunk.setLightCorrect(true); // TODO why are we checking instanceof ProtoChunk?
 					}
-					
-					#if POST_MC_1_18_1
+				
+				#if POST_MC_1_18_1
 					if (chunk instanceof LevelChunk)
 					{
 						LevelChunk levelChunk = (LevelChunk) chunk;
 						levelChunk.setLightCorrect(true);
 						levelChunk.setClientLightReady(true);
 					}
-					#endif
+				#endif
 				});
-				break;
 			}
 			
 			genEvent.refreshTimeout();

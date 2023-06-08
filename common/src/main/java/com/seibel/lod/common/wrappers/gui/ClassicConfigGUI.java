@@ -219,7 +219,8 @@ public class ClassicConfigGUI {
                 ConfigBase.INSTANCE.configFileINSTANCE.loadFromFile();
 
             // Changelog button
-            if (Config.Client.AutoUpdater.enableAutoUpdater.get()) {
+            if (Config.Client.Advanced.AutoUpdater.enableAutoUpdater.get())
+			{
                 this.addBtn(new TexturedButtonWidget(
                         // Where the button is on the screen
                         this.width - 28, this.height - 28,

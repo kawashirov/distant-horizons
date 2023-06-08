@@ -27,8 +27,11 @@ public class MixinMinecraft
             method = "<init>(Lnet/minecraft/client/main/GameConfig;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
     )
-    public void onOpenScreen(Minecraft instance, Screen guiScreen) {
-        if (!Config.Client.AutoUpdater.enableAutoUpdater.get()) { // Don't do anything if the user doesn't want it
+    public void onOpenScreen(Minecraft instance, Screen guiScreen) 
+	{
+        if (!Config.Client.Advanced.AutoUpdater.enableAutoUpdater.get()) 
+		{
+			// Don't do anything if the user doesn't want it
             instance.setScreen(guiScreen); // Sets the screen back to the vanilla screen as if nothing ever happened
             return;
         }

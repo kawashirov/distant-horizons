@@ -19,7 +19,9 @@
  
 package com.seibel.lod.common.wrappers.chunk;
 
+import com.seibel.lod.api.enums.config.ELightGenerationMode;
 import com.seibel.lod.common.wrappers.block.BlockStateWrapper;
+import com.seibel.lod.core.config.Config;
 import com.seibel.lod.core.pos.DhBlockPos;
 import com.seibel.lod.core.pos.DhChunkPos;
 import com.seibel.lod.core.pos.Pos2D;
@@ -56,6 +58,9 @@ public class ChunkWrapper implements IChunkWrapper
 	private final LevelReader lightSource;
 	private final ILevelWrapper wrappedLevel;
 	
+	private final boolean useMcLightingEngine;
+	private final boolean isDhGeneratedChunk;
+	
 	private final HashMap<BlockPos, BlockState> blockStateByBlockPosCache = new HashMap<>();
 	
 	
@@ -66,6 +71,10 @@ public class ChunkWrapper implements IChunkWrapper
 		this.lightSource = lightSource;
 		this.wrappedLevel = wrappedLevel;
 		this.chunkPos = new DhChunkPos(chunk.getPos().x, chunk.getPos().z);
+		
+		this.useMcLightingEngine = (Config.Client.Advanced.WorldGenerator.lightingEngine.get() == ELightGenerationMode.MINECRAFT);
+		// TODO is this the best way to differentiate between when we are generating chunks and when MC gave us a chunk?
+		this.isDhGeneratedChunk = (this.lightSource.getClass() == LightedWorldGenRegion.class);
 	}
 	
 	
@@ -164,18 +173,19 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public int getBlockLight(int x, int y, int z)
 	{
-		// TODO is this the best way to differentiate between when we are generating chunks and when MC gave us a chunk?
-		if (this.lightSource.getClass() != LightedWorldGenRegion.class)
+		// use the full lighting engine when the chunks are within render distance or the config requests it
+		if (this.useMcLightingEngine || !this.isDhGeneratedChunk)
 		{
+			// FIXME this returns 0 if the chunks unload
+			
 			// MC lighting method
-			// (used when the chunks are within render distance)
 			return this.lightSource.getBrightness(LightLayer.BLOCK, new BlockPos(x+this.getMinX(), y, z+this.getMinZ()));
 		}
 		else
 		{
 			// DH lighting method
 			return this.getMaxBlockLightAtBlockPos(new DhBlockPos(x, y, z));
-		}	
+		}
 	}
 	/** 
 	 * Note: this doesn't take into account blocks outside this chunk's borders <br>
@@ -230,11 +240,12 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public int getSkyLight(int x, int y, int z)
 	{
-		// TODO is this the best way to differentiate between when we are generating chunks and when MC gave us a chunk?
-		if (this.lightSource.getClass() != LightedWorldGenRegion.class)
+		// use the full lighting engine when the chunks are within render distance or the config requests it
+		if (this.useMcLightingEngine || !this.isDhGeneratedChunk)
 		{
+			// FIXME this returns 0 if the chunks unload
+			
 			// MC lighting method
-			// (used when the chunks are within render distance)
 			return this.lightSource.getBrightness(LightLayer.SKY, new BlockPos(x+this.getMinX(), y, z+this.getMinZ()));
 		}
 		else

@@ -46,7 +46,6 @@ public final class GenerationEvent
 	public final DhChunkPos minPos;
 	public final int size;
 	public final EDhApiWorldGenerationStep targetGenerationStep;
-	public final ELightGenerationMode lightMode;
 	public EventTimer timer = null;
 	public long inQueueTime;
 	public long timeoutTime = -1;
@@ -64,7 +63,6 @@ public final class GenerationEvent
 		this.size = size;
 		this.targetGenerationStep = targetGenerationStep;
 		this.threadedParam = ThreadedParameters.getOrMake(generationGroup.params);
-		this.lightMode = Config.Client.WorldGenerator.lightGenerationMode.get();
 		this.resultConsumer = resultConsumer;
 	}
 	
