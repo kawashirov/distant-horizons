@@ -94,7 +94,7 @@ public class UpdateModScreen extends Screen {
         );
         this.addBtn( // Silent update
                 new Button(this.width / 2 - 75, this.height / 2 + 30, 150, 20, translate(ModInfo.ID + ".updater.silent"), (btn) -> {
-                    Config.Client.Advanced.AutoUpdater.automaticallyUpdate.set(true);
+                    Config.Client.Advanced.AutoUpdater.enableSilentUpdates.set(true);
                     SelfUpdater.updateMod();
                     this.onClose();
                 })
