@@ -47,16 +47,8 @@ public class RegionFileStorageExternalCache implements AutoCloseable {
 	{
 		long posLong = ChunkPos.asLong(pos.getRegionX(), pos.getRegionZ());
 		RegionFile rFile;
-		// First check our custom cache
-		for (RegionFileCache cache : this.regionFileCache)
-		{
-			if (cache.pos == posLong)
-			{
-				return cache.file;
-			}
-		}
-		
-		// Then check vanilla cache
+
+		// Check vanilla cache
 		while (true)
 		{
 			try
@@ -73,6 +65,15 @@ public class RegionFileStorageExternalCache implements AutoCloseable {
 		if (rFile != null)
 		{
 			return rFile;
+		}
+
+		// Then check our custom cache
+		for (RegionFileCache cache : this.regionFileCache)
+		{
+			if (cache.pos == posLong)
+			{
+				return cache.file;
+			}
 		}
 		
 		// Otherwise, check if file exist, and if so, add it to the cache

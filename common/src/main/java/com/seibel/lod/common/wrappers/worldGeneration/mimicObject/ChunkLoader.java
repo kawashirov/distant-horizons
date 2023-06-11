@@ -204,7 +204,7 @@ public class ChunkLoader
 		ChunkPos actualPos = new ChunkPos(tagLevel.getInt("xPos"), tagLevel.getInt("zPos"));
 		if (!Objects.equals(chunkPos, actualPos))
 		{
-			LOGGER.error("Chunk file at "+chunkPos+" is in the wrong location; Ignoring. (Expected "+chunkPos+", got "+actualPos+")");
+			LOGGER.warn("Chunk file at "+chunkPos+" is in the wrong location; Ignoring. (Expected "+chunkPos+", got "+actualPos+")");
 			return null;
 		}
 		
