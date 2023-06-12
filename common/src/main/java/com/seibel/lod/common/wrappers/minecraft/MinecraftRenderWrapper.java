@@ -237,7 +237,12 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
         return getRenderTarget().frameBufferId;
     }
 
-    @Override
+	@Override
+	public int getDepthTextureId() {
+		return getRenderTarget().getDepthTextureId();
+	}
+
+	@Override
     public int getTargetFrameBufferViewportWidth() {
         return getRenderTarget().viewWidth;
     }
