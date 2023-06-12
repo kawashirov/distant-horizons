@@ -81,9 +81,11 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	public boolean isAir() { return this.isAir(this.blockState); }
 	public boolean isAir(BlockState blockState) { return blockState == null || blockState.isAir(); }
 	
+	@Override
+	public boolean isSolid() { return this.blockState.getMaterial().isSolid(); }
 	
-	
-	
+	@Override
+	public boolean isLiquid() { return this.blockState.getMaterial().isLiquid(); }
 	
 	
 	
