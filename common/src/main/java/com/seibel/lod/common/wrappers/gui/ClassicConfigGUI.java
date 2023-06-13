@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 // Logger (for debug stuff)
 
+import com.seibel.lod.api.enums.config.DisallowSelectingViaConfigGui;
 import com.seibel.lod.common.wrappers.gui.updater.ChangelogScreen;
 import com.seibel.lod.core.config.types.*;
 
@@ -27,10 +28,8 @@ import com.seibel.lod.core.config.*;
 // Minecraft imports
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.seibel.lod.core.dependencyInjection.SingletonInjector;
-import com.seibel.lod.core.jar.installer.ModrinthGetter;
 import com.seibel.lod.core.jar.updater.SelfUpdater;
-import com.seibel.lod.core.wrapperInterfaces.IVersionConstants;
+import com.seibel.lod.core.util.AnnotationUtil;
 import com.seibel.lod.coreapi.ModInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -52,6 +51,8 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 #endif
 
 /**
@@ -66,11 +67,14 @@ import net.minecraft.resources.ResourceLocation;
 // FLOATS DONT WORK WITH THIS
 /** This file is going to be removed sometime soon, please dont hook onto anything within this file until the new UI is compleated */
 @SuppressWarnings("unchecked")
-public class ClassicConfigGUI {
+public class ClassicConfigGUI
+{
 	/*
 	    This would be removed later on as it is going to be re-written in java swing
 	 */
-
+	
+	private static final Logger LOGGER = LogManager.getLogger();
+	
 
     //==============//
     // Initializers //
@@ -399,10 +403,39 @@ public class ClassicConfigGUI {
                 Function<Object, Component> func = value -> Component.translatable(translationPrefix + "enum." + fieldClass.getSimpleName() + "." + info.get().toString());
                 #endif
                 ((EntryInfo) info.guiValue).widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
-                    int index = values.indexOf(info.get()) + 1;
-                    info.set(values.get(index >= values.size() ? 0 : index));
-                    button.setMessage(func.apply(info.get()));
-                }, func);
+					
+					// get the currently selected enum and enum index
+					int startingIndex = values.indexOf(info.get());
+					Enum<?> enumValue = (Enum<?>) values.get(startingIndex);
+					
+					// search for the next enum that is selectable
+					int index = startingIndex+1;
+					index = (index >= values.size()) ? 0 : index;
+					while (index != startingIndex)
+					{
+						enumValue = (Enum<?>) values.get(index);
+						if (!AnnotationUtil.doesEnumHaveAnnotation(enumValue, DisallowSelectingViaConfigGui.class))
+						{
+							// this enum shouldn't be selectable via the UI,
+							// skip it
+							break;
+						}
+						
+						index++;
+						index = (index >= values.size()) ? 0 : index;
+					}
+					
+					if (index == startingIndex)
+					{
+						// none of the enums should be selectable, this is a programmer error
+						enumValue = (Enum<?>) values.get(startingIndex);
+						LOGGER.warn("Enum ["+enumValue.getClass()+"] doesn't contain any values that should be selectable via the UI, sticking to the currently selected value ["+enumValue+"].");
+					}
+					
+					
+					info.set(enumValue);
+					button.setMessage(func.apply(info.get()));
+				}, func);
             }
         } else if (ConfigCategory.class.isAssignableFrom(info.getClass())) {
 //            if (!info.info.getName().equals(""))
