@@ -1,5 +1,7 @@
 package com.seibel.lod.fabric.mixins.mods.imm_ptl_core;
 
+// TODO: Fix this eventually
+/*
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
@@ -68,3 +70,4 @@ public class MixinImmersivePortalsGameRenderer {
         );
     }
 }
+*/
