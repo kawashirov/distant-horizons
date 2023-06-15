@@ -34,6 +34,8 @@ import com.seibel.lod.common.wrappers.block.BiomeWrapper;
 import com.seibel.lod.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
 
 import com.seibel.lod.core.wrapperInterfaces.world.ILevelWrapper;
+import net.minecraft.client.multiplayer.ClientChunkCache;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 #if POST_MC_1_17_1
 import net.minecraft.core.QuartPos;
@@ -50,6 +52,9 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.WeakHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ChunkWrapper implements IChunkWrapper
 {
@@ -62,9 +67,19 @@ public class ChunkWrapper implements IChunkWrapper
 	private final boolean isDhGeneratedChunk;
 	
 	private final HashMap<BlockPos, BlockState> blockStateByBlockPosCache = new HashMap<>();
-	
-	
-	
+
+	// Due to vanilla `isClientLightReady()` not designed to be used by non-render thread, that value may return 'true'
+	// just before the light engine is ticked, (right after all light changes is marked to the engine to be processed).
+	// To fix this, on client-only mode, we mixin-redirect the `isClientLightReady()` so that after the call, it will
+	// trigger a synchronous update of this flag here on all chunks that are wrapped.
+	//
+	// Note: Using a static weak hash map to store the chunks that need to be updated, as instance of chunk wrapper
+	// can be duplicated, with same chunk instance. And the data stored here are all temporary, and thus will not be
+	// visible when a chunk is re-wrapped later.
+	// (Also, thread safety done via a reader writer lock)
+	private final static WeakHashMap<ChunkAccess, Boolean> chunksToUpdateClientLightReady = new WeakHashMap<>();
+	private final static ReentrantReadWriteLock weakMapLock = new ReentrantReadWriteLock();
+
 	public ChunkWrapper(ChunkAccess chunk, LevelReader lightSource, @Nullable ILevelWrapper wrappedLevel)
 	{
 		this.chunk = chunk;
@@ -75,9 +90,11 @@ public class ChunkWrapper implements IChunkWrapper
 		this.useMcLightingEngine = (Config.Client.Advanced.WorldGenerator.lightingEngine.get() == ELightGenerationMode.MINECRAFT);
 		// TODO is this the best way to differentiate between when we are generating chunks and when MC gave us a chunk?
 		this.isDhGeneratedChunk = (this.lightSource.getClass() == LightedWorldGenRegion.class);
+
+		weakMapLock.writeLock().lock();
+		chunksToUpdateClientLightReady.put(chunk, false);
+		weakMapLock.writeLock().unlock();
 	}
-	
-	
 	
 	//=========//
 	// methods //
@@ -159,12 +176,21 @@ public class ChunkWrapper implements IChunkWrapper
 		#else
 		if (this.chunk instanceof LevelChunk)
 		{
-			// called when connected to a server (and sometimes when in a singleplayer world)
-			return ((LevelChunk) this.chunk).isClientLightReady() || this.chunk.isLightCorrect();
+			LevelChunk levelChunk = (LevelChunk) this.chunk;
+			if (levelChunk.getLevel() instanceof ClientLevel)
+			{
+				weakMapLock.readLock().lock();
+				boolean fixedIsClientLightReady = chunksToUpdateClientLightReady.get(this.chunk);
+				weakMapLock.readLock().unlock();
+				return fixedIsClientLightReady;
+			}
+
+			// called when in single player or in dedicated server, and the chunk is a level chunk (active)
+			return this.chunk.isLightCorrect() && levelChunk.loaded;
 		}
 		else
 		{
-			// called when in a single player world
+			// called when in a single player world and the chunk is a proto chunk (in world gen, and not active)
 			return this.chunk.isLightCorrect();	
 		}
 		#endif
@@ -332,8 +358,38 @@ public class ChunkWrapper implements IChunkWrapper
 
 	@Override
 	public boolean isStillValid() { return this.wrappedLevel == null || this.wrappedLevel.tryGetChunk(this.chunkPos) == this; }
-	
-	
+
+	// Should be called after client light updates are triggered.
+	private static boolean updateClientLightReady(ChunkAccess chunk, boolean oldValue) {
+		if (chunk instanceof LevelChunk && ((LevelChunk)chunk).getLevel() instanceof ClientLevel)
+		{
+			LevelChunk levelChunk = (LevelChunk)chunk;
+			ClientChunkCache clientChunkCache = ((ClientLevel)levelChunk.getLevel()).getChunkSource();
+			return clientChunkCache.getChunkForLighting(chunk.getPos().x, chunk.getPos().z) != null && levelChunk.isClientLightReady();
+		}
+		else
+		{
+			return oldValue;
+		}
+	}
+
+	public static void syncedUpdateClientLightStatus()
+	{
+		#if PRE_MC_1_18_1
+		// TODO: Check what to do in 1.18.1, or in other versions
+		#else
+		weakMapLock.writeLock().lock();
+		try
+		{
+			chunksToUpdateClientLightReady.replaceAll(ChunkWrapper::updateClientLightReady);
+		}
+		finally {
+			weakMapLock.writeLock().unlock();
+		}
+		#endif
+	}
+
+
 	
 	//================//
 	// helper methods //

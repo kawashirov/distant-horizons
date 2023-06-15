@@ -416,6 +416,9 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			{
 				ChunkAccess target = genChunks.get(offsetX, offsetY);
 				ChunkWrapper wrappedChunk = new ChunkWrapper(target, region, null);
+				if (target instanceof LevelChunk) {
+					((LevelChunk) target).loaded = true;
+				}
 				if (!wrappedChunk.isLightCorrect())
 				{
 					throw new RuntimeException("The generated chunk somehow has isLightCorrect() returning false");
@@ -567,6 +570,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 					if (chunk instanceof ProtoChunk)
 					{
 						chunk.setLightCorrect(true); // TODO why are we checking instanceof ProtoChunk?
+						// TODO: This is due to old times where it may return actual live chunks, which is LevelChunk.
+						//   that though is no longer needed...
 					}
 				
 				#if POST_MC_1_18_1
@@ -575,6 +580,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 						LevelChunk levelChunk = (LevelChunk) chunk;
 						levelChunk.setLightCorrect(true);
 						levelChunk.setClientLightReady(true);
+						levelChunk.loaded = true;
 					}
 				#endif
 				});
