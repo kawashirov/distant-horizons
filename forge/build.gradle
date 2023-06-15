@@ -66,11 +66,11 @@ dependencies {
         // Mojmap mappings
         officialMojangMappings()
         // Parchment mappings (it adds parameter mappings & javadoc)
-        parchment("org.parchmentmc.data:parchment-${rootProject.minecraft_version}:${rootProject.parchment_version}@zip")
+        parchment("org.parchmentmc.data:parchment-${rootProject.parchment_version}@zip")
     }
 
     // Forge
-    forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${project.forge_version}"
+    forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
 
     // Architectury API
 //    if (minecraft_version == "1.16.5") {

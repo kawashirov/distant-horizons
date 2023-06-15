@@ -78,15 +78,12 @@ project(":api").projectDir = file('coreSubProjects/api')
 
 // Minecraft dependent sub-projects
 include("common")
-// Enables or disables the subprojects depending on whats in the version.properties
-if (gradle.builds_for.contains("forge"))
-    include("forge")
+// Enables or disables the subprojects depending on whats in the versionProperties/mcVer.properties
+for (loader in ((String) gradle.builds_for).split(",")) {
+    include(loader)
+}
 //if (gradle.builds_for.contains("fabric") || gradle.builds_for.contains("quilt"))
 //    include("fabricLike")
-if (gradle.builds_for.contains("fabric"))
-    include("fabric")
-if (gradle.builds_for.contains("quilt"))
-    include("quilt") // Just put this here for once we need it ;)
 
 
 rootProject.name = "DistantHorizons"
