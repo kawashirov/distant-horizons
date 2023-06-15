@@ -80,9 +80,11 @@ public class FabricMain
 		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("optifine")) {
 			ModAccessorInjector.INSTANCE.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
+		#if POST_MC_1_17_1
 		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("bclib")) {
 			ModAccessorInjector.INSTANCE.bind(IBCLibAccessor.class, new BCLibAccessor());
 		}
+		#endif
 		LOGGER.info(ModInfo.READABLE_NAME + " Initialized");
 		
 		ApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);

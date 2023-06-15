@@ -1,5 +1,6 @@
 package com.seibel.lod.fabric.wrappers.modAccessor;
 
+#if POST_MC_1_17_1
 import com.seibel.lod.core.wrapperInterfaces.modAccessor.IBCLibAccessor;
 import ru.bclib.config.ClientConfig;
 import ru.bclib.config.Configs;
@@ -19,3 +20,4 @@ public class BCLibAccessor implements IBCLibAccessor {
         Configs.CLIENT_CONFIG.set(ClientConfig.CUSTOM_FOG_RENDERING, newValue);
     }
 }
+#endif
