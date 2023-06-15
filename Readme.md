@@ -161,8 +161,8 @@ To build all versions: `./buildAll` (all builds will end up in the `Merged` fold
 Forgix (To merge multiple mod versions into one jar) [_Used to be_ [_DHJarMerger_](https://github.com/Ran-helo/DHJarMerger)]\
 https://github.com/PacifistMC/Forgix
 
-XZ for Java (data compression)\
-https://tukaani.org/xz/java.html
+LZ4 for Java (data compression)\
+https://github.com/lz4/lz4-java
 
 Json & Toml for Java (config handling)\
 https://github.com/TheElectronWill/night-config
