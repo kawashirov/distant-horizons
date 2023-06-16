@@ -221,10 +221,12 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
     @Override
     public void sendChatMessage(String string)
     {
+        LocalPlayer p = getPlayer();
+        if (p == null) return;
         #if PRE_MC_1_19
-        getPlayer().sendMessage(new TextComponent(string), getPlayer().getUUID());
+        p.sendMessage(new TextComponent(string), getPlayer().getUUID());
         #else
-        getPlayer().sendSystemMessage(net.minecraft.network.chat.Component.translatable(string));
+        p.sendSystemMessage(net.minecraft.network.chat.Component.translatable(string));
         #endif
     }
 
