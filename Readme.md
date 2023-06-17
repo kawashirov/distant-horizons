@@ -18,49 +18,61 @@ If you want to see a quick demo, check out a video covering the mod here:
 
 ## Minecraft and Library Versions
 
-This branch supports the following versions of Minecraft:
+### This branch supports the following versions of Minecraft:
 
-> **NOTE: At the moment only 1.18.2 fabric works/build/runs**
+#### 1.19.4 (BROKE)
+Fabric: 0.14.21\
+Fabric API: 0.83.0+1.19.4\
+Forge: 45.1.0\
+Parchment: 1.19.3:2023.03.12\
+Modmenu: 6.2.3
+
+#### 1.19.2 (BROKE)
+Fabric: 0.14.21\
+Fabric API: 0.76.0+1.19.2\
+Forge: 43.2.14\
+Parchment: 1.19.2:2022.11.27\
+Modmenu: 4.2.0-beta.2
 
 #### 1.19 (BROKE)
-Forge: 41.0.19\
-Fabric: 0.14.7\
-Fabric API: 0.55.3+1.19\
-Modmenu: 4.0.0
+Fabric: 0.14.21\
+Fabric API: 0.58.0+1.19\
+Forge: 41.1.0\
+Parchment: 1.19.2:2022.11.27\
+Modmenu: 4.0.4
 
-#### 1.18.2 (ONLY FABRIC WORKS)
-Fabric: 0.14.14\
-Fabric API: 0.67.1+1.18.2\
-Forge: 40.0.32\
-Parchment=2022.11.06\
+#### 1.18.2
+Fabric: 0.14.21\
+Fabric API: 0.76.0+1.18.2\
+Forge: 40.2.9\
+Parchment: 1.18.2:2022.11.06\
 Modmenu: 3.2.5
 
-#### 1.18.1, 1.18 (CEASING DEVELOPMENT SOON)
-Forge: 39.1.2\
-Fabric: 0.13.3\
-Fabric API: 0.42.6+1.18\
-Modmenu: 3.0.1
-
 #### 1.17.1, 1.17 (BROKE)
-Forge: 37.1.1\
-Fabric: 0.13.2\
+Fabric: 0.14.21\
 Fabric API: 0.46.1+1.17\
+Forge: 37.1.1\
+Parchment: 1.17.1:2021.12.12\
 Modmenu: 2.0.14
 
-#### 1.16.5, 1.16.5 (BROKE)
-Forge: 36.2.28\
-Fabric: 0.13.2\
+#### 1.16.5, 1.16.4 (BROKE)
+Fabric: 0.14.21\
 Fabric API: 0.42.0+1.16\
+Forge: 36.2.39\
+Parchment: 1.16.5:2022.03.06\
 Modmenu: 1.16.22
+
+### Versions no longer supported
+- 1.18.1, 1.18
 <br><br>
 
 ### Plugin and Library versions
 
-Fabric loom: 1.1-snapshot\
-Forge gradle: 5.1.67\
+Fabric loom: 1.1.+\
+Forge gradle (Using Architectury): 3.4-SNAPSHOT\
 Sponge vanilla gradle: 0.2.1-SNAPSHOT\
-Sponge mixin gradle: 0.7-SNAPSHOT\
-Java Compiler plugin: Manifold Preprocessor
+Sponge mixin: 0.8.5\
+Java Preprocessor plugin: Manifold Preprocessor
 
 <br>
 
@@ -108,13 +120,15 @@ From the File Explorer:
 2. Download the core from https://gitlab.com/jeseibel/distant-horizons-core and extract into a folder called `coreSubProjects`
 3. Open a terminal emulator in the project folder (On Windows you can type `cmd` in the title bar)
 4. Run the commands: `./gradlew assemble`
-5. The compiled jar file will be in the folder `Merged`
+5. Merge the jars wih `./gradlew mergeJars`
+6The compiled jar file will be in the folder `Merged`
 
 From the command line:
 1. `git clone --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
 2. `cd minecraft-lod-mod`
 3. `./gradlew assemble`
-4. The compiled jar file will be in the folder `Merged`
+4. `./gradlew mergeJars`
+5. The compiled jar file will be in the folder `Merged`
 
 Run tests with: `./gradlew test`
 
