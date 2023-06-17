@@ -87,7 +87,7 @@ dependencies {
     addMod("maven.modrinth:iris:${rootProject.iris_version}", rootProject.enable_iris)
 
     // BCLib
-    addMod("com.github.paulevsGitch:BCLib:${rootProject.bclib_version}", rootProject.enable_bclib)
+    addMod("com.github.quiqueck:BCLib:${rootProject.bclib_version}", rootProject.enable_bclib)
 
     // Canvas
     addMod("io.vram:canvas-fabric-${project.canvas_version}", rootProject.enable_canvas)
