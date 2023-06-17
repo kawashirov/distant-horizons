@@ -75,7 +75,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	
 	
 	@Override
-	public Object getWrappedMcObject_UNSAFE() { return this.blockState; }
+	public Object getWrappedMcObject() { return this.blockState; }
 	
 	@Override
 	public boolean isAir() { return this.isAir(this.blockState); }

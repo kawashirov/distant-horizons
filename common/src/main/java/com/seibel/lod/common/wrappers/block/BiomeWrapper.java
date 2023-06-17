@@ -113,6 +113,6 @@ public class BiomeWrapper implements IBiomeWrapper
 	
 	
 	@Override 
-	public Object getWrappedMcObject_UNSAFE() { return this.biome; }
+	public Object getWrappedMcObject() { return this.biome; }
 	
 }

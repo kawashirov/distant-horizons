@@ -28,7 +28,7 @@ public class ServerBlockStateCache
 
     public ServerBlockStateCache(BlockState blockState, ILevelWrapper samplingLevel, DhBlockPos samplingPos) {
         state = blockState;
-        level = (LevelReader) samplingLevel.getWrappedMcObject_UNSAFE();
+        level = (LevelReader) samplingLevel.getWrappedMcObject();
         pos = McObjectConverter.Convert(samplingPos);
         resolveShapes();
         //LOGGER.info("ServerBlockState created for {}", blockState);

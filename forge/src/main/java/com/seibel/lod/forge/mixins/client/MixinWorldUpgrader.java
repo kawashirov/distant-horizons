@@ -109,7 +109,7 @@ public class MixinWorldUpgrader {
         }
 
         @Override
-        public Object getWrappedMcObject_UNSAFE() {
+        public Object getWrappedMcObject() {
             return null;
         }
 

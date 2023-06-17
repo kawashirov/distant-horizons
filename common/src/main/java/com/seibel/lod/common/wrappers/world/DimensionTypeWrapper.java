@@ -82,7 +82,7 @@ public class DimensionTypeWrapper implements IDimensionTypeWrapper
     }
 	
 	@Override
-    public Object getWrappedMcObject_UNSAFE()
+    public Object getWrappedMcObject()
     {
         return this.dimensionType;
     }

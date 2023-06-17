@@ -45,7 +45,7 @@ public class ClientBlockStateCache
     public final BlockPos pos;
     public ClientBlockStateCache(BlockState blockState, IClientLevelWrapper samplingLevel, DhBlockPos samplingPos) {
         state = blockState;
-        level = (LevelReader) samplingLevel.getWrappedMcObject_UNSAFE();
+        level = (LevelReader) samplingLevel.getWrappedMcObject();
         pos = McObjectConverter.Convert(samplingPos);
         resolveColors();
         //LOGGER.info("ClientBlocKCache created for {}", blockState);

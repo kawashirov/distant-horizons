@@ -69,7 +69,7 @@ public final class GlobalParameters
 	{
 		this.lodLevel = lodLevel;
 
-		level = ((ServerLevelWrapper)lodLevel.getServerLevelWrapper()).getWrappedMcObject_UNSAFE();
+		level = ((ServerLevelWrapper)lodLevel.getServerLevelWrapper()).getWrappedMcObject();
 		lightEngine = (ThreadedLevelLightEngine) level.getLightEngine();
 		MinecraftServer server = level.getServer();
 		WorldData worldData = server.getWorldData();

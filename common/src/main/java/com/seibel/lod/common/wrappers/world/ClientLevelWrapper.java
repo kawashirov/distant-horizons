@@ -179,7 +179,7 @@ public class ClientLevelWrapper implements IClientLevelWrapper
     }
 
     @Override
-    public ClientLevel getWrappedMcObject_UNSAFE()
+    public ClientLevel getWrappedMcObject()
     {
         return level;
     }

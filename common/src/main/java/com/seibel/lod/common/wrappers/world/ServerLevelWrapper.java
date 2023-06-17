@@ -183,7 +183,7 @@ public class ServerLevelWrapper implements IServerLevelWrapper
     }
 
     @Override
-    public ServerLevel getWrappedMcObject_UNSAFE()
+    public ServerLevel getWrappedMcObject()
     {
         return level;
     }
