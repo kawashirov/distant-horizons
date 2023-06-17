@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import java.io.File;
 import java.nio.file.Path;
 
-//@Mixin(WorldUpgrader.class)
+@Mixin(WorldUpgrader.class)
 public class MixinWorldUpgrader {
     static class FakeLevelWrapper implements IServerLevelWrapper {
         private Path saveFolder;
