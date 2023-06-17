@@ -6,7 +6,7 @@ issueTrackerURL="${issues}"
 
 
 [[mods]] #//mandatory
-	modId="lod" #//mandatory
+	modId="distanthorizons" #//mandatory
 	version= "${version}" #//mandatory, gets the version number from jar populated by the build.gradle script
 	displayName="${mod_name}" #//mandatory
 	authors=["James Seibel", "Leonardo Amato", "Cola", "coolGi", "Ran", "Leetom"]
@@ -25,7 +25,7 @@ issueTrackerURL="${issues}"
 	acceptableRemoteVersions="*"
 
 
-[[dependencies.lod]]
+[[dependencies.distanthorizons]]
 	modId="minecraft"
 	mandatory=true
 	versionRange="${compatible_forgemc_versions}" # Where we set what version of mc it is avalible for

@@ -76,7 +76,7 @@ writeBuildGradlePredefine(rootProject.mcVers, rootProject.mcIndex)
 rootProject.versionStr = rootProject.mod_version + "-" + rootProject.minecraft_version // + "-" + new Date().format("yyyy_MM_dd_HH_mm")
 // Forgix settings (used for merging jars)
 forgix {
-    group = "com.seibel.lod"
+    group = "com.seibel.distanthorizons"
     mergedJarName = "DistantHorizons-${rootProject.versionStr}.jar"
 
     if (findProject(":forge"))
@@ -94,7 +94,7 @@ forgix {
             jarLocation = "build/libs/DistantHorizons-quilt-${rootProject.versionStr}.jar"
         }
 
-    removeDuplicate "com.seibel.lod"
+    removeDuplicate "com.seibel.distanthorizons"
 }
 
 subprojects { p ->
@@ -162,7 +162,7 @@ subprojects { p ->
     // (This will point to a non-existent class in all sub-projects except "Core")
     if (p == project(":core")) {
         application {
-            mainClass.set("com.seibel.lod.core.jar.JarMain")
+            mainClass.set("com.seibel.distanthorizons.core.jar.JarMain")
         }
     }
 
@@ -260,11 +260,11 @@ subprojects { p ->
         configurations = [project.configurations.shadowMe]
         if (isMinecraftSubProject && p != project(":common")) {
             configurations.push(project.configurations.shadowCommon) // Shadow the common subproject
-            relocate "com.seibel.lod.common", "loaderCommon.${p.name}.com.seibel.lod.common" // Move the loader files to a different location
+            relocate "com.seibel.distanthorizons.common", "loaderCommon.${p.name}.com.seibel.distanthorizons.common" // Move the loader files to a different location
 
             if (findProject(":fabricLike") && p != project(":fabricLike")) {
                 configurations.push(project.configurations.shadowFabricLike) // Shadow the fabricLike subproject
-                relocate "com.seibel.lod.fabriclike", "loaderCommon.${p.name}.com.seibel.lod.fabriclike" // Move the loader files to a different location
+                relocate "com.seibel.distanthorizons.fabriclike", "loaderCommon.${p.name}.com.seibel.distanthorizons.fabriclike" // Move the loader files to a different location
             }
         }
         def librariesLocation = "distanthorizons.libraries"
@@ -368,7 +368,7 @@ subprojects { p ->
         manifest {
             attributes 'Implementation-Title': rootProject.mod_name,
                     'Implementation-Version': rootProject.mod_version,
-                    'Main-Class': 'com.seibel.lod.core.jar.JarMain' // When changing the main of the jar change this line
+                    'Main-Class': 'com.seibel.distanthorizons.core.jar.JarMain' // When changing the main of the jar change this line
         }
     }
 
@@ -516,9 +516,9 @@ allprojects { p ->
 
 
     task copyCommonLoaderResources(type: Copy) {
-        from project(":common").file("src/main/resources/${accessWidenerVersion}.lod.accesswidener")
+        from project(":common").file("src/main/resources/${accessWidenerVersion}.distanthorizons.accesswidener")
         into(file(p.file("build/resources/main")))
-        rename "${accessWidenerVersion}.lod.accesswidener", "lod.accesswidener"
+        rename "${accessWidenerVersion}.distanthorizons.accesswidener", "distanthorizons.accesswidener"
 
         // Move the fabricLike mixin to its different places for each subproject
         if (findProject(":fabricLike")) {
@@ -540,7 +540,7 @@ allprojects { p ->
 
         // Delete all the duplicated accesswideners
         delete fileTree(p.file("build/resources/main")) {
-            include "*.lod.accesswidener"
+            include "*.distanthorizons.accesswidener"
         }
     }
 

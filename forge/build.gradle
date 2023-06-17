@@ -18,7 +18,7 @@ architectury {
 //}
 
 loom {
-    accessWidenerPath = project(":common").file("src/main/resources/${accessWidenerVersion}.lod.accesswidener")
+    accessWidenerPath = project(":common").file("src/main/resources/${accessWidenerVersion}.distanthorizons.accesswidener")
 
     forge {
         convertAccessWideners = true

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "id": "lod",
+  "id": "distanthorizons",
   "version": "${version}",
 
   "name": "${mod_name}",
@@ -16,19 +16,19 @@
   "license": "LGPL-3",
   "icon": "icon.png",
 
-  "accessWidener": "lod.accesswidener",
+  "accessWidener": "distanthorizons.accesswidener",
 
   "environment": "*",
   "entrypoints": {
     "client": [
-      "com.seibel.lod.fabric.FabricClientMain"
+      "com.seibel.distanthorizons.fabric.FabricClientMain"
     ],
     "server": [
-      "com.seibel.lod.fabric.FabricDedicatedServerMain"
+      "com.seibel.distanthorizons.fabric.FabricDedicatedServerMain"
     ],
 
     "modmenu": [
-      "com.seibel.lod.fabric.wrappers.config.ModMenuIntegration"
+      "com.seibel.distanthorizons.fabric.wrappers.config.ModMenuIntegration"
     ]
   },
 

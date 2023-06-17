@@ -1,7 +1,7 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "com.seibel.lod.fabric.mixins",
+  "package": "com.seibel.distanthorizons.fabric.mixins",
   "mixins": [
     "server.unsafe.MixinThreadingDetector",
     "server.MixinChunkGenerator",
@@ -26,5 +26,5 @@
   "injectors": {
     "defaultRequire": 1
   },
-  "plugin": "com.seibel.lod.fabric.mixins.FabricMixinPlugin"
+  "plugin": "com.seibel.distanthorizons.fabric.mixins.FabricMixinPlugin"
 }

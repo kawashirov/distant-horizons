@@ -1,7 +1,7 @@
 {
 	"required": true,
 	"minVersion": "0.8",
-	"package": "com.seibel.lod.forge.mixins",
+	"package": "com.seibel.distanthorizons.forge.mixins",
 	"mixins": [
 		"server.unsafe.MixinThreadingDetector",
       	"server.MixinUtilBackgroundThread",
@@ -19,5 +19,5 @@
 		"client.MixinTextureUtil"
 	],
 	"server": [],
-	"plugin": "com.seibel.lod.forge.mixins.ForgeMixinPlugin"
+	"plugin": "com.seibel.distanthorizons.forge.mixins.ForgeMixinPlugin"
 }

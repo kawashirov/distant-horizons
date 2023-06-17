@@ -3,7 +3,7 @@ plugins {
 }
 
 loom {
-    accessWidenerPath = project(":common").file("src/main/resources/${accessWidenerVersion}.lod.accesswidener")
+    accessWidenerPath = project(":common").file("src/main/resources/${accessWidenerVersion}.distanthorizons.accesswidener")
 
     // "runs" isn't required, but when we do need it then it can be useful
     runs {
