@@ -28,8 +28,6 @@ public class GetConfigScreen
         // This shouldn't be here, but I need a way to test it after Minecraft inits its assets
         //System.out.println(ConfigBase.INSTANCE.generateLang(false, true));
 		
-		runGuiOnlyConfigSetup();
-		
         return switch (useScreen)
 		{
             case Classic -> ClassicConfigGUI.getScreen(ConfigBase.INSTANCE, parent, "client");
@@ -39,16 +37,4 @@ public class GetConfigScreen
             default -> null;
         };
     }
-	
-	/** 
-	 * Updates any config values that are UI only 
-	 * and adds any listeners that depend on multiple config values. 
-	 */
-	private static void runGuiOnlyConfigSetup()
-	{
-		ThreadPresetConfigEventHandler.INSTANCE.setUiOnlyConfigValues();
-		RenderQualityPresetConfigEventHandler.INSTANCE.setUiOnlyConfigValues();
-		QuickRenderToggleConfigEventHandler.INSTANCE.setUiOnlyConfigValues();
-	}
-	
 }

@@ -48,7 +48,9 @@ public class LodCommonMain {
 //        }
     }
 
-    public static void initConfig() {
+    public static void initConfig()
+	{
         ConfigBase.INSTANCE = new ConfigBase(ModInfo.ID, ModInfo.NAME, Config.class,1);
-    }
+		Config.completeDelayedSetup();
+	}
 }
