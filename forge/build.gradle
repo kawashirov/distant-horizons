@@ -97,7 +97,6 @@ task deleteResources(type: Delete) {
 tasks.register('copyAllResources') {
     dependsOn(copyCoreResources)
     dependsOn(copyCommonLoaderResources)
-    dependsOn(deleteDuplicatedCommonLoaderResources)
 }
 
 processResources {

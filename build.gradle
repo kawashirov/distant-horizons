@@ -359,6 +359,21 @@ subprojects { p ->
                 }
             }
         }
+
+
+
+        // Delete un-needed files
+        exclude "DistantHorizons.fabricLike.mixins.json" // This isnt required atm, but we will be using it later
+//        exclude "*.distanthorizons.accesswidener"
+////        include "${accessWidenerVersion}.distanthorizons.accesswidener"
+        // Jank solution to remove all unused accesswideners
+        // The line above would work..., except forge requires the original accesswidener, meaning we require this jank solution
+        exclude { file ->
+            if (file.name.contains(".distanthorizons.accesswidener") && file.name != "${accessWidenerVersion}.distanthorizons.accesswidener") {
+                return true
+            }
+            return false
+        }
     }
 
 
@@ -520,6 +535,7 @@ allprojects { p ->
         into(file(p.file("build/resources/main")))
         rename "${accessWidenerVersion}.distanthorizons.accesswidener", "distanthorizons.accesswidener"
 
+
         // Move the fabricLike mixin to its different places for each subproject
         if (findProject(":fabricLike")) {
             from project(":fabricLike").file("src/main/resources/DistantHorizons.fabricLike.mixins.json")
@@ -531,17 +547,6 @@ allprojects { p ->
     task copyCoreResources(type: Copy) {
         from fileTree(project(":core").file("src/main/resources"))
         into p.file("build/resources/main")
-    }
-
-    // TODO: This method doesnt seem to actually remove it from the jar, probably called at incorrect spots
-    task deleteDuplicatedCommonLoaderResources(type: Delete) {
-        // Delete the duplicated fabricLike.mixins.json
-        delete p.file("build/resources/main/DistantHorizons.fabricLike.mixins.json")
-
-        // Delete all the duplicated accesswideners
-        delete fileTree(p.file("build/resources/main")) {
-            include "*.distanthorizons.accesswidener"
-        }
     }
 
     tasks.withType(JavaCompile) {
