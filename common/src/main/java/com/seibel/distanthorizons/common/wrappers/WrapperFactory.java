@@ -80,7 +80,7 @@ public class WrapperFactory implements IWrapperFactory
 	 */
 	public IChunkWrapper createChunkWrapper(Object[] objectArray) throws ClassCastException
 	{
-		if (objectArray.length == 1 && objectArray[0] instanceof IChunkWrapper) // alternate option if "instanceof" can't be compiled down to older JRE versions "IChunkWrapper.class.isInstance(objectArray[0])" Feel free to delete this comment if we've compiled the mod for 1.16 or earlier - James
+		if (objectArray.length == 1 && objectArray[0] instanceof IChunkWrapper)
 		{
 			try
 			{
@@ -93,22 +93,24 @@ public class WrapperFactory implements IWrapperFactory
 				throw new ClassCastException(createChunkWrapperErrorMessage(objectArray));
 			}
 		}
-		// correct number of parameters from the API
+		
+		// MC 1.18
+		#if POST_MC_1_17_1 && PRE_MC_1_19
 		else if (objectArray.length == 2)
 		{
+			// correct number of parameters from the API
+			
 			// chunk
-			if (!(objectArray[0] instanceof ChunkAccess))
+			if (!(objectArray[0] instanceof ChunkAccess chunk))
 			{
 				throw new ClassCastException(createChunkWrapperErrorMessage(objectArray));
 			}
-			ChunkAccess chunk = (ChunkAccess) objectArray[0];
 			
 			// light source
-			if (!(objectArray[1] instanceof LevelReader))
+			if (!(objectArray[1] instanceof LevelReader lightSource))
 			{
 				throw new ClassCastException(createChunkWrapperErrorMessage(objectArray));
 			}
-			LevelReader lightSource = (LevelReader) objectArray[1];
 			
 			
 			return new ChunkWrapper(chunk, lightSource, /*A DH wrapped level isn't necessary*/null);
@@ -118,15 +120,31 @@ public class WrapperFactory implements IWrapperFactory
 		{
 			throw new ClassCastException(createChunkWrapperErrorMessage(objectArray));
 		}
+		#else
+			// Intentional compiler error to bring attention to the missing wrapper function.
+			// If you need to work on an unimplemented version but don't have the ability to implement this yet
+			// you can comment it out, but please don't commit it. Someone will have to implement it 
+			not implemented for this version of Minecraft!
+		#endif
 	}
-	/** Note: when this is updated for different MC versions, make sure you also update the documentation in {@link IDhApiWorldGenerator#generateChunks}. */
+	/** 
+	 * Note: when this is updated for different MC versions, 
+	 * make sure you also update the documentation in {@link IDhApiWorldGenerator#generateChunks}. 
+	 */
 	private static String createChunkWrapperErrorMessage(Object[] objectArray)
 	{
 		StringBuilder message = new StringBuilder(
 				"Chunk wrapper creation failed. \n" +
-				"Expected parameters: " +
-				"[" + ChunkAccess.class.getName() + "], " +
-				"[" + LevelReader.class.getName() + "]. \n");
+						"Expected parameters: \n");
+		
+		// MC 1.18
+		#if POST_MC_1_17_1 && PRE_MC_1_19
+		message.append("["+ChunkAccess.class.getName()+"], \n");
+		message.append("["+LevelReader.class.getName()+"]. \n");
+		#else
+			// See preprocessor comment in createChunkWrapper() for full documentation
+			not implemented for this version of Minecraft!
+		#endif
 		
 		if (objectArray.length != 0)
 		{
