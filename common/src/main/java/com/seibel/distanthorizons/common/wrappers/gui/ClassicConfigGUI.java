@@ -328,7 +328,7 @@ public class ClassicConfigGUI
 
             // If the update is pending, display this message to inform the user that it will apply when the game restarts
             if (SelfUpdater.deleteOldOnClose)
-                drawString(matrices, font, new TranslatableComponent("lod.updater.waitingForClose"), 4, height-38, 0xFFFFFF);
+                drawString(matrices, font, new TranslatableComponent(configBase.modID + ".updater.waitingForClose"), 4, height-38, 0xFFFFFF);
 
 
             // Render the tooltip only if it can find a tooltip in the language file
