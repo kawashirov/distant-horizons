@@ -337,15 +337,20 @@ public class ClassicConfigGUI
                     if (list.getHoveredButton(mouseX, mouseY).isPresent()) {
                         AbstractWidget buttonWidget = list.getHoveredButton(mouseX, mouseY).get();
                         Component text = ButtonEntry.buttonsWithText.get(buttonWidget);
+                        // A quick fix for tooltips on linked entries
+                        AbstractConfigType newInfo = ConfigLinkedEntry.class.isAssignableFrom(info.getClass())?
+                                ((ConfigLinkedEntry) info).get():
+                                info;
+
                         #if PRE_MC_1_19
-                        TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.getName());
+                        TranslatableComponent name = new TranslatableComponent(this.translationPrefix + (newInfo.category.isEmpty() ? "" : newInfo.category + ".") + newInfo.getName());
                         #else
                         Component name = Component.translatable(this.translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.getName());
                         #endif
-                        String key = translationPrefix + (info.category.isEmpty() ? "" : info.category + ".") + info.getName() + ".@tooltip";
+                        String key = translationPrefix + (newInfo.category.isEmpty() ? "" : newInfo.category + ".") + newInfo.getName() + ".@tooltip";
 
-                        if (((EntryInfo) info.guiValue).error != null && text.equals(name))
-                            renderTooltip(matrices, (Component) ((EntryInfo) info.guiValue).error.getValue(), mouseX, mouseY);
+                        if (((EntryInfo) newInfo.guiValue).error != null && text.equals(name))
+                            renderTooltip(matrices, (Component) ((EntryInfo) newInfo.guiValue).error.getValue(), mouseX, mouseY);
                         else if (I18n.exists(key) && (text != null && text.equals(name))) {
                             List<Component> list = new ArrayList<>();
                             for (String str : I18n.get(key).split("\n"))
