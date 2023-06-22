@@ -121,7 +121,7 @@ From the File Explorer:
 3. Open a terminal emulator in the project folder (On Windows you can type `cmd` in the title bar)
 4. Run the commands: `./gradlew assemble`
 5. Merge the jars wih `./gradlew mergeJars`
-6The compiled jar file will be in the folder `Merged`
+6. The compiled jar file will be in the folder `Merged`
 
 From the command line:
 1. `git clone --recurse-submodules https://gitlab.com/jeseibel/minecraft-lod-mod.git`
