@@ -23,7 +23,6 @@ package com.seibel.distanthorizons.common.wrappers.worldGeneration;
 import com.seibel.distanthorizons.api.enums.worldGeneration.EDhApiWorldGenerationStep;
 import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject.*;
-import com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject.*;
 import com.seibel.distanthorizons.core.dataObjects.transformers.FullDataToRenderDataTransformer;
 import com.seibel.distanthorizons.core.level.IDhServerLevel;
 import com.seibel.distanthorizons.core.config.Config;
