@@ -95,7 +95,7 @@ public class WrapperFactory implements IWrapperFactory
 		}
 		
 		// MC 1.18
-		#if POST_MC_1_17_1 && PRE_MC_1_19
+		#if POST_MC_1_17_1 && PRE_MC_1_20_1
 		else if (objectArray.length == 2)
 		{
 			// correct number of parameters from the API
@@ -138,7 +138,7 @@ public class WrapperFactory implements IWrapperFactory
 						"Expected parameters: \n");
 		
 		// MC 1.18
-		#if POST_MC_1_17_1 && PRE_MC_1_19
+		#if POST_MC_1_17_1 && PRE_MC_1_20_1
 		message.append("["+ChunkAccess.class.getName()+"], \n");
 		message.append("["+LevelReader.class.getName()+"]. \n");
 		#else
