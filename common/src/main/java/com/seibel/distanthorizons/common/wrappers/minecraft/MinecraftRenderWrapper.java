@@ -37,7 +37,7 @@ import com.seibel.distanthorizons.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.wrapperInterfaces.misc.ILightMapWrapper;
 
-#if PRE_MC_1_19_3
+#if PRE_MC_1_19_4
 import com.mojang.math.Vector3f;
 #else
 import org.joml.Vector3f;

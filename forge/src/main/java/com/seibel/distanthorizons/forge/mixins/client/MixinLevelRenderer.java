@@ -20,7 +20,7 @@
 package com.seibel.distanthorizons.forge.mixins.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-#if PRE_MC_1_19_3
+#if PRE_MC_1_19_4
 import com.mojang.math.Matrix4f;
 #else
 import org.joml.Matrix4f;
@@ -103,6 +103,7 @@ public class MixinLevelRenderer
 		// have access to them
 		previousPartialTicks = tickDelta;
 	}
+	#endif
 
 	// TODO: Can we move this o forge's client proxy simmilar to how fabric does it
 	#if PRE_MC_1_17_1
@@ -136,5 +137,4 @@ public class MixinLevelRenderer
 			callback.cancel();
 		}
 	}
-	#endif
 }

@@ -161,7 +161,7 @@ public class ForgeMain implements LodForgeMethodCaller
 		LOGGER.info("Mod Post-Initialized");
 	}
 
-	#if PRE_MC_1_19_1
+	#if PRE_MC_1_19_2
 	private final ModelDataMap modelData = new ModelDataMap.Builder().build();
 	#else
 	private final ModelData modelData = ModelData.EMPTY;

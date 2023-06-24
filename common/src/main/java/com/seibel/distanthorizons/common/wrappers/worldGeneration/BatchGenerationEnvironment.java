@@ -310,7 +310,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		return new ProtoChunk(chunkPos, UpgradeData.EMPTY
 					#if POST_MC_1_17_1, level #endif
 					#if POST_MC_1_18_1, level.registryAccess().registryOrThrow(
-						#if PRE_MC_1_19_3
+						#if PRE_MC_1_19_4
 						Registry.BIOME_REGISTRY
 						#else
 						Registries.BIOME

@@ -20,7 +20,7 @@
 package com.seibel.distanthorizons.fabric.mixins.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-#if PRE_MC_1_19_3
+#if PRE_MC_1_19_4
 import com.mojang.math.Matrix4f;
 #else
 import org.joml.Matrix4f;

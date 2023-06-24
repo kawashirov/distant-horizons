@@ -5,6 +5,11 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
+#if PRE_MC_1_19
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+#endif
+
 public class GuiHelper {
     /**
      * Helper static methods for versional compat

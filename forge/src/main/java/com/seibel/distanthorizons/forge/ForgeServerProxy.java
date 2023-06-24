@@ -95,7 +95,7 @@ public class ForgeServerProxy
 
     // ServerLevelLoadEvent
     @SubscribeEvent
-	#if PRE_MC_1_19_1
+	#if PRE_MC_1_19_2
 	public void serverLevelLoadEvent(WorldEvent.Load event)
 	#else
     public void serverLevelLoadEvent(LevelEvent.Load event)
@@ -110,7 +110,7 @@ public class ForgeServerProxy
 
     // ServerLevelUnloadEvent
     @SubscribeEvent
-	#if PRE_MC_1_19_1
+	#if PRE_MC_1_19_2
 	public void serverLevelUnloadEvent(WorldEvent.Unload event)
 	#else
     public void serverLevelUnloadEvent(LevelEvent.Unload event)

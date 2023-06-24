@@ -56,7 +56,7 @@ public final class GlobalParameters
 	public final StructureTemplateManager structures;
 	public final RandomState randomState;
 	#endif
-	#if PRE_MC_1_19_3
+	#if PRE_MC_1_19_4
 	public final WorldGenSettings worldGenSettings;
 	#else
 	public final WorldOptions worldOptions;
@@ -83,7 +83,7 @@ public final class GlobalParameters
 		WorldData worldData = server.getWorldData();
 		registry = server.registryAccess();
 
-		#if PRE_MC_1_19_3
+		#if PRE_MC_1_19_4
 		worldGenSettings = worldData.worldGenSettings();
 		biomes = registry.registryOrThrow(Registry.BIOME_REGISTRY);
 		worldSeed = worldGenSettings.seed();

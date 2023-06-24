@@ -23,7 +23,7 @@ import java.nio.FloatBuffer;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-#if PRE_MC_1_19_3
+#if PRE_MC_1_19_4
 import com.mojang.math.Matrix4f;
 #else
 import org.joml.Matrix4f;
@@ -52,7 +52,7 @@ public class McObjectConverter
     }
     /** Taken from Minecraft's com.mojang.math.Matrix4f class from 1.18.2 */
     private static void storeMatrix(Matrix4f matrix, FloatBuffer buffer) {
-        #if PRE_MC_1_19_3
+        #if PRE_MC_1_19_4
         matrix.store(buffer);
         #else
         // Mojang starts to use joml's Matrix4f libary in 1.19.3 so we copy their store method and use it here if its newer than 1.19.3

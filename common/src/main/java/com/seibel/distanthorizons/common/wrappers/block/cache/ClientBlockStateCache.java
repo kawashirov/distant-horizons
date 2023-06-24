@@ -75,7 +75,7 @@ public class ClientBlockStateCache
     }
 
     private static int getWidth(TextureAtlasSprite texture) {
-        #if PRE_MC_1_19_3
+        #if PRE_MC_1_19_4
         return texture.getWidth();
         #else
         return texture.contents().width();
@@ -83,7 +83,7 @@ public class ClientBlockStateCache
     }
 
     private static int getHeight(TextureAtlasSprite texture) {
-        #if PRE_MC_1_19_3
+        #if PRE_MC_1_19_4
         return texture.getHeight();
         #else
         return texture.contents().height();
