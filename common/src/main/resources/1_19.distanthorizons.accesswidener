@@ -1,6 +1,5 @@
 accessWidener v1 named
 
-
 # used when determining where to save files to
 accessible field net/minecraft/world/level/storage/DimensionDataStorage dataFolder Ljava/io/File;
 
@@ -23,16 +22,12 @@ accessible field net/minecraft/world/level/chunk/storage/IOWorker storage Lnet/m
 accessible field net/minecraft/world/level/chunk/storage/RegionFileStorage regionCache Lit/unimi/dsi/fastutil/longs/Long2ObjectLinkedOpenHashMap;
 accessible field net/minecraft/world/level/chunk/storage/RegionFileStorage folder Ljava/nio/file/Path;
 
-
 # grabbing textures
-accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite animatedTexture Lnet/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture;
-accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite width I
-accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite height I
-accessible field net/minecraft/client/renderer/texture/TextureAtlasSprite mainImage [Lcom/mojang/blaze3d/platform/NativeImage;
-accessible class net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture
-accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameX (I)I
-accessible method net/minecraft/client/renderer/texture/TextureAtlasSprite$AnimatedTexture getFrameY (I)I
-extendable class com/mojang/math/Matrix4f
+accessible class net/minecraft/client/renderer/texture/SpriteContents$AnimatedTexture
+accessible method net/minecraft/client/renderer/texture/SpriteContents$AnimatedTexture getFrameX (I)I
+accessible method net/minecraft/client/renderer/texture/SpriteContents$AnimatedTexture getFrameY (I)I
+accessible field net/minecraft/client/renderer/texture/SpriteContents animatedTexture Lnet/minecraft/client/renderer/texture/SpriteContents$AnimatedTexture;
+accessible field net/minecraft/client/renderer/texture/SpriteContents originalImage Lcom/mojang/blaze3d/platform/NativeImage;
 
 # hacky stuff
 accessible field net/minecraft/util/ThreadingDetector lock Ljava/util/concurrent/Semaphore;

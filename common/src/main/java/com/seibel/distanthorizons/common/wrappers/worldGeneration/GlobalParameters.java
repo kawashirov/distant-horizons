@@ -38,8 +38,12 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 #if PRE_MC_1_19
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 #else
-import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
+import net.minecraft.world.level.levelgen.RandomState;
+#if POST_MC_1_19
+import net.minecraft.world.level.levelgen.WorldOptions;
+import net.minecraft.core.registries.Registries;
+#endif
 #endif
 import net.minecraft.world.level.storage.WorldData;
 
@@ -52,7 +56,11 @@ public final class GlobalParameters
 	public final StructureTemplateManager structures;
 	public final RandomState randomState;
 	#endif
+	#if PRE_MC_1_19_3
 	public final WorldGenSettings worldGenSettings;
+	#else
+	public final WorldOptions worldOptions;
+	#endif
 	public final ThreadedLevelLightEngine lightEngine;
 	public final IDhServerLevel lodLevel;
 	public final ServerLevel level;
@@ -73,10 +81,17 @@ public final class GlobalParameters
 		lightEngine = (ThreadedLevelLightEngine) level.getLightEngine();
 		MinecraftServer server = level.getServer();
 		WorldData worldData = server.getWorldData();
-		worldGenSettings = worldData.worldGenSettings();
 		registry = server.registryAccess();
+
+		#if PRE_MC_1_19_3
+		worldGenSettings = worldData.worldGenSettings();
 		biomes = registry.registryOrThrow(Registry.BIOME_REGISTRY);
 		worldSeed = worldGenSettings.seed();
+		#else
+		worldOptions = worldData.worldGenOptions();
+		biomes = registry.registryOrThrow(Registries.BIOME);
+		worldSeed = worldOptions.seed();
+		#endif
 		#if POST_MC_1_18_1
 		biomeManager = new BiomeManager(level, BiomeManager.obfuscateSeed(worldSeed));
 		chunkScanner = level.getChunkSource().chunkScanner();

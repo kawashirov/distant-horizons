@@ -69,8 +69,11 @@ public final class StepBiomes {
 			#elif PRE_MC_1_19
 			chunk = environment.joinSync(environment.params.generator.createBiomes(environment.params.biomes, Runnable::run, Blender.of(worldGenRegion),
 					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
-			#else
+			#elif PRE_MC_1_19_3
 			chunk = environment.joinSync(environment.params.generator.createBiomes(environment.params.biomes, Runnable::run, environment.params.randomState, Blender.of(worldGenRegion),
+					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
+			#else
+			chunk = environment.joinSync(environment.params.generator.createBiomes(Runnable::run, environment.params.randomState, Blender.of(worldGenRegion),
 					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
 			#endif
 		}

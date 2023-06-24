@@ -41,12 +41,19 @@ public class TextureAtlasSpriteWrapper {
         return sprite.mainImage[0].getPixelRGBA(
                 x + sprite.framesX[frameIndex] * sprite.getWidth(),
                 y + sprite.framesY[frameIndex] * sprite.getHeight());
-        #else
+        #elif PRE_MC_1_19_4
         if (sprite.animatedTexture != null) {
             x += sprite.animatedTexture.getFrameX(frameIndex) * sprite.width;
             y += sprite.animatedTexture.getFrameY(frameIndex) * sprite.height;
         }
         return sprite.mainImage[0].getPixelRGBA(x, y);
+        #else
+        if (sprite.contents().animatedTexture != null) {
+            x += sprite.contents().animatedTexture.getFrameX(frameIndex) * sprite.contents().width();
+            y += sprite.contents().animatedTexture.getFrameY(frameIndex) * sprite.contents().width();
+        }
+        return sprite.contents().originalImage.getPixelRGBA(x, y);
         #endif
+
     }
 }

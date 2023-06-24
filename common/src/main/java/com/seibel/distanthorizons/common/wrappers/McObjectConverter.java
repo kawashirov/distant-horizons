@@ -23,7 +23,12 @@ import java.nio.FloatBuffer;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+#if PRE_MC_1_19_3
 import com.mojang.math.Matrix4f;
+#else
+import org.joml.Matrix4f;
+#endif
+
 import com.seibel.distanthorizons.core.enums.ELodDirection;
 import com.seibel.distanthorizons.core.pos.DhBlockPos;
 import com.seibel.distanthorizons.core.pos.DhChunkPos;
@@ -42,13 +47,43 @@ import net.minecraft.world.level.ChunkPos;
  */
 public class McObjectConverter
 {
+    private static int bufferIndex(int x, int y) {
+        return y * 4 + x;
+    }
+    /** Taken from Minecraft's com.mojang.math.Matrix4f class from 1.18.2 */
+    private static void storeMatrix(Matrix4f matrix, FloatBuffer buffer) {
+        #if PRE_MC_1_19_3
+        matrix.store(buffer);
+        #else
+        // Mojang starts to use joml's Matrix4f libary in 1.19.3 so we copy their store method and use it here if its newer than 1.19.3
+        buffer.put(bufferIndex(0, 0), matrix.m00());
+        buffer.put(bufferIndex(0, 1), matrix.m01());
+        buffer.put(bufferIndex(0, 2), matrix.m02());
+        buffer.put(bufferIndex(0, 3), matrix.m03());
+        buffer.put(bufferIndex(1, 0), matrix.m10());
+        buffer.put(bufferIndex(1, 1), matrix.m11());
+        buffer.put(bufferIndex(1, 2), matrix.m12());
+        buffer.put(bufferIndex(1, 3), matrix.m13());
+        buffer.put(bufferIndex(2, 0), matrix.m20());
+        buffer.put(bufferIndex(2, 1), matrix.m21());
+        buffer.put(bufferIndex(2, 2), matrix.m22());
+        buffer.put(bufferIndex(2, 3), matrix.m23());
+        buffer.put(bufferIndex(3, 0), matrix.m30());
+        buffer.put(bufferIndex(3, 1), matrix.m31());
+        buffer.put(bufferIndex(3, 2), matrix.m32());
+        buffer.put(bufferIndex(3, 3), matrix.m33());
+        #endif
+    }
+
     /** 4x4 float matrix converter */
     public static Mat4f Convert(Matrix4f mcMatrix)
     {
         FloatBuffer buffer = FloatBuffer.allocate(16);
-        mcMatrix.store(buffer);
+        storeMatrix(mcMatrix, buffer);
         Mat4f matrix = new Mat4f(buffer);
-        matrix.transpose();
+        #if PRE_MC_1_19_4
+        matrix.transpose(); // In 1.19.3 and later, we no longer need to transpose it
+        #endif
         return matrix;
     }
 

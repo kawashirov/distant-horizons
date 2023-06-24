@@ -73,6 +73,23 @@ public class ClientBlockStateCache
             return Default;
         }
     }
+
+    private static int getWidth(TextureAtlasSprite texture) {
+        #if PRE_MC_1_19_3
+        return texture.getWidth();
+        #else
+        return texture.contents().width();
+        #endif
+    }
+
+    private static int getHeight(TextureAtlasSprite texture) {
+        #if PRE_MC_1_19_3
+        return texture.getHeight();
+        #else
+        return texture.contents().height();
+        #endif
+    }
+
     //TODO: Perhaps make this not just use the first frame?
     private static int calculateColorFromTexture(TextureAtlasSprite texture, ColorMode colorMode) {
         int count = 0;
@@ -83,9 +100,9 @@ public class ClientBlockStateCache
         int tempColor;
         {
             // textures normally use u and v instead of x and y
-            for (int u = 0; u < texture.getWidth(); u++)
+            for (int u = 0; u < getWidth(texture); u++)
             {
-                for (int v = 0; v < texture.getHeight(); v++)
+                for (int v = 0; v < getHeight(texture); v++)
                 {
                     //note: Minecraft color format is: 0xAA BB GG RR
                     //________ DH mod color format is: 0xAA RR GG BB

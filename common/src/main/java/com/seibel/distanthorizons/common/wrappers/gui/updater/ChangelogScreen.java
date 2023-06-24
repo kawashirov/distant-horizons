@@ -1,6 +1,7 @@
 package com.seibel.distanthorizons.common.wrappers.gui.updater;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.seibel.distanthorizons.common.wrappers.gui.DhScreen;
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
 import com.seibel.distanthorizons.core.wrapperInterfaces.IVersionConstants;
 import com.seibel.distanthorizons.coreapi.ModInfo;
@@ -16,7 +17,11 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+#if PRE_MC_1_19
 import net.minecraft.network.chat.TextComponent;
+#endif
+
+import static com.seibel.distanthorizons.common.wrappers.gui.GuiHelper.*;
 
 import java.util.*;
 
@@ -27,7 +32,7 @@ import java.util.*;
  */
 // TODO: After finishing the config, rewrite this in openGL as well
 // TODO: Make this
-public class ChangelogScreen extends Screen {
+public class ChangelogScreen extends DhScreen {
     private Screen parent;
     private String versionID;
     private List<String> changelog;
@@ -45,7 +50,7 @@ public class ChangelogScreen extends Screen {
     }
 
     public ChangelogScreen(Screen parent, String versionID) {
-        super(translate(ModInfo.ID + ".updater.title"));
+        super(Translatable(ModInfo.ID + ".updater.title"));
         this.parent = parent;
         this.versionID = versionID;
 
@@ -84,7 +89,7 @@ public class ChangelogScreen extends Screen {
 
 
         this.addBtn( // Close
-                new Button(5, this.height - 25, 100, 20, translate(ModInfo.ID + ".general.back"), (btn) -> {
+                MakeBtn(Translatable(ModInfo.ID + ".general.back"), 5, this.height - 25, 100, 20, (btn) -> {
                     this.onClose();
                 })
         );
@@ -92,7 +97,7 @@ public class ChangelogScreen extends Screen {
 
         this.changelogArea = new TextArea(this.minecraft, this.width*2, this.height, 32, this.height - 32, 10);
         for (int i = 0; i < changelog.size(); i++) {
-            this.changelogArea.addButton(new TextComponent(changelog.get(i)));
+            this.changelogArea.addButton( TextOrLiteral(changelog.get(i)));
 //            drawString(matrices, this.font, changelog.get(i), this.width / 2 - 175, this.height / 2 - 100 + i*10, 0xFFFFFF);
         }
 
@@ -117,36 +122,6 @@ public class ChangelogScreen extends Screen {
     public void onClose() {
         Objects.requireNonNull(minecraft).setScreen(this.parent); // Goto the parent screen
     }
-
-
-    // addRenderableWidget in 1.17 and over
-    // addButton in 1.16 and below
-    private void addBtn(Button button) {
-		#if PRE_MC_1_17_1
-        this.addButton(button);
-		#else
-        this.addRenderableWidget(button);
-		#endif
-    }
-
-    #if PRE_MC_1_19
-    public static net.minecraft.network.chat.TranslatableComponent translate (String str, Object... args) {
-        return new net.minecraft.network.chat.TranslatableComponent(str, args);
-    }
-    #else
-    public static net.minecraft.network.chat.MutableComponent translate (String str, Object... args) {
-            return net.minecraft.network.chat.Component.translatable(str, args);
-    }
-    #endif
-
-
-
-
-
-
-
-
-
 
     public static class TextArea extends ContainerObjectSelectionList<ButtonEntry> {
         Font textRenderer;

@@ -13,11 +13,17 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
-import net.minecraftforge.event.world.ChunkDataEvent;
+#if PRE_MC_1_19
+import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
+#else
+import net.minecraftforge.event.level.ChunkEvent;
+import net.minecraftforge.event.level.LevelEvent;
+#endif
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.apache.logging.log4j.Logger;
 
@@ -25,6 +31,12 @@ import java.util.function.Supplier;
 
 public class ForgeServerProxy
 {
+    #if PRE_MC_1_19
+    private static LevelAccessor GetLevel(WorldEvent e) { return e.getWorld(); }
+    #else
+    private static LevelAccessor GetLevel(LevelEvent e) { return e.getLevel(); }
+    #endif
+
     private final ServerApi serverApi = ServerApi.INSTANCE;
     private static final Logger LOGGER = DhLoggerBuilder.getLogger();
     private final boolean isDedicated;
@@ -83,43 +95,53 @@ public class ForgeServerProxy
 
     // ServerLevelLoadEvent
     @SubscribeEvent
-    public void serverLevelLoadEvent(WorldEvent.Load event) {
+	#if PRE_MC_1_19_1
+	public void serverLevelLoadEvent(WorldEvent.Load event)
+	#else
+    public void serverLevelLoadEvent(LevelEvent.Load event)
+	#endif
+    {
         if (isValidTime()) {
-            if (event.getWorld() instanceof ServerLevel) {
-                serverApi.serverLevelLoadEvent(getLevelWrapper((ServerLevel) event.getWorld()));
+            if (GetLevel(event) instanceof ServerLevel) {
+                serverApi.serverLevelLoadEvent(getLevelWrapper((ServerLevel) GetLevel(event)));
             }
         }
     }
 
     // ServerLevelUnloadEvent
     @SubscribeEvent
-    public void serverLevelUnloadEvent(WorldEvent.Unload event) {
+	#if PRE_MC_1_19_1
+	public void serverLevelUnloadEvent(WorldEvent.Unload event)
+	#else
+    public void serverLevelUnloadEvent(LevelEvent.Unload event)
+    #endif
+    {
         if (isValidTime()) {
-            if (event.getWorld() instanceof ServerLevel) {
-                serverApi.serverLevelUnloadEvent(getLevelWrapper((ServerLevel) event.getWorld()));
+            if (GetLevel(event) instanceof ServerLevel) {
+                serverApi.serverLevelUnloadEvent(getLevelWrapper((ServerLevel) GetLevel(event)));
             }
         }
     }
 
     @SubscribeEvent
-    public void serverChunkLoadEvent(ChunkDataEvent.Load event)
+    public void serverChunkLoadEvent(ChunkEvent.Load event)
     {
         if (isValidTime()) {
-            if (event.getWorld() instanceof ServerLevel) {
-                ServerLevelWrapper wrappedLevel = ServerLevelWrapper.getWrapper((ServerLevel) event.getWorld());
-                IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld(), wrappedLevel);
-                serverApi.serverChunkLoadEvent(chunk, getLevelWrapper((ServerLevel) event.getWorld()));
+            if (GetLevel(event) instanceof ServerLevel) {
+                ServerLevelWrapper wrappedLevel = ServerLevelWrapper.getWrapper((ServerLevel) GetLevel(event));
+                IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetLevel(event), wrappedLevel);
+                serverApi.serverChunkLoadEvent(chunk, getLevelWrapper((ServerLevel) GetLevel(event)));
             }
         }
     }
     @SubscribeEvent
-    public void serverChunkSaveEvent(ChunkDataEvent.Save event)
+    public void serverChunkSaveEvent(ChunkEvent.Unload event)
     {
         if (isValidTime()) {
-            if (event.getWorld() instanceof ServerLevel) {
-                ServerLevelWrapper wrappedLevel = ServerLevelWrapper.getWrapper((ServerLevel) event.getWorld());
-                IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld(), wrappedLevel);
-                serverApi.serverChunkSaveEvent(chunk, getLevelWrapper((ServerLevel) event.getWorld()));
+            if (GetLevel(event) instanceof ServerLevel) {
+                ServerLevelWrapper wrappedLevel = ServerLevelWrapper.getWrapper((ServerLevel) GetLevel(event));
+                IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetLevel(event), wrappedLevel);
+                serverApi.serverChunkSaveEvent(chunk, getLevelWrapper((ServerLevel) GetLevel(event)));
             }
         }
     }

@@ -1,6 +1,6 @@
 package com.seibel.distanthorizons.fabric.wrappers.modAccessor;
 
-#if POST_MC_1_17_1
+#if POST_MC_1_17_1 && FALSE
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.IBCLibAccessor;
 import ru.bclib.config.ClientConfig;
 import ru.bclib.config.Configs;

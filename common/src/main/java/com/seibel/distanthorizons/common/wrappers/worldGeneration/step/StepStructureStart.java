@@ -75,7 +75,7 @@ public final class StepStructureStart
 		#if PRE_MC_1_19
 		if (environment.params.worldGenSettings.generateFeatures()) {
 		#elif POST_MC_1_19
-		if (environment.params.worldGenSettings.generateStructures()) {
+		if (environment.params.worldOptions.generateStructures()) {
 		#endif
 			for (ChunkAccess chunk : chunksToDo)
 			{
@@ -83,9 +83,13 @@ public final class StepStructureStart
 				#if PRE_MC_1_19
 				environment.params.generator.createStructures(environment.params.registry, tParams.structFeat, chunk, environment.params.structures,
 						environment.params.worldSeed);
-				#elif POST_MC_1_19
+				#elif PRE_MC_1_19_3
 				environment.params.generator.createStructures(environment.params.registry, environment.params.randomState, tParams.structFeat, chunk, environment.params.structures,
 						environment.params.worldSeed);
+				#else
+				environment.params.generator.createStructures(environment.params.registry,
+						environment.params.level.getChunkSource().getGeneratorState(),
+						tParams.structFeat, chunk, environment.params.structures);
 				#endif
 				#if POST_MC_1_18_1
 				try

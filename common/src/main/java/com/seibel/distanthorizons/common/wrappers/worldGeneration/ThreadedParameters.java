@@ -80,7 +80,11 @@ public final class ThreadedParameters
 	
 	public void makeStructFeat(WorldGenLevel genLevel, GlobalParameters param)
 	{
+		#if PRE_MC_1_19_3
 		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, genLevel #if POST_MC_1_18_1, structCheck #endif);
+		#else
+		structFeat = new WorldGenStructFeatManager(param.worldOptions, genLevel, structCheck);
+		#endif
 	}
 	
 	

@@ -20,7 +20,11 @@
 package com.seibel.distanthorizons.forge.mixins.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+#if PRE_MC_1_19_3
 import com.mojang.math.Matrix4f;
+#else
+import org.joml.Matrix4f;
+#endif
 import com.seibel.distanthorizons.common.wrappers.McObjectConverter;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.core.config.Config;
@@ -101,10 +105,22 @@ public class MixinLevelRenderer
 	}
 
 	// TODO: Can we move this o forge's client proxy simmilar to how fabric does it
+	#if PRE_MC_1_17_1
+    @Inject(at = @At("HEAD"),
+			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDD)V",
+			cancellable = true)
+	private void renderChunkLayer(RenderType renderType, PoseStack matrixStackIn, double xIn, double yIn, double zIn, CallbackInfo callback)
+	#elif PRE_MC_1_19_4
+    @Inject(at = @At("HEAD"),
+            method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V",
+            cancellable = true)
+    private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
+	#else
 	@Inject(at = @At("HEAD"),
-			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V",
+			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLorg/joml/Matrix4f;)V",
 			cancellable = true)
 	private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
+    #endif
 	{
 		// only render before solid blocks
 		if (renderType.equals(RenderType.solid()))

@@ -20,7 +20,11 @@
 package com.seibel.distanthorizons.fabric.mixins.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+#if PRE_MC_1_19_3
 import com.mojang.math.Matrix4f;
+#else
+import org.joml.Matrix4f;
+#endif
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.distanthorizons.core.config.Config;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -66,28 +70,6 @@ public class MixinLevelRenderer
 		// have access to them
 		previousPartialTicks = partialTicks;
 	}
-
-	@Inject(at = @At("HEAD"),
-			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDD)V",
-			cancellable = true)
-	private void renderChunkLayer(RenderType renderType, PoseStack matrixStackIn, double xIn, double yIn, double zIn, CallbackInfo callback)
-	{
-//		// only render before solid blocks
-//		if (renderType.equals(RenderType.solid()))
-//		{
-//			// get MC's current projection matrix
-//			float[] mcProjMatrixRaw = new float[16];
-//			GL15.glGetFloatv(GL15.GL_PROJECTION_MATRIX, mcProjMatrixRaw);
-//			Mat4f mcProjectionMatrix = new Mat4f(mcProjMatrixRaw);
-//			mcProjectionMatrix.transpose();
-//			Mat4f mcModelViewMatrix = McObjectConverter.Convert(matrixStackIn.last().pose());
-//
-//			ClientApi.INSTANCE.renderLods(LevelWrapper.getWorldWrapper(level), mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
-//		}
-		if (Config.Client.Advanced.lodOnlyMode.get()) {
-			callback.cancel();
-		}
-	}
 	#else
     @Inject(method = "renderClouds", at = @At("HEAD"), cancellable = true)
     public void renderClouds(PoseStack poseStack, Matrix4f projectionMatrix, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
@@ -95,26 +77,30 @@ public class MixinLevelRenderer
         // have access to them
         previousPartialTicks = tickDelta;
     }
+    #endif
 
+	#if PRE_MC_1_17_1
+    @Inject(at = @At("HEAD"),
+			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDD)V",
+			cancellable = true)
+	private void renderChunkLayer(RenderType renderType, PoseStack matrixStackIn, double xIn, double yIn, double zIn, CallbackInfo callback)
+	#elif PRE_MC_1_19_4
     @Inject(at = @At("HEAD"),
             method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V",
             cancellable = true)
     private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
+	#else
+    @Inject(at = @At("HEAD"),
+            method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLorg/joml/Matrix4f;)V",
+            cancellable = true)
+    private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
+    #endif
     {
-//        // only render before solid blocks
-//        if (renderType.equals(RenderType.solid()))
-//        {
-//            Mat4f mcModelViewMatrix = McObjectConverter.Convert(modelViewMatrixStack.last().pose());
-//            Mat4f mcProjectionMatrix = McObjectConverter.Convert(projectionMatrix);
-//
-//            ClientApi.INSTANCE.renderLods(ClientLevelWrapper.getWrapper(level), mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
-//        }
         if (Config.Client.Advanced.Debugging.lodOnlyMode.get())
 		{
             callback.cancel();
         }
     }
-	#endif
 
     @Redirect(method =
                 "Lnet/minecraft/client/renderer/LevelRenderer;" +
@@ -122,7 +108,11 @@ public class MixinLevelRenderer
                 "FJZLnet/minecraft/client/Camera;" +
                 "Lnet/minecraft/client/renderer/GameRenderer;" +
                 "Lnet/minecraft/client/renderer/LightTexture;" +
+                #if PRE_MC_1_19_4
                 "Lcom/mojang/math/Matrix4f;)V"
+                #else
+                "Lorg/joml/Matrix4f;)V"
+                #endif
             ,
             at = @At(
             value = "INVOKE",

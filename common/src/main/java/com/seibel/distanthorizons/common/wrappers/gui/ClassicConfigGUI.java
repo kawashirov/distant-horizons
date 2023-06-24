@@ -58,6 +58,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import static com.seibel.distanthorizons.common.wrappers.gui.GuiHelper.*;
 
 
 /**
@@ -105,42 +106,6 @@ public class ClassicConfigGUI
         String tempValue;
         int index;
     }
-
-    /**
-     * Helper static methods for versional compat
-     */
-    private static Button MakeBtn(Component base, int a, int b, int c, int d, Button.OnPress action) {
-        #if PRE_MC_1_19
-        return new Button(a, b, c, d, base, action);
-        #else
-        return Button.builder(base, action).bounds(a,b,c,d).build();
-        #endif
-    }
-
-    private static MutableComponent TextOrLiteral(String text) {
-        #if PRE_MC_1_19
-        return new TextComponent(text);
-        #else
-        return Component.literal(text);
-        #endif
-    }
-
-    private static MutableComponent TextOrTranslatable(String text) {
-        #if PRE_MC_1_19
-        return new TextComponent(text);
-        #else
-        return Component.translatable(text);
-        #endif
-    }
-
-    private static MutableComponent Translatable(String text) {
-        #if PRE_MC_1_19
-        return new TranslatableComponent(text);
-        #else
-        return Component.translatable(text);
-        #endif
-    }
-
 
     /**
      * creates a text field
@@ -463,9 +428,6 @@ public class ClassicConfigGUI
 //        return info;
     }
 
-
-
-
     public static class ConfigListWidget extends ContainerObjectSelectionList<ButtonEntry> {
         Font textRenderer;
 
@@ -525,27 +487,15 @@ public class ClassicConfigGUI
         @Override
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
             if (button != null) {
-                #if PRE_MC_1_19
-                button.y = y;
-                #else
-                button.SetY(y);
-                #endif
+                SetY(button, y);
                 button.render(matrices, mouseX, mouseY, tickDelta);
             }
             if (resetButton != null) {
-                #if PRE_MC_1_19
-                resetButton.y = y;
-                #else
-                resetButton.SetY(y);
-                #endif
+                SetY(resetButton, y);
                 resetButton.render(matrices, mouseX, mouseY, tickDelta);
             }
             if (indexButton != null) {
-                #if PRE_MC_1_19
-                indexButton.y = y;
-                #else
-                indexButton.SetY(y);
-                #endif
+                SetY(indexButton, y);
                 indexButton.render(matrices, mouseX, mouseY, tickDelta);
             }
             if (text != null && (!text.getString().contains("spacer") || button != null))

@@ -37,8 +37,12 @@ public class MixinClientPacketListener
 	void onHandleRespawnStart(CallbackInfo ci) { ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper(level)); }
 	@Inject(method = "handleRespawn", at = @At("RETURN"))
 	void onHandleRespawnEnd(CallbackInfo ci) { ClientApi.INSTANCE.clientLevelLoadEvent(ClientLevelWrapper.getWrapper(level)); }
-	
+
+	#if PRE_MC_1_19
 	@Inject(method = "cleanup", at = @At("HEAD"))
+	#else
+	@Inject(method = "close", at = @At("HEAD"))
+	#endif
 	void onCleanupStart(CallbackInfo ci)
 	{
 		// TODO which unload method should be used? do we need both?

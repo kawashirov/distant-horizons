@@ -24,8 +24,17 @@ import com.seibel.distanthorizons.core.api.internal.ClientApi;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.wrapperInterfaces.chunk.IChunkWrapper;
 
+import net.minecraft.world.level.LevelAccessor;
+
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraftforge.event.world.ChunkDataEvent;
+#if PRE_MC_1_19
+import net.minecraftforge.event.world.ChunkEvent;
+import net.minecraftforge.event.world.WorldEvent;
+#else
+import net.minecraftforge.event.level.ChunkEvent;
+import net.minecraftforge.event.level.LevelEvent;
+#endif
+
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
@@ -45,6 +54,12 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  */
 public class ForgeClientProxy
 {
+	#if PRE_MC_1_19
+	private static LevelAccessor GetLevel(WorldEvent e) { return e.getWorld(); }
+	#else
+	private static LevelAccessor GetLevel(LevelEvent e) { return e.getLevel(); }
+	#endif
+
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 
 	@SubscribeEvent
@@ -76,23 +91,23 @@ public class ForgeClientProxy
 //	}
 
 	@SubscribeEvent
-	public void clientChunkLoadEvent(ChunkDataEvent.Load event)
+	public void clientChunkLoadEvent(ChunkEvent.Load event)
 	{
-		if (event.getWorld() instanceof ClientLevel)
+		if (GetLevel(event) instanceof ClientLevel)
 		{
-			ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld());
-			IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld(), wrappedLevel);
-			ClientApi.INSTANCE.clientChunkLoadEvent(chunk, ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld()));
+			ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) GetLevel(event));
+			IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetLevel(event), wrappedLevel);
+			ClientApi.INSTANCE.clientChunkLoadEvent(chunk, ClientLevelWrapper.getWrapper((ClientLevel) GetLevel(event)));
 		}
 	}
 	@SubscribeEvent
-	public void clientChunkSaveEvent(ChunkDataEvent.Save event)
+	public void clientChunkSaveEvent(ChunkEvent.Unload event)
 	{
-		if (event.getWorld() instanceof ClientLevel)
+		if (GetLevel(event) instanceof ClientLevel)
 		{
-			ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld());
-			IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), event.getWorld(), wrappedLevel);
-			ClientApi.INSTANCE.clientChunkSaveEvent(chunk, ClientLevelWrapper.getWrapper((ClientLevel) event.getWorld()));
+			ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) GetLevel(event));
+			IChunkWrapper chunk = new ChunkWrapper(event.getChunk() , GetLevel(event), wrappedLevel);
+			ClientApi.INSTANCE.clientChunkSaveEvent(chunk, ClientLevelWrapper.getWrapper((ClientLevel) GetLevel(event)));
 		}
 	}
 
@@ -102,7 +117,7 @@ public class ForgeClientProxy
 
 	// Register KeyBindings
 	@SubscribeEvent
-	public void registerKeyBindings(InputEvent.KeyInputEvent event)
+	public void registerKeyBindings(#if PRE_MC_1_19 InputEvent.KeyInputEvent #else InputEvent.Key #endif event)
 	{
 		if (Minecraft.getInstance().player == null) return;
 		if (event.getAction() != GLFW.GLFW_PRESS) return;

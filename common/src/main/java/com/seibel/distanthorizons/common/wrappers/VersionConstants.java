@@ -20,6 +20,7 @@
 package com.seibel.distanthorizons.common.wrappers;
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.IVersionConstants;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.Minecraft;
 
 /**
@@ -57,6 +58,10 @@ public class VersionConstants implements IVersionConstants
 
 	@Override
 	public String getMinecraftVersion() {
+		#if PRE_MC_1_19
 		return Minecraft.getInstance().getGame().getVersion().getId();
+		#else
+		return SharedConstants.getCurrentVersion().getId();
+		#endif
 	}
 }

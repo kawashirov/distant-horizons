@@ -1,38 +1,49 @@
 /*
  *    This file is part of the Distant Horizons mod (formerly the LOD Mod),
- *    licensed under the GNU LGPL v3 License.
+ *    licensed under the GNU GPL v3 License.
  *
  *    Copyright (C) 2020-2022  James Seibel
  *
  *    This program is free software: you can redistribute it and/or modify
- *    it under the terms of the GNU Lesser General Public License as published by
+ *    it under the terms of the GNU General Public License as published by
  *    the Free Software Foundation, version 3.
  *
  *    This program is distributed in the hope that it will be useful,
  *    but WITHOUT ANY WARRANTY; without even the implied warranty of
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *    GNU Lesser General Public License for more details.
+ *    GNU General Public License for more details.
  *
- *    You should have received a copy of the GNU Lesser General Public License
+ *    You should have received a copy of the GNU General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject;
 
+import com.google.common.collect.Maps;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 
 import com.seibel.distanthorizons.core.logging.ConfigBasedLogger;
-
+import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
+import it.unimi.dsi.fastutil.longs.LongSet;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.SectionPos;
+#if POST_MC_1_19_4
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+#endif
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.biome.Biome;
@@ -41,17 +52,29 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.*;
+import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import net.minecraft.world.level.levelgen.Heightmap;
 #if POST_MC_1_18_1
 import net.minecraft.world.level.levelgen.blending.BlendingData;
+#if PRE_MC_1_19
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
+#endif
+import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.levelgen.structure.pieces.StructurePieceSerializationContext;
 import net.minecraft.world.ticks.LevelChunkTicks;
 #endif
 #if POST_MC_1_18_2
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+#if PRE_MC_1_19
+import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
+#endif
 #endif
 
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
+import org.apache.logging.log4j.Logger;
 
 public class ChunkLoader
 {
@@ -80,11 +103,15 @@ public class ChunkLoader
 		return blendingData;
 	}
 	#endif
-	
+
 	private static LevelChunkSection[] readSections(LevelAccessor level, LevelLightEngine lightEngine, ChunkPos chunkPos, CompoundTag chunkData)
 	{
 		#if POST_MC_1_18_1
+		#if PRE_MC_1_19_4
 		Registry<Biome> biomes = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
+		#else
+		Registry<Biome> biomes = level.registryAccess().registryOrThrow(Registries.BIOME);
+		#endif
 			#if PRE_MC_1_18_2
 			Codec<PalettedContainer<Biome>> biomeCodec = PalettedContainer.codec(
 					biomes, biomes.byNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getOrThrow(Biomes.PLAINS));
@@ -92,8 +119,8 @@ public class ChunkLoader
 			Codec<PalettedContainer<Holder<Biome>>> biomeCodec = PalettedContainer.codec(
 					biomes.asHolderIdMap(), biomes.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getHolderOrThrow(Biomes.PLAINS));
 			#else
-			Codec<PalettedContainer<Holder<Biome>>> biomeCodec = PalettedContainer.codecRW(
-					biomes.asHolderIdMap(), biomes.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getHolderOrThrow(Biomes.PLAINS));
+		Codec<PalettedContainer<Holder<Biome>>> biomeCodec = PalettedContainer.codecRW(
+				biomes.asHolderIdMap(), biomes.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getHolderOrThrow(Biomes.PLAINS));
 			#endif
 		#endif
 		int i = #if PRE_MC_1_17_1 16; #else level.getSectionsCount(); #endif
@@ -143,21 +170,25 @@ public class ChunkLoader
 						? biomeCodec.parse(NbtOps.INSTANCE, tagSection.getCompound("biomes")).promotePartial(string -> logErrors(chunkPos, i, (String) string)).getOrThrow(false, LOGGER::error)
 						: new PalettedContainer<Holder<Biome>>(biomes.asHolderIdMap(), biomes.getHolderOrThrow(Biomes.PLAINS), PalettedContainer.Strategy.SECTION_BIOMES);
 				#endif
+				#if PRE_MC_1_20_1
 				chunkSections[sectionId] = new LevelChunkSection(sectionYPos, blockStateContainer, biomeContainer);
+				#else
+				chunkSections[sectionId] = new LevelChunkSection(blockStateContainer, biomeContainer);
+				#endif
 			}
 			#endif
 
 			if (!isLightOn) continue;
 			if (tagSection.contains("BlockLight", 7))
 				lightEngine.queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, sectionYPos),
-						new DataLayer(tagSection.getByteArray("BlockLight")), true);
+						new DataLayer(tagSection.getByteArray("BlockLight")) #if PRE_MC_1_20_1, true #endif);
 			if (hasSkyLight && tagSection.contains("SkyLight", 7))
 				lightEngine.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, sectionYPos),
-						new DataLayer(tagSection.getByteArray("SkyLight")), true);
+						new DataLayer(tagSection.getByteArray("SkyLight")) #if PRE_MC_1_20_1, true #endif);
 		}
 		return chunkSections;
 	}
-	
+
 	private static void readHeightmaps(LevelChunk chunk, CompoundTag chunkData)
 	{
 		CompoundTag tagHeightmaps = chunkData.getCompound("Heightmaps");
@@ -182,7 +213,7 @@ public class ChunkLoader
 			}
 		}
 	}
-	
+
 	public static ChunkStatus.ChunkType readChunkType(CompoundTag tagLevel)
 	{
 		ChunkStatus chunkStatus = ChunkStatus.byName(tagLevel.getString("Status"));
@@ -191,7 +222,7 @@ public class ChunkLoader
 		}
 		return ChunkStatus.ChunkType.PROTOCHUNK;
 	}
-	
+
 	public static LevelChunk read(WorldGenLevel level, LevelLightEngine lightEngine, ChunkPos chunkPos, CompoundTag chunkData)
 	{
 		#if PRE_MC_1_18_1
@@ -199,14 +230,13 @@ public class ChunkLoader
 		#else
 		CompoundTag tagLevel = chunkData;
 		#endif
-		
+
 		ChunkPos actualPos = new ChunkPos(tagLevel.getInt("xPos"), tagLevel.getInt("zPos"));
-		if (!Objects.equals(chunkPos, actualPos))
-		{
-			LOGGER.warn("Chunk file at "+chunkPos+" is in the wrong location; Ignoring. (Expected "+chunkPos+", got "+actualPos+")");
+		if (!Objects.equals(chunkPos, actualPos)) {
+			LOGGER.error("Chunk file at {} is in the wrong location; Ignoring. (Expected {}, got {})", chunkPos, chunkPos, actualPos);
 			return null;
 		}
-		
+
 		ChunkStatus.ChunkType chunkType = readChunkType(tagLevel);
 		#if PRE_MC_1_18_1
 		if (chunkType != ChunkStatus.ChunkType.LEVELCHUNK)
@@ -247,10 +277,17 @@ public class ChunkLoader
 				: new ProtoTickList<Fluid>(fluid -> (fluid == null || fluid == Fluids.EMPTY), chunkPos,
 				tagLevel.getList("LiquidsToBeTicked", 9)#if POST_MC_1_17_1, level #endif);
 		#else
+		#if PRE_MC_1_19_4
 		LevelChunkTicks<Block> blockTicks = LevelChunkTicks.load(tagLevel.getList(BLOCK_TICKS_TAG_18, 10),
 				string -> Registry.BLOCK.getOptional(ResourceLocation.tryParse(string)), chunkPos);
 		LevelChunkTicks<Fluid> fluidTicks = LevelChunkTicks.load(tagLevel.getList(FLUID_TICKS_TAG_18, 10),
 				string -> Registry.FLUID.getOptional(ResourceLocation.tryParse(string)), chunkPos);
+		#else
+		LevelChunkTicks<Block> blockTicks = LevelChunkTicks.load(tagLevel.getList(BLOCK_TICKS_TAG_18, 10),
+				(string -> BuiltInRegistries.BLOCK.getOptional(ResourceLocation.tryParse(string))), chunkPos);
+		LevelChunkTicks<Fluid> fluidTicks = LevelChunkTicks.load(tagLevel.getList(FLUID_TICKS_TAG_18, 10),
+				string -> BuiltInRegistries.FLUID.getOptional(ResourceLocation.tryParse(string)), chunkPos);
+		#endif
 		#endif
 
 		LevelChunkSection[] levelChunkSections = readSections(level, lightEngine, chunkPos, tagLevel);
@@ -260,8 +297,9 @@ public class ChunkLoader
 		LevelChunk chunk = new LevelChunk((Level) level.getLevel(), chunkPos, chunkBiomeContainer, upgradeData, blockTicks,
 				fluidTicks, inhabitedTime, levelChunkSections, null);
 		#else
+
 		LevelChunk chunk = new LevelChunk((Level) level, chunkPos, upgradeData, blockTicks,
-		 		fluidTicks, inhabitedTime, levelChunkSections, null, blendingData);
+				fluidTicks, inhabitedTime, levelChunkSections, null, blendingData);
 		#endif
 		// Set some states after object creation
 		chunk.setLightCorrect(isLightOn);
@@ -269,7 +307,7 @@ public class ChunkLoader
 		readPostPocessings(chunk, chunkData);
 		return chunk;
 	}
-	
+
 	private static void logErrors(ChunkPos chunkPos, int i, String string)
 	{
 		LOGGER.error("Distant Horizons: Recoverable errors when loading section [" + chunkPos.x + ", " + i + ", " + chunkPos.z + "]: " + string);

@@ -44,6 +44,7 @@ public class TexturedButtonWidget extends ImageButton {
         super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, text);
     }
 
+    #if PRE_MC_1_19
     public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction, OnTooltip tooltipSupplier, Component text) {
         super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, tooltipSupplier, text);
     }
@@ -58,7 +59,6 @@ public class TexturedButtonWidget extends ImageButton {
         RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
         #endif
-
         int i = this.getYImage(this.isHovered);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -68,4 +68,5 @@ public class TexturedButtonWidget extends ImageButton {
 
         super.renderButton(matrices, mouseX, mouseY, delta);
     }
+    #endif
 }

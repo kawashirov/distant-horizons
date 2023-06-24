@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import java.io.File;
 import java.nio.file.Path;
 
+#if FALSE
 @Mixin(WorldUpgrader.class)
 public class MixinWorldUpgrader {
     static class FakeLevelWrapper implements IServerLevelWrapper {
@@ -152,3 +153,4 @@ public class MixinWorldUpgrader {
 
 
 }
+#endif

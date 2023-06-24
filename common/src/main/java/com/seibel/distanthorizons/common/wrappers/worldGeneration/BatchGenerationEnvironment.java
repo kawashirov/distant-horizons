@@ -55,6 +55,10 @@ import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepStruc
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepStructureStart;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepSurface;
 
+#if POST_MC_1_19
+import net.minecraft.core.registries.Registries;
+#endif
+
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -302,6 +306,20 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 	}
 
+	private static ProtoChunk EmptyChunk(ServerLevel level, ChunkPos chunkPos) {
+		return new ProtoChunk(chunkPos, UpgradeData.EMPTY
+					#if POST_MC_1_17_1, level #endif
+					#if POST_MC_1_18_1, level.registryAccess().registryOrThrow(
+						#if PRE_MC_1_19_3
+						Registry.BIOME_REGISTRY
+						#else
+						Registries.BIOME
+						#endif
+		), null #endif
+		);
+
+	}
+
 	public ChunkAccess loadOrMakeChunk(ChunkPos chunkPos, WorldGenLevelLightEngine lightEngine)
 	{
 		ServerLevel level = params.level;
@@ -309,16 +327,12 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		CompoundTag chunkData = null;
 		try
 		{
-			#if POST_MC_1_19
-			chunkData = level.getChunkSource().chunkMap.readChunk(chunkPos).get().orElse(null);
-			#else
 			// Warning: if multiple threads attempt to access this method at the same time,
 			// it can throw EOFExceptions that are caught and logged by Minecraft
 			//chunkData = level.getChunkSource().chunkMap.readChunk(chunkPos);
 			RegionFileStorage storage = params.level.getChunkSource().chunkMap.worker.storage;
 			RegionFileStorageExternalCache cache = getOrCreateRegionFileCache(storage);
 			chunkData = cache.read(chunkPos);
-			#endif
 		}
 		catch (Exception e)
 		{
@@ -327,10 +341,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		
 		if (chunkData == null)
 		{
-			return new ProtoChunk(chunkPos, UpgradeData.EMPTY
-							#if POST_MC_1_17_1, level #endif
-							#if POST_MC_1_18_1, level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null #endif
-			);
+			return EmptyChunk(level, chunkPos);
 		}
 		else
 		{
@@ -342,10 +353,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			catch (Exception e)
 			{
 				LOAD_LOGGER.error("DistantHorizons: Couldn't load or make chunk "+chunkPos+". Returning an empty chunk. Error: "+e.getMessage(), e);
-				return new ProtoChunk(chunkPos, UpgradeData.EMPTY
-							#if POST_MC_1_17_1 , level #endif
-							#if POST_MC_1_18_1 , level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY), null #endif
-				);
+				return EmptyChunk(level, chunkPos);
 			}
 		}
 	}

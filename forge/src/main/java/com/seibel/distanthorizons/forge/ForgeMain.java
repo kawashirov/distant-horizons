@@ -45,7 +45,6 @@ import net.minecraft.world.level.ColorResolver;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.data.ModelDataMap;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -55,14 +54,26 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.ExtensionPoint;
 #elif MC_1_17_1
 import net.minecraftforge.fmlclient.ConfigGuiHandler;
-#else // 1.18+
+#elif POST_MC_1_18_2 && PRE_MC_1_19
 import net.minecraftforge.client.ConfigGuiHandler;
+#else
+import net.minecraftforge.client.ConfigScreenHandler;
 #endif
+
 import org.apache.logging.log4j.Logger;
+
+// these imports change due to forge refactoring classes in 1.19
+#if PRE_MC_1_19
+import net.minecraftforge.client.model.data.ModelDataMap;
+import java.util.Random;
+#else
+import net.minecraft.util.RandomSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraftforge.client.model.data.ModelData;
+#endif
 
 import java.lang.invoke.MethodHandles;
 import java.util.List;
-import java.util.Random;
 
 /**
  * Initialize and setup the Mod. <br>
@@ -109,13 +120,18 @@ public class ForgeMain implements LodForgeMethodCaller
 		if (ReflectionHandler.INSTANCE.optifinePresent()) {
 			ModAccessorInjector.INSTANCE.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
+
 		#if PRE_MC_1_17_1
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY,
 				() -> (client, parent) -> GetConfigScreen.getScreen(parent));
-		#else
+		#elif POST_MC_1_18_2 && PRE_MC_1_19
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
 				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> GetConfigScreen.getScreen(parent)));
+		#else
+		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
+				() -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> GetConfigScreen.getScreen(parent)));
 		#endif
+
 
 		LOGGER.info(ModInfo.READABLE_NAME + " Initialized");
 
@@ -145,15 +161,20 @@ public class ForgeMain implements LodForgeMethodCaller
 		LOGGER.info("Mod Post-Initialized");
 	}
 
-	private final ModelDataMap dataMap = new ModelDataMap.Builder().build();
+	#if PRE_MC_1_19_1
+	private final ModelDataMap modelData = new ModelDataMap.Builder().build();
+	#else
+	private final ModelData modelData = ModelData.EMPTY;
+	#endif
+
 	@Override
 	#if PRE_MC_1_19
 	public List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, Random random) {
-		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
+		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, modelData);
 	}
 	#else
 	public List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, RandomSource random) {
-		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, dataMap);
+		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, modelData #if POST_MC_1_19, RenderType.solid() #endif);
 	}
 	#endif
 
