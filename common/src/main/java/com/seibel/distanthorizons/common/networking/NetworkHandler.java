@@ -32,12 +32,8 @@ import net.minecraft.world.entity.player.Player;
 
 // TODO: Server sided stuff here
 public class NetworkHandler {
-    public static void receivePacketClient(Minecraft client, FriendlyByteBuf buf, Player player) {
+    public static void receivePacket(FriendlyByteBuf buf) {
         // This just exists here for testing purposes, it'll be removed in the future
         System.out.println("Received int " + buf.readInt());
-    }
-
-    public static void receivePacketServer(FriendlyByteBuf buf, Player player) {
-
     }
 }
