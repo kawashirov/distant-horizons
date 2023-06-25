@@ -4,6 +4,9 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.seibel.distanthorizons.core.config.gui.AbstractScreen;
 import net.minecraft.client.Minecraft;
+#if POST_MC_1_20_1
+import net.minecraft.client.gui.GuiGraphics;
+#endif
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +19,7 @@ public class MinecraftScreen {
         return new ConfigScreenRenderer(parent, screen, translationName);
     }
 
-    private static class ConfigScreenRenderer extends Screen {
+    private static class ConfigScreenRenderer extends DhScreen {
         private final Screen parent;
         private ConfigListWidget list;
         private AbstractScreen screen;
@@ -56,7 +59,12 @@ public class MinecraftScreen {
         }
 
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        #if PRE_MC_1_20_1
+        public void render(PoseStack matrices, int mouseX, int mouseY, float delta)
+        #else
+        public void render(GuiGraphics matrices, int mouseX, int mouseY, float delta)
+        #endif
+        {
             this.renderBackground(matrices); // Render background
             this.list.render(matrices, mouseX, mouseY, delta); // Renders the items in the render list (currently only used to tint background darker)
 

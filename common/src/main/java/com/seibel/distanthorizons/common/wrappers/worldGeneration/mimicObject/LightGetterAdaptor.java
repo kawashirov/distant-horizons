@@ -28,6 +28,9 @@ import net.minecraft.world.level.LevelHeightAccessor;
 #endif
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LightChunkGetter;
+#if POST_MC_1_20_1
+import net.minecraft.world.level.chunk.LightChunk;
+#endif
 
 public class LightGetterAdaptor implements LightChunkGetter {
 	private final BlockGetter heightGetter;
@@ -44,7 +47,7 @@ public class LightGetterAdaptor implements LightChunkGetter {
 	}
 
 	@Override
-	public BlockGetter getChunkForLighting(int chunkX, int chunkZ) {
+	public #if PRE_MC_1_20_1 BlockGetter #else LightChunk #endif getChunkForLighting(int chunkX, int chunkZ) {
 		if (genRegion == null)
 			throw new IllegalStateException("World Gen region has not been set!");
 		// May be null

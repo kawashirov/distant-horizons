@@ -4,6 +4,9 @@ import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.wrapperInterfaces.block.IBlockStateWrapper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.EmptyBlockGetter;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.logging.log4j.Logger;
 
@@ -81,10 +84,22 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	public boolean isAir(BlockState blockState) { return blockState == null || blockState.isAir(); }
 	
 	@Override
-	public boolean isSolid() { return this.blockState.getMaterial().isSolid(); }
+	public boolean isSolid() {
+        #if PRE_MC_1_20_1
+        return this.blockState.getMaterial().isSolid();
+        #else
+        return !this.blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).isEmpty();
+        #endif
+    }
 	
 	@Override
-	public boolean isLiquid() { return this.blockState.getMaterial().isLiquid(); }
+	public boolean isLiquid() {
+        #if PRE_MC_1_20_1
+        return this.blockState.getMaterial().isLiquid();
+        #else
+        return !this.blockState.getFluidState().isEmpty();
+        #endif
+    }
 	
 	
 	

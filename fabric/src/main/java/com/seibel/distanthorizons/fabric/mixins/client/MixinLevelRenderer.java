@@ -116,11 +116,19 @@ public class MixinLevelRenderer
             ,
             at = @At(
             value = "INVOKE",
+            #if PRE_MC_1_20_1
             target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runUpdates(IZZ)I"
+            #else
+            target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runLightUpdates()I"
+            #endif
             ))
-    private int callAfterRunUpdates(LevelLightEngine light, int pos, boolean isQueueEmpty, boolean updateBlockLight)
+    private int callAfterRunUpdates(LevelLightEngine light #if PRE_MC_1_20_1 , int pos, boolean isQueueEmpty, boolean updateBlockLight #endif)
     {
+        #if PRE_MC_1_20_1
         int r = light.runUpdates(pos, isQueueEmpty, updateBlockLight);
+        #else
+        int r = light.runLightUpdates();
+        #endif
         ChunkWrapper.syncedUpdateClientLightStatus();
         return r;
     }

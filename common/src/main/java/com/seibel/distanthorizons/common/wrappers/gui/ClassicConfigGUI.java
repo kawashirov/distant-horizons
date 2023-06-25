@@ -36,7 +36,11 @@ import com.seibel.distanthorizons.coreapi.ModInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+#if PRE_MC_1_20_1
 import net.minecraft.client.gui.GuiComponent;
+#else
+import net.minecraft.client.gui.GuiGraphics;
+#endif
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
@@ -165,7 +169,7 @@ public class ClassicConfigGUI
     /**
      * Pain
      */
-    private static class ConfigScreen extends Screen {
+    private static class ConfigScreen extends DhScreen {
         protected ConfigScreen(ConfigBase configBase, Screen parent, String category) {
             super(Translatable(
                     I18n.exists(configBase.modID + ".config" + (category.isEmpty() ? "." + category : "") + ".title") ?
@@ -201,17 +205,6 @@ public class ClassicConfigGUI
         public void onClose() {
             ConfigBase.INSTANCE.configFileINSTANCE.saveToFile();
             Objects.requireNonNull(minecraft).setScreen(this.parent);
-        }
-
-        // addRenderableWidget in 1.17 and over
-        // addButton in 1.16 and below
-        private Button addBtn(Button button) {
-			#if PRE_MC_1_17_1
-            this.addButton(button);
-			#else
-            this.addRenderableWidget(button);
-			#endif
-            return button;
         }
 
         @Override
@@ -314,14 +307,20 @@ public class ClassicConfigGUI
         }
 
         @Override
-        public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+        #if PRE_MC_1_20_1
+        public void render(PoseStack matrices, int mouseX, int mouseY, float delta)
+        #else
+        public void render(GuiGraphics matrices, int mouseX, int mouseY, float delta)
+		#endif
+        {
             this.renderBackground(matrices); // Renders background
             this.list.render(matrices, mouseX, mouseY, delta); // Render buttons
-            drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title
+
+            DhDrawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title
 
             // If the update is pending, display this message to inform the user that it will apply when the game restarts
             if (SelfUpdater.deleteOldOnClose)
-                drawString(matrices, font, Translatable(configBase.modID + ".updater.waitingForClose"), 4, height-38, 0xFFFFFF);
+                DhDrawString(matrices, font, Translatable(configBase.modID + ".updater.waitingForClose"), 4, height-38, 0xFFFFFF);
 
 
             // Render the tooltip only if it can find a tooltip in the language file
@@ -339,13 +338,13 @@ public class ClassicConfigGUI
                         String key = translationPrefix + (newInfo.category.isEmpty() ? "" : newInfo.category + ".") + newInfo.getName() + ".@tooltip";
 
                         if (((EntryInfo) newInfo.guiValue).error != null && text.equals(name))
-                            renderTooltip(matrices, (Component) ((EntryInfo) newInfo.guiValue).error.getValue(), mouseX, mouseY);
+                            DhRenderTooltip(matrices, font, ((EntryInfo) newInfo.guiValue).error.getValue(), mouseX, mouseY);
                         else if (I18n.exists(key) && (text != null && text.equals(name))) {
                             List<Component> list = new ArrayList<>();
                             for (String str : I18n.get(key).split("\n")) {
                                 list.add(TextOrTranslatable(str));
                             }
-                            renderComponentTooltip(matrices, list, mouseX, mouseY);
+                            DhRenderComponentTooltip(matrices, font, list, mouseX, mouseY);
                         }
                     }
                 }
@@ -485,7 +484,12 @@ public class ClassicConfigGUI
         }
 
         @Override
-        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+        #if PRE_MC_1_20_1
+        public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta)
+        #else
+        public void render(GuiGraphics matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta)
+		#endif
+        {
             if (button != null) {
                 SetY(button, y);
                 button.render(matrices, mouseX, mouseY, tickDelta);
@@ -499,7 +503,11 @@ public class ClassicConfigGUI
                 indexButton.render(matrices, mouseX, mouseY, tickDelta);
             }
             if (text != null && (!text.getString().contains("spacer") || button != null))
-                GuiComponent.drawString(matrices, textRenderer, text, 12, y + 5, 0xFFFFFF);
+                #if PRE_MC_1_20_1
+				GuiComponent.drawString(matrices, textRenderer, text, 12, y + 5, 0xFFFFFF);
+				#else
+                matrices.drawString(textRenderer, text, 12, y + 5, 0xFFFFFF);
+				#endif
         }
 
         @Override

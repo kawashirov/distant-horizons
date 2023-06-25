@@ -10,6 +10,9 @@ import com.seibel.distanthorizons.core.jar.JarUtils;
 import com.seibel.distanthorizons.core.jar.installer.ModrinthGetter;
 import com.seibel.distanthorizons.core.jar.updater.SelfUpdater;
 import net.minecraft.client.Minecraft;
+#if POST_MC_1_20_1
+import net.minecraft.client.gui.GuiGraphics;
+#endif
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.Screen;
@@ -117,13 +120,18 @@ public class UpdateModScreen extends DhScreen {
     }
 
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    #if PRE_MC_1_20_1
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta)
+    #else
+    public void render(GuiGraphics matrices, int mouseX, int mouseY, float delta)
+    #endif
+    {
         this.renderBackground(matrices); // Render background
 
 
         // Render the text's
-        drawCenteredString(matrices, this.font, Translatable(ModInfo.ID + ".updater.text1"), this.width / 2, this.height / 2 - 35, 0xFFFFFF);
-        drawCenteredString(matrices, this.font, Translatable(ModInfo.ID + ".updater.text2", ModInfo.VERSION, ModrinthGetter.releaseNames.get(this.newVersionID)), this.width / 2, this.height / 2 -20, 0x52FD52);
+        DhDrawCenteredString(matrices, this.font, Translatable(ModInfo.ID + ".updater.text1"), this.width / 2, this.height / 2 - 35, 0xFFFFFF);
+        DhDrawCenteredString(matrices, this.font, Translatable(ModInfo.ID + ".updater.text2", ModInfo.VERSION, ModrinthGetter.releaseNames.get(this.newVersionID)), this.width / 2, this.height / 2 -20, 0x52FD52);
 
         // TODO: add the tooltips for the buttons
         super.render(matrices, mouseX, mouseY, delta); // Render the buttons
