@@ -19,6 +19,7 @@ build_1_18_2:
   stage: build_1_18_2
   script:
     # this both runs the unit tests and assembles the code
+    - ./gradlew clean -PmcVer="1.18.2" --gradle-user-home cache/;
     - ./gradlew build -PmcVer="1.18.2" --gradle-user-home cache/;
     - ./gradlew mergeJars -PmcVer="1.18.2" --gradle-user-home cache/;
   image: eclipse-temurin:17
@@ -53,6 +54,7 @@ build_1_19_4:
   stage: build_1_19_4
   script:
     # this both runs the unit tests and assembles the code
+    - ./gradlew clean -PmcVer="1.19.4" --gradle-user-home cache/;
     - ./gradlew build -PmcVer="1.19.4" --gradle-user-home cache/;
     - ./gradlew mergeJars -PmcVer="1.19.4" --gradle-user-home cache/;
   image: eclipse-temurin:17
