@@ -587,7 +587,9 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 					{
 						LevelChunk levelChunk = (LevelChunk) chunk;
 						levelChunk.setLightCorrect(true);
+						#if PRE_MC_1_20_1
 						levelChunk.setClientLightReady(true);
+						#endif
 						levelChunk.loaded = true;
 					}
 				#endif

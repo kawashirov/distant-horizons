@@ -19,6 +19,7 @@
  
 package com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject;
 
+import net.minecraft.world.level.lighting.*;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
@@ -31,10 +32,7 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.DataLayer;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.level.lighting.BlockLightEngine;
-import net.minecraft.world.level.lighting.LayerLightEventListener;
-import net.minecraft.world.level.lighting.LevelLightEngine;
-import net.minecraft.world.level.lighting.SkyLightEngine;
+import org.jetbrains.annotations.PropertyKey;
 
 public class WorldGenLevelLightEngine extends LevelLightEngine {
 	public static final int MAX_SOURCE_LEVEL = 15;
@@ -42,10 +40,19 @@ public class WorldGenLevelLightEngine extends LevelLightEngine {
     #if POST_MC_1_17_1
     protected final LevelHeightAccessor levelHeightAccessor;
     #endif
+
+    #if PRE_MC_1_20_1
     @Nullable
     public final BlockLightEngine blockEngine;
     @Nullable
     public final SkyLightEngine skyEngine;
+    #else
+    @Nullable
+    public final LightEngine<?, ?> blockEngine;
+    @Nullable
+    public final LightEngine<?, ?> skyEngine;
+    #endif
+
 
     public WorldGenLevelLightEngine(LightGetterAdaptor genRegion) {
     	super(genRegion, false, false);
@@ -56,29 +63,12 @@ public class WorldGenLevelLightEngine extends LevelLightEngine {
         this.skyEngine = new SkyLightEngine(genRegion);
     }
 
-    @Override
-    public void checkBlock(BlockPos blockPos) {
-        if (this.blockEngine != null) {
-            this.blockEngine.checkBlock(blockPos);
-        }
-        if (this.skyEngine != null) {
-            this.skyEngine.checkBlock(blockPos);
-        }
-    }
-
+    #if PRE_MC_1_20_1
     @Override
     public void onBlockEmissionIncrease(BlockPos blockPos, int i) {
         if (this.blockEngine != null) {
             this.blockEngine.onBlockEmissionIncrease(blockPos, i);
         }
-    }
-
-    @Override
-    public boolean hasLightWork() {
-        if (this.skyEngine != null && this.skyEngine.hasLightWork()) {
-            return true;
-        }
-        return this.blockEngine != null && this.blockEngine.hasLightWork();
     }
 
     @Override
@@ -103,22 +93,93 @@ public class WorldGenLevelLightEngine extends LevelLightEngine {
     }
 
     @Override
-    public void updateSectionStatus(SectionPos sectionPos, boolean bl) {
-        if (this.blockEngine != null) {
-            this.blockEngine.updateSectionStatus(sectionPos, bl);
-        }
-        if (this.skyEngine != null) {
-            this.skyEngine.updateSectionStatus(sectionPos, bl);
-        }
-    }
-
-    @Override
     public void enableLightSources(ChunkPos chunkPos, boolean bl) {
         if (this.blockEngine != null) {
             this.blockEngine.enableLightSources(chunkPos, bl);
         }
         if (this.skyEngine != null) {
             this.skyEngine.enableLightSources(chunkPos, bl);
+        }
+    }
+
+    #else
+    @Override
+    public int runLightUpdates() {
+        int $$0 = 0;
+        if (this.blockEngine != null) {
+            $$0 += this.blockEngine.runLightUpdates();
+        }
+        if (this.skyEngine != null) {
+            $$0 += this.skyEngine.runLightUpdates();
+        }
+        return $$0;
+    }
+
+    @Override
+    public void setLightEnabled(ChunkPos $$0, boolean $$1) {
+        if (this.blockEngine != null) {
+            this.blockEngine.setLightEnabled($$0, $$1);
+        }
+
+        if (this.skyEngine != null) {
+            this.skyEngine.setLightEnabled($$0, $$1);
+        }
+    }
+
+    @Override
+    public void propagateLightSources(ChunkPos arg) {
+        if (this.skyEngine != null) {
+            this.skyEngine.propagateLightSources(arg);
+        }
+        if (this.blockEngine != null) {
+            this.blockEngine.propagateLightSources(arg);
+        }
+    }
+
+    public boolean lightOnInSection(SectionPos $$0) {
+        long $$1 = $$0.asLong();
+        return this.blockEngine == null
+                /*Note: Somehow vanilla access the protected 'storage' field from the LevelLightEngine class... we're using mixin to do this.*/
+                || this.blockEngine.storage.lightOnInSection($$1) && (this.skyEngine == null || this.skyEngine.storage.lightOnInSection($$1));
+    }
+    #endif
+
+    @Override
+    public void queueSectionData(LightLayer lightLayer, SectionPos sectionPos, @Nullable DataLayer dataLayer #if PRE_MC_1_20_1, boolean bl #endif) {
+        if (lightLayer == LightLayer.BLOCK) {
+            if (this.blockEngine != null) {
+                this.blockEngine.queueSectionData(sectionPos.asLong(), dataLayer #if PRE_MC_1_20_1, bl #endif);
+            }
+        } else if (this.skyEngine != null) {
+            this.skyEngine.queueSectionData(sectionPos.asLong(), dataLayer #if PRE_MC_1_20_1, bl #endif);
+        }
+    }
+
+    @Override
+    public void checkBlock(BlockPos blockPos) {
+        if (this.blockEngine != null) {
+            this.blockEngine.checkBlock(blockPos);
+        }
+        if (this.skyEngine != null) {
+            this.skyEngine.checkBlock(blockPos);
+        }
+    }
+
+    @Override
+    public boolean hasLightWork() {
+        if (this.skyEngine != null && this.skyEngine.hasLightWork()) {
+            return true;
+        }
+        return this.blockEngine != null && this.blockEngine.hasLightWork();
+    }
+
+    @Override
+    public void updateSectionStatus(SectionPos sectionPos, boolean bl) {
+        if (this.blockEngine != null) {
+            this.blockEngine.updateSectionStatus(sectionPos, bl);
+        }
+        if (this.skyEngine != null) {
+            this.skyEngine.updateSectionStatus(sectionPos, bl);
         }
     }
 
@@ -168,31 +229,31 @@ public class WorldGenLevelLightEngine extends LevelLightEngine {
             #else
             if (levelChunkSection.hasOnlyAir()) continue;
             int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
+            #if POST_MC_1_20_1
+            queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, i), null);
+            queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, i), null);
+            #endif
+
             updateSectionStatus(SectionPos.of(chunkPos, j), false);
             #endif
         }
+        #if PRE_MC_1_20_1
         enableLightSources(chunkPos, true);
         if (needLightBlockUpdate) {
             chunkAccess.getLights().forEach(blockPos ->
                     onBlockEmissionIncrease(blockPos, chunkAccess.getLightEmission(blockPos)));
         }
-
+        #else
+        //runLightUpdates();
+        propagateLightSources(chunkPos);
+        //runLightUpdates();
+        #endif
         chunkAccess.setLightCorrect(true);
     }
 
     @Override
     public String getDebugData(LightLayer lightLayer, SectionPos sectionPos) {
     	throw new UnsupportedOperationException("This should never be used!");
-    }
-    @Override
-    public void queueSectionData(LightLayer lightLayer, SectionPos sectionPos, @Nullable DataLayer dataLayer, boolean bl) {
-        if (lightLayer == LightLayer.BLOCK) {
-            if (this.blockEngine != null) {
-                this.blockEngine.queueSectionData(sectionPos.asLong(), dataLayer, bl);
-            }
-        } else if (this.skyEngine != null) {
-            this.skyEngine.queueSectionData(sectionPos.asLong(), dataLayer, bl);
-        }
     }
     @Override
     public void retainData(ChunkPos chunkPos, boolean bl) {

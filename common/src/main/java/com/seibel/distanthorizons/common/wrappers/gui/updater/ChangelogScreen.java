@@ -9,7 +9,11 @@ import com.seibel.distanthorizons.core.jar.installer.MarkdownFormatter;
 import com.seibel.distanthorizons.core.jar.installer.ModrinthGetter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+#if PRE_MC_1_20_1
 import net.minecraft.client.gui.GuiComponent;
+#else
+import net.minecraft.client.gui.GuiGraphics;
+#endif
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
@@ -104,7 +108,12 @@ public class ChangelogScreen extends DhScreen {
     }
 
     @Override
-    public void render(PoseStack matrices, int mouseX, int mouseY, float delta) {
+    #if PRE_MC_1_20_1
+    public void render(PoseStack matrices, int mouseX, int mouseY, float delta)
+    #else
+    public void render(GuiGraphics matrices, int mouseX, int mouseY, float delta)
+    #endif
+    {
         this.renderBackground(matrices); // Render background
 
         // Set the scroll position to the mouse height relative to the screen
@@ -115,7 +124,7 @@ public class ChangelogScreen extends DhScreen {
 
         super.render(matrices, mouseX, mouseY, delta); // Render the buttons
 
-        drawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title
+        DhDrawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title
     }
 
     @Override
@@ -155,10 +164,17 @@ public class ChangelogScreen extends DhScreen {
             return new ButtonEntry(text);
         }
 
+        #if PRE_MC_1_20_1
         @Override
         public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
             GuiComponent.drawString(matrices, textRenderer, text, 12, y + 5, 0xFFFFFF);
         }
+        #else
+        @Override
+        public void render(GuiGraphics matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
+            matrices.drawString(textRenderer, text, 12, y + 5, 0xFFFFFF);
+        }
+        #endif
 
         @Override
         public List<? extends GuiEventListener> children() {

@@ -64,12 +64,12 @@ public final class StepFeatures {
 			try {
 				#if PRE_MC_1_18_1
 				worldGenRegion.setOverrideCenter(chunk.getPos());
-				Heightmap.primeHeightmaps(chunk, STATUS.heightmapsAfter());
 				environment.params.generator.applyBiomeDecoration(worldGenRegion, tParams.structFeat);
-				#else
 				Heightmap.primeHeightmaps(chunk, STATUS.heightmapsAfter());
+				#else
 				environment.params.generator.applyBiomeDecoration(worldGenRegion, chunk,
 						tParams.structFeat.forWorldGenRegion(worldGenRegion));
+				Heightmap.primeHeightmaps(chunk, STATUS.heightmapsAfter());
 				#endif
 			} catch (ReportedException e) {
 				e.printStackTrace();

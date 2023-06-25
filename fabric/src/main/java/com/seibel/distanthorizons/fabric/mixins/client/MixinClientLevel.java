@@ -48,8 +48,9 @@ public class MixinClientLevel
 //	{
 //        ClientApi.INSTANCE.clientLevelLoadEvent(WorldWrapper.getWorldWrapper((ClientLevel)(Object)this));
 //    }
-	
-	#if POST_MC_1_18_1 // Only the setLightReady is only available after 1.18. This ensures the light data is ready.
+
+    // Moved to overriding the enableChunkLight(...) method over at ClientPacketListener for 1.20+
+	#if POST_MC_1_18_1 && PRE_MC_1_20_1 // Only the setLightReady is only available after 1.18. This ensures the light data is ready.
     @Inject(method = "setLightReady", at = @At("HEAD"))
 	private void onChunkLightReady(int x, int z, CallbackInfo ci)
 	{

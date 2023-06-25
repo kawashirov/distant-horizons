@@ -72,11 +72,19 @@ public final class StepLight {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			#if POST_MC_1_18_1
+			#if POST_MC_1_18_1 && PRE_MC_1_20_1
 			if (chunk instanceof LevelChunk) ((LevelChunk)chunk).setClientLightReady(true);
+			#elif POST_MC_1_20_1
+			lightEngine.setLightEnabled(chunk.getPos(), true);
 			#endif
+
+
 			chunk.setLightCorrect(true);
 		}
+		#if PRE_MC_1_20_1
 		lightEngine.runUpdates(Integer.MAX_VALUE, true, true);
+		#else
+		lightEngine.runLightUpdates();
+		#endif
 	}
 }

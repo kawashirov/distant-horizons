@@ -39,15 +39,22 @@ import net.minecraft.core.BlockPos;
 #if POST_MC_1_17_1
 import net.minecraft.core.QuartPos;
 #endif
+import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 // Which nullable should be used???
+import net.minecraft.world.level.lighting.LevelLightEngine;
+#if POST_MC_1_20_1
+import net.minecraft.world.level.lighting.LightEngine;
+#endif
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -357,13 +364,32 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public boolean isStillValid() { return this.wrappedLevel == null || this.wrappedLevel.tryGetChunk(this.chunkPos) == this; }
 
+	#if POST_MC_1_20_1
+	private static boolean checkLightSectionsOnChunk(LevelChunk chunk, LevelLightEngine engine) {
+		LevelChunkSection[] sections = chunk.getSections();
+		int minY = chunk.getMinSection();
+		int maxY = chunk.getMaxSection();
+		for (int y = minY; y < maxY; ++y) {
+			LevelChunkSection section = sections[chunk.getSectionIndexFromSectionY(y)];
+			if (section.hasOnlyAir()) continue;
+			if (!engine.lightOnInSection(SectionPos.of(chunk.getPos(), y))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	#endif
+
 	// Should be called after client light updates are triggered.
 	private static boolean updateClientLightReady(ChunkAccess chunk, boolean oldValue) {
 		if (chunk instanceof LevelChunk && ((LevelChunk)chunk).getLevel() instanceof ClientLevel)
 		{
 			LevelChunk levelChunk = (LevelChunk)chunk;
 			ClientChunkCache clientChunkCache = ((ClientLevel)levelChunk.getLevel()).getChunkSource();
-			return clientChunkCache.getChunkForLighting(chunk.getPos().x, chunk.getPos().z) != null && levelChunk.isClientLightReady();
+			return clientChunkCache.getChunkForLighting(chunk.getPos().x, chunk.getPos().z) != null &&
+					#if PRE_MC_1_20_1 levelChunk.isClientLightReady()
+					#else checkLightSectionsOnChunk(levelChunk, levelChunk.getLevel().getLightEngine())
+					#endif;
 		}
 		else
 		{
