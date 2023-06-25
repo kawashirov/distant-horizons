@@ -86,8 +86,8 @@ build_1_19_4:
 
 
 # 1.20.1 build
-build_1.20.1:
-  stage: build_1.20.1
+build_1_20_1:
+  stage: build_1_20_1
   script:
     # this both runs the unit tests and assembles the code
     - ./gradlew clean -PmcVer="1.20.1" --gradle-user-home cache/;
@@ -95,7 +95,7 @@ build_1.20.1:
     - ./gradlew mergeJars -PmcVer="1.20.1" --gradle-user-home cache/;
   image: eclipse-temurin:17
   artifacts:
-    name: "NightlyBuild_1.20.1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+    name: "NightlyBuild_1_20_1-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
     paths:
       - Merged/*.jar
       - fabric/build/libs/*.jar
