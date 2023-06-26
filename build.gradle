@@ -182,6 +182,9 @@ subprojects { p ->
         implementation("org.apache.logging.log4j:log4j-api:${rootProject.log4j_version}")
         implementation("org.apache.logging.log4j:log4j-core:${rootProject.log4j_version}")
 
+        // Netty
+        implementation("io.netty:netty-all:${rootProject.netty_version}")
+
         // JOML
         implementation("org.joml:joml:${rootProject.joml_version}")
 

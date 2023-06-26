@@ -1,6 +1,5 @@
 package com.seibel.distanthorizons.fabric;
 
-import com.seibel.distanthorizons.common.networking.Networking;
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
@@ -70,9 +69,6 @@ public class FabricServerProxy
 		
 		/* Register the mod needed event callbacks */
 		
-		// TEST EVENT
-		//ServerTickEvents.END_SERVER_TICK.register(this::tester);
-		
 		// ServerTickEvent
 		ServerTickEvents.END_SERVER_TICK.register((server) -> SERVER_API.serverTickEvent());
 		
@@ -124,17 +120,4 @@ public class FabricServerProxy
 		});
 		// ServerChunkSaveEvent - Done in MixinChunkMap
 	}
-	
-	// This just exists here for testing purposes, it'll be removed in the future
-	public void tester(MinecraftServer server)
-	{ // I disabled the Networking functions for now so this will not work atm - coolGi
-		for (ServerPlayer player : server.getPlayerList().getPlayers())
-		{
-			FriendlyByteBuf payload = Networking.createNew();
-			payload.writeInt(1);
-			System.out.println("Sending int 1");
-			Networking.send(player, payload);
-		}
-	}
-	
 }
