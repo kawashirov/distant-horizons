@@ -9,7 +9,7 @@ stages:
   - build_1_18_2
   - build_1_19_4
   - build_1_20_1
-  - build_api_javadocs
+  - pages
 
 variables:
     # Pull core when building
@@ -121,22 +121,21 @@ build_1_20_1:
   allow_failure: true
 
 
-# generate API javadocs
-build_api_javadocs:
-  stage: build_api_javadocs
+# generate and publish API javadocs
+pages:
+  stage: pages
   script:
     # this should only run for the API
     - ./gradlew api:clean --gradle-user-home cache/;
     # this also runs unit tests
     - ./gradlew api:build --gradle-user-home cache/;
     - ./gradlew api:javadoc --gradle-user-home cache/;
+    - mkdir public
+    - cp -r $CI_PROJECT_DIR/coreSubProjects/api/build/docs/javadoc/ .public
   image: eclipse-temurin:17
   artifacts:
-    name: "ApiJavaDoc-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
     paths:
-      - $CI_PROJECT_DIR/coreSubProjects/api/build/docs/javadoc/
-    expose_as: "apiJavaDocs"
-    when: always
+      - public
   cache:
     key: "gradleCache"
     policy: pull-push
