@@ -131,7 +131,7 @@ pages:
     - ./gradlew api:build --gradle-user-home cache/;
     - ./gradlew api:javadoc --gradle-user-home cache/;
     - mkdir public
-    - cp -r $CI_PROJECT_DIR/coreSubProjects/api/build/docs/javadoc/ public
+    - cp -r $CI_PROJECT_DIR/coreSubProjects/api/build/docs/javadoc/. public
   image: eclipse-temurin:17
   artifacts:
     paths:
