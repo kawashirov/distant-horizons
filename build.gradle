@@ -423,12 +423,16 @@ allprojects { p ->
 
     apply plugin: "java"
     apply plugin: "maven-publish"
-
+    
     archivesBaseName = rootProject.mod_name
     version = project.name + "-" + rootProject.versionStr
     group = rootProject.maven_group
-
-
+    
+    // this is the text that appears at the top of the overview (home) page
+    // and is used when bookmarking a page
+    javadoc.title = rootProject.mod_name + "-" + project.name
+    
+    
     repositories {
         // The central repo
         mavenCentral()
