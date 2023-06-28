@@ -21,6 +21,7 @@ package com.seibel.distanthorizons.fabric;
 
 import com.seibel.distanthorizons.api.methods.events.abstractEvents.DhApiAfterDhInitEvent;
 import com.seibel.distanthorizons.api.methods.events.abstractEvents.DhApiBeforeDhInitEvent;
+import com.seibel.distanthorizons.core.config.ConfigBase;
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.*;
 import com.seibel.distanthorizons.common.LodCommonMain;
 import com.seibel.distanthorizons.coreapi.ModInfo;
@@ -54,6 +55,9 @@ public class FabricMain
 
 		if (Config.Client.Advanced.Graphics.Fog.disableVanillaFog.get() && SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("bclib"))
 			ModAccessorInjector.INSTANCE.get(IBCLibAccessor.class).setRenderCustomFog(false); // Remove BCLib's fog
+
+		if (ConfigBase.INSTANCE == null)
+			throw new IllegalStateException("Config was not initialized. Make sure to call LodCommonMain.initConfig() before calling this method.");
 
 		LOGGER.info("Mod Post-Initialized");
 	}
@@ -89,9 +93,5 @@ public class FabricMain
 		LOGGER.info(ModInfo.READABLE_NAME + " Initialized");
 		
 		ApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);
-
-		// Init config
-		// The reason im initialising in this rather than the post init process is cus im using this for the auto updater
-		LodCommonMain.initConfig();
 	}
 }

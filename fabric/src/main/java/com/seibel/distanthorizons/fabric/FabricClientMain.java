@@ -1,5 +1,6 @@
 package com.seibel.distanthorizons.fabric;
 
+import com.seibel.distanthorizons.common.LodCommonMain;
 import com.seibel.distanthorizons.common.wrappers.DependencySetup;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -20,6 +21,7 @@ public class FabricClientMain implements ClientModInitializer
 	{
 		DependencySetup.createClientBindings();
 		FabricMain.init();
+		LodCommonMain.initConfig();
 		
 		server_proxy = new FabricServerProxy(false);
 		server_proxy.registerEvents();
