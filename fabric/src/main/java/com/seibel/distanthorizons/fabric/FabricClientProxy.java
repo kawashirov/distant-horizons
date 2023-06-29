@@ -97,7 +97,7 @@ public class FabricClientProxy
 		
 		// ClientChunkLoadEvent
 		// TODO: Is using setClientLightReady one still better?
-		//#if PRE_MC_1_18_1 // in 1.18+, we use mixin hook in setClientLightReady(true)
+		//#if PRE_MC_1_18_2 // in 1.18+, we use mixin hook in setClientLightReady(true)
 		ClientChunkEvents.CHUNK_LOAD.register((level, chunk) ->
 		{
 			ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);

@@ -144,7 +144,7 @@ public class ChunkWrapper implements IChunkWrapper
 		#if PRE_MC_1_17_1
 		return BiomeWrapper.getBiomeWrapper(chunk.getBiomes().getNoiseBiome(
 				x >> 2, y >> 2, z >> 2));
-		#elif PRE_MC_1_18_1
+		#elif PRE_MC_1_18_2
 		return BiomeWrapper.getBiomeWrapper(chunk.getBiomes().getNoiseBiome(
 				QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)));
 		#elif PRE_MC_1_18_2
@@ -176,7 +176,7 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public boolean isLightCorrect()
 	{
-		#if PRE_MC_1_18_1
+		#if PRE_MC_1_18_2
 		return true;
 		#else
 		if (this.chunk instanceof LevelChunk)
@@ -399,7 +399,7 @@ public class ChunkWrapper implements IChunkWrapper
 
 	public static void syncedUpdateClientLightStatus()
 	{
-		#if PRE_MC_1_18_1
+		#if PRE_MC_1_18_2
 		// TODO: Check what to do in 1.18.1, or in other versions
 		#else
 		weakMapLock.writeLock().lock();

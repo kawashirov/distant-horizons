@@ -10,11 +10,9 @@ echo So if someone does use Windows and knows how to script stuff then can you p
 @REM Old BAT script if you need some help with this task
 
 @REM SETLOCAL
-@REM CALL :buildVersion "1.19"
 @REM CALL :buildVersion "1.18.2"
-@REM CALL :buildVersion "1.18.1"
-@REM CALL :buildVersion "1.17.1"
-@REM CALL :buildVersion "1.16.5"
+@REM CALL :buildVersion "1.19.4"
+@REM CALL :buildVersion "1.20.1"
 @REM EXIT /B %ERRORLEVEL%
 @REM
 @REM :buildVersion
