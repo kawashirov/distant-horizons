@@ -54,7 +54,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.ExtensionPoint;
 #elif MC_1_17_1
 import net.minecraftforge.fmlclient.ConfigGuiHandler;
-#elif POST_MC_1_18_2 && PRE_MC_1_19
+#elif POST_MC_1_18_2 && PRE_MC_1_19_2
 import net.minecraftforge.client.ConfigGuiHandler;
 #else
 import net.minecraftforge.client.ConfigScreenHandler;
@@ -124,7 +124,7 @@ public class ForgeMain implements LodForgeMethodCaller
 		#if PRE_MC_1_17_1
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY,
 				() -> (client, parent) -> GetConfigScreen.getScreen(parent));
-		#elif POST_MC_1_18_2 && PRE_MC_1_19
+		#elif POST_MC_1_18_2 && PRE_MC_1_19_2
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
 				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> GetConfigScreen.getScreen(parent)));
 		#else

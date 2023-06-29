@@ -115,7 +115,7 @@ public class ChunkLoader
 			#if PRE_MC_1_18_2
 			Codec<PalettedContainer<Biome>> biomeCodec = PalettedContainer.codec(
 					biomes, biomes.byNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getOrThrow(Biomes.PLAINS));
-			#elif PRE_MC_1_19
+			#elif PRE_MC_1_19_2
 			Codec<PalettedContainer<Holder<Biome>>> biomeCodec = PalettedContainer.codec(
 					biomes.asHolderIdMap(), biomes.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getHolderOrThrow(Biomes.PLAINS));
 			#else

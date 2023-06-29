@@ -66,7 +66,7 @@ public final class StepBiomes {
 			// System.out.println("StepBiomes: "+chunk.getPos());
 			#if PRE_MC_1_18_2
 			environment.params.generator.createBiomes(environment.params.biomes, chunk);
-			#elif PRE_MC_1_19
+			#elif PRE_MC_1_19_2
 			chunk = environment.joinSync(environment.params.generator.createBiomes(environment.params.biomes, Runnable::run, Blender.of(worldGenRegion),
 					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
 			#elif PRE_MC_1_19_4

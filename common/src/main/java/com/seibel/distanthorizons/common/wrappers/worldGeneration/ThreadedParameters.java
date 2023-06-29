@@ -65,7 +65,7 @@ public final class ThreadedParameters
 		this.level = param.level;
 		#if PRE_MC_1_18_2
 		this.structFeat = new WorldGenStructFeatManager(param.worldGenSettings, level);
-		#elif PRE_MC_1_19
+		#elif PRE_MC_1_19_2
 		this.structCheck = this.createStructureCheck(param);
 		#else
 		this.structCheck = new StructureCheck(param.chunkScanner, param.registry, param.structures,
