@@ -21,7 +21,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-#if PRE_MC_1_19
+#if PRE_MC_1_19_2
 import net.minecraft.network.chat.TextComponent;
 #endif
 

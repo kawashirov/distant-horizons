@@ -16,7 +16,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
-#if PRE_MC_1_19
+#if PRE_MC_1_19_2
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 #else
@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 
 public class ForgeServerProxy
 {
-    #if PRE_MC_1_19
+    #if PRE_MC_1_19_2
     private static LevelAccessor GetLevel(WorldEvent e) { return e.getWorld(); }
     #else
     private static LevelAccessor GetLevel(LevelEvent e) { return e.getLevel(); }

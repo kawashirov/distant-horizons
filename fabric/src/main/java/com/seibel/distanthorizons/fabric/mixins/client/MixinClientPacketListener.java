@@ -40,7 +40,7 @@ public class MixinClientPacketListener
 	@Inject(method = "handleRespawn", at = @At("RETURN"))
 	void onHandleRespawnEnd(CallbackInfo ci) { ClientApi.INSTANCE.clientLevelLoadEvent(ClientLevelWrapper.getWrapper(level)); }
 
-	#if PRE_MC_1_19
+	#if PRE_MC_1_19_4
 	@Inject(method = "cleanup", at = @At("HEAD"))
 	#else
 	@Inject(method = "close", at = @At("HEAD"))

@@ -43,7 +43,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-#if PRE_MC_1_19
+#if PRE_MC_1_19_2
 import net.minecraft.network.chat.TextComponent;
 #endif
 import net.minecraft.server.level.ServerLevel;
@@ -223,7 +223,7 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
     {
         LocalPlayer p = getPlayer();
         if (p == null) return;
-        #if PRE_MC_1_19
+        #if PRE_MC_1_19_2
         p.sendMessage(new TextComponent(string), getPlayer().getUUID());
         #else
         p.sendSystemMessage(net.minecraft.network.chat.Component.translatable(string));

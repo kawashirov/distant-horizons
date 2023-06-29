@@ -27,7 +27,7 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.chunk.IChunkWrapper;
 import net.minecraft.world.level.LevelAccessor;
 
 import net.minecraft.client.multiplayer.ClientLevel;
-#if PRE_MC_1_19
+#if PRE_MC_1_19_2
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 #else
@@ -54,7 +54,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
  */
 public class ForgeClientProxy
 {
-	#if PRE_MC_1_19
+	#if PRE_MC_1_19_2
 	private static LevelAccessor GetLevel(WorldEvent e) { return e.getWorld(); }
 	#else
 	private static LevelAccessor GetLevel(LevelEvent e) { return e.getLevel(); }
@@ -117,7 +117,7 @@ public class ForgeClientProxy
 
 	// Register KeyBindings
 	@SubscribeEvent
-	public void registerKeyBindings(#if PRE_MC_1_19 InputEvent.KeyInputEvent #else InputEvent.Key #endif event)
+	public void registerKeyBindings(#if PRE_MC_1_19_2 InputEvent.KeyInputEvent #else InputEvent.Key #endif event)
 	{
 		if (Minecraft.getInstance().player == null) return;
 		if (event.getAction() != GLFW.GLFW_PRESS) return;
