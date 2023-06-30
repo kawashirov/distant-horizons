@@ -9,6 +9,7 @@ stages:
   - build_1_18_2
   - build_1_19_4
   - build_1_20_1
+  - api
   - pages
 
 variables:
@@ -110,6 +111,35 @@ build_1_20_1:
       - forge/build/libs/*-sources.jar
       - quilt/build/libs/*-all.jar
       - quilt/build/libs/*-sources.jar
+    expire_in: 1 day
+    when: always
+  cache:
+    key: "gradleCache"
+    policy: pull-push
+    paths:
+      - .gradle
+      - cache/
+  allow_failure: true
+
+
+api:
+  stage: api
+  script:
+    # this should only run for the API
+    - ./gradlew api:clean --gradle-user-home cache/;
+    # this also runs unit tests
+    - ./gradlew api:build --gradle-user-home cache/;
+    - ./gradlew api:addSourcesToCompiledJar --gradle-user-home cache/;
+  image: eclipse-temurin:17
+  artifacts:
+    name: "Api_NightlyBuild-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+    paths:
+      - coreSubProjects/api/build/libs/merged/*.jar
+      # can be uncommented if we don't want a jar with the source code
+      # - coreSubProjects/api/build/libs/*.jar
+    exclude:
+      - coreSubProjects/api/build/libs/merged/*-all.jar
+      - coreSubProjects/api/build/libs/merged/*-sources.jar
     expire_in: 1 day
     when: always
   cache:
