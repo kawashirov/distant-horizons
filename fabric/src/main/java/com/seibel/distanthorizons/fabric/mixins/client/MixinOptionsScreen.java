@@ -26,7 +26,7 @@ import com.seibel.distanthorizons.core.config.Config;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-#if PRE_MC_1_19
+#if PRE_MC_1_19_2
 import net.minecraft.network.chat.TranslatableComponent;
 #endif
 import net.minecraft.resources.ResourceLocation;
@@ -68,7 +68,7 @@ public class MixinOptionsScreen extends Screen {
                 // For now it goes to the client option by default
                 (buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(GetConfigScreen.getScreen(this)),
                 // Add a title to the utton
-                #if PRE_MC_1_19
+                #if PRE_MC_1_19_2
                 new TranslatableComponent(ModInfo.ID + ".title")));
                 #else
                 Component.translatable(ModInfo.ID + ".title")));

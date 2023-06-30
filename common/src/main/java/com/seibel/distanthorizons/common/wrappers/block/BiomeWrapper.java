@@ -30,7 +30,7 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.world.IBiomeWrapper;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
-#if POST_MC_1_19
+#if POST_MC_1_19_2
 import net.minecraft.data.worldgen.biome.EndBiomes;
 import net.minecraft.data.worldgen.biome.NetherBiomes;
 #endif

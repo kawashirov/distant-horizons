@@ -38,7 +38,7 @@ import com.seibel.distanthorizons.forge.wrappers.modAccessor.OptifineAccessor;
 
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.core.Direction;
-#if POST_MC_1_19
+#if POST_MC_1_19_2
 import net.minecraft.util.RandomSource;
 #endif
 import net.minecraft.world.level.ColorResolver;
@@ -54,7 +54,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.ExtensionPoint;
 #elif MC_1_17_1
 import net.minecraftforge.fmlclient.ConfigGuiHandler;
-#elif POST_MC_1_18_2 && PRE_MC_1_19
+#elif POST_MC_1_18_2 && PRE_MC_1_19_2
 import net.minecraftforge.client.ConfigGuiHandler;
 #else
 import net.minecraftforge.client.ConfigScreenHandler;
@@ -63,7 +63,7 @@ import net.minecraftforge.client.ConfigScreenHandler;
 import org.apache.logging.log4j.Logger;
 
 // these imports change due to forge refactoring classes in 1.19
-#if PRE_MC_1_19
+#if PRE_MC_1_19_2
 import net.minecraftforge.client.model.data.ModelDataMap;
 import java.util.Random;
 #else
@@ -124,7 +124,7 @@ public class ForgeMain implements LodForgeMethodCaller
 		#if PRE_MC_1_17_1
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY,
 				() -> (client, parent) -> GetConfigScreen.getScreen(parent));
-		#elif POST_MC_1_18_2 && PRE_MC_1_19
+		#elif POST_MC_1_18_2 && PRE_MC_1_19_2
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
 				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> GetConfigScreen.getScreen(parent)));
 		#else
@@ -168,13 +168,13 @@ public class ForgeMain implements LodForgeMethodCaller
 	#endif
 
 	@Override
-	#if PRE_MC_1_19
+	#if PRE_MC_1_19_2
 	public List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, Random random) {
 		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, modelData);
 	}
 	#else
 	public List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, RandomSource random) {
-		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, modelData #if POST_MC_1_19, RenderType.solid() #endif);
+		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, modelData #if POST_MC_1_19_2, RenderType.solid() #endif);
 	}
 	#endif
 

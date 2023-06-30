@@ -31,16 +31,16 @@ import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-#if POST_MC_1_18_1
+#if POST_MC_1_18_2
 import net.minecraft.world.level.chunk.storage.ChunkScanAccess;
 #endif
 import net.minecraft.world.level.levelgen.WorldGenSettings;
-#if PRE_MC_1_19
+#if PRE_MC_1_19_2
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 #else
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 import net.minecraft.world.level.levelgen.RandomState;
-#if POST_MC_1_19
+#if POST_MC_1_19_4
 import net.minecraft.world.level.levelgen.WorldOptions;
 import net.minecraft.core.registries.Registries;
 #endif
@@ -50,7 +50,7 @@ import net.minecraft.world.level.storage.WorldData;
 public final class GlobalParameters
 {
 	public final ChunkGenerator generator;
-	#if PRE_MC_1_19
+	#if PRE_MC_1_19_2
 	public final StructureManager structures;
 	#else
 	public final StructureTemplateManager structures;
@@ -68,7 +68,7 @@ public final class GlobalParameters
 	public final RegistryAccess registry;
 	public final long worldSeed;
 	public final DataFixer fixerUpper;
-	#if POST_MC_1_18_1
+	#if POST_MC_1_18_2
 	public final BiomeManager biomeManager;
 	public final ChunkScanAccess chunkScanner; // FIXME: Figure out if this is actually needed
 	#endif
@@ -92,14 +92,14 @@ public final class GlobalParameters
 		biomes = registry.registryOrThrow(Registries.BIOME);
 		worldSeed = worldOptions.seed();
 		#endif
-		#if POST_MC_1_18_1
+		#if POST_MC_1_18_2
 		biomeManager = new BiomeManager(level, BiomeManager.obfuscateSeed(worldSeed));
 		chunkScanner = level.getChunkSource().chunkScanner();
 		#endif
 		structures = server.getStructureManager();
 		generator = level.getChunkSource().getGenerator();
 		fixerUpper = server.getFixerUpper();
-		#if POST_MC_1_19
+		#if POST_MC_1_19_2
 		randomState = level.getChunkSource().randomState();
 		#endif
 	}

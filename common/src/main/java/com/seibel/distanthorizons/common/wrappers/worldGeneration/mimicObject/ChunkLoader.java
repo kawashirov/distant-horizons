@@ -54,9 +54,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.*;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import net.minecraft.world.level.levelgen.Heightmap;
-#if POST_MC_1_18_1
+#if POST_MC_1_18_2
 import net.minecraft.world.level.levelgen.blending.BlendingData;
-#if PRE_MC_1_19
+#if PRE_MC_1_19_2
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 #endif
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -66,7 +66,7 @@ import net.minecraft.world.ticks.LevelChunkTicks;
 #if POST_MC_1_18_2
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
-#if PRE_MC_1_19
+#if PRE_MC_1_19_2
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 #endif
 #endif
@@ -78,9 +78,9 @@ import org.apache.logging.log4j.Logger;
 
 public class ChunkLoader
 {
-	#if POST_MC_1_19
+	#if POST_MC_1_19_2
 	private static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codecRW(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES, Blocks.AIR.defaultBlockState());
-	#elif POST_MC_1_18_1
+	#elif POST_MC_1_18_2
 	private static final Codec<PalettedContainer<BlockState>> BLOCK_STATE_CODEC = PalettedContainer.codec(Block.BLOCK_STATE_REGISTRY, BlockState.CODEC, PalettedContainer.Strategy.SECTION_STATES, Blocks.AIR.defaultBlockState());
 	#endif
 	private static final String TAG_UPGRADE_DATA = "UpgradeData";
@@ -90,7 +90,7 @@ public class ChunkLoader
 	private static final String FLUID_TICKS_TAG_PRE18 = "LiquidTicks";
 	private static final ConfigBasedLogger LOGGER = BatchGenerationEnvironment.LOAD_LOGGER;
 
-	#if POST_MC_1_18_1
+	#if POST_MC_1_18_2
 	private static BlendingData readBlendingData(CompoundTag chunkData)
 	{
 		BlendingData blendingData = null;
@@ -106,7 +106,7 @@ public class ChunkLoader
 
 	private static LevelChunkSection[] readSections(LevelAccessor level, LevelLightEngine lightEngine, ChunkPos chunkPos, CompoundTag chunkData)
 	{
-		#if POST_MC_1_18_1
+		#if POST_MC_1_18_2
 		#if PRE_MC_1_19_4
 		Registry<Biome> biomes = level.registryAccess().registryOrThrow(Registry.BIOME_REGISTRY);
 		#else
@@ -115,7 +115,7 @@ public class ChunkLoader
 			#if PRE_MC_1_18_2
 			Codec<PalettedContainer<Biome>> biomeCodec = PalettedContainer.codec(
 					biomes, biomes.byNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getOrThrow(Biomes.PLAINS));
-			#elif PRE_MC_1_19
+			#elif PRE_MC_1_19_2
 			Codec<PalettedContainer<Holder<Biome>>> biomeCodec = PalettedContainer.codec(
 					biomes.asHolderIdMap(), biomes.holderByNameCodec(), PalettedContainer.Strategy.SECTION_BIOMES, biomes.getHolderOrThrow(Biomes.PLAINS));
 			#else
@@ -136,7 +136,7 @@ public class ChunkLoader
 			CompoundTag tagSection = tagSections.getCompound(j);
 			int sectionYPos = tagSection.getByte("Y");
 
-			#if PRE_MC_1_18_1
+			#if PRE_MC_1_18_2
 			if (tagSection.contains("Palette", 9) && tagSection.contains("BlockStates", 12)) {
 				LevelChunkSection levelChunkSection = new LevelChunkSection(sectionYPos << 4);
 				levelChunkSection.getStates().read(tagSection.getList("Palette", 10),
@@ -225,7 +225,7 @@ public class ChunkLoader
 
 	public static LevelChunk read(WorldGenLevel level, LevelLightEngine lightEngine, ChunkPos chunkPos, CompoundTag chunkData)
 	{
-		#if PRE_MC_1_18_1
+		#if PRE_MC_1_18_2
 		CompoundTag tagLevel = chunkData.getCompound("Level");
 		#else
 		CompoundTag tagLevel = chunkData;
@@ -238,12 +238,12 @@ public class ChunkLoader
 		}
 
 		ChunkStatus.ChunkType chunkType = readChunkType(tagLevel);
-		#if PRE_MC_1_18_1
+		#if PRE_MC_1_18_2
 		if (chunkType != ChunkStatus.ChunkType.LEVELCHUNK)
 			return null;
 		#else
 		BlendingData blendingData = readBlendingData(tagLevel);
-		#if PRE_MC_1_19
+		#if PRE_MC_1_19_2
 		if (chunkType == ChunkStatus.ChunkType.PROTOCHUNK && (blendingData == null || !blendingData.oldNoise()))
 			return null;
 		#else
@@ -261,7 +261,7 @@ public class ChunkLoader
 
 		boolean isLightOn = tagLevel.getBoolean("isLightOn");
 		if (isLightOn) lightEngine.retainData(chunkPos, true);
-		#if PRE_MC_1_18_1
+		#if PRE_MC_1_18_2
 		ChunkBiomeContainer chunkBiomeContainer = new ChunkBiomeContainer(
 				level.getLevel().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY)#if POST_MC_1_17_1, level #endif,
 				chunkPos, level.getLevel().getChunkSource().getGenerator().getBiomeSource(),
@@ -293,7 +293,7 @@ public class ChunkLoader
 		LevelChunkSection[] levelChunkSections = readSections(level, lightEngine, chunkPos, tagLevel);
 
 		// ====================== Make the chunk =========================
-		#if PRE_MC_1_18_1
+		#if PRE_MC_1_18_2
 		LevelChunk chunk = new LevelChunk((Level) level.getLevel(), chunkPos, chunkBiomeContainer, upgradeData, blockTicks,
 				fluidTicks, inhabitedTime, levelChunkSections, null);
 		#else

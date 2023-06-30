@@ -53,7 +53,7 @@ import net.minecraft.client.resources.language.I18n;	// translation
 #if POST_MC_1_17_1
 import net.minecraft.client.gui.narration.NarratableEntry;
 #endif
-#if PRE_MC_1_19
+#if PRE_MC_1_19_2
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 #endif

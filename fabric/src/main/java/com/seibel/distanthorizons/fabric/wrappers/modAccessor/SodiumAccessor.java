@@ -64,7 +64,7 @@ public class SodiumAccessor implements ISodiumAccessor {
 		SodiumWorldRenderer renderer = SodiumWorldRenderer.instance();
 		LevelHeightAccessor height =  Minecraft.getInstance().level;
 
-		#if POST_MC_1_18_1
+		#if POST_MC_1_18_2
 		// 0b11 = Lighted chunk & loaded chunk
 		return renderer.getChunkTracker().getChunks(0b00).filter(
 			(long l) -> {

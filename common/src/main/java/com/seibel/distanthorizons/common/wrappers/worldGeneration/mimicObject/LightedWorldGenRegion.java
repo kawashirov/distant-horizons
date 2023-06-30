@@ -66,7 +66,7 @@ public class LightedWorldGenRegion extends WorldGenRegion
 	private final List<ChunkAccess> cache;
 	Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
 	
-	#if PRE_MC_1_18_1
+	#if PRE_MC_1_18_2
 	private ChunkPos overrideCenterPos = null;
 	
 	public void setOverrideCenter(ChunkPos pos) {overrideCenterPos = pos;}
@@ -114,7 +114,7 @@ public class LightedWorldGenRegion extends WorldGenRegion
         if (k > this.writeRadius || l > this.writeRadius) {
             return false;
         }
-		#if POST_MC_1_18_1
+		#if POST_MC_1_18_2
         if (center.isUpgrading()) {
             LevelHeightAccessor levelHeightAccessor = center.getHeightAccessorForGeneration();
             if (blockPos.getY() < levelHeightAccessor.getMinBuildHeight() || blockPos.getY() >= levelHeightAccessor.getMaxBuildHeight()) {
@@ -220,7 +220,7 @@ public class LightedWorldGenRegion extends WorldGenRegion
 	public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
 		ChunkAccess chunk = getChunkAccess(i, j, chunkStatus, bl);
 		if (chunk instanceof LevelChunk) {
-			chunk = new ImposterProtoChunk((LevelChunk) chunk #if POST_MC_1_18_1, true #endif);
+			chunk = new ImposterProtoChunk((LevelChunk) chunk #if POST_MC_1_18_2, true #endif);
 		}
 		return chunk;
 	}
@@ -284,7 +284,7 @@ public class LightedWorldGenRegion extends WorldGenRegion
 	
 	public int calculateBlockTint(BlockPos blockPos, ColorResolver colorResolver)
 	{
-		#if PRE_MC_1_19
+		#if PRE_MC_1_19_2
 		int i = (Minecraft.getInstance()).options.biomeBlendRadius;
 		#else
 		int i = (Minecraft.getInstance()).options.biomeBlendRadius().get();

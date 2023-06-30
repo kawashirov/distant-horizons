@@ -61,7 +61,7 @@ public class MixinUtilBackgroundThread
 		}
 	}
 	#endif
-	#if POST_MC_1_18_1
+	#if POST_MC_1_18_2
 	@Inject(method = "wrapThreadWithTaskName(Ljava/lang/String;Ljava/util/function/Supplier;)Ljava/util/function/Supplier;",
 			at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$wrapThreadWithTaskNameForSupplier(String string, Supplier<?> r, CallbackInfoReturnable<Supplier<?>> ci)

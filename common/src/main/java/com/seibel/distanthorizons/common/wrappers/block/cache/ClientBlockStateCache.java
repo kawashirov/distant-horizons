@@ -19,7 +19,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FlowerBlock;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
-#if POST_MC_1_19
+#if POST_MC_1_19_2
 import net.minecraft.util.RandomSource;
 #endif
 import net.minecraft.world.level.block.state.BlockState;
@@ -37,7 +37,7 @@ public class ClientBlockStateCache
 
     private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 
-	#if PRE_MC_1_19
+	#if PRE_MC_1_19_2
     public static final Random random = new Random(0);
 	#else
     public static final RandomSource random = RandomSource.create();

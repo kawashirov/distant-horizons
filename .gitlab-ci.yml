@@ -9,6 +9,7 @@ stages:
   - build_1_18_2
   - build_1_19_4
   - build_1_20_1
+  - build_1_19_2
   - api
   - pages
 
@@ -51,6 +52,39 @@ build_1_18_2:
       - cache/
   allow_failure: true
 
+# 1.19.2 build
+build_1_19_2:
+  stage: build_1_19_2
+  script:
+    # this both runs the unit tests and assembles the code
+    - ./gradlew clean -PmcVer="1.19.2" --gradle-user-home cache/;
+    - ./gradlew build -PmcVer="1.19.2" --gradle-user-home cache/;
+    - ./gradlew mergeJars -PmcVer="1.19.2" --gradle-user-home cache/;
+  image: eclipse-temurin:17
+  artifacts:
+    name: "NightlyBuild_1_19_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+    paths:
+      - Merged/*.jar
+      - fabric/build/libs/*.jar
+      - forge/build/libs/*.jar
+      - quilt/build/libs/*.jar
+    exclude:
+      # TODO: There is a lot of duplicate stuff here, fix it later to be smaller
+      - fabric/build/libs/*-all.jar
+      - fabric/build/libs/*-sources.jar
+      - forge/build/libs/*-all.jar
+      - forge/build/libs/*-sources.jar
+      - quilt/build/libs/*-all.jar
+      - quilt/build/libs/*-sources.jar
+    expire_in: 1 day
+    when: always
+  cache:
+    key: "gradleCache"
+    policy: pull-push
+    paths:
+      - .gradle
+      - cache/
+  allow_failure: true
 
 # 1.19.4 build
 build_1_19_4:

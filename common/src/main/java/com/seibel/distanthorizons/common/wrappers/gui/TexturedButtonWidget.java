@@ -44,7 +44,7 @@ public class TexturedButtonWidget extends ImageButton {
         super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, text);
     }
 
-    #if PRE_MC_1_19
+    #if PRE_MC_1_19_2
     public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction, OnTooltip tooltipSupplier, Component text) {
         super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, tooltipSupplier, text);
     }

@@ -55,7 +55,7 @@ import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepStruc
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepStructureStart;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepSurface;
 
-#if POST_MC_1_19
+#if POST_MC_1_19_4
 import net.minecraft.core.registries.Registries;
 #endif
 
@@ -309,7 +309,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	private static ProtoChunk EmptyChunk(ServerLevel level, ChunkPos chunkPos) {
 		return new ProtoChunk(chunkPos, UpgradeData.EMPTY
 					#if POST_MC_1_17_1, level #endif
-					#if POST_MC_1_18_1, level.registryAccess().registryOrThrow(
+					#if POST_MC_1_18_2, level.registryAccess().registryOrThrow(
 						#if PRE_MC_1_19_4
 						Registry.BIOME_REGISTRY
 						#else
@@ -394,7 +394,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				{
 					target = new ProtoChunk(chunkPos, UpgradeData.EMPTY
 							#if POST_MC_1_17_1 , params.level #endif
-							#if POST_MC_1_18_1 , params.biomes, null #endif
+							#if POST_MC_1_18_2 , params.biomes, null #endif
 					);
 				}
 				return target;
@@ -433,7 +433,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				}
 				
 				boolean isFull = target.getStatus() == ChunkStatus.FULL || target instanceof LevelChunk;
-				#if POST_MC_1_18_1
+				#if POST_MC_1_18_2
 				boolean isPartial = target.isOldNoiseGeneration();
 				#endif
 				if (isFull)
@@ -441,7 +441,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 					LOAD_LOGGER.info("Detected full existing chunk at {}", target.getPos());
 					genEvent.resultConsumer.accept(wrappedChunk);
 				}
-				#if POST_MC_1_18_1
+				#if POST_MC_1_18_2
 				else if (isPartial)
 				{
 					LOAD_LOGGER.info("Detected old existing chunk at {}", target.getPos());
@@ -582,7 +582,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 						//   that though is no longer needed...
 					}
 				
-				#if POST_MC_1_18_1
+				#if POST_MC_1_18_2
 					if (chunk instanceof LevelChunk)
 					{
 						LevelChunk levelChunk = (LevelChunk) chunk;
