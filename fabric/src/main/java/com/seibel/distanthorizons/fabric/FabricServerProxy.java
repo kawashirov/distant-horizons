@@ -1,6 +1,7 @@
 package com.seibel.distanthorizons.fabric;
 
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
+import com.seibel.distanthorizons.common.wrappers.misc.ServerPlayerWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.BatchGenerationEnvironment;
@@ -11,6 +12,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerChunkEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -60,7 +62,8 @@ public class FabricServerProxy
 	
 	private ClientLevelWrapper getClientLevelWrapper(ClientLevel level) { return ClientLevelWrapper.getWrapper(level); }
 	private ServerLevelWrapper getServerLevelWrapper(ServerLevel level) { return ServerLevelWrapper.getWrapper(level); }
-	
+	private ServerPlayerWrapper getServerPlayerWrapper(ServerPlayer player) { return ServerPlayerWrapper.getWrapper(player); }
+
 	/** Registers Fabric Events */
 	public void registerEvents()
 	{
@@ -119,5 +122,20 @@ public class FabricServerProxy
 			}
 		});
 		// ServerChunkSaveEvent - Done in MixinChunkMap
+
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
+		{
+			if (isValidTime())
+			{
+				ServerApi.INSTANCE.serverPlayerJoinEvent(getServerPlayerWrapper(handler.player));
+			}
+		});
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
+		{
+			if (isValidTime())
+			{
+				ServerApi.INSTANCE.serverPlayerDisconnectEvent(getServerPlayerWrapper(handler.player));
+			}
+		});
 	}
 }
