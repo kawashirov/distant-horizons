@@ -85,6 +85,8 @@ dependencies {
 
     addMod("curse.maven:TerraForged-363820:${rootProject.terraforged_version}", rootProject.enable_terraforged)
 
+    addMod("curse.maven:TerraFirmaCraft-302973:4616004", rootProject.enable_terrafirmacraft)
+
 //    if (System.getProperty("idea.sync.active") != "true") {
 //        annotationProcessor "org.spongepowered:mixin:0.8.4:processor"
 //    }
