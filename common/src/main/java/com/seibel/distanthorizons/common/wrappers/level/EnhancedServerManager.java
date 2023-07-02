@@ -2,16 +2,15 @@ package com.seibel.distanthorizons.common.wrappers.level;
 
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.core.level.IServerEnhancedClientLevel;
-import com.seibel.distanthorizons.core.level.IServerEnhancedManager;
+import com.seibel.distanthorizons.core.level.IEnhancedServerManager;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
 import net.minecraft.client.multiplayer.ClientLevel;
-import org.apache.logging.log4j.core.jmx.Server;
 
 import java.util.Objects;
 
-public class ServerEnhancedManager implements IServerEnhancedManager {
+public class EnhancedServerManager implements IEnhancedServerManager {
 
-    public static ServerEnhancedManager INSTANCE = new ServerEnhancedManager();
+    public static EnhancedServerManager INSTANCE = new EnhancedServerManager();
 
     @Override
     public void registerServerEnhancedLevel(IServerEnhancedClientLevel clientLevel) {
