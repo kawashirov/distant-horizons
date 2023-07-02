@@ -38,7 +38,34 @@ public class ClientLevelWrapper implements IClientLevelWrapper
     private static final ConcurrentHashMap<ClientLevel, ClientLevelWrapper>
             levelWrapperMap = new ConcurrentHashMap<>();
 
-    public static ClientLevelWrapper getWrapper(ClientLevel level) {
+    /**
+     * This is set and managed by the ClientApi for servers with support for DH.
+     */
+    private static IClientLevelWrapper overrideWrapper = null;
+    private static boolean useOverrideWrapper = false;
+
+    public static void setWrappedLevel(IClientLevelWrapper wrapper) {
+        overrideWrapper = wrapper;
+    }
+
+    public static void setUseOverrideWrapper(boolean useOverrideWrapper) {
+        ClientLevelWrapper.useOverrideWrapper = useOverrideWrapper;
+    }
+
+    public static IClientLevelWrapper getWrapper(ClientLevel level) {
+        if(useOverrideWrapper) {
+            return overrideWrapper;
+        }
+        return getOriginalWrapper(level);
+    }
+
+    /**
+     * Gets the original level wrapper, regardless of whether or not the server is overriding the
+     * level wrapper.
+     * @param level
+     * @return
+     */
+    public static IClientLevelWrapper getOriginalWrapper(ClientLevel level) {
         return levelWrapperMap.computeIfAbsent(level, ClientLevelWrapper::new);
     }
     public static void closeWrapper(ClientLevel level)
@@ -46,9 +73,11 @@ public class ClientLevelWrapper implements IClientLevelWrapper
         levelWrapperMap.remove(level);
     }
 
-    private ClientLevelWrapper(ClientLevel level) {
+    protected ClientLevelWrapper(ClientLevel level) {
         this.level = level;
     }
+
+
     final ClientLevel level;
     ClientBlockDetailMap blockMap = new ClientBlockDetailMap(this);
     @Nullable
@@ -184,6 +213,9 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 
     @Override
     public String toString() {
+        if(level == null) {
+            return "Wrapped{null}";
+        }
         return "Wrapped{" + level.toString() + "@" + getDimensionType().getDimensionName() + "}";
     }
 
