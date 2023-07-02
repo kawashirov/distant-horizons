@@ -29,12 +29,12 @@ import com.seibel.distanthorizons.core.util.objects.UncheckedInterruptedExceptio
 import net.minecraft.server.level.WorldGenRegion;
 #if POST_MC_1_17_1
 #endif
-#if PRE_MC_1_19
+#if PRE_MC_1_19_2
 #endif
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ProtoChunk;
-#if POST_MC_1_18_1
+#if POST_MC_1_18_2
 import net.minecraft.world.level.levelgen.blending.Blender;
 #endif
 
@@ -69,10 +69,10 @@ public final class StepNoise {
 			// System.out.println("StepNoise: "+chunk.getPos());
 			#if PRE_MC_1_17_1
 			environment.params.generator.fillFromNoise(worldGenRegion, tParams.structFeat, chunk);
-			#elif PRE_MC_1_18_1
+			#elif PRE_MC_1_18_2
 			chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run,
 					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
-			#elif PRE_MC_1_19
+			#elif PRE_MC_1_19_2
 			chunk = environment.joinSync(environment.params.generator.fillFromNoise(Runnable::run, Blender.of(worldGenRegion),
 					tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk));
 			#else

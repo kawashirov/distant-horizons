@@ -138,7 +138,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public double getGamma()
 	{
-		#if PRE_MC_1_19
+		#if PRE_MC_1_19_2
 		return MC.options.gamma;
 		#else
 		return MC.options.gamma().get();
@@ -186,7 +186,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	@Override
 	public int getRenderDistance()
 	{
-		#if PRE_MC_1_18_1
+		#if PRE_MC_1_18_2
 		//FIXME: How to resolve this?
 		return MC.options.renderDistance;
 		#else
@@ -278,7 +278,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 			try {
 				LevelRenderer levelRenderer = MC.levelRenderer;
 				Collection<LevelRenderer.RenderChunkInfo> chunks =
-					#if PRE_MC_1_18_1 levelRenderer.renderChunks;
+					#if PRE_MC_1_18_2 levelRenderer.renderChunks;
 					#else levelRenderer.renderChunkStorage.get().renderChunks; #endif
 
 				return (chunks.stream().map((chunk) -> {

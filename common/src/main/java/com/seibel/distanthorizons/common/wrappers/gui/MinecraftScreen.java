@@ -25,7 +25,7 @@ public class MinecraftScreen {
         private AbstractScreen screen;
 
 
-    #if PRE_MC_1_19
+    #if PRE_MC_1_19_2
         public static net.minecraft.network.chat.TranslatableComponent translate (String str, Object... args) {
             return new net.minecraft.network.chat.TranslatableComponent(str, args);
         }

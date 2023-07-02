@@ -221,7 +221,7 @@ public class WorldGenLevelLightEngine extends LevelLightEngine {
             if (!LevelChunkSection.isEmpty(levelChunkSection)) {
                 updateSectionStatus(SectionPos.of(chunkPos, i), false);
             }
-            #elif PRE_MC_1_18_1
+            #elif PRE_MC_1_18_2
             if (!LevelChunkSection.isEmpty(levelChunkSection)) {
                 int j = this.levelHeightAccessor.getSectionYFromSectionIndex(i);
                 updateSectionStatus(SectionPos.of(chunkPos, j), false);

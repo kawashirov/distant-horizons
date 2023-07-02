@@ -25,7 +25,7 @@ import com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject.Wo
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.WorldGenLevel;
-#if POST_MC_1_18_1
+#if POST_MC_1_18_2
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
 #endif
 
@@ -35,7 +35,7 @@ public final class ThreadedParameters
 	
 	final ServerLevel level;
 	public WorldGenStructFeatManager structFeat = null;
-	#if POST_MC_1_18_1
+	#if POST_MC_1_18_2
 	public StructureCheck structCheck;
 	#endif
 	boolean isValid = true;
@@ -63,9 +63,9 @@ public final class ThreadedParameters
 		previousGlobalParameters = param;
 		
 		this.level = param.level;
-		#if PRE_MC_1_18_1
+		#if PRE_MC_1_18_2
 		this.structFeat = new WorldGenStructFeatManager(param.worldGenSettings, level);
-		#elif PRE_MC_1_19
+		#elif PRE_MC_1_19_2
 		this.structCheck = this.createStructureCheck(param);
 		#else
 		this.structCheck = new StructureCheck(param.chunkScanner, param.registry, param.structures,
@@ -81,14 +81,14 @@ public final class ThreadedParameters
 	public void makeStructFeat(WorldGenLevel genLevel, GlobalParameters param)
 	{
 		#if PRE_MC_1_19_4
-		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, genLevel #if POST_MC_1_18_1, structCheck #endif);
+		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, genLevel #if POST_MC_1_18_2, structCheck #endif);
 		#else
 		structFeat = new WorldGenStructFeatManager(param.worldOptions, genLevel, structCheck);
 		#endif
 	}
 	
 	
-	#if PRE_MC_1_19
+	#if PRE_MC_1_19_2
 	public void recreateStructureCheck()
 	{
 		if (previousGlobalParameters != null)

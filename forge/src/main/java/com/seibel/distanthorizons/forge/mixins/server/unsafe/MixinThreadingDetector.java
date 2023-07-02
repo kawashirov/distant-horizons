@@ -19,7 +19,7 @@
  
 package com.seibel.distanthorizons.forge.mixins.server.unsafe;
 import org.spongepowered.asm.mixin.Mixin;
-#if POST_MC_1_18_1
+#if POST_MC_1_18_2
 
 import net.minecraft.util.ThreadingDetector;
 import org.spongepowered.asm.mixin.Mutable;
