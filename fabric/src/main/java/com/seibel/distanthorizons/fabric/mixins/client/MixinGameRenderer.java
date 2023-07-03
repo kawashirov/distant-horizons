@@ -1,5 +1,6 @@
 package com.seibel.distanthorizons.fabric.mixins.client;
 
+import com.seibel.distanthorizons.common.wrappers.DependencySetupDoneCheck;
 import com.seibel.distanthorizons.core.api.internal.ClientApi;
 import net.minecraft.client.renderer.GameRenderer;
 import org.apache.logging.log4j.LogManager;
@@ -18,14 +19,22 @@ public class MixinGameRenderer
 	#if POST_MC_1_17_1
     @Inject(method = "shutdownShaders", at = @At("HEAD"))
     public void onShutdownShaders(CallbackInfo ci) {
-        LOGGER.info("Shutting down renderer");
+        LOGGER.info("Shutting down renderer (fabric)");
+        if (!DependencySetupDoneCheck.isDone) {
+            LOGGER.warn("Dependency setup is not done yet, skipping renderer this shutdown event!");
+            return;
+        }
         ClientApi.INSTANCE.rendererShutdownEvent();
     }
 
     // FIXME: This I think will dup multiple renderStartupEvent calls...
-    @Inject(method = {"reloadShaders", "preloadUiShader", "preloadShader"}, at = @At("TAIL"))
+    @Inject(method = {"reloadShaders", "preloadUiShader"}, at = @At("TAIL"))
     public void onStartupShaders(CallbackInfo ci) {
-        LOGGER.info("Starting up renderer");
+        LOGGER.info("Starting up renderer (fabric)");
+        if (!DependencySetupDoneCheck.isDone) {
+            LOGGER.warn("Dependency setup is not done yet, skipping renderer this startup event!");
+            return;
+        }
         ClientApi.INSTANCE.rendererStartupEvent();
     }
     #else
