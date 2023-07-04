@@ -111,7 +111,7 @@ public class ServerLevelWrapper implements IServerLevelWrapper
     }
 	
 	@Override 
-	public EDhApiLevelType getLevelType() { return EDhApiLevelType.CLIENT_LEVEL; }
+	public EDhApiLevelType getLevelType() { return EDhApiLevelType.SERVER_LEVEL; }
 	
 	@Override
     public int getBlockLight(int x, int y, int z)

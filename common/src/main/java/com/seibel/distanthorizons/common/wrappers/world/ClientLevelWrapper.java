@@ -122,51 +122,33 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 	//====================//
 	
     @Override
-    public int computeBaseColor(DhBlockPos pos, IBiomeWrapper biome, IBlockStateWrapper blockState) {
-        return blockMap.getColor(((BlockStateWrapper)blockState).blockState,
-                (BiomeWrapper)biome, pos);
+    public int computeBaseColor(DhBlockPos pos, IBiomeWrapper biome, IBlockStateWrapper blockState)
+    {
+        return this.blockMap.getColor(((BlockStateWrapper)blockState).blockState, (BiomeWrapper)biome, pos);
     }
 
     @Override
-    public IDhApiDimensionTypeWrapper getDimensionType()
-    {
-        return DimensionTypeWrapper.getDimensionTypeWrapper(level.dimensionType());
-    }
+    public IDhApiDimensionTypeWrapper getDimensionType() { return DimensionTypeWrapper.getDimensionTypeWrapper(this.level.dimensionType()); }
 	
 	@Override 
 	public EDhApiLevelType getLevelType() { return EDhApiLevelType.CLIENT_LEVEL; }
 	
 	@Override
-    public int getBlockLight(int x, int y, int z)
-    {
-        return level.getBrightness(LightLayer.BLOCK, new BlockPos(x,y,z));
-    }
+    public int getBlockLight(int x, int y, int z) { return this.level.getBrightness(LightLayer.BLOCK, new BlockPos(x,y,z)); }
 
     @Override
-    public int getSkyLight(int x, int y, int z)
-    {
-        return level.getBrightness(LightLayer.SKY, new BlockPos(x,y,z));
-    }
+    public int getSkyLight(int x, int y, int z) { return this.level.getBrightness(LightLayer.SKY, new BlockPos(x,y,z)); }
 
-    public ClientLevel getLevel()
-    {
-        return level;
-    }
+    public ClientLevel getLevel() { return this.level; }
 
     @Override
-    public boolean hasCeiling() {
-        return level.dimensionType().hasCeiling();
-    }
+    public boolean hasCeiling() { return this.level.dimensionType().hasCeiling(); }
 
     @Override
-    public boolean hasSkyLight() {
-        return level.dimensionType().hasSkyLight();
-    }
+    public boolean hasSkyLight() { return this.level.dimensionType().hasSkyLight(); }
 
     @Override
-    public int getHeight() {
-        return level.getHeight();
-    }
+    public int getHeight() { return this.level.getHeight(); }
 
     @Override
     public int getMinHeight()
@@ -174,39 +156,45 @@ public class ClientLevelWrapper implements IClientLevelWrapper
         #if PRE_MC_1_17_1
         return 0;
         #else
-        return level.getMinBuildHeight();
+        return this.level.getMinBuildHeight();
         #endif
     }
 
     @Override
-    public IChunkWrapper tryGetChunk(DhChunkPos pos) {
-        if (!level.hasChunk(pos.x, pos.z)) return null;
-        ChunkAccess chunk = level.getChunk(pos.getX(), pos.getZ(), ChunkStatus.EMPTY, false);
-        if (chunk == null) return null;
-        return new ChunkWrapper(chunk, level, this);
+    public IChunkWrapper tryGetChunk(DhChunkPos pos)
+    {
+        if (!this.level.hasChunk(pos.x, pos.z))
+        {
+			return null;
+        }
+		
+        ChunkAccess chunk = this.level.getChunk(pos.x, pos.z, ChunkStatus.EMPTY, false);
+        if (chunk == null)
+        {
+			return null;
+        }
+		
+        return new ChunkWrapper(chunk, this.level, this);
     }
 
     @Override
-    public boolean hasChunkLoaded(int chunkX, int chunkZ) {
-        ChunkSource source = level.getChunkSource();
+    public boolean hasChunkLoaded(int chunkX, int chunkZ)
+    {
+        ChunkSource source = this.level.getChunkSource();
         return source.hasChunk(chunkX, chunkZ);
     }
 
     @Override
-    public IBlockStateWrapper getBlockState(DhBlockPos pos) {
-        return BlockStateWrapper.fromBlockState(level.getBlockState(McObjectConverter.Convert(pos)));
-    }
+    public IBlockStateWrapper getBlockState(DhBlockPos pos) 
+    { 
+		return BlockStateWrapper.fromBlockState(this.level.getBlockState(McObjectConverter.Convert(pos)));
+	}
 
     @Override
-    public IBiomeWrapper getBiome(DhBlockPos pos) {
-        return BiomeWrapper.getBiomeWrapper(level.getBiome(McObjectConverter.Convert(pos)));
-    }
+    public IBiomeWrapper getBiome(DhBlockPos pos) { return BiomeWrapper.getBiomeWrapper(this.level.getBiome(McObjectConverter.Convert(pos))); }
 
     @Override
-    public ClientLevel getWrappedMcObject()
-    {
-        return level;
-    }
+    public ClientLevel getWrappedMcObject() { return this.level; }
 
     @Override
     public String toString()
