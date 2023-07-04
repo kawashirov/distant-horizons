@@ -20,9 +20,9 @@
 package com.seibel.distanthorizons.common.wrappers;
 
 import com.seibel.distanthorizons.common.wrappers.gui.LangWrapper;
-import com.seibel.distanthorizons.common.wrappers.level.EnhancedServerManager;
+import com.seibel.distanthorizons.common.wrappers.level.KeyedClientLevelManager;
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftDedicatedServerWrapper;
-import com.seibel.distanthorizons.core.level.IEnhancedServerManager;
+import com.seibel.distanthorizons.core.level.IKeyedClientLevelManager;
 import com.seibel.distanthorizons.core.wrapperInterfaces.config.ILangWrapper;
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftClientWrapper;
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftRenderWrapper;
@@ -51,7 +51,7 @@ public class DependencySetup {
         SingletonInjector.INSTANCE.bind(ILangWrapper.class, LangWrapper.INSTANCE);
         SingletonInjector.INSTANCE.bind(IVersionConstants.class, VersionConstants.INSTANCE);
         SingletonInjector.INSTANCE.bind(IWrapperFactory.class, WrapperFactory.INSTANCE);
-        SingletonInjector.INSTANCE.bind(IEnhancedServerManager.class, EnhancedServerManager.INSTANCE);
+        SingletonInjector.INSTANCE.bind(IKeyedClientLevelManager.class, KeyedClientLevelManager.INSTANCE);
         DependencySetupDoneCheck.isDone = true;
     }
 

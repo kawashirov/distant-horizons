@@ -2,7 +2,6 @@ package com.seibel.distanthorizons.fabric;
 
 import com.seibel.distanthorizons.common.networking.Networking;
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
-import com.seibel.distanthorizons.common.wrappers.minecraft.FriendlyByteBufWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.BatchGenerationEnvironment;
@@ -131,11 +130,11 @@ public class FabricServerProxy
 		});
 		// ServerChunkSaveEvent - Done in MixinChunkMap
 
-		ClientPlayNetworking.registerGlobalReceiver(new ResourceLocation("distant_horizons", "world_control"),
-				(Minecraft client, ClientPacketListener handler, FriendlyByteBuf buf, PacketSender responseSender) ->
-		{
-			ClientApi.INSTANCE.serverMessageReceived(new FriendlyByteBufWrapper(buf));
-		});
+		ClientPlayNetworking.registerGlobalReceiver(new ResourceLocation("distant_horizons", "world_control"), // TODO move these strings into a constant somewhere
+				(Minecraft client, ClientPacketListener handler, FriendlyByteBuf byteBuffer, PacketSender responseSender) ->
+				{
+					ClientApi.INSTANCE.serverMessageReceived(byteBuffer);
+				});
 	}
 
 	// This just exists here for testing purposes, it'll be removed in the future
