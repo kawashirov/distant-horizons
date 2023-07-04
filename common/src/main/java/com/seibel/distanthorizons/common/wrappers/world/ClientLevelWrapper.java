@@ -8,6 +8,8 @@ import com.seibel.distanthorizons.common.wrappers.block.BlockStateWrapper;
 import com.seibel.distanthorizons.common.wrappers.block.cache.ClientBlockDetailMap;
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftClientWrapper;
+import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
+import com.seibel.distanthorizons.core.level.IKeyedClientLevelManager;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.pos.DhBlockPos;
 import com.seibel.distanthorizons.core.pos.DhChunkPos;
@@ -28,30 +30,48 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * 
- * @version 2023-6-3
- */
 public class ClientLevelWrapper implements IClientLevelWrapper
 {
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(ClientLevelWrapper.class.getSimpleName());
-    private static final ConcurrentHashMap<ClientLevel, ClientLevelWrapper>
-            levelWrapperMap = new ConcurrentHashMap<>();
-
-    public static ClientLevelWrapper getWrapper(ClientLevel level) {
-        return levelWrapperMap.computeIfAbsent(level, ClientLevelWrapper::new);
-    }
-    public static void closeWrapper(ClientLevel level)
-    {
-        levelWrapperMap.remove(level);
-    }
-
-    private ClientLevelWrapper(ClientLevel level) {
-        this.level = level;
-    }
-    final ClientLevel level;
-    ClientBlockDetailMap blockMap = new ClientBlockDetailMap(this);
-    @Nullable
+    private static final ConcurrentHashMap<ClientLevel, ClientLevelWrapper> LEVEL_WRAPPER_BY_CLIENT_LEVEL = new ConcurrentHashMap<>();
+	private static final IKeyedClientLevelManager KEYED_CLIENT_LEVEL_MANAGER = SingletonInjector.INSTANCE.get(IKeyedClientLevelManager.class);
+	
+	private final ClientLevel level;
+	private final ClientBlockDetailMap blockMap = new ClientBlockDetailMap(this);
+	
+	
+	
+	//=============//
+	// constructor //
+	//=============//
+	
+    protected ClientLevelWrapper(ClientLevel level) { this.level = level; }
+	
+	
+	
+	//===============//
+	// wrapper logic //
+	//===============//
+	
+	public static IClientLevelWrapper getWrapper(ClientLevel level)
+	{
+		// used if the client is connected to a server that defines the currently loaded level
+		if (KEYED_CLIENT_LEVEL_MANAGER.getUseOverrideWrapper())
+		{
+			return KEYED_CLIENT_LEVEL_MANAGER.getOverrideWrapper();
+		}
+		
+		return getWrapperIgnoringOverride(level);
+	}
+	public static IClientLevelWrapper getWrapperIgnoringOverride(ClientLevel level)
+	{
+		return LEVEL_WRAPPER_BY_CLIENT_LEVEL.computeIfAbsent(level, ClientLevelWrapper::new);
+	}
+	
+	public static void closeLevel(ClientLevel level) { LEVEL_WRAPPER_BY_CLIENT_LEVEL.remove(level); }
+	
+	
+	@Nullable
     @Override
 	public IServerLevelWrapper tryGetServerSideWrapper()
 	{
@@ -89,12 +109,18 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 		}
 	}
     public static void cleanCheck() {
-        if (!levelWrapperMap.isEmpty()) {
-            LOGGER.warn("{} client levels havn't been freed!", levelWrapperMap.size());
-            levelWrapperMap.clear();
+        if (!LEVEL_WRAPPER_BY_CLIENT_LEVEL.isEmpty()) {
+            LOGGER.warn("{} client levels havn't been freed!", LEVEL_WRAPPER_BY_CLIENT_LEVEL.size());
+            LEVEL_WRAPPER_BY_CLIENT_LEVEL.clear();
         }
     }
-
+	
+	
+	
+	//====================//
+	// base level methods //
+	//====================//
+	
     @Override
     public int computeBaseColor(DhBlockPos pos, IBiomeWrapper biome, IBlockStateWrapper blockState) {
         return blockMap.getColor(((BlockStateWrapper)blockState).blockState,
@@ -183,8 +209,14 @@ public class ClientLevelWrapper implements IClientLevelWrapper
     }
 
     @Override
-    public String toString() {
-        return "Wrapped{" + level.toString() + "@" + getDimensionType().getDimensionName() + "}";
-    }
+    public String toString()
+	{
+		if (this.level == null)
+		{
+			return "Wrapped{null}";
+		}
+		
+		return "Wrapped{" + this.level.toString() + "@" + this.getDimensionType().getDimensionName() + "}";
+	}
 
 }

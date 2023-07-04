@@ -203,7 +203,9 @@ subprojects { p ->
         // SVG
         shadowMe("com.formdev:svgSalamander:${rootProject.svgSalamander_version}")
         shadowMe("com.formdev:flatlaf-extras:${rootProject.flatlaf_version}")
-
+        
+        // Netty
+        shadowMe("io.netty:netty-all:4.1.94.Final")
 
         // Remember, for lwjgl dependancies that arent included in Minecraft, you need to also need to add it to the ShadowJar thing
         shadowMe("org.lwjgl:lwjgl-jawt:3.2.2") {

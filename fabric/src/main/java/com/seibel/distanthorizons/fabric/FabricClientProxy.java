@@ -31,6 +31,7 @@ import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.IImmersivePortalsAccessor;
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
+import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
 import com.seibel.distanthorizons.fabric.wrappers.modAccessor.ImmersivePortalsAccessor;
 import com.seibel.distanthorizons.fabric.wrappers.modAccessor.SodiumAccessor;
 import net.fabricmc.api.EnvType;
@@ -100,7 +101,7 @@ public class FabricClientProxy
 		//#if PRE_MC_1_18_2 // in 1.18+, we use mixin hook in setClientLightReady(true)
 		ClientChunkEvents.CHUNK_LOAD.register((level, chunk) ->
 		{
-			ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);
+			IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);
 			ClientApi.INSTANCE.clientChunkLoadEvent(
 					new ChunkWrapper(chunk, level, wrappedLevel),
 					wrappedLevel
@@ -119,7 +120,7 @@ public class FabricClientProxy
 				{
 //					LOGGER.info("attack block at blockpos: " + blockPos);
 					
-					ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
+					IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
 					ClientApi.INSTANCE.clientChunkLoadEvent(
 							new ChunkWrapper(chunk, level, wrappedLevel),
 							wrappedLevel
@@ -146,7 +147,7 @@ public class FabricClientProxy
 					{
 //						LOGGER.info("use block at blockpos: " + hitResult.getBlockPos());
 						
-						ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
+						IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
 						ClientApi.INSTANCE.clientChunkLoadEvent(
 								new ChunkWrapper(chunk, level, wrappedLevel),
 								wrappedLevel
@@ -163,7 +164,7 @@ public class FabricClientProxy
 		// ClientChunkSaveEvent
 		ClientChunkEvents.CHUNK_UNLOAD.register((level, chunk) ->
 		{
-			ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);
+			IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);
 			ClientApi.INSTANCE.clientChunkSaveEvent(
 					new ChunkWrapper(chunk, level, wrappedLevel),
 					wrappedLevel
