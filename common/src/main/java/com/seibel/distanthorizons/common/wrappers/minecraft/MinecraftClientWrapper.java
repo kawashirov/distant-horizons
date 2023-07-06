@@ -22,6 +22,7 @@ package com.seibel.distanthorizons.common.wrappers.minecraft;
 import java.io.File;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.UUID;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.seibel.distanthorizons.common.wrappers.McObjectConverter;
@@ -146,6 +147,11 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
     public boolean playerExists()
     {
         return mc.player != null;
+    }
+
+    @Override
+    public UUID getPlayerUUID() {
+        return getPlayer().getUUID();
     }
 
     @Override
