@@ -25,10 +25,12 @@ import com.mojang.math.Matrix4f;
 #else
 import org.joml.Matrix4f;
 #endif
+import com.seibel.distanthorizons.common.rendering.SeamlessOverdraw;
 import com.seibel.distanthorizons.common.wrappers.McObjectConverter;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.api.internal.ClientApi;
+import com.seibel.distanthorizons.core.util.RenderUtil;
 import com.seibel.distanthorizons.coreapi.util.math.Mat4f;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -39,6 +41,8 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.nio.FloatBuffer;
 
 /**
  * This class is used to mix in my rendering code
@@ -130,6 +134,13 @@ public class MixinLevelRenderer
 			Mat4f mcProjectionMatrix = McObjectConverter.Convert(projectionMatrix);
 
 			ClientApi.INSTANCE.renderLods(ClientLevelWrapper.getWrapper(level), mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
+			
+			// experimental proof-of-concept option
+			if (Config.Client.Advanced.Graphics.AdvancedGraphics.seamlessOverdraw.get())
+			{
+				FloatBuffer modifiedMatrixBuffer = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(projectionMatrix, previousPartialTicks);
+				projectionMatrix.load(modifiedMatrixBuffer);
+			}
 		}
 		
 		if (Config.Client.Advanced.Debugging.lodOnlyMode.get()) 

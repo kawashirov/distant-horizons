@@ -19,15 +19,19 @@
 
 package com.seibel.distanthorizons.fabric;
 
+import com.mojang.math.Matrix4f;
+import com.seibel.distanthorizons.common.rendering.SeamlessOverdraw;
 import com.seibel.distanthorizons.common.wrappers.McObjectConverter;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.core.api.internal.ClientApi;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 
+import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
+import com.seibel.distanthorizons.core.util.RenderUtil;
 import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.IImmersivePortalsAccessor;
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
@@ -44,6 +48,7 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
 
+import java.nio.FloatBuffer;
 import java.util.HashSet;
 
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -189,10 +194,18 @@ public class FabricClientProxy
 			}
 			else
 			{
-				clientApi.renderLods(ClientLevelWrapper.getWrapper(renderContext.world()),
+				this.clientApi.renderLods(ClientLevelWrapper.getWrapper(renderContext.world()),
 						McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
 						McObjectConverter.Convert(renderContext.projectionMatrix()),
 						renderContext.tickDelta());
+				
+				
+				// experimental proof-of-concept option
+				if (Config.Client.Advanced.Graphics.AdvancedGraphics.seamlessOverdraw.get())
+				{
+					FloatBuffer modifiedMatrixBuffer = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(renderContext.projectionMatrix(), renderContext.tickDelta());
+					renderContext.projectionMatrix().load(modifiedMatrixBuffer);
+				}
 			}
 
 			if (immersiveAccessor != null)
