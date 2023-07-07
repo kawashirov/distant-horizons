@@ -1,6 +1,10 @@
 package com.seibel.distanthorizons.common.rendering;
 
+#if PRE_MC_1_19_4
 import com.mojang.math.Matrix4f;
+#else
+import org.joml.Matrix4f;
+#endif
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.util.RenderUtil;
 
@@ -15,7 +19,13 @@ public class SeamlessOverdraw
 	public static FloatBuffer overwriteMinecraftNearFarClipPlanes(Matrix4f minecraftProjectionMatrix, float previousPartialTicks)
 	{
 		FloatBuffer matrixFloatBuffer = FloatBuffer.allocate(16);
+		
+		#if PRE_MC_1_19_4
 		minecraftProjectionMatrix.store(matrixFloatBuffer);
+		#else
+		minecraftProjectionMatrix.get(matrixFloatBuffer);
+		#endif
+		
 		float[] matrixFloatArray = matrixFloatBuffer.array();
 		
 		float dhFarClipPlane = RenderUtil.getNearClipPlaneDistanceInBlocks(previousPartialTicks);

@@ -139,7 +139,12 @@ public class MixinLevelRenderer
 			if (Config.Client.Advanced.Graphics.AdvancedGraphics.seamlessOverdraw.get())
 			{
 				FloatBuffer modifiedMatrixBuffer = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(projectionMatrix, previousPartialTicks);
+				
+				#if PRE_MC_1_19_4
 				projectionMatrix.load(modifiedMatrixBuffer);
+				#else
+				projectionMatrix.set(modifiedMatrixBuffer);
+				#endif
 			}
 		}
 		

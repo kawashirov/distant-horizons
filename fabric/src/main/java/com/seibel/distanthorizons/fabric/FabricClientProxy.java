@@ -19,7 +19,6 @@
 
 package com.seibel.distanthorizons.fabric;
 
-import com.mojang.math.Matrix4f;
 import com.seibel.distanthorizons.common.rendering.SeamlessOverdraw;
 import com.seibel.distanthorizons.common.wrappers.McObjectConverter;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
@@ -204,7 +203,12 @@ public class FabricClientProxy
 				if (Config.Client.Advanced.Graphics.AdvancedGraphics.seamlessOverdraw.get())
 				{
 					FloatBuffer modifiedMatrixBuffer = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(renderContext.projectionMatrix(), renderContext.tickDelta());
+					
+					#if PRE_MC_1_19_4
 					renderContext.projectionMatrix().load(modifiedMatrixBuffer);
+					#else
+					renderContext.projectionMatrix().set(modifiedMatrixBuffer);
+					#endif
 				}
 			}
 
