@@ -1,8 +1,5 @@
 package com.seibel.distanthorizons.common.wrappers.gui;
 
-import com.seibel.distanthorizons.core.config.eventHandlers.QuickRenderToggleConfigEventHandler;
-import com.seibel.distanthorizons.core.config.eventHandlers.presets.RenderQualityPresetConfigEventHandler;
-import com.seibel.distanthorizons.core.config.eventHandlers.presets.ThreadPresetConfigEventHandler;
 import com.seibel.distanthorizons.coreapi.ModInfo;
 import com.seibel.distanthorizons.core.config.ConfigBase;
 import com.seibel.distanthorizons.core.config.gui.ConfigScreen;

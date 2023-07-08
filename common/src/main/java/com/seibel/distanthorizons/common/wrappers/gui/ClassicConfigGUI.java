@@ -9,14 +9,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 // Logger (for debug stuff)
 
-import com.kitfox.svg.animation.TrackBase;
 import com.seibel.distanthorizons.api.enums.config.DisallowSelectingViaConfigGui;
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.config.ConfigBase;
@@ -53,11 +51,6 @@ import net.minecraft.client.resources.language.I18n;	// translation
 #if POST_MC_1_17_1
 import net.minecraft.client.gui.narration.NarratableEntry;
 #endif
-#if PRE_MC_1_19_2
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
-#endif
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

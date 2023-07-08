@@ -31,7 +31,6 @@ import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.fabric.wrappers.FabricDependencySetup;
 import com.seibel.distanthorizons.fabric.wrappers.modAccessor.*;
-import com.seibel.distanthorizons.fabric.wrappers.modAccessor.*;
 
 import org.apache.logging.log4j.Logger;
 

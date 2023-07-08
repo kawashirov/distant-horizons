@@ -13,7 +13,6 @@ import net.minecraft.client.Minecraft;
 #if POST_MC_1_20_1
 import net.minecraft.client.gui.GuiGraphics;
 #endif
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
