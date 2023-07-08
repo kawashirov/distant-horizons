@@ -31,7 +31,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
-#if POST_MC_1_18_2 
+#if POST_MC_1_18_2
 #endif
 
 public final class StepFeatures {
@@ -66,10 +66,12 @@ public final class StepFeatures {
 				worldGenRegion.setOverrideCenter(chunk.getPos());
 				environment.params.generator.applyBiomeDecoration(worldGenRegion, tParams.structFeat);
 				Heightmap.primeHeightmaps(chunk, STATUS.heightmapsAfter());
+				BatchGenerationEnvironment.clearDistantGenerationMixinData();
 				#else
 				environment.params.generator.applyBiomeDecoration(worldGenRegion, chunk,
 						tParams.structFeat.forWorldGenRegion(worldGenRegion));
 				Heightmap.primeHeightmaps(chunk, STATUS.heightmapsAfter());
+				BatchGenerationEnvironment.clearDistantGenerationMixinData();
 				#endif
 			} catch (ReportedException e) {
 				e.printStackTrace();

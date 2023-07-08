@@ -94,7 +94,7 @@ public class WrapperFactory implements IWrapperFactory
 			}
 		}
 		
-		// MC 1.18
+		// MC 1.18, 1.19, 1.20
 		#if POST_MC_1_17_1
 		else if (objectArray.length == 2)
 		{
@@ -123,7 +123,11 @@ public class WrapperFactory implements IWrapperFactory
 		#else
 			// Intentional compiler error to bring attention to the missing wrapper function.
 			// If you need to work on an unimplemented version but don't have the ability to implement this yet
-			// you can comment it out, but please don't commit it. Someone will have to implement it 
+			// you can comment it out, but please don't commit it. Someone will have to implement it .
+
+			// After implementing the new version please read this method's javadocs for instructions
+			// on what other locations also need to be updated, the DhAPI specifically needs to
+			// be updated to state which objects this method accepts.
 			not implemented for this version of Minecraft!
 		#endif
 	}
@@ -137,7 +141,7 @@ public class WrapperFactory implements IWrapperFactory
 				"Chunk wrapper creation failed. \n" +
 						"Expected parameters: \n");
 		
-		// MC 1.18
+		// MC 1.18, 1.19, 1.20
 		#if POST_MC_1_17_1
 		message.append("["+ChunkAccess.class.getName()+"], \n");
 		message.append("["+LevelReader.class.getName()+"]. \n");

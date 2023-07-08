@@ -1,8 +1,8 @@
 package com.seibel.distanthorizons.fabric.mixins.client;
 
-import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.core.api.internal.ClientApi;
+import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -58,10 +58,10 @@ public class MixinClientPacketListener
 	@Inject(method = "enableChunkLight", at = @At("TAIL"))
 	void onEnableChunkLight(LevelChunk chunk, int x, int z, CallbackInfo ci)
 	{
-		ClientLevelWrapper clientLevel = ClientLevelWrapper.getWrapper((ClientLevel) chunk.getLevel());
+		IClientLevelWrapper clientLevel = ClientLevelWrapper.getWrapper((ClientLevel) chunk.getLevel());
 		ClientApi.INSTANCE.clientChunkLoadEvent(new ChunkWrapper(chunk, chunk.getLevel(), clientLevel), clientLevel);
 	}
 
 	#endif
-	
+
 }

@@ -19,33 +19,43 @@
 
 package com.seibel.distanthorizons.fabric;
 
+import com.seibel.distanthorizons.common.rendering.SeamlessOverdraw;
 import com.seibel.distanthorizons.common.wrappers.McObjectConverter;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.core.api.internal.ClientApi;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 
+import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
+import com.seibel.distanthorizons.core.util.RenderUtil;
 import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.IImmersivePortalsAccessor;
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
+import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
 import com.seibel.distanthorizons.fabric.wrappers.modAccessor.ImmersivePortalsAccessor;
 import com.seibel.distanthorizons.fabric.wrappers.modAccessor.SodiumAccessor;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
 
+import java.nio.FloatBuffer;
 import java.util.HashSet;
 
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.HitResult;
@@ -100,7 +110,7 @@ public class FabricClientProxy
 		//#if PRE_MC_1_18_2 // in 1.18+, we use mixin hook in setClientLightReady(true)
 		ClientChunkEvents.CHUNK_LOAD.register((level, chunk) ->
 		{
-			ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);
+			IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);
 			ClientApi.INSTANCE.clientChunkLoadEvent(
 					new ChunkWrapper(chunk, level, wrappedLevel),
 					wrappedLevel
@@ -119,7 +129,7 @@ public class FabricClientProxy
 				{
 //					LOGGER.info("attack block at blockpos: " + blockPos);
 					
-					ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
+					IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
 					ClientApi.INSTANCE.clientChunkLoadEvent(
 							new ChunkWrapper(chunk, level, wrappedLevel),
 							wrappedLevel
@@ -146,7 +156,7 @@ public class FabricClientProxy
 					{
 //						LOGGER.info("use block at blockpos: " + hitResult.getBlockPos());
 						
-						ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
+						IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
 						ClientApi.INSTANCE.clientChunkLoadEvent(
 								new ChunkWrapper(chunk, level, wrappedLevel),
 								wrappedLevel
@@ -163,7 +173,7 @@ public class FabricClientProxy
 		// ClientChunkSaveEvent
 		ClientChunkEvents.CHUNK_UNLOAD.register((level, chunk) ->
 		{
-			ClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);
+			IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);
 			ClientApi.INSTANCE.clientChunkSaveEvent(
 					new ChunkWrapper(chunk, level, wrappedLevel),
 					wrappedLevel
@@ -188,10 +198,23 @@ public class FabricClientProxy
 			}
 			else
 			{
-				clientApi.renderLods(ClientLevelWrapper.getWrapper(renderContext.world()),
+				this.clientApi.renderLods(ClientLevelWrapper.getWrapper(renderContext.world()),
 						McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
 						McObjectConverter.Convert(renderContext.projectionMatrix()),
 						renderContext.tickDelta());
+				
+				
+				// experimental proof-of-concept option
+				if (Config.Client.Advanced.Graphics.AdvancedGraphics.seamlessOverdraw.get())
+				{
+					FloatBuffer modifiedMatrixBuffer = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(renderContext.projectionMatrix(), renderContext.tickDelta());
+					
+					#if PRE_MC_1_19_4
+					renderContext.projectionMatrix().load(modifiedMatrixBuffer);
+					#else
+					renderContext.projectionMatrix().set(modifiedMatrixBuffer);
+					#endif
+				}
 			}
 
 			if (immersiveAccessor != null)
@@ -209,6 +232,12 @@ public class FabricClientProxy
 				onKeyInput();
 			}
 		});
+
+		ClientPlayNetworking.registerGlobalReceiver(new ResourceLocation("distant_horizons", "world_control"), // TODO move these strings into a constant somewhere
+				(Minecraft client, ClientPacketListener handler, FriendlyByteBuf byteBuffer, PacketSender responseSender) ->
+				{
+					ClientApi.INSTANCE.serverMessageReceived(byteBuffer);
+				});
 	}
 	
 	private boolean isValidTime() { return !(Minecraft.getInstance().screen instanceof TitleScreen); }

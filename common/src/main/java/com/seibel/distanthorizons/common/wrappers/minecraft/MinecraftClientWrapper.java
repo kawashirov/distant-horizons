@@ -186,7 +186,7 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
 			return null;
 		}
 		
-        return ClientLevelWrapper.getWrapper(mc.level);
+        return ClientLevelWrapper.getWrapperIgnoringOverride(this.mc.level);
     }
 
     /** Please move over to getInstallationDirectory() */
@@ -267,4 +267,8 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
     public File getInstallationDirectory() {
         return mc.gameDirectory;
     }
+
+    @Override
+    public void executeOnRenderThread(Runnable runnable) { this.mc.execute(runnable); }
+	
 }

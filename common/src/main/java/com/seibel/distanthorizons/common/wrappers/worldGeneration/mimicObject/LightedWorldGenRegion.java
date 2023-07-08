@@ -208,7 +208,7 @@ public class LightedWorldGenRegion extends WorldGenRegion
 	}
 
 	// Use this instead of super.hasChunk() to bypass C2ME concurrency checks
-	private boolean superHasChunk(int x, int z) {
+	public boolean superHasChunk(int x, int z) {
 		int k = x - firstPos.x;
 		int l = z - firstPos.z;
 		return l >= 0 && l < size && k >= 0 && k < size;

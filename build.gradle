@@ -182,9 +182,6 @@ subprojects { p ->
         implementation("org.apache.logging.log4j:log4j-api:${rootProject.log4j_version}")
         implementation("org.apache.logging.log4j:log4j-core:${rootProject.log4j_version}")
 
-        // Netty
-        implementation("io.netty:netty-all:${rootProject.netty_version}")
-
         // JOML
         implementation("org.joml:joml:${rootProject.joml_version}")
 
@@ -207,6 +204,8 @@ subprojects { p ->
         shadowMe("com.formdev:svgSalamander:${rootProject.svgSalamander_version}")
         shadowMe("com.formdev:flatlaf-extras:${rootProject.flatlaf_version}")
 
+        // Netty
+        shadowMe("io.netty:netty-all:${rootProject.netty_version}")
 
         // Remember, for lwjgl dependancies that arent included in Minecraft, you need to also need to add it to the ShadowJar thing
         shadowMe("org.lwjgl:lwjgl-jawt:3.2.2") {
