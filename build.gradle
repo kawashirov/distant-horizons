@@ -117,7 +117,6 @@ subprojects { p ->
         apply plugin: "dev.architectury.loom"
 
 
-
     // Set the manifold version (may not be required tough)
     manifold {
         manifoldVersion = rootProject.manifold_version
@@ -133,8 +132,19 @@ subprojects { p ->
 
         // Configuration fpr core & api
         coreProjects
-        shadowMe.extendsFrom coreProjects
-
+        shadowMe.extendsFrom(coreProjects)
+        
+        
+        // FIXME this additional configuration is necessary because forge 
+        //  needs forgeRuntimeLibrary, although adding it to shadowMe
+        //  causes runtime issues where the libraries aren't properly added
+        forgeShadowMe
+        // this should match shadowMe pretty closely
+        implementation.extendsFrom(forgeShadowMe)
+        shadowMe.extendsFrom(forgeShadowMe)
+        forgeRuntimeLibrary.extendsFrom(forgeShadowMe)
+        
+        
         if (isMinecraftSubProject && p != project(":common")) {
             // Shadow common
             common
@@ -171,11 +181,12 @@ subprojects { p ->
         // shared dependencies //
         //=====================//
         
-
+        
         // Manifold
-        if (isMinecraftSubProject)
+        if (isMinecraftSubProject) {
             annotationProcessor("systems.manifold:manifold-preprocessor:${rootProject.manifold_version}")
-
+        }
+        
         // Log4j
         // TODO: Change to shadowMe later to work in the standalone jar
         // We cannot do this now as it would break Quilt
@@ -191,24 +202,24 @@ subprojects { p ->
         implementation("junit:junit:4.13")
         
         // Compression
-        shadowMe("org.lz4:lz4-java:${rootProject.lz4_version}")
+        forgeShadowMe("org.lz4:lz4-java:${rootProject.lz4_version}")
         
         // NightConfig (includes Toml & Json)
-        shadowMe("com.electronwill.night-config:toml:${rootProject.nightconfig_version}")
-        shadowMe("com.electronwill.night-config:json:${rootProject.nightconfig_version}")
+        forgeShadowMe("com.electronwill.night-config:toml:${rootProject.nightconfig_version}")
+        forgeShadowMe("com.electronwill.night-config:json:${rootProject.nightconfig_version}")
 
         // Theming
-        shadowMe("com.formdev:flatlaf:${rootProject.flatlaf_version}")
+        forgeShadowMe("com.formdev:flatlaf:${rootProject.flatlaf_version}")
 
         // SVG
-        shadowMe("com.formdev:svgSalamander:${rootProject.svgSalamander_version}")
-        shadowMe("com.formdev:flatlaf-extras:${rootProject.flatlaf_version}")
+        forgeShadowMe("com.formdev:svgSalamander:${rootProject.svgSalamander_version}")
+        forgeShadowMe("com.formdev:flatlaf-extras:${rootProject.flatlaf_version}")
         
         // Netty
-        shadowMe("io.netty:netty-all:4.1.94.Final")
+        forgeShadowMe("io.netty:netty-all:4.1.94.Final")
 
         // Remember, for lwjgl dependancies that arent included in Minecraft, you need to also need to add it to the ShadowJar thing
-        shadowMe("org.lwjgl:lwjgl-jawt:3.2.2") {
+        forgeShadowMe("org.lwjgl:lwjgl-jawt:3.2.2") {
             exclude group: "org.lwjgl", module: "lwjgl" // This module is imported by Minecraft so exclude it
         }
         
