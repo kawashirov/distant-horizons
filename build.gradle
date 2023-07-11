@@ -216,7 +216,7 @@ subprojects { p ->
         forgeShadowMe("com.formdev:flatlaf-extras:${rootProject.flatlaf_version}")
         
         // Netty
-        forgeShadowMe("io.netty:netty-all:4.1.94.Final")
+        forgeShadowMe("io.netty:netty-all:${rootProject.netty_version}")
 
         // Remember, for lwjgl dependancies that arent included in Minecraft, you need to also need to add it to the ShadowJar thing
         forgeShadowMe("org.lwjgl:lwjgl-jawt:3.2.2") {

@@ -30,15 +30,21 @@ import com.seibel.distanthorizons.core.config.ConfigBase;
  * This is the common main class
  * @author Ran
  */
-public class LodCommonMain {
+public class LodCommonMain 
+{
     public static boolean forge = false;
     public static LodForgeMethodCaller forgeMethodCaller;
-    public static void startup(LodForgeMethodCaller caller) {
-        if (caller != null) {
+	
+	
+	
+    public static void startup(LodForgeMethodCaller forgeMethodCaller) 
+	{
+        if (forgeMethodCaller != null) 
+		{
             LodCommonMain.forge = true;
-            forgeMethodCaller = caller;
+            LodCommonMain.forgeMethodCaller = forgeMethodCaller;
         }
-
+		
         DependencySetup.createSharedBindings();
         SharedApi.init();
 //        if (!serverSided) {
@@ -53,4 +59,5 @@ public class LodCommonMain {
         ConfigBase.INSTANCE = new ConfigBase(ModInfo.ID, ModInfo.NAME, Config.class,1);
 		Config.completeDelayedSetup();
 	}
+	
 }

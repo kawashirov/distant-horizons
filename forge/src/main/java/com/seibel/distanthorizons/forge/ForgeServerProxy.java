@@ -1,6 +1,5 @@
 package com.seibel.distanthorizons.forge;
 
-import com.seibel.distanthorizons.common.networking.Networking;
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.BatchGenerationEnvironment;
@@ -143,16 +142,6 @@ public class ForgeServerProxy
                 IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetLevel(event), wrappedLevel);
                 serverApi.serverChunkSaveEvent(chunk, getLevelWrapper((ServerLevel) GetLevel(event)));
             }
-        }
-    }
-
-    // This just exists here for testing purposes, it'll be removed in the future
-    public void tester(MinecraftServer server) {
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            FriendlyByteBuf payload = Networking.createNew();
-            payload.writeInt(1);
-            System.out.println("Sending int 1");
-            Networking.send(player, payload);
         }
     }
 }

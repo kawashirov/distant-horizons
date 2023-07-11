@@ -45,7 +45,9 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftSha
  * @author Ran
  * @version 12-1-2021
  */
-public class DependencySetup {
+public class DependencySetup
+{
+	
     public static void createSharedBindings()
     {
         SingletonInjector.INSTANCE.bind(ILangWrapper.class, LangWrapper.INSTANCE);
@@ -56,15 +58,18 @@ public class DependencySetup {
     }
 
     //@Environment(EnvType.SERVER)
-    public static void createServerBindings() {
+    public static void createServerBindings() 
+	{
         SingletonInjector.INSTANCE.bind(IMinecraftSharedWrapper.class, MinecraftDedicatedServerWrapper.INSTANCE);
     }
 
     //@Environment(EnvType.CLIENT)
-    public static void createClientBindings() {
+    public static void createClientBindings() 
+	{
         SingletonInjector.INSTANCE.bind(IMinecraftClientWrapper.class, MinecraftClientWrapper.INSTANCE);
         SingletonInjector.INSTANCE.bind(IMinecraftSharedWrapper.class, MinecraftClientWrapper.INSTANCE);
         SingletonInjector.INSTANCE.bind(IMinecraftRenderWrapper.class, MinecraftRenderWrapper.INSTANCE);
         SingletonInjector.INSTANCE.bind(IReflectionHandler.class, ReflectionHandler.INSTANCE);
     }
+	
 }

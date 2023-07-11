@@ -124,7 +124,7 @@ public class WrapperFactory implements IWrapperFactory
 			// Intentional compiler error to bring attention to the missing wrapper function.
 			// If you need to work on an unimplemented version but don't have the ability to implement this yet
 			// you can comment it out, but please don't commit it. Someone will have to implement it .
-			
+
 			// After implementing the new version please read this method's javadocs for instructions
 			// on what other locations also need to be updated, the DhAPI specifically needs to
 			// be updated to state which objects this method accepts.

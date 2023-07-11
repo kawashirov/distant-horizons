@@ -1,7 +1,7 @@
 package com.seibel.distanthorizons.fabric;
 
-import com.seibel.distanthorizons.common.networking.Networking;
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
+import com.seibel.distanthorizons.common.wrappers.misc.ServerPlayerWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.BatchGenerationEnvironment;
@@ -16,13 +16,13 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import org.apache.logging.log4j.Logger;
@@ -67,6 +67,7 @@ public class FabricServerProxy
 
 	private IClientLevelWrapper getClientLevelWrapper(ClientLevel level) { return ClientLevelWrapper.getWrapper(level); }
 	private ServerLevelWrapper getServerLevelWrapper(ServerLevel level) { return ServerLevelWrapper.getWrapper(level); }
+	private ServerPlayerWrapper getServerPlayerWrapper(ServerPlayer player) { return ServerPlayerWrapper.getWrapper(player); }
 
 	/** Registers Fabric Events */
 	public void registerEvents()
@@ -75,9 +76,6 @@ public class FabricServerProxy
 		isGenerationThreadChecker = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
 
 		/* Register the mod needed event callbacks */
-
-		// TEST EVENT
-		//ServerTickEvents.END_SERVER_TICK.register(this::tester);
 
 		// ServerTickEvent
 		ServerTickEvents.END_SERVER_TICK.register((server) -> SERVER_API.serverTickEvent());
@@ -130,23 +128,20 @@ public class FabricServerProxy
 		});
 		// ServerChunkSaveEvent - Done in MixinChunkMap
 
-		ClientPlayNetworking.registerGlobalReceiver(new ResourceLocation("distant_horizons", "world_control"), // TODO move these strings into a constant somewhere
-				(Minecraft client, ClientPacketListener handler, FriendlyByteBuf byteBuffer, PacketSender responseSender) ->
-				{
-					ClientApi.INSTANCE.serverMessageReceived(byteBuffer);
-				});
-	}
-
-	// This just exists here for testing purposes, it'll be removed in the future
-	public void tester(MinecraftServer server)
-	{ // I disabled the Networking functions for now so this will not work atm - coolGi
-		for (ServerPlayer player : server.getPlayerList().getPlayers())
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
 		{
-			FriendlyByteBuf payload = Networking.createNew();
-			payload.writeInt(1);
-			System.out.println("Sending int 1");
-			Networking.send(player, payload);
-		}
+			if (isValidTime())
+			{
+				ServerApi.INSTANCE.serverPlayerJoinEvent(getServerPlayerWrapper(handler.player));
+			}
+		});
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
+		{
+			if (isValidTime())
+			{
+				ServerApi.INSTANCE.serverPlayerDisconnectEvent(getServerPlayerWrapper(handler.player));
+			}
+		});
 	}
 
 }
