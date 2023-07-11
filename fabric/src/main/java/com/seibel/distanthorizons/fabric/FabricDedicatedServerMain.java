@@ -19,31 +19,37 @@ public class FabricDedicatedServerMain implements DedicatedServerModInitializer
 	private static final Logger LOGGER = LogManager.getLogger(FabricDedicatedServerMain.class.getSimpleName());
 	
 	public static FabricServerProxy server_proxy;
-    public boolean hasPostSetupDone = false;
-
-    @Override
-    public void onInitializeServer() {
-        DependencySetup.createServerBindings();
-        FabricMain.init();
-
-        // FIXME this prevents returning uninitialized Config values
-        //  resulting from a circular reference mid-initialization in a static class
-        // ThreadPresetConfigEventHandler <-> Config
-        ThreadPresetConfigEventHandler.INSTANCE.toString();
-
-        server_proxy = new FabricServerProxy(true);
-        server_proxy.registerEvents();
-
-        ServerLifecycleEvents.SERVER_STARTING.register((server) -> {
-            if (hasPostSetupDone) return;
-            hasPostSetupDone = true;
-            LodUtil.assertTrue(server instanceof DedicatedServer);
-
-            MinecraftDedicatedServerWrapper.INSTANCE.dedicatedServer = (DedicatedServer) server;
-            LodCommonMain.initConfig();
-            FabricMain.postInit();
-
-            LOGGER.info("Dedicated server inited at {}", server.getServerDirectory());
-        });
-    }
+	public boolean hasPostSetupDone = false;
+	
+	@Override
+	public void onInitializeServer()
+	{
+		DependencySetup.createServerBindings();
+		FabricMain.init();
+		
+		// FIXME this prevents returning uninitialized Config values
+		//  resulting from a circular reference mid-initialization in a static class
+		// ThreadPresetConfigEventHandler <-> Config
+		ThreadPresetConfigEventHandler.INSTANCE.toString();
+		
+		server_proxy = new FabricServerProxy(true);
+		server_proxy.registerEvents();
+		
+		ServerLifecycleEvents.SERVER_STARTING.register((server) -> 
+		{
+			if (this.hasPostSetupDone)
+			{
+				return;
+			}
+			
+			this.hasPostSetupDone = true;
+			LodUtil.assertTrue(server instanceof DedicatedServer);
+			
+			MinecraftDedicatedServerWrapper.INSTANCE.dedicatedServer = (DedicatedServer) server;
+			LodCommonMain.initConfig();
+			FabricMain.postInit();
+			
+			LOGGER.info("Dedicated server initialized at "+server.getServerDirectory());
+		});
+	}
 }
