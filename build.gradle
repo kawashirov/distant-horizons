@@ -28,13 +28,27 @@ def writeBuildGradlePredefine(List<String> mcVers, int mcIndex) {
 
     for (int i = 0; i < mcVers.size(); i++) {
         String mcStr = mcVers[i].replace(".", "_")
+        
         if (mcIndex < i) {
+            // exclusive before
             redefineList.add("PRE_MC_" + mcStr)
         }
+        if (mcIndex <= i) {
+            // inclusive before
+            redefineList.add("PRE_AND_MC_" + mcStr)
+        }
+        
         if (mcIndex == i) {
+            // exact
             redefineList.add("MC_" + mcStr)
         }
+        
+        if (mcIndex > i) {
+            // inclusive after
+            redefineList.add("POST_AND_MC_" + mcStr)
+        }
         if (mcIndex >= i) {
+            // exclusive after
             redefineList.add("POST_MC_" + mcStr)
         }
     }
