@@ -28,8 +28,13 @@ public class ServerPlayerWrapper implements IServerPlayerWrapper {
         return serverPlayer.getUUID();
     }
 
-    public IServerLevelWrapper getLevel() {
-        return ServerLevelWrapper.getWrapper(serverPlayer.getLevel());
+    public IServerLevelWrapper getLevel() 
+	{
+		#if PRE_MC_1_20_1
+		return ServerLevelWrapper.getWrapper(this.serverPlayer.getLevel());
+		#else
+		return ServerLevelWrapper.getWrapper(this.serverPlayer.serverLevel());
+		#endif
     }
 
     public Object getWrappedMcObject() {
