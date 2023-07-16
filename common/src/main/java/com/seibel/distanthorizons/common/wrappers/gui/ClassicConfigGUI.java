@@ -118,12 +118,19 @@ public class ClassicConfigGUI
             Number value = 0;
             ((EntryInfo) info.guiValue).error = null;
             if (isNumber && !stringValue.isEmpty() && !stringValue.equals("-") && !stringValue.equals(".")) {
-                value = func.apply(stringValue);
+                try {
+                    value = func.apply(stringValue);
+                } catch (Exception e) {
+                    value = null;
+                }
+
                 byte isValid = ((ConfigEntry) info).isValid(value);
-                ((EntryInfo) info.guiValue).error = isValid == 0 ? null :
-                        new AbstractMap.SimpleEntry<>(editBox, TextOrTranslatable(isValid == -1 ?
-                        "§cMinimum " + "length" + (cast ? " is " + (int) ((ConfigEntry) info).getMin() : " is " + ((ConfigEntry) info).getMin()) :
-                        "§cMaximum " + "length" + (cast ? " is " + (int) ((ConfigEntry) info).getMax() : " is " + ((ConfigEntry) info).getMax())));
+                switch (isValid) {
+                    case 0:  ((EntryInfo) info.guiValue).error = null; break;
+                    case -1: ((EntryInfo) info.guiValue).error = new AbstractMap.SimpleEntry<>(editBox, TextOrTranslatable("§cMinimum length is " + ((ConfigEntry) info).getMin())); break;
+                    case 1:  ((EntryInfo) info.guiValue).error = new AbstractMap.SimpleEntry<>(editBox, TextOrTranslatable("§cMaximum length is " + ((ConfigEntry) info).getMax())); break;
+                    case 2:  ((EntryInfo) info.guiValue).error = new AbstractMap.SimpleEntry<>(editBox, TextOrTranslatable("§cValue is invalid")); break;
+                }
             }
 
             ((EntryInfo) info.guiValue).tempValue = stringValue;
