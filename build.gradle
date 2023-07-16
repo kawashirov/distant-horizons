@@ -394,7 +394,7 @@ subprojects { p ->
 //        exclude "*.distanthorizons.accesswidener"
 ////        include "${accessWidenerVersion}.distanthorizons.accesswidener"
         // Jank solution to remove all unused accesswideners
-        // The line above would work..., except forge requires the original accesswidener, meaning we require this jank solution
+        // The line above would work..., except forge requires the original accesswidener, meaning we require this jank solution to keep it
         exclude { file ->
             if (file.name.contains(".distanthorizons.accesswidener") && file.name != "${accessWidenerVersion}.distanthorizons.accesswidener") {
                 return true

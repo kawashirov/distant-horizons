@@ -29,6 +29,7 @@ import net.minecraft.resources.ResourceLocation;
 /**
  * Creates a button with a texture on it
  */
+// TODO: Is this still needed? Can we switch to vanilla's ImageButton?
 public class TexturedButtonWidget extends ImageButton {
     #if POST_MC_1_17_1
     public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, ResourceLocation texture, OnPress pressAction) {
