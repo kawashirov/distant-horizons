@@ -16,25 +16,19 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+ 
 package com.seibel.distanthorizons.common.wrappers.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-#if PRE_MC_1_20_1
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.Minecraft;
-#else
-import net.minecraft.client.gui.GuiGraphics;
-#endif
 
 /**
  * Creates a button with a texture on it
  */
-// TODO: Is this still needed, can we move over to Vanilla's ImageButton?
 public class TexturedButtonWidget extends ImageButton {
     #if POST_MC_1_17_1
     public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, ResourceLocation texture, OnPress pressAction) {
@@ -50,11 +44,11 @@ public class TexturedButtonWidget extends ImageButton {
         super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, text);
     }
 
-//    public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction, OnTooltip tooltipSupplier, Component text) {
-//        super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, tooltipSupplier, text);
-//    }
+    #if PRE_MC_1_19_2
+    public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction, OnTooltip tooltipSupplier, Component text) {
+        super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, tooltipSupplier, text);
+    }
 
-    #if PRE_MC_1_19_4
     @Override
     public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
         #if PRE_MC_1_17_1
@@ -65,50 +59,14 @@ public class TexturedButtonWidget extends ImageButton {
         RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
         #endif
-
         int i = this.getYImage(this.isHovered);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableDepthTest();
-        #if PRE_MC_1_19_3
         this.blit(matrices, this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
         this.blit(matrices, this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
-        #else
-        this.blit(matrices, this.getX(), this.getY(), 0, 46 + i * 20, this.getWidth() / 2, this.getHeight());
-        this.blit(matrices, this.getX() + this.getWidth() / 2, this.getY(), 200 - this.width / 2, 46 + i * 20, this.getWidth() / 2, this.getHeight());
-        #endif
 
         super.renderButton(matrices, mouseX, mouseY, delta);
-    }
-    #else
-    @Override
-    #if PRE_MC_1_20_1
-    public void renderWidget(PoseStack matrices, int mouseX, int mouseY, float delta) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
-    #else
-    public void renderWidget(GuiGraphics matrices, int mouseX, int mouseY, float delta) {
-    #endif
-        int i = 1;
-        if (!this.active)
-            i = 0;
-        else if (this.isHovered)
-            i = 2;
-
-        #if PRE_MC_1_20_1
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableDepthTest();
-
-        this.blit(matrices, this.getX(), this.getY(), 0, 46 + i * 20, this.getWidth() / 2, this.getHeight());
-        this.blit(matrices, this.getX() + this.getWidth() / 2, this.getY(), 200 - this.width / 2, 46 + i * 20, this.getWidth() / 2, this.getHeight());
-        #else
-        matrices.blit(WIDGETS_LOCATION, this.getX(), this.getY(), 0, 46 + i * 20, this.getWidth() / 2, this.getHeight());
-        matrices.blit(WIDGETS_LOCATION, this.getX() + this.getWidth() / 2, this.getY(), 200 - this.width / 2, 46 + i * 20, this.getWidth() / 2, this.getHeight());
-        #endif
-
-        super.renderWidget(matrices, mouseX, mouseY, delta);
     }
     #endif
 }
