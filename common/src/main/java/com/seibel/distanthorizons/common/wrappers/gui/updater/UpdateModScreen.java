@@ -92,7 +92,6 @@ public class UpdateModScreen extends DhScreen {
 
         this.addBtn( // Update
                 MakeBtn(Translatable(ModInfo.ID + ".updater.update"), this.width / 2 - 75, this.height / 2 + 8, 150, 20, (btn) -> {
-                    SelfUpdater.deleteOldOnClose = true;
                     SelfUpdater.updateMod();
                     this.onClose();
                 })
