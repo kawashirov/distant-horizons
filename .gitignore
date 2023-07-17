@@ -22,6 +22,8 @@ hs_err_pid*
 
 **/src/generated/
 Merged/
+# Folder created by the buildAll scripts
+buildAllJars/
 
 # file from notepad++
 *.bak
