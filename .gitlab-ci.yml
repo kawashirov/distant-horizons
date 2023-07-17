@@ -7,9 +7,9 @@ image: gradle:eclipse-temurin
 stages:
   # TODO: Make stages depending on what is in versionProperties
   - build_1_18_2
+  - build_1_19_2
   - build_1_19_4
   - build_1_20_1
-  - build_1_19_2
   - api
   - pages
 
