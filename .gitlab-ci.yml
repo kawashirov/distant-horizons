@@ -7,9 +7,10 @@ image: gradle:eclipse-temurin
 stages:
   # TODO: Make stages depending on what is in versionProperties
   - build_1_18_2
-  - build_1_19_2
-  - build_1_19_4
-  - build_1_20_1
+  # Disabled those for now as im attempting to optimise the build script
+#  - build_1_19_2
+#  - build_1_19_4
+#  - build_1_20_1
   - api
   - pages
 
@@ -18,17 +19,16 @@ variables:
     GIT_SUBMODULE_STRATEGY: recursive
 
 
-# 1.18.2 build
-build_1_18_2:
-  stage: build_1_18_2
+# This can be extended so code is a bit less duplicated
+.build_mc:
   script:
     # this both runs the unit tests and assembles the code
-    - ./gradlew clean -PmcVer="1.18.2" --gradle-user-home cache/;
-    - ./gradlew build -PmcVer="1.18.2" --gradle-user-home cache/;
-    - ./gradlew mergeJars -PmcVer="1.18.2" --gradle-user-home cache/;
+    - ./gradlew clean -PmcVer="${MC_VER}" --gradle-user-home cache/;
+    - ./gradlew build -PmcVer="${MC_VER}" --gradle-user-home cache/;
+    - ./gradlew mergeJars -PmcVer="${MC_VER}" --gradle-user-home cache/;
   image: eclipse-temurin:17
   artifacts:
-    name: "NightlyBuild_1_18_2-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
+    name: "NightlyBuild_${MC_VER}-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
     paths:
       - Merged/*.jar
       - fabric/build/libs/*.jar
@@ -51,6 +51,19 @@ build_1_18_2:
       - .gradle
       - cache/
   allow_failure: true
+
+
+# 1.18.2 build
+build_1_18_2:
+  stage: build_1_18_2
+  variables:
+    MC_VER: "1.18.2"
+  extends: .build_mc
+
+
+
+
+
 
 # 1.19.2 build
 build_1_19_2:
