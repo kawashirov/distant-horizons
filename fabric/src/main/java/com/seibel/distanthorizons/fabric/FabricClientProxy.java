@@ -36,6 +36,7 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.ISodiumAcce
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
 import com.seibel.distanthorizons.fabric.wrappers.modAccessor.ImmersivePortalsAccessor;
 import com.seibel.distanthorizons.fabric.wrappers.modAccessor.SodiumAccessor;
+import io.netty.buffer.ByteBuf;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
@@ -235,7 +236,9 @@ public class FabricClientProxy
 		ClientPlayNetworking.registerGlobalReceiver(new ResourceLocation("distant_horizons", "world_control"), // TODO move these strings into a constant somewhere
 				(Minecraft client, ClientPacketListener handler, FriendlyByteBuf byteBuffer, PacketSender responseSender) ->
 				{
-					ClientApi.INSTANCE.serverMessageReceived(byteBuffer);
+					// converting to a ByteBuf is necessary otherwise Fabric will complain when the game boots
+					ByteBuf nettyByteBuf = byteBuffer.asByteBuf();
+					ClientApi.INSTANCE.serverMessageReceived(nettyByteBuf);
 				});
 	}
 	
