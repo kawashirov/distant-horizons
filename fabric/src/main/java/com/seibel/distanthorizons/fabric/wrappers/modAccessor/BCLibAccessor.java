@@ -1,8 +1,13 @@
 package com.seibel.distanthorizons.fabric.wrappers.modAccessor;
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.IBCLibAccessor;
+#if PRE_MC_1_19_2
 import ru.bclib.config.ClientConfig;
 import ru.bclib.config.Configs;
+#else
+import org.betterx.bclib.config.ClientConfig;
+import org.betterx.bclib.config.Configs;
+#endif
 
 public class BCLibAccessor implements IBCLibAccessor {
     @Override
