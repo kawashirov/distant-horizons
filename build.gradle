@@ -98,12 +98,12 @@ forgix {
             jarLocation = "build/libs/DistantHorizons-forge-${rootProject.versionStr}.jar"
         }
 
-    findProject(":fabric")
+    if (findProject(":fabric"))
         fabric {
             jarLocation = "build/libs/DistantHorizons-fabric-${rootProject.versionStr}.jar"
         }
 
-    findProject(":quilt")
+    if (findProject(":quilt"))
         quilt {
             jarLocation = "build/libs/DistantHorizons-quilt-${rootProject.versionStr}.jar"
         }
