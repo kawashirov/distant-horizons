@@ -12,11 +12,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
  *
  * @author coolGi
  */
-    #if PRE_MC_1_20_1 // FIXME: Forge seems to be missing the mapping for this ,and remap=false doesn't work... Help
 @Mixin(TextureUtil.class)
 public class MixinTextureUtil {
     @Redirect(method = "Lcom/mojang/blaze3d/platform/TextureUtil;prepareImage(Lcom/mojang/blaze3d/platform/NativeImage$InternalGlFormat;IIII)V",
-            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texParameter(IIF)V", remap=false))
+            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texParameter(IIF)V"), remap=false)
     private static void setLodBias(int target, int pname, float param)
 	{
         float biasValue = Config.Client.Advanced.Graphics.AdvancedGraphics.lodBias.get().floatValue();
@@ -27,4 +26,3 @@ public class MixinTextureUtil {
         }
     }
 }
-    #endif
