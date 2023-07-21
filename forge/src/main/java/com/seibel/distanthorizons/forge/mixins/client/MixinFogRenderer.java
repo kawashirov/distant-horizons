@@ -50,7 +50,7 @@ public class MixinFogRenderer {
 
 	@Inject(at = @At("RETURN"),
 			method = "setupFog(Lnet/minecraft/client/Camera;Lnet/minecraft/client/renderer/FogRenderer$FogMode;FZF)V",
-			remap = #if MC_1_16_5 true #else false #endif) // Remap messiness due to this being added by forge.
+			remap = #if MC_1_16_5 || POST_AND_MC_1_19_2 true #else false #endif) // Remap messiness due to this being added by forge.
 	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, float partTick, CallbackInfo callback)
 	{
 		#if PRE_MC_1_17_1
