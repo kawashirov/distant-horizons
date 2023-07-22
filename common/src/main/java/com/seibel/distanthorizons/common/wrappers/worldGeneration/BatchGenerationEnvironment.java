@@ -158,8 +158,6 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 	}
 	
-	public static final int TIMEOUT_SECONDS = 60;
-	
 	private final IDhServerLevel serverlevel;
 	
 	//=================Generation Step===================
@@ -335,7 +333,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				
 				iter.remove();
 			}
-			else if (event.hasTimeout(TIMEOUT_SECONDS, TimeUnit.SECONDS))
+			else if (event.hasTimeout(Config.Client.Advanced.WorldGenerator.worldGenerationTimeoutLengthInSeconds.get(), TimeUnit.SECONDS))
 			{
 				EVENT_LOGGER.error("Batching World Generator: " + event + " timed out and terminated!");
 				EVENT_LOGGER.info("Dump PrefEvent: " + event.timer);
