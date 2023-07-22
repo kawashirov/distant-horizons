@@ -425,7 +425,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		EVENT_LOGGER.debug("Lod Generate Event: "+genEvent.minPos);
 		
 		ArrayGridList<ChunkWrapper> chunkWrapperList;
-		LightedWorldGenRegion region;
+		DhLitWorldGenRegion region;
 		WorldGenLevelLightEngine lightEngine;
 		LightGetterAdaptor adaptor;
 
@@ -467,7 +467,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			totalChunks = new ArrayGridList<>(refSize, (x,z) -> generator.generate(x + refPosX,z + refPosZ));
 			
 			genEvent.refreshTimeout();
-			region = new LightedWorldGenRegion(params.level, lightEngine, totalChunks,
+			region = new DhLitWorldGenRegion(params.level, lightEngine, totalChunks,
 					ChunkStatus.STRUCTURE_STARTS, refSize/2, generator);
 			adaptor.setRegion(region);
 			genEvent.threadedParam.makeStructFeat(region, params);
@@ -550,7 +550,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	}
 	
 	public void generateDirect(GenerationEvent genEvent, ArrayGridList<ChunkWrapper> chunksToGenerate, int border,
-								EDhApiWorldGenerationStep step, LightedWorldGenRegion region) throws InterruptedException
+								EDhApiWorldGenerationStep step, DhLitWorldGenRegion region) throws InterruptedException
 	{
 		if (Thread.interrupted())
 		{

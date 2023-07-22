@@ -28,8 +28,8 @@ import com.mojang.blaze3d.platform.NativeImage;
 import com.seibel.distanthorizons.common.wrappers.McObjectConverter;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
+import com.seibel.distanthorizons.core.enums.EDhDirection;
 import com.seibel.distanthorizons.coreapi.ModInfo;
-import com.seibel.distanthorizons.core.enums.ELodDirection;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftSharedWrapper;
@@ -108,7 +108,7 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
     //=================//
 
     @Override
-    public float getShade(ELodDirection lodDirection) {
+    public float getShade(EDhDirection lodDirection) {
         if (mc.level != null)
         {
             Direction mcDir = McObjectConverter.Convert(lodDirection);

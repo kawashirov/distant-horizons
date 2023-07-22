@@ -54,7 +54,7 @@ import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 
-public class LightedWorldGenRegion extends WorldGenRegion
+public class DhLitWorldGenRegion extends WorldGenRegion
 {
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 	
@@ -87,7 +87,7 @@ public class LightedWorldGenRegion extends WorldGenRegion
 		#endif
 	#endif
 
-	public LightedWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine,
+	public DhLitWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine,
 			List<ChunkAccess> chunkList, ChunkStatus chunkStatus, int writeRadius,
 			BatchGenerationEnvironment.EmptyChunkGenerator generator)
 	{

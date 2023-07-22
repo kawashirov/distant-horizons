@@ -34,7 +34,7 @@ import net.minecraft.world.level.chunk.LightChunk;
 
 public class LightGetterAdaptor implements LightChunkGetter {
 	private final BlockGetter heightGetter;
-	public LightedWorldGenRegion genRegion = null;
+	public DhLitWorldGenRegion genRegion = null;
 	final boolean shouldReturnNull;
 
 	public LightGetterAdaptor(BlockGetter heightAccessor) {
@@ -42,7 +42,7 @@ public class LightGetterAdaptor implements LightChunkGetter {
 		shouldReturnNull = ModAccessorInjector.INSTANCE.get(IStarlightAccessor.class) != null;
 	}
 
-	public void setRegion(LightedWorldGenRegion region) {
+	public void setRegion(DhLitWorldGenRegion region) {
 		genRegion = region;
 	}
 

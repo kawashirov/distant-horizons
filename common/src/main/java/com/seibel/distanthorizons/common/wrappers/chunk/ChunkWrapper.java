@@ -22,7 +22,7 @@ package com.seibel.distanthorizons.common.wrappers.chunk;
 import com.seibel.distanthorizons.api.enums.config.ELightGenerationMode;
 import com.seibel.distanthorizons.common.wrappers.block.BiomeWrapper;
 import com.seibel.distanthorizons.common.wrappers.block.BlockStateWrapper;
-import com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject.LightedWorldGenRegion;
+import com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject.DhLitWorldGenRegion;
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.pos.DhBlockPos;
 import com.seibel.distanthorizons.core.pos.DhChunkPos;
@@ -96,7 +96,7 @@ public class ChunkWrapper implements IChunkWrapper
 		this.chunkPos = new DhChunkPos(chunk.getPos().x, chunk.getPos().z);
 		
 		// TODO is this the best way to differentiate between when we are generating chunks and when MC gave us a chunk?
-		boolean isDhGeneratedChunk = (this.lightSource.getClass() == LightedWorldGenRegion.class);
+		boolean isDhGeneratedChunk = (this.lightSource.getClass() == DhLitWorldGenRegion.class);
 		this.useDhLightingEngine = isDhGeneratedChunk && (Config.Client.Advanced.WorldGenerator.worldGenLightingEngine.get() == ELightGenerationMode.DISTANT_HORIZONS);
 		
 		weakMapLock.writeLock().lock();
@@ -167,13 +167,13 @@ public class ChunkWrapper implements IChunkWrapper
 	public ChunkAccess getChunk() { return this.chunk; }
 	
 	@Override
-	public int getMaxX() { return this.chunk.getPos().getMaxBlockX(); }
+	public int getMaxBlockX() { return this.chunk.getPos().getMaxBlockX(); }
 	@Override
-	public int getMaxZ() { return this.chunk.getPos().getMaxBlockZ(); }
+	public int getMaxBlockZ() { return this.chunk.getPos().getMaxBlockZ(); }
 	@Override
-	public int getMinX() { return this.chunk.getPos().getMinBlockX(); }
+	public int getMinBlockX() { return this.chunk.getPos().getMinBlockX(); }
 	@Override
-	public int getMinZ() { return this.chunk.getPos().getMinBlockZ(); }
+	public int getMinBlockZ() { return this.chunk.getPos().getMinBlockZ(); }
 	
 	@Override
 	public long getLongChunkPos() { return this.chunk.getPos().toLong(); }
@@ -259,7 +259,7 @@ public class ChunkWrapper implements IChunkWrapper
 			// note: this returns 0 if the chunk is unload
 			
 			// MC lighting method
-			return this.lightSource.getBrightness(LightLayer.BLOCK, new BlockPos(relX +this.getMinX(), relY, relZ +this.getMinZ()));
+			return this.lightSource.getBrightness(LightLayer.BLOCK, new BlockPos(relX +this.getMinBlockX(), relY, relZ +this.getMinBlockZ()));
 		}
 	}
 	
@@ -277,7 +277,7 @@ public class ChunkWrapper implements IChunkWrapper
 		else
 		{
 			// MC lighting method
-			return this.lightSource.getBrightness(LightLayer.SKY, new BlockPos(relX +this.getMinX(), relY, relZ +this.getMinZ()));
+			return this.lightSource.getBrightness(LightLayer.SKY, new BlockPos(relX +this.getMinBlockX(), relY, relZ +this.getMinBlockZ()));
 		}
 	}
 	
@@ -307,9 +307,9 @@ public class ChunkWrapper implements IChunkWrapper
 	}
 	
 	@Override
-	public boolean doesNearbyChunksExist()
+	public boolean doNearbyChunksExist()
 	{
-		if (this.lightSource instanceof LightedWorldGenRegion)
+		if (this.lightSource instanceof DhLitWorldGenRegion)
 		{
 			return true;
 		}

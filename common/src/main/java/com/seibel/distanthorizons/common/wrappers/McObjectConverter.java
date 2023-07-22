@@ -29,7 +29,7 @@ import com.mojang.math.Matrix4f;
 import org.joml.Matrix4f;
 #endif
 
-import com.seibel.distanthorizons.core.enums.ELodDirection;
+import com.seibel.distanthorizons.core.enums.EDhDirection;
 import com.seibel.distanthorizons.core.pos.DhBlockPos;
 import com.seibel.distanthorizons.core.pos.DhChunkPos;
 import com.seibel.distanthorizons.coreapi.util.math.Mat4f;
@@ -89,12 +89,12 @@ public class McObjectConverter
 
 
     static final Direction[] directions;
-    static final ELodDirection[] lodDirections;
+    static final EDhDirection[] lodDirections;
     static {
-    	ELodDirection[] lodDirs = ELodDirection.values();
+    	EDhDirection[] lodDirs = EDhDirection.values();
     	directions = new Direction[lodDirs.length];
-    	lodDirections = new ELodDirection[lodDirs.length];
-		for (ELodDirection lodDir : lodDirs)
+    	lodDirections = new EDhDirection[lodDirs.length];
+		for (EDhDirection lodDir : lodDirs)
 		{
 			Direction dir;
 			switch (lodDir.name().toUpperCase())
@@ -138,11 +138,11 @@ public class McObjectConverter
         return new ChunkPos(wrappedPos.x, wrappedPos.z);
     }
 
-    public static Direction Convert(ELodDirection lodDirection)
+    public static Direction Convert(EDhDirection lodDirection)
     {
         return directions[lodDirection.ordinal()];
     }
-    public static ELodDirection Convert(Direction direction)
+    public static EDhDirection Convert(Direction direction)
     {
         return lodDirections[direction.ordinal()];
     }
