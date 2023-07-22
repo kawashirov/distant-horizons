@@ -22,6 +22,7 @@ package com.seibel.distanthorizons.common.wrappers.worldGeneration.step;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.ThreadedParameters;
 
@@ -59,12 +60,13 @@ public final class StepStructureStart
 	}
 
 	public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
-			List<ChunkAccess> chunks)
+			List<ChunkWrapper> chunkWrappers)
 	{
 		ArrayList<ChunkAccess> chunksToDo = new ArrayList<>();
 		
-		for (ChunkAccess chunk : chunks)
+		for (ChunkWrapper chunkWrapper : chunkWrappers)
 		{
+			ChunkAccess chunk = chunkWrapper.getChunk();
 			if (!chunk.getStatus().isOrAfter(STATUS))
 			{
 				((ProtoChunk) chunk).setStatus(STATUS);

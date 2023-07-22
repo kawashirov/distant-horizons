@@ -26,7 +26,6 @@ import com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject.Li
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.pos.DhBlockPos;
 import com.seibel.distanthorizons.core.pos.DhChunkPos;
-import com.seibel.distanthorizons.core.pos.Pos2D;
 import com.seibel.distanthorizons.core.util.LodUtil;
 import com.seibel.distanthorizons.core.wrapperInterfaces.block.IBlockStateWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.chunk.IChunkWrapper;
@@ -39,25 +38,20 @@ import net.minecraft.core.BlockPos;
 #if POST_MC_1_17_1
 import net.minecraft.core.QuartPos;
 #endif
-import net.minecraft.core.SectionPos;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
 
-// Which nullable should be used???
-import net.minecraft.world.level.lighting.LevelLightEngine;
 #if POST_MC_1_20_1
-import net.minecraft.world.level.lighting.LightEngine;
 #endif
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -68,11 +62,14 @@ public class ChunkWrapper implements IChunkWrapper
 	private final LevelReader lightSource;
 	private final ILevelWrapper wrappedLevel;
 	
-	private final boolean useMcLightingEngine;
-	private final boolean isDhGeneratedChunk;
+	private boolean isDhLightCorrect = false;
+	private final HashMap<DhBlockPos, Integer> blockLightAtRelBlockPos = new HashMap<>(LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * 256);
+	private final HashMap<DhBlockPos, Integer> skyLightAtRelBlockPos = new HashMap<>(LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * 256);
 	
-	private final HashMap<BlockPos, BlockState> blockStateByBlockPosCache = new HashMap<>();
-
+	private LinkedList<DhBlockPos> blockLightPosList = null;
+	
+	private final boolean useDhLightingEngine;
+	
 	// Due to vanilla `isClientLightReady()` not designed to be used by non-render thread, that value may return 'true'
 	// just before the light engine is ticked, (right after all light changes is marked to the engine to be processed).
 	// To fix this, on client-only mode, we mixin-redirect the `isClientLightReady()` so that after the call, it will
@@ -84,7 +81,13 @@ public class ChunkWrapper implements IChunkWrapper
 	// (Also, thread safety done via a reader writer lock)
 	private final static WeakHashMap<ChunkAccess, Boolean> chunksToUpdateClientLightReady = new WeakHashMap<>();
 	private final static ReentrantReadWriteLock weakMapLock = new ReentrantReadWriteLock();
-
+	
+	
+	
+	//=============//
+	// constructor //
+	//=============//
+	
 	public ChunkWrapper(ChunkAccess chunk, LevelReader lightSource, @Nullable ILevelWrapper wrappedLevel)
 	{
 		this.chunk = chunk;
@@ -92,14 +95,16 @@ public class ChunkWrapper implements IChunkWrapper
 		this.wrappedLevel = wrappedLevel;
 		this.chunkPos = new DhChunkPos(chunk.getPos().x, chunk.getPos().z);
 		
-		this.useMcLightingEngine = (Config.Client.Advanced.WorldGenerator.lightingEngine.get() == ELightGenerationMode.MINECRAFT);
 		// TODO is this the best way to differentiate between when we are generating chunks and when MC gave us a chunk?
-		this.isDhGeneratedChunk = (this.lightSource.getClass() == LightedWorldGenRegion.class);
-
+		boolean isDhGeneratedChunk = (this.lightSource.getClass() == LightedWorldGenRegion.class);
+		this.useDhLightingEngine = isDhGeneratedChunk && (Config.Client.Advanced.WorldGenerator.worldGenLightingEngine.get() == ELightGenerationMode.DISTANT_HORIZONS);
+		
 		weakMapLock.writeLock().lock();
 		chunksToUpdateClientLightReady.put(chunk, false);
 		weakMapLock.writeLock().unlock();
 	}
+	
+	
 	
 	//=========//
 	// methods //
@@ -137,7 +142,7 @@ public class ChunkWrapper implements IChunkWrapper
 	
 	
 	@Override
-	public IBiomeWrapper getBiome(int x, int y, int z)
+	public IBiomeWrapper getBiome(int relX, int relY, int relZ)
 	{
 		//if (wrappedLevel != null) return wrappedLevel.getBiome(new DhBlockPos(x + getMinX(), y, z + getMinZ()));
 
@@ -152,7 +157,7 @@ public class ChunkWrapper implements IChunkWrapper
 				QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)));
 		#else //Now returns a Holder<Biome> instead of Biome
 		return BiomeWrapper.getBiomeWrapper(chunk.getNoiseBiome(
-				QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)));
+				QuartPos.fromBlock(relX), QuartPos.fromBlock(relY), QuartPos.fromBlock(relZ)));
 		#endif
 	}
 
@@ -174,8 +179,17 @@ public class ChunkWrapper implements IChunkWrapper
 	public long getLongChunkPos() { return this.chunk.getPos().toLong(); }
 	
 	@Override
+	public void setIsDhLightCorrect(boolean isDhLightCorrect) { this.isDhLightCorrect = isDhLightCorrect; }
+	
+	@Override
 	public boolean isLightCorrect()
 	{
+		if (this.useDhLightingEngine)
+		{
+			return this.isDhLightCorrect;
+		}
+		
+		
 		#if PRE_MC_1_18_2
 		return true;
 		#else
@@ -201,126 +215,95 @@ public class ChunkWrapper implements IChunkWrapper
 		#endif
 	}
 	
+	
 	@Override
-	public int getBlockLight(int x, int y, int z)
+	public int getDhBlockLight(int relX, int relY, int relZ) 
 	{
-		// use the full lighting engine when the chunks are within render distance or the config requests it
-		if (this.useMcLightingEngine || !this.isDhGeneratedChunk)
-		{
-			// FIXME this returns 0 if the chunks unload
-			
-			// MC lighting method
-			return this.lightSource.getBrightness(LightLayer.BLOCK, new BlockPos(x+this.getMinX(), y, z+this.getMinZ()));
-		}
-		else
-		{
-			// DH lighting method
-			return this.getMaxBlockLightAtBlockPos(new DhBlockPos(x, y, z));
-		}
+		throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
+		return this.blockLightAtRelBlockPos.getOrDefault(new DhBlockPos(relX, relY, relZ), 0); 
 	}
-	/** 
-	 * Note: this doesn't take into account blocks outside this chunk's borders <br>
-	 * AKA: there will be sharp shadow cut-offs on chunk boundaries
-	 * 
-	 * @param inputPos a relative position for this chunk (IE between [0,0] and [15,15]) 
-	 * @apiNote TODO DH lighting should be moved into its own class in Core 
-	 */
-	private int getMaxBlockLightAtBlockPos(DhBlockPos inputPos)
+	@Override
+	public void setDhBlockLight(int relX, int relY, int relZ, int lightValue) 
 	{
-		// how many blocks (in a square) to take into account when generating lighting
-		// higher numbers will make the lighting more accurate but will take significantly longer
-		int width = 4;
-		
-		int maxBlockLight = this.getCachedBlockState(new BlockPos(inputPos.x, inputPos.y, inputPos.z)).getLightEmission();
-		int inputMaxYPos = this.getSolidHeightMapValue(inputPos.x, inputPos.z);
-		
-		// min and max calls to clamp the position to this chunk
-		for (int relX = Math.max(0, inputPos.x-width); relX < Math.min(inputPos.x+width, LodUtil.CHUNK_WIDTH); relX++)
-		{
-			for (int relZ = Math.max(0, inputPos.z-width); relZ < Math.min(inputPos.z+width, LodUtil.CHUNK_WIDTH); relZ++)
-			{
-				int lightYPos = this.getSolidHeightMapValue(relX, relZ);
-				
-				if (inputPos.y < lightYPos && inputPos.y < inputMaxYPos)
-				{
-					// input is below the light
-					// and another block that isn't the light, ignore
-					continue;	
-				}
-				
-				
-				// the max(height, height-1) is to fix an edge case involving torches
-				int lightValue = Math.max(
-									this.getCachedBlockState(new BlockPos(relX, lightYPos, relZ)).getLightEmission(),
-									this.getCachedBlockState(new BlockPos(relX, lightYPos-1, relZ)).getLightEmission());
-				
-				
-				int centerDistanceFromLight = new Pos2D(inputPos.x, inputPos.z).manhattanDist(new Pos2D(relX, relZ));
-				// multiply falloff by 2 to make light fade faster to reduce the number of hard edges caused by going outside of chunk boundaries
-				// (This could be removed if we add the ability to access blocks outside this chunk)
-				centerDistanceFromLight *= 2;
-				
-				lightValue = lightValue - centerDistanceFromLight;
-				maxBlockLight = Math.max(maxBlockLight, lightValue);
-			}
-		}
-		
-		return maxBlockLight;
+		throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
+		this.blockLightAtRelBlockPos.put(new DhBlockPos(relX, relY, relZ), lightValue); 
 	}
 	
 	@Override
-	public int getSkyLight(int x, int y, int z)
+	public int getDhSkyLight(int relX, int relY, int relZ) 
 	{
+		throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
+		return this.skyLightAtRelBlockPos.getOrDefault(new DhBlockPos(relX, relY, relZ), 0); 
+	}
+	@Override
+	public void setDhSkyLight(int relX, int relY, int relZ, int lightValue) 
+	{
+		throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
+		this.skyLightAtRelBlockPos.put(new DhBlockPos(relX, relY, relZ), lightValue); 
+	}
+	
+	
+	@Override
+	public int getBlockLight(int relX, int relY, int relZ)
+	{
+		throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
+		
 		// use the full lighting engine when the chunks are within render distance or the config requests it
-		if (this.useMcLightingEngine || !this.isDhGeneratedChunk)
+		if (this.useDhLightingEngine)
 		{
-			// FIXME this returns 0 if the chunks unload
-			
-			// MC lighting method
-			return this.lightSource.getBrightness(LightLayer.SKY, new BlockPos(x+this.getMinX(), y, z+this.getMinZ()));
+			// DH lighting method
+			return this.blockLightAtRelBlockPos.getOrDefault(new DhBlockPos(relX, relY, relZ), 0);
 		}
 		else
 		{
-			// DH lighting method
-			return this.getMaxSkyLightAtBlockPos(new DhBlockPos(x,y,z));
+			// note: this returns 0 if the chunk is unload
+			
+			// MC lighting method
+			return this.lightSource.getBrightness(LightLayer.BLOCK, new BlockPos(relX +this.getMinX(), relY, relZ +this.getMinZ()));
 		}
 	}
-	/**
-	 * Note: this doesn't take into account blocks outside this chunk's borders <br>
-	 * AKA: there will be sharp shadow cut-offs on chunk boundaries
-	 * 	 
-	 * @param inputPos a relative position for this chunk (IE between [0,0] and [15,15])
-	 * @apiNote TODO DH lighting should be moved into its own class in Core
-	 */
-	private int getMaxSkyLightAtBlockPos(DhBlockPos inputPos)
+	
+	@Override
+	public int getSkyLight(int relX, int relY, int relZ)
 	{
-		// Note: this doesn't take into account blocks outside this chunk's borders
-		// AKA: there will be sharp shadow cut-offs on chunk boundaries
+		throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
 		
-		// how many blocks (in a square) to take into account when generating lighting
-		// higher numbers will make the lighting more accurate but will take longer
-		int width = 4;
-		
-		
-		int maxSkyLight = 0;
-		Pos2D centerPos = new Pos2D(inputPos.x,inputPos.z);
-		
-		// min and max calls to clamp the position to this chunk
-		for (int relX = Math.max(0, inputPos.x-width); relX < Math.min(inputPos.x+width, LodUtil.CHUNK_WIDTH); relX++)
+		// use the full lighting engine when the chunks are within render distance or the config requests it
+		if (this.useDhLightingEngine)
 		{
-			for (int relZ = Math.max(0, inputPos.z-width); relZ < Math.min(inputPos.z+width, LodUtil.CHUNK_WIDTH); relZ++)
+			// DH lighting method
+			return this.skyLightAtRelBlockPos.getOrDefault(new DhBlockPos(relX, relY, relZ), 0);
+		}
+		else
+		{
+			// MC lighting method
+			return this.lightSource.getBrightness(LightLayer.SKY, new BlockPos(relX +this.getMinX(), relY, relZ +this.getMinZ()));
+		}
+	}
+	
+	@Override 
+	public List<DhBlockPos> getBlockLightPosList()
+	{
+		// only populate the list once
+		if (this.blockLightPosList == null)
+		{
+			this.blockLightPosList = new LinkedList<>();
+			
+			
+			#if PRE_MC_1_20_1
+			this.chunk.getLights().forEach((blockPos) -> 
 			{
-				int heightAtPos = this.getLightBlockingHeightMapValue(relX, relZ);
-				int lightAtRelPos = (inputPos.y >= heightAtPos) ? 15 : 0; // 15 if it can see the sky, 0 otherwise
-				
-				int centerDistanceFromLight = centerPos.manhattanDist(new Pos2D(relX, relZ));
-				int centerLight = Math.max(0, lightAtRelPos - centerDistanceFromLight);
-				
-				maxSkyLight = Math.max(maxSkyLight, centerLight);
-			}
+				this.blockLightPosList.add(new DhBlockPos(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+			});
+			#elif MC_1_20_1
+			this.chunk.findBlockLightSources((blockPos, blockState) -> 
+			{
+				this.blockLightPosList.add(new DhBlockPos(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
+			});
+			#endif
 		}
 		
-		return maxSkyLight;
+		return this.blockLightPosList;
 	}
 	
 	@Override
@@ -355,10 +338,10 @@ public class ChunkWrapper implements IChunkWrapper
 	public String toString() { return this.chunk.getClass().getSimpleName() + this.chunk.getPos(); }
 
 	@Override
-	public IBlockStateWrapper getBlockState(int x, int y, int z)
+	public IBlockStateWrapper getBlockState(int relX, int relY, int relZ)
 	{
 		//if (wrappedLevel != null) return wrappedLevel.getBlockState(new DhBlockPos(x + getMinX(), y, z + getMinZ()));
-		return BlockStateWrapper.fromBlockState(this.chunk.getBlockState(new BlockPos(x,y,z)));
+		return BlockStateWrapper.fromBlockState(this.chunk.getBlockState(new BlockPos(relX, relY, relZ)));
 	}
 
 	@Override
@@ -412,23 +395,21 @@ public class ChunkWrapper implements IChunkWrapper
 		}
 		#endif
 	}
-
-
+	
+	
 	
 	//================//
 	// helper methods //
 	//================//
 	
-	/** can be used to speed up operations that need to interact with blockstates often */
-	private BlockState getCachedBlockState(BlockPos pos)
+	/** used to prevent accidentally attempting to get/set values outside this chunk's boundaries */
+	private static void throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(int x, int y, int z) throws IndexOutOfBoundsException
 	{
-		if (!this.blockStateByBlockPosCache.containsKey(pos))
+		if (x < 0 || x >= LodUtil.CHUNK_WIDTH
+			|| z < 0 || z >= LodUtil.CHUNK_WIDTH)
 		{
-			BlockState blockState = this.chunk.getBlockState(pos);
-			this.blockStateByBlockPosCache.put(pos, blockState);
+			throw new IndexOutOfBoundsException("Indices are relative and must be between 0 and 15 (inclusive), X:"+x+", Y:"+y+" Z:"+z);
 		}
-		
-		return this.blockStateByBlockPosCache.get(pos);
 	}
 	
 }

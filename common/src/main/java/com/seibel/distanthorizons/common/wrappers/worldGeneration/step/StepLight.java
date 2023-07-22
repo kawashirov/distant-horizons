@@ -19,6 +19,7 @@
  
 package com.seibel.distanthorizons.common.wrappers.worldGeneration.step;
 
+import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject.WorldGenLevelLightEngine;
 import com.seibel.distanthorizons.core.util.gridList.ArrayGridList;
@@ -49,14 +50,18 @@ public final class StepLight {
 	public void generateGroup(
 			#if PRE_MC_1_17_1 LevelLightEngine lightEngine,
 			#else LightEventListener lightEngine, #endif
-			ArrayGridList<ChunkAccess> chunks) {
+			ArrayGridList<ChunkWrapper> chunkWrappers) {
 		
-		for (ChunkAccess chunk : chunks) {
+		for (ChunkWrapper chunkWrapper : chunkWrappers)
+		{
+			ChunkAccess chunk = chunkWrapper.getChunk();
 			if (chunk.getStatus().isOrAfter(STATUS)) continue;
 			((ProtoChunk) chunk).setStatus(STATUS);
 		}
 		
-		for (ChunkAccess chunk : chunks) {
+		for (ChunkWrapper chunkWrapper : chunkWrappers)
+		{
+			ChunkAccess chunk = chunkWrapper.getChunk();
 			boolean hasCorrectBlockLight = (chunk instanceof LevelChunk && chunk.isLightCorrect());
 			try {
 				if (lightEngine == null) {

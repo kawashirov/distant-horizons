@@ -26,6 +26,7 @@ import com.seibel.distanthorizons.api.enums.worldGeneration.EDhApiWorldGeneratio
 import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject.*;
 import com.seibel.distanthorizons.core.dataObjects.transformers.FullDataToRenderDataTransformer;
+import com.seibel.distanthorizons.core.generation.DhLightingEngine;
 import com.seibel.distanthorizons.core.level.IDhServerLevel;
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.api.enums.config.ELightGenerationMode;
@@ -38,6 +39,7 @@ import com.seibel.distanthorizons.core.util.gridList.ArrayGridList;
 import com.seibel.distanthorizons.core.util.objects.DhThreadFactory;
 import com.seibel.distanthorizons.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvironmentWrapper;
+import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 
 import java.io.IOException;
 import java.util.*;
@@ -48,7 +50,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import com.seibel.distanthorizons.common.wrappers.DependencySetupDoneCheck;
-import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepBiomes;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepFeatures;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepLight;
@@ -59,6 +60,8 @@ import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepSurfa
 
 #if POST_MC_1_19_4
 import net.minecraft.core.registries.Registries;
+#else
+import net.minecraft.core.Registry;
 #endif
 
 import net.minecraft.server.level.ServerLevel;
@@ -73,7 +76,6 @@ import net.minecraft.world.level.chunk.storage.RegionFileStorage;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import org.apache.logging.log4j.LogManager;
 
@@ -157,6 +159,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	}
 	
 	public static final int TIMEOUT_SECONDS = 60;
+	
+	private final IDhServerLevel serverlevel;
 	
 	//=================Generation Step===================
 	
@@ -250,7 +254,11 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	public BatchGenerationEnvironment(IDhServerLevel serverlevel)
 	{
 		super(serverlevel);
+		this.serverlevel = serverlevel;
+		
 		EVENT_LOGGER.info("================WORLD_GEN_STEP_INITING=============");
+		
+		serverlevel.getServerLevelWrapper().getDimensionType();
 		
 		ChunkGenerator generator = ((ServerLevelWrapper) (serverlevel.getServerLevelWrapper())).getLevel().getChunkSource().getGenerator();
 		if (!(generator instanceof NoiseBasedChunkGenerator ||
@@ -404,11 +412,11 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 	}
 
-	private static ArrayGridList<ChunkAccess> GetCutoutFrom(ArrayGridList<ChunkAccess> total, int border) {
+	private static <T> ArrayGridList<T> GetCutoutFrom(ArrayGridList<T> total, int border) {
 		return new ArrayGridList<>(total, border, total.gridSize - border);
 	}
 
-	private static ArrayGridList<ChunkAccess> GetCutoutFrom(ArrayGridList<ChunkAccess> total, EDhApiWorldGenerationStep step) {
+	private static <T> ArrayGridList<T> GetCutoutFrom(ArrayGridList<T> total, EDhApiWorldGenerationStep step) {
 		return GetCutoutFrom(total, MaxBorderNeeded - BorderNeeded.get(step));
 	}
 
@@ -416,8 +424,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	{
 		EVENT_LOGGER.debug("Lod Generate Event: "+genEvent.minPos);
 		
-		ArrayGridList<ChunkAccess> totalChunks;
-		ArrayGridList<ChunkAccess> finalGenChunks;
+		ArrayGridList<ChunkWrapper> chunkWrapperList;
 		LightedWorldGenRegion region;
 		WorldGenLevelLightEngine lightEngine;
 		LightGetterAdaptor adaptor;
@@ -429,6 +436,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		
 		try
 		{
+			ArrayGridList<ChunkAccess> totalChunks;
+			
 			adaptor = new LightGetterAdaptor(params.level);
 			lightEngine = new WorldGenLevelLightEngine(adaptor);
 			
@@ -462,7 +471,19 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 					ChunkStatus.STRUCTURE_STARTS, refSize/2, generator);
 			adaptor.setRegion(region);
 			genEvent.threadedParam.makeStructFeat(region, params);
-			this.generateDirect(genEvent, totalChunks, borderSize, genEvent.targetGenerationStep, region);
+			
+			
+			chunkWrapperList = new ArrayGridList<>(totalChunks.gridSize);
+			totalChunks.forEachPos((x, z) ->
+			{
+				ChunkAccess chunk = totalChunks.get(x, z);
+				if (chunk != null)
+				{
+					chunkWrapperList.set(x,z, new ChunkWrapper(chunk, region, null));
+				}
+			});
+			
+			this.generateDirect(genEvent, chunkWrapperList, borderSize, genEvent.targetGenerationStep, region);
 			genEvent.timer.nextEvent("cleanup");
 		}
 		catch (StepStructureStart.StructStartCorruptedException f)
@@ -470,17 +491,19 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			genEvent.threadedParam.markAsInvalid();
 			throw (RuntimeException)f.getCause();
 		}
-
-		finalGenChunks = GetCutoutFrom(totalChunks, borderSize);
+		
+		ArrayGridList<ChunkWrapper> finalGenChunks = GetCutoutFrom(chunkWrapperList, borderSize);
 		for (int offsetY = 0; offsetY < finalGenChunks.gridSize; offsetY++)
 		{
 			for (int offsetX = 0; offsetX < finalGenChunks.gridSize; offsetX++)
 			{
-				ChunkAccess target = finalGenChunks.get(offsetX, offsetY);
-				ChunkWrapper wrappedChunk = new ChunkWrapper(target, region, null);
-				if (target instanceof LevelChunk) {
+				ChunkWrapper wrappedChunk = finalGenChunks.get(offsetX, offsetY);
+				ChunkAccess target = wrappedChunk.getChunk();
+				if (target instanceof LevelChunk) 
+				{
 					((LevelChunk) target).loaded = true;
 				}
+				
 				if (!wrappedChunk.isLightCorrect())
 				{
 					throw new RuntimeException("The generated chunk somehow has isLightCorrect() returning false");
@@ -526,7 +549,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 	}
 	
-	public void generateDirect(GenerationEvent genEvent, ArrayGridList<ChunkAccess> chunksToGenerate, int border,
+	public void generateDirect(GenerationEvent genEvent, ArrayGridList<ChunkWrapper> chunksToGenerate, int border,
 								EDhApiWorldGenerationStep step, LightedWorldGenRegion region) throws InterruptedException
 	{
 		if (Thread.interrupted())
@@ -536,8 +559,9 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		
 		try
 		{
-			chunksToGenerate.forEach((chunk) ->
+			chunksToGenerate.forEach((chunkWrapper) ->
 			{
+				ChunkAccess chunk = chunkWrapper.getChunk();
 				if (chunk instanceof ProtoChunk)
 				{
 					ProtoChunk protoChunk = ((ProtoChunk) chunk);
@@ -613,7 +637,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		{
 			genEvent.timer.nextEvent("light");
 			
-			boolean useMinecraftLightingEngine = Config.Client.Advanced.WorldGenerator.lightingEngine.get() == ELightGenerationMode.MINECRAFT;
+			boolean useMinecraftLightingEngine = Config.Client.Advanced.WorldGenerator.worldGenLightingEngine.get() == ELightGenerationMode.MINECRAFT;
 			if (useMinecraftLightingEngine)
 			{
 				// generates chunk lighting using MC's methods
@@ -625,29 +649,25 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 			else
 			{
-				// ignores lighting
+				// generates lighting using DH's methods
 				
-				chunksToGenerate.forEach((chunk) ->
+				int maxSkyLight = this.serverlevel.getServerLevelWrapper().hasSkyLight() ? 15 : 0;
+				
+				// explicit cast required because java generics or something
+				ArrayList<IChunkWrapper> iChunkWrapperList = new ArrayList<>(chunksToGenerate);
+				for (int i = 0; i < iChunkWrapperList.size(); i++)
 				{
-					if (chunk instanceof ProtoChunk)
+					IChunkWrapper centerChunk = iChunkWrapperList.get(i);
+					if (centerChunk == null)
 					{
-						chunk.setLightCorrect(true); // TODO why are we checking instanceof ProtoChunk?
-						// TODO: This is due to old times where it may return actual live chunks, which is LevelChunk.
-						//   that though is no longer needed...
+						continue;
 					}
+					
+					
+					DhLightingEngine.INSTANCE.lightChunks(centerChunk, iChunkWrapperList, maxSkyLight);
+					centerChunk.setIsDhLightCorrect(true);
+				}
 				
-				#if POST_MC_1_18_2
-					if (chunk instanceof LevelChunk)
-					{
-						LevelChunk levelChunk = (LevelChunk) chunk;
-						levelChunk.setLightCorrect(true);
-						#if PRE_MC_1_20_1
-						levelChunk.setClientLightReady(true);
-						#endif
-						levelChunk.loaded = true;
-					}
-				#endif
-				});
 			}
 			
 			genEvent.refreshTimeout();
