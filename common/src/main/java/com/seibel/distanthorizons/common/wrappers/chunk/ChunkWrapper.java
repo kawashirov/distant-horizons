@@ -35,9 +35,6 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
 import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
-#if POST_MC_1_17_1
-import net.minecraft.core.QuartPos;
-#endif
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkAccess;
@@ -45,8 +42,6 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 
-#if POST_MC_1_20_1
-#endif
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -54,6 +49,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.WeakHashMap;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+#if POST_MC_1_17_1
+import net.minecraft.core.QuartPos;
+#endif
+
+#if POST_MC_1_20_1
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.lighting.LevelLightEngine;
+import net.minecraft.core.SectionPos;
+#endif
 
 public class ChunkWrapper implements IChunkWrapper
 {
