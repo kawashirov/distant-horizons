@@ -103,7 +103,7 @@ public class BiomeWrapper implements IBiomeWrapper
 		}
 		catch (Exception e)
 		{
-			throw new IOException("Failed to deserialize biome wrapper", e);
+			throw new IOException("Failed to deserialize the string ["+str+"] into a BiomeWrapper: "+e.getMessage(), e);
 		}
 	}
 	

@@ -20,7 +20,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 {
     private static final Logger LOGGER = DhLoggerBuilder.getLogger();
     public static final BlockStateWrapper AIR = new BlockStateWrapper(null);
-
+	
     public static ConcurrentHashMap<BlockState, BlockStateWrapper> cache = new ConcurrentHashMap<>();
 	
 	
@@ -51,18 +51,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	// methods //
 	//=========//
 	
-    @Override
-    public String serialize()
-	{
-		if (this.blockState == null)
-		{
-			return "AIR";
-		}
-	
-		return BlockState.CODEC.encodeStart(JsonOps.COMPRESSED, this.blockState).get().orThrow().toString();
-	}
-	
-	@Override 
+	@Override
 	public int getOpacity()
 	{
 		// this method isn't perfect, but works well enough for our use case
@@ -81,6 +70,18 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	@Override
 	public int getLightEmission() { return (this.blockState != null) ? this.blockState.getLightEmission() : 0; }
 	
+	
+	@Override
+    public String serialize()
+	{
+		if (this.blockState == null)
+		{
+			return "AIR";
+		}
+		
+		return BlockState.CODEC.encodeStart(JsonOps.INSTANCE, this.blockState).get().orThrow().toString();
+	}
+	
 	public static BlockStateWrapper deserialize(String str) throws IOException
 	{
 		if (str.equals("AIR"))
@@ -90,12 +91,12 @@ public class BlockStateWrapper implements IBlockStateWrapper
 		try
 		{
 			return new BlockStateWrapper(
-					BlockState.CODEC.decode(JsonOps.COMPRESSED, JsonParser.parseString(str)).get().orThrow().getFirst()
+					BlockState.CODEC.decode(JsonOps.INSTANCE, JsonParser.parseString(str)).get().orThrow().getFirst()
 			);
 		}
 		catch (Exception e)
 		{
-			throw new IOException("Failed to deserialize BlockStateWrapper", e);
+			throw new IOException("Failed to deserialize the string ["+str+"] into a BlockStateWrapper: "+e.getMessage(), e);
 		}
     }
 
