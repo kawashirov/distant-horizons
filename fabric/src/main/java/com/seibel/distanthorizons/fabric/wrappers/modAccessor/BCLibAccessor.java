@@ -1,9 +1,13 @@
 package com.seibel.distanthorizons.fabric.wrappers.modAccessor;
 
-#if POST_MC_1_17_1 && FALSE
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.IBCLibAccessor;
+#if PRE_MC_1_19_2
 import ru.bclib.config.ClientConfig;
 import ru.bclib.config.Configs;
+#else
+import org.betterx.bclib.config.ClientConfig;
+import org.betterx.bclib.config.Configs;
+#endif
 
 public class BCLibAccessor implements IBCLibAccessor {
     @Override
@@ -17,4 +21,3 @@ public class BCLibAccessor implements IBCLibAccessor {
         Configs.CLIENT_CONFIG.set(ClientConfig.CUSTOM_FOG_RENDERING, newValue);
     }
 }
-#endif
