@@ -247,7 +247,7 @@ public class ChunkLoader
 		if (chunkType == ChunkStatus.ChunkType.PROTOCHUNK && (blendingData == null || !blendingData.oldNoise()))
 			return null;
 		#else
-		if (chunkType == ChunkStatus.ChunkType.PROTOCHUNK && (blendingData == null || level.getChunk(chunkPos.getMiddleBlockX(),chunkPos.getMiddleBlockZ()).isOldNoiseGeneration()))
+		if (chunkType == ChunkStatus.ChunkType.PROTOCHUNK && blendingData == null)
 			return null;
 		#endif
 		#endif
