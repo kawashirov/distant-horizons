@@ -86,16 +86,13 @@ public class ServerLevelWrapper implements IServerLevelWrapper
     @Override
 	public IClientLevelWrapper tryGetClientLevelWrapper()
 	{
-		try
+		MinecraftClientWrapper client = MinecraftClientWrapper.INSTANCE;
+		if (client.mc.level == null)
 		{
-			MinecraftClientWrapper client = MinecraftClientWrapper.INSTANCE;
-			return ClientLevelWrapper.getWrapper(client.mc.level);
-		}
-		catch (Exception e)
-		{
-			LOGGER.error("Failed to get client side wrapper for server level "+level+".");
 			return null;
 		}
+		
+		return ClientLevelWrapper.getWrapper(client.mc.level);
 	}
 
     @Override
