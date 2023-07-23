@@ -16,17 +16,19 @@ public class SeamlessOverdraw
 	 * Proof-of-concept experimental option, not intended for normal use. <br>
 	 * (Poorly) replaces Minecraft's far clip plane so it lines up with DH's near clip plane.
 	 */
-	public static FloatBuffer overwriteMinecraftNearFarClipPlanes(Matrix4f minecraftProjectionMatrix, float previousPartialTicks)
+	public static float[] overwriteMinecraftNearFarClipPlanes(Matrix4f minecraftProjectionMatrix, float previousPartialTicks)
 	{
-		FloatBuffer matrixFloatBuffer = FloatBuffer.allocate(16);
+		float[] matrixFloatArray;
 		
 		#if PRE_MC_1_19_4
+		FloatBuffer matrixFloatBuffer = FloatBuffer.allocate(16);
 		minecraftProjectionMatrix.store(matrixFloatBuffer);
+		matrixFloatArray = matrixFloatBuffer.array();
 		#else
-		minecraftProjectionMatrix.get(matrixFloatBuffer);
+		// Passing float buffers in caused native code crashes, so we are passing in a float array instead			
+		matrixFloatArray = new float[16];
+		minecraftProjectionMatrix.get(matrixFloatArray);
 		#endif
-		
-		float[] matrixFloatArray = matrixFloatBuffer.array();
 		
 		float dhFarClipPlane = RenderUtil.getNearClipPlaneDistanceInBlocks(previousPartialTicks);
 		float farClip = dhFarClipPlane * 5.1f; // magic number found via trial and error, James has no idea what it represents, except that it makes the seam between DH and vanilla rendering pretty close
@@ -36,8 +38,7 @@ public class SeamlessOverdraw
 		matrixFloatArray[10] = -((farClip + nearClip) / (farClip - nearClip)); // near clip plane
 		matrixFloatArray[11] = -((2 * farClip * nearClip) / (farClip - nearClip)); // far clip plane
 		
-		matrixFloatBuffer = FloatBuffer.wrap(matrixFloatArray);
-		return matrixFloatBuffer;
+		return matrixFloatArray;
 	}
 	
 }

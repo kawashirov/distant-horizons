@@ -137,12 +137,12 @@ public class MixinLevelRenderer
 			// experimental proof-of-concept option
 			if (Config.Client.Advanced.Graphics.AdvancedGraphics.seamlessOverdraw.get())
 			{
-				FloatBuffer modifiedMatrixBuffer = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(projectionMatrix, previousPartialTicks);
+				float[] matrixFloatArray = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(projectionMatrix, previousPartialTicks);
 				
 				#if PRE_MC_1_19_4
-				projectionMatrix.load(modifiedMatrixBuffer);
+				projectionMatrix.load(FloatBuffer.wrap(matrixFloatArray));
 				#else
-				projectionMatrix.set(modifiedMatrixBuffer);
+				projectionMatrix.set(matrixFloatArray);
 				#endif
 			}
 		}

@@ -207,12 +207,12 @@ public class FabricClientProxy
 				// experimental proof-of-concept option
 				if (Config.Client.Advanced.Graphics.AdvancedGraphics.seamlessOverdraw.get())
 				{
-					FloatBuffer modifiedMatrixBuffer = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(renderContext.projectionMatrix(), renderContext.tickDelta());
+					float[] matrixFloatArray = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(renderContext.projectionMatrix(), renderContext.tickDelta());
 					
 					#if PRE_MC_1_19_4
-					renderContext.projectionMatrix().load(modifiedMatrixBuffer);
+					renderContext.projectionMatrix().load(FloatBuffer.wrap(matrixFloatArray));
 					#else
-					renderContext.projectionMatrix().set(modifiedMatrixBuffer);
+					renderContext.projectionMatrix().set(matrixFloatArray);
 					#endif
 				}
 			}
