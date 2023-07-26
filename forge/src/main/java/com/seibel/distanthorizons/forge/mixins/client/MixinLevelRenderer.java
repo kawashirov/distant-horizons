@@ -27,6 +27,7 @@ import org.joml.Matrix4f;
 #endif
 import com.seibel.distanthorizons.common.rendering.SeamlessOverdraw;
 import com.seibel.distanthorizons.common.wrappers.McObjectConverter;
+import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.api.internal.ClientApi;
@@ -34,11 +35,13 @@ import com.seibel.distanthorizons.coreapi.util.math.Mat4f;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.world.level.lighting.LevelLightEngine;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.nio.FloatBuffer;
@@ -152,4 +155,36 @@ public class MixinLevelRenderer
 			callback.cancel();
 		}
 	}
+	
+	@Redirect(method =
+                "Lnet/minecraft/client/renderer/LevelRenderer;" +
+                "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;" +
+                "FJZLnet/minecraft/client/Camera;" +
+                "Lnet/minecraft/client/renderer/GameRenderer;" +
+                "Lnet/minecraft/client/renderer/LightTexture;" +
+                #if PRE_MC_1_19_4
+                "Lcom/mojang/math/Matrix4f;)V"
+                #else
+                "Lorg/joml/Matrix4f;)V"
+                #endif
+            ,
+            at = @At(
+            value = "INVOKE",
+            #if PRE_MC_1_20_1
+            target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runUpdates(IZZ)I"
+            #else
+            target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runLightUpdates()I"
+            #endif
+            ))
+	private int callAfterRunUpdates(LevelLightEngine light #if PRE_MC_1_20_1 , int pos, boolean isQueueEmpty, boolean updateBlockLight #endif)
+	{
+        #if PRE_MC_1_20_1
+		int r = light.runUpdates(pos, isQueueEmpty, updateBlockLight);
+        #else
+        int r = light.runLightUpdates();
+        #endif
+		ChunkWrapper.syncedUpdateClientLightStatus();
+		return r;
+	}
+	
 }
