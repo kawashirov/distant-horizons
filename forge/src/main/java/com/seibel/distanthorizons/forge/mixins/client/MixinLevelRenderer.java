@@ -51,7 +51,7 @@ import java.nio.FloatBuffer;
  * before Minecraft starts rendering blocks.
  * If this wasn't done, and we used Forge's
  * render last event, the LODs would render on top
- * of the normal terrain.
+ * of the normal terrain. <br><br>
  *
  * This is also the mixin for rendering the clouds
  *

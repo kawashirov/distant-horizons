@@ -131,8 +131,9 @@ public class ForgeMain implements LodForgeMethodCaller
 		ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class,
 				() -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> GetConfigScreen.getScreen(parent)));
 		#endif
-
-
+		
+		ForgeClientProxy.setupNetworkingListeners(event);
+		
 		LOGGER.info(ModInfo.READABLE_NAME + " Initialized");
 
 		ApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);

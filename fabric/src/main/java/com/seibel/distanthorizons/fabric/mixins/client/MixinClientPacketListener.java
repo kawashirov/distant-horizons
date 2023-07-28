@@ -24,12 +24,6 @@ public class MixinClientPacketListener
 	
 	
 	
-    /** THIS EXPLANATION IS WRITTEN BY FABRIC.
-     * An explanation why we unload entities during onGameJoin: (On in our remapping name case, handleLogin(TODO: CHECK))
-     * Proxies such as Waterfall may send another Game Join packet if entity meta rewrite is disabled, so we will cover ourselves.
-     * Velocity by default will send a Game Join packet when the player changes servers, which will create a new client world.
-     * Also anyone can send another GameJoinPacket at any time, so we need to watch out.
-     */
     @Inject(method = "handleLogin", at = @At("HEAD"))
 	void onHandleLoginStart(CallbackInfo ci)
 	{
