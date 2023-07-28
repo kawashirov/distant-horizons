@@ -34,14 +34,15 @@ import net.minecraft.world.level.LevelAccessor;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 #if PRE_MC_1_19_2
-import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 #else
 import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.event.level.LevelEvent;
 #endif
+
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraft.world.level.chunk.ChunkAccess;
 
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.network.NetworkRegistry;
@@ -99,29 +100,51 @@ public class ForgeClientProxy
 	//==============//
 	
 	@SubscribeEvent
+	#if PRE_MC_1_19_2
 	public void clientLevelLoadEvent(WorldEvent.Load event)
+	#else
+	public void clientLevelLoadEvent(LevelEvent.Load event)
+	#endif
 	{
 		LOGGER.info("level load");
 		
-		if (event != null && event.getWorld() != null && event.getWorld() instanceof ClientLevel)
+		#if PRE_MC_1_19_2
+		LevelAccessor level = event.getWorld();
+		#else
+		LevelAccessor level = event.getLevel();
+		#endif
+		if (!(level instanceof ClientLevel))
 		{
-			ClientLevel clientLevel = (ClientLevel) event.getWorld();
-			IClientLevelWrapper clientLevelWrapper = ClientLevelWrapper.getWrapper(clientLevel);
-			// TODO this causes a crash due to level being set to null somewhere
-			ClientApi.INSTANCE.clientLevelLoadEvent(clientLevelWrapper);
+			return;
 		}
+		
+		ClientLevel clientLevel = (ClientLevel) level;
+		IClientLevelWrapper clientLevelWrapper = ClientLevelWrapper.getWrapper(clientLevel);
+		// TODO this causes a crash due to level being set to null somewhere
+		ClientApi.INSTANCE.clientLevelLoadEvent(clientLevelWrapper);
 	}
 	@SubscribeEvent
+	#if PRE_MC_1_19_2
 	public void clientLevelUnloadEvent(WorldEvent.Unload event)
+	#else
+	public void clientLevelUnloadEvent(LevelEvent.Load event)
+	#endif
 	{
 		LOGGER.info("level unload");
 		
-		if (event != null && event.getWorld() != null && event.getWorld() instanceof ClientLevel)
+		#if PRE_MC_1_19_2
+		LevelAccessor level = event.getWorld();
+		#else
+		LevelAccessor level = event.getLevel();
+		#endif
+		if (!(level instanceof ClientLevel))
 		{
-			ClientLevel clientLevel = (ClientLevel) event.getWorld();
-			IClientLevelWrapper clientLevelWrapper = ClientLevelWrapper.getWrapper(clientLevel);
-			ClientApi.INSTANCE.clientLevelUnloadEvent(clientLevelWrapper);
+			return;
 		}
+		
+		ClientLevel clientLevel = (ClientLevel) level;
+		IClientLevelWrapper clientLevelWrapper = ClientLevelWrapper.getWrapper(clientLevel);
+		ClientApi.INSTANCE.clientLevelUnloadEvent(clientLevelWrapper);
 	}
 	
 	
@@ -135,7 +158,12 @@ public class ForgeClientProxy
 	{
 		LOGGER.trace("interact or block place event at blockPos: " + event.getPos());
 		
+		#if PRE_MC_1_19_2
 		LevelAccessor level = event.getWorld();
+		#else
+		LevelAccessor level = event.getLevel();
+		#endif
+		
 		ChunkAccess chunk = level.getChunk(event.getPos());
 		this.onClientBlockChangeEvent(level, chunk);
 	}
@@ -144,7 +172,12 @@ public class ForgeClientProxy
 	{
 		LOGGER.trace("break or block attack at blockPos: " + event.getPos());
 		
+		#if PRE_MC_1_19_2
 		LevelAccessor level = event.getWorld();
+		#else
+		LevelAccessor level = event.getLevel();
+		#endif
+		
 		ChunkAccess chunk = level.getChunk(event.getPos());
 		this.onClientBlockChangeEvent(level, chunk);
 	}
