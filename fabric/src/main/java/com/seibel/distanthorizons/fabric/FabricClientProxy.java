@@ -68,7 +68,7 @@ import org.lwjgl.glfw.GLFW;
  * 
  * @author coolGi
  * @author Ran
- * @version 11-23-2021
+ * @version 2023-7-27
  */
 @Environment(EnvType.CLIENT)
 public class FabricClientProxy
@@ -93,28 +93,32 @@ public class FabricClientProxy
 		LOGGER.info("Registering Fabric Client Events");
 		
 		
-		/* Register the mod needed event callbacks */
+		//========================//
+		// register mod accessors //
+		//========================//
 		
-		// ClientTickEvent
-		ClientTickEvents.START_CLIENT_TICK.register((client) -> 
-		{
-			//LOGGER.info("ClientTickEvent.START_CLIENT_TICK");
-			ClientApi.INSTANCE.clientTickEvent();
-		});
+		SodiumAccessor sodiumAccessor = (SodiumAccessor) ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class);
+		ImmersivePortalsAccessor immersivePortalsAccessor = (ImmersivePortalsAccessor) ModAccessorInjector.INSTANCE.get(IImmersivePortalsAccessor.class);
 		
-		// ClientLevelLoadEvent - Done in MixinClientPacketListener
-		// ClientLevelUnloadEvent - Done in MixinClientPacketListener
+		
+		
+		//=============//
+		// tick events //
+		//=============//
+		
+		ClientTickEvents.START_CLIENT_TICK.register((client) -> { ClientApi.INSTANCE.clientTickEvent(); });
+		
+		
+		
+		//==============//
+		// chunk events //
+		//==============//
 		
 		// ClientChunkLoadEvent
-		// TODO: Is using setClientLightReady one still better?
-		//#if PRE_MC_1_18_2 // in 1.18+, we use mixin hook in setClientLightReady(true)
 		ClientChunkEvents.CHUNK_LOAD.register((level, chunk) ->
 		{
 			IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);
-			ClientApi.INSTANCE.clientChunkLoadEvent(
-					new ChunkWrapper(chunk, level, wrappedLevel),
-					wrappedLevel
-			);
+			ClientApi.INSTANCE.clientChunkLoadEvent(new ChunkWrapper(chunk, level, wrappedLevel), wrappedLevel);
 		});
 		
 		// (kinda) block break event
@@ -127,7 +131,7 @@ public class FabricClientProxy
 				ChunkAccess chunk = level.getChunk(blockPos);
 				if (chunk != null)
 				{
-//					LOGGER.info("attack block at blockpos: " + blockPos);
+					LOGGER.trace("attack block at blockPos: " + blockPos);
 					
 					IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
 					ClientApi.INSTANCE.clientChunkLoadEvent(
@@ -154,7 +158,7 @@ public class FabricClientProxy
 					ChunkAccess chunk = level.getChunk(hitResult.getBlockPos());
 					if (chunk != null)
 					{
-//						LOGGER.info("use block at blockpos: " + hitResult.getBlockPos());
+						LOGGER.trace("use block at blockPos: " + hitResult.getBlockPos());
 						
 						IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
 						ClientApi.INSTANCE.clientChunkLoadEvent(
@@ -169,24 +173,21 @@ public class FabricClientProxy
 			return InteractionResult.PASS;
 		});
 		
-		//#endif
-		// ClientChunkSaveEvent
+		
+		// Client Chunk Save
 		ClientChunkEvents.CHUNK_UNLOAD.register((level, chunk) ->
 		{
 			IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);
-			ClientApi.INSTANCE.clientChunkSaveEvent(
-					new ChunkWrapper(chunk, level, wrappedLevel),
-					wrappedLevel
-			);
+			ClientApi.INSTANCE.clientChunkSaveEvent(new ChunkWrapper(chunk, level, wrappedLevel), wrappedLevel);
 		});
 		
-		// RendererStartupEvent - Done in MixinGameRenderer
-		// RendererShutdownEvent - Done in MixinGameRenderer
-
-		SodiumAccessor sodiumAccessor = (SodiumAccessor) ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class);
-		ImmersivePortalsAccessor immersiveAccessor = (ImmersivePortalsAccessor) ModAccessorInjector.INSTANCE.get(IImmersivePortalsAccessor.class);
-
-		// ClientRenderLevelTerrainEvent
+		
+		
+		//==============//
+		// render event //
+		//==============//
+		
+		// Client Render Level
 		WorldRenderEvents.AFTER_SETUP.register((renderContext) ->
 		{
 			if (sodiumAccessor != null)
@@ -217,41 +218,37 @@ public class FabricClientProxy
 				}
 			}
 
-			if (immersiveAccessor != null)
+			if (immersivePortalsAccessor != null)
 			{
-				immersiveAccessor.partialTicks = renderContext.tickDelta();
+				immersivePortalsAccessor.partialTicks = renderContext.tickDelta();
 			}
 		});
 
 		// Debug keyboard event
-		// FIXME: Use better hooks so it doesn't trigger even in text boxes
+		// FIXME: Use better hooks so it doesn't trigger key press events in text boxes
 		ClientTickEvents.END_CLIENT_TICK.register(client -> 
 		{
-			if (client.player != null && isValidTime())
+			if (client.player != null && !(Minecraft.getInstance().screen instanceof TitleScreen))
 			{
-				onKeyInput();
+				this.onKeyInput();
 			}
 		});
-
+		
+		
+		
+		//==================//
+		// networking event //
+		//==================//
+		
+		// TODO add forge equivalent
 		ClientPlayNetworking.registerGlobalReceiver(new ResourceLocation("distant_horizons", "world_control"), // TODO move these strings into a constant somewhere
-				(Minecraft client, ClientPacketListener handler, FriendlyByteBuf byteBuffer, PacketSender responseSender) ->
-				{
-					// converting to a ByteBuf is necessary otherwise Fabric will complain when the game boots
-					ByteBuf nettyByteBuf = byteBuffer.asByteBuf();
-					ClientApi.INSTANCE.serverMessageReceived(nettyByteBuf);
-				});
+			(Minecraft client, ClientPacketListener handler, FriendlyByteBuf byteBuffer, PacketSender responseSender) ->
+			{
+				// converting to a ByteBuf is necessary otherwise Fabric will complain when the game boots
+				ByteBuf nettyByteBuf = byteBuffer.asByteBuf();
+				ClientApi.INSTANCE.serverMessageReceived(nettyByteBuf);
+			});
 	}
-	
-	private boolean isValidTime() { return !(Minecraft.getInstance().screen instanceof TitleScreen); }
-
-//	public void blockChangeEvent(LevelAccessor world, BlockPos pos) {
-//		if (!isValidTime()) return;
-//		IChunkWrapper chunk = new ChunkWrapper(world.getChunk(pos), world);
-//		DimensionTypeWrapper dimType = DimensionTypeWrapper.getDimensionTypeWrapper(world.dimensionType());
-//
-//		// recreate the LOD where the blocks were changed
-//		// TODO: serverApi.blockChangeEvent(chunk, dimType);
-//	}
 	
 	public void onKeyInput()
 	{
