@@ -34,6 +34,7 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftCli
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.IImmersivePortalsAccessor;
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
+import com.seibel.distanthorizons.coreapi.ModInfo;
 import com.seibel.distanthorizons.fabric.wrappers.modAccessor.ImmersivePortalsAccessor;
 import com.seibel.distanthorizons.fabric.wrappers.modAccessor.SodiumAccessor;
 import io.netty.buffer.ByteBuf;
@@ -240,12 +241,15 @@ public class FabricClientProxy
 		// networking event //
 		//==================//
 		
-		// TODO add forge equivalent
-		ClientPlayNetworking.registerGlobalReceiver(new ResourceLocation("distant_horizons", "world_control"), // TODO move these strings into a constant somewhere
-			(Minecraft client, ClientPacketListener handler, FriendlyByteBuf byteBuffer, PacketSender responseSender) ->
+		ClientPlayNetworking.registerGlobalReceiver(new ResourceLocation(ModInfo.NETWORKING_RESOURCE_NAMESPACE, ModInfo.MULTIVERSE_PLUGIN_NAMESPACE),
+			(Minecraft client, ClientPacketListener handler, FriendlyByteBuf friendlyByteBuf, PacketSender responseSender) ->
 			{
 				// converting to a ByteBuf is necessary otherwise Fabric will complain when the game boots
-				ByteBuf nettyByteBuf = byteBuffer.asByteBuf();
+				ByteBuf nettyByteBuf = friendlyByteBuf.asByteBuf();
+				
+				// remove the Bukkit/Forge packet ID byte
+				nettyByteBuf.readByte();
+				
 				ClientApi.INSTANCE.serverMessageReceived(nettyByteBuf);
 			});
 	}

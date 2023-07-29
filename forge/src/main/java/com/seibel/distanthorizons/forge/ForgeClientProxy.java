@@ -69,7 +69,7 @@ public class ForgeClientProxy
 	private static final IMinecraftClientWrapper MC = SingletonInjector.INSTANCE.get(IMinecraftClientWrapper.class);
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 	
-	private static SimpleChannel SIMPLE_CHANNEL;
+	private static SimpleChannel multiversePluginChannel;
 	
 	
 	#if PRE_MC_1_19_2
@@ -248,47 +248,55 @@ public class ForgeClientProxy
 	/** @param event this is just to ensure the event is called at the right time, if it is called outside the {@link FMLClientSetupEvent} event, the binding may fail */
 	public static void setupNetworkingListeners(FMLClientSetupEvent event)
 	{
-		
-		SIMPLE_CHANNEL = NetworkRegistry.newSimpleChannel(
-				new ResourceLocation("distant_horizons", "world_control"), // TODO move to common location
-				() -> ModInfo.PROTOCOL_VERSION+"",
+		multiversePluginChannel = NetworkRegistry.newSimpleChannel(
+				new ResourceLocation(ModInfo.NETWORKING_RESOURCE_NAMESPACE, ModInfo.MULTIVERSE_PLUGIN_NAMESPACE),
+				// network protocol version
+				() -> ModInfo.MULTIVERSE_PLUGIN_PROTOCOL_VERSION +"",
 				// client accepted versions
 				ForgeClientProxy::isReceivedProtocolVersionAcceptable,
 				// server accepted versions
 				ForgeClientProxy::isReceivedProtocolVersionAcceptable
 		);
 		
-		SIMPLE_CHANNEL.registerMessage(0, ByteBuf.class,
+		multiversePluginChannel.registerMessage(0/*should be incremented for each simple channel we listen to*/, ByteBuf.class,
 				// encoder
-				(pack, buf) -> { },
+				(pack, friendlyByteBuf) -> { },
 				// decoder
-				(buf) -> buf.asByteBuf(),
+				(friendlyByteBuf) -> friendlyByteBuf.asByteBuf(),
 				// message consumer
-				(nettyByteBuf, contextSupplier) ->
+				(nettyByteBuf, contextRef) ->
 				{
 					ClientApi.INSTANCE.serverMessageReceived(nettyByteBuf);
+					contextRef.get().setPacketHandled(true);
 				}
 		);
 	}
 	
 	public static boolean isReceivedProtocolVersionAcceptable(String versionString)
 	{
-		try
+		if (versionString.toLowerCase().contains("allowvanilla"))
 		{
-			// may be necessary in order to connect to vanilla servers?
-			if (versionString.toLowerCase().contains("allowvanilla"))
-			{
-				return true;
-			}
-			
-			int version = Integer.parseInt(versionString);
-			return ModInfo.PROTOCOL_VERSION == version;
+			// allow using networking on vanilla servers
+			return true;
 		}
-		catch (NumberFormatException ignored)
+		else if (versionString.toLowerCase().contains("absent"))
 		{
-			return false;
+			// allow using networking even if DH isn't installed on the server
+			return true;
+		}
+		else
+		{
+			// DH is installed on the server, check if the version is valid to use
+			try
+			{
+				int version = Integer.parseInt(versionString);
+				return ModInfo.MULTIVERSE_PLUGIN_PROTOCOL_VERSION == version;
+			}
+			catch (NumberFormatException ignored)
+			{
+				return false;
+			}
 		}
 	}
-	
 	
 }
