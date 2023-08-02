@@ -92,9 +92,7 @@ public class TintGetterOverrideSmooth implements BlockAndTintGetter {
     }
 
     @Override
-    public float getShade(Direction direction, boolean bl) {
-        return parent.getShade(direction, bl);
-    }
+    public float getShade(Direction direction, boolean bl) { return this.parent.getShade(direction, bl); }
 
     @Override
     public LevelLightEngine getLightEngine() {

@@ -25,9 +25,11 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import com.seibel.distanthorizons.api.enums.config.ELodShading;
 import com.seibel.distanthorizons.common.wrappers.McObjectConverter;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
+import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.enums.EDhDirection;
 import com.seibel.distanthorizons.coreapi.ModInfo;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
@@ -106,17 +108,46 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
     //=================//
     // method wrappers //
     //=================//
-
+	
     @Override
-    public float getShade(EDhDirection lodDirection) {
-        if (mc.level != null)
-        {
-            Direction mcDir = McObjectConverter.Convert(lodDirection);
-            return mc.level.getShade(mcDir, true);
-        }
-        else return 0.0f;
+    public float getShade(EDhDirection lodDirection)
+    {
+	    ELodShading lodShading = Config.Client.Advanced.Graphics.AdvancedGraphics.lodShading.get();
+	    switch (lodShading)
+	    {
+		    default:
+		    case MINECRAFT:
+			    if (this.mc.level != null)
+			    {
+				    Direction mcDir = McObjectConverter.Convert(lodDirection);
+				    return this.mc.level.getShade(mcDir, true);
+			    }
+			    else
+			    {
+				    return 0.0f;
+			    }
+		    
+		    case OLD_LIGHTING:
+			    switch (lodDirection)
+			    {
+				    case DOWN:
+					    return 0.5F;
+				    default:
+				    case UP:
+					    return 1.0F;
+				    case NORTH:
+				    case SOUTH:
+					    return 0.8F;
+				    case WEST:
+				    case EAST:
+					    return 0.6F;
+			    }
+		    
+		    case NONE:
+			    return 1.0F;
+	    }
     }
-
+	
     @Override
     public boolean hasSinglePlayerServer() { return mc.hasSingleplayerServer(); }
     @Override
