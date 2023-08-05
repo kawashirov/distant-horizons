@@ -21,7 +21,6 @@ package com.seibel.distanthorizons.common.wrappers.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -29,6 +28,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.FluidState;
 import org.jetbrains.annotations.Nullable;
+
+#if POST_MC_1_18_2
+import net.minecraft.core.Holder;
+#endif
 
 public class TintWithoutLevelOverrider implements BlockAndTintGetter {
     final BiomeWrapper biome;
@@ -70,6 +73,9 @@ public class TintWithoutLevelOverrider implements BlockAndTintGetter {
     public FluidState getFluidState(BlockPos pos) {
         throw new UnsupportedOperationException("ERROR: getFluidState() called on TintWithoutLevelOverrider. Object is for tinting only.");
     }
+	
+	
+	#if POST_MC_1_18_2
     @Override
     public int getHeight() {
         throw new UnsupportedOperationException("ERROR: getHeight() called on TintWithoutLevelOverrider. Object is for tinting only.");
@@ -78,4 +84,6 @@ public class TintWithoutLevelOverrider implements BlockAndTintGetter {
     public int getMinBuildHeight() {
         throw new UnsupportedOperationException("ERROR: getMinBuildHeight() called on TintWithoutLevelOverrider. Object is for tinting only.");
     }
+	#endif
+	
 }
