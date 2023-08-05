@@ -374,16 +374,17 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 
 	public ChunkAccess loadOrMakeChunk(ChunkPos chunkPos, WorldGenLevelLightEngine lightEngine)
 	{
-		ServerLevel level = params.level;
-
+		ServerLevel level = this.params.level;
+		
 		CompoundTag chunkData = null;
 		try
 		{
 			// Warning: if multiple threads attempt to access this method at the same time,
 			// it can throw EOFExceptions that are caught and logged by Minecraft
 			//chunkData = level.getChunkSource().chunkMap.readChunk(chunkPos);
-			RegionFileStorage storage = params.level.getChunkSource().chunkMap.worker.storage;
-			RegionFileStorageExternalCache cache = getOrCreateRegionFileCache(storage);
+			
+			RegionFileStorage storage = this.params.level.getChunkSource().chunkMap.worker.storage;
+			RegionFileStorageExternalCache cache = this.getOrCreateRegionFileCache(storage);
 			chunkData = cache.read(chunkPos);
 		}
 		catch (Exception e)
@@ -499,7 +500,11 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				ChunkAccess target = wrappedChunk.getChunk();
 				if (target instanceof LevelChunk) 
 				{
+					#if MC_1_16_5
+					((LevelChunk) target).setLoaded(true);
+					#else
 					((LevelChunk) target).loaded = true;
+					#endif
 				}
 				
 				if (!wrappedChunk.isLightCorrect())
@@ -692,7 +697,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		}
 		
 		// clear the chunk cache
-		var regionStorage = this.regionFileStorageCacheRef.get();
+		RegionFileStorageExternalCache regionStorage = this.regionFileStorageCacheRef.get();
 		if (regionStorage != null)
 		{
 			try
