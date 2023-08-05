@@ -47,6 +47,7 @@ public class MixinThreadingDetector {
 }
 
 #else
+
+import net.minecraft.world.level.chunk.ChunkGenerator;
 @Mixin(ChunkGenerator.class)
-public class MixinThreadingDectector {}
 #endif

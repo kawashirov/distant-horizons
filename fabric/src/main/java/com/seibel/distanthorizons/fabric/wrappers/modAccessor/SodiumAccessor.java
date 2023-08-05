@@ -81,11 +81,11 @@ public class SodiumAccessor implements ISodiumAccessor {
 	}
 	#else
 	@Override
-	public HashSet<DHChunkPos> getNormalRenderedChunks() {
+	public HashSet<DhChunkPos> getNormalRenderedChunks() {
 		SodiumWorldRenderer renderer = SodiumWorldRenderer.getInstance();
 		LevelAccessor height = Minecraft.getInstance().level;
 		// TODO: Maybe use a mixin to make this more efficient
-		return MC_RENDER.getMaximumRenderedChunks().stream().filter((DHChunkPos chunk) -> {
+		return MC_RENDER.getMaximumRenderedChunks().stream().filter((DhChunkPos chunk) -> {
 			FakeChunkEntity AABB = new FakeChunkEntity(chunk.getX(), chunk.getZ(), height.getMaxBuildHeight());
 			return (renderer.isEntityVisible(AABB));
 		}).collect(Collectors.toCollection(HashSet::new));

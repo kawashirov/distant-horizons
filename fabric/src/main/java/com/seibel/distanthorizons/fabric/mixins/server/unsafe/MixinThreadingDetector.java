@@ -48,6 +48,9 @@ public class MixinThreadingDetector {
     }
 }
 #else
+
+import net.minecraft.server.level.ServerLevel;
+
 @Mixin(ServerLevel.class)
-    public class MixinThreadingDectector {} //FIXME: Is there some way to make this file just not be added?
+public class MixinThreadingDetector { } //FIXME: Is there some way to make this file just not be added?
 #endif
