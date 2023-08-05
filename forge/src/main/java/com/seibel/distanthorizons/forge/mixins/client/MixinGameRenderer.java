@@ -17,16 +17,6 @@ public class MixinGameRenderer
 	private static final Logger LOGGER = LogManager.getLogger(MixinGameRenderer.class.getSimpleName());
 	
     #if POST_MC_1_17_1
-    @Inject(method = "shutdownShaders", at = @At("HEAD"))
-    public void onShutdownShaders(CallbackInfo ci) {
-        LOGGER.info("Shutting down renderer (forge)");
-        if (!DependencySetupDoneCheck.isDone) {
-            LOGGER.warn("Dependency setup is not done yet, skipping renderer this shutdown event!");
-            return;
-        }
-        ClientApi.INSTANCE.rendererShutdownEvent();
-    }
-
     // FIXME: This I think will dup multiple renderStartupEvent calls...
     @Inject(method = {"reloadShaders", "preloadUiShader"}, at = @At("TAIL"))
     public void onStartupShaders(CallbackInfo ci) {
@@ -37,21 +27,28 @@ public class MixinGameRenderer
         }
         ClientApi.INSTANCE.rendererStartupEvent();
     }
-    #else
-    // FIXME: on 1.16 we dont have stuff for reloading/shutting down shaders
-
-    @Inject(method = "shutdownShaders", at = @At("HEAD"))
+	
+	@Inject(method = "shutdownShaders", at = @At("HEAD"))
     public void onShutdownShaders(CallbackInfo ci) {
-        LOGGER.info("Shutting down renderer");
+        LOGGER.info("Shutting down renderer (forge)");
+        if (!DependencySetupDoneCheck.isDone) {
+            LOGGER.warn("Dependency setup is not done yet, skipping renderer this shutdown event!");
+            return;
+        }
         ClientApi.INSTANCE.rendererShutdownEvent();
     }
-
-    // FIXME: This I think will dup multiple renderStartupEvent calls...
-    @Inject(method = {"reloadShaders", "preloadUiShader", "preloadShader"}, at = @At("TAIL"))
+    #else
+    
+	
+    @Inject(method = {"loadEffect"}, at = @At("TAIL"))
     public void onStartupShaders(CallbackInfo ci) {
-        LOGGER.info("Starting up renderer");
         ClientApi.INSTANCE.rendererStartupEvent();
     }
+	
+	@Inject(method = "shutdownEffect", at = @At("HEAD"))
+	public void onShutdownShaders(CallbackInfo ci) {
+		ClientApi.INSTANCE.rendererShutdownEvent();
+	}
     #endif
-
+	
 }

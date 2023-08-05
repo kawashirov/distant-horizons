@@ -7,6 +7,7 @@ import org.joml.Matrix4f;
 #endif
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.util.RenderUtil;
+import com.seibel.distanthorizons.coreapi.util.math.Mat4f;
 
 import java.nio.FloatBuffer;
 
@@ -30,6 +31,16 @@ public class SeamlessOverdraw
 		minecraftProjectionMatrix.get(matrixFloatArray);
 		#endif
 		
+		return overwriteMinecraftNearFarClipPlanes(matrixFloatArray, previousPartialTicks);
+	}
+	
+	public static float[] overwriteMinecraftNearFarClipPlanes(Mat4f minecraftProjectionMatrix, float previousPartialTicks)
+	{
+		return overwriteMinecraftNearFarClipPlanes(minecraftProjectionMatrix.getValuesAsArray(), previousPartialTicks);
+	}
+	
+	private static float[] overwriteMinecraftNearFarClipPlanes(float[] matrixFloatArray, float previousPartialTicks)
+	{
 		float dhFarClipPlane = RenderUtil.getNearClipPlaneDistanceInBlocks(previousPartialTicks);
 		float farClip = dhFarClipPlane * 5.1f; // magic number found via trial and error, James has no idea what it represents, except that it makes the seam between DH and vanilla rendering pretty close
 		float nearClip = 0.5f; // this causes issues with some vanilla rendering, specifically the wireframe around selected blocks is slightly off. Unfortunately the ratio between the near and far clip plane can't be easily modified without completely screwing up the rendering. 

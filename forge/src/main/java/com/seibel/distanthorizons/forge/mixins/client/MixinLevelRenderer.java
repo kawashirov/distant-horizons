@@ -46,6 +46,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.nio.FloatBuffer;
 
+#if PRE_MC_1_17_1
+import org.lwjgl.opengl.GL15;
+#endif
+
+
 /**
  * This class is used to mix in my rendering code
  * before Minecraft starts rendering blocks.
@@ -75,43 +80,18 @@ public class MixinLevelRenderer
 	#if PRE_MC_1_17_1
 	@Inject(at = @At("RETURN"), method = "renderSky(Lcom/mojang/blaze3d/vertex/PoseStack;F)V")
 	private void renderSky(PoseStack matrixStackIn, float partialTicks, CallbackInfo callback)
+	#else
+	@Inject(method = "renderClouds", at = @At("HEAD"), cancellable = true)
+	public void renderClouds(PoseStack poseStack, Matrix4f projectionMatrix, float partialTicks, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) 
+	#endif
 	{
 		// get the partial ticks since renderBlockLayer doesn't
 		// have access to them
 		previousPartialTicks = partialTicks;
 	}
-
-	@Inject(at = @At("HEAD"),
-			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDD)V",
-			cancellable = true)
-	private void renderChunkLayer(RenderType renderType, PoseStack matrixStackIn, double xIn, double yIn, double zIn, CallbackInfo callback)
-	{
-		// only render before solid blocks
-		if (renderType.equals(RenderType.solid()))
-		{
-			// get MC's current projection matrix
-			float[] mcProjMatrixRaw = new float[16];
-			GL15.glGetFloatv(GL15.GL_PROJECTION_MATRIX, mcProjMatrixRaw);
-			Mat4f mcProjectionMatrix = new Mat4f(mcProjMatrixRaw);
-			mcProjectionMatrix.transpose();
-			Mat4f mcModelViewMatrix = McObjectConverter.Convert(matrixStackIn.last().pose());
-
-			ClientApi.INSTANCE.renderLods(LevelWrapper.getWorldWrapper(level), mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
-		}
-		if (Config.Client.Advanced.lodOnlyMode.get()) {
-			callback.cancel();
-		}
-	}
-	#else
-	@Inject(method = "renderClouds", at = @At("HEAD"), cancellable = true)
-	public void renderClouds(PoseStack poseStack, Matrix4f projectionMatrix, float tickDelta, double cameraX, double cameraY, double cameraZ, CallbackInfo ci) {
-		// get the partial ticks since renderChunkLayer doesn't
-		// have access to them
-		previousPartialTicks = tickDelta;
-	}
-	#endif
-
-	// TODO: Can we move this o forge's client proxy simmilar to how fabric does it
+	
+	
+	// TODO: Can we move this to forge's client proxy similarly to how fabric does it
 	#if PRE_MC_1_17_1
     @Inject(at = @At("HEAD"),
 			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDD)V",
@@ -129,20 +109,44 @@ public class MixinLevelRenderer
 	private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
     #endif
 	{
+		// get MC's model view and projection matrices
+		#if MC_1_16_5
+		// get the matrices from the OpenGL fixed pipeline
+		float[] mcProjMatrixRaw = new float[16];
+		GL15.glGetFloatv(GL15.GL_PROJECTION_MATRIX, mcProjMatrixRaw);
+		Mat4f mcProjectionMatrix = new Mat4f(mcProjMatrixRaw);
+		mcProjectionMatrix.transpose();
+		
+		Mat4f mcModelViewMatrix = McObjectConverter.Convert(matrixStackIn.last().pose());
+		
+		#else
+		// get the matrices directly from MC
+		Mat4f mcModelViewMatrix = McObjectConverter.Convert(modelViewMatrixStack.last().pose());
+		Mat4f mcProjectionMatrix = McObjectConverter.Convert(projectionMatrix);
+		#endif
+		
+		
+		
 		// only render before solid blocks
 		if (renderType.equals(RenderType.solid()))
 		{
-			Mat4f mcModelViewMatrix = McObjectConverter.Convert(modelViewMatrixStack.last().pose());
-			Mat4f mcProjectionMatrix = McObjectConverter.Convert(projectionMatrix);
-
 			ClientApi.INSTANCE.renderLods(ClientLevelWrapper.getWrapper(level), mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
 			
 			// experimental proof-of-concept option
 			if (Config.Client.Advanced.Graphics.AdvancedGraphics.seamlessOverdraw.get())
 			{
-				float[] matrixFloatArray = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(projectionMatrix, previousPartialTicks);
+				float[] matrixFloatArray = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(mcProjectionMatrix, previousPartialTicks);
 				
-				#if PRE_MC_1_19_4
+				#if MC_1_16_5
+				int glMatrixMode = GL15.glGetInteger(GL15.GL_MATRIX_MODE);
+				GL15.glMatrixMode(GL15.GL_PROJECTION);
+				
+				GL15.glPopMatrix();
+				GL15.glPushMatrix();
+				GL15.glLoadMatrixf(matrixFloatArray);
+				
+				GL15.glMatrixMode(glMatrixMode);
+				#elif PRE_MC_1_19_4
 				projectionMatrix.load(FloatBuffer.wrap(matrixFloatArray));
 				#else
 				projectionMatrix.set(matrixFloatArray);
