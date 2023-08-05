@@ -152,16 +152,16 @@ public class ChunkWrapper implements IChunkWrapper
 		//if (wrappedLevel != null) return wrappedLevel.getBiome(new DhBlockPos(x + getMinX(), y, z + getMinZ()));
 
 		#if PRE_MC_1_17_1
-		return BiomeWrapper.getBiomeWrapper(chunk.getBiomes().getNoiseBiome(
-				x >> 2, y >> 2, z >> 2));
+		return BiomeWrapper.getBiomeWrapper(this.chunk.getBiomes().getNoiseBiome(
+				relX >> 2, relY >> 2, relZ >> 2));
 		#elif PRE_MC_1_18_2
-		return BiomeWrapper.getBiomeWrapper(chunk.getBiomes().getNoiseBiome(
-				QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)));
+		return BiomeWrapper.getBiomeWrapper(this.chunk.getBiomes().getNoiseBiome(
+				QuartPos.fromBlock(relX), QuartPos.fromBlock(relY), QuartPos.fromBlock(relZ)));
 		#elif PRE_MC_1_18_2
-		return BiomeWrapper.getBiomeWrapper(chunk.getNoiseBiome(
-				QuartPos.fromBlock(x), QuartPos.fromBlock(y), QuartPos.fromBlock(z)));
+		return BiomeWrapper.getBiomeWrapper(this.chunk.getNoiseBiome(
+				QuartPos.fromBlock(relX), QuartPos.fromBlock(relY), QuartPos.fromBlock(relZ)));
 		#else //Now returns a Holder<Biome> instead of Biome
-		return BiomeWrapper.getBiomeWrapper(chunk.getNoiseBiome(
+		return BiomeWrapper.getBiomeWrapper(this.chunk.getNoiseBiome(
 				QuartPos.fromBlock(relX), QuartPos.fromBlock(relY), QuartPos.fromBlock(relZ)));
 		#endif
 	}
@@ -369,7 +369,8 @@ public class ChunkWrapper implements IChunkWrapper
 	#endif
 
 	// Should be called after client light updates are triggered.
-	private static boolean updateClientLightReady(ChunkAccess chunk, boolean oldValue) {
+	private static boolean updateClientLightReady(ChunkAccess chunk, boolean oldValue)
+	{
 		if (chunk instanceof LevelChunk && ((LevelChunk)chunk).getLevel() instanceof ClientLevel)
 		{
 			LevelChunk levelChunk = (LevelChunk)chunk;

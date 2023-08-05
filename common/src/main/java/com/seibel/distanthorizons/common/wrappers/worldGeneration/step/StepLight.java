@@ -29,7 +29,11 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.ProtoChunk;
+#if PRE_MC_1_17_1
+import net.minecraft.world.level.lighting.LevelLightEngine;
+#else
 import net.minecraft.world.level.lighting.LightEventListener;
+#endif
 
 public final class StepLight {
 	/**

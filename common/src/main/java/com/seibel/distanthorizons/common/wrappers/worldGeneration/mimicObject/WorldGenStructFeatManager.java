@@ -50,13 +50,17 @@ import net.minecraft.world.level.StructureManager;
 #if POST_MC_1_18_2
 import net.minecraft.world.level.levelgen.structure.StructureCheck;
 #endif
+
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 
-#if PRE_MC_1_19_2
-public class WorldGenStructFeatManager extends StructureFeatureManager {
-#else
-public class WorldGenStructFeatManager extends StructureManager {
-	#endif
+#if PRE_MC_1_18_2
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
+#endif
+
+
+
+public class WorldGenStructFeatManager extends #if PRE_MC_1_19_2 StructureFeatureManager #else StructureManager #endif 
+{
 	final WorldGenLevel genLevel;
 
 	#if PRE_MC_1_19_4

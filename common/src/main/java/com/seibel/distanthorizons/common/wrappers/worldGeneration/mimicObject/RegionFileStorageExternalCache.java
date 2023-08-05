@@ -14,23 +14,28 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class RegionFileStorageExternalCache implements AutoCloseable {
+public class RegionFileStorageExternalCache implements AutoCloseable 
+{
     public final RegionFileStorage storage;
     public static final int MAX_CACHE_SIZE = 16;
 
     @Override
-    public void close() throws IOException {
+    public void close() throws IOException 
+    {
         RegionFileCache cache;
-        while ((cache = regionFileCache.poll()) != null) {
+        while ((cache = this.regionFileCache.poll()) != null) 
+		{
             cache.file.close();
         }
     }
 
-    static class RegionFileCache {
+    static class RegionFileCache 
+    {
         public final long pos;
         public final RegionFile file;
 
-        public RegionFileCache(long pos, RegionFile file) {
+        public RegionFileCache(long pos, RegionFile file) 
+        {
             this.pos = pos;
             this.file = file;
         }
@@ -38,9 +43,7 @@ public class RegionFileStorageExternalCache implements AutoCloseable {
 
     public ConcurrentLinkedQueue<RegionFileCache> regionFileCache = new ConcurrentLinkedQueue<>();
 
-    public RegionFileStorageExternalCache(RegionFileStorage storage) {
-        this.storage = storage;
-    }
+    public RegionFileStorageExternalCache(RegionFileStorage storage) { this.storage = storage; }
 
     @Nullable
     public RegionFile getRegionFile(ChunkPos pos) throws IOException
@@ -53,7 +56,12 @@ public class RegionFileStorageExternalCache implements AutoCloseable {
 		{
 			try
 			{
-				rFile = this.storage.regionCache.getOrDefault(posLong, null);
+				#if MC_1_16_5
+				rFile = this.storage.getRegionFile(pos);
+				#else
+				rFile = this.storage.regionCache.getOrDefault(posLong, null);	
+				#endif
+				
 				break;
 			}
 			catch (ArrayIndexOutOfBoundsException e)
@@ -77,18 +85,29 @@ public class RegionFileStorageExternalCache implements AutoCloseable {
 		}
 		
 		// Otherwise, check if file exist, and if so, add it to the cache
-		Path p = storage.folder;
-		if (!Files.exists(p))
+		Path storageFolderPath;
+		#if MC_1_16_5
+		storageFolderPath = this.storage.folder.toPath();
+		#else
+		storageFolderPath = this.storage.folder;
+		#endif
+		
+		if (!Files.exists(storageFolderPath))
 		{
 			return null;
 		}
 		
-		Path rFilePath = p.resolve("r." + pos.getRegionX() + "." + pos.getRegionZ() + ".mca");
-		rFile = new RegionFile(rFilePath, p, false);
-		regionFileCache.add(new RegionFileCache(ChunkPos.asLong(pos.getRegionX(), pos.getRegionZ()), rFile));
-		while (regionFileCache.size() > MAX_CACHE_SIZE)
+		Path regionFilePath = storageFolderPath.resolve("r." + pos.getRegionX() + "." + pos.getRegionZ() + ".mca");
+		#if MC_1_16_5
+		rFile = new RegionFile(regionFilePath.toFile(), storageFolderPath.toFile(), false);
+		#else
+		rFile = new RegionFile(regionFilePath, storageFolderPath, false);
+		#endif
+		
+		this.regionFileCache.add(new RegionFileCache(ChunkPos.asLong(pos.getRegionX(), pos.getRegionZ()), rFile));
+		while (this.regionFileCache.size() > MAX_CACHE_SIZE)
 		{
-			regionFileCache.poll().file.close();
+			this.regionFileCache.poll().file.close();
 		}
 		
 		return rFile;
