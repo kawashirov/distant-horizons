@@ -24,19 +24,36 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.google.gson.JsonParser;
-import com.mojang.serialization.JsonOps;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IBiomeWrapper;
 
 import net.minecraft.client.Minecraft;
+#if POST_MC_1_17
 import net.minecraft.core.Holder;
+import net.minecraft.resources.RegistryOps;
+#endif
+
 #if POST_MC_1_19_2
 import net.minecraft.data.worldgen.biome.EndBiomes;
 import net.minecraft.data.worldgen.biome.NetherBiomes;
 #endif
-import net.minecraft.resources.RegistryOps;
+
+
+#if MC_1_16_5
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.data.BuiltinRegistries;
+import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.resources.RegistryWriteOps;
+#else
+import net.minecraft.resources.RegistryReadOps;
+#endif
+
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.state.BlockState;
+#if !PRE_MC_1_18_2
 import net.minecraft.world.level.biome.Biomes;
+#endif
 
 
 /** This class wraps the minecraft BlockPos.Mutable (and BlockPos) class */
@@ -71,14 +88,6 @@ public class BiomeWrapper implements IBiomeWrapper
     }
 
     @Override
-    public String serialize() {
-        //FIXME: Pass in a level obj
-        String data = Biome.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, Minecraft.getInstance().level.registryAccess()),
-                biome).get().orThrow().toString();
-        return data;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -91,19 +100,50 @@ public class BiomeWrapper implements IBiomeWrapper
         return Objects.hash(biome);
     }
 	
-	public static IBiomeWrapper deserialize(String str) throws IOException
+	@Override
+	public String serialize() // FIXME pass in level to prevent null pointers (or maybe just RegistryAccess?)
 	{
+		net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
+		ResourceLocation resourceLocation = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.biome);
+		if (resourceLocation == null)
+		{
+			// shouldn't normally happen, but just in case
+			return "";
+		}
+		else
+		{
+			String resourceLocationString = resourceLocation.getNamespace()+":"+resourceLocation.getPath();
+			return resourceLocationString;	
+		}
+	}
+	
+	public static IBiomeWrapper deserialize(String resourceLocationString) throws IOException // FIXME pass in level to prevent null pointers (or maybe just RegistryAccess?)
+	{
+		if (resourceLocationString.trim().isEmpty() || resourceLocationString.equals(""))
+		{
+			// shouldn't normally happen, but just in case
+			new ResourceLocation("minecraft", "the_void"); // just "void" in MC 1.12 through 1.9 (inclusive)
+		}
+		
+		
+		// parse the resource location
+		int separatorIndex = resourceLocationString.indexOf(":");
+		if (separatorIndex == -1)
+		{
+			throw new IOException("Unable to parse resource location string: ["+resourceLocationString+"].");
+		}
+		ResourceLocation resourceLocation = new ResourceLocation(resourceLocationString.substring(0, separatorIndex), resourceLocationString.substring(separatorIndex+1));
+		
+		
 		try
 		{
-         #if PRE_MC_1_18_2 Biome #else
-			Holder<Biome> #endif
-					biome = Biome.CODEC.decode(RegistryOps.create(JsonOps.INSTANCE, Minecraft.getInstance().level.registryAccess()),
-					JsonParser.parseString(str)).get().orThrow().getFirst();
+			net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
+			Biome biome = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).get(resourceLocation);
 			return getBiomeWrapper(biome);
 		}
 		catch (Exception e)
 		{
-			throw new IOException("Failed to deserialize the string ["+str+"] into a BiomeWrapper: "+e.getMessage(), e);
+			throw new IOException("Failed to deserialize the string ["+resourceLocationString+"] into a BiomeWrapper: "+e.getMessage(), e);
 		}
 	}
 	
