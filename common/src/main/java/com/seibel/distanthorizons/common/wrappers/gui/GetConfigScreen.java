@@ -25,13 +25,17 @@ public class GetConfigScreen
         // This shouldn't be here, but I need a way to test it after Minecraft inits its assets
         //System.out.println(ConfigBase.INSTANCE.generateLang(false, true));
 		
-        return switch (useScreen)
+        switch (useScreen)
 		{
-            case Classic -> ClassicConfigGUI.getScreen(ConfigBase.INSTANCE, parent, "client");
-            case OpenGL -> MinecraftScreen.getScreen(parent, new OpenGLConfigScreen(), ModInfo.ID + ".title");
+			case Classic:
+		            return ClassicConfigGUI.getScreen(ConfigBase.INSTANCE, parent, "client");
+			case OpenGL: MinecraftScreen.getScreen(parent, new OpenGLConfigScreen(), ModInfo.ID + ".title");
+				return null;
 //            case JavaFX -> MinecraftScreen.getScreen(parent, new JavaScreenHandlerScreen(new JavaScreenHandlerScreen.ExampleScreen()), ModInfo.ID + ".title");
-            case JavaFX -> MinecraftScreen.getScreen(parent, new JavaScreenHandlerScreen(new ConfigScreen()), ModInfo.ID + ".title");
-            default -> null;
-        };
+			case JavaFX: 
+				return MinecraftScreen.getScreen(parent, new JavaScreenHandlerScreen(new ConfigScreen()), ModInfo.ID + ".title");
+			default:
+				return null;
+        }
     }
 }
