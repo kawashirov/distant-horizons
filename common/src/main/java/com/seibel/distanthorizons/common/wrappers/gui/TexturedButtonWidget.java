@@ -22,9 +22,15 @@ package com.seibel.distanthorizons.common.wrappers.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+
+#if PRE_MC_1_17_1
+import net.minecraft.client.Minecraft;
+#else
+import net.minecraft.client.renderer.GameRenderer;
+#endif
+
 
 /**
  * Creates a button with a texture on it

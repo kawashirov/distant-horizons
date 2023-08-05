@@ -9,19 +9,22 @@ import com.seibel.distanthorizons.core.jar.installer.MarkdownFormatter;
 import com.seibel.distanthorizons.core.jar.installer.ModrinthGetter;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+
+#if POST_MC_1_17_1
+import net.minecraft.client.gui.narration.NarratableEntry;
+#endif
+
 #if PRE_MC_1_20_1
 import net.minecraft.client.gui.GuiComponent;
 #else
 import net.minecraft.client.gui.GuiGraphics;
 #endif
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.ContainerObjectSelectionList;
-import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.narration.NarratableEntry;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
-#if PRE_MC_1_19_2
-#endif
+
 
 import static com.seibel.distanthorizons.common.wrappers.gui.GuiHelper.*;
 
@@ -69,10 +72,10 @@ public class ChangelogScreen extends DhScreen {
         this.changelog.add("");
 
         // Get the release changelog and split it by the new lines
-        List<String> unwrappedChangelog =
-                List.of(new MarkdownFormatter.MinecraftFormat().convertTo( // This formats markdown to minecraft's "§" characters
+        String[] unwrappedChangelog = // Arrays.asList could be used if a list object is desired here vs List.of which is only available for Java 9+
+		        new MarkdownFormatter.MinecraftFormat().convertTo( // This formats markdown to minecraft's "§" characters
                         ModrinthGetter.changeLogs.get(versionID)
-                ).split("\\n"));
+                ).split("\\n");
         // Makes the words wrap around to not go off the screen
         for (String str: unwrappedChangelog) {
             this.changelog.addAll(
@@ -116,7 +119,13 @@ public class ChangelogScreen extends DhScreen {
 
         // Set the scroll position to the mouse height relative to the screen
         // This is a bit of a hack as we cannot scroll on this area
-        this.changelogArea.scrollAmount = ((double) mouseY)/((double) this.height) * 1.1 * this.changelogArea.getMaxScroll();
+	    double scrollAmount = ((double) mouseY)/((double) this.height) * 1.1 * this.changelogArea.getMaxScroll();
+	    #if MC_1_16_5
+	    this.changelogArea.setScrollAmount(scrollAmount);
+		#else
+		this.changelogArea.scrollAmount = scrollAmount;
+		#endif
+        
 
         this.changelogArea.render(matrices, mouseX, mouseY, delta); // Render the changelog
 
@@ -149,7 +158,8 @@ public class ChangelogScreen extends DhScreen {
         }
     }
 
-    public static class ButtonEntry extends ContainerObjectSelectionList.Entry<ButtonEntry> {
+    public static class ButtonEntry extends ContainerObjectSelectionList.Entry<ButtonEntry>
+    {
         private static final Font textRenderer = Minecraft.getInstance().font;
         private final Component text;
         private final List<AbstractWidget> children = new ArrayList<>();
