@@ -21,11 +21,13 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	/** example "minecraft:water_state_{level:0}" */
 	public static final String STATE_STRING_SEPARATOR = "_STATE_";
 	
+	
+	// must be defined before AIR, otherwise a null pointer will be thrown
+	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
+	
 	public static final BlockStateWrapper AIR = new BlockStateWrapper(null);
 	
 	
-    private static final Logger LOGGER = DhLoggerBuilder.getLogger();
-    
     public static ConcurrentHashMap<BlockState, BlockStateWrapper> cache = new ConcurrentHashMap<>();
 	
 	
