@@ -40,10 +40,6 @@ import net.minecraft.data.worldgen.biome.NetherBiomes;
 
 #if MC_1_16_5
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.data.BuiltinRegistries;
-import net.minecraft.resources.RegistryReadOps;
-import net.minecraft.resources.RegistryWriteOps;
 #elif MC_1_18_2
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -56,7 +52,6 @@ import net.minecraft.core.registries.Registries;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.state.BlockState;
 #if !PRE_MC_1_18_2
 import net.minecraft.world.level.biome.Biomes;
 #endif
