@@ -7,6 +7,7 @@ image: gradle:eclipse-temurin
 stages:
   # TODO: Make stages depend on what is in versionProperties
   - build_1_16_5
+  - build_1_17_1
   - build_1_18_2
   - build_1_19_2
   - build_1_19_4
@@ -60,6 +61,13 @@ build_1_16_5:
   stage: build_1_16_5
   variables:
     MC_VER: "1.16.5"
+  extends: .build_mc
+  
+# 1.17.1 build
+build_1_17_1:
+  stage: build_1_17_1
+  variables:
+    MC_VER: "1.17.1"
   extends: .build_mc
   
 # 1.18.2 build
