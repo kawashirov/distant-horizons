@@ -299,6 +299,11 @@ public class ClassicConfigGUI
                     Objects.requireNonNull(minecraft).setScreen(ClassicConfigGUI.getScreen(this.configBase, this, ((ConfigCategory) info).getDestination()));
                 }));
                 this.list.addButton(widget, null, null, null);
+            } else if (ConfigUIButton.class.isAssignableFrom(info.getClass())) {
+                Button widget = MakeBtn(name, this.width / 2 - 100, this.height - 28, 100 * 2, 20, (button -> {
+                    ((ConfigUIButton) info).runAction();
+                }));
+                this.list.addButton(widget, null, null, null);
             } else if (ConfigUIComment.class.isAssignableFrom(info.getClass())) {
                 this.list.addButton(null, null, null, name);
             } else if (ConfigLinkedEntry.class.isAssignableFrom(info.getClass())) {
