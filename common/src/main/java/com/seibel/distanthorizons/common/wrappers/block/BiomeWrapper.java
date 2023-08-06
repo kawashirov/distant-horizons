@@ -38,7 +38,7 @@ import net.minecraft.data.worldgen.biome.NetherBiomes;
 #endif
 
 
-#if MC_1_16_5
+#if MC_1_16_5 || MC_1_17_1
 import net.minecraft.core.Registry;
 #elif MC_1_18_2 || MC_1_19_2
 import net.minecraft.core.Holder;
@@ -108,7 +108,7 @@ public class BiomeWrapper implements IBiomeWrapper
 		net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
 		
 		ResourceLocation resourceLocation;
-		#if MC_1_16_5
+		#if MC_1_16_5 || MC_1_17_1
 		resourceLocation = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.biome);
 		#elif MC_1_18_2 || MC_1_19_2
 		resourceLocation = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.biome.value());
@@ -150,7 +150,7 @@ public class BiomeWrapper implements IBiomeWrapper
 		{
 			net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
 			
-			#if MC_1_16_5
+			#if MC_1_16_5 || MC_1_17_1
 			Biome biome = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).get(resourceLocation);
 			#elif MC_1_18_2 || MC_1_19_2
 			Biome unwrappedBiome = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).get(resourceLocation);

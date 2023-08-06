@@ -500,7 +500,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				ChunkAccess target = wrappedChunk.getChunk();
 				if (target instanceof LevelChunk) 
 				{
-					#if MC_1_16_5
+					#if MC_1_16_5 || MC_1_17_1
 					((LevelChunk) target).setLoaded(true);
 					#else
 					((LevelChunk) target).loaded = true;

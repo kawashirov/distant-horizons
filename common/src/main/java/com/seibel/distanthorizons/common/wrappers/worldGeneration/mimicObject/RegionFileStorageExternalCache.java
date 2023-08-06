@@ -56,7 +56,7 @@ public class RegionFileStorageExternalCache implements AutoCloseable
 		{
 			try
 			{
-				#if MC_1_16_5
+				#if MC_1_16_5 || MC_1_17_1
 				rFile = this.storage.getRegionFile(pos);
 				#else
 				rFile = this.storage.regionCache.getOrDefault(posLong, null);	
@@ -86,7 +86,7 @@ public class RegionFileStorageExternalCache implements AutoCloseable
 		
 		// Otherwise, check if file exist, and if so, add it to the cache
 		Path storageFolderPath;
-		#if MC_1_16_5
+		#if MC_1_16_5 || MC_1_17_1
 		storageFolderPath = this.storage.folder.toPath();
 		#else
 		storageFolderPath = this.storage.folder;
@@ -98,7 +98,7 @@ public class RegionFileStorageExternalCache implements AutoCloseable
 		}
 		
 		Path regionFilePath = storageFolderPath.resolve("r." + pos.getRegionX() + "." + pos.getRegionZ() + ".mca");
-		#if MC_1_16_5
+		#if MC_1_16_5 || MC_1_17_1
 		rFile = new RegionFile(regionFilePath.toFile(), storageFolderPath.toFile(), false);
 		#else
 		rFile = new RegionFile(regionFilePath, storageFolderPath, false);

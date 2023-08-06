@@ -72,7 +72,7 @@ public class SodiumAccessor implements ISodiumAccessor {
 			}).mapToObj(DhChunkPos::new).collect(Collectors.toCollection(HashSet::new));
 		#else
 		// TODO: Maybe use a mixin to make this more efficient, and maybe ignore changes behind the camera
-		return MC_RENDER.getMaximumRenderedChunks().stream().filter((DHChunkPos chunk) -> {
+		return MC_RENDER.getMaximumRenderedChunks().stream().filter((DhChunkPos chunk) -> {
 			return (renderer.isBoxVisible(
 					chunk.getMinBlockX()+1, height.getMinBuildHeight()+1, chunk.getMinBlockZ()+1,
 					chunk.getMinBlockX()+15, height.getMaxBuildHeight()-1, chunk.getMinBlockZ()+15));

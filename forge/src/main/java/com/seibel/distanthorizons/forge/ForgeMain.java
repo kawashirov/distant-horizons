@@ -124,7 +124,7 @@ public class ForgeMain implements LodForgeMethodCaller
 		#if PRE_MC_1_17_1
 		ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY,
 				() -> (client, parent) -> GetConfigScreen.getScreen(parent));
-		#elif POST_MC_1_18_2 && PRE_MC_1_19_2
+		#elif MC_1_17_1 || MC_1_18_2 || PRE_MC_1_19_2
 		ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class,
 				() -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> GetConfigScreen.getScreen(parent)));
 		#else

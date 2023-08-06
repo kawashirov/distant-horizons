@@ -376,8 +376,8 @@ public class ChunkWrapper implements IChunkWrapper
 			LevelChunk levelChunk = (LevelChunk)chunk;
 			ClientChunkCache clientChunkCache = ((ClientLevel)levelChunk.getLevel()).getChunkSource();
 			return clientChunkCache.getChunkForLighting(chunk.getPos().x, chunk.getPos().z) != null &&
-					#if MC_1_16_5
 					levelChunk.isLightCorrect()
+					#if MC_1_16_5 || MC_1_17_1
 					#elif PRE_MC_1_20_1 
 					levelChunk.isClientLightReady()
 					#else 

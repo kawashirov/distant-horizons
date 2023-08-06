@@ -107,7 +107,7 @@ public class TintWithoutLevelSmoothOverrider implements BlockAndTintGetter {
     }
     
 	
-	#if POST_MC_1_18_2
+	#if MC_1_17_1 || POST_MC_1_18_2
     @Override
     public int getHeight() {
         throw new UnsupportedOperationException("ERROR: getHeight() called on TintWithoutLevelOverrider. Object is for tinting only.");

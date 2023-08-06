@@ -120,7 +120,7 @@ public class ChangelogScreen extends DhScreen {
         // Set the scroll position to the mouse height relative to the screen
         // This is a bit of a hack as we cannot scroll on this area
 	    double scrollAmount = ((double) mouseY)/((double) this.height) * 1.1 * this.changelogArea.getMaxScroll();
-	    #if MC_1_16_5
+	    #if MC_1_16_5 || MC_1_17_1
 	    this.changelogArea.setScrollAmount(scrollAmount);
 		#else
 		this.changelogArea.scrollAmount = scrollAmount;

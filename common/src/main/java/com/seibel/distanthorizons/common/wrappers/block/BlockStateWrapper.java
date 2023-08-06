@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-#if MC_1_16_5
+#if MC_1_16_5 || MC_1_17_1
 import net.minecraft.core.Registry;
 #elif MC_1_18_2 || MC_1_19_2
 import net.minecraft.client.Minecraft;
@@ -101,7 +101,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 		}
 		
 		ResourceLocation resourceLocation;
-		#if MC_1_16_5
+		#if MC_1_16_5 || MC_1_17_1
 		resourceLocation = Registry.BLOCK.getKey(this.blockState.getBlock());
 		#elif MC_1_18_2 || MC_1_19_2
 		net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
@@ -148,7 +148,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 		try
 		{
 			Block block;
-			#if MC_1_16_5
+			#if MC_1_16_5 || MC_1_17_1
 			block = Registry.BLOCK.get(resourceLocation);
 			#elif MC_1_18_2 || MC_1_19_2
 			net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();

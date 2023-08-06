@@ -23,6 +23,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 #if MC_1_16_5
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
+#elif MC_1_17_1
+import net.minecraftforge.fmlserverevents.FMLServerAboutToStartEvent;
+import net.minecraftforge.fmlserverevents.FMLServerStoppingEvent;
 #else
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
@@ -79,7 +82,7 @@ public class ForgeServerProxy
 
     // ServerWorldLoadEvent
     @SubscribeEvent
-    public void dedicatedWorldLoadEvent(#if MC_1_16_5 FMLServerAboutToStartEvent #else ServerAboutToStartEvent #endif event)
+    public void dedicatedWorldLoadEvent(#if MC_1_16_5 || MC_1_17_1 FMLServerAboutToStartEvent #else ServerAboutToStartEvent #endif event)
 	{
 		if (this.isValidTime())
 		{
@@ -89,7 +92,7 @@ public class ForgeServerProxy
 
     // ServerWorldUnloadEvent
     @SubscribeEvent
-    public void serverWorldUnloadEvent(#if MC_1_16_5 FMLServerStoppingEvent #else ServerStoppingEvent #endif event)
+    public void serverWorldUnloadEvent(#if MC_1_16_5 || MC_1_17_1 FMLServerStoppingEvent #else ServerStoppingEvent #endif event)
 	{
 		if (this.isValidTime())
 		{
