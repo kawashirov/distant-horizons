@@ -213,15 +213,7 @@ public class FabricClientProxy
 					float[] matrixFloatArray = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(renderContext.projectionMatrix(), renderContext.tickDelta());
 					
 					#if MC_1_16_5
-					int glMatrixMode = GL15.glGetInteger(GL15.GL_MATRIX_MODE);
-					GL15.glMatrixMode(GL15.GL_PROJECTION);
-					
-					GL15.glPopMatrix();
-					GL15.glPushMatrix();
-					// TODO this doesn't work in 1.16
-					GL15.glLoadMatrixf(matrixFloatArray);
-					
-					GL15.glMatrixMode(glMatrixMode);
+					SeamlessOverdraw.applyLegacyProjectionMatrix(matrixFloatArray);
 					#elif PRE_MC_1_19_4
 					renderContext.projectionMatrix().load(FloatBuffer.wrap(matrixFloatArray));
 					#else

@@ -138,14 +138,7 @@ public class MixinLevelRenderer
 				float[] matrixFloatArray = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(mcProjectionMatrix, previousPartialTicks);
 				
 				#if MC_1_16_5
-				int glMatrixMode = GL15.glGetInteger(GL15.GL_MATRIX_MODE);
-				GL15.glMatrixMode(GL15.GL_PROJECTION);
-				
-				GL15.glPopMatrix();
-				GL15.glPushMatrix();
-				GL15.glLoadMatrixf(matrixFloatArray);
-				
-				GL15.glMatrixMode(glMatrixMode);
+				SeamlessOverdraw.applyLegacyProjectionMatrix(matrixFloatArray);
 				#elif PRE_MC_1_19_4
 				projectionMatrix.load(FloatBuffer.wrap(matrixFloatArray));
 				#else
