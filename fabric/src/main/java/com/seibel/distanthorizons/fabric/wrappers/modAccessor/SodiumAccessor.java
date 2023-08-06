@@ -32,7 +32,6 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.ISodiumAcce
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
-import me.jellysquid.mods.sodium.client.render.chunk.map.ChunkTrackerHolder;
 import net.minecraft.client.Minecraft;
 #if PRE_MC_1_17_1
 import net.minecraft.nbt.CompoundTag;
