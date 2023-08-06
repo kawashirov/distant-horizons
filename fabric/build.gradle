@@ -75,11 +75,11 @@ dependencies {
 
     // Sodium
     addMod("maven.modrinth:sodium:${rootProject.sodium_version}", rootProject.enable_sodium)
-//    if (rootProject.enable_sodium != "0") {
-//        implementation "org.joml:joml:1.10.2"
-//        modImplementation(fabricApi.module("fabric-rendering-data-attachment-v1", rootProject.fabric_api_version))
-//        modImplementation(fabricApi.module("fabric-rendering-fluids-v1", rootProject.fabric_api_version))
-//    }
+    if (rootProject.enable_sodium == "2") {
+        implementation "org.joml:joml:1.10.2"
+        modImplementation(fabricApi.module("fabric-rendering-data-attachment-v1", rootProject.fabric_api_version))
+        modImplementation(fabricApi.module("fabric-rendering-fluids-v1", rootProject.fabric_api_version))
+    }
 
 	// Lithium
     addMod("maven.modrinth:lithium:${rootProject.lithium_version}", rootProject.enable_lithium)
