@@ -35,6 +35,7 @@ import java.util.concurrent.Semaphore;
 
 /**
  * Why does this exist? But okay! (Will be probably removed when the experimental generator is done)
+ * FIXME: Recheck this
  */
 @Mixin(ThreadingDetector.class)
 public class MixinThreadingDetector {
