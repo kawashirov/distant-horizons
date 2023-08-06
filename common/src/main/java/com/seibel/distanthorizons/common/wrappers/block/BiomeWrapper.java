@@ -45,7 +45,8 @@ import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.resources.RegistryReadOps;
 import net.minecraft.resources.RegistryWriteOps;
 #else
-import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 #endif
 
 import net.minecraft.resources.ResourceLocation;
@@ -103,8 +104,16 @@ public class BiomeWrapper implements IBiomeWrapper
 	@Override
 	public String serialize() // FIXME pass in level to prevent null pointers (or maybe just RegistryAccess?)
 	{
+		
 		net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
-		ResourceLocation resourceLocation = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.biome);
+		
+		ResourceLocation resourceLocation;
+		#if MC_1_16_5
+		resourceLocation = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.biome);
+		#else
+		resourceLocation = registryAccess.registryOrThrow(Registries.BIOME).getKey(this.biome.value());
+		#endif
+		
 		if (resourceLocation == null)
 		{
 			// shouldn't normally happen, but just in case
@@ -138,7 +147,14 @@ public class BiomeWrapper implements IBiomeWrapper
 		try
 		{
 			net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
+			
+			#if MC_1_16_5
 			Biome biome = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).get(resourceLocation);
+			#else
+			Biome unwrappedBiome = registryAccess.registryOrThrow(Registries.BIOME).get(resourceLocation);
+			Holder<Biome> biome = new Holder.Direct<>(unwrappedBiome);
+			#endif
+			
 			return getBiomeWrapper(biome);
 		}
 		catch (Exception e)

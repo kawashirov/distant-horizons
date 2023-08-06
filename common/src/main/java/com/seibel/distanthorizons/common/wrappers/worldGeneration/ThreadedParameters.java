@@ -88,7 +88,7 @@ public final class ThreadedParameters
 	}
 	
 	
-	#if POST_MC_1_18_2
+	#if POST_MC_1_18_2 && PRE_MC_1_19_2
 	public void recreateStructureCheck()
 	{
 		if (previousGlobalParameters != null)

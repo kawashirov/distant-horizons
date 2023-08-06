@@ -2,7 +2,7 @@ package com.seibel.distanthorizons.common.wrappers.block;
 
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.wrapperInterfaces.block.IBlockStateWrapper;
-import net.minecraft.core.Registry;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -13,6 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+
+#if MC_1_16_5
+import net.minecraft.core.Registry;
+#else
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.level.EmptyBlockGetter;
+#endif
 
 public class BlockStateWrapper implements IBlockStateWrapper
 {
@@ -80,20 +89,27 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	
 	
 	@Override
-    public String serialize()
+    public String serialize() // FIXME pass in level to prevent null pointers (or maybe just RegistryAccess?)
 	{
 		if (this.blockState == null)
 		{
 			return "AIR";
 		}
 		
-		ResourceLocation resourceLocation = Registry.BLOCK.getKey(this.blockState.getBlock());
+		ResourceLocation resourceLocation;
+		#if MC_1_16_5
+		resourceLocation = Registry.BLOCK.getKey(this.blockState.getBlock());
+		#else
+		net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
+		resourceLocation = registryAccess.registryOrThrow(Registries.BLOCK).getKey(this.blockState.getBlock());
+		#endif
+		
 		String resourceStateString = resourceLocation.getNamespace() + RESOURCE_LOCATION_SEPARATOR + resourceLocation.getPath()
 										+ STATE_STRING_SEPARATOR + serializeBlockStateProperties(this.blockState);
 		return resourceStateString;
 	}
 	
-	public static BlockStateWrapper deserialize(String resourceStateString) throws IOException
+	public static BlockStateWrapper deserialize(String resourceStateString) throws IOException // FIXME pass in level to prevent null pointers (or maybe just RegistryAccess?)
 	{
 		if (resourceStateString.equals("AIR") || resourceStateString.equals("")) // the empty string shouldn't normally happen, but just in case
 		{
@@ -124,7 +140,15 @@ public class BlockStateWrapper implements IBlockStateWrapper
 		// attempt to get the BlockState from all possible BlockStates
 		try
 		{
-			Block block = Registry.BLOCK.get(resourceLocation);
+			Block block;
+			#if MC_1_16_5
+			block = Registry.BLOCK.get(resourceLocation);
+			#else
+			net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
+			block = registryAccess.registryOrThrow(Registries.BLOCK).get(resourceLocation);
+			#endif
+			
+			
 			
 			BlockState foundState = null;
 			List<BlockState> possibleStateList = block.getStateDefinition().getPossibleStates();
