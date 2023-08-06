@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(SodiumWorldRenderer.class)
+@Mixin(RegionChunkRenderer.class)
 public class MixinSodiumRenderer 
 {
     @Unique SodiumAccessor accessor = null;
