@@ -28,7 +28,17 @@ public class MixinChunkMap {
     ServerLevel level;
 
     @Inject(method = "save", at = @At(value = "INVOKE", target = CHUNK_SERIALIZER_WRITE))
-    private void onChunkSave(ChunkAccess chunk, CallbackInfoReturnable<Boolean> ci) {
+    private void onChunkSave(ChunkAccess chunk, CallbackInfoReturnable<Boolean> ci) 
+    {
+		#if MC_1_16_5
+		if (chunk.getBiomes() == null)
+		{
+			// in 1.16.5 some chunks may be missing their biomes, which cause issues when attempting to save them
+			return;
+		}
+		#endif
+		
+	    
         ServerApi.INSTANCE.serverChunkSaveEvent(
                 new ChunkWrapper(chunk, level, ServerLevelWrapper.getWrapper(level)),
                 ServerLevelWrapper.getWrapper(level)
