@@ -5,7 +5,8 @@ image: gradle:eclipse-temurin
 
 # all stages need to be defined here
 stages:
-  # TODO: Make stages depending on what is in versionProperties
+  # TODO: Make stages depend on what is in versionProperties
+  - build_1_16_5
   - build_1_18_2
   - build_1_19_2
   - build_1_19_4
@@ -54,6 +55,13 @@ variables:
   extends: .build_java
 
 
+# 1.16.5 build
+build_1_16_5:
+  stage: build_1_16_5
+  variables:
+    MC_VER: "1.16.5"
+  extends: .build_mc
+  
 # 1.18.2 build
 build_1_18_2:
   stage: build_1_18_2
@@ -130,7 +138,7 @@ pages:
 
 
 
-# ============================== Previos CI for future reference ============================== #
+# ============================== Previous CI for future reference ============================== #
 ## all stages need to be defined here
 #  # Don't build the standalone jar yet because it isn't done yet
 #  # - build_standalone
