@@ -96,10 +96,11 @@ public class MixinLevelRenderer
     private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
     #endif
     {
-        if (Config.Client.Advanced.Debugging.lodOnlyMode.get())
+		// FIXME completely disables rendering when sodium is installed
+		if (Config.Client.Advanced.Debugging.lodOnlyMode.get())
 		{
-            callback.cancel();
-        }
+		    callback.cancel();
+		}
     }
 
     @Redirect(method =

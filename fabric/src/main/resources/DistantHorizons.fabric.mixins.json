@@ -20,7 +20,7 @@
     "client.MixinMinecraft",
     "client.MixinTextureUtil",
 
-    "mods.sodium.MixinSodiumChunkRenderer"
+    "mods.sodium.MixinSodiumRenderer"
   ],
   "server": [],
   "injectors": {
