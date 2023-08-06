@@ -75,16 +75,18 @@ public class ChunkWrapper implements IChunkWrapper
 	
 	private final boolean useDhLightingEngine;
 	
-	// Due to vanilla `isClientLightReady()` not designed to be used by non-render thread, that value may return 'true'
-	// just before the light engine is ticked, (right after all light changes is marked to the engine to be processed).
-	// To fix this, on client-only mode, we mixin-redirect the `isClientLightReady()` so that after the call, it will
-	// trigger a synchronous update of this flag here on all chunks that are wrapped.
-	//
-	// Note: Using a static weak hash map to store the chunks that need to be updated, as instance of chunk wrapper
-	// can be duplicated, with same chunk instance. And the data stored here are all temporary, and thus will not be
-	// visible when a chunk is re-wrapped later.
-	// (Also, thread safety done via a reader writer lock)
-	private final static WeakHashMap<ChunkAccess, Boolean> chunksToUpdateClientLightReady = new WeakHashMap<>();
+	/**
+	 * Due to vanilla `isClientLightReady()` not designed to be used by non-render thread, that value may return 'true'
+	 * just before the light engine is ticked, (right after all light changes is marked to the engine to be processed).
+	 * To fix this, on client-only mode, we mixin-redirect the `isClientLightReady()` so that after the call, it will
+	 * trigger a synchronous update of this flag here on all chunks that are wrapped. <br><br>
+	 * 
+	 * Note: Using a static weak hash map to store the chunks that need to be updated, as instance of chunk wrapper
+	 * can be duplicated, with same chunk instance. And the data stored here are all temporary, and thus will not be
+	 * visible when a chunk is re-wrapped later. <br>
+	 * (Also, thread safety done via a reader writer lock)
+	 */
+	private final static WeakHashMap<ChunkAccess, Boolean> chunksToUpdateClientLightReady = new WeakHashMap<>(); // TODO this is never cleared
 	private final static ReentrantReadWriteLock weakMapLock = new ReentrantReadWriteLock();
 	
 	
@@ -400,7 +402,8 @@ public class ChunkWrapper implements IChunkWrapper
 		{
 			chunksToUpdateClientLightReady.replaceAll(ChunkWrapper::updateClientLightReady);
 		}
-		finally {
+		finally 
+		{
 			weakMapLock.writeLock().unlock();
 		}
 		#endif
