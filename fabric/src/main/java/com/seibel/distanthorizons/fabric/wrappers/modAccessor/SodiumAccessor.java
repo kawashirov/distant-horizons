@@ -32,6 +32,7 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.ISodiumAcce
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
 import me.jellysquid.mods.sodium.client.render.SodiumWorldRenderer;
+import me.jellysquid.mods.sodium.client.render.chunk.map.ChunkTrackerHolder;
 import net.minecraft.client.Minecraft;
 #if PRE_MC_1_17_1
 import net.minecraft.nbt.CompoundTag;
@@ -64,7 +65,14 @@ public class SodiumAccessor implements ISodiumAccessor {
 		SodiumWorldRenderer renderer = SodiumWorldRenderer.instance();
 		LevelHeightAccessor height =  Minecraft.getInstance().level;
 
-		#if POST_MC_1_18_2
+		#if POST_MC_1_20_1
+		// TODO: This is just a tmp solution, use a proper solution later
+		return MC_RENDER.getMaximumRenderedChunks().stream().filter((DhChunkPos chunk) -> {
+			return (renderer.isBoxVisible(
+					chunk.getMinBlockX()+1, height.getMinBuildHeight()+1, chunk.getMinBlockZ()+1,
+					chunk.getMinBlockX()+15, height.getMaxBuildHeight()-1, chunk.getMinBlockZ()+15));
+		}).collect(Collectors.toCollection(HashSet::new));
+		#elif POST_MC_1_18_2
 		// 0b11 = Lighted chunk & loaded chunk
 		return renderer.getChunkTracker().getChunks(0b00).filter(
 			(long l) -> {
