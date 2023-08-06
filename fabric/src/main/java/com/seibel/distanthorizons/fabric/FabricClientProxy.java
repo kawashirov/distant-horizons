@@ -37,7 +37,7 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapp
 import com.seibel.distanthorizons.coreapi.ModInfo;
 import com.seibel.distanthorizons.fabric.wrappers.modAccessor.ImmersivePortalsAccessor;
 import com.seibel.distanthorizons.fabric.wrappers.modAccessor.SodiumAccessor;
-import io.netty.buffer.ByteBuf;
+//import io.netty.buffer.ByteBuf;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientChunkEvents;
@@ -218,6 +218,7 @@ public class FabricClientProxy
 					
 					GL15.glPopMatrix();
 					GL15.glPushMatrix();
+					// TODO this doesn't work in 1.16
 					GL15.glLoadMatrixf(matrixFloatArray);
 					
 					GL15.glMatrixMode(glMatrixMode);
@@ -251,17 +252,17 @@ public class FabricClientProxy
 		// networking event //
 		//==================//
 		
-		ClientPlayNetworking.registerGlobalReceiver(new ResourceLocation(ModInfo.NETWORKING_RESOURCE_NAMESPACE, ModInfo.MULTIVERSE_PLUGIN_NAMESPACE),
-			(Minecraft client, ClientPacketListener handler, FriendlyByteBuf friendlyByteBuf, PacketSender responseSender) ->
-			{
-				// converting to a ByteBuf is necessary otherwise Fabric will complain when the game boots
-				ByteBuf nettyByteBuf = friendlyByteBuf.asByteBuf();
-				
-				// remove the Bukkit/Forge packet ID byte
-				nettyByteBuf.readByte();
-				
-				ClientApi.INSTANCE.serverMessageReceived(nettyByteBuf);
-			});
+//		ClientPlayNetworking.registerGlobalReceiver(new ResourceLocation(ModInfo.NETWORKING_RESOURCE_NAMESPACE, ModInfo.MULTIVERSE_PLUGIN_NAMESPACE),
+//			(Minecraft client, ClientPacketListener handler, FriendlyByteBuf friendlyByteBuf, PacketSender responseSender) ->
+//			{
+//				// converting to a ByteBuf is necessary otherwise Fabric will complain when the game boots
+//				ByteBuf nettyByteBuf = friendlyByteBuf.asByteBuf();
+//				
+//				// remove the Bukkit/Forge packet ID byte
+//				nettyByteBuf.readByte();
+//				
+//				ClientApi.INSTANCE.serverMessageReceived(nettyByteBuf);
+//			});
 	}
 	
 	public void onKeyInput()

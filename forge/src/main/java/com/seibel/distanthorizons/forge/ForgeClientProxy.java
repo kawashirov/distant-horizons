@@ -28,7 +28,7 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
 import com.seibel.distanthorizons.coreapi.ModInfo;
-import io.netty.buffer.ByteBuf;
+//import io.netty.buffer.ByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelAccessor;
 
@@ -45,8 +45,8 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.simple.SimpleChannel;
+//import net.minecraftforge.network.NetworkRegistry;
+//import net.minecraftforge.network.simple.SimpleChannel;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
@@ -69,7 +69,7 @@ public class ForgeClientProxy
 	private static final IMinecraftClientWrapper MC = SingletonInjector.INSTANCE.get(IMinecraftClientWrapper.class);
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 	
-	private static SimpleChannel multiversePluginChannel;
+//	private static SimpleChannel multiversePluginChannel;
 	
 	
 	#if PRE_MC_1_19_2
@@ -248,28 +248,28 @@ public class ForgeClientProxy
 	/** @param event this is just to ensure the event is called at the right time, if it is called outside the {@link FMLClientSetupEvent} event, the binding may fail */
 	public static void setupNetworkingListeners(FMLClientSetupEvent event)
 	{
-		multiversePluginChannel = NetworkRegistry.newSimpleChannel(
-				new ResourceLocation(ModInfo.NETWORKING_RESOURCE_NAMESPACE, ModInfo.MULTIVERSE_PLUGIN_NAMESPACE),
-				// network protocol version
-				() -> ModInfo.MULTIVERSE_PLUGIN_PROTOCOL_VERSION +"",
-				// client accepted versions
-				ForgeClientProxy::isReceivedProtocolVersionAcceptable,
-				// server accepted versions
-				ForgeClientProxy::isReceivedProtocolVersionAcceptable
-		);
-		
-		multiversePluginChannel.registerMessage(0/*should be incremented for each simple channel we listen to*/, ByteBuf.class,
-				// encoder
-				(pack, friendlyByteBuf) -> { },
-				// decoder
-				(friendlyByteBuf) -> friendlyByteBuf.asByteBuf(),
-				// message consumer
-				(nettyByteBuf, contextRef) ->
-				{
-					ClientApi.INSTANCE.serverMessageReceived(nettyByteBuf);
-					contextRef.get().setPacketHandled(true);
-				}
-		);
+//		multiversePluginChannel = NetworkRegistry.newSimpleChannel(
+//				new ResourceLocation(ModInfo.NETWORKING_RESOURCE_NAMESPACE, ModInfo.MULTIVERSE_PLUGIN_NAMESPACE),
+//				// network protocol version
+//				() -> ModInfo.MULTIVERSE_PLUGIN_PROTOCOL_VERSION +"",
+//				// client accepted versions
+//				ForgeClientProxy::isReceivedProtocolVersionAcceptable,
+//				// server accepted versions
+//				ForgeClientProxy::isReceivedProtocolVersionAcceptable
+//		);
+//		
+//		multiversePluginChannel.registerMessage(0/*should be incremented for each simple channel we listen to*/, ByteBuf.class,
+//				// encoder
+//				(pack, friendlyByteBuf) -> { },
+//				// decoder
+//				(friendlyByteBuf) -> friendlyByteBuf.asByteBuf(),
+//				// message consumer
+//				(nettyByteBuf, contextRef) ->
+//				{
+//					ClientApi.INSTANCE.serverMessageReceived(nettyByteBuf);
+//					contextRef.get().setPacketHandled(true);
+//				}
+//		);
 	}
 	
 	public static boolean isReceivedProtocolVersionAcceptable(String versionString)

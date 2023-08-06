@@ -31,6 +31,7 @@ def writeBuildGradlePredefine(List<String> mcVers, int mcIndex) {
         
         if (mcIndex < i) {
             // exclusive before
+            // FIXME doesn't function correctly for 1.16.5 (IE the first item in the list)
             redefineList.add("PRE_MC_" + mcStr)
         }
         if (mcIndex <= i) {
@@ -230,7 +231,8 @@ subprojects { p ->
         forgeShadowMe("com.formdev:flatlaf-extras:${rootProject.flatlaf_version}")
         
         // Netty
-        forgeShadowMe("io.netty:netty-all:${rootProject.netty_version}")
+        // Breaks 1.16.5
+        //forgeShadowMe("io.netty:netty-all:${rootProject.netty_version}")
 
         // Remember, for lwjgl dependencies that arent included in Minecraft, you need to also need to add it to the ShadowJar thing
         forgeShadowMe("org.lwjgl:lwjgl-jawt:3.2.2") {
