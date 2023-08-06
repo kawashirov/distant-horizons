@@ -20,31 +20,31 @@ If you want to see a quick demo, check out a video covering the mod here:
 
 ### This branch supports the following versions of Minecraft:
 
-#### 1.19.4 (BROKE)
+#### 1.20.1, 1.20
+Fabric: 0.14.21\
+Fabric API: 0.85.0+1.20.1\
+Forge: 45.1.0\
+Parchment: 1.19.3:2023.03.25\
+Modmenu: 7.0.1
+
+#### 1.19.4
 Fabric: 0.14.21\
 Fabric API: 0.83.0+1.19.4\
 Forge: 45.1.0\
-Parchment: 1.19.3:2023.03.12\
+Parchment: 1.19.3:2023.06.25\
 Modmenu: 6.2.3
 
-#### 1.19.2 (BROKE)
+#### 1.19.2
 Fabric: 0.14.21\
 Fabric API: 0.76.0+1.19.2\
 Forge: 43.2.14\
 Parchment: 1.19.2:2022.11.27\
 Modmenu: 4.2.0-beta.2
 
-#### 1.19 (BROKE)
-Fabric: 0.14.21\
-Fabric API: 0.58.0+1.19\
-Forge: 41.1.0\
-Parchment: 1.19.2:2022.11.27\
-Modmenu: 4.0.4
-
-#### 1.18.2
+#### 1.18.2 (Default)
 Fabric: 0.14.21\
 Fabric API: 0.76.0+1.18.2\
-Forge: 40.2.9\
+Forge: 40.2.10\
 Parchment: 1.18.2:2022.11.06\
 Modmenu: 3.2.5
 
@@ -64,6 +64,8 @@ Modmenu: 1.16.22
 
 ### Versions no longer supported
 - 1.18.1, 1.18
+- 1.19.1, 1.19
+- 1.19.3
 <br><br>
 
 ### Plugin and Library versions
@@ -119,7 +121,7 @@ From the File Explorer:
 1. Download and extract the project zip
 2. Download the core from https://gitlab.com/jeseibel/distant-horizons-core and extract into a folder called `coreSubProjects`
 3. Open a terminal emulator in the project folder (On Windows you can type `cmd` in the title bar)
-4. Run the commands: `./gradlew assemble`
+4. Run the commands: `./gradlew assemble` (You may need to use a `.\` on Windows)
 5. Merge the jars wih `./gradlew mergeJars`
 6. The compiled jar file will be in the folder `Merged`
 
@@ -178,7 +180,7 @@ https://github.com/PacifistMC/Forgix
 LZ4 for Java (data compression)\
 https://github.com/lz4/lz4-java
 
-Json & Toml for Java (config handling)\
+NightConfig for Json & Toml (config handling)\
 https://github.com/TheElectronWill/night-config
 
 SVG Salamander for SVG support\
