@@ -8,14 +8,9 @@ import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.wrapperInterfaces.chunk.IChunkWrapper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.TitleScreen;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
-import net.minecraftforge.event.server.ServerStoppingEvent;
 #if PRE_MC_1_19_2
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -24,6 +19,16 @@ import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.event.level.LevelEvent;
 #endif
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+
+#if MC_1_16_5
+import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
+#else
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
+#endif
+
+
 import org.apache.logging.log4j.Logger;
 
 import java.util.function.Supplier;
@@ -74,7 +79,7 @@ public class ForgeServerProxy
 
     // ServerWorldLoadEvent
     @SubscribeEvent
-    public void dedicatedWorldLoadEvent(ServerAboutToStartEvent event)
+    public void dedicatedWorldLoadEvent(#if MC_1_16_5 FMLServerAboutToStartEvent #else ServerAboutToStartEvent #endif event)
 	{
 		if (this.isValidTime())
 		{
@@ -84,7 +89,7 @@ public class ForgeServerProxy
 
     // ServerWorldUnloadEvent
     @SubscribeEvent
-    public void serverWorldUnloadEvent(ServerStoppingEvent event)
+    public void serverWorldUnloadEvent(#if MC_1_16_5 FMLServerStoppingEvent #else ServerStoppingEvent #endif event)
 	{
 		if (this.isValidTime())
 		{
