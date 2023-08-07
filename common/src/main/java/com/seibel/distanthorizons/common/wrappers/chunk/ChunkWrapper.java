@@ -73,7 +73,7 @@ public class ChunkWrapper implements IChunkWrapper
 	
 	private LinkedList<DhBlockPos> blockLightPosList = null;
 	
-	private final boolean useDhLightingEngine;
+	private boolean useDhLighting;
 	
 	/**
 	 * Due to vanilla `isClientLightReady()` not designed to be used by non-render thread, that value may return 'true'
@@ -104,7 +104,7 @@ public class ChunkWrapper implements IChunkWrapper
 		
 		// TODO is this the best way to differentiate between when we are generating chunks and when MC gave us a chunk?
 		boolean isDhGeneratedChunk = (this.lightSource.getClass() == DhLitWorldGenRegion.class);
-		this.useDhLightingEngine = isDhGeneratedChunk && (Config.Client.Advanced.WorldGenerator.worldGenLightingEngine.get() == ELightGenerationMode.DISTANT_HORIZONS);
+		this.useDhLighting = isDhGeneratedChunk && (Config.Client.Advanced.WorldGenerator.worldGenLightingEngine.get() == ELightGenerationMode.DISTANT_HORIZONS);
 		
 		weakMapLock.writeLock().lock();
 		chunksToUpdateClientLightReady.put(chunk, false);
@@ -189,9 +189,14 @@ public class ChunkWrapper implements IChunkWrapper
 	public void setIsDhLightCorrect(boolean isDhLightCorrect) { this.isDhLightCorrect = isDhLightCorrect; }
 	
 	@Override
+	public void setUseDhLighting(boolean useDhLighting) { this.useDhLighting = useDhLighting; }
+	
+	
+	
+	@Override
 	public boolean isLightCorrect()
 	{
-		if (this.useDhLightingEngine)
+		if (this.useDhLighting)
 		{
 			return this.isDhLightCorrect;
 		}
@@ -256,7 +261,7 @@ public class ChunkWrapper implements IChunkWrapper
 		throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
 		
 		// use the full lighting engine when the chunks are within render distance or the config requests it
-		if (this.useDhLightingEngine)
+		if (this.useDhLighting)
 		{
 			// DH lighting method
 			return this.blockLightAtRelBlockPos.getOrDefault(new DhBlockPos(relX, relY, relZ), 0);
@@ -276,7 +281,7 @@ public class ChunkWrapper implements IChunkWrapper
 		throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
 		
 		// use the full lighting engine when the chunks are within render distance or the config requests it
-		if (this.useDhLightingEngine)
+		if (this.useDhLighting)
 		{
 			// DH lighting method
 			return this.skyLightAtRelBlockPos.getOrDefault(new DhBlockPos(relX, relY, relZ), 0);
