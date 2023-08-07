@@ -1,0 +1,5 @@
+{
+    "git_main_commit": "${git_main_commit}",
+    "git_core_commit": "${git_core_commit}",
+    "git_main_branch": "${git_main_branch}"
+}

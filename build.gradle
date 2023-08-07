@@ -326,13 +326,17 @@ subprojects { p ->
     // Put stuff from gradle.properties into the mod info
     processResources {
         def resourceTargets = [ // Location of where to inject the properties
-                                // Properties for each of the loaders
-                                "fabric.mod.json",
-                                "quilt.mod.json",
-                                "META-INF/mods.toml",
+                // Holds info like git commit
+                // TODO: For some reason this script doesnt work with the core project
+                "build_info.json",
 
-                                // The mixins for each of the loaders
-                                "DistantHorizons."+ p.name +".fabricLike.mixins.json"
+                // Properties for each of the loaders
+                "fabric.mod.json",
+                "quilt.mod.json",
+                "META-INF/mods.toml",
+
+                // The mixins for each of the loaders
+                "DistantHorizons."+ p.name +".fabricLike.mixins.json"
         ]
         def intoTargets = ["$buildDir/resources/main/"] // Location of the built resources folder
 
@@ -355,6 +359,18 @@ subprojects { p ->
         // TODOI: Find something we can use so we can basically re-map only when the jar is shadowed and relocated
 //        println p.tasks.findByName('shadowJar')
 
+        // Gets git info for the project
+        def git_main_commit = "Git_not_found"
+        def git_core_commit = "Git_not_found"
+        def git_main_branch = "Git_not_found"
+        try {
+            "git rev-parse --is-inside-work-tree".execute() // If git doesnt exist, or this isnt cloned from git, then this wont work
+            git_main_commit = 'git rev-parse --verify HEAD'.execute().text.trim()
+            git_core_commit = 'git ls-tree --object-only HEAD coreSubProjects'.execute().text.trim()
+            git_main_branch = 'git symbolic-ref --short HEAD'.execute().text.trim()
+        } catch (Exception e) {
+            println "Git or Git project not found"
+        }
 
         def replaceProperties = [
                 version                      : mod_version,
@@ -370,7 +386,11 @@ subprojects { p ->
                 compatible_minecraft_versions: compatible_minecraft_versions,
                 compatible_forgemc_versions  : compatible_forgemc_versions,
                 java_version                 : java_version,
-                quilt_contributors           : "{"+quilt_contributors.join(", ")+"}"
+                quilt_contributors           : "{"+quilt_contributors.join(", ")+"}",
+
+                git_main_commit              : git_main_commit,
+                git_core_commit              : git_core_commit,
+                git_main_branch              : git_main_branch
         ]
         // The left side is what gets replaced in the mod info and the right side is where to get it from in the gradle.properties
 

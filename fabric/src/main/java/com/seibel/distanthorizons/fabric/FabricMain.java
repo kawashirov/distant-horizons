@@ -22,6 +22,7 @@ package com.seibel.distanthorizons.fabric;
 import com.seibel.distanthorizons.api.methods.events.abstractEvents.DhApiAfterDhInitEvent;
 import com.seibel.distanthorizons.api.methods.events.abstractEvents.DhApiBeforeDhInitEvent;
 import com.seibel.distanthorizons.core.config.ConfigBase;
+import com.seibel.distanthorizons.core.jar.ModGitInfo;
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.*;
 import com.seibel.distanthorizons.common.LodCommonMain;
 import com.seibel.distanthorizons.coreapi.ModInfo;
@@ -71,6 +72,11 @@ public class FabricMain
 		LodCommonMain.startup(null);
 		FabricDependencySetup.createInitialBindings();
 		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
+
+		// Print git info (Useful for dev builds)
+		LOGGER.info("DH Branch: "+ ModGitInfo.Git_Main_Branch);
+		LOGGER.info("DH Commit: "+ ModGitInfo.Git_Main_Commit);
+		LOGGER.info("DH-Core Commit: "+ ModGitInfo.Git_Core_Commit);
 
 		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("sodium")) {
 			ModAccessorInjector.INSTANCE.bind(ISodiumAccessor.class, new SodiumAccessor());

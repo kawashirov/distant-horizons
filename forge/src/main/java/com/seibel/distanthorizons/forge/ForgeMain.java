@@ -26,6 +26,7 @@ import com.seibel.distanthorizons.common.forge.LodForgeMethodCaller;
 import com.seibel.distanthorizons.common.wrappers.DependencySetup;
 import com.seibel.distanthorizons.common.wrappers.gui.GetConfigScreen;
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftClientWrapper;
+import com.seibel.distanthorizons.core.jar.ModGitInfo;
 import com.seibel.distanthorizons.coreapi.DependencyInjection.ApiEventInjector;
 import com.seibel.distanthorizons.coreapi.ModInfo;
 import com.seibel.distanthorizons.core.ReflectionHandler;
@@ -111,6 +112,11 @@ public class ForgeMain implements LodForgeMethodCaller
 		LodCommonMain.startup(this);
 		ForgeDependencySetup.createInitialBindings();
 		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
+
+		// Print git info (Useful for dev builds)
+		LOGGER.info("DH Branch: "+ ModGitInfo.Git_Main_Branch);
+		LOGGER.info("DH Commit: "+ ModGitInfo.Git_Main_Commit);
+		LOGGER.info("DH-Core Commit: "+ ModGitInfo.Git_Core_Commit);
 
 		client_proxy = new ForgeClientProxy();
 		MinecraftForge.EVENT_BUS.register(client_proxy);
