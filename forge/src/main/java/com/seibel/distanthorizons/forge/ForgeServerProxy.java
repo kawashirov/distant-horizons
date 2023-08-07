@@ -133,22 +133,26 @@ public class ForgeServerProxy
     @SubscribeEvent
     public void serverChunkLoadEvent(ChunkEvent.Load event)
     {
-        if (isValidTime()) {
-            if (GetLevel(event) instanceof ServerLevel) {
-                ServerLevelWrapper wrappedLevel = ServerLevelWrapper.getWrapper((ServerLevel) GetLevel(event));
-                IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetLevel(event), wrappedLevel);
-                serverApi.serverChunkLoadEvent(chunk, getLevelWrapper((ServerLevel) GetLevel(event)));
-            }
+        if (this.isValidTime())
+        {
+	        if (GetLevel(event) instanceof ServerLevel)
+	        {
+		        ServerLevelWrapper wrappedLevel = ServerLevelWrapper.getWrapper((ServerLevel) GetLevel(event));
+		        IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetLevel(event), wrappedLevel);
+		        this.serverApi.serverChunkLoadEvent(chunk, this.getLevelWrapper((ServerLevel) GetLevel(event)));
+	        }
         }
     }
     @SubscribeEvent
     public void serverChunkSaveEvent(ChunkEvent.Unload event)
     {
-        if (isValidTime()) {
-            if (GetLevel(event) instanceof ServerLevel) {
+        if (this.isValidTime()) 
+		{
+            if (GetLevel(event) instanceof ServerLevel) 
+			{
                 ServerLevelWrapper wrappedLevel = ServerLevelWrapper.getWrapper((ServerLevel) GetLevel(event));
                 IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetLevel(event), wrappedLevel);
-                serverApi.serverChunkSaveEvent(chunk, getLevelWrapper((ServerLevel) GetLevel(event)));
+                this.serverApi.serverChunkSaveEvent(chunk, this.getLevelWrapper((ServerLevel) GetLevel(event)));
             }
         }
     }
