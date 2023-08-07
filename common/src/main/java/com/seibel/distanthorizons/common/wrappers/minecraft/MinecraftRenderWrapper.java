@@ -326,11 +326,6 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		#endif
 	}
 	
-	@Override
-	public boolean tryDisableVanillaFog() {
-		return true; // Handled via MixinFogRenderer in both forge and fabric
-	}
-
     public void updateLightmap(NativeImage lightPixels) {
 		if (lightmap== null) {
 			lightmap = new LightMapWrapper();
