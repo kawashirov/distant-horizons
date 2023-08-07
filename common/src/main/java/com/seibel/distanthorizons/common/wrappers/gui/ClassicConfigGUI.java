@@ -285,6 +285,7 @@ public class ClassicConfigGUI
                         widget.setValue(value -> Translatable(translationPrefix + "enum." + info.getType().getSimpleName() + "." + info.get().toString()));
                     }
                     this.list.addButton(MakeBtn(widget.getValue().apply(info.get()), this.width - 150 - ConfigScreenConfigs.SpaceFromRightScreen, 0, 150, 20, widget.getKey()), resetButton, null, name);
+                    return;
                 } else if (((EntryInfo) info.guiValue).widget != null) {
                     EditBox widget = new EditBox(font, this.width - 150 - ConfigScreenConfigs.SpaceFromRightScreen + 2, 0, 150 - 4, 20, null);
                     widget.setMaxLength(150);
@@ -292,23 +293,34 @@ public class ClassicConfigGUI
                     Predicate<String> processor = ((BiFunction<EditBox, Button, Predicate<String>>) ((EntryInfo) info.guiValue).widget).apply(widget, doneButton);
                     widget.setFilter(processor);
                     this.list.addButton(widget, resetButton, null, name);
+                    return;
                 }
-            } else if (ConfigCategory.class.isAssignableFrom(info.getClass())) {
+            }
+            if (ConfigCategory.class.isAssignableFrom(info.getClass())) {
                 Button widget = MakeBtn(name, this.width / 2 - 100, this.height - 28, 100 * 2, 20, (button -> {
                     ConfigBase.INSTANCE.configFileINSTANCE.saveToFile();
                     Objects.requireNonNull(minecraft).setScreen(ClassicConfigGUI.getScreen(this.configBase, this, ((ConfigCategory) info).getDestination()));
                 }));
                 this.list.addButton(widget, null, null, null);
-            } else if (ConfigUIButton.class.isAssignableFrom(info.getClass())) {
+                return;
+            }
+            if (ConfigUIButton.class.isAssignableFrom(info.getClass())) {
                 Button widget = MakeBtn(name, this.width / 2 - 100, this.height - 28, 100 * 2, 20, (button -> {
                     ((ConfigUIButton) info).runAction();
                 }));
                 this.list.addButton(widget, null, null, null);
-            } else if (ConfigUIComment.class.isAssignableFrom(info.getClass())) {
-                this.list.addButton(null, null, null, name);
-            } else if (ConfigLinkedEntry.class.isAssignableFrom(info.getClass())) {
-                this.addMenuItem(((ConfigLinkedEntry) info).get());
+                return;
             }
+            if (ConfigUIComment.class.isAssignableFrom(info.getClass())) {
+                this.list.addButton(null, null, null, name);
+                return;
+            }
+            if (ConfigLinkedEntry.class.isAssignableFrom(info.getClass())) {
+                this.addMenuItem(((ConfigLinkedEntry) info).get());
+                return;
+            }
+
+            LOGGER.warn("Config ["+ info.getNameWCategory() +"] failed to show. Please try something like changing its type.");
         }
 
         @Override
