@@ -126,4 +126,12 @@ public class SodiumAccessor implements ISodiumAccessor {
 	}
 	#endif
 
+	/** A temporary overwrite for a config in sodium 0.5 to fix their terrain from showing, will be removed once a proper fix is added */
+	// FIXME
+	@Override
+	public void setFogOcclusion(boolean b) {
+		#if POST_MC_1_20_1
+		me.jellysquid.mods.sodium.client.SodiumClientMod.options().performance.useFogOcclusion = b;
+		#endif
+	}
 }

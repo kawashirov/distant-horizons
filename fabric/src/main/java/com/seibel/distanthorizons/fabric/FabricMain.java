@@ -55,6 +55,10 @@ public class FabricMain
 
 		if (Config.Client.Advanced.Graphics.Fog.disableVanillaFog.get() && SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("bclib"))
 			ModAccessorInjector.INSTANCE.get(IBCLibAccessor.class).setRenderCustomFog(false); // Remove BCLib's fog
+		#if POST_MC_1_20_1
+		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("sodium"))
+			ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class).setFogOcclusion(false); // FIXME: This is a temporary solution to get sodium 0.5 to work
+		#endif
 
 		if (ConfigBase.INSTANCE == null)
 			throw new IllegalStateException("Config was not initialized. Make sure to call LodCommonMain.initConfig() before calling this method.");
