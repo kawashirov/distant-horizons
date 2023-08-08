@@ -6,6 +6,7 @@ image: gradle:eclipse-temurin
 # all stages need to be defined here
 stages:
   # TODO: Make stages depend on what is in versionProperties
+  - test_git
   - build_1_16_5
   - build_1_17_1
   - build_1_18_2
@@ -53,6 +54,12 @@ variables:
       - quilt/build/libs/*-sources.jar
     expire_in: 1 day
     when: always
+  extends: .build_java
+
+test_git:
+  stage: test_git
+  script:
+    - git ls-tree HEAD
   extends: .build_java
 
 
