@@ -33,8 +33,6 @@ import net.minecraft.resources.RegistryOps;
 #endif
 
 #if POST_MC_1_19_2
-import net.minecraft.data.worldgen.biome.EndBiomes;
-import net.minecraft.data.worldgen.biome.NetherBiomes;
 #endif
 
 
@@ -54,12 +52,17 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 #if !PRE_MC_1_18_2
 import net.minecraft.world.level.biome.Biomes;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 #endif
 
 
 /** This class wraps the minecraft BlockPos.Mutable (and BlockPos) class */
 public class BiomeWrapper implements IBiomeWrapper
 {
+	private static final Logger LOGGER = LogManager.getLogger();
+	
+	
     #if PRE_MC_1_18_2
     public static final ConcurrentMap<Biome, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
     public final Biome biome;
@@ -67,7 +70,19 @@ public class BiomeWrapper implements IBiomeWrapper
     public static final ConcurrentMap<Holder<Biome>, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
     public final Holder<Biome> biome;
     #endif
-
+	
+	/** 
+	 * Cached so it can be quickly used as a semi-stable hashing method. <br>
+	 * This may also fix the issue where we can serialize and save after a level has been shut down.
+	 */
+	private String serializationResult = null;
+	
+	
+	
+	//==============//
+	// constructors //
+	//==============//
+	
     static public IBiomeWrapper getBiomeWrapper(#if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif biome)
     {
         return biomeWrapperMap.computeIfAbsent(biome, BiomeWrapper::new);
@@ -77,61 +92,80 @@ public class BiomeWrapper implements IBiomeWrapper
     {
         this.biome = biome;
     }
-
-    @Override
+	
+	
+	
+	//=========//
+	// methods //
+	//=========//
+	
+	@Override
     public String getName()
     {
         #if PRE_MC_1_18_2
         return biome.toString();
         #else
-        return biome.unwrapKey().orElse(Biomes.THE_VOID).registry().toString();
+        return this.biome.unwrapKey().orElse(Biomes.THE_VOID).registry().toString();
         #endif
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        BiomeWrapper that = (BiomeWrapper) o;
-        return Objects.equals(biome, that.biome);
+    public boolean equals(Object obj) 
+    {
+        if (this == obj)
+        {
+			return true;
+        }
+        else if (obj == null || this.getClass() != obj.getClass())
+        {
+			return false;
+        }
+		
+        BiomeWrapper that = (BiomeWrapper) obj;
+	    // the serialized value is used so we can test the contents instead of the references
+        return Objects.equals(this.serialize(), that.serialize());
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(biome);
-    }
+    public int hashCode() { return Objects.hash(this.serialize()); }
 	
 	@Override
 	public String serialize() // FIXME pass in level to prevent null pointers (or maybe just RegistryAccess?)
 	{
-		
-		net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
-		
-		ResourceLocation resourceLocation;
-		#if MC_1_16_5 || MC_1_17_1
-		resourceLocation = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.biome);
-		#elif MC_1_18_2 || MC_1_19_2
-		resourceLocation = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.biome.value());
-		#else
-		resourceLocation = registryAccess.registryOrThrow(Registries.BIOME).getKey(this.biome.value());
-		#endif
-		
-		if (resourceLocation == null)
+		if (this.serializationResult == null)
 		{
-			// shouldn't normally happen, but just in case
-			return "";
+			net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
+			
+			ResourceLocation resourceLocation;
+			#if MC_1_16_5 || MC_1_17_1
+			resourceLocation = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.biome);
+			#elif MC_1_18_2 || MC_1_19_2
+			resourceLocation = registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(this.biome.value());
+			#else
+			resourceLocation = registryAccess.registryOrThrow(Registries.BIOME).getKey(this.biome.value());
+			#endif
+			
+			if (resourceLocation == null)
+			{
+				LOGGER.warn("unable to serialize: "+this.biome.value());
+				// shouldn't normally happen, but just in case
+				this.serializationResult = "";
+			}
+			else
+			{
+				this.serializationResult = resourceLocation.getNamespace()+":"+resourceLocation.getPath();
+			}
 		}
-		else
-		{
-			String resourceLocationString = resourceLocation.getNamespace()+":"+resourceLocation.getPath();
-			return resourceLocationString;	
-		}
+		
+		return this.serializationResult;
 	}
 	
 	public static IBiomeWrapper deserialize(String resourceLocationString) throws IOException // FIXME pass in level to prevent null pointers (or maybe just RegistryAccess?)
 	{
 		if (resourceLocationString.trim().isEmpty() || resourceLocationString.equals(""))
 		{
+			LOGGER.warn("null biome string deserialized");
+			
 			// shouldn't normally happen, but just in case
 			new ResourceLocation("minecraft", "the_void"); // just "void" in MC 1.12 through 1.9 (inclusive)
 		}
@@ -157,6 +191,10 @@ public class BiomeWrapper implements IBiomeWrapper
 			Holder<Biome> biome = new Holder.Direct<>(unwrappedBiome);
 			#else
 			Biome unwrappedBiome = registryAccess.registryOrThrow(Registries.BIOME).get(resourceLocation);
+			if (unwrappedBiome == null)
+			{
+				LOGGER.warn("null biome string deserialized from string: "+resourceLocationString);
+			}
 			Holder<Biome> biome = new Holder.Direct<>(unwrappedBiome);
 			#endif
 			
@@ -171,5 +209,8 @@ public class BiomeWrapper implements IBiomeWrapper
 	
 	@Override 
 	public Object getWrappedMcObject() { return this.biome; }
+	
+	@Override
+	public String toString() { return this.serialize(); }
 	
 }
