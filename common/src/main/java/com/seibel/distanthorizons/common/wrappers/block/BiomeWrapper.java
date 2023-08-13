@@ -23,6 +23,8 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IBiomeWrapper;
 
@@ -52,8 +54,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.biome.Biome;
 #if !PRE_MC_1_18_2
 import net.minecraft.world.level.biome.Biomes;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 #endif
 
 
@@ -147,7 +147,14 @@ public class BiomeWrapper implements IBiomeWrapper
 			
 			if (resourceLocation == null)
 			{
-				LOGGER.warn("unable to serialize: "+this.biome.value());
+				String biomeName;
+				#if MC_1_16_5 || MC_1_17_1
+				biomeName = this.biome.toString();
+				#else
+				biomeName = this.biome.value().toString();
+				#endif
+				
+				LOGGER.warn("unable to serialize: "+biomeName);
 				// shouldn't normally happen, but just in case
 				this.serializationResult = "";
 			}
