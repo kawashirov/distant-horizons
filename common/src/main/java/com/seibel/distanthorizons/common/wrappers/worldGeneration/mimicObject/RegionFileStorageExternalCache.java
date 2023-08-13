@@ -49,11 +49,15 @@ public class RegionFileStorageExternalCache implements AutoCloseable
     public RegionFile getRegionFile(ChunkPos pos) throws IOException
 	{
 		long posLong = ChunkPos.asLong(pos.getRegionX(), pos.getRegionZ());
-		RegionFile rFile;
+		RegionFile rFile = null;
 
 		// Check vanilla cache
-		while (true)
+		int retryCount = 0;
+		int maxRetryCount = 8;
+		while (retryCount < maxRetryCount)
 		{
+			retryCount++;
+			
 			try
 			{
 				#if MC_1_16_5 || MC_1_17_1
@@ -66,9 +70,25 @@ public class RegionFileStorageExternalCache implements AutoCloseable
 			}
 			catch (ArrayIndexOutOfBoundsException e)
 			{
-				BatchGenerationEnvironment.LOAD_LOGGER.warn("Concurrency issue detected when getting region file for chunk at " + pos + ". Retrying...");
+				#if MC_1_16_5 || MC_1_17_1
+				// the file just wasn't cached
+				break;
+				#else
+				// potential concurrency issue, wait a second and try to get the file again
+				try
+				{
+					Thread.sleep(250);
+				}
+				catch (InterruptedException ignored) { }
+				#endif 
 			}
 		}
+		
+		if (retryCount >= maxRetryCount)
+		{
+			BatchGenerationEnvironment.LOAD_LOGGER.warn("Concurrency issue detected when getting region file for chunk at " + pos + ".");
+		}
+		
 		
 		if (rFile != null)
 		{
