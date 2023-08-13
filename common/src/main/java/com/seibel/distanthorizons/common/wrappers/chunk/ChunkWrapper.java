@@ -44,10 +44,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 #if POST_MC_1_17_1
@@ -68,8 +65,9 @@ public class ChunkWrapper implements IChunkWrapper
 	private final ILevelWrapper wrappedLevel;
 	
 	private boolean isDhLightCorrect = false;
-	private final HashMap<DhBlockPos, Integer> blockLightAtRelBlockPos = new HashMap<>(LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * 256);
-	private final HashMap<DhBlockPos, Integer> skyLightAtRelBlockPos = new HashMap<>(LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * 256);
+	
+	private final byte[] blockLightArray;
+	private final byte[] skyLightArray;
 	
 	private LinkedList<DhBlockPos> blockLightPosList = null;
 	
@@ -105,6 +103,10 @@ public class ChunkWrapper implements IChunkWrapper
 		// TODO is this the best way to differentiate between when we are generating chunks and when MC gave us a chunk?
 		boolean isDhGeneratedChunk = (this.lightSource.getClass() == DhLitWorldGenRegion.class);
 		this.useDhLighting = isDhGeneratedChunk && (Config.Client.Advanced.WorldGenerator.worldGenLightingEngine.get() == ELightGenerationMode.DISTANT_HORIZONS);
+		
+		// FIXME +2 is to handle the fact that LodDataBuilder adds +1 to all block lighting calculations, also done in the relative position validator
+		this.blockLightArray = new byte[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 2)];
+		this.skyLightArray = new byte[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 2)];
 		
 		weakMapLock.writeLock().lock();
 		chunksToUpdateClientLightReady.put(chunk, false);
@@ -229,67 +231,77 @@ public class ChunkWrapper implements IChunkWrapper
 	
 	
 	@Override
-	public int getDhBlockLight(int relX, int relY, int relZ) 
+	public int getDhBlockLight(int relX, int y, int relZ) 
 	{
-		throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
-		return this.blockLightAtRelBlockPos.getOrDefault(new DhBlockPos(relX, relY, relZ), 0); 
+		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
+		
+		int index = this.relativeBlockPosToIndex(relX, y, relZ);
+		return this.blockLightArray[index]; 
 	}
 	@Override
-	public void setDhBlockLight(int relX, int relY, int relZ, int lightValue) 
+	public void setDhBlockLight(int relX, int y, int relZ, int lightValue) 
 	{
-		throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
-		this.blockLightAtRelBlockPos.put(new DhBlockPos(relX, relY, relZ), lightValue); 
-	}
-	
-	@Override
-	public int getDhSkyLight(int relX, int relY, int relZ) 
-	{
-		throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
-		return this.skyLightAtRelBlockPos.getOrDefault(new DhBlockPos(relX, relY, relZ), 0); 
-	}
-	@Override
-	public void setDhSkyLight(int relX, int relY, int relZ, int lightValue) 
-	{
-		throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
-		this.skyLightAtRelBlockPos.put(new DhBlockPos(relX, relY, relZ), lightValue); 
+		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
+		
+		int index = this.relativeBlockPosToIndex(relX, y, relZ);
+		this.blockLightArray[index] = (byte) lightValue;
 	}
 	
+	@Override
+	public int getDhSkyLight(int relX, int y, int relZ) 
+	{
+		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
+		
+		int index = this.relativeBlockPosToIndex(relX, y, relZ);
+		return this.skyLightArray[index];
+	}
+	@Override
+	public void setDhSkyLight(int relX, int y, int relZ, int lightValue) 
+	{
+		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
+		
+		int index = this.relativeBlockPosToIndex(relX, y, relZ);
+		this.skyLightArray[index] = (byte) lightValue;
+	}
+	
 	
 	@Override
-	public int getBlockLight(int relX, int relY, int relZ)
+	public int getBlockLight(int relX, int y, int relZ)
 	{
-		throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
+		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
 		
 		// use the full lighting engine when the chunks are within render distance or the config requests it
 		if (this.useDhLighting)
 		{
 			// DH lighting method
-			return this.blockLightAtRelBlockPos.getOrDefault(new DhBlockPos(relX, relY, relZ), 0);
+			int index = this.relativeBlockPosToIndex(relX, y, relZ);
+			return this.blockLightArray[index];
 		}
 		else
 		{
 			// note: this returns 0 if the chunk is unload
 			
 			// MC lighting method
-			return this.lightSource.getBrightness(LightLayer.BLOCK, new BlockPos(relX +this.getMinBlockX(), relY, relZ +this.getMinBlockZ()));
+			return this.lightSource.getBrightness(LightLayer.BLOCK, new BlockPos(relX +this.getMinBlockX(), y, relZ +this.getMinBlockZ()));
 		}
 	}
 	
 	@Override
-	public int getSkyLight(int relX, int relY, int relZ)
+	public int getSkyLight(int relX, int y, int relZ)
 	{
-		throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
+		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
 		
 		// use the full lighting engine when the chunks are within render distance or the config requests it
 		if (this.useDhLighting)
 		{
 			// DH lighting method
-			return this.skyLightAtRelBlockPos.getOrDefault(new DhBlockPos(relX, relY, relZ), 0);
+			int index = this.relativeBlockPosToIndex(relX, y, relZ);
+			return this.skyLightArray[index];
 		}
 		else
 		{
 			// MC lighting method
-			return this.lightSource.getBrightness(LightLayer.SKY, new BlockPos(relX +this.getMinBlockX(), relY, relZ +this.getMinBlockZ()));
+			return this.lightSource.getBrightness(LightLayer.SKY, new BlockPos(relX +this.getMinBlockX(), y, relZ +this.getMinBlockZ()));
 		}
 	}
 	
@@ -421,13 +433,53 @@ public class ChunkWrapper implements IChunkWrapper
 	//================//
 	
 	/** used to prevent accidentally attempting to get/set values outside this chunk's boundaries */
-	private static void throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(int x, int y, int z) throws IndexOutOfBoundsException
+	private void throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(int x, int y, int z) throws IndexOutOfBoundsException
 	{
+		// FIXME +/-1 is to handle the fact that LodDataBuilder adds +1 to all block lighting calculations, also done in the relative position validator
+		int minHeight = this.getMinBuildHeight()-1;
+		int maxHeight = this.getMaxBuildHeight()+1;
+
 		if (x < 0 || x >= LodUtil.CHUNK_WIDTH
-			|| z < 0 || z >= LodUtil.CHUNK_WIDTH)
+			|| z < 0 || z >= LodUtil.CHUNK_WIDTH
+			|| y < minHeight || y > maxHeight)
 		{
-			throw new IndexOutOfBoundsException("Indices are relative and must be between 0 and 15 (inclusive), X:"+x+", Y:"+y+" Z:"+z);
+			String errorMessage = "Relative position ["+x+","+y+","+z+"] out of bounds. \n" +
+					"X/Z must be between 0 and 15 (inclusive) \n" +
+					"Y must be between ["+minHeight+"] and ["+maxHeight+"] (inclusive).";
+			throw new IndexOutOfBoundsException(errorMessage);
 		}
 	}
+	
+	
+	/**
+	 * Converts a 3D position into a 1D array index. <br><br>
+	 *
+	 * Source: <br>
+	 * <a href="https://stackoverflow.com/questions/7367770/how-to-flatten-or-index-3d-array-in-1d-array">stackoverflow</a> 
+	 */
+	public int relativeBlockPosToIndex(int xRel, int y, int zRel) 
+	{
+		int yRel = y - this.getMinBuildHeight();
+		return (zRel * LodUtil.CHUNK_WIDTH * this.getHeight()) + (yRel * LodUtil.CHUNK_WIDTH) + xRel; 
+	}
+	
+	/**
+	 * Converts a 3D position into a 1D array index. <br><br>
+	 *
+	 * Source: <br>
+	 * <a href="https://stackoverflow.com/questions/7367770/how-to-flatten-or-index-3d-array-in-1d-array">stackoverflow</a> 
+	 */
+	public DhBlockPos indexToRelativeBlockPos(int index) 
+	{
+		final int zRel = index / (LodUtil.CHUNK_WIDTH * this.getHeight());
+		index -= (zRel * LodUtil.CHUNK_WIDTH * this.getHeight());
+		
+		final int y = index / LodUtil.CHUNK_WIDTH;
+		final int yRel = y + this.getMinBuildHeight();
+		
+		final int xRel = index % LodUtil.CHUNK_WIDTH;
+		return new DhBlockPos(xRel, yRel, zRel);
+	}
+	
 	
 }
