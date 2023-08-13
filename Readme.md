@@ -109,7 +109,8 @@ If running in an IDE, to ensure the IDE noticed the version change, run any grad
 >Note: There may be a `java.nio.file.FileSystemException` thrown when running the command after switching versions. To fix it, either restart your IDE (as your IDE is probably locking a file) or use a tool like LockHunter to unlock the linked file(s). (Generally it is a lib file under `common\build\lib`, `forge\build\lib`, or `fabric\build\lib`). \
 > If anyone knows how to solve this issue please let us know here: \
 > https://gitlab.com/jeseibel/minecraft-lod-mod/-/issues/233
- 
+
+
 <br>
 
 ## Compiling
@@ -138,7 +139,16 @@ Run tests with: `./gradlew test`
 > Example: `./gradlew assemble -PmcVer=1.18.2`
 
 
-<Br>
+<br>
+
+## Compiling with Docker
+
+`./compile <version>`
+
+You can also locally compile the DH jars without a Java environment by using Docker. Where `<version>` is the version of Minecraft to compile for (ie `1.20.1`), or the keyword `all`. See [Versions](#minecraft-and-library-versions) for a list of all supported values.
+
+
+<br>
 
 ## Other commands
 
