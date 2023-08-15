@@ -193,6 +193,7 @@ public class FabricClientProxy
         //Define this in the MixinLevelRenderer so that it works with sodium without any changes to the code
         // TODO: If all else is fine, can we remove these commented code
 		// Client Render Level
+		/*
 		WorldRenderEvents.AFTER_SETUP.register((renderContext) ->
 		{
 			if (sodiumAccessor != null)
@@ -230,6 +231,7 @@ public class FabricClientProxy
 				immersivePortalsAccessor.partialTicks = renderContext.tickDelta();
 			}
 		});
+		 */
 
 		// Debug keyboard event
 		// FIXME: Use better hooks so it doesn't trigger key press events in text boxes
