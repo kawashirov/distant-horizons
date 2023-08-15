@@ -23,6 +23,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 #if PRE_MC_1_19_4
 import com.mojang.math.Matrix4f;
 #else
+import com.seibel.distanthorizons.common.rendering.SeamlessOverdraw;
+import com.seibel.distanthorizons.common.wrappers.McObjectConverter;
+import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
+import com.seibel.distanthorizons.core.api.internal.ClientApi;
+import com.seibel.distanthorizons.coreapi.util.math.Mat4f;
 import org.joml.Matrix4f;
 #endif
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
@@ -96,6 +101,45 @@ public class MixinLevelRenderer
     private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
     #endif
     {
+
+        // get MC's model view and projection matrices
+		#if MC_1_16_5
+		// get the matrices from the OpenGL fixed pipeline
+		float[] mcProjMatrixRaw = new float[16];
+		GL15.glGetFloatv(GL15.GL_PROJECTION_MATRIX, mcProjMatrixRaw);
+		Mat4f mcProjectionMatrix = new Mat4f(mcProjMatrixRaw);
+		mcProjectionMatrix.transpose();
+
+		Mat4f mcModelViewMatrix = McObjectConverter.Convert(matrixStackIn.last().pose());
+
+		#else
+        // get the matrices directly from MC
+        Mat4f mcModelViewMatrix = McObjectConverter.Convert(modelViewMatrixStack.last().pose());
+        Mat4f mcProjectionMatrix = McObjectConverter.Convert(projectionMatrix);
+		#endif
+
+
+
+        // only render before solid blocks
+        if (renderType.equals(RenderType.solid()))
+        {
+            ClientApi.INSTANCE.renderLods(ClientLevelWrapper.getWrapper(level), mcModelViewMatrix, mcProjectionMatrix, previousPartialTicks);
+
+            // experimental proof-of-concept option
+            if (Config.Client.Advanced.Graphics.AdvancedGraphics.seamlessOverdraw.get())
+            {
+                float[] matrixFloatArray = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(mcProjectionMatrix, previousPartialTicks);
+
+				#if MC_1_16_5
+				SeamlessOverdraw.applyLegacyProjectionMatrix(matrixFloatArray);
+				#elif PRE_MC_1_19_4
+				projectionMatrix.load(FloatBuffer.wrap(matrixFloatArray));
+				#else
+                projectionMatrix.set(matrixFloatArray);
+				#endif
+            }
+        }
+
 		// FIXME completely disables rendering when sodium is installed
 		if (Config.Client.Advanced.Debugging.lodOnlyMode.get())
 		{
@@ -133,5 +177,8 @@ public class MixinLevelRenderer
         ChunkWrapper.syncedUpdateClientLightStatus();
         return r;
     }
+
+
+
 
 }

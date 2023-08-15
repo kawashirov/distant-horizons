@@ -90,8 +90,7 @@ public class MixinLevelRenderer
 		previousPartialTicks = partialTicks;
 	}
 	
-	
-	// TODO: Can we move this to forge's client proxy similarly to how fabric does it
+
 	#if PRE_MC_1_17_1
     @Inject(at = @At("HEAD"),
 			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDD)V",

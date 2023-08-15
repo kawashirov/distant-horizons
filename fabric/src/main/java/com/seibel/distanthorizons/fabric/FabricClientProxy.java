@@ -188,45 +188,47 @@ public class FabricClientProxy
 		//==============//
 		// render event //
 		//==============//
-		
-		// Client Render Level
-		WorldRenderEvents.AFTER_SETUP.register((renderContext) ->
-		{
-			if (sodiumAccessor != null)
-			{
-				sodiumAccessor.levelWrapper = ClientLevelWrapper.getWrapper(renderContext.world());
-				sodiumAccessor.mcModelViewMatrix = McObjectConverter.Convert(renderContext.matrixStack().last().pose());
-				sodiumAccessor.mcProjectionMatrix = McObjectConverter.Convert(renderContext.projectionMatrix());
-				sodiumAccessor.partialTicks = renderContext.tickDelta();
-			}
-			else
-			{
-				this.clientApi.renderLods(ClientLevelWrapper.getWrapper(renderContext.world()),
-						McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
-						McObjectConverter.Convert(renderContext.projectionMatrix()),
-						renderContext.tickDelta());
-				
-				
-				// experimental proof-of-concept option
-				if (Config.Client.Advanced.Graphics.AdvancedGraphics.seamlessOverdraw.get())
-				{
-					float[] matrixFloatArray = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(renderContext.projectionMatrix(), renderContext.tickDelta());
-					
-					#if MC_1_16_5
-					SeamlessOverdraw.applyLegacyProjectionMatrix(matrixFloatArray);
-					#elif PRE_MC_1_19_4
-					renderContext.projectionMatrix().load(FloatBuffer.wrap(matrixFloatArray));
-					#else
-					renderContext.projectionMatrix().set(matrixFloatArray);
-					#endif
-				}
-			}
 
-			if (immersivePortalsAccessor != null)
-			{
-				immersivePortalsAccessor.partialTicks = renderContext.tickDelta();
-			}
-		});
+		//Define this in the MixinLevelRenderer so that it works with sodium without any changes to the code
+		// TODO: If all else is fine, can we remove these commented code
+		// Client Render Level
+//		WorldRenderEvents.AFTER_SETUP.register((renderContext) ->
+//		{
+//			if (sodiumAccessor != null)
+//			{
+//				sodiumAccessor.levelWrapper = ClientLevelWrapper.getWrapper(renderContext.world());
+//				sodiumAccessor.mcModelViewMatrix = McObjectConverter.Convert(renderContext.matrixStack().last().pose());
+//				sodiumAccessor.mcProjectionMatrix = McObjectConverter.Convert(renderContext.projectionMatrix());
+//				sodiumAccessor.partialTicks = renderContext.tickDelta();
+//			}
+//			else
+//			{
+//				this.clientApi.renderLods(ClientLevelWrapper.getWrapper(renderContext.world()),
+//						McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
+//						McObjectConverter.Convert(renderContext.projectionMatrix()),
+//						renderContext.tickDelta());
+//
+//
+//				// experimental proof-of-concept option
+//				if (Config.Client.Advanced.Graphics.AdvancedGraphics.seamlessOverdraw.get())
+//				{
+//					float[] matrixFloatArray = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(renderContext.projectionMatrix(), renderContext.tickDelta());
+//
+//					#if MC_1_16_5
+//					SeamlessOverdraw.applyLegacyProjectionMatrix(matrixFloatArray);
+//					#elif PRE_MC_1_19_4
+//					renderContext.projectionMatrix().load(FloatBuffer.wrap(matrixFloatArray));
+//					#else
+//					renderContext.projectionMatrix().set(matrixFloatArray);
+//					#endif
+//				}
+//			}
+//
+//			if (immersivePortalsAccessor != null)
+//			{
+//				immersivePortalsAccessor.partialTicks = renderContext.tickDelta();
+//			}
+//		});
 
 		// Debug keyboard event
 		// FIXME: Use better hooks so it doesn't trigger key press events in text boxes
