@@ -12,16 +12,19 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LightTexture.class)
-public class MixinLightmap {
-    @Shadow
-    @Final
-    public NativeImage lightPixels;
-
-    @Inject(method="updateLightTexture", at=@At(
-            value="INVOKE",
-            target="Lnet/minecraft/client/renderer/texture/DynamicTexture;upload()V"))
-    public void updateLightTexture(float f, CallbackInfo ci) {
-        //ApiShared.LOGGER.info("Lightmap update");
-        MinecraftRenderWrapper.INSTANCE.updateLightmap(lightPixels);
-    }
+public class MixinLightmap
+{
+	@Shadow
+	@Final
+	public NativeImage lightPixels;
+	
+	@Inject(method = "updateLightTexture", at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/client/renderer/texture/DynamicTexture;upload()V"))
+	public void updateLightTexture(float f, CallbackInfo ci)
+	{
+		//ApiShared.LOGGER.info("Lightmap update");
+		MinecraftRenderWrapper.INSTANCE.updateLightmap(lightPixels);
+	}
+	
 }

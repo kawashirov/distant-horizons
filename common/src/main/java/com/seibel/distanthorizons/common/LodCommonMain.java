@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common;
 
 import com.seibel.distanthorizons.common.forge.LodForgeMethodCaller;
@@ -28,35 +28,36 @@ import com.seibel.distanthorizons.core.config.ConfigBase;
 
 /**
  * This is the common main class
+ *
  * @author Ran
  */
-public class LodCommonMain 
+public class LodCommonMain
 {
-    public static boolean forge = false;
-    public static LodForgeMethodCaller forgeMethodCaller;
+	public static boolean forge = false;
+	public static LodForgeMethodCaller forgeMethodCaller;
 	
 	
 	
-    public static void startup(LodForgeMethodCaller forgeMethodCaller) 
+	public static void startup(LodForgeMethodCaller forgeMethodCaller)
 	{
-        if (forgeMethodCaller != null) 
+		if (forgeMethodCaller != null)
 		{
-            LodCommonMain.forge = true;
-            LodCommonMain.forgeMethodCaller = forgeMethodCaller;
-        }
+			LodCommonMain.forge = true;
+			LodCommonMain.forgeMethodCaller = forgeMethodCaller;
+		}
 		
-        DependencySetup.createSharedBindings();
-        SharedApi.init();
+		DependencySetup.createSharedBindings();
+		SharedApi.init();
 //        if (!serverSided) {
 //            new NetworkReceiver().register_Client();
 //        } else {
 //            new NetworkReceiver().register_Server();
 //        }
-    }
-
-    public static void initConfig()
+	}
+	
+	public static void initConfig()
 	{
-        ConfigBase.INSTANCE = new ConfigBase(ModInfo.ID, ModInfo.NAME, Config.class,1);
+		ConfigBase.INSTANCE = new ConfigBase(ModInfo.ID, ModInfo.NAME, Config.class, 1);
 		Config.completeDelayedSetup();
 	}
 	

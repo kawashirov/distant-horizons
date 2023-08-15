@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.fabric.wrappers;
 
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
@@ -28,18 +28,21 @@ import com.seibel.distanthorizons.fabric.wrappers.modAccessor.ModChecker;
  * can access them in Core. <br>
  * This needs to be called before any Core classes
  * are loaded.
- * 
+ *
  * @author James Seibel
  * @author Ran
  * @version 3-5-2022
  */
 public class FabricDependencySetup
 {
-	public static void createInitialBindings() {
+	public static void createInitialBindings()
+	{
 		SingletonInjector.INSTANCE.bind(IModChecker.class, ModChecker.INSTANCE);
 	}
 	
-	public static void runDelayedSetup() {
+	public static void runDelayedSetup()
+	{
 		SingletonInjector.INSTANCE.runDelayedSetup();
 	}
+	
 }

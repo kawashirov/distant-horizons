@@ -1,8 +1,10 @@
 package com.seibel.distanthorizons.common.rendering;
 
 #if PRE_MC_1_19_4
+
 import com.mojang.math.Matrix4f;
 #else
+
 import org.joml.Matrix4f;
 #endif
 import com.seibel.distanthorizons.core.config.Config;

@@ -40,7 +40,7 @@ import org.apache.logging.log4j.Logger;
  * Initialize and setup the Mod. <br>
  * If you are looking for the real start of the mod
  * check out the ClientProxy.
- * 
+ *
  * @author coolGi
  * @author Ran
  * @version 9-2-2022
@@ -48,25 +48,26 @@ import org.apache.logging.log4j.Logger;
 public class FabricMain
 {
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
-
-	public static void postInit() {
+	
+	public static void postInit()
+	{
 		LOGGER.info("Post-Initializing Mod");
 		FabricDependencySetup.runDelayedSetup();
-
+		
 		if (Config.Client.Advanced.Graphics.Fog.disableVanillaFog.get() && SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("bclib"))
 			ModAccessorInjector.INSTANCE.get(IBCLibAccessor.class).setRenderCustomFog(false); // Remove BCLib's fog
 		#if POST_MC_1_20_1
 		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("sodium"))
 			ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class).setFogOcclusion(false); // FIXME: This is a temporary solution to get sodium 0.5 to work
 		#endif
-
+		
 		if (ConfigBase.INSTANCE == null)
 			throw new IllegalStateException("Config was not initialized. Make sure to call LodCommonMain.initConfig() before calling this method.");
-
+		
 		LOGGER.info("Mod Post-Initialized");
 	}
-
-
+	
+	
 	// This loads the mod after minecraft loads which doesn't causes a lot of issues
 	public static void init()
 	{
@@ -76,29 +77,35 @@ public class FabricMain
 		LodCommonMain.startup(null);
 		FabricDependencySetup.createInitialBindings();
 		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
-
+		
 		// Print git info (Useful for dev builds)
-		LOGGER.info("DH Branch: "+ ModGitInfo.Git_Main_Branch);
-		LOGGER.info("DH Commit: "+ ModGitInfo.Git_Main_Commit);
-		LOGGER.info("DH-Core Commit: "+ ModGitInfo.Git_Core_Commit);
-
-		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("sodium")) {
+		LOGGER.info("DH Branch: " + ModGitInfo.Git_Main_Branch);
+		LOGGER.info("DH Commit: " + ModGitInfo.Git_Main_Commit);
+		LOGGER.info("DH-Core Commit: " + ModGitInfo.Git_Core_Commit);
+		
+		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("sodium"))
+		{
 			ModAccessorInjector.INSTANCE.bind(ISodiumAccessor.class, new SodiumAccessor());
 		}
-		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("imm_ptl_core")) {
+		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("imm_ptl_core"))
+		{
 			ModAccessorInjector.INSTANCE.bind(IImmersivePortalsAccessor.class, new ImmersivePortalsAccessor());
 		}
-		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("starlight")) {
+		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("starlight"))
+		{
 			ModAccessorInjector.INSTANCE.bind(IStarlightAccessor.class, new StarlightAccessor());
 		}
-		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("optifine")) {
+		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("optifine"))
+		{
 			ModAccessorInjector.INSTANCE.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
-		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("bclib")) {
+		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("bclib"))
+		{
 			ModAccessorInjector.INSTANCE.bind(IBCLibAccessor.class, new BCLibAccessor());
 		}
 		LOGGER.info(ModInfo.READABLE_NAME + " Initialized");
 		
 		ApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);
 	}
+	
 }

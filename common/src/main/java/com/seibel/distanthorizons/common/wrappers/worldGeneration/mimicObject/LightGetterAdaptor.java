@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject;
 
 import com.seibel.distanthorizons.core.dependencyInjection.ModAccessorInjector;
@@ -32,35 +32,41 @@ import net.minecraft.world.level.chunk.LightChunkGetter;
 import net.minecraft.world.level.chunk.LightChunk;
 #endif
 
-public class LightGetterAdaptor implements LightChunkGetter {
+public class LightGetterAdaptor implements LightChunkGetter
+{
 	private final BlockGetter heightGetter;
 	public DhLitWorldGenRegion genRegion = null;
 	final boolean shouldReturnNull;
-
-	public LightGetterAdaptor(BlockGetter heightAccessor) {
+	
+	public LightGetterAdaptor(BlockGetter heightAccessor)
+	{
 		this.heightGetter = heightAccessor;
 		shouldReturnNull = ModAccessorInjector.INSTANCE.get(IStarlightAccessor.class) != null;
 	}
-
-	public void setRegion(DhLitWorldGenRegion region) {
+	
+	public void setRegion(DhLitWorldGenRegion region)
+	{
 		genRegion = region;
 	}
-
+	
 	@Override
-	public #if PRE_MC_1_20_1 BlockGetter #else LightChunk #endif getChunkForLighting(int chunkX, int chunkZ) {
+	public #if PRE_MC_1_20_1 BlockGetter #else LightChunk #endif getChunkForLighting(int chunkX, int chunkZ)
+	{
 		if (genRegion == null)
 			throw new IllegalStateException("World Gen region has not been set!");
 		// May be null
 		return genRegion.getChunk(chunkX, chunkZ, ChunkStatus.EMPTY, false);
 	}
-
+	
 	@Override
-	public BlockGetter getLevel() {
+	public BlockGetter getLevel()
+	{
 		return shouldReturnNull ? null : (genRegion != null ? genRegion : heightGetter);
 	}
-
+	
 	#if POST_MC_1_17_1
-	public LevelHeightAccessor getLevelHeightAccessor() {
+	public LevelHeightAccessor getLevelHeightAccessor()
+	{
 		return heightGetter;
 	}
 	#endif

@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.forge.wrappers;
 
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
@@ -28,7 +28,7 @@ import com.seibel.distanthorizons.forge.wrappers.modAccessor.ModChecker;
  * can access them in Core. <br>
  * This needs to be called before any Core classes
  * are loaded.
- * 
+ *
  * @author James Seibel
  * @author Ran
  * @version 12-1-2021
@@ -39,8 +39,10 @@ public class ForgeDependencySetup
 	{
 		SingletonInjector.INSTANCE.bind(IModChecker.class, ModChecker.INSTANCE);
 	}
-
-	public static void runDelayedSetup() {
+	
+	public static void runDelayedSetup()
+	{
 		SingletonInjector.INSTANCE.runDelayedSetup();
 	}
+	
 }

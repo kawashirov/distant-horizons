@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.worldGeneration.step;
 
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
@@ -35,12 +35,13 @@ import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.lighting.LightEventListener;
 #endif
 
-public final class StepLight {
+public final class StepLight
+{
 	/**
-	 * 
+	 *
 	 */
 	private final BatchGenerationEnvironment environment;
-
+	
 	/**
 	 * @param batchGenerationEnvironment
 	 */
@@ -48,13 +49,14 @@ public final class StepLight {
 	{
 		environment = batchGenerationEnvironment;
 	}
-
+	
 	public final ChunkStatus STATUS = ChunkStatus.LIGHT;
 	
 	public void generateGroup(
 			#if PRE_MC_1_17_1 LevelLightEngine lightEngine,
 			#else LightEventListener lightEngine, #endif
-			ArrayGridList<ChunkWrapper> chunkWrappers) {
+			ArrayGridList<ChunkWrapper> chunkWrappers)
+	{
 		
 		for (ChunkWrapper chunkWrapper : chunkWrappers)
 		{
@@ -67,27 +69,37 @@ public final class StepLight {
 		{
 			ChunkAccess chunk = chunkWrapper.getChunk();
 			boolean hasCorrectBlockLight = (chunk instanceof LevelChunk && chunk.isLightCorrect());
-			try {
-				if (lightEngine == null) {
+			try
+			{
+				if (lightEngine == null)
+				{
 					// Do nothing
-				} else if (lightEngine instanceof WorldGenLevelLightEngine) {
-					((WorldGenLevelLightEngine)lightEngine).lightChunk(chunk, !hasCorrectBlockLight);
-				} else if (lightEngine instanceof ThreadedLevelLightEngine) {
+				}
+				else if (lightEngine instanceof WorldGenLevelLightEngine)
+				{
+					((WorldGenLevelLightEngine) lightEngine).lightChunk(chunk, !hasCorrectBlockLight);
+				}
+				else if (lightEngine instanceof ThreadedLevelLightEngine)
+				{
 					((ThreadedLevelLightEngine) lightEngine).lightChunk(chunk, !hasCorrectBlockLight).join();
-				} else {
-					assert(false);
+				}
+				else
+				{
+					assert (false);
 				}
 				
-			} catch (Exception e) {
+			}
+			catch (Exception e)
+			{
 				e.printStackTrace();
 			}
 			#if POST_MC_1_18_2 && PRE_MC_1_20_1
-			if (chunk instanceof LevelChunk) ((LevelChunk)chunk).setClientLightReady(true);
+			if (chunk instanceof LevelChunk) ((LevelChunk) chunk).setClientLightReady(true);
 			#elif POST_MC_1_20_1
 			lightEngine.setLightEnabled(chunk.getPos(), true);
 			#endif
-
-
+			
+			
 			chunk.setLightCorrect(true);
 		}
 		#if PRE_MC_1_20_1
@@ -96,4 +108,5 @@ public final class StepLight {
 		lightEngine.runLightUpdates();
 		#endif
 	}
+	
 }

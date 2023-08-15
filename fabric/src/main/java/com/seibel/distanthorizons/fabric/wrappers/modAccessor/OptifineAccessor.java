@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.fabric.wrappers.modAccessor;
 
 import java.util.HashSet;
@@ -26,13 +26,13 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.AbstractOpt
 
 public class OptifineAccessor extends AbstractOptifineAccessor
 {
-
+	
 	@Override
 	public String getModName()
 	{
 		return "Optifine-Fabric-1.18.X";
 	}
-
+	
 	@Override
 	public HashSet<DhChunkPos> getNormalRenderedChunks()
 	{

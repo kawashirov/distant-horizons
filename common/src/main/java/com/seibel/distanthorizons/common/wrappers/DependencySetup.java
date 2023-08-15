@@ -48,28 +48,28 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftSha
 public class DependencySetup
 {
 	
-    public static void createSharedBindings()
-    {
-        SingletonInjector.INSTANCE.bind(ILangWrapper.class, LangWrapper.INSTANCE);
-        SingletonInjector.INSTANCE.bind(IVersionConstants.class, VersionConstants.INSTANCE);
-        SingletonInjector.INSTANCE.bind(IWrapperFactory.class, WrapperFactory.INSTANCE);
-        SingletonInjector.INSTANCE.bind(IKeyedClientLevelManager.class, KeyedClientLevelManager.INSTANCE);
-        DependencySetupDoneCheck.isDone = true;
-    }
-
-    //@Environment(EnvType.SERVER)
-    public static void createServerBindings() 
+	public static void createSharedBindings()
 	{
-        SingletonInjector.INSTANCE.bind(IMinecraftSharedWrapper.class, MinecraftDedicatedServerWrapper.INSTANCE);
-    }
-
-    //@Environment(EnvType.CLIENT)
-    public static void createClientBindings() 
+		SingletonInjector.INSTANCE.bind(ILangWrapper.class, LangWrapper.INSTANCE);
+		SingletonInjector.INSTANCE.bind(IVersionConstants.class, VersionConstants.INSTANCE);
+		SingletonInjector.INSTANCE.bind(IWrapperFactory.class, WrapperFactory.INSTANCE);
+		SingletonInjector.INSTANCE.bind(IKeyedClientLevelManager.class, KeyedClientLevelManager.INSTANCE);
+		DependencySetupDoneCheck.isDone = true;
+	}
+	
+	//@Environment(EnvType.SERVER)
+	public static void createServerBindings()
 	{
-        SingletonInjector.INSTANCE.bind(IMinecraftClientWrapper.class, MinecraftClientWrapper.INSTANCE);
-        SingletonInjector.INSTANCE.bind(IMinecraftSharedWrapper.class, MinecraftClientWrapper.INSTANCE);
-        SingletonInjector.INSTANCE.bind(IMinecraftRenderWrapper.class, MinecraftRenderWrapper.INSTANCE);
-        SingletonInjector.INSTANCE.bind(IReflectionHandler.class, ReflectionHandler.INSTANCE);
-    }
+		SingletonInjector.INSTANCE.bind(IMinecraftSharedWrapper.class, MinecraftDedicatedServerWrapper.INSTANCE);
+	}
+	
+	//@Environment(EnvType.CLIENT)
+	public static void createClientBindings()
+	{
+		SingletonInjector.INSTANCE.bind(IMinecraftClientWrapper.class, MinecraftClientWrapper.INSTANCE);
+		SingletonInjector.INSTANCE.bind(IMinecraftSharedWrapper.class, MinecraftClientWrapper.INSTANCE);
+		SingletonInjector.INSTANCE.bind(IMinecraftRenderWrapper.class, MinecraftRenderWrapper.INSTANCE);
+		SingletonInjector.INSTANCE.bind(IReflectionHandler.class, ReflectionHandler.INSTANCE);
+	}
 	
 }

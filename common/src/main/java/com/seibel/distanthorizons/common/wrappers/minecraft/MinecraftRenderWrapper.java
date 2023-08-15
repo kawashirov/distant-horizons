@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.minecraft;
 
 import java.awt.Color;
@@ -87,11 +87,11 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 	private static final Minecraft MC = Minecraft.getInstance();
 	private static final IWrapperFactory FACTORY = WrapperFactory.INSTANCE;
-
+	
 	private static final IOptifineAccessor OPTIFINE_ACCESSOR = ModAccessorInjector.INSTANCE.get(IOptifineAccessor.class);
 	
 	public LightMapWrapper lightmap = null;
-
+	
 	
 	
 	@Override
@@ -146,7 +146,8 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	}
 	
 	@Override
-	public Color getFogColor(float partialTicks) {
+	public Color getFogColor(float partialTicks)
+	{
 		#if PRE_MC_1_17_1
 		float[] colorValues = new float[4];
 		GL15.glGetFloatv(GL15.GL_FOG_COLOR, colorValues);
@@ -164,15 +165,18 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	// getSpecialFogColor() is the same as getFogColor()
 	
 	@Override
-	public Color getSkyColor() {
-		if (MC.level.dimensionType().hasSkyLight()) {
+	public Color getSkyColor()
+	{
+		if (MC.level.dimensionType().hasSkyLight())
+		{
 			#if PRE_MC_1_17_1
 			Vec3 colorValues = MC.level.getSkyColor(MC.gameRenderer.getMainCamera().getBlockPosition(), MC.getFrameTime());
 			#else
 			Vec3 colorValues = MC.level.getSkyColor(MC.gameRenderer.getMainCamera().getPosition(), MC.getFrameTime());
 			#endif
 			return new Color((float) colorValues.x, (float) colorValues.y, (float) colorValues.z);
-		} else
+		}
+		else
 			return new Color(0, 0, 0);
 	}
 	
@@ -229,58 +233,68 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		return height;
 	}
 	
-    private RenderTarget getRenderTarget() {
-        RenderTarget r = null; //MC.levelRenderer.getCloudsTarget();
-        return r!=null ? r : MC.getMainRenderTarget();
-    }
-
-    @Override
-    public int getTargetFrameBuffer() {
-        return getRenderTarget().frameBufferId;
-    }
-
+	private RenderTarget getRenderTarget()
+	{
+		RenderTarget r = null; //MC.levelRenderer.getCloudsTarget();
+		return r != null ? r : MC.getMainRenderTarget();
+	}
+	
 	@Override
-	public int getDepthTextureId() {
+	public int getTargetFrameBuffer()
+	{
+		return getRenderTarget().frameBufferId;
+	}
+	
+	@Override
+	public int getDepthTextureId()
+	{
 		return getRenderTarget().getDepthTextureId();
 	}
-
+	
 	@Override
-    public int getTargetFrameBufferViewportWidth() {
-        return getRenderTarget().viewWidth;
-    }
-
-    @Override
-    public int getTargetFrameBufferViewportHeight() {
-        return getRenderTarget().viewHeight;
-    }
-
+	public int getTargetFrameBufferViewportWidth()
+	{
+		return getRenderTarget().viewWidth;
+	}
+	
+	@Override
+	public int getTargetFrameBufferViewportHeight()
+	{
+		return getRenderTarget().viewHeight;
+	}
+	
 	/**
 	 * This method returns the ChunkPos of all chunks that Minecraft
 	 * is going to render this frame. <br><br>
 	 * <p>
 	 */
 	
-    public boolean usingBackupGetVanillaRenderedChunks = false;
+	public boolean usingBackupGetVanillaRenderedChunks = false;
 	@Override
-	public HashSet<DhChunkPos> getVanillaRenderedChunks() {
+	public HashSet<DhChunkPos> getVanillaRenderedChunks()
+	{
 		ISodiumAccessor sodium = ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class);
-		if (sodium != null) {
+		if (sodium != null)
+		{
 			return sodium.getNormalRenderedChunks();
 		}
 		IOptifineAccessor optifine = ModAccessorInjector.INSTANCE.get(IOptifineAccessor.class);
-		if (optifine != null) {
+		if (optifine != null)
+		{
 			HashSet<DhChunkPos> pos = optifine.getNormalRenderedChunks();
 			if (pos == null)
 				pos = getMaximumRenderedChunks();
 			return pos;
 		}
-		if (!usingBackupGetVanillaRenderedChunks) {
-			try {
+		if (!usingBackupGetVanillaRenderedChunks)
+		{
+			try
+			{
 				LevelRenderer levelRenderer = MC.levelRenderer;
 				Collection<LevelRenderer.RenderChunkInfo> chunks =
 					#if PRE_MC_1_18_2 levelRenderer.renderChunks;
 					#else levelRenderer.renderChunkStorage.get().renderChunks; #endif
-
+				
 				return (chunks.stream().map((chunk) -> {
 					AABB chunkBoundingBox =
 						#if PRE_MC_1_18_2 chunk.chunk.bb;
@@ -288,14 +302,19 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 					return new DhChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
 							Math.floorDiv((int) chunkBoundingBox.minZ, 16));
 				}).collect(Collectors.toCollection(HashSet::new)));
-			} catch (LinkageError e) {
-				try {
+			}
+			catch (LinkageError e)
+			{
+				try
+				{
 					MinecraftClientWrapper.INSTANCE.sendChatMessage(
 							"\u00A7e\u00A7l\u00A7uWARNING: Distant Horizons: getVanillaRenderedChunks method failed."
 									+ " Using Backup Method.");
 					MinecraftClientWrapper.INSTANCE.sendChatMessage(
 							"\u00A7eOverdraw prevention will be worse than normal.");
-				} catch (Exception e2) {
+				}
+				catch (Exception e2)
+				{
 				}
 				LOGGER.error("getVanillaRenderedChunks Error: ", e);
 				usingBackupGetVanillaRenderedChunks = true;
@@ -303,14 +322,16 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		}
 		return getMaximumRenderedChunks();
 	}
-
+	
 	@Override
-	public ILightMapWrapper getLightmapWrapper() {
+	public ILightMapWrapper getLightmapWrapper()
+	{
 		return lightmap;
 	}
 	
 	@Override
-	public boolean isFogStateSpecial() {
+	public boolean isFogStateSpecial()
+	{
 		#if PRE_MC_1_17_1
 		Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
 		FluidState fluidState = camera.getFluidInCamera();
@@ -321,15 +342,18 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		return isUnderWater;
 		#else
 		Entity entity = MC.gameRenderer.getMainCamera().getEntity();
-		boolean isBlind = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
+		boolean isBlind = (entity instanceof LivingEntity) && ((LivingEntity) entity).hasEffect(MobEffects.BLINDNESS);
 		return MC.gameRenderer.getMainCamera().getFluidInCamera() != FogType.NONE || isBlind;
 		#endif
 	}
 	
-    public void updateLightmap(NativeImage lightPixels) {
-		if (lightmap== null) {
+	public void updateLightmap(NativeImage lightPixels)
+	{
+		if (lightmap == null)
+		{
 			lightmap = new LightMapWrapper();
 		}
 		lightmap.uploadLightmap(lightPixels);
-    }
+	}
+	
 }

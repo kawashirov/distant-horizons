@@ -2,6 +2,7 @@ package com.seibel.distanthorizons.fabric.mixins.mods.sodium;
 
 #if POST_MC_1_20_1
 // Sodium 0.5
+
 import com.seibel.distanthorizons.core.api.internal.ClientApi;
 import com.seibel.distanthorizons.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
@@ -23,33 +24,34 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(RegionChunkRenderer.class)
 public class MixinSodiumRenderer
 {
-    @Unique SodiumAccessor accessor = null;
-
-    @Inject(remap = false, method = "render", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/render/chunk/ShaderChunkRenderer;begin(Lme/jellysquid/mods/sodium/client/render/chunk/terrain/TerrainRenderPass;)V", shift = At.Shift.AFTER))
-    private void injectDHLoDRendering(ChunkRenderMatrices matrices, CommandList commandList, RenderRegionManager regions, SortedRenderLists renderLists, TerrainRenderPass renderPass, ChunkCameraContext camera, CallbackInfo ci)
-    {
-        if (accessor == null)
-        {
-            accessor = (SodiumAccessor)ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class);
-        }
-
-        if (renderPass.equals(DefaultTerrainRenderPasses.SOLID))
-        {
-            //TODO: use matrices.modelView() and matrices.projection() instead of
-            // SodiumAccessor.mcModelViewMatrix,
-            // SodiumAccessor.mcProjectionMatrix,
-            ClientApi.INSTANCE.renderLods(accessor.levelWrapper,
-                    accessor.mcModelViewMatrix,
-                    accessor.mcProjectionMatrix,
-                    accessor.partialTicks);
-        }
-    }
-
-
+	@Unique SodiumAccessor accessor = null;
+	
+	@Inject(remap = false, method = "render", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/render/chunk/ShaderChunkRenderer;begin(Lme/jellysquid/mods/sodium/client/render/chunk/terrain/TerrainRenderPass;)V", shift = At.Shift.AFTER))
+	private void injectDHLoDRendering(ChunkRenderMatrices matrices, CommandList commandList, RenderRegionManager regions, SortedRenderLists renderLists, TerrainRenderPass renderPass, ChunkCameraContext camera, CallbackInfo ci)
+	{
+		if (accessor == null)
+		{
+			accessor = (SodiumAccessor) ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class);
+		}
+		
+		if (renderPass.equals(DefaultTerrainRenderPasses.SOLID))
+		{
+			//TODO: use matrices.modelView() and matrices.projection() instead of
+			// SodiumAccessor.mcModelViewMatrix,
+			// SodiumAccessor.mcProjectionMatrix,
+			ClientApi.INSTANCE.renderLods(accessor.levelWrapper,
+					accessor.mcModelViewMatrix,
+					accessor.mcProjectionMatrix,
+					accessor.partialTicks);
+		}
+	}
+	
+	
 }
 
 #elif POST_MC_1_17_1
 // Sodium 0.3 to 0.4
+
 import com.seibel.distanthorizons.core.api.internal.ClientApi;
 import com.seibel.distanthorizons.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
@@ -68,29 +70,29 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(RegionChunkRenderer.class)
-public class MixinSodiumRenderer 
+public class MixinSodiumRenderer
 {
-    @Unique SodiumAccessor accessor = null;
-
-    @Inject(remap = false, method = "render", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/render/chunk/ShaderChunkRenderer;begin(Lme/jellysquid/mods/sodium/client/render/chunk/passes/BlockRenderPass;)V", shift = At.Shift.AFTER))
-    private void injectDHLoDRendering(ChunkRenderMatrices matrices, CommandList commandList, ChunkRenderList list, BlockRenderPass pass, ChunkCameraContext camera, CallbackInfo ci) 
-    {
-        if (accessor == null) 
+	@Unique SodiumAccessor accessor = null;
+	
+	@Inject(remap = false, method = "render", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/render/chunk/ShaderChunkRenderer;begin(Lme/jellysquid/mods/sodium/client/render/chunk/passes/BlockRenderPass;)V", shift = At.Shift.AFTER))
+	private void injectDHLoDRendering(ChunkRenderMatrices matrices, CommandList commandList, ChunkRenderList list, BlockRenderPass pass, ChunkCameraContext camera, CallbackInfo ci)
+	{
+		if (accessor == null)
 		{
-            accessor = (SodiumAccessor)ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class);
-        }
-
-        if (pass.equals(BlockRenderPass.SOLID)) 
+			accessor = (SodiumAccessor) ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class);
+		}
+		
+		if (pass.equals(BlockRenderPass.SOLID))
 		{
-            //TODO: use matrices.modelView() and matrices.projection() instead of
-            // SodiumAccessor.mcModelViewMatrix,
-            // SodiumAccessor.mcProjectionMatrix,
-            ClientApi.INSTANCE.renderLods(accessor.levelWrapper,
-                    accessor.mcModelViewMatrix,
-                    accessor.mcProjectionMatrix,
-                    accessor.partialTicks);
-        }
-    }
+			//TODO: use matrices.modelView() and matrices.projection() instead of
+			// SodiumAccessor.mcModelViewMatrix,
+			// SodiumAccessor.mcProjectionMatrix,
+			ClientApi.INSTANCE.renderLods(accessor.levelWrapper,
+					accessor.mcModelViewMatrix,
+					accessor.mcProjectionMatrix,
+					accessor.partialTicks);
+		}
+	}
 	
 	
 }

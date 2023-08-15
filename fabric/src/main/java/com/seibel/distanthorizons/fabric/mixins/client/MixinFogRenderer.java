@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.fabric.mixins.client;
 
 import com.seibel.distanthorizons.core.config.Config;
@@ -40,17 +40,20 @@ import net.minecraft.world.level.material.FogType;
 #endif
 
 @Mixin(FogRenderer.class)
-public class MixinFogRenderer {
+public class MixinFogRenderer
+{
 	
 	// Using this instead of Float.MAX_VALUE because Sodium don't like it.
 	private static final float A_REALLY_REALLY_BIG_VALUE = 420694206942069.F;
 	private static final float A_EVEN_LARGER_VALUE = 42069420694206942069.F;
-
+	
 	@Inject(at = @At("RETURN"), method = "setupFog")
 	#if PRE_MC_1_19_2
-	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, CallbackInfo callback) {
+	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, CallbackInfo callback)
+	{
 	#else
-	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, float g, CallbackInfo callback) {
+	private static void disableSetupFog(Camera camera, FogMode fogMode, float f, boolean bl, float g, CallbackInfo callback)
+	{
 	#endif
 		#if PRE_MC_1_17_1
 		FluidState fluidState = camera.getFluidInCamera();
@@ -59,7 +62,7 @@ public class MixinFogRenderer {
 		FogType fogTypes = camera.getFluidInCamera();
 		boolean cameraNotInFluid = fogTypes == FogType.NONE;
 		#endif
-
+		
 		Entity entity = camera.getEntity();
 		boolean isSpecialFog = (entity instanceof LivingEntity) && ((LivingEntity) entity).hasEffect(MobEffects.BLINDNESS);
 		if (!isSpecialFog && cameraNotInFluid && fogMode == FogMode.FOG_TERRAIN
@@ -74,4 +77,5 @@ public class MixinFogRenderer {
 			#endif
 		}
 	}
+	
 }

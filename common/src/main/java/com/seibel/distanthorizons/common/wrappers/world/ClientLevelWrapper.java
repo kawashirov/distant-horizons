@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ClientLevelWrapper implements IClientLevelWrapper
 {
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(ClientLevelWrapper.class.getSimpleName());
-    private static final ConcurrentHashMap<ClientLevel, ClientLevelWrapper> LEVEL_WRAPPER_BY_CLIENT_LEVEL = new ConcurrentHashMap<>();
+	private static final ConcurrentHashMap<ClientLevel, ClientLevelWrapper> LEVEL_WRAPPER_BY_CLIENT_LEVEL = new ConcurrentHashMap<>();
 	private static final IKeyedClientLevelManager KEYED_CLIENT_LEVEL_MANAGER = SingletonInjector.INSTANCE.get(IKeyedClientLevelManager.class);
 	
 	private final ClientLevel level;
@@ -45,7 +45,7 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 	// constructor //
 	//=============//
 	
-    protected ClientLevelWrapper(ClientLevel level) { this.level = level; }
+	protected ClientLevelWrapper(ClientLevel level) { this.level = level; }
 	
 	
 	
@@ -72,7 +72,7 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 	
 	
 	@Nullable
-    @Override
+	@Override
 	public IServerLevelWrapper tryGetServerSideWrapper()
 	{
 		try
@@ -89,14 +89,14 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 			// attempt to find the server level with the same dimension type
 			// TODO this assumes only one level per dimension type, the SubDimensionLevelMatcher will need to be added for supporting multiple levels per dimension
 			ServerLevelWrapper foundLevelWrapper = null;
-
-            // TODO: Surely there is a more efficient way to write this code
+			
+			// TODO: Surely there is a more efficient way to write this code
 			for (ServerLevel serverLevel : serverLevels)
 			{
 				if (serverLevel.dimension() == this.level.dimension())
 				{
 					foundLevelWrapper = ServerLevelWrapper.getWrapper(serverLevel);
-                    break;
+					break;
 				}
 			}
 			
@@ -104,16 +104,18 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 		}
 		catch (Exception e)
 		{
-			LOGGER.error("Failed to get server side wrapper for client level: "+level);
+			LOGGER.error("Failed to get server side wrapper for client level: " + level);
 			return null;
 		}
 	}
-    public static void cleanCheck() {
-        if (!LEVEL_WRAPPER_BY_CLIENT_LEVEL.isEmpty()) {
-            LOGGER.warn("{} client levels havn't been freed!", LEVEL_WRAPPER_BY_CLIENT_LEVEL.size());
-            LEVEL_WRAPPER_BY_CLIENT_LEVEL.clear();
-        }
-    }
+	public static void cleanCheck()
+	{
+		if (!LEVEL_WRAPPER_BY_CLIENT_LEVEL.isEmpty())
+		{
+			LOGGER.warn("{} client levels havn't been freed!", LEVEL_WRAPPER_BY_CLIENT_LEVEL.size());
+			LEVEL_WRAPPER_BY_CLIENT_LEVEL.clear();
+		}
+	}
 	
 	
 	
@@ -121,83 +123,83 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 	// base level methods //
 	//====================//
 	
-    @Override
-    public int computeBaseColor(DhBlockPos pos, IBiomeWrapper biome, IBlockStateWrapper blockState)
-    {
-        return this.blockMap.getColor(((BlockStateWrapper)blockState).blockState, (BiomeWrapper)biome, pos);
-    }
-
-    @Override
-    public IDhApiDimensionTypeWrapper getDimensionType() { return DimensionTypeWrapper.getDimensionTypeWrapper(this.level.dimensionType()); }
+	@Override
+	public int computeBaseColor(DhBlockPos pos, IBiomeWrapper biome, IBlockStateWrapper blockState)
+	{
+		return this.blockMap.getColor(((BlockStateWrapper) blockState).blockState, (BiomeWrapper) biome, pos);
+	}
 	
-	@Override 
+	@Override
+	public IDhApiDimensionTypeWrapper getDimensionType() { return DimensionTypeWrapper.getDimensionTypeWrapper(this.level.dimensionType()); }
+	
+	@Override
 	public EDhApiLevelType getLevelType() { return EDhApiLevelType.CLIENT_LEVEL; }
 	
 	@Override
-    public int getBlockLight(int x, int y, int z) { return this.level.getBrightness(LightLayer.BLOCK, new BlockPos(x,y,z)); }
-
-    @Override
-    public int getSkyLight(int x, int y, int z) { return this.level.getBrightness(LightLayer.SKY, new BlockPos(x,y,z)); }
-
-    public ClientLevel getLevel() { return this.level; }
-
-    @Override
-    public boolean hasCeiling() { return this.level.dimensionType().hasCeiling(); }
-
-    @Override
-    public boolean hasSkyLight() { return this.level.dimensionType().hasSkyLight(); }
-
-    @Override
-    public int getHeight() { return this.level.getHeight(); }
-
-    @Override
-    public int getMinHeight()
-    {
+	public int getBlockLight(int x, int y, int z) { return this.level.getBrightness(LightLayer.BLOCK, new BlockPos(x, y, z)); }
+	
+	@Override
+	public int getSkyLight(int x, int y, int z) { return this.level.getBrightness(LightLayer.SKY, new BlockPos(x, y, z)); }
+	
+	public ClientLevel getLevel() { return this.level; }
+	
+	@Override
+	public boolean hasCeiling() { return this.level.dimensionType().hasCeiling(); }
+	
+	@Override
+	public boolean hasSkyLight() { return this.level.dimensionType().hasSkyLight(); }
+	
+	@Override
+	public int getHeight() { return this.level.getHeight(); }
+	
+	@Override
+	public int getMinHeight()
+	{
         #if PRE_MC_1_17_1
         return 0;
         #else
-        return this.level.getMinBuildHeight();
+		return this.level.getMinBuildHeight();
         #endif
-    }
-
-    @Override
-    public IChunkWrapper tryGetChunk(DhChunkPos pos)
-    {
-        if (!this.level.hasChunk(pos.x, pos.z))
-        {
+	}
+	
+	@Override
+	public IChunkWrapper tryGetChunk(DhChunkPos pos)
+	{
+		if (!this.level.hasChunk(pos.x, pos.z))
+		{
 			return null;
-        }
+		}
 		
-        ChunkAccess chunk = this.level.getChunk(pos.x, pos.z, ChunkStatus.EMPTY, false);
-        if (chunk == null)
-        {
+		ChunkAccess chunk = this.level.getChunk(pos.x, pos.z, ChunkStatus.EMPTY, false);
+		if (chunk == null)
+		{
 			return null;
-        }
+		}
 		
-        return new ChunkWrapper(chunk, this.level, this);
-    }
-
-    @Override
-    public boolean hasChunkLoaded(int chunkX, int chunkZ)
-    {
-        ChunkSource source = this.level.getChunkSource();
-        return source.hasChunk(chunkX, chunkZ);
-    }
-
-    @Override
-    public IBlockStateWrapper getBlockState(DhBlockPos pos) 
-    { 
+		return new ChunkWrapper(chunk, this.level, this);
+	}
+	
+	@Override
+	public boolean hasChunkLoaded(int chunkX, int chunkZ)
+	{
+		ChunkSource source = this.level.getChunkSource();
+		return source.hasChunk(chunkX, chunkZ);
+	}
+	
+	@Override
+	public IBlockStateWrapper getBlockState(DhBlockPos pos)
+	{
 		return BlockStateWrapper.fromBlockState(this.level.getBlockState(McObjectConverter.Convert(pos)));
 	}
-
-    @Override
-    public IBiomeWrapper getBiome(DhBlockPos pos) { return BiomeWrapper.getBiomeWrapper(this.level.getBiome(McObjectConverter.Convert(pos))); }
-
-    @Override
-    public ClientLevel getWrappedMcObject() { return this.level; }
-
-    @Override
-    public String toString()
+	
+	@Override
+	public IBiomeWrapper getBiome(DhBlockPos pos) { return BiomeWrapper.getBiomeWrapper(this.level.getBiome(McObjectConverter.Convert(pos))); }
+	
+	@Override
+	public ClientLevel getWrappedMcObject() { return this.level; }
+	
+	@Override
+	public String toString()
 	{
 		if (this.level == null)
 		{
@@ -206,5 +208,5 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 		
 		return "Wrapped{" + this.level.toString() + "@" + this.getDimensionType().getDimensionName() + "}";
 	}
-
+	
 }

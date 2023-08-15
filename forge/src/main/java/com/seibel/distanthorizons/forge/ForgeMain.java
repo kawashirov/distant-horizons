@@ -66,6 +66,7 @@ import org.apache.logging.log4j.Logger;
 // these imports change due to forge refactoring classes in 1.19
 #if PRE_MC_1_19_2
 import net.minecraftforge.client.model.data.ModelDataMap;
+
 import java.util.Random;
 #else
 import net.minecraft.util.RandomSource;
@@ -92,7 +93,7 @@ public class ForgeMain implements LodForgeMethodCaller
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 	public static ForgeClientProxy client_proxy = null;
 	public static ForgeServerProxy server_proxy = null;
-
+	
 	public ForgeMain()
 	{
 		DependencySetup.createClientBindings();
@@ -103,27 +104,28 @@ public class ForgeMain implements LodForgeMethodCaller
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::initClient);
 		FMLJavaModLoadingContext.get().getModEventBus().addListener(this::initDedicated);
 	}
-
+	
 	private void initClient(final FMLClientSetupEvent event)
 	{
 		ApiEventInjector.INSTANCE.fireAllEvents(DhApiBeforeDhInitEvent.class, null);
-
+		
 		LOGGER.info("Initializing Mod");
 		LodCommonMain.startup(this);
 		ForgeDependencySetup.createInitialBindings();
 		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
-
+		
 		// Print git info (Useful for dev builds)
-		LOGGER.info("DH Branch: "+ ModGitInfo.Git_Main_Branch);
-		LOGGER.info("DH Commit: "+ ModGitInfo.Git_Main_Commit);
-		LOGGER.info("DH-Core Commit: "+ ModGitInfo.Git_Core_Commit);
-
+		LOGGER.info("DH Branch: " + ModGitInfo.Git_Main_Branch);
+		LOGGER.info("DH Commit: " + ModGitInfo.Git_Main_Commit);
+		LOGGER.info("DH-Core Commit: " + ModGitInfo.Git_Core_Commit);
+		
 		client_proxy = new ForgeClientProxy();
 		MinecraftForge.EVENT_BUS.register(client_proxy);
 		server_proxy = new ForgeServerProxy(false);
 		MinecraftForge.EVENT_BUS.register(server_proxy);
-
-		if (ReflectionHandler.INSTANCE.optifinePresent()) {
+		
+		if (ReflectionHandler.INSTANCE.optifinePresent())
+		{
 			ModAccessorInjector.INSTANCE.bind(IOptifineAccessor.class, new OptifineAccessor());
 		}
 
@@ -141,14 +143,14 @@ public class ForgeMain implements LodForgeMethodCaller
 		ForgeClientProxy.setupNetworkingListeners(event);
 		
 		LOGGER.info(ModInfo.READABLE_NAME + " Initialized");
-
+		
 		ApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);
-
+		
 		// Init config
 		// The reason im initialising in this rather than the post init process is cus im using this for the auto updater
 		LodCommonMain.initConfig();
 	}
-
+	
 	private void initDedicated(final FMLDedicatedServerSetupEvent event)
 	{
 //		DependencySetup.createServerBindings();
@@ -159,39 +161,43 @@ public class ForgeMain implements LodForgeMethodCaller
 //
 		postInitCommon();
 	}
-
+	
 	private void postInitCommon()
 	{
 		LOGGER.info("Post-Initializing Mod");
 		ForgeDependencySetup.runDelayedSetup();
-
+		
 		LOGGER.info("Mod Post-Initialized");
 	}
-
+	
 	#if PRE_MC_1_19_2
 	private final ModelDataMap modelData = new ModelDataMap.Builder().build();
 	#else
 	private final ModelData modelData = ModelData.EMPTY;
 	#endif
-
+	
 	@Override
 	#if PRE_MC_1_19_2
-	public List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, Random random) {
+	public List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, Random random)
+	{
 		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, modelData);
 	}
 	#else
-	public List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, RandomSource random) {
-		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, modelData #if POST_MC_1_19_2, RenderType.solid() #endif);
+	public List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, RandomSource random)
+	{
+		return mc.getModelManager().getBlockModelShaper().getBlockModel(block.defaultBlockState()).getQuads(blockState, direction, random, modelData #if POST_MC_1_19_2 , RenderType.solid() #endif );
 	}
 	#endif
-
+	
 	@Override //TODO: Check this if its still needed
-	public int colorResolverGetColor(ColorResolver resolver, Biome biome, double x, double z) {
+	public int colorResolverGetColor(ColorResolver resolver, Biome biome, double x, double z)
+	{
 		#if MC_1_17_1______Still_needed
 		return resolver.m_130045_(biome, x, z);
 		#else
 		return resolver.getColor(biome, x, z);
 		#endif
-
+		
 	}
+	
 }

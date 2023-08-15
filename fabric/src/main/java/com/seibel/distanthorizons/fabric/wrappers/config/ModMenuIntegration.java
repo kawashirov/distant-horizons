@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.fabric.wrappers.config;
 
 import com.seibel.distanthorizons.common.wrappers.gui.GetConfigScreen;
@@ -26,10 +26,13 @@ import com.terraformersmc.modmenu.api.ModMenuApi;
 /**
  * For making the config show up in modmenu
  */
-public class ModMenuIntegration implements ModMenuApi {
-    // For the custom config code
-    @Override
-    public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return parent -> GetConfigScreen.getScreen(parent);
-    }
+public class ModMenuIntegration implements ModMenuApi
+{
+	// For the custom config code
+	@Override
+	public ConfigScreenFactory<?> getModConfigScreenFactory()
+	{
+		return parent -> GetConfigScreen.getScreen(parent);
+	}
+	
 }

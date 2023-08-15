@@ -16,17 +16,20 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.forge.wrappers.modAccessor;
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.IModChecker;
 import net.minecraftforge.fml.ModList;
 
-public class ModChecker implements IModChecker {
-    public static final ModChecker INSTANCE = new ModChecker();
-
-    @Override
-    public boolean isModLoaded(String modid) {
-        return ModList.get().isLoaded(modid);
-    }
+public class ModChecker implements IModChecker
+{
+	public static final ModChecker INSTANCE = new ModChecker();
+	
+	@Override
+	public boolean isModLoaded(String modid)
+	{
+		return ModList.get().isLoaded(modid);
+	}
+	
 }

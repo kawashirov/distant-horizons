@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.fabric.wrappers.modAccessor;
 
 import java.util.HashSet;
@@ -44,45 +44,48 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.level.LevelHeightAccessor;
 #endif
 
-public class SodiumAccessor implements ISodiumAccessor {
+public class SodiumAccessor implements ISodiumAccessor
+{
 	private final IWrapperFactory factory = SingletonInjector.INSTANCE.get(IWrapperFactory.class);
 	private final IMinecraftRenderWrapper MC_RENDER = SingletonInjector.INSTANCE.get(IMinecraftRenderWrapper.class);
-
+	
 	public IClientLevelWrapper levelWrapper;
 	public Mat4f mcModelViewMatrix;
 	public Mat4f mcProjectionMatrix;
 	public float partialTicks;
-
+	
 	@Override
-	public String getModName() {
+	public String getModName()
+	{
 		return "Sodium-Fabric";
 	}
-
+	
 	#if POST_MC_1_17_1
 	@Override
-	public HashSet<DhChunkPos> getNormalRenderedChunks() {
+	public HashSet<DhChunkPos> getNormalRenderedChunks()
+	{
 		SodiumWorldRenderer renderer = SodiumWorldRenderer.instance();
-		LevelHeightAccessor height =  Minecraft.getInstance().level;
+		LevelHeightAccessor height = Minecraft.getInstance().level;
 
 		#if POST_MC_1_20_1
 		// TODO: This is just a tmp solution, use a proper solution later
 		return MC_RENDER.getMaximumRenderedChunks().stream().filter((DhChunkPos chunk) -> {
 			return (renderer.isBoxVisible(
-					chunk.getMinBlockX()+1, height.getMinBuildHeight()+1, chunk.getMinBlockZ()+1,
-					chunk.getMinBlockX()+15, height.getMaxBuildHeight()-1, chunk.getMinBlockZ()+15));
+					chunk.getMinBlockX() + 1, height.getMinBuildHeight() + 1, chunk.getMinBlockZ() + 1,
+					chunk.getMinBlockX() + 15, height.getMaxBuildHeight() - 1, chunk.getMinBlockZ() + 15));
 		}).collect(Collectors.toCollection(HashSet::new));
 		#elif POST_MC_1_18_2
 		// 0b11 = Lighted chunk & loaded chunk
 		return renderer.getChunkTracker().getChunks(0b00).filter(
-			(long l) -> {
-				return true;
-			}).mapToObj(DhChunkPos::new).collect(Collectors.toCollection(HashSet::new));
+				(long l) -> {
+					return true;
+				}).mapToObj(DhChunkPos::new).collect(Collectors.toCollection(HashSet::new));
 		#else
 		// TODO: Maybe use a mixin to make this more efficient, and maybe ignore changes behind the camera
 		return MC_RENDER.getMaximumRenderedChunks().stream().filter((DhChunkPos chunk) -> {
 			return (renderer.isBoxVisible(
-					chunk.getMinBlockX()+1, height.getMinBuildHeight()+1, chunk.getMinBlockZ()+1,
-					chunk.getMinBlockX()+15, height.getMaxBuildHeight()-1, chunk.getMinBlockZ()+15));
+					chunk.getMinBlockX() + 1, height.getMinBuildHeight() + 1, chunk.getMinBlockZ() + 1,
+					chunk.getMinBlockX() + 15, height.getMaxBuildHeight() - 1, chunk.getMinBlockZ() + 15));
 		}).collect(Collectors.toCollection(HashSet::new));
 		#endif
 	}
@@ -125,13 +128,15 @@ public class SodiumAccessor implements ISodiumAccessor {
 		}
 	}
 	#endif
-
+	
 	/** A temporary overwrite for a config in sodium 0.5 to fix their terrain from showing, will be removed once a proper fix is added */
 	// FIXME
 	@Override
-	public void setFogOcclusion(boolean b) {
+	public void setFogOcclusion(boolean b)
+	{
 		#if POST_MC_1_20_1
 		me.jellysquid.mods.sodium.client.SodiumClientMod.options().performance.useFogOcclusion = b;
 		#endif
 	}
+	
 }

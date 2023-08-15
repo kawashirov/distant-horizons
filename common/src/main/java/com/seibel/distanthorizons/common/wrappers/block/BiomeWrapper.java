@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -63,15 +64,15 @@ public class BiomeWrapper implements IBiomeWrapper
 	private static final Logger LOGGER = LogManager.getLogger();
 	
 	
-    #if PRE_MC_1_18_2
-    public static final ConcurrentMap<Biome, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
-    public final Biome biome;
-    #else
-    public static final ConcurrentMap<Holder<Biome>, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
-    public final Holder<Biome> biome;
+	#if PRE_MC_1_18_2
+	public static final ConcurrentMap<Biome, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
+	public final Biome biome;
+	#else
+	public static final ConcurrentMap<Holder<Biome>, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
+	public final Holder<Biome> biome;
     #endif
 	
-	/** 
+	/**
 	 * Cached so it can be quickly used as a semi-stable hashing method. <br>
 	 * This may also fix the issue where we can serialize and save after a level has been shut down.
 	 */
@@ -83,15 +84,15 @@ public class BiomeWrapper implements IBiomeWrapper
 	// constructors //
 	//==============//
 	
-    static public IBiomeWrapper getBiomeWrapper(#if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif biome)
-    {
-        return biomeWrapperMap.computeIfAbsent(biome, BiomeWrapper::new);
-    }
-
-    private BiomeWrapper(#if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif biome)
-    {
-        this.biome = biome;
-    }
+	static public IBiomeWrapper getBiomeWrapper(#if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif biome)
+	{
+		return biomeWrapperMap.computeIfAbsent(biome, BiomeWrapper::new);
+	}
+	
+	private BiomeWrapper(#if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif biome)
+	{
+		this.biome = biome;
+	}
 	
 	
 	
@@ -100,34 +101,34 @@ public class BiomeWrapper implements IBiomeWrapper
 	//=========//
 	
 	@Override
-    public String getName()
-    {
+	public String getName()
+	{
         #if PRE_MC_1_18_2
-        return biome.toString();
+		return biome.toString();
         #else
-        return this.biome.unwrapKey().orElse(Biomes.THE_VOID).registry().toString();
+		return this.biome.unwrapKey().orElse(Biomes.THE_VOID).registry().toString();
         #endif
-    }
-
-    @Override
-    public boolean equals(Object obj) 
-    {
-        if (this == obj)
-        {
+	}
+	
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
+		{
 			return true;
-        }
-        else if (obj == null || this.getClass() != obj.getClass())
-        {
+		}
+		else if (obj == null || this.getClass() != obj.getClass())
+		{
 			return false;
-        }
+		}
 		
-        BiomeWrapper that = (BiomeWrapper) obj;
-	    // the serialized value is used so we can test the contents instead of the references
-        return Objects.equals(this.serialize(), that.serialize());
-    }
-
-    @Override
-    public int hashCode() { return Objects.hash(this.serialize()); }
+		BiomeWrapper that = (BiomeWrapper) obj;
+		// the serialized value is used so we can test the contents instead of the references
+		return Objects.equals(this.serialize(), that.serialize());
+	}
+	
+	@Override
+	public int hashCode() { return Objects.hash(this.serialize()); }
 	
 	@Override
 	public String serialize() // FIXME pass in level to prevent null pointers (or maybe just RegistryAccess?)
@@ -154,13 +155,13 @@ public class BiomeWrapper implements IBiomeWrapper
 				biomeName = this.biome.value().toString();
 				#endif
 				
-				LOGGER.warn("unable to serialize: "+biomeName);
+				LOGGER.warn("unable to serialize: " + biomeName);
 				// shouldn't normally happen, but just in case
 				this.serializationResult = "";
 			}
 			else
 			{
-				this.serializationResult = resourceLocation.getNamespace()+":"+resourceLocation.getPath();
+				this.serializationResult = resourceLocation.getNamespace() + ":" + resourceLocation.getPath();
 			}
 		}
 		
@@ -182,9 +183,9 @@ public class BiomeWrapper implements IBiomeWrapper
 		int separatorIndex = resourceLocationString.indexOf(":");
 		if (separatorIndex == -1)
 		{
-			throw new IOException("Unable to parse resource location string: ["+resourceLocationString+"].");
+			throw new IOException("Unable to parse resource location string: [" + resourceLocationString + "].");
 		}
-		ResourceLocation resourceLocation = new ResourceLocation(resourceLocationString.substring(0, separatorIndex), resourceLocationString.substring(separatorIndex+1));
+		ResourceLocation resourceLocation = new ResourceLocation(resourceLocationString.substring(0, separatorIndex), resourceLocationString.substring(separatorIndex + 1));
 		
 		
 		try
@@ -200,7 +201,7 @@ public class BiomeWrapper implements IBiomeWrapper
 			Biome unwrappedBiome = registryAccess.registryOrThrow(Registries.BIOME).get(resourceLocation);
 			if (unwrappedBiome == null)
 			{
-				LOGGER.warn("null biome string deserialized from string: "+resourceLocationString);
+				LOGGER.warn("null biome string deserialized from string: " + resourceLocationString);
 			}
 			Holder<Biome> biome = new Holder.Direct<>(unwrappedBiome);
 			#endif
@@ -209,12 +210,12 @@ public class BiomeWrapper implements IBiomeWrapper
 		}
 		catch (Exception e)
 		{
-			throw new IOException("Failed to deserialize the string ["+resourceLocationString+"] into a BiomeWrapper: "+e.getMessage(), e);
+			throw new IOException("Failed to deserialize the string [" + resourceLocationString + "] into a BiomeWrapper: " + e.getMessage(), e);
 		}
 	}
 	
 	
-	@Override 
+	@Override
 	public Object getWrappedMcObject() { return this.biome; }
 	
 	@Override

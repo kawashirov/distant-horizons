@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.fabric.mixins.events;
 
 import net.minecraft.core.BlockPos;
@@ -31,10 +31,11 @@ import org.spongepowered.asm.mixin.Shadow;
  */
 @Mixin(ClientboundBlockUpdatePacket.class)
 @Deprecated
-public abstract class MixinBlockUpdate {
-    @Shadow public abstract BlockPos getPos();
-
-    //TODO: Check if this event will be needed in new reworked system
+public abstract class MixinBlockUpdate
+{
+	@Shadow public abstract BlockPos getPos();
+	
+	//TODO: Check if this event will be needed in new reworked system
 //    @Inject(method = "handle(Lnet/minecraft/network/protocol/game/ClientGamePacketListener;)V", at = @At("TAIL"))
 //    private void onBlockUpdate(ClientGamePacketListener clientGamePacketListener, CallbackInfo ci) {
 //        Main.client_proxy.blockChangeEvent(Minecraft.getInstance().player.clientLevel, this.getPos());

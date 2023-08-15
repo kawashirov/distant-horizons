@@ -16,20 +16,24 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.fabric.wrappers.modAccessor;
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.IStarlightAccessor;
 
 
-public class StarlightAccessor implements IStarlightAccessor {
-
+public class StarlightAccessor implements IStarlightAccessor
+{
+	
 	@Override
-	public String getModName() {
+	public String getModName()
+	{
 		return "Starlight-Fabric-1.18.X";
 	}
 	
-	public StarlightAccessor() {
+	public StarlightAccessor()
+	{
 		
 	}
+	
 }

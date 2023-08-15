@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.chunk;
 
 import com.seibel.distanthorizons.api.enums.config.ELightGenerationMode;
@@ -78,7 +78,7 @@ public class ChunkWrapper implements IChunkWrapper
 	 * just before the light engine is ticked, (right after all light changes is marked to the engine to be processed).
 	 * To fix this, on client-only mode, we mixin-redirect the `isClientLightReady()` so that after the call, it will
 	 * trigger a synchronous update of this flag here on all chunks that are wrapped. <br><br>
-	 * 
+	 *
 	 * Note: Using a static weak hash map to store the chunks that need to be updated, as instance of chunk wrapper
 	 * can be duplicated, with same chunk instance. And the data stored here are all temporary, and thus will not be
 	 * visible when a chunk is re-wrapped later. <br>
@@ -169,10 +169,10 @@ public class ChunkWrapper implements IChunkWrapper
 				QuartPos.fromBlock(relX), QuartPos.fromBlock(relY), QuartPos.fromBlock(relZ)));
 		#endif
 	}
-
+	
 	@Override
 	public DhChunkPos getChunkPos() { return this.chunkPos; }
-
+	
 	public ChunkAccess getChunk() { return this.chunk; }
 	
 	@Override
@@ -217,29 +217,29 @@ public class ChunkWrapper implements IChunkWrapper
 				weakMapLock.readLock().unlock();
 				return fixedIsClientLightReady;
 			}
-
+			
 			// called when in single player or in dedicated server, and the chunk is a level chunk (active)
 			return this.chunk.isLightCorrect() && levelChunk.loaded;
 		}
 		else
 		{
 			// called when in a single player world and the chunk is a proto chunk (in world gen, and not active)
-			return this.chunk.isLightCorrect();	
+			return this.chunk.isLightCorrect();
 		}
 		#endif
 	}
 	
 	
 	@Override
-	public int getDhBlockLight(int relX, int y, int relZ) 
+	public int getDhBlockLight(int relX, int y, int relZ)
 	{
 		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
 		
 		int index = this.relativeBlockPosToIndex(relX, y, relZ);
-		return this.blockLightArray[index]; 
+		return this.blockLightArray[index];
 	}
 	@Override
-	public void setDhBlockLight(int relX, int y, int relZ, int lightValue) 
+	public void setDhBlockLight(int relX, int y, int relZ, int lightValue)
 	{
 		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
 		
@@ -248,7 +248,7 @@ public class ChunkWrapper implements IChunkWrapper
 	}
 	
 	@Override
-	public int getDhSkyLight(int relX, int y, int relZ) 
+	public int getDhSkyLight(int relX, int y, int relZ)
 	{
 		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
 		
@@ -256,7 +256,7 @@ public class ChunkWrapper implements IChunkWrapper
 		return this.skyLightArray[index];
 	}
 	@Override
-	public void setDhSkyLight(int relX, int y, int relZ, int lightValue) 
+	public void setDhSkyLight(int relX, int y, int relZ, int lightValue)
 	{
 		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
 		
@@ -282,7 +282,7 @@ public class ChunkWrapper implements IChunkWrapper
 			// note: this returns 0 if the chunk is unload
 			
 			// MC lighting method
-			return this.lightSource.getBrightness(LightLayer.BLOCK, new BlockPos(relX +this.getMinBlockX(), y, relZ +this.getMinBlockZ()));
+			return this.lightSource.getBrightness(LightLayer.BLOCK, new BlockPos(relX + this.getMinBlockX(), y, relZ + this.getMinBlockZ()));
 		}
 	}
 	
@@ -301,11 +301,11 @@ public class ChunkWrapper implements IChunkWrapper
 		else
 		{
 			// MC lighting method
-			return this.lightSource.getBrightness(LightLayer.SKY, new BlockPos(relX +this.getMinBlockX(), y, relZ +this.getMinBlockZ()));
+			return this.lightSource.getBrightness(LightLayer.SKY, new BlockPos(relX + this.getMinBlockX(), y, relZ + this.getMinBlockZ()));
 		}
 	}
 	
-	@Override 
+	@Override
 	public List<DhBlockPos> getBlockLightPosList()
 	{
 		// only populate the list once
@@ -315,12 +315,12 @@ public class ChunkWrapper implements IChunkWrapper
 			
 			
 			#if PRE_MC_1_20_1
-			this.chunk.getLights().forEach((blockPos) -> 
+			this.chunk.getLights().forEach((blockPos) ->
 			{
 				this.blockLightPosList.add(new DhBlockPos(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
 			});
 			#elif MC_1_20_1
-			this.chunk.findBlockLightSources((blockPos, blockState) -> 
+			this.chunk.findBlockLightSources((blockPos, blockState) ->
 			{
 				this.blockLightPosList.add(new DhBlockPos(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
 			});
@@ -357,49 +357,52 @@ public class ChunkWrapper implements IChunkWrapper
 	}
 	
 	public LevelReader getColorResolver() { return this.lightSource; }
-
+	
 	@Override
 	public String toString() { return this.chunk.getClass().getSimpleName() + this.chunk.getPos(); }
-
+	
 	@Override
 	public IBlockStateWrapper getBlockState(int relX, int relY, int relZ)
 	{
 		//if (wrappedLevel != null) return wrappedLevel.getBlockState(new DhBlockPos(x + getMinX(), y, z + getMinZ()));
 		return BlockStateWrapper.fromBlockState(this.chunk.getBlockState(new BlockPos(relX, relY, relZ)));
 	}
-
+	
 	@Override
 	public boolean isStillValid() { return this.wrappedLevel == null || this.wrappedLevel.tryGetChunk(this.chunkPos) == this; }
-
+	
 	#if POST_MC_1_20_1
-	private static boolean checkLightSectionsOnChunk(LevelChunk chunk, LevelLightEngine engine) {
+	private static boolean checkLightSectionsOnChunk(LevelChunk chunk, LevelLightEngine engine)
+	{
 		LevelChunkSection[] sections = chunk.getSections();
 		int minY = chunk.getMinSection();
 		int maxY = chunk.getMaxSection();
-		for (int y = minY; y < maxY; ++y) {
+		for (int y = minY; y < maxY; ++y)
+		{
 			LevelChunkSection section = sections[chunk.getSectionIndexFromSectionY(y)];
 			if (section.hasOnlyAir()) continue;
-			if (!engine.lightOnInSection(SectionPos.of(chunk.getPos(), y))) {
+			if (!engine.lightOnInSection(SectionPos.of(chunk.getPos(), y)))
+			{
 				return false;
 			}
 		}
 		return true;
 	}
 	#endif
-
+	
 	// Should be called after client light updates are triggered.
 	private static boolean updateClientLightReady(ChunkAccess chunk, boolean oldValue)
 	{
-		if (chunk instanceof LevelChunk && ((LevelChunk)chunk).getLevel() instanceof ClientLevel)
+		if (chunk instanceof LevelChunk && ((LevelChunk) chunk).getLevel() instanceof ClientLevel)
 		{
-			LevelChunk levelChunk = (LevelChunk)chunk;
-			ClientChunkCache clientChunkCache = ((ClientLevel)levelChunk.getLevel()).getChunkSource();
+			LevelChunk levelChunk = (LevelChunk) chunk;
+			ClientChunkCache clientChunkCache = ((ClientLevel) levelChunk.getLevel()).getChunkSource();
 			return clientChunkCache.getChunkForLighting(chunk.getPos().x, chunk.getPos().z) != null &&
 					#if MC_1_16_5 || MC_1_17_1
 					levelChunk.isLightCorrect();
-					#elif PRE_MC_1_20_1 
+					#elif PRE_MC_1_20_1
 					levelChunk.isClientLightReady();
-					#else 
+					#else
 					checkLightSectionsOnChunk(levelChunk, levelChunk.getLevel().getLightEngine());
 					#endif
 		}
@@ -408,7 +411,7 @@ public class ChunkWrapper implements IChunkWrapper
 			return oldValue;
 		}
 	}
-
+	
 	public static void syncedUpdateClientLightStatus()
 	{
 		#if PRE_MC_1_18_2
@@ -419,7 +422,7 @@ public class ChunkWrapper implements IChunkWrapper
 		{
 			chunksToUpdateClientLightReady.replaceAll(ChunkWrapper::updateClientLightReady);
 		}
-		finally 
+		finally
 		{
 			weakMapLock.writeLock().unlock();
 		}
@@ -436,16 +439,16 @@ public class ChunkWrapper implements IChunkWrapper
 	private void throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(int x, int y, int z) throws IndexOutOfBoundsException
 	{
 		// FIXME +/-1 is to handle the fact that LodDataBuilder adds +1 to all block lighting calculations, also done in the relative position validator
-		int minHeight = this.getMinBuildHeight()-1;
-		int maxHeight = this.getMaxBuildHeight()+1;
-
+		int minHeight = this.getMinBuildHeight() - 1;
+		int maxHeight = this.getMaxBuildHeight() + 1;
+		
 		if (x < 0 || x >= LodUtil.CHUNK_WIDTH
-			|| z < 0 || z >= LodUtil.CHUNK_WIDTH
-			|| y < minHeight || y > maxHeight)
+				|| z < 0 || z >= LodUtil.CHUNK_WIDTH
+				|| y < minHeight || y > maxHeight)
 		{
-			String errorMessage = "Relative position ["+x+","+y+","+z+"] out of bounds. \n" +
+			String errorMessage = "Relative position [" + x + "," + y + "," + z + "] out of bounds. \n" +
 					"X/Z must be between 0 and 15 (inclusive) \n" +
-					"Y must be between ["+minHeight+"] and ["+maxHeight+"] (inclusive).";
+					"Y must be between [" + minHeight + "] and [" + maxHeight + "] (inclusive).";
 			throw new IndexOutOfBoundsException(errorMessage);
 		}
 	}
@@ -455,21 +458,21 @@ public class ChunkWrapper implements IChunkWrapper
 	 * Converts a 3D position into a 1D array index. <br><br>
 	 *
 	 * Source: <br>
-	 * <a href="https://stackoverflow.com/questions/7367770/how-to-flatten-or-index-3d-array-in-1d-array">stackoverflow</a> 
+	 * <a href="https://stackoverflow.com/questions/7367770/how-to-flatten-or-index-3d-array-in-1d-array">stackoverflow</a>
 	 */
-	public int relativeBlockPosToIndex(int xRel, int y, int zRel) 
+	public int relativeBlockPosToIndex(int xRel, int y, int zRel)
 	{
 		int yRel = y - this.getMinBuildHeight();
-		return (zRel * LodUtil.CHUNK_WIDTH * this.getHeight()) + (yRel * LodUtil.CHUNK_WIDTH) + xRel; 
+		return (zRel * LodUtil.CHUNK_WIDTH * this.getHeight()) + (yRel * LodUtil.CHUNK_WIDTH) + xRel;
 	}
 	
 	/**
 	 * Converts a 3D position into a 1D array index. <br><br>
 	 *
 	 * Source: <br>
-	 * <a href="https://stackoverflow.com/questions/7367770/how-to-flatten-or-index-3d-array-in-1d-array">stackoverflow</a> 
+	 * <a href="https://stackoverflow.com/questions/7367770/how-to-flatten-or-index-3d-array-in-1d-array">stackoverflow</a>
 	 */
-	public DhBlockPos indexToRelativeBlockPos(int index) 
+	public DhBlockPos indexToRelativeBlockPos(int index)
 	{
 		final int zRel = index / (LodUtil.CHUNK_WIDTH * this.getHeight());
 		index -= (zRel * LodUtil.CHUNK_WIDTH * this.getHeight());

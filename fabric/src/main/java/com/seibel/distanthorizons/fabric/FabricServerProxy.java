@@ -36,45 +36,45 @@ public class FabricServerProxy
 {
 	private static final ServerApi SERVER_API = ServerApi.INSTANCE;
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
-
+	
 	private final boolean isDedicated;
 	public static Supplier<Boolean> isGenerationThreadChecker = null;
-
-
-
+	
+	
+	
 	public FabricServerProxy(boolean isDedicated)
 	{
 		this.isDedicated = isDedicated;
 	}
-
-
-
+	
+	
+	
 	private boolean isValidTime()
 	{
 		if (isDedicated)
 		{
 			return true;
 		}
-
+		
 		//FIXME: This may cause init issue...
 		return !(Minecraft.getInstance().screen instanceof TitleScreen);
 	}
-
+	
 	private IClientLevelWrapper getClientLevelWrapper(ClientLevel level) { return ClientLevelWrapper.getWrapper(level); }
 	private ServerLevelWrapper getServerLevelWrapper(ServerLevel level) { return ServerLevelWrapper.getWrapper(level); }
 	private ServerPlayerWrapper getServerPlayerWrapper(ServerPlayer player) { return ServerPlayerWrapper.getWrapper(player); }
-
+	
 	/** Registers Fabric Events */
 	public void registerEvents()
 	{
 		LOGGER.info("Registering Fabric Server Events");
 		isGenerationThreadChecker = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
-
+		
 		/* Register the mod needed event callbacks */
-
+		
 		// ServerTickEvent
 		ServerTickEvents.END_SERVER_TICK.register((server) -> SERVER_API.serverTickEvent());
-
+		
 		// ServerWorldLoadEvent
 		//TODO: Check if both of these use the correct timed events. (i.e. is it 'ed' or 'ing' one?)
 		ServerLifecycleEvents.SERVER_STARTING.register((server) ->
@@ -92,7 +92,7 @@ public class FabricServerProxy
 				ServerApi.INSTANCE.serverUnloadEvent();
 			}
 		});
-
+		
 		// ServerLevelLoadEvent
 		ServerWorldEvents.LOAD.register((server, level) ->
 		{
@@ -109,7 +109,7 @@ public class FabricServerProxy
 				ServerApi.INSTANCE.serverLevelUnloadEvent(getServerLevelWrapper(level));
 			}
 		});
-
+		
 		// ServerChunkLoadEvent
 		ServerChunkEvents.CHUNK_LOAD.register((server, chunk) ->
 		{
@@ -122,7 +122,7 @@ public class FabricServerProxy
 			}
 		});
 		// ServerChunkSaveEvent - Done in MixinChunkMap
-
+		
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
 		{
 			if (isValidTime())
@@ -138,5 +138,5 @@ public class FabricServerProxy
 			}
 		});
 	}
-
+	
 }

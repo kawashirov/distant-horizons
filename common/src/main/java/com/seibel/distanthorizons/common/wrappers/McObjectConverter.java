@@ -47,53 +47,56 @@ import net.minecraft.world.level.ChunkPos;
  */
 public class McObjectConverter
 {
-    private static int bufferIndex(int x, int y) {
-        return y * 4 + x;
-    }
-    /** Taken from Minecraft's com.mojang.math.Matrix4f class from 1.18.2 */
-    private static void storeMatrix(Matrix4f matrix, FloatBuffer buffer) {
+	private static int bufferIndex(int x, int y)
+	{
+		return y * 4 + x;
+	}
+	/** Taken from Minecraft's com.mojang.math.Matrix4f class from 1.18.2 */
+	private static void storeMatrix(Matrix4f matrix, FloatBuffer buffer)
+	{
         #if PRE_MC_1_19_4
-        matrix.store(buffer);
+		matrix.store(buffer);
         #else
-        // Mojang starts to use joml's Matrix4f libary in 1.19.3 so we copy their store method and use it here if its newer than 1.19.3
-        buffer.put(bufferIndex(0, 0), matrix.m00());
-        buffer.put(bufferIndex(0, 1), matrix.m01());
-        buffer.put(bufferIndex(0, 2), matrix.m02());
-        buffer.put(bufferIndex(0, 3), matrix.m03());
-        buffer.put(bufferIndex(1, 0), matrix.m10());
-        buffer.put(bufferIndex(1, 1), matrix.m11());
-        buffer.put(bufferIndex(1, 2), matrix.m12());
-        buffer.put(bufferIndex(1, 3), matrix.m13());
-        buffer.put(bufferIndex(2, 0), matrix.m20());
-        buffer.put(bufferIndex(2, 1), matrix.m21());
-        buffer.put(bufferIndex(2, 2), matrix.m22());
-        buffer.put(bufferIndex(2, 3), matrix.m23());
-        buffer.put(bufferIndex(3, 0), matrix.m30());
-        buffer.put(bufferIndex(3, 1), matrix.m31());
-        buffer.put(bufferIndex(3, 2), matrix.m32());
-        buffer.put(bufferIndex(3, 3), matrix.m33());
+		// Mojang starts to use joml's Matrix4f libary in 1.19.3 so we copy their store method and use it here if its newer than 1.19.3
+		buffer.put(bufferIndex(0, 0), matrix.m00());
+		buffer.put(bufferIndex(0, 1), matrix.m01());
+		buffer.put(bufferIndex(0, 2), matrix.m02());
+		buffer.put(bufferIndex(0, 3), matrix.m03());
+		buffer.put(bufferIndex(1, 0), matrix.m10());
+		buffer.put(bufferIndex(1, 1), matrix.m11());
+		buffer.put(bufferIndex(1, 2), matrix.m12());
+		buffer.put(bufferIndex(1, 3), matrix.m13());
+		buffer.put(bufferIndex(2, 0), matrix.m20());
+		buffer.put(bufferIndex(2, 1), matrix.m21());
+		buffer.put(bufferIndex(2, 2), matrix.m22());
+		buffer.put(bufferIndex(2, 3), matrix.m23());
+		buffer.put(bufferIndex(3, 0), matrix.m30());
+		buffer.put(bufferIndex(3, 1), matrix.m31());
+		buffer.put(bufferIndex(3, 2), matrix.m32());
+		buffer.put(bufferIndex(3, 3), matrix.m33());
         #endif
-    }
-
-    /** 4x4 float matrix converter */
-    public static Mat4f Convert(Matrix4f mcMatrix)
-    {
-        FloatBuffer buffer = FloatBuffer.allocate(16);
-        storeMatrix(mcMatrix, buffer);
-        Mat4f matrix = new Mat4f(buffer);
+	}
+	
+	/** 4x4 float matrix converter */
+	public static Mat4f Convert(Matrix4f mcMatrix)
+	{
+		FloatBuffer buffer = FloatBuffer.allocate(16);
+		storeMatrix(mcMatrix, buffer);
+		Mat4f matrix = new Mat4f(buffer);
         #if PRE_MC_1_19_4
-        matrix.transpose(); // In 1.19.3 and later, we no longer need to transpose it
+		matrix.transpose(); // In 1.19.3 and later, we no longer need to transpose it
         #endif
-        return matrix;
-    }
-
-
-    static final Direction[] directions;
-    static final EDhDirection[] lodDirections;
-    static {
-    	EDhDirection[] lodDirs = EDhDirection.values();
-    	directions = new Direction[lodDirs.length];
-    	lodDirections = new EDhDirection[lodDirs.length];
+		return matrix;
+	}
+	
+	
+	static final Direction[] directions;
+	static final EDhDirection[] lodDirections;
+	static
+	{
+		EDhDirection[] lodDirs = EDhDirection.values();
+		directions = new Direction[lodDirs.length];
+		lodDirections = new EDhDirection[lodDirs.length];
 		for (EDhDirection lodDir : lodDirs)
 		{
 			Direction dir;
@@ -129,39 +132,43 @@ public class McObjectConverter
 			directions[lodDir.ordinal()] = dir;
 			lodDirections[dir.ordinal()] = lodDir;
 		}
-    }
-
-    public static BlockPos Convert(DhBlockPos wrappedPos) {
-    	return new BlockPos(wrappedPos.x, wrappedPos.y, wrappedPos.z);
-    }
-    public static ChunkPos Convert(DhChunkPos wrappedPos) {
-        return new ChunkPos(wrappedPos.x, wrappedPos.z);
-    }
-
-    public static Direction Convert(EDhDirection lodDirection)
-    {
-        return directions[lodDirection.ordinal()];
-    }
-    public static EDhDirection Convert(Direction direction)
-    {
-        return lodDirections[direction.ordinal()];
-    }
-    public static void DebugCheckAllPackers() {
-        BiConsumer<Integer, Integer> func = (x, z) -> DhChunkPos._DebugCheckPacker(x,z,ChunkPos.asLong(x,z));
-        func.accept(0,0);
-        func.accept(12345,134);
-        func.accept(-12345,-134);
-        func.accept(-30000000/16,30000000/16);
-        func.accept(30000000/16,-30000000/16);
-        func.accept(30000000/16,30000000/16);
-        func.accept(-30000000/16,-30000000/16);
-        Consumer<BlockPos> func2 = (p) -> DhBlockPos._DebugCheckPacker(p.getX(),p.getY(),p.getZ(),p.asLong());
-        func2.accept(new BlockPos(0,0,0));
-        func2.accept(new BlockPos(12345,134,123));
-        func2.accept(new BlockPos(-12345,-134,-80));
-        func2.accept(new BlockPos(-30000000, 2047, 30000000));
-        func2.accept(new BlockPos(30000000, -2048, -30000000));
-        func2.accept(new BlockPos(30000000, 2047, 30000000));
-        func2.accept(new BlockPos(-30000000, -2048, -30000000));
-    }
+	}
+	
+	public static BlockPos Convert(DhBlockPos wrappedPos)
+	{
+		return new BlockPos(wrappedPos.x, wrappedPos.y, wrappedPos.z);
+	}
+	public static ChunkPos Convert(DhChunkPos wrappedPos)
+	{
+		return new ChunkPos(wrappedPos.x, wrappedPos.z);
+	}
+	
+	public static Direction Convert(EDhDirection lodDirection)
+	{
+		return directions[lodDirection.ordinal()];
+	}
+	public static EDhDirection Convert(Direction direction)
+	{
+		return lodDirections[direction.ordinal()];
+	}
+	public static void DebugCheckAllPackers()
+	{
+		BiConsumer<Integer, Integer> func = (x, z) -> DhChunkPos._DebugCheckPacker(x, z, ChunkPos.asLong(x, z));
+		func.accept(0, 0);
+		func.accept(12345, 134);
+		func.accept(-12345, -134);
+		func.accept(-30000000 / 16, 30000000 / 16);
+		func.accept(30000000 / 16, -30000000 / 16);
+		func.accept(30000000 / 16, 30000000 / 16);
+		func.accept(-30000000 / 16, -30000000 / 16);
+		Consumer<BlockPos> func2 = (p) -> DhBlockPos._DebugCheckPacker(p.getX(), p.getY(), p.getZ(), p.asLong());
+		func2.accept(new BlockPos(0, 0, 0));
+		func2.accept(new BlockPos(12345, 134, 123));
+		func2.accept(new BlockPos(-12345, -134, -80));
+		func2.accept(new BlockPos(-30000000, 2047, 30000000));
+		func2.accept(new BlockPos(30000000, -2048, -30000000));
+		func2.accept(new BlockPos(30000000, 2047, 30000000));
+		func2.accept(new BlockPos(-30000000, -2048, -30000000));
+	}
+	
 }

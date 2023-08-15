@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.forge.mixins.server;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,25 +33,30 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.WorldgenRandom;
 
 @Mixin(ChunkGenerator.class)
-public class MixinChunkGenerator {
-    @Redirect(method = "applyBiomeDecoration", at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/biome/Biome;generate(Lnet/minecraft/world/level/StructureFeatureManager;"
-                    + "Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/server/level/WorldGenRegion;J"
-                    + "Lnet/minecraft/world/level/levelgen/WorldgenRandom;Lnet/minecraft/core/BlockPos;)V"
-
-    ))
-    private void wrapBiomeGenerateCall(Biome biome, StructureFeatureManager structFeatManager, ChunkGenerator generator,
-                                       WorldGenRegion genRegion, long l, WorldgenRandom random, BlockPos pos) {
-        synchronized(ChunkGenerator.class) {
-            //ApiShared.LOGGER.info("Generating Biome {} and acquired lock.", biome.getRegistryName());
-            biome.generate(structFeatManager, (ChunkGenerator)(Object)this, genRegion, l, random, pos);
-        }
-        //ApiShared.LOGGER.info("Released lock. Biome {} generated.", biome.getRegistryName());
-    }
+public class MixinChunkGenerator
+{
+	@Redirect(method = "applyBiomeDecoration", at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/world/level/biome/Biome;generate(Lnet/minecraft/world/level/StructureFeatureManager;"
+					+ "Lnet/minecraft/world/level/chunk/ChunkGenerator;Lnet/minecraft/server/level/WorldGenRegion;J"
+					+ "Lnet/minecraft/world/level/levelgen/WorldgenRandom;Lnet/minecraft/core/BlockPos;)V"
+	
+	))
+	private void wrapBiomeGenerateCall(
+			Biome biome, StructureFeatureManager structFeatManager, ChunkGenerator generator,
+			WorldGenRegion genRegion, long l, WorldgenRandom random, BlockPos pos)
+	{
+		synchronized (ChunkGenerator.class)
+		{
+			//ApiShared.LOGGER.info("Generating Biome {} and acquired lock.", biome.getRegistryName());
+			biome.generate(structFeatManager, (ChunkGenerator) (Object) this, genRegion, l, random, pos);
+		}
+		//ApiShared.LOGGER.info("Released lock. Biome {} generated.", biome.getRegistryName());
+	}
+	
 }
 
 #else
 @Mixin(ChunkGenerator.class)
-public class MixinChunkGenerator {}
+public class MixinChunkGenerator { }
 #endif

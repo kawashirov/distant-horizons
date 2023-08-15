@@ -12,13 +12,13 @@ public class MixinClientPacketListener
 {
 	// TODO update fabric version as well
 	
-    @Inject(method = "handleLogin", at = @At("HEAD"))
-    void onHandleLoginStart(CallbackInfo ci)
-    {
-        // not the best way to notify Core that we are no longer in the previous world, but it will have to do for now
-        ClientApi.INSTANCE.onClientOnlyDisconnected();
-    }
-    @Inject(method = "handleLogin", at = @At("RETURN"))
-    void onHandleLoginEnd(CallbackInfo ci) { ClientApi.INSTANCE.onClientOnlyConnected(); }
+	@Inject(method = "handleLogin", at = @At("HEAD"))
+	void onHandleLoginStart(CallbackInfo ci)
+	{
+		// not the best way to notify Core that we are no longer in the previous world, but it will have to do for now
+		ClientApi.INSTANCE.onClientOnlyDisconnected();
+	}
+	@Inject(method = "handleLogin", at = @At("RETURN"))
+	void onHandleLoginEnd(CallbackInfo ci) { ClientApi.INSTANCE.onClientOnlyConnected(); }
 	
 }

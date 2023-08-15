@@ -19,12 +19,12 @@ import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 @Mixin(ClientPacketListener.class)
 public class MixinClientPacketListener
 {
-    @Shadow
-    private ClientLevel level;
+	@Shadow
+	private ClientLevel level;
 	
 	
 	
-    @Inject(method = "handleLogin", at = @At("HEAD"))
+	@Inject(method = "handleLogin", at = @At("HEAD"))
 	void onHandleLoginStart(CallbackInfo ci)
 	{
 		// not the best way to notify Core that we are no longer in the previous world, but it will have to do for now
@@ -37,7 +37,7 @@ public class MixinClientPacketListener
 	void onHandleRespawnStart(CallbackInfo ci) { ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper(level)); }
 	@Inject(method = "handleRespawn", at = @At("RETURN"))
 	void onHandleRespawnEnd(CallbackInfo ci) { ClientApi.INSTANCE.clientLevelLoadEvent(ClientLevelWrapper.getWrapper(level)); }
-
+	
 	#if PRE_MC_1_19_4
 	@Inject(method = "cleanup", at = @At("HEAD"))
 	#else
@@ -51,7 +51,7 @@ public class MixinClientPacketListener
 			ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper(level));
 		}
 	}
-
+	
 	#if POST_MC_1_20_1
 	@Inject(method = "enableChunkLight", at = @At("TAIL"))
 	void onEnableChunkLight(LevelChunk chunk, int x, int z, CallbackInfo ci)
@@ -61,5 +61,5 @@ public class MixinClientPacketListener
 	}
 
 	#endif
-
+	
 }

@@ -15,21 +15,22 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ChunkMap.class)
-public class MixinChunkMap {
-
-    @Unique
-    private static final String CHUNK_SERIALIZER_WRITE
-            = "Lnet/minecraft/world/level/chunk/storage/ChunkSerializer;write(" +
-            "Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/chunk/ChunkAccess;)" +
-            "Lnet/minecraft/nbt/CompoundTag;";
-
-    @Shadow
-    @Final
-    ServerLevel level;
-
-    @Inject(method = "save", at = @At(value = "INVOKE", target = CHUNK_SERIALIZER_WRITE))
-    private void onChunkSave(ChunkAccess chunk, CallbackInfoReturnable<Boolean> ci) 
-    {
+public class MixinChunkMap
+{
+	
+	@Unique
+	private static final String CHUNK_SERIALIZER_WRITE
+			= "Lnet/minecraft/world/level/chunk/storage/ChunkSerializer;write(" +
+			"Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/level/chunk/ChunkAccess;)" +
+			"Lnet/minecraft/nbt/CompoundTag;";
+	
+	@Shadow
+	@Final
+	ServerLevel level;
+	
+	@Inject(method = "save", at = @At(value = "INVOKE", target = CHUNK_SERIALIZER_WRITE))
+	private void onChunkSave(ChunkAccess chunk, CallbackInfoReturnable<Boolean> ci)
+	{
 		#if MC_1_16_5
 		if (chunk.getBiomes() == null)
 		{
@@ -38,11 +39,11 @@ public class MixinChunkMap {
 		}
 		#endif
 		
-	    
-        ServerApi.INSTANCE.serverChunkSaveEvent(
-                new ChunkWrapper(chunk, level, ServerLevelWrapper.getWrapper(level)),
-                ServerLevelWrapper.getWrapper(level)
-        );
-    }
-
+		
+		ServerApi.INSTANCE.serverChunkSaveEvent(
+				new ChunkWrapper(chunk, level, ServerLevelWrapper.getWrapper(level)),
+				ServerLevelWrapper.getWrapper(level)
+		);
+	}
+	
 }

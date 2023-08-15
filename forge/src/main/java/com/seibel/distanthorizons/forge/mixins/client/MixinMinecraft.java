@@ -23,31 +23,36 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public class MixinMinecraft
 {
-    @Redirect(
-            method = "<init>(Lnet/minecraft/client/main/GameConfig;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
-    )
-    public void onOpenScreen(Minecraft instance, Screen guiScreen) 
+	@Redirect(
+			method = "<init>(Lnet/minecraft/client/main/GameConfig;)V",
+			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
+	)
+	public void onOpenScreen(Minecraft instance, Screen guiScreen)
 	{
-        if (!Config.Client.Advanced.AutoUpdater.enableAutoUpdater.get()) 
+		if (!Config.Client.Advanced.AutoUpdater.enableAutoUpdater.get())
 		{
 			// Don't do anything if the user doesn't want it
-            instance.setScreen(guiScreen); // Sets the screen back to the vanilla screen as if nothing ever happened
-            return;
-        }
-
-        if (SelfUpdater.onStart()) {
-            instance.setScreen(new UpdateModScreen(
-                    new TitleScreen(false), // We don't want to use the vanilla title screen as it would fade the buttons
-                    ModrinthGetter.getLatestIDForVersion(SingletonInjector.INSTANCE.get(IVersionConstants.class).getMinecraftVersion())
-            ));
-        } else {
-            instance.setScreen(guiScreen); // Sets the screen back to the vanilla screen as if nothing ever happened
-        }
-    }
-
-    @Inject(at = @At("HEAD"), method = "close()V", remap = false)
-    public void close(CallbackInfo ci) {
-        SelfUpdater.onClose();
-    }
+			instance.setScreen(guiScreen); // Sets the screen back to the vanilla screen as if nothing ever happened
+			return;
+		}
+		
+		if (SelfUpdater.onStart())
+		{
+			instance.setScreen(new UpdateModScreen(
+					new TitleScreen(false), // We don't want to use the vanilla title screen as it would fade the buttons
+					ModrinthGetter.getLatestIDForVersion(SingletonInjector.INSTANCE.get(IVersionConstants.class).getMinecraftVersion())
+			));
+		}
+		else
+		{
+			instance.setScreen(guiScreen); // Sets the screen back to the vanilla screen as if nothing ever happened
+		}
+	}
+	
+	@Inject(at = @At("HEAD"), method = "close()V", remap = false)
+	public void close(CallbackInfo ci)
+	{
+		SelfUpdater.onClose();
+	}
+	
 }

@@ -57,5 +57,5 @@ public class MixinTFChunkGenerator
 
 #else
 @Mixin(ChunkGenerator.class)
-class MixinTFChunkGenerator {  }
+class MixinTFChunkGenerator { }
 #endif

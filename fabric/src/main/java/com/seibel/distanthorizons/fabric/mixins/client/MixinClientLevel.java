@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.fabric.mixins.client;
 
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
@@ -33,8 +33,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * This class is used for world loading events
- * @author Ran
  *
+ * @author Ran
  */
 
 @Mixin(ClientLevel.class)
@@ -48,10 +48,10 @@ public class MixinClientLevel
 //	{
 //        ClientApi.INSTANCE.clientLevelLoadEvent(WorldWrapper.getWorldWrapper((ClientLevel)(Object)this));
 //    }
-
-    // Moved to overriding the enableChunkLight(...) method over at ClientPacketListener for 1.20+
+	
+	// Moved to overriding the enableChunkLight(...) method over at ClientPacketListener for 1.20+
 	#if POST_MC_1_18_2 && PRE_MC_1_20_1 // Only the setLightReady is only available after 1.18. This ensures the light data is ready.
-    @Inject(method = "setLightReady", at = @At("HEAD"))
+	@Inject(method = "setLightReady", at = @At("HEAD"))
 	private void onChunkLightReady(int x, int z, CallbackInfo ci)
 	{
 		ClientLevel clientLevel = (ClientLevel) (Object) this;

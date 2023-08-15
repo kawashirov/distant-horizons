@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.worldGeneration.step;
 
 import java.util.ArrayList;
@@ -36,12 +36,13 @@ import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.levelgen.blending.Blender;
 #endif
 
-public final class StepBiomes {
+public final class StepBiomes
+{
 	/**
-	 * 
+	 *
 	 */
 	private final BatchGenerationEnvironment environment;
-
+	
 	/**
 	 * @param batchGenerationEnvironment
 	 */
@@ -49,12 +50,14 @@ public final class StepBiomes {
 	{
 		environment = batchGenerationEnvironment;
 	}
-
+	
 	public final ChunkStatus STATUS = ChunkStatus.BIOMES;
 	
-	public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
-			List<ChunkWrapper> chunkWrappers) {
-
+	public void generateGroup(
+			ThreadedParameters tParams, WorldGenRegion worldGenRegion,
+			List<ChunkWrapper> chunkWrappers)
+	{
+		
 		ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
 		
 		for (ChunkWrapper chunkWrapper : chunkWrappers)
@@ -65,7 +68,8 @@ public final class StepBiomes {
 			chunksToDo.add(chunk);
 		}
 		
-		for (ChunkAccess chunk : chunksToDo) {
+		for (ChunkAccess chunk : chunksToDo)
+		{
 			// System.out.println("StepBiomes: "+chunk.getPos());
 			#if PRE_MC_1_18_2
 			environment.params.generator.createBiomes(environment.params.biomes, chunk);
@@ -81,4 +85,5 @@ public final class StepBiomes {
 			#endif
 		}
 	}
+	
 }

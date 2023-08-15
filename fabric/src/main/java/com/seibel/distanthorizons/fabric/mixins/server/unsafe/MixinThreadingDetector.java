@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.fabric.mixins.server.unsafe;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,15 +38,18 @@ import java.util.concurrent.Semaphore;
  * FIXME: Recheck this
  */
 @Mixin(ThreadingDetector.class)
-public class MixinThreadingDetector {
-    @Mutable
-    @Shadow
-    private Semaphore lock;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void setSemaphore(CallbackInfo ci) {
-        this.lock = new Semaphore(2);
-    }
+public class MixinThreadingDetector
+{
+	@Mutable
+	@Shadow
+	private Semaphore lock;
+	
+	@Inject(method = "<init>", at = @At("RETURN"))
+	private void setSemaphore(CallbackInfo ci)
+	{
+		this.lock = new Semaphore(2);
+	}
+	
 }
 #else
 
