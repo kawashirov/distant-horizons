@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject;
 
 import java.lang.invoke.MethodHandles;
@@ -69,29 +69,33 @@ public class DhLitWorldGenRegion extends WorldGenRegion
 	#if PRE_MC_1_18_2
 	private ChunkPos overrideCenterPos = null;
 	
-	public void setOverrideCenter(ChunkPos pos) {overrideCenterPos = pos;}
-		#if PRE_MC_1_17_1
-		@Override
-		public int getCenterX() {
-			return overrideCenterPos==null ? super.getCenterX() : overrideCenterPos.x;
-		}
-		@Override
-		public int getCenterZ() {
-			return overrideCenterPos==null ? super.getCenterX() : overrideCenterPos.z;
-		}
-		#else
-		@Override
-		public ChunkPos getCenter() {
-			return overrideCenterPos==null ? super.getCenter() : overrideCenterPos;
-		}
-		#endif
+	public void setOverrideCenter(ChunkPos pos) { overrideCenterPos = pos; }
+	#if PRE_MC_1_17_1
+	@Override
+	public int getCenterX() 
+	{
+		return overrideCenterPos==null ? super.getCenterX() : overrideCenterPos.x;
+	}
+	@Override
+	public int getCenterZ() 
+	{
+		return overrideCenterPos==null ? super.getCenterX() : overrideCenterPos.z;
+	}
+	#else
+	@Override
+	public ChunkPos getCenter()
+	{
+		return overrideCenterPos == null ? super.getCenter() : overrideCenterPos;
+	}
 	#endif
-
-	public DhLitWorldGenRegion(ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine,
+	#endif
+	
+	public DhLitWorldGenRegion(
+			ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine,
 			List<ChunkAccess> chunkList, ChunkStatus chunkStatus, int writeRadius,
 			BatchGenerationEnvironment.EmptyChunkGenerator generator)
 	{
-		super(serverLevel, chunkList #if POST_MC_1_17_1, chunkStatus, writeRadius #endif);
+		super(serverLevel, chunkList #if POST_MC_1_17_1 , chunkStatus, writeRadius #endif );
 		this.firstPos = chunkList.get(0).getPos();
 		this.generator = generator;
 		this.light = lightEngine;
@@ -99,43 +103,47 @@ public class DhLitWorldGenRegion extends WorldGenRegion
 		this.cache = chunkList;
 		this.size = Mth.floor(Math.sqrt(chunkList.size()));
 	}
-
+	
 	#if POST_MC_1_17_1
 	// Bypass BCLib mixin overrides.
-    @Override
-    public boolean ensureCanWrite(BlockPos blockPos)
+	@Override
+	public boolean ensureCanWrite(BlockPos blockPos)
 	{
-        int i = SectionPos.blockToSectionCoord(blockPos.getX());
-        int j = SectionPos.blockToSectionCoord(blockPos.getZ());
-        ChunkPos chunkPos = this.getCenter();
-        ChunkAccess center = this.getChunk(chunkPos.x, chunkPos.z);
-        int k = Math.abs(chunkPos.x - i);
-        int l = Math.abs(chunkPos.z - j);
-        if (k > this.writeRadius || l > this.writeRadius) {
-            return false;
-        }
+		int i = SectionPos.blockToSectionCoord(blockPos.getX());
+		int j = SectionPos.blockToSectionCoord(blockPos.getZ());
+		ChunkPos chunkPos = this.getCenter();
+		ChunkAccess center = this.getChunk(chunkPos.x, chunkPos.z);
+		int k = Math.abs(chunkPos.x - i);
+		int l = Math.abs(chunkPos.z - j);
+		if (k > this.writeRadius || l > this.writeRadius)
+		{
+			return false;
+		}
 		#if POST_MC_1_18_2
-        if (center.isUpgrading()) {
-            LevelHeightAccessor levelHeightAccessor = center.getHeightAccessorForGeneration();
-            if (blockPos.getY() < levelHeightAccessor.getMinBuildHeight() || blockPos.getY() >= levelHeightAccessor.getMaxBuildHeight()) {
-                return false;
-            }
-        }
+		if (center.isUpgrading())
+		{
+			LevelHeightAccessor levelHeightAccessor = center.getHeightAccessorForGeneration();
+			if (blockPos.getY() < levelHeightAccessor.getMinBuildHeight() || blockPos.getY() >= levelHeightAccessor.getMaxBuildHeight())
+			{
+				return false;
+			}
+		}
 		#endif
-        return true;
-    }
+		return true;
+	}
 	#endif
-
+	
 	// TODO Check this
 //	@Override
 //	public List<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos,
 //			StructureFeature<?> structureFeature) {
 //		return structFeat.startsForFeature(sectionPos, structureFeature);
 //	}
-
+	
 	// Skip updating the related tile entities
 	@Override
-	public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j) {
+	public boolean setBlock(BlockPos blockPos, BlockState blockState, int i, int j)
+	{
 		ChunkAccess chunkAccess = this.getChunk(blockPos);
 		if (chunkAccess instanceof LevelChunk)
 			return true;
@@ -146,104 +154,121 @@ public class DhLitWorldGenRegion extends WorldGenRegion
 		// this.getChunk(blockPos).markPosForPostprocessing(blockPos);
 		return true;
 	}
-
+	
 	// Skip Dropping the item on destroy
 	@Override
-	public boolean destroyBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity, int i) {
+	public boolean destroyBlock(BlockPos blockPos, boolean bl, @Nullable Entity entity, int i)
+	{
 		BlockState blockState = this.getBlockState(blockPos);
-		if (blockState.isAir()) {
+		if (blockState.isAir())
+		{
 			return false;
 		}
 		return this.setBlock(blockPos, Blocks.AIR.defaultBlockState(), 3, i);
 	}
-
+	
 	// Skip BlockEntity stuff. It aren't really needed
 	@Override
-	public BlockEntity getBlockEntity(BlockPos blockPos) {
+	public BlockEntity getBlockEntity(BlockPos blockPos)
+	{
 		BlockState blockState = this.getBlockState(blockPos);
-
+		
 		// This is a bypass for the spawner block since MC complains about not having it
 		#if POST_MC_1_17_1
-		if (blockState.getBlock() instanceof SpawnerBlock) {
+		if (blockState.getBlock() instanceof SpawnerBlock)
+		{
 			return ((EntityBlock) blockState.getBlock()).newBlockEntity(blockPos, blockState);
-		} else return null;
+		}
+		else return null;
 		#else
 		if (blockState.getBlock() instanceof SpawnerBlock) {
 			return ((EntityBlock) blockState.getBlock()).newBlockEntity(this);
 		} else return null;
 		#endif
 	}
-
+	
 	// Skip BlockEntity stuff. It aren't really needed
 	@Override
-	public boolean addFreshEntity(Entity entity) {
+	public boolean addFreshEntity(Entity entity)
+	{
 		return true;
 	}
-
+	
 	// Allays have empty chunks even if it's outside the worldGenRegion
 	// @Override
 	// public boolean hasChunk(int i, int j) {
 	// return true;
 	// }
-
+	
 	// Override to ensure no other mod mixins cause skipping the overrided
 	// getChunk(...)
 	@Override
-	public ChunkAccess getChunk(int i, int j) {
+	public ChunkAccess getChunk(int i, int j)
+	{
 		return this.getChunk(i, j, ChunkStatus.EMPTY);
 	}
-
+	
 	// Override to ensure no other mod mixins cause skipping the overrided
 	// getChunk(...)
 	@Override
-	public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus) {
+	public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus)
+	{
 		return this.getChunk(i, j, chunkStatus, true);
 	}
-
+	
 	// Use this instead of super.getChunk() to bypass C2ME concurrency checks
-	private ChunkAccess superGetChunk(int x, int z, ChunkStatus cs) {
+	private ChunkAccess superGetChunk(int x, int z, ChunkStatus cs)
+	{
 		int k = x - firstPos.x;
 		int l = z - firstPos.z;
 		return cache.get(k + l * size);
 	}
-
+	
 	// Use this instead of super.hasChunk() to bypass C2ME concurrency checks
-	public boolean superHasChunk(int x, int z) {
+	public boolean superHasChunk(int x, int z)
+	{
 		int k = x - firstPos.x;
 		int l = z - firstPos.z;
 		return l >= 0 && l < size && k >= 0 && k < size;
 	}
-
+	
 	// Allow creating empty chunks even if it's outside the worldGenRegion
 	@Override
 	@Nullable
-	public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl) {
+	public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus, boolean bl)
+	{
 		ChunkAccess chunk = getChunkAccess(i, j, chunkStatus, bl);
-		if (chunk instanceof LevelChunk) {
-			chunk = new ImposterProtoChunk((LevelChunk) chunk #if POST_MC_1_18_2, true #endif);
+		if (chunk instanceof LevelChunk)
+		{
+			chunk = new ImposterProtoChunk((LevelChunk) chunk #if POST_MC_1_18_2 , true #endif );
 		}
 		return chunk;
 	}
-
+	
 	private static ChunkStatus debugTriggeredForStatus = null;
-
-	private ChunkAccess getChunkAccess(int i, int j, ChunkStatus chunkStatus, boolean bl) {
+	
+	private ChunkAccess getChunkAccess(int i, int j, ChunkStatus chunkStatus, boolean bl)
+	{
 		ChunkAccess chunk = superHasChunk(i, j) ? superGetChunk(i, j, ChunkStatus.EMPTY) : null;
-		if (chunk != null && chunk.getStatus().isOrAfter(chunkStatus)) {
+		if (chunk != null && chunk.getStatus().isOrAfter(chunkStatus))
+		{
 			return chunk;
 		}
 		if (!bl)
 			return null;
-		if (chunk == null) {
+		if (chunk == null)
+		{
 			chunk = chunkMap.get(ChunkPos.asLong(i, j));
-			if (chunk == null) {
+			if (chunk == null)
+			{
 				chunk = generator.generate(i, j);
 				if (chunk == null)
 					throw new NullPointerException("The provided generator should not return null!");
 				chunkMap.put(ChunkPos.asLong(i, j), chunk);
 			}
 		}
-		if (chunkStatus != ChunkStatus.EMPTY && chunkStatus != debugTriggeredForStatus) {
+		if (chunkStatus != ChunkStatus.EMPTY && chunkStatus != debugTriggeredForStatus)
+		{
 			LOGGER.info("WorldGen requiring " + chunkStatus
 					+ " outside expected range detected. Force passing EMPTY chunk and seeing if it works.");
 			debugTriggeredForStatus = chunkStatus;
@@ -265,7 +290,8 @@ public class DhLitWorldGenRegion extends WorldGenRegion
 	
 	/** Overriding allows us to use our own lighting engine */
 	@Override
-	public boolean canSeeSky(BlockPos blockPos) {
+	public boolean canSeeSky(BlockPos blockPos)
+	{
 		return (getBrightness(LightLayer.SKY, blockPos) >= getMaxLightLevel());
 	}
 	
@@ -273,8 +299,9 @@ public class DhLitWorldGenRegion extends WorldGenRegion
 	{
 		return calculateBlockTint(blockPos, colorResolver);
 	}
-
-	private Biome _getBiome(BlockPos pos) {
+	
+	private Biome _getBiome(BlockPos pos)
+	{
 		#if POST_MC_1_18_2
 		return getBiome(pos).value();
 		#else
@@ -307,5 +334,5 @@ public class DhLitWorldGenRegion extends WorldGenRegion
 		}
 		return (k / j & 0xFF) << 16 | (l / j & 0xFF) << 8 | m / j & 0xFF;
 	}
-
+	
 }

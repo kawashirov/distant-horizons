@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers;
 
 import java.util.function.Supplier;
@@ -26,6 +26,6 @@ public class DependencySetupDoneCheck
 	// TODO move to DependencySetup
 	public static boolean isDone = false;
 	// TODO why is this here and what is its purpose?
-	public static Supplier<Boolean> getIsCurrentThreadDistantGeneratorThread = (() -> {return false;});
+	public static Supplier<Boolean> getIsCurrentThreadDistantGeneratorThread = (() -> { return false; });
 	
 }

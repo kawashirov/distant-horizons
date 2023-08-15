@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 
 package com.seibel.distanthorizons.common.wrappers.worldGeneration;
 
@@ -81,7 +81,7 @@ public final class ThreadedParameters
 	public void makeStructFeat(WorldGenLevel genLevel, GlobalParameters param)
 	{
 		#if PRE_MC_1_19_4
-		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, genLevel #if POST_MC_1_18_2, structCheck #endif);
+		structFeat = new WorldGenStructFeatManager(param.worldGenSettings, genLevel #if POST_MC_1_18_2 , structCheck #endif );
 		#else
 		structFeat = new WorldGenStructFeatManager(param.worldOptions, genLevel, structCheck);
 		#endif

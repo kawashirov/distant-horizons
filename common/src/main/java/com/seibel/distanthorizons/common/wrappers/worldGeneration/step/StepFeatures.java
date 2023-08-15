@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.worldGeneration.step;
 
 import java.util.ArrayList;
@@ -35,12 +35,13 @@ import net.minecraft.world.level.levelgen.Heightmap;
 #if POST_MC_1_18_2
 #endif
 
-public final class StepFeatures {
+public final class StepFeatures
+{
 	/**
-	 * 
+	 *
 	 */
 	private final BatchGenerationEnvironment environment;
-
+	
 	/**
 	 * @param batchGenerationEnvironment
 	 */
@@ -48,11 +49,13 @@ public final class StepFeatures {
 	{
 		environment = batchGenerationEnvironment;
 	}
-
+	
 	public final ChunkStatus STATUS = ChunkStatus.FEATURES;
-
-	public void generateGroup(ThreadedParameters tParams, DhLitWorldGenRegion worldGenRegion,
-			ArrayGridList<ChunkWrapper> chunkWrappers) {
+	
+	public void generateGroup(
+			ThreadedParameters tParams, DhLitWorldGenRegion worldGenRegion,
+			ArrayGridList<ChunkWrapper> chunkWrappers)
+	{
 		ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
 		
 		for (ChunkWrapper chunkWrapper : chunkWrappers)
@@ -63,8 +66,10 @@ public final class StepFeatures {
 			chunksToDo.add(chunk);
 		}
 		
-		for (ChunkAccess chunk : chunksToDo) {
-			try {
+		for (ChunkAccess chunk : chunksToDo)
+		{
+			try
+			{
 				#if PRE_MC_1_18_2
 				worldGenRegion.setOverrideCenter(chunk.getPos());
 				environment.params.generator.applyBiomeDecoration(worldGenRegion, tParams.structFeat);
@@ -76,11 +81,14 @@ public final class StepFeatures {
 				Heightmap.primeHeightmaps(chunk, STATUS.heightmapsAfter());
 				BatchGenerationEnvironment.clearDistantGenerationMixinData();
 				#endif
-			} catch (ReportedException e) {
+			}
+			catch (ReportedException e)
+			{
 				e.printStackTrace();
 				// FIXME: Features concurrent modification issue. Something about cocobeans might just
 				// error out. For now just retry.
 			}
 		}
 	}
+	
 }

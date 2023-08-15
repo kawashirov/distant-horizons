@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.worldGeneration.step;
 
 import java.util.ArrayList;
@@ -31,12 +31,13 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ProtoChunk;
 
-public final class StepSurface {
+public final class StepSurface
+{
 	/**
-	 * 
+	 *
 	 */
 	private final BatchGenerationEnvironment environment;
-
+	
 	/**
 	 * @param batchGenerationEnvironment
 	 */
@@ -44,11 +45,13 @@ public final class StepSurface {
 	{
 		environment = batchGenerationEnvironment;
 	}
-
+	
 	public final ChunkStatus STATUS = ChunkStatus.SURFACE;
-
-	public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
-			List<ChunkWrapper> chunkWrappers) {
+	
+	public void generateGroup(
+			ThreadedParameters tParams, WorldGenRegion worldGenRegion,
+			List<ChunkWrapper> chunkWrappers)
+	{
 		ArrayList<ChunkAccess> chunksToDo = new ArrayList<>();
 		
 		for (ChunkWrapper chunkWrapper : chunkWrappers)
@@ -59,7 +62,8 @@ public final class StepSurface {
 			chunksToDo.add(chunk);
 		}
 		
-		for (ChunkAccess chunk : chunksToDo) {
+		for (ChunkAccess chunk : chunksToDo)
+		{
 			// System.out.println("StepSurface: "+chunk.getPos());
 			#if PRE_MC_1_18_2
 			environment.params.generator.buildSurfaceAndBedrock(worldGenRegion, chunk);
@@ -70,4 +74,5 @@ public final class StepSurface {
 			#endif
 		}
 	}
+	
 }

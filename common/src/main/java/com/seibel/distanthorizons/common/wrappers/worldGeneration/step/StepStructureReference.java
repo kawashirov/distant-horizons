@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.worldGeneration.step;
 
 import java.util.ArrayList;
@@ -33,12 +33,13 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ProtoChunk;
 
-public final class StepStructureReference {
+public final class StepStructureReference
+{
 	/**
-	 * 
+	 *
 	 */
 	private final BatchGenerationEnvironment environment;
-
+	
 	/**
 	 * @param batchGenerationEnvironment
 	 */
@@ -46,12 +47,14 @@ public final class StepStructureReference {
 	{
 		environment = batchGenerationEnvironment;
 	}
-
+	
 	public final ChunkStatus STATUS = ChunkStatus.STRUCTURE_REFERENCES;
-
-	public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
-			List<ChunkWrapper> chunkWrappers) {
-
+	
+	public void generateGroup(
+			ThreadedParameters tParams, WorldGenRegion worldGenRegion,
+			List<ChunkWrapper> chunkWrappers)
+	{
+		
 		ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
 		
 		for (ChunkWrapper chunkWrapper : chunkWrappers)
@@ -62,9 +65,11 @@ public final class StepStructureReference {
 			chunksToDo.add(chunk);
 		}
 		
-		for (ChunkAccess chunk : chunksToDo) {
+		for (ChunkAccess chunk : chunksToDo)
+		{
 			// System.out.println("StepStructureReference: "+chunk.getPos());
 			environment.params.generator.createReferences(worldGenRegion, tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk);
 		}
 	}
+	
 }

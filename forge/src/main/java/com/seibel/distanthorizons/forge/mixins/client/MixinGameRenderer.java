@@ -16,27 +16,31 @@ public class MixinGameRenderer
 {
 	private static final Logger LOGGER = LogManager.getLogger(MixinGameRenderer.class.getSimpleName());
 	
-    #if POST_MC_1_17_1
-    // FIXME: This I think will dup multiple renderStartupEvent calls...
-    @Inject(method = {"reloadShaders", "preloadUiShader"}, at = @At("TAIL"))
-    public void onStartupShaders(CallbackInfo ci) {
-        LOGGER.info("Starting up renderer (forge)");
-        if (!DependencySetupDoneCheck.isDone) {
-            LOGGER.warn("Dependency setup is not done yet, skipping renderer this startup event!");
-            return;
-        }
-        ClientApi.INSTANCE.rendererStartupEvent();
-    }
+	#if POST_MC_1_17_1
+	// FIXME: This I think will dup multiple renderStartupEvent calls...
+	@Inject(method = {"reloadShaders", "preloadUiShader"}, at = @At("TAIL"))
+	public void onStartupShaders(CallbackInfo ci)
+	{
+		LOGGER.info("Starting up renderer (forge)");
+		if (!DependencySetupDoneCheck.isDone)
+		{
+			LOGGER.warn("Dependency setup is not done yet, skipping renderer this startup event!");
+			return;
+		}
+		ClientApi.INSTANCE.rendererStartupEvent();
+	}
 	
 	@Inject(method = "shutdownShaders", at = @At("HEAD"))
-    public void onShutdownShaders(CallbackInfo ci) {
-        LOGGER.info("Shutting down renderer (forge)");
-        if (!DependencySetupDoneCheck.isDone) {
-            LOGGER.warn("Dependency setup is not done yet, skipping renderer this shutdown event!");
-            return;
-        }
-        ClientApi.INSTANCE.rendererShutdownEvent();
-    }
+	public void onShutdownShaders(CallbackInfo ci)
+	{
+		LOGGER.info("Shutting down renderer (forge)");
+		if (!DependencySetupDoneCheck.isDone)
+		{
+			LOGGER.warn("Dependency setup is not done yet, skipping renderer this shutdown event!");
+			return;
+		}
+		ClientApi.INSTANCE.rendererShutdownEvent();
+	}
     #else
     
 	

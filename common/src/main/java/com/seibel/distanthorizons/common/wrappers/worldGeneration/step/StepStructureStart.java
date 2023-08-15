@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.worldGeneration.step;
 
 import java.util.ArrayList;
@@ -38,7 +38,7 @@ public final class StepStructureStart
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 	
 	private final BatchGenerationEnvironment environment;
-
+	
 	/**
 	 * @param batchGenerationEnvironment
 	 */
@@ -46,20 +46,24 @@ public final class StepStructureStart
 	{
 		environment = batchGenerationEnvironment;
 	}
-
+	
 	public final ChunkStatus STATUS = ChunkStatus.STRUCTURE_STARTS;
 	
-	public static class StructStartCorruptedException extends RuntimeException {
+	public static class StructStartCorruptedException extends RuntimeException
+	{
 		private static final long serialVersionUID = -8987434342051563358L;
-
-		public StructStartCorruptedException(ArrayIndexOutOfBoundsException e) {
+		
+		public StructStartCorruptedException(ArrayIndexOutOfBoundsException e)
+		{
 			super("StructStartCorruptedException");
 			super.initCause(e);
 			fillInStackTrace();
 		}
+		
 	}
-
-	public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
+	
+	public void generateGroup(
+			ThreadedParameters tParams, WorldGenRegion worldGenRegion,
 			List<ChunkWrapper> chunkWrappers)
 	{
 		ArrayList<ChunkAccess> chunksToDo = new ArrayList<>();
@@ -75,11 +79,13 @@ public final class StepStructureStart
 		}
 		
 		#if PRE_MC_1_19_2
-		if (environment.params.worldGenSettings.generateFeatures()) {
+		if (environment.params.worldGenSettings.generateFeatures())
+		{
 		#elif PRE_MC_1_19_4
 		if (environment.params.worldGenSettings.generateStructures()) {
 		#else
-		if (environment.params.worldOptions.generateStructures()) {
+		if (environment.params.worldOptions.generateStructures())
+		{
 		#endif
 			for (ChunkAccess chunk : chunksToDo)
 			{
@@ -117,7 +123,7 @@ public final class StepStructureStart
 					catch (ArrayIndexOutOfBoundsException secondEx)
 					{
 						// the structure logic failed again, log it and move on
-						LOGGER.error("Unable to create structure starts for "+chunk.getPos()+". This is an error with MC's world generation. Ignoring and continuing generation. Error: "+secondEx.getMessage()); // don't log the full stack trace since it is long and will generally end up in MC's code
+						LOGGER.error("Unable to create structure starts for " + chunk.getPos() + ". This is an error with MC's world generation. Ignoring and continuing generation. Error: " + secondEx.getMessage()); // don't log the full stack trace since it is long and will generally end up in MC's code
 						
 						//throw new StepStructureStart.StructStartCorruptedException(secondEx);
 					}
@@ -126,4 +132,5 @@ public final class StepStructureStart
 			}
 		}
 	}
+	
 }

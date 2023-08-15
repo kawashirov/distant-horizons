@@ -71,12 +71,13 @@ public class MixinLevelRenderer
 	private ClientLevel level;
 	@Unique
 	private static float previousPartialTicks = 0;
-
+	
 	// TODO: Is there any reason why this is here? Can it be deleted?
-	public MixinLevelRenderer() {
+	public MixinLevelRenderer()
+	{
 		throw new NullPointerException("Null cannot be cast to non-null type.");
 	}
-
+	
 	#if PRE_MC_1_17_1
 	@Inject(at = @At("RETURN"), method = "renderSky(Lcom/mojang/blaze3d/vertex/PoseStack;F)V")
 	private void renderSky(PoseStack matrixStackIn, float partialTicks, CallbackInfo callback)
@@ -97,10 +98,10 @@ public class MixinLevelRenderer
 			cancellable = true)
 	private void renderChunkLayer(RenderType renderType, PoseStack matrixStackIn, double xIn, double yIn, double zIn, CallbackInfo callback)
 	#elif PRE_MC_1_19_4
-    @Inject(at = @At("HEAD"),
-            method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V",
-            cancellable = true)
-    private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
+	@Inject(at = @At("HEAD"),
+			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V",
+			cancellable = true)
+	private void renderChunkLayer(RenderType renderType, PoseStack modelViewMatrixStack, double cameraXBlockPos, double cameraYBlockPos, double cameraZBlockPos, Matrix4f projectionMatrix, CallbackInfo callback)
 	#else
 	@Inject(at = @At("HEAD"),
 			method = "renderChunkLayer(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLorg/joml/Matrix4f;)V",
@@ -146,38 +147,38 @@ public class MixinLevelRenderer
 			}
 		}
 		
-		if (Config.Client.Advanced.Debugging.lodOnlyMode.get()) 
+		if (Config.Client.Advanced.Debugging.lodOnlyMode.get())
 		{
 			callback.cancel();
 		}
 	}
 	
 	@Redirect(method =
-                "Lnet/minecraft/client/renderer/LevelRenderer;" +
-                "renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;" +
-                "FJZLnet/minecraft/client/Camera;" +
-                "Lnet/minecraft/client/renderer/GameRenderer;" +
-                "Lnet/minecraft/client/renderer/LightTexture;" +
+			"Lnet/minecraft/client/renderer/LevelRenderer;" +
+					"renderLevel(Lcom/mojang/blaze3d/vertex/PoseStack;" +
+					"FJZLnet/minecraft/client/Camera;" +
+					"Lnet/minecraft/client/renderer/GameRenderer;" +
+					"Lnet/minecraft/client/renderer/LightTexture;" +
                 #if PRE_MC_1_19_4
-                "Lcom/mojang/math/Matrix4f;)V"
-                #else
-                "Lorg/joml/Matrix4f;)V"
-                #endif
-            ,
-            at = @At(
-            value = "INVOKE",
-            #if PRE_MC_1_20_1
-            target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runUpdates(IZZ)I"
-            #else
-            target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runLightUpdates()I"
-            #endif
-            ))
-	private int callAfterRunUpdates(LevelLightEngine light #if PRE_MC_1_20_1 , int pos, boolean isQueueEmpty, boolean updateBlockLight #endif)
+					"Lcom/mojang/math/Matrix4f;)V"
+			#else
+				"Lorg/joml/Matrix4f;)V"
+		#endif
+			,
+			at = @At(
+					value = "INVOKE",
+					#if PRE_MC_1_20_1
+					target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runUpdates(IZZ)I"
+					#else
+					target = "Lnet/minecraft/world/level/lighting/LevelLightEngine;runLightUpdates()I"
+					#endif
+			))
+	private int callAfterRunUpdates(LevelLightEngine light #if PRE_MC_1_20_1 , int pos, boolean isQueueEmpty, boolean updateBlockLight #endif )
 	{
         #if PRE_MC_1_20_1
 		int r = light.runUpdates(pos, isQueueEmpty, updateBlockLight);
         #else
-        int r = light.runLightUpdates();
+		int r = light.runLightUpdates();
         #endif
 		ChunkWrapper.syncedUpdateClientLightStatus();
 		return r;

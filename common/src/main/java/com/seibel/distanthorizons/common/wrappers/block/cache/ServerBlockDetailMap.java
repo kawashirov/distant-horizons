@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.block.cache;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,10 +32,12 @@ public class ServerBlockDetailMap
 	//private final ConcurrentHashMap<#if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif, Biome> biomeMap = new ConcurrentHashMap<>();
 	private final ServerLevelWrapper level;
 	public ServerBlockDetailMap(ServerLevelWrapper level) { this.level = level; }
-
-	public ServerBlockStateCache getBlockStateData(BlockState state, DhBlockPos pos) { //TODO: Allow a per pos unique setting
-		return blockCache.computeIfAbsent(state, (s) -> new ServerBlockStateCache(s, level, new DhBlockPos(0,0,0)));
+	
+	public ServerBlockStateCache getBlockStateData(BlockState state, DhBlockPos pos)
+	{ //TODO: Allow a per pos unique setting
+		return blockCache.computeIfAbsent(state, (s) -> new ServerBlockStateCache(s, level, new DhBlockPos(0, 0, 0)));
 	}
-
+	
 	public void clear() { blockCache.clear(); }
+	
 }

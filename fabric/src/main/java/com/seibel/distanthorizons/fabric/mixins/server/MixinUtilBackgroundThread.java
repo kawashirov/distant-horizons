@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.fabric.mixins.server;
 
 import java.util.concurrent.ExecutorService;
@@ -35,10 +35,11 @@ import net.minecraft.Util;
 @Mixin(Util.class)
 public class MixinUtilBackgroundThread
 {
-	private static boolean shouldApplyOverride() {
+	private static boolean shouldApplyOverride()
+	{
 		return FabricServerProxy.isGenerationThreadChecker != null && FabricServerProxy.isGenerationThreadChecker.get();
 	}
-
+	
 	@Inject(method = "backgroundExecutor", at = @At("HEAD"), cancellable = true)
 	private static void overrideUtil$backgroundExecutor(CallbackInfoReturnable<ExecutorService> ci)
 	{
@@ -48,7 +49,7 @@ public class MixinUtilBackgroundThread
 			ci.setReturnValue(new DummyRunExecutorService());
 		}
 	}
-
+	
 	#if POST_MC_1_17_1
 	@Inject(method = "wrapThreadWithTaskName(Ljava/lang/String;Ljava/lang/Runnable;)Ljava/lang/Runnable;",
 			at = @At("HEAD"), cancellable = true)
@@ -73,5 +74,5 @@ public class MixinUtilBackgroundThread
 		}
 	}
 	#endif
-
+	
 }

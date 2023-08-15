@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers;
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.IVersionConstants;
@@ -43,25 +43,27 @@ public class VersionConstants implements IVersionConstants
 	{
 		return 0;
 	}
-
+	
 	@Override
 	public int getWorldGenerationCountPerThread()
 	{
 		return 1;
 	}
-
+	
 	@Override
 	public boolean isVanillaRenderedChunkSquare()
 	{
 		return false;
 	}
-
+	
 	@Override
-	public String getMinecraftVersion() {
+	public String getMinecraftVersion()
+	{
 		#if PRE_MC_1_19_2
 		return Minecraft.getInstance().getGame().getVersion().getId();
 		#else
 		return SharedConstants.getCurrentVersion().getId();
 		#endif
 	}
+	
 }

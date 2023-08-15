@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject;
 
 import java.util.Iterator;
@@ -59,40 +59,45 @@ import net.minecraft.world.level.levelgen.feature.StructureFeature;
 
 
 
-public class WorldGenStructFeatManager extends #if PRE_MC_1_19_2 StructureFeatureManager #else StructureManager #endif 
+public class WorldGenStructFeatManager extends #if PRE_MC_1_19_2 StructureFeatureManager #else StructureManager #endif
 {
 	final WorldGenLevel genLevel;
-
+	
 	#if PRE_MC_1_19_4
 	WorldGenSettings worldGenSettings;
 	#else
 	WorldOptions worldOptions;
 	#endif
-
+	
 	#if POST_MC_1_18_2
 	StructureCheck structureCheck;
 	#endif
-
+	
 	#if PRE_MC_1_19_4
-	public WorldGenStructFeatManager(WorldGenSettings worldGenSettings,
-									 WorldGenLevel genLevel #if POST_MC_1_18_2 , StructureCheck structureCheck #endif ) {
-
+	public WorldGenStructFeatManager(
+			WorldGenSettings worldGenSettings,
+			WorldGenLevel genLevel #if POST_MC_1_18_2 , StructureCheck structureCheck #endif )
+	{
+		
 		super(genLevel, worldGenSettings #if POST_MC_1_18_2 , structureCheck #endif );
 		this.genLevel = genLevel;
 		this.worldGenSettings = worldGenSettings;
 	}
 	#else
-	public WorldGenStructFeatManager(WorldOptions worldOptions,
-									 WorldGenLevel genLevel, StructureCheck structureCheck) {
-
+	public WorldGenStructFeatManager(
+			WorldOptions worldOptions,
+			WorldGenLevel genLevel, StructureCheck structureCheck)
+	{
+		
 		super(genLevel, worldOptions, structureCheck);
 		this.genLevel = genLevel;
 		this.worldOptions = worldOptions;
 	}
 	#endif
-
+	
 	@Override
-	public WorldGenStructFeatManager forWorldGenRegion(WorldGenRegion worldGenRegion) {
+	public WorldGenStructFeatManager forWorldGenRegion(WorldGenRegion worldGenRegion)
+	{
 		if (worldGenRegion == genLevel)
 			return this;
 	#if PRE_MC_1_19_4
@@ -101,19 +106,22 @@ public class WorldGenStructFeatManager extends #if PRE_MC_1_19_2 StructureFeatur
 		return new WorldGenStructFeatManager(worldOptions, worldGenRegion, structureCheck);
 	#endif
 	}
-
-	private ChunkAccess _getChunk(int x, int z, ChunkStatus status) {
+	
+	private ChunkAccess _getChunk(int x, int z, ChunkStatus status)
+	{
 		if (genLevel == null) return null;
 		return genLevel.getChunk(x, z, status, false);
 	}
-
+	
 	#if PRE_MC_1_18_2
 	@Override
-	public Stream<? extends StructureStart<?>> startsForFeature(SectionPos sectionPos2,
-																StructureFeature<?> structureFeature) {
+	public Stream<? extends StructureStart<?>> startsForFeature(
+			SectionPos sectionPos2,
+			StructureFeature<?> structureFeature)
+	{
 		ChunkAccess chunk = _getChunk(sectionPos2.x(), sectionPos2.z(), ChunkStatus.STRUCTURE_REFERENCES);
 		if (chunk == null) return Stream.empty();
-
+		
 		return chunk.getReferencesForFeature(structureFeature).stream().map(pos -> {
 			SectionPos sectPos = SectionPos.of(ChunkPos.getX(pos), 0, ChunkPos.getZ(pos));
 			ChunkAccess startChunk = _getChunk(sectPos.x(), sectPos.z(), ChunkStatus.STRUCTURE_STARTS);
@@ -123,13 +131,14 @@ public class WorldGenStructFeatManager extends #if PRE_MC_1_19_2 StructureFeatur
 	}
 	#else
 	@Override
-	public boolean hasAnyStructureAt(BlockPos blockPos) {
+	public boolean hasAnyStructureAt(BlockPos blockPos)
+	{
 		SectionPos sectionPos = SectionPos.of(blockPos);
 		ChunkAccess chunk = _getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES);
 		if (chunk == null) return false;
 		return chunk.hasAnyStructureReferences();
 	}
-
+	
 	#if MC_1_18_1
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -157,34 +166,38 @@ public class WorldGenStructFeatManager extends #if PRE_MC_1_19_2 StructureFeatur
 	#else
 	#if PRE_MC_1_19_2
 	@Override
-	public List<StructureStart> startsForFeature(SectionPos sectionPos, Predicate<ConfiguredStructureFeature<?, ?>> predicate) {
+	public List<StructureStart> startsForFeature(SectionPos sectionPos, Predicate<ConfiguredStructureFeature<?, ?>> predicate)
+	{
 		ChunkAccess chunk = _getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES);
 		if (chunk == null) return List.of();
-
+		
 		// Copied from StructureFeatureManager::startsForFeature(...)
 		Map<ConfiguredStructureFeature<?, ?>, LongSet> map = chunk.getAllReferences();
-
+		
 		ImmutableList.Builder<StructureStart> builder = ImmutableList.builder();
 		Iterator<Map.Entry<ConfiguredStructureFeature<?, ?>, LongSet>> var5 = map.entrySet().iterator();
-
-		while(var5.hasNext()) {
+		
+		while (var5.hasNext())
+		{
 			Map.Entry<ConfiguredStructureFeature<?, ?>, LongSet> entry = var5.next();
 			ConfiguredStructureFeature<?, ?> configuredStructureFeature = entry.getKey();
-			if (predicate.test(configuredStructureFeature)) {
-				LongSet var10002 = (LongSet)entry.getValue();
+			if (predicate.test(configuredStructureFeature))
+			{
+				LongSet var10002 = (LongSet) entry.getValue();
 				Objects.requireNonNull(builder);
 				this.fillStartsForFeature(configuredStructureFeature, var10002, builder::add);
 			}
 		}
-
+		
 		return builder.build();
 	}
-
+	
 	@Override
-	public List<StructureStart> startsForFeature(SectionPos sectionPos, ConfiguredStructureFeature<?, ?> configuredStructureFeature) {
+	public List<StructureStart> startsForFeature(SectionPos sectionPos, ConfiguredStructureFeature<?, ?> configuredStructureFeature)
+	{
 		ChunkAccess chunk = _getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES);
 		if (chunk == null) return (List<StructureStart>) Stream.empty();
-
+		
 		// Copied from StructureFeatureManager::startsForFeature(...)
 		LongSet longSet = chunk.getReferencesForFeature(configuredStructureFeature);
 		ImmutableList.Builder<StructureStart> builder = ImmutableList.builder();
@@ -192,44 +205,49 @@ public class WorldGenStructFeatManager extends #if PRE_MC_1_19_2 StructureFeatur
 		this.fillStartsForFeature(configuredStructureFeature, longSet, builder::add);
 		return builder.build();
 	}
-
+	
 	@Override
-	public Map<ConfiguredStructureFeature<?, ?>, LongSet> getAllStructuresAt(BlockPos blockPos) {
+	public Map<ConfiguredStructureFeature<?, ?>, LongSet> getAllStructuresAt(BlockPos blockPos)
+	{
 		SectionPos sectionPos = SectionPos.of(blockPos);
 		ChunkAccess chunk = _getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES);
 		if (chunk == null) return (Map<ConfiguredStructureFeature<?, ?>, LongSet>) Stream.empty();
-			return chunk.getAllReferences();
+		return chunk.getAllReferences();
 	}
 	#else
 	@Override
-	public List<StructureStart> startsForStructure(ChunkPos sectionPos, Predicate<Structure> predicate) {
+	public List<StructureStart> startsForStructure(ChunkPos sectionPos, Predicate<Structure> predicate)
+	{
 		ChunkAccess chunk = _getChunk(sectionPos.x, sectionPos.z, ChunkStatus.STRUCTURE_REFERENCES);
 		if (chunk == null) return List.of();
-
+		
 		// Copied from StructureFeatureManager::startsForFeature(...)
 		Map<Structure, LongSet> map = chunk.getAllReferences();
-
+		
 		ImmutableList.Builder<StructureStart> builder = ImmutableList.builder();
 		Iterator<Map.Entry<Structure, LongSet>> var5 = map.entrySet().iterator();
-
-		while (var5.hasNext()) {
+		
+		while (var5.hasNext())
+		{
 			Map.Entry<Structure, LongSet> entry = var5.next();
 			Structure configuredStructureFeature = entry.getKey();
-			if (predicate.test(configuredStructureFeature)) {
+			if (predicate.test(configuredStructureFeature))
+			{
 				LongSet var10002 = (LongSet) entry.getValue();
 				Objects.requireNonNull(builder);
 				this.fillStartsForStructure(configuredStructureFeature, var10002, builder::add);
 			}
 		}
-
+		
 		return builder.build();
 	}
-
+	
 	@Override
-	public List<StructureStart> startsForStructure(SectionPos sectionPos, Structure structure) {
+	public List<StructureStart> startsForStructure(SectionPos sectionPos, Structure structure)
+	{
 		ChunkAccess chunk = _getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES);
 		if (chunk == null) return (List<StructureStart>) Stream.empty();
-
+		
 		// Copied from StructureFeatureManager::startsForFeature(...)
 		LongSet longSet = chunk.getReferencesForStructure(structure);
 		ImmutableList.Builder<StructureStart> builder = ImmutableList.builder();
@@ -237,9 +255,10 @@ public class WorldGenStructFeatManager extends #if PRE_MC_1_19_2 StructureFeatur
 		this.fillStartsForStructure(structure, longSet, builder::add);
 		return builder.build();
 	}
-
+	
 	@Override
-	public Map<Structure, LongSet> getAllStructuresAt(BlockPos blockPos) {
+	public Map<Structure, LongSet> getAllStructuresAt(BlockPos blockPos)
+	{
 		SectionPos sectionPos = SectionPos.of(blockPos);
 		ChunkAccess chunk = _getChunk(sectionPos.x(), sectionPos.z(), ChunkStatus.STRUCTURE_REFERENCES);
 		if (chunk == null) return (Map<Structure, LongSet>) Stream.empty();

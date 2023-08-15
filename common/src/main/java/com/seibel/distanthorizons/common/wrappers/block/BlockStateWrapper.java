@@ -40,7 +40,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 	
 	public static final BlockStateWrapper AIR = new BlockStateWrapper(null);
-    public static final ConcurrentHashMap<BlockState, BlockStateWrapper> cache = new ConcurrentHashMap<>();
+	public static final ConcurrentHashMap<BlockState, BlockStateWrapper> cache = new ConcurrentHashMap<>();
 	
 	/**
 	 * Cached so it can be quickly used as a semi-stable hashing method. <br>
@@ -53,22 +53,22 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	// constructors //
 	//==============//
 	
-    public static BlockStateWrapper fromBlockState(BlockState blockState)
+	public static BlockStateWrapper fromBlockState(BlockState blockState)
 	{
-        if (blockState == null || blockState.isAir())
-        {
-	        return AIR;
-        }
+		if (blockState == null || blockState.isAir())
+		{
+			return AIR;
+		}
 		
-        return cache.computeIfAbsent(blockState, BlockStateWrapper::new);
-    }
-
-    public final BlockState blockState;
-    BlockStateWrapper(BlockState blockState)
-    {
-        this.blockState = blockState;
-        LOGGER.trace("Created BlockStateWrapper for ["+blockState+"]");
-    }
+		return cache.computeIfAbsent(blockState, BlockStateWrapper::new);
+	}
+	
+	public final BlockState blockState;
+	BlockStateWrapper(BlockState blockState)
+	{
+		this.blockState = blockState;
+		LOGGER.trace("Created BlockStateWrapper for [" + blockState + "]");
+	}
 	
 	
 	
@@ -97,7 +97,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	
 	
 	@Override
-    public String serialize() // FIXME pass in level to prevent null pointers (or maybe just RegistryAccess?)
+	public String serialize() // FIXME pass in level to prevent null pointers (or maybe just RegistryAccess?)
 	{
 		// cache the serialization result so it can be quickly used as a semi-stable hashing method
 		if (this.serializationResult == null)
@@ -120,7 +120,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 			
 			if (resourceLocation == null)
 			{
-				LOGGER.warn("unable to serialize: "+this.blockState);
+				LOGGER.warn("unable to serialize: " + this.blockState);
 			}
 			
 			this.serializationResult = resourceLocation.getNamespace() + RESOURCE_LOCATION_SEPARATOR + resourceLocation.getPath()
@@ -144,18 +144,18 @@ public class BlockStateWrapper implements IBlockStateWrapper
 		int stateSeparatorIndex = resourceStateString.indexOf(STATE_STRING_SEPARATOR);
 		if (stateSeparatorIndex == -1)
 		{
-			throw new IOException("Unable to parse BlockState out of string: ["+resourceStateString+"].");
+			throw new IOException("Unable to parse BlockState out of string: [" + resourceStateString + "].");
 		}
-		String blockStatePropertiesString = resourceStateString.substring(stateSeparatorIndex+STATE_STRING_SEPARATOR.length());
-		resourceStateString =  resourceStateString.substring(0, stateSeparatorIndex);
+		String blockStatePropertiesString = resourceStateString.substring(stateSeparatorIndex + STATE_STRING_SEPARATOR.length());
+		resourceStateString = resourceStateString.substring(0, stateSeparatorIndex);
 		
 		// parse the resource location
 		int resourceSeparatorIndex = resourceStateString.indexOf(RESOURCE_LOCATION_SEPARATOR);
 		if (resourceSeparatorIndex == -1)
 		{
-			throw new IOException("Unable to parse Resource Location out of string: ["+resourceStateString+"].");
+			throw new IOException("Unable to parse Resource Location out of string: [" + resourceStateString + "].");
 		}
-		ResourceLocation resourceLocation = new ResourceLocation(resourceStateString.substring(0, resourceSeparatorIndex), resourceStateString.substring(resourceSeparatorIndex+1));
+		ResourceLocation resourceLocation = new ResourceLocation(resourceStateString.substring(0, resourceSeparatorIndex), resourceStateString.substring(resourceSeparatorIndex + 1));
 		
 		
 		
@@ -190,16 +190,16 @@ public class BlockStateWrapper implements IBlockStateWrapper
 			// use the default if no state was found
 			if (foundState == null)
 			{
-				LOGGER.warn("Unable to find BlockState for Block ["+resourceLocation+"] with properties: ["+blockStatePropertiesString+"].");
+				LOGGER.warn("Unable to find BlockState for Block [" + resourceLocation + "] with properties: [" + blockStatePropertiesString + "].");
 				foundState = block.defaultBlockState();
 			}
 			return new BlockStateWrapper(foundState);
 		}
 		catch (Exception e)
 		{
-			throw new IOException("Failed to deserialize the string ["+resourceStateString+"] into a BlockStateWrapper: "+e.getMessage(), e);
+			throw new IOException("Failed to deserialize the string [" + resourceStateString + "] into a BlockStateWrapper: " + e.getMessage(), e);
 		}
-    }
+	}
 	
 	/** used to compare and save BlockStates based on their properties */
 	private static String serializeBlockStateProperties(BlockState blockState)
@@ -209,7 +209,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 		
 		// alphabetically sort the list so they are always in the same order
 		List<net.minecraft.world.level.block.state.properties.Property<?>> sortedBlockPropteryList = new ArrayList<>(blockPropertyCollection);
-		sortedBlockPropteryList.sort((a,b) -> a.getName().compareTo(b.getName()));
+		sortedBlockPropteryList.sort((a, b) -> a.getName().compareTo(b.getName()));
 		
 		
 		StringBuilder stringBuilder = new StringBuilder();
@@ -232,26 +232,26 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	}
 	
 	
-    @Override
-    public boolean equals(Object obj) 
-    {
-        if (this == obj) 
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj)
 		{
 			return true;
-        }
+		}
 		
-        if (obj == null || this.getClass() != obj.getClass())
-        {
+		if (obj == null || this.getClass() != obj.getClass())
+		{
 			return false;
-        }
+		}
 		
-        BlockStateWrapper that = (BlockStateWrapper) obj;
-	    // the serialized value is used so we can test the contents instead of the references
-        return Objects.equals(this.serialize(), that.serialize());
-    }
-
-    @Override
-    public int hashCode() { return Objects.hash(this.serialize()); }
+		BlockStateWrapper that = (BlockStateWrapper) obj;
+		// the serialized value is used so we can test the contents instead of the references
+		return Objects.equals(this.serialize(), that.serialize());
+	}
+	
+	@Override
+	public int hashCode() { return Objects.hash(this.serialize()); }
 	
 	
 	@Override
@@ -262,17 +262,17 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	public boolean isAir(BlockState blockState) { return blockState == null || blockState.isAir(); }
 	
 	@Override
-	public boolean isSolid() 
+	public boolean isSolid()
 	{
         #if PRE_MC_1_20_1
-        return this.blockState.getMaterial().isSolid();
+		return this.blockState.getMaterial().isSolid();
         #else
-        return !this.blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).isEmpty();
+		return !this.blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).isEmpty();
         #endif
-    }
+	}
 	
 	@Override
-	public boolean isLiquid() 
+	public boolean isLiquid()
 	{
 		if (this.isAir())
 		{
@@ -280,11 +280,11 @@ public class BlockStateWrapper implements IBlockStateWrapper
 		}
 		
         #if PRE_MC_1_20_1
-        return this.blockState.getMaterial().isLiquid();
+		return this.blockState.getMaterial().isLiquid();
         #else
-        return !this.blockState.getFluidState().isEmpty();
+		return !this.blockState.getFluidState().isEmpty();
         #endif
-    }
+	}
 	
 	@Override
 	public String toString() { return this.serialize(); }

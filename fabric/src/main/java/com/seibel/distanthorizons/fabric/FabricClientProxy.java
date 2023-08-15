@@ -67,7 +67,7 @@ import org.lwjgl.opengl.GL15;
 /**
  * This handles all events sent to the client,
  * and is the starting point for most of the mod.
- * 
+ *
  * @author coolGi
  * @author Ran
  * @version 2023-7-27
@@ -80,7 +80,7 @@ public class FabricClientProxy
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 	
 	// TODO we shouldn't be filtering keys on the Forge/Fabric side, only in ClientApi
-	private static final int[] KEY_TO_CHECK_FOR = { GLFW.GLFW_KEY_F6, GLFW.GLFW_KEY_F8, GLFW.GLFW_KEY_P};
+	private static final int[] KEY_TO_CHECK_FOR = {GLFW.GLFW_KEY_F6, GLFW.GLFW_KEY_F8, GLFW.GLFW_KEY_P};
 	
 	HashSet<Integer> previouslyPressKeyCodes = new HashSet<>();
 	
@@ -88,6 +88,7 @@ public class FabricClientProxy
 	
 	/**
 	 * Registers Fabric Events
+	 *
 	 * @author Ran
 	 */
 	public void registerEvents()
@@ -148,7 +149,7 @@ public class FabricClientProxy
 		});
 		
 		// (kinda) block place event
-		UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> 
+		UseBlockCallback.EVENT.register((player, level, hand, hitResult) ->
 		{
 			// if we have access to the server, use the chunk save event instead 
 			if (MC.clientConnectedToDedicatedServer())
@@ -189,50 +190,50 @@ public class FabricClientProxy
 		// render event //
 		//==============//
 
-		//Define this in the MixinLevelRenderer so that it works with sodium without any changes to the code
-		// TODO: If all else is fine, can we remove these commented code
+        //Define this in the MixinLevelRenderer so that it works with sodium without any changes to the code
+        // TODO: If all else is fine, can we remove these commented code
 		// Client Render Level
-//		WorldRenderEvents.AFTER_SETUP.register((renderContext) ->
-//		{
-//			if (sodiumAccessor != null)
-//			{
-//				sodiumAccessor.levelWrapper = ClientLevelWrapper.getWrapper(renderContext.world());
-//				sodiumAccessor.mcModelViewMatrix = McObjectConverter.Convert(renderContext.matrixStack().last().pose());
-//				sodiumAccessor.mcProjectionMatrix = McObjectConverter.Convert(renderContext.projectionMatrix());
-//				sodiumAccessor.partialTicks = renderContext.tickDelta();
-//			}
-//			else
-//			{
-//				this.clientApi.renderLods(ClientLevelWrapper.getWrapper(renderContext.world()),
-//						McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
-//						McObjectConverter.Convert(renderContext.projectionMatrix()),
-//						renderContext.tickDelta());
-//
-//
-//				// experimental proof-of-concept option
-//				if (Config.Client.Advanced.Graphics.AdvancedGraphics.seamlessOverdraw.get())
-//				{
-//					float[] matrixFloatArray = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(renderContext.projectionMatrix(), renderContext.tickDelta());
-//
-//					#if MC_1_16_5
-//					SeamlessOverdraw.applyLegacyProjectionMatrix(matrixFloatArray);
-//					#elif PRE_MC_1_19_4
-//					renderContext.projectionMatrix().load(FloatBuffer.wrap(matrixFloatArray));
-//					#else
-//					renderContext.projectionMatrix().set(matrixFloatArray);
-//					#endif
-//				}
-//			}
-//
-//			if (immersivePortalsAccessor != null)
-//			{
-//				immersivePortalsAccessor.partialTicks = renderContext.tickDelta();
-//			}
-//		});
+		WorldRenderEvents.AFTER_SETUP.register((renderContext) ->
+		{
+			if (sodiumAccessor != null)
+			{
+				sodiumAccessor.levelWrapper = ClientLevelWrapper.getWrapper(renderContext.world());
+				sodiumAccessor.mcModelViewMatrix = McObjectConverter.Convert(renderContext.matrixStack().last().pose());
+				sodiumAccessor.mcProjectionMatrix = McObjectConverter.Convert(renderContext.projectionMatrix());
+				sodiumAccessor.partialTicks = renderContext.tickDelta();
+			}
+			else
+			{
+				this.clientApi.renderLods(ClientLevelWrapper.getWrapper(renderContext.world()),
+						McObjectConverter.Convert(renderContext.matrixStack().last().pose()),
+						McObjectConverter.Convert(renderContext.projectionMatrix()),
+						renderContext.tickDelta());
+				
+				
+				// experimental proof-of-concept option
+				if (Config.Client.Advanced.Graphics.AdvancedGraphics.seamlessOverdraw.get())
+				{
+					float[] matrixFloatArray = SeamlessOverdraw.overwriteMinecraftNearFarClipPlanes(renderContext.projectionMatrix(), renderContext.tickDelta());
+					
+					#if MC_1_16_5
+					SeamlessOverdraw.applyLegacyProjectionMatrix(matrixFloatArray);
+					#elif PRE_MC_1_19_4
+					renderContext.projectionMatrix().load(FloatBuffer.wrap(matrixFloatArray));
+					#else
+					renderContext.projectionMatrix().set(matrixFloatArray);
+					#endif
+				}
+			}
+
+			if (immersivePortalsAccessor != null)
+			{
+				immersivePortalsAccessor.partialTicks = renderContext.tickDelta();
+			}
+		});
 
 		// Debug keyboard event
 		// FIXME: Use better hooks so it doesn't trigger key press events in text boxes
-		ClientTickEvents.END_CLIENT_TICK.register(client -> 
+		ClientTickEvents.END_CLIENT_TICK.register(client ->
 		{
 			if (client.player != null && !(Minecraft.getInstance().screen instanceof TitleScreen))
 			{
@@ -245,7 +246,7 @@ public class FabricClientProxy
 		//==================//
 		// networking event //
 		//==================//
-		
+
 //		ClientPlayNetworking.registerGlobalReceiver(new ResourceLocation(ModInfo.NETWORKING_RESOURCE_NAMESPACE, ModInfo.MULTIVERSE_PLUGIN_NAMESPACE),
 //			(Minecraft client, ClientPacketListener handler, FriendlyByteBuf friendlyByteBuf, PacketSender responseSender) ->
 //			{

@@ -10,12 +10,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(DebugScreenOverlay.class)
-public class MixinDebugScreenOverlay {
-
-    @Inject(method = "getSystemInformation", at = @At("RETURN"))
-    private void addCustomF3(CallbackInfoReturnable<List<String>> cir) {
-        List<String> messages = cir.getReturnValue();
-        F3Screen.addStringToDisplay(messages);
-    }
-
+public class MixinDebugScreenOverlay
+{
+	
+	@Inject(method = "getSystemInformation", at = @At("RETURN"))
+	private void addCustomF3(CallbackInfoReturnable<List<String>> cir)
+	{
+		List<String> messages = cir.getReturnValue();
+		F3Screen.addStringToDisplay(messages);
+	}
+	
 }

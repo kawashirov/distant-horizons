@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.worldGeneration.step;
 
 import java.util.ArrayList;
@@ -39,12 +39,13 @@ import net.minecraft.world.level.chunk.ProtoChunk;
 import net.minecraft.world.level.levelgen.blending.Blender;
 #endif
 
-public final class StepNoise {
+public final class StepNoise
+{
 	/**
-	 * 
+	 *
 	 */
 	private final BatchGenerationEnvironment environment;
-
+	
 	/**
 	 * @param batchGenerationEnvironment
 	 */
@@ -54,10 +55,12 @@ public final class StepNoise {
 	}
 	
 	public final ChunkStatus STATUS = ChunkStatus.NOISE;
-    
-	public void generateGroup(ThreadedParameters tParams, WorldGenRegion worldGenRegion,
-			List<ChunkWrapper> chunkWrappers) {
-
+	
+	public void generateGroup(
+			ThreadedParameters tParams, WorldGenRegion worldGenRegion,
+			List<ChunkWrapper> chunkWrappers)
+	{
+		
 		ArrayList<ChunkAccess> chunksToDo = new ArrayList<ChunkAccess>();
 		
 		for (ChunkWrapper chunkWrapper : chunkWrappers)
@@ -68,7 +71,8 @@ public final class StepNoise {
 			chunksToDo.add(chunk);
 		}
 		
-		for (ChunkAccess chunk : chunksToDo) {
+		for (ChunkAccess chunk : chunksToDo)
+		{
 			// System.out.println("StepNoise: "+chunk.getPos());
 			#if PRE_MC_1_17_1
 			environment.params.generator.fillFromNoise(worldGenRegion, tParams.structFeat, chunk);
@@ -85,4 +89,5 @@ public final class StepNoise {
 			UncheckedInterruptedException.throwIfInterrupted();
 		}
 	}
+	
 }

@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.forge;
 
 import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftClientWrapper;
@@ -36,14 +36,17 @@ import java.util.Random;
 /**
  * used for calling methods that forge modified
  * (forge modifies vanilla methods for some reason)
+ *
  * @author Ran
  */
-public interface LodForgeMethodCaller {
-    #if PRE_MC_1_19_2
-    List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, Random random); // FIXME: For 1.19
-    #else
-    List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, RandomSource random); // FIXME: For 1.19
+public interface LodForgeMethodCaller
+{
+	#if PRE_MC_1_19_2
+	List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, Random random); // FIXME: For 1.19
+	#else
+	List<BakedQuad> getQuads(MinecraftClientWrapper mc, Block block, BlockState blockState, Direction direction, RandomSource random); // FIXME: For 1.19
     #endif
-
-    int colorResolverGetColor(ColorResolver resolver, Biome biome, double x, double z);
+	
+	int colorResolverGetColor(ColorResolver resolver, Biome biome, double x, double z);
+	
 }

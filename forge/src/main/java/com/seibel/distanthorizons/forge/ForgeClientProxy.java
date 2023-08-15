@@ -60,7 +60,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 /**
  * This handles all events sent to the client,
  * and is the starting point for most of the mod.
- * 
+ *
  * @author James_Seibel
  * @version 2023-7-27
  */
@@ -68,7 +68,7 @@ public class ForgeClientProxy
 {
 	private static final IMinecraftClientWrapper MC = SingletonInjector.INSTANCE.get(IMinecraftClientWrapper.class);
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
-	
+
 //	private static SimpleChannel multiversePluginChannel;
 	
 	
@@ -213,7 +213,7 @@ public class ForgeClientProxy
 		if (GetLevel(event) instanceof ClientLevel)
 		{
 			IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) GetLevel(event));
-			IChunkWrapper chunk = new ChunkWrapper(event.getChunk() , GetLevel(event), wrappedLevel);
+			IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetLevel(event), wrappedLevel);
 			ClientApi.INSTANCE.clientChunkSaveEvent(chunk, ClientLevelWrapper.getWrapper((ClientLevel) GetLevel(event)));
 		}
 	}

@@ -14,43 +14,44 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class RegionFileStorageExternalCache implements AutoCloseable 
+public class RegionFileStorageExternalCache implements AutoCloseable
 {
-    public final RegionFileStorage storage;
-    public static final int MAX_CACHE_SIZE = 16;
-
-    @Override
-    public void close() throws IOException 
-    {
-        RegionFileCache cache;
-        while ((cache = this.regionFileCache.poll()) != null) 
+	public final RegionFileStorage storage;
+	public static final int MAX_CACHE_SIZE = 16;
+	
+	@Override
+	public void close() throws IOException
+	{
+		RegionFileCache cache;
+		while ((cache = this.regionFileCache.poll()) != null)
 		{
-            cache.file.close();
-        }
-    }
-
-    static class RegionFileCache 
-    {
-        public final long pos;
-        public final RegionFile file;
-
-        public RegionFileCache(long pos, RegionFile file) 
-        {
-            this.pos = pos;
-            this.file = file;
-        }
-    }
-
-    public ConcurrentLinkedQueue<RegionFileCache> regionFileCache = new ConcurrentLinkedQueue<>();
-
-    public RegionFileStorageExternalCache(RegionFileStorage storage) { this.storage = storage; }
-
-    @Nullable
-    public RegionFile getRegionFile(ChunkPos pos) throws IOException
+			cache.file.close();
+		}
+	}
+	
+	static class RegionFileCache
+	{
+		public final long pos;
+		public final RegionFile file;
+		
+		public RegionFileCache(long pos, RegionFile file)
+		{
+			this.pos = pos;
+			this.file = file;
+		}
+		
+	}
+	
+	public ConcurrentLinkedQueue<RegionFileCache> regionFileCache = new ConcurrentLinkedQueue<>();
+	
+	public RegionFileStorageExternalCache(RegionFileStorage storage) { this.storage = storage; }
+	
+	@Nullable
+	public RegionFile getRegionFile(ChunkPos pos) throws IOException
 	{
 		long posLong = ChunkPos.asLong(pos.getRegionX(), pos.getRegionZ());
 		RegionFile rFile = null;
-
+		
 		// Check vanilla cache
 		int retryCount = 0;
 		int maxRetryCount = 8;
@@ -79,8 +80,10 @@ public class RegionFileStorageExternalCache implements AutoCloseable
 				{
 					Thread.sleep(250);
 				}
-				catch (InterruptedException ignored) { }
-				#endif 
+				catch (InterruptedException ignored)
+				{
+				}
+				#endif
 			}
 		}
 		
@@ -94,7 +97,7 @@ public class RegionFileStorageExternalCache implements AutoCloseable
 		{
 			return rFile;
 		}
-
+		
 		// Then check our custom cache
 		for (RegionFileCache cache : this.regionFileCache)
 		{
@@ -134,8 +137,8 @@ public class RegionFileStorageExternalCache implements AutoCloseable
 	}
 	
 	
-    @Nullable
-    public CompoundTag read(ChunkPos pos) throws IOException
+	@Nullable
+	public CompoundTag read(ChunkPos pos) throws IOException
 	{
 		RegionFile file = getRegionFile(pos);
 		if (file == null)
@@ -158,5 +161,5 @@ public class RegionFileStorageExternalCache implements AutoCloseable
 			return null;
 		}
 	}
-
+	
 }

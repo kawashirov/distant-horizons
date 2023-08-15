@@ -38,6 +38,7 @@ import java.io.IOException;
 
 /**
  * This handles creating abstract wrapper objects.
+ *
  * @author James Seibel
  * @version 2022-12-5
  */
@@ -74,8 +75,9 @@ public class WrapperFactory implements IWrapperFactory
 	/**
 	 * Note: when this is updated for different MC versions, make sure you also update the documentation in
 	 * {@link IDhApiWorldGenerator#generateChunks} and the type list in {@link WrapperFactory#createChunkWrapperErrorMessage}. <br><br>
-	 * 
+	 *
 	 * For full method documentation please see: {@link IWrapperFactory#createChunkWrapper}
+	 *
 	 * @see IWrapperFactory#createChunkWrapper
 	 */
 	public IChunkWrapper createChunkWrapper(Object[] objectArray) throws ClassCastException
@@ -105,14 +107,14 @@ public class WrapperFactory implements IWrapperFactory
 			{
 				throw new ClassCastException(createChunkWrapperErrorMessage(objectArray));
 			}
-			ChunkAccess chunk = (ChunkAccess)objectArray[0];
+			ChunkAccess chunk = (ChunkAccess) objectArray[0];
 			
 			// light source
 			if (!(objectArray[1] instanceof LevelReader))
 			{
 				throw new ClassCastException(createChunkWrapperErrorMessage(objectArray));
 			}
-			LevelReader lightSource = (LevelReader)objectArray[1];
+			LevelReader lightSource = (LevelReader) objectArray[1];
 			
 			
 			return new ChunkWrapper(chunk, lightSource, /*A DH wrapped level isn't necessary*/null);
@@ -133,9 +135,9 @@ public class WrapperFactory implements IWrapperFactory
 			not implemented for this version of Minecraft!
 		#endif
 	}
-	/** 
-	 * Note: when this is updated for different MC versions, 
-	 * make sure you also update the documentation in {@link IDhApiWorldGenerator#generateChunks}. 
+	/**
+	 * Note: when this is updated for different MC versions,
+	 * make sure you also update the documentation in {@link IDhApiWorldGenerator#generateChunks}.
 	 */
 	private static String createChunkWrapperErrorMessage(Object[] objectArray)
 	{
@@ -145,8 +147,8 @@ public class WrapperFactory implements IWrapperFactory
 		
 		// MC 1.16, 1.18, 1.19, 1.20
 		#if POST_MC_1_17_1 || MC_1_16_5
-		message.append("["+ChunkAccess.class.getName()+"], \n");
-		message.append("["+LevelReader.class.getName()+"]. \n");
+		message.append("[" + ChunkAccess.class.getName() + "], \n");
+		message.append("[" + LevelReader.class.getName() + "]. \n");
 		#else
 			// See preprocessor comment in createChunkWrapper() for full documentation
 			not implemented for this version of Minecraft!

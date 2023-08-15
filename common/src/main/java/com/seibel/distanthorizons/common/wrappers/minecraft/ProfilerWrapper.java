@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.minecraft;
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IProfilerWrapper;
@@ -29,32 +29,33 @@ import net.minecraft.util.profiling.ProfilerFiller;
  */
 public class ProfilerWrapper implements IProfilerWrapper
 {
-    public ProfilerFiller profiler;
-
-    public ProfilerWrapper(ProfilerFiller newProfiler)
-    {
-        profiler = newProfiler;
-    }
-
-
-    /** starts a new section inside the currently running section */
-    @Override
-    public void push(String newSection)
-    {
-        profiler.push(newSection);
-    }
-
-    /** ends the currently running section and starts a new one */
-    @Override
-    public void popPush(String newSection)
-    {
-        profiler.popPush(newSection);
-    }
-
-    /** ends the currently running section */
-    @Override
-    public void pop()
-    {
-        profiler.pop();
-    }
+	public ProfilerFiller profiler;
+	
+	public ProfilerWrapper(ProfilerFiller newProfiler)
+	{
+		profiler = newProfiler;
+	}
+	
+	
+	/** starts a new section inside the currently running section */
+	@Override
+	public void push(String newSection)
+	{
+		profiler.push(newSection);
+	}
+	
+	/** ends the currently running section and starts a new one */
+	@Override
+	public void popPush(String newSection)
+	{
+		profiler.popPush(newSection);
+	}
+	
+	/** ends the currently running section */
+	@Override
+	public void pop()
+	{
+		profiler.pop();
+	}
+	
 }

@@ -12,16 +12,17 @@ import org.betterx.bclib.config.Configs;
 
 public class BCLibAccessor implements IBCLibAccessor
 {
-    @Override
-    public String getModName() { return "BCLib"; }
-
-    public void setRenderCustomFog(boolean newValue)
-    {
+	@Override
+	public String getModName() { return "BCLib"; }
+	
+	public void setRenderCustomFog(boolean newValue)
+	{
 	    #if MC_1_16_5 || MC_1_17_1
 	    #elif PRE_MC_1_19_2
-	    // Change the value of CUSTOM_FOG_RENDERING in the bclib client config
-        // This disabled fog from rendering within bclib
-        Configs.CLIENT_CONFIG.set(ClientConfig.CUSTOM_FOG_RENDERING, newValue);
+		// Change the value of CUSTOM_FOG_RENDERING in the bclib client config
+		// This disabled fog from rendering within bclib
+		Configs.CLIENT_CONFIG.set(ClientConfig.CUSTOM_FOG_RENDERING, newValue);
 		#endif
-    }
+	}
+	
 }

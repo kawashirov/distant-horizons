@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 
 package com.seibel.distanthorizons.common.wrappers.worldGeneration;
 
@@ -34,7 +34,9 @@ public class Rolling
 		this.size = size;
 		samples = new double[size];
 		for (int i = 0; i < size; i++)
+		{
 			samples[i] = 0d;
+		}
 	}
 	
 	public void add(double x)
@@ -48,6 +50,7 @@ public class Rolling
 	
 	public double getAverage()
 	{
-		return size==0 ? 0 : total / size;
+		return size == 0 ? 0 : total / size;
 	}
+	
 }

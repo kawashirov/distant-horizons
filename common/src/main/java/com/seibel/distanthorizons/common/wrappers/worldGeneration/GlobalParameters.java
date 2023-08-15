@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.common.wrappers.worldGeneration;
 
 import com.mojang.datafixers.DataFixer;
@@ -76,8 +76,8 @@ public final class GlobalParameters
 	public GlobalParameters(IDhServerLevel lodLevel)
 	{
 		this.lodLevel = lodLevel;
-
-		level = ((ServerLevelWrapper)lodLevel.getServerLevelWrapper()).getWrappedMcObject();
+		
+		level = ((ServerLevelWrapper) lodLevel.getServerLevelWrapper()).getWrappedMcObject();
 		lightEngine = (ThreadedLevelLightEngine) level.getLightEngine();
 		MinecraftServer server = level.getServer();
 		WorldData worldData = server.getWorldData();
@@ -103,4 +103,5 @@ public final class GlobalParameters
 		randomState = level.getChunkSource().randomState();
 		#endif
 	}
+	
 }

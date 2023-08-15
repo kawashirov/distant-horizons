@@ -16,7 +16,7 @@
  *    You should have received a copy of the GNU Lesser General Public License
  *    along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
- 
+
 package com.seibel.distanthorizons.fabric.mixins.events;
 
 import net.minecraft.server.level.ServerLevel;
@@ -24,11 +24,13 @@ import org.spongepowered.asm.mixin.Mixin;
 
 /**
  * This class is used for world saving events
+ *
  * @author Ran
  */
 @Mixin(ServerLevel.class)
 @Deprecated // TODO: Not sure if this is needed anymore
-public class MixinServerLevel {
+public class MixinServerLevel
+{
 //    #if PRE_MC_1_17_1
 //    @Inject(method = "save", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerChunkCache;save(Z)V", shift = At.Shift.AFTER))
 //    private void saveWorldEvent(ProgressListener progressListener, boolean bl, boolean bl2, CallbackInfo ci) {

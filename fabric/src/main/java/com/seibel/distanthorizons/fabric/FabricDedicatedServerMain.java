@@ -35,7 +35,7 @@ public class FabricDedicatedServerMain implements DedicatedServerModInitializer
 		server_proxy = new FabricServerProxy(true);
 		server_proxy.registerEvents();
 		
-		ServerLifecycleEvents.SERVER_STARTING.register((server) -> 
+		ServerLifecycleEvents.SERVER_STARTING.register((server) ->
 		{
 			if (this.hasPostSetupDone)
 			{
@@ -49,7 +49,8 @@ public class FabricDedicatedServerMain implements DedicatedServerModInitializer
 			LodCommonMain.initConfig();
 			FabricMain.postInit();
 			
-			LOGGER.info("Dedicated server initialized at "+server.getServerDirectory());
+			LOGGER.info("Dedicated server initialized at " + server.getServerDirectory());
 		});
 	}
+	
 }

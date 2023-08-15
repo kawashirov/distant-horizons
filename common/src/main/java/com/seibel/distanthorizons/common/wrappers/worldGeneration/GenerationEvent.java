@@ -52,8 +52,9 @@ public final class GenerationEvent
 	
 	
 	
-	public GenerationEvent(DhChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
-							EDhApiWorldGenerationStep targetGenerationStep, Consumer<IChunkWrapper> resultConsumer)
+	public GenerationEvent(
+			DhChunkPos minPos, int size, BatchGenerationEnvironment generationGroup,
+			EDhApiWorldGenerationStep targetGenerationStep, Consumer<IChunkWrapper> resultConsumer)
 	{
 		this.inQueueTime = System.nanoTime();
 		this.id = generationFutureDebugIDs++;
@@ -91,7 +92,9 @@ public final class GenerationEvent
 				//LOGGER.info("generating [{}]", event.minPos);
 				genEnvironment.generateLodFromList(generationEvent);
 			}
-			catch (InterruptedException ignored) { }
+			catch (InterruptedException ignored)
+			{
+			}
 			finally
 			{
 				BatchGenerationEnvironment.isDistantGeneratorThread.remove();
@@ -144,6 +147,6 @@ public final class GenerationEvent
 	}
 	
 	@Override
-	public String toString() { return this.id+":"+this.size+"@"+this.minPos+"("+this.targetGenerationStep +")"; }
+	public String toString() { return this.id + ":" + this.size + "@" + this.minPos + "(" + this.targetGenerationStep + ")"; }
 	
 }
