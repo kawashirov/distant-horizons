@@ -16,7 +16,7 @@ public class ClientBlockDetailMap
 	
 	public ClientBlockStateCache getBlockStateData(BlockState state, DhBlockPos pos)
 	{ //TODO: Allow a per pos unique setting
-		return blockCache.computeIfAbsent(state, (s) -> new ClientBlockStateCache(s, level, new DhBlockPos(0, 0, 0)));
+		return blockCache.computeIfAbsent(state, (s) -> new ClientBlockStateCache(s, level, pos));
 	}
 	
 	public void clear() { blockCache.clear(); }
