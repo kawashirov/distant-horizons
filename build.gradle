@@ -366,7 +366,7 @@ subprojects { p ->
         try {
             "git rev-parse --is-inside-work-tree".execute() // If git doesnt exist, or this isnt cloned from git, then this wont work
             git_main_commit = 'git rev-parse --verify HEAD'.execute().text.trim()
-            git_core_commit = 'git ls-tree --object-only HEAD coreSubProjects'.execute().text.trim()
+            git_core_commit = 'git ls-tree --object-only HEAD ../coreSubProjects'.execute().text.trim() // TODO: is there a way to do this universally
             git_main_branch = 'git symbolic-ref --short HEAD'.execute().text.trim()
         } catch (Exception e) {
             println "Git or Git project not found"
