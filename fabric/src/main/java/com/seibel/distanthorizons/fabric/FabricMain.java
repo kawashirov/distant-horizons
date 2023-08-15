@@ -58,7 +58,7 @@ public class FabricMain
 			ModAccessorInjector.INSTANCE.get(IBCLibAccessor.class).setRenderCustomFog(false); // Remove BCLib's fog
 		#if POST_MC_1_20_1
 		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("sodium"))
-			ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class).setFogOcclusion(false); // FIXME: This is a temporary solution to get sodium 0.5 to work
+			ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class).setFogOcclusion(false); // FIXME: This is a tmp fix for sodium 0.5.0, and 0.5.1. This is fixed in sodium 0.5.2
 		#endif
 		
 		if (ConfigBase.INSTANCE == null)
@@ -86,10 +86,6 @@ public class FabricMain
 		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("sodium"))
 		{
 			ModAccessorInjector.INSTANCE.bind(ISodiumAccessor.class, new SodiumAccessor());
-		}
-		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("imm_ptl_core"))
-		{
-			ModAccessorInjector.INSTANCE.bind(IImmersivePortalsAccessor.class, new ImmersivePortalsAccessor());
 		}
 		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("starlight"))
 		{

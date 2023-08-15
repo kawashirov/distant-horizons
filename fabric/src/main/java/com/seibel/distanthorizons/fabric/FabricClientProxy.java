@@ -31,12 +31,7 @@ import com.seibel.distanthorizons.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
-import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.IImmersivePortalsAccessor;
-import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
-import com.seibel.distanthorizons.coreapi.ModInfo;
-import com.seibel.distanthorizons.fabric.wrappers.modAccessor.ImmersivePortalsAccessor;
-import com.seibel.distanthorizons.fabric.wrappers.modAccessor.SodiumAccessor;
 //import io.netty.buffer.ByteBuf;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -94,15 +89,6 @@ public class FabricClientProxy
 	public void registerEvents()
 	{
 		LOGGER.info("Registering Fabric Client Events");
-		
-		
-		//========================//
-		// register mod accessors //
-		//========================//
-		
-		SodiumAccessor sodiumAccessor = (SodiumAccessor) ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class);
-		ImmersivePortalsAccessor immersivePortalsAccessor = (ImmersivePortalsAccessor) ModAccessorInjector.INSTANCE.get(IImmersivePortalsAccessor.class);
-		
 		
 		
 		//=============//
@@ -224,11 +210,6 @@ public class FabricClientProxy
 					renderContext.projectionMatrix().set(matrixFloatArray);
 					#endif
 				}
-			}
-
-			if (immersivePortalsAccessor != null)
-			{
-				immersivePortalsAccessor.partialTicks = renderContext.tickDelta();
 			}
 		});
 		 */
