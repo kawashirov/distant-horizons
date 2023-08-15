@@ -29,7 +29,7 @@ pluginManagement {
 
 // Loads the version.properties
 def loadProperties() {
-    def defaultMcVersion = "1.18.2" // 1.18.2 is our current most stable version so we use that if no version was defined
+    def defaultMcVersion = "1.20.1" // 1.20.1 is our current most stable version so we use that if no version was defined
 
     def mcVersion = ""
     def mcVers = fileTree("versionProperties").files.name // Get all the files in "versionProperties"
