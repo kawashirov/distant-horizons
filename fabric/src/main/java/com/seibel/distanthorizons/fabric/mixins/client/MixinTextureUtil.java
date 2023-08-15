@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class MixinTextureUtil
 {
 	@Redirect(method = "Lcom/mojang/blaze3d/platform/TextureUtil;prepareImage(Lcom/mojang/blaze3d/platform/NativeImage$InternalGlFormat;IIII)V",
-			at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texParameter(IIF)V", remap = false))
+			at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/GlStateManager;_texParameter(IIF)V", #if MC_1_16_5 remap = true #else remap = false #endif))
 	private static void setLodBias(int target, int pname, float param)
 	{
 		float biasValue = Config.Client.Advanced.Graphics.AdvancedGraphics.lodBias.get().floatValue();
