@@ -31,7 +31,10 @@ import com.seibel.distanthorizons.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
+import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.ISodiumAccessor;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
+import com.seibel.distanthorizons.coreapi.ModInfo;
+import com.seibel.distanthorizons.fabric.wrappers.modAccessor.SodiumAccessor;
 //import io.netty.buffer.ByteBuf;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -62,7 +65,7 @@ import org.lwjgl.opengl.GL15;
 /**
  * This handles all events sent to the client,
  * and is the starting point for most of the mod.
- *
+ * 
  * @author coolGi
  * @author Ran
  * @version 2023-7-27
@@ -75,7 +78,7 @@ public class FabricClientProxy
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 	
 	// TODO we shouldn't be filtering keys on the Forge/Fabric side, only in ClientApi
-	private static final int[] KEY_TO_CHECK_FOR = {GLFW.GLFW_KEY_F6, GLFW.GLFW_KEY_F8, GLFW.GLFW_KEY_P};
+	private static final int[] KEY_TO_CHECK_FOR = { GLFW.GLFW_KEY_F6, GLFW.GLFW_KEY_F8, GLFW.GLFW_KEY_P};
 	
 	HashSet<Integer> previouslyPressKeyCodes = new HashSet<>();
 	
@@ -83,12 +86,19 @@ public class FabricClientProxy
 	
 	/**
 	 * Registers Fabric Events
-	 *
 	 * @author Ran
 	 */
 	public void registerEvents()
 	{
 		LOGGER.info("Registering Fabric Client Events");
+		
+		
+		//========================//
+		// register mod accessors //
+		//========================//
+		
+		SodiumAccessor sodiumAccessor = (SodiumAccessor) ModAccessorInjector.INSTANCE.get(ISodiumAccessor.class);
+		
 		
 		
 		//=============//
@@ -135,7 +145,7 @@ public class FabricClientProxy
 		});
 		
 		// (kinda) block place event
-		UseBlockCallback.EVENT.register((player, level, hand, hitResult) ->
+		UseBlockCallback.EVENT.register((player, level, hand, hitResult) -> 
 		{
 			// if we have access to the server, use the chunk save event instead 
 			if (MC.clientConnectedToDedicatedServer())
@@ -179,7 +189,6 @@ public class FabricClientProxy
         //Define this in the MixinLevelRenderer so that it works with sodium without any changes to the code
         // TODO: If all else is fine, can we remove these commented code
 		// Client Render Level
-		/*
 		WorldRenderEvents.AFTER_SETUP.register((renderContext) ->
 		{
 			if (sodiumAccessor != null)
@@ -212,11 +221,10 @@ public class FabricClientProxy
 				}
 			}
 		});
-		 */
 
 		// Debug keyboard event
 		// FIXME: Use better hooks so it doesn't trigger key press events in text boxes
-		ClientTickEvents.END_CLIENT_TICK.register(client ->
+		ClientTickEvents.END_CLIENT_TICK.register(client -> 
 		{
 			if (client.player != null && !(Minecraft.getInstance().screen instanceof TitleScreen))
 			{
@@ -229,7 +237,7 @@ public class FabricClientProxy
 		//==================//
 		// networking event //
 		//==================//
-
+		
 //		ClientPlayNetworking.registerGlobalReceiver(new ResourceLocation(ModInfo.NETWORKING_RESOURCE_NAMESPACE, ModInfo.MULTIVERSE_PLUGIN_NAMESPACE),
 //			(Minecraft client, ClientPacketListener handler, FriendlyByteBuf friendlyByteBuf, PacketSender responseSender) ->
 //			{

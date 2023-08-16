@@ -49,6 +49,11 @@ public class SodiumAccessor implements ISodiumAccessor
 	private final IWrapperFactory factory = SingletonInjector.INSTANCE.get(IWrapperFactory.class);
 	private final IMinecraftRenderWrapper MC_RENDER = SingletonInjector.INSTANCE.get(IMinecraftRenderWrapper.class);
 
+	public IClientLevelWrapper levelWrapper;
+	public Mat4f mcModelViewMatrix;
+	public Mat4f mcProjectionMatrix;
+	public float partialTicks;
+
 	@Override
 	public String getModName()
 	{
@@ -125,7 +130,7 @@ public class SodiumAccessor implements ISodiumAccessor
 	#endif
 
 	/** A temporary overwrite for a config in sodium 0.5 to fix their terrain from showing, will be removed once a proper fix is added */
-	// TODO: This is fixed in the upcoming sodium 0.5.2, so remove it once it gets released
+	// FIXME
 	@Override
 	public void setFogOcclusion(boolean b)
 	{
