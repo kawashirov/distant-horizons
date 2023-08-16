@@ -1,6 +1,8 @@
 # DH Main
 root = true
 
+# Note: please keep this and the core .editorconfig in sync
+
 [*]
 charset = utf-8
 end_of_line = crlf
