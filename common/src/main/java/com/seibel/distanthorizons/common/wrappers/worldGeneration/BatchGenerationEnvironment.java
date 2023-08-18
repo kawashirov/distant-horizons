@@ -36,7 +36,6 @@ import com.seibel.distanthorizons.core.pos.DhChunkPos;
 import com.seibel.distanthorizons.core.util.objects.EventTimer;
 import com.seibel.distanthorizons.core.util.LodUtil;
 import com.seibel.distanthorizons.core.util.gridList.ArrayGridList;
-import com.seibel.distanthorizons.core.util.objects.DhThreadFactory;
 import com.seibel.distanthorizons.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvironmentWrapper;
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
@@ -745,7 +744,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	 * This is necessary to allow canceling world gen since waiting
 	 * for some world gen requests to finish can take a while.
 	 */
-	private static void throwIfThreadInterrupted() throws InterruptedException
+	public static void throwIfThreadInterrupted() throws InterruptedException
 	{
 		if (Thread.interrupted())
 		{

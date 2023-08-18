@@ -64,7 +64,7 @@ public final class StepStructureStart
 	
 	public void generateGroup(
 			ThreadedParameters tParams, WorldGenRegion worldGenRegion,
-			List<ChunkWrapper> chunkWrappers)
+			List<ChunkWrapper> chunkWrappers) throws InterruptedException
 	{
 		ArrayList<ChunkAccess> chunksToDo = new ArrayList<>();
 		
@@ -90,6 +90,11 @@ public final class StepStructureStart
 			for (ChunkAccess chunk : chunksToDo)
 			{
 				// System.out.println("StepStructureStart: "+chunk.getPos());
+				
+				// there are a few cases where the structure generator call may lock up (either due to teleporting or leaving the world).
+				// hopefully allowing interrupts here will prevent that from happening.
+				BatchGenerationEnvironment.throwIfThreadInterrupted();
+				
 				#if PRE_MC_1_19_2
 				environment.params.generator.createStructures(environment.params.registry, tParams.structFeat, chunk, environment.params.structures,
 						environment.params.worldSeed);
