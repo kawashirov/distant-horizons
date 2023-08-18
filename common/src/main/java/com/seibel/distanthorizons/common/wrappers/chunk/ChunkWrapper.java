@@ -105,9 +105,9 @@ public class ChunkWrapper implements IChunkWrapper
 		// MC loaded chunks should get their lighting from MC, DH generated chunks should get their lighting from DH
 		this.useDhLighting = isDhGeneratedChunk;
 		
-		// FIXME +2 is to handle the fact that LodDataBuilder adds +1 to all block lighting calculations, also done in the relative position validator
-		this.blockLightArray = new byte[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 2)];
-		this.skyLightArray = new byte[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 2)];
+		// FIXME +1 is to handle the fact that LodDataBuilder adds +1 to all block lighting calculations, also done in the relative position validator
+		this.blockLightArray = new byte[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 1)];
+		this.skyLightArray = new byte[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 1)];
 		
 		weakMapLock.writeLock().lock();
 		chunksToUpdateClientLightReady.put(chunk, false);
@@ -439,8 +439,8 @@ public class ChunkWrapper implements IChunkWrapper
 	/** used to prevent accidentally attempting to get/set values outside this chunk's boundaries */
 	private void throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(int x, int y, int z) throws IndexOutOfBoundsException
 	{
-		// FIXME +/-1 is to handle the fact that LodDataBuilder adds +1 to all block lighting calculations, also done in the relative position validator
-		int minHeight = this.getMinBuildHeight() - 1;
+		// FIXME +1 is to handle the fact that LodDataBuilder adds +1 to all block lighting calculations, also done in the constructor
+		int minHeight = this.getMinBuildHeight();
 		int maxHeight = this.getMaxBuildHeight() + 1;
 		
 		if (x < 0 || x >= LodUtil.CHUNK_WIDTH
