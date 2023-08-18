@@ -61,7 +61,6 @@ public final class GlobalParameters
 	#else
 	public final WorldOptions worldOptions;
 	#endif
-	public final ThreadedLevelLightEngine lightEngine;
 	public final IDhServerLevel lodLevel;
 	public final ServerLevel level;
 	public final Registry<Biome> biomes;
@@ -78,7 +77,6 @@ public final class GlobalParameters
 		this.lodLevel = lodLevel;
 		
 		level = ((ServerLevelWrapper) lodLevel.getServerLevelWrapper()).getWrappedMcObject();
-		lightEngine = (ThreadedLevelLightEngine) level.getLightEngine();
 		MinecraftServer server = level.getServer();
 		WorldData worldData = server.getWorldData();
 		registry = server.registryAccess();

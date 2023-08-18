@@ -58,7 +58,7 @@ public class DhLitWorldGenRegion extends WorldGenRegion
 {
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger(MethodHandles.lookup().lookupClass().getSimpleName());
 	
-	public final WorldGenLevelLightEngine light;
+	public final DummyLightEngine lightEngine;
 	public final BatchGenerationEnvironment.EmptyChunkGenerator generator;
 	public final int writeRadius;
 	public final int size;
@@ -91,14 +91,14 @@ public class DhLitWorldGenRegion extends WorldGenRegion
 	#endif
 	
 	public DhLitWorldGenRegion(
-			ServerLevel serverLevel, WorldGenLevelLightEngine lightEngine,
+			ServerLevel serverLevel, DummyLightEngine lightEngine,
 			List<ChunkAccess> chunkList, ChunkStatus chunkStatus, int writeRadius,
 			BatchGenerationEnvironment.EmptyChunkGenerator generator)
 	{
 		super(serverLevel, chunkList #if POST_MC_1_17_1 , chunkStatus, writeRadius #endif );
 		this.firstPos = chunkList.get(0).getPos();
 		this.generator = generator;
-		this.light = lightEngine;
+		this.lightEngine = lightEngine;
 		this.writeRadius = writeRadius;
 		this.cache = chunkList;
 		this.size = Mth.floor(Math.sqrt(chunkList.size()));
@@ -278,15 +278,15 @@ public class DhLitWorldGenRegion extends WorldGenRegion
 	
 	/** Overriding allows us to use our own lighting engine */
 	@Override
-	public LevelLightEngine getLightEngine() { return this.light; }
+	public LevelLightEngine getLightEngine() { return this.lightEngine; }
 	
 	/** Overriding allows us to use our own lighting engine */
 	@Override
-	public int getBrightness(LightLayer lightLayer, BlockPos blockPos) { return this.light.getLayerListener(lightLayer).getLightValue(blockPos); }
+	public int getBrightness(LightLayer lightLayer, BlockPos blockPos) { return 0; }
 	
 	/** Overriding allows us to use our own lighting engine */
 	@Override
-	public int getRawBrightness(BlockPos blockPos, int i) { return this.light.getRawBrightness(blockPos, i); }
+	public int getRawBrightness(BlockPos blockPos, int i) { return 0; }
 	
 	/** Overriding allows us to use our own lighting engine */
 	@Override

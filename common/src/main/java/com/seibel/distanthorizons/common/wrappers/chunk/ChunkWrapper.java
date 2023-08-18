@@ -102,7 +102,8 @@ public class ChunkWrapper implements IChunkWrapper
 		
 		// TODO is this the best way to differentiate between when we are generating chunks and when MC gave us a chunk?
 		boolean isDhGeneratedChunk = (this.lightSource.getClass() == DhLitWorldGenRegion.class);
-		this.useDhLighting = isDhGeneratedChunk && (Config.Client.Advanced.WorldGenerator.worldGenLightingEngine.get() == ELightGenerationMode.DISTANT_HORIZONS);
+		// MC loaded chunks should get their lighting from MC, DH generated chunks should get their lighting from DH
+		this.useDhLighting = isDhGeneratedChunk;
 		
 		// FIXME +2 is to handle the fact that LodDataBuilder adds +1 to all block lighting calculations, also done in the relative position validator
 		this.blockLightArray = new byte[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 2)];

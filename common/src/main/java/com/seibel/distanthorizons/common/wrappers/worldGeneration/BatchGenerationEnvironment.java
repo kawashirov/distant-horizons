@@ -29,7 +29,6 @@ import com.seibel.distanthorizons.core.dataObjects.transformers.FullDataToRender
 import com.seibel.distanthorizons.core.generation.DhLightingEngine;
 import com.seibel.distanthorizons.core.level.IDhServerLevel;
 import com.seibel.distanthorizons.core.config.Config;
-import com.seibel.distanthorizons.api.enums.config.ELightGenerationMode;
 import com.seibel.distanthorizons.core.logging.ConfigBasedLogger;
 import com.seibel.distanthorizons.core.logging.ConfigBasedSpamLogger;
 import com.seibel.distanthorizons.core.pos.DhChunkPos;
@@ -51,7 +50,6 @@ import java.util.function.Consumer;
 import com.seibel.distanthorizons.common.wrappers.DependencySetupDoneCheck;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepBiomes;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepFeatures;
-import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepLight;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepNoise;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepStructureReference;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.step.StepStructureStart;
@@ -170,7 +168,6 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	public final StepNoise stepNoise = new StepNoise(this);
 	public final StepSurface stepSurface = new StepSurface(this);
 	public final StepFeatures stepFeatures = new StepFeatures(this);
-	public final StepLight stepLight = new StepLight(this);
 	public boolean unsafeThreadingRecorded = false;
 	public static final long EXCEPTION_TIMER_RESET_TIME = TimeUnit.NANOSECONDS.convert(1, TimeUnit.SECONDS);
 	public static final int EXCEPTION_COUNTER_TRIGGER = 20;
@@ -378,7 +375,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		
 	}
 	
-	public ChunkAccess loadOrMakeChunk(ChunkPos chunkPos, WorldGenLevelLightEngine lightEngine)
+	public ChunkAccess loadOrMakeChunk(ChunkPos chunkPos)
 	{
 		ServerLevel level = this.params.level;
 		
@@ -407,7 +404,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			try
 			{
 				LOAD_LOGGER.info("DistantHorizons: Loading chunk " + chunkPos + " from disk.");
-				return ChunkLoader.read(level, lightEngine, chunkPos, chunkData);
+				return ChunkLoader.read(level, chunkPos, chunkData);
 			}
 			catch (Exception e)
 			{
@@ -433,7 +430,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		
 		ArrayGridList<ChunkWrapper> chunkWrapperList;
 		DhLitWorldGenRegion region;
-		WorldGenLevelLightEngine lightEngine;
+		DummyLightEngine lightEngine;
 		LightGetterAdaptor adaptor;
 		
 		int borderSize = MaxBorderNeeded;
@@ -445,8 +442,8 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		{
 			ArrayGridList<ChunkAccess> totalChunks;
 			
-			adaptor = new LightGetterAdaptor(params.level);
-			lightEngine = new WorldGenLevelLightEngine(adaptor);
+			adaptor = new LightGetterAdaptor(this.params.level);
+			lightEngine = new DummyLightEngine(adaptor);
 			
 			EmptyChunkGenerator generator = (int x, int z) ->
 			{
@@ -454,7 +451,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				ChunkAccess target = null;
 				try
 				{
-					target = loadOrMakeChunk(chunkPos, lightEngine);
+					target = this.loadOrMakeChunk(chunkPos);
 				}
 				catch (RuntimeException e2)
 				{
@@ -544,10 +541,6 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				{
 					genEvent.resultConsumer.accept(wrappedChunk);
 				}
-				if (isFull)
-				{
-					lightEngine.retainData(target.getPos(), false);
-				}
 			}
 		}
 		
@@ -579,7 +572,6 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 					ProtoChunk protoChunk = ((ProtoChunk) chunk);
 					
 					protoChunk.setLightEngine(region.getLightEngine());
-					region.getLightEngine().retainData(protoChunk.getPos(), true);
 				}
 			});
 			
@@ -649,37 +641,22 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		{
 			genEvent.timer.nextEvent("light");
 			
-			boolean useMinecraftLightingEngine = Config.Client.Advanced.WorldGenerator.worldGenLightingEngine.get() == ELightGenerationMode.MINECRAFT;
-			if (useMinecraftLightingEngine)
+			// generate lighting using DH's lighting engine
+				
+			int maxSkyLight = this.serverlevel.getServerLevelWrapper().hasSkyLight() ? 15 : 0;
+			
+			ArrayList<IChunkWrapper> iChunkWrapperList = new ArrayList<>(chunksToGenerate);
+			for (int i = 0; i < iChunkWrapperList.size(); i++)
 			{
-				// generates chunk lighting using MC's methods
-				
-				if (!Thread.interrupted())
+				IChunkWrapper centerChunk = iChunkWrapperList.get(i);
+				if (centerChunk == null)
 				{
-					this.stepLight.generateGroup(region.getLightEngine(), GetCutoutFrom(chunksToGenerate, EDhApiWorldGenerationStep.LIGHT));
-				}
-			}
-			else
-			{
-				// generates lighting using DH's methods
-				
-				int maxSkyLight = this.serverlevel.getServerLevelWrapper().hasSkyLight() ? 15 : 0;
-				
-				// explicit cast required because java generics or something
-				ArrayList<IChunkWrapper> iChunkWrapperList = new ArrayList<>(chunksToGenerate);
-				for (int i = 0; i < iChunkWrapperList.size(); i++)
-				{
-					IChunkWrapper centerChunk = iChunkWrapperList.get(i);
-					if (centerChunk == null)
-					{
-						continue;
-					}
-					
-					
-					DhLightingEngine.INSTANCE.lightChunks(centerChunk, iChunkWrapperList, maxSkyLight);
-					centerChunk.setIsDhLightCorrect(true);
+					continue;
 				}
 				
+				throwIfThreadInterrupted();
+				
+				DhLightingEngine.INSTANCE.lightChunk(centerChunk, iChunkWrapperList, maxSkyLight);
 			}
 			
 			genEvent.refreshTimeout();

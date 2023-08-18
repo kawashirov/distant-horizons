@@ -72,10 +72,7 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 #endif
 #endif
 
-import net.minecraft.world.level.lighting.LevelLightEngine;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraft.world.level.material.Fluids;
-import org.apache.logging.log4j.Logger;
 
 public class ChunkLoader
 {
@@ -105,7 +102,7 @@ public class ChunkLoader
 	}
 	#endif
 	
-	private static LevelChunkSection[] readSections(LevelAccessor level, LevelLightEngine lightEngine, ChunkPos chunkPos, CompoundTag chunkData)
+	private static LevelChunkSection[] readSections(LevelAccessor level, ChunkPos chunkPos, CompoundTag chunkData)
 	{
 		#if POST_MC_1_18_2
 		#if PRE_MC_1_19_4
@@ -180,13 +177,6 @@ public class ChunkLoader
 			}
 			#endif
 			
-			if (!isLightOn) continue;
-			if (tagSection.contains("BlockLight", 7))
-				lightEngine.queueSectionData(LightLayer.BLOCK, SectionPos.of(chunkPos, sectionYPos),
-						new DataLayer(tagSection.getByteArray("BlockLight")) #if PRE_MC_1_20_1 , true #endif );
-			if (hasSkyLight && tagSection.contains("SkyLight", 7))
-				lightEngine.queueSectionData(LightLayer.SKY, SectionPos.of(chunkPos, sectionYPos),
-						new DataLayer(tagSection.getByteArray("SkyLight")) #if PRE_MC_1_20_1 , true #endif );
 		}
 		return chunkSections;
 	}
@@ -226,7 +216,7 @@ public class ChunkLoader
 		return ChunkStatus.ChunkType.PROTOCHUNK;
 	}
 	
-	public static LevelChunk read(WorldGenLevel level, LevelLightEngine lightEngine, ChunkPos chunkPos, CompoundTag chunkData)
+	public static LevelChunk read(WorldGenLevel level, ChunkPos chunkPos, CompoundTag chunkData)
 	{
 		#if PRE_MC_1_18_2
 		CompoundTag tagLevel = chunkData.getCompound("Level");
@@ -264,7 +254,6 @@ public class ChunkLoader
 				: UpgradeData.EMPTY;
 		
 		boolean isLightOn = tagLevel.getBoolean("isLightOn");
-		if (isLightOn) lightEngine.retainData(chunkPos, true);
 		#if PRE_MC_1_18_2
 		ChunkBiomeContainer chunkBiomeContainer = new ChunkBiomeContainer(
 				level.getLevel().registryAccess().registryOrThrow(Registry.BIOME_REGISTRY)#if POST_MC_1_17_1 , level #endif ,
@@ -294,7 +283,7 @@ public class ChunkLoader
 		#endif
 		#endif
 		
-		LevelChunkSection[] levelChunkSections = readSections(level, lightEngine, chunkPos, tagLevel);
+		LevelChunkSection[] levelChunkSections = readSections(level, chunkPos, tagLevel);
 		
 		// ====================== Make the chunk =========================
 		#if PRE_MC_1_18_2
