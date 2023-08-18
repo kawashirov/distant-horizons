@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import com.seibel.distanthorizons.api.enums.worldGeneration.EDhApiWorldGenerationStep;
+import com.seibel.distanthorizons.core.generation.WorldGenerationQueue;
 import com.seibel.distanthorizons.core.util.objects.UncheckedInterruptedException;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.pos.DhChunkPos;
@@ -120,7 +121,7 @@ public final class GenerationEvent
 	public boolean terminate()
 	{
 		LOGGER.info("======================DUMPING ALL THREADS FOR WORLD GEN=======================");
-		BatchGenerationEnvironment.threadFactory.dumpAllThreadStacks();
+		WorldGenerationQueue.THREAD_FACTORY.dumpAllThreadStacks();
 		this.future.cancel(true);
 		return this.future.isCancelled();
 	}

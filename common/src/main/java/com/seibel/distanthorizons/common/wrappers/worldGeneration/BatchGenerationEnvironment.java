@@ -215,8 +215,6 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 		onDistantGenerationMixinData.remove();
 	}
 	
-	public static final DhThreadFactory threadFactory = new DhThreadFactory("DH-Gen-Worker-Thread", Thread.MIN_PRIORITY);
-	
 	
 	
 	//==============//
