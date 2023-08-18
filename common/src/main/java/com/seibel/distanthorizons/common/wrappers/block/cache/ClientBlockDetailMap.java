@@ -23,7 +23,7 @@ public class ClientBlockDetailMap
 	
 	public int getColor(BlockState state, BiomeWrapper biome, DhBlockPos pos)
 	{
-		return getBlockStateData(state, pos).getAndResolveFaceColor(biome);
+		return getBlockStateData(state, pos).getAndResolveFaceColor(biome, pos);
 	}
 	
 }
