@@ -73,14 +73,13 @@ public final class StepFeatures
 				#if PRE_MC_1_18_2
 				worldGenRegion.setOverrideCenter(chunk.getPos());
 				environment.params.generator.applyBiomeDecoration(worldGenRegion, tParams.structFeat);
-				Heightmap.primeHeightmaps(chunk, STATUS.heightmapsAfter());
-				BatchGenerationEnvironment.clearDistantGenerationMixinData();
 				#else
 				environment.params.generator.applyBiomeDecoration(worldGenRegion, chunk,
 						tParams.structFeat.forWorldGenRegion(worldGenRegion));
+				#endif
+				
 				Heightmap.primeHeightmaps(chunk, STATUS.heightmapsAfter());
 				BatchGenerationEnvironment.clearDistantGenerationMixinData();
-				#endif
 			}
 			catch (ReportedException e)
 			{

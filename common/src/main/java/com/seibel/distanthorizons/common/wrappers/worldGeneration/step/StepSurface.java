@@ -30,23 +30,21 @@ import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ProtoChunk;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 public final class StepSurface
 {
-	/**
-	 *
-	 */
 	private final BatchGenerationEnvironment environment;
 	
-	/**
-	 * @param batchGenerationEnvironment
-	 */
+	public final ChunkStatus STATUS = ChunkStatus.SURFACE;
+	
+	
+	
 	public StepSurface(BatchGenerationEnvironment batchGenerationEnvironment)
 	{
-		environment = batchGenerationEnvironment;
+		this.environment = batchGenerationEnvironment;
 	}
 	
-	public final ChunkStatus STATUS = ChunkStatus.SURFACE;
 	
 	public void generateGroup(
 			ThreadedParameters tParams, WorldGenRegion worldGenRegion,
