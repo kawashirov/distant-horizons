@@ -27,9 +27,10 @@ import com.seibel.distanthorizons.common.wrappers.gui.updater.ChangelogScreen;
 
 // Minecraft imports
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
 import com.seibel.distanthorizons.core.jar.updater.SelfUpdater;
 import com.seibel.distanthorizons.core.util.AnnotationUtil;
+import com.seibel.distanthorizons.core.wrapperInterfaces.config.IConfigGui;
 import com.seibel.distanthorizons.coreapi.ModInfo;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -78,6 +79,9 @@ public class ClassicConfigGUI
 	 */
 	
 	private static final Logger LOGGER = LogManager.getLogger();
+	
+	public static final ConfigCoreInterface CONFIG_CORE_INTERFACE = new ConfigCoreInterface();
+	
 	
 	
 	//==============//
@@ -225,7 +229,9 @@ public class ClassicConfigGUI
 		public void onClose()
 		{
 			ConfigBase.INSTANCE.configFileINSTANCE.saveToFile();
-			Objects.requireNonNull(minecraft).setScreen(this.parent);
+			Objects.requireNonNull(this.minecraft).setScreen(this.parent);
+			
+			CONFIG_CORE_INTERFACE.onScreenChangeListenerList.forEach((listener) -> listener.run());
 		}
 		
 		@Override
@@ -233,7 +239,9 @@ public class ClassicConfigGUI
 		{
 			super.init();
 			if (!reload)
+			{
 				ConfigBase.INSTANCE.configFileINSTANCE.loadFromFile();
+			}
 			
 			// Changelog button
 			if (Config.Client.Advanced.AutoUpdater.enableAutoUpdater.get())
@@ -285,6 +293,11 @@ public class ClassicConfigGUI
 					e.printStackTrace();
 				}
 			}
+			
+			
+			
+			CONFIG_CORE_INTERFACE.onScreenChangeListenerList.forEach((listener) -> listener.run());
+			
 		}
 		
 		private void addMenuItem(AbstractConfigType info)
@@ -609,6 +622,31 @@ public class ClassicConfigGUI
 			return children;
 		}
 		#endif
+	}
+	
+	
+	
+	
+	
+	//================//
+	// event handling //
+	//================//
+	
+	private static class ConfigCoreInterface implements IConfigGui
+	{
+		/**
+		 * in the future it would be good to pass in the current page and other variables, 
+		 * but for now just knowing when the page is closed is good enough 
+		 */
+		public final ArrayList<Runnable> onScreenChangeListenerList = new ArrayList<>();
+		
+		
+		
+		@Override
+		public void addOnScreenChangeListener(Runnable newListener) { this.onScreenChangeListenerList.add(newListener); }
+		@Override
+		public void removeOnScreenChangeListener(Runnable oldListener) { this.onScreenChangeListenerList.remove(oldListener); }
+		
 	}
 	
 }
