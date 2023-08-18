@@ -211,12 +211,12 @@ public class ClientBlockStateCache
 		isColorResolved = true;
 	}
 	
-	public int getAndResolveFaceColor(BiomeWrapper biome)
+	public int getAndResolveFaceColor(BiomeWrapper biome, DhBlockPos pos)
 	{
 		// FIXME: impl per-face colors
 		if (!needPostTinting) return baseColor;
 		int tintColor = Minecraft.getInstance().getBlockColors()
-				.getColor(state, new TintWithoutLevelOverrider(biome), pos, tintIndex);
+				.getColor(state, new TintWithoutLevelOverrider(biome), McObjectConverter.Convert(pos), tintIndex);
 		if (tintColor == -1) return baseColor;
 		return ColorUtil.multiplyARGBwithRGB(baseColor, tintColor);
 	}
