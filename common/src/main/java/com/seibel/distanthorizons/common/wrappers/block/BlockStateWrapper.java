@@ -80,7 +80,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	public int getOpacity()
 	{
 		// this method isn't perfect, but works well enough for our use case
-		if (this.isAir() || !this.isSolid())
+		if (this.isAir() || !this.blockState.canOcclude())
 		{
 			// completely transparent
 			return 0;
