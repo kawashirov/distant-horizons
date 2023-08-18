@@ -398,6 +398,11 @@ public class ClassicConfigGUI
 					{
 						AbstractWidget buttonWidget = list.getHoveredButton(mouseX, mouseY).get();
 						Component text = ButtonEntry.buttonsWithText.get(buttonWidget);
+						if (text == null)
+						{
+							continue;
+						}
+						
 						// A quick fix for tooltips on linked entries
 						AbstractConfigType newInfo = ConfigLinkedEntry.class.isAssignableFrom(info.getClass()) ?
 								((ConfigLinkedEntry) info).get() :
