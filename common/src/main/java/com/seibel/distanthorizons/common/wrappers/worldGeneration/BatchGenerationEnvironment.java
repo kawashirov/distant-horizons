@@ -72,6 +72,7 @@ import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.chunk.storage.RegionFileStorage;
 import net.minecraft.world.level.levelgen.DebugLevelSource;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.nbt.CompoundTag;
 import org.apache.logging.log4j.LogManager;
@@ -582,7 +583,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			
 			genEvent.timer.nextEvent("structStart");
 			throwIfThreadInterrupted();
-			stepStructureStart.generateGroup(genEvent.threadedParam, region, GetCutoutFrom(chunksToGenerate, EDhApiWorldGenerationStep.STRUCTURE_START));
+			this.stepStructureStart.generateGroup(genEvent.threadedParam, region, GetCutoutFrom(chunksToGenerate, EDhApiWorldGenerationStep.STRUCTURE_START));
 			genEvent.refreshTimeout();
 			if (step == EDhApiWorldGenerationStep.STRUCTURE_START)
 			{
@@ -591,7 +592,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			
 			genEvent.timer.nextEvent("structRef");
 			throwIfThreadInterrupted();
-			stepStructureReference.generateGroup(genEvent.threadedParam, region, GetCutoutFrom(chunksToGenerate, EDhApiWorldGenerationStep.STRUCTURE_REFERENCE));
+			this.stepStructureReference.generateGroup(genEvent.threadedParam, region, GetCutoutFrom(chunksToGenerate, EDhApiWorldGenerationStep.STRUCTURE_REFERENCE));
 			genEvent.refreshTimeout();
 			if (step == EDhApiWorldGenerationStep.STRUCTURE_REFERENCE)
 			{
@@ -600,7 +601,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			
 			genEvent.timer.nextEvent("biome");
 			throwIfThreadInterrupted();
-			stepBiomes.generateGroup(genEvent.threadedParam, region, GetCutoutFrom(chunksToGenerate, EDhApiWorldGenerationStep.BIOMES));
+			this.stepBiomes.generateGroup(genEvent.threadedParam, region, GetCutoutFrom(chunksToGenerate, EDhApiWorldGenerationStep.BIOMES));
 			genEvent.refreshTimeout();
 			if (step == EDhApiWorldGenerationStep.BIOMES)
 			{
@@ -609,7 +610,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			
 			genEvent.timer.nextEvent("noise");
 			throwIfThreadInterrupted();
-			stepNoise.generateGroup(genEvent.threadedParam, region, GetCutoutFrom(chunksToGenerate, EDhApiWorldGenerationStep.NOISE));
+			this.stepNoise.generateGroup(genEvent.threadedParam, region, GetCutoutFrom(chunksToGenerate, EDhApiWorldGenerationStep.NOISE));
 			genEvent.refreshTimeout();
 			if (step == EDhApiWorldGenerationStep.NOISE)
 			{
@@ -618,7 +619,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			
 			genEvent.timer.nextEvent("surface");
 			throwIfThreadInterrupted();
-			stepSurface.generateGroup(genEvent.threadedParam, region, GetCutoutFrom(chunksToGenerate, EDhApiWorldGenerationStep.SURFACE));
+			this.stepSurface.generateGroup(genEvent.threadedParam, region, GetCutoutFrom(chunksToGenerate, EDhApiWorldGenerationStep.SURFACE));
 			genEvent.refreshTimeout();
 			if (step == EDhApiWorldGenerationStep.SURFACE)
 			{
@@ -627,6 +628,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			
 			genEvent.timer.nextEvent("carver");
 			throwIfThreadInterrupted();
+			// caves can generally be ignored since they aren't generally visible from far away
 			if (step == EDhApiWorldGenerationStep.CARVERS)
 			{
 				return;
@@ -634,7 +636,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			
 			genEvent.timer.nextEvent("feature");
 			throwIfThreadInterrupted();
-			stepFeatures.generateGroup(genEvent.threadedParam, region, GetCutoutFrom(chunksToGenerate, EDhApiWorldGenerationStep.FEATURES));
+			this.stepFeatures.generateGroup(genEvent.threadedParam, region, GetCutoutFrom(chunksToGenerate, EDhApiWorldGenerationStep.FEATURES));
 			genEvent.refreshTimeout();
 		}
 		finally
@@ -656,6 +658,11 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				
 				throwIfThreadInterrupted();
 				
+				// make sure the height maps are all properly generated
+				// if this isn't done everything else afterward may fail
+				Heightmap.primeHeightmaps(((ChunkWrapper)centerChunk).getChunk(), ChunkStatus.FEATURES.heightmapsAfter());
+				
+				// populate the lighting
 				DhLightingEngine.INSTANCE.lightChunk(centerChunk, iChunkWrapperList, maxSkyLight);
 			}
 			
