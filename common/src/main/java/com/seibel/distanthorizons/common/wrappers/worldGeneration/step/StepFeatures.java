@@ -37,20 +37,15 @@ import net.minecraft.world.level.levelgen.Heightmap;
 
 public final class StepFeatures
 {
-	/**
-	 *
-	 */
+	public static final ChunkStatus STATUS = ChunkStatus.FEATURES;
+	
 	private final BatchGenerationEnvironment environment;
 	
-	/**
-	 * @param batchGenerationEnvironment
-	 */
-	public StepFeatures(BatchGenerationEnvironment batchGenerationEnvironment)
-	{
-		environment = batchGenerationEnvironment;
-	}
 	
-	public final ChunkStatus STATUS = ChunkStatus.FEATURES;
+	
+	public StepFeatures(BatchGenerationEnvironment batchGenerationEnvironment) { this.environment = batchGenerationEnvironment; }
+	
+	
 	
 	public void generateGroup(
 			ThreadedParameters tParams, DhLitWorldGenRegion worldGenRegion,

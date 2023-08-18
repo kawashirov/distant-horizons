@@ -36,18 +36,15 @@ import org.apache.logging.log4j.Logger;
 public final class StepStructureStart
 {
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
+	private static final ChunkStatus STATUS = ChunkStatus.STRUCTURE_STARTS;
 	
 	private final BatchGenerationEnvironment environment;
 	
-	/**
-	 * @param batchGenerationEnvironment
-	 */
-	public StepStructureStart(BatchGenerationEnvironment batchGenerationEnvironment)
-	{
-		environment = batchGenerationEnvironment;
-	}
 	
-	public final ChunkStatus STATUS = ChunkStatus.STRUCTURE_STARTS;
+	
+	public StepStructureStart(BatchGenerationEnvironment batchGenerationEnvironment) { this.environment = batchGenerationEnvironment; }
+	
+	
 	
 	public static class StructStartCorruptedException extends RuntimeException
 	{

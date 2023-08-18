@@ -41,20 +41,15 @@ import net.minecraft.world.level.levelgen.blending.Blender;
 
 public final class StepNoise
 {
-	/**
-	 *
-	 */
+	private static final ChunkStatus STATUS = ChunkStatus.NOISE;
+	
 	private final BatchGenerationEnvironment environment;
 	
-	/**
-	 * @param batchGenerationEnvironment
-	 */
-	public StepNoise(BatchGenerationEnvironment batchGenerationEnvironment)
-	{
-		environment = batchGenerationEnvironment;
-	}
 	
-	public final ChunkStatus STATUS = ChunkStatus.NOISE;
+	
+	public StepNoise(BatchGenerationEnvironment batchGenerationEnvironment) { this.environment = batchGenerationEnvironment; }
+	
+	
 	
 	public void generateGroup(
 			ThreadedParameters tParams, WorldGenRegion worldGenRegion,

@@ -38,20 +38,14 @@ import net.minecraft.world.level.levelgen.blending.Blender;
 
 public final class StepBiomes
 {
-	/**
-	 *
-	 */
+	public static final ChunkStatus STATUS = ChunkStatus.BIOMES;
+	
 	private final BatchGenerationEnvironment environment;
 	
-	/**
-	 * @param batchGenerationEnvironment
-	 */
-	public StepBiomes(BatchGenerationEnvironment batchGenerationEnvironment)
-	{
-		environment = batchGenerationEnvironment;
-	}
 	
-	public final ChunkStatus STATUS = ChunkStatus.BIOMES;
+	public StepBiomes(BatchGenerationEnvironment batchGenerationEnvironment) { this.environment = batchGenerationEnvironment; }
+	
+	
 	
 	public void generateGroup(
 			ThreadedParameters tParams, WorldGenRegion worldGenRegion,

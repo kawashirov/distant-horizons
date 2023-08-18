@@ -34,16 +34,14 @@ import net.minecraft.world.level.levelgen.Heightmap;
 
 public final class StepSurface
 {
+	private static final ChunkStatus STATUS = ChunkStatus.SURFACE;
+	
 	private final BatchGenerationEnvironment environment;
 	
-	public final ChunkStatus STATUS = ChunkStatus.SURFACE;
 	
 	
+	public StepSurface(BatchGenerationEnvironment batchGenerationEnvironment) { this.environment = batchGenerationEnvironment; }
 	
-	public StepSurface(BatchGenerationEnvironment batchGenerationEnvironment)
-	{
-		this.environment = batchGenerationEnvironment;
-	}
 	
 	
 	public void generateGroup(

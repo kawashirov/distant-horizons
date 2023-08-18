@@ -35,20 +35,15 @@ import net.minecraft.world.level.chunk.ProtoChunk;
 
 public final class StepStructureReference
 {
-	/**
-	 *
-	 */
+	private static final ChunkStatus STATUS = ChunkStatus.STRUCTURE_REFERENCES;
+	
 	private final BatchGenerationEnvironment environment;
 	
-	/**
-	 * @param batchGenerationEnvironment
-	 */
-	public StepStructureReference(BatchGenerationEnvironment batchGenerationEnvironment)
-	{
-		environment = batchGenerationEnvironment;
-	}
 	
-	public final ChunkStatus STATUS = ChunkStatus.STRUCTURE_REFERENCES;
+	
+	public StepStructureReference(BatchGenerationEnvironment batchGenerationEnvironment) { this.environment = batchGenerationEnvironment; }
+	
+	
 	
 	public void generateGroup(
 			ThreadedParameters tParams, WorldGenRegion worldGenRegion,
