@@ -72,7 +72,12 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 #endif
 #endif
 
+#if MC_1_16_5 || MC_1_17_1
+import net.minecraft.world.level.material.Fluids;
+#endif
+
 import net.minecraft.world.level.material.Fluid;
+
 
 public class ChunkLoader
 {

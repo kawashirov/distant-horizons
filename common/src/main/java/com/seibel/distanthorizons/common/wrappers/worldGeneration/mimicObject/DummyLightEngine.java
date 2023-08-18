@@ -44,7 +44,7 @@ public class DummyLightEngine extends LevelLightEngine
 	public void onBlockEmissionIncrease(BlockPos blockPos, int i) { }
 	
 	@Override
-	public int runUpdates(int i, boolean bl, boolean bl2) { }
+	public int runUpdates(int i, boolean bl, boolean bl2) { return 0; }
 	
 	@Override
 	public void enableLightSources(ChunkPos chunkPos, boolean bl) { }

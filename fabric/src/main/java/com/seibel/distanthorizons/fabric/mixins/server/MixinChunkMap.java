@@ -31,7 +31,7 @@ public class MixinChunkMap
 	@Inject(method = "save", at = @At(value = "INVOKE", target = CHUNK_SERIALIZER_WRITE))
 	private void onChunkSave(ChunkAccess chunk, CallbackInfoReturnable<Boolean> ci)
 	{
-		#if MC_1_16_5
+		#if MC_1_16_5 || MC_1_17_1
 		if (chunk.getBiomes() == null)
 		{
 			// in 1.16.5 some chunks may be missing their biomes, which cause issues when attempting to save them
