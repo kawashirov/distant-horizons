@@ -36,6 +36,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 #if PRE_MC_1_20_1
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiComponent;
 #else
 import net.minecraft.client.gui.GuiGraphics;
