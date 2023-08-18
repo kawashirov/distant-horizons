@@ -37,6 +37,17 @@ public class MixinChunkMap
 			// in 1.16.5 some chunks may be missing their biomes, which cause issues when attempting to save them
 			return;
 		}
+		#else
+		try
+		{
+			// this will throw an exception if the biomes aren't set up
+			chunk.getNoiseBiome(0,0,0);
+		}
+		catch (Exception e)
+		{
+			// some chunks may be missing their biomes, which cause issues when attempting to save them
+			return;
+		}
 		#endif
 		
 		
