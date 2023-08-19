@@ -161,15 +161,15 @@ public class ClassicConfigGUI
 			if (((ConfigEntry) info).isValid(value) == 0 && info.getType() != List.class)
 			{
 				if (!cast)
-					((ConfigEntry) info).setWithoutSaving(value);
+					((ConfigEntry) info).uiSetWithoutSaving(value);
 				else
-					((ConfigEntry) info).setWithoutSaving(value.intValue());
+					((ConfigEntry) info).uiSetWithoutSaving(value.intValue());
 			}
 //            else if (((ConfigEntry) info).isValidMemoryAddress() == 0)
 //            {
 //                if (((List<String>) info.get()).size() == ((EntryInfo) info.guiValue).index)
-//                    info.set(((List<String>) info.get()).add(""));
-//                info.set(((List<String>) info.get()).set(((EntryInfo) info.guiValue).index, Arrays.stream(((EntryInfo) info.guiValue).tempValue.replace("[", "").replace("]", "").split(", ")).collect(Collectors.toList()).get(0)));
+//                    info.uiSet(((List<String>) info.get()).add(""));
+//                info.uiSet(((List<String>) info.get()).set(((EntryInfo) info.guiValue).index, Arrays.stream(((EntryInfo) info.guiValue).tempValue.replace("[", "").replace("]", "").split(", ")).collect(Collectors.toList()).get(0)));
 //            }
 			
 			return true;
@@ -309,7 +309,7 @@ public class ClassicConfigGUI
 			if (ConfigEntry.class.isAssignableFrom(info.getClass()))
 			{
 				Button.OnPress btnAction = button -> {
-					((ConfigEntry) info).setWithoutSaving(((ConfigEntry) info).getDefaultValue());
+					((ConfigEntry) info).uiSetWithoutSaving(((ConfigEntry) info).getDefaultValue());
 					((EntryInfo) info.guiValue).index = 0;
 					this.reload = true;
 					Objects.requireNonNull(minecraft).setScreen(this);
@@ -463,7 +463,7 @@ public class ClassicConfigGUI
 				Function<Object, Component> func = value -> TextOrTranslatable((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
 				
 				((EntryInfo) info.guiValue).widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
-					((ConfigEntry) info).setWithoutSaving(!(Boolean) info.get());
+					((ConfigEntry) info).uiSetWithoutSaving(!(Boolean) info.get());
 					button.setMessage(func.apply(info.get()));
 				}, func);
 			}
@@ -503,7 +503,7 @@ public class ClassicConfigGUI
 					}
 					
 					
-					info.set(enumValue);
+					((ConfigEntry<Enum<?>>) info).uiSetWithoutSaving(enumValue);
 					button.setMessage(func.apply(info.get()));
 				}, func);
 			}
