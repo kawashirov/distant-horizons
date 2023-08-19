@@ -19,11 +19,9 @@
 
 package com.seibel.distanthorizons.common.wrappers.chunk;
 
-import com.seibel.distanthorizons.api.enums.config.ELightGenerationMode;
 import com.seibel.distanthorizons.common.wrappers.block.BiomeWrapper;
 import com.seibel.distanthorizons.common.wrappers.block.BlockStateWrapper;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject.DhLitWorldGenRegion;
-import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.pos.DhBlockPos;
 import com.seibel.distanthorizons.core.pos.DhChunkPos;
 import com.seibel.distanthorizons.core.util.LodUtil;
@@ -59,6 +57,10 @@ import net.minecraft.core.SectionPos;
 
 public class ChunkWrapper implements IChunkWrapper
 {
+	/** useful for debugging, but can slow down chunk operations quite a bit due to being called every time. */
+	private static final boolean RUN_RELATIVE_POS_INDEX_VALIDATION = false; 
+	
+	
 	private final ChunkAccess chunk;
 	private final DhChunkPos chunkPos;
 	private final LevelReader lightSource;
@@ -439,6 +441,9 @@ public class ChunkWrapper implements IChunkWrapper
 	/** used to prevent accidentally attempting to get/set values outside this chunk's boundaries */
 	private void throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(int x, int y, int z) throws IndexOutOfBoundsException
 	{
+		if (RUN_RELATIVE_POS_INDEX_VALIDATION)
+			return;
+		
 		// FIXME +1 is to handle the fact that LodDataBuilder adds +1 to all block lighting calculations, also done in the constructor
 		int minHeight = this.getMinBuildHeight();
 		int maxHeight = this.getMaxBuildHeight() + 1;
