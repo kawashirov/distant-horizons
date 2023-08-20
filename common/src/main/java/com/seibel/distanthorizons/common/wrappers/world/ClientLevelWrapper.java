@@ -68,22 +68,12 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 		return LEVEL_WRAPPER_BY_CLIENT_LEVEL.computeIfAbsent(level, ClientLevelWrapper::new);
 	}
 	
-	public static void closeLevel(ClientLevel level) { LEVEL_WRAPPER_BY_CLIENT_LEVEL.remove(level); }
-	
-	
 	@Nullable
 	@Override
 	public IServerLevelWrapper tryGetServerSideWrapper()
 	{
 		try
 		{
-			// commented out because this breaks when traveling between dimensions,
-			// serverPlayer.getLevel() will return the previously loaded level, which causes issues 
-//			PlayerList serverPlayerList = MinecraftClientWrapper.INSTANCE.mc.getSingleplayerServer().getPlayerList();
-//			ServerPlayer serverPlayer = serverPlayerList.getPlayer(MinecraftClientWrapper.INSTANCE.mc.player.getUUID());
-//			return ServerLevelWrapper.getWrapper(serverPlayer.getLevel());
-			
-			
 			Iterable<ServerLevel> serverLevels = MinecraftClientWrapper.INSTANCE.mc.getSingleplayerServer().getAllLevels();
 			
 			// attempt to find the server level with the same dimension type
@@ -108,14 +98,6 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 			return null;
 		}
 	}
-	public static void cleanCheck()
-	{
-		if (!LEVEL_WRAPPER_BY_CLIENT_LEVEL.isEmpty())
-		{
-			LOGGER.warn("{} client levels havn't been freed!", LEVEL_WRAPPER_BY_CLIENT_LEVEL.size());
-			LEVEL_WRAPPER_BY_CLIENT_LEVEL.clear();
-		}
-	}
 	
 	
 	
@@ -134,12 +116,6 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 	
 	@Override
 	public EDhApiLevelType getLevelType() { return EDhApiLevelType.CLIENT_LEVEL; }
-	
-	@Override
-	public int getBlockLight(int x, int y, int z) { return this.level.getBrightness(LightLayer.BLOCK, new BlockPos(x, y, z)); }
-	
-	@Override
-	public int getSkyLight(int x, int y, int z) { return this.level.getBrightness(LightLayer.SKY, new BlockPos(x, y, z)); }
 	
 	public ClientLevel getLevel() { return this.level; }
 	
@@ -197,6 +173,9 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 	
 	@Override
 	public ClientLevel getWrappedMcObject() { return this.level; }
+	
+	@Override
+	public void onUnload() { LEVEL_WRAPPER_BY_CLIENT_LEVEL.remove(this.level); }
 	
 	@Override
 	public String toString()

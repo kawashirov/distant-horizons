@@ -38,9 +38,7 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.world.IBiomeWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IServerLevelWrapper;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
@@ -54,33 +52,30 @@ import org.jetbrains.annotations.Nullable;
 public class ServerLevelWrapper implements IServerLevelWrapper
 {
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
-	private static final ConcurrentHashMap<ServerLevel, ServerLevelWrapper>
-			levelWrapperMap = new ConcurrentHashMap<>();
-	
-	public static ServerLevelWrapper getWrapper(ServerLevel level)
-	{
-		return levelWrapperMap.computeIfAbsent(level, ServerLevelWrapper::new);
-	}
-	public static void closeWrapper(ServerLevel level)
-	{
-		levelWrapperMap.remove(level);
-	}
-	public static void cleanCheck()
-	{
-		if (!levelWrapperMap.isEmpty())
-		{
-			LOGGER.warn(levelWrapperMap.size() + " server levels haven't been freed!");
-			levelWrapperMap.clear();
-		}
-	}
+	private static final ConcurrentHashMap<ServerLevel, ServerLevelWrapper> LEVEL_WRAPPER_BY_SERVER_LEVEL = new ConcurrentHashMap<>();
 	
 	final ServerLevel level;
 	ServerBlockDetailMap blockMap = new ServerBlockDetailMap(this);
+	
+	
+	
+	//==============//
+	// constructors //
+	//==============//
+	
+	public static ServerLevelWrapper getWrapper(ServerLevel level) { return LEVEL_WRAPPER_BY_SERVER_LEVEL.computeIfAbsent(level, ServerLevelWrapper::new); }
 	
 	public ServerLevelWrapper(ServerLevel level)
 	{
 		this.level = level;
 	}
+	
+	
+	
+	//=========//
+	// methods //
+	//=========//
+	
 	@Nullable
 	@Override
 	public IClientLevelWrapper tryGetClientLevelWrapper()
@@ -108,18 +103,6 @@ public class ServerLevelWrapper implements IServerLevelWrapper
 	
 	@Override
 	public EDhApiLevelType getLevelType() { return EDhApiLevelType.SERVER_LEVEL; }
-	
-	@Override
-	public int getBlockLight(int x, int y, int z)
-	{
-		return level.getBrightness(LightLayer.BLOCK, new BlockPos(x, y, z));
-	}
-	
-	@Override
-	public int getSkyLight(int x, int y, int z)
-	{
-		return level.getBrightness(LightLayer.SKY, new BlockPos(x, y, z));
-	}
 	
 	public ServerLevel getLevel()
 	{
@@ -187,6 +170,9 @@ public class ServerLevelWrapper implements IServerLevelWrapper
 	{
 		return level;
 	}
+	
+	@Override
+	public void onUnload() { LEVEL_WRAPPER_BY_SERVER_LEVEL.remove(this.level); }
 	
 	@Override
 	public String toString()
