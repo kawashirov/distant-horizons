@@ -484,7 +484,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 				ChunkAccess chunk = totalChunks.get(x, z);
 				if (chunk != null)
 				{
-					chunkWrapperList.set(x, z, new ChunkWrapper(chunk, region, null));
+					chunkWrapperList.set(x, z, new ChunkWrapper(chunk, region, serverlevel.getLevelWrapper()));
 				}
 			});
 			
