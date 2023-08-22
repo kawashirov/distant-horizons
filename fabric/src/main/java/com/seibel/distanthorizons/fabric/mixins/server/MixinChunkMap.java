@@ -31,6 +31,18 @@ public class MixinChunkMap
 	@Inject(method = "save", at = @At(value = "INVOKE", target = CHUNK_SERIALIZER_WRITE))
 	private void onChunkSave(ChunkAccess chunk, CallbackInfoReturnable<Boolean> ci)
 	{
+		// corrupt/incomplete chunk validation
+		#if MC_1_18_2
+		// MC 1.18.2 has the tendency to try saving incomplete or corrupted chunks (which show up as empty or black chunks)
+		// this should prevent that from happening
+		if (chunk.isUnsaved() || chunk.isUpgrading() || !chunk.isLightCorrect())
+		{
+			return;
+		}
+		#endif
+		
+		
+		// biome validation
 		#if MC_1_16_5 || MC_1_17_1
 		if (chunk.getBiomes() == null)
 		{
