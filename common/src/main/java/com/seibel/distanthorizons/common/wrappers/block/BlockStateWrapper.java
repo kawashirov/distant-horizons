@@ -4,13 +4,10 @@ import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.wrapperInterfaces.block.IBlockStateWrapper;
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.*;
@@ -18,12 +15,16 @@ import java.util.concurrent.ConcurrentHashMap;
 
 #if MC_1_16_5 || MC_1_17_1
 import net.minecraft.core.Registry;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.EmptyBlockGetter;
 #elif MC_1_18_2 || MC_1_19_2
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.Level;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 #else
 import net.minecraft.client.Minecraft;
+import net.minecraft.world.level.Level;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.EmptyBlockGetter;
@@ -174,7 +175,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 		
 		
 		
-		#if MC_1_18_2 || MC_1_19_2 || MC_1_20_1
+		#if !(MC_1_16_5 || MC_1_17_1)
 		// use the given level if possible, otherwise try using the currently loaded one 
 		Level level = (levelWrapper != null ? (Level)levelWrapper.getWrappedMcObject() : null);
 		level = (level == null ? Minecraft.getInstance().level : level);
@@ -238,7 +239,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 		try
 		{
 			
-			#if MC_1_18_2 || MC_1_19_2 || MC_1_20_1
+			#if !(MC_1_16_5 || MC_1_17_1)
 			// use the given level if possible, otherwise try using the currently loaded one 
 			Level level = (levelWrapper != null ? (Level)levelWrapper.getWrappedMcObject() : null);
 			level = (level == null ? Minecraft.getInstance().level : level);
