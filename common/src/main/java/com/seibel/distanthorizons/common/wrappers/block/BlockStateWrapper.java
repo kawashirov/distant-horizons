@@ -3,8 +3,10 @@ package com.seibel.distanthorizons.common.wrappers.block;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.wrapperInterfaces.block.IBlockStateWrapper;
 
+import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.logging.log4j.Logger;
@@ -31,18 +33,25 @@ public class BlockStateWrapper implements IBlockStateWrapper
 {
 	/** example "minecraft:plains" */
 	public static final String RESOURCE_LOCATION_SEPARATOR = ":";
-	/** example "minecraft:water_state_{level:0}" */
+	/** example "minecraft:water_STATE_{level:0}" */
 	public static final String STATE_STRING_SEPARATOR = "_STATE_";
 	
 	
 	// must be defined before AIR, otherwise a null pointer will be thrown
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 	
-    public static final ConcurrentHashMap<BlockState, BlockStateWrapper> cache = new ConcurrentHashMap<>();
-	public static final BlockStateWrapper AIR = fromBlockState(BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse("minecraft:air")).defaultBlockState(), false);
-	public static final String[] RENDERER_IGNORED_BLOCKS_RESOURCE_LOCATIONS = {"minecraft:air", "minecraft:barrier", "minecraft:structure_void"};
-	public static final HashMap<BlockState, String> RENDERER_IGNORED_BLOCKS_INTERNAL = getRendererIgnoredBlocksInternal(RENDERER_IGNORED_BLOCKS_RESOURCE_LOCATIONS);
-	public static final HashMap<String, ? extends IBlockStateWrapper> RENDERER_IGNORED_BLOCKS = getRendererIgnoredBlocks(RENDERER_IGNORED_BLOCKS_INTERNAL);
+    public static final ConcurrentHashMap<BlockState, BlockStateWrapper> WRAPPER_BY_BLOCK_STATE = new ConcurrentHashMap<>();
+	
+	public static String AIR_STRING = "AIR";
+	public static final BlockStateWrapper AIR = new BlockStateWrapper(null);
+	
+	public static final String[] RENDERER_IGNORED_BLOCKS_RESOURCE_LOCATIONS = { AIR_STRING, "minecraft:barrier", "minecraft:structure_void", "minecraft:light" };
+	
+	public static HashSet<IBlockStateWrapper> rendererIgnoredBlocks = null;
+	
+	
+	
+	public final BlockState blockState;
 	
 	/**
 	 * Cached so it can be quickly used as a semi-stable hashing method. <br>
@@ -51,86 +60,83 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	private String serializationResult = null;
 	
 	
+	
 	//==============//
 	// constructors //
 	//==============//
 	
-    public static BlockStateWrapper fromBlockState(BlockState blockState)
+	public static BlockStateWrapper fromBlockState(BlockState blockState)
 	{
-		return fromBlockState(blockState, true);
-    }
-	
-	private static BlockStateWrapper fromBlockState(BlockState blockState, boolean nullCheck)
-	{
-		if (Objects.requireNonNull(blockState).isAir() && AIR != null)
+		if (blockState == null || blockState.isAir())
+		{
 			return AIR;
-		
-		return cache.computeIfAbsent(blockState, blockState1 -> new BlockStateWrapper(blockState1, nullCheck));
-	}
-	
-	/**
-	 * Only meant for use in the {@code RENDERER_IGNORED_BLOCKS_INTERNAL} list. Do not use elsewhere, since the {@code levelWrapper} parameter of each {@code IBlockStateWrapper} will be {@code null}, causing issues.
-	 * @param resourceLocations The resource location(s) of the block(s) that should be ignored by the renderer, may only contain {@code [a-z0-9/._-)} characters.
-	 * @return The default blockstate(s) of the block(s), paired with the serialized resource location(s) of the block(s), which should be passed into the {@code RENDERER_IGNORED_BLOCKS_INTERNAL} map and the {@code getRendererIgnoredBlocks} method.
-	 */
-	@SuppressWarnings("SameParameterValue")
-	private static @NotNull HashMap<BlockState, String> getRendererIgnoredBlocksInternal(String @NotNull ... resourceLocations)
-	{
-		HashMap<BlockState, String> blockStates = new HashMap<>();
-		
-		for (String resourceLocation : resourceLocations)
-		{
-			ResourceLocation fetchedResourceLocation = Objects.requireNonNull(ResourceLocation.tryParse(resourceLocation), String.format("Supplied a resource location that couldn't be parsed by Minecraft: %s", resourceLocation));
-			var splitResourceLocation = resourceLocation.split(":");
-			
-			if (splitResourceLocation.length == 0) {
-				LOGGER.warn("A resource location that should be ignored by the renderer was in an invalid format: {}", resourceLocation);
-				continue;
-			}
-			
-			blockStates.put(BuiltInRegistries.BLOCK.get(fetchedResourceLocation).defaultBlockState(), splitResourceLocation[1].toUpperCase(Locale.ROOT));
 		}
 		
-		return blockStates;
+		return WRAPPER_BY_BLOCK_STATE.computeIfAbsent(blockState, newBlockState -> new BlockStateWrapper(newBlockState));
 	}
 	
-	/**
-	 * Only meant for use in the {@code RENDERER_IGNORED_BLOCKS} list. Do not use elsewhere, since the {@code levelWrapper} parameter of each {@code IBlockStateWrapper} will be {@code null}, causing issues.
-	 * @param rendererIgnoredBlocks A map containing the blockstate(s) of the block(s), paired with the resource location(s) of the block(s) that should be ignored by the renderer.
-	 * @return The blockstate wrapper(s) of the blockstate(s), which should be passed into the {@code RENDERER_IGNORED_BLOCKS} list.
-	 */
-	@SuppressWarnings("SameParameterValue")
-	private static @NotNull HashMap<String, ? extends IBlockStateWrapper> getRendererIgnoredBlocks(@NotNull Map<BlockState, String> rendererIgnoredBlocks)
+	private BlockStateWrapper(BlockState blockState) 
 	{
-		HashMap<String, BlockStateWrapper> blockStateWrappers = new HashMap<>();
-		
-		for (Map.Entry<BlockState, String> blockStateResourceLocations : rendererIgnoredBlocks.entrySet())
-		{
-			blockStateWrappers.put(blockStateResourceLocations.getValue(), fromBlockState(blockStateResourceLocations.getKey(), false));
-		}
-		
-		return blockStateWrappers;
-	}
-	
-    public final BlockState blockState;
-	
-    BlockStateWrapper(BlockState blockState)
-    {
-        this(blockState, true);
-    }
-	
-	// TODO: Pass in levelwrapper so nullCheck has a use
-	private BlockStateWrapper(BlockState blockState, boolean nullCheck) {
 		this.blockState = blockState;
-		
-		LOGGER.trace("Created BlockStateWrapper for [{}]", blockState);
+		LOGGER.trace("Created BlockStateWrapper for ["+blockState+"]");
 	}
 	
 	
 	
-	//=========//
-	// methods //
-	//=========//
+	//================//
+	// helper methods //
+	//================//
+	
+	/** 
+	 * Requires a {@link ILevelWrapper} since {@link BlockStateWrapper#deserialize(String,ILevelWrapper)} also requires one. 
+	 * This way the method won't accidentally be called before the deserialization can be completed.
+	 */
+	public static HashSet<IBlockStateWrapper> getRendererIgnoredBlocks(ILevelWrapper levelWrapper)
+	{
+		// use the cached version if possible
+		if (rendererIgnoredBlocks != null)
+		{
+			return rendererIgnoredBlocks;
+		}
+		
+		
+		// deserialize each of the given resource locations
+		HashSet<IBlockStateWrapper> blockStateWrappers = new HashSet<>();
+		for (String blockResourceLocation : RENDERER_IGNORED_BLOCKS_RESOURCE_LOCATIONS)
+		{
+			try
+			{
+				BlockStateWrapper DefaultBlockStateToIgnore = (BlockStateWrapper) deserialize(blockResourceLocation, levelWrapper);
+				blockStateWrappers.add(DefaultBlockStateToIgnore);
+				
+				if (DefaultBlockStateToIgnore == AIR)
+				{
+					continue;
+				}
+				
+				// add all possible blockstates (to account for light blocks with different light values and such)
+				List<BlockState> blockStatesToIgnore = DefaultBlockStateToIgnore.blockState.getBlock().getStateDefinition().getPossibleStates();
+				for (BlockState blockState : blockStatesToIgnore)
+				{
+					BlockStateWrapper newBlockToIgnore = BlockStateWrapper.fromBlockState(blockState);
+					blockStateWrappers.add(newBlockToIgnore);
+				}
+			}
+			catch (IOException e)
+			{
+				LOGGER.warn("Unable to deserialize rendererIgnoredBlock with the resource location: ["+blockResourceLocation+"]. Error: "+e.getMessage(), e);
+			}
+		}
+		
+		rendererIgnoredBlocks = blockStateWrappers;
+		return rendererIgnoredBlocks;
+	}
+	
+	
+	
+	//=================//
+	// wrapper methods //
+	//=================//
 	
 	@Override
 	public int getOpacity()
@@ -152,30 +158,38 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	public int getLightEmission() { return (this.blockState != null) ? this.blockState.getLightEmission() : 0; }
 	
 	@Override
-	public String serialize() // FIXME pass in level to prevent null pointers (or maybe just RegistryAccess?)
+	public String serialize() { return this.serialize(null); }
+	public String serialize(ILevelWrapper levelWrapper)
 	{
-		// the result can be quickly used as a semi-stable hashing method, so it's going to be cached
+		// the serialization result can be quickly used as a semi-stable hashing method, so it needs to be cached for speed
 		if (this.serializationResult != null)
+		{
 			return this.serializationResult;
+		}
 		
 		if (this.blockState == null)
 		{
-			return "AIR";
+			return AIR_STRING;
 		}
 		
-		if (RENDERER_IGNORED_BLOCKS_INTERNAL.containsKey(this.blockState))
-			return this.serializationResult = RENDERER_IGNORED_BLOCKS_INTERNAL.get(this.blockState);
+		
+		
+		#if MC_1_18_2 || MC_1_19_2 || MC_1_20_1
+		// use the given level if possible, otherwise try using the currently loaded one 
+		Level level = (levelWrapper != null ? (Level)levelWrapper.getWrappedMcObject() : null);
+		level = (level == null ? Minecraft.getInstance().level : null);
+		#endif
 		
 		ResourceLocation resourceLocation;
-			#if MC_1_16_5 || MC_1_17_1
-			resourceLocation = Registry.BLOCK.getKey(this.blockState.getBlock());
-			#elif MC_1_18_2 || MC_1_19_2
-			net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
-			resourceLocation = registryAccess.registryOrThrow(Registry.BLOCK_REGISTRY).getKey(this.blockState.getBlock());
-			#else
-		net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
+		#if MC_1_16_5 || MC_1_17_1
+		resourceLocation = Registry.BLOCK.getKey(this.blockState.getBlock());
+		#elif MC_1_18_2 || MC_1_19_2
+		net.minecraft.core.RegistryAccess registryAccess = level.registryAccess();
+		resourceLocation = registryAccess.registryOrThrow(Registry.BLOCK_REGISTRY).getKey(this.blockState.getBlock());
+		#else
+		net.minecraft.core.RegistryAccess registryAccess = level.registryAccess();
 		resourceLocation = registryAccess.registryOrThrow(Registries.BLOCK).getKey(this.blockState.getBlock());
-			#endif
+		#endif
 		
 		if (resourceLocation == null)
 		{
@@ -188,23 +202,27 @@ public class BlockStateWrapper implements IBlockStateWrapper
 		return this.serializationResult;
 	}
 	
-	public static IBlockStateWrapper deserialize(String resourceStateString) throws IOException // FIXME pass in level to prevent null pointers (or maybe just RegistryAccess?)
+	
+	/** will only work if a level is currently loaded */
+	public static IBlockStateWrapper deserialize(String resourceStateString) throws IOException { return deserialize(resourceStateString, null); }
+	public static IBlockStateWrapper deserialize(String resourceStateString, ILevelWrapper levelWrapper) throws IOException
 	{
-		if (resourceStateString.isEmpty())
-			throw new IOException("resourceStateString is empty");
-		
-		if (RENDERER_IGNORED_BLOCKS_INTERNAL.containsValue(resourceStateString))
-			return RENDERER_IGNORED_BLOCKS.get(resourceStateString);
-		
-		
-		// parse the BlockState
-		int stateSeparatorIndex = resourceStateString.indexOf(STATE_STRING_SEPARATOR);
-		if (stateSeparatorIndex == -1)
+		if (resourceStateString.equals(AIR_STRING) || resourceStateString.equals("")) // the empty string shouldn't normally happen, but just in case
 		{
-			throw new IOException("Unable to parse BlockState out of string: [" + resourceStateString + "].");
+			return AIR;
 		}
-		String blockStatePropertiesString = resourceStateString.substring(stateSeparatorIndex + STATE_STRING_SEPARATOR.length());
-		resourceStateString = resourceStateString.substring(0, stateSeparatorIndex);
+		
+		
+		
+		// try to parse out the BlockState
+		String blockStatePropertiesString = null; // will be null if no properties were included
+		int stateSeparatorIndex = resourceStateString.indexOf(STATE_STRING_SEPARATOR);
+		if (stateSeparatorIndex != -1)
+		{
+			// blockstate properties found
+			blockStatePropertiesString = resourceStateString.substring(stateSeparatorIndex + STATE_STRING_SEPARATOR.length());
+			resourceStateString = resourceStateString.substring(0, stateSeparatorIndex);
+		}
 		
 		// parse the resource location
 		int resourceSeparatorIndex = resourceStateString.indexOf(RESOURCE_LOCATION_SEPARATOR);
@@ -219,35 +237,58 @@ public class BlockStateWrapper implements IBlockStateWrapper
 		// attempt to get the BlockState from all possible BlockStates
 		try
 		{
+			
+			#if MC_1_18_2 || MC_1_19_2 || MC_1_20_1
+			// use the given level if possible, otherwise try using the currently loaded one 
+			Level level = (levelWrapper != null ? (Level)levelWrapper.getWrappedMcObject() : null);
+			level = (level == null ? Minecraft.getInstance().level : null);
+			#endif
+			
 			Block block;
 			#if MC_1_16_5 || MC_1_17_1
 			block = Registry.BLOCK.get(resourceLocation);
 			#elif MC_1_18_2 || MC_1_19_2
-			net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
+			net.minecraft.core.RegistryAccess registryAccess = level.registryAccess();
 			block = registryAccess.registryOrThrow(Registry.BLOCK_REGISTRY).get(resourceLocation);
 			#else
-			net.minecraft.core.RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
+			net.minecraft.core.RegistryAccess registryAccess = level.registryAccess();
 			block = registryAccess.registryOrThrow(Registries.BLOCK).get(resourceLocation);
 			#endif
 			
 			
-			
-			BlockState foundState = null;
-			List<BlockState> possibleStateList = block.getStateDefinition().getPossibleStates();
-			for (BlockState possibleState : possibleStateList)
+			if (block == null)
 			{
-				String possibleStatePropertiesString = serializeBlockStateProperties(possibleState);
-				if (possibleStatePropertiesString.equals(blockStatePropertiesString))
+				// shouldn't normally happen, but here to make the compiler happy
+				LOGGER.warn("Unable to find BlockState with the resourceLocation [" + resourceLocation + "] and properties: [" + blockStatePropertiesString + "]. Air will be used instead, some data may be lost.");
+				return AIR;
+			}
+			
+			
+			// attempt to find the blockstate from all possibilities
+			BlockState foundState = null;
+			if (blockStatePropertiesString != null)
+			{
+				List<BlockState> possibleStateList = block.getStateDefinition().getPossibleStates();
+				for (BlockState possibleState : possibleStateList)
 				{
-					foundState = possibleState;
-					break;
+					String possibleStatePropertiesString = serializeBlockStateProperties(possibleState);
+					if (possibleStatePropertiesString.equals(blockStatePropertiesString))
+					{
+						foundState = possibleState;
+						break;
+					}
 				}
 			}
 			
-			// use the default if no state was found
+			// use the default if no state was found or given
 			if (foundState == null)
 			{
-				LOGGER.warn("Unable to find BlockState for Block [" + resourceLocation + "] with properties: [" + blockStatePropertiesString + "].");
+				if (blockStatePropertiesString != null)
+				{
+					// we should have found a blockstate, but didn't
+					LOGGER.warn("Unable to find BlockState for Block [" + resourceLocation + "] with properties: [" + blockStatePropertiesString + "].");
+				}
+				
 				foundState = block.defaultBlockState();
 			}
 			return new BlockStateWrapper(foundState);

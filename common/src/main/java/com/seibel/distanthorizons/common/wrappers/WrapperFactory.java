@@ -30,12 +30,13 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.IWrapperFactory;
 import com.seibel.distanthorizons.core.wrapperInterfaces.block.IBlockStateWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IBiomeWrapper;
+import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvironmentWrapper;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.HashSet;
 
 /**
  * This handles creating abstract wrapper objects.
@@ -73,7 +74,7 @@ public class WrapperFactory implements IWrapperFactory
 	public IBlockStateWrapper getAirBlockStateWrapper() { return BlockStateWrapper.AIR; }
 	
 	@Override
-	public HashMap<String, ? extends IBlockStateWrapper> getRendererIgnoredBlocks() { return BlockStateWrapper.RENDERER_IGNORED_BLOCKS; }
+	public HashSet<IBlockStateWrapper> getRendererIgnoredBlocks(ILevelWrapper levelWrapper) { return BlockStateWrapper.getRendererIgnoredBlocks(levelWrapper); }
 	
 	
 	/**
