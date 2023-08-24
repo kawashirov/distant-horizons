@@ -385,9 +385,15 @@ public class ClassicConfigGUI
 			
 			DhDrawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title
 			
-			// If the update is pending, display this message to inform the user that it will apply when the game restarts
-			if (SelfUpdater.deleteOldOnClose)
-				DhDrawString(matrices, font, Translatable(configBase.modID + ".updater.waitingForClose"), 4, height - 38, 0xFFFFFF);
+			if (this.configBase.modID == "distanthorizons")
+			{
+				// Display version
+				DhDrawString(matrices, font, TextOrLiteral(ModInfo.VERSION), 2, height - 10, 0xAAAAAA);
+				
+				// If the update is pending, display this message to inform the user that it will apply when the game restarts
+				if (SelfUpdater.deleteOldOnClose)
+					DhDrawString(matrices, font, Translatable(configBase.modID + ".updater.waitingForClose"), 4, height - 38, 0xFFFFFF);
+			}
 			
 			
 			// Render the tooltip only if it can find a tooltip in the language file
