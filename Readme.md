@@ -20,7 +20,7 @@ If you want to see a quick demo, check out a video covering the mod here:
 
 ### This branch supports the following versions of Minecraft:
 
-#### 1.20.1, 1.20
+#### 1.20.1, 1.20 (Default)
 Fabric: 0.14.21\
 Fabric API: 0.85.0+1.20.1\
 Forge: 45.1.0\
@@ -41,21 +41,21 @@ Forge: 43.2.14\
 Parchment: 1.19.2:2022.11.27\
 Modmenu: 4.2.0-beta.2
 
-#### 1.18.2 (Default)
+#### 1.18.2
 Fabric: 0.14.21\
 Fabric API: 0.76.0+1.18.2\
 Forge: 40.2.10\
 Parchment: 1.18.2:2022.11.06\
 Modmenu: 3.2.5
 
-#### 1.17.1, 1.17 (BROKE)
+#### 1.17.1, 1.17
 Fabric: 0.14.21\
 Fabric API: 0.46.1+1.17\
 Forge: 37.1.1\
 Parchment: 1.17.1:2021.12.12\
 Modmenu: 2.0.14
 
-#### 1.16.5, 1.16.4 (BROKE)
+#### 1.16.5, 1.16.4
 Fabric: 0.14.21\
 Fabric API: 0.42.0+1.16\
 Forge: 36.2.39\
@@ -196,5 +196,5 @@ https://github.com/TheElectronWill/night-config
 SVG Salamander for SVG support\
 https://github.com/blackears/svgSalamander
 
-FlatLaf for theming (for development testing, may remove later)\
+FlatLaf for Java Swing theming (for development testing, may remove later, and not included in compiled jars)\
 https://www.formdev.com/flatlaf/
