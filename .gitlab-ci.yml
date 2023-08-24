@@ -33,9 +33,9 @@ build:
       - MC_VER: ["1.16.5", "1.17.1", "1.18.2", "1.19.2", "1.19.4", "1.20.1"]
   script:
     # this both runs the unit tests and assembles the code
-    - ./gradlew clean -PmcVer="${MC_VER}" -PgitMainBranch="${CI_COMMIT_BRANCH}" -PgitMainCommit="${CI_COMMIT_SHA}" -PgitCoreCommit="None(ran through Gitlab CI)" --gradle-user-home cache/;
-    - ./gradlew build -PmcVer="${MC_VER}" -PgitMainBranch="${CI_COMMIT_BRANCH}" -PgitMainCommit="${CI_COMMIT_SHA}" -PgitCoreCommit="None(ran through Gitlab CI)" --gradle-user-home cache/;
-    - ./gradlew mergeJars -PmcVer="${MC_VER}" -PgitMainBranch="${CI_COMMIT_BRANCH}" -PgitMainCommit="${CI_COMMIT_SHA}" -PgitCoreCommit="None(ran through Gitlab CI)" --gradle-user-home cache/;
+    - ./gradlew clean -PmcVer="${MC_VER}" -PgitMainBranch="${CI_COMMIT_BRANCH}" -PgitMainCommit="${CI_COMMIT_SHA}" -PgitCoreCommit="Unavailable (built by Gitlab CI)" --gradle-user-home cache/;
+    - ./gradlew build -PmcVer="${MC_VER}" -PgitMainBranch="${CI_COMMIT_BRANCH}" -PgitMainCommit="${CI_COMMIT_SHA}" -PgitCoreCommit="Unavailable (built by Gitlab CI)" --gradle-user-home cache/;
+    - ./gradlew mergeJars -PmcVer="${MC_VER}" -PgitMainBranch="${CI_COMMIT_BRANCH}" -PgitMainCommit="${CI_COMMIT_SHA}" -PgitCoreCommit="Unavailable (built by Gitlab CI)" --gradle-user-home cache/;
   artifacts:
     name: "NightlyBuild_${MC_VER}-${CI_COMMIT_SHORT_SHA}-${CI_COMMIT_TIMESTAMP}"
     paths:
