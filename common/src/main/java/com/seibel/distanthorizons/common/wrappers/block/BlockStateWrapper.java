@@ -177,7 +177,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 		#if MC_1_18_2 || MC_1_19_2 || MC_1_20_1
 		// use the given level if possible, otherwise try using the currently loaded one 
 		Level level = (levelWrapper != null ? (Level)levelWrapper.getWrappedMcObject() : null);
-		level = (level == null ? Minecraft.getInstance().level : null);
+		level = (level == null ? Minecraft.getInstance().level : level);
 		#endif
 		
 		ResourceLocation resourceLocation;
@@ -241,7 +241,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 			#if MC_1_18_2 || MC_1_19_2 || MC_1_20_1
 			// use the given level if possible, otherwise try using the currently loaded one 
 			Level level = (levelWrapper != null ? (Level)levelWrapper.getWrappedMcObject() : null);
-			level = (level == null ? Minecraft.getInstance().level : null);
+			level = (level == null ? Minecraft.getInstance().level : level);
 			#endif
 			
 			Block block;
