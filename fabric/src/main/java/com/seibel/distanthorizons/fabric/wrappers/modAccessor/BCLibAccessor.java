@@ -22,6 +22,8 @@ public class BCLibAccessor implements IBCLibAccessor
 		// Change the value of CUSTOM_FOG_RENDERING in the bclib client config
 		// This disabled fog from rendering within bclib
 		Configs.CLIENT_CONFIG.set(ClientConfig.CUSTOM_FOG_RENDERING, newValue);
+		#else
+		Configs.CLIENT_CONFIG.set(ClientConfig.CUSTOM_FOG_RENDERING, newValue);
 		#endif
 	}
 	
