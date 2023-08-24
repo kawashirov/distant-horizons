@@ -40,7 +40,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	
     public static final ConcurrentHashMap<BlockState, BlockStateWrapper> cache = new ConcurrentHashMap<>();
 	public static final BlockStateWrapper AIR = fromBlockState(BuiltInRegistries.BLOCK.get(ResourceLocation.tryParse("minecraft:air")).defaultBlockState(), false);
-	public static final String[] RENDERER_IGNORED_BLOCKS_RESOURCE_LOCATIONS = {"minecraft:air", "minecraft:barrier", "minecraft:structure_void"};
+	public static final String[] RENDERER_IGNORED_BLOCKS_RESOURCE_LOCATIONS = {"minecraft:air", "minecraft:barrier", "minecraft:structure_void", "minecraft:tripwire"};
 	public static final HashMap<BlockState, String> RENDERER_IGNORED_BLOCKS_INTERNAL = getRendererIgnoredBlocksInternal(RENDERER_IGNORED_BLOCKS_RESOURCE_LOCATIONS);
 	public static final HashMap<String, ? extends IBlockStateWrapper> RENDERER_IGNORED_BLOCKS = getRendererIgnoredBlocks(RENDERER_IGNORED_BLOCKS_INTERNAL);
 	
