@@ -165,7 +165,7 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 	@Override
 	public IBlockStateWrapper getBlockState(DhBlockPos pos)
 	{
-		return BlockStateWrapper.fromBlockState(this.level.getBlockState(McObjectConverter.Convert(pos)));
+		return BlockStateWrapper.fromBlockState(this.level.getBlockState(McObjectConverter.Convert(pos)), this);
 	}
 	
 	@Override

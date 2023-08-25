@@ -156,7 +156,7 @@ public class ServerLevelWrapper implements IServerLevelWrapper
 	@Override
 	public IBlockStateWrapper getBlockState(DhBlockPos pos)
 	{
-		return BlockStateWrapper.fromBlockState(level.getBlockState(McObjectConverter.Convert(pos)));
+		return BlockStateWrapper.fromBlockState(level.getBlockState(McObjectConverter.Convert(pos)), this);
 	}
 	
 	@Override

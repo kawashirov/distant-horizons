@@ -95,7 +95,7 @@ public class ChunkWrapper implements IChunkWrapper
 	// constructor //
 	//=============//
 	
-	public ChunkWrapper(ChunkAccess chunk, LevelReader lightSource, @Nullable ILevelWrapper wrappedLevel)
+	public ChunkWrapper(ChunkAccess chunk, LevelReader lightSource, ILevelWrapper wrappedLevel)
 	{
 		this.chunk = chunk;
 		this.lightSource = lightSource;
@@ -156,8 +156,6 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public IBiomeWrapper getBiome(int relX, int relY, int relZ)
 	{
-		//if (wrappedLevel != null) return wrappedLevel.getBiome(new DhBlockPos(x + getMinX(), y, z + getMinZ()));
-
 		#if PRE_MC_1_17_1
 		return BiomeWrapper.getBiomeWrapper(this.chunk.getBiomes().getNoiseBiome(
 				relX >> 2, relY >> 2, relZ >> 2));
@@ -367,12 +365,11 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public IBlockStateWrapper getBlockState(int relX, int relY, int relZ)
 	{
-		//if (wrappedLevel != null) return wrappedLevel.getBlockState(new DhBlockPos(x + getMinX(), y, z + getMinZ()));
-		return BlockStateWrapper.fromBlockState(this.chunk.getBlockState(new BlockPos(relX, relY, relZ)));
+		return BlockStateWrapper.fromBlockState(this.chunk.getBlockState(new BlockPos(relX, relY, relZ)), this.wrappedLevel);
 	}
 	
 	@Override
-	public boolean isStillValid() { return this.wrappedLevel == null || this.wrappedLevel.tryGetChunk(this.chunkPos) == this; }
+	public boolean isStillValid() { return this.wrappedLevel.tryGetChunk(this.chunkPos) == this; }
 	
 	#if POST_MC_1_20_1
 	private static boolean checkLightSectionsOnChunk(LevelChunk chunk, LevelLightEngine engine)

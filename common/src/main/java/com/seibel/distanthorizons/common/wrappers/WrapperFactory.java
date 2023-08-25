@@ -23,6 +23,8 @@ import com.seibel.distanthorizons.api.interfaces.override.worldGenerator.IDhApiW
 import com.seibel.distanthorizons.common.wrappers.block.BiomeWrapper;
 import com.seibel.distanthorizons.common.wrappers.block.BlockStateWrapper;
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
+import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
+import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.distanthorizons.core.level.IDhLevel;
 import com.seibel.distanthorizons.core.level.IDhServerLevel;
@@ -32,6 +34,9 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IBiomeWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.worldGeneration.AbstractBatchGenerationEnvironmentWrapper;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
@@ -68,7 +73,7 @@ public class WrapperFactory implements IWrapperFactory
 	public IBiomeWrapper deserializeBiomeWrapper(String str) throws IOException { return BiomeWrapper.deserialize(str); }
 	
 	@Override
-	public IBlockStateWrapper deserializeBlockStateWrapper(String str) throws IOException { return BlockStateWrapper.deserialize(str); }
+	public IBlockStateWrapper deserializeBlockStateWrapper(String str, ILevelWrapper levelWrapper) throws IOException { return BlockStateWrapper.deserialize(str, levelWrapper); }
 	
 	@Override
 	public IBlockStateWrapper getAirBlockStateWrapper() { return BlockStateWrapper.AIR; }
@@ -114,15 +119,34 @@ public class WrapperFactory implements IWrapperFactory
 			}
 			ChunkAccess chunk = (ChunkAccess) objectArray[0];
 			
-			// light source
-			if (!(objectArray[1] instanceof LevelReader))
+			// level / light source
+			if (!(objectArray[1] instanceof Level))
 			{
 				throw new ClassCastException(createChunkWrapperErrorMessage(objectArray));
 			}
-			LevelReader lightSource = (LevelReader) objectArray[1];
+			// the level is needed for the DH level wrapper...
+			Level level = (Level) objectArray[1];
+			// ...the LevelReader is needed for chunk lighting
+			LevelReader lightSource = level;
 			
 			
-			return new ChunkWrapper(chunk, lightSource, /*A DH wrapped level isn't necessary*/null);
+			// level wrapper
+			ILevelWrapper levelWrapper;
+			if (level instanceof ServerLevel)
+			{
+				levelWrapper = ServerLevelWrapper.getWrapper((ServerLevel)level);
+			}
+			else if (level instanceof ClientLevel)
+			{
+				levelWrapper = ClientLevelWrapper.getWrapper((ClientLevel)level);
+			}
+			else
+			{
+				throw new ClassCastException(createChunkWrapperErrorMessage(objectArray));
+			}
+			
+			
+			return new ChunkWrapper(chunk, lightSource, levelWrapper);
 		}
 		// incorrect number of parameters from the API
 		else
@@ -153,7 +177,7 @@ public class WrapperFactory implements IWrapperFactory
 		// MC 1.16, 1.18, 1.19, 1.20
 		#if POST_MC_1_17_1 || MC_1_16_5
 		message.append("[" + ChunkAccess.class.getName() + "], \n");
-		message.append("[" + LevelReader.class.getName() + "]. \n");
+		message.append("[" + ServerLevel.class.getName() + "] or [" + ClientLevel.class.getName() + "]. \n");
 		#else
 			// See preprocessor comment in createChunkWrapper() for full documentation
 			not implemented for this version of Minecraft!

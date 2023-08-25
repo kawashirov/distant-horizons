@@ -32,7 +32,7 @@ import net.minecraft.world.level.EmptyBlockGetter;
 
 public class BlockStateWrapper implements IBlockStateWrapper
 {
-	/** example "minecraft:plains" */
+	/** example "minecraft:water" */
 	public static final String RESOURCE_LOCATION_SEPARATOR = ":";
 	/** example "minecraft:water_STATE_{level:0}" */
 	public static final String STATE_STRING_SEPARATOR = "_STATE_";
@@ -44,7 +44,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
     public static final ConcurrentHashMap<BlockState, BlockStateWrapper> WRAPPER_BY_BLOCK_STATE = new ConcurrentHashMap<>();
 	
 	public static String AIR_STRING = "AIR";
-	public static final BlockStateWrapper AIR = new BlockStateWrapper(null);
+	public static final BlockStateWrapper AIR = new BlockStateWrapper(null, null);
 	
 	public static final String[] RENDERER_IGNORED_BLOCKS_RESOURCE_LOCATIONS = { AIR_STRING, "minecraft:barrier", "minecraft:structure_void", "minecraft:light" };
 	
@@ -53,12 +53,8 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	
 	
 	public final BlockState blockState;
-	
-	/**
-	 * Cached so it can be quickly used as a semi-stable hashing method. <br>
-	 * This may also fix the issue where we can serialize and save after a level has been shut down.
-	 */
-	private String serializationResult = null;
+	/** technically final, but since it requires a method call to generate it can't be marked as such */
+	private String serialString;
 	
 	
 	
@@ -66,19 +62,20 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	// constructors //
 	//==============//
 	
-	public static BlockStateWrapper fromBlockState(BlockState blockState)
+	public static BlockStateWrapper fromBlockState(BlockState blockState, ILevelWrapper levelWrapper)
 	{
 		if (blockState == null || blockState.isAir())
 		{
 			return AIR;
 		}
 		
-		return WRAPPER_BY_BLOCK_STATE.computeIfAbsent(blockState, newBlockState -> new BlockStateWrapper(newBlockState));
+		return WRAPPER_BY_BLOCK_STATE.computeIfAbsent(blockState, newBlockState -> new BlockStateWrapper(newBlockState, levelWrapper));
 	}
 	
-	private BlockStateWrapper(BlockState blockState) 
+	private BlockStateWrapper(BlockState blockState, ILevelWrapper levelWrapper)
 	{
 		this.blockState = blockState;
+		this.serialString = this.serialize(levelWrapper);
 		LOGGER.trace("Created BlockStateWrapper for ["+blockState+"]");
 	}
 	
@@ -119,7 +116,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 				List<BlockState> blockStatesToIgnore = DefaultBlockStateToIgnore.blockState.getBlock().getStateDefinition().getPossibleStates();
 				for (BlockState blockState : blockStatesToIgnore)
 				{
-					BlockStateWrapper newBlockToIgnore = BlockStateWrapper.fromBlockState(blockState);
+					BlockStateWrapper newBlockToIgnore = BlockStateWrapper.fromBlockState(blockState, levelWrapper);
 					blockStateWrappers.add(newBlockToIgnore);
 				}
 			}
@@ -159,15 +156,73 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	public int getLightEmission() { return (this.blockState != null) ? this.blockState.getLightEmission() : 0; }
 	
 	@Override
-	public String serialize() { return this.serialize(null); }
-	public String serialize(ILevelWrapper levelWrapper)
+	public String getSerialString() { return this.serialString; }
+	
+	@Override
+	public boolean equals(Object obj)
 	{
-		// the serialization result can be quickly used as a semi-stable hashing method, so it needs to be cached for speed
-		if (this.serializationResult != null)
+		if (this == obj)
 		{
-			return this.serializationResult;
+			return true;
 		}
 		
+		if (obj == null || this.getClass() != obj.getClass())
+		{
+			return false;
+		}
+		
+		BlockStateWrapper that = (BlockStateWrapper) obj;
+		// the serialized value is used so we can test the contents instead of the references
+		return Objects.equals(this.getSerialString(), that.getSerialString());
+	}
+	
+	@Override
+	public int hashCode() { return Objects.hash(this.getSerialString()); }
+	
+	
+	@Override
+	public Object getWrappedMcObject() { return this.blockState; }
+	
+	@Override
+	public boolean isAir() { return this.isAir(this.blockState); }
+	public boolean isAir(BlockState blockState) { return blockState == null || blockState.isAir(); }
+	
+	@Override
+	public boolean isSolid()
+	{
+        #if PRE_MC_1_20_1
+		return this.blockState.getMaterial().isSolid();
+        #else
+		return !this.blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).isEmpty();
+        #endif
+	}
+	
+	@Override
+	public boolean isLiquid()
+	{
+		if (this.isAir())
+		{
+			return false;
+		}
+		
+        #if PRE_MC_1_20_1
+		return this.blockState.getMaterial().isLiquid();
+        #else
+		return !this.blockState.getFluidState().isEmpty();
+        #endif
+	}
+	
+	@Override
+	public String toString() { return this.getSerialString(); }
+	
+	
+	
+	//=======================//
+	// serialization methods //
+	//=======================//
+	
+	private String serialize(ILevelWrapper levelWrapper)
+	{
 		if (this.blockState == null)
 		{
 			return AIR_STRING;
@@ -175,37 +230,37 @@ public class BlockStateWrapper implements IBlockStateWrapper
 		
 		
 		
+		// older versions of MC have a static registry
 		#if !(MC_1_16_5 || MC_1_17_1)
-		// use the given level if possible, otherwise try using the currently loaded one 
-		Level level = (levelWrapper != null ? (Level)levelWrapper.getWrappedMcObject() : null);
-		level = (level == null ? Minecraft.getInstance().level : level);
+		Level level = (Level)levelWrapper.getWrappedMcObject();
+		net.minecraft.core.RegistryAccess registryAccess = level.registryAccess();
 		#endif
 		
 		ResourceLocation resourceLocation;
 		#if MC_1_16_5 || MC_1_17_1
 		resourceLocation = Registry.BLOCK.getKey(this.blockState.getBlock());
 		#elif MC_1_18_2 || MC_1_19_2
-		net.minecraft.core.RegistryAccess registryAccess = level.registryAccess();
 		resourceLocation = registryAccess.registryOrThrow(Registry.BLOCK_REGISTRY).getKey(this.blockState.getBlock());
 		#else
-		net.minecraft.core.RegistryAccess registryAccess = level.registryAccess();
 		resourceLocation = registryAccess.registryOrThrow(Registries.BLOCK).getKey(this.blockState.getBlock());
 		#endif
 		
+		
+		
 		if (resourceLocation == null)
 		{
-			LOGGER.warn("unable to serialize: " + this.blockState);
+			LOGGER.warn("No ResourceLocation found, unable to serialize: " + this.blockState);
+			return AIR_STRING;
 		}
 		
-		this.serializationResult = resourceLocation.getNamespace() + RESOURCE_LOCATION_SEPARATOR + resourceLocation.getPath()
+		this.serialString = resourceLocation.getNamespace() + RESOURCE_LOCATION_SEPARATOR + resourceLocation.getPath()
 				+ STATE_STRING_SEPARATOR + serializeBlockStateProperties(this.blockState);
 		
-		return this.serializationResult;
+		return this.serialString;
 	}
 	
 	
 	/** will only work if a level is currently loaded */
-	public static IBlockStateWrapper deserialize(String resourceStateString) throws IOException { return deserialize(resourceStateString, null); }
 	public static IBlockStateWrapper deserialize(String resourceStateString, ILevelWrapper levelWrapper) throws IOException
 	{
 		if (resourceStateString.equals(AIR_STRING) || resourceStateString.equals("")) // the empty string shouldn't normally happen, but just in case
@@ -292,7 +347,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 				
 				foundState = block.defaultBlockState();
 			}
-			return new BlockStateWrapper(foundState);
+			return new BlockStateWrapper(foundState, levelWrapper);
 		}
 		catch (Exception e)
 		{
@@ -331,61 +386,5 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	}
 	
 	
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (this == obj)
-		{
-			return true;
-		}
-		
-		if (obj == null || this.getClass() != obj.getClass())
-		{
-			return false;
-		}
-		
-		BlockStateWrapper that = (BlockStateWrapper) obj;
-		// the serialized value is used so we can test the contents instead of the references
-		return Objects.equals(this.serialize(), that.serialize());
-	}
-	
-	@Override
-	public int hashCode() { return Objects.hash(this.serialize()); }
-	
-	
-	@Override
-	public Object getWrappedMcObject() { return this.blockState; }
-	
-	@Override
-	public boolean isAir() { return this.isAir(this.blockState); }
-	public boolean isAir(BlockState blockState) { return blockState == null || blockState.isAir(); }
-	
-	@Override
-	public boolean isSolid()
-	{
-        #if PRE_MC_1_20_1
-		return this.blockState.getMaterial().isSolid();
-        #else
-		return !this.blockState.getCollisionShape(EmptyBlockGetter.INSTANCE, BlockPos.ZERO).isEmpty();
-        #endif
-	}
-	
-	@Override
-	public boolean isLiquid()
-	{
-		if (this.isAir())
-		{
-			return false;
-		}
-		
-        #if PRE_MC_1_20_1
-		return this.blockState.getMaterial().isLiquid();
-        #else
-		return !this.blockState.getFluidState().isEmpty();
-        #endif
-	}
-	
-	@Override
-	public String toString() { return this.serialize(); }
 	
 }
