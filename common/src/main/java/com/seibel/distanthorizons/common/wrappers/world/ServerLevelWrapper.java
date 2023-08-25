@@ -162,7 +162,7 @@ public class ServerLevelWrapper implements IServerLevelWrapper
 	@Override
 	public IBiomeWrapper getBiome(DhBlockPos pos)
 	{
-		return BiomeWrapper.getBiomeWrapper(level.getBiome(McObjectConverter.Convert(pos)));
+		return BiomeWrapper.getBiomeWrapper(level.getBiome(McObjectConverter.Convert(pos)), this);
 	}
 	
 	@Override

@@ -158,16 +158,21 @@ public class ChunkWrapper implements IChunkWrapper
 	{
 		#if PRE_MC_1_17_1
 		return BiomeWrapper.getBiomeWrapper(this.chunk.getBiomes().getNoiseBiome(
-				relX >> 2, relY >> 2, relZ >> 2));
+				relX >> 2, relY >> 2, relZ >> 2),
+				this.wrappedLevel);
 		#elif PRE_MC_1_18_2
 		return BiomeWrapper.getBiomeWrapper(this.chunk.getBiomes().getNoiseBiome(
-				QuartPos.fromBlock(relX), QuartPos.fromBlock(relY), QuartPos.fromBlock(relZ)));
+				QuartPos.fromBlock(relX), QuartPos.fromBlock(relY), QuartPos.fromBlock(relZ)),
+				this.wrappedLevel);
 		#elif PRE_MC_1_18_2
 		return BiomeWrapper.getBiomeWrapper(this.chunk.getNoiseBiome(
-				QuartPos.fromBlock(relX), QuartPos.fromBlock(relY), QuartPos.fromBlock(relZ)));
-		#else //Now returns a Holder<Biome> instead of Biome
+				QuartPos.fromBlock(relX), QuartPos.fromBlock(relY), QuartPos.fromBlock(relZ)),
+				this.wrappedLevel);
+		#else 
+		//Now returns a Holder<Biome> instead of Biome
 		return BiomeWrapper.getBiomeWrapper(this.chunk.getNoiseBiome(
-				QuartPos.fromBlock(relX), QuartPos.fromBlock(relY), QuartPos.fromBlock(relZ)));
+				QuartPos.fromBlock(relX), QuartPos.fromBlock(relY), QuartPos.fromBlock(relZ)),
+				this.wrappedLevel);
 		#endif
 	}
 	

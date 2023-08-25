@@ -43,7 +43,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	
     public static final ConcurrentHashMap<BlockState, BlockStateWrapper> WRAPPER_BY_BLOCK_STATE = new ConcurrentHashMap<>();
 	
-	public static String AIR_STRING = "AIR";
+	public static final String AIR_STRING = "AIR";
 	public static final BlockStateWrapper AIR = new BlockStateWrapper(null, null);
 	
 	public static final String[] RENDERER_IGNORED_BLOCKS_RESOURCE_LOCATIONS = { AIR_STRING, "minecraft:barrier", "minecraft:structure_void", "minecraft:light" };
@@ -51,6 +51,8 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	public static HashSet<IBlockStateWrapper> rendererIgnoredBlocks = null;
 	
 	
+	
+	// properties //
 	
 	public final BlockState blockState;
 	/** technically final, but since it requires a method call to generate it can't be marked as such */
@@ -76,7 +78,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	{
 		this.blockState = blockState;
 		this.serialString = this.serialize(levelWrapper);
-		LOGGER.trace("Created BlockStateWrapper for ["+blockState+"]");
+		LOGGER.trace("Created BlockStateWrapper ["+this.serialString+"] for ["+blockState+"]");
 	}
 	
 	
@@ -342,7 +344,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 				if (blockStatePropertiesString != null)
 				{
 					// we should have found a blockstate, but didn't
-					LOGGER.warn("Unable to find BlockState for Block [" + resourceLocation + "] with properties: [" + blockStatePropertiesString + "].");
+					LOGGER.warn("Unable to find BlockState for Block [" + resourceLocation + "] with properties: [" + blockStatePropertiesString + "]. Using the default block state.");
 				}
 				
 				foundState = block.defaultBlockState();

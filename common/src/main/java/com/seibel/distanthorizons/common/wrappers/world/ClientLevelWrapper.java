@@ -169,7 +169,7 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 	}
 	
 	@Override
-	public IBiomeWrapper getBiome(DhBlockPos pos) { return BiomeWrapper.getBiomeWrapper(this.level.getBiome(McObjectConverter.Convert(pos))); }
+	public IBiomeWrapper getBiome(DhBlockPos pos) { return BiomeWrapper.getBiomeWrapper(this.level.getBiome(McObjectConverter.Convert(pos)), this); }
 	
 	@Override
 	public ClientLevel getWrappedMcObject() { return this.level; }
