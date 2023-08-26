@@ -193,5 +193,5 @@ https://github.com/lz4/lz4-java
 NightConfig for Json & Toml (config handling)\
 https://github.com/TheElectronWill/night-config
 
-SVG Salamander for SVG support\
+SVG Salamander for SVG support (not being used atm)\
 https://github.com/blackears/svgSalamander
