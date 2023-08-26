@@ -195,6 +195,3 @@ https://github.com/TheElectronWill/night-config
 
 SVG Salamander for SVG support\
 https://github.com/blackears/svgSalamander
-
-FlatLaf for Java Swing theming (for development testing, may remove later, and not included in compiled jars)\
-https://www.formdev.com/flatlaf/
