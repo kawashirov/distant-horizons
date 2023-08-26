@@ -223,12 +223,8 @@ subprojects { p ->
         forgeShadowMe("com.electronwill.night-config:toml:${rootProject.nightconfig_version}")
         forgeShadowMe("com.electronwill.night-config:json:${rootProject.nightconfig_version}")
 
-        // Theming
-        forgeShadowMe("com.formdev:flatlaf:${rootProject.flatlaf_version}")
-
-        // SVG
-        forgeShadowMe("com.formdev:svgSalamander:${rootProject.svgSalamander_version}")
-        forgeShadowMe("com.formdev:flatlaf-extras:${rootProject.flatlaf_version}")
+        // SVG (not needed atm)
+//        forgeShadowMe("com.formdev:svgSalamander:${rootProject.svgSalamander_version}")
         
         // Netty
         // Breaks 1.16.5
@@ -308,11 +304,8 @@ subprojects { p ->
         // NightConfig (includes Toml & Json)
         relocate "com.electronwill.nightconfig", "${librariesLocation}.electronwill.nightconfig"
 
-        // Theming
-        relocate "com.formdev.flatlaf", "${librariesLocation}.formdev.flatlaf"
-
-        // SVG
-        relocate "com.kitfox.svg", "${librariesLocation}.kitfox.svg"
+        // SVG (not needed atm)
+//        relocate "com.kitfox.svg", "${librariesLocation}.kitfox.svg"
         
         // Netty
         relocate "io.netty", "${librariesLocation}.netty"
