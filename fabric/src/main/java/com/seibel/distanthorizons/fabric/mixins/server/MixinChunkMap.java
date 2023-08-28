@@ -32,8 +32,8 @@ public class MixinChunkMap
 	private void onChunkSave(ChunkAccess chunk, CallbackInfoReturnable<Boolean> ci)
 	{
 		// corrupt/incomplete chunk validation
-		#if MC_1_18_2
-		// MC 1.18.2 has the tendency to try saving incomplete or corrupted chunks (which show up as empty or black chunks)
+		#if MC_1_18_2 || MC_1_19_2 || MC_1_19_4
+		// MC 1.18 and 1.19 have a tendency to try saving incomplete or corrupted chunks (which show up as empty or black chunks)
 		// this should prevent that from happening
 		if (chunk.isUnsaved() || chunk.isUpgrading() || !chunk.isLightCorrect())
 		{
