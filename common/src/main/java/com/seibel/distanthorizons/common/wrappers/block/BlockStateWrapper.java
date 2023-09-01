@@ -208,7 +208,7 @@ public class BlockStateWrapper implements IBlockStateWrapper
 		}
 		
         #if PRE_MC_1_20_1
-		return this.blockState.getMaterial().isLiquid();
+		return this.blockState.getMaterial().isLiquid() || !this.blockState.getFluidState().isEmpty();
         #else
 		return !this.blockState.getFluidState().isEmpty();
         #endif
