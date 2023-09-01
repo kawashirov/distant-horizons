@@ -1,8 +1,8 @@
 /*
- *    This file is part of the Distant Horizons mod (formerly the LOD Mod),
+ *    This file is part of the Distant Horizons mod
  *    licensed under the GNU GPL v3 License.
  *
- *    Copyright (C) 2020-2022  James Seibel
+ *    Copyright (C) 2020-2023 James Seibel
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
