@@ -20,6 +20,8 @@
 package com.seibel.distanthorizons.forge.mixins.client;
 
 import com.seibel.distanthorizons.core.config.Config;
+import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
+import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftRenderWrapper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -66,6 +68,7 @@ public class MixinFogRenderer
 		Entity entity = camera.getEntity();
 		boolean isSpecialFog = (entity instanceof LivingEntity) && ((LivingEntity) entity).hasEffect(MobEffects.BLINDNESS);
 		if (!isSpecialFog && cameraNotInFluid && fogMode == FogMode.FOG_TERRAIN
+				&& !SingletonInjector.INSTANCE.get(IMinecraftRenderWrapper.class).playerHasBlindingEffect()
 				&& Config.Client.Advanced.Graphics.Fog.disableVanillaFog.get())
 		{
 			#if PRE_MC_1_17_1
