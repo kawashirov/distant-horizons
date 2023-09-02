@@ -111,9 +111,13 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	}
 	
 	@Override
-	public boolean playerHasBlindnessEffect()
+	public boolean playerHasBlindingEffect()
 	{
-		return MC.player.getActiveEffectsMap().get(MobEffects.BLINDNESS) != null;
+		return MC.player.getActiveEffectsMap().get(MobEffects.BLINDNESS) != null
+				#if POST_AND_MC_1_19_2
+				|| MC.player.getActiveEffectsMap().get(MobEffects.DARKNESS) != null // Deep dark effect
+				#endif
+				;
 	}
 	
 	@Override

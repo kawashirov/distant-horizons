@@ -27,7 +27,7 @@ import java.util.*;
  *
  * @author coolGi
  */
-// TODO: After finishing the config, rewrite this in openGL as well
+// TODO: After finishing the config, rewrite this in Java Swing as well
 // and also maybe add this suggestion https://discord.com/channels/881614130614767666/1035863487110467625/1035949054485594192
 public class UpdateModScreen extends DhScreen
 {
