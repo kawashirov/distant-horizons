@@ -65,7 +65,8 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	public static final String AIR_STRING = "AIR";
 	public static final BlockStateWrapper AIR = new BlockStateWrapper(null, null);
 	
-	public static final String[] RENDERER_IGNORED_BLOCKS_RESOURCE_LOCATIONS = { AIR_STRING, "minecraft:barrier", "minecraft:structure_void", "minecraft:light" };
+	// TODO: Make this changeable through the config
+	public static final String[] RENDERER_IGNORED_BLOCKS_RESOURCE_LOCATIONS = { AIR_STRING, "minecraft:barrier", "minecraft:structure_void", "minecraft:light", "minecraft:tripwire" };
 	
 	public static HashSet<IBlockStateWrapper> rendererIgnoredBlocks = null;
 	
