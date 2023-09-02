@@ -44,16 +44,32 @@ public class ChangelogScreen extends DhScreen
 	private List<String> changelog;
 	private TextArea changelogArea;
 	
+	public boolean usable = false;
+	
 	public ChangelogScreen(Screen parent)
 	{
 		this(parent, null);
 		
 		if (!ModrinthGetter.initted) // Make sure the modrinth stuff is initted
 			ModrinthGetter.init();
-		if (!ModrinthGetter.initted) // If its not initted the just close the screen
-			onClose();
+		if (!ModrinthGetter.initted) // If its not initted, then this isnt usable
+			return;
 		
-		setupChangelog(ModrinthGetter.getLatestIDForVersion(SingletonInjector.INSTANCE.get(IVersionConstants.class).getMinecraftVersion()));
+		if (!ModrinthGetter.mcVersions.contains(SingletonInjector.INSTANCE.get(IVersionConstants.class).getMinecraftVersion()))
+			return;
+		
+		String versionID = ModrinthGetter.getLatestIDForVersion(SingletonInjector.INSTANCE.get(IVersionConstants.class).getMinecraftVersion());
+		if (versionID == null)
+			return;
+		try
+		{
+			setupChangelog(versionID);
+			usable = true;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	public ChangelogScreen(Screen parent, String versionID)
@@ -62,8 +78,18 @@ public class ChangelogScreen extends DhScreen
 		this.parent = parent;
 		this.versionID = versionID;
 		
-		if (versionID != null)
+		
+		if (versionID == null)
+			return;
+		try
+		{
 			setupChangelog(versionID);
+			usable = true;
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
 	}
 	
 	private void setupChangelog(String versionID)
@@ -97,6 +123,8 @@ public class ChangelogScreen extends DhScreen
 	protected void init()
 	{
 		super.init();
+		if (!usable)
+			return;
 		
 		
 		this.addBtn( // Close
@@ -123,6 +151,8 @@ public class ChangelogScreen extends DhScreen
     #endif
 	{
 		this.renderBackground(matrices); // Render background
+		if (!usable)
+			return;
 		
 		// Set the scroll position to the mouse height relative to the screen
 		// This is a bit of a hack as we cannot scroll on this area

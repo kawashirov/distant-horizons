@@ -257,7 +257,13 @@ public class ClassicConfigGUI
 						// Some textuary stuff
 						0, new ResourceLocation(ModInfo.ID, "textures/gui/changelog.png"), 20, 20,
 						// Create the button and tell it where to go
-						(buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(new ChangelogScreen(this)),
+						(buttonWidget) -> {
+							ChangelogScreen changelogScreen = new ChangelogScreen(this);
+							if (changelogScreen.usable)
+								Objects.requireNonNull(minecraft).setScreen(changelogScreen);
+							else 
+								LOGGER.warn("Changelog was not able to open");
+						},
 						// Add a title to the button
 						Translatable(ModInfo.ID + ".updater.title")
 				));
