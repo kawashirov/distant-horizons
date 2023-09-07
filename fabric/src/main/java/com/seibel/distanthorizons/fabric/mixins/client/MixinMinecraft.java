@@ -23,7 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public class MixinMinecraft
 {
-	#if PRE_MC_1_20
+	#if PRE_MC_1_20_1
 	@Redirect(
 			method = "<init>(Lnet/minecraft/client/main/GameConfig;)V",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
