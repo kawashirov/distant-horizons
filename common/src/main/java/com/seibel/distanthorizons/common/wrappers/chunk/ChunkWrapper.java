@@ -42,6 +42,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 #if POST_MC_1_17_1
 import net.minecraft.core.QuartPos;
@@ -89,9 +90,7 @@ public class ChunkWrapper implements IChunkWrapper
 	 * visible when a chunk is re-wrapped later. <br>
 	 * (Also, thread safety done via a reader writer lock)
 	 */
-	private static ArrayList<ChunkWrapper> chunksToUpdateClientLightReadyWriter = new ArrayList<>(300);
-	/** two arrays are used to prevent concurrency issues and the need to use a read/write lock. */
-	private static ArrayList<ChunkWrapper> chunksToUpdateClientLightReadyReader = new ArrayList<>(300);
+	private static final ConcurrentLinkedQueue<ChunkWrapper> chunksNeedingClientLightUpdating = new ConcurrentLinkedQueue<>(); 
 	
 	
 	
@@ -115,7 +114,7 @@ public class ChunkWrapper implements IChunkWrapper
 		this.blockLightArray = new byte[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 1)];
 		this.skyLightArray = new byte[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 1)];
 		
-		chunksToUpdateClientLightReadyWriter.add(this);
+		chunksNeedingClientLightUpdating.add(this);
 	}
 	
 	
@@ -404,19 +403,13 @@ public class ChunkWrapper implements IChunkWrapper
 		// TODO: Check what to do in 1.18.1 and older
 		#else
 		
-		// swap the buffers
-		ArrayList<ChunkWrapper> temp = chunksToUpdateClientLightReadyReader;
-		chunksToUpdateClientLightReadyReader = chunksToUpdateClientLightReadyWriter;
-		chunksToUpdateClientLightReadyWriter = temp;
-	
 		// update the chunks client lighting
-		for (ChunkWrapper chunkWrapper : chunksToUpdateClientLightReadyReader)
+		ChunkWrapper chunkWrapper = chunksNeedingClientLightUpdating.poll();
+		while (chunkWrapper != null)
 		{
 			chunkWrapper.updateIsClientLightingCorrect();
+			chunkWrapper = chunksNeedingClientLightUpdating.poll();
 		}
-		// remove the processed chunks.
-		// FIXME sometimes chunks will be processed slightly early and will be removed even if they have valid lighting, this can cause holes in the world when flying around.
-		chunksToUpdateClientLightReadyReader.clear();
 		
 		#endif
 	}
