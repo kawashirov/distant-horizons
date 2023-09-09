@@ -41,12 +41,13 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 
+import org.apache.logging.log4j.Logger;
+
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 #if POST_MC_1_17_1
 import net.minecraft.core.QuartPos;
-import org.apache.logging.log4j.Logger;
 #endif
 
 #if POST_MC_1_20_1
