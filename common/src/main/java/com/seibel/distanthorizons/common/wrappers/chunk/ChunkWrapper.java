@@ -22,6 +22,7 @@ package com.seibel.distanthorizons.common.wrappers.chunk;
 import com.seibel.distanthorizons.common.wrappers.block.BiomeWrapper;
 import com.seibel.distanthorizons.common.wrappers.block.BlockStateWrapper;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject.DhLitWorldGenRegion;
+import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.pos.DhBlockPos;
 import com.seibel.distanthorizons.core.pos.DhChunkPos;
 import com.seibel.distanthorizons.core.util.LodUtil;
@@ -40,13 +41,11 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.util.*;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 #if POST_MC_1_17_1
 import net.minecraft.core.QuartPos;
+import org.apache.logging.log4j.Logger;
 #endif
 
 #if POST_MC_1_20_1
@@ -57,6 +56,8 @@ import net.minecraft.core.SectionPos;
 
 public class ChunkWrapper implements IChunkWrapper
 {
+	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
+	
 	/** useful for debugging, but can slow down chunk operations quite a bit due to being called every time. */
 	private static final boolean RUN_RELATIVE_POS_INDEX_VALIDATION = false; 
 	
@@ -67,6 +68,8 @@ public class ChunkWrapper implements IChunkWrapper
 	private final ILevelWrapper wrappedLevel;
 	
 	private boolean isDhLightCorrect = false;
+	/** only used when connected to a dedicated server */
+	private boolean isMcClientLightingCorrect = false;
 	
 	private final byte[] blockLightArray;
 	private final byte[] skyLightArray;
@@ -76,8 +79,8 @@ public class ChunkWrapper implements IChunkWrapper
 	private boolean useDhLighting;
 	
 	/**
-	 * Due to vanilla `isClientLightReady()` not designed to be used by non-render thread, that value may return 'true'
-	 * just before the light engine is ticked, (right after all light changes is marked to the engine to be processed).
+	 * Due to vanilla `isClientLightReady()` not being designed for use by a non-render thread, it may return 'true'
+	 * before the light engine has ticked, (right after all light changes is marked by the engine to be processed).
 	 * To fix this, on client-only mode, we mixin-redirect the `isClientLightReady()` so that after the call, it will
 	 * trigger a synchronous update of this flag here on all chunks that are wrapped. <br><br>
 	 *
@@ -86,8 +89,9 @@ public class ChunkWrapper implements IChunkWrapper
 	 * visible when a chunk is re-wrapped later. <br>
 	 * (Also, thread safety done via a reader writer lock)
 	 */
-	private final static WeakHashMap<ChunkAccess, Boolean> chunksToUpdateClientLightReady = new WeakHashMap<>(); // TODO this is never cleared
-	private final static ReentrantReadWriteLock weakMapLock = new ReentrantReadWriteLock();
+	private static ArrayList<ChunkWrapper> chunksToUpdateClientLightReadyWriter = new ArrayList<>(300);
+	/** two arrays are used to prevent concurrency issues and the need to use a read/write lock. */
+	private static ArrayList<ChunkWrapper> chunksToUpdateClientLightReadyReader = new ArrayList<>(300);
 	
 	
 	
@@ -111,9 +115,7 @@ public class ChunkWrapper implements IChunkWrapper
 		this.blockLightArray = new byte[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 1)];
 		this.skyLightArray = new byte[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 1)];
 		
-		weakMapLock.writeLock().lock();
-		chunksToUpdateClientLightReady.put(chunk, false);
-		weakMapLock.writeLock().unlock();
+		chunksToUpdateClientLightReadyWriter.add(this);
 	}
 	
 	
@@ -218,14 +220,14 @@ public class ChunkWrapper implements IChunkWrapper
 			LevelChunk levelChunk = (LevelChunk) this.chunk;
 			if (levelChunk.getLevel() instanceof ClientLevel)
 			{
-				weakMapLock.readLock().lock();
-				boolean fixedIsClientLightReady = chunksToUpdateClientLightReady.get(this.chunk);
-				weakMapLock.readLock().unlock();
-				return fixedIsClientLightReady;
+				// connected to a server
+				return this.isMcClientLightingCorrect;
 			}
-			
-			// called when in single player or in dedicated server, and the chunk is a level chunk (active)
-			return this.chunk.isLightCorrect() && levelChunk.loaded;
+			else
+			{
+				// in a single player world
+				return this.chunk.isLightCorrect() && levelChunk.loaded;	
+			}
 		}
 		else
 		{
@@ -395,14 +397,37 @@ public class ChunkWrapper implements IChunkWrapper
 	}
 	#endif
 	
-	// Should be called after client light updates are triggered.
-	private static boolean updateClientLightReady(ChunkAccess chunk, boolean oldValue)
+	
+	public static void syncedUpdateClientLightStatus()
 	{
-		if (chunk instanceof LevelChunk && ((LevelChunk) chunk).getLevel() instanceof ClientLevel)
+		#if PRE_MC_1_18_2
+		// TODO: Check what to do in 1.18.1 and older
+		#else
+		
+		// swap the buffers
+		ArrayList<ChunkWrapper> temp = chunksToUpdateClientLightReadyReader;
+		chunksToUpdateClientLightReadyReader = chunksToUpdateClientLightReadyWriter;
+		chunksToUpdateClientLightReadyWriter = temp;
+	
+		// update the chunks client lighting
+		for (ChunkWrapper chunkWrapper : chunksToUpdateClientLightReadyReader)
 		{
-			LevelChunk levelChunk = (LevelChunk) chunk;
+			chunkWrapper.updateIsClientLightingCorrect();
+		}
+		// remove the processed chunks.
+		// FIXME sometimes chunks will be processed slightly early and will be removed even if they have valid lighting, this can cause holes in the world when flying around.
+		chunksToUpdateClientLightReadyReader.clear();
+		
+		#endif
+	}
+	/** Should be called after client light updates are triggered. */
+	private void updateIsClientLightingCorrect()
+	{
+		if (this.chunk instanceof LevelChunk && ((LevelChunk) this.chunk).getLevel() instanceof ClientLevel)
+		{
+			LevelChunk levelChunk = (LevelChunk) this.chunk;
 			ClientChunkCache clientChunkCache = ((ClientLevel) levelChunk.getLevel()).getChunkSource();
-			return clientChunkCache.getChunkForLighting(chunk.getPos().x, chunk.getPos().z) != null &&
+			this.isMcClientLightingCorrect = clientChunkCache.getChunkForLighting(this.chunk.getPos().x, this.chunk.getPos().z) != null &&
 					#if MC_1_16_5 || MC_1_17_1
 					levelChunk.isLightCorrect();
 					#elif PRE_MC_1_20_1
@@ -411,27 +436,6 @@ public class ChunkWrapper implements IChunkWrapper
 					checkLightSectionsOnChunk(levelChunk, levelChunk.getLevel().getLightEngine());
 					#endif
 		}
-		else
-		{
-			return oldValue;
-		}
-	}
-	
-	public static void syncedUpdateClientLightStatus()
-	{
-		#if PRE_MC_1_18_2
-		// TODO: Check what to do in 1.18.1, or in other versions
-		#else
-		weakMapLock.writeLock().lock();
-		try
-		{
-			chunksToUpdateClientLightReady.replaceAll(ChunkWrapper::updateClientLightReady);
-		}
-		finally
-		{
-			weakMapLock.writeLock().unlock();
-		}
-		#endif
 	}
 	
 	
