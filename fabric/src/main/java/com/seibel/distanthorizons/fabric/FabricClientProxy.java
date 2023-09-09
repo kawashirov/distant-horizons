@@ -133,7 +133,7 @@ public class FabricClientProxy
 					LOGGER.trace("attack block at blockPos: " + blockPos);
 					
 					IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
-					ClientApi.INSTANCE.clientChunkLoadEvent(
+					ClientApi.INSTANCE.clientChunkBlockChangedEvent(
 							new ChunkWrapper(chunk, level, wrappedLevel),
 							wrappedLevel
 					);
@@ -160,7 +160,7 @@ public class FabricClientProxy
 						LOGGER.trace("use block at blockPos: " + hitResult.getBlockPos());
 						
 						IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
-						ClientApi.INSTANCE.clientChunkLoadEvent(
+						ClientApi.INSTANCE.clientChunkBlockChangedEvent(
 								new ChunkWrapper(chunk, level, wrappedLevel),
 								wrappedLevel
 						);
