@@ -61,7 +61,10 @@ public class ChunkWrapper implements IChunkWrapper
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 	
 	/** useful for debugging, but can slow down chunk operations quite a bit due to being called every time. */
-	private static final boolean RUN_RELATIVE_POS_INDEX_VALIDATION = false; 
+	private static final boolean RUN_RELATIVE_POS_INDEX_VALIDATION = false;
+	
+	/** can be used for interactions with the underlying chunk where creating new BlockPos objects could cause issues for the garbage collector. */
+	private static final ThreadLocal<BlockPos.MutableBlockPos> MUTABLE_BLOCK_POS_REF = ThreadLocal.withInitial(() -> new BlockPos.MutableBlockPos());
 	
 	
 	private final ChunkAccess chunk;
@@ -75,9 +78,6 @@ public class ChunkWrapper implements IChunkWrapper
 	
 	private final byte[] blockLightArray;
 	private final byte[] skyLightArray;
-	
-	/** cache so we don't have to hit the vanilla chunk as often. */
-	private final IBlockStateWrapper[] blockStateWrappers;
 	
 	private ArrayList<DhBlockPos> blockLightPosList = null;
 	
@@ -117,8 +117,6 @@ public class ChunkWrapper implements IChunkWrapper
 		// FIXME +1 is to handle the fact that LodDataBuilder adds +1 to all block lighting calculations, also done in the relative position validator
 		this.blockLightArray = new byte[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 1)];
 		this.skyLightArray = new byte[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 1)];
-		
-		this.blockStateWrappers = new IBlockStateWrapper[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 1)];
 		
 		chunksNeedingClientLightUpdating.add(this);
 	}
@@ -377,21 +375,13 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public IBlockStateWrapper getBlockState(int relX, int relY, int relZ)
 	{
-		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
+		BlockPos.MutableBlockPos blockPos = MUTABLE_BLOCK_POS_REF.get();
 		
-		int index = this.relativeBlockPosToIndex(relX, relY, relZ);
-		IBlockStateWrapper cachedBlockState = this.blockStateWrappers[index];
-		if (cachedBlockState != null)
-		{
-			return cachedBlockState;
-		}
-		else
-		{
-			// the wrapper is cached to prevent having to create a bunch of new BlockPos and hitting the vanilla chunk object
-			IBlockStateWrapper blockState = BlockStateWrapper.fromBlockState(this.chunk.getBlockState(new BlockPos(relX, relY, relZ)), this.wrappedLevel);
-			this.blockStateWrappers[index] = blockState;
-			return blockState;
-		}
+		blockPos.setX(relX);
+		blockPos.setY(relY);
+		blockPos.setZ(relZ);
+		
+		return BlockStateWrapper.fromBlockState(this.chunk.getBlockState(blockPos), this.wrappedLevel);
 	}
 	
 	@Override
