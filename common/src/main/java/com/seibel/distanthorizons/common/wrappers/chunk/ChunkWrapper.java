@@ -31,6 +31,7 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IBiomeWrapper;
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
+import com.seibel.distanthorizons.coreapi.util.BitShiftUtil;
 import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -148,6 +149,21 @@ public class ChunkWrapper implements IChunkWrapper
 	}
 	@Override
 	public int getMaxBuildHeight() { return this.chunk.getMaxBuildHeight(); }
+	
+	@Override
+	public int getMinFilledHeight()
+	{
+		LevelChunkSection[] sections = this.chunk.getSections();
+		for (int index = 0; index < sections.length; index++)
+		{
+			if (!sections[index].hasOnlyAir())
+			{
+				// convert from an index to a block coordinate
+				return this.chunk.getSectionYFromSectionIndex(index) * 16;
+			}
+		}
+		return Integer.MAX_VALUE;
+	}
 	
 	
 	@Override
