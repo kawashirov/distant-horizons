@@ -99,6 +99,15 @@ public class FabricMain
 		{
 			ModAccessorInjector.INSTANCE.bind(IBCLibAccessor.class, new BCLibAccessor());
 		}
+		
+		#if MC_1_16_5 || MC_1_18_2 || MC_1_19_2 || MC_1_19_4 || MC_1_20_1
+		// 1.17.1 won't support this since there isn't a matching Iris version
+		if (SingletonInjector.INSTANCE.get(IModChecker.class).isModLoaded("iris"))
+		{
+			ModAccessorInjector.INSTANCE.bind(IIrisAccessor.class, new IrisAccessor());
+		}
+		#endif
+		
 		LOGGER.info(ModInfo.READABLE_NAME + " Initialized");
 		
 		ApiEventInjector.INSTANCE.fireAllEvents(DhApiAfterDhInitEvent.class, null);
