@@ -91,7 +91,17 @@ public class BlockStateWrapper implements IBlockStateWrapper
 			return AIR;
 		}
 		
-		return WRAPPER_BY_BLOCK_STATE.computeIfAbsent(blockState, newBlockState -> new BlockStateWrapper(newBlockState, levelWrapper));
+		
+		if (WRAPPER_BY_BLOCK_STATE.containsKey(blockState))
+		{
+			return WRAPPER_BY_BLOCK_STATE.get(blockState);
+		}
+		else
+		{
+			BlockStateWrapper newWrapper = new BlockStateWrapper(blockState, levelWrapper);
+			WRAPPER_BY_BLOCK_STATE.put(blockState, newWrapper);
+			return newWrapper;
+		}
 	}
 	
 	private BlockStateWrapper(BlockState blockState, ILevelWrapper levelWrapper)

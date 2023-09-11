@@ -66,9 +66,9 @@ public class BiomeWrapper implements IBiomeWrapper
 	private static final Logger LOGGER = LogManager.getLogger();
 	
 	#if PRE_MC_1_18_2
-	public static final ConcurrentMap<Biome, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<Biome, BiomeWrapper> WRAPPER_BY_BIOME = new ConcurrentHashMap<>();
 	#else
-	public static final ConcurrentMap<Holder<Biome>, BiomeWrapper> biomeWrapperMap = new ConcurrentHashMap<>();
+	public static final ConcurrentMap<Holder<Biome>, BiomeWrapper> WRAPPER_BY_BIOME = new ConcurrentHashMap<>();
     #endif
 	
 	public static final String EMPTY_STRING = "EMPTY";
@@ -100,7 +100,17 @@ public class BiomeWrapper implements IBiomeWrapper
 			return EMPTY_WRAPPER;
 		}
 		
-		return biomeWrapperMap.computeIfAbsent(biome, newBiome -> new BiomeWrapper(newBiome, levelWrapper));
+		
+		if (WRAPPER_BY_BIOME.containsKey(biome))
+		{
+			return WRAPPER_BY_BIOME.get(biome);
+		}
+		else
+		{
+			BiomeWrapper newWrapper = new BiomeWrapper(biome, levelWrapper);
+			WRAPPER_BY_BIOME.put(biome, newWrapper);
+			return newWrapper;
+		}
 	}
 	
 	private BiomeWrapper(#if PRE_MC_1_18_2 Biome #else Holder<Biome> #endif biome, ILevelWrapper levelWrapper)
