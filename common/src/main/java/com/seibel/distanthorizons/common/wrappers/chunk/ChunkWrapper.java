@@ -77,8 +77,8 @@ public class ChunkWrapper implements IChunkWrapper
 	/** only used when connected to a dedicated server */
 	private boolean isMcClientLightingCorrect = false;
 	
-	private final byte[] blockLightArray;
-	private final byte[] skyLightArray;
+	private ChunkLightStorage blockLightArray;
+	private ChunkLightStorage skyLightArray;
 	
 	private ArrayList<DhBlockPos> blockLightPosList = null;
 	
@@ -116,9 +116,7 @@ public class ChunkWrapper implements IChunkWrapper
 		this.useDhLighting = isDhGeneratedChunk;
 		
 		// FIXME +1 is to handle the fact that LodDataBuilder adds +1 to all block lighting calculations, also done in the relative position validator
-		this.blockLightArray = new byte[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 1)];
-		this.skyLightArray = new byte[LodUtil.CHUNK_WIDTH * LodUtil.CHUNK_WIDTH * (this.getHeight() + 1)];
-		
+
 		chunksNeedingClientLightUpdating.add(this);
 	}
 	
@@ -256,39 +254,48 @@ public class ChunkWrapper implements IChunkWrapper
 		#endif
 	}
 	
-	
+	private ChunkLightStorage getBlockLightArray()
+	{
+		if (this.blockLightArray == null)
+		{
+			this.blockLightArray = new ChunkLightStorage(this.getMinBuildHeight(), this.getMaxBuildHeight());
+		}
+		return this.blockLightArray;
+	}
+
+	private ChunkLightStorage getSkyLightArray()
+	{
+		if (this.skyLightArray == null)
+		{
+			this.skyLightArray = new ChunkLightStorage(this.getMinBuildHeight(), this.getMaxBuildHeight());
+		}
+		return this.skyLightArray;
+	}
+
 	@Override
 	public int getDhBlockLight(int relX, int y, int relZ)
 	{
 		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
-		
-		int index = this.relativeBlockPosToIndex(relX, y, relZ);
-		return this.blockLightArray[index];
+		return this.getBlockLightArray().get(relX, y, relZ);
 	}
 	@Override
 	public void setDhBlockLight(int relX, int y, int relZ, int lightValue)
 	{
 		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
-		
-		int index = this.relativeBlockPosToIndex(relX, y, relZ);
-		this.blockLightArray[index] = (byte) lightValue;
+		this.getBlockLightArray().set(relX, y, relZ, lightValue);
 	}
 	
 	@Override
 	public int getDhSkyLight(int relX, int y, int relZ)
 	{
 		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
-		
-		int index = this.relativeBlockPosToIndex(relX, y, relZ);
-		return this.skyLightArray[index];
+		return this.getSkyLightArray().get(relX, y, relZ);
 	}
 	@Override
 	public void setDhSkyLight(int relX, int y, int relZ, int lightValue)
 	{
 		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
-		
-		int index = this.relativeBlockPosToIndex(relX, y, relZ);
-		this.skyLightArray[index] = (byte) lightValue;
+		this.getSkyLightArray().set(relX, y, relZ, lightValue);
 	}
 	
 	
@@ -301,8 +308,7 @@ public class ChunkWrapper implements IChunkWrapper
 		if (this.useDhLighting)
 		{
 			// DH lighting method
-			int index = this.relativeBlockPosToIndex(relX, y, relZ);
-			return this.blockLightArray[index];
+			return this.getBlockLightArray().get(relX, y, relZ);
 		}
 		else
 		{
@@ -322,8 +328,7 @@ public class ChunkWrapper implements IChunkWrapper
 		if (this.useDhLighting)
 		{
 			// DH lighting method
-			int index = this.relativeBlockPosToIndex(relX, y, relZ);
-			return this.skyLightArray[index];
+			return this.getSkyLightArray().get(relX, y, relZ);
 		}
 		else
 		{
