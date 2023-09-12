@@ -31,7 +31,6 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IBiomeWrapper;
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
-import com.seibel.distanthorizons.coreapi.util.BitShiftUtil;
 import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -77,8 +76,8 @@ public class ChunkWrapper implements IChunkWrapper
 	/** only used when connected to a dedicated server */
 	private boolean isMcClientLightingCorrect = false;
 	
-	private ChunkLightStorage blockLightArray;
-	private ChunkLightStorage skyLightArray;
+	private ChunkLightStorage blockLightStorage;
+	private ChunkLightStorage skyLightStorage;
 	
 	private ArrayList<DhBlockPos> blockLightPosList = null;
 	
@@ -254,48 +253,50 @@ public class ChunkWrapper implements IChunkWrapper
 		#endif
 	}
 	
-	private ChunkLightStorage getBlockLightArray()
-	{
-		if (this.blockLightArray == null)
-		{
-			this.blockLightArray = new ChunkLightStorage(this.getMinBuildHeight(), this.getMaxBuildHeight());
-		}
-		return this.blockLightArray;
-	}
-
-	private ChunkLightStorage getSkyLightArray()
-	{
-		if (this.skyLightArray == null)
-		{
-			this.skyLightArray = new ChunkLightStorage(this.getMinBuildHeight(), this.getMaxBuildHeight());
-		}
-		return this.skyLightArray;
-	}
-
+	
 	@Override
 	public int getDhBlockLight(int relX, int y, int relZ)
 	{
 		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
-		return this.getBlockLightArray().get(relX, y, relZ);
+		return this.getBlockLightStorage().get(relX, y, relZ);
 	}
 	@Override
 	public void setDhBlockLight(int relX, int y, int relZ, int lightValue)
 	{
 		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
-		this.getBlockLightArray().set(relX, y, relZ, lightValue);
+		this.getBlockLightStorage().set(relX, y, relZ, lightValue);
 	}
+	
+	private ChunkLightStorage getBlockLightStorage()
+	{
+		if (this.blockLightStorage == null)
+		{
+			this.blockLightStorage = new ChunkLightStorage(this.getMinBuildHeight(), this.getMaxBuildHeight());
+		}
+		return this.blockLightStorage;
+	}
+	
 	
 	@Override
 	public int getDhSkyLight(int relX, int y, int relZ)
 	{
 		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
-		return this.getSkyLightArray().get(relX, y, relZ);
+		return this.getSkyLightStorage().get(relX, y, relZ);
 	}
 	@Override
 	public void setDhSkyLight(int relX, int y, int relZ, int lightValue)
 	{
 		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, y, relZ);
-		this.getSkyLightArray().set(relX, y, relZ, lightValue);
+		this.getSkyLightStorage().set(relX, y, relZ, lightValue);
+	}
+	
+	private ChunkLightStorage getSkyLightStorage()
+	{
+		if (this.skyLightStorage == null)
+		{
+			this.skyLightStorage = new ChunkLightStorage(this.getMinBuildHeight(), this.getMaxBuildHeight());
+		}
+		return this.skyLightStorage;
 	}
 	
 	
@@ -308,7 +309,7 @@ public class ChunkWrapper implements IChunkWrapper
 		if (this.useDhLighting)
 		{
 			// DH lighting method
-			return this.getBlockLightArray().get(relX, y, relZ);
+			return this.getBlockLightStorage().get(relX, y, relZ);
 		}
 		else
 		{
@@ -328,7 +329,7 @@ public class ChunkWrapper implements IChunkWrapper
 		if (this.useDhLighting)
 		{
 			// DH lighting method
-			return this.getSkyLightArray().get(relX, y, relZ);
+			return this.getSkyLightStorage().get(relX, y, relZ);
 		}
 		else
 		{
