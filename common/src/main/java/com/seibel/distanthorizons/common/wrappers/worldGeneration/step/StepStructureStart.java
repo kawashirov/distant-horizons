@@ -110,8 +110,6 @@ public final class StepStructureStart
 						tParams.structFeat, chunk, environment.params.structures);
 				#endif
 				
-				structurePlacementLock.unlock();
-				
 				#if POST_MC_1_18_2
 				try
 				{
@@ -139,6 +137,8 @@ public final class StepStructureStart
 						//throw new StepStructureStart.StructStartCorruptedException(secondEx);
 					}
 				}
+				
+				structurePlacementLock.unlock();
 				#endif
 			}
 		}
