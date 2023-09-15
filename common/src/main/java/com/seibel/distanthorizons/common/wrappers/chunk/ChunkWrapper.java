@@ -50,6 +50,22 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import net.minecraft.core.QuartPos;
 #endif
 
+#if MC_1_16_5
+import net.minecraft.world.level.chunk.LevelChunkSection;
+#endif
+
+#if MC_1_17_1
+import net.minecraft.world.level.chunk.LevelChunkSection;
+#endif
+
+#if MC_1_18_2
+import net.minecraft.world.level.chunk.LevelChunkSection;
+#endif
+
+#if MC_1_19_2 || MC_1_19_4
+import net.minecraft.world.level.chunk.LevelChunkSection;
+#endif
+
 #if POST_MC_1_20_1
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.lighting.LevelLightEngine;
@@ -153,11 +169,25 @@ public class ChunkWrapper implements IChunkWrapper
 		LevelChunkSection[] sections = this.chunk.getSections();
 		for (int index = 0; index < sections.length; index++)
 		{
+			#if MC_1_16_5
+			if (!sections[index].isEmpty())
+			{
+				// convert from an index to a block coordinate
+				return this.chunk.getSections()[index].bottomBlockY() * 16;
+			}
+			#elif MC_1_17_1
+			if (!sections[index].isEmpty())
+			{
+				// convert from an index to a block coordinate
+				return this.chunk.getSections()[index].bottomBlockY() * 16;
+			}	
+			#else
 			if (!sections[index].hasOnlyAir())
 			{
 				// convert from an index to a block coordinate
 				return this.chunk.getSectionYFromSectionIndex(index) * 16;
 			}
+			#endif
 		}
 		return Integer.MAX_VALUE;
 	}
@@ -409,25 +439,6 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public boolean isStillValid() { return this.wrappedLevel.tryGetChunk(this.chunkPos) == this; }
 	
-	#if POST_MC_1_20_1
-	private static boolean checkLightSectionsOnChunk(LevelChunk chunk, LevelLightEngine engine)
-	{
-		LevelChunkSection[] sections = chunk.getSections();
-		int minY = chunk.getMinSection();
-		int maxY = chunk.getMaxSection();
-		for (int y = minY; y < maxY; ++y)
-		{
-			LevelChunkSection section = sections[chunk.getSectionIndexFromSectionY(y)];
-			if (section.hasOnlyAir()) continue;
-			if (!engine.lightOnInSection(SectionPos.of(chunk.getPos(), y)))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-	#endif
-	
 	
 	public static void syncedUpdateClientLightStatus()
 	{
@@ -462,6 +473,24 @@ public class ChunkWrapper implements IChunkWrapper
 					#endif
 		}
 	}
+	#if POST_MC_1_20_1
+	private static boolean checkLightSectionsOnChunk(LevelChunk chunk, LevelLightEngine engine)
+	{
+		LevelChunkSection[] sections = chunk.getSections();
+		int minY = chunk.getMinSection();
+		int maxY = chunk.getMaxSection();
+		for (int y = minY; y < maxY; ++y)
+		{
+			LevelChunkSection section = sections[chunk.getSectionIndexFromSectionY(y)];
+			if (section.hasOnlyAir()) continue;
+			if (!engine.lightOnInSection(SectionPos.of(chunk.getPos(), y)))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+	#endif
 	
 	
 	
