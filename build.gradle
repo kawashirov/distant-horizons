@@ -398,6 +398,7 @@ subprojects { p ->
                 git_main_branch              : git_main_branch,
 
                 fabric_incompatibility_list  : fabric_incompatibility_list,
+                fabric_recommend_list  : fabric_recommend_list,
         ]
         // The left side is what gets replaced in the mod info and the right side is where to get it from in the gradle.properties
 

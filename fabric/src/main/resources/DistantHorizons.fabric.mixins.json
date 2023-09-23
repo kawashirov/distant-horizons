@@ -18,8 +18,7 @@
         "client.MixinLightmap",
         "client.MixinOptionsScreen",
         "client.MixinMinecraft",
-        "client.MixinTextureUtil",
-        "mods.sodium.MixinSodiumRenderer"
+        "client.MixinTextureUtil"
     ],
     "server": [],
     "injectors": {

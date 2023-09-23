@@ -56,5 +56,6 @@
         "blendium": "*"
     },
     
-    "breaks": $fabric_incompatibility_list
+    "breaks": $fabric_incompatibility_list,
+    "recommends": $fabric_recommend_list
 }
