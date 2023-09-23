@@ -303,16 +303,17 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	
 	public void updateAllFutures()
 	{
-		if (unknownExceptionCount > 0)
+		if (this.unknownExceptionCount > 0)
 		{
-			if (System.nanoTime() - lastExceptionTriggerTime >= EXCEPTION_TIMER_RESET_TIME)
+			if (System.nanoTime() - this.lastExceptionTriggerTime >= EXCEPTION_TIMER_RESET_TIME)
 			{
-				unknownExceptionCount = 0;
+				this.unknownExceptionCount = 0;
 			}
 		}
 		
+		
 		// Update all current out standing jobs
-		Iterator<GenerationEvent> iter = generationEventList.iterator();
+		Iterator<GenerationEvent> iter = this.generationEventList.iterator();
 		while (iter.hasNext())
 		{
 			GenerationEvent event = iter.next();
@@ -327,10 +328,9 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 					}
 					catch (Exception e)
 					{
-						unknownExceptionCount++;
-						lastExceptionTriggerTime = System.nanoTime();
-						EVENT_LOGGER.error("Batching World Generator: Event {} gotten an exception", event);
-						EVENT_LOGGER.error("Exception: ", e);
+						this.unknownExceptionCount++;
+						this.lastExceptionTriggerTime = System.nanoTime();
+						EVENT_LOGGER.error("Batching World Generator event ["+event+"] threw an exception: "+e.getMessage(), e);
 					}
 				}
 				
@@ -354,10 +354,10 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 			}
 		}
 		
-		if (unknownExceptionCount > EXCEPTION_COUNTER_TRIGGER)
+		if (this.unknownExceptionCount > EXCEPTION_COUNTER_TRIGGER)
 		{
 			EVENT_LOGGER.error("Too many exceptions in Batching World Generator! Disabling the generator.");
-			unknownExceptionCount = 0;
+			this.unknownExceptionCount = 0;
 			Config.Client.Advanced.WorldGenerator.enableDistantGeneration.set(false);
 		}
 	}
