@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
@@ -161,7 +162,7 @@ public final class BatchGenerationEnvironment extends AbstractBatchGenerationEnv
 	
 	//=================Generation Step===================
 	
-	public final LinkedList<GenerationEvent> generationEventList = new LinkedList<>();
+	public final LinkedBlockingQueue<GenerationEvent> generationEventList = new LinkedBlockingQueue<>();
 	public final GlobalParameters params;
 	public final StepStructureStart stepStructureStart = new StepStructureStart(this);
 	public final StepStructureReference stepStructureReference = new StepStructureReference(this);
