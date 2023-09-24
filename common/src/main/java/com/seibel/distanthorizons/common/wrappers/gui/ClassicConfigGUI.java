@@ -270,11 +270,11 @@ public class ClassicConfigGUI
 			}
 			
 			
-			addBtn(MakeBtn(CommonComponents.GUI_CANCEL, this.width / 2 - 154, this.height - 28, 150, 20, button -> {
+			addBtn(MakeBtn(Translatable("distanthorizons.general.cancel"), this.width / 2 - 154, this.height - 28, 150, 20, button -> {
 				ConfigBase.INSTANCE.configFileINSTANCE.loadFromFile();
 				Objects.requireNonNull(minecraft).setScreen(parent);
 			}));
-			doneButton = addBtn(MakeBtn(CommonComponents.GUI_DONE, this.width / 2 + 4, this.height - 28, 150, 20, (button) -> {
+			doneButton = addBtn(MakeBtn(Translatable("distanthorizons.general.done"), this.width / 2 + 4, this.height - 28, 150, 20, (button) -> {
 				ConfigBase.INSTANCE.configFileINSTANCE.saveToFile();
 				Objects.requireNonNull(minecraft).setScreen(parent);
 			}));
@@ -325,7 +325,7 @@ public class ClassicConfigGUI
 				int c = ConfigScreenConfigs.ResetButtonWidth;
 				int d = 20;
 				
-				Button resetButton = MakeBtn(TextOrLiteral("Reset").withStyle(ChatFormatting.RED), a, b, c, d, btnAction);
+				Button resetButton = MakeBtn(Translatable("distanthorizons.general.reset").withStyle(ChatFormatting.RED), a, b, c, d, btnAction);
 				
 				if (((EntryInfo) info.guiValue).widget instanceof Map.Entry)
 				{
@@ -472,7 +472,7 @@ public class ClassicConfigGUI
 			else if (fieldClass == Boolean.class)
 			{
 				// For boolean
-				Function<Object, Component> func = value -> TextOrTranslatable((Boolean) value ? "True" : "False").withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
+				Function<Object, Component> func = value -> Translatable("distanthorizons.general."+((Boolean) value ? "true" : "false")).withStyle((Boolean) value ? ChatFormatting.GREEN : ChatFormatting.RED);
 				
 				((EntryInfo) info.guiValue).widget = new AbstractMap.SimpleEntry<Button.OnPress, Function<Object, Component>>(button -> {
 					((ConfigEntry) info).uiSetWithoutSaving(!(Boolean) info.get());
