@@ -48,14 +48,14 @@ public class UpdateModScreen extends DhScreen
 		this.newVersionID = newVersionID;
 
         switch (Config.Client.Advanced.AutoUpdater.updateBranch.get()) {
-            case STABLE -> {
+	        case STABLE:
                 currentVer = ModInfo.VERSION;
                 nextVer = ModrinthGetter.releaseNames.get(this.newVersionID);
-            }
-            case NIGHTLY -> {
-                currentVer = ModGitInfo.Git_Main_Commit;
-                nextVer = this.newVersionID;
-            }
+				break;
+	        case NIGHTLY:
+                currentVer = ModGitInfo.Git_Main_Commit.substring(0,7);
+                nextVer = this.newVersionID.substring(0,7);
+				break;
         }
 	}
 	
