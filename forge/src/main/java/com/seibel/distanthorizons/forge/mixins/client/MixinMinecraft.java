@@ -1,8 +1,10 @@
 package com.seibel.distanthorizons.forge.mixins.client;
 
+import com.seibel.distanthorizons.api.enums.config.EUpdateBranch;
 import com.seibel.distanthorizons.common.wrappers.gui.updater.UpdateModScreen;
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
+import com.seibel.distanthorizons.core.jar.installer.GitlabGetter;
 import com.seibel.distanthorizons.core.jar.installer.ModrinthGetter;
 import com.seibel.distanthorizons.core.jar.updater.SelfUpdater;
 import com.seibel.distanthorizons.core.wrapperInterfaces.IVersionConstants;
@@ -48,7 +50,7 @@ public class MixinMinecraft
 		{
 			instance.setScreen(new UpdateModScreen(
 					new TitleScreen(false), // We don't want to use the vanilla title screen as it would fade the buttons
-					ModrinthGetter.getLatestIDForVersion(SingletonInjector.INSTANCE.get(IVersionConstants.class).getMinecraftVersion())
+					(Config.Client.Advanced.AutoUpdater.updateBranch.get() == EUpdateBranch.STABLE ? ModrinthGetter.getLatestIDForVersion(SingletonInjector.INSTANCE.get(IVersionConstants.class).getMinecraftVersion()): GitlabGetter.INSTANCE.projectPipelines.get(0).get("sha"))
 			));
 		}
 		else

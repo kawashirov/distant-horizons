@@ -2,8 +2,11 @@ package com.seibel.distanthorizons.common.wrappers.gui.updater;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.seibel.distanthorizons.api.enums.config.EUpdateBranch;
 import com.seibel.distanthorizons.common.wrappers.gui.DhScreen;
 import com.seibel.distanthorizons.common.wrappers.gui.TexturedButtonWidget;
+import com.seibel.distanthorizons.core.jar.ModGitInfo;
+import com.seibel.distanthorizons.core.jar.installer.GitlabGetter;
 import com.seibel.distanthorizons.coreapi.ModInfo;
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.jar.JarUtils;
@@ -34,12 +37,26 @@ public class UpdateModScreen extends DhScreen
 	private Screen parent;
 	private String newVersionID;
 	
+	private String currentVer;
+	private String nextVer;
+	
 	
 	public UpdateModScreen(Screen parent, String newVersionID)
 	{
 		super(Translatable(ModInfo.ID + ".updater.title"));
 		this.parent = parent;
 		this.newVersionID = newVersionID;
+
+        switch (Config.Client.Advanced.AutoUpdater.updateBranch.get()) {
+            case STABLE -> {
+                currentVer = ModInfo.VERSION;
+                nextVer = ModrinthGetter.releaseNames.get(this.newVersionID);
+            }
+            case NIGHTLY -> {
+                currentVer = ModGitInfo.Git_Main_Commit;
+                nextVer = this.newVersionID;
+            }
+        }
 	}
 	
 	@Override
@@ -81,21 +98,23 @@ public class UpdateModScreen extends DhScreen
 			e.printStackTrace();
 		}
 		
-		
-		this.addBtn(new TexturedButtonWidget(
-				// Where the button is on the screen
-				this.width / 2 - 97, this.height / 2 + 8,
-				// Width and height of the button
-				20, 20,
-				// Offset
-				0, 0,
-				// Some textuary stuff
-				0, new ResourceLocation(ModInfo.ID, "textures/gui/changelog.png"), 20, 20,
-				// Create the button and tell it where to go
-				(buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(new ChangelogScreen(this, this.newVersionID)), // TODO: Add a proper easter egg to pressing the logo (maybe with confetti)
-				// Add a title to the button
-				Translatable(ModInfo.ID + ".updater.title")
-		));
+		if (Config.Client.Advanced.AutoUpdater.updateBranch.get() == EUpdateBranch.STABLE)
+		{
+			this.addBtn(new TexturedButtonWidget(
+					// Where the button is on the screen
+					this.width / 2 - 97, this.height / 2 + 8,
+					// Width and height of the button
+					20, 20,
+					// Offset
+					0, 0,
+					// Some textuary stuff
+					0, new ResourceLocation(ModInfo.ID, "textures/gui/changelog.png"), 20, 20,
+					// Create the button and tell it where to go
+					(buttonWidget) -> Objects.requireNonNull(minecraft).setScreen(new ChangelogScreen(this, this.newVersionID)), // TODO: Add a proper easter egg to pressing the logo (maybe with confetti)
+					// Add a title to the button
+					Translatable(ModInfo.ID + ".updater.title")
+			));
+		}
 		
 		
 		this.addBtn( // Update
@@ -137,7 +156,9 @@ public class UpdateModScreen extends DhScreen
 		
 		// Render the text's
 		DhDrawCenteredString(matrices, this.font, Translatable(ModInfo.ID + ".updater.text1"), this.width / 2, this.height / 2 - 35, 0xFFFFFF);
-		DhDrawCenteredString(matrices, this.font, Translatable(ModInfo.ID + ".updater.text2", ModInfo.VERSION, ModrinthGetter.releaseNames.get(this.newVersionID)), this.width / 2, this.height / 2 - 20, 0x52FD52);
+		DhDrawCenteredString(matrices, this.font, 
+				Translatable(ModInfo.ID + ".updater.text2", currentVer, nextVer), 
+				this.width / 2, this.height / 2 - 20, 0x52FD52);
 		
 		// TODO: add the tooltips for the buttons
 		super.render(matrices, mouseX, mouseY, delta); // Render the buttons
