@@ -219,6 +219,9 @@ subprojects { p ->
         // Compression
         forgeShadowMe("org.lz4:lz4-java:${rootProject.lz4_version}")
         
+        // Sqlite Database
+        forgeShadowMe("org.xerial:sqlite-jdbc:${rootProject.sqlite_jdbc_version}")
+        
         // NightConfig (includes Toml & Json)
         forgeShadowMe("com.electronwill.night-config:toml:${rootProject.nightconfig_version}")
         forgeShadowMe("com.electronwill.night-config:json:${rootProject.nightconfig_version}")
