@@ -20,6 +20,13 @@ If you want to see a quick demo, check out a video covering the mod here:
 
 ### This branch supports the following versions of Minecraft:
 
+#### 1.20.2
+Fabric: 0.14.22\
+Fabric API: 0.89.2+1.20.2\
+Forge: 48.0.13\
+Parchment: 1.19.3:2023.03.25\
+Modmenu: 8.0.0
+
 #### 1.20.1, 1.20 (Default)
 Fabric: 0.14.21\
 Fabric API: 0.85.0+1.20.1\

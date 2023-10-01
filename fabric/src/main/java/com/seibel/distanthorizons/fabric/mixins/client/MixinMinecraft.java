@@ -25,16 +25,25 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Minecraft.class)
 public class MixinMinecraft
 {
-	#if PRE_MC_1_20_1
+	#if MC_1_20_2
+	// FIXME
+	//@Redirect(
+	//		method = "Lnet/minecraft/client/Minecraft;buildInitialScreens(Lnet/minecraft/client/Minecraft$GameLoadCookie;)Ljava/lang/Runnable;",
+	//		at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
+	//)
+	public void onOpenScreen(Screen guiScreen)
+	{
+		Minecraft instance = Minecraft.getInstance();
+	#elif MC_1_20_1
 	@Redirect(
-			method = "<init>(Lnet/minecraft/client/main/GameConfig;)V",
+			method = "Lnet/minecraft/client/Minecraft;setInitialScreen(Lcom/mojang/realmsclient/client/RealmsClient;Lnet/minecraft/server/packs/resources/ReloadInstance;Lnet/minecraft/client/main/GameConfig$QuickPlayData;)V",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
 	)
 	public void onOpenScreen(Minecraft instance, Screen guiScreen)
 	{
 	#else
 	@Redirect(
-			method = "Lnet/minecraft/client/Minecraft;setInitialScreen(Lcom/mojang/realmsclient/client/RealmsClient;Lnet/minecraft/server/packs/resources/ReloadInstance;Lnet/minecraft/client/main/GameConfig$QuickPlayData;)V",
+			method = "<init>(Lnet/minecraft/client/main/GameConfig;)V",
 			at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V")
 	)
 	public void onOpenScreen(Minecraft instance, Screen guiScreen)

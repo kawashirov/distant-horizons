@@ -31,28 +31,40 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 #endif
 
+#if MC_1_20_2
+import net.minecraft.client.gui.components.WidgetSprites;
+#endif
+
 
 /**
  * Creates a button with a texture on it
  */
 // TODO: Is this still needed? Can we switch to vanilla's ImageButton?
+// 
+// Note after 1.20.2: They changed how buttons work, and are asking for a WidgetSprites.
+// This should probably still exist so that code only needs to be changed here to work on all mc versions
 public class TexturedButtonWidget extends ImageButton
 {
-	#if POST_MC_1_17_1
-	public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, ResourceLocation texture, OnPress pressAction)
+	#if MC_1_20_2
+	public static WidgetSprites locationToSprite(int width, int height, int u, int v, int hoveredVOffset, ResourceLocation resourceLocation)
 	{
-		super(x, y, width, height, u, v, texture, pressAction);
+		// FIXME[1.20.2]: Fix this
+		//Registries.
+		//
+		//ResourceLocation unfocused = new ResourceLocation();
+        //ResourceLocation focused = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath());
+		
+		return new WidgetSprites(resourceLocation, resourceLocation);
 	}
-    #endif
-	
-	public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction)
-	{
-		super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction);
-	}
+	#endif
 	
 	public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction, Component text)
 	{
+		#if MC_1_20_2
+		super(x, y, width, height, locationToSprite(textureWidth, textureHeight, u, v, hoveredVOffset, texture), pressAction, text);
+		#else
 		super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, text);
+		#endif
 	}
 	
 	#if PRE_MC_1_19_2

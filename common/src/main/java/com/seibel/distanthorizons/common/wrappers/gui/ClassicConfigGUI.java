@@ -387,7 +387,11 @@ public class ClassicConfigGUI
 		public void render(GuiGraphics matrices, int mouseX, int mouseY, float delta)
 		#endif
 		{
+			#if MC_1_20_2
+			this.renderBackground(matrices, mouseX, mouseY, delta); // Renders background
+			#else
 			this.renderBackground(matrices); // Renders background
+			#endif
 			this.list.render(matrices, mouseX, mouseY, delta); // Render buttons
 			
 			DhDrawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title

@@ -72,7 +72,11 @@ public class MinecraftScreen
 		public void render(GuiGraphics matrices, int mouseX, int mouseY, float delta)
         #endif
 		{
+			#if MC_1_20_2
+			this.renderBackground(matrices, mouseX, mouseY, delta); // Render background
+			#else
 			this.renderBackground(matrices); // Render background
+			#endif
 			this.list.render(matrices, mouseX, mouseY, delta); // Renders the items in the render list (currently only used to tint background darker)
 			
 			screen.mouseX = mouseX;

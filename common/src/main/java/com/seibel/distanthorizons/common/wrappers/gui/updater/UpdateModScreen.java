@@ -77,7 +77,7 @@ public class UpdateModScreen extends DhScreen
 			
 			
 			// Logo image
-			this.addBtn(new ImageButton(
+			this.addBtn(new TexturedButtonWidget(
 					// Where the button is on the screen
 					this.width / 2 - 65, this.height / 2 - 110,
 					// Width and height of the button
@@ -151,7 +151,11 @@ public class UpdateModScreen extends DhScreen
 	public void render(GuiGraphics matrices, int mouseX, int mouseY, float delta)
     #endif
 	{
+		#if MC_1_20_2
+		this.renderBackground(matrices, mouseX, mouseY, delta); // Render background
+		#else
 		this.renderBackground(matrices); // Render background
+		#endif
 		
 		
 		// Render the text's
