@@ -9,7 +9,7 @@ accessible method net/minecraft/client/renderer/GameRenderer getFov (Lnet/minecr
 # used for grabbing vanilla rendered chunks
 accessible field net/minecraft/client/renderer/LevelRenderer visibleSections Lit/unimi/dsi/fastutil/objects/ObjectArrayList;
 
-#accessible field net/minecraft/client/renderer/LevelRenderer$RenderChunkInfo chunk Lnet/minecraft/client/renderer/chunk/ChunkRenderDispatcher$RenderChunk;
+#accessible method net/minecraft/client/renderer/LevelRenderer renderSectionLayer (Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLorg/joml/Matrix4f;)V
 
 # world generation
 # accessible method net/minecraft/world/level/lighting/LayerLightEngine queueSectionData (JLnet/minecraft/world/level/chunk/DataLayer;Z)V
