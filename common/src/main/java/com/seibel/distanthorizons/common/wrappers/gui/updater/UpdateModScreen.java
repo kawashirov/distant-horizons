@@ -90,7 +90,9 @@ public class UpdateModScreen extends DhScreen
 					// For now it goes to the client option by default
 					(buttonWidget) -> System.out.println("Nice, you found an easter egg :)"), // TODO: Add a proper easter egg to pressing the logo (maybe with confetti)
 					// Add a title to the button
-					Translatable(ModInfo.ID + ".updater.title")
+					Translatable(ModInfo.ID + ".updater.title"),
+					// Dont render the background of the button
+					false
 			));
 		}
 		catch (Exception e)
