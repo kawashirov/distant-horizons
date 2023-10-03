@@ -19,6 +19,17 @@
 
 package com.seibel.distanthorizons.common.wrappers.gui;
 
+/**
+ * Creates a button with a texture on it (and a background) that works with all mc versions
+ * 
+ * @author coolGi
+ * @version 2023-10-03
+ */
+
+
+import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -28,72 +39,26 @@ import net.minecraft.client.Minecraft;
 #else
 import net.minecraft.client.gui.GuiGraphics;
 #endif
-#if POST_MC_1_20_2
-import net.minecraft.client.gui.components.WidgetSprites;
-#endif
 
-/**
- * Creates a button with a texture on it (and a background) that works with all mc versions
- * 
- * @author coolGi
- * @version 2023-10-03
- */
+#if PRE_MC_1_20_2
 public class TexturedButtonWidget extends ImageButton
+#else
+public class TexturedButtonWidget extends Button
+#endif
 {
 	public final boolean renderBackground;
+	
 	#if POST_MC_1_20_2
-	public static WidgetSprites locationToSprite(ResourceLocation resourceLocation, int u, int v)
-	{
-		// FIXME[1.20.2]: Change the `-1`'s to use resourceLocation's texture values
-		return locationToSprite(resourceLocation, u, v, -1, -1, -1);
-	}
-	public static WidgetSprites locationToSprite(ResourceLocation resourceLocation, int u, int v, int textureWidth, int textureHeight, int hoveredVOffset)
-	{
-		// FIXME[1.20.2]: No idea how widget sprite works, and not documented anywhere
-		/*
-			Several things need to be done to fix this
-				- First of all, what do each of the paramiters mean
-					We know that they may relate to the normal, deactivated, hovered, and pressed textures, but which is which. And are these guesses correct?
-				- How do we move the texture
-					As Minecraft is now asking for several textures, instead of one big texture, what is the plan on getting this to work?
-					- One strategy is to split the textures in our assets, then combine them for older versions
-					- Another is to split it for newer versions
-					Either of those requires the texture files to be changed, and new resources to be mapped
-		 */
-		return new WidgetSprites(resourceLocation, resourceLocation);
-	}
+	private final int u;
+	private final int v;
+	private final int hoveredVOffset;
+	
+	private final ResourceLocation texture;
+	
+	private final int textureWidth;
+	private final int textureHeight;
 	#endif
 	
-	
-	
-	
-	#if POST_MC_1_17_1
-	public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, ResourceLocation texture, OnPress pressAction) {
-		this(x, y, width, height, u, v, texture, pressAction, true);
-	}
-	public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, ResourceLocation texture, OnPress pressAction, boolean renderBackground)
-	{
-		#if PRE_MC_1_20_2
-		super(x, y, width, height, u, v, texture, pressAction);
-		#else
-		super(x, y, width, height, locationToSprite(texture, u, v), pressAction);
-		#endif
-		this.renderBackground = renderBackground;
-	}
-    #endif
-	
-	public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction) {
-		this(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, true);
-	}
-	public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction, boolean renderBackground)
-	{
-		#if PRE_MC_1_20_2
-		super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction);
-		#else
-		super(x, y, width, height, locationToSprite(texture, u, v, textureWidth, textureHeight, hoveredVOffset), pressAction);
-		#endif
-		this.renderBackground = renderBackground;
-	}
 	
 	public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction, Component text) {
 		this(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, text, true);
@@ -103,12 +68,24 @@ public class TexturedButtonWidget extends ImageButton
 		#if PRE_MC_1_20_2
 		super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, text);
 		#else
-		super(x, y, locationToSprite(texture, u, v, textureWidth, textureHeight, hoveredVOffset), pressAction, text);
+		// We don't pass on the text option as otherwise it will render (we normally pass it for narration)
+		// TODO: Find a fix for it
+		super(x, y, width, height, Component.empty(), pressAction, DEFAULT_NARRATION);
+		
+		this.u = u;
+		this.v = v;
+		this.hoveredVOffset = hoveredVOffset;
+		
+		this.texture = texture;
+		
+		this.textureWidth = textureWidth;
+		this.textureHeight = textureHeight;
 		#endif
+		
 		this.renderBackground = renderBackground;
 	}
 	
-	
+	#if PRE_MC_1_20_2
 	#if PRE_MC_1_19_4
 	@Override
 	public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
@@ -139,14 +116,15 @@ public class TexturedButtonWidget extends ImageButton
 		super.renderButton(matrices, mouseX, mouseY, delta);
 	}
 	#else
-	@Override
     #if PRE_MC_1_20_1
+	@Override
     public void renderWidget(PoseStack matrices, int mouseX, int mouseY, float delta)
     {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
     #else
+	@Override
 	public void renderWidget(GuiGraphics matrices, int mouseX, int mouseY, float delta)
 	{
     #endif
@@ -163,17 +141,33 @@ public class TexturedButtonWidget extends ImageButton
 			
             this.blit(matrices, this.getX(), this.getY(), 0, 46 + i * 20, this.getWidth() / 2, this.getHeight());
             this.blit(matrices, this.getX() + this.getWidth() / 2, this.getY(), 200 - this.width / 2, 46 + i * 20, this.getWidth() / 2, this.getHeight());
-            #elif MC_1_20_1
+            #else
 			matrices.blit(WIDGETS_LOCATION, this.getX(), this.getY(), 0, 46 + i * 20, this.getWidth() / 2, this.getHeight());
 			matrices.blit(WIDGETS_LOCATION, this.getX() + this.getWidth() / 2, this.getY(), 200 - this.width / 2, 46 + i * 20, this.getWidth() / 2, this.getHeight());
-			#else
-			// FIXME[1.20.2]: Later changed `.enabled()` to a proper thing taking the hovered and active into account
-			matrices.blit(sprites.enabled(), this.getX(), this.getY(), 0, 46 + i * 20, this.getWidth() / 2, this.getHeight());
-			matrices.blit(sprites.enabled(), this.getX() + this.getWidth() / 2, this.getY(), 200 - this.width / 2, 46 + i * 20, this.getWidth() / 2, this.getHeight());
             #endif
 		}
 		
 		super.renderWidget(matrices, mouseX, mouseY, delta);
 	}
-    #endif
+	#endif
+	#else
+	@Override
+	public void renderWidget(GuiGraphics matrices, int mouseX, int mouseY, float delta)
+	{
+		if (this.renderBackground)
+		{
+			//RenderSystem.enableBlend();
+			//RenderSystem.enableDepthTest();
+			matrices.blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
+		}
+		
+		
+		// Renders the sprite
+		int i = 0;
+		if (!this.active)           i = 2;
+		else if (this.isHovered)    i = 1;
+		
+		matrices.blit(this.texture, this.getX(), this.getY(), this.u, this.v + (this.hoveredVOffset * i), this.width, this.height, this.textureWidth, this.textureHeight);
+	}
+	#endif
 }

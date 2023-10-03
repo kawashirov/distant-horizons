@@ -30,6 +30,9 @@ accessible method net/minecraft/client/renderer/texture/SpriteContents$AnimatedT
 accessible field net/minecraft/client/renderer/texture/SpriteContents animatedTexture Lnet/minecraft/client/renderer/texture/SpriteContents$AnimatedTexture;
 accessible field net/minecraft/client/renderer/texture/SpriteContents originalImage Lcom/mojang/blaze3d/platform/NativeImage;
 
+# UI stuff
+accessible field net/minecraft/client/gui/components/AbstractButton SPRITES Lnet/minecraft/client/gui/components/WidgetSprites;
+
 # hacky stuff
 accessible field net/minecraft/util/ThreadingDetector lock Ljava/util/concurrent/Semaphore;
 mutable field net/minecraft/util/ThreadingDetector lock Ljava/util/concurrent/Semaphore;
