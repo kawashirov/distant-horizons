@@ -3,7 +3,7 @@
     "id": "distanthorizons",
     "version": "${version}",
     
-    "provides": "lod",
+    "provides": [ "lod" ],
     
     
     "name": "${mod_name}",
@@ -51,7 +51,8 @@
         "modmenu": {
             "links": {
                 "modmenu.discord": "${discord}"
-            }
+            },
+            "update_checker": false
         }
     },
     

@@ -521,10 +521,12 @@ allprojects { p ->
         }
 
         // Required for importing CursedForge mods
+        // DONT USE CURSEDFORGE UNLESS NEEDED. Modrinth, and anywhere else is more reliable than cursedforge
         maven {
+            name = "CursedForge"
             url "https://www.cursemaven.com"
             content {
-                includeGroup "curse.maven"
+                includeGroup "maven.curse"
             }
         }
 

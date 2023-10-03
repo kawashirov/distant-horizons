@@ -67,10 +67,10 @@ dependencies {
 
 
     // Starlight
-    addMod("curse.maven:starlight-521783:${rootProject.starlight_version_fabric}", rootProject.enable_starlight)
+    addMod("maven.curse:starlight-521783:${rootProject.starlight_version_fabric}", rootProject.enable_starlight)
 
     // Phosphor
-    addMod("curse.maven:phosphor-372124:${rootProject.phosphor_version_fabric}", rootProject.enable_phosphor)
+    addMod("maven.curse:phosphor-372124:${rootProject.phosphor_version_fabric}", rootProject.enable_phosphor)
 
     // Sodium
     addMod("maven.modrinth:sodium:${rootProject.sodium_version}", rootProject.enable_sodium)
