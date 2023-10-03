@@ -35,14 +35,14 @@ loom {
             client()
             setConfigName("Forge Client")
             ideConfigGenerated(true)
-            runDir("run")
+            runDir("../run")
             vmArgs("-XX:-OmitStackTraceInFastThrow", minecraftMemoryJavaArg)
         }
         server {
             server()
             setConfigName("Forge Server")
             ideConfigGenerated(true)
-            runDir("run")
+            runDir("../run")
         }
     }
 }
