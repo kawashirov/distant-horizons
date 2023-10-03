@@ -31,3 +31,6 @@ buildAllJars/
 
 # file genearated via MC version switching using preprocessor
 build.properties
+
+# Sqlite databases
+*.sqlite
