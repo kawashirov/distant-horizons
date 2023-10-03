@@ -33,6 +33,10 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+
+#if POST_MC_1_17_1
+import net.minecraft.client.renderer.GameRenderer;
+#endif
 #if PRE_MC_1_20_1
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
