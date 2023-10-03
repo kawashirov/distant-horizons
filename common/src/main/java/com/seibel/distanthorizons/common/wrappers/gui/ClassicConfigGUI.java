@@ -387,16 +387,16 @@ public class ClassicConfigGUI
 		public void render(GuiGraphics matrices, int mouseX, int mouseY, float delta)
 		#endif
 		{
-			#if MC_1_20_2
-			this.renderBackground(matrices, mouseX, mouseY, delta); // Renders background
-			#else
+			#if PRE_MC_1_20_2 // 1.20.2 now enables this by default in the `this.list.render` function
 			this.renderBackground(matrices); // Renders background
+			#else
+			super.render(matrices, mouseX, mouseY, delta);
 			#endif
 			this.list.render(matrices, mouseX, mouseY, delta); // Render buttons
 			
 			DhDrawCenteredString(matrices, font, title, width / 2, 15, 0xFFFFFF); // Render title
 			
-			if (this.configBase.modID == "distanthorizons")
+			if (this.configBase.modID.equals("distanthorizons"))
 			{
 				// Display version
 				DhDrawString(matrices, font, TextOrLiteral(ModInfo.VERSION), 2, height - 10, 0xAAAAAA);
@@ -443,7 +443,9 @@ public class ClassicConfigGUI
 					}
 				}
 			}
+			#if PRE_MC_1_20_2
 			super.render(matrices, mouseX, mouseY, delta);
+			#endif
 		}
 		
 	}
