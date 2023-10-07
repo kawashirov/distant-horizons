@@ -2,6 +2,9 @@
     "schemaVersion": 1,
     "id": "distanthorizons",
     "version": "${version}",
+
+    "provides": [ "lod" ],
+    
     
     "name": "${mod_name}",
     "description": "${description}",

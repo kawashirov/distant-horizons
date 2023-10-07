@@ -19,67 +19,159 @@
 
 package com.seibel.distanthorizons.common.wrappers.gui;
 
+/**
+ * Creates a button with a texture on it (and a background) that works with all mc versions
+ * 
+ * @author coolGi
+ * @version 2023-10-03
+ */
+
+
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.components.AbstractButton;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-#if PRE_MC_1_17_1
-import net.minecraft.client.Minecraft;
-#else
+#if POST_MC_1_17_1
 import net.minecraft.client.renderer.GameRenderer;
 #endif
+#if PRE_MC_1_20_1
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
+#else
+import net.minecraft.client.gui.GuiGraphics;
+#endif
 
-
-/**
- * Creates a button with a texture on it
- */
-// TODO: Is this still needed? Can we switch to vanilla's ImageButton?
+#if PRE_MC_1_20_2
 public class TexturedButtonWidget extends ImageButton
+#else
+public class TexturedButtonWidget extends Button
+#endif
 {
-	#if POST_MC_1_17_1
-	public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, ResourceLocation texture, OnPress pressAction)
-	{
-		super(x, y, width, height, u, v, texture, pressAction);
-	}
-    #endif
+	public final boolean renderBackground;
 	
-	public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction)
-	{
-		super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction);
-	}
+	#if POST_MC_1_20_2
+	private final int u;
+	private final int v;
+	private final int hoveredVOffset;
 	
-	public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction, Component text)
+	private final ResourceLocation texture;
+	
+	private final int textureWidth;
+	private final int textureHeight;
+	#endif
+	
+	
+	public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction, Component text) {
+		this(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, text, true);
+	}
+	public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction, Component text, boolean renderBackground)
 	{
+		#if PRE_MC_1_20_2
 		super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, text);
-	}
-	
-	#if PRE_MC_1_19_2
-	public TexturedButtonWidget(int x, int y, int width, int height, int u, int v, int hoveredVOffset, ResourceLocation texture, int textureWidth, int textureHeight, OnPress pressAction, OnTooltip tooltipSupplier, Component text)
-	{
-		super(x, y, width, height, u, v, hoveredVOffset, texture, textureWidth, textureHeight, pressAction, tooltipSupplier, text);
-	}
-	
-	@Override
-	public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta)
-	{
-        #if PRE_MC_1_17_1
-        Minecraft.getInstance().getTextureManager().bind(WIDGETS_LOCATION);
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.alpha);
-        #else
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
-		RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
-        #endif
-		int i = this.getYImage(this.isHovered);
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.enableDepthTest();
-		this.blit(matrices, this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
-		this.blit(matrices, this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
+		#else
+		// We don't pass on the text option as otherwise it will render (we normally pass it for narration)
+		// TODO: Find a fix for it
+		super(x, y, width, height, Component.empty(), pressAction, DEFAULT_NARRATION);
 		
+		this.u = u;
+		this.v = v;
+		this.hoveredVOffset = hoveredVOffset;
+		
+		this.texture = texture;
+		
+		this.textureWidth = textureWidth;
+		this.textureHeight = textureHeight;
+		#endif
+		
+		this.renderBackground = renderBackground;
+	}
+	
+	#if PRE_MC_1_20_2
+	#if PRE_MC_1_19_4
+	@Override
+	public void renderButton(PoseStack matrices, int mouseX, int mouseY, float delta) {
+		if (this.renderBackground) // Renders the background of the button
+		{
+			#if PRE_MC_1_17_1
+			Minecraft.getInstance().getTextureManager().bind(WIDGETS_LOCATION);
+			RenderSystem.color4f(1.0F, 1.0F, 1.0F, this.alpha);
+			#else
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
+			#endif
+
+			int i = this.getYImage(this.isHovered);
+			RenderSystem.enableBlend();
+			RenderSystem.defaultBlendFunc();
+			RenderSystem.enableDepthTest();
+			#if PRE_MC_1_19_4
+			this.blit(matrices, this.x, this.y, 0, 46 + i * 20, this.width / 2, this.height);
+			this.blit(matrices, this.x + this.width / 2, this.y, 200 - this.width / 2, 46 + i * 20, this.width / 2, this.height);
+			#else
+			this.blit(matrices, this.getX(), this.getY(), 0, 46 + i * 20, this.getWidth() / 2, this.getHeight());
+			this.blit(matrices, this.getX() + this.getWidth() / 2, this.getY(), 200 - this.width / 2, 46 + i * 20, this.getWidth() / 2, this.getHeight());
+			#endif
+		}
+
 		super.renderButton(matrices, mouseX, mouseY, delta);
 	}
+	#else
+    #if PRE_MC_1_20_1
+	@Override
+    public void renderWidget(PoseStack matrices, int mouseX, int mouseY, float delta)
+    {
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
+    #else
+	@Override
+	public void renderWidget(GuiGraphics matrices, int mouseX, int mouseY, float delta)
+	{
     #endif
+		if (this.renderBackground) // Renders the background of the button
+		{
+			int i = 1;
+			if (!this.active)           i = 0;
+			else if (this.isHovered)    i = 2;
+
+            #if PRE_MC_1_20_1
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.enableDepthTest();
+			
+            this.blit(matrices, this.getX(), this.getY(), 0, 46 + i * 20, this.getWidth() / 2, this.getHeight());
+            this.blit(matrices, this.getX() + this.getWidth() / 2, this.getY(), 200 - this.width / 2, 46 + i * 20, this.getWidth() / 2, this.getHeight());
+            #else
+			matrices.blit(WIDGETS_LOCATION, this.getX(), this.getY(), 0, 46 + i * 20, this.getWidth() / 2, this.getHeight());
+			matrices.blit(WIDGETS_LOCATION, this.getX() + this.getWidth() / 2, this.getY(), 200 - this.width / 2, 46 + i * 20, this.getWidth() / 2, this.getHeight());
+            #endif
+		}
+		
+		super.renderWidget(matrices, mouseX, mouseY, delta);
+	}
+	#endif
+	#else
+	@Override
+	public void renderWidget(GuiGraphics matrices, int mouseX, int mouseY, float delta)
+	{
+		if (this.renderBackground)
+		{
+			//RenderSystem.enableBlend();
+			//RenderSystem.enableDepthTest();
+			matrices.blitSprite(SPRITES.get(this.active, this.isHoveredOrFocused()), this.getX(), this.getY(), this.getWidth(), this.getHeight());
+		}
+		
+		
+		// Renders the sprite
+		int i = 0;
+		if (!this.active)           i = 2;
+		else if (this.isHovered)    i = 1;
+		
+		matrices.blit(this.texture, this.getX(), this.getY(), this.u, this.v + (this.hoveredVOffset * i), this.width, this.height, this.textureWidth, this.textureHeight);
+	}
+	#endif
 }

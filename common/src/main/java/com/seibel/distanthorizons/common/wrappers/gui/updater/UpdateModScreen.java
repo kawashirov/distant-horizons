@@ -77,7 +77,7 @@ public class UpdateModScreen extends DhScreen
 			
 			
 			// Logo image
-			this.addBtn(new ImageButton(
+			this.addBtn(new TexturedButtonWidget(
 					// Where the button is on the screen
 					this.width / 2 - 65, this.height / 2 - 110,
 					// Width and height of the button
@@ -90,7 +90,9 @@ public class UpdateModScreen extends DhScreen
 					// For now it goes to the client option by default
 					(buttonWidget) -> System.out.println("Nice, you found an easter egg :)"), // TODO: Add a proper easter egg to pressing the logo (maybe with confetti)
 					// Add a title to the button
-					Translatable(ModInfo.ID + ".updater.title")
+					Translatable(ModInfo.ID + ".updater.title"),
+					// Dont render the background of the button
+					false
 			));
 		}
 		catch (Exception e)
@@ -151,7 +153,11 @@ public class UpdateModScreen extends DhScreen
 	public void render(GuiGraphics matrices, int mouseX, int mouseY, float delta)
     #endif
 	{
+		#if MC_1_20_2
+		this.renderBackground(matrices, mouseX, mouseY, delta); // Render background
+		#else
 		this.renderBackground(matrices); // Render background
+		#endif
 		
 		
 		// Render the text's
