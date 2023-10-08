@@ -182,8 +182,6 @@ public class ForgeClientProxy
 	}
 	private void onClientBlockChangeEvent(LevelAccessor level, ChunkAccess chunk)
 	{
-		// TODO rate limit this event per blockPos to prevent spam
-		
 		// if we have access to the server, use the chunk save event instead 
 		if (MC.clientConnectedToDedicatedServer())
 		{

@@ -1,14 +1,16 @@
 package com.seibel.distanthorizons.forge;
 
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
+import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.distanthorizons.core.api.internal.ServerApi;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.wrapperInterfaces.chunk.IChunkWrapper;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.TitleScreen;
+import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.event.TickEvent;
 #if PRE_MC_1_19_2
@@ -39,9 +41,9 @@ import java.util.function.Supplier;
 public class ForgeServerProxy
 {
 	#if PRE_MC_1_19_2
-	private static LevelAccessor GetLevel(WorldEvent e) { return e.getWorld(); }
+	private static LevelAccessor GetEventLevel(WorldEvent e) { return e.getWorld(); }
 	#else
-	private static LevelAccessor GetLevel(LevelEvent e) { return e.getLevel(); }
+	private static LevelAccessor GetEventLevel(LevelEvent e) { return e.getLevel(); }
     #endif
 	
 	private final ServerApi serverApi = ServerApi.INSTANCE;
@@ -49,23 +51,22 @@ public class ForgeServerProxy
 	private final boolean isDedicated;
 	public static Supplier<Boolean> isGenerationThreadChecker = null;
 	
+	
+	//=============//
+	// constructor //
+	//=============//
+	
 	public ForgeServerProxy(boolean isDedicated)
 	{
 		this.isDedicated = isDedicated;
 		isGenerationThreadChecker = BatchGenerationEnvironment::isCurrentThreadDistantGeneratorThread;
 	}
-	private boolean isValidTime()
-	{
-		if (this.isDedicated)
-		{
-			return true;
-		}
-		
-		//FIXME: This may cause init issue...
-		return !(Minecraft.getInstance().screen instanceof TitleScreen);
-	}
-	private ServerLevelWrapper getLevelWrapper(ServerLevel level) { return ServerLevelWrapper.getWrapper(level); }
 	
+	
+	
+	//========//
+	// events //
+	//========//
 	
 	// ServerTickEvent (at end)
 	@SubscribeEvent
@@ -73,10 +74,7 @@ public class ForgeServerProxy
 	{
 		if (event.phase == TickEvent.Phase.END)
 		{
-			if (this.isValidTime())
-			{
-				this.serverApi.serverTickEvent();
-			}
+			this.serverApi.serverTickEvent();
 		}
 	}
 	
@@ -84,20 +82,14 @@ public class ForgeServerProxy
 	@SubscribeEvent
 	public void dedicatedWorldLoadEvent(#if MC_1_16_5 || MC_1_17_1 FMLServerAboutToStartEvent #else ServerAboutToStartEvent #endif event)
 	{
-		if (this.isValidTime())
-		{
-			this.serverApi.serverLoadEvent(this.isDedicated);
-		}
+		this.serverApi.serverLoadEvent(this.isDedicated);
 	}
 	
 	// ServerWorldUnloadEvent
 	@SubscribeEvent
 	public void serverWorldUnloadEvent(#if MC_1_16_5 || MC_1_17_1 FMLServerStoppingEvent #else ServerStoppingEvent #endif event)
 	{
-		if (this.isValidTime())
-		{
-			this.serverApi.serverUnloadEvent();
-		}
+		this.serverApi.serverUnloadEvent();
 	}
 	
 	// ServerLevelLoadEvent
@@ -108,12 +100,9 @@ public class ForgeServerProxy
 	public void serverLevelLoadEvent(LevelEvent.Load event)
 	#endif
 	{
-		if (isValidTime())
+		if (GetEventLevel(event) instanceof ServerLevel)
 		{
-			if (GetLevel(event) instanceof ServerLevel)
-			{
-				serverApi.serverLevelLoadEvent(getLevelWrapper((ServerLevel) GetLevel(event)));
-			}
+			this.serverApi.serverLevelLoadEvent(this.getServerLevelWrapper((ServerLevel) GetEventLevel(event)));
 		}
 	}
 	
@@ -125,40 +114,51 @@ public class ForgeServerProxy
 	public void serverLevelUnloadEvent(LevelEvent.Unload event)
     #endif
 	{
-		if (isValidTime())
+		if (GetEventLevel(event) instanceof ServerLevel)
 		{
-			if (GetLevel(event) instanceof ServerLevel)
-			{
-				serverApi.serverLevelUnloadEvent(getLevelWrapper((ServerLevel) GetLevel(event)));
-			}
+			this.serverApi.serverLevelUnloadEvent(this.getServerLevelWrapper((ServerLevel) GetEventLevel(event)));
 		}
 	}
 	
 	@SubscribeEvent
 	public void serverChunkLoadEvent(ChunkEvent.Load event)
 	{
-		if (this.isValidTime())
-		{
-			if (GetLevel(event) instanceof ServerLevel)
-			{
-				ServerLevelWrapper wrappedLevel = ServerLevelWrapper.getWrapper((ServerLevel) GetLevel(event));
-				IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetLevel(event), wrappedLevel);
-				this.serverApi.serverChunkLoadEvent(chunk, this.getLevelWrapper((ServerLevel) GetLevel(event)));
-			}
-		}
+		ILevelWrapper levelWrapper = getLevelWrapper(GetEventLevel(event));
+		
+		IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetEventLevel(event), levelWrapper);
+		this.serverApi.serverChunkLoadEvent(chunk, levelWrapper);
 	}
 	@SubscribeEvent
 	public void serverChunkSaveEvent(ChunkEvent.Unload event)
 	{
-		if (this.isValidTime())
-		{
-			if (GetLevel(event) instanceof ServerLevel)
-			{
-				ServerLevelWrapper wrappedLevel = ServerLevelWrapper.getWrapper((ServerLevel) GetLevel(event));
-				IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetLevel(event), wrappedLevel);
-				this.serverApi.serverChunkSaveEvent(chunk, this.getLevelWrapper((ServerLevel) GetLevel(event)));
-			}
-		}
+		ILevelWrapper levelWrapper = getLevelWrapper(GetEventLevel(event));
+		
+		IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetEventLevel(event), levelWrapper);
+		this.serverApi.serverChunkSaveEvent(chunk, levelWrapper);
 	}
+	
+	
+	
+	//================//
+	// helper methods //
+	//================//
+	
+	private static ServerLevelWrapper getServerLevelWrapper(ServerLevel level) { return ServerLevelWrapper.getWrapper(level); }
+	
+	private static ILevelWrapper getLevelWrapper(LevelAccessor level) 
+	{
+		ILevelWrapper levelWrapper;
+		if (level instanceof ServerLevel)
+		{
+			levelWrapper = ServerLevelWrapper.getWrapper((ServerLevel) level);
+		}
+		else
+		{
+			levelWrapper = ClientLevelWrapper.getWrapper((ClientLevel) level);
+		}
+		
+		return levelWrapper;
+	}
+	
 	
 }
