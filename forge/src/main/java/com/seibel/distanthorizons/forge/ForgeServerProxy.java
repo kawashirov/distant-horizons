@@ -1,5 +1,6 @@
 package com.seibel.distanthorizons.forge;
 
+import com.seibel.distanthorizons.common.util.ProxyUtil;
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
@@ -123,7 +124,7 @@ public class ForgeServerProxy
 	@SubscribeEvent
 	public void serverChunkLoadEvent(ChunkEvent.Load event)
 	{
-		ILevelWrapper levelWrapper = getLevelWrapper(GetEventLevel(event));
+		ILevelWrapper levelWrapper = ProxyUtil.getLevelWrapper(GetEventLevel(event));
 		
 		IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetEventLevel(event), levelWrapper);
 		this.serverApi.serverChunkLoadEvent(chunk, levelWrapper);
@@ -131,7 +132,7 @@ public class ForgeServerProxy
 	@SubscribeEvent
 	public void serverChunkSaveEvent(ChunkEvent.Unload event)
 	{
-		ILevelWrapper levelWrapper = getLevelWrapper(GetEventLevel(event));
+		ILevelWrapper levelWrapper = ProxyUtil.getLevelWrapper(GetEventLevel(event));
 		
 		IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetEventLevel(event), levelWrapper);
 		this.serverApi.serverChunkSaveEvent(chunk, levelWrapper);
@@ -144,21 +145,6 @@ public class ForgeServerProxy
 	//================//
 	
 	private static ServerLevelWrapper getServerLevelWrapper(ServerLevel level) { return ServerLevelWrapper.getWrapper(level); }
-	
-	private static ILevelWrapper getLevelWrapper(LevelAccessor level) 
-	{
-		ILevelWrapper levelWrapper;
-		if (level instanceof ServerLevel)
-		{
-			levelWrapper = ServerLevelWrapper.getWrapper((ServerLevel) level);
-		}
-		else
-		{
-			levelWrapper = ClientLevelWrapper.getWrapper((ClientLevel) level);
-		}
-		
-		return levelWrapper;
-	}
 	
 	
 }

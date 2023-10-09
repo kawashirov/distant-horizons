@@ -19,6 +19,7 @@
 
 package com.seibel.distanthorizons.forge;
 
+import com.seibel.distanthorizons.common.util.ProxyUtil;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.distanthorizons.core.api.internal.ClientApi;
@@ -187,7 +188,7 @@ public class ForgeClientProxy
 	}
 	private void onBlockChangeEvent(LevelAccessor level, ChunkAccess chunk)
 	{
-		ILevelWrapper wrappedLevel = getLevelWrapper(level);
+		ILevelWrapper wrappedLevel = ProxyUtil.getLevelWrapper(level);
 		SharedApi.INSTANCE.chunkBlockChangedEvent(new ChunkWrapper(chunk, level, wrappedLevel), wrappedLevel);
 	}
 	
@@ -195,14 +196,14 @@ public class ForgeClientProxy
 	@SubscribeEvent
 	public void clientChunkLoadEvent(ChunkEvent.Load event)
 	{
-		ILevelWrapper wrappedLevel = getLevelWrapper(GetEventLevel(event));
+		ILevelWrapper wrappedLevel = ProxyUtil.getLevelWrapper(GetEventLevel(event));
 		IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetEventLevel(event), wrappedLevel);
 		SharedApi.INSTANCE.chunkLoadEvent(chunk, wrappedLevel);
 	}
 	@SubscribeEvent
 	public void clientChunkUnloadEvent(ChunkEvent.Unload event)
 	{
-		ILevelWrapper wrappedLevel = getLevelWrapper(GetEventLevel(event));
+		ILevelWrapper wrappedLevel = ProxyUtil.getLevelWrapper(GetEventLevel(event));
 		IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetEventLevel(event), wrappedLevel);
 		SharedApi.INSTANCE.chunkSaveEvent(chunk, wrappedLevel);
 	}
@@ -286,22 +287,6 @@ public class ForgeClientProxy
 				return false;
 			}
 		}
-	}
-	
-	
-	private static ILevelWrapper getLevelWrapper(LevelAccessor level)
-	{
-		ILevelWrapper levelWrapper;
-		if (level instanceof ServerLevel)
-		{
-			levelWrapper = ServerLevelWrapper.getWrapper((ServerLevel) level);
-		}
-		else
-		{
-			levelWrapper = ClientLevelWrapper.getWrapper((ClientLevel) level);
-		}
-		
-		return levelWrapper;
 	}
 	
 }
