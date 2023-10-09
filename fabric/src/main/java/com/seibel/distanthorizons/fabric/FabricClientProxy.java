@@ -26,6 +26,7 @@ import com.seibel.distanthorizons.core.api.internal.ClientApi;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 
+import com.seibel.distanthorizons.core.api.internal.SharedApi;
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.dependencyInjection.ModAccessorInjector;
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
@@ -117,7 +118,7 @@ public class FabricClientProxy
 		ClientChunkEvents.CHUNK_LOAD.register((level, chunk) ->
 		{
 			IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);
-			ClientApi.INSTANCE.clientChunkLoadEvent(new ChunkWrapper(chunk, level, wrappedLevel), wrappedLevel);
+			SharedApi.INSTANCE.chunkLoadEvent(new ChunkWrapper(chunk, level, wrappedLevel), wrappedLevel);
 		});
 		
 		// (kinda) block break event
@@ -133,7 +134,7 @@ public class FabricClientProxy
 					LOGGER.trace("attack block at blockPos: " + blockPos);
 					
 					IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
-					ClientApi.INSTANCE.clientChunkBlockChangedEvent(
+					SharedApi.INSTANCE.chunkBlockChangedEvent(
 							new ChunkWrapper(chunk, level, wrappedLevel),
 							wrappedLevel
 					);
@@ -160,7 +161,7 @@ public class FabricClientProxy
 						LOGGER.trace("use block at blockPos: " + hitResult.getBlockPos());
 						
 						IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
-						ClientApi.INSTANCE.clientChunkBlockChangedEvent(
+						SharedApi.INSTANCE.chunkBlockChangedEvent(
 								new ChunkWrapper(chunk, level, wrappedLevel),
 								wrappedLevel
 						);
@@ -177,7 +178,7 @@ public class FabricClientProxy
 		ClientChunkEvents.CHUNK_UNLOAD.register((level, chunk) ->
 		{
 			IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);
-			ClientApi.INSTANCE.clientChunkSaveEvent(new ChunkWrapper(chunk, level, wrappedLevel), wrappedLevel);
+			SharedApi.INSTANCE.chunkSaveEvent(new ChunkWrapper(chunk, level, wrappedLevel), wrappedLevel);
 		});
 		
 		

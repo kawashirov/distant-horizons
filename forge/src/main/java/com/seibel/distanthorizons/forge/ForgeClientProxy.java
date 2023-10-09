@@ -20,15 +20,20 @@
 package com.seibel.distanthorizons.forge;
 
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
+import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.distanthorizons.core.api.internal.ClientApi;
+import com.seibel.distanthorizons.core.api.internal.SharedApi;
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
+import com.seibel.distanthorizons.core.pos.DhChunkPos;
 import com.seibel.distanthorizons.core.wrapperInterfaces.chunk.IChunkWrapper;
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
+import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.distanthorizons.coreapi.ModInfo;
 //import io.netty.buffer.ByteBuf;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelAccessor;
 
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -74,7 +79,7 @@ public class ForgeClientProxy
 	#if PRE_MC_1_19_2
 	private static LevelAccessor GetLevel(WorldEvent e) { return e.getWorld(); }
 	#else
-	private static LevelAccessor GetLevel(LevelEvent e) { return e.getLevel(); }
+	private static LevelAccessor GetEventLevel(LevelEvent e) { return e.getLevel(); }
 	#endif
 	
 	
@@ -164,7 +169,7 @@ public class ForgeClientProxy
 		#endif
 		
 		ChunkAccess chunk = level.getChunk(event.getPos());
-		this.onClientBlockChangeEvent(level, chunk);
+		this.onBlockChangeEvent(level, chunk);
 	}
 	@SubscribeEvent
 	public void leftClickBlockEvent(PlayerInteractEvent.LeftClickBlock event)
@@ -178,41 +183,28 @@ public class ForgeClientProxy
 		#endif
 		
 		ChunkAccess chunk = level.getChunk(event.getPos());
-		this.onClientBlockChangeEvent(level, chunk);
+		this.onBlockChangeEvent(level, chunk);
 	}
-	private void onClientBlockChangeEvent(LevelAccessor level, ChunkAccess chunk)
+	private void onBlockChangeEvent(LevelAccessor level, ChunkAccess chunk)
 	{
-		// if we have access to the server, use the chunk save event instead 
-		if (MC.clientConnectedToDedicatedServer())
-		{
-			if (chunk != null)
-			{
-				IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) level);
-				ClientApi.INSTANCE.clientChunkBlockChangedEvent(new ChunkWrapper(chunk, level, wrappedLevel), wrappedLevel);
-			}
-		}
+		ILevelWrapper wrappedLevel = getLevelWrapper(level);
+		SharedApi.INSTANCE.chunkBlockChangedEvent(new ChunkWrapper(chunk, level, wrappedLevel), wrappedLevel);
 	}
 	
 	
 	@SubscribeEvent
 	public void clientChunkLoadEvent(ChunkEvent.Load event)
 	{
-		if (GetLevel(event) instanceof ClientLevel)
-		{
-			IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) GetLevel(event));
-			IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetLevel(event), wrappedLevel);
-			ClientApi.INSTANCE.clientChunkLoadEvent(chunk, ClientLevelWrapper.getWrapper((ClientLevel) GetLevel(event)));
-		}
+		ILevelWrapper wrappedLevel = getLevelWrapper(GetEventLevel(event));
+		IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetEventLevel(event), wrappedLevel);
+		SharedApi.INSTANCE.chunkLoadEvent(chunk, wrappedLevel);
 	}
 	@SubscribeEvent
 	public void clientChunkUnloadEvent(ChunkEvent.Unload event)
 	{
-		if (GetLevel(event) instanceof ClientLevel)
-		{
-			IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper((ClientLevel) GetLevel(event));
-			IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetLevel(event), wrappedLevel);
-			ClientApi.INSTANCE.clientChunkSaveEvent(chunk, ClientLevelWrapper.getWrapper((ClientLevel) GetLevel(event)));
-		}
+		ILevelWrapper wrappedLevel = getLevelWrapper(GetEventLevel(event));
+		IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetEventLevel(event), wrappedLevel);
+		SharedApi.INSTANCE.chunkSaveEvent(chunk, wrappedLevel);
 	}
 	
 	
@@ -294,6 +286,22 @@ public class ForgeClientProxy
 				return false;
 			}
 		}
+	}
+	
+	
+	private static ILevelWrapper getLevelWrapper(LevelAccessor level)
+	{
+		ILevelWrapper levelWrapper;
+		if (level instanceof ServerLevel)
+		{
+			levelWrapper = ServerLevelWrapper.getWrapper((ServerLevel) level);
+		}
+		else
+		{
+			levelWrapper = ClientLevelWrapper.getWrapper((ClientLevel) level);
+		}
+		
+		return levelWrapper;
 	}
 	
 }
