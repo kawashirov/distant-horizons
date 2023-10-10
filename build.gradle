@@ -303,6 +303,9 @@ subprojects { p ->
 
         // Compression (LZ4)
         relocate "net.jpountz", "${librariesLocation}.jpountz"
+        
+        // Sqlite Database
+        relocate "org.sqlite", "${librariesLocation}.sqlite"
 
         // NightConfig (includes Toml & Json)
         relocate "com.electronwill.nightconfig", "${librariesLocation}.electronwill.nightconfig"
