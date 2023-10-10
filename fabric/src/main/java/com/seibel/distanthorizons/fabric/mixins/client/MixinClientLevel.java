@@ -22,6 +22,7 @@ package com.seibel.distanthorizons.fabric.mixins.client;
 import com.seibel.distanthorizons.common.wrappers.chunk.ChunkWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.core.api.internal.ClientApi;
+import com.seibel.distanthorizons.core.api.internal.SharedApi;
 import net.minecraft.client.multiplayer.ClientLevel;
 #if POST_MC_1_18_2
 #endif
@@ -59,7 +60,7 @@ public class MixinClientLevel
 		
 		if (chunk != null && !chunk.isClientLightReady())
 		{
-			ClientApi.INSTANCE.clientChunkLoadEvent(new ChunkWrapper(chunk, clientLevel, ClientLevelWrapper.getWrapper(clientLevel)), ClientLevelWrapper.getWrapper(clientLevel));
+			SharedApi.INSTANCE.chunkLoadEvent(new ChunkWrapper(chunk, clientLevel, ClientLevelWrapper.getWrapper(clientLevel)), ClientLevelWrapper.getWrapper(clientLevel));
 		}
 	}
 	#endif
