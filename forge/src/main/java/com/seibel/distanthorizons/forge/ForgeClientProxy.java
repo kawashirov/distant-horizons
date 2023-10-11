@@ -78,7 +78,7 @@ public class ForgeClientProxy
 	
 	
 	#if PRE_MC_1_19_2
-	private static LevelAccessor GetLevel(WorldEvent e) { return e.getWorld(); }
+	private static LevelAccessor GetEventLevel(WorldEvent e) { return e.getWorld(); }
 	#else
 	private static LevelAccessor GetEventLevel(LevelEvent e) { return e.getLevel(); }
 	#endif
