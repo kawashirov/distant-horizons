@@ -31,6 +31,7 @@ import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.enums.EDhDirection;
+import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
 import com.seibel.distanthorizons.coreapi.ModInfo;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
 import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
@@ -211,9 +212,9 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
 	
 	@Nullable
 	@Override
-	public ILevelWrapper getWrappedClientWorld()
+	public IClientLevelWrapper getWrappedClientLevel()
 	{
-		if (mc.level == null)
+		if (this.mc.level == null)
 		{
 			return null;
 		}

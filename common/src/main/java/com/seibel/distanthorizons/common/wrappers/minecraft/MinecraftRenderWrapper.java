@@ -22,6 +22,7 @@ package com.seibel.distanthorizons.common.wrappers.minecraft;
 import java.awt.Color;
 import java.lang.invoke.MethodHandles;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.stream.Collectors;
 
@@ -40,6 +41,8 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.misc.ILightMapWrapper;
 #if PRE_MC_1_19_4
 import com.mojang.math.Vector3f;
 #else
+import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
+import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
 import org.joml.Vector3f;
 #endif
 #if MC_1_20_2
@@ -93,7 +96,11 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	
 	private static final IOptifineAccessor OPTIFINE_ACCESSOR = ModAccessorInjector.INSTANCE.get(IOptifineAccessor.class);
 	
-	public LightMapWrapper lightmap = null;
+	/** 
+	 * In the case of immersive portals multiple levels may be active at once, causing conflicting lightmaps. <br> 
+	 * Requiring the use of multiple {@link LightMapWrapper}.
+	 */
+	public HashMap<IClientLevelWrapper, LightMapWrapper> lightmapByLevelWrapper = new HashMap<>();
 	
 	
 	
@@ -342,10 +349,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	}
 	
 	@Override
-	public ILightMapWrapper getLightmapWrapper()
-	{
-		return lightmap;
-	}
+	public ILightMapWrapper getLightmapWrapper(ILevelWrapper level) { return this.lightmapByLevelWrapper.get(level); }
 	
 	@Override
 	public boolean isFogStateSpecial()
@@ -365,13 +369,13 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		#endif
 	}
 	
-	public void updateLightmap(NativeImage lightPixels)
+	public void updateLightmap(NativeImage lightPixels, IClientLevelWrapper level)
 	{
-		if (lightmap == null)
+		if (!this.lightmapByLevelWrapper.containsKey(level))
 		{
-			lightmap = new LightMapWrapper();
+			this.lightmapByLevelWrapper.put(level, new LightMapWrapper());
 		}
-		lightmap.uploadLightmap(lightPixels);
+		this.lightmapByLevelWrapper.get(level).uploadLightmap(lightPixels);
 	}
 	
 }
