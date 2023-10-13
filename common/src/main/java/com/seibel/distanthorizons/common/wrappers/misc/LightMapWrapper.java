@@ -61,7 +61,8 @@ public class LightMapWrapper implements ILightMapWrapper
 	@Override
 	public void bind()
 	{
-		GL32.glBindTexture(GL32.GL_TEXTURE_2D, textureId);
+		GL32.glActiveTexture(GL32.GL_TEXTURE0);
+		GL32.glBindTexture(GL32.GL_TEXTURE_2D, this.textureId);
 	}
 	
 	@Override
