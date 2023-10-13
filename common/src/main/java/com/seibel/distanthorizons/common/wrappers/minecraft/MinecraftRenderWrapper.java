@@ -123,6 +123,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	}
 	
 	@Override
+	/** Unless you really need to know if the player is blind, use {@link MinecraftRenderWrapper#isFogStateSpecial()}/{@link IMinecraftRenderWrapper#isFogStateSpecial()} instead */
 	public boolean playerHasBlindingEffect()
 	{
 		return MC.player.getActiveEffectsMap().get(MobEffects.BLINDNESS) != null
@@ -360,13 +361,12 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
 		FluidState fluidState = camera.getFluidInCamera();
 		Entity entity = camera.getEntity();
-		boolean isUnderWater = (entity instanceof LivingEntity) && ((LivingEntity)entity).hasEffect(MobEffects.BLINDNESS);
-			isUnderWater |= fluidState.is(FluidTags.WATER);
-			isUnderWater |= fluidState.is(FluidTags.LAVA);
-		return isUnderWater;
+		boolean isBlind = this.playerHasBlindingEffect();
+			isBlind |= fluidState.is(FluidTags.WATER);
+			isBlind |= fluidState.is(FluidTags.LAVA);
+		return isBlind;
 		#else
-		Entity entity = MC.gameRenderer.getMainCamera().getEntity();
-		boolean isBlind = (entity instanceof LivingEntity) && ((LivingEntity) entity).hasEffect(MobEffects.BLINDNESS);
+		boolean isBlind = this.playerHasBlindingEffect();
 		return MC.gameRenderer.getMainCamera().getFluidInCamera() != FogType.NONE || isBlind;
 		#endif
 	}

@@ -68,7 +68,7 @@ public class MixinFogRenderer
 		Entity entity = camera.getEntity();
 		boolean isSpecialFog = (entity instanceof LivingEntity) && ((LivingEntity) entity).hasEffect(MobEffects.BLINDNESS);
 		if (!isSpecialFog && cameraNotInFluid && fogMode == FogMode.FOG_TERRAIN
-				&& !SingletonInjector.INSTANCE.get(IMinecraftRenderWrapper.class).playerHasBlindingEffect()
+				&& !SingletonInjector.INSTANCE.get(IMinecraftRenderWrapper.class).isFogStateSpecial()
 				&& Config.Client.Advanced.Graphics.Fog.disableVanillaFog.get())
 		{
 			#if PRE_MC_1_17_1
