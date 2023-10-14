@@ -36,6 +36,7 @@ import com.seibel.distanthorizons.core.pos.DhChunkPos;
 import com.seibel.distanthorizons.core.dependencyInjection.ModAccessorInjector;
 
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
+import com.seibel.distanthorizons.core.render.DhApiRenderProxy;
 import com.seibel.distanthorizons.core.wrapperInterfaces.misc.ILightMapWrapper;
 
 #if PRE_MC_1_19_4
@@ -250,23 +251,17 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		return height;
 	}
 	
-	private RenderTarget getRenderTarget()
-	{
-		RenderTarget r = null; //MC.levelRenderer.getCloudsTarget();
-		return r != null ? r : MC.getMainRenderTarget();
-	}
+	private RenderTarget getRenderTarget() { return MC.getMainRenderTarget(); }
 	
 	@Override
 	public int getTargetFrameBuffer()
 	{
-		return getRenderTarget().frameBufferId;
+		int frameBufferOverrideId = DhApiRenderProxy.INSTANCE.targetFrameBufferOverride;
+		return (frameBufferOverrideId == -1) ? this.getRenderTarget().frameBufferId : frameBufferOverrideId;
 	}
 	
 	@Override
-	public int getDepthTextureId()
-	{
-		return getRenderTarget().getDepthTextureId();
-	}
+	public int getDepthTextureId() { return this.getRenderTarget().getDepthTextureId(); }
 	
 	@Override
 	public int getTargetFrameBufferViewportWidth()
