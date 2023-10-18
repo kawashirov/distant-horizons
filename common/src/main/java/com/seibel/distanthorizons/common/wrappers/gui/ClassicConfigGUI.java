@@ -28,7 +28,6 @@ import com.seibel.distanthorizons.common.wrappers.gui.updater.ChangelogScreen;
 
 // Minecraft imports
 
-import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
 import com.seibel.distanthorizons.core.jar.updater.SelfUpdater;
 import com.seibel.distanthorizons.core.util.AnnotationUtil;
 import com.seibel.distanthorizons.core.wrapperInterfaces.config.IConfigGui;
@@ -48,7 +47,6 @@ import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.client.resources.language.I18n;    // translation
 #if POST_MC_1_17_1
@@ -402,7 +400,7 @@ public class ClassicConfigGUI
 				DhDrawString(matrices, font, TextOrLiteral(ModInfo.VERSION), 2, height - 10, 0xAAAAAA);
 				
 				// If the update is pending, display this message to inform the user that it will apply when the game restarts
-				if (SelfUpdater.deleteOldOnClose)
+				if (SelfUpdater.deleteOldJarOnJvmShutdown)
 					DhDrawString(matrices, font, Translatable(configBase.modID + ".updater.waitingForClose"), 4, height - 38, 0xFFFFFF);
 			}
 			
