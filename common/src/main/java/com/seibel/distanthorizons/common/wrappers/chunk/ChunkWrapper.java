@@ -263,8 +263,10 @@ public class ChunkWrapper implements IChunkWrapper
 		}
 		
 		
-		#if PRE_MC_1_18_2
+		#if PRE_MC_1_17_1
 		return true;
+		#elif MC_1_17_1
+		return false; // MC's lighting engine never works for 1.17
 		#else
 		if (this.chunk instanceof LevelChunk)
 		{
