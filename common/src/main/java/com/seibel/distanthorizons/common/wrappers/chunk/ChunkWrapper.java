@@ -170,7 +170,7 @@ public class ChunkWrapper implements IChunkWrapper
 		for (int index = 0; index < sections.length; index++)
 		{
 			#if MC_1_16_5
-			if (!sections[index].isEmpty())
+			if (sections[index] != null && !sections[index].isEmpty())
 			{
 				// convert from an index to a block coordinate
 				return this.chunk.getSections()[index].bottomBlockY() * 16;
