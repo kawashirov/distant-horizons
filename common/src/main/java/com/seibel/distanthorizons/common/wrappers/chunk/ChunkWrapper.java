@@ -169,8 +169,13 @@ public class ChunkWrapper implements IChunkWrapper
 		LevelChunkSection[] sections = this.chunk.getSections();
 		for (int index = 0; index < sections.length; index++)
 		{
+			if (sections[index] == null)
+			{
+				continue;
+			}
+			
 			#if MC_1_16_5
-			if (sections[index] != null && !sections[index].isEmpty())
+			if (!sections[index].isEmpty())
 			{
 				// convert from an index to a block coordinate
 				return this.chunk.getSections()[index].bottomBlockY() * 16;
