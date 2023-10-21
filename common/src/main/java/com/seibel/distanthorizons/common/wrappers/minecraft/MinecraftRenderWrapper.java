@@ -28,11 +28,9 @@ import java.util.stream.Collectors;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.distanthorizons.common.wrappers.McObjectConverter;
 import com.seibel.distanthorizons.common.wrappers.WrapperFactory;
 import com.seibel.distanthorizons.common.wrappers.misc.LightMapWrapper;
-import com.seibel.distanthorizons.common.wrappers.world.DimensionTypeWrapper;
 import com.seibel.distanthorizons.core.pos.DhChunkPos;
 import com.seibel.distanthorizons.core.dependencyInjection.ModAccessorInjector;
 
@@ -43,15 +41,15 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.misc.ILightMapWrapper;
 #if PRE_MC_1_19_4
 import com.mojang.math.Vector3f;
 #else
-import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
-import com.seibel.distanthorizons.core.wrapperInterfaces.world.IDimensionTypeWrapper;
-import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
 import org.joml.Vector3f;
 #endif
 #if MC_1_20_2
 import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 #endif
 
+import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
+import com.seibel.distanthorizons.core.wrapperInterfaces.world.IDimensionTypeWrapper;
+import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.distanthorizons.coreapi.util.math.Mat4f;
 import com.seibel.distanthorizons.coreapi.util.math.Vec3d;
 import com.seibel.distanthorizons.coreapi.util.math.Vec3f;
@@ -69,6 +67,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffects;
 #if PRE_MC_1_17_1
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.material.FluidState;
 import org.lwjgl.opengl.GL15;
 #else
