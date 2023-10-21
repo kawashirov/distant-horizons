@@ -32,6 +32,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.seibel.distanthorizons.common.wrappers.McObjectConverter;
 import com.seibel.distanthorizons.common.wrappers.WrapperFactory;
 import com.seibel.distanthorizons.common.wrappers.misc.LightMapWrapper;
+import com.seibel.distanthorizons.common.wrappers.world.DimensionTypeWrapper;
 import com.seibel.distanthorizons.core.pos.DhChunkPos;
 import com.seibel.distanthorizons.core.dependencyInjection.ModAccessorInjector;
 
@@ -43,6 +44,7 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.misc.ILightMapWrapper;
 import com.mojang.math.Vector3f;
 #else
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
+import com.seibel.distanthorizons.core.wrapperInterfaces.world.IDimensionTypeWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
 import org.joml.Vector3f;
 #endif
@@ -50,8 +52,6 @@ import org.joml.Vector3f;
 import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 #endif
 
-import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
-import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.distanthorizons.coreapi.util.math.Mat4f;
 import com.seibel.distanthorizons.coreapi.util.math.Vec3d;
 import com.seibel.distanthorizons.coreapi.util.math.Vec3f;
@@ -67,8 +67,6 @@ import net.minecraft.client.renderer.FogRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 #if PRE_MC_1_17_1
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.level.material.FluidState;
@@ -103,7 +101,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	 * In the case of immersive portals multiple levels may be active at once, causing conflicting lightmaps. <br> 
 	 * Requiring the use of multiple {@link LightMapWrapper}.
 	 */
-	public HashMap<IClientLevelWrapper, LightMapWrapper> lightmapByLevelWrapper = new HashMap<>();
+	public HashMap<IDimensionTypeWrapper, LightMapWrapper> lightmapByDimensionType = new HashMap<>();
 	
 	
 	
@@ -347,7 +345,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	}
 	
 	@Override
-	public ILightMapWrapper getLightmapWrapper(ILevelWrapper level) { return this.lightmapByLevelWrapper.get(level); }
+	public ILightMapWrapper getLightmapWrapper(ILevelWrapper level) { return this.lightmapByDimensionType.get(level); }
 	
 	@Override
 	public boolean isFogStateSpecial()
@@ -368,11 +366,16 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	
 	public void updateLightmap(NativeImage lightPixels, IClientLevelWrapper level)
 	{
-		if (!this.lightmapByLevelWrapper.containsKey(level))
+		// Using ClientLevelWrapper as the key would be better, but we don't have a consistent way to create the same
+		// object for the same MC level and/or the same hash,
+		// so this will have to do for now
+		IDimensionTypeWrapper dimensionType = level.getDimensionType();
+		
+		if (!this.lightmapByDimensionType.containsKey(dimensionType))
 		{
-			this.lightmapByLevelWrapper.put(level, new LightMapWrapper());
+			this.lightmapByDimensionType.put(dimensionType, new LightMapWrapper());
 		}
-		this.lightmapByLevelWrapper.get(level).uploadLightmap(lightPixels);
+		this.lightmapByDimensionType.get(dimensionType).uploadLightmap(lightPixels);
 	}
 	
 }
