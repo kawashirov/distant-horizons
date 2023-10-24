@@ -191,7 +191,7 @@ To build all versions: `./buildAll` (all builds will end up in the `Merged` fold
 
 ## Open Source Acknowledgements
 
-Forgix (To merge multiple mod versions into one jar) [_Used to be_ [_DHJarMerger_](https://github.com/Ran-helo/DHJarMerger)]\
+Forgix (To merge multiple mod versions into one jar) [_Formerly_ [_DHJarMerger_](https://github.com/Ran-helo/DHJarMerger)]\
 https://github.com/PacifistMC/Forgix
 
 LZ4 for Java (data compression)\
@@ -202,3 +202,6 @@ https://github.com/TheElectronWill/night-config
 
 SVG Salamander for SVG support (not being used atm)\
 https://github.com/blackears/svgSalamander
+
+sqlite-jdbc\
+https://github.com/xerial/sqlite-jdbc
