@@ -39,6 +39,8 @@ import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 #if POST_MC_1_19_2
 import net.minecraft.util.RandomSource;
+#else
+import java.util.Random;
 #endif
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.logging.log4j.Logger;
