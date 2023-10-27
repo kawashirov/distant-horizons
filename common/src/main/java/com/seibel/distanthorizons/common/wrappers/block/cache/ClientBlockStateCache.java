@@ -21,6 +21,7 @@ package com.seibel.distanthorizons.common.wrappers.block.cache;
 
 import com.seibel.distanthorizons.common.wrappers.block.BiomeWrapper;
 import com.seibel.distanthorizons.common.wrappers.block.TextureAtlasSpriteWrapper;
+import com.seibel.distanthorizons.common.wrappers.block.TintWithoutLevelOverrider;
 import com.seibel.distanthorizons.common.wrappers.McObjectConverter;
 import com.seibel.distanthorizons.common.wrappers.block.*;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
@@ -45,8 +46,8 @@ import java.util.Random;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.logging.log4j.Logger;
 
-import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @version 2022-9-16
@@ -55,8 +56,6 @@ public class ClientBlockStateCache
 {
 	
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
-	
-	private static final HashSet<BlockState> BROKEN_BLOCK_STATES = new HashSet<>();
 	
 	#if PRE_MC_1_19_2
 	public static final Random random = new Random(0);
@@ -233,43 +232,14 @@ public class ClientBlockStateCache
 		isColorResolved = true;
 	}
 	
-	/** 
-	 * {@link TintWithoutLevelOverrider} was originally used here, but it broke when the Aether was installed, 
-	 * so now we are using {@link TintGetterOverrideFast} instead.
-	 */
 	public int getAndResolveFaceColor(BiomeWrapper biome, DhBlockPos pos)
 	{
 		// FIXME: impl per-face colors
-		if (!this.needPostTinting)
-		{
-			return this.baseColor;
-		}
-		
-		
-		int tintColor = -1;
-		try
-		{
-			tintColor = Minecraft.getInstance().getBlockColors()
-					.getColor(this.state, new TintGetterOverrideFast(this.level), McObjectConverter.Convert(pos), this.tintIndex);
-		}
-		catch (Exception e)
-		{
-			// only display the error once per block/biome type to reduce log spam
-			if (!BROKEN_BLOCK_STATES.contains(this.state))
-			{
-				LOGGER.warn("Failed to get block color for block: [" + this.state + "] and biome: [" + biome + "] at pos: " + pos + ". Error: ["+e.getMessage() + "]. Note: future errors for this block/biome will be ignored.", e);
-				BROKEN_BLOCK_STATES.add(this.state);
-			}
-		}
-		
-		if (tintColor == -1)
-		{
-			return this.baseColor;
-		}
-		else
-		{
-			return ColorUtil.multiplyARGBwithRGB(this.baseColor, tintColor);
-		}
+		if (!needPostTinting) return baseColor;
+		int tintColor = Minecraft.getInstance().getBlockColors()
+				.getColor(state, new TintWithoutLevelOverrider(biome), McObjectConverter.Convert(pos), tintIndex);
+		if (tintColor == -1) return baseColor;
+		return ColorUtil.multiplyARGBwithRGB(baseColor, tintColor);
 	}
 	
 }
