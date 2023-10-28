@@ -23,14 +23,6 @@ public class MixinClientPacketListener
 	@Shadow
 	private ClientLevel level;
 	
-	
-	
-	@Inject(method = "handleLogin", at = @At("HEAD"))
-	void onHandleLoginStart(CallbackInfo ci)
-	{
-		// not the best way to notify Core that we are no longer in the previous world, but it will have to do for now
-		ClientApi.INSTANCE.onClientOnlyDisconnected();
-	}
 	@Inject(method = "handleLogin", at = @At("RETURN"))
 	void onHandleLoginEnd(CallbackInfo ci) { ClientApi.INSTANCE.onClientOnlyConnected(); }
 	
@@ -46,11 +38,12 @@ public class MixinClientPacketListener
 	#endif
 	void onCleanupStart(CallbackInfo ci)
 	{
-		// TODO which unload method should be used? do we need both?
+		// TODO Is this even needed here?
 		if (level != null)
 		{
 			ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper(level));
 		}
+		ClientApi.INSTANCE.onClientOnlyDisconnected();
 	}
 	
 	#if POST_MC_1_20_1
