@@ -178,7 +178,7 @@ public class FabricClientProxy
 		ClientChunkEvents.CHUNK_UNLOAD.register((level, chunk) ->
 		{
 			IClientLevelWrapper wrappedLevel = ClientLevelWrapper.getWrapper(level);
-			SharedApi.INSTANCE.chunkSaveEvent(new ChunkWrapper(chunk, level, wrappedLevel), wrappedLevel);
+			SharedApi.INSTANCE.chunkUnloadEvent(new ChunkWrapper(chunk, level, wrappedLevel), wrappedLevel);
 		});
 		
 		

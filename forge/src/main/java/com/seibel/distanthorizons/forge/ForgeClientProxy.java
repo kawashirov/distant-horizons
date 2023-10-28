@@ -205,7 +205,7 @@ public class ForgeClientProxy
 	{
 		ILevelWrapper wrappedLevel = ProxyUtil.getLevelWrapper(GetEventLevel(event));
 		IChunkWrapper chunk = new ChunkWrapper(event.getChunk(), GetEventLevel(event), wrappedLevel);
-		SharedApi.INSTANCE.chunkSaveEvent(chunk, wrappedLevel);
+		SharedApi.INSTANCE.chunkUnloadEvent(chunk, wrappedLevel);
 	}
 	
 	
