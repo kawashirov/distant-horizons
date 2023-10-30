@@ -21,49 +21,49 @@ If you want to see a quick demo, check out a video covering the mod here:
 ### This branch supports the following versions of Minecraft:
 
 #### 1.20.2
-Fabric: 0.14.22\
-Fabric API: 0.89.2+1.20.2\
+Fabric: 0.14.24\
+Fabric API: 0.90.4+1.20.2\
 Forge: 48.0.13\
-Parchment: 1.19.3:2023.03.25\
+Parchment: 1.20.1:2023.09.03\
 Modmenu: 8.0.0
 
 #### 1.20.1, 1.20 (Default)
-Fabric: 0.14.21\
-Fabric API: 0.85.0+1.20.1\
-Forge: 45.1.0\
-Parchment: 1.19.3:2023.03.25\
-Modmenu: 7.0.1
+Fabric: 0.14.24\
+Fabric API: 0.90.4+1.20.1\
+Forge: 47.2.1\
+Parchment: 1.20.1:2023.09.03\
+Modmenu: 7.2.2
 
 #### 1.19.4
-Fabric: 0.14.21\
-Fabric API: 0.83.0+1.19.4\
-Forge: 45.1.0\
-Parchment: 1.19.3:2023.06.25\
-Modmenu: 6.2.3
+Fabric: 0.14.24\
+Fabric API: 0.87.1+1.19.4\
+Forge: 45.2.4\
+Parchment: 1.19.4:2023.06.26\
+Modmenu: 6.3.1
 
 #### 1.19.2
-Fabric: 0.14.21\
-Fabric API: 0.76.0+1.19.2\
-Forge: 43.2.14\
+Fabric: 0.14.24\
+Fabric API: 0.76.1+1.19.2\
+Forge: 43.3.2\
 Parchment: 1.19.2:2022.11.27\
 Modmenu: 4.2.0-beta.2
 
 #### 1.18.2
-Fabric: 0.14.21\
+Fabric: 0.14.24\
 Fabric API: 0.76.0+1.18.2\
 Forge: 40.2.10\
 Parchment: 1.18.2:2022.11.06\
 Modmenu: 3.2.5
 
 #### 1.17.1, 1.17
-Fabric: 0.14.21\
+Fabric: 0.14.24\
 Fabric API: 0.46.1+1.17\
 Forge: 37.1.1\
 Parchment: 1.17.1:2021.12.12\
 Modmenu: 2.0.14
 
 #### 1.16.5, 1.16.4
-Fabric: 0.14.21\
+Fabric: 0.14.24\
 Fabric API: 0.42.0+1.16\
 Forge: 36.2.39\
 Parchment: 1.16.5:2022.03.06\
