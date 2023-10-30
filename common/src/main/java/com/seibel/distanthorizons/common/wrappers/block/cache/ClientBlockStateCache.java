@@ -66,12 +66,12 @@ public class ClientBlockStateCache
 	public static final RandomSource random = RandomSource.create();
 	#endif
 	
-	public final BlockState state;
+	public final BlockState blockState;
 	public final LevelReader level;
 	public final BlockPos pos;
 	public ClientBlockStateCache(BlockState blockState, IClientLevelWrapper samplingLevel, DhBlockPos samplingPos)
 	{
-		state = blockState;
+		this.blockState = blockState;
 		level = (LevelReader) samplingLevel.getWrappedMcObject();
 		pos = McObjectConverter.Convert(samplingPos);
 		resolveColors();
@@ -189,21 +189,21 @@ public class ClientBlockStateCache
 	private void resolveColors()
 	{
 		if (isColorResolved) return;
-		if (state.getFluidState().isEmpty())
+		if (blockState.getFluidState().isEmpty())
 		{
 			List<BakedQuad> quads = null;
 			for (Direction direction : DIRECTION_ORDER)
 			{
 				quads = Minecraft.getInstance().getModelManager().getBlockModelShaper().
-						getBlockModel(state).getQuads(state, direction, random);
+						getBlockModel(blockState).getQuads(blockState, direction, random);
 				if (quads != null && !quads.isEmpty() &&
-						!(state.getBlock() instanceof RotatedPillarBlock && direction == Direction.UP))
+						!(blockState.getBlock() instanceof RotatedPillarBlock && direction == Direction.UP))
 					break;
 			} ;
 			if (quads == null || quads.isEmpty())
 			{
 				quads = Minecraft.getInstance().getModelManager().getBlockModelShaper().
-						getBlockModel(state).getQuads(state, null, random);
+						getBlockModel(blockState).getQuads(blockState, null, random);
 			}
 			if (quads != null && !quads.isEmpty())
 			{
@@ -213,15 +213,15 @@ public class ClientBlockStateCache
 				baseColor = calculateColorFromTexture(
                         #if PRE_MC_1_17_1 quads.get(0).sprite,
 						#else quads.get(0).getSprite(), #endif
-						ColorMode.getColorMode(state.getBlock()));
+						ColorMode.getColorMode(blockState.getBlock()));
 			}
 			else
 			{ // Backup method.
 				needPostTinting = false;
 				needShade = false;
 				tintIndex = 0;
-				baseColor = calculateColorFromTexture(Minecraft.getInstance().getModelManager().getBlockModelShaper().getParticleIcon(state),
-						ColorMode.getColorMode(state.getBlock()));
+				baseColor = calculateColorFromTexture(Minecraft.getInstance().getModelManager().getBlockModelShaper().getParticleIcon(blockState),
+						ColorMode.getColorMode(blockState.getBlock()));
 			}
 		}
 		else
@@ -229,8 +229,8 @@ public class ClientBlockStateCache
 			needPostTinting = true;
 			needShade = false;
 			tintIndex = 0;
-			baseColor = calculateColorFromTexture(Minecraft.getInstance().getModelManager().getBlockModelShaper().getParticleIcon(state),
-					ColorMode.getColorMode(state.getBlock()));
+			baseColor = calculateColorFromTexture(Minecraft.getInstance().getModelManager().getBlockModelShaper().getParticleIcon(blockState),
+					ColorMode.getColorMode(blockState.getBlock()));
 		}
 		isColorResolved = true;
 	}
@@ -246,7 +246,7 @@ public class ClientBlockStateCache
 		}
 		
 		// don't try tinting blocks that don't support our method of tint getting
-		if (BROKEN_BLOCK_STATES.contains(this.state))
+		if (BROKEN_BLOCK_STATES.contains(this.blockState))
 		{
 			return this.baseColor;
 		}
@@ -257,37 +257,37 @@ public class ClientBlockStateCache
 		try
 		{
 			// try to use the fast tint getter logic first
-			if (!BLOCK_STATES_THAT_NEED_LEVEL.contains(this.state))
+			if (!BLOCK_STATES_THAT_NEED_LEVEL.contains(this.blockState))
 			{
 				try
 				{
 					tintColor = Minecraft.getInstance().getBlockColors()
-							.getColor(this.state, new TintWithoutLevelOverrider(biome), McObjectConverter.Convert(pos), this.tintIndex);
+							.getColor(this.blockState, new TintWithoutLevelOverrider(biome), McObjectConverter.Convert(pos), this.tintIndex);
 				}
 				catch (UnsupportedOperationException e)
 				{
 					// this exception generally occurs if the tint requires other blocks besides itself
-					LOGGER.debug("Unable to use ["+TintWithoutLevelOverrider.class.getSimpleName()+"] to get the block tint for block: [" + this.state + "] and biome: [" + biome + "] at pos: " + pos + ". Error: [" + e.getMessage() + "]. Attempting to use backup method...", e);
-					BLOCK_STATES_THAT_NEED_LEVEL.add(this.state);
+					LOGGER.debug("Unable to use ["+TintWithoutLevelOverrider.class.getSimpleName()+"] to get the block tint for block: [" + this.blockState + "] and biome: [" + biome + "] at pos: " + pos + ". Error: [" + e.getMessage() + "]. Attempting to use backup method...", e);
+					BLOCK_STATES_THAT_NEED_LEVEL.add(this.blockState);
 				}
 			}
 			
 			// use the level logic only if requested
-			if (BLOCK_STATES_THAT_NEED_LEVEL.contains(this.state))
+			if (BLOCK_STATES_THAT_NEED_LEVEL.contains(this.blockState))
 			{
 				// this logic can't be used all the time due to it breaking some blocks tinting
 				// specifically oceans don't render correctly
 				tintColor = Minecraft.getInstance().getBlockColors()
-						.getColor(this.state, new TintGetterOverrideFast(this.level), McObjectConverter.Convert(pos), this.tintIndex);
+						.getColor(this.blockState, new TintGetterOverrideFast(this.level), McObjectConverter.Convert(pos), this.tintIndex);
 			}
 		}
 		catch (Exception e)
 		{
 			// only display the error once per block/biome type to reduce log spam
-			if (!BROKEN_BLOCK_STATES.contains(this.state))
+			if (!BROKEN_BLOCK_STATES.contains(this.blockState))
 			{
-				LOGGER.warn("Failed to get block color for block: [" + this.state + "] and biome: [" + biome + "] at pos: " + pos + ". Error: ["+e.getMessage() + "]. Note: future errors for this block/biome will be ignored.", e);
-				BROKEN_BLOCK_STATES.add(this.state);
+				LOGGER.warn("Failed to get block color for block: [" + this.blockState + "] and biome: [" + biome + "] at pos: " + pos + ". Error: ["+e.getMessage() + "]. Note: future errors for this block/biome will be ignored.", e);
+				BROKEN_BLOCK_STATES.add(this.blockState);
 			}
 		}
 		
