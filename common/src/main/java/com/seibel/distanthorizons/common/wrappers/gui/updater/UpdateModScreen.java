@@ -13,6 +13,8 @@ import com.seibel.distanthorizons.core.jar.updater.SelfUpdater;
 import net.minecraft.client.Minecraft;
 #if POST_MC_1_20_1
 import net.minecraft.client.gui.GuiGraphics;
+#else
+import com.mojang.blaze3d.vertex.PoseStack;
 #endif
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
