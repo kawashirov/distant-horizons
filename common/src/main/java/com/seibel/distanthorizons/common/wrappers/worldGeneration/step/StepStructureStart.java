@@ -138,8 +138,9 @@ public final class StepStructureStart
 					}
 				}
 				
-				structurePlacementLock.unlock();
 				#endif
+				
+				structurePlacementLock.unlock();
 			}
 		}
 	}
