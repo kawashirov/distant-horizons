@@ -22,7 +22,7 @@ package com.seibel.distanthorizons.fabric;
 import com.seibel.distanthorizons.api.methods.events.abstractEvents.DhApiAfterDhInitEvent;
 import com.seibel.distanthorizons.api.methods.events.abstractEvents.DhApiBeforeDhInitEvent;
 import com.seibel.distanthorizons.core.config.ConfigBase;
-import com.seibel.distanthorizons.core.jar.ModGitInfo;
+import com.seibel.distanthorizons.core.jar.ModJarInfo;
 import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.*;
 import com.seibel.distanthorizons.common.LodCommonMain;
@@ -80,9 +80,9 @@ public class FabricMain
 		LOGGER.info(ModInfo.READABLE_NAME + ", Version: " + ModInfo.VERSION);
 		
 		// Print git info (Useful for dev builds)
-		LOGGER.info("DH Branch: " + ModGitInfo.Git_Main_Branch);
-		LOGGER.info("DH Commit: " + ModGitInfo.Git_Main_Commit);
-		LOGGER.info("DH-Core Commit: " + ModGitInfo.Git_Core_Commit);
+		LOGGER.info("DH Branch: " + ModJarInfo.Git_Branch);
+		LOGGER.info("DH Commit: " + ModJarInfo.Git_Commit);
+		LOGGER.info("DH Jar Build Source: " + ModJarInfo.Build_Source);
 		
 		IModChecker modChecker = SingletonInjector.INSTANCE.get(IModChecker.class);
 		if (modChecker.isModLoaded("sodium"))

@@ -1,12 +1,10 @@
 package com.seibel.distanthorizons.common.wrappers.gui.updater;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.seibel.distanthorizons.api.enums.config.EUpdateBranch;
 import com.seibel.distanthorizons.common.wrappers.gui.DhScreen;
 import com.seibel.distanthorizons.common.wrappers.gui.TexturedButtonWidget;
-import com.seibel.distanthorizons.core.jar.ModGitInfo;
-import com.seibel.distanthorizons.core.jar.installer.GitlabGetter;
+import com.seibel.distanthorizons.core.jar.ModJarInfo;
 import com.seibel.distanthorizons.coreapi.ModInfo;
 import com.seibel.distanthorizons.core.config.Config;
 import com.seibel.distanthorizons.core.jar.JarUtils;
@@ -16,7 +14,6 @@ import net.minecraft.client.Minecraft;
 #if POST_MC_1_20_1
 import net.minecraft.client.gui.GuiGraphics;
 #endif
-import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
@@ -53,7 +50,7 @@ public class UpdateModScreen extends DhScreen
                 nextVer = ModrinthGetter.releaseNames.get(this.newVersionID);
 				break;
 	        case NIGHTLY:
-                currentVer = ModGitInfo.Git_Main_Commit.substring(0,7);
+                currentVer = ModJarInfo.Git_Commit.substring(0,7);
                 nextVer = this.newVersionID.substring(0,7);
 				break;
         }

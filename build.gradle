@@ -359,28 +359,15 @@ subprojects { p ->
         // TODOI: Find something we can use so we can basically re-map only when the jar is shadowed and relocated
 //        println p.tasks.findByName('shadowJar')
 
-        // Gets git info for the project
-        def git_main_commit = "Git_not_found"
-        def git_core_commit = "Git_not_found"
-        def git_main_branch = "Git_not_found"
+        
         // These "hasProperty"'s are so that they can be passed through the cli (ie in the CI)
         try {
-//            "git rev-parse --is-inside-work-tree".execute() // If git doesnt exist, or this isnt cloned from git, then this wont work
-            if (gitMainCommit != "null")
-                git_main_commit = gitMainCommit
-            else
-                git_main_commit = 'git rev-parse --verify HEAD'.execute().text.trim()
-            
-            if (gitCoreCommit != "null")
-                git_core_commit = gitCoreCommit
-            else
-                git_core_commit = 'git ls-tree --object-only HEAD ../coreSubProjects'.execute().text.trim() // TODO: is there a way to do this universally
-            
-            if (gitMainBranch != "null")
-                git_main_branch = gitMainBranch
-            else
-                git_main_branch = 'git symbolic-ref --short HEAD'.execute().text.trim()
+            if (infoGitCommit == "null")
+                infoGitCommit = 'git rev-parse --verify HEAD'.execute().text.trim()
+            if (infoGitBranch == "null")
+                infoGitBranch = 'git symbolic-ref --short HEAD'.execute().text.trim()
         } catch (Exception e) {
+            infoGitCommit = infoGitBranch = "Git not found"
             println "Git or Git project not found"
         }
 
@@ -400,9 +387,9 @@ subprojects { p ->
                 java_version                 : java_version,
                 quilt_contributors           : "{"+quilt_contributors.join(", ")+"}",
 
-                git_main_commit              : git_main_commit,
-                git_core_commit              : git_core_commit,
-                git_main_branch              : git_main_branch,
+                info_git_commit              : infoGitBranch,
+                info_git_branch              : infoGitCommit,
+                info_build_source            : infoBuildSource,
 
                 fabric_incompatibility_list  : fabric_incompatibility_list,
                 fabric_recommend_list  : fabric_recommend_list,
