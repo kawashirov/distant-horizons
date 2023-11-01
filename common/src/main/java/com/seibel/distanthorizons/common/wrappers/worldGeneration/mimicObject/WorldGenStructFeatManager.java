@@ -122,6 +122,7 @@ public class WorldGenStructFeatManager extends #if PRE_MC_1_19_2 StructureFeatur
 		ChunkAccess chunk = _getChunk(sectionPos2.x(), sectionPos2.z(), ChunkStatus.STRUCTURE_REFERENCES);
 		if (chunk == null) return Stream.empty();
 		
+		// FIXME getReferencesForFeature can throw ConcurrentModificationException's
 		return chunk.getReferencesForFeature(structureFeature).stream().map(pos -> {
 			SectionPos sectPos = SectionPos.of(ChunkPos.getX(pos), 0, ChunkPos.getZ(pos));
 			ChunkAccess startChunk = _getChunk(sectPos.x(), sectPos.z(), ChunkStatus.STRUCTURE_STARTS);
