@@ -31,12 +31,18 @@ public class MixinChunkMap
 	@Inject(method = "save", at = @At(value = "INVOKE", target = CHUNK_SERIALIZER_WRITE))
 	private void onChunkSave(ChunkAccess chunk, CallbackInfoReturnable<Boolean> ci)
 	{
-		// corrupt/incomplete chunk validation
-		#if MC_1_16_5 || MC_1_17_1
-		// no validation necessary 
-		#else
+		//=====================================//
+		// corrupt/incomplete chunk validation //
+		//=====================================//
+		
 		// MC has a tendency to try saving incomplete or corrupted chunks (which show up as empty or black chunks)
-		// this should prevent that from happening
+		// this logic should prevent that from happening
+		#if MC_1_16_5 || MC_1_17_1
+		if (chunk.isUnsaved() || chunk.getUpgradeData() != null || !chunk.isLightCorrect())
+		{
+			return;
+		}
+		#else
 		if (chunk.isUnsaved() || chunk.isUpgrading() || !chunk.isLightCorrect())
 		{
 			return;
@@ -44,11 +50,14 @@ public class MixinChunkMap
 		#endif
 		
 		
-		// biome validation
+		//==================//
+		// biome validation //
+		//==================//
+		
+		// some chunks may be missing their biomes, which cause issues when attempting to save them
 		#if MC_1_16_5 || MC_1_17_1
 		if (chunk.getBiomes() == null)
 		{
-			// in 1.16.5 some chunks may be missing their biomes, which cause issues when attempting to save them
 			return;
 		}
 		#else
@@ -59,15 +68,15 @@ public class MixinChunkMap
 		}
 		catch (Exception e)
 		{
-			// some chunks may be missing their biomes, which cause issues when attempting to save them
 			return;
 		}
 		#endif
 		
 		
+		
 		ServerApi.INSTANCE.serverChunkSaveEvent(
-				new ChunkWrapper(chunk, level, ServerLevelWrapper.getWrapper(level)),
-				ServerLevelWrapper.getWrapper(level)
+				new ChunkWrapper(chunk, this.level, ServerLevelWrapper.getWrapper(this.level)),
+				ServerLevelWrapper.getWrapper(this.level)
 		);
 	}
 	
