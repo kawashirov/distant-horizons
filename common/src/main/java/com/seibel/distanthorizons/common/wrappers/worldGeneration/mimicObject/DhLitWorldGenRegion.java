@@ -21,6 +21,7 @@ package com.seibel.distanthorizons.common.wrappers.worldGeneration.mimicObject;
 
 import java.lang.invoke.MethodHandles;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.seibel.distanthorizons.common.wrappers.worldGeneration.BatchGenerationEnvironment;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
@@ -66,6 +67,12 @@ public class DhLitWorldGenRegion extends WorldGenRegion
 	private final List<ChunkAccess> cache;
 	Long2ObjectOpenHashMap<ChunkAccess> chunkMap = new Long2ObjectOpenHashMap<ChunkAccess>();
 	
+	/** 
+	 * Present to reduce the chance that we accidentally break underlying MC code that isn't thread safe, 
+	 * specifically: "it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap.getAndMoveToFirst()"
+	 */
+	ReentrantLock getChunkLock = new ReentrantLock();
+	
 	#if PRE_MC_1_18_2
 	private ChunkPos overrideCenterPos = null;
 	
@@ -90,6 +97,8 @@ public class DhLitWorldGenRegion extends WorldGenRegion
 	#endif
 	#endif
 	
+	
+	
 	public DhLitWorldGenRegion(
 			ServerLevel serverLevel, DummyLightEngine lightEngine,
 			List<ChunkAccess> chunkList, ChunkStatus chunkStatus, int writeRadius,
@@ -103,6 +112,8 @@ public class DhLitWorldGenRegion extends WorldGenRegion
 		this.cache = chunkList;
 		this.size = Mth.floor(Math.sqrt(chunkList.size()));
 	}
+	
+	
 	
 	#if POST_MC_1_17_1
 	// Bypass BCLib mixin overrides.
@@ -205,7 +216,16 @@ public class DhLitWorldGenRegion extends WorldGenRegion
 	@Override
 	public ChunkAccess getChunk(int i, int j)
 	{
-		return this.getChunk(i, j, ChunkStatus.EMPTY);
+		try
+		{
+			// lock is to prevent issues with underlying MC code that doesn't support multithreading
+			this.getChunkLock.lock();
+			return this.getChunk(i, j, ChunkStatus.EMPTY);
+		}
+		finally
+		{
+			this.getChunkLock.unlock();
+		}
 	}
 	
 	// Override to ensure no other mod mixins cause skipping the overrided
@@ -213,7 +233,16 @@ public class DhLitWorldGenRegion extends WorldGenRegion
 	@Override
 	public ChunkAccess getChunk(int i, int j, ChunkStatus chunkStatus)
 	{
-		return this.getChunk(i, j, chunkStatus, true);
+		try
+		{
+			// lock is to prevent issues with underlying MC code that doesn't support multithreading
+			this.getChunkLock.lock();
+			return this.getChunk(i, j, chunkStatus, true);
+		}
+		finally
+		{
+			this.getChunkLock.unlock();
+		}
 	}
 	
 	// Use this instead of super.getChunk() to bypass C2ME concurrency checks

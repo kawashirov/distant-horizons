@@ -63,7 +63,7 @@ public final class StepStructureReference
 		for (ChunkAccess chunk : chunksToDo)
 		{
 			// System.out.println("StepStructureReference: "+chunk.getPos());
-			environment.params.generator.createReferences(worldGenRegion, tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk);
+			this.environment.params.generator.createReferences(worldGenRegion, tParams.structFeat.forWorldGenRegion(worldGenRegion), chunk);
 		}
 	}
 	

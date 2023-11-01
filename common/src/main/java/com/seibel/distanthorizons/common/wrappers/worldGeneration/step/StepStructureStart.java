@@ -38,7 +38,7 @@ public final class StepStructureStart
 {
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 	private static final ChunkStatus STATUS = ChunkStatus.STRUCTURE_STARTS;
-	private static final ReentrantLock structurePlacementLock = new ReentrantLock();
+	private static final ReentrantLock STRUCTURE_PLACEMENT_LOCK = new ReentrantLock();
 	
 	private final BatchGenerationEnvironment environment;
 	
@@ -96,7 +96,7 @@ public final class StepStructureStart
 				
 				// hopefully this shouldn't cause any performance issues (this step is generally quite quick so hopefully it should be fine)
 				// and should prevent some concurrency issues
-				structurePlacementLock.lock();
+				STRUCTURE_PLACEMENT_LOCK.lock();
 				
 				#if PRE_MC_1_19_2
 				environment.params.generator.createStructures(environment.params.registry, tParams.structFeat, chunk, environment.params.structures,
@@ -140,7 +140,7 @@ public final class StepStructureStart
 				
 				#endif
 				
-				structurePlacementLock.unlock();
+				STRUCTURE_PLACEMENT_LOCK.unlock();
 			}
 		}
 	}
