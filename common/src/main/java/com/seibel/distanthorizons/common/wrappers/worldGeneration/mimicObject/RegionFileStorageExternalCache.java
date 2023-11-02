@@ -66,6 +66,16 @@ public class RegionFileStorageExternalCache implements AutoCloseable
 				
 				#if MC_1_16_5 || MC_1_17_1
 				rFile = this.storage.getRegionFile(pos);
+				
+				// keeping the region cache size low helps prevent concurrency issues
+				if (this.storage.regionCache.size() > 150) // max 256
+				{
+					RegionFile removedFile = this.storage.regionCache.removeLast();
+					if (removedFile != null)
+					{
+						removedFile.close();
+					}
+				}
 				#else
 				rFile = this.storage.regionCache.getOrDefault(posLong, null);	
 				#endif

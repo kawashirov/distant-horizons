@@ -37,6 +37,7 @@ accessible field net/minecraft/server/level/ChunkMap mainThreadExecutor Lnet/min
 accessible method net/minecraft/server/level/ChunkMap readChunk (Lnet/minecraft/world/level/ChunkPos;)Lnet/minecraft/nbt/CompoundTag;
 accessible method net/minecraft/world/level/chunk/storage/RegionFileStorage getRegionFile (Lnet/minecraft/world/level/ChunkPos;)Lnet/minecraft/world/level/chunk/storage/RegionFile;
 accessible field net/minecraft/world/level/chunk/storage/RegionFileStorage folder Ljava/io/File;
+accessible field net/minecraft/world/level/chunk/storage/RegionFileStorage regionCache Lit/unimi/dsi/fastutil/longs/Long2ObjectLinkedOpenHashMap;
 accessible field net/minecraft/world/level/chunk/storage/ChunkStorage worker Lnet/minecraft/world/level/chunk/storage/IOWorker;
 accessible field net/minecraft/world/level/chunk/storage/IOWorker storage Lnet/minecraft/world/level/chunk/storage/RegionFileStorage;
 
