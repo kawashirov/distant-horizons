@@ -40,11 +40,11 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 #else
-import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.event.level.LevelEvent;
 #endif
 
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
@@ -298,7 +298,11 @@ public class ForgeClientProxy
 	@SubscribeEvent
 	public void afterLevelRenderEvent(RenderLevelStageEvent event)
 	{
+		#if POST_MC_1_20_1
 		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL)
+		#else
+		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_SOLID_BLOCKS)
+		#endif
 		{
 			try
 			{

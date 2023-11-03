@@ -42,13 +42,13 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.misc.ILightMapWrapper;
 #if PRE_MC_1_19_4
 import com.mojang.math.Vector3f;
 #else
-import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.AbstractOptifineAccessor;
 import org.joml.Vector3f;
 #endif
 #if MC_1_20_2
 import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 #endif
 
+import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.AbstractOptifineAccessor;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IDimensionTypeWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
