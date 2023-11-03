@@ -28,7 +28,10 @@ public class MixinLightmap
 	{
 		// since the light map is always updated on the client render thread we should be able to access the client level at the same time
 		IMinecraftClientWrapper mc = SingletonInjector.INSTANCE.get(IMinecraftClientWrapper.class);
-		if (mc.getWrappedClientLevel() == null)
+		if (
+				mc != null &&
+				mc.getWrappedClientLevel() == null
+		)
 			return;
 		IClientLevelWrapper clientLevel = mc.getWrappedClientLevel();
 		
