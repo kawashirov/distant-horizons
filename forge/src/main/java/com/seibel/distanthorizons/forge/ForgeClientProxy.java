@@ -20,13 +20,12 @@
 package com.seibel.distanthorizons.forge;
 
 import com.seibel.distanthorizons.common.util.ProxyUtil;
+import com.seibel.distanthorizons.common.wrappers.minecraft.MinecraftRenderWrapper;
 import com.seibel.distanthorizons.common.wrappers.world.ClientLevelWrapper;
-import com.seibel.distanthorizons.common.wrappers.world.ServerLevelWrapper;
 import com.seibel.distanthorizons.core.api.internal.ClientApi;
 import com.seibel.distanthorizons.core.api.internal.SharedApi;
 import com.seibel.distanthorizons.core.dependencyInjection.SingletonInjector;
 import com.seibel.distanthorizons.core.logging.DhLoggerBuilder;
-import com.seibel.distanthorizons.core.pos.DhChunkPos;
 import com.seibel.distanthorizons.core.wrapperInterfaces.chunk.IChunkWrapper;
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.minecraft.IMinecraftClientWrapper;
@@ -34,7 +33,6 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.world.IClientLevelWrapp
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
 import com.seibel.distanthorizons.coreapi.ModInfo;
 //import io.netty.buffer.ByteBuf;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.LevelAccessor;
 
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -42,6 +40,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraftforge.event.world.ChunkEvent;
 import net.minecraftforge.event.world.WorldEvent;
 #else
+import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.event.level.ChunkEvent;
 import net.minecraftforge.event.level.LevelEvent;
 #endif
@@ -61,6 +60,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.lwjgl.opengl.GL32;
 
 /**
  * This handles all events sent to the client,
@@ -288,5 +288,31 @@ public class ForgeClientProxy
 			}
 		}
 	}
+	
+	
+	
+	//===========//
+	// rendering //
+	//===========//
+	
+	@SubscribeEvent
+	public void afterLevelRenderEvent(RenderLevelStageEvent event)
+	{
+		if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_LEVEL)
+		{
+			try
+			{
+				// should generally only need to be set once per game session
+				// allows DH to render directly to Optifine's level frame buffer,
+				// allowing better shader support
+				MinecraftRenderWrapper.INSTANCE.finalLevelFrameBufferId = GL32.glGetInteger(GL32.GL_FRAMEBUFFER_BINDING);
+			}
+			catch (Exception | Error e)
+			{
+				LOGGER.error("Unexpected error in afterLevelRenderEvent: "+e.getMessage(), e);
+			}
+		}
+	}
+	
 	
 }

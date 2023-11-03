@@ -42,6 +42,7 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.misc.ILightMapWrapper;
 #if PRE_MC_1_19_4
 import com.mojang.math.Vector3f;
 #else
+import com.seibel.distanthorizons.core.wrapperInterfaces.modAccessor.AbstractOptifineAccessor;
 import org.joml.Vector3f;
 #endif
 #if MC_1_20_2
@@ -102,6 +103,12 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	 * Requiring the use of multiple {@link LightMapWrapper}.
 	 */
 	public HashMap<IDimensionTypeWrapper, LightMapWrapper> lightmapByDimensionType = new HashMap<>();
+	
+	/** 
+	 * Holds the render buffer that should be used when displaying levels to the screen.
+	 * This is used for Optifine shader support so we can render directly to Optifine's level frame buffer.
+	 */
+	public int finalLevelFrameBufferId = -1;
 	
 	
 	
@@ -255,8 +262,22 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 	public int getTargetFrameBuffer()
 	{
 		int frameBufferOverrideId = DhApiRenderProxy.INSTANCE.targetFrameBufferOverride;
-		return (frameBufferOverrideId == -1) ? this.getRenderTarget().frameBufferId : frameBufferOverrideId;
+		if (frameBufferOverrideId != -1)
+		{
+			return frameBufferOverrideId;
+		}
+		
+		// used so we can access the framebuffer shaders end up rendering to
+		if (AbstractOptifineAccessor.optifinePresent())
+		{
+			return this.finalLevelFrameBufferId;
+		}
+		
+		return this.getRenderTarget().frameBufferId;
 	}
+	
+	@Override
+	public void clearTargetFrameBuffer() { this.finalLevelFrameBufferId = -1; }
 	
 	@Override
 	public int getDepthTextureId() { return this.getRenderTarget().getDepthTextureId(); }
