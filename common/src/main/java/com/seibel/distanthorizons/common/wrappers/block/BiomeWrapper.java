@@ -20,6 +20,7 @@
 package com.seibel.distanthorizons.common.wrappers.block;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -73,6 +74,9 @@ public class BiomeWrapper implements IBiomeWrapper
 	
 	public static final String EMPTY_STRING = "EMPTY";
 	public static final BiomeWrapper EMPTY_WRAPPER = new BiomeWrapper(null, null);
+	
+	/** keep track of broken biomes so we don't log every time */
+	private static final HashSet<String> BrokenResourceLocationStrings = new HashSet<>();
 	
 	
 	
@@ -266,7 +270,11 @@ public class BiomeWrapper implements IBiomeWrapper
 			
 			if (!success)
 			{
-				LOGGER.warn("Unable to deserialize biome from string: [" + resourceLocationString + "]");
+				if (!BrokenResourceLocationStrings.contains(resourceLocationString))
+				{
+					BrokenResourceLocationStrings.add(resourceLocationString);
+					LOGGER.warn("Unable to deserialize biome from string: [" + resourceLocationString + "]");
+				}
 				return EMPTY_WRAPPER;
 			}
 			

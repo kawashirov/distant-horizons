@@ -67,8 +67,10 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	
 	// TODO: Make this changeable through the config
 	public static final String[] RENDERER_IGNORED_BLOCKS_RESOURCE_LOCATIONS = { AIR_STRING, "minecraft:barrier", "minecraft:structure_void", "minecraft:light", "minecraft:tripwire" };
-	
 	public static HashSet<IBlockStateWrapper> rendererIgnoredBlocks = null;
+	
+	/** keep track of broken blocks so we don't log every time */
+	private static final HashSet<ResourceLocation> BrokenResourceLocations = new HashSet<>();
 	
 	
 	
@@ -347,7 +349,11 @@ public class BlockStateWrapper implements IBlockStateWrapper
 			if (block == null)
 			{
 				// shouldn't normally happen, but here to make the compiler happy
-				LOGGER.warn("Unable to find BlockState with the resourceLocation [" + resourceLocation + "] and properties: [" + blockStatePropertiesString + "]. Air will be used instead, some data may be lost.");
+				if (!BrokenResourceLocations.contains(resourceLocation))
+				{
+					BrokenResourceLocations.add(resourceLocation);
+					LOGGER.warn("Unable to find BlockState with the resourceLocation [" + resourceLocation + "] and properties: [" + blockStatePropertiesString + "]. Air will be used instead, some data may be lost.");
+				}
 				return AIR;
 			}
 			
@@ -374,7 +380,11 @@ public class BlockStateWrapper implements IBlockStateWrapper
 				if (blockStatePropertiesString != null)
 				{
 					// we should have found a blockstate, but didn't
-					LOGGER.warn("Unable to find BlockState for Block [" + resourceLocation + "] with properties: [" + blockStatePropertiesString + "]. Using the default block state.");
+					if (!BrokenResourceLocations.contains(resourceLocation))
+					{
+						BrokenResourceLocations.add(resourceLocation);
+						LOGGER.warn("Unable to find BlockState for Block [" + resourceLocation + "] with properties: [" + blockStatePropertiesString + "]. Using the default block state.");
+					}
 				}
 				
 				foundState = block.defaultBlockState();
