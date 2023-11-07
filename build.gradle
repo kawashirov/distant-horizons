@@ -234,7 +234,7 @@ subprojects { p ->
         //forgeShadowMe("io.netty:netty-all:${rootProject.netty_version}")
 
         // Remember, for lwjgl dependencies that arent included in Minecraft, you need to also need to add it to the ShadowJar thing
-        forgeShadowMe("org.lwjgl:lwjgl-jawt:3.2.2") {
+        forgeShadowMe("org.lwjgl:lwjgl-jawt:${rootProject.lwjgl_version}") {
             exclude group: "org.lwjgl", module: "lwjgl" // This module is imported by Minecraft so exclude it
         }
         
