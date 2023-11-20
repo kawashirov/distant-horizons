@@ -96,10 +96,8 @@ public class FabricMain
 			{
 				// People don't read the crash logs!!!
 				// So, just put a notification, so they hopefully realise what's the problem (and dont just open issues)
-				new Thread(() -> {
-					System.setProperty("java.awt.headless", "false"); // Required to make it work
-					JOptionPane.showMessageDialog(null, ModInfo.READABLE_NAME + " now relies on Indium to work with Sodium.\nPlease download Indium from https://modrinth.com/mod/indium", ModInfo.READABLE_NAME, JOptionPane.INFORMATION_MESSAGE);
-				}).start();
+				System.setProperty("java.awt.headless", "false"); // Required to make it work
+				JOptionPane.showMessageDialog(null, ModInfo.READABLE_NAME + " now relies on Indium to work with Sodium.\nPlease download Indium from https://modrinth.com/mod/indium", ModInfo.READABLE_NAME, JOptionPane.INFORMATION_MESSAGE);
 				
 				IMinecraftClientWrapper mc = SingletonInjector.INSTANCE.get(IMinecraftClientWrapper.class);
 				String errorMessage = "loading Distant Horizons. Distant Horizons requires Indium in order to run with Sodium.";
