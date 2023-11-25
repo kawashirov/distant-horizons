@@ -177,12 +177,12 @@ public class BlockStateWrapper implements IBlockStateWrapper
 		if (this.isAir() || !this.blockState.canOcclude())
 		{
 			// completely transparent
-			return 0;
+			return FULLY_TRANSPARENT;
 		}
 		else
 		{
 			// completely opaque
-			return 16;
+			return FULLY_OPAQUE;
 		}
 	}
 	
