@@ -27,9 +27,9 @@ public class MixinClientPacketListener
 	void onHandleLoginEnd(CallbackInfo ci) { ClientApi.INSTANCE.onClientOnlyConnected(); }
 	
 	@Inject(method = "handleRespawn", at = @At("HEAD"))
-	void onHandleRespawnStart(CallbackInfo ci) { ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper(level)); }
+	void onHandleRespawnStart(CallbackInfo ci) { ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper(this.level)); }
 	@Inject(method = "handleRespawn", at = @At("RETURN"))
-	void onHandleRespawnEnd(CallbackInfo ci) { ClientApi.INSTANCE.clientLevelLoadEvent(ClientLevelWrapper.getWrapper(level)); }
+	void onHandleRespawnEnd(CallbackInfo ci) { ClientApi.INSTANCE.clientLevelLoadEvent(ClientLevelWrapper.getWrapper(this.level)); }
 	
 	#if PRE_MC_1_19_4
 	@Inject(method = "cleanup", at = @At("HEAD"))
@@ -38,10 +38,9 @@ public class MixinClientPacketListener
 	#endif
 	void onCleanupStart(CallbackInfo ci)
 	{
-		// TODO Is this even needed here?
-		if (level != null)
+		if (this.level != null)
 		{
-			ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper(level));
+			ClientApi.INSTANCE.clientLevelUnloadEvent(ClientLevelWrapper.getWrapper(this.level));
 		}
 		ClientApi.INSTANCE.onClientOnlyDisconnected();
 	}
