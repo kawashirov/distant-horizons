@@ -31,6 +31,7 @@ import com.seibel.distanthorizons.core.wrapperInterfaces.chunk.IChunkWrapper;
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.IBiomeWrapper;
 
 import com.seibel.distanthorizons.core.wrapperInterfaces.world.ILevelWrapper;
+import com.seibel.distanthorizons.coreapi.ModInfo;
 import net.minecraft.client.multiplayer.ClientChunkCache;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
@@ -77,7 +78,7 @@ public class ChunkWrapper implements IChunkWrapper
 	private static final Logger LOGGER = DhLoggerBuilder.getLogger();
 	
 	/** useful for debugging, but can slow down chunk operations quite a bit due to being called every time. */
-	private static final boolean RUN_RELATIVE_POS_INDEX_VALIDATION = false;
+	private static final boolean RUN_RELATIVE_POS_INDEX_VALIDATION = ModInfo.IS_DEV_BUILD;
 	
 	/** can be used for interactions with the underlying chunk where creating new BlockPos objects could cause issues for the garbage collector. */
 	private static final ThreadLocal<BlockPos.MutableBlockPos> MUTABLE_BLOCK_POS_REF = ThreadLocal.withInitial(() -> new BlockPos.MutableBlockPos());
@@ -432,6 +433,8 @@ public class ChunkWrapper implements IChunkWrapper
 	@Override
 	public IBlockStateWrapper getBlockState(int relX, int relY, int relZ)
 	{
+		this.throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(relX, relY, relZ);
+		
 		BlockPos.MutableBlockPos blockPos = MUTABLE_BLOCK_POS_REF.get();
 		
 		blockPos.setX(relX);
@@ -511,7 +514,7 @@ public class ChunkWrapper implements IChunkWrapper
 	/** used to prevent accidentally attempting to get/set values outside this chunk's boundaries */
 	private void throwIndexOutOfBoundsIfRelativePosOutsideChunkBounds(int x, int y, int z) throws IndexOutOfBoundsException
 	{
-		if (RUN_RELATIVE_POS_INDEX_VALIDATION)
+		if (!RUN_RELATIVE_POS_INDEX_VALIDATION)
 		{
 			return;
 		}
