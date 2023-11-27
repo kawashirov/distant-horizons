@@ -16,6 +16,7 @@
         "client.MixinGameRenderer",
         "client.MixinLevelRenderer",
         "client.MixinLightmap",
+        "client.MixinLightmap2",
         "client.MixinOptionsScreen",
         "client.MixinMinecraft",
         "client.MixinTextureUtil"
