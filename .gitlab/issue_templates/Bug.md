@@ -1,4 +1,4 @@
-## Chcek off each item in this list before submitting:
+## Check off each item in this list before submitting:
 
 <!-- 
 To mark a section as complete either put an "x" in between the square brackets, example: "[x]" 
