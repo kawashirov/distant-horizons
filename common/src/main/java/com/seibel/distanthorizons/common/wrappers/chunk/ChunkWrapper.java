@@ -388,7 +388,7 @@ public class ChunkWrapper implements IChunkWrapper
 			{
 				this.blockLightPosList.add(new DhBlockPos(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
 			});
-			#elif MC_1_20_1
+			#else
 			this.chunk.findBlockLightSources((blockPos, blockState) ->
 			{
 				this.blockLightPosList.add(new DhBlockPos(blockPos.getX(), blockPos.getY(), blockPos.getZ()));
