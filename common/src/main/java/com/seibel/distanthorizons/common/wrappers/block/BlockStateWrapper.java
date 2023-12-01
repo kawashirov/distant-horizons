@@ -174,7 +174,13 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	public int getOpacity()
 	{
 		// this method isn't perfect, but works well enough for our use case
-		if (this.isAir() || !this.blockState.canOcclude())
+		
+		if (this.isLiquid() && !this.blockState.canOcclude())
+		{
+			// probably not a waterlogged block (which should block light entirely)
+			return FULLY_TRANSPARENT + 1;
+		}
+		else if (this.isAir() || !this.blockState.canOcclude())
 		{
 			// completely transparent
 			return FULLY_TRANSPARENT;
