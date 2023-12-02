@@ -79,6 +79,11 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	public final BlockState blockState;
 	/** technically final, but since it requires a method call to generate it can't be marked as such */
 	private String serialString;
+	/** 
+	 * Cached opacity value, -1 if not populated. <br>
+	 * Should be between {@link IBlockStateWrapper#FULLY_OPAQUE} and {@link IBlockStateWrapper#FULLY_OPAQUE}
+	 */
+	private int opacity = -1;
 	
 	
 	
@@ -173,23 +178,39 @@ public class BlockStateWrapper implements IBlockStateWrapper
 	@Override
 	public int getOpacity()
 	{
-		// this method isn't perfect, but works well enough for our use case
+		// use the cached opacity value if possible
+		if (this.opacity != -1)
+		{
+			return this.opacity;
+		}
 		
-		if (this.isLiquid() && !this.blockState.canOcclude())
+		
+		// this method isn't perfect, but works well enough for our use case
+		int opacity;
+		if (this.isAir())
+		{
+			opacity = FULLY_TRANSPARENT;
+		}
+		else if (this.isLiquid() && !this.blockState.canOcclude())
 		{
 			// probably not a waterlogged block (which should block light entirely)
-			return FULLY_TRANSPARENT + 1;
+			
+			// +1 to indicate that the block is translucent (in between transparent and opaque) 
+			opacity = FULLY_TRANSPARENT + 1;
 		}
-		else if (this.isAir() || !this.blockState.canOcclude())
+		else if (this.blockState.propagatesSkylightDown(EmptyBlockGetter.INSTANCE, BlockPos.ZERO))
 		{
-			// completely transparent
-			return FULLY_TRANSPARENT;
+			opacity = FULLY_TRANSPARENT;
 		}
 		else
 		{
-			// completely opaque
-			return FULLY_OPAQUE;
+			// default for all other blocks
+			opacity = FULLY_OPAQUE;
 		}
+		
+		
+		this.opacity = opacity;
+		return this.opacity;
 	}
 	
 	@Override
