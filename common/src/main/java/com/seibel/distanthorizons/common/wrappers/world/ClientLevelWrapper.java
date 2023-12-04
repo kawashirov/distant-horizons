@@ -27,6 +27,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,8 +55,14 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 	// wrapper logic //
 	//===============//
 	
-	public static IClientLevelWrapper getWrapper(ClientLevel level)
+	@Nullable
+	public static IClientLevelWrapper getWrapper(@Nullable ClientLevel level)
 	{
+		if (level == null)
+		{
+			return null;
+		}
+		
 		// used if the client is connected to a server that defines the currently loaded level
 		if (KEYED_CLIENT_LEVEL_MANAGER.getUseOverrideWrapper())
 		{
@@ -64,10 +71,7 @@ public class ClientLevelWrapper implements IClientLevelWrapper
 		
 		return getWrapperIgnoringOverride(level);
 	}
-	public static IClientLevelWrapper getWrapperIgnoringOverride(ClientLevel level)
-	{
-		return LEVEL_WRAPPER_BY_CLIENT_LEVEL.computeIfAbsent(level, ClientLevelWrapper::new);
-	}
+	public static IClientLevelWrapper getWrapperIgnoringOverride(@NotNull ClientLevel level) { return LEVEL_WRAPPER_BY_CLIENT_LEVEL.computeIfAbsent(level, ClientLevelWrapper::new); }
 	
 	@Nullable
 	@Override

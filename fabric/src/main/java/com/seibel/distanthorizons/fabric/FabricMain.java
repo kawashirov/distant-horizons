@@ -37,6 +37,8 @@ import com.seibel.distanthorizons.fabric.wrappers.modAccessor.*;
 
 import org.apache.logging.log4j.Logger;
 
+import javax.swing.*;
+
 /**
  * Initialize and setup the Mod. <br>
  * If you are looking for the real start of the mod
@@ -92,6 +94,11 @@ public class FabricMain
 			// If sodium is installed Indium is also necessary in order to use the Fabric rendering API
 			if (!modChecker.isModLoaded("indium"))
 			{
+				// People don't read the crash logs!!!
+				// So, just put a notification, so they hopefully realise what's the problem (and dont just open issues)
+				System.setProperty("java.awt.headless", "false"); // Required to make it work
+				JOptionPane.showMessageDialog(null, ModInfo.READABLE_NAME + " now relies on Indium to work with Sodium.\nPlease download Indium from https://modrinth.com/mod/indium", ModInfo.READABLE_NAME, JOptionPane.INFORMATION_MESSAGE);
+				
 				IMinecraftClientWrapper mc = SingletonInjector.INSTANCE.get(IMinecraftClientWrapper.class);
 				String errorMessage = "loading Distant Horizons. Distant Horizons requires Indium in order to run with Sodium.";
 				String exceptionError = "Distant Horizons conditional mod Exception";
