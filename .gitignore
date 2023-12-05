@@ -25,6 +25,7 @@ hs_err_pid*
 Merged/
 # Folder created by the buildAll scripts
 buildAllJars/
+buildForMiA/
 
 # file from notepad++
 *.bak
