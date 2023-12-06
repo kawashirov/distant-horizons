@@ -9,7 +9,7 @@ Check out Mine in Abyss here:<br>
 https://mineinabyss.com/
 
 Forum thread on Mine in Abyss Discord:<br>
-https://canary.discord.com/channels/385252444734619680/1181222588169588746/1181222588169588746
+https://discord.com/channels/385252444734619680/1181222588169588746/1181222588169588746
 
 ### Differences from original version
 - Fixed issue that causes `LodDataBuilder` to fail on most of tall chunks on MiA. Should build LODs for all the chunks properly.
