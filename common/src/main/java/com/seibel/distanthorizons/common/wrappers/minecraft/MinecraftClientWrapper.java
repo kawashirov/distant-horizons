@@ -282,7 +282,11 @@ public class MinecraftClientWrapper implements IMinecraftClientWrapper, IMinecra
 	{
 		LOGGER.error(ModInfo.READABLE_NAME + " had the following error: [" + errorMessage + "]. Crashing Minecraft...", exception);
 		CrashReport report = new CrashReport(errorMessage, exception);
+		#if PRE_MC_1_20_4
 		Minecraft.crash(report);
+		#else
+		Minecraft.getInstance().delayCrash(report);
+		#endif
 	}
 	
 	@Override

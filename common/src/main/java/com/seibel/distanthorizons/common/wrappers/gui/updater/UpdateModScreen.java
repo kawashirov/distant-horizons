@@ -152,10 +152,10 @@ public class UpdateModScreen extends DhScreen
 	public void render(GuiGraphics matrices, int mouseX, int mouseY, float delta)
     #endif
 	{
-		#if MC_1_20_2
-		this.renderBackground(matrices, mouseX, mouseY, delta); // Render background
-		#else
+		#if PRE_MC_1_20_2
 		this.renderBackground(matrices); // Render background
+		#else
+		this.renderBackground(matrices, mouseX, mouseY, delta); // Render background
 		#endif
 		
 		

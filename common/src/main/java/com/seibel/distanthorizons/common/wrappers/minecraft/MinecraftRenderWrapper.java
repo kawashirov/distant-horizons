@@ -44,7 +44,7 @@ import com.mojang.math.Vector3f;
 #else
 import org.joml.Vector3f;
 #endif
-#if MC_1_20_2
+#if POST_MC_1_20_2
 import net.minecraft.client.renderer.chunk.SectionRenderDispatcher;
 #endif
 
@@ -321,16 +321,7 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 		{
 			try
 			{
-				#if MC_1_20_2
-				LevelRenderer levelRenderer = MC.levelRenderer;
-				Collection<SectionRenderDispatcher.RenderSection> chunks = levelRenderer.visibleSections;
-				
-				return (chunks.stream().map((chunk) -> {
-					AABB chunkBoundingBox = chunk.getBoundingBox();
-					return new DhChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
-							Math.floorDiv((int) chunkBoundingBox.minZ, 16));
-				}).collect(Collectors.toCollection(HashSet::new)));
-				#else
+				#if PRE_MC_1_20_2
 				LevelRenderer levelRenderer = MC.levelRenderer;
 				Collection<LevelRenderer.RenderChunkInfo> chunks =
 					#if PRE_MC_1_18_2 levelRenderer.renderChunks;
@@ -340,6 +331,15 @@ public class MinecraftRenderWrapper implements IMinecraftRenderWrapper
 					AABB chunkBoundingBox =
 						#if PRE_MC_1_18_2 chunk.chunk.bb;
 						#else chunk.chunk.getBoundingBox(); #endif
+					return new DhChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
+							Math.floorDiv((int) chunkBoundingBox.minZ, 16));
+				}).collect(Collectors.toCollection(HashSet::new)));
+				#else
+				LevelRenderer levelRenderer = MC.levelRenderer;
+				Collection<SectionRenderDispatcher.RenderSection> chunks = levelRenderer.visibleSections;
+				
+				return (chunks.stream().map((chunk) -> {
+					AABB chunkBoundingBox = chunk.getBoundingBox();
 					return new DhChunkPos(Math.floorDiv((int) chunkBoundingBox.minX, 16),
 							Math.floorDiv((int) chunkBoundingBox.minZ, 16));
 				}).collect(Collectors.toCollection(HashSet::new)));

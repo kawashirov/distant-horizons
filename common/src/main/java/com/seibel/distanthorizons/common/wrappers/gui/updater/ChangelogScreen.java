@@ -134,7 +134,7 @@ public class ChangelogScreen extends DhScreen
 		);
 		
 		
-		this.changelogArea = new TextArea(this.minecraft, this.width * 2, this.height, 32, this.height - 32, 10);
+		this.changelogArea = new TextArea(this.minecraft, this.width * 2, this.height, 32, this.height - 32);
 		for (int i = 0; i < changelog.size(); i++)
 		{
 			this.changelogArea.addButton(TextOrLiteral(changelog.get(i)));
@@ -150,10 +150,10 @@ public class ChangelogScreen extends DhScreen
 	public void render(GuiGraphics matrices, int mouseX, int mouseY, float delta)
     #endif
 	{
-		#if MC_1_20_2
-		this.renderBackground(matrices, mouseX, mouseY, delta); // Render background
-		#else
+		#if PRE_MC_1_20_2
 		this.renderBackground(matrices); // Render background
+		#else
+		this.renderBackground(matrices, mouseX, mouseY, delta); // Render background
 		#endif
 		if (!usable)
 			return;
@@ -185,9 +185,13 @@ public class ChangelogScreen extends DhScreen
 	{
 		Font textRenderer;
 		
-		public TextArea(Minecraft minecraftClient, int i, int j, int k, int l, int m)
+		public TextArea(Minecraft minecraftClient, int i, int j, int k, int l)
 		{
-			super(minecraftClient, i, j, k, l, m);
+			#if PRE_MC_1_20_4
+			super(minecraftClient, i, j, k, l, 10);
+			#else
+			super(minecraftClient, i, j, k, l);
+			#endif
 			this.centerListVertically = false;
 			textRenderer = minecraftClient.font;
 		}

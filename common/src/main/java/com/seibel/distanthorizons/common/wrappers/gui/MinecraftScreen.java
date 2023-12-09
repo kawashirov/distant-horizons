@@ -59,7 +59,7 @@ public class MinecraftScreen
 			screen.scaledHeight = this.height;
 			screen.init(); // Init our own config screen
 			
-			this.list = new ConfigListWidget(this.minecraft, this.width, this.height, 0, this.height, 25); // Select the area to tint
+			this.list = new ConfigListWidget(this.minecraft, this.width, this.height, 0, this.height); // Select the area to tint
 			if (this.minecraft != null && this.minecraft.level != null) // Check if in game
 				this.list.setRenderBackground(false); // Disable from rendering
 			this.addWidget(this.list); // Add the tint to the things to be rendered
@@ -72,10 +72,10 @@ public class MinecraftScreen
 		public void render(GuiGraphics matrices, int mouseX, int mouseY, float delta)
         #endif
 		{
-			#if MC_1_20_2
-			this.renderBackground(matrices, mouseX, mouseY, delta); // Render background
-			#else
+			#if PRE_MC_1_20_2
 			this.renderBackground(matrices); // Render background
+			#else
+			this.renderBackground(matrices, mouseX, mouseY, delta); // Render background
 			#endif
 			this.list.render(matrices, mouseX, mouseY, delta); // Renders the items in the render list (currently only used to tint background darker)
 			
@@ -131,9 +131,13 @@ public class MinecraftScreen
 	
 	public static class ConfigListWidget extends ContainerObjectSelectionList
 	{
-		public ConfigListWidget(Minecraft minecraftClient, int i, int j, int k, int l, int m)
+		public ConfigListWidget(Minecraft minecraftClient, int i, int j, int k, int l)
 		{
-			super(minecraftClient, i, j, k, l, m);
+			#if PRE_MC_1_20_4
+			super(minecraftClient, i, j, k, l, 25);
+			#else
+			super(minecraftClient, i, j, k, l);
+			#endif
 			this.centerListVertically = false;
 		}
 		
