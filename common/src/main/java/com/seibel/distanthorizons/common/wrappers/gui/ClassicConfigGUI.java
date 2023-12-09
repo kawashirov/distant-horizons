@@ -278,7 +278,7 @@ public class ClassicConfigGUI
 				Objects.requireNonNull(minecraft).setScreen(parent);
 			}));
 			
-			this.list = new ConfigListWidget(this.minecraft, this.width * 2, this.height, 32, this.height - 32);
+			this.list = new ConfigListWidget(this.minecraft, this.width * 2, this.height, 32, 32, 25);
 			if (this.minecraft != null && this.minecraft.level != null)
 				this.list.setRenderBackground(false);
 			
@@ -537,12 +537,12 @@ public class ClassicConfigGUI
 	{
 		Font textRenderer;
 		
-		public ConfigListWidget(Minecraft minecraftClient, int i, int j, int k, int l)
+		public ConfigListWidget(Minecraft minecraftClient, int canvasWidth, int canvasHeight, int topMargin, int botMargin, int itemSpacing)
 		{
 			#if PRE_MC_1_20_4
-			super(minecraftClient, i, j, k, l, 25);
+			super(minecraftClient, canvasWidth, canvasHeight, topMargin, canvasHeight - botMargin, itemSpacing);
 			#else
-			super(minecraftClient, i, j, k, l);
+			super(minecraftClient, canvasWidth, canvasHeight - (topMargin + botMargin), topMargin, itemSpacing);
 			#endif
 			this.centerListVertically = false;
 			textRenderer = minecraftClient.font;
